@@ -22,6 +22,59 @@ export class Dog extends Animal {
   static name: string = 'Dog';
 }
 
+// abstract class
+export abstract class Shape {
+  abstract calArea(): int;
+}
+
+export class Square extends Shape {
+  length: int = 5;
+  calArea(): int {
+    return this.length * this.length;
+  }
+}
+
+// final class
+export final class City {
+  static name: string = 'Shanghai';
+}
+
+// class and method in namespace
+export namespace Language {
+
+  export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {
+    return b1 && b2;
+  }
+
+  export class C {
+    static name: string = 'c language';
+  }
+
+  export namespace DynamicLanguage {
+     
+    export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {
+      return b1 || b2;
+    }
+
+    export class Javascript {
+      static name: string = 'javascript language';
+    }
+
+    export namespace Python {
+      export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {
+      return b1 && b2;
+    }
+    }
+  }
+}
+
+// generic class
+export class Container<T> {
+  calArea(area: T): T {
+    return area;
+  }
+}
+
 // classGet/SetStaticField
 export class Person {
     static name: string = 'Person';
@@ -35,7 +88,10 @@ export class Person {
 }
 
 // objectGet/SetProperty
-export class Student {
+export class Child {
+   isChild: boolean = true;
+}
+export class Student extends Child{
     name: string = 'Student';
     age: int = 18;
     male: boolean = true
@@ -47,9 +103,12 @@ export class Student {
 export let student: Student = new Student();
 
 // fixedArrayGetLength
+export let zeroArray: FixedArray<int> = [];
 export let intArray: FixedArray<int> = [1, 2, 3, 4, 5];
 export let boolArray: FixedArray<boolean> = [true, false, true, false];
 export let strArray: FixedArray<string> = ['ab', 'cd', 'ef'];
+export let stuArray: FixedArray<Student> = [student];
+
 
 // enumGetIndexByName, enumGetNameByIndex, enumGetValueByIndex, enumGetIndexByValue
 export enum COLOR {
@@ -58,6 +117,12 @@ export enum COLOR {
     Blue = 5,
     Yellow = 7,
     White = 9,
+}
+
+export enum MEDIA {
+  JSON = 'app/json',
+  XML = 'app/xml',
+  YAML = 'app/yaml'
 }
 
 /*

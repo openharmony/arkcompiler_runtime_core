@@ -121,6 +121,7 @@ function(panda_ets_interop_js_gtest TARGET)
         )
         add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
     endif()
+    set(COMPILED_ABCPATH ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_gtest_package/src/classes.abc)
 
     set(JS_COMPILATION_OPTIONS --module --merge-abc --enable-ets-implements)
     if(ARG_COMPILATION_JS_WITH_CJS_ON)
@@ -183,6 +184,7 @@ function(panda_ets_interop_js_gtest TARGET)
             "FIXED_ISSUES=${FIXED_ISSUES}"
             "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
             "ARK_ETS_INTEROP_JS_TARGET_GTEST_PACKAGE=${TARGET_GTEST_PACKAGE}"
+            "ARK_ETS_INTEROP_JS_COMPILED_ABC_PATH=${COMPILED_ABCPATH}"
         LAUNCHER
             ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
