@@ -92,7 +92,7 @@ cases:
 
     - decl: |-
           interface A {
-              name: string|undefined
+              name?: string|undefined
           }
           interface B extends A {
               age: number
