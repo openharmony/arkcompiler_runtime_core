@@ -578,7 +578,12 @@ void SaveStateBridgesBuilder::SearchSSOnWay(BasicBlock *block, Inst *startFrom, 
             }
         }
     }
+
+    auto sourceBlock = sourceInst->GetBasicBlock();
     for (auto pred : block->GetPredsBlocks()) {
+        if (!sourceBlock->IsDominate(pred)) {
+            continue;
+        }
         SearchSSOnWay(pred, pred->GetLastInst(), sourceInst, visited, stopSearch);
     }
 }
