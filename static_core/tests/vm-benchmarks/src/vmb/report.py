@@ -680,6 +680,16 @@ def compare_reports(args):
         else 1)
 
 
+def exit_with_dry_run_status(bus: List[BenchUnit]) -> None:
+    if not bus:
+        log.fatal('No tests run!')
+        sys.exit(1)
+    failed = [bu for bu in bus if bu.status == BUStatus.COMPILATION_FAILED]
+    for bu in failed:
+        log.error("%s : Compilation failed", bu.name)
+    sys.exit(1 if failed else 0)
+
+
 def report_main(args: Args,
                 bus: Optional[List[BenchUnit]] = None,
                 ext_info: Optional[Any] = None,
@@ -689,6 +699,8 @@ def report_main(args: Args,
         ext_info = {}
     # if called after run
     if bus:
+        if args.dry_run:
+            exit_with_dry_run_status(bus)
         name = args.get('name', None)
         if not name:
             name = '-'.join([args.platform, args.mode])
