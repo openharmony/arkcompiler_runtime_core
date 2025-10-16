@@ -334,3 +334,71 @@ cases:
       use: |-
         let xx = new Alias
         let ok = xx instanceof FinitaLaComedia && xx instanceof Alias;
+
+    - defs: |-
+        type ValueOrArray<T> = T | Array<ValueOrArray<T>>
+        type ValueOrArray2<T> = T | ArrayOfValueOrArray<T>
+        class ArrayOfValueOrArray<T> extends Array<ValueOrArray2<T>> { }
+
+      use: |-
+        let xx: ArrayOfValueOrArray<Boolean>
+        let ok = true
+        
+
+    - defs: |-
+        class Node<T> {
+          value: T;
+          left: Alias<T> | undefined
+          right?: Alias<T>;
+        
+        }
+        type Alias<T> = Node<T>
+      use: |-
+        let xx = new Alias<string>
+        xx.value = "I am Node root"
+        let ok = xx instanceof Node
+
+    - defs: |-
+        class Node<T> {
+          value: T;
+          left: Alias<T> | undefined
+          right?: Alias<T>;        
+        }
+        type Alias<T> = Node<T>
+      use: |-
+        let xx: Alias<string> = { value: 'I am Node root', left: { value: 'I am Left Node' }}
+        let xl: Node<string> = xx.left!
+        let ok = xx instanceof Node && xx.value instanceof string && xx.value == 'I am Node root' && xl.value == 'I am Left Node'
+
+    - defs: |-
+        type None = undefined
+        type Some<T> = T
+        type Maybe<T> = Some<T> | None
+      use: |-
+        let v0: Maybe<string> = undefined
+        let v1: Maybe<string> = 'Hello World'
+        let ok = v0 === undefined && v1 instanceof string && v1 == 'Hello World'
+
+    - defs: |-
+        type Lazy<T> = T | () => T
+      use: |-
+        let vl: Lazy<string> = 'Hello World'
+        vl = () => 'Call Me'
+        let ok = vl instanceof Function && vl() == 'Call Me'
+
+    - defs: |-
+        type TU<T1, T2> = T1 | T2
+        type EX<T1, T2> = Record<string, int | TU<T1, T2> | undefined>
+      use: |-
+        let tv: TU<string, boolean> = 'I am String'
+        let v: EX<string, boolean> = {'s1': 'String', 's2': true, 's3': 42, 's4': undefined, 's5': tv}
+        let ok = v['s1'] == 'String' && v['s2'] == true && v['s3'] == 42 && v['s4'] === undefined && v['s5'] == 'I am String';
+
+    - defs: |-
+        type TRR<T> = Record<string, T | TRR<T> | undefined>
+      use: |-
+        let x: TRR<string> = {'k1': 'String 1'}
+        let y: object = x;
+        let xr: TRR<string> = {'k1': 'String 1', 'k2': x, 'k3': y, 'k4': undefined, 'k5': {'l2': 'String 2'}}
+        let ok = false
+        
