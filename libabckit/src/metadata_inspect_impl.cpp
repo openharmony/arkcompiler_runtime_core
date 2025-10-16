@@ -1144,30 +1144,6 @@ extern "C" AbckitValue *ModuleFieldGetValue(AbckitCoreModuleField *field)
     return field->value;
 }
 
-extern "C" bool ModuleFieldIsPublic(AbckitCoreModuleField *field)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
-}
-
-extern "C" bool ModuleFieldIsPrivate(AbckitCoreModuleField *field)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
-}
-
-extern "C" bool ModuleFieldEnumerateAnnotations(AbckitCoreModuleField *field, void *data,
-                                                bool (*cb)(AbckitCoreAnnotation *anno, void *data))
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)data;
-    (void)cb;
-    return false;
-}
-
 // ========================================
 // Namespace Field
 // ========================================
@@ -1315,20 +1291,6 @@ extern "C" bool ClassFieldIsStatic(AbckitCoreClassField *field)
     return ClassFieldIsStaticStatic(field);
 }
 
-extern "C" bool ClassFieldIsReadonly(AbckitCoreClassField *field)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
-}
-
-extern "C" bool ClassFieldIsOverride(AbckitCoreClassField *field)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
-}
-
 extern "C" bool ClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
                                                bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
@@ -1375,13 +1337,6 @@ extern "C" AbckitType *InterfaceFieldGetType(AbckitCoreInterfaceField *field)
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(field, nullptr);
     return field->type;
-}
-
-extern "C" bool InterfaceFieldIsPrivate(AbckitCoreInterfaceField *field)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    return false;
 }
 
 extern "C" bool InterfaceFieldIsReadonly(AbckitCoreInterfaceField *field)
@@ -2633,9 +2588,6 @@ AbckitInspectApi g_inspectApiImpl = {
     ModuleFieldGetName,
     ModuleFieldGetType,
     ModuleFieldGetValue,
-    ModuleFieldIsPublic,
-    ModuleFieldIsPrivate,
-    ModuleFieldEnumerateAnnotations,
 
     // ========================================
     // Namespace Field
@@ -2658,8 +2610,6 @@ AbckitInspectApi g_inspectApiImpl = {
     ClassFieldIsPrivate,
     ClassFieldIsInternal,
     ClassFieldIsStatic,
-    ClassFieldIsReadonly,
-    ClassFieldIsOverride,
     ClassFieldEnumerateAnnotations,
 
     // ========================================
@@ -2669,7 +2619,6 @@ AbckitInspectApi g_inspectApiImpl = {
     InterfaceFieldGetInterface,
     InterfaceFieldGetName,
     InterfaceFieldGetType,
-    InterfaceFieldIsPrivate,
     InterfaceFieldIsReadonly,
     InterfaceFieldEnumerateAnnotations,
 

@@ -22,6 +22,9 @@ class Class1 {
     public static create(): Class1 {
         return new Class1();
     }
+    // After AOP classAddMethod
+    // foo() { return this.field1 + 1 ;}
+
 }
 
 abstract class Class2 {
@@ -36,3 +39,7 @@ class Class3 extends Class1 {
 
 function foo(c: Class1){}
 
+function main(){
+    let klass =new Class1();
+    console.log(klass.field1); // After AOP classAddMethod -> cosole.log(klass.foo());
+}

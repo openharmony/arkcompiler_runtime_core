@@ -83,13 +83,6 @@ TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classRemoveField)
     helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classRemoveField);
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::classAddMethod,
-// abc-kind=NoABC, category=negative-nullptr, extension=c
-TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, classAddMethod)
-{
-    helpers_nullptr::TestNullptr(g_arktsModifyApiImp->classAddMethod);
-}
-
 // Test: test-kind=api, api=ArktsModifyApiImpl::interfaceAddField,
 // abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsArktsModifyApiImpl0, interfaceAddField)

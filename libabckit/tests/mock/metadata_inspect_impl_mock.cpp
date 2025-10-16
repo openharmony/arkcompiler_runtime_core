@@ -594,28 +594,6 @@ AbckitValue *ModuleFieldGetValue(AbckitCoreModuleField *field)
     return DEFAULT_VALUE;
 }
 
-bool ModuleFieldIsPublic(AbckitCoreModuleField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
-    return DEFAULT_BOOL;
-}
-
-bool ModuleFieldIsPrivate(AbckitCoreModuleField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
-    return DEFAULT_BOOL;
-}
-
-bool ModuleFieldEnumerateAnnotations(AbckitCoreModuleField *field, void *data,
-                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data))
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_CORE_MODULE_FIELD);
-    return cb(DEFAULT_CORE_ANNOTATION, data);
-}
-
 // ========================================
 // Namespace Field
 // ========================================
@@ -708,20 +686,6 @@ bool ClassFieldIsStatic(AbckitCoreClassField *field)
     return DEFAULT_BOOL;
 }
 
-bool ClassFieldIsReadonly(AbckitCoreClassField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
-    return DEFAULT_BOOL;
-}
-
-bool ClassFieldIsOverride(AbckitCoreClassField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
-    return DEFAULT_BOOL;
-}
-
 bool ClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
@@ -753,13 +717,6 @@ AbckitType *InterfaceFieldGetType(AbckitCoreInterfaceField *field)
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(field == DEFAULT_CORE_INTERFACE_FIELD);
     return DEFAULT_TYPE;
-}
-
-bool InterfaceFieldIsPrivate(AbckitCoreInterfaceField *field)
-{
-    g_calledFuncs.push(__func__);
-    EXPECT_TRUE(field == DEFAULT_CORE_INTERFACE_FIELD);
-    return DEFAULT_BOOL;
 }
 
 bool InterfaceFieldIsReadonly(AbckitCoreInterfaceField *field)
@@ -1490,9 +1447,6 @@ static AbckitInspectApi g_inspectApiImpl = {
     ModuleFieldGetName,
     ModuleFieldGetType,
     ModuleFieldGetValue,
-    ModuleFieldIsPublic,
-    ModuleFieldIsPrivate,
-    ModuleFieldEnumerateAnnotations,
 
     // ========================================
     // Namespace Field
@@ -1515,8 +1469,6 @@ static AbckitInspectApi g_inspectApiImpl = {
     ClassFieldIsPrivate,
     ClassFieldIsInternal,
     ClassFieldIsStatic,
-    ClassFieldIsReadonly,
-    ClassFieldIsOverride,
     ClassFieldEnumerateAnnotations,
 
     // ========================================
@@ -1526,7 +1478,6 @@ static AbckitInspectApi g_inspectApiImpl = {
     InterfaceFieldGetInterface,
     InterfaceFieldGetName,
     InterfaceFieldGetType,
-    InterfaceFieldIsPrivate,
     InterfaceFieldIsReadonly,
     InterfaceFieldEnumerateAnnotations,
 

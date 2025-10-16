@@ -50,6 +50,8 @@ class Function : public ViewInResource<AbckitCoreFunction *, const File *> {
     friend class abckit::File;
     /// @brief to access private constructor
     friend class arkts::Namespace;
+    /// @brief to access private constructor
+    friend class arkts::Class;
 
 protected:
     /// @brief Core API View type

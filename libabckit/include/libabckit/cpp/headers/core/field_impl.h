@@ -58,22 +58,6 @@ inline Value ModuleField::GetValue() const
     return Value(value, conf, GetResource());
 }
 
-inline bool ModuleField::IsPublic() const
-{
-    const ApiConfig *conf = GetApiConfig();
-    bool res = conf->cIapi_->moduleFieldIsPublic(GetView());
-    CheckError(conf);
-    return res;
-}
-
-inline bool ModuleField::IsPrivate() const
-{
-    const ApiConfig *conf = GetApiConfig();
-    bool res = conf->cIapi_->moduleFieldIsPrivate(GetView());
-    CheckError(conf);
-    return res;
-}
-
 // ========================================
 // Namesapce Field
 // ========================================
@@ -182,22 +166,6 @@ inline bool ClassField::IsStatic() const
     return res;
 }
 
-inline bool ClassField::IsReadonly() const
-{
-    const ApiConfig *conf = GetApiConfig();
-    bool res = conf->cIapi_->classFieldIsReadonly(GetView());
-    CheckError(conf);
-    return res;
-}
-
-inline bool ClassField::IsOverride() const
-{
-    const ApiConfig *conf = GetApiConfig();
-    bool res = conf->cIapi_->classFieldIsOverride(GetView());
-    CheckError(conf);
-    return res;
-}
-
 inline std::vector<core::Annotation> ClassField::GetAnnotations() const
 {
     std::vector<core::Annotation> annotations;
@@ -240,14 +208,6 @@ inline Type InterfaceField::GetType() const
     AbckitType *type = conf->cIapi_->interfaceFieldGetType(GetView());
     CheckError(conf);
     return Type(type, conf, GetResource());
-}
-
-inline bool InterfaceField::IsPrivate() const
-{
-    const ApiConfig *conf = GetApiConfig();
-    bool res = conf->cIapi_->interfaceFieldIsPrivate(GetView());
-    CheckError(conf);
-    return res;
 }
 
 inline bool InterfaceField::IsReadonly() const

@@ -15,7 +15,10 @@
 
 const field1 = 'Module';
 
-function main(){};
+function main(){
+    let a:int = 12;
+    console.log(a);
+};
 
 class Class1 {}
 

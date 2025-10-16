@@ -1230,36 +1230,6 @@ struct CAPI_EXPORT AbckitInspectApi {
      */
     AbckitValue *(*moduleFieldGetValue)(AbckitCoreModuleField *field);
 
-    /**
-     * @brief Returns whether module field `field` is public.
-     * @return `true` if field `field` is public.
-     * @param [ in ] field - Field to be inspected.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     */
-    bool (*moduleFieldIsPublic)(AbckitCoreModuleField *field);
-
-    /**
-     * @brief Returns whether module field `field` is private.
-     * @return `true` if field `field` is private.
-     * @param [ in ] field - Field to be inspected.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     */
-    bool (*moduleFieldIsPrivate)(AbckitCoreModuleField *field);
-
-    /**
-     * @brief Enumerates annotations of module field `field`, invoking callback `cb` for each annotation.
-     * @return `false` if was early exited. Otherwise - `true`.
-     * @param [ in ] field - Field to be inspected.
-     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
-     * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
-     * should continue.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
-     */
-    bool (*moduleFieldEnumerateAnnotations)(AbckitCoreModuleField *field, void *data,
-                                            bool (*cb)(AbckitCoreAnnotation *anno, void *data));
-
     /* ========================================
      * Namespace Field
      * ======================================== */
@@ -1365,22 +1335,6 @@ struct CAPI_EXPORT AbckitInspectApi {
     bool (*classFieldIsStatic)(AbckitCoreClassField *field);
 
     /**
-     * @brief Returns whether class field `field` is readonly.
-     * @return `true` if field `field` is readonly.
-     * @param [ in ] field - Field to be inspected.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     */
-    bool (*classFieldIsReadonly)(AbckitCoreClassField *field);
-
-    /**
-     * @brief Returns whether class field `field` is override.
-     * @return `true` if field `field` is override.
-     * @param [ in ] field - Field to be inspected.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     */
-    bool (*classFieldIsOverride)(AbckitCoreClassField *field);
-
-    /**
      * @brief Enumerates annotations of class field `field`, invoking callback `cb` for each annotation.
      * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] field - Field to be inspected.
@@ -1421,14 +1375,6 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      */
     AbckitType *(*interfaceFieldGetType)(AbckitCoreInterfaceField *field);
-
-    /**
-     * @brief Returns whether interface field `field` is private.
-     * @return `true` if field `field` is private.
-     * @param [ in ] field - Field to be inspected.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
-     */
-    bool (*interfaceFieldIsPrivate)(AbckitCoreInterfaceField *field);
 
     /**
      * @brief Returns whether interface field `field` is readonly.

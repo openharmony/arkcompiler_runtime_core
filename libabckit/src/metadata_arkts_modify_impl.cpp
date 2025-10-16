@@ -532,32 +532,6 @@ extern "C" bool ClassRemoveField(AbckitArktsClass *klass, AbckitArktsClassField 
     }
 }
 
-extern "C" bool ClassAddMethod(AbckitArktsClass *klass, AbckitArktsFunction *method)
-{
-    LIBABCKIT_CLEAR_LAST_ERROR;
-    LIBABCKIT_IMPLEMENTED;
-
-    LIBABCKIT_BAD_ARGUMENT(klass, false);
-    LIBABCKIT_BAD_ARGUMENT(method, false);
-
-    LIBABCKIT_INTERNAL_ERROR(klass->core, false);
-    LIBABCKIT_INTERNAL_ERROR(method->core, false);
-
-    auto kt = klass->core->owningModule->target;
-    auto at = method->core->owningModule->target;
-    LIBABCKIT_CHECK_SAME_TARGET_RETURN(kt, at, false);
-
-    switch (kt) {
-        case ABCKIT_TARGET_ARK_TS_V1:
-            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return false;
-        case ABCKIT_TARGET_ARK_TS_V2:
-            return ClassAddMethodStatic(klass, method);
-        default:
-            LIBABCKIT_UNREACHABLE;
-    }
-}
-
 extern "C" bool ClassRemoveMethod(AbckitArktsClass *klass, AbckitArktsFunction *method)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -633,14 +607,6 @@ extern "C" bool ClassSetOwningModule(AbckitArktsClass *klass, AbckitArktsModule 
         default:
             LIBABCKIT_UNREACHABLE;
     }
-}
-
-extern "C" bool ClassSetParentFunction(AbckitArktsClass *klass, AbckitArktsFunction *func)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)klass;
-    (void)func;
-    return false;
 }
 
 // ========================================
@@ -858,14 +824,6 @@ extern "C" bool InterfaceSetOwningModule(AbckitArktsInterface *iface, AbckitArkt
         default:
             LIBABCKIT_UNREACHABLE;
     }
-}
-
-extern "C" bool InterfaceSetParentFunction(AbckitArktsInterface *iface, AbckitArktsFunction *func)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)iface;
-    (void)func;
-    return false;
 }
 
 extern "C" AbckitArktsInterface *CreateInterface(AbckitArktsModule *m, const char *name)
@@ -1299,22 +1257,6 @@ extern "C" bool EnumFieldSetName(AbckitArktsEnumField *field, const char *name)
     return EnumFieldSetNameStatic(field->core, name);
 }
 
-extern "C" bool EnumFieldSetType(AbckitArktsEnumField *field, AbckitType *type)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)type;
-    return false;
-}
-
-extern "C" bool EnumFieldSetValue(AbckitArktsEnumField *field, AbckitValue *value)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)value;
-    return false;
-}
-
 // ========================================
 // AnnotationInterface
 // ========================================
@@ -1445,30 +1387,6 @@ extern "C" void FunctionRemoveAnnotation(AbckitArktsFunction *function, AbckitAr
     }
 }
 
-extern "C" bool FunctionSetOwningModule(AbckitArktsFunction *function, AbckitArktsModule *module)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    (void)module;
-    return false;
-}
-
-extern "C" bool FunctionSetParentClass(AbckitArktsFunction *function, AbckitArktsClass *klass)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    (void)klass;
-    return false;
-}
-
-extern "C" bool FunctionSetParentFunction(AbckitArktsFunction *function, AbckitArktsFunction *parentFunction)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)function;
-    (void)parentFunction;
-    return false;
-}
-
 extern "C" bool FunctionSetName(AbckitArktsFunction *function, const char *name)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -1527,12 +1445,46 @@ extern "C" bool FunctionSetReturnType(AbckitArktsFunction *func, AbckitType *typ
     return FunctionSetReturnTypeStatic(func, type);
 }
 
-extern "C" AbckitArktsFunction *CreateFunction(const char *name, AbckitType *returnType)
+extern "C" AbckitArktsFunction *ModuleAddFunction(AbckitArktsModule *module,
+                                                  struct AbckitArktsFunctionCreateParams *params)
 {
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)name;
-    (void)returnType;
-    return nullptr;
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(module, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+
+    switch (module->core->target) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return nullptr;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ModuleAddFunctionStatic(module, params);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
+extern "C" AbckitArktsFunction *ClassAddMethod(AbckitArktsClass *klass, struct ArktsMethodCreateParams *params)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(params, nullptr);
+
+    LIBABCKIT_INTERNAL_ERROR(klass->core, nullptr);
+    switch (klass->core->owningModule->target) {
+        case ABCKIT_TARGET_ARK_TS_V1:
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return nullptr;
+        case ABCKIT_TARGET_ARK_TS_V2:
+            return ClassAddMethodStatic(klass, params);
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
 }
 
 // ========================================
@@ -1655,16 +1607,14 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // ========================================
 
     ClassAddAnnotation, ClassRemoveAnnotation, ClassAddInterface, ClassRemoveInterface, ClassSetSuperClass,
-    ClassSetName, ClassAddField, ClassRemoveField, ClassAddMethod, ClassRemoveMethod, CreateClass, ClassSetOwningModule,
-    ClassSetParentFunction,
+    ClassSetName, ClassAddField, ClassRemoveField, ClassRemoveMethod, CreateClass, ClassSetOwningModule,
 
     // ========================================
     // Interface
     // ========================================
 
     InterfaceAddSuperInterface, InterfaceRemoveSuperInterface, InterfaceSetName, InterfaceAddField,
-    InterfaceRemoveField, InterfaceAddMethod, InterfaceRemoveMethod, InterfaceSetOwningModule,
-    InterfaceSetParentFunction, CreateInterface,
+    InterfaceRemoveField, InterfaceAddMethod, InterfaceRemoveMethod, InterfaceSetOwningModule, CreateInterface,
 
     // ========================================
     // Enum
@@ -1700,7 +1650,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Enum Field
     // ========================================
 
-    EnumFieldSetName, EnumFieldSetType, EnumFieldSetValue,
+    EnumFieldSetName,
 
     // ========================================
     // AnnotationInterface
@@ -1712,9 +1662,8 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Function
     // ========================================
 
-    FunctionAddAnnotation, FunctionRemoveAnnotation, FunctionSetOwningModule, FunctionSetParentClass,
-    FunctionSetParentFunction, FunctionSetName, FunctionAddParameter, FunctionRemoveParameter, FunctionSetReturnType,
-    CreateFunction,
+    FunctionAddAnnotation, FunctionRemoveAnnotation, FunctionSetName, FunctionAddParameter, FunctionRemoveParameter,
+    FunctionSetReturnType, ModuleAddFunction, ClassAddMethod,
 
     // ========================================
     // Annotation
