@@ -116,7 +116,7 @@ static_core/runtime/include/tooling/                     @slynkodenis
 static_core/runtime/tests/tooling/                       @slynkodenis
 static_core/plugins/ets/runtime/ani/ani_helpers*                              @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw ^asidorov
 static_core/plugins/ets/runtime/finalreg/*                                    ^dmitriitr @udav @ipetrov ^shemetovphilip
-static_core/plugins/ets/runtime/interop_js/                                   @nazarovkonstantin @vpukhov @zmzhao1995 @gitee-dakeQI
+static_core/plugins/ets/runtime/interop_js/                                   @igelhaus @nazarovkonstantin @vpukhov @gitee-dakeQI ^slynkodenis
 static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @udav ^ipetrov ^molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof
@@ -129,6 +129,7 @@ static_core/plugins/ets/runtime/intrinsics/std_core_Value.cpp                 @m
 static_core/plugins/ets/runtime/intrinsics/std_core_finalization_registry.cpp ^dmitriitr @udav
 static_core/plugins/ets/runtime/intrinsics/std_core_gc.cpp                    ^dmitriitr @udav
 static_core/plugins/ets/runtime/libani_helpers/                               @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
+static_core/plugins/ets/runtime/libani_helpers/interop_js                     @igelhaus @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
 static_core/plugins/ets/runtime/mem/                                          ^dmitriitr @udav
 static_core/plugins/ets/runtime/regexp/                                       ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/types/                                        @nazarovkonstantin @slynkodenis
@@ -141,12 +142,12 @@ static_core/plugins/ets/runtime/types/ets_method*                             @m
 static_core/plugins/ets/runtime/types/ets_promise.h                           ^tanglu10 @zhuangkudecha ^yuesiyuan ^Wangyuzhong11 ^dmitriitr @konstanting
 static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof @asidorov
-static_core/plugins/ets/tests/benchmarks/interop_js                           @nazarovkonstantin @ignatenkooleg @Prof
+static_core/plugins/ets/tests/benchmarks/interop_js                           @igelhaus @nazarovkonstantin @ignatenkooleg @Prof ^slynkodenis
 static_core/plugins/ets/tests/checked/                                        @Prof @dingding5
 static_core/plugins/ets/tests/ets-templates/                                  ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets_es_checked/                                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^jokerxd-liu ^lijin1039
 static_core/plugins/ets/tests/ets_sdk/                                        ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @yuan-yao14
-static_core/plugins/ets/tests/interop_js/                                     ^igelhaus @nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav
+static_core/plugins/ets/tests/interop_js/                                     @igelhaus @nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav ^slynkodenis
 static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
@@ -184,7 +185,7 @@ static_core/plugins/ets/tests/ets_test_suite/gc/                              @u
 static_core/plugins/ets/tests/ets_test_suite/gc/*finalization*                @udav ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/gc/*finreg*                      @udav ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov
-static_core/plugins/ets/tests/interop_js/tests/                               ^igelhaus @nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav
+static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus @nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav ^slynkodenis
 static_core/plugins/ets/tests/interop_js/xgc/                                 @ipetrov ^udav
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
 static_core/plugins/ets/tests/runtime/tooling/                                @slynkodenis
