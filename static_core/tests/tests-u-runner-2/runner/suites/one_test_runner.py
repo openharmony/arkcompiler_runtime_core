@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,18 +16,24 @@
 #
 
 import subprocess
+import tempfile
 from collections.abc import Callable
 from copy import deepcopy
 from pathlib import Path
+from subprocess import CompletedProcess
+from typing import cast
 
 from runner.enum_types.fail_kind import FailureReturnCode
 from runner.enum_types.params import BinaryParams, TestEnv, TestReport
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.logger import Log
+from runner.options.step import StepKind
 
 _LOGGER = Log.get_logger(__file__)
 
+GTestResultValidator = Callable[[str, CompletedProcess], ValidationResult]
 ResultValidator = Callable[[str, str, int], ValidationResult]
+CommonResultValidator = Callable[..., ValidationResult]  # type: ignore[explicit-any]
 ReturnCodeInterpreter = Callable[[str, str, int], int]
 
 
@@ -78,7 +84,8 @@ class OneTestRunner:
     def __fail_kind_passed(name: str) -> str:
         return f"{name.upper()}_PASSED"
 
-    def run_with_coverage(self, name: str, params: BinaryParams, result_validator: ResultValidator,
+    def run_with_coverage(self, name: str, step_kind: StepKind, params: BinaryParams,
+                          result_validator: CommonResultValidator,
                           return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
             -> tuple[bool, TestReport, str | None]:
 
@@ -91,14 +98,16 @@ class OneTestRunner:
             params.env['GCOV_PREFIX'] = gcov_prefix
             params.env['GCOV_PREFIX_STRIP'] = gcov_prefix_strip
 
-        passed, report, fail_kind = self.run_one_step(name, params, result_validator, return_code_interpreter)
+        passed, report, fail_kind = self.run_one_step(name, step_kind, params,
+                                                      result_validator, return_code_interpreter)
 
         if self.coverage_config.use_llvm_cov and profraw_file and profdata_file:
             self.coverage_manager.llvm_cov_tool.merge_and_delete_profraw_files(profraw_file, profdata_file)
 
         return passed, report, fail_kind
 
-    def run_one_step(self, name: str, params: BinaryParams, result_validator: ResultValidator,
+    def run_one_step(self, name: str, step_kind: StepKind, params: BinaryParams,
+                     result_validator: CommonResultValidator,
                      return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
             -> tuple[bool, TestReport, str | None]:
 
@@ -107,8 +116,13 @@ class OneTestRunner:
         error = ""
 
         try:
-            passed, fail_kind, output, error, return_code = self.__run(
-                name, params, result_validator, return_code_interpreter)
+            if step_kind == StepKind.GTEST_RUNNER:
+                (passed, fail_kind, output,
+                 error, return_code) = self.__run_gtest(name, params, cast(GTestResultValidator, result_validator))
+            else:
+                passed, fail_kind, output, error, return_code = self.__run(name, params,
+                                                                           cast(ResultValidator, result_validator),
+                                                                           return_code_interpreter)
         except subprocess.SubprocessError as ex:
             fail_kind = self.__fail_kind_subprocess(name)
             fail_kind_msg = f"{name}: Failed with {str(ex).strip()}"
@@ -172,6 +186,47 @@ class OneTestRunner:
                 error = fail_kind
                 return_code = process.returncode
                 process.kill()
+        return passed, fail_kind, output, error, return_code
+
+    def __run_gtest(self, name: str,
+                    params: BinaryParams,
+                    result_validator: GTestResultValidator) -> tuple[bool, str | None, str, str, int]:
+        cmd = [str(params.executor)]
+        if params.use_qemu:
+            cmd = [*self.test_env.cmd_prefix, *cmd]
+        cmd.extend(params.flags)
+        passed = False
+        fail_kind: str | None = None
+
+        self.__log_cmd(f"{name}: {' '.join(cmd)}")
+        _LOGGER.all(f"Run {name}: {' '.join(cmd)}")
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json') as f:
+            json_file = f.name
+
+            try:
+                result = subprocess.run(
+                    [*cmd, f"--gtest_output=json:{json_file}"],
+                    capture_output=True,
+                    text=True,
+                    timeout=params.timeout,
+                    env=params.env,
+                    check=False
+                )
+                output = result.stdout
+                error = result.stderr
+                return_code = result.returncode
+                validator_result = result_validator(json_file, result)
+                passed = validator_result.passed
+                fail_kind = validator_result.kind.value
+                self.__log_cmd(f"{name}: Actual output: {output.strip()}")
+            except subprocess.TimeoutExpired as pt:
+                self.__log_cmd(f"{name}: Failed by timeout after {params.timeout} sec")
+                fail_kind = self.__fail_kind_timeout(name)
+                error = pt.stderr.decode() if pt.stderr else ""
+                output = pt.stdout.decode() if pt.stdout else ""
+                return_code = -1
+
         return passed, fail_kind, output, error, return_code
 
     def __get_prof_files(

@@ -240,5 +240,6 @@ add_entrypoints_yaml(${CMAKE_CURRENT_SOURCE_DIR}/runtime/ets_entrypoints.yaml)
 
 # Write to a file the list of all binaries
 get_property(stash_files GLOBAL PROPERTY ets_stash_list)
+list(APPEND stash_files "abc-gtests")
 list(JOIN stash_files "\n" file_content)
 file(WRITE ${PANDA_BINARY_ROOT}/ets_stash_files.txt "${file_content}\n")

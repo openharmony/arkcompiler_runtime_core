@@ -14,4 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from runner.extensions.flows import test_flows  # noqa: F401
+from runner.enum_types.params import TestEnv
+from runner.extensions.suites.test_suite_registry import ITestSuite, suite_registry
+from runner.suites.test_suite import GTestSuite, TestSuite
+
+
+@suite_registry.register("ets")
+def make_test_suite(test_env: TestEnv) -> ITestSuite:
+    return TestSuite(test_env)
+
+
+@suite_registry.register("gtest")
+def make_gtest_suite(test_env: TestEnv) -> ITestSuite:
+    return GTestSuite(test_env)

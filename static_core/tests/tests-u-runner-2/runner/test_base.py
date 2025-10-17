@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,8 +18,9 @@
 from __future__ import annotations
 
 import argparse
+import re
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Literal, cast
 
 import pytz
@@ -96,7 +97,7 @@ class Test:
         """ True if test.expected.err file exists """
         return self.path_to_expected_err.exists()
 
-    def run(self, repeat: int) -> Test:
+    def run(self, repeat: int) -> Test | GTest:
         start = datetime.now(pytz.UTC)
         _LOGGER.all(f"\033[1mStarted:\033[0m \033[1;33m{self.test_id}\033[0m. Launch #{repeat}")
         self.repeat = repeat
@@ -129,7 +130,7 @@ class Test:
 
         return result
 
-    def do_run(self) -> Test:
+    def do_run(self) -> Test | GTest:
         return self
 
     def status(self) -> TestStatus:
@@ -267,6 +268,7 @@ class Test:
                 if key in collection_params:
                     collection_params[key] += [*val.split()]
                 else:
+                    val = str(val)
                     collection_params[key] = [*val.split()]
 
         return collection_params
@@ -314,3 +316,28 @@ class Test:
             return is_all or is_ignored or is_new
 
         return True
+
+    def get_test_names(self) -> tuple[str, str]:
+
+        # if --test-file is set to test, e.g. ani_test_any_call/AnyTestClass.ani_test_valid
+        test_id_re = re.compile(r'^[A-Z][A-Za-z0-9_]*\.[A-Za-z][A-Za-z0-9_]+$')
+        if test_id_re.match(PurePosixPath(self.test_id).name):
+            test_class_name, test_name = PurePosixPath(self.test_id).name.split(".")
+            return test_class_name, test_name
+
+        return "", ""
+
+
+class GTest(Test):
+    gtest_name: str
+    gtest_class: str
+    precompiled_tests: bool
+
+    def __init__(self, test_env: TestEnv, test_path: Path, params: IOptions, test_id: str, precompiled_tests: bool):
+        Test.__init__(self, test_env, test_path, params, test_id)
+        self.path = self.path.parent
+        gtest_class, gtest_name = self.get_test_names()
+        self.gtest_class = gtest_class
+        self.gtest_name = gtest_name
+        self.build_dir = Path(cast(str, self.test_env.config.workflow.get_parameter("build")))
+        self.precompiled_tests = precompiled_tests

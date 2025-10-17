@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,6 +21,7 @@ import platform
 import random
 import re
 import shutil
+import stat
 import subprocess
 import threading
 import zipfile
@@ -530,3 +531,10 @@ def normalize_str(input_str: str) -> str:
     input_str = input_str.lower()
     input_str = re.sub(r"\s+", " ", input_str).strip()
     return input_str
+
+
+def is_executable_file(path_to_file: Path) -> bool:
+    if not path_to_file.is_file():
+        return False
+    mode = path_to_file.stat().st_mode
+    return bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -133,6 +133,10 @@ def parametrized_test_cases(test_cases: list[tuple[list[str]]]) -> Callable:
                     func(self, *test_case)
         return wrapper
     return decorator
+
+
+def get_list_path(main_path: str, list_name: str, test_data_folder: str = "data") -> Path:
+    return Path(main_path).parent / test_data_folder / list_name
 
 
 def set_process_mock(mock_popen: MagicMock, return_code: int, output: str = "", error_out: str = "") -> None:
