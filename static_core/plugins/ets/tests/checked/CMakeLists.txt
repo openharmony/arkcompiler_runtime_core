@@ -316,6 +316,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_nested_loops.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder_length.ets ETS_STRINGS_CONCAT "false")
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_stringbuilder_loop_branch.ets OPT_LEVEL 1 ETS_STRINGS_CONCAT "false")
 #triggers an OOM segfault in ReallocateBuffer
 #panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_stringbuilder_oom.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_const_array.ets)
