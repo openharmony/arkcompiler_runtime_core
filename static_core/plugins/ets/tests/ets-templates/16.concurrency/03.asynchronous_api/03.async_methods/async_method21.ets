@@ -32,9 +32,9 @@ class MethodAwaitReject {
 async function startTest() {
     const example = new MethodAwaitReject();
     const result = await example.methodAwaitReject();
-    arktest.assertEQ(result, "Rejected!");
+    arktest.assertEQ(result, "Caught error: Rejected!");
 }
 
 function main(): void {
-    startTest();
+    waitForCompletion(startTest);
 }

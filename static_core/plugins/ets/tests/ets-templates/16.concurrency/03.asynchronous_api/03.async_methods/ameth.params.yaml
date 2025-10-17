@@ -20,7 +20,7 @@ cases:
       use: |-
           // Promise of void
           let r = new A().foo()
-          arktest.assertTrue((await r) == undefined)
+          arktest.assertEQ((await r), undefined)
 
     - decl: |-
           class A {
@@ -30,7 +30,7 @@ cases:
           }
       use: |-
           // Promise of primitive
-          arktest.assertTrue((await new A().foo(42)) == 84)
+          arktest.assertEQ((await new A().foo(42)), 84)
 
     - decl: |-
           class A {
@@ -40,7 +40,7 @@ cases:
           }
       use: |-
           // Promise of primitive
-          arktest.assertTrue((await new A().foo(42)) == 84)
+          arktest.assertEQ((await new A().foo(42)), 84)
 
     - decl: |-
           class A {
@@ -50,7 +50,7 @@ cases:
           }
       use: |-
           // Promise of boxed
-          arktest.assertTrue((await new A().foo(new Double(42.0))) == 84.0)
+          arktest.assertEQ((await new A().foo(new Double(42.0))), 84.0)
 
     - decl: |-
           class A {
@@ -60,7 +60,7 @@ cases:
           }
       use: |-
           // Promise of boxed
-          arktest.assertTrue((await new A().foo(new Double(42.0))) == 84.0)
+          arktest.assertEQ((await new A().foo(new Double(42.0))), 84.0)
 
     - decl: |-
           class A {
@@ -71,7 +71,7 @@ cases:
       use: |-
           // Promise of string
           let r = new A().foo(42)
-          arktest.assertTrue((await r) == '42')
+          arktest.assertEQ((await r), '42')
 
     - decl: |-
           class A {
@@ -82,7 +82,7 @@ cases:
       use: |-
           // Promise of string
           let r = new A().foo(42)
-          arktest.assertTrue((await r) == '4242')
+          arktest.assertEQ((await r), '4242')
 
     - decl: |-
           class A {
@@ -132,7 +132,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          arktest.assertTrue((await new A().foo(42)) == 43)
+          arktest.assertEQ((await new A().foo(42)), 43)
 
     - decl: |-
           class A {
@@ -142,7 +142,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          arktest.assertTrue((await new A().foo(42)) == 43)
+          arktest.assertEQ((await new A().foo(42)), 43)
 
     - decl: |-
           class A {
@@ -152,7 +152,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          arktest.assertTrue((await new A().foo(42)) == 43)
+          arktest.assertEQ((await new A().foo(42)), 43)
 
     - decl: |-
           class A {
@@ -162,7 +162,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          arktest.assertTrue((await new A().foo(42)) == 43)
+          arktest.assertEQ((await new A().foo(42)), 43)
 
     - decl: |-
           class A {
@@ -172,7 +172,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          arktest.assertTrue((await new A().foo(42)) == 43)
+          arktest.assertEQ((await new A().foo(42)), 43)
 
     - decl: |-
           class A {
@@ -185,7 +185,7 @@ cases:
           }
       use: |-
           // Promise of nullish
-          arktest.assertTrue((await new A().foo(42)) == 43)
+          arktest.assertEQ((await new A().foo(42)), 43)
 
     - decl: |-
           class A {
@@ -199,7 +199,7 @@ cases:
           }
       use: |-
           // Promise of promise
-          arktest.assertTrue((await new A().bar('A')) == 'AA')
+          arktest.assertEQ((await new A().bar('A')), 'AA')
 
     - decl: |-
           class A {
@@ -213,7 +213,7 @@ cases:
           }
       use: |-
           // Promise of promise
-          arktest.assertTrue((await new A().bar('A')) == 'AA')
+          arktest.assertEQ((await new A().bar('A')), 'AA')
 
     - decl: |-
           class A {
@@ -224,7 +224,10 @@ cases:
       use: |-
           // Promise of array
           let q: int[] = await new A().foo()
-          arktest.assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
+          //arktest.assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
+          arktest.assertEQ(q[0], 1)
+          arktest.assertEQ(q[1], 2)
+          arktest.assertEQ(q[2], 3)
 
     - decl: |-
           class A {
@@ -235,7 +238,12 @@ cases:
       use: |-
           // Promise of array
           let q: int[] = await new A().foo()
-          arktest.assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
+          //arktest.assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
+          arktest.assertEQ(q[0], 1)
+          arktest.assertEQ(q[1], 2)
+          arktest.assertEQ(q[2], 3)
+          arktest.assertEQ(q.length, 3)
+
 
     - decl: |-
           class A {
@@ -245,7 +253,7 @@ cases:
           }
       use: |-
           // Promise of function
-          arktest.assertTrue((await new A().foo())('A') == 'AA')
+          arktest.assertEQ((await new A().foo())('A'), 'AA')
 
     - decl: |-
           type FT = (p: string) => string
@@ -257,7 +265,7 @@ cases:
           }
       use: |-
           // Promise of function
-          arktest.assertTrue((await new A().foo())('A') == 'AA')
+          arktest.assertEQ((await new A().foo())('A'), 'AA')
 
     - decl: |-
           type UT = number | string | boolean
@@ -269,7 +277,7 @@ cases:
       use: |-
           // Promise of union
           let q: boolean|number|string = await new A().foo(-1)
-          arktest.assertTrue(q as string == '-1')
+          arktest.assertEQ(q as string, '-1')
 
     - decl: |-
           type UT = number | string | boolean
@@ -282,7 +290,7 @@ cases:
       use: |-
           // Promise of union
           let q: boolean|number|string = await new A().foo(-1)
-          arktest.assertTrue(q as string == '-1')
+          arktest.assertEQ(q as string, '-1')
 
     - decl: |-
           class A {
@@ -293,7 +301,9 @@ cases:
       use: |-
           // Promise of tuple
           let q: [Boolean, Error] = await new A().foo(42)
-          arktest.assertTrue(q[0] && (q[1] instanceof Error))
+          arktest.assertEQ(q[0], true)
+          arktest.assertTrue(q[1] instanceof Error)
+
 
     - decl: |-
           class A {
@@ -304,7 +314,8 @@ cases:
       use: |-
           // Promise of tuple
           let q: [Boolean, Error] = await new A().foo(42)
-          arktest.assertTrue(q[0] && (q[1] instanceof Error))
+          arktest.assertEQ(q[0], true)
+          arktest.assertTrue(q[1] instanceof Error)
 
     - decl: |-
           class A {
@@ -315,7 +326,7 @@ cases:
       use: |-
           // Promise of BigInt
           let q: BigInt = await new A().foo('123456789012345678901234567890')
-          arktest.assertTrue(q == 123456789012345678901234567890n)
+          arktest.assertEQ(q, 123456789012345678901234567890n)
 
     - decl: |-
           class A {
@@ -326,7 +337,7 @@ cases:
       use: |-
           // Promise of BigInt
           let q: BigInt = await new A().foo('123456789012345678901234567890')
-          arktest.assertTrue(q == 123456789012345678901234567890n)
+          arktest.assertEQ(q, 123456789012345678901234567890n)
 
     - decl: |-
           class A {
@@ -337,7 +348,7 @@ cases:
       use: |-
           // Promise of bigint
           let q: bigint = await new A().foo(123456789012345678901234567890n)
-          arktest.assertTrue(q == 123456789012345678901234567890n)
+          arktest.assertEQ(q, 123456789012345678901234567890n)
 
     - decl: |-
           class A {
@@ -348,7 +359,7 @@ cases:
       use: |-
           // Promise of bigint
           let q: bigint = await new A().foo(123456789012345678901234567890n)
-          arktest.assertTrue(q == 123456789012345678901234567890n)
+          arktest.assertEQ(q, 123456789012345678901234567890n)
 
     - decl: |-
           class B {
@@ -374,7 +385,7 @@ cases:
           ]
           let cnt = 0.0
           for (let v of arr) cnt += (await v)
-          arktest.assertTrue(cnt == 90.0)
+          arktest.assertEQ(cnt, 90.0)
 
     - decl: |-
           class A {
@@ -398,7 +409,7 @@ cases:
           ]
           let cnt = 0.0
           for (let v of arr) cnt += (await v)
-          arktest.assertTrue(cnt == 90.0)
+          arktest.assertEQ(cnt, 90.0)
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -409,7 +420,7 @@ cases:
           }
       use: |-
           // Promise of enum
-          arktest.assertTrue((await new A().foo(42)) == Color.Green)
+          arktest.assertEQ((await new A().foo(42)), Color.Green)
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -420,7 +431,7 @@ cases:
           }
       use: |-
           // Promise of enum
-          arktest.assertTrue((await new A().foo(42)) == Color.Green)
+          arktest.assertEQ((await new A().foo(42)), Color.Green)
 
     - decl: |-
           enum Color { R="red", G="green", B="blue" }
@@ -431,7 +442,7 @@ cases:
           }
       use: |-
           // Promise of string-based enum
-          arktest.assertTrue((await new A().foo(-42)) == Color.B)
+          arktest.assertEQ((await new A().foo(-42)), Color.B)
 
     - decl: |-
           enum Color { R="red", G="green", B="blue" }
@@ -442,7 +453,7 @@ cases:
           }
       use: |-
           // Promise of string-based enum
-          arktest.assertTrue((await new A().foo(-42)) == Color.B)
+          arktest.assertEQ((await new A().foo(-42)), Color.B)
 
     - decl: |-
           class B<T> {
@@ -463,7 +474,7 @@ cases:
       use: |-
           // Promise of T
           let a: A<string> = new A<string>("abc")
-          arktest.assertTrue(a.meth() == "abc")
+          arktest.assertEQ(a.meth(), "abc")
 
     - decl: |-
           class B<T> {
@@ -487,7 +498,7 @@ cases:
       use: |-
           // Promise of T
           let a: A<string> = new A<string>("abc")
-          arktest.assertTrue(a.meth() == "abc")
+          arktest.assertEQ(a.meth(), "abc")
 
     - decl: |-
           class A {
@@ -501,7 +512,7 @@ cases:
       use: |-
           // Promise in object literal
           let a: A = { fld: new B().foo(42.0) }
-          arktest.assertTrue((await a.fld!) == '42')
+          arktest.assertEQ((await a.fld!), '42')
 
     - decl: |-
           class A {
@@ -515,7 +526,7 @@ cases:
       use: |-
           // Promise in object literal
           let a: A = { fld: B.foo(42.0) }
-          arktest.assertTrue((await a.fld!) == '42')
+          arktest.assertEQ((await a.fld!), '42')
 
     - decl: |-
           let s = 'ABC'
@@ -527,7 +538,7 @@ cases:
       use: |-
           // Launch in argument lambda
           let r = await new A().foo((): Promise<string> => (async (): Promise<string> => s)())
-          arktest.assertTrue(r == 'ABC')
+          arktest.assertEQ(r, 'ABC')
 
     - decl: |-
           let s = 'ABC'
@@ -539,7 +550,7 @@ cases:
       use: |-
           // Launch in argument lambda
           let r = await new A().foo((): Promise<string> => (async (): Promise<string> => s)())
-          arktest.assertTrue(r == 'ABC')
+          arktest.assertEQ(r, 'ABC')
 
     - decl: |-
           let s = 'ABC'
@@ -551,7 +562,7 @@ cases:
       use: |-
           // Launch in trailing lambda
           let r = await new A().foo(async (): Promise<string> => s)
-          arktest.assertTrue(r == 'ABC')
+          arktest.assertEQ(r, 'ABC')
 
     - decl: |-
           let s = 'ABC'
@@ -563,7 +574,7 @@ cases:
       use: |-
           // Launch in trailing lambda
           let r = await A.foo(async (): Promise<string> => s)
-          arktest.assertTrue(r == 'ABC')
+          arktest.assertEQ(r, 'ABC')
 
     - decl: |-
           let s = 'A'
@@ -578,7 +589,7 @@ cases:
               .then((p: string): string => p + p)
               .then((p: string): string => p + p)
 
-          arktest.assertTrue((await r) == 'AAAAAAAA')
+          arktest.assertEQ((await r), 'AAAAAAAA')
 
     - decl: |-
             type EN = Error|null
@@ -598,7 +609,7 @@ cases:
                 .catch((p: EN): string => p!.message)
                 .then((p: string): string => p + p)
 
-            arktest.assertTrue((await r) == 'EE')
+            arktest.assertEQ((await r), 'EE')
 
     - decl: |-
             type EN = Error|null
@@ -614,7 +625,7 @@ cases:
                 .then((p: string): string => { throw new Error(p) })
                 .catch((p: EN): string => p!.message + p!.message)
 
-            arktest.assertTrue((await r) == 'AAAA')
+            arktest.assertEQ((await r), 'AAAA')
 
     - decl: |-
             type EN = Error|null
@@ -635,8 +646,8 @@ cases:
                 .catch((p: EN): string => { throw p! })
             try {
                 await r
+                arktest.assertTrue(false)
             } catch (e) {
-                arktest.assertTrue((e as Error).message == 'E')
-                return
+                arktest.assertEQ((e as Error).message, 'E')
             }
-            arktest.assertTrue(false)
+            

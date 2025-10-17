@@ -27,22 +27,26 @@ class MethodConcurrentExecution {
     return 42.0;
   }
 
-  async methodConcurrentExecution(): Promise<Array<String | number>> {
-    const result = await Promise.all( new Array<Promise<string | number>>(
+  async methodConcurrentExecution(): Promise<Array<Promise<String|number>>> {
+    const result  = await Promise.all( new Array<Promise<string | number>>(
       this.methodReturnString(),
       this.methodReturnNumber(),
     ));
-    return result as Array<String | number>;
+    return result; 
   }
 }
 
 async function startTest() {
   const example = new MethodConcurrentExecution();
   const result = await example.methodConcurrentExecution();
-  const resTemp = new Array<number | string>("Hello", 42);
-  arktest.assertEQ(result === resTemp, true);
+
+  arktest.assertTrue(Array.isArray(result), "Result is not instanceof Array");
+  arktest.assertEQ(result.length, 2);
+  arktest.assertEQ(result[0], "Hello");
+  arktest.assertEQ(result[1], 42.0);
+
 }
 
 function main(): void {
-  startTest();
+  waitForCompletion(startTest);
 }

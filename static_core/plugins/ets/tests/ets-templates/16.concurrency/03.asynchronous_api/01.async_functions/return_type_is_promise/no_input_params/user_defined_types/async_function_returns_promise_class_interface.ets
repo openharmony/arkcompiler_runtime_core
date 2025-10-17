@@ -13,24 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous method.
-      The asynchronous method returns a void.
----*/
+{% from "16.concurrency/03.asynchronous_api/async_returns_class_interface.base.jinja" import generate_complete_test %}
 
-class MethodReturnVoid {
-    value: number = 0;
-    async methodReturnVoid(): Promise<void> {
-        this.value = 1;
-        arktest.assertEQ(this.value, 1);
-    }
-}
-
-async function startTest() {
-    const example = new MethodReturnVoid();
-    await example.methodReturnVoid();
-}
-
-function main(): void {
-    waitForCompletion(startTest);
-}
+{{ generate_complete_test('function') }}

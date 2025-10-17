@@ -17,18 +17,33 @@
     {
         'body': 'console.log("Hello")',
         'return_type': '',
-        'description': 'The return type of an async function must be Promise<void>.'
+        'description': 'The return type of an async function/method must be Promise<void> (with expresion inside function/method).'
     },
     {
         'body': 'console.log("Hello")',
         'return_type': ': Promise<void>',
         'description': 'No-argument return statement can be added implicitly as the last statement of the function
- body if there is no explicit return statement in a function with the return Promise<void>.'
+ body if there is no explicit return statement in a function/method with the return Promise<void> (with expresion inside function/method).'
     },
     {
         'body': 'return',
         'return_type': ': Promise<void>',
         'description': 'Using return statement without an expression is allowed if the return type is Promise<void>.'
+    },
+    {
+        'body': '',
+        'return_type': ': Promise<void>',
+        'description': 'Using without return is allowed if the return type is Promise<void>.'
+    },
+    {
+        'body': 'return',
+        'return_type': '',
+        'description': 'Using return without without explicit return type specification.'
+    },
+    {
+        'body': '',
+        'return_type': '',
+        'description': 'The return type of an async function/method must be Promise<void>.'
     }
  ] %}
 

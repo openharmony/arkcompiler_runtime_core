@@ -13,23 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-desc: Test cases for various usage scenarios of asynchronous method.
-      The asynchronous method returns a double.
----*/
+{% from "16.concurrency/03.asynchronous_api/async_returns_class_interface.base.jinja" import generate_complete_test %}
 
-class MethodReturnDouble {
-    async methodReturnDouble(): Promise<double> {
-        return 10.0;
-    }
-}
-
-async function startTest() {
-    const example = new MethodReturnDouble();
-    const result = await example.methodReturnDouble();
-    arktest.assertEQ(result, 10.0);
-}
-
-function main(): void {
-    waitForCompletion(startTest);
-}
+{{ generate_complete_test('method') }}

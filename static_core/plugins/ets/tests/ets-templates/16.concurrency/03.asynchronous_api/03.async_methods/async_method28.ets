@@ -43,5 +43,5 @@ async function startTest() {
 }
 
 function main(): void {
-  startTest();
+  waitForCompletion(startTest);
 }
