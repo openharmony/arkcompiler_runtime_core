@@ -1063,6 +1063,10 @@ uint8_t ESValueAnyIsStaticValue(EtsObject *etsObject)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return 0;
+    }
     auto env = ctx->GetJSEnv();
 
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
