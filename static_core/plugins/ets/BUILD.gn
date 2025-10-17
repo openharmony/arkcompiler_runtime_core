@@ -326,7 +326,7 @@ if (with_stdlib) {
       } else {
         sources = [ "$target_gen_dir/etsstdlib.abc" ]
       }
-      outputs = [ "$root_build_dir/ohos-sdk/linux/ets/ets1.2/build-tools/ets2panda/lib/etsstdlib.abc" ]
+      outputs = [ "$root_build_dir/ohos-sdk/linux/ets/static/build-tools/ets2panda/lib/etsstdlib.abc" ]
     }
   }
 
@@ -338,7 +338,7 @@ if (with_stdlib) {
       } else {
         sources = [ "$target_gen_dir/etsstdlib.abc" ]
       }
-      outputs = [ "$root_build_dir/ohos-sdk/windows/ets/ets1.2/build-tools/ets2panda/lib/etsstdlib.abc" ]
+      outputs = [ "$root_build_dir/ohos-sdk/windows/ets/static/build-tools/ets2panda/lib/etsstdlib.abc" ]
     }
   }
 
