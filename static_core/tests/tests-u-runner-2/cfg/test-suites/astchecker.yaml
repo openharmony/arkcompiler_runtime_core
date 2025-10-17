@@ -19,10 +19,10 @@ test-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test
 
 parameters:
   work-dir: ${WORK_DIR}/${suite-name}
-  enable-verifier: False
+  enable-verifier: false
   build: ${PANDA_BUILD}
   validator: runner.extensions.validators.astchecker.astchecker_validator.AstCheckerValidator
-  with-js: False
+  with-js: false
 
 collections:
   #  js tests

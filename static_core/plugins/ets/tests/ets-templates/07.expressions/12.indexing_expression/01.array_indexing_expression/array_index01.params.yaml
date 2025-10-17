@@ -22,4 +22,3 @@ cases:
   - { change: 'names[0] = "Martin";', index: 0, value: 'Martin' }
   - { change: 'names[1] = "Martin";', index: 1, value: 'Martin' }
   - { change: 'names[2] = "Martin";', index: 2, value: 'Martin' }
-    

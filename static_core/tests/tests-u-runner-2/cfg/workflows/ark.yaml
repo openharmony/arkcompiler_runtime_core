@@ -29,7 +29,7 @@ parameters:
     compiler-enable-jit: "false"
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
-    is-panda: True
+    is-panda: true
 steps:
     ark:
         executable-path: ${parameters.build}/bin/ark

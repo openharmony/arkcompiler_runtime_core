@@ -97,4 +97,3 @@ cases:
     use: |-
       const i: J = new I
       arktest.assertEQ(i.foo(1), '1')
-      

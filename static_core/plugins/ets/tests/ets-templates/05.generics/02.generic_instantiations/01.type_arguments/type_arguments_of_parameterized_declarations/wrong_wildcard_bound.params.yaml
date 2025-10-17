@@ -41,4 +41,3 @@ wrong_constraints:
 type_with_one_generic:
   - {decl: "class ClassGener<T> {}", type: "ClassGener", curly_if_need: "{}"}
   - {decl: "interface IfaceGener<T> {}", type: "IfaceGener", curly_if_need: "{}"}
-  

@@ -39,4 +39,3 @@ cases:
        = c + 100
   - value: |-
        = c
-      

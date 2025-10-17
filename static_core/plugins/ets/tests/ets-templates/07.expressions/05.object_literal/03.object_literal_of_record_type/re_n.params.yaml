@@ -175,4 +175,3 @@ cases:
           }
           let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
           arktest.expectThrow(() => {!a["a"]![42]!}, expectedException)
-          

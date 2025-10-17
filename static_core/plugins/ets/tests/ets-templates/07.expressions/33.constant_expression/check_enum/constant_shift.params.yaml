@@ -49,4 +49,3 @@ cases:
   - { type: number, value: 5051.9,  sign: '>>>', expected: 631     }
   - { type: number, value: -5051.9, sign: '<<',  expected: -40408  }
   - { type: number, value: -5051.9, sign: '>>',  expected: -632    }
-      

@@ -23,7 +23,7 @@ parameters:
     work-dir: ${WORK_DIR}/${suite-name}
 
 collections:
-    ets-common-tests:
+    ets-common-tests: |-
     ets-common-tests/atomics:
         parameters:
             ark-test-suite-args:
@@ -33,4 +33,4 @@ collections:
         parameters:
             ark-test-suite-args:
                 - "--compiler-enable-osr=false"
-    ets_test_suite/strings:
+    ets_test_suite/strings: |-

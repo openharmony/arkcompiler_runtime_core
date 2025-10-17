@@ -24,4 +24,3 @@ cases:
   - { nlist: 'fooN',           list: 'N.fooN',         tag: 'negative' }
   - { nlist: 'fooN',           list: 'Math.abs',       tag: 'negative' }
   - { nlist: 'fooN',           list: 'Math.abs, foo2', tag: 'negative' }
-  

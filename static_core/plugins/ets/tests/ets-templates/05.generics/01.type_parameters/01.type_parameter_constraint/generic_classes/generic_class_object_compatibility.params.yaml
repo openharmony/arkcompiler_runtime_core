@@ -42,7 +42,7 @@ cases:
           new A<null>()
           new A<undefined>()
       }
-  - tags:
+  - tags: |-
     code: |-
       let res = 0
       class A {

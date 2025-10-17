@@ -45,4 +45,3 @@ error_type_param:
       let dogs: MyArray<Dog> = [new Dog(), new Dog()];
       let animals: Animal[] = dogs;
       let cat: Cat = animals[1] as Cat;
-

@@ -20,7 +20,7 @@ list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tools/declge
 parameters:
     opt-level: 0
     output-file: "/dev/null"
-    enable-verifier: False
+    enable-verifier: false
     extension: ets
     load-runtimes: ets
     work-dir: ${WORK_DIR}/${suite-name}

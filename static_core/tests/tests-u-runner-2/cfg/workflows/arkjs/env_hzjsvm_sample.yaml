@@ -77,7 +77,7 @@ general:
     # If you develop tests - use True
     # If you just run tests and not change them - use False to skip
     # copying to the work-dir on every runner.sh launch.
-    force-generate: True
+    force-generate: true
     # Sets logging level. Supported values:
     # SILENT - default level, minimal output, only the most important messages
     # SHORT - more detailed output
@@ -93,7 +93,7 @@ general:
     # Set to True to show progress bar.
     # It is not recommended to set True if verbose/verbose-fiter are set to ALL
     # The best usage of True - with verbose=NONE and verbose-filter=NEW
-    show-progress: False
+    show-progress: false
     # Sets number of used 'threads' to run tests.
     # set the number like 1, 5 etc.
     # all - special value to use value from `nproc` utility

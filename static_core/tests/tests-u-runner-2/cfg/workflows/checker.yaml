@@ -18,9 +18,9 @@ parameters:
     arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
     build: ${PANDA_BUILD}
     checked: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/checked
-    enable-es2panda: True
-    enable-verifier: True
-    enable-checker: True
+    enable-es2panda: true
+    enable-verifier: true
+    enable-checker: true
     es2panda-args: []
     es2panda-full-args:
         - "--thread=${parameters.thread}"
@@ -56,7 +56,7 @@ parameters:
     checker-is-release: "false"
     work-dir: ${parameters.work-dir}
     # adds --boot-panda-files option to verifier with all dependent and the current abc files
-    is-panda: True
+    is-panda: true
 steps:
     compile:
         from: es2panda-verifier

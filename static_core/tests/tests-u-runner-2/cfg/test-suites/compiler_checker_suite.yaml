@@ -23,7 +23,7 @@ parameters:
     work-dir: ${WORK_DIR}/${suite-name}
 
 collections:
-    simple_run:
+    simple_run: |-
     simple_run/ets_string_cache_options.ets:
         parameters:
             es2panda-test-suite-args:

@@ -46,7 +46,7 @@ cases:
           arktest.assertEQ(res, "123")
           arktest.assertEQ(v, null)
 
-    - desc: #24859 undefined register, Register type conflict
+    - desc: |- # 24859 undefined register, Register type conflict
       defs: |-
           type UT = number[][][][][] | null
           let res: string = ""

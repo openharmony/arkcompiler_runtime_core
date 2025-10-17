@@ -206,4 +206,3 @@ cases:
           let str: strs = "abc"
       use: |-
           arktest.assertTrue(str === "ghi")  // CTE: wrong comparing
-

@@ -24,4 +24,3 @@ cases:
   - { type: short, x: 'new Short(1)', index: x,        value: 2 }
   - { type: Int,   x: 'new Int(1)',   index: x,        value: 2 }
   - { type: int,   x: 'new Int(2)',   index: x,        value: 3 }
-    

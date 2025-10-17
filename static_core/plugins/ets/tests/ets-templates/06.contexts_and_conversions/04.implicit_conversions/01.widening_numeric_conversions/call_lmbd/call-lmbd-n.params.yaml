@@ -42,4 +42,3 @@ cases:
     - { from_type: float, expr: +0.0f, to_type: long }
     - { from_type: float, expr: +0.0f, to_type: boolean }
     - { from_type: float, expr: +0.0f, to_type: Color }
-

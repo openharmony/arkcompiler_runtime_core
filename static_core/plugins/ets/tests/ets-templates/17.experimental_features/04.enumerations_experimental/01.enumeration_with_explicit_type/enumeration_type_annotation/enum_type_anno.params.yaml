@@ -49,4 +49,3 @@ cases:
           arktest.assertEQ( Enum.first.valueOf(), a )
           arktest.assertEQ( Enum.second.valueOf(), b )
           arktest.assertEQ( Enum.third.valueOf(), b - 1 )
-          

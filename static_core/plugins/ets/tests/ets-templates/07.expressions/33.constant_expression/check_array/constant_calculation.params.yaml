@@ -47,4 +47,3 @@ cases:
   - { type: number, value: 551.9, sign: '%', expected: 1,    conversion: .toInt() }
   - { type: number, value: 551.9, sign: '+', expected: 561,  conversion: .toInt() }
   - { type: number, value: 551.9, sign: '-', expected: 541,  conversion: .toInt() }
-      
