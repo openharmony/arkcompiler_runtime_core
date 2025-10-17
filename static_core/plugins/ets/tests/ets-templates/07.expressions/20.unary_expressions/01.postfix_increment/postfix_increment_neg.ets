@@ -21,6 +21,8 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
+{{c.decl}}
+
 function main(): void {
     {{c.use|indent}}
 }

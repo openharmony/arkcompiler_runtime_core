@@ -13,21 +13,17 @@
 
 ---
 cases:
-    - use: |-
-        let s = "100"
-        s++  // Bad operand type, the type of the operand must be numeric type
-    - use: |-
-        let a: int[] = []
-        a++  // Bad operand type, the type of the operand must be numeric type
-    - use: |-
-        4++  // Invalid left-hand side operator
-    - use: |-
-        let x = -5;
-        (x++)++  // Invalid left-hand side operator
-    - decl: |-
-        class C {
-            f: number
-        }
-      use: |-
-        let c = new C();
-        (c?.f)++  // Invalid left-hand side operator
+    - type: byte
+      value: 1
+    - type: short
+      value: 654
+    - type: int
+      value: -3267
+    - type: long
+      value: 234217
+    - type: float
+      value: 1896.2f
+    - type: double
+      value: -24.5
+    - type: bigint
+      value: 17n

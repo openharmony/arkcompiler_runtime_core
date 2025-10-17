@@ -15,15 +15,15 @@
 
 {% for c in cases %}
 /*---
-desc: Unary plus operator
-assertion: The type of the operand expression with the unary plus operator must be convertible to a numeric type. 
-           Otherwise, a compile-time error occurs.
-tags: [negative, compile-only]
+desc: Type of a postfix decrement expression.
+assert: Type of a postfix decrement expression is the type of the variable.
 ---*/
 
-{{c.decl}}
-
 function main(): void {
-    {{c.use|indent}}
+    let v: {{c.type}} = {{c.value}};
+    arktest.assertTrue(
+        (v--) instanceof {{c.type}}, 
+        "Type of postfix decrement for " + "{{c.type}}" + " isn't " + "{{c.type}}"
+    );
 }
 {% endfor %}

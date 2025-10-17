@@ -15,8 +15,8 @@
 
 {% for c in cases %}
 /*---
-desc: Unary plus operator
-assertion: The type of the operand expression with the unary plus operator must be convertible to a numeric type. 
+desc: Unary minus operator
+assertion: The type of the operand expression with the unary minus operator must be convertible to a numeric type. 
            Otherwise, a compile-time error occurs.
 tags: [negative, compile-only]
 ---*/

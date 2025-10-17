@@ -14,20 +14,21 @@
 ---
 cases:
     - use: |-
-        let s = "100"
-        s++  // Bad operand type, the type of the operand must be numeric type
+        let c = "text"
+        let d = -c
     - use: |-
-        let a: int[] = []
-        a++  // Bad operand type, the type of the operand must be numeric type
+        let a: int[] = [1]
+        let b = -a
     - use: |-
-        4++  // Invalid left-hand side operator
-    - use: |-
-        let x = -5;
-        (x++)++  // Invalid left-hand side operator
+        let f = (): int => { return 13 }
+        let g = -f
     - decl: |-
-        class C {
-            f: number
-        }
+        class C { f(): int { return 13 } }
       use: |-
-        let c = new C();
-        (c?.f)++  // Invalid left-hand side operator
+        let c = new C
+        let d = -c
+    - decl: |-
+        class C { f(): int { return 13 } }
+      use: |-
+        let c = new C
+        let d = -c
