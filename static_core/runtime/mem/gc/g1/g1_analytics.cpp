@@ -407,7 +407,9 @@ uint64_t G1Analytics::PredictRemsetScanTimeInMicros(size_t edenLength) const
 
 uint64_t G1Analytics::PredictOldCollectionTimeInMicros(Region *region) const
 {
-    auto expectedLiveObjects = region->GetLiveBytes() * region->GetAllocatedObjects() / region->GetAllocatedBytes();
+    uint32_t allocated = region->GetAllocatedBytes();
+    ASSERT(allocated > 0);
+    auto expectedLiveObjects = region->GetLiveBytes() * region->GetAllocatedObjects() / allocated;
     return PredictOldCollectionTimeInMicros(region->GetRemSetSize(), region->GetLiveBytes(), expectedLiveObjects);
 }
 
