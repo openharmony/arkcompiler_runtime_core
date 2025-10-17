@@ -226,7 +226,6 @@ if (abckit_enable) {
 
 libarkcompiler_configs = [
   ":arkcompiler_public_config",
-  "$ark_root:ark_config",
   "$ark_root/libpandabase:arkbase_public_config",
   "$ark_root/libpandafile:arkfile_public_config",
   "$ark_root/runtime:arkruntime_public_config",
@@ -334,6 +333,8 @@ ohos_shared_library("libarktscompiler") {
   sources = libarkcompiler_sources
 
   public_configs = _libarktscompiler_calculated_configs
+  public_configs += ["$ark_root:ark_config"]
+
 
   deps = _libarktscompiler_calculated_deps
 
@@ -360,13 +361,14 @@ ohos_shared_library("libarktscompiler") {
 }
 
 ohos_shared_library("libarktscompiler_host") {
-  sources = libarkcompiler_sources
-
   public_configs = _libarktscompiler_calculated_configs
+  public_configs += ["$ark_root:ark_host_config"]
 
-  deps = _libarktscompiler_calculated_deps
-
-  external_deps = _libarktscompiler_calculated_external_deps
+  if (current_toolchain == host_toolchain){
+    sources = libarkcompiler_sources
+    deps = _libarktscompiler_calculated_deps
+    external_deps = _libarktscompiler_calculated_external_deps
+  }
 
   include_dirs = _libarktscompiler_calculated_include_dirs
 
@@ -383,6 +385,7 @@ ohos_source_set("libarktscompiler_frontend_static") {
   sources = libarkcompiler_sources
 
   configs = libarkcompiler_configs
+  configs += ["$ark_root:ark_config"]
 
   deps = [
     ":arktscompiler_header_deps",
