@@ -50,3 +50,8 @@ class BuildTypeKind(BaseEnum):
     FAST_VERIFY = "FAST-VERIFY"  # default value
     DEBUG = "DEBUG"
     RELEASE = "RELEASE"
+
+
+class BuildSystem(BaseEnum):
+    CMAKE = "CMAKE"
+    GN = "GN"
