@@ -8,6 +8,12 @@
 			"std": [
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ]
+		},
+		"dependencies": {
+			"esvalue_to_promise_test": {
+				"language": "js",
+				"ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/esvalue_to_promise_test"
+			}
 		}
 	}
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_async_reject/ts_to_ets/reject_string');
+let module = ESValue.load('reject_string');
 
 function testInteropRejectStringCatch(): int {
     let func = module.getProperty('AsyncFunctionRejectString')

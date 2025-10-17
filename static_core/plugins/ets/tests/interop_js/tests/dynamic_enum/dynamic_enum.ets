@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/dynamic_enum/index')
+let module = ESValue.load('js_code')
 let makeEnum = module.getProperty('makeEnum');
 let jsEnum = module.getProperty('jsEnum');
 let isEq = module.getProperty('isEq');

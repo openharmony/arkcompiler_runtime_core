@@ -8,6 +8,9 @@
 			"std": [
                 "${PANDA_ROOT}/plugins/ets/stdlib/std"
             ]
+		},
+		"dependencies": {
+			"js_code": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/classtype_conversion" }
 		}
 	}
 }

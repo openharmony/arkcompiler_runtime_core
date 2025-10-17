@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_union/ts_to_ets/union');
+let module = ESValue.load('union');
 let dynamicObj = module.getProperty('dynamicObj');
 let TestClass = module.getProperty("TestClass");
 

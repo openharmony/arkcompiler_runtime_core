@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/function_with_this/ts_to_ets/function_this')
+let module = ESValue.load('js_code')
 
 function testBaseClass() {
     let obj = module.getProperty('Base').instantiate().invokeMethod('getCurrent')

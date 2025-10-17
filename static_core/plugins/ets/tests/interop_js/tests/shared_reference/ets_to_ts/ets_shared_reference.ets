@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/shared_reference/ets_to_ts/test_ts_shared_reference');
+let module = ESValue.load('js_code');
 
 let tmpFunc1: Function = () => {};
 function areFuncsEqual1(func: Function): boolean {

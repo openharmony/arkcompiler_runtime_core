@@ -11,8 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
+
 panda_ets_interop_js_gtest(ets_interop_js__test_init_module
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_init_module.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_init_module_static.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_init_module_dynamic.ts
+    ETS_CONFIG ${ETS_CONFIG}
 )

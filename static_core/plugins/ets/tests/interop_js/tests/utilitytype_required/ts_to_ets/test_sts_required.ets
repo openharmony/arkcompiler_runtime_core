@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/utilitytype_required/ts_to_ets/ts_required');
+let module = ESValue.load('ts_required');
 let testInEts = module.getProperty('Test');
 let requiredTestInTs = module.getProperty('requiredTestInTs');
 let optionalTestInTs = module.getProperty('optionalTestInTs');

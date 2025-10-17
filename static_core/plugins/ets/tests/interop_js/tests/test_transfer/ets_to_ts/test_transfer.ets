@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_transfer/ets_to_ts/transfer_to_ts');
+let module = ESValue.load('transfer_to_ts');
 
 let testDynamicArrayBuffer = module.getProperty('testDynamicArrayBuffer');
 let testDynamicInt8Array = module.getProperty('testDynamicInt8Array');
