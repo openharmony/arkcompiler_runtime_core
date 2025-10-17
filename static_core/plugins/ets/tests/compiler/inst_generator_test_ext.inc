@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-if (id == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING) {
+if (id == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING ||
+    id == RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_GET_STRING_SIZE_IN_BYTES ||
+    id == RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_READ_STRING ||
+    id == RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_STRING) {
     // Skip it as this intrinsic requires LocationBuilder to be run successfully.
     graph->~Graph();
     graphCreator_.GetAllocator()->Resize(0U);
