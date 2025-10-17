@@ -20,7 +20,7 @@ cases:
       decl: |-
           let a: string | number | boolean = 'abc'
           let b: string | number = 42
-          b = a // compile-time error, boolean is absent is 'b'
+          b = a // compile-time error, boolean is absent in b
           
     - doc: |-
           Union type U (U1 | ... | Un) is a subtype of union type V (V1 | ... | Vm) if

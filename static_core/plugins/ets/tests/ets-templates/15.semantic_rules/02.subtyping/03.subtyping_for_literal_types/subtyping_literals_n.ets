@@ -13,15 +13,17 @@
 * limitations under the License.
 */
 
+{% for case in cases %}
+
 /*---
-desc: Subtype relation between type literal and type String
+desc: Subtype relation among type literal and type String - negative cases
+tags: [negative, compile-only]
 ---*/
 
-type strLiteral = "some_string"
-let a: strLiteral = "some_string"
-let b: String = "another_string"
+{{case.decl|indent}}
 
-function main(): void {
-  b = a
-  arktest.assertTrue(b instanceof strLiteral)
+function main() {
+    {{case.check|indent if case.check}}
 }
+
+{% endfor %}
