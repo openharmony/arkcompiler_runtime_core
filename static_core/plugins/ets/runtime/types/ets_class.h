@@ -458,7 +458,10 @@ public:
         return GetRuntimeClass()->IsInitialized();
     }
 
-    EtsType GetEtsType();
+    EtsType GetEtsType()
+    {
+        return ConvertPandaTypeToEtsType(GetRuntimeClass()->GetType());
+    }
 
     static size_t GetSize(uint32_t klassSize)
     {

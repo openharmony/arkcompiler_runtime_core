@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
-#include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
+#include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
 #include "include/mem/panda_string.h"
 #include "include/object_header.h"
 #include "intrinsics.h"

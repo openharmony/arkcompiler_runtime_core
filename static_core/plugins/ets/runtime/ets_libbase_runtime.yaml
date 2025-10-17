@@ -6968,6 +6968,29 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::ReflectFieldGetNameInternal
 
+  - name: StdCoreReflectFieldSetValueInternal
+    space: ets
+    class_name: std.core.reflect.Field
+    method_name: setValueInternal
+    static: false
+    signature:
+      ret: void
+      args:
+        - std.core.Object
+        - std.core.Object
+    impl: ark::ets::intrinsics::ReflectFieldSetValueInternal
+
+  - name: StdCoreReflectFieldGetValueInternal
+    space: ets
+    class_name: std.core.reflect.Field
+    method_name: getValueInternal
+    static: false
+    signature:
+      ret: std.core.Object
+      args:
+        - std.core.Object
+    impl: ark::ets::intrinsics::ReflectFieldGetValueInternal
+
 ##################
 # std.core.Class #
 ##################

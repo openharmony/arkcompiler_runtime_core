@@ -28,12 +28,35 @@ export final class InstanceField extends Field {
         return this.fieldPtr == other.fieldPtr
     }
 
-    public getValue(ownerInstance: Object): Any {
-        throw new Error("Not implemeted yet")
+    /**
+     * Reads value from an instance field.
+     *
+     * @param thisObj object used as `this`.
+     *
+     * @returns field value.
+     *
+     * @throws OutofMemoryError if there is no memory to allocate return value.
+     *
+     * @throws TypeError if there is an incompatible `this`.
+     */
+    public getValue(thisObj: Object): Any {
+        return this.getValueInternal(thisObj)
     }
 
-    public setValue(ownerInstance: Object, v: Any) {
-        throw new Error("Not implemeted yet")
+    /**
+     * Writes value into an instance field.
+     *
+     * @param thisObj object used as `this`.
+     *
+     * @param value value to write.
+     *
+     * @throws TypeError if there is an incompatible `this` or value type.
+     */
+    public setValue(thisObj: Object, value: Any): void {
+        if (this.isReadonly()) {
+            throw new TypeError("setValue to a readonly field")
+        }
+        this.setValueInternal(thisObj, value)
     }
 }
 
