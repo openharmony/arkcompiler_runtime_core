@@ -241,6 +241,20 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     }
 
     /**
+     * Converts the primitive to a string
+     *
+     * @param v value to be converted
+     *
+     * @returns result of the conversion
+     */
+    public static toString(v: boolean): string {
+        if (v) {
+            return 'true';
+        }
+        return 'false';
+    }
+
+    /**
      * Converts this object to a string
      *
      * @returns 'True' if this instance is true, 'False' otherwise

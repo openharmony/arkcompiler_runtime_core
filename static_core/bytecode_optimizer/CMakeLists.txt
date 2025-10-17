@@ -89,6 +89,7 @@ set(BYTECODE_OPT_TEST_SOURCES
     tests/check_resolver_test.cpp
     tests/canonicalization_test.cpp
     tests/irbuilder_test.cpp
+    tests/bytecodeopt_peepholes_initobj.cpp
 )
 
 panda_add_gtest(

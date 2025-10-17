@@ -278,6 +278,17 @@ export final class Short extends Integral implements Comparable<Short> {
     }
 
     /**
+     * Converts the primitive to a string
+     *
+     * @param v value to be converted
+     *
+     * @returns result of the conversion
+     */
+    public static toString(v: short): string {
+        return StringBuilder.toString(v);
+    }
+
+    /**
      * Converts this object to a string
      *
      * @returns result of the conversion

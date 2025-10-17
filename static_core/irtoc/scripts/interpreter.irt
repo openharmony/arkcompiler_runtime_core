@@ -680,6 +680,9 @@ macro(:initobj_call) do |id, size, callee, nargs, copy_lambda, op_format, first_
 
   class_flags := LoadI(klass).Imm(Constants::BASE_CLASS_FLAGS_OFFSET).u32
   If(AndI(class_flags).Imm("ark::Class::STRING_CLASS").u32, 0).NE.Unlikely {
+    # Don't extend string constructor here.
+    # Since string constructor processing is handled in frontend.
+    # Processing from char arrays is allowed here since it's legacy. Avoid unnecessary changes here.
     ctor_arg := vreg_value(first_vreg).ref
     str := call_runtime("VmCreateString", %tr, callee_, ctor_arg).ptr
     If(str, 0).EQ.Unlikely {

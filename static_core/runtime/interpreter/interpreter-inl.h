@@ -3932,6 +3932,8 @@ public:
                 return;
             }
 
+            // StringClass constructor extensions for InitObj instruction are considered as legacy and should not be
+            // extended
             uint16_t objVreg = this->GetInst().template GetVReg<FORMAT>();
             ObjectHeader *ctorArg = this->GetFrame()->GetVReg(objVreg).template GetAs<ObjectHeader *>();
 

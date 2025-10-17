@@ -76,6 +76,95 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
     /**
+     * Creates a new instance of a String from boolean
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: boolean): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from byte
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: byte): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from char
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: char): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from short
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: short): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from int
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: int): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from long
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: long): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from float
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: float): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from double
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: double): string {
+        return new String(value);
+    }
+
+
+    /**
      * Creates a new instance of a String
      *
      * @param value The value to be converted to a string. Can be an Object or null.

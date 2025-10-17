@@ -26,11 +26,13 @@ const expectedValue = `${value}.1.2`;
 
 function promiseChaining() {
   return Promise.resolve(value)
-    .then((result) => {
-      return String(result)+".1";
+    .then((result: Any) => {
+      // NOTE (#30899): Bug in overload resolution with implicit conversions. Replace with String(result) after fix.
+      return result + ".1";
     })
-    .then((result) => {
-      return String(result)+".2";
+    .then((result: Any) => {
+      // NOTE (#30899): Bug in overload resolution with implicit conversions. Replace with String(result) after fix.
+      return result + ".2";
     });
 }
 async function startTest() {
@@ -39,7 +41,7 @@ async function startTest() {
 }
 
 function main() {
-    waitForCompletion(startTest); 
+    waitForCompletion(startTest);
 }
 {% endfor %}
 {% endfor %}
