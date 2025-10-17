@@ -34,6 +34,18 @@ class FailKindTest(TestCase):
     data_folder: ClassVar[Callable[[], Path]] = lambda: test_utils.data_folder(__file__, "test_data")
     test_environ: ClassVar[dict[str, str]] = test_utils.test_environ(
         'TESTS_LOADING_TEST_ROOT', data_folder().as_posix())
+    sys_argv: ClassVar = [
+        ["runner.sh", "panda", "test_suite1", "--test-file", "test4.ets"],
+        ["runner.sh", "panda", "test_suite1", "--test-file", "test4.ets", "--gn-build"]
+    ]
+    sys_argv_test5: ClassVar = [
+        ["runner.sh", "panda", "test_suite1", "--test-file", "test5_compile_only_neg.ets"],
+        ["runner.sh", "panda", "test_suite1", "--test-file", "test5_compile_only_neg.ets", "--gn-build"]
+    ]
+    sys_argv_test1: ClassVar = [
+        ["runner.sh", "panda", "test_suite1", "--test-file", "test1.console.ets"],
+        ["runner.sh", "panda", "test_suite1", "--test-file", "test1.console.ets", "--gn-build"]
+    ]
 
     @staticmethod
     def get_config() -> Config:
@@ -58,182 +70,216 @@ class FailKindTest(TestCase):
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test4.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_passed(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=0)
+        for argv in self.sys_argv:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=0)
 
-        test_result = self.run_test()
+                    test_result = self.run_test()
 
-        self.assertTrue(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_PASSED")
+                    self.assertTrue(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_PASSED")
 
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+                    work_dir = Path(os.environ["WORK_DIR"])
+                    shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test4.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_fail(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=1)
+        for argv in self.sys_argv:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=1)
 
-        test_result = self.run_test()
+                    test_result = self.run_test()
 
-        self.assertFalse(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_FAIL")
+                    self.assertFalse(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_FAIL")
 
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+                    work_dir = Path(os.environ["WORK_DIR"])
+                    shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test5_compile_only_neg.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_neg_fail(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=0)
+        for argv in self.sys_argv_test5:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=0)
 
-        test_result = self.run_test()
+                    test_result = self.run_test()
 
-        self.assertFalse(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_NEG_FAIL")
+                    self.assertFalse(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_NEG_FAIL")
 
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+                    work_dir = Path(os.environ["WORK_DIR"])
+                    shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test4.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_segfault(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=139)
+        for argv in self.sys_argv:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=139)
 
-        test_result = self.run_test()
+                    test_result = self.run_test()
 
-        self.assertFalse(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_SEGFAULT_FAIL")
+                    self.assertFalse(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_SEGFAULT_FAIL")
 
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+                    work_dir = Path(os.environ["WORK_DIR"])
+                    shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test4.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_abort_fail(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=-6)
+        for argv in self.sys_argv:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=-6)
 
-        test_result = self.run_test()
+                    test_result = self.run_test()
 
-        self.assertFalse(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_ABORT_FAIL")
+                    self.assertFalse(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_ABORT_FAIL")
 
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+                    work_dir = Path(os.environ["WORK_DIR"])
+                    shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test4.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_irtoc_fail(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=133)
+        for argv in self.sys_argv:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=133)
 
-        test_result = self.run_test()
+                    test_result = self.run_test()
 
-        self.assertFalse(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_IRTOC_ASSERT_FAIL")
+                    self.assertFalse(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_IRTOC_ASSERT_FAIL")
 
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test1.console.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_expected_fail(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=0, output="default: 5")
-        test_result = self.run_test()
+        for argv in self.sys_argv_test1:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=0, output="default: 5")
+                    test_result = self.run_test()
 
-        self.assertFalse(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT")
+                    self.assertFalse(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT")
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test1.console.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_expected_output_ok(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=0, output="default: 1\ndefault: 2\ndefault: 3\n"
-                                                                "userClick: 1\nuserClick: 2\nuserClick: 3")
-        test_result = self.run_test()
+        for argv in self.sys_argv_test1:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=0, output="default: 1\ndefault: 2\ndefault: 3\n"
+                                                                        "userClick: 1\nuserClick: 2\nuserClick: 3")
+                    test_result = self.run_test()
 
-        self.assertTrue(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_PASSED")
+                    self.assertTrue(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_PASSED")
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test1.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_expected_stderr_not_empty_fail(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=0, error_out="default: 1")
-
-        test_result = self.run_test()
-        self.assertFalse(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_STDERR_NOT_EMPTY")
+        sys_argv = [
+            ["runner.sh", "panda", "test_suite1", "--test-file", "test1.ets"],
+            ["runner.sh", "panda", "test_suite1", "--test-file", "test1.ets", "--gn-build"]
+        ]
+        for argv in sys_argv:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=0, error_out="default: 1")
+                    test_result = self.run_test()
+                    self.assertFalse(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_STDERR_NOT_EMPTY")
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test1.console.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_expected_err_fail(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=0, output="default: 1\ndefault: 2\ndefault: 3\n"
-                                                                "userClick: 1\nuserClick: 2\nuserClick: 3",
-                              error_out="error!")
-
-        test_result = self.run_test()
-        self.assertFalse(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT")
+        for argv in self.sys_argv_test1:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=0, output="default: 1\ndefault: 2\ndefault: 3\n"
+                                                                        "userClick: 1\nuserClick: 2\nuserClick: 3",
+                                        error_out="error!")
+                    test_result = self.run_test()
+                    self.assertFalse(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT")
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--test-file", "test1.console.ets"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_fail_kind_expected_err_fail_no_file(self, mock_popen: MagicMock) -> None:
-        self.set_process_mock(mock_popen, return_code=0, error_out="default: 1\ndefault: 2\ndefault: 3\n"
-                                                                "userClick: 1\nuserClick: 2\nuserClick: 3")
-
-        test_result = self.run_test()
-        self.assertFalse(test_result.passed)
-        self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT")
+        for argv in self.sys_argv_test1:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    self.set_process_mock(mock_popen, return_code=0, error_out="default: 1\ndefault: 2\ndefault: 3\n"
+                                                                        "userClick: 1\nuserClick: 2\nuserClick: 3")
+                    test_result = self.run_test()
+                    self.assertFalse(test_result.passed)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_COMPARE_OUTPUT")
