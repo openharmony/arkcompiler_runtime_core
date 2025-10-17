@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{% for type in topLevelTypes %}
+{% for type in compileErrorTypes %}
 
 /*---
 desc: A few bad top-level declarations
