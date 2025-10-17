@@ -544,6 +544,8 @@ export namespace taskpool {
         isPeriodicTask: boolean = false;
         /// identifier of task which is executeDelayed or executePeriodically
         timerId: int = -1;
+        /// id of the coroutine that executes task
+        coroId: int = -1;
 
         // NOTE(ipetrov, #19949): Change to private when bug in frontend will be fixed
         taskMutex: Object;
@@ -1679,7 +1681,9 @@ export namespace taskpool {
             runningGroupTasks.set(InternalTask.of(task).groupId, runningTasksOfTheGroup + 1);
         }
         // NOTE(ipetrov, #20208): CoroutineExtras is debug functionality, maybe need to create a separate intrinsic
-        executingTasks.set(CoroutineExtras.getCoroutineId(), task);
+        const currentCoroId: int = CoroutineExtras.getCoroutineId()
+        InternalTask.of(task).coroId = currentCoroId;
+        executingTasks.set(currentCoroId, task);
         const currentWorkerId: int = CoroutineExtras.getWorkerId();
         InternalTask.of(task).workerId = currentWorkerId;
         currentExecutingTasks.set(currentWorkerId, task);
@@ -1700,8 +1704,7 @@ export namespace taskpool {
     function taskFinished(task: Task): boolean {
         let isTaskCanceled: boolean = false;
         ConcurrencyHelpers.lockGuard(mutex, () => {
-            // NOTE(ipetrov, #20208): CoroutineExtras is debug functionality, maybe need to create a separate intrinsic
-            executingTasks.delete(CoroutineExtras.getCoroutineId());
+            executingTasks.delete(InternalTask.of(task).coroId);
             workerToTasks.get(InternalTask.of(task).workerId)!.delete(task);
             const cancelByTask: boolean = popFromMap(task, runningTasks, waitingTasks, tasksToBeCanceled);
             let cancelByGroup: boolean = false;
