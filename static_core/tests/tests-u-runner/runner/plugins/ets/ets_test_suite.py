@@ -140,11 +140,18 @@ class RuntimeEtsTestSuite(EtsTestSuite):
 
 class GCStressEtsTestSuite(EtsTestSuite):
     def __init__(self, config: Config, work_dir: WorkDir, default_list_root: str):
-        super().__init__(config, work_dir, EtsSuites.GCSTRESS.value, default_list_root)
+        test_list_path = (Path(config.general.static_core_root).parent.parent /
+                        "ets_frontend" / "ets2panda" / "test"/ "ark_tests" / "ets-tests" / "test-lists")
+        if not test_list_path.exists():
+            raise Exception(f'There is no path {test_list_path}! GC stress test-lists are located in separate repo!')
+        super().__init__(config, work_dir, EtsSuites.GCSTRESS.value, str(test_list_path))
         self._ets_test_dir = EtsTestDir(config.general.static_core_root, config.general.test_root)
         self.set_preparation_steps()
 
     def set_preparation_steps(self) -> None:
+        if not self._ets_test_dir.gc_stress.exists():
+            raise Exception(f'There is no path {self._ets_test_dir.gc_stress}! \
+                            с')
         self._preparation_steps.append(CopyStep(
             test_source_path=self._ets_test_dir.gc_stress,
             test_gen_path=self.test_root,
