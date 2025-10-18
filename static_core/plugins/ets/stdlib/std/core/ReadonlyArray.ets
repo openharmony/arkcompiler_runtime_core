@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
 export interface ReadonlyArray<out T> extends ConcatArray<T> {
     // concat(...items: (T | ConcatArray<T>)[]): T[];

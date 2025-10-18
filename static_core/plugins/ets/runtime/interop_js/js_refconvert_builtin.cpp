@@ -245,7 +245,7 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_MAP_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"),
-             {"{ULescompat/ReadonlyArray;Lstd/core/Iterable;Lstd/core/Null;}:V", 2, "<ctor>"}}};
+             {"{ULstd/core/Iterable;Lstd/core/Null;Lstd/core/ReadonlyArray;}:V", 2, "<ctor>"}}};
         wMap_ = RegisterClassWithLeafMatcher(descriptors::MAP, "Map", &W_MAP_OVERLOADS);
     }
 
