@@ -30,16 +30,16 @@ loader.config({ monaco });
 // @ts-ignore
 globalThis.MonacoEnvironment = {
     // @ts-ignore
-    getWorker(_, label) {
+    getWorker(_, label): Worker {
         if (label === 'json') {
-        return new Worker(
-            new URL('monaco-editor/esm/vs/language/json/json.worker?worker', import.meta.url),
-            { type: 'module' }
-        );
+            return new Worker(
+                new URL('monaco-editor/esm/vs/language/json/json.worker?worker', import.meta.url),
+                { type: 'module' }
+            );
         }
         return new Worker(
-        new URL('monaco-editor/esm/vs/editor/editor.worker?worker', import.meta.url),
-        { type: 'module' }
+            new URL('monaco-editor/esm/vs/editor/editor.worker?worker', import.meta.url),
+            { type: 'module' }
         );
     }
 };

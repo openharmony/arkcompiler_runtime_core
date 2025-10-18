@@ -55,7 +55,7 @@ const ArkTSEditor: React.FC = () => {
             return;
         }
         const pos = { lineNumber: jumpTo.line, column: jumpTo.column || 1 };
-      
+
         editorInstance.setSelection({
           startLineNumber: pos.lineNumber,
           startColumn: pos.column,
@@ -108,18 +108,18 @@ const ArkTSEditor: React.FC = () => {
             });
         }
     }, [monaco, syn]);
-    
+
     const debouncedDispatchRef = useRef(
         debounce((value: string) => {
           dispatch(setCodeAction(value));
         }, 800)
       );
-      
+
       useEffect(() => {
         return () => debouncedDispatchRef.current.cancel();
       }, []);
 
-    const handleEditorChange = (value?: string) => {
+    const handleEditorChange = (value?: string): void => {
         debouncedDispatchRef.current(value ?? '');
     };
 
@@ -142,7 +142,7 @@ const ArkTSEditor: React.FC = () => {
              : monaco.MarkerSeverity.Error
         })
     );
-    
+
         monacoEditor.setModelMarkers(model, 'arkts', markers);
     }, [highlightErrors, monaco, editorInstance]);
 
@@ -157,7 +157,7 @@ const ArkTSEditor: React.FC = () => {
                 theme={theme === 'dark' ? 'vs-dark' : 'light'}
                 onChange={handleEditorChange}
                 className={styles.editor}
-                options={{ 
+                options={{
                     fixedOverflowWidgets: true,
                     automaticLayout: true
                  }}

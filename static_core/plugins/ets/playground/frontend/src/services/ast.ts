@@ -39,6 +39,6 @@ export const astService = {
     );
   },
 
-  fetchAstAuto: (payload: IAstFetch) => astService.fetchAst(payload, 'auto'),
-  fetchAstManual: (payload: IAstFetch) => astService.fetchAst(payload, 'manual'),
+  fetchAstAuto: (payload: IAstFetch): Promise<IServiceResponse<IAstReq>> => astService.fetchAst(payload, 'auto'),
+  fetchAstManual: (payload: IAstFetch): Promise<IServiceResponse<IAstReq>> => astService.fetchAst(payload, 'manual'),
 };
