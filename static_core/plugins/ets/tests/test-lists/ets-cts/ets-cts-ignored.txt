@@ -1105,10 +1105,6 @@
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_2.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_3.ets
 
-#30430 GGW:70004
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/consume_clash_0_0.ets
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/consume_clash_0_1.ets
-
 #30464
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default.ets
 
