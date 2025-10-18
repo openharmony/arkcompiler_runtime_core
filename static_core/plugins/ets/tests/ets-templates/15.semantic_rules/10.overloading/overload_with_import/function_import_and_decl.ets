@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: Overload function combination of local and imported functions
 files: [./modules/function_export_all.ets]
+tags: [compile-only, negative]
 ---*/
 
 import {{c.import}} from "./modules/function_export_all.ets";

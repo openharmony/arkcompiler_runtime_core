@@ -1436,23 +1436,11 @@
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_13.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_14.ets
 
-#28374
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_0.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_1.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_2.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_3.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_4.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_5.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_6.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_7.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_8.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_0.ets
+#30721 No CTE when using overloads with import_all_from_reexport_0
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_1.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_2.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_3.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_4.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_5.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_6.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_3.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_7.ets
 
 #27999
@@ -2430,7 +2418,3 @@
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_21.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_22.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/narrowing_neg_23.ets
-
-#29866
-09.classes/07.method_declarations/method_declaration_with_existed_name_3.ets
-

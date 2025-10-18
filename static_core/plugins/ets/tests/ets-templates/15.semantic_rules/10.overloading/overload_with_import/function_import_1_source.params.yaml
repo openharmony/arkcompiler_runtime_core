@@ -13,15 +13,15 @@
 
 ---
 cases:
-    - { import: '* as FM',          list: 'FM.foo01, FM.foo02', call: 'foo()',             res: 1      }
-    - { import: '* as FM',          list: 'FM.foo01, FM.foo02', call: 'foo(true)',         res: 2      }
-    - { import: '* as FM',          list: 'FM.foo03, FM.foo06', call: 'foo(10)',           res: 3      }
-    - { import: '* as FM',          list: 'FM.foo03, FM.foo06', call: 'foo(7.4f)',         res: 6      }
-    - { import: '* as FM',          list: 'FM.foo03, FM.foo06', call: 'foo(7.4f)',         res: 6      }
-    - { import: '* as FM',          list: 'Math.abs, Math.max', call: 'foo(-7)',           res: 7      }
-    - { import: '* as FM',          list: 'Math.abs, Math.max', call: 'foo(7, 24)',        res: 24     }
-    - { import: '* as FM',          list: 'FM.foo08, Math.abs', call: 'foo(-6)',           res: 6      }
-    - { import: '* as FM',          list: 'FM.foo08, Math.abs', call: 'foo("Hi")',         res: '"Hi"' }
+    - { import: '* as FM',          list: 'FM.foo01, FM.foo02', call: 'foo()',             res: 1,      tags: "[compile-only, negative]"} 
+    - { import: '* as FM',          list: 'FM.foo01, FM.foo02', call: 'foo(true)',         res: 2,      tags: "[compile-only, negative]"}
+    - { import: '* as FM',          list: 'FM.foo03, FM.foo06', call: 'foo(10)',           res: 3,      tags: "[compile-only, negative]"}
+    - { import: '* as FM',          list: 'FM.foo03, FM.foo06', call: 'foo(7.4f)',         res: 6,      tags: "[compile-only, negative]"}
+    - { import: '* as FM',          list: 'FM.foo03, FM.foo06', call: 'foo(7.4f)',         res: 6,      tags: "[compile-only, negative]"}
+    - { import: '* as FM',          list: 'Math.abs, Math.max', call: 'foo(-7)',           res: 7,      tags: "[compile-only, negative]"}
+    - { import: '* as FM',          list: 'Math.abs, Math.max', call: 'foo(7, 24)',        res: 24,     tags: "[compile-only, negative]"}
+    - { import: '* as FM',          list: 'FM.foo08, Math.abs', call: 'foo(-6)',           res: 6,      tags: "[compile-only, negative]"}
+    - { import: '* as FM',          list: 'FM.foo08, Math.abs', call: 'foo("Hi")',         res: '"Hi"', tags: "[compile-only, negative]"}
     - { import: '{ foo04, foo07 }', list: 'foo04, foo07',       call: 'foo(10)',           res: 4      }
     - { import: '{ foo04, foo07 }', list: 'foo04, foo07',       call: 'foo(10.5)',         res: 7      }
     - { import: '{ foo05, foo09 }', list: 'foo05, foo09',       call: 'foo(10)',           res: 5      }
