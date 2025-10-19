@@ -1191,10 +1191,6 @@
 15.semantic_rules/03.type_identity/union_types_identity_6.ets
 15.semantic_rules/03.type_identity/union_types_identity_7.ets
 
-#30441
-15.semantic_rules/04.assignability/never_assignability_0.ets
-15.semantic_rules/04.assignability/never_assignability_2.ets
-
 #28484 Interface has methods
 15.semantic_rules/06.compatibility_call_args/inheritance_relationship_compatibility_case/inheritance_relationship_compatibility_case_03.ets
 15.semantic_rules/06.compatibility_call_args/interface_implementation_compatibility_case/interface_implementation_compatibility_case_01.ets
