@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,6 @@ public:
     bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const override;
     bool IsMethodTypedArrayCtor([[maybe_unused]] MethodPtr method) const override;
     bool IsClassStringBuilder(ClassPtr klass) const override;
-    bool IsClassEscompatMap(ClassPtr klass) const override;
-    bool IsClassEscompatSet(ClassPtr klass) const override;
     bool IsClassEscompatArray(ClassPtr klass) const override;
     bool IsClassEscompatInt8Array(ClassPtr klass) const override;
     bool IsClassEscompatUint8Array(ClassPtr klass) const override;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -228,16 +228,6 @@ bool EtsRuntimeInterface::IsMethodInModuleScope(MethodPtr method) const
 bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
 {
     return ClassCast(klass)->GetName() == "std.core.StringBuilder";
-}
-
-bool EtsRuntimeInterface::IsClassEscompatMap(ClassPtr klass) const
-{
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreMap;
-}
-
-bool EtsRuntimeInterface::IsClassEscompatSet(ClassPtr klass) const
-{
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreSet;
 }
 
 bool EtsRuntimeInterface::IsClassEscompatArray(ClassPtr klass) const
