@@ -15,7 +15,7 @@ limitations under the License.
 
 /*---
 desc: Method call by his name.
-assert: The identifier in a classMethodDeclaration is the name of the method whitch may be used to refer to the method.
+assert: The identifier in a classMethodDeclaration is the name of the method which may be used to refer to the method.
 ---*/
 
 class A {

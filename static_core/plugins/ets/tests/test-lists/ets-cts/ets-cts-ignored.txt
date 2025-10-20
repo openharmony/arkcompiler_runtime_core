@@ -706,8 +706,14 @@
 09.classes/06.field_declarations/04.field_initialization/class_fields_cte_43.ets
 09.classes/06.field_declarations/04.field_initialization/class_fields_cte_44.ets
 09.classes/06.field_declarations/04.field_initialization/class_fields_cte_45.ets
-09.classes/06.field_declarations/04.field_initialization/field_initialization_with_super.ets
-09.classes/06.field_declarations/04.field_initialization/field_initialization_with_this.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_super_0.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_super_1.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_super_2.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_this_0.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_this_1.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_this_2.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_this_3_0.ets
+09.classes/06.field_declarations/04.field_initialization/field_initialization_with_this_3_1.ets
 09.classes/06.field_declarations/04.field_initialization/non_static_field_initialization_reference.ets
 09.classes/06.field_declarations/04.field_initialization/non_static_field_self_initialization_reference.ets
 
@@ -1723,10 +1729,6 @@
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_7.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_8.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_9.ets
-
-#28191
-17.experimental_features/02.fixed_array_types/fixed_array_types_ext_8.ets
-17.experimental_features/02.fixed_array_types/fixed_array_types_ext_9.ets
 
 #28486
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con1_8.ets
