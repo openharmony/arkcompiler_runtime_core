@@ -19,24 +19,51 @@
 #include "runtime/mem/gc/gc.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/mem/root_provider.h"
+#include "plugins/ets/runtime/types/ets_finalization_registry.h"
 
 namespace ark::ets {
 
 class PandaEtsVM;
 
-/// @brief The final class that manages all created FinalizationRegistry objects
-class FinalizationRegistryManager final {
+/**
+ * The class that manages all created FinalizationRegistry objects
+ * and its finalization process together with EtsReferenceProcessor.
+ *
+ * Each FinalizationRegistry instance has a finalization queue
+ * (fields finalizationQueueHead and finalizationQueueTail).
+ *
+ * When EtsReferenceProcessor clears a FinRegNode (which inherits from WeakRef)
+ * it adds the FinRegNode to finalization queue of the same FinalizationRegistry instance.
+ * Also reference processor adds the FinalizationRegistry instance to the linked list in
+ * FinalizationRegistryManager if it is not in it (the field finalizationList_).
+ * This list is organized as a list of lists of FinalizationRegistry instances.
+ * Each FinalizationRegistry has a list of FinRegNode which requires finalization.
+ *
+ * +-------------+    +----------------+    +-----------------+    +-----------------+
+ * | domain:main | -> | domain:general | -> | domain:ea, id:5 | -> | domain:ea, id:6 |
+ * +-------------+    +----------------+    +-----------------+    +-----------------+
+ *        |                   |                      |                      |
+ *        V                   V                      V                      V
+ *    +--------+          +--------+             +--------+             +--------+
+ *    | FinReg |          | FinReg |             | FinReg |             | FinReg |
+ *    +--------+          +--------+             +--------+             +--------+
+ *        |
+ *        V
+ *    +--------+    +------------+    +------------+
+ *    | FinReg | -> | FinRegNode | -> | FinRegNode |
+ *    +--------+    +------------+    +------------+
+ * finalizationList_ is not a GC root but GC updates its references and sweeps dead instancies.
+ * After GC finished in a managed thread it asks FinalizationRegistryManager to start a clenup coroutine.
+ * The manager finds the corresponding FinalizationRegistry list (there are may be several lists) and combine
+ * all finalization queues into a single list. This list is passed as an argument to the clenaup coroutine.
+ */
+class FinalizationRegistryManager final : public mem::RootProvider {
 public:
-    explicit FinalizationRegistryManager(PandaEtsVM *vm) : vm_(vm) {}
+    explicit FinalizationRegistryManager(PandaEtsVM *vm);
     NO_COPY_SEMANTIC(FinalizationRegistryManager);
     NO_MOVE_SEMANTIC(FinalizationRegistryManager);
-    ~FinalizationRegistryManager() = default;
-
-    /**
-     * @brief Add a new created FinalizationRegistry instanse to array of FinalizationRegistry
-     * @param instance Object that represents WeakRef<FinalizationRegistry>
-     */
-    void RegisterInstance(EtsObject *instance);
+    ~FinalizationRegistryManager() override = default;
 
     /**
      * @brief Checks the number of called coroutines with cleanup and calls the next one
@@ -50,23 +77,28 @@ public:
 
     static CoroutineWorkerDomain GetCoroDomain(EtsCoroutine *coro);
 
+    void Enqueue(EtsFinalizationRegistry *finReg);
+
+    void VisitRoots(const GCRootVisitor &visitor) override;
+
+    void UpdateRefs(const GCRootUpdater &gcRootUpdater) override;
+
+    void Sweep(const GCObjectVisitor &gcObjectVisitor);
+
+    static bool CanCleanup(CoroutineWorker::Id currentId, CoroutineWorkerDomain currentDomain, CoroutineWorker::Id id,
+                           CoroutineWorkerDomain domain);
+
 private:
-    void SortInstancies();
-
-    void EnsureCapacity(EtsCoroutine *coro);
-
     /// @brief Increase number of cleanup coroutines and check if not exceeds limit
     bool UpdateFinRegCoroCountAndCheckIfCleanupNeeded();
+    EtsFinalizationRegistry *SweepFinRegChain(EtsFinalizationRegistry *head, const GCObjectVisitor &gcObjectVisitor);
 
     // Limit of cleanup coroutines count
     static constexpr uint32_t MAX_FINREG_CLEANUP_COROS = 3;
-    // Initial size of the created array
-    static constexpr uint32_t INIT_SIZE = 10;
 
     PandaEtsVM *vm_ {nullptr};
-    size_t finRegLastIndex_ {0};
     std::atomic<uint32_t> finRegCleanupCoroCount_ {0};
-    mem::Reference *finRegInstancies_ {nullptr};
+    PandaList<EtsFinalizationRegistry *> finalizationList_;
 };
 }  // namespace ark::ets
 

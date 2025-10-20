@@ -23,7 +23,7 @@ package std.core;
  *
  * @tparam T Object type for weak reference
  */
-export final class WeakRef<T extends Object> {
+export class WeakRef<T extends Object> {
     // Reference to target object
     private referent: T | undefined;
 
@@ -41,7 +41,7 @@ export final class WeakRef<T extends Object> {
      *
      * @returns instance's target object, or undefined if the target object has been collected
      */
-    public deref(): T | undefined {
+    public final deref(): T | undefined {
         return this.referent;
     }
 }

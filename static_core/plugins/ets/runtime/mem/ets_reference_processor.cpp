@@ -14,18 +14,22 @@
  */
 
 #include "libarkbase/os/mutex.h"
+#include "runtime/include/class.h"
 #include "runtime/include/object_header.h"
 #include "runtime/mem/gc/gc_phase.h"
 #include "runtime/mem/object_helpers.h"
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref.h"
-#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_finreg_node.h"
+#include "plugins/ets/runtime/types/ets_finalization_registry.h"
+#include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 
 namespace ark::mem::ets {
 
-EtsReferenceProcessor::EtsReferenceProcessor(GC *gc) : gc_(gc) {}
+EtsReferenceProcessor::EtsReferenceProcessor(GC *gc, ark::ets::PandaEtsVM *vm) : gc_(gc), vm_(vm) {}
 
 void EtsReferenceProcessor::Initialize()
 {
@@ -98,33 +102,34 @@ template <bool USE_OBJECT_REF>
 void EtsReferenceProcessor::HandleOtherFields(const BaseClass *cls, const ObjectHeader *object,
                                               const ReferenceProcessorT &processor)
 {
-    auto *etsClass = ark::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(cls));
-    if (!etsClass->IsFinalizerReference()) {
-        return;
-    }
-    // Currently, only finalizer references' other fields are handled
-    ASSERT(etsClass->IsWeakReference());
-    auto *finalizableWeakRef = ark::ets::EtsFinalizableWeakRef::FromCoreType(object);
-    if constexpr (USE_OBJECT_REF) {
-        auto refHandler = [processor, finalizableWeakRef](auto *ref, size_t offset) {
-            if (ref == nullptr) {
-                return;
+    auto *weakRefClass = ark::ets::PlatformTypes(vm_)->coreWeakRef->GetRuntimeClass();
+    const auto *klass = static_cast<const Class *>(cls);
+    while (klass != weakRefClass) {
+        auto refNum = klass->GetRefFieldsNum<false>();
+        if (refNum == 0) {
+            klass = klass->GetBase();
+            continue;
+        }
+
+        auto offset = klass->GetRefFieldsOffset<false>();
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto *refStart = reinterpret_cast<ObjectPointerType *>(ToUintPtr(object) + offset);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto *refEnd = refStart + refNum;
+        for (auto *ref = refStart; ref < refEnd; ++ref) {
+            auto o = ObjectAccessor::Load(ref);
+            if (o == 0) {
+                continue;
             }
-            ASSERT(ref->GetReferent() != nullptr);
-            processor(ToVoidPtr(ToUintPtr(finalizableWeakRef) + offset));
-        };
-        refHandler(finalizableWeakRef->GetPrev(), ark::ets::EtsFinalizableWeakRef::GetPrevOffset());
-        refHandler(finalizableWeakRef->GetNext(), ark::ets::EtsFinalizableWeakRef::GetNextOffset());
-    } else {
-        auto refHandler = [processor](auto *ref) {
-            if (ref == nullptr) {
-                return;
+            if constexpr (USE_OBJECT_REF) {
+                processor(ref);
+            } else {
+                auto *obj = ObjectAccessor::DecodeNotNull<EtsLanguageConfig::LANG_TYPE>(o);
+                processor(obj);
             }
-            ASSERT(ref->GetReferent() != nullptr);
-            processor(ref->GetCoreType());
-        };
-        refHandler(finalizableWeakRef->GetPrev());
-        refHandler(finalizableWeakRef->GetNext());
+        }
+
+        klass = klass->GetBase();
     }
 }
 
@@ -198,6 +203,16 @@ void EtsReferenceProcessor::EnqueueFinalizer(ark::ets::EtsWeakReference *weakRef
         auto finalizer = finalizableWeakRef->ReleaseFinalizer();
         if (!finalizer.IsEmpty()) {
             finalizerQueue_.push_back(finalizer);
+        }
+    }
+    auto *types = ark::ets::PlatformTypes(vm_);
+    if (weakRefClass == types->coreFinRegNode) {
+        auto *node = reinterpret_cast<ark::ets::EtsFinRegNode *>(weakRef);
+        auto *finReg = node->GetFinalizationRegistry();
+        bool inFinalizationQueue = finReg->GetFinalizationQueueHead() != nullptr;
+        ark::ets::EtsFinalizationRegistry::Enqueue(node, finReg);
+        if (!inFinalizationQueue) {
+            vm_->GetFinalizationRegistryManager()->Enqueue(finReg);
         }
     }
 }

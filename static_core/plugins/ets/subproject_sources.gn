@@ -210,6 +210,8 @@ srcs_runtime = [
   "runtime/types/ets_typeapi_create.cpp",
   "runtime/types/ets_waiters_list.cpp",
   "runtime/types/ets_finalizable_weak_ref.cpp",
+  "runtime/types/ets_finreg_node.cpp",
+  "runtime/types/ets_finalization_registry.cpp",
   "runtime/types/ets_map.cpp",
   "runtime/ets_utils.cpp",
   "runtime/static_object_accessor.cpp",

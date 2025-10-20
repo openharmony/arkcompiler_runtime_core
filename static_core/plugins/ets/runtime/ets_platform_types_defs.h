@@ -72,9 +72,12 @@
     T("Lstd/core/QueueSpinlock;", coreQueueSpinlock)                                                                  \
     T("Lstd/core/RWLock;", coreRWLock)                                                                                \
     /* Finalization */                                                                                                \
+    T("Lstd/core/WeakRef;", coreWeakRef)                                                                              \
     T("Lstd/core/FinalizableWeakRef;", coreFinalizableWeakRef)                                                        \
     T("Lstd/core/FinalizationRegistry;", coreFinalizationRegistry)                                                    \
-    S("Lstd/core/FinalizationRegistry;", "execCleanup", "[Lstd/core/WeakRef;:V", coreFinalizationRegistryExecCleanup) \
+    S("Lstd/core/FinalizationRegistry;", "execCleanup", "Lstd/core/FinRegNode;:V",                                    \
+      coreFinalizationRegistryExecCleanup)                                                                            \
+    T("Lstd/core/FinRegNode;", coreFinRegNode)                                                                        \
     /* Containers */                                                                                                  \
     T("Lescompat/Array;", escompatArray)                                                                              \
     I("Lescompat/Array;", "pop", ":Lstd/core/Object;", escompatArrayPop)                                              \

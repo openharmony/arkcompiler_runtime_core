@@ -26,18 +26,16 @@ package std.core;
  *
  * @tparam T Object type for weak reference
  */
-final class FinalizableWeakRef<T extends Object> {
+final class FinalizableWeakRef<T extends Object> extends WeakRef<T> {
     /**
      * Constructs weak reference object referring to a given target object
      *
      * @param target - target object for weak reference
      */
     public constructor(target: T) {
-        this.referent = target;
+        super(target);
     }
 
-    // Reference to target object
-    private referent: T | undefined;
     private prevRef: FinalizableWeakRef<T> | null = null;
     private nextRef: FinalizableWeakRef<T> | null = null;
     private finalizerPtr: long;

@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
 
+#include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref.h"
@@ -31,7 +32,7 @@ class EtsReferenceProcessor final : public ReferenceProcessor {
     using RefFinalizer = ark::ets::EtsFinalizableWeakRef::Finalizer;
 
 public:
-    explicit EtsReferenceProcessor(GC *gc);
+    EtsReferenceProcessor(GC *gc, ark::ets::PandaEtsVM *vm);
     NO_COPY_SEMANTIC(EtsReferenceProcessor);
     NO_MOVE_SEMANTIC(EtsReferenceProcessor);
     ~EtsReferenceProcessor() final = default;
@@ -88,6 +89,7 @@ private:
 
     mem::MPSCSet<PandaUnorderedSet<ObjectHeader *>> weakReferences_;
     GC *gc_ {nullptr};
+    ark::ets::PandaEtsVM *vm_;
     ark::ets::EtsObject *nullValue_ {nullptr};
     PandaDeque<RefFinalizer> finalizerQueue_;
 };

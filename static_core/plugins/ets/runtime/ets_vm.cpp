@@ -53,6 +53,7 @@
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
+#include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 
 #include "plugins/ets/runtime/ets_object_state_table.h"
 #include "libarkbase/taskmanager/task_manager.h"
@@ -195,7 +196,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
     stringTable_ = allocator->New<StringTable>();
     monitorPool_ = allocator->New<MonitorPool>(allocator);
     finalizationRegistryManager_ = allocator->New<FinalizationRegistryManager>(this);
-    referenceProcessor_ = allocator->New<mem::ets::EtsReferenceProcessor>(mm_->GetGC());
+    referenceProcessor_ = allocator->New<mem::ets::EtsReferenceProcessor>(mm_->GetGC(), this);
     unhandledObjectManager_ = allocator->New<UnhandledObjectManager>(this);
     fullGCLongTimeListener_ = allocator->New<FullGCLongTimeListener>();
 
@@ -783,6 +784,12 @@ void PandaEtsVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
         }
     }
     GetUnhandledObjectManager()->UpdateObjects(gcRootUpdater);
+}
+
+void PandaEtsVM::SweepVmRefs(const GCObjectVisitor &gcObjectVisitor)
+{
+    PandaVM::SweepVmRefs(gcObjectVisitor);
+    finalizationRegistryManager_->Sweep(gcObjectVisitor);
 }
 
 EtsFinalizableWeakRef *PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,
