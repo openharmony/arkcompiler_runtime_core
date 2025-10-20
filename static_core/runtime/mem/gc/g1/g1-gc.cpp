@@ -1300,17 +1300,9 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
 
     size_t allocatedBytesYoung = 0;
     size_t allocatedBytesOld = 0;
-    for (auto *region : collectionSet_) {
-        auto allocated = region->GetAllocatedBytes();
-        if (region->HasFlag(RegionFlag::IS_EDEN)) {
-            allocatedBytesYoung += allocated;
-        } else {
-            allocatedBytesOld += allocated;
-        }
-    }
-
-    copiedBytesYoung_ = 0;
-    copiedBytesOld_ = 0;
+    size_t allocatedObjectsYoung = 0;
+    size_t allocatedObjectsOld = 0;
+    CollectMetrickBeforeSinglePass(allocatedBytesYoung, allocatedBytesOld, allocatedObjectsYoung, allocatedObjectsOld);
 
     EvacuateCollectionSet(remset);
 
@@ -1320,10 +1312,7 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
 
     analytics_.ReportEvacuatedBytes(copiedBytesYoung_);
 
-    this->memStats_.template RecordSizeMovedYoung<false>(copiedBytesYoung_);
-    this->memStats_.template RecordSizeMovedTenured<false>(copiedBytesOld_);
-    this->memStats_.template RecordSizeFreedYoung<false>(allocatedBytesYoung - copiedBytesYoung_);
-    this->memStats_.template RecordSizeFreedTenured<false>(allocatedBytesOld - copiedBytesOld_);
+    UpdateMetricsAfterSinglePass(allocatedBytesYoung, allocatedBytesOld, allocatedObjectsYoung, allocatedObjectsOld);
 
     updatedRefsQueue_->insert(updatedRefsQueue_->end(), updatedRefsQueueTemp_->begin(), updatedRefsQueueTemp_->end());
     updatedRefsQueueTemp_->clear();
@@ -1340,6 +1329,53 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
     SweepRegularVmRefs();
 
     ResetRegionAfterMixedGC();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::CollectMetrickBeforeSinglePass(size_t &allocatedBytesYoung, size_t &allocatedBytesOld,
+                                                          size_t &allocatedObjectsYoung, size_t &allocatedObjectsOld)
+{
+    copiedBytesYoung_ = 0;
+    copiedBytesOld_ = 0;
+    copiedObjectsYoung_ = 0;
+    copiedObjectsOld_ = 0;
+
+    auto youngVisitor = [&allocatedObjectsYoung]([[maybe_unused]] ObjectHeader *obj) { ++allocatedObjectsYoung; };
+
+    for (auto *region : collectionSet_) {
+        auto allocatedBytes = region->GetAllocatedBytes();
+        if (region->HasFlag(RegionFlag::IS_EDEN)) {
+            allocatedBytesYoung += allocatedBytes;
+            if (g1TrackFreedObjects_) {
+                // GetAllocatedObjects is supported for tenured only - have to iterate
+                region->IterateOverObjects(youngVisitor);
+            }
+        } else {
+            allocatedBytesOld += allocatedBytes;
+            allocatedObjectsOld += region->GetAllocatedObjects();
+        }
+    }
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::UpdateMetricsAfterSinglePass(size_t allocatedBytesYoung, size_t allocatedBytesOld,
+                                                        size_t allocatedObjectsYoung, size_t allocatedObjectsOld)
+{
+    ASSERT(allocatedBytesYoung >= copiedObjectsYoung_);
+    ASSERT(allocatedBytesOld >= copiedObjectsOld_);
+    this->memStats_.template RecordSizeMovedYoung<false>(copiedBytesYoung_);
+    this->memStats_.template RecordSizeMovedTenured<false>(copiedBytesOld_);
+    this->memStats_.template RecordSizeFreedYoung<false>(allocatedBytesYoung - copiedBytesYoung_);
+    this->memStats_.template RecordSizeFreedTenured<false>(allocatedBytesOld - copiedBytesOld_);
+
+    if (g1TrackFreedObjects_) {
+        ASSERT(allocatedObjectsYoung >= copiedObjectsYoung_);
+        ASSERT(allocatedObjectsOld >= copiedObjectsOld_);
+        this->memStats_.template RecordCountMovedYoung<false>(copiedObjectsYoung_);
+        this->memStats_.template RecordCountMovedTenured<false>(copiedObjectsOld_);
+        this->memStats_.template RecordCountFreedYoung<false>(allocatedObjectsYoung - copiedObjectsYoung_);
+        this->memStats_.template RecordCountFreedTenured<false>(allocatedObjectsOld - copiedObjectsOld_);
+    }
 }
 
 template <class LanguageConfig>
