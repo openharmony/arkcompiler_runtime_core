@@ -35,4 +35,18 @@ static {
         result[32] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(32) }
         return result
     }()
+
+    dayNames = [
+        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+    ];
+
+    monthNames = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+
+    firstDayInMonthNormal = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    firstDayInMonthLeap = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
+
+    maxDateOffset = 8.64e15.toLong();
+    INVALID_DATE = maxDateOffset + 1;
 }

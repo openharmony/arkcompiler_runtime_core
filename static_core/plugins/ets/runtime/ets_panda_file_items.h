@@ -236,7 +236,7 @@ static constexpr std::string_view ANNOTATION_MODULE_EXPORTED           = "export
 static constexpr std::string_view INTERFACE_OBJ_LITERAL                = "Lstd/annotations/InterfaceObjectLiteral;";
 
 // escompat
-static constexpr std::string_view DATE                                 = "Lescompat/Date;";
+static constexpr std::string_view DATE                                 = "Lstd/core/Date;";
 static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lescompat/ArrayEntriesIterator_T;";
 static constexpr std::string_view ITERATOR_RESULT                      = "Lstd/core/IteratorResult;";
 static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lescompat/ArrayKeysIterator;";

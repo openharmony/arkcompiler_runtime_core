@@ -56,7 +56,7 @@ cases:
   - desc: How to get Date via reflection.
     logic: |-
       let type_of_date: Type = Type.from<Date>();
-      arktest.assertEQ(type_of_date.toString(), "escompat.Date");
+      arktest.assertEQ(type_of_date.toString(), "std.core.Date");
   - desc: How to get Set<string> via reflection.
     logic: |-
       let type_of_set: Type = Type.from<Set<string>>();

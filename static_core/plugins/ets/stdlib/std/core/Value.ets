@@ -527,7 +527,7 @@ export final class ClassValue extends reflect.Value {
             return result.toString();
         }
 
-        if (this.typ.getName() == "escompat.Date") {
+        if (this.typ.getName() == "std.core.Date") {
             return new StringBuilder("Date: ").append("\"").append((this.data as Date).toISOString()).append("\"").toString()
         }
         if (depth == 0) {

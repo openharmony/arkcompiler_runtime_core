@@ -1514,11 +1514,11 @@ intrinsics:
 
 
 #################
-# escompat.Date #
+# std.core.Date #
 #################
   - name: EscompatDateNow
     space: ets
-    class_name: escompat.Date
+    class_name: std.core.Date
     method_name: now
     static: true
     signature:
@@ -1528,7 +1528,7 @@ intrinsics:
 
   - name: EscompatDateGetLocalTimezoneOffset
     space: ets
-    class_name: escompat.Date
+    class_name: std.core.Date
     method_name: getLocalTimezoneOffset
     static: true
     signature:
@@ -1538,7 +1538,7 @@ intrinsics:
 
   - name: EscompatDateGetTimezoneName
     space: ets
-    class_name: escompat.Date
+    class_name: std.core.Date
     method_name: getTimezoneName
     static: true
     signature:

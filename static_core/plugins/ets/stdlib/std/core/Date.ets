@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
 // TODO To offer protection against timing attacks and fingerprinting, the precision of `Date.getTime()`,
 // `Date.now()` might get rounded depending on browser (target) settings.
