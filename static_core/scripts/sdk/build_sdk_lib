@@ -37,7 +37,8 @@ function build_panda() {
         -DPANDA_WITH_ACCORD=OFF \
         -DPANDA_WITH_CANGJIE=OFF \
         -DPANDA_WITH_HZ_ECMASCRIPT=OFF \
-        -DPANDA_WITH_TESTS_JAVA_ECMASCRIPT=OFF"
+        -DPANDA_WITH_TESTS_JAVA_ECMASCRIPT=OFF \
+        -DPANDA_TS_BINDINGS=ON"
 
     # shellcheck disable=SC2086
     ${OHOS_SDK_NATIVE}/build-tools/cmake/bin/cmake -B"$build_dir" ${COMMONS_CMAKE_ARGS[@]} $cmake_arguments
@@ -242,14 +243,16 @@ function ts_linter() {
 
 function es2panda_driver() {
     echo "> Building es2panda driver"
+    local ts_bindings_root="$ETS_FRONTEND_ROOT/ets2panda/bindings"
+    (cd "$ts_bindings_root" && npm install && npm run run)
     local build_system_root="$ETS_FRONTEND_ROOT/ets2panda/driver/build_system"
     (cd "$build_system_root" && npm install && npm run build)
     mkdir -p "$PANDA_SDK_PATH"/driver/build_system
     cp -r "$build_system_root"/dist "$PANDA_SDK_PATH"/driver/build_system/
-    cp -r "$build_system_root"/node_modules "$PANDA_SDK_PATH"/driver/build_system/
+    cp -rL "$build_system_root"/node_modules "$PANDA_SDK_PATH"/driver/build_system/
     cp "$build_system_root"/package.json "$PANDA_SDK_PATH"/driver/build_system/
 
-    rm -rf "$build_system_root"/dist
+    rm -rf "$ts_bindings_root"/dist "$ts_bindings_root"/ts_bindings.node "$ts_bindings_root"/tsconfig.tsbuildinfo "$build_system_root"/dist
 }
 
 function ets_std_lib() {
