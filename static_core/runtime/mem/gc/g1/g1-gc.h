@@ -245,6 +245,10 @@ private:
      */
     bool SinglePassCompactionAvailable();
     void CollectInSinglePass(const GCTask &task);
+    void UpdateMetricsAfterSinglePass(size_t allocatedBytesYoung, size_t allocatedBytesOld,
+                                      size_t allocatedObjectsYoung, size_t allocatedObjectsOld);
+    void CollectMetrickBeforeSinglePass(size_t &allocatedBytesYoung, size_t &allocatedBytesOld,
+                                        size_t &allocatedObjectsYoung, size_t &allocatedObjectsOld);
     void EvacuateCollectionSet(const RemSet<> &remset);
     void MergeRemSet(RemSet<> *remset);
     void HandleReferences(const GCTask &task);
@@ -564,6 +568,9 @@ private:
 
     size_t copiedBytesYoung_ {0};
     size_t copiedBytesOld_ {0};
+
+    size_t copiedObjectsYoung_ {0};
+    size_t copiedObjectsOld_ {0};
     bool singlePassCompactionEnabled_ {false};
 
     template <class, bool>
