@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,21 @@
 #include "platforms/ohos/ohos_device_helpers.h"
 
 #include "syspara/parameter.h"
+#include "syspara/parameters.h"
 
 namespace ark::ohos_device {
 std::string GetHardwareModelString()
 {
     return GetHardwareModel();
+}
+
+bool GetCoverageEnable()
+{
+    return OHOS::system::GetBoolParameter("persist.ark.static.codecoverage.enable", false);
+}
+
+std::string GetCodeCoverageOutput()
+{
+    return "/data/storage/el2/base/files/coverageBytecodeInfo.csv";
 }
 }  // namespace ark::ohos_device

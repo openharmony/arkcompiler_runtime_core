@@ -19,7 +19,7 @@ namespace ark::tooling {
 
 CoverageListener::CoverageListener(const std::string &fileName) : fileName_(fileName)
 {
-    delegate_ = std::make_unique<BytecodeCounter>();
+    delegate_ = MakePandaUnique<BytecodeCounter>();
     ClearInfoFile();
     outFile.open(fileName_, std::ofstream::app);
     dumpThread_ = std::thread(&CoverageListener::DumpThreadWorker, this);

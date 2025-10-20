@@ -437,13 +437,6 @@ _libarkruntime_calculated_deps = [
   "$ark_root/runtime/asm_defines:asm_defines_generator",
 ]
 
-if (!(ark_standalone_build || ark_static_standalone_build)) {
-  _libarkruntime_calculated_deps += [
-    "$ark_root/etc/para:code_coverage.para",
-    "$ark_root/etc/para:code_coverage.para.dac",
-  ]
-}
-
 if (ark_static_standalone_build) {
   _libarkruntime_calculated_configs += [ zlib_public_config ]
   _libarkruntime_calculated_deps += [
@@ -519,7 +512,6 @@ if (is_ohos && is_standard_system) {
     "hitrace:hitrace_meter",
     "libuv:uv",
     "qos_manager:qos",
-    "init:libbegetutil",
   ]
   if (!(ark_standalone_build || ark_static_standalone_build)) {
     _libarkruntime_calculated_defines += [
@@ -531,6 +523,8 @@ if (is_ohos && is_standard_system) {
     _libarkruntime_calculated_deps += [
       "$ark_root/runtime/para:RuntimeEnableDebugger.para",
       "$ark_root/runtime/para:RuntimeEnableDebugger.para.dac",
+      "$ark_root/etc/para:code_coverage.para",
+      "$ark_root/etc/para:code_coverage.para.dac",
     ]
   }
 }

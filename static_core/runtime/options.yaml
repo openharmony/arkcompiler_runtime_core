@@ -970,5 +970,5 @@ options:
 
 - name: code-coverage-output
   type: std::string
-  default: "/data/storage/el2/base/files/coverageBytecodeInfo.csv"
+  default: ""
   description: Specify the location the collected code coverage information.

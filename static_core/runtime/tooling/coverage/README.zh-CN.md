@@ -37,7 +37,7 @@
 ```
 python coverage.py gen_report --all
 或
-python coverage.py gen_report --a
+python coverage.py gen_report -a
 ```
 
 指令2：生成增量覆盖率html文件
@@ -49,7 +49,7 @@ python coverage.py gen_report -d
 ```
 
 注：指令2 需要传入diff.txt文件；
-执行如下指令，生成diff.txt,将此文件放到脚本当前目录。
+执行如下指令，生成diff.txt，将此文件放到脚本当前目录。
 
 ```
 git diff HEAD^ HEAD > diff.txt
