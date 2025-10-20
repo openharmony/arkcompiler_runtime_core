@@ -15,7 +15,7 @@
 
 package std.core
 
-const BigIntType: Type;
+const BigIntType: Class;
 
 export interface JsonReplacer {
     jsonReplacer(): Record<String, Any>
@@ -40,18 +40,11 @@ export @interface JSONParseIgnore {
 }
 
 class JSONAPI {
-    /*
-        JSON intrinsics
-    */
-    native static getJSONStringifyIgnoreByIdx(cls: Class, idx: long): boolean
+    native static getJSONStringifyIgnore(field: reflect.InstanceField): boolean
 
-    native static getJSONStringifyIgnoreByName(cls: Class, name: string): boolean
+    native static getJSONParseIgnore(field: reflect.InstanceField): boolean
 
-    native static getJSONParseIgnoreFromAnnotation(cls: Class, idx: long): boolean
-
-    native static getJSONRenameByIdx(cls: Class, idx: long): string | undefined
-
-    native static getJSONRenameByName(cls: Class, name: string): string | undefined
+    native static getJSONRename(field: reflect.InstanceField): string | undefined
 }
 
 export class JSON {
@@ -616,41 +609,30 @@ export class JSON {
     }
 
     // TODO(kirill-mitkin): Map<Long, Long> blocked by internal issue
-    private static checkType(typ: Type, used: Array<TypeColor>): boolean {
-        let ind = used.findIndex((tc: TypeColor) => tc.typ.equals(typ))
+    private static checkType(type: Class, used: Array<TypeColor>): boolean {
+        let ind = used.findIndex((tc: TypeColor) => type === tc.type)
         if (ind != -1) {
             return (used.at(ind) as TypeColor).color == TypeColor.VISITED
         }
-        used.push(new TypeColor(typ, TypeColor.AT_STACK))
+        used.push(new TypeColor(type, TypeColor.AT_STACK))
         let ok = true
-        if (typ.equals(BigIntType)) {
+        if (type === BigIntType) {
             ok = true
-        } else if (typ instanceof ClassType) {
-            let ct = typ as ClassType
-            ok &= ct.hasEmptyConstructor()
-            let field_num = ct.getFieldsNum()
-            for (let f = 0; f < field_num; f++) {
-                if (JSONAPI.getJSONParseIgnoreFromAnnotation(ct.cls, f)) {
-                    continue
-                }
-                ok &= JSON.checkType(ct.getField(f).getType(), used)
-            }
-        } else if (typ instanceof ArrayType) {
-            let et = (typ as ArrayType).getElementType()
-            ok = JSON.checkType(et, used)
-        } else if (typ instanceof UnionType) {
+        } else if (type.isFixedArray()) {
+            ok = JSON.checkType(type.getFixedArrayComponentType()!, used)
+        } else if (type.isUnion()) {
             // NOTE(lyupaanastasia) parse union #27136
             throw new Error("UnionType is not supported yet")
-        } else if (typ instanceof StringType
-                    || typ instanceof DoubleType
-                    || typ instanceof BooleanType
-                    || typ instanceof NullType
-                    || typ instanceof IntType
-                    || typ instanceof LongType
-                    || typ instanceof ByteType
-                    || typ instanceof ShortType
-                    || typ instanceof FloatType) {
+        } else if (type === TypeColor.STRING_CLASS || TypeColor.isPrimitiveType(type) || type === TypeColor.NULL_CLASS) {
             ok = true
+        } else if (type.isSubtypeOf(TypeColor.OBJECT_CLASS)) {
+            ok &= JSON.classHasDefaultCtor(type)
+            for (const field of type.getInstanceFields()) {
+                if (JSONAPI.getJSONParseIgnore(field)) {
+                    continue
+                }
+                ok &= JSON.checkType(field.getType(), used)
+            }
         } else {
             ok = false
         }
@@ -658,18 +640,43 @@ export class JSON {
         return ok
     }
 
+    private static classHasDefaultCtor(cls: Class): boolean {
+        for (const ctor of cls.getConstructors()) {
+            if (ctor.getParametersNum() == 0) {
+                return true
+            }
+        }
+        return false
+    }
+
     // TODO(kirill-mitkin): For testing purpose only, shpuld be replaced by error checking
-    public static isCorrectForParsing(typ: Type): boolean {
-        return JSON.checkType(typ, new Array<TypeColor>())
+    public static isCorrectForParsing(type: Class): boolean {
+        return JSON.checkType(type, new Array<TypeColor>())
     }
 
     public static parse<T>(text: String, type: Type): Nullish<T> {
-        return JSON.parse<T>(text, undefined, type)
+        const cls = type.getClass()
+        if (cls !== undefined) {
+            return JSON.parse<T>(text, undefined, cls)
+        }
+        throw new Error(`Unable to resolve type ${type} runtime class`)
     }
 
     public static parse<T>(text: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Type, options?: jsonx.ParseOptions): Nullish<T> {
+        const cls = type.getClass()
+        if (cls !== undefined) {
+            return JSON.parse<T>(text, reviver, cls, options)
+        }
+        throw new Error(`Unable to resolve type ${type} runtime class`)
+    }
+
+    public static parse<T>(json: string, type: Class): Nullish<T> {
+        return JSON.parse<T>(json, undefined, type)
+    }
+
+    public static parse<T>(json: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Class, options?: jsonx.ParseOptions): Nullish<T> {
         if (!JSON.checkType(type, new Array<TypeColor>())) {
-            throw new Error("Incorrect type: " + type.toString())
+            throw new Error("Incorrect type: " + type.getName())
         }
 
         let bigIntOpt: int = options ? options.bigIntMode as int : 0
@@ -677,7 +684,7 @@ export class JSON {
             throw new Error("bigIntMode value should be from 0 to 2, current value is" + bigIntOpt)
         }
 
-        let jsonValue = JSONParser.parse(text)
+        let jsonValue = JSONParser.parse(json)
         const parsingResult = new JSONValueParser(reviver, bigIntOpt).parse(jsonValue, type) as T
 
         if (reviver !== undefined) {
@@ -1104,11 +1111,11 @@ class JSONWriter {
                     continue
                 }
 
-                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByName(cls, fieldName);
+                hasJsonIgnore = JSONAPI.getJSONStringifyIgnore(field);
                 if (hasJsonIgnore) {
                     continue
                 }
-                fieldRename = JSONAPI.getJSONRenameByName(cls, fieldName);
+                fieldRename = JSONAPI.getJSONRename(field);
                 if (fieldRename != undefined) {
                     if (cls.getInstanceFieldByName(fieldRename) !== undefined) {
                         throw new Error("Cannot rename " + fieldRename + " in keys of " + cls.getName())
@@ -1125,15 +1132,14 @@ class JSONWriter {
             }
         } else {
             for (const field of this.getClassInstanceFields(cls)) {
-                const fieldOwnerCls = field.getOwner()
-                hasJsonIgnore = JSONAPI.getJSONStringifyIgnoreByName(fieldOwnerCls, field.getName());
+                hasJsonIgnore = JSONAPI.getJSONStringifyIgnore(field);
                 if (hasJsonIgnore) {
                     continue
                 }
                 const index: int = this.findKeyIndex(field.getName(), writableFields)
-                fieldRename = JSONAPI.getJSONRenameByName(fieldOwnerCls, field.getName());
+                fieldRename = JSONAPI.getJSONRename(field);
                 if (fieldRename !== undefined) {
-                    if (fieldOwnerCls.getInstanceFieldByName(fieldRename) !== undefined) {
+                    if (field.getOwner().getInstanceFieldByName(fieldRename) !== undefined) {
                         throw new Error("Cannot rename " + fieldRename + " in keys of " + cls.getName())
                     } else {
                         field.name = fieldRename
@@ -1477,11 +1483,63 @@ function getIndentation(space?: int | string, depth: int = 0): string {
 class TypeColor {
     readonly static VISITED : int = 1
     readonly static AT_STACK : int = 2
-    typ : Type
-    color : int
-    constructor(typ: Type, color: int) {
-        this.typ = typ
+
+    readonly static STRING_CLASS = Class.of("")
+
+    private readonly static BOXED_DOUBLE = Class.from<Double>()
+    private readonly static BOXED_BOOLEAN = Class.from<Boolean>()
+    private readonly static BOXED_INT = Class.from<Int>()
+    private readonly static BOXED_LONG = Class.from<Long>()
+    private readonly static BOXED_BYTE = Class.from<Byte>()
+    private readonly static BOXED_SHORT = Class.from<Short>()
+    private readonly static BOXED_FLOAT = Class.from<Float>()
+
+    readonly static OBJECT_CLASS = Class.from<Object>()
+    readonly static NULL_CLASS = Class.of(null)
+
+    type: Class
+    color: int
+    constructor(type: Class, color: int) {
+        this.type = type
         this.color = color
+    }
+
+    static isDoubleType(type: Class): boolean {
+        return type === TypeColor.BOXED_DOUBLE || type === Class.PRIMITIVE_DOUBLE
+    }
+
+    static isBooleanType(type: Class): boolean {
+        return type === TypeColor.BOXED_BOOLEAN || type === Class.PRIMITIVE_BOOLEAN
+    }
+
+    static isIntType(type: Class): boolean {
+        return type === TypeColor.BOXED_INT || type === Class.PRIMITIVE_INT
+    }
+
+    static isLongType(type: Class): boolean {
+        return type === TypeColor.BOXED_LONG || type === Class.PRIMITIVE_LONG
+    }
+
+    static isByteType(type: Class): boolean {
+        return type === TypeColor.BOXED_BYTE || type === Class.PRIMITIVE_BYTE
+    }
+
+    static isShortType(type: Class): boolean {
+        return type === TypeColor.BOXED_SHORT || type === Class.PRIMITIVE_SHORT
+    }
+
+    static isFloatType(type: Class): boolean {
+        return type === TypeColor.BOXED_FLOAT || type === Class.PRIMITIVE_FLOAT
+    }
+
+    static isPrimitiveType(type: Class): boolean {
+        return TypeColor.isDoubleType(type)
+            || TypeColor.isBooleanType(type)
+            || TypeColor.isIntType(type)
+            || TypeColor.isLongType(type)
+            || TypeColor.isByteType(type)
+            || TypeColor.isShortType(type)
+            || TypeColor.isFloatType(type)
     }
 }
 
@@ -1511,6 +1569,8 @@ export class JSONParser {
     private curChar: char
     private escapeWhitespaces: boolean
     // TODO(ivan-tyulyandin): replace the hardcode with proper use of Array<T>/Map<T> in JSONValue inheritors
+
+    private static readonly SETTER_PREFIX = "<set>"
 
     constructor(json: String) {
         this.json = json
@@ -1741,86 +1801,90 @@ class JSONValueParser {
         this.bigIntMode = bigIntMode
     }
 
-    private createNumber(value: JSONNumber, typ: Type): Any {
-        if (typ.equals(BigIntType) && (this.bigIntMode === 2 || (!Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+    private createNumber(value: JSONNumber, type: Class): Any {
+        if (type === BigIntType && (this.bigIntMode === 2 || (!Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new BigInt(value.bigintValue)
-        } else if (typ instanceof DoubleType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+        } else if (TypeColor.isDoubleType(type) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value)
-        } else if (typ instanceof IntType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+        } else if (TypeColor.isIntType(type) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value).toInt()
-        } else if (typ instanceof LongType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if (TypeColor.isLongType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Long().createFromJSONValue(value)
-        } else if (typ instanceof ShortType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if (TypeColor.isShortType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Short().createFromJSONValue(value)
-        } else if (typ instanceof FloatType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if (TypeColor.isFloatType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Float().createFromJSONValue(value)
-        } else if (typ instanceof ByteType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if (TypeColor.isByteType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Byte().createFromJSONValue(value)
         } else {
-            throw new Error(typ + " is expected, but get " + Type.of(value.value) + " with bigIntMode=" + this.bigIntMode)
+            throw new Error(type.getName() + " is expected, but get " + Class.of(value.value).getName() + " with bigIntMode=" + this.bigIntMode)
         }
     }
 
-    parse(value: JSONValue, typ: Type): Any {
-        if (value instanceof JSONObject && typ instanceof ClassType) {
-            return this.parseObject(value as JSONObject, typ as ClassType)
-        } else if (value instanceof JSONObject && typ instanceof UnionType) {
+    parse(value: JSONValue, type: Class): Any {
+        if (value instanceof JSONObject && type.isUnion()) {
             // NOTE(lyupaanastasia) parse union #27136
             throw new Error("UnionType is not supported yet")
-        } else if (value instanceof JSONArray && typ instanceof ArrayType) {
-            return this.parseArray(value as JSONArray, typ as ArrayType)
-        } else if (value instanceof JSONNumber && (typ instanceof DoubleType || typ.equals(BigIntType) || typ instanceof IntType || typ instanceof LongType || typ instanceof ByteType || typ instanceof ShortType || typ instanceof FloatType)) {
-            return this.createNumber(value as JSONNumber, typ)
-        } else if (value instanceof JSONString && typ instanceof StringType) {
+        } else if (value instanceof JSONArray && type.isFixedArray()) {
+            return this.parseArray(value as JSONArray, type)
+        } else if (
+                value instanceof JSONNumber && (
+                    TypeColor.isDoubleType(type) ||
+                    type === BigIntType ||
+                    TypeColor.isIntType(type) ||
+                    TypeColor.isLongType(type) ||
+                    TypeColor.isByteType(type) ||
+                    TypeColor.isShortType(type) ||
+                    TypeColor.isFloatType(type))) {
+            return this.createNumber(value as JSONNumber, type)
+        } else if (value instanceof JSONString && type === TypeColor.STRING_CLASS) {
             return (value as JSONString).value
-        } else if (value instanceof JSONTrue && typ instanceof BooleanType) {
+        } else if (value instanceof JSONTrue && TypeColor.isBooleanType(type)) {
             return new Boolean(true)
-        } else if (value instanceof JSONFalse && typ instanceof BooleanType) {
+        } else if (value instanceof JSONFalse && TypeColor.isBooleanType(type)) {
             return new Boolean(false)
-        } else if (value instanceof JSONNull && typ instanceof NullType) {
+        } else if (value instanceof JSONNull && type === TypeColor.NULL_CLASS) {
             return null
+        } else if (value instanceof JSONObject && type.isSubtypeOf(TypeColor.OBJECT_CLASS)) {
+            return this.parseObject(value as JSONObject, type)
         } else {
-            throw new Error(typ + " is expected, but get " + value)
+            throw new Error(type.getName() + " is expected, but get " + value)
         }
     }
 
-    private classFieldSetter(classVal: ClassValue, fieldName: string, fieldVal: Any): void {
-        classVal.setFieldByName(fieldName, reflect.Value.of(fieldVal))
-    }
-
-    private parseObject(jsonObj: JSONObject, classType: ClassType): Object {
-        let setClassFieldFn = (cv: ClassValue, fn: string, fv: Any) => { cv.setFieldByName(fn, reflect.Value.of(fv)) }
+    private parseObject(jsonObj: JSONObject, classType: Class): Object {
+        let setClassFieldFn = (obj: object, fieldName: string, fieldVal: Any) => {
+            const field = Class.of(obj).getInstanceFieldByName(fieldName)!
+            field.setValue(obj, fieldVal)
+        }
 
         if (this.reviver != undefined) {
-            setClassFieldFn = (classVal: ClassValue, fieldName: string, fieldVal: Any): void => {
+            setClassFieldFn = (obj: object, fieldName: string, fieldVal: Any): void => {
                 const revivedVal = this.reviver!(fieldName, fieldVal)
 
-                // setFieldByName doesn't allow null/undefined values
-                if (revivedVal != null) {
-                    classVal.setFieldByName(fieldName, reflect.Value.of(revivedVal))
-                }
+                const field = Class.of(obj).getInstanceFieldByName(fieldName)!
+                field.setValue(obj, revivedVal)
             }
         }
 
-        let obj = classType.make()
-        let classVal = reflect.Value.of(obj) as ClassValue
+        const obj = JSONValueParser.classGetDefaultCtor(classType).createInstance() as object
         let hasJsonParseIgnore: boolean = false
         let hasJsonStringifyIgnore: boolean = false
         const jsonObjFields = jsonObj.getFields()
-        for (let field_num = 0; field_num < classType.getFieldsNum(); field_num++) {
-            let classField = classType.getField(field_num)
-            hasJsonParseIgnore = JSONAPI.getJSONParseIgnoreFromAnnotation(classType.cls, field_num);
-            if (hasJsonParseIgnore || classField.isStatic()) {
+
+        for (const classField of classType.getInstanceFields()) {
+            hasJsonParseIgnore = JSONAPI.getJSONParseIgnore(classField);
+            if (hasJsonParseIgnore) {
                 continue
             }
 
             let jsonFieldVal = jsonObjFields.get(classField.getName())
             if (jsonFieldVal === undefined) {
-                hasJsonStringifyIgnore = JSONAPI.getJSONStringifyIgnoreByIdx(classType.cls, field_num);
+                hasJsonStringifyIgnore = JSONAPI.getJSONStringifyIgnore(classField);
                 if (hasJsonStringifyIgnore) {
                     continue
                 }
-                let fieldRename = JSONAPI.getJSONRenameByIdx(classType.cls, field_num);
+                let fieldRename = JSONAPI.getJSONRename(classField);
                 if (fieldRename == undefined) {
                     throw new Error("Cannot find " + classField.getName() + " in keys of " + classType.getName())
                 }
@@ -1831,15 +1895,46 @@ class JSONValueParser {
             }
 
             const classFieldVal = this.parse(jsonFieldVal, classField.getType())
-            setClassFieldFn(classVal, classField.getName(), classFieldVal)
+            setClassFieldFn(obj, classField.getName(), classFieldVal)
+        }
+
+        for (const method of classType.getInstanceMethods()) {
+            const methodName = method.getName()
+            if (methodName.startsWith(JSONParser.SETTER_PREFIX)) {
+                const propName = methodName.substring(JSONParser.SETTER_PREFIX.length)
+                const jsonFieldVal = jsonObjFields.get(propName)
+                if (jsonFieldVal !== undefined) {
+                    const propType = method.getParameterType(0)!
+                    const classFieldVal = this.parse(jsonFieldVal, propType)
+
+                    if (this.reviver !== undefined) {
+                        const revivedVal = this.reviver!(propName, classFieldVal)
+                        const setterArgs: FixedArray<Any> = [revivedVal]
+                        method.invoke(obj, setterArgs)
+                    } else {
+                        const setterArgs: FixedArray<Any> = [classFieldVal]
+                        method.invoke(obj, setterArgs)
+                    }
+                }
+            }
         }
 
         return obj
     }
 
-    private parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
+    private static classGetDefaultCtor(cls: Class): reflect.Constructor {
+        for (const ctor of cls.getConstructors()) {
+            if (ctor.getParametersNum() == 0) {
+                return ctor
+            }
+        }
+        throw new Error(`class ${cls.getName()} doesn't have default ctor`)
+    }
+
+    private parseArray(jVal: JSONArray, aType: Class): Object | null {
         let len = jVal.values.length
-        let arr = aType.make(len.toInt()) as FixedArray<Any>
+        // NOTE(cheezzario) Class API lacks array creation facility
+        let arr = ArrayType.getInstance(aType).make(len.toInt()) as FixedArray<Any>
 
         let setArrayElementFn = (a: FixedArray<Any>, i: int, v: Any) => { a[i] = v }
 
@@ -1851,7 +1946,7 @@ class JSONValueParser {
         }
 
         for (let i = 0; i < len; i++) {
-            let elem = this.parse(jVal.values.at(i) as JSONValue, aType.getElementType())
+            let elem = this.parse(jVal.values.at(i) as JSONValue, aType.getFixedArrayComponentType()!)
             setArrayElementFn(arr, i, elem)
         }
         return arr

@@ -509,6 +509,10 @@ export abstract class Type extends Object {
         return this.contextLinker
     }
 
+    public getClass(): Class | undefined {
+        return TypeAPI.getClass(this.td, this.contextLinker)
+    }
+
     // T.subTypeOf(U) means that `T extends U`
     protected subTypeOf(other: Type): boolean {
         if (this.equals(other)) {

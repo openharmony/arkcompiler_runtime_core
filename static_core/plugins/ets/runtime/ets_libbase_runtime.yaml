@@ -1462,55 +1462,35 @@ intrinsics:
 #################
 # std.core.JSON #
 #################
-  - name: StdCoreJSONGetJSONStringifyIgnoreByIdx
+  - name: StdCoreJSONGetJSONStringifyIgnore
     space: ets
     class_name: std.core.JSONAPI
-    method_name: getJSONStringifyIgnoreByIdx
+    method_name: getJSONStringifyIgnore
     static: true
     signature:
       ret: u1
-      args: [ std.core.Class, i64 ]
-    impl: ark::ets::intrinsics::StdCoreJSONGetJSONStringifyIgnoreByIdx
+      args: [ std.core.reflect.InstanceField ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetJSONStringifyIgnore
 
-  - name: StdCoreJSONGetJSONStringifyIgnoreByName
+  - name: StdCoreJSONGetJSONParseIgnore
     space: ets
     class_name: std.core.JSONAPI
-    method_name: getJSONStringifyIgnoreByName
+    method_name: getJSONParseIgnore
     static: true
     signature:
       ret: u1
-      args: [ std.core.Class, std.core.String ]
-    impl: ark::ets::intrinsics::StdCoreJSONGetJSONStringifyIgnoreByName
+      args: [ std.core.reflect.InstanceField ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetJSONParseIgnore
 
-  - name: StdCoreJSONGetJSONParseIgnoreFromAnnotation
+  - name: StdCoreJSONGetJSONRename
     space: ets
     class_name: std.core.JSONAPI
-    method_name: getJSONParseIgnoreFromAnnotation
-    static: true
-    signature:
-      ret: u1
-      args: [ std.core.Class, i64 ]
-    impl: ark::ets::intrinsics::StdCoreJSONGetJSONParseIgnoreFromAnnotation
-
-  - name: StdCoreJSONGetJSONRenameByIdx
-    space: ets
-    class_name: std.core.JSONAPI
-    method_name: getJSONRenameByIdx
+    method_name: getJSONRename
     static: true
     signature:
       ret: std.core.String
-      args: [ std.core.Class, i64 ]
-    impl: ark::ets::intrinsics::StdCoreJSONGetJSONRenameByIdx
-
-  - name: StdCoreJSONGetJSONRenameByName
-    space: ets
-    class_name: std.core.JSONAPI
-    method_name: getJSONRenameByName
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.Class, std.core.String ]
-    impl: ark::ets::intrinsics::StdCoreJSONGetJSONRenameByName
+      args: [ std.core.reflect.InstanceField ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetJSONRename
 
 
 #################
