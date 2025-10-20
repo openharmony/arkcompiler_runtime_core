@@ -17,6 +17,6 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-export function importedFromFile() : void {
-    // no-op
+export function importedFromFile() : string {
+    return "module_a.ets"
 }

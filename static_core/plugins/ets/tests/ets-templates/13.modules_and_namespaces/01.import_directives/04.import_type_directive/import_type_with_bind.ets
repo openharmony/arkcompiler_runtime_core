@@ -23,8 +23,6 @@ files:
 
 import {Class1, type Class2 } from "./export_type_with_bind"
 
-class C extends AC {};
-
 function main(): void {
     let c1 = new Class1();
     let c2 = new Class2();

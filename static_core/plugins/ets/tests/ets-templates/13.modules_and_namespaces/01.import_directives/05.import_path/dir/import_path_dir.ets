@@ -16,18 +16,17 @@
 {% for stmt in import_stmts %}
 
 /*---
-desc: |- 
-  If import path refers to a folder denoted by the last name in the resolved file path, then the compiler imports the
-  package which resides in the folder.
-tags: [compile-only]
-params: {{stmt}}
-files: [module_a.ets, module_a/module_a.ets, nesteddir/module_a/module_a.ets]
+desc: >-
+    If the import path refers to a folder, then the way to handle the case is determined by the actual compiler.
+    If the compiler cannot locate a module source definitely, then a compile-time error occurs.
+    {{stmt.doc}}
+tags: [{{stmt.tags}}]
+files:
+    - ./module_a.ets
+    - ./module_a/module_a.ets
+    - ./module_b/module_b.ets
 ---*/
 
-{{stmt}}
-
-function main(): void {
-  ma.importedFromDir()
-}
+{{stmt.import}}
 
 {% endfor %}

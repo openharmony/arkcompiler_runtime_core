@@ -1096,6 +1096,12 @@
 13.modules_and_namespaces/01.import_directives/04.import_type_directive/export_type_with_bind.ets
 13.modules_and_namespaces/01.import_directives/04.import_type_directive/import_type_with_bind.ets
 
+#30658 incorrect linkage
+13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_2.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_3.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_6.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_7.ets
+
 #29939
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_global_0.ets
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_global_1.ets

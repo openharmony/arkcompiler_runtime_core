@@ -17,8 +17,6 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-package module_a
-
-export function importedFromDir() : void {
-    // no-op
+export function importedFromFile() : string {
+    return "../module_a.ets"
 }

@@ -20,6 +20,6 @@ tags: [compile-only]
 
 import * as all from "std/math"
 
-function main(): void {
-  return
+function main() {
+  arktest.assertEQ(all.power2(3), 8)
 }

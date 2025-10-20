@@ -16,17 +16,11 @@
 {% for stmt in import_stmts %}
 
 /*---
-desc: |-
-  Import path is a string literal—represented as a combination of the slash character ‘/’ and a sequence alpha-numeric
-  characters—that determines how an imported compilation unit must be placed.
+desc: Import path is a string literal that determines where and how an imported module is to be searched for.
 tags: [compile-only, negative]
 params: {{stmt}}
 ---*/
 
 {{stmt}}
-
-function main(): void {
-  return
-}
 
 {% endfor %}

@@ -16,17 +16,16 @@
 {% for stmt in import_stmts %}
 
 /*---
-desc: |-
-  The compiler imports the module that the import path refers to. The source code of the module is the
-  file with the extension provided within the import path, or—if none is so provided—appended by the compiler.
-params: {{stmt}}
-files: [module_a.ets, nesteddir/module_a.ets, nesteddir/../module_a.ets, ../module_a.ets]
+desc: >-
+    The compiler imports the module that the import path refers to. The source code of the module is the
+    file with the extension provided within the import path, or, if none is so provided, appended by the compiler.
+files: [./module_a.ets, ./nesteddir/module_a.ets, ../module_a.ets]
 ---*/
 
-{{stmt}}
+{{stmt.import}}
 
-function main(): void {
-  all.importedFromFile()
+function main() {
+  arktest.assertEQ(all.importedFromFile(), {{stmt.res}})
 }
 
 {% endfor %}
