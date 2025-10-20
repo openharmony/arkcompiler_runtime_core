@@ -216,11 +216,6 @@ public:
     {
         return sizeof(BaseObject);
     }
-
-    bool IsString() const
-    {
-        return GetBaseClass()->IsString();
-    }
 protected:
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {
