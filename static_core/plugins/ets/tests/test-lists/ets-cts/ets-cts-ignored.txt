@@ -1811,9 +1811,6 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_8.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_9.ets
 
-#24859
-17.experimental_features/03.resizable_array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
-
 #29161
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_cte_20.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_cte_21.ets
