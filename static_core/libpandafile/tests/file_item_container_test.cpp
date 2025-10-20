@@ -151,7 +151,7 @@ TEST(ItemContainer, TestFileFormatVersionValid)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::fill(reinterpret_cast<uint8_t *>(&header), reinterpret_cast<uint8_t *>(&header) + sizeof(header), 0);
         header.magic = File::MAGIC;
-        header.version = {0, 0, 0, 5};
+        header.version = {0, 0, 0, 6};
         header.fileSize = sizeof(File::Header);
         auto pChecksumData = reinterpret_cast<uint8_t *>(&header.version);
         auto checksum = adler32(1, pChecksumData, sizeof(header) - offsetof(File::Header, version));
@@ -241,12 +241,15 @@ TEST(ItemContainer, TestClasses)
 
     ASSERT_NE(pandaFile, nullptr);
 
-    EXPECT_THAT(pandaFile->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 5));
+    EXPECT_THAT(pandaFile->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 6));
     EXPECT_EQ(pandaFile->GetHeader()->fileSize, memWriter.GetData().size());
     EXPECT_EQ(pandaFile->GetHeader()->foreignOff, 0U);
     EXPECT_EQ(pandaFile->GetHeader()->foreignSize, 0U);
     EXPECT_EQ(pandaFile->GetHeader()->numClasses, 3U);
     EXPECT_EQ(pandaFile->GetHeader()->classIdxOff, sizeof(File::Header));
+    EXPECT_EQ(pandaFile->GetHeader()->numExportTable, 0U);
+    EXPECT_EQ(pandaFile->GetHeader()->exportTableOff,
+              sizeof(File::Header) + (pandaFile->GetHeader()->numClasses * File::EntityId::GetSize()));
 
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     const auto *classIndex =
@@ -993,6 +996,9 @@ TEST(ItemContainer, GettersTest)
     ASSERT_TRUE(classMap != nullptr && classMap->size() == 2);
     auto it = classMap->find("Bar");
     ASSERT_TRUE(it != classMap->end());
+
+    std::map<std::string, panda_file::BaseClassItem *> *exportMap = container.GetExportMap();
+    ASSERT_TRUE(exportMap != nullptr && exportMap->size() == 0);
 
     std::unordered_map<std::string, StringItem *> *stringMap = container.GetStringMap();
     ASSERT_TRUE(stringMap != nullptr && stringMap->size() == 4);

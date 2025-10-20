@@ -104,8 +104,8 @@ chapters:
       value. Regular static instructions can also be used when the VM executes a code inside a dynamically-typed language context.
 
 # File format and ISA versioning
-min_version: 0.0.0.5
-version: 0.0.0.5
+min_version: 0.0.0.6
+version: 0.0.0.6
 
 properties:
   - tag: type_id

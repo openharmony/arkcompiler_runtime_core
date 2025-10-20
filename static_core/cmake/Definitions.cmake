@@ -218,7 +218,7 @@ option(PANDA_WITH_BYTECODE_OPTIMIZER "Enable bytecode optimizer" true)
 option(PANDA_COMPILER_DEBUG_INFO "Support DWARF debug information in Compiler (JIT/AOT/IRtoC)" OFF)
 option(PANDA_ENABLE_CCACHE "Enable ccache" true)
 if (NOT DEFINED ES2PANDA_PATH)
-    set(ES2PANDA_PATH ${PANDA_ROOT}/tools/es2panda)
+    file(REAL_PATH ${PANDA_ROOT}/tools/es2panda ES2PANDA_PATH)
 endif()
 
 if(PANDA_TARGET_WINDOWS)

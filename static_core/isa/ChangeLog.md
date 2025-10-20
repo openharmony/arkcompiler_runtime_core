@@ -1,6 +1,10 @@
 File format and ISA ChangeLog
 =============================
 
+* 0.0.0.6
+    + Added export table for faster reading from abc
+    + Changed header - 2 new items for supporting table
+
 * 0.0.0.5
     + Removed calli.dyn and return.dyn opcodes
 

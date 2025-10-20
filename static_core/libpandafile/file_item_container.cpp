@@ -515,12 +515,25 @@ uint32_t ItemContainer::DeleteForeignItems()
     return 0;
 }
 
+void ItemContainer::FillExportMap()
+{
+    for (auto it : classMap_) {
+        if (!it.second->IsForeign() && it.first.rfind("ETSGLOBAL") != std::string::npos) {
+            exportMap_.insert({it.first, it.second});
+        }
+    }
+}
+
 uint32_t ItemContainer::ComputeLayout()
 {
+    FillExportMap();
+
     uint32_t numClasses = classMap_.size();
     uint32_t numLiteralarrays = literalarrayMap_.size();
+    uint32_t numExportClasses = exportMap_.size();
     uint32_t classIdxOffset = sizeof(File::Header);
-    uint32_t curOffset = classIdxOffset + (numClasses + numLiteralarrays) * ID_SIZE;
+    uint32_t exportIdxOffset = classIdxOffset + numClasses * ID_SIZE;  // immediately after class table
+    uint32_t curOffset = exportIdxOffset + (numExportClasses + numLiteralarrays) * ID_SIZE;
 
     UpdateOrderIndexes();
     UpdateLiteralIndexes();
@@ -669,6 +682,15 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
+    if (!writer->Write<uint32_t>(exportMap_.size())) {
+        return false;
+    }
+
+    uint32_t exportMapOffset = sizeof(File::Header) + classMap_.size() * ID_SIZE;
+    if (!writer->Write<uint32_t>(exportMapOffset)) {
+        return false;
+    }
+
     if (!writer->Write<uint32_t>(lineNumberProgramIndexItem_.GetNumItems())) {
         return false;
     }
@@ -681,7 +703,7 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
-    uint32_t literalarrayIdxOffset = sizeof(File::Header) + classMap_.size() * ID_SIZE;
+    uint32_t literalarrayIdxOffset = sizeof(File::Header) + (classMap_.size() + exportMap_.size()) * ID_SIZE;
     if (!writer->Write<uint32_t>(literalarrayIdxOffset)) {
         return false;
     }
@@ -750,15 +772,20 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLay
     ASSERT(checksumOffset != -1);
 
     // Write class idx
-
     for (auto &entry : classMap_) {
         if (!writer->Write(entry.second->GetOffset())) {
             return false;
         }
     }
 
-    // Write literalArray idx
+    // Write export class idx
+    for (auto &entry : exportMap_) {
+        if (!writer->Write(entry.second->GetOffset())) {
+            return false;
+        }
+    }
 
+    // Write literalArray idx
     for (auto &entry : literalarrayMap_) {
         if (!writer->Write(entry.second->GetOffset())) {
             return false;
@@ -812,6 +839,7 @@ std::map<std::string, size_t> ItemContainer::GetStat()
 
     stat["header_item"] = sizeof(File::Header);
     stat["class_idx_item"] = classMap_.size() * ID_SIZE;
+    stat["export_table_idx_item"] = exportMap_.size() * ID_SIZE;
     stat["line_number_program_idx_item"] = lineNumberProgramIndexItem_.GetNumItems() * ID_SIZE;
     stat["literalarray_idx"] = literalarrayMap_.size() * ID_SIZE;
 
