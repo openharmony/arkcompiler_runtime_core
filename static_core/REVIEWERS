@@ -150,8 +150,8 @@ static_core/plugins/ets/tests/ets_sdk/                                        ^a
 static_core/plugins/ets/tests/interop_js/                                     ^igelhaus @nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav
 static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
-static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @kuchkovairina
-static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @kuchkovairina @Nojpg ^luobohua2025 @chenmudan
+static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
+static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg ^luobohua2025 @chenmudan
 static_core/plugins/ets/tools/declgen_ts2sts/                                 @Nojpg ^trubachevilya @nazarovkonstantin ^luobohua2025 @chenmudan @lihao000
 static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @Nojpg ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
@@ -188,6 +188,8 @@ static_core/plugins/ets/tests/interop_js/xgc/                                 @i
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
 static_core/plugins/ets/tests/runtime/tooling/                                @slynkodenis
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^udav
+static_core/plugins/ets/tests/test-lists/ets-func-tests/                      ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev
+static_core/plugins/ets/tests/test-lists/ets-sdk/                             ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev 
 static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting ^tanglu10 ^zhuangkudecha
 static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^Nojpg
 static_core/plugins/ets/tests/interop_js/tests/checked/                       ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof ^kurnevichstanislav @dingding5
