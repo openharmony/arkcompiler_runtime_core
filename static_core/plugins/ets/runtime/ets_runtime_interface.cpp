@@ -208,11 +208,6 @@ bool EtsRuntimeInterface::IsMethodStringBuilderAppend(MethodPtr method) const
     return GetMethodFullName(method, false) == "std.core.StringBuilder::append";
 }
 
-bool EtsRuntimeInterface::IsMethodEscompatMapCtor(MethodPtr method) const
-{
-    return MethodCast(method)->IsConstructor() && IsClassEscompatMap(MethodCast(method)->GetClass());
-}
-
 bool EtsRuntimeInterface::IsMethodInModuleScope(MethodPtr method) const
 {
     return static_cast<EtsMethod *>(method)->GetClass()->IsModule();
@@ -226,6 +221,11 @@ bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
 bool EtsRuntimeInterface::IsClassEscompatMap(ClassPtr klass) const
 {
     return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatMap;
+}
+
+bool EtsRuntimeInterface::IsClassEscompatSet(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatSet;
 }
 
 bool EtsRuntimeInterface::IsClassEscompatArray(ClassPtr klass) const
