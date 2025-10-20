@@ -112,4 +112,13 @@ TEST_F(ArkDebugNativeAPITest, ArkDebugNativeAPINormalTest)
     result = ArkDebugNativeAPI::StopProfiling();
     EXPECT_TRUE(result);
 }
+
+TEST_F(ArkDebugNativeAPITest, CheckDebugModeTest)
+{
+    ark::Runtime::GetCurrent()->SetDebugMode(false);
+    EXPECT_FALSE(ArkDebugNativeAPI::IsDebugModeEnabled());
+    ark::Runtime::GetCurrent()->SetDebugMode(true);
+    EXPECT_TRUE(ArkDebugNativeAPI::IsDebugModeEnabled());
+}
+
 }  // namespace ark::test
