@@ -27,6 +27,7 @@
 #include "runtime/include/field.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
+#include "runtime/include/thread_scopes.h"
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/mem/heap_manager.h"
 #include "runtime/mem/refstorage/reference.h"
@@ -980,6 +981,9 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr,
         AddTask(std::move(ctx), func);
     }
     if (noAsyncJit_) {
+        // Change thread status to release mutator lock, in case JIT thread needs to invalidate compiled code
+        ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_COMPILER_WAITING);
+
         auto status = method->GetCompilationStatus();
         for (; (status == Method::WAITING) || (status == Method::COMPILATION);
              status = method->GetCompilationStatus()) {
