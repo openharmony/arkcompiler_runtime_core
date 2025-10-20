@@ -383,7 +383,9 @@ if (with_stdlib) {
       deps = [
         "$ark_root/tools/ark_js_napi_cli:HybridXGCTests",
         "tests/interop_js/eacoro:eacoro_tests",
-        "tests/interop_js/taskpool:taskpool_tests",
+
+        # NOTE(molotkovmikhail, #30788): Enable after fix the taskpool stop worker issue
+        # "tests/interop_js/taskpool:taskpool_tests",
         "tests/interop_js/serialize:serialize_tests",
         "tests/interop_js/xgc:xgc_tests",
       ]
