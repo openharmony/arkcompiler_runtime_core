@@ -14,10 +14,15 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Export class and class type in the same module.
-tags: [compile-only, not-a-test]
+desc: Import class type without 'type' key specified in the module.
+files:
+- ../../03.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_2.ets
+tags: [compile-only]
 ---*/
 
-export class A {}
+import type {C} from "../../03.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_2"
 
-export type {A}
+function main(): void {
+    let c: C = new C();
+    arktest.assertTrue(c instanceof C)
+}

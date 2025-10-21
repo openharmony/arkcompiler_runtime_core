@@ -17,8 +17,6 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-// !!! THIS FILE SHOULD NOT BE IMPORTED !!!
-//
-// If import path refers to a folder denoted by the last name in the resolved file path, then the compiler imports the
-// package which resides in the folder. The source code of the package is all the ArkTS source files in the folder.
-//
+export function importedFromDir() : string {
+    return "module_a.ets"
+}

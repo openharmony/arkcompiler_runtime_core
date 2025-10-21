@@ -23,7 +23,7 @@ tags: [compile-only]
 {{stmt}}
 
 function main(): void {
-  return
+  arktest.assertEQ(all.power2(3), 8)
 }
 
 {% endfor %}

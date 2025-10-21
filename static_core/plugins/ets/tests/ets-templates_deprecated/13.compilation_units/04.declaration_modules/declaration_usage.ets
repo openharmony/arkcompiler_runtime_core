@@ -14,15 +14,15 @@
  */
 
 /*---
-desc: First simple sample from spec
+desc: The base URL setting is used to resolve a path that starts with /
 files:
-- ./declaration_module.ets
-- ./declaration_module.d.ets
+    - module_a.ets
+    - nesteddir/module_a.ets
+    - ../module_a.ets
 ---*/
 
-// Module which uses B and process_field
-import * as m from "./declaration_module.d"
+import * as all from "/../plugins/ets/tests/ets-templates/13.modules_and_namespaces/01.import_directives/05.import_path/file/module_a.ets"
 
 function main() {
-    arktest.assertEQ(m.NS_A.foo(), 1);
+  arktest.assertEQ(all.importedFromFile(), "module_a.ets")
 }

@@ -21,7 +21,3 @@ tags: [compile-only, negative]
 ---*/
 
 import type {A} from "../../03.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class"
-
-function main(): void {
-    let c: A = new A();
-}

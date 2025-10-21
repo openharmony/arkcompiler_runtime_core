@@ -14,21 +14,20 @@
  */
 
 /*---
-desc: Compilation unit should be initialized only once
-tags: [no-warmup]
-files:
-- ./global.ets
-- ./module.ets
+desc: Re-export directive, new names should be available
+files: ['./modules/module_all_renamed.ets', './modules/module_a.ets']
 ---*/
 
-import {i} from "./global.ets";
+import { NewClassA, NewInterfaceA, newFoo, NEW_BAR, AOIR } from './modules/module_all_renamed'
 
-import {foo} from "./module.ets";
+class ConsumeNewA implements NewInterfaceA {
+}
+
+type ATR = AOIR
 
 function main() {
-  i++;
+    newFoo()
+    new NewClassA
+    arktest.assertEQ(146, NEW_BAR)
 
-  arktest.assertEQ(i, 1, "i != 1");
-  arktest.assertEQ(i + 1, foo(), "i != foo()");
-  arktest.assertEQ(i, 2, "i != 2");
 }

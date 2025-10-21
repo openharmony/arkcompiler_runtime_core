@@ -14,14 +14,10 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Import class type without 'type' key specified in the module.
+desc: Import non-existing type from the module.
 files:
-- ../../03.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_2.ets
-tags: [compile-only]
+- ../../03.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class.ets
+tags: [compile-only, negative]
 ---*/
 
-import type {C} from "../../03.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_2"
-
-function main(): void {
-    let c: C = new C();
-}
+import type {A} from "../../03.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class"
