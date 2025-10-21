@@ -19,17 +19,6 @@
 02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
 02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
 
-#30347
-03.types/alias_unconversion/comp_obj/comp-clss_20.ets
-
-#29471 Exponentiation doesn't work for BigInt
-03.types/06.value_types/01.numeric_types/conversions_with_bigint_10.ets
-03.types/06.value_types/01.numeric_types/conversions_with_bigint_100.ets
-03.types/06.value_types/01.numeric_types/conversions_with_bigint_28.ets
-03.types/06.value_types/01.numeric_types/conversions_with_bigint_46.ets
-03.types/06.value_types/01.numeric_types/conversions_with_bigint_64.ets
-03.types/06.value_types/01.numeric_types/conversions_with_bigint_82.ets
-
 #28320 CTE in the spec example 3.11
 03.types/11.type_void/generic_void_2.ets
 
@@ -41,15 +30,10 @@
 03.types/19.function_types/01.type_function/positive_args_16.ets
 
 #25512
-03.types/20.union_types/united_switch_ext_1.ets
 03.types/20.union_types/united_switch_ext_3.ets
-03.types/20.union_types/united_switch_ext_4.ets
 03.types/20.union_types/united_switch_ext_5.ets
-03.types/20.union_types/united_switch_ext_6.ets
 03.types/20.union_types/united_switch_ext_7.ets
 03.types/20.union_types/united_switch_ext_8.ets
-03.types/20.union_types/united_switch_ext_9.ets
-03.types/20.union_types/united_switch_ext_10.ets
 
 #30239 first match overload
 03.types/20.union_types/02.access_to_common_union_members/overload/overload_6.ets
@@ -136,7 +120,7 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_8.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_8.ets
 
-# 30718
+#30718
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_n_4.ets
 
 #28900
@@ -205,9 +189,6 @@
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_82.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_83.ets
 
-#27963
-07.expressions/01.evaluation_of_expressions/optional_chain_this.ets
-
 #30469
 07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets
 
@@ -219,10 +200,6 @@
 
 #30653
 07.expressions/03.named_reference/01.function_reference/static_field_as_ref.ets
-
-#24879 Cannot determine type of array expression in Union type
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_28.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_30.ets
 
 #23363 No CTE when array type cannot be determined
 07.expressions/04.array_literal/arr_n_2.ets
@@ -393,7 +370,6 @@
 07.expressions/15.instanceof_expression/instanceof_177.ets
 07.expressions/15.instanceof_expression/instanceof_187.ets
 07.expressions/15.instanceof_expression/instanceof_194.ets
-07.expressions/15.instanceof_expression/instanceof_195.ets
 07.expressions/15.instanceof_expression/instanceof_205.ets
 
 #28907 Specifying type for too large integer number with as doesn't produce CTE
@@ -408,9 +384,6 @@
 07.expressions/19.nullish-coalescing_expression/nullish_coalescing_expression_record_3.ets
 
 #30486
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_16.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/inf_17.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_12.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_21.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_22.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_23.ets
@@ -530,9 +503,7 @@
 
 #26107 type compatability
 07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_2.ets
-07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_3.ets
 07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_6.ets
-07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_7.ets
 
 #30203 BigInt compare with floating-point number
 07.expressions/25.equality_expressions/01.numerical_equality_operators/different_types_equality_48.ets
@@ -600,9 +571,6 @@
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_call_2.ets
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_n.ets
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_n3.ets
-
-#28771
-09.classes/03.class_implementation_clause/two_superinterfaces_from_same_generic_interface.ets
 
 #30149
 09.classes/06.field_declarations/reference_to_inheritance_fields_with_same_name_0.ets
@@ -720,9 +688,6 @@
 
 #29937
 09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_15.ets
-
-#30350
-09.classes/06.field_declarations/04.field_initialization/class_static_fields_decl_23.ets
 
 #29713
 09.classes/06.field_declarations/04.field_initialization/static_field_initialization_reference.ets
@@ -865,28 +830,16 @@
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_298.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_299.ets
 
-#28790
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_272.ets
-
-#28791
-09.classes/06.field_declarations/06.overriding_fields/overriding_fields_273.ets
-
 #28793
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_300.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_301.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_302.ets
 
-# 30286
+#30286
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_neg_3.ets
 
-# 26983
+#26983
 09.classes/06.field_declarations/06.overriding_fields/sample.ets
-
-#30409
-09.classes/06.field_declarations/class_static_readonly_optional_fields_decl_with_implicit_type_9.ets
-
-#30407
-09.classes/06.field_declarations/class_static_readonly_fields_decl_with_explicit_type_8.ets
 
 #29602
 09.classes/07.method_declarations/01.static_methods/static_method_with_body_type_parameter_0.ets
@@ -905,9 +858,6 @@
 09.classes/08.accessor_declarations/accessor_declarations_neg_7.ets
 09.classes/08.accessor_declarations/accessor_declarations_neg_22.ets
 09.classes/08.accessor_declarations/accessor_declarations_neg_23.ets
-
-#30338
-09.classes/08.accessor_declarations/accessor_declarations_neg_13.ets
 
 #26730
 09.classes/09.constructor_declaration/constructor_declaration_overload1.ets
@@ -1034,9 +984,7 @@
 
 #30565 no CTE on getter override
 10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_37_n.ets
-10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_38_n.ets
 10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_39_n.ets
-10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_40_n.ets
 
 #28994
 11.enumerations/01.enumeration_integer_values/enum_long_20.ets
@@ -1117,10 +1065,6 @@
 11.enumerations/03.enumeration_operations/enum_explicit_type_constant_to_string_21.ets
 11.enumerations/03.enumeration_operations/enum_explicit_type_constant_to_string_22.ets
 11.enumerations/03.enumeration_operations/enum_explicit_type_constant_to_string_23.ets
-
-#29515
-13.modules_and_namespaces/01.import_directives/not_distinguishable_import_2.ets
-13.modules_and_namespaces/01.import_directives/not_distinguishable_import_3.ets
 
 #26714
 13.modules_and_namespaces/01.import_directives/test.ets
@@ -1348,12 +1292,6 @@
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_obj_on_gen_7.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_obj_on_gen_8.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_obj_on_gen_9.ets
-
-#30506
-15.semantic_rules/03.type_identity/union_types_identity_4.ets
-15.semantic_rules/03.type_identity/union_types_identity_5.ets
-15.semantic_rules/03.type_identity/union_types_identity_6.ets
-15.semantic_rules/03.type_identity/union_types_identity_7.ets
 
 #30441
 15.semantic_rules/04.assignability/never_assignability_0.ets
@@ -1592,13 +1530,7 @@
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_12.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_13.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_14.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_8.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_9.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_10.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_11.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_12.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_13.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_14.ets
+
 
 #30721 No CTE when using overloads with import_all_from_reexport_0
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_1.ets
@@ -1613,15 +1545,12 @@
 15.semantic_rules/10.overloading/legacy_overload_negative_8.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_9.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_11.ets
-15.semantic_rules/10.overloading/legacy_overload_negative_13.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_14.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_15.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_20.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_21.ets
-15.semantic_rules/10.overloading/legacy_overload_negative_26.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_27.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_28.ets
-15.semantic_rules/10.overloading/legacy_overload_negative_31.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_39.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_40.ets
 15.semantic_rules/10.overloading/overload_constructor_negative_0.ets
@@ -1664,8 +1593,6 @@
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
 15.semantic_rules/11.type_erasure/instanceof_0.ets
 15.semantic_rules/11.type_erasure/instanceof_1.ets
-15.semantic_rules/11.type_erasure/instanceof_16.ets
-15.semantic_rules/11.type_erasure/instanceof_18.ets
 15.semantic_rules/11.type_erasure/instanceof_28.ets
 15.semantic_rules/11.type_erasure/instanceof_5.ets
 15.semantic_rules/11.type_erasure/instanceof_6.ets
@@ -1674,10 +1601,8 @@
 15.semantic_rules/11.type_erasure/instanceof_gen_1.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_10.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_11.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_13.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_14.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_16.ets
-15.semantic_rules/11.type_erasure/instanceof_gen_17.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_19.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_2.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_20.ets
@@ -1696,17 +1621,7 @@
 16.concurrency/03.asynchronous_api/05.promise/promise_negative_1.ets
 
 #29982
-16.concurrency/03.asynchronous_api/01.async_functions/async_functions25.ets
 16.concurrency/03.asynchronous_api/03.async_methods/async_method17.ets
-
-#30720
-16.concurrency/03.asynchronous_api/03.async_methods/async_method27_1.ets
-16.concurrency/03.asynchronous_api/03.async_methods/async_method27_2.ets
-
-#29301
-16.concurrency/03.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/predefined_types/async_function_returns_promise_void_4.ets
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/no_input_params/predefined_types/async_lambda_returns_promise_void_4.ets
-16.concurrency/03.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/predefined_types/async_method_returns_promise_void_4.ets
 
 #30547
 16.concurrency/03.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/negative/async_function_await_call_not_from_async_negative_0.ets
@@ -2376,10 +2291,6 @@
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_8.ets
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_9.ets
 
-#30272
-17.experimental_features/05.indexable_types/ind_expr_6.ets
-17.experimental_features/05.indexable_types/ind_expr_7.ets
-
 #18763 es2panda aborts on for-of over a union type array
 17.experimental_features/06.iterable_types/it_11.ets
 17.experimental_features/06.iterable_types/it_12.ets
@@ -2552,7 +2463,7 @@
 07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
 
-# 29160
+#29160
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_0.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_1.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
@@ -2570,7 +2481,6 @@
 #59 verifier in lambda
 07.expressions/06.spread_expression/spex_lmbd_37.ets
 07.expressions/06.spread_expression/spex_lmbd_39.ets
-07.expressions/06.spread_expression/spex_lmbd_48.ets
 
 #30582
 07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
@@ -2588,7 +2498,7 @@
 17.experimental_features/02.fixed_array_types/far3_4.ets
 17.experimental_features/02.fixed_array_types/far3_7.ets
 
-# 27159
+#27159
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
 
@@ -2601,7 +2511,7 @@
 #30697
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_39.ets
 
-# 27886 Issues with default values
+#27886 Issues with default values
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_3.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_4.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_5.ets

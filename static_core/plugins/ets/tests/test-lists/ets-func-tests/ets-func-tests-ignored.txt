@@ -1,6 +1,9 @@
 #24352
 algorithms/SampleAppTest.ets
 
+#24357 Koala related issues
+koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
+
 #24358 Koala related issues
 koala-related-benchmarks/arkts-phase1.ets
 

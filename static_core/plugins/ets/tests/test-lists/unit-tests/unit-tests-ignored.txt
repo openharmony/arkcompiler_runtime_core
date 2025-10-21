@@ -13,7 +13,7 @@ ets-common-tests/exporting-ambient-decl/main.ets
 # 25057
 ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
 
-#30502
+#30897
 ets-common-tests/atomics/base_operation_load.ets
 ets-common-tests/atomics/base_operation_compare_exchange.ets
 ets-common-tests/taskpool/long_task.ets
@@ -24,7 +24,7 @@ ets-common-tests/generics/generics_methods.ets
 ets-common-tests/intrinsics/bigint64array_sort.ets
 ets-common-tests/intrinsics/uint32array_sort.ets
 
-# 28060
+#30894
 ets-common-tests/taskpool/common_tasks.ets
 
 #29592
