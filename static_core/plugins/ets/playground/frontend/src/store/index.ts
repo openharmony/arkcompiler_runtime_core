@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@ import options from './slices/options';
 import syntax from './slices/syntax';
 import code from './slices/code';
 import logs from './slices/logs';
+import ast from './slices/ast';
+import features from './slices/features';
 
 export const store = configureStore({
     reducer: {
@@ -26,7 +28,9 @@ export const store = configureStore({
         options,
         syntax,
         code,
-        logs
+        logs,
+        ast,
+        features
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware({
         serializableCheck: false,

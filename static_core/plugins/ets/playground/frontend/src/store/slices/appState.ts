@@ -21,6 +21,7 @@ interface IState {
     primaryColor: string;
     disasm: boolean;
     verifier: boolean;
+    astView: boolean;
     versions: Versions;
     versionsLoading: boolean;
     clearLogsEachRun: boolean;
@@ -38,7 +39,8 @@ const initialState: IState = {
     theme: (localStorage.getItem('theme') as Theme) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     disasm: false,
     verifier: true,
-    runtimeVerify: false,
+    runtimeVerify: true,
+    astView: false,
     primaryColor: '#e32b49',
     versions: {
         frontend: '',
@@ -63,6 +65,9 @@ const appStateSlice = createSlice({
         setDisasm: (state, action: PayloadAction<boolean>) => {
             state.disasm = action.payload;
         },
+        setAstView: (state, action: PayloadAction<boolean>) => {
+            state.astView = action.payload;
+        },
         setVerifier: (state, action: PayloadAction<boolean>) => {
             state.verifier = action.payload;
         },
@@ -86,6 +91,7 @@ export const {
     setTheme,
     setDisasm,
     setVerifier,
+    setAstView,
     setPrimaryColor,
     setVersions,
     setVersionsLoading,

@@ -26,6 +26,8 @@ import {
     setVerifierOutLogs
 } from '../store/slices/logs';
 import { RootState } from '../store';
+import { IAstReq } from './ast';
+import { IServiceResponse } from '../services/types';
 
 export enum ELogType {
     COMPILE_OUT = 'compileOut',
@@ -36,6 +38,8 @@ export enum ELogType {
     DISASM_ERR = 'disasmErr',
     VERIFIER_OUT = 'verifierOut',
     VERIFIER_ERR = 'verifierErr',
+    AST_OUT = 'ASTOut',
+    AST_ERR = 'ASTErr',
 }
 
 export interface ILog {
@@ -132,7 +136,7 @@ export const handleResponseLogs = createAsyncThunk(
     async (response: IApiResponse, thunkAPI) => {
 
         const handleLog = (
-            data: ICompileData | IRunData | IDisassemblyData | undefined,
+            data: ICompileData | IRunData | IDisassemblyData | IAstReq | undefined,
             logTypeOut: ELogType,
             logTypeErr: ELogType,
             successMessage: string,
@@ -277,5 +281,25 @@ export const handleResponseLogs = createAsyncThunk(
                 setVerifierErrLogs
             );
         }
+    }
+);
+
+export const handleASTLogs = createAsyncThunk(
+    'logs/compileLogs',
+    async (data: IAstReq, thunkAPI) => {
+            const state: RootState = thunkAPI.getState() as RootState;
+            const logsState = state.logs;
+            if (!data) {
+                return;
+            }
+            if (data.error) {
+                thunkAPI.dispatch(setErrLogs(
+                    logsState.err.concat({
+                        message: collectHighlights(data.error),
+                        isRead: false,
+                        from: ELogType.AST_ERR
+                    })
+                ));
+            }
     }
 );

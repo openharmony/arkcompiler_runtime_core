@@ -15,6 +15,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
+    setAstView,
     setClearLogsEachRun,
     setDisasm,
     setPrimaryColor,
@@ -56,6 +57,12 @@ export const setVerifAction = createAsyncThunk(
     '@verifier/change',
     (data: boolean, thunkAPI) => {
         thunkAPI.dispatch(setVerifier(data));
+    },
+);
+export const setAstViewAction = createAsyncThunk(
+    '@astView/change',
+    (data: boolean, thunkAPI) => {
+        thunkAPI.dispatch(setAstView(data));
     },
 );
 export const setRuntimeVerifAction = createAsyncThunk(

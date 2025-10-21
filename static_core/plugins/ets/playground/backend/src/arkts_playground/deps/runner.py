@@ -148,6 +148,26 @@ class Runner:
             result["code"] = await f.read()
         return result
 
+    async def dump_ast(self, code: str, options: list | None = None) -> Dict[str, Any]:
+        """Parse ETS code and return AST dump strictly from stdout."""
+        opts = list(options) if options else []
+        async with aiofiles.tempfile.TemporaryDirectory(prefix="arkts_playground") as tempdir:
+            stsfile_name = await self._save_code(tempdir, code)
+            cmd = ["--dump-ast", "--extension=ets", stsfile_name]
+            stdout, stderr, retcode = await self._execute_cmd(self.binary.es2panda, *(opts + cmd))
+
+            if retcode == -11:
+                stderr += "ast: Segmentation fault"
+
+            ast_out = stdout if (retcode == 0 and stdout) else None
+
+            return {
+                "ast": ast_out,
+                "output": stdout,
+                "error": stderr,
+                "exit_code": retcode
+            }
+
     async def _compile(self, filename: str, options: list) -> Dict[str, Any]:
         """Compiles ets code stored in file
         :rtype: Dict[str, Any]
