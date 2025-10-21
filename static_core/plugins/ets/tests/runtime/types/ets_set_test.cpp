@@ -67,7 +67,7 @@ protected:
 // Check both EtsEscompatSet and ark::Class<Set> has the same number of fields and at the same offsets
 TEST_F(EtsSetTest, SetMemoryLayout)
 {
-    EtsClass *setClass = PlatformTypes(vm_)->escompatSet;
+    EtsClass *setClass = PlatformTypes(vm_)->coreSet;
     MirrorFieldInfo::CompareMemberOffsets(setClass, GetSetMembers());
 }
 

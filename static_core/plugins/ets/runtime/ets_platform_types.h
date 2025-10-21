@@ -97,6 +97,7 @@ public:
     EtsMethod *coreFinalizationRegistryExecCleanup {};
 
     /* Containers */
+
     EtsClass *escompatArray {};
     EtsMethod *escompatArrayPush {};
     EtsMethod *escompatArrayPop {};
@@ -113,12 +114,12 @@ public:
     EtsClass *escompatBigInt64Array {};
     EtsClass *escompatBigUint64Array {};
     EtsClass *containersArrayAsListInt {};
-    EtsClass *escompatRecord {};
-    EtsMethod *escompatRecordGetter {};
-    EtsMethod *escompatRecordSetter {};
-    EtsClass *escompatMap {};
-    EtsClass *escompatMapEntry {};
-    EtsClass *escompatSet {};
+    EtsClass *coreRecord {};
+    EtsMethod *coreRecordGetter {};
+    EtsMethod *coreRecordSetter {};
+    EtsClass *coreMap {};
+    EtsClass *coreMapEntry {};
+    EtsClass *coreSet {};
 
     /* InteropJS */
     EtsClass *interopJSValue {};
