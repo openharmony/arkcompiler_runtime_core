@@ -43,6 +43,7 @@ template("create_merge_file") {
 }
 
 abckit_gtests_sources = [
+  "adapter_dynamic/inst_props_helpers_dynamic_test.cpp",
   "adapter_static/ir_static_test.cpp",
   "adapter_static/runtime_adapter_static_test.cpp",
   "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic_test.cpp",
@@ -62,6 +63,7 @@ abckit_gtests_sources = [
   "clean_scenarios/cpp_api/dynamic/replace_call_site/replace_call_site_test.cpp",
   "clean_scenarios/cpp_api/dynamic/router_table/router_table_test.cpp",
   "clean_scenarios/cpp_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
+  "codegen/insn_info_test.cpp",
   "cpp/tests/cpp_test.cpp",
   "helpers/helpers.cpp",
   "helpers/helpers_mode.cpp",
@@ -951,6 +953,8 @@ libabckit_host_unittest_action("abckit_gtests") {
     "$ark_root_static/compiler",
     "$ark_root_static/libarkbase",
     "$ark_root_static/runtime",
+    "$target_gen_dir/../../libabckit/src/adapter_dynamic",
+    "$target_gen_dir/../../libabckit/src/codegen",
     "$target_gen_dir/../../static_core/",
     "$target_gen_dir/../../static_core/assembler",
     "$target_gen_dir/../../static_core/compiler/generated",
@@ -1033,6 +1037,8 @@ libabckit_host_unittest_action("arklink_strip_unused_code_gtests") {
     "$ark_root_static/compiler",
     "$ark_root_static/libarkbase",
     "$ark_root_static/runtime",
+    "$target_gen_dir/../../libabckit/src/adapter_dynamic",
+    "$target_gen_dir/../../libabckit/src/codegen",
     "$target_gen_dir/../../static_core/",
     "$target_gen_dir/../../static_core/assembler",
     "$target_gen_dir/../../static_core/compiler/generated",
