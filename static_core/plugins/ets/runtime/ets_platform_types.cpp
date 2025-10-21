@@ -201,7 +201,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreFinalizableWeakRef, FINALIZABLE_WEAK_REF);
     findType(&EtsPlatformTypes::coreFinalizationRegistry, FINALIZATION_REGISTRY);
     findMethod(&EtsPlatformTypes::coreFinalizationRegistryExecCleanup, coreFinalizationRegistry, "execCleanup",
-               "[Lstd/core/WeakRef;I:V", true);
+               "[Lstd/core/WeakRef;:V", true);
 
     findType(&EtsPlatformTypes::escompatArray, ARRAY);
     findMethod(&EtsPlatformTypes::escompatArrayPush, escompatArray, "pushSingle", "Lstd/core/Object;:V", false);

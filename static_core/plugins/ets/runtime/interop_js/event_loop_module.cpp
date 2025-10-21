@@ -140,14 +140,14 @@ void EventLoop::DeleteAsyncWork(uv_async_t *async, AsyncWorkDeleter deleter)
 {
     using PackedData = std::pair<void *, AsyncWorkDeleter>;
 
-    auto *packedData = new PackedData();
-    packedData->first = std::exchange(async->data, packedData);
-    packedData->second = deleter;
+    auto *data = new PackedData();
+    data->first = std::exchange(async->data, data);
+    data->second = deleter;
     uv_close(reinterpret_cast<uv_handle_t *>(async), [](uv_handle_t *handle) {
         auto *packedData = static_cast<PackedData *>(handle->data);
-        auto [data, asyncDeleter] = *packedData;
+        auto [userData, asyncDeleter] = *packedData;
         delete packedData;
-        handle->data = data;
+        handle->data = userData;
         asyncDeleter(handle);
         DecrementEventCount();
     });

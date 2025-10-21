@@ -18,28 +18,11 @@
 
 #include "runtime/coroutines/affinity_mask.h"
 #include "runtime/coroutines/coroutine_worker.h"
+#include "runtime/coroutines/coroutine_worker_domain.h"
 
 namespace ark {
 
 class CoroutineManager;
-
-/// @brief Coroutine domain consists of the coroutine workers that have something in common
-enum class CoroutineWorkerDomain {
-    /// regular workers that do not support interop, are not "exclusive" and support coroutine migration
-    GENERAL = 0,
-    /// this domain (or domains) consist of the user-provided worker IDs
-    EXACT_ID,
-    /// single MAIN worker
-    MAIN,
-    /**
-     * workers that are in the "exclusive" mode:
-     * - no incoming coroutines allowed
-     * - all child coroutines are scheduled to the same worker
-     * - no coroutine migration allowed
-     * NOTE(ivagin): rename EA to EXCLUSIVE in core part
-     */
-    EA,
-};
 
 /**
  * @brief A group of coroutine workers

@@ -92,6 +92,18 @@ void FinalizationRegistryManager::CleanupCoroFinished()
     ASSERT(oldCnt > 0);
 }
 
+CoroutineWorkerDomain FinalizationRegistryManager::GetCoroDomain(EtsCoroutine *coro)
+{
+    ASSERT(coro != nullptr);
+    CoroutineWorker *worker = coro->GetWorker();
+    if (worker->IsMainWorker()) {
+        return CoroutineWorkerDomain::MAIN;
+    } else if (worker->InExclusiveMode()) {
+        return CoroutineWorkerDomain::EA;
+    }
+    return CoroutineWorkerDomain::GENERAL;
+}
+
 bool FinalizationRegistryManager::UpdateFinRegCoroCountAndCheckIfCleanupNeeded()
 {
     // Atomic with acquire order reason: getting correct value
@@ -106,6 +118,17 @@ bool FinalizationRegistryManager::UpdateFinRegCoroCountAndCheckIfCleanupNeeded()
     return oldCnt < MAX_FINREG_CLEANUP_COROS;
 }
 
+static CoroutineWorkerGroup::Id GetGroupId(CoroutineManager *coroManager, CoroutineWorkerDomain domain,
+                                           CoroutineWorker::Id id)
+{
+    if (domain == CoroutineWorkerDomain::MAIN) {
+        return CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN);
+    } else if (domain == CoroutineWorkerDomain::EA) {
+        return CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::EA, {id});
+    }
+    return CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::GENERAL);
+}
+
 void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
 {
     ASSERT(coro != nullptr);
@@ -115,12 +138,10 @@ void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
         auto *objArray = EtsObjectArray::FromCoreType(vm_->GetGlobalObjectStorage()->Get(finRegInstancies_));
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
         Method *cleanup = PlatformTypes(vm_)->coreFinalizationRegistryExecCleanup->GetPandaMethod();
-        auto workerDomain =
-            coro->GetWorker()->IsMainWorker() ? CoroutineWorkerDomain::MAIN : CoroutineWorkerDomain::GENERAL;
-        auto groupId = coro->GetWorker()->IsMainWorker()
-                           ? CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN)
-                           : CoroutineWorkerGroup::AnyId();
-        auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(workerDomain))};
+        auto workerId = coro->GetWorker()->GetId();
+        auto workerDomain = GetCoroDomain(coro);
+        auto groupId = GetGroupId(coroManager, workerDomain, workerId);
+        auto args = PandaVector<Value> {Value(objArray->GetCoreType())};
         [[maybe_unused]] LaunchResult launchResult =
             coroManager->Launch(event, cleanup, std::move(args), groupId, CoroutinePriority::DEFAULT_PRIORITY, false);
         ASSERT(launchResult == LaunchResult::OK);

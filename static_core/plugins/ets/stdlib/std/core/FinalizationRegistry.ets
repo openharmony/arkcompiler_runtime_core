@@ -50,6 +50,7 @@ export final class FinalizationRegistry<T> {
     private callback: (value: T) => void;
     private static finalizationRegistryLock = new Mutex();
     private mutex = new Mutex();
+    private workerId: int;
     private workerDomain: int;
 
     // Map for unregistrable objects
@@ -60,12 +61,13 @@ export final class FinalizationRegistry<T> {
     private nonUnregistrableList: FinalizationNode<T> | undefined = undefined;
     private listSize: int = 0;
 
-    private static execCleanup(array: FixedArray<(WeakRef<FinalizationRegistry<T>> | undefined)>, workerDomain: int): void {
+    private static execCleanup(array: FixedArray<(WeakRef<FinalizationRegistry<T>> | undefined)>): void {
         FinalizationRegistry.finalizationRegistryLock.lock();
         try {
             for (let i = 0; i < array.length; i++) {
                 if (array[i]?.deref() !== undefined) {
-                    if (array[i]!.deref()!.workerDomain == workerDomain) {
+                    let finReg = array[i]!.deref()!;
+                    if (FinalizationRegistry.canCleanup(finReg.workerId, finReg.workerDomain)) {
                         try {
                             FinalizationRegistry.finalizationRegistryLock.unlock();
                             array[i]!.deref()!.cleanup();
@@ -180,8 +182,10 @@ export final class FinalizationRegistry<T> {
      */
     public constructor(callback: (value: T) => void) {
         this.callback = callback;
+        this.workerId = FinalizationRegistry.getWorkerId();
+        this.workerDomain = FinalizationRegistry.getWorkerDomain();
         FinalizationRegistry.finalizationRegistryLock.lockGuard(() => {
-            this.workerDomain = FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
+            FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
         });
         this.buckets = new (FinalizationNode<T> | undefined)[16];  // Init size for hash map is 16
     }
@@ -315,7 +319,10 @@ export final class FinalizationRegistry<T> {
         }
     }
 
-    private static native registerInstance(object: Object): int;
+    private static native registerInstance(object: Object): void;
+    private static native getWorkerId(): int;
+    private static native getWorkerDomain(): int;
+    private static native canCleanup(workerId: int, workerDomain: int): boolean;
     private static native finishCleanup(): void;
 
 }

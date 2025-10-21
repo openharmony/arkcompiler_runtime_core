@@ -5633,9 +5633,39 @@ intrinsics:
     method_name: registerInstance
     static: true
     signature:
-      ret: i32
+      ret: void
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryRegisterInstance
+
+  - name: StdFinalizationRegistryGetWorkerId
+    space: ets
+    class_name: std.core.FinalizationRegistry
+    method_name: getWorkerId
+    static: true
+    signature:
+      ret: i32
+      args: [ ]
+    impl: ark::ets::intrinsics::StdFinalizationRegistryGetWorkerId
+
+  - name: StdFinalizationRegistryGetWorkerDomain
+    space: ets
+    class_name: std.core.FinalizationRegistry
+    method_name: getWorkerDomain
+    static: true
+    signature:
+      ret: i32
+      args: [  ]
+    impl: ark::ets::intrinsics::StdFinalizationRegistryGetWorkerDomain
+
+  - name: StdFinalizationRegistryCanCleanup
+    space: ets
+    class_name: std.core.FinalizationRegistry
+    method_name: canCleanup
+    static: true
+    signature:
+      ret: u1
+      args: [ i32, i32 ]
+    impl: ark::ets::intrinsics::StdFinalizationRegistryCanCleanup
 
   - name: StdFinalizationRegistryFinishCleanup
     space: ets
