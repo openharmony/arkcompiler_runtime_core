@@ -79,6 +79,9 @@
 #ifdef ARK_HYBRID
 #include "base_runtime.h"
 #endif
+#ifdef OHOS_PANDA_DEBUG_MODE_ENABLE
+#include "base/startup/init/interfaces/innerkits/include/syspara/parameters.h"
+#endif
 
 namespace ark {
 
@@ -329,6 +332,8 @@ bool Runtime::Create(const RuntimeOptions &options)
 
     IntrusiveTestOption::SetTestId(options);
 
+    SetDebuggerOptions(const_cast<RuntimeOptions &>(options));
+
     const_cast<RuntimeOptions &>(options).InitializeRuntimeSpacesAndType();
     trace::ScopedTrace scopedTrace("Runtime::Create");
 
@@ -383,6 +388,22 @@ bool Runtime::Create(const RuntimeOptions &options)
 
     return true;
 }
+
+#ifdef OHOS_PANDA_DEBUG_MODE_ENABLE
+void Runtime::SetDebuggerOptions(RuntimeOptions &options)
+{
+    const std::string debugLibraryPathMode = "/system/lib64/libarkinspector.so";
+    bool enableDebugMode = OHOS::system::GetBoolParameter("persist.ark.enableDebugMode", false);
+    if (enableDebugMode) {
+        options.SetInterpreterType("cpp");
+        options.SetDebuggerEnable(true);
+        options.SetDebuggerLibraryPath(debugLibraryPathMode);
+        options.SetDebuggerBreakOnStart(true);
+    }
+}
+#else
+void Runtime::SetDebuggerOptions([[maybe_unused]] RuntimeOptions &options) {}
+#endif
 
 Runtime *Runtime::GetCurrent()
 {
