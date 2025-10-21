@@ -180,6 +180,7 @@
   "plugins/ets/tests/verify_unions": "*",
   "plugins/ets/tools": "*",
   "plugins/ets/verification": "*",
+  "plugins/ets/tests/checked_urunner/simple_run/optimize_istrue.ets": "*",
   "plugins/ets/tests/debugger/src/arkdb/compiler_verification/expression_verifier.py": "*",
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/interface/interface.ts": "*",
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/standard_lib/standard_lib.ts": "*",

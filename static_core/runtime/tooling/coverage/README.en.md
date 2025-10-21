@@ -1,12 +1,13 @@
-# coverage.py Script instructions:
+# coverage.py Script Usage Instructions:
 
-## Precondition
+## Preconditions
 
-Using this script requires a syntax tree file (.json), a disassembly file (.pa) and ets source code with the same name.
+To use this script, you need to have syntax tree files (.json), disassembly files (.pa), and ets source code with the same name in the same directory as the script.
 
-Syntax tree file (.json) is placed in ast directory, disassembly file (.pa) is placed in pa directory, ets source code is placed in src directory, and runtime information (.csv) is placed in runtime_info directory.
+Syntax tree files (.json) are placed in the ast directory, disassembly files (.pa) are placed in the pa directory, ets source code is placed in the src directory, and runtime information (.csv) is placed in the runtime_info directory.
 
 The directory structure is as follows:
+
 ```
 .
 ├── ast
@@ -29,24 +30,51 @@ The directory structure is as follows:
         └── world.ets
 ```
 
-## instruction description
-Instruction 1: Generate a full coverage html file
+## Command Instructions
+### 1. Generate AST Files
+Command 1: Generate AST files for host side
+
 ```
-python coverage.py gen_report --all
+python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --mode=host
+```
+
+Command 2: Generate AST files for device side
+
+```
+python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --mode=hap
+```
+
+### 2. Generate PA Files
+
+Command: Decompile ABC files to generate PA files
+
+```
+python3 coverage.py gen_pa --src=./abc --output=./pa --ark_disasm-path=../../../out/bin/ark_disasm
+```
+
+### 3. Generate HTML Files
+
+Host Side:
+- Generate full coverage HTML file:
+
+```
+python coverage.py gen_report --src=./src --mode=host --all
 or
-python coverage.py gen_report -a
+python coverage.py gen_report --src=./src --mode=host -a
 ```
 
-Instruction 2: Generate an incremental coverage html file
+- Generate incremental coverage HTML file:
+
 ```
-python coverage.py gen_report --diff
+python coverage.py gen_report --src=./src --mode=host --diff
 or
-python coverage.py gen_report -d
+python coverage.py gen_report --src=./src --mode=host -d
 ```
 
+Note: For the device side, replace `--mode=host` with `--mode=hap`. To generate an incremental coverage HTML file, a diff.txt file must be created and placed in the same directory as coverage.py.
 
-Note: instruction 2 needs to be passed into diff.txt file;
-Execute the following instructions to generate diff.txt and put this file in the current directory of the script.
+Command to generate diff.txt:
+
 ```
 git diff HEAD^ HEAD > diff.txt
 ```
