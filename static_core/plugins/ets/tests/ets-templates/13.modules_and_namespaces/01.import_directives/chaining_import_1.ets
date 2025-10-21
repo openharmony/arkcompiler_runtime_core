@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,19 @@
  */
 
 /*---
-desc: ambient import entities from multiple modules using bind all method
+desc: Chaining import (default -> selective -> all) Selective and all import the previously exported classes 
+  with type keyword and extra export
 files:
-- ./modules/mod1.ets
-- ./modules/mod2.ets
+- ./chaining_import_0.ets
+name: chaining_import_1
 ---*/
 
-import * as A from "./modules/mod1.d"
-import * as B from "./modules/mod2.d"
+import type {DefaultExportedClass0 as SomeExportedClass1} from "./chaining_import_0"
+import * as Test1 from "./chaining_import_0"
+
+export const testvar: number = 1
+export SomeExportedClass1
 
 function main() {
-  arktest.assertEQ(A.foo(), 1)
-  arktest.assertEQ(A.f, 2)
-  arktest.assertEQ(new A.C().foo(), 3)
-  arktest.assertEQ(B.foo(), 4)
-  arktest.assertEQ(B.f, 5)
-  arktest.assertEQ(new B.C().foo(), 6)
+    arktest.assertEQ(new Test1.TestClass().hello('hello'), 'hello_world')
 }

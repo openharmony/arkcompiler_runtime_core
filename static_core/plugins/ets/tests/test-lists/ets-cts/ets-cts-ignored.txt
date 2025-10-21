@@ -1113,6 +1113,9 @@
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_global_0.ets
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_global_1.ets
 
+#30787
+13.modules_and_namespaces/01.import_directives/type_binding_type_import_neg.ets
+
 #29735
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/type_binding_neg.ets
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/type_binding_neg_2.ets
