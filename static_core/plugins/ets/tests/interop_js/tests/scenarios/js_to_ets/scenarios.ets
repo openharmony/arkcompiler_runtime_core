@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/js_suites/scenarios');
+let module = ESValue.load('pure_js');
 let standaloneFunctionJs = module.getProperty('standaloneFunctionJs');
 let ClassWithMethodJs = module.getProperty('ClassWithMethodJs');
 let newInterfaceWithMethod = module.getProperty('newInterfaceWithMethod');

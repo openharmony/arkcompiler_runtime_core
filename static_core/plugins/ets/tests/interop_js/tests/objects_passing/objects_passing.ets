@@ -15,7 +15,7 @@
 
 // Pass ArkTS object to JS (wrapping) (ArkTS calls TS)
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/objects_passing/objects_passing')
+let module = ESValue.load('js_import')
 let updateObjectId = module.getProperty('updateObjectId');
 let getOuterObj = module.getProperty('getOuterObj');
 let testOuterObject = module.getProperty('testOuterObject');

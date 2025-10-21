@@ -14,7 +14,7 @@
  */
 function testProcessInput() {
     let callback = ():boolean => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let processInputDy = module.getProperty('processInput');
         let res1 = processInputDy.invoke(ESValue.wrapNumber(5)); //  2 * 5 = 10
         let res2 = processInputDy.invoke(ESValue.wrapString('hello')); // 'HELLO'
@@ -28,7 +28,7 @@ function testProcessInput() {
 
 function testCreateArray() {
     let callback = ():boolean => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let createArrayDy = module.getProperty('createArray');
         // [5]
         let res1 = createArrayDy.invoke(ESValue.wrapNumber(5), ESValue.wrapNumber(1));
@@ -46,7 +46,7 @@ function testCreateArray() {
 
 function testGetUser() {
     let callback = ():boolean => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let getUserDy = module.getProperty('getUser');
         // { id: 123, name: 'John Doe' }
         let res1 = getUserDy.invoke(ESValue.wrapNumber(123));
@@ -67,7 +67,7 @@ function testUnion() {
   let result = false;
   try {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let dynamicObj = module.getProperty('dynamicObj');
         let TestClass = module.getProperty('TestClass');
         dynamicObj.setProperty('unionProp', ESValue.wrapNumber(123));
@@ -94,7 +94,7 @@ function testUnion() {
 
 function testBaseClass() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let obj = module.getProperty('Base').instantiate().invokeMethod('getCurrent')
         arktest.assertTrue(obj.typeOf() === 'object')
         arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
@@ -104,7 +104,7 @@ function testBaseClass() {
 
 function testChildClass() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let obj = module.getProperty('Child').instantiate().invokeMethod('getSuper')
         arktest.assertTrue(obj.typeOf() === 'object')
         arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
@@ -115,7 +115,7 @@ function testChildClass() {
 
 function testBaseFunc() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let obj = module.getProperty('baseFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
@@ -124,7 +124,7 @@ function testBaseFunc() {
 
 function testChildFunc() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let obj = module.getProperty('childFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
@@ -133,7 +133,7 @@ function testChildFunc() {
 
 function testFooBaseObjInvoke() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let fooBaseObj = module.getProperty('fooBaseObj')
         let result = fooBaseObj.getProperty('foo').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
@@ -143,7 +143,7 @@ function testFooBaseObjInvoke() {
 
 function testFooBaseObjInvokeMethod() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let fooBaseObj = module.getProperty('fooBaseObj')
         let result = fooBaseObj.invokeMethod('fooFunc')
         arktest.assertTrue(ESValue.areStrictlyEqual(result, fooBaseObj))
@@ -153,7 +153,7 @@ function testFooBaseObjInvokeMethod() {
 
 function testFooChildObjInvoke() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let fooChildObj = module.getProperty('fooChildObj')
         let result = fooChildObj.getProperty('foo').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
@@ -163,7 +163,7 @@ function testFooChildObjInvoke() {
 
 function testFooChildObjInvokeMethod() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let fooChildObj = module.getProperty('fooChildObj')
         let result = fooChildObj.invokeMethod('fooFunc')
         arktest.assertTrue(ESValue.areStrictlyEqual(result, fooChildObj))
@@ -173,7 +173,7 @@ function testFooChildObjInvokeMethod() {
 
 function testArrowFuncInvoke() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let result = module.getProperty('arrowFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
@@ -182,7 +182,7 @@ function testArrowFuncInvoke() {
 
 function testOptionalParams() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         arktest.assertTrue(module.getProperty('foo1').invoke(ESValue.wrap(1), ESValue.wrap('str')).toBoolean());
         arktest.assertTrue(module.getProperty('foo2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true)).toBoolean());
         arktest.assertTrue(module.getProperty('foo3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(true), ESValue.wrap(2)).toBoolean());
@@ -202,7 +202,7 @@ const CustomErrorCode: number = 1001;
 
 function testError() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let err = module.getProperty('err');
         let res: boolean;
         res = (err.getProperty('message').toString() == ErrMsg);
@@ -214,7 +214,7 @@ function testError() {
 
 function testThrowError() {
     let callback = () => {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let module = ESValue.load('concurrency_helpers');
     let res: boolean;
     try {
         module.getProperty('ErrorFunc').invoke(ESValue.wrapString(ErrorMessage));
@@ -230,7 +230,7 @@ function testThrowError() {
 
 function testCustomThrowError() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let res: boolean;
         try {
             module.getProperty('CustomErrorFunc').invoke(ESValue.wrapString(CustomErrorMessage), ESValue.wrapNumber(CustomErrorCode));
@@ -247,7 +247,7 @@ function testCustomThrowError() {
 
 function testTaskpoolNestedExecute() {
     let callback = ():boolean => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let processInputDy = module.getProperty('processInput');
         let res1 = processInputDy.invoke(ESValue.wrapNumber(5)); //  2 * 5 = 10
         let res2 = processInputDy.invoke(ESValue.wrapString('hello')); // 'HELLO'
@@ -255,7 +255,7 @@ function testTaskpoolNestedExecute() {
         let res = (res1.toNumber() === 10) && (res2.toString() === 'HELLO') && (!res3.toBoolean());
 
         let callbackInner = ():boolean => {
-            let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+            let module = ESValue.load('concurrency_helpers');
             let processInputDy = module.getProperty('processInput');
             let res1 = processInputDy.invoke(ESValue.wrapNumber(5)); //  2 * 5 = 10
             let res2 = processInputDy.invoke(ESValue.wrapString('hello')); // 'HELLO'
@@ -272,7 +272,7 @@ function testTaskpoolNestedExecute() {
 
 function testTaskpoolInteropLoop() {
     let callback = () => {
-        let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+        let module = ESValue.load('concurrency_helpers');
         let processInputDy = module.getProperty('processInput');
         for (let i = 0; i < 100; i++) {
             let res1 = processInputDy.invoke(ESValue.wrapNumber(5)); //  2 * 5 = 10
@@ -297,14 +297,14 @@ function testSerializeFunc(serializeTestObj: ESValue) {
 }
 
 function testTaskpoolSerialize() {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let module = ESValue.load('concurrency_helpers');
     let serializeTestObj = module.getProperty('serializeTestObj');
     let res = (waitForCompletion(() => taskpool.execute(testSerializeFunc, serializeTestObj))) as boolean;
     arktest.assertEQ(res, true);
 }
 
 function testTaskpoolSerializeClassInstantiate() {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let module = ESValue.load('concurrency_helpers');
     let SerializeTest = module.getProperty('SerializeTest');
     let serializeTestObj = SerializeTest.instantiate('SerializeTest', 1, ['1', '2', '3']);
     let res = (waitForCompletion(() => taskpool.execute(testSerializeFunc, serializeTestObj))) as boolean;
@@ -312,7 +312,7 @@ function testTaskpoolSerializeClassInstantiate() {
 }
 
 function testTaskpoolSerializeUndefined() {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let module = ESValue.load('concurrency_helpers');
     let serializeObj = module.getProperty('serializeUndefined');
     let callback = (value: ESValue) => {
         arktest.assertTrue(value.isUndefined());
@@ -321,7 +321,7 @@ function testTaskpoolSerializeUndefined() {
 }
 
 function testTaskpoolSerializeNull() {
-    let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/concurrency/concurrency_helpers');
+    let module = ESValue.load('concurrency_helpers');
     let serializeObj = module.getProperty('serializeNull');
     let callback = (value: ESValue) => {
         arktest.assertTrue(value.isNull());

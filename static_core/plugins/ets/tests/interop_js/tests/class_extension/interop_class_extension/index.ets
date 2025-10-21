@@ -16,7 +16,7 @@
 
 let global = ESValue.getGlobal();
 let gtestEnv = global.getProperty("gtest_env");
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/interop_class_extension/interop_class_extension/index');
+let module = ESValue.load('js_code');
 
 let DEFAULT_STRING_VALUE = module.getProperty('DEFAULT_STRING_VALUE');
 let TestNativeClass = module.getProperty('TestNativeClass');

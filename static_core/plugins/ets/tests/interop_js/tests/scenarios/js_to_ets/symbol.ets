@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/symbol');
+let module = ESValue.load('symbol');
 let functionArgTypeClassToCheckSymbol = module.getProperty('functionArgTypeClassToCheckSymbol');
 let ClassToCheckSymbol = module.getProperty('ClassToCheckSymbol');
 

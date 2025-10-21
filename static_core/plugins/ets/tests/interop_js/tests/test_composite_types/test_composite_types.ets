@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_composite_types/test_composite_types')
+let module = ESValue.load('js_code')
 let isTTupleTS = module.getProperty('isTTupleTS');
 let returnTuple = module.getProperty('returnTuple');
 let returnStrArray = module.getProperty('returnStrArray');

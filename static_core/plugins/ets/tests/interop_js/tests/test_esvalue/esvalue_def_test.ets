@@ -13,8 +13,8 @@
 * limitations under the License.
 */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_esvalue/esvalue_def_test');
-let module2 = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_esvalue/esvalue_def_test2');
+let module = ESValue.load('esvalue_def_test');
+let module2 = ESValue.load('esvalue_def_test2');
 
 let jsBoolean = module.getProperty('b');
 let jsNumber = module.getProperty('n');

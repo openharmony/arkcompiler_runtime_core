@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/interface/ts_to_ets/interface_method');
+let module = ESValue.load('dynamic_import');
 let tsNumber = module.getProperty('tsNumber').toNumber();
 let tsString = module.getProperty('tsString').toString();
 let AnyTypeMethodClass = module.getProperty('AnyTypeMethodClass');

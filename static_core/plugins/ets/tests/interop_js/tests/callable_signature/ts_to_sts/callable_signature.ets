@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/callable_signature/ts_to_sts/main');
+let module = ESValue.load('main_js');
 let callableInstance = module.getProperty('callableInstance');
 
 const etsInt: int = 1;

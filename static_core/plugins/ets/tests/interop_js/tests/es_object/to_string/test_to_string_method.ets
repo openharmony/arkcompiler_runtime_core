@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/es_object/to_string/test_to_string_method');
+let module = ESValue.load('to_string');
 let etsIdentity = module.getProperty('Identity');
 let etsIntValue = module.getProperty('IntValue');
 let etsOptional = module.getProperty('Optional');

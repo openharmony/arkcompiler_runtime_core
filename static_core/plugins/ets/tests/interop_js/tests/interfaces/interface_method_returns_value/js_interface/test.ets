@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/interfaces/interface_method_returns_value/js_interface/index');
+let module = ESValue.load('js_code');
 let BOOLEAN_VALUE = module.getProperty('BOOLEAN_VALUE');
 let ENUM_VALUE = module.getProperty('ENUM_VALUE');
 let GenericInterface = module.getProperty('GenericInterface');

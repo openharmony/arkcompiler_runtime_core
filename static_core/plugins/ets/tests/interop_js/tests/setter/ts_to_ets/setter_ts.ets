@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/setter/ts_to_ets/setter')
+let module = ESValue.load('js/setter')
 let clsUnionSetter = module.getProperty('UnionSetter');
 let clsInterfaceSetter = module.getProperty('InterfaceSetter');
 let clsBaseClass = module.getProperty('BaseClass');

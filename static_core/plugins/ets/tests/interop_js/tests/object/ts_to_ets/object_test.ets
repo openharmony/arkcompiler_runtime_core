@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/object/ts_to_ets/test_object')
+let module = ESValue.load('js_code')
 let numb_valBoxed = module.getProperty('numb_valBoxed');
 let bool_valBoxed = module.getProperty('bool_valBoxed');
 let str_valBoxed = module.getProperty('str_valBoxed');

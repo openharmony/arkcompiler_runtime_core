@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-let module1 = ESValue.load('../../plugins/ets/tests/interop_js/tests/indexed_type/indexed_type');
+let module1 = ESValue.load('indexed_type');
 let getArray = module1.getProperty('getArray');
 let returnCustomArray = module1.getProperty('returnCustomArray');
 let createStringRecord = module1.getProperty('createStringRecord');
 let createInt8Array = module1.getProperty('createInt8Array');
 let handler = module1.getProperty('handler');
 
-let module2 = ESValue.load('../../plugins/ets/tests/interop_js/tests/indexed_type/proxy');
+let module2 = ESValue.load('proxy');
 let createProxy = module2.getProperty('createProxy')
 
 const arr: FixedArray<string> = ['A', 'B', 'C'];

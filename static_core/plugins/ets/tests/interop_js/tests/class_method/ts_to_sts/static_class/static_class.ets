@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/class_method/ts_to_sts/main');
+let module = ESValue.load('main_js');
 let StaticClass = module.getProperty('StaticClass');
 let createStaticClassFromTs = module.getProperty('createStaticClassFromTs');
 

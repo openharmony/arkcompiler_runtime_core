@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/implement_interfaces/test_class')
+let module = ESValue.load('test_class')
 let getId = module.getProperty('getId');
 let testClass = module.getProperty('TestClass');
 

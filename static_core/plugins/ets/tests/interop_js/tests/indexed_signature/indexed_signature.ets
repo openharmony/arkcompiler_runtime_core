@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module1 = ESValue.load('../../plugins/ets/tests/interop_js/tests/indexed_signature/indexed_signature')
+let module1 = ESValue.load('utils_js')
 let createProxy = module1.getProperty('createProxy');
 
 const stsInt = 2;

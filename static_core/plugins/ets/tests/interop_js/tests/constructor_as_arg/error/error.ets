@@ -15,7 +15,7 @@
 
 let global = ESValue.getGlobal();
 let gtestEnv = global.getProperty("gtest_env");
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/constructor_as_arg/main');
+let module = ESValue.load('main_js');
 
 let tsInt = module.getProperty('tsInt');
 let ParentClass = module.getProperty('ParentClass');

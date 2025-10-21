@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_classtype_conversion/classtype_conversion');
+let module = ESValue.load('js_code');
 
 let jsBoolean = module.getProperty('b');
 let jsNumber = module.getProperty('n');

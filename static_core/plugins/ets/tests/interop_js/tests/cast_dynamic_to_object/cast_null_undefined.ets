@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/cast_dynamic_to_object/pure');
+let module = ESValue.load('js_code');
 let funcReturnTypeNull = module.getProperty('funcReturnTypeNull');
 let funcReturnTypeUndefined = module.getProperty('funcReturnTypeUndefined');
 let funcArgType = module.getProperty('funcArgType');

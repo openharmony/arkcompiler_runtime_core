@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_callable/test_callable')
+let module = ESValue.load('js_code')
 let callNamedFunction = module.getProperty('callNamedFunction');
 let callAnonymousFunction = module.getProperty('callAnonymousFunction');
 let callArrowFunction = module.getProperty('callArrowFunction');

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_record/ts_to_ets/record');
+const module = ESValue.load('record');
 const myRecord = module.getProperty('myRecord');
 const originalRecord = module.getProperty('originalRecord');
 const testNewRecordValueFromStatic = module.getProperty('testNewRecordValueFromStatic');

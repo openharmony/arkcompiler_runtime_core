@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-let module =
-    ESValue.load('../../plugins/ets/tests/interop_js/tests/function_return_array_test/ts_to_ets/ts_return_array');
+let module = ESValue.load('js_code');
 let functionReturnArray1 = module.getProperty('functionReturnArray1');
 let functionReturnArray2 = module.getProperty('functionReturnArray2');
 let functionReturnArray3 = module.getProperty('functionReturnArray3');

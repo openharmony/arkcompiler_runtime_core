@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/operator_new/operator_new')
+let module = ESValue.load('js_import')
 let primitive = module.getProperty('primitive');
 let TestObject = module.getProperty('TestObject');
 let testfn = module.getProperty('testfn');

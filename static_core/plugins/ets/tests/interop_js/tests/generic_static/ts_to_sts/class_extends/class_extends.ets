@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/generic_static/ts_to_sts/main');
+let module = ESValue.load('main_js')
 let GenericExtends = module.getProperty('GenericExtends');
 let genericClassExtendsCallFromTs = module.getProperty('genericClassExtendsCallFromTs');
 

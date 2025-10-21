@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { foo } from "testDecl";
+import { foo } from 'testDecl';
 initModule('testDecl')
 
 function bar1() {
@@ -21,7 +21,7 @@ function bar1() {
 }
 
 
-function bar2() {
+function bar2() : boolean {
     let module = ESValue.load('testDecl');
     let testNumber = module.getProperty(`testNumber`);
     return testNumber.toNumber() == 10;
