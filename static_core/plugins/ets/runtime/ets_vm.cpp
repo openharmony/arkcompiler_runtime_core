@@ -169,6 +169,8 @@ bool PandaEtsVM::Destroy(PandaEtsVM *vm)
     auto runtime = Runtime::GetCurrent();
     runtime->GetInternalAllocator()->Delete(vm);
 
+    runtime->StopCoverageListener();
+
     return true;
 }
 
@@ -404,6 +406,10 @@ void PandaEtsVM::PostZygoteFork()
     // Postpone GC on application start-up
     // Postpone GCEnd method should be called on start-up ending event
     mm_->GetGC()->PostponeGCStart();
+
+    auto runtime = Runtime::GetCurrent();
+    runtime->StartCoverageListener();
+
     PreStartup();
 }
 

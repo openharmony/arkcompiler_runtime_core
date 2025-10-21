@@ -29,6 +29,7 @@ set(SOURCES
     class_linker_extension.cpp
     class_initializer.cpp
     tooling/backtrace/backtrace.cpp
+    tooling/coverage_listener.cpp
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp
     tooling/inspector/debugger_arkapi.cpp
@@ -1093,6 +1094,7 @@ endif()
 add_gtests(
     arkruntime_utils_test
     tests/class_size_test.cpp
+    tests/coverage_listener_test.cpp
     tests/debugger_test.cpp
     tests/frame_test.cpp
     tests/i2c_bridge_test.cpp
