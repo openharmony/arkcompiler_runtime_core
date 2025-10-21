@@ -49,19 +49,20 @@ std::string ark::guard::JsonUtil::GetStringValue(const JsonObject *object, const
         return result.value();
     }
     ARK_GUARD_ASSERT(!optionalField, ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
-                     "Fail to obtain required field:" + std::string(field));
+                     "Configuration parsing failed: fail to obtain required field:" + std::string(field));
     return "";
 }
 
-bool ark::guard::JsonUtil::GetBoolValue(const JsonObject *object, const std::string_view &field, bool optionalField)
+bool ark::guard::JsonUtil::GetBoolValue(const JsonObject *object, const std::string_view &field, bool defaultValue,
+                                        bool optionalField)
 {
     auto result = GetJsonValue<JsonObject::BoolT>(object, field);
     if (result.has_value()) {
         return result.value();
     }
     ARK_GUARD_ASSERT(!optionalField, ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
-                     "Fail to obtain required field:" + std::string(field));
-    return false;
+                     "Configuration parsing failed: fail to obtain required field:" + std::string(field));
+    return defaultValue;
 }
 
 std::vector<std::string> ark::guard::JsonUtil::GetArrayStringValue(const JsonObject *object,
@@ -71,7 +72,7 @@ std::vector<std::string> ark::guard::JsonUtil::GetArrayStringValue(const JsonObj
     auto arrValues = object->GetValue<JsonObject::ArrayT>(field.data());
     if (!arrValues) {
         ARK_GUARD_ASSERT(!optionalField, ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
-                         "Fail to obtain required field:" + std::string(field));
+                         "Configuration parsing failed: fail to obtain required field:" + std::string(field));
         return res;
     }
     res.reserve(arrValues->size());

@@ -44,7 +44,7 @@ void ark::guard::NameCacheParser::Parse()
     if (content.empty()) {
         return;
     }
-    LOG_D << "Name Cache Content: " << content;
+    LOG_I << "Name Cache Content: " << content;
 
     ParseNameCache(content);
 }
@@ -57,7 +57,8 @@ const ark::guard::ObjectNameCacheTable &ark::guard::NameCacheParser::GetNameCach
 void ark::guard::NameCacheParser::ParseNameCache(const std::string &content)
 {
     JsonObject object(content);
-    ARK_GUARD_ASSERT(!object.IsValid(), ErrorCode::NAME_CACHE_FORMAT_ERROR, "the name cache is not a valid json");
+    ARK_GUARD_ASSERT(!object.IsValid(), ErrorCode::NAME_CACHE_FORMAT_ERROR,
+                     "NameCache parsing failed: Invalid JSON format detected in name cache data");
 
     for (size_t i = 0; i < object.GetSize(); ++i) {
         const auto &key = object.GetKeyByIndex(i);
@@ -107,7 +108,8 @@ void ark::guard::NameCacheParser::ParseObjectNameCache(const JsonObject *object,
             ParseObjectNameCache(innerObject, key, objectCache->objects);
             continue;
         }
-        ARK_GUARD_ABORT(ErrorCode::NAME_CACHE_MODULE_FORMAT_ERROR, "unknown name cache module format, key:" + key);
+        ARK_GUARD_ABORT(ErrorCode::NAME_CACHE_MODULE_FORMAT_ERROR,
+                        "NameCache parsing failed: unknown name cache module format, key:" + key);
     }
     objectCaches.emplace(objectName, objectCache);
 }

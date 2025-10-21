@@ -49,11 +49,13 @@ public:
      * @brief Obtain the content of a JSON object with a field type of bool
      * @param object json object
      * @param field field name in json object
+     * @param defaultValue Default value, default to false (not optional)
      * @param optionalField Optional field, default to true (optional). When the field is false,
      * if there is no information about the field in the JSON object, an error will be reported
      * @return bool Specify the value of the field in the JSON object
      */
-    static bool GetBoolValue(const JsonObject *object, const std::string_view &field, bool optionalField = true);
+    static bool GetBoolValue(const JsonObject *object, const std::string_view &field, bool defaultValue = false,
+                             bool optionalField = true);
 
     /**
      * @brief Obtain the content of a JSON object with a field type of string array

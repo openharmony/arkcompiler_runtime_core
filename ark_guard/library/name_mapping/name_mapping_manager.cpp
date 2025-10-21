@@ -44,13 +44,13 @@ ark::guard::ErrorCode ark::guard::NameMapping::Create(NameGeneratorType type)
 std::string ark::guard::NameMapping::GetName(const std::string &originName)
 {
     if (IsInWhiteList(originName)) {
-        LOG_D << "NameMapping WhiteList:" << originName << " --> " << originName;
+        LOG_I << "NameMapping WhiteList:" << originName << " --> " << originName;
         return originName;
     }
 
     auto it = nameMapping_.find(originName);
     if (it != nameMapping_.end()) {
-        LOG_D << "NameMapping Cached:" << originName << " --> " << it->second;
+        LOG_I << "NameMapping Cached:" << originName << " --> " << it->second;
         return it->second;
     }
 
@@ -65,7 +65,7 @@ std::string ark::guard::NameMapping::GetName(const std::string &originName)
         obfName = nameGenerator_->GenerateName();
     } while (obfName == originName);
     nameMapping_.emplace(originName, obfName);
-    LOG_D << "NameMapping generated:" << originName << " --> " << obfName;
+    LOG_I << "NameMapping generated:" << originName << " --> " << obfName;
     return obfName;
 }
 

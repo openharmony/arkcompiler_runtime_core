@@ -35,13 +35,12 @@ constexpr std::string_view UNION_TYPE_SUFFIX = "}";
 
 constexpr uint32_t VALID_FLAGS_FIELD = abckit_wrapper::AccessFlags::PUBLIC | abckit_wrapper::AccessFlags::PROTECTED |
                                        abckit_wrapper::AccessFlags::PRIVATE | abckit_wrapper::AccessFlags::STATIC |
-                                       abckit_wrapper::AccessFlags::READONLY | abckit_wrapper::AccessFlags::OVERRIDE;
+                                       abckit_wrapper::AccessFlags::READONLY;
 
 constexpr uint32_t VALID_FLAGS_METHOD = abckit_wrapper::AccessFlags::PUBLIC | abckit_wrapper::AccessFlags::PROTECTED |
                                         abckit_wrapper::AccessFlags::PRIVATE | abckit_wrapper::AccessFlags::STATIC |
                                         abckit_wrapper::AccessFlags::NATIVE | abckit_wrapper::AccessFlags::FINAL |
-                                        abckit_wrapper::AccessFlags::ABSTRACT | abckit_wrapper::AccessFlags::ASYNC |
-                                        abckit_wrapper::AccessFlags::OVERRIDE;
+                                        abckit_wrapper::AccessFlags::ABSTRACT | abckit_wrapper::AccessFlags::ASYNC;
 
 constexpr uint32_t INVALID_MODIFIERS = 0;
 
@@ -69,8 +68,6 @@ uint32_t GetMemberAccessFlags(const std::string &word)
         {ark::guard::AccessFlagsConstants::FINAL, abckit_wrapper::AccessFlags::FINAL},
         {ark::guard::AccessFlagsConstants::ABSTRACT, abckit_wrapper::AccessFlags::ABSTRACT},
         {ark::guard::AccessFlagsConstants::ASYNC, abckit_wrapper::AccessFlags::ASYNC},
-        {ark::guard::AccessFlagsConstants::READONLY, abckit_wrapper::AccessFlags::READONLY},
-        {ark::guard::AccessFlagsConstants::OVERRIDE, abckit_wrapper::AccessFlags::OVERRIDE},
     };
 
     const auto it = table.find(word);
@@ -135,27 +132,28 @@ bool ConfigurationEnd(const std::string &word)
 void CheckFieldAccessFlags(uint32_t setAccessFlags, uint32_t unSetAccessFlags, const std::string &word)
 {
     ARK_GUARD_ASSERT(((setAccessFlags | unSetAccessFlags) & ~VALID_FLAGS_FIELD) != 0,
-                     ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR, "invalid access flags for field:" + word);
+                     ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
+                     "ClassSpecification parsing failed: invalid access flags for field:" + word);
 }
 
 void CheckMethodAccessFlags(uint32_t setAccessFlags, uint32_t unSetAccessFlags, const std::string &word)
 {
     ARK_GUARD_ASSERT(((setAccessFlags | unSetAccessFlags) & ~VALID_FLAGS_METHOD) != 0,
                      ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "invalid access flags for method:" + word);
+                     "ClassSpecification parsing failed: invalid access flags for method:" + word);
 }
 
 void CheckAccessFlags(uint32_t setAccessFlags, uint32_t unSetAccessFlags, const std::string &word)
 {
     ARK_GUARD_ASSERT((setAccessFlags & unSetAccessFlags) != 0, ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "conflicting access flags for:" + word);
+                     "ClassSpecification parsing failed: conflicting access flags for:" + word);
 }
 
 void CheckTypeDeclarations(uint32_t setTypeDeclarations, uint32_t unSetTypeDeclarations, const std::string &word)
 {
     ARK_GUARD_ASSERT((setTypeDeclarations & unSetTypeDeclarations) != 0,
                      ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "conflicting type declarations for:" + word);
+                     "ClassSpecification parsing failed: conflicting type declarations for:" + word);
 }
 
 std::string PrimitiveTypeToPandaFileType(const std::string &type)
@@ -175,6 +173,8 @@ std::string PrimitiveTypeToPandaFileType(const std::string &type)
         {ark::guard::PrimitiveTypesConstants::NULL_TYPE, ark::guard::PandaFileTypesConstants::NULL_TYPE},
         {ark::guard::PrimitiveTypesConstants::NEVER, ark::guard::PandaFileTypesConstants::NEVER},
         {ark::guard::PrimitiveTypesConstants::UNDEFINED, ark::guard::PandaFileTypesConstants::UNDEFINED},
+        {ark::guard::PrimitiveTypesConstants::PROMISE, ark::guard::PandaFileTypesConstants::PROMISE},
+        {ark::guard::PrimitiveTypesConstants::PROMISE_LIKE, ark::guard::PandaFileTypesConstants::PROMISE_LIKE},
     };
 
     const auto it = table.find(type);
@@ -206,6 +206,8 @@ std::string PrimitiveTypeToPandaFileUnionType(const std::string &type)
         {ark::guard::PrimitiveTypesConstants::NULL_TYPE, ark::guard::PandaFileUnionTypesConstants::NULL_TYPE},
         {ark::guard::PrimitiveTypesConstants::NEVER, ark::guard::PandaFileUnionTypesConstants::NEVER},
         {ark::guard::PrimitiveTypesConstants::UNDEFINED, ark::guard::PandaFileUnionTypesConstants::UNDEFINED},
+        {ark::guard::PrimitiveTypesConstants::PROMISE, ark::guard::PandaFileUnionTypesConstants::PROMISE},
+        {ark::guard::PrimitiveTypesConstants::PROMISE_LIKE, ark::guard::PandaFileUnionTypesConstants::PROMISE_LIKE},
     };
 
     const auto it = table.find(type);
@@ -214,7 +216,7 @@ std::string PrimitiveTypeToPandaFileUnionType(const std::string &type)
     }
 
     if (type.find(ark::guard::PrimitiveTypesConstants::ARRAY) != std::string::npos) {
-        return ark::guard::PandaFileTypesConstants::ARRAY.data();
+        return ark::guard::PandaFileUnionTypesConstants::ARRAY.data();
     }
 
     return type;
@@ -224,13 +226,14 @@ void CheckSemicolonKeyword(const std::string &actualWord)
 {
     ARK_GUARD_ASSERT(actualWord != ark::guard::ConfigurationConstants::SEMICOLON_KEYWORD,
                      ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "the expect character is " + std::string(ark::guard::ConfigurationConstants::SEMICOLON_KEYWORD) +
+                     "ClassSpecification parsing failed: the expect character is " +
+                         std::string(ark::guard::ConfigurationConstants::SEMICOLON_KEYWORD) +
                          " but actual character is " + actualWord);
 }
 
-std::set<std::string> ConvertUnionType(const std::string &type)
+std::vector<std::string> ConvertUnionType(const std::string &type)
 {
-    std::set<std::string> unionTypes;  // use set for sorting
+    std::vector<std::string> unionTypes;
     std::stringstream ss(type);
     std::string segment;
     while (std::getline(ss, segment, ark::guard::ConfigurationConstants::PIPE_KEYWORD)) {
@@ -241,10 +244,11 @@ std::set<std::string> ConvertUnionType(const std::string &type)
             std::string processedSubType = ark::guard::StringUtil::ConvertWildcardToRegexEx(rawSubType);
             std::string convertedSubType = PrimitiveTypeToPandaFileUnionType(processedSubType);
             if (!convertedSubType.empty()) {  // when union type is never or undefined, value will be empty
-                unionTypes.insert(convertedSubType);
+                unionTypes.emplace_back(convertedSubType);
             }
         }
     }
+    sort(unionTypes.begin(), unionTypes.end());
     return unionTypes;
 }
 
@@ -252,7 +256,7 @@ std::set<std::string> ConvertUnionType(const std::string &type)
 
 ark::guard::KeepOptionParser::KeepOptionParser(const std::string &keepOptionStr) : wordReader_(keepOptionStr)
 {
-    LOG_D << "keep option :" << keepOptionStr;
+    LOG_I << "keep option :" << keepOptionStr;
 }
 
 std::optional<ark::guard::ClassSpecification> ark::guard::KeepOptionParser::Parse()
@@ -268,7 +272,7 @@ std::optional<ark::guard::ClassSpecification> ark::guard::KeepOptionParser::Pars
     } else if (nextWord_ == KeepOptionsConstants::KEEP_CLASS_MEMBERS) {
         specification = ParseClassSpecificationArguments(false);
     } else {
-        ARK_GUARD_ABORT(ErrorCode::UNKNOWN_KEEP_OPTION, "unknown keep option:" + nextWord_);
+        ARK_GUARD_ABORT(ErrorCode::UNKNOWN_KEEP_OPTION, "KeepOption parsing failed: unknown keep option:" + nextWord_);
     }
     return specification;
 }
@@ -311,8 +315,9 @@ ark::guard::ClassSpecification ark::guard::KeepOptionParser::ParseClassSpecifica
     // parse member specification part
     if (!ConfigurationEnd(nextWord_)) {
         ARK_GUARD_ASSERT(nextWord_ != ConfigurationConstants::OPEN_KEYWORD, ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                         "the expect character is " + std::string(ConfigurationConstants::OPEN_KEYWORD) +
-                             " but actual character is " + nextWord_);
+                         "ClassSpecification parsing failed: the expect character is " +
+                             std::string(ConfigurationConstants::OPEN_KEYWORD) + " but actual character is " +
+                             nextWord_);
 
         while (!nextWord_.empty()) {
             nextWord_ = wordReader_.NextWord();
@@ -340,7 +345,7 @@ void ark::guard::KeepOptionParser::GetClassAnnotationNameAndAccessFlags(std::str
 
         uint32_t accessFlag = GetClassAccessFlags(strippedWord);
         ARK_GUARD_ASSERT(accessFlag == INVALID_MODIFIERS, ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                         "unknown access flag:" + strippedWord);
+                         "ClassSpecification parsing failed: unknown access flag:" + strippedWord);
 
         if (accessFlag == abckit_wrapper::AccessFlags::ANNOTATION) {
             nextWord_ = wordReader_.NextWord();
@@ -377,7 +382,7 @@ void ark::guard::KeepOptionParser::GetClassTypeDeclarations(uint32_t &setTypeDec
 
     uint32_t typeDeclaration = GetTypeDeclarations(strippedWord);
     ARK_GUARD_ASSERT(typeDeclaration == INVALID_MODIFIERS, ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "unknown type declarations:" + strippedWord);
+                     "ClassSpecification parsing failed: unknown type declarations:" + strippedWord);
 
     if (!negated) {
         setTypeDeclarations |= typeDeclaration;
@@ -416,11 +421,11 @@ void ark::guard::KeepOptionParser::GetExtensionInfo(uint32_t &extensionType, std
  * parse class_specification member section
  * {
  *      [@annotationName]
- *      [[!]public|private|protected|intenal|static|readonly|override ...]
+ *      [[!]public|private|protected|intenal|static ...]
  *      <fields> | fieldName [:fieldType] [=fieldValue];
  *
  *      [@annotationName]
- *      [[!]public|private|protected|intenal|static|native|final|abstract|async|override ...]
+ *      [[!]public|private|protected|intenal|static|native|final|abstract|async ...]
  *      <methods> | methodName(argumentType ...):returnType;
  * }
  */
@@ -446,7 +451,7 @@ void ark::guard::KeepOptionParser::ParseMemberSpecificationArguments(ClassSpecif
     }
 
     ARK_GUARD_ABORT(ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                    "the format of member part of class_specification is incorrect");
+                    "ClassSpecification parsing failed: the format of member part of class_specification is incorrect");
 }
 
 /*
@@ -592,8 +597,8 @@ bool ark::guard::KeepOptionParser::HandleMethodSpecification(const std::string &
 
     nextWord_ = wordReader_.NextWord();
     ARK_GUARD_ASSERT(nextWord_ != ConfigurationConstants::COLON_KEYWORD, ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "the expect character is " + std::string(ConfigurationConstants::COLON_KEYWORD) +
-                         " but actual character is " + nextWord_);
+                     "ClassSpecification parsing failed: the expect character is " +
+                         std::string(ConfigurationConstants::COLON_KEYWORD) + " but actual character is " + nextWord_);
 
     nextWord_ = wordReader_.NextWord();  // skip COLON_KEYWORD
     std::unordered_set<std::string_view> delimiters = {ConfigurationConstants::SEMICOLON_KEYWORD};
@@ -686,7 +691,7 @@ std::string ark::guard::KeepOptionParser::ParseMethodArguments()
         arguments.append(argType);
 
         ARK_GUARD_ASSERT(argDelimiters.count(nextWord_) == 0, ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                         "unexpected token in method arguments: " + nextWord_);
+                         "ClassSpecification parsing failed: unexpected token in method arguments: " + nextWord_);
 
         if (nextWord_ == ConfigurationConstants::COMMA_KEYWORD) {
             arguments.append(ConfigurationConstants::COMMA_KEYWORD);

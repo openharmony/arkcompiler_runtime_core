@@ -16,6 +16,8 @@
 #include "obfuscator_data_manager.h"
 
 #include "logger.h"
+#include "member_linker.h"
+#include "util/assert_util.h"
 
 ark::guard::ObfuscatorDataManager::ObfuscatorDataManager(abckit_wrapper::Object *object)
 {
@@ -53,4 +55,21 @@ void ark::guard::ObfuscatorDataManager::SetNameAndObfuscatedName(const std::stri
     if (data->IsKept()) {
         data->SetObfName(obfName);
     }
+}
+
+void ark::guard::ObfuscatorDataManager::SetKeptWithMemberLink(abckit_wrapper::Member *member)
+{
+    auto lastMember = MemberLinker::LastMember(member);
+    if (lastMember != member) {
+        ObfuscatorDataManager memberManager(member);
+        auto data = memberManager.GetData();
+        ARK_GUARD_ASSERT(data == nullptr, ErrorCode::GENERIC_ERROR,
+                         "Get obfuscate data failed, name:" + member->GetFullyQualifiedName());
+        data->SetKept();
+    }
+    ObfuscatorDataManager lastMemberManager(lastMember);
+    auto lastData = lastMemberManager.GetData();
+    ARK_GUARD_ASSERT(lastData == nullptr, ErrorCode::GENERIC_ERROR,
+                     "Get obfuscate data failed, name:" + lastMember->GetFullyQualifiedName());
+    lastData->SetKept();
 }

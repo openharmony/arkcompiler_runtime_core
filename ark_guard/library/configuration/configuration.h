@@ -38,8 +38,8 @@ struct PrintSeedsOption {
  * obfuscated file names.
  */
 struct FileNameObfuscationOption {
-    /*  The default value is false, indicating that file name obfuscation is not enabled */
-    bool enable = false;
+    /* The default value is true, indicating that file name obfuscation is enabled */
+    bool enable = true;
     /* Record the list of file names to be retained, excluding wildcard characters */
     std::vector<std::string> reservedFileNames;
     /* Record a list of file names to be retained, including wildcard characters */
@@ -59,10 +59,10 @@ struct KeepPathOption {
 };
 
 /**
- * @brief KeepOption
+ * @brief KeepOptions
  * The file path and class_Specification of this structure will not be obfuscated.
  */
-struct KeepOption {
+struct KeepOptions {
     /* Record the list of file paths to be retained */
     KeepPathOption pathOption;
     /*  Record the list of class_Specification to be retained */
@@ -88,7 +88,7 @@ struct ObfuscationRules {
     /* File name obfuscation and reserved options */
     FileNameObfuscationOption fileNameOption;
     /*  Keep option reserved */
-    KeepOption keepOption;
+    KeepOptions keepOptions;
 };
 
 /**
@@ -168,9 +168,10 @@ public:
     /**
      * @brief Is keep path
      * @param str path
+     * @param keptPath receive the result of keptPath
      * @return true: keep, false: not keep
      */
-    [[nodiscard]] bool IsKeepPath(const std::string &str) const;
+    [[nodiscard]] bool IsKeepPath(const std::string &str, std::string &keptPath) const;
 
     /**
      * @brief Get ClassSpecification object list

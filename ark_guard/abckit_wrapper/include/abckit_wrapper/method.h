@@ -75,11 +75,7 @@ public:
 
     bool SetName(const std::string &name) override;
 
-    /**
-     * @brief Tells if Method is constructor
-     * @return `true` if Method is constructor
-     */
-    bool IsConstructor() const;
+    bool IsConstructor() const override;
 
     /**
      * @brief Accept visit

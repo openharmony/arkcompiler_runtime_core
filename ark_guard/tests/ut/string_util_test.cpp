@@ -59,16 +59,17 @@ HWTEST(StringUtilTest, string_util_test_002, TestSize.Level0)
         {"*", "[^/\\.]*"},
         {"?", "[^/\\.]"},
         {"%",
-         "(f64|i8|i16|i32|i64|i32|i64|u16|u1|std\\.core\\.string|escompat\\.BigInt|void|std\\.core\\.Null|std\\.core\\."
-         "Object|std\\.core\\.Object)"},
+         "(f64|i8|i16|i32|i64|i32|i64|u16|u1|std\\.core\\.String|std\\.core\\.BigInt|void|std\\.core\\.Null|std\\."
+         "core\\.Object|std\\.core\\.Int|std\\.core\\.Byte|std\\.core\\.Short|std\\.core\\.Long|std\\.core\\.Double|"
+         "std\\.core\\.Float|std\\.core\\.Char|std\\.core\\.Boolean)"},
         {"Test?", "Test[^/\\.]"},
         {"*Test*", "[^/\\.]*Test[^/\\.]*"},
         {"Test**Test", "Test.*Test"},
         {"Test.*Test<2>", "Test\\.[^/\\.]*Test"},
         {"int,%",
-         "int,(f64|i8|i16|i32|i64|i32|i64|u16|u1|std\\.core\\.string|escompat\\.BigInt|void|std\\.core\\.Null|std\\."
-         "core\\."
-         "Object|std\\.core\\.Object)"},
+         "int,(f64|i8|i16|i32|i64|i32|i64|u16|u1|std\\.core\\.String|std\\.core\\.BigInt|void|std\\.core\\.Null|std\\."
+         "core\\.Object|std\\.core\\.Int|std\\.core\\.Byte|std\\.core\\.Short|std\\.core\\.Long|std\\.core\\.Double|"
+         "std\\.core\\.Float|std\\.core\\.Char|std\\.core\\.Boolean)"},
         {"(...)", "(.*)"},
         {"()***", "().*"},
     };

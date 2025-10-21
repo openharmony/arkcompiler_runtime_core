@@ -3,8 +3,8 @@
   "obfAbcPath": "xxx",
   "defaultNameCachePath": "xxx",
   "obfuscationRules": {
-    "keepOption": {
-      "keep": [
+    "keepOptions": {
+      "keeps": [
         "-keep class XXX {\n    foo1():string|int;\n    }",
         "-keep class XXX {\n    foo2():string|int[];\n    }"
       ]

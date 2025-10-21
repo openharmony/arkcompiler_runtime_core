@@ -214,9 +214,15 @@ public:
      */
     void SetNameAndObfuscatedName(const std::string &name, const std::string &obfName);
 
+    /**
+     * @brief Set kept to Member and linked Member
+     * @param member the member to be set kept
+     */
+    static void SetKeptWithMemberLink(abckit_wrapper::Member *member);
+
 private:
     abckit_wrapper::Object *object_ = nullptr;
 };
-} // namespace ark::guard
+}  // namespace ark::guard
 
 #endif  // ARK_GUARD_OBFUSCATOR_OBFUSCATOR_DATA_MANAGER_H

@@ -3,8 +3,8 @@
   "obfAbcPath": "xxx",
   "defaultNameCachePath": "xxx",
   "obfuscationRules": {
-    "keepOption": {
-      "keep": [
+    "keepOptions": {
+      "keeps": [
         "-keep class XXX {\n    v1: int| string;\n    }",
         "-keep class XXX {\n    v2: byte| string;\n    }",
         "-keep class XXX {\n    v3: short| string;\n    }",

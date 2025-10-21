@@ -57,6 +57,11 @@ std::string abckit_wrapper::Member::GetSignature()
     return this->rawName_ + this->descriptor_;
 }
 
+bool abckit_wrapper::Member::IsConstructor() const
+{
+    return false;
+}
+
 bool abckit_wrapper::Member::MemberAccept(MemberVisitor &visitor)
 {
     return visitor.Visit(this);

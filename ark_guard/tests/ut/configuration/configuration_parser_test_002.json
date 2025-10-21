@@ -3,14 +3,10 @@
   "obfAbcPath": "xxx",
   "defaultNameCachePath": "xxx",
   "obfuscationRules": {
-    "keepOption": {
-      "keep": [
-        "-keep @AnnotationA !final class classA extends @AnnotationB classB {\n    *;\n    }"
-      ],
-      "keepclasswithmembers": [
-        "-keepclasswithmembers @AnnotationA !final class classA extends @AnnotationB classB {\n    *;\n    }"
-      ],
-      "keepclassmembers": [
+    "keepOptions": {
+      "keeps": [
+        "-keep @AnnotationA !final class classA extends @AnnotationB classB {\n    *;\n    }",
+        "-keepclasswithmembers @AnnotationA !final class classA extends @AnnotationB classB {\n    *;\n    }",
         "-keepclassmembers @AnnotationA !final class classA extends @AnnotationB classB {\n    *;\n    }"
       ]
     }

@@ -163,7 +163,7 @@ std::string ark::guard::WordReader::HandleQuotedWord(char startCharacter)
     do {
         currentLinePos_++;
         ARK_GUARD_ASSERT(currentLinePos_ == currentLine_.length(), ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                         "missing closing quote");
+                         "ClassSpecification parsing failed: missing closing quote");
     } while (currentLinePos_ < currentLine_.length() && currentLine_[currentLinePos_] != startCharacter);
     currentWord_ = currentLine_.substr(startPos, currentLinePos_ - startPos);
     currentLinePos_++;
