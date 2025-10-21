@@ -15,12 +15,23 @@
 
 /*---
 desc: >-
-    Only an object literal of interface type can contain object literal methods. An attempt to declare
-    a method in an object literal of class type causes a compile-time error
-tags: [negative, compile-only]
+    A method reference refers to a static or instance method of a class or an interface.
+
 ---*/
 
-class Base1 {}
+let x: string
 
-const o1: Base1 = { m(): void {} } // compile-time error
+class Aliases {
+    static foo(): string {
+        return x
+    }
+}
 
+const aRef = Aliases.foo
+
+function main() {
+    x = 'One'
+    arktest.assertEQ('One', aRef())
+    x = 'Two'
+    arktest.assertEQ('Two', aRef())
+}

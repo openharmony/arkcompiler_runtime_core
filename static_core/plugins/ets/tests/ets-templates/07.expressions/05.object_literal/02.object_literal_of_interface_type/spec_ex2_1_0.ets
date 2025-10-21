@@ -15,12 +15,19 @@
 
 /*---
 desc: >-
-    Only an object literal of interface type can contain object literal methods. An attempt to declare
-    a method in an object literal of class type causes a compile-time error
+    Only an object literal of interface type can contain object literal methods.
 tags: [negative, compile-only]
 ---*/
 
-class Base1 {}
 
-const o1: Base1 = { m(): void {} } // compile-time error
+interface ILiteral {
+    name: string
+}
 
+
+
+function main() {
+    // Declare literal method not from interface
+    const ii: ILiteral = { foo(input: int): int { return input }, name: 'Alice' }
+    arktest.assertEQ(42, ii.foo(42))
+}

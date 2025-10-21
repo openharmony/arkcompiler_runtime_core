@@ -13,14 +13,20 @@
  * limitations under the License.
  */
 
+{% for case in assertions %}
+
 /*---
-desc: >-
-    Only an object literal of interface type can contain object literal methods. An attempt to declare
-    a method in an object literal of class type causes a compile-time error
-tags: [negative, compile-only]
+ desc: A function reference refers to a declared or imported function.
+       A compile-time error occurs if an overload alias is used in a named reference
+ tags: [compile-only, negative]
+
 ---*/
 
-class Base1 {}
+function fooE(): void {}
+function fooS(x: string): void {}
 
-const o1: Base1 = { m(): void {} } // compile-time error
+overload foo { fooE, fooS }
 
+{{case.assertion|indent}}
+
+{% endfor %}

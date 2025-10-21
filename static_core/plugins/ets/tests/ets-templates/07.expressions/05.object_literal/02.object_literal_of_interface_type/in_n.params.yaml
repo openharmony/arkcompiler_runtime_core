@@ -21,14 +21,6 @@ cases:
           let a: A = { age: 42 } // CTE, no such field
 
     - decl: |-
-          interface A {
-              name: string|null
-              foo(): void
-          }
-      use: |-
-          let a: A = { name: "John" } // CTE, interface can contain fields only
-
-    - decl: |-
           class B {
               name: string|null = null
           }

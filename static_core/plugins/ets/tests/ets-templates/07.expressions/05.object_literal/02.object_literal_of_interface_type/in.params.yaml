@@ -91,8 +91,8 @@ cases:
           arktest.assertTrue( arr[1] instanceof A && arr[1].name == null )
 
     - decl: |-
-          interface A {
-              name?: string|undefined
+          interface A {  // 10.4.2 : Optional property short form identifier '?' ':' T
+              name?: string
           }
           interface B extends A {
               age: number
@@ -104,6 +104,22 @@ cases:
           arktest.assertTrue( a instanceof A && a.name == "John" )
           let c: B = {age: 0}
           arktest.assertTrue( c instanceof B && c.age == 0 && c.name == undefined )
+
+    - decl: |-
+        interface A {  // 10.4.2 : Explicit form identifier ':' T | undefined
+            name: string | undefined
+        }
+        interface B extends A {
+            age: number
+        }
+      use: |-
+        let b: B = { name: "John", age: 42 }
+        arktest.assertTrue( b instanceof B && b.age == 42 && b.name == "John" )
+        let a: A = b
+        arktest.assertTrue( a instanceof A && a.name == "John" )
+        let c: B = {age: 0}
+        arktest.assertTrue( c instanceof B && c.age == 0 && c.name == undefined )
+        
 
     - decl: |-
           interface A {}
@@ -180,3 +196,21 @@ cases:
           arktest.assertTrue(a instanceof A)
           arktest.assertEQ(a.age, 42)
           arktest.assertEQ(a.name, undefined)
+
+    - decl: |-
+        interface A {
+            name: string | null
+            foo(): void
+        }
+      use: |-
+        let a: A = { name: 'John' } // CTE, is not abstract and does not override abstract method foo
+
+    - decl: |-
+        type FR = (input: string) => string
+        interface A {
+            name: string | null
+            func: FR
+        }
+      use: |-
+        let a: A = { name: 'John', func: (input: string) => { return input + input } }
+        arktest.assertEQ('JohnJohn', a.func('John'))

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,22 @@
 
 /*---
 desc: >-
-    Interface type I must contain properties only.
-    If interface type I contains a method,
-    then a compile-time error occurs
-tags: [compile-only, negative]
+    Only an object literal of interface type can contain object literal methods.
+
 ---*/
 
-interface I {
+
+interface ILiteral {
+    foo(input: int): int {
+        return input
+    }
     name: string
-    foo(): void
 }
 
-let i: I = {name: "Bob"} // compile-time error, interface has methods
+
+
+function main() {
+    // Declare interface literal and use default implementation
+    const ii: ILiteral = { name: 'Alice' }
+    arktest.assertEQ(21, ii.foo(21))
+}
