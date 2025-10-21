@@ -94,7 +94,7 @@ end
 optparser.parse!(into: options)
 
 # export the current panda target for the scripts that need it
-$selected_target = options['target'].sub('x86_64', 'amd64') if options['target']
+$selected_target = options['target'].sub('x86_64', 'amd64').sub('aarch64', 'arm64') if options['target']
 
 check_option(optparser, options, :data)
 check_option(optparser, options, :api)

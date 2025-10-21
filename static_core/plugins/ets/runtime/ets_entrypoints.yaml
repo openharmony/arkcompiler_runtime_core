@@ -979,8 +979,8 @@
   - ark::ObjectHeader*
   - size_t
 
-- name: Int8ArrayFillInternalFastPath
-  entrypoint: Int8ArrayFillInternalFastPath
+- name: Int8ArrayFillInternal
+  entrypoint: Int8ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1001,8 +1001,8 @@
     - int32_t
     - int32_t
 
-- name: Int16ArrayFillInternalFastPath
-  entrypoint: Int16ArrayFillInternalFastPath
+- name: Int16ArrayFillInternal
+  entrypoint: Int16ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1023,8 +1023,8 @@
     - int32_t
     - int32_t
 
-- name: Int32ArrayFillInternalFastPath
-  entrypoint: Int32ArrayFillInternalFastPath
+- name: Int32ArrayFillInternal
+  entrypoint: Int32ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1045,8 +1045,8 @@
     - int32_t
     - int32_t
 
-- name: BigInt64ArrayFillInternalFastPath
-  entrypoint: BigInt64ArrayFillInternalFastPath
+- name: BigInt64ArrayFillInternal
+  entrypoint: BigInt64ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1067,8 +1067,8 @@
     - int32_t
     - int32_t
 
-- name: Float32ArrayFillInternalFastPath
-  entrypoint: Float32ArrayFillInternalFastPath
+- name: Float32ArrayFillInternal
+  entrypoint: Float32ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1089,8 +1089,8 @@
     - int32_t
     - int32_t
 
-- name: Float64ArrayFillInternalFastPath
-  entrypoint: Float64ArrayFillInternalFastPath
+- name: Float64ArrayFillInternal
+  entrypoint: Float64ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1111,8 +1111,8 @@
     - int32_t
     - int32_t
 
-- name: UInt8ClampedArrayFillInternalFastPath
-  entrypoint: UInt8ClampedArrayFillInternalFastPath
+- name: UInt8ClampedArrayFillInternal
+  entrypoint: UInt8ClampedArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1133,8 +1133,8 @@
     - int32_t
     - int32_t
 
-- name: UInt8ArrayFillInternalFastPath
-  entrypoint: UInt8ArrayFillInternalFastPath
+- name: UInt8ArrayFillInternal
+  entrypoint: UInt8ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1155,8 +1155,8 @@
     - int32_t
     - int32_t
 
-- name: UInt16ArrayFillInternalFastPath
-  entrypoint: UInt16ArrayFillInternalFastPath
+- name: UInt16ArrayFillInternal
+  entrypoint: UInt16ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1177,8 +1177,8 @@
     - int32_t
     - int32_t
 
-- name: UInt32ArrayFillInternalFastPath
-  entrypoint: UInt32ArrayFillInternalFastPath
+- name: UInt32ArrayFillInternal
+  entrypoint: UInt32ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1199,8 +1199,8 @@
     - int32_t
     - int32_t
 
-- name: BigUInt64ArrayFillInternalFastPath
-  entrypoint: BigUInt64ArrayFillInternalFastPath
+- name: BigUInt64ArrayFillInternal
+  entrypoint: BigUInt64ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:

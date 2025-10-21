@@ -629,7 +629,7 @@ void Codegen::CreateStringRepeat([[maybe_unused]] IntrinsicInst *inst, Reg dst, 
 void Codegen::CreateInt8ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypoint = EntrypointId::INT8_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::INT8_ARRAY_FILL_INTERNAL;
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }
@@ -637,7 +637,7 @@ void Codegen::CreateInt8ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS 
 void Codegen::CreateInt16ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypoint = EntrypointId::INT16_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::INT16_ARRAY_FILL_INTERNAL;
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }
@@ -645,7 +645,7 @@ void Codegen::CreateInt16ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS
 void Codegen::CreateInt32ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypoint = EntrypointId::INT32_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::INT32_ARRAY_FILL_INTERNAL;
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }
@@ -653,7 +653,7 @@ void Codegen::CreateInt32ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS
 void Codegen::CreateBigInt64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypoint = EntrypointId::BIG_INT64_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::BIG_INT64_ARRAY_FILL_INTERNAL;
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }
@@ -663,7 +663,7 @@ void Codegen::CreateFloat32ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCRE
     ASSERT(GetArch() != Arch::AARCH32);
     auto valType = inst->GetInputType(SECOND_OPERAND);
     ASSERT(valType == DataType::FLOAT32);
-    auto entrypoint = EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL;
     ScopedTmpReg tmp(GetEncoder(), ConvertDataType(DataType::INT32, GetArch()));
     auto val = ConvertRegister(inst->GetSrcReg(SECOND_OPERAND), valType);
     GetEncoder()->EncodeMov(tmp, val);
@@ -675,7 +675,7 @@ void Codegen::CreateFloat64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCRE
     ASSERT(GetArch() != Arch::AARCH32);
     auto valType = inst->GetInputType(SECOND_OPERAND);
     ASSERT(valType == DataType::FLOAT64);
-    auto entrypoint = EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL;
     ScopedTmpReg tmp(GetEncoder(), ConvertDataType(DataType::INT64, GetArch()));
     auto val = ConvertRegister(inst->GetSrcReg(SECOND_OPERAND), valType);
     GetEncoder()->EncodeMov(tmp, val);
@@ -685,7 +685,7 @@ void Codegen::CreateFloat64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCRE
 void Codegen::CreateUInt8ClampedArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypoint = EntrypointId::U_INT8_CLAMPED_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::U_INT8_CLAMPED_ARRAY_FILL_INTERNAL;
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }
@@ -693,7 +693,7 @@ void Codegen::CreateUInt8ClampedArrayFillInternal(IntrinsicInst *inst, Reg dst, 
 void Codegen::CreateUInt8ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypoint = EntrypointId::U_INT8_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::U_INT8_ARRAY_FILL_INTERNAL;
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }
@@ -701,7 +701,7 @@ void Codegen::CreateUInt8ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS
 void Codegen::CreateUInt16ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypoint = EntrypointId::U_INT16_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::U_INT16_ARRAY_FILL_INTERNAL;
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }
@@ -709,7 +709,7 @@ void Codegen::CreateUInt16ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREG
 void Codegen::CreateUInt32ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypoint = EntrypointId::U_INT32_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::U_INT32_ARRAY_FILL_INTERNAL;
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }
@@ -717,7 +717,7 @@ void Codegen::CreateUInt32ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREG
 void Codegen::CreateBigUInt64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
-    auto entrypoint = EntrypointId::BIG_U_INT64_ARRAY_FILL_INTERNAL_FAST_PATH;
+    auto entrypoint = EntrypointId::BIG_U_INT64_ARRAY_FILL_INTERNAL;
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }

@@ -16,6 +16,8 @@
 include_relative 'common.irt'
 include_relative 'string_helpers.irt'
 
+GenerateStringEqualsUnrolled(compressed=true)
+GenerateStringEqualsUnrolled(compressed=false)
 GenerateStringEquals(lang='', dynamic=false, compressed=true, :FastPath)
 GenerateStringEquals(lang='', dynamic=false, compressed=true, :NativePlus)
 GenerateStringEquals(lang='', dynamic=false, compressed=false, :FastPath)

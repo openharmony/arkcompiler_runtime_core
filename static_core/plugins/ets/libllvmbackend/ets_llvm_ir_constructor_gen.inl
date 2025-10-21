@@ -451,13 +451,13 @@ bool LLVMIrConstructor::EmitStringFromCharCodeSingle(Inst *inst)
 
 bool LLVMIrConstructor::EmitFloat32ArrayFillInternal(Inst *inst)
 {
-    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL_FAST_PATH,
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL,
                                       builder_.getInt32Ty());
 }
 
 bool LLVMIrConstructor::EmitFloat64ArrayFillInternal(Inst *inst)
 {
-    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL_FAST_PATH,
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL,
                                       builder_.getInt64Ty());
 }
 
