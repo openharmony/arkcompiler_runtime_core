@@ -11,15 +11,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/runtime_core/ark_config.gni")
-import("$ark_root/tests/test_helper.gni")
+import("./ark_guard_test_config.gni")
 
-host_unittest_action("ArkGuardUnitTest") {
+test_ets_path = "$ark_root/ark_guard/tests"
+
+test_ets_files = [
+  "ut/name_cache/name_cache_keeper_test_001",
+]
+
+ets2abc_mass_gen_abc("gen_test_ets_files") {
+  src_file_list = test_ets_files
+  src_root_dir = test_ets_path
+}
+
+arkguard_host_unittest_action("ArkGuardUnitTest") {
   module_out_path = "$ark_root"
 
-  sources = [ "ut/ark_guard_test.cpp" ]
+  sources = [
+    "ut/args_parser_test.cpp",
+    "ut/configuration/configuration_parser_test.cpp",
+    "ut/keep_option_parser_test.cpp",
+    "ut/name_cache/name_cache_keeper_test.cpp",
+    "ut/name_cache/name_cache_parser_test.cpp",
+    "ut/name_mapping_manager_test.cpp",
+    "ut/string_util_test.cpp",
+    "ut/word_reader_test.cpp",
+  ]
 
-  include_dirs = [ "$ark_root/ark_guard/library" ]
+  include_dirs = [
+    "$ark_root/libabckit/include",
+    "$ark_root/ark_guard/library",
+    "$ark_root/ark_guard/tests/util/include",
+    "$ark_root/static_core",
+    "$ark_root",
+  ]
 
   configs = [
     "$ark_root/libabckit:abckit_config",
@@ -28,7 +53,38 @@ host_unittest_action("ArkGuardUnitTest") {
     "$ark_root/ark_guard:ark_guard_public_config",
   ]
 
-  deps = [ "$ark_root/ark_guard:ark_guard_static" ]
+  deps = [
+    ":gen_test_ets_files",
+    "$ark_root/ark_guard:ark_guard_shared",
+    "$ark_root/ark_guard/abckit_wrapper:abckit_wrapper_shared",
+    "$ark_root/libabckit/src:libabckit",
+    "$ark_root/static_core/libarkbase:libarktsbase",
+    "$ark_root/static_core/plugins/ets:etsstdlib",
+    "$ark_root/static_core/runtime:libarkruntime",
+  ]
+
+  if (ark_standalone_build) {
+    deps += [ "$ark_third_party_root/libuv:uv" ]
+  } else {
+    external_deps = [ "libuv:uv" ]
+  }
+
+  if (is_ohos && is_standard_system) {
+    test_abc_dir = "/data/test"
+  } else {
+    test_abc_dir = rebase_path(target_out_dir)
+  }
+  etsstdlib =
+      rebase_path(get_label_info("$ark_root/static_core/plugins/ets:etsstdlib",
+                                 "target_gen_dir")) + "/etsstdlib.abc"
+
+  ark_guard_test_dir = rebase_path("$ark_root/ark_guard/tests/")
+
+  defines = [
+    "ARK_GUARD_ABC_FILE_DIR=\"${test_abc_dir}/\"",
+    "ARK_GUARD_UNIT_TEST_DIR=\"${ark_guard_test_dir}/\"",
+    "ARK_GUARD_ETS_STD_LIB=\"${etsstdlib}\"",
+  ]
 }
 
 group("host_unittest") {

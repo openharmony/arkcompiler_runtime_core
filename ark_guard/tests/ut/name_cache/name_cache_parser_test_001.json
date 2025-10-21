@@ -1,0 +1,28 @@
+{
+  "entry.src.main.ets.file_1.ets": {
+    "#obfName": "a.ets",
+    "foo()void": "a",
+    "foo(int)void": "a",
+    "foo1()void": "b",
+    "foo1(int)void": "a",
+    "Anno": "c",
+    "ClassA": {
+      "#obfName": "d",
+      "sField": "a",
+      "field1": "b",
+      "field2 number": "c",
+      "method1()void": "d",
+      "method1(string)void": "d",
+      "method2()void": "e",
+      "method2(int)void": "d"
+    },
+    "Color": {
+      "#obfName": "e",
+      "RED entry.src.main.ets.file_1.Color": "a",
+      "GREEN entry.src.main.ets.file_1.Color": "b",
+      "BLUE entry.src.main.ets.file_1.Color": "c"
+    },
+    "VAR1": "f",
+    "VAR2": "g"
+  }
+}
