@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{% from '16.concurrency/03.asynchronous_api/predefined_types.jinja' import numeric_types_cases, boolean_types_cases, symbol_types_cases, no_value_types_cases %}
-{% from '16.concurrency/03.asynchronous_api/async_returns_predefined0.base.jinja' import generate_complete_test %}
+{% from "16.concurrency/03.asynchronous_api/user_defined_types.jinja" import class_cases, enum_cases, function_cases, tuple_cases, union_cases %}
+{% from "16.concurrency/03.asynchronous_api/async_returns_array.base.jinja" import generate_complete_test %}
 
-{{ generate_complete_test(numeric_types_cases + boolean_types_cases + symbol_types_cases + no_value_types_cases, 'lambda') }}
+{{ generate_complete_test(class_cases + enum_cases + function_cases + tuple_cases + union_cases, 'lambda') }}

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-{% from '16.concurrency/03.asynchronous_api/predefined_types.jinja' import numeric_types_cases, boolean_types_cases, symbol_types_cases %}
-{% from '16.concurrency/03.asynchronous_api/async_returns_predefined1.base.jinja' import generate_complete_test %}
+{% from '16.concurrency/03.asynchronous_api/async_has_arguments.base.jinja' import generate_complete_test %}
 
-{{ generate_complete_test(numeric_types_cases + boolean_types_cases + symbol_types_cases, 'method') }}
+{{ generate_complete_test('method') }}

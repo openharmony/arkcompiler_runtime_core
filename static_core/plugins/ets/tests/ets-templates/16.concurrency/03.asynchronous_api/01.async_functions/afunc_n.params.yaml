@@ -19,18 +19,6 @@ cases:
 
     - decl: |-
           // The return type of an async function must be Promise<T>
-          async function foo(p: int): undefined {
-              return undefined
-          }
-
-    - decl: |-
-          // The return type of an async function must be Promise<T>
-          async function foo(p: int): int {
-              return p + p
-          }
-
-    - decl: |-
-          // The return type of an async function must be Promise<T>
           async function foo(p: boolean): Promise<Int> {
               return p
           }
@@ -39,18 +27,6 @@ cases:
           // The return type of an async function must be Promise<T>
           async function foo<U>(p: U): Promise<T> {
               return p
-          }
-
-    - decl: |-
-          // Returning values of types Promise<T> and T from async functions is allowed.
-          async function foo<T>(p: T): Promise<T> {
-              return new Object()
-          }
-
-    - decl: |-
-          // Returning values of types Promise<T> and T from async functions is allowed.
-          async function foo(p: string): Promise<String> {
-              return (async (): Object => new Object())()
           }
 
     - decl: |-
@@ -67,19 +43,22 @@ cases:
           }
 
     - decl: |-
-        type EN = Error|null
-        let s = 'A'
-        async function foo(p: string): Promise<string> {
-            if (p == 'A') {
-                throw new Error('E')
+        // A compile-time error occurs if async function is called in a static initializer
+        async function testAsync(): Promise<void> {}
+        class MyClass {
+            static {
+                testAsync();
             }
-            return 'X'
         }
-      use: |-
-        // Catch error in chained catch
-        let r = foo(s)
-            .then((p: string): string => p + p)  // skipped
-            .catch((p: EN): string => p!.message)
-            .then((p: string): string => p + p)
         
-        arktest.assertTrue((await r) == 'EE')
+    - decl: |-
+        // A compile-time error occurs if async function is called in a static initializer
+        async function testAsync(): Promise<void> {}
+        class MyClass {
+            public static myVar = testAsync();            
+        }
+
+    - decl: |-
+        // A compile-time error occurs if async function is called in a static initializer, including module scope;
+        async function testAsync(): Promise<void> {}
+        testAsync()   
