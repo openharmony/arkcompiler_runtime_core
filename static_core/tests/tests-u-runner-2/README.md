@@ -8,7 +8,7 @@ Universal test runner, version 2, for Open Harmony.
 -   Python3 version at least 3.8. 3.10 is recommended.
 -   Make sure to run `sudo static_core/scripts/install-deps-ubuntu -i=test` to create a ~/.venv-panda virtual environment with
 all required python libraries  (`tqdm`, `dataclasses`, `python-dotenv`, etc). 
--   Suite `ets-es-checked` requires [node and some packages](#sts-es-checked-dependencies)
+-   Suite `ets-es-checked` requires [node and some packages](#ETS-ES-checked-dependencies)
 
 ## Quick run
 
@@ -226,3 +226,15 @@ The values can contain macros detected by `${}`. The macro's name is yaml path t
 
 The special macro `${test-id}` refers to the test file name (or path to the test file if some folder hierarchy is used).
 It will be expanded during the binary executing.
+
+## ETS ES checked dependencies
+- `ruby` (installed by default with `$PROJECT/static_core/scripts/install-deps-ubuntu -i=dev`)
+- `node` and `ts-node`, to install them see commands below
+
+```bash
+sudo apt-get -y install npm
+sudo npm install -g n
+sudo n install 22
+cd $PROJECT/static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/generate-es-checked
+npm install
+```

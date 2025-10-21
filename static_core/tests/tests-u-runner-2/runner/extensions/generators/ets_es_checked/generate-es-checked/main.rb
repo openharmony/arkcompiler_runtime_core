@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,6 +24,7 @@ require 'fileutils'
 require 'optparse'
 require 'set'
 require 'etc'
+require 'timeout'
 
 require_relative 'src/types'
 require_relative 'src/value_dumper'
@@ -44,15 +45,15 @@ end
 
 def print_help
     puts $optparse
-    puts 'NOTE: this program requires node version 21.4, you can use `n` tool to install it'
+    puts 'NOTE: this program requires minimal node version 22, you can use `n` tool to install it'
 end
 
 $optparse = OptionParser.new do |opts|
     opts.banner = 'Usage: test-generator [options] --out=DIR --tmp=DIR confs...'
     opts.on '--run-ets=PANDA', 'used to instantly run es2panda&ark on generated file, PANDA is a path to panda build directory'
-    opts.on '--out=DIR', String, 'path to .sts files output directory'
+    opts.on '--out=DIR', String, 'path to .ets files output directory'
     opts.on '--tmp=DIR', String, 'path to temporary directory (where to output .ts and .json files)'
-    opts.on '--chunk-size=NUM', Integer, 'amout of tests in a single file'
+    opts.on '--chunk-size=NUM', Integer, 'amount of tests in a single file'
     opts.on '--proc=PROC', Integer, 'number of ruby threads to use, defaults to max available' do |v|
         $options[:proc] = [v, 1].max
     end
@@ -87,7 +88,7 @@ eval("require '#{__dir__}/src/script_module'", $user_binding)
 ScriptClass = Class.new.extend(eval('ScriptModule', $user_binding))
 
 $template_ts = ERB.new File.read("#{__dir__}/templates/template.ts.erb"), nil, '%'
-$template_ets = ERB.new File.read("#{__dir__}/templates/template.sts.erb"), nil, '%'
+$template_ets = ERB.new File.read("#{__dir__}/templates/template.ets.erb"), nil, '%'
 
 def deep_copy(a)
     Marshal.load(Marshal.dump(a))
@@ -128,7 +129,9 @@ end
 class Generator
     attr_reader :test_count, :tests_failed, :test_files, :tests_excluded
 
+    # ts-node with certain npm versions can hang or crash during the tests
     NODE_RETRIES = 5
+    NODE_TIMEOUT = 900
 
     module SpecialAction
         # value is priority, greater value = higher priority
@@ -172,7 +175,7 @@ class Generator
             print_help
             raise
         end
-        unless version =~ /21\.4(\..*|\s*$)/
+        unless version =~ /22(\..*|\s*$)/
             puts "Invalid node version #{version}"
             puts
             print_help
@@ -211,7 +214,7 @@ class Generator
                 name = conf.category + sub["expr"].gsub(/\s+/, '').gsub(/[^a-zA-Z0-9_=]/, '_')
                 is_expr = true
             else
-                name = conf.category + sub["method"]
+                name = conf.category + sub["method"].gsub(/\s+/, '').gsub(/[^a-zA-Z0-9_=]/, '_')
                 is_expr = false
             end
             return if not (@filter_pattern =~ name)
@@ -324,7 +327,9 @@ class Generator
             stdout_str = ""
             errors = []
             NODE_RETRIES.times do |i|
-                stdout_str = get_command_output(*$options[:'ts-node'], ts_path)
+                Timeout.timeout(NODE_TIMEOUT) {
+                    stdout_str = get_command_output(*$options[:'ts-node'], ts_path)
+                }
                 break
             rescue => e
                 puts "NOTE: node failed for #{k}, retry: #{i + 1}/#{NODE_RETRIES}"
@@ -338,15 +343,15 @@ class Generator
             # ets part
             expected = JSON.load(stdout_str)
             buf = $template_ets.result(binding)
-            ets_path = File.join $options[:out], "#{k}#{chunk_id}.sts"
+            ets_path = File.join $options[:out], "#{k}#{chunk_id}.ets"
             File.write ets_path, buf
 
             # verify ets
             if $options[:"run-ets"]
                 panda_build = $options[:"run-ets"]
                 abc_path = File.join $options[:tmp], "#{k}#{chunk_id}.abc"
-                get_command_output("#{panda_build}/bin/es2panda", "--extension=sts", "--opt-level=2", "--output", abc_path, ets_path)
-                res = get_command_output("#{panda_build}/bin/ark", "--no-async-jit=true", "--gc-trigger-type=debug", "--boot-panda-files", "#{panda_build}/plugins/ets/etsstdlib.abc", "--load-runtimes=ets", abc_path, "ETSGLOBAL::main")
+                get_command_output("#{panda_build}/bin/es2panda", "--extension=ets", "--opt-level=2", "--output", abc_path, ets_path)
+                res = get_command_output("#{panda_build}/bin/ark", "--no-async-jit=true", "--gc-trigger-type=debug", "--boot-panda-files", "#{panda_build}/plugins/ets/etsstdlib.abc", "--load-runtimes=ets", abc_path, "#{k}#{chunk_id}.ETSGLOBAL::main")
                 res.strip!
                 puts "✔ executed ets #{k} #{chunk_id}"
                 if res.size != 0
@@ -390,7 +395,7 @@ class Generator
         res.map! { |r|
             p = OpenStruct.new
             r.map! { |e| e.kind_of?(String) ? e.strip : e }
-            p.ts = p.sts = p.ets = r
+            p.ts = p.ets = p.ets = r
             p
         }
         return res
@@ -401,7 +406,11 @@ gen = Generator.new($options[:'filter'])
 
 ARGV.each { |a|
     puts "reading #{a}"
-    file = YAML.load_file(a)
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+      file = YAML.load_file(a)
+    else
+      file = YAML.load_file(a, aliases: true)
+    end
     gen.prepare a, file
     gen.process file
 }
