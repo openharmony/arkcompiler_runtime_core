@@ -1604,17 +1604,6 @@
 15.semantic_rules/11.type_erasure/instanceof_gen_7.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_8.ets
 
-# 30153 no CTE for chars in extended semantics
-15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_0.ets
-15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_1.ets
-15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_2.ets
-15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_3.ets
-15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_4.ets
-15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_5.ets
-15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_6.ets
-15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_7.ets
-15.semantic_rules/14.compatibility_features/01.extended_conditional_expressions/char_negative_8.ets
-
 #30498
 16.concurrency/03.asynchronous_api/05.promise/promise_negative_1.ets
 

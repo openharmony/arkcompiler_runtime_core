@@ -43,6 +43,7 @@ cases:
     - { val: 'new String("abc").substring(0, 0)', type: 'string' }
     - { val: '"" + ""', type: 'string' }
     - { val: '``', type: 'string' }
+    - { val: "c'\\u0000'", type: 'char' }
 
     - { val: 'false', type: 'boolean' }
     - { val: '!!false', type: 'boolean' }
