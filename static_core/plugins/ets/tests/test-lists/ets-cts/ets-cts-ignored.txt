@@ -2111,12 +2111,6 @@
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_8.ets
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_9.ets
 
-#30319
-17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_tostring_16.ets
-17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_tostring_17.ets
-17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_tostring_18.ets
-17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_tostring_19.ets
-
 #30272
 17.experimental_features/05.indexable_types/ind_expr_6.ets
 17.experimental_features/05.indexable_types/ind_expr_7.ets
