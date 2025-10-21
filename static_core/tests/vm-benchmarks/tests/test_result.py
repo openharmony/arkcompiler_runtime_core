@@ -481,7 +481,7 @@ def test_vmb_report_exclude():
         vmb_rep.text_report(full=True, exclude=['Test_Two'], fmt='expo')
         lines = [line.strip() for line in f.getvalue().split("\n") if line]
         assert_in('Test_One_Blah | 9.48e-05 | 9.74e+04 | 8.93e+04 | Passed  |', lines)
-        assert_in('1 tests; 0 failed; 1 excluded; Time(GM): 94783.8 Size(GM): '
+        assert_in('2 tests; 0 failed; 1 excluded; Time(GM): 94783.8 Size(GM): '
                   '97384.0 RSS(GM): 89336.0', lines)
 
 

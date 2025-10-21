@@ -214,7 +214,7 @@ class VMBReport(Jsonable):
         times, sizes, rsss = [], [], []
         if not exclude:
             exclude = []
-        self.total_cnt, self.excluded_cnt, self.fail_cnt = 0, len(exclude), 0
+        self.total_cnt, self.excluded_cnt, self.fail_cnt = 0, 0, 0
         if tags:
             tags = set(t.lower() for t in tags)
             self.report.tests = list(filter(lambda t: tags.intersection(t.tags), self.report.tests))
@@ -224,9 +224,10 @@ class VMBReport(Jsonable):
             self.report.tests = list(filter(lambda t: not skips.intersection(t.tags), self.report.tests))
         for t in self.report.tests:
             name = t.name
-            if name in exclude:
-                continue
             self.total_cnt += 1
+            if name in exclude:
+                self.excluded_cnt += 1
+                continue
             self._name_len = max(self._name_len, len(name))
             if not test_passed(t):
                 self.fail_cnt += 1
