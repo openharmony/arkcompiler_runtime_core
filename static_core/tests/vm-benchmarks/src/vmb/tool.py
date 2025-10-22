@@ -37,7 +37,7 @@ log = logging.getLogger('vmb')
 class VmbToolExecError(Exception):
     """VMB Error. Tool execution failed."""
 
-    def __init__(self, message: str,
+    def __init__(self, message: str,  # noqa: B042
                  res: Optional[ShellResult] = None) -> None:
         super().__init__(message)
         self.out = f'{message}\n\nout:\n{res.out}\n\nerr:\n{res.err}\n' \
