@@ -159,7 +159,7 @@ static ani_status BindTextDecoder(ani_env *env)
         },
         ani_native_function {
             "doEncodeInfoUint8Array",
-            "C{std.core.String}C{std.core.String}C{escompat.Uint8Array}:C{escompat.Array}",
+            "C{std.core.String}C{std.core.String}C{escompat.Uint8Array}:C{std.core.Array}",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeIntoUint8Array),
         },
     };

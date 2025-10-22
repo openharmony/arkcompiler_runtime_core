@@ -62,48 +62,48 @@ public:
         return MEMBER_OFFSET(EtsEscompatArray, actualLength_);
     }
 
-    /// @brief Creates instance of `escompat.Array` with given length
+    /// @brief Creates instance of `std.core.Array` with given length
     static EtsEscompatArray *Create(EtsCoroutine *coro, size_t length);
 
-    /// @brief Checks whether the object's real type is `escompat.Array`
+    /// @brief Checks whether the object's real type is `std.core.Array`
     static bool IsExactlyEscompatArray(const EtsObject *obj, EtsCoroutine *coro)
     {
         return obj->GetClass() == PlatformTypes(coro)->escompatArray;  // NOLINT (readability-implicit-bool-conversion)
     }
 
-    /// @brief Checks whether the object's real type is `escompat.Array`
+    /// @brief Checks whether the object's real type is `std.core.Array`
     bool IsExactlyEscompatArray(EtsCoroutine *coro) const
     {
         return EtsEscompatArray::IsExactlyEscompatArray(this, coro);
     }
 
-    /// @brief Implementation of `escompat.Array` method `$_get`
+    /// @brief Implementation of `std.core.Array` method `$_get`
     EtsObject *EscompatArrayGet(EtsInt index);
 
-    /// @brief Implementation of `escompat.Array` method `$_set`
+    /// @brief Implementation of `std.core.Array` method `$_set`
     void EscompatArraySet(EtsInt index, EtsObject *value);
 
-    /// @brief Implementation of `escompat.Array` method `$_set_unsafe`
+    /// @brief Implementation of `std.core.Array` method `$_set_unsafe`
     EtsObject *EscompatArrayGetUnsafe(EtsInt index);
 
-    /// @brief Implementation of `escompat.Array` method `$_get_unsafe`
+    /// @brief Implementation of `std.core.Array` method `$_get_unsafe`
     void EscompatArraySetUnsafe(EtsInt index, EtsObject *value);
 
     /**
-     * @brief Implementation of `escompat.Array` method `pop`
-     * Note that this method is valid only when `values` array is exactly `escompat.Array`.
+     * @brief Implementation of `std.core.Array` method `pop`
+     * Note that this method is valid only when `values` array is exactly `std.core.Array`.
      * Implementation of this method must be aligned with managed implementation of `pop` method
      */
     EtsObject *EscompatArrayPop();
 
-    /// @brief Returns underlying buffer, object must be exactly `escompat.Array`
+    /// @brief Returns underlying buffer, object must be exactly `std.core.Array`
     EtsObjectArray *GetDataFromEscompatArray()
     {
         ASSERT(IsExactlyEscompatArray(EtsCoroutine::GetCurrent()));
         return GetDataFromEscompatArrayImpl();
     }
 
-    /// @brief Returns `actualLength` of array, object must be exactly `escompat.Array`
+    /// @brief Returns `actualLength` of array, object must be exactly `std.core.Array`
     EtsInt GetActualLengthFromEscompatArray()
     {
         ASSERT(IsExactlyEscompatArray(EtsCoroutine::GetCurrent()));

@@ -18,40 +18,40 @@
 //! METHOD  "escompat_array_get_set_derived.ETSGLOBAL::arrayGet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /CallVirtual.*escompat\.Array::._get/
+//! INST       /CallVirtual.*std\.core\.Array::._get/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
 //! METHOD  "escompat_array_get_set_derived.ETSGLOBAL::arraySet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! INST       /CallVirtual.*escompat\.Array::._set/
+//! INST       /CallVirtual.*std\.core\.Array::._set/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
 
-//! CHECKER AOT IR Builder, MyArray.get/set shall not be inlined as escompat.Array.get/set.
+//! CHECKER AOT IR Builder, MyArray.get/set shall not be inlined as std.core.Array.get/set.
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: "--compiler-regex='.*(array[GS]et|MyArray).*'"
 //! METHOD  "escompat_array_get_set_derived.ETSGLOBAL::arrayGet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /CallVirtual.*escompat\.Array::._get/
+//! INST       /CallVirtual.*std\.core\.Array::._get/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /CallVirtual.*escompat\.Array::._get/
+//! INST       /CallVirtual.*std\.core\.Array::._get/
 //! METHOD  "escompat_array_get_set_derived.ETSGLOBAL::arraySet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! INST       /CallVirtual.*escompat\.Array::._set/
+//! INST       /CallVirtual.*std\.core\.Array::._set/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! INST       /CallVirtual.*escompat\.Array::._set/
+//! INST       /CallVirtual.*std\.core\.Array::._set/
 
-//! CHECKER AOT IR Builder, MyArray.get/set shall not be inlined as escompat.Array.get/set. (Output correctness check)
+//! CHECKER AOT IR Builder, MyArray.get/set shall not be inlined as std.core.Array.get/set. (Output correctness check)
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: ""
 //! RUN        entry: "escompat_array_get_set_derived.ETSGLOBAL::test1"
 
-//! CHECKER JIT IR Builder, Inlining & static devirtualization as escompat.Array.get/set.
+//! CHECKER JIT IR Builder, Inlining & static devirtualization as std.core.Array.get/set.
 //! RUN     force_jit: true, options: "--compiler-regex='.*(test2|array[GS]et|MyArray).*'", entry: "escompat_array_get_set_derived.ETSGLOBAL::test2"
 //! METHOD  "escompat_array_get_set_derived.ETSGLOBAL::test2"
 //! PASS_AFTER "Inline"
@@ -62,7 +62,7 @@
 //! INST_NOT   /Call(Virtual|Static) .*Array::._set/
 //! INST_COUNT /StoreArray/, 3
 
-//! CHECKER AOT IR Builder, Inlining & static devirtualization as escompat.Array.get/set.
+//! CHECKER AOT IR Builder, Inlining & static devirtualization as std.core.Array.get/set.
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: "--compiler-regex='.*(test2|array[GS]et|MyArray).*'"
 //! METHOD  "escompat_array_get_set_derived.ETSGLOBAL::test2"

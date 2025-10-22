@@ -168,7 +168,7 @@ ani_status RegisterIntlListFormat(ani_env *env)
 {
     std::array methods = {ani_native_function {
         "formatToPartsNative",
-        "C{escompat.Array}C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.Object}",
+        "C{std.core.Array}C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.Object}",
         reinterpret_cast<void *>(FormatToParts)}};
 
     g_elementAniStr = StdStrToAni(env, "element");

@@ -106,7 +106,7 @@ static ani_object CreateAbcRuntimeLinker(ani_env *env, ani_class abcRuntimeLinke
 
     ani_method abcRuntimeLinkerCtor;
     status = env->Class_FindMethod(abcRuntimeLinkerClass, "<ctor>",
-                                   "C{std.core.RuntimeLinker}C{escompat.Array}:", &abcRuntimeLinkerCtor);
+                                   "C{std.core.RuntimeLinker}C{std.core.Array}:", &abcRuntimeLinkerCtor);
     if (CheckAniStatus(status, "Cannot find abcRuntimeLinker constructor")) {
         return nullptr;
     }

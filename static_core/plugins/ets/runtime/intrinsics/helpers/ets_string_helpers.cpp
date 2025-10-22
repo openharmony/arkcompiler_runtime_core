@@ -70,7 +70,7 @@ EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes)
 
     auto *coro = EtsCoroutine::GetCurrent();
     if (LIKELY(charCodes->IsExactlyEscompatArray(coro))) {
-        // Fast path, `charCodes` is exactly `escompat.Array`
+        // Fast path, `charCodes` is exactly `std.core.Array`
         return CreateNewStringFromCharCode(charCodes->GetDataFromEscompatArray(),
                                            charCodes->GetActualLengthFromEscompatArray());
     }

@@ -19,33 +19,33 @@
 //!
 //! METHOD        "test_array_int_join"
 //! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
+//! INST          /Call.*std.core.Array::join*/
 //!
 //! METHOD        "test_array_long_join"
 //! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
+//! INST          /Call.*std.core.Array::join*/
 //!
 //! METHOD        "test_array_short_join"
 //! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
+//! INST          /Call.*std.core.Array::join*/
 //!
 //! METHOD        "test_array_float_join"
 //! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
+//! INST          /Call.*std.core.Array::join*/
 //!
 //! METHOD        "test_array_double_join"
 //! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
+//! INST          /Call.*std.core.Array::join*/
 //!
 //! METHOD        "test_array_string_join"
 //! PASS_AFTER    "Codegen"
-//! INST          /Call.*escompat.Array::join*/
+//! INST          /Call.*std.core.Array::join*/
 
 
 //! CHECKER      OOM error for Array.join
 //! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, options: "--heap-size-limit=12345678 --compiler-hotness-threshold=0 --compiler-regex='ETSGLOBAL::test_oom'", entry: "escompat_array_join.ETSGLOBAL::test_oom"
-//! EVENT        /Exception,escompat.Array::join.*NATIVE/
+//! EVENT        /Exception,std.core.Array::join.*NATIVE/
 
 const arrayIntStrRes = "1,3,5,7,9";
 const arrayIntStrRes1 = "1|3|5|7|9";

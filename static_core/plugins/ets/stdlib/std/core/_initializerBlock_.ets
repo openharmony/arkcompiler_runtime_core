@@ -16,6 +16,7 @@
 package std.core;
 // Note: This file initialize all the `const` property that non-immediately initialized(spec-issue 217).
 static {
+    FROM_BUFFER = new FromBuffer()
     // 5 lower bits stores kind's id
     TypeKindMask = ((1 << 6) - 1).toByte();
     BigIntType = Class.from<BigInt>();

@@ -387,13 +387,13 @@ ani_array StdCoreIntlLookupLocales(ani_env *env, [[maybe_unused]] ani_class klas
 
 ani_status RegisterIntlLocaleMatch(ani_env *env)
 {
-    const auto methods = std::array {ani_native_function {"bestFitLocale", "C{escompat.Array}:C{std.core.String}",
+    const auto methods = std::array {ani_native_function {"bestFitLocale", "C{std.core.Array}:C{std.core.String}",
                                                           reinterpret_cast<void *>(StdCoreIntlBestFitLocale)},
-                                     ani_native_function {"lookupLocale", "C{escompat.Array}:C{std.core.String}",
+                                     ani_native_function {"lookupLocale", "C{std.core.Array}:C{std.core.String}",
                                                           reinterpret_cast<void *>(StdCoreIntlLookupLocale)},
-                                     ani_native_function {"bestFitLocales", "C{escompat.Array}:C{escompat.Array}",
+                                     ani_native_function {"bestFitLocales", "C{std.core.Array}:C{std.core.Array}",
                                                           reinterpret_cast<void *>(StdCoreIntlBestFitLocales)},
-                                     ani_native_function {"lookupLocales", "C{escompat.Array}:C{escompat.Array}",
+                                     ani_native_function {"lookupLocales", "C{std.core.Array}:C{std.core.Array}",
                                                           reinterpret_cast<void *>(StdCoreIntlLookupLocales)}};
 
     ani_class localeMatchClass;

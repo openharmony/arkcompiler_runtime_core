@@ -495,7 +495,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_015, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("toplevel_field_demo.con1", "con1");
     AddElement<abckit_wrapper::Field>("toplevel_field_demo.var2", "var2");
     AddElement<abckit_wrapper::Field>("toplevel_field_demo.var3", "var3");
-    AddElement<abckit_wrapper::Method>("toplevel_field_demo.foo1:escompat.Array;std.core.String;", "foo1");
+    AddElement<abckit_wrapper::Method>("toplevel_field_demo.foo1:std.core.Array;std.core.String;", "foo1");
     AddElement<abckit_wrapper::Class>("toplevel_field_demo.Cls1", "Cls1");
     AddElement<abckit_wrapper::Field>("toplevel_field_demo.Cls1.field1", "field1");
     AddElement<abckit_wrapper::Field>("toplevel_field_demo.Cls1.field2", "field2");
@@ -575,12 +575,12 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_017, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("function_demo.math1:f64;f64;std.core.Double;f64;", "math1");
     AddElement<abckit_wrapper::Method>("function_demo.math1:f64;f64;std.core.Double;f64;", "math1");
     AddElement<abckit_wrapper::Method>("function_demo.add1:f64;f64;std.core.Object;", "add1");
-    AddElement<abckit_wrapper::Method>("function_demo.buildName3:std.core.String;escompat.Array;std.core.String;",
+    AddElement<abckit_wrapper::Method>("function_demo.buildName3:std.core.String;std.core.Array;std.core.String;",
                                        "buildName3");
     AddElement<abckit_wrapper::Method>("function_demo.buildName1:std.core.String;std.core.String;std.core.String;",
                                        "buildName1");
     AddElement<abckit_wrapper::Method>(
-        "function_demo.foo1:i32;function_demo.ClassA;std.core.String;escompat.Array;void;", "foo1");
+        "function_demo.foo1:i32;function_demo.ClassA;std.core.String;std.core.Array;void;", "foo1");
     AddElement<abckit_wrapper::Method>("function_demo.fun1:i32;", "fun1");
     AddElement<abckit_wrapper::Method>("function_demo.fun3:i32;", "fun3");
     AddElement<abckit_wrapper::Method>("function_demo.fun2:i32;", "fun2");
@@ -592,7 +592,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_017, TestSize.Level1)
         "suit");
     AddElement<abckit_wrapper::Class>("function_demo.ClassA", "ClassA");
     AddElement<abckit_wrapper::Method>(
-        "function_demo.ClassA.method1:function_demo.ClassA;i32;std.core.String;escompat.Array;std.core.String;",
+        "function_demo.ClassA.method1:function_demo.ClassA;i32;std.core.String;std.core.Array;std.core.String;",
         "method1");
 
     this->VerifyObfuscated();
@@ -787,7 +787,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_021, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("function_error_demo.processFile:std.core.String;void;", "processFile");
     AddElement<abckit_wrapper::Class>("function_error_demo.UnknownError", "UnknownError");
     AddElement<abckit_wrapper::Field>("function_error_demo.UnknownError.error", "error");
-    AddElement<abckit_wrapper::Method>("function_error_demo.getArrayElement:escompat.Array;i32;std.core.Object;",
+    AddElement<abckit_wrapper::Method>("function_error_demo.getArrayElement:std.core.Array;i32;std.core.Object;",
                                        "getArrayElement");
 
     this->VerifyObfuscated();
@@ -898,7 +898,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_024, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("generics_demo1.array", "array");
     AddElement<abckit_wrapper::Field>("generics_demo1.c1", "c1");
     AddElement<abckit_wrapper::Method>("generics_demo1.foo:std.core.Object;std.core.Object;void;", "foo");
-    AddElement<abckit_wrapper::Method>("generics_demo1.loggingIdentity1:escompat.Array;escompat.Array;",
+    AddElement<abckit_wrapper::Method>("generics_demo1.loggingIdentity1:std.core.Array;std.core.Array;",
                                        "loggingIdentity1");
     AddElement<abckit_wrapper::Class>("generics_demo1.ClsA", "ClsA");
     AddElement<abckit_wrapper::Method>("generics_demo1.ClsA.method:generics_demo1.ClsA;std.core.Object;void;",
@@ -1137,10 +1137,10 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_029, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("lambda_demo.var2", "var2");
     AddElement<abckit_wrapper::Field>("lambda_demo.var1", "var1");
     AddElement<abckit_wrapper::Field>("lambda_demo.fun1", "fun1");
-    AddElement<abckit_wrapper::Method>("lambda_demo.buildName:std.core.String;escompat.Array;std.core.String;",
+    AddElement<abckit_wrapper::Method>("lambda_demo.buildName:std.core.String;std.core.Array;std.core.String;",
                                        "buildName");
-    AddElement<abckit_wrapper::Method>("lambda_demo.math3:f64;f64;escompat.Array;f64;", "math3");
-    AddElement<abckit_wrapper::Method>("lambda_demo.foo1:escompat.Array;std.core.String;", "foo1");
+    AddElement<abckit_wrapper::Method>("lambda_demo.math3:f64;f64;std.core.Array;f64;", "math3");
+    AddElement<abckit_wrapper::Method>("lambda_demo.foo1:std.core.Array;std.core.String;", "foo1");
     AddElement<abckit_wrapper::Method>("lambda_demo.identity:std.core.Object;std.core.Object;", "identity");
     AddElement<abckit_wrapper::Method>("lambda_demo.memB:std.core.String;", "memB");
     AddElement<abckit_wrapper::Class>("lambda_demo.C1", "C1");

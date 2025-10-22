@@ -47,7 +47,7 @@ function classInitByRest() {
      * @Benchmark
      */
     this.test = function() {
-        // ClassCastError: $escompat.Array$ cannot be cast to std.core.Double
+        // ClassCastError: $std.core.Array$ cannot be cast to std.core.Double
         new this.UnlimitedArguments(this.arr);
     };
 

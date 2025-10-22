@@ -68,7 +68,7 @@ ArkTS中常用类型的**类型Mangling参考**如下所示：
 - `number` → `d`
 - `string` → `C{std.core.String}`
 - `bigint` → `C{std.core.BigInt}`
-- `Array`|`int[]` →	`C{escompat.Array}`
+- `Array`|`int[]` →	`C{std.core.Array}`
 - `FixedArray<int>` → `A{i}`
 - `null` →	`C{std.core.Object}`
 

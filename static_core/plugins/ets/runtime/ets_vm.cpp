@@ -874,7 +874,7 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
     std::array args {Value(linkerHandle->GetCoreType()), Value(nullptr), Value(pathsHandle->GetCoreType())};
 
     auto *ctor =
-        klass->GetDirectMethod(GetLanguageContext().GetCtorName(), "Lstd/core/RuntimeLinker;Lescompat/Array;:V");
+        klass->GetDirectMethod(GetLanguageContext().GetCtorName(), "Lstd/core/RuntimeLinker;Lstd/core/Array;:V");
     ASSERT(ctor != nullptr);
     ctor->GetPandaMethod()->InvokeVoid(coro, args.data());
     if (coro->HasPendingException()) {

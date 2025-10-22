@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-//! CHECKER    JIT IR Builder: Case #1: escompat.Array get/set operations.
+//! CHECKER    JIT IR Builder: Case #1: std.core.Array get/set operations.
 //! RUN        force_jit: true, options: "--compiler-regex='.*(test1|array[GS]et).*'", entry: "escompat_array_get_set.ETSGLOBAL::test1"
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::arrayGet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /CallVirtual.*escompat\.Array::\$_get/
+//! INST       /CallVirtual.*std\.core\.Array::\$_get/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::arraySet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! INST       /CallVirtual.*escompat\.Array::\$_set/
+//! INST       /CallVirtual.*std\.core\.Array::\$_set/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 
@@ -34,49 +34,49 @@
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::arrayGet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /CallVirtual.*escompat\.Array::\$_get/
+//! INST       /CallVirtual.*std\.core\.Array::\$_get/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /Call((Virtual)|(Static)) .*escompat\.Array::\$_get/
+//! INST       /Call((Virtual)|(Static)) .*std\.core\.Array::\$_get/
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::arraySet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! INST       /CallVirtual.*escompat\.Array::\$_set/
+//! INST       /CallVirtual.*std\.core\.Array::\$_set/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! INST       /Call((Virtual)|(Static)) .*escompat\.Array::\$_set/
+//! INST       /Call((Virtual)|(Static)) .*std\.core\.Array::\$_set/
 
-//! CHECKER    JIT IR Builder: Case #2: escompat.Array get/set operations (with errors).
+//! CHECKER    JIT IR Builder: Case #2: std.core.Array get/set operations (with errors).
 //! SKIP_IF    @architecture == "arm32"
 //! RUN        force_jit: true, entry: "escompat_array_get_set.ETSGLOBAL::test2"
 //! EVENT      /Compilation,escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError,.*,COMPILED/
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! INST       /CallVirtual.*escompat\.Array::\$_set/
+//! INST       /CallVirtual.*std\.core\.Array::\$_set/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 //! EVENT      /Compilation,escompat_array_get_set.ETSGLOBAL::__noinline__testClassCastError,.*,COMPILED/
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::__noinline__testClassCastError"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /CallVirtual.*escompat\.Array::\$_get/
+//! INST       /CallVirtual.*std\.core\.Array::\$_get/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
 
-//! CHECKER    AOT IR Builder: Case #2: escompat.Array get/set operations (with errors).
+//! CHECKER    AOT IR Builder: Case #2: std.core.Array get/set operations (with errors).
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: ""
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
-//! INST       /CallVirtual.*escompat\.Array::\$_set/
+//! INST       /CallVirtual.*std\.core\.Array::\$_set/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::__noinline__testClassCastError"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
-//! INST       /CallVirtual.*escompat\.Array::\$_get/
+//! INST       /CallVirtual.*std\.core\.Array::\$_get/
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
 //! RUN        entry: "escompat_array_get_set.ETSGLOBAL::test2"
@@ -149,15 +149,15 @@ class ExtArray<T> extends Array<T> {
 }
 
 //! CHECKER       Array getUnsafe cpp intrinsic
-//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
-//! METHOD        "escompat.Array::pop"
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=std.core.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
+//! METHOD        "std.core.Array::pop"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.EscompatArrayGetUnsafe"
 //! INST_NOT      /Call/
 
 //! CHECKER       Array getUnsafe IR intrinsic
-//! RUN           force_jit: true, options: "--compiler-regex=escompat.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
-//! METHOD        "escompat.Array::pop"
+//! RUN           force_jit: true, options: "--compiler-regex=std.core.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
+//! METHOD        "std.core.Array::pop"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "LoadArray"
 //! INST_NOT      "Intrinsic.EscompatArrayGetUnsafe"
@@ -170,15 +170,15 @@ function testGetUnsafe() {
 }
 
 //! CHECKER       Array setUnsafe cpp intrinsic
-//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=escompat.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
-//! METHOD        "escompat.Array::with"
+//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=std.core.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
+//! METHOD        "std.core.Array::with"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.EscompatArraySetUnsafe"
 //! INST_NOT      /Call.*set_unsafe/
 
 //! CHECKER       Array setUnsafe IR intrinsic
-//! RUN           force_jit: true, options: "--compiler-regex=escompat.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
-//! METHOD        "escompat.Array::with"
+//! RUN           force_jit: true, options: "--compiler-regex=std.core.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
+//! METHOD        "std.core.Array::with"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "StoreArray"
 //! INST_NOT      "Intrinsic.EscompatArraySetUnsafe"

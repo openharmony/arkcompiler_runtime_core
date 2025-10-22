@@ -83,16 +83,16 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
 class ArrayValueIteratorTest implements IterableIterator<Number> {
     private idx: int
     private val: int
-  
+
     constructor() {
       this.idx = 0
       this.val = 1
     }
-  
+
     override $_iterator(): IterableIterator<Number> {
       return this;
     }
-  
+
     override next(): IteratorResult<Number> {
       if (this.idx < 0 || this.idx >= 1) {
         return new IteratorResult<Number>()
@@ -108,12 +108,12 @@ function check_array<T>(arr: Array<T>, start: int, end: int, expected: T) {
     }
 }
 
-//! CHECKER       escompat Array from primitive array
+//! CHECKER       std.core Array from primitive array
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, entry: "escompat_array_from.ETSGLOBAL::test_array_from"
 //! METHOD        "escompat_array_from.ETSGLOBAL::test_array_from"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallStatic.*escompat.Array::from/
+//! INST          /CallStatic.*std.core.Array::from/
 function test_array_from() {
     {
         let array1 = Array.from(smallFromBigInt64Array);

@@ -108,7 +108,7 @@ public:
         ASSERT(status == ANI_OK);
 
         ani_method ctor {};
-        status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.RuntimeLinker}C{escompat.Array}:", &ctor);
+        status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.RuntimeLinker}C{std.core.Array}:", &ctor);
         ASSERT(status == ANI_OK);
 
         ani_object obj {};
