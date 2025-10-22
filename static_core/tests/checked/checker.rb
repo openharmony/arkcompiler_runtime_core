@@ -39,6 +39,7 @@ OptionParser.new do |opts|
   opts.banner = 'Usage: checker.rb [options] TEST_FILE'
 
   opts.on('--run-prefix=PREFIX', 'Prefix that will be inserted before panda run command') do |v|
+    v = v.gsub ',', ' '
     options.run_prefix = v.eql?("\'\'") ? "" : v
   end
   opts.on('--source=FILE', 'Path to source file')
@@ -911,7 +912,11 @@ def read_checks(options)
 end
 
 def main(options)
-  Dir.chdir options.test_dir if options.test_dir
+  if options.test_dir
+    require 'fileutils'
+    FileUtils.mkdir_p options.test_dir
+    Dir.chdir options.test_dir
+  end
   read_checks(options).flat_map(&:populate).each(&:run)
   0
 end

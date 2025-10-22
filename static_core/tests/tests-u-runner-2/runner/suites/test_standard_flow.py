@@ -371,6 +371,7 @@ class TestStandardFlow(Test):
             flags=self.__expand_last_call_macros(step),
             env=cmd_env,
             timeout=step.timeout,
+            use_qemu=not step.skip_qemu
         )
 
         test_runner = OneTestRunner(self.test_env)

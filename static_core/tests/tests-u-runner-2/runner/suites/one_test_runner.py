@@ -97,9 +97,6 @@ class OneTestRunner:
                      return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
             -> tuple[bool, TestReport, str | None]:
 
-        cmd = [*self.test_env.cmd_prefix, str(params.executor)]
-        cmd.extend(params.flags)
-
         passed = False
         output = ""
         error = ""
@@ -130,7 +127,9 @@ class OneTestRunner:
 
     def __run(self, name: str, params: BinaryParams, result_validator: ResultValidator,
               return_code_interpreter: ReturnCodeInterpreter) -> tuple[bool, str | None, str, str, int]:
-        cmd = [*self.test_env.cmd_prefix, str(params.executor)]
+        cmd = [str(params.executor)]
+        if params.use_qemu:
+            cmd = [*self.test_env.cmd_prefix, *cmd]
         cmd.extend(params.flags)
         passed = False
         output = ""

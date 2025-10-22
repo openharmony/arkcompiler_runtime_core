@@ -15,27 +15,13 @@ runner-api-level: 0.0.0.1
 type: workflow
 workflow-name: checker
 parameters:
-    arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
     build: ${PANDA_BUILD}
     checked: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/checked
-    enable-es2panda: true
-    enable-verifier: true
     enable-checker: true
-    es2panda-args: []
-    es2panda-full-args:
-        - "--thread=${parameters.thread}"
-        - "--extension=${parameters.extension}"
-        - "--opt-level=${parameters.opt-level}"
-        - "--output=${parameters.output-file}"
-        - "${parameters.es2panda-args}"
-    thread: 0
     extension: sts
     load-runtimes: ets
-    opt-level: 2
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
     stdlib: "${parameters.build}/plugins/ets/etsstdlib.abc"
-    es2panda-timeout: 60
-    verifier-timeout: 60
     checker-timeout: 180
     checker-repeat-args:
         - "--panda ${parameters.build}/bin/ark"
@@ -48,7 +34,7 @@ parameters:
     checker-paoc-options: "--load-runtimes=ets,--run-gc-in-place,--coroutine-workers-count=1,--boot-panda-files=${parameters.stdlib},${parameters.checker-compiler-check-final}"
     checker-frontend-options: "--thread=0,--extension=ets"
     checker-command-token: "//!"
-    checker-test-dir: "${parameters.work-dir}/intermediate"
+    checker-test-dir: "${parameters.work-dir}/intermediate/${test-id}"
     checker-arch: x64
     checker-build-config: Static
     checker-is-llvm: "false"
@@ -58,33 +44,24 @@ parameters:
     # adds --boot-panda-files option to verifier with all dependent and the current abc files
     is-panda: true
 steps:
-    compile:
-        from: es2panda-verifier
-        opt-level: ${parameters.opt-level}
-        work-dir: ${parameters.work-dir}
-        enable-es2panda: ${parameters.enable-es2panda}
-        enable-verifier: ${parameters.enable-verifier}
-        extension: ${parameters.extension}
-        es2panda-full-args: ${parameters.es2panda-full-args}
-        es2panda-timeout: ${parameters.es2panda-timeout}
-        verifier-timeout: ${parameters.verifier-timeout}
     ruby_checker:
         executable-path: ${parameters.checked}/checker.rb
         timeout: ${parameters.checker-timeout}
         enabled: ${parameters.enable-checker}
         step-type: other
+        skip-qemu: true
         args:
             - "--source ${parameters.work-dir}/gen/${test-id}"
             - "${parameters.checker-repeat-args}"
             - "--run-prefix ${parameters.checker-run-prefix}"
             - "--test-file ${parameters.output-file}"
             - "--panda-options ${parameters.checker-panda-options}"
-            - "--paoc-options ${parameters.checker-paoc-options}" 
-            - "--frontend-options ${parameters.checker-frontend-options}" 
+            - "--paoc-options ${parameters.checker-paoc-options}"
+            - "--frontend-options ${parameters.checker-frontend-options}"
             - "--command-token ${parameters.checker-command-token}"
             - "--arch ${parameters.checker-arch}"
             - "--build-config ${parameters.checker-build-config}"
-            - "${parameters.checker-is-release}"
+            - "--is-release ${parameters.checker-is-release}"
             - "--test-dir ${parameters.checker-test-dir}"
             - "--is-llvm ${parameters.checker-is-llvm}"
             - "--is-verbose ${parameters.checker-is-verbose}"
