@@ -1184,9 +1184,6 @@
 15.semantic_rules/02.subtyping/06.subtyping_for_fixed-size_array_types/negative_type_safety_0.ets
 15.semantic_rules/02.subtyping/06.subtyping_for_fixed-size_array_types/negative_type_safety_1.ets
 
-#27911 Generic functions subtyping
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_generic_1.ets
-
 #30553 intersection in smart casts
 15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/case1_0.ets
 15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/case1_1.ets
