@@ -39,9 +39,7 @@ public:
 
     virtual ~CoroutineEvent()
     {
-        if (IsLocked()) {
-            Unlock();
-        }
+        ASSERT(!IsLocked());
     };
 
     Type GetType()
@@ -108,7 +106,7 @@ private:
     CoroutineManager *coroManager_ = nullptr;
     EventId eventId_;
 
-    os::memory::Mutex mutex_;
+    os::memory::RecursiveMutex mutex_;
 };
 
 /**

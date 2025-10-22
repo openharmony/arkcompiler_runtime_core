@@ -94,6 +94,12 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
 
     ProcessTimerEvents();
 
+    if (awaitee->Happened()) {
+        awaitee->Unlock();
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::WaitForEvent finished (no await happened)";
+        return;
+    }
+
     waitersLock_.Lock();
     awaitee->Unlock();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::AddWaitingCoroutine: " << waiter->GetName() << " AWAITS";
@@ -141,7 +147,9 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
         coroManager_->MigrateAwakenedCoro(unblockedCoro);
         return;
     }
-    hasRunnableCoroEvent_.Happen();
+    if (blocker != &hasRunnableCoroEvent_) {
+        hasRunnableCoroEvent_.Happen();
+    }
 }
 
 void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
@@ -206,8 +214,8 @@ bool StackfulCoroutineWorker::ProcessAsyncWork()
             coroManager_->Schedule();
             asyncWorkExists = true;
         } else if (!waiters_.empty()) {
-            hasRunnableCoroEvent_.SetNotHappened();
             hasRunnableCoroEvent_.Lock();
+            hasRunnableCoroEvent_.SetNotHappened();
             unlock(waitersLock_, runnablesLock_);
             coroManager_->Await(&hasRunnableCoroEvent_);
             asyncWorkExists = true;

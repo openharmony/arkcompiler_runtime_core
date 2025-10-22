@@ -491,12 +491,6 @@ void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
     [[maybe_unused]] auto *waiter = Coroutine::GetCurrent();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await started by " + waiter->GetName();
 
-    if (awaitee->Happened()) {
-        awaitee->Unlock();
-        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await finished (no await happened)";
-        return;
-    }
-
     GetCurrentWorker()->WaitForEvent(awaitee);
     // NB: at this point the awaitee is likely already deleted
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await finished by " + waiter->GetName();
