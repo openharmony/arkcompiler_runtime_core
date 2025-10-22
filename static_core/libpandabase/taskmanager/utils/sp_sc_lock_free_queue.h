@@ -199,13 +199,19 @@ public:
     {
         static_assert(ALLOCATION_TYPE == QueueElemAllocationType::INPLACE);
         auto inode = static_cast<QueueBigNode *>(node);
-        TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
-        // Atomic with relaxed order reason: gets correct value
-        auto count = inode->toDeleteCount.fetch_sub(1, std::memory_order_relaxed);
+
+        // inode->toDeleteCount is atomic because the queue is used by multiple consumers with mutex,
+        // but this function is executed concurrently
+
+        // Atomic with release order reason: we need to sychronize an unprotected access to the node content
+        // with deletion of the node
+        auto count = inode->toDeleteCount.fetch_sub(1, std::memory_order_release);
         if (count == 1) {
+            // Fence with acquire order reason: need to synchronize the last fetch_sub with other fetch_sub's
+            ATOMIC_THREAD_FENCE_ACQUIRE(inode->toDeleteCount);
+
             DeleteQueueBigNode(inode);
         }
-        TSAN_ANNOTATE_IGNORE_WRITES_END();
     }
 
 private:

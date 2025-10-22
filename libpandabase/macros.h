@@ -281,6 +281,16 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 #define TSAN_ANNOTATE_IGNORE_WRITES_END()
 #endif
 
+// TSAN does not support memory fences. To avoid false positive reports we can use atomic loads instead
+// Ref: https://doc.rust-lang.org/src/alloc/sync.rs.html#58-74
+#if defined(USE_THREAD_SANITIZER)
+// CC-OFFNXT(G.PRE.02) code readability
+#define ATOMIC_THREAD_FENCE_ACQUIRE(expr) expr.load(std::memory_order_acquire)
+#else
+// CC-OFFNXT(G.PRE.02) code readability
+#define ATOMIC_THREAD_FENCE_ACQUIRE(expr) std::atomic_thread_fence(std::memory_order_acquire)
+#endif
+
 // for clang
 #if defined(__has_feature)
 #if __has_feature(undefined_behavior_sanitizer)
