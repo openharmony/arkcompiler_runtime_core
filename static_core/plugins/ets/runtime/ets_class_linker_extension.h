@@ -140,8 +140,6 @@ private:
     Class *InitializeClass(ObjectHeader *objectHeader, const uint8_t *descriptor, size_t vtableSize, size_t imtSize,
                            size_t size);
 
-    Class *CreateClassRoot(const uint8_t *descriptor, ClassRoot root);
-
     Class *CacheClass(std::string_view descriptor, bool forceInit = false);
     template <typename F>
     Class *CacheClass(std::string_view descriptor, F const &setup, bool forceInit = false);

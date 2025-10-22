@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -203,7 +203,7 @@ static void TestPrimitiveClassRoot(const ClassLinkerExtension &classLinkerExt, C
     ASSERT_NE(klass, nullptr) << msg;
     EXPECT_EQ(klass->GetBase(), nullptr) << msg;
     EXPECT_EQ(klass->GetComponentSize(), 0U) << msg;
-    EXPECT_EQ(klass->GetFlags(), 0U) << msg;
+    EXPECT_EQ(klass->GetRuntimeFlags(), 0U) << msg;
     EXPECT_EQ(klass->GetAccessFlags(), ACC_PUBLIC | ACC_FINAL | ACC_ABSTRACT) << msg;
     EXPECT_EQ(klass->GetType().GetId(), typeId) << msg;
     EXPECT_FALSE(klass->IsArrayClass()) << msg;
@@ -264,7 +264,7 @@ static void TestArrayClassRoot(const ClassLinkerExtension &classLinkerExt, Class
     EXPECT_EQ(klass->GetBase(), classLinkerExt.GetClassRoot(ClassRoot::OBJECT)) << msg;
     EXPECT_EQ(klass->GetComponentType(), componentClass) << msg;
     EXPECT_EQ(klass->GetComponentSize(), GetComponentSize(componentRoot)) << msg;
-    EXPECT_EQ(klass->GetFlags(), 0U) << msg;
+    EXPECT_EQ(klass->GetRuntimeFlags(), 0U) << msg;
     EXPECT_EQ(klass->GetAccessFlags(), ACC_PUBLIC | ACC_FINAL | ACC_ABSTRACT) << msg;
     EXPECT_EQ(klass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE) << msg;
     EXPECT_EQ(klass->IsObjectArrayClass(), !componentClass->IsPrimitive()) << msg;
@@ -297,7 +297,7 @@ static void TestClassRoot(Class *classClass, ClassLinkerExtension *ext)
     ASSERT_NE(classClass, nullptr);
     EXPECT_EQ(classClass->GetBase(), ext->GetClassRoot(ClassRoot::OBJECT));
     EXPECT_EQ(classClass->GetComponentSize(), 0U);
-    EXPECT_EQ(classClass->GetFlags(), 0U);
+    EXPECT_EQ(classClass->GetRuntimeFlags(), 0U);
     EXPECT_EQ(classClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
     EXPECT_TRUE(classClass->IsClassClass());
     EXPECT_FALSE(classClass->IsObjectClass());
@@ -314,7 +314,7 @@ static void TestObjectClassRoot(Class *objectClass)
     ASSERT_NE(objectClass, nullptr);
     EXPECT_EQ(objectClass->GetBase(), nullptr);
     EXPECT_EQ(objectClass->GetComponentSize(), 0U);
-    EXPECT_EQ(objectClass->GetFlags(), 0U);
+    EXPECT_EQ(objectClass->GetRuntimeFlags(), 0U);
     EXPECT_EQ(objectClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
     EXPECT_TRUE(objectClass->IsObjectClass());
     EXPECT_FALSE(objectClass->IsArrayClass());
@@ -330,7 +330,7 @@ static void TestStringClassRoot(Class *stringClass, Class *objectClass)
     ASSERT_NE(stringClass, nullptr);
     EXPECT_EQ(stringClass->GetBase(), objectClass);
     EXPECT_EQ(stringClass->GetComponentSize(), 0U);
-    EXPECT_EQ(stringClass->GetFlags(), Class::STRING_CLASS);
+    EXPECT_EQ(stringClass->GetRuntimeFlags(), Class::STRING_CLASS);
     EXPECT_EQ(stringClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
     EXPECT_FALSE(stringClass->IsObjectClass());
     EXPECT_FALSE(stringClass->IsArrayClass());
@@ -347,7 +347,7 @@ static void TestLineStringClassRoot(Class *lineStringClass, Class *stringClass)
     ASSERT_NE(lineStringClass, nullptr);
     EXPECT_EQ(lineStringClass->GetBase(), stringClass);
     EXPECT_EQ(lineStringClass->GetComponentSize(), 0U);
-    EXPECT_EQ(lineStringClass->GetFlags(), Class::STRING_CLASS);
+    EXPECT_EQ(lineStringClass->GetRuntimeFlags(), Class::STRING_CLASS);
     EXPECT_EQ(lineStringClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
     EXPECT_FALSE(lineStringClass->IsObjectClass());
     EXPECT_FALSE(lineStringClass->IsArrayClass());

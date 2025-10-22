@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -181,6 +181,9 @@ public:
     static constexpr uint32_t STRING_CLASS = DYNAMIC_CLASS << 1U;
     static constexpr uint32_t IS_CLONEABLE = STRING_CLASS << 1U;
     static constexpr uint32_t XREF_CLASS = IS_CLONEABLE << 1U;
+    // Should be true if parent classes dont have reference fields
+    static constexpr uint32_t NO_REFS_IN_PARENTS = XREF_CLASS << 1U;
+
     static constexpr size_t IMTABLE_SIZE = 32;
 
     enum {
@@ -200,6 +203,7 @@ public:
 
     void SetBase(Class *base)
     {
+        ASSERT(base == nullptr || !HaveNoRefsInParents() || base->HaveNoRefClass());
         base_ = base;
     }
 
@@ -455,6 +459,13 @@ public:
         return IsArrayClass() && !componentType_->IsPrimitive();
     }
 
+    // This method returns only flags, that have behavior impact
+    // while GetFlags returns all flags, including optimization ones
+    uint32_t GetRuntimeFlags() const
+    {
+        return GetFlags() & (~NO_REFS_IN_PARENTS);
+    }
+
     bool IsStringClass() const
     {
         return (GetFlags() & STRING_CLASS) != 0;
@@ -463,6 +474,19 @@ public:
     bool IsXRefClass() const
     {
         return (GetFlags() & XREF_CLASS) != 0;
+    }
+
+    // Should be true if parents have no refs (Class itself CAN have references)
+    bool HaveNoRefsInParents() const
+    {
+        return (GetFlags() & NO_REFS_IN_PARENTS) != 0;
+    }
+
+    void CalcHaveNoRefsInParents();
+
+    void ClearHaveNoRefsInParentsFlag()
+    {
+        SetFlags(GetFlags() & (~NO_REFS_IN_PARENTS));
     }
 
     void SetStringClass()
@@ -1040,6 +1064,12 @@ private:
     Span<const std::byte> GetClassSpan() const
     {
         return Span(reinterpret_cast<const std::byte *>(this), classSize_);
+    }
+
+    // Should be true if Class and its parents have no reference
+    bool HaveNoRefClass() const
+    {
+        return HaveNoRefsInParents() && numReffields_ == 0;
     }
 
 private:

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,10 +67,14 @@ bool GCStaticObjectHelpers::TraverseObject(ObjectHeader *object, Class *cls, Han
 {
     ASSERT(cls != nullptr);
     ASSERT(!cls->IsDynamicClass());
-    while (cls != nullptr) {
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
         // Iterate over instance fields
         uint32_t refNum = cls->GetRefFieldsNum<false>();
         if (refNum == 0) {
+            if (cls->HaveNoRefsInParents()) {
+                break;
+            }
             cls = cls->GetBase();
             continue;
         }
@@ -94,6 +98,9 @@ bool GCStaticObjectHelpers::TraverseObject(ObjectHeader *object, Class *cls, Han
             }
         }
 
+        if (cls->HaveNoRefsInParents()) {
+            break;
+        }
         cls = cls->GetBase();
     }
     return true;

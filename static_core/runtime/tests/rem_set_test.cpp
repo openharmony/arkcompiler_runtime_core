@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ public:
         // NOLINTNEXTLINE(readability-magic-numbers)
         spaces_.InitializePercentages(0, 100U);
         spaces_.isInitialized_ = true;
-        thread_ = ark::MTManagedThread::GetCurrent();
+        thread_ = ark::ManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
         Init();
     }
@@ -75,7 +75,7 @@ public:
     }
 
 private:
-    ark::MTManagedThread *thread_ {};
+    ark::ManagedThread *thread_ {};
     RuntimeOptions options_;
     PandaUniquePtr<CardTable> cardTable_ {nullptr};
 
@@ -161,6 +161,8 @@ TEST_F(RemSetTest, TravelObjectToAddRefTest)
     cls->SetRefFieldsNum(1, false);
     auto offset = ObjectHeader::ObjectHeaderSize();
     cls->SetRefFieldsOffset(offset, false);
+    // As cls is a fake class we have to calculate HaveNoRefsInParents flag manually
+    cls->CalcHaveNoRefsInParents();
 
     auto obj1 = static_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize()));
     obj1->SetClass(cls);

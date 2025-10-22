@@ -158,6 +158,7 @@ Class *EtsClassLinkerExtension::CreateStringSubClass(const uint8_t *descriptor, 
     }
 
     subClass->SetState(Class::State::INITIALIZING);
+    subClass->ClearHaveNoRefsInParentsFlag();
     subClass->SetStringClass();
     switch (type) {
         case ClassRoot::LINE_STRING: {
@@ -581,34 +582,6 @@ Class *EtsClassLinkerExtension::CreateClass(const uint8_t *descriptor, size_t vt
     }
 
     return InitializeClass(classObject, descriptor, vtableSize, imtSize, size);
-}
-
-Class *EtsClassLinkerExtension::CreateClassRoot(const uint8_t *descriptor, ClassRoot root)
-{
-    auto vtableSize = GetClassVTableSize(root);
-    auto imtSize = GetClassIMTSize(root);
-    auto size = GetClassSize(root);
-
-    Class *klass;
-    if (root == ClassRoot::CLASS) {
-        ASSERT(GetClassRoot(ClassRoot::CLASS) == nullptr);
-        auto objectHeader = heapManager_->AllocateNonMovableObject<true>(nullptr, EtsClass::GetSize(size));
-        ASSERT(objectHeader != nullptr);
-
-        klass = InitializeClass(objectHeader, descriptor, vtableSize, imtSize, size);
-        klass->SetObjectSize(EtsClass::GetSize(size));
-        EtsClass::FromRuntimeClass(klass)->AsObject()->SetClass(EtsClass::FromRuntimeClass(klass));
-    } else {
-        klass = CreateClass(descriptor, vtableSize, imtSize, size);
-    }
-
-    ASSERT(klass != nullptr);
-    klass->SetBase(GetClassRoot(ClassRoot::OBJECT));
-    EtsClass::FromRuntimeClass(klass)->SetSuperClass(EtsClass::FromRuntimeClass(GetClassRoot(ClassRoot::OBJECT)));
-    klass->SetState(Class::State::LOADED);
-    klass->SetLoadContext(GetBootContext());
-    GetClassLinker()->AddClassRoot(root, klass);
-    return klass;
 }
 
 void EtsClassLinkerExtension::FreeClass(Class *klass)
