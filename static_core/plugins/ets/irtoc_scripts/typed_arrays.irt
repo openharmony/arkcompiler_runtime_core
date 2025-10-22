@@ -166,7 +166,7 @@ macro(:allocate_object_tlab) do |klass, klass_size, data_size|
 end
 
 ###
-# Numbers in an instance of 'escompat.Array' are represented as an array of object pointers to instances of the
+# Numbers in an instance of 'std.core.Array' are represented as an array of object pointers to instances of the
 # boxing class 'std.core.Double' or 'std.core.Int'.
 #
 scoped_macro(:validate_number) do |data, offset, type_mask_value|
@@ -184,7 +184,7 @@ scoped_macro(:validate_number) do |data, offset, type_mask_value|
 end  # validate_number
 
 ###
-# Numbers in an instance of 'escompat.Array' are represented as an array of object pointers to instances of the
+# Numbers in an instance of 'std.core.Array' are represented as an array of object pointers to instances of the
 # boxing class 'std.core.Double' or 'std.core.Int'. Runtime stores such objects as instances of the
 # 'ark::ets::EtsBoxPrimitive' class and every instance has a field of type 'double' or 'int', the value.
 #
@@ -231,7 +231,7 @@ scoped_macro(:load_big_int) do |data, offset|
 end # load_big_int
 
 ###
-# BigInt values in an instance of 'escompat.Array' are represented as an array of object pointers to instances of the
+# BigInt values in an instance of 'std.core.Array' are represented as an array of object pointers to instances of the
 # class `BigInt` and a special bit is set for this class.
 #
 scoped_macro(:validate_big_int) do |data, offset|

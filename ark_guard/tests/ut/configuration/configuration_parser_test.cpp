@@ -215,7 +215,7 @@ HWTEST(ConfigParserTest, configuration_parser_test_006, TestSize.Level0)
                                                                      {"v11", "std.core.String"},
                                                                      {"v12", "{Ustd.core.Null,std.core.String}"},
                                                                      {"v13", "std.core.String"},
-                                                                     {"v14", "{Uescompat.Array,std.core.String}"},
+                                                                     {"v14", "{Ustd.core.Array,std.core.String}"},
                                                                      {"v15", "std.core.Object"},
                                                                      {"v16", "std.core.Int"}};
 
@@ -259,7 +259,7 @@ HWTEST(ConfigParserTest, configuration_parser_test_007, TestSize.Level0)
         {"foo11", "std.core.String"},
         {"foo12", "{Ustd.core.Null,std.core.String}"},
         {"foo13", "std.core.String"},
-        {"foo14", "{Uescompat.Array,std.core.String}"},
+        {"foo14", "{Ustd.core.Array,std.core.String}"},
         {"foo15", "std.core.Object"},
         {"foo16", "std.core.Int"},
         {"foo17", "std.core.PromiseLike"},
@@ -306,7 +306,7 @@ HWTEST(ConfigParserTest, configuration_parser_test_008, TestSize.Level0)
         {"fooEx11", "std.core.String"},
         {"fooEx12", "{Ustd.core.Null,std.core.String}"},
         {"fooEx13", "std.core.String"},
-        {"fooEx14", "{Uescompat.Array,std.core.String}"},
+        {"fooEx14", "{Ustd.core.Array,std.core.String}"},
         {"fooEx15", "std.core.Object"},
         {"fooEx16", "std.core.Int"},
         {"fooEx17", "std.core.Promise"},
@@ -339,7 +339,7 @@ HWTEST(ConfigParserTest, configuration_parser_test_009, TestSize.Level0)
     parser.Parse(configuration);
 
     std::unordered_map<std::string, std::string> expectMap {{"foo1", "{Ustd.core.Int,std.core.String}"},
-                                                            {"foo2", "{Uescompat.Array,std.core.String}"}};
+                                                            {"foo2", "{Ustd.core.Array,std.core.String}"}};
 
     const auto classSpecifications = configuration.GetClassSpecifications();
     ASSERT_TRUE(!classSpecifications.empty());

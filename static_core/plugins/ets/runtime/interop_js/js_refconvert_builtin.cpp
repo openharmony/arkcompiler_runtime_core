@@ -209,8 +209,8 @@ private:
             {utf::CStringAsMutf8("at"), {"I:Lstd/core/Object;", 2, "at"}},
             {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
             {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "lastIndexOf"}},
-            {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lescompat/Array;", 3, "toSpliced"}},
-            {utf::CStringAsMutf8("push"), {"Lescompat/Array;:I", 1, "pushArray"}}};
+            {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lstd/core/Array;", 3, "toSpliced"}},
+            {utf::CStringAsMutf8("push"), {"Lstd/core/Array;:I", 1, "pushArray"}}};
 
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
         wArray_->GetOverloadNameMapping()["pushOne"] = "push";

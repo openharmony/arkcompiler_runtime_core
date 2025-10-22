@@ -20,8 +20,8 @@ class ExtArray<T> extends Array<T> {
 }
 
 //! CHECKER       Array unshift cpp intrinsic
-//! RUN           force_jit: true, options: "--compiler-regex=escompat.Array::unshift", entry: "escompat_array_unshift.ETSGLOBAL::testUnshift"
-//! METHOD        "escompat.Array::unshift"
+//! RUN           force_jit: true, options: "--compiler-regex=std.core.Array::unshift", entry: "escompat_array_unshift.ETSGLOBAL::testUnshift"
+//! METHOD        "std.core.Array::unshift"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.EscompatArrayUnshift"
 //! INST_NOT      /Call/

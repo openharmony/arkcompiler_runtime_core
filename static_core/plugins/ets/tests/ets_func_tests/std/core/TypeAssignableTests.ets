@@ -72,7 +72,7 @@ function testArrayAssignable() {
     const arrInt2: int[] = [3, 4];
     arktest.assertTrue(
         Type.of(arrInt1).assignableFrom(Type.of(arrInt2)),
-        'escompat.Array <- escompat.Array should be true'
+        'std.core.Array <- std.core.Array should be true'
     );
 }
 

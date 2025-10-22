@@ -496,7 +496,7 @@ static void EtsEscompatTypedArraySetValuesFromArrayImpl(T *thisArray, EtsEscompa
 
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (LIKELY(srcArray->IsExactlyEscompatArray(coro))) {
-        // Fast path in case of `srcArray` being exactly `escompat.Array`
+        // Fast path in case of `srcArray` being exactly `std.core.Array`
         EtsEscompatTypedArraySetValuesFromFixedArray(thisArray, dstData, srcArray->GetDataFromEscompatArray(),
                                                      srcArray->GetActualLengthFromEscompatArray());
     } else {
@@ -2127,7 +2127,7 @@ void EtsEscompatArrayOfBigIntImpl(T *thisArray, EtsTypedObjectArray<EtsBigInt> *
 extern "C" void EtsEscompatBigInt64ArrayOfBigInt(ark::ets::EtsEscompatBigInt64Array *thisArray, ark::ObjectHeader *src)
 {
     // The method fills the typed array from a FixedArray<bigint> and in contrast to
-    // EtsEscompatBigInt64ArraySetValuesFromArray, which fills a typed array from escompat.Array<bigint>, we can be
+    // EtsEscompatBigInt64ArraySetValuesFromArray, which fills a typed array from std.core.Array<bigint>, we can be
     // sure that `src` is an instance of the EtsTypedObjectArray<EtsBigInt> class.
     EtsEscompatArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
                                  [](EtsBigInt *bigint) { return unbox::GetLong(bigint); });
@@ -2259,7 +2259,7 @@ extern "C" void EtsEscompatBigUint64ArrayOfBigInt(ark::ets::EtsEscompatBigUInt64
                                                   ark::ObjectHeader *src)
 {
     // The method fills the typed array from a FixedArray<bigint> and in contrast to
-    // EtsEscompatBigUint64ArraySetValuesFromArray, which fills a typed array from escompat.Array<bigint>, we can be
+    // EtsEscompatBigUint64ArraySetValuesFromArray, which fills a typed array from std.core.Array<bigint>, we can be
     // sure that `src` is an instance of the EtsTypedObjectArray<EtsBigInt> class.
     EtsEscompatArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
                                  [](EtsBigInt *bigint) { return unbox::GetULong(bigint); });

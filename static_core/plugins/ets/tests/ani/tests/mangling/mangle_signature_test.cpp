@@ -511,7 +511,7 @@ TEST_F(MangleSignatureTest, Module_FindFunction)
 
     // Check references
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", "dC{msig.A}C{msig.B}:E{msig.E}", &fn), ANI_OK);
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "P{msig.A}C{escompat.Array}:", &fn), ANI_OK);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "P{msig.A}C{std.core.Array}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", FOO_UNION_SIGNATURE.data(), &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "foo1", FOO1_UNION_SIGNATURE.data(), &fn), ANI_OK);
 }
@@ -550,7 +550,7 @@ TEST_F(MangleSignatureTest, Module_FindFunction_OldFormat)
 
     // Check references
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", "DLmsig/A;Lmsig/B;:Lmsig/E;", &fn), ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "Lmsig/%%partial-A;Lescompat/Array;:V", &fn), ANI_INVALID_DESCRIPTOR);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "Lmsig/%%partial-A;Lstd/core/Array;:V", &fn), ANI_INVALID_DESCRIPTOR);
 }
 
 TEST_F(MangleSignatureTest, Namespace_FindFunction)
@@ -589,7 +589,7 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction)
 
     // Check references
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "dC{msig.rls.A}C{msig.rls.B}:E{msig.rls.E}", &fn), ANI_OK);
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "P{msig.A}C{escompat.Array}:", &fn), ANI_OK);
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "P{msig.A}C{std.core.Array}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", NAMESPACE_FOO_UNION_SIGNATURE.data(), &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", NAMESPACE_FOO1_UNION_SIGNATURE.data(), &fn), ANI_OK);
 }
@@ -630,7 +630,7 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction_OldFormat)
     // Check references
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "DLmsig/rls/A;Lmsig/rls/B;:Lmsig/rls/E;", &fn),
               ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "Lmsig/%%partial-A;Lescompat/Array;:V", &fn),
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "Lmsig/%%partial-A;Lstd/core/Array;:V", &fn),
               ANI_INVALID_DESCRIPTOR);
 }
 
@@ -670,7 +670,7 @@ TEST_F(MangleSignatureTest, Class_FindMethod)
 
     // Check references
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "dC{msig.A}C{msig.B}:E{msig.E}", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "P{msig.A}C{escompat.Array}:", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "P{msig.A}C{std.core.Array}:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", FOO_UNION_SIGNATURE.data(), &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", FOO1_UNION_SIGNATURE.data(), &method), ANI_OK);
 }
@@ -710,7 +710,7 @@ TEST_F(MangleSignatureTest, Class_FindMethod_OldFormat)
 
     // Check references
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "DLmsig/A;Lmsig/B;:Lmsig/E;", &method), ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "Lmsig/%%partial-A;Lescompat/Array;:V", &method),
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "Lmsig/%%partial-A;Lstd/core/Array;:V", &method),
               ANI_INVALID_DESCRIPTOR);
 }
 
@@ -750,7 +750,7 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod)
 
     // Check references
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "dC{msig.A}C{msig.B}:E{msig.E}", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "P{msig.A}C{escompat.Array}:", &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "P{msig.A}C{std.core.Array}:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", FOO_UNION_SIGNATURE.data(), &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", FOO1_UNION_SIGNATURE.data(), &method), ANI_OK);
 }
@@ -789,7 +789,7 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod_OldFormat)
 
     // Check references
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "DLmsig/A;Lmsig/B;:Lmsig/E;", &method), ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "Lmsig/%%partial-A;Lescompat/Array;:V", &method),
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "Lmsig/%%partial-A;Lstd/core/Array;:V", &method),
               ANI_INVALID_DESCRIPTOR);
 }
 
@@ -1015,8 +1015,8 @@ TEST_F(MangleSignatureTest, Class_BindNativeMethods)
     auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
 
     std::array functions = {
-        ani_native_function {"foo", "C{escompat.Array}:C{escompat.Array}", foo1},
-        ani_native_function {"foo", "C{escompat.Array}C{std.core.Function1}:", foo2},
+        ani_native_function {"foo", "C{std.core.Array}:C{std.core.Array}", foo1},
+        ani_native_function {"foo", "C{std.core.Array}C{std.core.Function1}:", foo2},
     };
 
     ani_class cls {};
@@ -1030,8 +1030,8 @@ TEST_F(MangleSignatureTest, Class_BindNativeMethods_OldFormat)
     auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
 
     std::array functions = {
-        ani_native_function {"foo", "Lescompat/Array;:Lescompat/Array;", foo1},
-        ani_native_function {"foo", "Lescompat/Array;Lstd/core/Function1;:V", foo2},
+        ani_native_function {"foo", "Lstd/core/Array;:Lstd/core/Array;", foo1},
+        ani_native_function {"foo", "Lstd/core/Array;Lstd/core/Function1;:V", foo2},
     };
 
     ani_class cls {};
@@ -1046,8 +1046,8 @@ TEST_F(MangleSignatureTest, Namespace_BindNativeFunctions)
     auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
 
     std::array functions = {
-        ani_native_function {"foo", "C{escompat.Array}:C{escompat.Array}", foo1},
-        ani_native_function {"foo", "C{escompat.Array}C{std.core.Function1}:", foo2},
+        ani_native_function {"foo", "C{std.core.Array}:C{std.core.Array}", foo1},
+        ani_native_function {"foo", "C{std.core.Array}C{std.core.Function1}:", foo2},
     };
 
     ani_namespace ns {};
@@ -1061,8 +1061,8 @@ TEST_F(MangleSignatureTest, Namespace_BindNativeFunctions_OldFormat)
     auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
 
     std::array functions = {
-        ani_native_function {"foo", "Lescompat/Array;:Lescompat/Array;", foo1},
-        ani_native_function {"foo", "Lescompat/Array;Lstd/core/Function1;:V", foo2},
+        ani_native_function {"foo", "Lstd/core/Array;:Lstd/core/Array;", foo1},
+        ani_native_function {"foo", "Lstd/core/Array;Lstd/core/Function1;:V", foo2},
     };
 
     ani_namespace ns {};
@@ -1077,8 +1077,8 @@ TEST_F(MangleSignatureTest, Module_BindNativeFunctions)
     auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
 
     std::array functions = {
-        ani_native_function {"foo", "C{escompat.Array}:C{escompat.Array}", foo1},
-        ani_native_function {"foo", "C{escompat.Array}C{std.core.Function1}:", foo2},
+        ani_native_function {"foo", "C{std.core.Array}:C{std.core.Array}", foo1},
+        ani_native_function {"foo", "C{std.core.Array}C{std.core.Function1}:", foo2},
     };
 
     ani_module m {};
@@ -1092,8 +1092,8 @@ TEST_F(MangleSignatureTest, Module_BindNativeFunctions_OldFormat)
     auto *foo2 = reinterpret_cast<void *>(ClassBindNativeFunctionsFoo2);
 
     std::array functions = {
-        ani_native_function {"foo", "Lescompat/Array;:Lescompat/Array;", foo1},
-        ani_native_function {"foo", "Lescompat/Array;Lstd/core/Function1;:V", foo2},
+        ani_native_function {"foo", "Lstd/core/Array;:Lstd/core/Array;", foo1},
+        ani_native_function {"foo", "Lstd/core/Array;Lstd/core/Function1;:V", foo2},
     };
 
     ani_module m {};

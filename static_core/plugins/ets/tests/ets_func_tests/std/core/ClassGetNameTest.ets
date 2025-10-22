@@ -64,7 +64,7 @@ function testClassGetNameFixedArray() {
 
 function testClassGetNameNestedFixedArray() {
     let f: FixedArray<FixedArray<FixedArray<Array<int>>>> = [[[[123]]]]
-    arktest.assertEQ(getName(f), "escompat.Array[][][]")
+    arktest.assertEQ(getName(f), "std.core.Array[][][]")
     arktest.assertEQ(getBootRuntimeLinker().findLoadedClass(getName(f))!.getName(), getName(f))
 }
 

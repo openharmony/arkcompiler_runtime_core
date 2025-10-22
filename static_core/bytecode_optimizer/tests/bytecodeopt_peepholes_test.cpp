@@ -142,27 +142,27 @@ TEST_F(IrBuilderTest, VirtualCallToDirectCallAdvanced)
 TEST_F(IrBuilderTest, VirtualCallToDirectCallArray)
 {
     auto source = std::string(R"(
-        .record escompat.Array <external>
+        .record std.core.Array <external>
         .record std.core.Double <external>
         .record std.core.Object <external>
 
         .function i32 main() {
-            initobj.short escompat.Array._ctor_:(escompat.Array)
+            initobj.short std.core.Array._ctor_:(std.core.Array)
             sta.obj v0
-            
+
             newobj v1, std.core.Double
             fldai.64 0x3ff0000000000000
             call.acc.short std.core.Double._ctor_:(std.core.Double, f64), v1, 0x1
-            
-            call.virt.short escompat.Array.pushOne:(escompat.Array, std.core.Object), v0, v1
+
+            call.virt.short std.core.Array.pushOne:(std.core.Array, std.core.Object), v0, v1
 
             ldai 0
             return
         }
-        
-        .function void escompat.Array._ctor_(escompat.Array a0) <ctor, external>
 
-        .function f64 escompat.Array.pushOne(escompat.Array a0, std.core.Object a1) <external, access.function=public>
+        .function void std.core.Array._ctor_(std.core.Array a0) <ctor, external>
+
+        .function f64 std.core.Array.pushOne(std.core.Array a0, std.core.Object a1) <external, access.function=public>
 
         .function void std.core.Double._ctor_(std.core.Double a0, f64 a1) <ctor, external, access.function=public>
         )");

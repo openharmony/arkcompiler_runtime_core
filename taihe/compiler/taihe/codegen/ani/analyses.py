@@ -1758,7 +1758,7 @@ class ArrayTypeAniInfo(TypeAniInfo):
         self.am = am
         self.t = t
         self.ani_type = ANI_ARRAY
-        self.sig_type = AniRuntimeClassType("escompat.Array")
+        self.sig_type = AniRuntimeClassType("std.core.Array")
 
     @override
     def sts_type_in(self, target: StsWriter) -> str:

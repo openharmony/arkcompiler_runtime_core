@@ -15,8 +15,8 @@
 
 //! CHECKER       Check Array.concat uses intrinsics
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex=escompat.Array::concat", entry: "escompat_array_concat.ETSGLOBAL::testConcatForArray"
-//! METHOD        "escompat.Array::concat"
+//! RUN           force_jit: true, options: "--compiler-regex=std.core.Array::concat", entry: "escompat_array_concat.ETSGLOBAL::testConcatForArray"
+//! METHOD        "std.core.Array::concat"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.EscompatArrayIsPlatformArray"
 //! INST          "Intrinsic.StdCoreObjectCopyTo"

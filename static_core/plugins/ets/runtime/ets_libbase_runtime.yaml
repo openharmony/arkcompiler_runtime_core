@@ -103,7 +103,7 @@ coretypes:
 - managed_class: std.core.Set
   mirror_class: ark::ets::EtsEscompatSet
 
-- managed_class: escompat.Array
+- managed_class: std.core.Array
   mirror_class: ark::ets::EtsEscompatArray
 
 - managed_class: std.core.ArrayBuffer
@@ -1153,7 +1153,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.String
-      args: [ escompat.Array ]
+      args: [ std.core.Array ]
     impl: ark::ets::intrinsics::StdCoreStringFromCharCode
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateStringFromCharCode
@@ -1528,11 +1528,11 @@ intrinsics:
     impl: ark::ets::intrinsics::EscompatDateGetTimezoneName
 
 ##################
-# escompat.Array #
+# std.core.Array #
 ##################
   - name: EscompatArrayGet
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: $_get
     static: false
     signature:
@@ -1542,7 +1542,7 @@ intrinsics:
 
   - name: EscompatArraySet
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: $_set
     static: false
     signature:
@@ -1552,7 +1552,7 @@ intrinsics:
 
   - name: EscompatArrayJoin
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: joinInternal
     static: true
     signature:
@@ -1565,7 +1565,7 @@ intrinsics:
 
   - name: EscompatInternalArrayIndexOf
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: indexOfImpl
     static: true
     signature:
@@ -1579,7 +1579,7 @@ intrinsics:
 
   - name: EscompatArrayInternalLastIndexOf
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: lastIndexOfImpl
     static: true
     signature:
@@ -1593,7 +1593,7 @@ intrinsics:
 
   - name: EscompatArrayFillImpl
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: fillImpl
     static: true
     signature:
@@ -1608,7 +1608,7 @@ intrinsics:
 
   - name: EscompatArrayGetUnsafe
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: $_get_unsafe
     static: false
     signature:
@@ -1618,7 +1618,7 @@ intrinsics:
 
   - name: EscompatArraySetUnsafe
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: $_set_unsafe
     static: false
     signature:
@@ -1628,7 +1628,7 @@ intrinsics:
 
   - name: EscompatArrayUnshiftInternal
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: unshiftInternal
     static: true
     signature:
@@ -1637,12 +1637,12 @@ intrinsics:
         - std.core.Object[]
         - i32
         - std.core.Object[]
-        - escompat.Array
+        - std.core.Array
     impl: ark::ets::intrinsics::EtsEscompatArrayUnshiftInternal
 
   - name: EscompatArrayReverse
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: reverseImpl
     static: true
     signature:
@@ -1657,7 +1657,7 @@ intrinsics:
 
   - name: EscompatArrayIsPlatformArray
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: isPlatformArray
     static: true
     signature:
@@ -1673,7 +1673,7 @@ intrinsics:
 
   - name: EscompatArrayGetBuffer
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: getBuffer
     static: true
     signature:
@@ -1889,7 +1889,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateInt8ArraySetValuesFromArray
@@ -2006,7 +2006,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateInt16ArraySetValuesFromArray
@@ -2103,7 +2103,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateInt32ArraySetValuesFromArray
@@ -2200,7 +2200,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateBigInt64ArraySetValuesFromArray
@@ -2297,7 +2297,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateFloat32ArraySetValuesFromArray
@@ -2404,7 +2404,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateFloat64ArraySetValuesFromArray
@@ -2511,7 +2511,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateUint8ClampedArraySetValuesFromArray
@@ -2618,7 +2618,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatUint8ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateUint8ArraySetValuesFromArray
@@ -2725,7 +2725,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatUint16ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateUint16ArraySetValuesFromArray
@@ -2842,7 +2842,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatUint32ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateUint32ArraySetValuesFromArray
@@ -2949,7 +2949,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatBigUint64ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateBigUint64ArraySetValuesFromArray
@@ -5050,7 +5050,7 @@ intrinsics:
 
   - name: EscompatObjectFastCopyToUnchecked
     space: ets
-    class_name: escompat.ETSGLOBAL
+    class_name: std.core.ETSGLOBAL
     method_name: copyToFast
     static: true
     signature:
@@ -9199,7 +9199,7 @@ intrinsics:
       ret: i64[]
       args:
         - i32
-        - escompat.Array
+        - std.core.Array
     impl: ark::ets::intrinsics::WorkerGroupGenerateGroupIdImpl
 
 ###############################
@@ -9599,5 +9599,5 @@ intrinsics:
         - std.core.RuntimeLinker
         - std.core.String
         - std.core.Class[]
-        - escompat.Array
+        - std.core.Array
     impl: ark::ets::intrinsics::ReflectProxyGenerateProxy

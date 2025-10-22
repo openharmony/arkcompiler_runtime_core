@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-E/bytecode_optimizer: Optimizing 15278_2.ETSGLOBAL.callMe:escompat.Array;{U15278_2.McOne,15278_2.McThree,15278_2.McTwo};void;: IR builder failed!
+E/bytecode_optimizer: Optimizing 15278_2.ETSGLOBAL.callMe:std.core.Array;{U15278_2.McOne,15278_2.McThree,15278_2.McTwo};void;: IR builder failed!

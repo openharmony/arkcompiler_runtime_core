@@ -477,7 +477,7 @@ TEST_F(ObjectNewTest, object_new_a_multiple_parameters_method)
     ASSERT_EQ(env_->FindClass("object_new_test.Mixture", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
     const char *name =
-        "C{std.core.Null}C{escompat.Array}C{escompat.Array}ifdzlsC{std.core.String}C{object_new_test.Animal}:C{"
+        "C{std.core.Null}C{std.core.Array}C{std.core.Array}ifdzlsC{std.core.String}C{object_new_test.Animal}:C{"
         "object_new_test.Mixture}";
     ani_method newMethod {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "newMixtureObject", name, &newMethod), ANI_OK);

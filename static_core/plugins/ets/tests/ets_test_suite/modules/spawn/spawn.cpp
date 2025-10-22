@@ -65,7 +65,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *version)
         return ANI_ERROR;
     }
 
-    ani_native_function function {"getAppAbcFiles", ":C{escompat.Array}", reinterpret_cast<void *>(getAppAbcFiles)};
+    ani_native_function function {"getAppAbcFiles", ":C{std.core.Array}", reinterpret_cast<void *>(getAppAbcFiles)};
 
     std::string_view mdl = "@spawn.spawn";
     ani_module spawnModule;

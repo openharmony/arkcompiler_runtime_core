@@ -644,9 +644,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Creates an array from an object of escompat.Array<int>.
+     * Creates an array from an object of std.core.Array<int>.
      *
-     * @param arr An instance of the escompat.Array type to convert to an array.
+     * @param arr An instance of the std.core.Array type to convert to an array.
      *
      * @returns new Uint8ClampedArray
      */
@@ -2141,9 +2141,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from an object of escompat.Array<int>.
+     * Creates an array from an object of std.core.Array<int>.
      *
-     * @param arr An instance of the escompat.Array type to convert to an array.
+     * @param arr An instance of the std.core.Array type to convert to an array.
      *
      * @returns new Uint8Array
      */
@@ -3622,9 +3622,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from an object of escompat.Array<int>.
+     * Creates an array from an object of std.core.Array<int>.
      *
-     * @param arr An instance of the escompat.Array type to convert to an array.
+     * @param arr An instance of the std.core.Array type to convert to an array.
      *
      * @returns new Uint16Array
      */
@@ -5137,9 +5137,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from an object of escompat.Array<int>.
+     * Creates an array from an object of std.core.Array<int>.
      *
-     * @param arr An instance of the escompat.Array type to convert to an array.
+     * @param arr An instance of the std.core.Array type to convert to an array.
      *
      * @returns new Uint32Array
      */
@@ -6664,9 +6664,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Creates an array from an object of escompat.Array<BigInt>.
+     * Creates an array from an object of std.core.Array<BigInt>.
      *
-     * @param arr An instance of the escompat.Array type to convert to an array.
+     * @param arr An instance of the std.core.Array type to convert to an array.
      *
      * @returns new BigUint64Array
      */

@@ -2,7 +2,7 @@
 
 
 ## 1.2 crash stack
-in 1.2 application, the crash offten happened in cpp code. when we have cpp crash, we will have a cpp crash stack, for example: 
+in 1.2 application, the crash offten happened in cpp code. when we have cpp crash, we will have a cpp crash stack, for example:
 ```
 ...
 ProcessMemory(kB):...
@@ -103,8 +103,8 @@ Output Example:
 
 ```
 Panda call stack:
-   0: 0x7f000XXXX in escompat.Array::slice (managed)
-   1: 0x7f000XXXX in escompat.Array::shift (managed)
+   0: 0x7f000XXXX in std.core.Array::slice (managed)
+   1: 0x7f000XXXX in std.core.Array::shift (managed)
    2: 0x7f000XXXX in std.concurrency.TimerTable::lambda_invoke-1 (managed)
    3: 0x7f000XXXX in std.concurrentcy.%%lambda-lambda_invoke-1::$_invoke (managed)
    4: 0x7f000XXXX in std.concurrency.ConcurrencyHelpers::spinlockGuard (managed)
@@ -112,7 +112,7 @@ Panda call stack:
 ...
 ```
 
-Add the code in the place you want, and use `StackWalker` get 1.2 ets stack. 
+Add the code in the place you want, and use `StackWalker` get 1.2 ets stack.
 
 ## Get 1.1 js stack in interop scenarios
 

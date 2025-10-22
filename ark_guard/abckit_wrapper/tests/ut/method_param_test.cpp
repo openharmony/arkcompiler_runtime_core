@@ -75,7 +75,7 @@ public:
         AddTargetParameterTypeName("method_param_test.ClassA");
         AddTargetParameterTypeName("i32");
         AddTargetParameterTypeName("std.core.String");
-        AddTargetParameterTypeName("escompat.Array");
+        AddTargetParameterTypeName("std.core.Array");
     }
 };
 
@@ -88,7 +88,7 @@ public:
 HWTEST_F(TestMethodParam, method_param_001, TestSize.Level0)
 {
     const auto method1 = fileView.Get<abckit_wrapper::Method>(
-        "method_param_test.ClassA.method1:method_param_test.ClassA;i32;std.core.String;escompat.Array;void;");
+        "method_param_test.ClassA.method1:method_param_test.ClassA;i32;std.core.String;std.core.Array;void;");
     ASSERT_TRUE(method1.has_value());
     visitor_ = std::make_unique<TestClassMethodParamVisitor>();
     method1.value()->ParametersAccept(*visitor_);
@@ -101,7 +101,7 @@ public:
         AddTargetParameterTypeName("i32");
         AddTargetParameterTypeName("method_param_test.ClassA");
         AddTargetParameterTypeName("std.core.String");
-        AddTargetParameterTypeName("escompat.Array");
+        AddTargetParameterTypeName("std.core.Array");
     }
 };
 
@@ -114,7 +114,7 @@ public:
 HWTEST_F(TestMethodParam, method_param_002, TestSize.Level0)
 {
     const auto foo1 = fileView.Get<abckit_wrapper::Method>(
-        "method_param_test.foo1:i32;method_param_test.ClassA;std.core.String;escompat.Array;void;");
+        "method_param_test.foo1:i32;method_param_test.ClassA;std.core.String;std.core.Array;void;");
     ASSERT_TRUE(foo1.has_value());
     visitor_ = std::make_unique<TestFunctionParamVisitor>();
     foo1.value()->ParametersAccept(*visitor_);
