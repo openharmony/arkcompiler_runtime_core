@@ -44,7 +44,7 @@ function RunTasksWithJsCallTest(): void {
         try {
             arktest.assertEQ(val, 2);
         }
-        catch(e: Error) {
+        catch(e) {
             console.log("RunTasksWithJsCallTest failed");
             return 1;
         }
@@ -103,7 +103,7 @@ function CreateEAWorkerWithoutInterop(): void {
             let val = JSRuntime.getPropertyJSValue(module, 'returnTwo');
         };
         eaw.run<void>(callback).Await();
-    } catch(e: Error) {
+    } catch(e) {
         res = true;
         eaw.join();
     }

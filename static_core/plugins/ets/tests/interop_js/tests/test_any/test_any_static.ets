@@ -127,19 +127,19 @@ function testSetter(): void {
     try {
         user.age = -11;
         res = false;
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Age cannot be negative';
     }
     try {
         user.username = 'jo';
         res = false;
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Username must be at least 3 characters long';
     }
     try {
         user.username = 'jo';
         res = false;
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Username must be at least 3 characters long';
     }
     arktest.assertTrue(res);

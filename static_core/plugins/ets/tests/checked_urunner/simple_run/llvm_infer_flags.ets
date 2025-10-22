@@ -59,8 +59,12 @@ function willThrow(): int {
                 i0 += 4
             }
         }
-    } catch(e: ArithmeticError) {
-        return 0
+    } catch(e) {
+        if ( e instanceof ArithmeticError) {
+            return 0
+        } else {
+            throw e;
+        }
     }
     return i0
 }
@@ -80,8 +84,12 @@ function overflows(): int {
                 i0 += 2
             }
         }
-    } catch(expected: ArithmeticError) {
-        return 0
+    } catch(expected) {
+        if (expected instanceof ArithmeticError) {
+            return 0
+        } else {
+            throw e
+        }
     }
     return 1
 }

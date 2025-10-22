@@ -118,7 +118,7 @@ async function doTestRejectWithAwaitShouldFail(p : Promise<Object>) : Promise<vo
     try {
         await p;
         globalTest!.fail();
-    } catch (e: Error) {
+    } catch (e) {
         let jse = e as Error;
         if (jse.message == 'rejected') {
             globalTest!.success();
@@ -137,7 +137,7 @@ async function doTestThenRejectWithAwaitShouldFail(p : Promise<Object>) : Promis
     try {
         await q;
         globalTest!.fail();
-    } catch (e: Error) {
+    } catch (e) {
         let jse = e as Error;
         if (jse.message == 'rejected') {
             globalTest!.success();

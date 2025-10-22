@@ -77,7 +77,7 @@ function newWithJustFunction(): boolean {
     try {
         const instance = testfn.instantiate();
         return false
-    } catch (e: Error) {
+    } catch (e) {
         return true
     }
 }
@@ -86,7 +86,7 @@ function newWithObj(): boolean {
     try {
         const instance = TestObject.instantiate();
         return false
-    } catch (e: Error) {
+    } catch (e) {
         return true
     }
 }
@@ -95,7 +95,7 @@ function newWithPrimitive(): boolean {
     try {
         const newPrimitive = primitive.instantiate();
         return false
-    } catch (e: Error) {
+    } catch (e) {
         return true
     }   
 }

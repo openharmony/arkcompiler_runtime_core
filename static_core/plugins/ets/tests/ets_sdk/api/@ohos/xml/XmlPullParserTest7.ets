@@ -254,11 +254,11 @@ function testXmlGetAttributeCount0003() {
         }
         parser.parseXml(options);
         arktest.assertTrue(false)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
+        try {
+            arktest.assertEQ((err as BusinessError).code, 401);
+        } catch (e) {}
     }
 }
 

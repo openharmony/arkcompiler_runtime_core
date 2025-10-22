@@ -28,7 +28,7 @@ function castIntToString(val: int): string {
 function handleBadValue(val: int): int {
     try {
         castIntToString(val)
-    } catch (e: Error) {
+    } catch (e) {
         return 0;
     }
     return 1;

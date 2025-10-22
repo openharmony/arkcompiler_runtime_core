@@ -56,7 +56,7 @@ function testSetUndefined() {
     let hashMap: HashMap<string|undefined, double|undefined> = new HashMap<string|undefined, double|undefined>();
     try {
         hashMap.set(undefined, 356);
-    } catch (e: BusinessError) {
+    } catch (e) {
         arktest.assertEQ(e.code, 401, "The HashMap should throw a BusinessError when key is undefined");
         return;
     }

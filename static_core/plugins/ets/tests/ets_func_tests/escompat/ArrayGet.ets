@@ -48,7 +48,7 @@ function testReadonlyArrayGetInvalidIndex(): int {
     let compRes: boolean;
     try {
         compRes = (b[negative] == undefined);
-    } catch (e: Error) {
+    } catch (e) {
         if (e instanceof RangeError) {
             return success;
         }
@@ -74,7 +74,7 @@ function testArrayLikeGetInvalidIndex(): int {
     let compRes: boolean;
     try {
         compRes = (b[negative] == undefined);
-    } catch (e: Error) {
+    } catch (e) {
         if (e instanceof RangeError) {
             return success;
         }
@@ -100,7 +100,7 @@ function testConcatArrayGetInvalidIndex(): int {
     let compRes: boolean;
     try {
         compRes = (b[negative] == undefined);
-    } catch (e: Error) {
+    } catch (e) {
         if (e instanceof RangeError) {
             return success;
         }

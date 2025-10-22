@@ -217,10 +217,10 @@ function testThrowError() {
     let callback = () => {
     let module = ESValue.load('concurrency_helpers');
     let res: boolean;
-        try {
-            module.getProperty('ErrorFunc').invoke(ESValue.wrapString(ErrorMessage));
-            res = false;
-        } catch (error: Error) {
+    try {
+        module.getProperty('ErrorFunc').invoke(ESValue.wrapString(ErrorMessage));
+        res = false;
+        } catch (error) {
             res = (error instanceof Error) && (error.message == ErrorMessage);
         }
         return res;
@@ -236,7 +236,7 @@ function testCustomThrowError() {
         try {
             module.getProperty('CustomErrorFunc').invoke(ESValue.wrapString(CustomErrorMessage), ESValue.wrapNumber(CustomErrorCode));
             res = false;
-        } catch (e: Error) {
+        } catch (e) {
             res = (e instanceof Error) && (e.message == CustomErrorMessage) &&
                 (e.code == CustomErrorCode);
         }

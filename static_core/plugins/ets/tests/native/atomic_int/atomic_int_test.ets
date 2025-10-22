@@ -50,7 +50,7 @@ function main(): int {
     for (let i: int = 0; i < 1000; i++) {
         try {
             testVisiablity();
-        } catch (e: Error) {
+        } catch (e) {
             console.log("testVisiablity failed with error: " + e.message + " at iteration " + i);
             res = 4;  // return a failure code if visibility test fails
             break;    // stop after the first failure to avoid flooding the output

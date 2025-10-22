@@ -11,3 +11,9 @@ api/@ohos/util/LightWeightMap/LightWeightMapGetKeysValuesSetValueAtTest.ets
 
 ### Issue 28302
 api/@ohos/util/ErrnoToStringTest.ets
+    
+### Issue 7957
+api/@ohos/uri/UriTestCreatePart.ets
+api/@ohos/uri/UriTestSegment.ets
+api/@ohos/url/UrlTestParamCombine.ets
+api/@ohos/util/HashMap/HashMapSetGetSetAllTest.ets

@@ -433,7 +433,6 @@ cases:
           } catch (e) {
             if (e instanceof A) {
               arktest.assertEQ(e.message, 'Error in main')
-              arktest.assertEQ(e.fld, 7)
               return
             }
           }

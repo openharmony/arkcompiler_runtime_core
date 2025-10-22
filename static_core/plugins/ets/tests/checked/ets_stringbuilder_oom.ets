@@ -25,15 +25,16 @@ function main(): int {
         try {
             sb.append(new String(c));
             n += 100;
-        } catch (e: OutOfMemoryError) {
-            if (n != foo(i)) {
-                return 3;
-            }
-            // Expected error caught
-            return 0;
         } catch (e) {
-            // Unexpected error caught
-            return 1;
+            if (e instanceof OutOfMemoryError) {
+                if (n != foo(i)) {
+                    return 3;
+                }
+                // Expected error caught
+                return 0;
+            } else {
+                return 1;
+            }
         }
     }
 

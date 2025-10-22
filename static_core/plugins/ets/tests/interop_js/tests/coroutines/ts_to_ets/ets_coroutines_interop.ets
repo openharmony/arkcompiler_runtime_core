@@ -28,8 +28,10 @@ function checkInteropNegative(): boolean {
     EtsGlobalInitPlaceholder();
     try {
         launch<Any, () => Any>(Bar).Await();
-    } catch (e: NoInteropContextError) {
-        return true;
+    } catch (e) {
+        if (e instanceof NoInteropContextError) {
+            return true;
+        }
     }
     return false;
 }
@@ -38,7 +40,7 @@ function checkInteropPositive(): boolean {
     EtsGlobalInitPlaceholder();
     try {
         Bar();
-    } catch (e: Error) {
+    } catch (e) {
         return false;
     }
     return true;

@@ -65,7 +65,7 @@ function __noinline__caller(str: string, arg: int) {
     } else {
       return __noinline__callee(str) + 'ok';
     }
-  } catch (e: Error) {
+  } catch (e) {
     // if NullPointerError occurs, returns empty string
     return e.message;
   }

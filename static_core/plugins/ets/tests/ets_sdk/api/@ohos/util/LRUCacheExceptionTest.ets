@@ -38,7 +38,7 @@ function testLRUCacheUpdateGetCapacity_Zero() {
     let that = new util.LRUCache<number, number>();
     try {
         that.updateCapacity(0);
-    } catch (err: BusinessError) {
+    } catch (err) {
         arktest.assertEQ(err.message, "Parameter error. The type of 0 must be small integer")
         return
     }
@@ -49,7 +49,7 @@ function testLRUCacheUpdateGetCapacity_Negative() {
     let that = new util.LRUCache<number, number>();
     try {
         that.updateCapacity(-1);
-    } catch (err: BusinessError) {
+    } catch (err) {
         arktest.assertEQ(err.message, "Parameter error. The type of -1 must be small integer")
         return
     }
@@ -59,7 +59,7 @@ function testLRUCacheUpdateGetCapacity_Negative() {
 function testLRUCacheConstructor_Zero() {
     try {
         let that = new util.LRUCache<number, number>(0);
-    } catch (err: BusinessError) {
+    } catch (err) {
         arktest.assertEQ(err.message, "Parameter error. The type of 0 must be small integer")
         return
     }
@@ -68,7 +68,7 @@ function testLRUCacheConstructor_Zero() {
 function testLRUCacheConstructor_Negative() {
     try {
         let that = new util.LRUCache<number, number>(-1);
-    } catch (err: BusinessError) {
+    } catch (err) {
         arktest.assertEQ(err.message, "Parameter error. The type of -1 must be small integer")
         return
     }

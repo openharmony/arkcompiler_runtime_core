@@ -517,7 +517,7 @@ Interop rules
 
     try {
         foo();
-    } catch (e: Error) {
+    } catch (e) {
         e.message; // ok
     }
 
@@ -543,7 +543,7 @@ Limitations & Solutions
 
     try {
         foo();
-    } catch (e: Error) {
+    } catch (e) {
         if (e instanceof RewrappedESObjectError) {
           let v = e.getValue() as number; // ok, obtain what's actually thrown
         }

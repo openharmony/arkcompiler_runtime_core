@@ -75,8 +75,10 @@ function testThrowingPreallocOOMObjectSuite(): Error
     let error: Error;
     try {
         fillHeap(arr, numberOfIter);
-    } catch(e: OutOfMemoryError) {
-        return e;
+    } catch(e) {
+        if (e instanceof OutOfMemoryError){
+            return e;
+        }
     }
 
     return new Error();
@@ -104,15 +106,20 @@ function testThrowingPreallocOOMObjectTwiceSuite(): Error
     let error: Error = new Error("testThrowingPreallocOOMObjectTwiceSuite failed");
     try {
         fillHeap(arr, numberOfIter);
-    } catch(e: OutOfMemoryError) {
+    } catch(e) {
+        if (!(e instanceof OutOfMemoryError)) {
+            throw e;
+        }
     }
 
     try {
         // Try to allocate more memory to get one more OOM
         arr2 = new Object[numberOfIter];
         fillHeap(arr2, numberOfIter);
-    } catch(e: OutOfMemoryError) {
-        error = e;
+    } catch(e) {
+        if (e instanceof OutOfMemoryError){
+            error = e;
+        }
     }
 
     return error;

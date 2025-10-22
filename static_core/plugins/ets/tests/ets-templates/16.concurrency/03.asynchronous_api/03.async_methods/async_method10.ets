@@ -28,7 +28,7 @@ class MethodWithErrorHandling {
             await this.methodThrowError();
             return "Success";
         } catch (error) {
-            return `Caught error: ${(error as Error).message}`;
+            return `Caught error: ${error.message as string}`;
         }
     }
 }

@@ -75,10 +75,11 @@ function findMethodByName(ct: InterfaceType, name: string): Method | null {
 function testGetInterfaceError(it: InterfaceType): boolean {
     try {
         it.getInterface(1000)
-    } catch (ignored: TypeError) {
+    } catch (ignored) {
+        if (ignored instanceof TypeError){
+            return true
+        }
         // Expected error is catched
-        return true
-    } catch (other) {
     }
     return false
 }
@@ -86,10 +87,11 @@ function testGetInterfaceError(it: InterfaceType): boolean {
 function testGetMethodError(it: InterfaceType): boolean {
     try {
         it.getMethod(1000)
-    } catch (ignored: TypeError) {
+    } catch (ignored) {
+        if (ignored instanceof TypeError){
+            return true
+        }
         // Expected error is catched
-        return true
-    } catch (other) {
     }
     return false
 }

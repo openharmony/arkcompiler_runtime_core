@@ -88,7 +88,7 @@ function testCreateError() {
 function testThrowError() {
     try {
         throw new Error("Test throw")
-    } catch (err: Error) {
+    } catch (err) {
         return
     }
 }
@@ -96,7 +96,7 @@ function testThrowError() {
 function testErrorMessage() {
     try {
         throw new Error("Error message test")
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.message, "Error message test")
         return
     }

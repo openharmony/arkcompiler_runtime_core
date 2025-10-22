@@ -45,7 +45,7 @@ export function checkAsync(ptr: bigint) {
         let method = module.getProperty('checkResult');
         try {
             method.invoke(ESValue.wrap(ptr));
-        } catch (e: Error) {
+        } catch (e) {
             return 1;
         }
         return 0;

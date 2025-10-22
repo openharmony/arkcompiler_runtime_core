@@ -94,10 +94,11 @@ function findMethodByName(ct: ClassType, name: string): Method | null {
 function testGetReceiverTypeError(staticMethod: MethodType): boolean {
     try {
         staticMethod.getReceiverType()
-    } catch (ignored: TypeError) {
+    } catch (ignored) {
+        if (ignored instanceof TypeError){
+            return true
+        }
         // Expected error is catched
-        return true
-    } catch (other) {
     }
     return false
 }

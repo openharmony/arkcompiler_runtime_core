@@ -19,7 +19,7 @@ function testStringIndexOutOfBoundsErrorExtendsRangeError() {
         str[-1];
     } catch (e) {
         arktest.assertTrue(e instanceof StringIndexOutOfBoundsError);
-        arktest.assertEQ((e as Error).name, "StringIndexOutOfBoundsError");
+        arktest.assertEQ(e.name, "StringIndexOutOfBoundsError");
         arktest.assertTrue(e instanceof RangeError);
     }
 
@@ -27,7 +27,7 @@ function testStringIndexOutOfBoundsErrorExtendsRangeError() {
         str[5];
     } catch (e) {
         arktest.assertTrue(e instanceof StringIndexOutOfBoundsError);
-        arktest.assertEQ((e as Error).name, "StringIndexOutOfBoundsError");
+        arktest.assertEQ(e.name, "StringIndexOutOfBoundsError");
         arktest.assertTrue(e instanceof RangeError);
     }
 }
@@ -36,7 +36,7 @@ function testArrayIndexOutOfBoundsErrorExtendsRangeError() {
     try {
         throw new ArrayIndexOutOfBoundsError("ArrayIndexOutOfBoundsError");
     } catch (e) {
-        arktest.assertEQ((e as Error).name, "ArrayIndexOutOfBoundsError");
+        arktest.assertEQ(e.name, "ArrayIndexOutOfBoundsError");
         arktest.assertTrue(e instanceof RangeError);
     }
 }
@@ -45,7 +45,7 @@ function testIndexOutOfBoundsErrorExtendsRangeError() {
     try {
         throw new IndexOutOfBoundsError("IndexOutOfBoundsError");
     } catch (e) {
-        arktest.assertEQ((e as Error).name, "IndexOutOfBoundsError");
+        arktest.assertEQ(e.name, "IndexOutOfBoundsError");
         arktest.assertTrue(e instanceof RangeError);
     }
 }
