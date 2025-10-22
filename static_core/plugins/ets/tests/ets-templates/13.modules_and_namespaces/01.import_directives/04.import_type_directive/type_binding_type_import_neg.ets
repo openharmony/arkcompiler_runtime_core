@@ -16,7 +16,7 @@ limitations under the License.
 /*---
 desc: A compile-time error occurs if import type is used, and one of bindings also uses type.
 files:
-- ../../03.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class
+- ../../03.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class.ets
 tags: [compile-only, negative]
 ---*/
 

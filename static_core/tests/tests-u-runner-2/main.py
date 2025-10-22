@@ -23,7 +23,7 @@ from typing import Any, cast
 
 import pytz
 
-from runner.common_exceptions import InvalidConfiguration, InvalidInitialization, RunnerException
+from runner.common_exceptions import InvalidConfiguration, InvalidInitialization
 from runner.enum_types.verbose_format import VerboseKind
 from runner.environment import RunnerEnv
 from runner.init_runner import InitRunner
@@ -61,13 +61,8 @@ def main() -> None:
         Log.default(logger, "Attention: tests are going to take only 1 process. The execution can be slow. "
                             "You can set the option `--processes` to wished processes quantity "
                             "or use special value `all` to use all available cores.")
-    failed_tests = 0
-    try:
-        failed_tests = main_cycle(config, logger)
-    except RunnerException as exc:
-        logger.logger.critical(exc.message)
-    finally:
-        sys.exit(0 if failed_tests == 0 else 1)
+    failed_tests = main_cycle(config, logger)
+    sys.exit(0 if failed_tests == 0 else 1)
 
 
 def main_cycle(config: Config, logger: Log) -> int:
