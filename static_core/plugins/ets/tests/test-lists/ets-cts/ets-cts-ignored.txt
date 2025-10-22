@@ -401,6 +401,9 @@
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_9.ets
 07.expressions/21.multiplicative_expressions/04.exponentiation/nan_10.ets
 
+#30891
+07.expressions/21.multiplicative_expressions/04.exponentiation/enum.ets
+
 #24367 no CTE on equality expressions with numeric types vs. enum int
 07.expressions/25.equality_expressions/eq_neg_100.ets
 07.expressions/25.equality_expressions/eq_neg_145.ets
