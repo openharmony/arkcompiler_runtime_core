@@ -411,7 +411,7 @@ function testGetName() {
     let strXml = str.join("")
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: tokenCb}
     parser.parseXml(options)
 
     let expectedTextStr = '{ START_TAG : note }; { START_TAG : title }; { END_TAG : title }; { START_TAG : todo }; { END_TAG : todo }; { END_TAG : note }; '
