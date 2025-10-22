@@ -48,6 +48,7 @@
 #include "runtime/thread_manager.h"
 #include "runtime/mem/gc/gc_adaptive_stack_inl.h"
 #include "libarkbase/utils/utils.h"
+#include "runtime/trace.h"
 
 namespace ark::mem {
 using TaggedValue = coretypes::TaggedValue;
@@ -774,10 +775,12 @@ bool GC::WaitForGC(GCTask task)
     Timing suspendThreadsTiming;
     {
         ScopedTiming t("SuspendThreads", suspendThreadsTiming);
+        Tracer::Start("GC::WaitForGC");
         this->GetPandaVm()->GetRendezvous()->SafepointBegin();
     }
     if (!this->NeedRunGCAfterWaiting(oldCounter, task)) {
         this->GetPandaVm()->GetRendezvous()->SafepointEnd();
+        Tracer::Finish();
         return false;
     }
 
@@ -789,6 +792,7 @@ bool GC::WaitForGC(GCTask task)
     }
 
     this->GetPandaVm()->GetRendezvous()->SafepointEnd();
+    Tracer::Finish();
     Runtime::GetCurrent()->GetNotificationManager()->GarbageCollectorFinishEvent();
     this->GetPandaVm()->HandleGCFinished();
     this->GetPandaVm()->HandleEnqueueReferences();
@@ -833,6 +837,7 @@ void GC::PrintDetailedLog()
 ConcurrentScope::ConcurrentScope(GC *gc, bool autoStart)
 {
     LOG(DEBUG, GC) << "Start ConcurrentScope";
+    Tracer::Start("GC ConcurrentScope");
     gc_ = gc;
     if (autoStart) {
         Start();
@@ -847,6 +852,7 @@ ConcurrentScope::~ConcurrentScope()
         gc_->SetupCpuAffinityAfterConcurrent();
         gc_->EndConcurrentScopeRoutine();
     }
+    Tracer::Finish();
 }
 
 NO_THREAD_SAFETY_ANALYSIS void ConcurrentScope::Start()
