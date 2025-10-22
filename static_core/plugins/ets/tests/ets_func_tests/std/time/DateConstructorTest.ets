@@ -154,11 +154,11 @@ function testStringConstructorLocalTZ(): void {
 function testStringConstructorInvalidArgs(): void {
     arktest.expectError(() => {
         const startingSpaceDate = new Date(" 2024-02-19T08:00:00")
-    }, "Invalid time value")
+    }, "Invalid time value: ' 2024-02-19T08:00:00'")
     
     arktest.expectError(() => {
         const trailingSpaceDate = new Date("2024-02-19T08:00:00 ")
-    }, "Invalid time value")
+    }, "Invalid time value: '2024-02-19T08:00:00 '")
 
     const ms4Date = new Date("2024-02-28T00:55:31.1234Z")
     arktest.assertEQ(Date.UTC(2024, 1, 28, 0, 55, 31, 123), ms4Date.getTime())
@@ -168,7 +168,27 @@ function testStringConstructorInvalidArgs(): void {
 
     arktest.expectError(() => {
         const missingMsDate = new Date("2024-02-28T00:55:31.")
-    }, "Invalid time value")
+    }, "Invalid time value: '2024-02-28T00:55:31.'")
+
+    arktest.expectError(() => {
+        const invalidMonth = new Date("2000-99-01T00:00:00.001Z")
+    }, "Invalid time value: '2000-99-01T00:00:00.001Z'")
+
+    arktest.expectError(() => {
+        const invalidDay = new Date("2000-01-99T00:00:00.001Z")
+    }, "Invalid time value: '2000-01-99T00:00:00.001Z'")
+
+    arktest.expectError(() => {
+        const invalidHour = new Date("2000-01-01T99:00:00.001Z")
+    }, "Invalid time value: '2000-01-01T99:00:00.001Z'")
+
+    arktest.expectError(() => {
+        const invalidMinute = new Date("2000-01-01T00:99:00.001Z")
+    }, "Invalid time value: '2000-01-01T00:99:00.001Z'")
+
+    arktest.expectError(() => {
+        const invalidSecond = new Date("2000-01-01T00:00:99.001Z")
+    }, "Invalid time value: '2000-01-01T00:00:99.001Z'")
 }
 
 function testStringConstructorExpandedYear(): void {

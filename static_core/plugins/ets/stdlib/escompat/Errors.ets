@@ -121,3 +121,16 @@ export class AggregateError extends Error {
     }
 
 }
+
+/**
+ * @class Represents an error that occurs when an input string contains invalid or incorrectly formatted data.
+ */
+export class FormatError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("FormatError", message, options)
+    }
+
+    static $_invoke(message?: String, options?: ErrorOptions): FormatError {
+        return new FormatError(message, options)
+    }
+}

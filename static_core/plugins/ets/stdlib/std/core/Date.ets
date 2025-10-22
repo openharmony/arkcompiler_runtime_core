@@ -484,7 +484,7 @@ export class Date {
             const parser = new LegacyDateParser(dateStr)
             const parsedDate = parser.parseDate()
             if (parsedDate === INVALID_DATE) {
-                throw new RangeError("Invalid time value")
+                throw new FormatError(`Invalid time value: '${dateStr}'`)
             }
             return parsedDate
         }
@@ -493,42 +493,18 @@ export class Date {
         try {
             parseResult = new ISODateParser(dateStr).parse()
         } catch (parseError) {
-            throw new RangeError("Invalid time value")
+            throw new FormatError(`Invalid time value: '${dateStr}'`)
         }
 
         const date = new Date(0)
         date.setUTCFullYear(parseResult.year)
-
         if (parseResult.month > 0) {
-            if (parseResult.month > monthCountPerYear) {
-                throw new RangeError("Invalid time value")
-            }
             date.setUTCMonth(parseResult.month - 1)
         }
-
-        if (parseResult.day > maxDaysInMonth) {
-            throw new RangeError("Invalid time value")
-        }
         date.setUTCDay(parseResult.day)
-
-        if (parseResult.hour > hoursPerDay) {
-            throw new RangeError("Invalid time value")
-        }
         date.setUTCHours(parseResult.hour)
-
-        if (parseResult.minute > minutesPerHour) {
-            throw new RangeError("Invalid time value")
-        }
         date.setUTCMinutes(parseResult.minute)
-
-        if (parseResult.second > secondsPerMinute) {
-            throw new RangeError("Invalid time value")
-        }
         date.setUTCSeconds(parseResult.second)
-
-        if (parseResult.ms > msPerSecond) {
-            throw new RangeError("Invalid time value")
-        }
         date.setUTCMilliseconds(parseResult.ms)
 
         const tzOffset = parseResult.tzOffset

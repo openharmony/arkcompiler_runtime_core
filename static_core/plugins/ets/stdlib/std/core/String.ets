@@ -1219,7 +1219,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     public charCodeAt(index: int): number {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return NaN;
+            throw new RangeError(`Invalid index: ${index}`);
         }
         return this.charAt(index).toDouble();
     }
@@ -1228,10 +1228,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
      */
     public charCodeAt(index: number): number {
-        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return NaN;
-        }
-        return this.charAt(index.toInt()).toDouble();
+        return this.charCodeAt(index.toInt());
     }
 
     public static native fromCharCodeImpl(codes: Array<number>): String;
