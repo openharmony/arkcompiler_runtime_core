@@ -35,18 +35,9 @@ function testMain() {
 }
 
 function writer(): Int {
-    wait()
     Atomics.store(bytearr, 0, 5 as byte)
     let count = Atomics.notify(arr, 0)
     return 1
-}
-
-function wait(): int {
-    let i = 1
-    for (let j = 0; j < 10000; j++) {
-        i += j
-    }
-    return i
 }
 
 function main() {
