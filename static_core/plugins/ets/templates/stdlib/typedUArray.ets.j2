@@ -139,14 +139,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
                 {%- if element.get('name') == 'BigUint64' %}
                 this.setUnsafeClamp(i, arr.$_get(i){{numberBigIntToPrimitive}})
                 {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
-                let temp: double = arr.$_get(i);
-                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
-                    this.setUnsafeClamp(i, 0);
-                } else {
-                    this.setUnsafeClamp(i, {{element.get('name')}}Array.doubleToInt(temp));
-                }
-                {%- elif element.get('name') != 'Uint8Clamped' %}
-                this.setUnsafeClamp(i, this.zeroIfInfinity(arr.$_get(i)).to{{element['primitiveType'].capitalize()}}())
+                this.setUnsafeClamp(i, {{element.get('name')}}Array.doubleToInt(arr.$_get(i)));
                 {%- else %}
                 this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(arr.$_get(i)))
                 {%- endif %}
@@ -161,7 +154,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     {%- if element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
-    public static native doubleToInt(d: double): {{element['primitiveType'].capitalize()}};
+    private static native doubleToInt(d: double): {{element['primitiveType'].capitalize()}};
     {%- endif %}
 
     /**
@@ -269,10 +262,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                {%- if element.get('clamped', False) %}
-                this.setUnsafe(i, {{element['name']}}Array.clamp(arr.$_get(i).to{{element['primitiveType'].capitalize()}}()))
+                {%- if element.get('name') == 'BigUint64' %}
+                this.setUnsafe(i, new BigInt(arr[i]).getULong())
+                {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+                this.setUnsafe(i, {{element.get('name')}}Array.doubleToInt(arr[i]))
                 {%- else %}
-                this.setUnsafe(i, arr.$_get(i).to{{element['primitiveType'].capitalize()}}())
+                this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(arr[i]))
                 {%- endif %}
             }
         } else {
@@ -323,9 +318,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             {%- if element.get('name') == 'BigUint64' %}
-            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( valueOrBigIntGetULong % 'numbers[i]' ) }})
-            {%- elif element.get('name') != 'Uint8Clamped' %}
-            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( 'this.zeroIfInfinity(' + (valueOrBigIntGetULong % 'numbers[i]') + ')' ) }})
+            this.setUnsafe(i, new BigInt(numbers[i]).getULong())
+            {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+            this.setUnsafe(i, {{element.get('name')}}Array.doubleToInt(numbers[i]))
             {%- else %}
             this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(numbers[i]))
             {%- endif %}
@@ -341,7 +336,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             {%- if element.get('name') == 'BigUint64' %}
             this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( valueOrBigIntGetULong % 'numbers[i]' ) }})
             {%- elif element.get('name') != 'Uint8Clamped' %}
-            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( 'this.zeroIfInfinity(' + (valueOrBigIntGetULong % 'numbers[i]') + ')' ) }})
+            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( valueOrBigIntGetULong % 'numbers[i]' ) }})
             {%- else %}
             this.setUnsafeClamp(i, numbers[i].to{{element['primitiveType'].capitalize()}}())
             {%- endif %}
@@ -358,27 +353,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, {{fromElementCompat % 'numbers[i]'}})
         }
-    }
-    {%- endif %}
-
-
-{%- if element.get('name') not in ['Uint8Clamped', 'BigUint64'] %}{#- comment: Uint8Array and others, except Uint8Clamped, BigUint64 #}
-    private zeroIfInfinity(val: {{element['subsetType']}}): {{element['subsetType']}} {
-        {%- if element.get('subsetType') == 'number' %}
-        if ((val == Infinity) || (val == -Infinity)) {
-        {%- else %}
-        if (({{fromElementCompat % 'val'}} == Infinity) || ({{fromElementCompat % 'val'}} == -Infinity)) {
-        {%- endif %}
-            return {{ '0' if element['subsetType'] != 'BigInt' else 'new BigInt(0)' }}
-        }
-        return {{ 'val' if element['subsetType'] != 'BigInt' else 'new BigInt(val)' }}
-    }
-
-    private zeroIfInfinity(val: {{element['primitiveType']}}): {{element['primitiveType']}} {
-        if ((val == Infinity) || (val == -Infinity)) {
-            return 0
-        }
-        return val
     }
     {%- endif %}
 
@@ -439,11 +413,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param index index to change
      */
     public $_set(index: int, val: {{element['subsetType']}}): void {
-        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
-        let v = this.zeroIfInfinity(val)
-        this.$_set(index, {{fromElementCompat % 'v'}})
+        {%- if element.get('name') == 'BigUint64' %}
+        this.$_set(index, val.getULong())
+        {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+        this.$_set(index, {{element.get('name')}}Array.doubleToInt(val))
         {%- else %}
-        this.$_set(index, {{fromElementCompat % 'val'}})
+        this.$_set(index, Uint8ClampedArray.toUint8Clamped(val))
         {%- endif %}
     }
 
@@ -524,10 +499,13 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start?: int, end?: int): {{element['name']}}Array {
-        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
-        value = this.zeroIfInfinity(value)
+        {%- if element.get('name') == 'BigUint64' %}
+        this.fill(value.getULong(), start, end)
+        {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+        this.fill({{element.get('name')}}Array.doubleToInt(value), start, end)
+        {%- else %}
+        this.fill(Uint8ClampedArray.toUint8Clamped(value), start, end)
         {%- endif %}
-        this.fill({{fromElementCompat % 'value'}}, start, end)
         return this
     }
 
@@ -586,12 +564,13 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
-        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64']%}
-            let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafeClamp(insertPos + i, {{fromElementCompat % 'v'}})
-        {%- else %}
-            this.setUnsafeClamp(insertPos + i, {{fromElementCompat % 'arr[i]'}})
-        {%- endif %}
+            {%- if element.get('name') == 'BigUint64' %}
+            this.setUnsafe(insertPos + i, arr[i].getULong())
+            {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+            this.setUnsafe(insertPos + i, {{element.get('name')}}Array.doubleToInt(arr[i]))
+            {%- else %}
+            this.setUnsafeClamp(insertPos + i, Uint8ClampedArray.toUint8Clamped(arr[i]))
+            {%- endif %}
         }
     }
 
@@ -609,12 +588,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
-        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
-            let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafeClamp(insertPos + i, v)
-        {%- else %}
             this.setUnsafeClamp(insertPos + i, arr[i])
-        {%- endif %}
         }
     }
 
@@ -657,12 +631,13 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < array.length; ++i) {
-        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
-            let v = this.zeroIfInfinity(array[i])
-            this.setUnsafeClamp(insertPos + i, {{fromElementCompat % 'v'}})
-        {%- else %}
-            this.setUnsafeClamp(insertPos + i, {{fromElementCompat % 'array[i]'}})
-        {%- endif %}
+            {%- if element.get('name') == 'BigUint64' %}
+            this.setUnsafe(insertPos + i, array[i].getULong())
+            {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+            this.setUnsafe(insertPos + i, {{element.get('name')}}Array.doubleToInt(array[i]))
+            {%- else %}
+            this.setUnsafeClamp(insertPos + i, Uint8ClampedArray.toUint8Clamped(array[i]))
+            {%- endif %}
         }
     }
     {%- set uniquePrimitiveTypes = ['number', 'int',  element['primitiveTypeWide']] if element['primitiveTypeWide'] != 'int' else ['number', 'int'] %}
@@ -736,33 +711,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         const len = arr.length;
         const result = new Uint8ClampedArray(len);
         for (let i: int = 0; i < len; ++i) {
-            const raw = (arr as ArrayLike<number>)[i];
-            let m: number;
-
-            if (isNaN(raw)) {
-                m = 0;
-            } else if (raw === Infinity) {
-                m = 255;
-            } else if (raw === -Infinity) {
-                m = 0;
-            } else {
-                const floor = Math.floor(raw);
-                const frac = raw - floor;
-                if (frac > 0.5) {
-                    m = floor + 1;
-                } else if (frac === 0.5) {
-                    m = (floor % 2 === 0) ? floor : floor + 1;
-                } else {
-                    m = floor;
-                }
-                if (m < 0) {
-                    m = 0;
-                } else if (m > 255) {
-                    m = 255;
-                }
-            }
-
-            result.setUnsafeClamp(i, m.toInt());
+            result.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(arr[i]))
         }
         return result;
         {%- elif element.name != 'BigUint64' %}
@@ -887,12 +836,13 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
                 if (x.done) {
                     return new {{element['name']}}Array(result.buffer, 0, i)
                 }
+                const mapped = (mapfn)!(x.value!, i)
                 {%- if element.get('name') == 'BigUint64' %}
-                result.setUnsafeClamp(i, ((mapfn)!(x.value!, i)){{numberBigIntToPrimitive}})
-                {%- elif element.get('name') != 'Uint8Clamped' %}
-                result.setUnsafeClamp(i, result.zeroIfInfinity((mapfn)!(x.value!, i)).to{{element['primitiveType'].capitalize()}}())
+                result.setUnsafe(i, mapped.getULong())
+                {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+                result.setUnsafe(i, {{element.get('name')}}Array.doubleToInt(mapped))
                 {%- else %}
-                result.setUnsafeClamp(i, (mapfn)!(x.value!, i).to{{element['primitiveType'].capitalize()}}())
+                result.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(mapped))
                 {%- endif %}
             }
             return result
@@ -913,12 +863,13 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
                 }
                 temp = new {{element['name']}}Array(tb)
             }
+            const mapped = (mapfn)!(x, index[0])
             {%- if element.get('name') == 'BigUint64' %}
-            temp.setUnsafeClamp(index[0], ((mapfn)!(x, index[0])){{numberBigIntToPrimitive}})
-            {%- elif element.get('name') != 'Uint8Clamped' %}
-            temp.setUnsafeClamp(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])).to{{element['primitiveType'].capitalize()}}())
+            temp.setUnsafe(index[0], mapped.getULong())
+            {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+            temp.setUnsafe(index[0], {{element.get('name')}}Array.doubleToInt(mapped))
             {%- else %}
-            temp.setUnsafeClamp(index[0], (mapfn)!(x, index[0]).to{{element['primitiveType'].capitalize()}}())
+            temp.setUnsafeClamp(index[0], Uint8ClampedArray.toUint8Clamped(mapped))
             {%- endif %}
             index[0]++
         })
@@ -941,13 +892,14 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-        {%- if element.get('name') == 'BigUint64' %}
-            res.setUnsafeClamp(idx[0], (mapfn(x as T, idx[0].toDouble())){{numberBigIntToPrimitive}})
-        {%- elif element.get('name') != 'Uint8Clamped' %}
-            res.setUnsafeClamp(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0].toDouble())).to{{element['primitiveType'].capitalize()}}())
-        {%- else %}
-            res.setUnsafeClamp(idx[0], mapfn(x as T, idx[0].toDouble()).to{{element['primitiveType'].capitalize()}}())
-        {%- endif %}
+            const mapped = mapfn(x as T, idx[0].toDouble())
+            {%- if element.get('name') == 'BigUint64' %}
+            res.setUnsafe(idx[0], mapped.getULong())
+            {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+            res.setUnsafe(idx[0], {{element.get('name')}}Array.doubleToInt(mapped))
+            {%- else %}
+            res.setUnsafeClamp(idx[0], Uint8ClampedArray.toUint8Clamped(mapped))
+            {%- endif %}
             idx[0] += 1
         })
         return res

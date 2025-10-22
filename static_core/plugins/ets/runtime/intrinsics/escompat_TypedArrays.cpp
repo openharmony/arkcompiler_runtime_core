@@ -2038,19 +2038,25 @@ static T CastNumberUnsigned(double val)
 template <>
 uint8_t CastNumberUnsignedHelper(double val)
 {
-    return StdCoreDoubleToInt(val);
+    auto ret = TypedArrayDoubleToInt(val, INT8_BITS);
+    auto pTmp = reinterpret_cast<uint8_t *>(&ret);
+    return reinterpret_cast<uint8_t>(*pTmp);
 }
 
 template <>
 uint16_t CastNumberUnsignedHelper(double val)
 {
-    return StdCoreDoubleToInt(val);
+    auto ret = TypedArrayDoubleToInt(val, INT16_BITS);
+    auto pTmp = reinterpret_cast<uint16_t *>(&ret);
+    return static_cast<uint16_t>(*pTmp);
 }
 
 template <>
 uint32_t CastNumberUnsignedHelper(double val)
 {
-    return StdCoreDoubleToLong(val);
+    auto ret = TypedArrayDoubleToInt(val, INT32_BITS);
+    auto pTmp = reinterpret_cast<uint32_t *>(&ret);
+    return static_cast<uint32_t>(*pTmp);
 }
 
 template <typename T1, typename T2>
