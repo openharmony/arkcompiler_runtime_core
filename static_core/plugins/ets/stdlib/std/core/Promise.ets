@@ -217,28 +217,48 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @returns { Promise } new promise that will be completed the same way as the current promise after the execution of the callback
      *     or rejected if the callback finished with an exception
      */
-    finally(onFinally?: () => void): Promise<Awaited<T>> {
+    finally<U = T>(onFinally?: () => U|PromiseLike<U>): Promise<Awaited<T>> {
         let promise = new Promise<Awaited<T>>();
         let fn: () => void = (): void => {
             try {
+                let onFinallyResult: U|PromiseLike<U>;
+                let onFinallyError: Error | undefined = undefined;
+
+                const resolveOriginalPromise = (): void => {
+                    if (this.state == Promise.STATE_RESOLVED) {
+                        promise.resolveImpl(this.value as T, false);
+                    } else {
+                        promise.rejectImpl(this.value as Error, false);
+                    }
+                };
+
                 if (onFinally) {
                     try {
-                        onFinally();
-                    } catch(error) {
-                        // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-                        promise.rejectImpl(error as Error, false);
+                        onFinallyResult = onFinally();
+                    } catch (error) {
+                        // Use cast method temporarily, wait issue#22428 resolve front bug
+                        onFinallyError = error as Error;
                     }
                 }
-                if (this.state == Promise.STATE_RESOLVED) {
-                    promise.resolveImpl(this.value as T, false);
+
+                if (onFinallyError) {
+                    promise.rejectImpl(onFinallyError!, false);
+                } else if (onFinallyResult instanceof Promise) {
+                    onFinallyResult.then(
+                        () => {
+                            resolveOriginalPromise();
+                        },
+                        (error) => {
+                            promise.rejectImpl(error as Error, false);
+                        }
+                    );
                 } else {
-                    promise.rejectImpl(this.value as Error, false);
+                    resolveOriginalPromise();
                 }
-            } catch (e) {
-                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-                promise.rejectImpl(e as Error, false);
+            } catch (unexpectedError) {
+                promise.rejectImpl(unexpectedError as Error, false);
             }
-        }
+        };
         this.submitCallback(fn as Object);
         return promise;
     }
