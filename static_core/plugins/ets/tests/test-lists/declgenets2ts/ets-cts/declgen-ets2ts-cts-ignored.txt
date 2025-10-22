@@ -1711,6 +1711,9 @@
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/re_export_test_4.ets
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/re_export_test_5.ets
 #end of 29393
+13.modules_and_namespaces/01.import_directives/chaining_import_0.ets
+13.modules_and_namespaces/01.import_directives/chaining_import_1.ets
+13.modules_and_namespaces/01.import_directives/chaining_import_2.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/default_module.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/module_a.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/module_all.ets
@@ -2344,3 +2347,4 @@
 13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations_consts.ets
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/export_type_set2_1.ets
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/export_type_set2_2.ets
+16.concurrency/03.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/user_defined_types/async_method_returns_promise_class_interface_36.ets
