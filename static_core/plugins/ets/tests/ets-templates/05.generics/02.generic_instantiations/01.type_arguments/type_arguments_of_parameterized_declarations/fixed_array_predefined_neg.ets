@@ -15,31 +15,17 @@ limitations under the License.
 
 {% for c in cases %}
 /*---
-desc: Type arguments
-params: class arguments, invariant
+desc: A compile-time error occurs if a generic instantiation leads to instantiation of the type
+   FixedArray with the predefined value type
+tags: [compile-only, negative]
 ---*/
 
-interface I {}
-
-class X implements I {}
-
-enum Color { Red, Green, Blue }
-
-class A<T{{c.bound}}> {
-    private t: T
-
-    public constructor(t: T) {
-        this.t = t
-    }
+class A <T> {
+    foo (p: FixedArray<T>) {}
 }
 
-type foo_type = () => void
-
 {{c.decl}}
-function main() {
 
-    {{c.use|indent}}
-    arktest.assertTrue(v instanceof A)
-    
+function main() {
 }
 {% endfor %}

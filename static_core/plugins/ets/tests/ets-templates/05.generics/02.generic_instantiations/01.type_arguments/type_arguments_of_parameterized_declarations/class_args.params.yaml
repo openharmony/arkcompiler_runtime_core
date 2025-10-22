@@ -150,6 +150,33 @@ cases:
   - use: |-
       let v: A<[A<X>, A<X>]> = new A<[A<X>, A<X>]>([new A<X>(new X()), new A<X>(new X())])
 
+  # type argument is function
+  - use: |-
+      let foo: foo_type = () => {}
+      let v: A<foo_type> = new A<foo_type>(foo)
+
+  - use: |-
+      let foo: foo_type = () => {}
+      let foo1: foo_type1 = (foo) => {}
+      let v: A<foo_type1> = new A<foo_type1>(foo1)
+    decl: |-
+      type foo_type1 = (p: foo_type) => void
+
+  - use: |-
+      let v: A<foo_type|[X, X]|null> = new A<foo_type|[X, X]|null>(null)
+
+  - use: |-
+      let foo: foo_type = () => {}
+      let v: A<[foo_type|null, foo_type]> = new A<[foo_type|null, foo_type]>([null, foo])
+
+  - use: |-
+      let foo: foo_type = () => {}
+      let v: A<A<[foo_type, foo_type]>> = new A<A<[foo_type, foo_type]>>(new A<[foo_type, foo_type]>([foo, foo]))
+
+  - use: |-
+      let foo: foo_type = () => {}
+      let v: A<[A<foo_type>, A<foo_type>]> = new A<[A<foo_type>, A<foo_type>]>([new A<foo_type>(foo), new A<foo_type>(foo)])
+
   # type argument is FixedArray
   - use: |-
       let v: A<FixedArray<X>> = new A<FixedArray<X>>([new X()])
