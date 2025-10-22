@@ -46,6 +46,8 @@ G1EvacuateRegionsWorkerState<LanguageConfig>::~G1EvacuateRegionsWorkerState()
     gc_->memStats_.template RecordCountMovedTenured<false>(GetCopiedObjectsOld());
     gc_->copiedBytesYoung_ += GetCopiedBytesYoung();
     gc_->copiedBytesOld_ += GetCopiedBytesOld();
+    gc_->copiedObjectsYoung_ += GetCopiedObjectsYoung();
+    gc_->copiedObjectsOld_ += GetCopiedObjectsOld();
 
     VisitCards([this](auto *card) {
         if (!card->IsMarked()) {
