@@ -4344,7 +4344,7 @@ void LLVMIrConstructor::VisitCall(GraphVisitor *v, Inst *inst)
     }
 
     // Check if function has debug info
-    if (function->getSubprogram() != nullptr) {
+    if (call->getFunction()->getSubprogram() != nullptr) {
         ctor->debugData_->SetLocation(call, inst->GetPc());
     }
 
