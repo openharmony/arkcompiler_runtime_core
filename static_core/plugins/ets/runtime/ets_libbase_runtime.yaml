@@ -153,10 +153,10 @@ coretypes:
 - managed_class: escompat.BigUint64Array
   mirror_class: ark::ets::EtsEscompatBigUInt64Array
 
-- managed_class: escompat.Map
+- managed_class: std.core.Map
   mirror_class: ark::ets::EtsEscompatMap
 
-- managed_class: escompat.MapEntry
+- managed_class: std.core.MapEntry
   mirror_class: ark::ets::EtsEscompatMapEntry
 
 intrinsics_namespace: ark::ets::intrinsics

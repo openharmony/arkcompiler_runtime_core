@@ -76,14 +76,14 @@ protected:
 // Check both EtsEscompatMap and ark::Class<Map> has the same number of fields and at the same offsets
 TEST_F(EtsMapTest, MapMemoryLayout)
 {
-    EtsClass *mapClass = PlatformTypes(vm_)->escompatMap;
+    EtsClass *mapClass = PlatformTypes(vm_)->coreMap;
     MirrorFieldInfo::CompareMemberOffsets(mapClass, GetMapMembers());
 }
 
 // Check both EtsEscompatMapEntry and ark::Class<MapEntry> has the same number of fields and at the same offsets
 TEST_F(EtsMapTest, MapEntryMemoryLayout)
 {
-    EtsClass *mapEntryClass = PlatformTypes(vm_)->escompatMapEntry;
+    EtsClass *mapEntryClass = PlatformTypes(vm_)->coreMapEntry;
     MirrorFieldInfo::CompareMemberOffsets(mapEntryClass, GetMapEntryMembers());
 }
 

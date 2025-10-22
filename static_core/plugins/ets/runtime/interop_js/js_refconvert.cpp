@@ -28,7 +28,7 @@ namespace ark::ets::interop::js {
 
 static bool IsRecord(Class *klass)
 {
-    return PlatformTypes()->escompatRecord->GetRuntimeClass()->IsAssignableFrom(klass);
+    return PlatformTypes()->coreRecord->GetRuntimeClass()->IsAssignableFrom(klass);
 }
 
 static bool IsTupleClass(Class *klass)

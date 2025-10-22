@@ -45,11 +45,11 @@
 //! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::__noinline__SetHas_bool"
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*Inlined.*std\.core\.Set::has/
-//! INST          /Call.*Inlined.*escompat\.Map::has/
+//! INST          /Call.*Inlined.*std\.core\.Map::has/
 //! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::__noinline__SetDelete_bool"
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*Inlined.*std\.core\.Set::delete/
-//! INST          /Call.*Inlined.*escompat\.Map::delete/
+//! INST          /Call.*Inlined.*std\.core\.Map::delete/
 
 function test_set_bool_double_overrided1() {
     let set: Set<boolean> = new Set<boolean>()
@@ -78,9 +78,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -90,9 +90,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -102,9 +102,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -114,9 +114,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -126,9 +126,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_long,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_long,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -138,9 +138,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_float,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_float,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -150,9 +150,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_double,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_double,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -162,9 +162,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_string,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_string,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -174,9 +174,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 
 //! CHECKER       JIT: Set intrinsics
 //! RUN           force_jit: true, options: "--compiler-regex='.*test_set_.*'", entry: "ets_escompat_set_inlining.ETSGLOBAL::main"
@@ -189,9 +189,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -201,9 +201,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -213,9 +213,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -225,9 +225,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -237,9 +237,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_long,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_long,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -249,9 +249,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_float,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_float,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -261,9 +261,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_double,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_double,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -273,9 +273,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_string,std\.core\.Set::has,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_string,std\.core\.Set::delete,.*,STATIC,SUCCESS/
@@ -285,9 +285,9 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /CallStatic.*std\.core\.Set::delete/
 //! PASS_AFTER    "Inline"
 //! INST          /Call.*std\.core\.Set::has/
-//! INST          /Call.*escompat\.Map::has/
+//! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
-//! INST          /Call.*escompat\.Map::delete/
+//! INST          /Call.*std\.core\.Map::delete/
 
 function test_set_bool() {
     let set: Set<boolean> = new Set<boolean>

@@ -219,12 +219,12 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::escompatBigInt64Array, BIG_INT64_ARRAY);
     findType(&EtsPlatformTypes::escompatBigUint64Array, BIG_UINT64_ARRAY);
     findType(&EtsPlatformTypes::containersArrayAsListInt, ARRAY_AS_LIST_INT);
-    findType(&EtsPlatformTypes::escompatRecord, RECORD);
-    findMethod(&EtsPlatformTypes::escompatRecordGetter, escompatRecord, GET_INDEX_METHOD, nullptr, false);
-    findMethod(&EtsPlatformTypes::escompatRecordSetter, escompatRecord, SET_INDEX_METHOD, nullptr, false);
-    findType(&EtsPlatformTypes::escompatMap, MAP);
-    findType(&EtsPlatformTypes::escompatMapEntry, MAPENTRY);
-    findType(&EtsPlatformTypes::escompatSet, SET);
+    findType(&EtsPlatformTypes::coreRecord, RECORD);
+    findMethod(&EtsPlatformTypes::coreRecordGetter, coreRecord, GET_INDEX_METHOD, nullptr, false);
+    findMethod(&EtsPlatformTypes::coreRecordSetter, coreRecord, SET_INDEX_METHOD, nullptr, false);
+    findType(&EtsPlatformTypes::coreMap, MAP);
+    findType(&EtsPlatformTypes::coreMapEntry, MAPENTRY);
+    findType(&EtsPlatformTypes::coreSet, SET);
 
     findType(&EtsPlatformTypes::interopJSValue, JS_VALUE);
 

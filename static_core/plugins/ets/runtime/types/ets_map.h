@@ -38,8 +38,8 @@ public:
     {
         ASSERT(coro != nullptr);
         const EtsPlatformTypes *platformTypes = PlatformTypes(coro);
-        EtsHandle<EtsEscompatMapEntry> entryHandle(
-            coro, FromEtsObject(EtsObject::Create(coro, platformTypes->escompatMapEntry)));
+        EtsHandle<EtsEscompatMapEntry> entryHandle(coro,
+                                                   FromEtsObject(EtsObject::Create(coro, platformTypes->coreMapEntry)));
         if (UNLIKELY(entryHandle.GetPtr() == nullptr)) {
             return nullptr;
         }
@@ -54,7 +54,7 @@ public:
     {
         ASSERT(coro != nullptr);
         const EtsPlatformTypes *platformTypes = PlatformTypes(coro);
-        return FromEtsObject(EtsObject::Create(coro, platformTypes->escompatMapEntry));
+        return FromEtsObject(EtsObject::Create(coro, platformTypes->coreMapEntry));
     }
 
     static EtsEscompatMapEntry *FromCoreType(ObjectHeader *obj)

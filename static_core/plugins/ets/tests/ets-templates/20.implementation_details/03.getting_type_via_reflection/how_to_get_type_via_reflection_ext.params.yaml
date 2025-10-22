@@ -64,7 +64,7 @@ cases:
   - desc: How to get Map<string, string> via reflection.
     logic: |-
       let type_of_map: Type = Type.from<Map<string, string>>();
-      arktest.assertEQ(type_of_map.toString(), "escompat.Map");
+      arktest.assertEQ(type_of_map.toString(), "std.core.Map");
   - desc: How to get Int via reflection.
     logic: |-
       let type_of_int: Type = Type.from<int>();
@@ -76,7 +76,7 @@ cases:
   - desc: How to get Map via reflection.
     logic: |-
       let type_of_Map: Type = Type.from<Map<number, string>>();
-      arktest.assertEQ(type_of_Map.toString(), "escompat.Map");
+      arktest.assertEQ(type_of_Map.toString(), "std.core.Map");
   - desc: How to get null via reflection.
     logic: |-
       let type_of_Null: Type = Type.from<null>();

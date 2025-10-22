@@ -220,12 +220,12 @@ bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
 
 bool EtsRuntimeInterface::IsClassEscompatMap(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatMap;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreMap;
 }
 
 bool EtsRuntimeInterface::IsClassEscompatSet(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatSet;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreSet;
 }
 
 bool EtsRuntimeInterface::IsClassEscompatArray(ClassPtr klass) const

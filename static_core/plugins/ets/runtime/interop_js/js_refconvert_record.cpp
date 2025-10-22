@@ -76,7 +76,7 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
 
-    Method *getMethod = PlatformTypes()->escompatRecordGetter->GetPandaMethod();
+    Method *getMethod = PlatformTypes()->coreRecordGetter->GetPandaMethod();
 
     if (argc < 2U) {
         INTEROP_LOG(ERROR) << "Invalid number of arguments for $_get";
@@ -107,7 +107,7 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
 
-    Method *setMethod = PlatformTypes()->escompatRecordSetter->GetPandaMethod();
+    Method *setMethod = PlatformTypes()->coreRecordSetter->GetPandaMethod();
 
     if (argc < 3U) {
         INTEROP_LOG(ERROR) << "Invalid number of arguments for $_set";
@@ -129,15 +129,15 @@ EtsObject *JSRefConvertRecord::UnwrapImpl([[maybe_unused]] InteropCtx *ctx, [[ma
 
     if (LIKELY(sharedRef != nullptr)) {
         EtsObject *etsObject = sharedRef->GetEtsObject();
-        if (UNLIKELY(!PlatformTypes()->escompatRecord->IsAssignableFrom(etsObject->GetClass()))) {
-            InteropCtx::ThrowJSTypeError(env, std::string("Object is not compatible with escompat.Record"));
+        if (UNLIKELY(!PlatformTypes()->coreRecord->IsAssignableFrom(etsObject->GetClass()))) {
+            InteropCtx::ThrowJSTypeError(env, std::string("Object is not compatible with std.core.Record"));
             return nullptr;
         }
 
         return etsObject;
     }
 
-    InteropCtx::ThrowJSTypeError(env, std::string("Object is not compatible with escompat.Record"));
+    InteropCtx::ThrowJSTypeError(env, std::string("Object is not compatible with std.core.Record"));
     return nullptr;
 }
 

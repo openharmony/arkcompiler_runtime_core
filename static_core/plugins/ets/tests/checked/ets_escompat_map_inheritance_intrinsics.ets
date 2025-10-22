@@ -62,15 +62,15 @@ class MyMap<K, V> extends Map<K, V> {
 //! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapHas_bool_double"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.MapHas"
-//! INST          /CallVirtual.*escompat\.Map::has/
+//! INST          /CallVirtual.*std\.core\.Map::has/
 //! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapGet_bool_double"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.MapGet"
-//! INST          /CallVirtual.*escompat\.Map::get/
+//! INST          /CallVirtual.*std\.core\.Map::get/
 //! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapDelete_bool_double"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.MapDelete"
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallVirtual.*std\.core\.Map::delete/
 
 //! CHECKER       AOT PGO: MyMap<boolean, double> overrided intrinsics
 //! SKIP_IF       @architecture == "arm32"
@@ -94,15 +94,15 @@ class MyMap<K, V> extends Map<K, V> {
 //! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapHas_bool_double"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.MapHas"
-//! INST          /CallVirtual.*escompat\.Map::has/
+//! INST          /CallVirtual.*std\.core\.Map::has/
 //! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapGet_bool_double"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.MapGet"
-//! INST          /CallVirtual.*escompat\.Map::get/
+//! INST          /CallVirtual.*std\.core\.Map::get/
 //! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapDelete_bool_double"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.MapDelete"
-//! INST          /CallVirtual.*escompat\.Map::delete/
+//! INST          /CallVirtual.*std\.core\.Map::delete/
 
 function test_map_bool_double_overrided2() {
     let map: MyMap<boolean, double> = new MyMap<boolean, double>()

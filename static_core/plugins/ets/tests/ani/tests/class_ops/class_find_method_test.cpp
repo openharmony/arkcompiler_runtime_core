@@ -137,7 +137,7 @@ public:
 
     void RecordCreator(ani_class *cls, ani_object *result)
     {
-        ASSERT_EQ(env_->FindClass("escompat.Record", cls), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std.core.Record", cls), ANI_OK);
         ASSERT_NE(cls, nullptr);
 
         ani_method ctor;
