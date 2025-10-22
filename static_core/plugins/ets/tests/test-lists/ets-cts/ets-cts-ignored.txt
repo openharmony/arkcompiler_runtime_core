@@ -2323,6 +2323,9 @@
 07.expressions/32.lambda_expression/01.lambda_signature/positive_4.ets
 07.expressions/32.lambda_expression/01.lambda_signature/positive_5.ets
 
+#30813 No CTE for lambda body without return statement
+07.expressions/32.lambda_expression/02.lambda_body/negative_2.ets
+
 #25111
 17.experimental_features/02.fixed_array_types/far3_0.ets
 17.experimental_features/02.fixed_array_types/far3_1.ets

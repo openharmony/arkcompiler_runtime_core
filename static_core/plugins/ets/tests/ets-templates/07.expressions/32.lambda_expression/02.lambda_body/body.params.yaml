@@ -132,3 +132,86 @@ cases:
     call: |-
       let f = () => helloWorld
       arktest.assertEQ(f()(), 'Hello, World!', 'capture constant failed')
+
+  - desc: capturing within the function scope
+    impl: |-
+        let global1: number = 0
+        let global2: number = 0
+        function capturingFunction() {
+            let local1: number = 0
+            return (local2: number) => {
+                global1 = local1
+                global2 = local2
+                local1 = local2
+            }
+        }
+    call: |-
+        const func1 = capturingFunction()
+        const func2 = capturingFunction()
+
+        func1(11)
+        arktest.assertEQ(global1, 0)
+        arktest.assertEQ(global2, 11)
+
+        func2(22)
+        arktest.assertEQ(global1, 0)
+        arktest.assertEQ(global2, 22)
+
+        func1(33)
+        arktest.assertEQ(global1, 11)
+        arktest.assertEQ(global2, 33)
+
+        func2(44)
+        arktest.assertEQ(global1, 22)
+        arktest.assertEQ(global2, 44)
+
+  - desc: capturing within the loop scope
+    impl: |-
+        const lambda = (): int => { return 1 }
+        const storage = [lambda, lambda, lambda, lambda, lambda]
+    call: |-
+        for(let index = 0; index < storage.length; index++) {
+            storage[index] = () => { 
+                return index
+            }
+        }
+        for(let index = 0; index < storage.length; index++) {
+            arktest.assertEQ(storage[index](), index)
+        }
+  - desc: lambda chain
+    impl: |-
+        let lambda = () => () => () => 1
+    call: |-
+        arktest.assertEQ(lambda()()(), 1, 'lambda chain failed')
+
+  - desc: lambda reassignment with capture
+    impl: |-
+        class IntPair {
+            p1: int
+            p2: int
+            constructor(p1: int, p2: int) {
+                this.p1 = p1
+                this.p2 = p2
+            }
+        }
+
+        function box(lambda: () => int): int { return lambda() }
+        
+        function bar(p: IntPair): int {
+            let f = () => { return p.p1++ }
+            let get0 = f
+
+            f = () => { return ++p.p2 }
+            let get1 = f
+
+            let get2 = get1
+            f = () => { return ++p.p1 }
+            get2 = f
+
+            return box(get0) + box(get1) + box(get2)
+        }
+    call: |-
+        let p = new IntPair(0, 0)
+        arktest.assertEQ(bar(p), 3, 'lambda reassignment failed')
+        arktest.assertEQ(p.p1, 2, 'lambda reassignment failed')
+        arktest.assertEQ(p.p2, 1, 'lambda reassignment failed')

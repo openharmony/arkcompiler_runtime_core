@@ -13,19 +13,14 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Return type can be inferred from the lambda body
+desc: Lambda expression type is a function type that has lambda parameters (if any) as parameters of the function type 
+assertion: {{c.assertion}}
 ---*/
 
-interface IPerson {
-    name: String
-    age: int
-}
-
 function main() {
-    let fl = () => { return {name: 'Bob', age: 25} as IPerson }
-    let x = fl()
-
-    arktest.assertTrue(x instanceof IPerson)
-    arktest.assertEQ('Bob', x.name)
+    {{c.call|indent}}
 }
+
+{% endfor %}

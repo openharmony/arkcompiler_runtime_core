@@ -21,6 +21,34 @@ cases:
     impl: |-
         let f = (a, b) => a + b
 
-  - desc: CTE. A required parameter cannot follow an optional parameter.
+  - desc: A required parameter cannot follow an optional parameter.
     impl: |-
       let f = (a?: String, b: String) => a + b
+
+  - desc: A required parameter cannot follow an optional parameter.
+    impl: |-
+      let f = (a: String = 'test ', b: String) => a + b
+
+  - desc: A rest parameter is not last in parameter list.
+    impl: |-
+      let f = (...a: string[], b: string) => a[0] + b
+
+  - desc: A rest parameter is neither array nor tuple.
+    impl: |-
+      let f = (a: string, ...b: string) => a + b
+
+  - desc: Generic lambda.
+    impl: |-
+      let f = <T>(p: T) => T
+
+  - desc: Readonly array as lambda parameter.
+    impl: |-
+      (array: readonly string[]) => {
+          array[0] = 'test'
+      }
+
+  - desc: Readonly tuple as lambda parameter.
+    impl: |-
+      (tuple: readonly [number, string]) => {
+          tuple[0] = 1
+      }

@@ -15,8 +15,6 @@
 
 /*---
 desc: Return type can be inferred from the lambda body
-tags:
-
 ---*/
 
 
