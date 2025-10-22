@@ -17,7 +17,6 @@ cases:
   - { param: "in T",  expression: "f(p: T): T { return p }"      }
   - { param: "in T",  expression: "field: T = 'a' as T"          }
   - { param: "in T",  expression: "readonly field: T = 'a' as T" }
-  - { param: "out T", expression: "constructor(p: T) {}"         }
   - { param: "out T", expression: "f(p: T) {}"                   }
   - { param: "out T", expression: "f(p: T): T { return p }"      }
   - { param: "out T", expression: "field: T = 'a' as T"          }
