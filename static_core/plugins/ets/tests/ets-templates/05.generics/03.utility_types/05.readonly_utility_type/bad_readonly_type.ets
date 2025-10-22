@@ -20,7 +20,10 @@ desc: T must be a class or an interface type
 tags: [compile-only, negative]
 ---*/
 
+class A {}
+class B {}
 
+type AB = A | B
 type TSI = String | Int
 type ABU = 'aaaa' | 'bbbb'
 

@@ -16,33 +16,15 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Using union as T for Readonly<T> is incompatible
-tags: [negative, compile-only]
+desc: >-
+    Checks for type alias declaration method access and member change for readonly utility type
+tags: [{{c.tags}}]
 ---*/
 
-interface I {
-  i: number;
-  j: string;
-}
-
-class A implements I {
-  i = 1.7;
-  j = "A";
-}
-
-class C {
-  i: number = 2.6;
-  j: string = "C";
-}
-
-function foo(i: Readonly<A|C>, a: number, b: string) {
-  arktest.assertEQ(i.i, a)
-  arktest.assertEQ(i.j, b)
-}
+{{c.decl}}
 
 function main() {
-  let i: Readonly<{{c.class}}> = {{c.argument}}
-  foo( i, {{c.num}}, {{c.str}} )
+  {{c.check}}
 }
 
 {% endfor %}
