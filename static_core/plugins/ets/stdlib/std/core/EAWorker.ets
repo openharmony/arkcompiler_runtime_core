@@ -50,7 +50,7 @@ class ExclusiveLauncher {
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      * @returns { int } the id of the worker
      */
-    internal static elaunch(task: Task,  name: string, needInterop: boolean = false): int {
+    public static elaunch(task: Task,  name: string, needInterop: boolean = false): int {
         return ExclusiveLauncher.elaunch(task as Object, needInterop, name);
     }
 
