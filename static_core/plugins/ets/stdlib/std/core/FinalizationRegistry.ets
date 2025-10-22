@@ -160,6 +160,7 @@ export final class FinalizationRegistry<T> {
         } else if (next == undefined) {
             prev!.next = next;
         } else if (prev == undefined) {
+            this.nonUnregistrableList = next;
             next!.prev = prev;
         } else {
             prev!.next = next;
@@ -228,6 +229,9 @@ export final class FinalizationRegistry<T> {
             this.mutex.lock();
             let newNode = new FinalizationNode<T>(refObject, callbackArg);
             newNode.next = this.nonUnregistrableList;
+            if (this.nonUnregistrableList !== undefined) {
+                this.nonUnregistrableList!.prev = newNode;
+            }
             this.nonUnregistrableList = newNode;
             this.listSize++;
             this.mutex.unlock();
