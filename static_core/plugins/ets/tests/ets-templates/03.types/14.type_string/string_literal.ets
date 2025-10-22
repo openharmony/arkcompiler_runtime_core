@@ -18,7 +18,7 @@ desc: All string literals, such as ”abc”, are implemented as instances of St
 ---*/
 
 function main(): void {
-  let x = "abc";
+  let x = "abc\0\u0000\u{10FFFF}";
 
   arktest.assertTrue( x instanceof String)
 }

@@ -14,21 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    Type string behaves like a reference type (see Reference Types) if it is created, assigned,
-    or passed as an argument.
-    A string object is immutable, the value of a string object cannot be changed after the object is created.
-    The value of a string object can be shared.
+desc: Type string values are all string literals, e.g., ‘abc’. Type string stores sequences of characters as Unicode
+      UTF-16 code units.
+      Character is not from Unicode UTF-16
+tags: [compile-only, negative]
 ---*/
 
-function f(a: string) {
-	a += "d"
-	arktest.assertEQ(a, "abcd")
-}
-
 function main(): void {
-  let a: string = "abc"
-  f(a)
-  arktest.assertEQ(a, "abc")
-  arktest.assertNE(a, "abcd")
+  let x = "\u{110000}";
+  arktest.assertTrue( x instanceof String)
 }
