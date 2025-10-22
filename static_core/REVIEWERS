@@ -232,6 +232,7 @@ static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/g
 /platforms/	@gitee-dakeQI @jokerxd-liu
 /plugins/ @jokerxd-liu
 /scripts/ @jokerxd-liu
+/taihe/ @wanzixuan330
 /templates/	@jokerxd-liu
 /tests/	@jokerxd-liu
 /verifier/	@oatuwwutao	^seeuiceland
