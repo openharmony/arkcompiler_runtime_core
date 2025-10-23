@@ -16,7 +16,7 @@
 /*---
 desc: 2.9.7 Null Literal, 3.8.12 Nullish Types
 name: nullable-method-default-param_5.ets
-
+tags: [compile-only, negative]
 ---*/
 
 class TestC {
@@ -29,5 +29,4 @@ class TestC {
 
 function main(): void {
     new TestC().test("Hello World");
-
 }
