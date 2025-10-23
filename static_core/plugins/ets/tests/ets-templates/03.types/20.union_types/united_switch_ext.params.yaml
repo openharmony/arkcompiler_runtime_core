@@ -378,7 +378,7 @@ cases:
     decl: |-
       function unitedSwitch(value: short | string): string {
         switch (typeof value) {
-          case 'number':
+          case 'short':
             return 'short case triggered';
           case 'string':
             return 'string case triggered';
@@ -438,7 +438,7 @@ cases:
     decl: |-
       function unitedSwitch(value: byte | string): string {
         switch (typeof value) {
-          case 'number':
+          case 'byte':
             return 'byte case triggered';
           case 'string':
             return 'string case triggered';

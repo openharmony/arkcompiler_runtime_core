@@ -48,7 +48,7 @@ cases:
 
   - files: './impl/case_1.ets'
     decl: import { myC } from './decl/case_1'
-    assert: typeof myC == "number" && myC == 10
+    assert: typeof myC == "int" && myC == 10
 
   - files: './impl/case_2.ets'
     decl: import { myC } from './decl/case_2'

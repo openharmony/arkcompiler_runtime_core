@@ -26,13 +26,13 @@ function foo2(v: int | object) {
 };
 
 function testNumerics() {
-    arktest.assertEQ(typeof (() => { let v: byte = 1; return v })(), "number");
-    arktest.assertEQ(typeof (() => { let v: short = 1; return v })(), "number");
-    arktest.assertEQ(typeof (() => { let v: int = 1; return v })(), "number");
-    arktest.assertEQ(typeof (() => { let v: long = 123456789123; return v })(), "number");
-    arktest.assertEQ(typeof (() => { let v: float = 1.1f; return v })(), "number");
+    arktest.assertEQ(typeof (() => { let v: byte = 1; return v })(), "byte");
+    arktest.assertEQ(typeof (() => { let v: short = 1; return v })(), "short");
+    arktest.assertEQ(typeof (() => { let v: int = 1; return v })(), "int");
+    arktest.assertEQ(typeof (() => { let v: long = 123456789123; return v })(), "long");
+    arktest.assertEQ(typeof (() => { let v: float = 1.1f; return v })(), "float");
     arktest.assertEQ(typeof (() => { let v: double = 1.1; return v })(), "number");
-    arktest.assertEQ(typeof (() => { let v: char = c'a'; return v })(), "number");
+    arktest.assertEQ(typeof (() => { let v: char = c'a'; return v })(), "char");
 }
 
 function testNumerics2() {
@@ -43,13 +43,13 @@ function testNumerics2() {
     let a5: float = 1.1f;
     let a6: double = 1.1;
     let a7: char = c'a';
-    arktest.assertEQ(typeof erase(a1), "number");
-    arktest.assertEQ(typeof erase(a2), "number");
-    arktest.assertEQ(typeof erase(a3), "number");
-    arktest.assertEQ(typeof erase(a4), "number");
-    arktest.assertEQ(typeof erase(a5), "number");
+    arktest.assertEQ(typeof erase(a1), "byte");
+    arktest.assertEQ(typeof erase(a2), "short");
+    arktest.assertEQ(typeof erase(a3), "int");
+    arktest.assertEQ(typeof erase(a4), "long");
+    arktest.assertEQ(typeof erase(a5), "float");
     arktest.assertEQ(typeof erase(a6), "number");
-    arktest.assertEQ(typeof erase(a7), "number");
+    arktest.assertEQ(typeof erase(a7), "char");
 }
 
 function testString() {
@@ -84,13 +84,13 @@ function testObject() {
     arktest.assertEQ(typeof obj2, "object");
     arktest.assertEQ(typeof obj3, "function");
     arktest.assertEQ(typeof obj4, "object");
-    arktest.assertEQ(typeof obj5, "number");
+    arktest.assertEQ(typeof obj5, "int");
 
     arktest.assertEQ(typeof erase(obj1), "object");
     arktest.assertEQ(typeof erase(obj2), "object");
     arktest.assertEQ(typeof erase(obj3), "function");
     arktest.assertEQ(typeof erase(obj4), "object");
-    arktest.assertEQ(typeof erase(obj5), "number");
+    arktest.assertEQ(typeof erase(obj5), "int");
 }
 
 let f1: () => void = () => {
@@ -141,11 +141,11 @@ function testEnum() {
     arktest.assertEQ(typeof dir, "number");
     arktest.assertEQ(typeof status, "string");
     // The enum is wrapped as an object type when calling erase
-    arktest.assertEQ(typeof erase(dir), "number");
+    arktest.assertEQ(typeof erase(dir), "int");
     arktest.assertEQ(typeof erase(status), "string");
-    arktest.assertEQ(typeof foo(dir), "number");
+    arktest.assertEQ(typeof foo(dir), "int");
     // The union type will convert all its members into object
-    arktest.assertEQ(typeof foo2(dir), "number");
+    arktest.assertEQ(typeof foo2(dir), "int");
 }
 
 let v1: string | number | boolean = "abc";
