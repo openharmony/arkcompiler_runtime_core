@@ -341,6 +341,15 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 #define NO_ADDRESS_SANITIZE
 #endif  // USE_ADDRESS_SANITIZER
 
+// To avoid ASAN warnings on exit we should use quick_exit
+#ifdef USE_ADDRESS_SANITIZER
+// CC-OFFNXT(G.PRE.02) code readability
+#define PROCESS_EXIT(code) std::quick_exit(code)
+#else
+// CC-OFFNXT(G.PRE.02) code readability
+#define PROCESS_EXIT(code) std::exit(code)
+#endif
+
 #if defined(__has_include)
 #if __has_include(<filesystem>)
 #define USE_STD_FILESYSTEM

@@ -286,7 +286,7 @@ bool UnhandledObjectManager::HasRejectedPromiseObjects(EtsCoroutine *coro, bool 
         descr == panda_file_items::class_descriptors::STACK_OVERFLOW_ERROR) {
         LOG(ERROR, RUNTIME) << "Unhandled exception: " << exception->GetCoreType()->ClassAddr<Class>()->GetName();
         // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
-        _exit(1);
+        PROCESS_EXIT(1);
     }
     coro->ClearException();
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();

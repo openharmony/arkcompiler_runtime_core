@@ -389,7 +389,7 @@ static ani_string PManagerGetEnvironmentVar(ani_env *env, [[maybe_unused]] ani_o
 
 static void PManagerExit([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process, ani_int code)
 {
-    std::quick_exit(code);  // CC-OFF(G.STD.16-CPP) solid logic
+    PROCESS_EXIT(code);
 }
 
 static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object process, ani_int signal, ani_int pid)
