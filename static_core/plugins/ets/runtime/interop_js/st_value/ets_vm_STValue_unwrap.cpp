@@ -120,13 +120,19 @@ napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callbac
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
+
+    if (data->IsAniNullOrUndefined(env)) {
+        STValueThrowJSError(env, "\'this\' STValue instance does not wrap a value of type std.core.String");
+        return nullptr;
+    }
+
     ani_object aniObject = reinterpret_cast<ani_object>(data->GetAniRef());
 
     ani_class stringClass;
-    AniCheckAndThrowToDynamic(env, aniEnv->FindClass("std.core.String", &stringClass));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("std.core.String", &stringClass));
 
     ani_boolean isString = ANI_FALSE;
-    AniCheckAndThrowToDynamic(env, aniEnv->Object_InstanceOf(aniObject, stringClass, &isString));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_InstanceOf(aniObject, stringClass, &isString));
 
     if (isString == ANI_FALSE) {
         STValueThrowJSError(env, "\'this\' STValue instance does not wrap a value of type std.core.String");
@@ -211,12 +217,16 @@ napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
+    if (data->IsAniNullOrUndefined(env)) {
+        STValueThrowJSError(env, "Expected BigInt object, but got different type.");
+        return nullptr;
+    }
     ani_object aniObject = reinterpret_cast<ani_object>(data->GetAniRef());
 
     ani_class bigIntClass;
-    AniCheckAndThrowToDynamic(env, aniEnv->FindClass("escompat.BigInt", &bigIntClass));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("escompat.BigInt", &bigIntClass));
     ani_boolean isBigInt = ANI_FALSE;
-    AniCheckAndThrowToDynamic(env, aniEnv->Object_InstanceOf(aniObject, bigIntClass, &isBigInt));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_InstanceOf(aniObject, bigIntClass, &isBigInt));
     if (isBigInt == ANI_FALSE) {
         STValueThrowJSError(env, "Expected BigInt object, but got different type.");
         return nullptr;

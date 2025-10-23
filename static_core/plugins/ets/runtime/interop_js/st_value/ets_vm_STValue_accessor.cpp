@@ -44,8 +44,9 @@
 #include "plugins/ets/runtime/ets_utils.h"
 #include "runtime/include/runtime.h"
 
-#include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
+#include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
+#include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue_param_getter.h"
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
@@ -72,14 +73,14 @@ napi_value ClassGetSuperClassImpl(napi_env env, napi_callback_info info)
     auto *aniEnv = GetAniEnv();
 
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_type currentType = reinterpret_cast<ani_type>(data->GetAniRef());
 
     ani_class superClass = nullptr;
-    AniCheckAndThrowToDynamic(env, aniEnv->Type_GetSuperClass(currentType, &superClass));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Type_GetSuperClass(currentType, &superClass));
 
     if (superClass == nullptr) {
         napi_value jsNull;
@@ -108,14 +109,14 @@ napi_value FixedArrayGetLengthImpl(napi_env env, napi_callback_info info)
     auto *aniEnv = GetAniEnv();
 
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_fixedarray currentArray = reinterpret_cast<ani_fixedarray>(data->GetAniRef());
 
     ani_size length = 0;
-    AniCheckAndThrowToDynamic(env, aniEnv->FixedArray_GetLength(currentArray, &length));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_GetLength(currentArray, &length));
 
     napi_value jsLength;
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(length), &jsLength));
@@ -141,23 +142,24 @@ napi_value EnumGetIndexByNameImpl(napi_env env, napi_callback_info info)
     napi_value jsArgv[1];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
-    std::string memberName = GetString(env, jsArgv[0]);  // fatal ? check before?
+    std::string memberName;
+    if (!GetString(env, jsArgv[0], "memberName", memberName)) {
+        return nullptr;
+    }
     auto *aniEnv = GetAniEnv();
 
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_enum currentEnum = reinterpret_cast<ani_enum>(data->GetAniRef());
 
     ani_enum_item enumItem = nullptr;
-    ani_status status = aniEnv->Enum_GetEnumItemByName(currentEnum, memberName.c_str(), &enumItem);
-    AniCheckAndThrowToDynamic(env, status);
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Enum_GetEnumItemByName(currentEnum, memberName.c_str(), &enumItem));
 
     ani_size index = 0;
-    status = aniEnv->EnumItem_GetIndex(enumItem, &index);
-    AniCheckAndThrowToDynamic(env, status);
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->EnumItem_GetIndex(enumItem, &index));
 
     napi_value jsIndex;
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(index), &jsIndex));
@@ -189,7 +191,7 @@ napi_value EnumGetNameByIndexImpl(napi_env env, napi_callback_info info)
     auto *aniEnv = GetAniEnv();
 
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
@@ -197,11 +199,11 @@ napi_value EnumGetNameByIndexImpl(napi_env env, napi_callback_info info)
 
     ani_enum_item enumItem = nullptr;
     ani_status status = aniEnv->Enum_GetEnumItemByIndex(currentEnum, index, &enumItem);
-    AniCheckAndThrowToDynamic(env, status);
+    ANI_CHECK_ERROR_RETURN(env, status);
 
     ani_string aniMemberName = nullptr;
     status = aniEnv->EnumItem_GetName(enumItem, &aniMemberName);
-    AniCheckAndThrowToDynamic(env, status);
+    ANI_CHECK_ERROR_RETURN(env, status);
 
     ani_size sz {};
     AniExpectOK(aniEnv->String_GetUTF8Size(aniMemberName, &sz));
@@ -233,31 +235,87 @@ napi_value EnumGetValueByNameImpl(napi_env env, napi_callback_info info)
     napi_value jsArgv[2];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
-    std::string memberName = GetString(env, jsArgv[0]);
+    std::string memberName;
+    if (!GetString(env, jsArgv[0], "memberName", memberName)) {
+        return nullptr;
+    }
     uint32_t valueTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[1], &valueTypeInt));
     SType valueType = static_cast<SType>(valueTypeInt);
 
     auto *aniEnv = GetAniEnv();
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_enum currentEnum = reinterpret_cast<ani_enum>(data->GetAniRef());
 
     ani_enum_item enumItem = nullptr;
-    AniCheckAndThrowToDynamic(env, aniEnv->Enum_GetEnumItemByName(currentEnum, memberName.c_str(), &enumItem));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Enum_GetEnumItemByName(currentEnum, memberName.c_str(), &enumItem));
 
     switch (valueType) {
         case SType::INT: {
             ani_int value = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->EnumItem_GetValue_Int(enumItem, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->EnumItem_GetValue_Int(enumItem, &value));
             return CreateSTValueInstance(env, value);
         }
         case SType::REFERENCE: {
             ani_string aniValue = nullptr;
-            AniCheckAndThrowToDynamic(env, aniEnv->EnumItem_GetValue_String(enumItem, &aniValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->EnumItem_GetValue_String(enumItem, &aniValue));
+            return CreateSTValueInstance(env, aniValue);
+        }
+        default: {
+            ThrowUnsupportedSTypeError(env, valueType);
+            return nullptr;
+        }
+    }
+}
+
+// enumGetValueByIndex(index: number, valueType: SType): STValue
+napi_value EnumGetValueByIndexImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    NAPI_TO_ANI_SCOPE;
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+    if (jsArgc != 2U) {
+        ThrowJSBadArgCountError(env, jsArgc, 2U);
+        return nullptr;
+    }
+
+    napi_value jsThis;
+    napi_value jsArgv[2];
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
+
+    uint32_t index = 0;
+    NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &index));
+    uint32_t valueTypeInt = 0;
+    NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[1], &valueTypeInt));
+    SType valueType = static_cast<SType>(valueTypeInt);
+
+    auto *aniEnv = GetAniEnv();
+
+    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
+        ThrowJSThisNonObjectError(env);
+        return nullptr;
+    }
+    ani_enum currentEnum = reinterpret_cast<ani_enum>(data->GetAniRef());
+
+    ani_enum_item enumItem = nullptr;
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Enum_GetEnumItemByIndex(currentEnum, index, &enumItem));
+
+    switch (valueType) {
+        case SType::INT: {
+            ani_int value = 0;
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->EnumItem_GetValue_Int(enumItem, &value));
+            return CreateSTValueInstance(env, value);
+        }
+        case SType::REFERENCE: {
+            ani_string aniValue = nullptr;
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->EnumItem_GetValue_String(enumItem, &aniValue));
             return CreateSTValueInstance(env, aniValue);
         }
         default: {
@@ -285,7 +343,10 @@ napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info)
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
-    std::string fieldName = GetString(env, jsArgv[0]);  // fatal ? check before?
+    std::string fieldName;
+    if (!GetString(env, jsArgv[0], "fieldName", fieldName)) {
+        return nullptr;
+    }
     uint32_t fieldTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[1], &fieldTypeInt));
     SType fieldType = static_cast<SType>(fieldTypeInt);
@@ -293,7 +354,7 @@ napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info)
     auto *aniEnv = GetAniEnv();
 
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
@@ -303,56 +364,56 @@ napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info)
         case SType::BOOLEAN: {
             ani_boolean value = 0;
             auto status = aniEnv->Class_GetStaticFieldByName_Boolean(currentClass, fieldName.c_str(), &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::BYTE: {
             ani_byte value = 0;
             auto status = aniEnv->Class_GetStaticFieldByName_Byte(currentClass, fieldName.c_str(), &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::CHAR: {
             // problem: how to cast uint16_t to char?  ans: use uint16_t
             ani_char value = 0;
             auto status = aniEnv->Class_GetStaticFieldByName_Char(currentClass, fieldName.c_str(), &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::SHORT: {
             ani_short value = 0;
             auto status = aniEnv->Class_GetStaticFieldByName_Short(currentClass, fieldName.c_str(), &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::INT: {
             ani_int value = 0;
             auto status = aniEnv->Class_GetStaticFieldByName_Int(currentClass, fieldName.c_str(), &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::LONG: {
             ani_long value = 0;
             auto status = aniEnv->Class_GetStaticFieldByName_Long(currentClass, fieldName.c_str(), &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::FLOAT: {
             ani_float value = 0.0f;
             auto status = aniEnv->Class_GetStaticFieldByName_Float(currentClass, fieldName.c_str(), &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::DOUBLE: {
             ani_double value = 0;
             auto status = aniEnv->Class_GetStaticFieldByName_Double(currentClass, fieldName.c_str(), &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::REFERENCE: {
             ani_ref value = nullptr;
             auto status = aniEnv->Class_GetStaticFieldByName_Ref(currentClass, fieldName.c_str(), &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             if (value == nullptr) {
                 napi_value jsNull = nullptr;
                 NAPI_CHECK_FATAL(napi_get_null(env, &jsNull));
@@ -385,15 +446,19 @@ napi_value ClassSetStaticFieldImpl(napi_env env, napi_callback_info info)
     napi_value jsArgv[3];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
-    std::string fieldName = GetString(env, jsArgv[0]);
+    std::string fieldName;
+    if (!GetString(env, jsArgv[0], "fieldName", fieldName)) {
+        return nullptr;
+    }
     napi_value jsValue = jsArgv[1];
+
     uint32_t fieldTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[2U], &fieldTypeInt));
     SType fieldType = static_cast<SType>(fieldTypeInt);
 
     auto *aniEnv = GetAniEnv();
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
@@ -481,7 +546,7 @@ napi_value ClassSetStaticFieldImpl(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    AniCheckAndThrowToDynamic(env, status);
+    ANI_CHECK_ERROR_RETURN(env, status);
 
     napi_value undefined;
     NAPI_CHECK_FATAL(napi_get_undefined(env, &undefined));
@@ -506,15 +571,19 @@ napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info)
     napi_value jsArgv[2];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
-    auto propNameStr = GetString(env, jsArgv[0]);
+    std::string propNameStr;
+    if (!GetString(env, jsArgv[0], "propNameStr", propNameStr)) {
+        return nullptr;
+    }
     auto propName = propNameStr.c_str();
+
     uint32_t propTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[1], &propTypeInt));
     SType propType = static_cast<SType>(propTypeInt);
 
     auto aniEnv = GetAniEnv();
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
@@ -523,47 +592,47 @@ napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info)
     switch (propType) {
         case SType::BOOLEAN: {
             ani_boolean value = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_GetPropertyByName_Boolean(currentObject, propName, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Boolean(currentObject, propName, &value));
             return CreateSTValueInstance(env, value);
         }
         case SType::BYTE: {
             ani_byte value = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_GetPropertyByName_Byte(currentObject, propName, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Byte(currentObject, propName, &value));
             return CreateSTValueInstance(env, value);
         }
         case SType::CHAR: {
             ani_char value = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_GetPropertyByName_Char(currentObject, propName, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Char(currentObject, propName, &value));
             return CreateSTValueInstance(env, value);
         }
         case SType::SHORT: {
             ani_short value = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_GetPropertyByName_Short(currentObject, propName, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Short(currentObject, propName, &value));
             return CreateSTValueInstance(env, value);
         }
         case SType::INT: {
             ani_int value = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_GetPropertyByName_Int(currentObject, propName, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Int(currentObject, propName, &value));
             return CreateSTValueInstance(env, value);
         }
         case SType::LONG: {
             ani_long value = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_GetPropertyByName_Long(currentObject, propName, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Long(currentObject, propName, &value));
             return CreateSTValueInstance(env, value);
         }
         case SType::FLOAT: {
             ani_float value = 0.0f;
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_GetPropertyByName_Float(currentObject, propName, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Float(currentObject, propName, &value));
             return CreateSTValueInstance(env, value);
         }
         case SType::DOUBLE: {
             ani_double value = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_GetPropertyByName_Double(currentObject, propName, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Double(currentObject, propName, &value));
             return CreateSTValueInstance(env, value);
         }
         case SType::REFERENCE: {
             ani_ref value = nullptr;
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_GetPropertyByName_Ref(currentObject, propName, &value));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Ref(currentObject, propName, &value));
             if (value == nullptr) {
                 napi_value jsNull = nullptr;
                 NAPI_CHECK_FATAL(napi_get_null(env, &jsNull));
@@ -596,9 +665,12 @@ napi_value ObjectSetPropertyImpl(napi_env env, napi_callback_info info)
     napi_value jsArgv[3];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
-    std::string propNameStr = GetString(env, jsArgv[0]);
+    std::string propNameStr;
+    if (!GetString(env, jsArgv[0], "propNameStr", propNameStr)) {
+        return nullptr;
+    }
     auto *propName = propNameStr.c_str();
-    // problem: check
+
     napi_value jsValue = jsArgv[1];
     uint32_t propTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[2U], &propTypeInt));
@@ -606,7 +678,7 @@ napi_value ObjectSetPropertyImpl(napi_env env, napi_callback_info info)
 
     auto aniEnv = GetAniEnv();
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
@@ -693,7 +765,7 @@ napi_value ObjectSetPropertyImpl(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    AniCheckAndThrowToDynamic(env, status);
+    ANI_CHECK_ERROR_RETURN(env, status);
 
     napi_value undefined;
     NAPI_CHECK_FATAL(napi_get_undefined(env, &undefined));
@@ -727,7 +799,7 @@ napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info)
 
     auto *aniEnv = GetAniEnv();
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
@@ -741,55 +813,55 @@ napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info)
             ani_int value = 0;
             status =
                 aniEnv->FixedArray_GetRegion_Int(reinterpret_cast<ani_fixedarray_int>(currentArray), index, 1, &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::BOOLEAN: {
             ani_boolean value = ANI_FALSE;
             status = aniEnv->FixedArray_GetRegion_Boolean(reinterpret_cast<ani_fixedarray_boolean>(currentArray), index,
                                                           1, &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::BYTE: {
             ani_byte value = 0;
             status = aniEnv->FixedArray_GetRegion_Byte(reinterpret_cast<ani_fixedarray_byte>(currentArray), index, 1,
                                                        &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::CHAR: {
             ani_char value = 0;
             status = aniEnv->FixedArray_GetRegion_Char(reinterpret_cast<ani_fixedarray_char>(currentArray), index, 1,
                                                        &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::SHORT: {
             ani_short value = 0;
             status = aniEnv->FixedArray_GetRegion_Short(reinterpret_cast<ani_fixedarray_short>(currentArray), index, 1,
                                                         &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::LONG: {
             ani_long value = 0;
             status = aniEnv->FixedArray_GetRegion_Long(reinterpret_cast<ani_fixedarray_long>(currentArray), index, 1,
                                                        &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::FLOAT: {
             ani_float value = 0;
             status = aniEnv->FixedArray_GetRegion_Float(reinterpret_cast<ani_fixedarray_float>(currentArray), index, 1,
                                                         &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::REFERENCE: {
             ani_ref value {};
-            status = aniEnv->FixedArray_Get_Ref(reinterpret_cast<ani_fixedarray_ref>(currentArray), index, &value);
-            AniCheckAndThrowToDynamic(env, status);
+            ANI_CHECK_ERROR_RETURN(
+                env, aniEnv->FixedArray_Get_Ref(reinterpret_cast<ani_fixedarray_ref>(currentArray), index, &value));
             if (value == nullptr) {
                 napi_value jsNull = nullptr;
                 NAPI_CHECK_FATAL(napi_get_null(env, &jsNull));
@@ -833,7 +905,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
     auto *aniEnv = GetAniEnv();
 
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
@@ -917,7 +989,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    AniCheckAndThrowToDynamic(env, status);
+    ANI_CHECK_ERROR_RETURN(env, status);
 
     napi_value undefined;
     NAPI_CHECK_FATAL(napi_get_undefined(env, &undefined));
@@ -949,17 +1021,20 @@ napi_value STValueModuleGetVariableImpl(napi_env env, napi_callback_info info)
     auto *aniEnv = GetAniEnv();
 
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_module aniModule = reinterpret_cast<ani_module>(data->GetAniRef());
 
     napi_value variableNameNapiValue = jsArgv[0];
-    std::string variableName = GetString(env, variableNameNapiValue);
+    std::string variableName;
+    if (!GetString(env, variableNameNapiValue, "variableName", variableName)) {
+        return nullptr;
+    }
 
     ani_variable getVariable {nullptr};
-    AniCheckAndThrowToDynamic(env, aniEnv->Module_FindVariable(aniModule, variableName.c_str(), &getVariable));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Module_FindVariable(aniModule, variableName.c_str(), &getVariable));
 
     if (getVariable == nullptr) {
         STValueThrowJSError(env, "Cannot find variable: " + variableName);
@@ -969,47 +1044,47 @@ napi_value STValueModuleGetVariableImpl(napi_env env, napi_callback_info info)
     switch (variableType) {
         case SType::BOOLEAN: {
             ani_boolean boolValue = 0U;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Boolean(getVariable, &boolValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Boolean(getVariable, &boolValue));
             return CreateSTValueInstance(env, boolValue);
         }
         case SType::CHAR: {
             ani_char charValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Char(getVariable, &charValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Char(getVariable, &charValue));
             return CreateSTValueInstance(env, charValue);
         }
         case SType::BYTE: {
             ani_byte byteValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Byte(getVariable, &byteValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Byte(getVariable, &byteValue));
             return CreateSTValueInstance(env, byteValue);
         }
         case SType::SHORT: {
             ani_short shortValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Short(getVariable, &shortValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Short(getVariable, &shortValue));
             return CreateSTValueInstance(env, shortValue);
         }
         case SType::INT: {
             ani_int intValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Int(getVariable, &intValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Int(getVariable, &intValue));
             return CreateSTValueInstance(env, intValue);
         }
         case SType::LONG: {
             ani_long longValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Long(getVariable, &longValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Long(getVariable, &longValue));
             return CreateSTValueInstance(env, longValue);
         }
         case SType::FLOAT: {
             ani_float floatValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Float(getVariable, &floatValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Float(getVariable, &floatValue));
             return CreateSTValueInstance(env, floatValue);
         }
         case SType::DOUBLE: {
             ani_double doubleValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Double(getVariable, &doubleValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Double(getVariable, &doubleValue));
             return CreateSTValueInstance(env, doubleValue);
         }
         case SType::REFERENCE: {
             ani_ref refValue = nullptr;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Ref(getVariable, &refValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Ref(getVariable, &refValue));
             if (refValue == nullptr) {
                 napi_value jsNull = nullptr;
                 NAPI_CHECK_FATAL(napi_get_null(env, &jsNull));
@@ -1048,20 +1123,23 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
     SType variableType = static_cast<SType>(variableInt);
 
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_module aniModule = reinterpret_cast<ani_module>(data->GetAniRef());
 
     napi_value variableNameNapiValue = jsArgv[0];
-    std::string variableName = GetString(env, variableNameNapiValue);
+    std::string variableName;
+    if (!GetString(env, variableNameNapiValue, "variableName", variableName)) {
+        return nullptr;
+    }
 
     napi_value newValue = jsArgv[1];
     STValueData *newValueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, newValue));
 
     ani_variable getVariable {nullptr};
-    AniCheckAndThrowToDynamic(env, aniEnv->Module_FindVariable(aniModule, variableName.c_str(), &getVariable));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Module_FindVariable(aniModule, variableName.c_str(), &getVariable));
 
     switch (variableType) {
         case SType::BOOLEAN: {
@@ -1071,7 +1149,7 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
             }
             ani_boolean boolValue = 0;
             boolValue = newValueData->GetAniBoolean();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Boolean(getVariable, boolValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Boolean(getVariable, boolValue));
             break;
         }
         case SType::CHAR: {
@@ -1081,7 +1159,7 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
             }
             ani_char charValue = 0;
             charValue = newValueData->GetAniChar();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Char(getVariable, charValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Char(getVariable, charValue));
             break;
         }
         case SType::BYTE: {
@@ -1091,7 +1169,7 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
             }
             ani_byte byteValue = 0;
             byteValue = newValueData->GetAniByte();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Byte(getVariable, byteValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Byte(getVariable, byteValue));
             break;
         }
         case SType::SHORT: {
@@ -1101,7 +1179,7 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
             }
             ani_short shortValue = 0;
             shortValue = newValueData->GetAniShort();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Short(getVariable, shortValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Short(getVariable, shortValue));
             break;
         }
         case SType::INT: {
@@ -1111,7 +1189,7 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
             }
             ani_int IntValue = 0;
             IntValue = newValueData->GetAniInt();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Int(getVariable, IntValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Int(getVariable, IntValue));
             break;
         }
         case SType::LONG: {
@@ -1121,7 +1199,7 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
             }
             ani_long longValue = 0;
             longValue = newValueData->GetAniLong();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Long(getVariable, longValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Long(getVariable, longValue));
             break;
         }
         case SType::FLOAT: {
@@ -1131,7 +1209,7 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
             }
             ani_float floatValue = 0;
             floatValue = newValueData->GetAniFloat();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Float(getVariable, floatValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Float(getVariable, floatValue));
             break;
         }
         case SType::DOUBLE: {
@@ -1141,7 +1219,7 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
             }
             ani_double doubleValue = 0.0;
             doubleValue = newValueData->GetAniDouble();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Double(getVariable, doubleValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Double(getVariable, doubleValue));
             break;
         }
         case SType::REFERENCE: {
@@ -1150,7 +1228,7 @@ napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             ani_ref refValue = newValueData->GetAniRef();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Ref(getVariable, refValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Ref(getVariable, refValue));
             break;
         }
         default: {
@@ -1189,62 +1267,65 @@ napi_value STValueNamespaceGetVariableImpl(napi_env env, napi_callback_info info
     auto *aniEnv = GetAniEnv();
 
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_namespace aniNamespace = reinterpret_cast<ani_namespace>(data->GetAniRef());
 
     napi_value variableNameNapiValue = jsArgv[0];
-    std::string variableName = GetString(env, variableNameNapiValue);
+    std::string variableName;
+    if (!GetString(env, variableNameNapiValue, "variableName", variableName)) {
+        return nullptr;
+    }
 
     ani_variable getVariable {nullptr};
-    AniCheckAndThrowToDynamic(env, aniEnv->Namespace_FindVariable(aniNamespace, variableName.c_str(), &getVariable));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Namespace_FindVariable(aniNamespace, variableName.c_str(), &getVariable));
 
     switch (variableType) {
         case SType::BOOLEAN: {
             ani_boolean boolValue = 0U;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Boolean(getVariable, &boolValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Boolean(getVariable, &boolValue));
             return CreateSTValueInstance(env, boolValue);
         }
         case SType::BYTE: {
             ani_byte byteValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Byte(getVariable, &byteValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Byte(getVariable, &byteValue));
             return CreateSTValueInstance(env, byteValue);
         }
         case SType::CHAR: {
             ani_char charValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Char(getVariable, &charValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Char(getVariable, &charValue));
             return CreateSTValueInstance(env, charValue);
         }
         case SType::SHORT: {
             ani_short shortValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Short(getVariable, &shortValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Short(getVariable, &shortValue));
             return CreateSTValueInstance(env, shortValue);
         }
         case SType::INT: {
             ani_int intValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Int(getVariable, &intValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Int(getVariable, &intValue));
             return CreateSTValueInstance(env, intValue);
         }
         case SType::LONG: {
             ani_long longValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Long(getVariable, &longValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Long(getVariable, &longValue));
             return CreateSTValueInstance(env, longValue);
         }
         case SType::FLOAT: {
             ani_float floatValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Float(getVariable, &floatValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Float(getVariable, &floatValue));
             return CreateSTValueInstance(env, floatValue);
         }
         case SType::DOUBLE: {
             ani_double doubleValue = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Double(getVariable, &doubleValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Double(getVariable, &doubleValue));
             return CreateSTValueInstance(env, doubleValue);
         }
         case SType::REFERENCE: {
             ani_ref refValue = nullptr;
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_GetValue_Ref(getVariable, &refValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_GetValue_Ref(getVariable, &refValue));
             if (refValue == nullptr) {
                 napi_value jsNull = nullptr;
                 NAPI_CHECK_FATAL(napi_get_null(env, &jsNull));
@@ -1283,20 +1364,23 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
 
     auto *aniEnv = GetAniEnv();
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (!data->IsAniRef()) {
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_namespace aniNamespace = reinterpret_cast<ani_namespace>(data->GetAniRef());
 
     napi_value variableNameNapiValue = jsArgv[0];
-    std::string variableName = GetString(env, variableNameNapiValue);
+    std::string variableName;
+    if (!GetString(env, variableNameNapiValue, "variableName", variableName)) {
+        return nullptr;
+    }
 
     napi_value newValue = jsArgv[1];
     STValueData *newValueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, newValue));
 
     ani_variable getVariable {nullptr};
-    AniCheckAndThrowToDynamic(env, aniEnv->Namespace_FindVariable(aniNamespace, variableName.c_str(), &getVariable));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Namespace_FindVariable(aniNamespace, variableName.c_str(), &getVariable));
 
     switch (variableType) {
         case SType::BOOLEAN: {
@@ -1305,7 +1389,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 return nullptr;
             }
             ani_boolean boolValue = newValueData->GetAniBoolean();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Boolean(getVariable, boolValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Boolean(getVariable, boolValue));
             break;
         }
         case SType::BYTE: {
@@ -1314,7 +1398,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 return nullptr;
             }
             ani_byte byteValue = newValueData->GetAniByte();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Byte(getVariable, byteValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Byte(getVariable, byteValue));
             break;
         }
         case SType::CHAR: {
@@ -1323,7 +1407,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 return nullptr;
             }
             ani_char charValue = newValueData->GetAniChar();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Char(getVariable, charValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Char(getVariable, charValue));
             break;
         }
         case SType::SHORT: {
@@ -1332,7 +1416,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 return nullptr;
             }
             ani_short shortValue = newValueData->GetAniShort();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Short(getVariable, shortValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Short(getVariable, shortValue));
             break;
         }
         case SType::INT: {
@@ -1341,7 +1425,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 return nullptr;
             }
             ani_int IntValue = newValueData->GetAniInt();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Int(getVariable, IntValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Int(getVariable, IntValue));
             break;
         }
         case SType::LONG: {
@@ -1350,7 +1434,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 return nullptr;
             }
             ani_long longValue = newValueData->GetAniLong();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Long(getVariable, longValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Long(getVariable, longValue));
             break;
         }
         case SType::FLOAT: {
@@ -1359,7 +1443,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 return nullptr;
             }
             ani_float floatValue = newValueData->GetAniFloat();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Float(getVariable, floatValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Float(getVariable, floatValue));
             break;
         }
         case SType::DOUBLE: {
@@ -1368,7 +1452,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 return nullptr;
             }
             ani_double doubleValue = newValueData->GetAniDouble();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Double(getVariable, doubleValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Double(getVariable, doubleValue));
             break;
         }
         case SType::REFERENCE: {
@@ -1377,7 +1461,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 return nullptr;
             }
             ani_ref refValue = newValueData->GetAniRef();
-            AniCheckAndThrowToDynamic(env, aniEnv->Variable_SetValue_Ref(getVariable, refValue));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Ref(getVariable, refValue));
             break;
         }
         default: {
@@ -1408,14 +1492,14 @@ napi_value STValueObjectGetTypeImpl(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr);
 
     STValueData *objectData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (objectData == nullptr || !objectData->IsAniRef()) {
+    if (objectData == nullptr || !objectData->IsAniRef() || objectData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_object objObject = static_cast<ani_object>(objectData->GetAniRef());
 
     ani_type resType {};
-    AniCheckAndThrowToDynamic(env, aniEnv->Object_GetType(objObject, &resType));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetType(objObject, &resType));
     return CreateSTValueInstance(env, resType);
 }
 
@@ -1425,6 +1509,7 @@ static napi_value STValueTemplateFindElement(napi_env env, napi_callback_info in
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
+    // 1. get elementName
     size_t jsArgc = 0;
     napi_value jsElementName {};
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
@@ -1435,11 +1520,18 @@ static napi_value STValueTemplateFindElement(napi_env env, napi_callback_info in
 
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, &jsElementName, nullptr, nullptr));
 
-    auto elementName = GetString(env, jsElementName);
+    // 2. get elementName and check it
+    std::string elementName;
+    if (!GetString(env, jsElementName, "elementName", elementName)) {
+        return nullptr;
+    }
+
     ani_ref aniElement = findElement(elementName);
     if (aniElement == nullptr) {
         return nullptr;
     }
+
+    // 3. return result
     return CreateSTValueInstance<ani_ref>(env, std::move(aniElement));
 }
 
@@ -1455,7 +1547,8 @@ ani_object CreateBoolean(ani_env *env, ani_boolean boo)
     return obj;
 }
 
-ani_ref GetClassFromInteropDefaultLinker(napi_env napiEnv, ani_env *env, const std::string &elementName)
+ani_status GetClassFromInteropDefaultLinker([[maybe_unused]] napi_env napiEnv, ani_env *env,
+                                            const std::string &elementName, ani_ref *ref)
 {
     ani_string elementStr = nullptr;
     AniExpectOK(env->String_NewUTF8(elementName.c_str(), elementName.size(), &elementStr));
@@ -1478,35 +1571,52 @@ ani_ref GetClassFromInteropDefaultLinker(napi_env napiEnv, ani_env *env, const s
     }
     static ani_object boolObj = CreateBoolean(env, ANI_FALSE);
     ani_ref clsRef = nullptr;
-    AniCheckAndThrowToDynamic(napiEnv, env->Object_CallMethod_Ref(static_cast<ani_object>(linkerRef), loadMethod,
-                                                                  &clsRef, elementStr, boolObj));
-    return clsRef;
+    ani_status status =
+        env->Object_CallMethod_Ref(static_cast<ani_object>(linkerRef), loadMethod, &clsRef, elementStr, boolObj);
+    if (status != ani_status::ANI_OK) {
+        return status;
+    }
+
+    *ref = clsRef;
+    return ani_status::ANI_OK;
 }
 
 napi_value STValueFindModuleImpl(napi_env env, napi_callback_info info)
 {
     auto findModule = [env](const std::string &moduleName) -> ani_ref {
+        // 1. find it by default classlinker
         auto aniEnv = GetAniEnv();
         ani_module aniModule = nullptr;
         ani_status aniStatus = aniEnv->FindModule(moduleName.c_str(), &aniModule);
-        if (aniModule == nullptr) {
-            aniModule =
-                static_cast<ani_module>(GetClassFromInteropDefaultLinker(env, aniEnv, moduleName + ".ETSGLOBAL"));
-            if (aniModule != nullptr) {
-                return aniModule;
-            }
+        if (aniStatus == ani_status::ANI_OK && aniModule != nullptr) {
+            return aniModule;
         }
-        if (aniStatus != ani_status::ANI_OK) {
-            STValueThrowJSError(env, "FindModule failed: moduleName=" + moduleName +
-                                         ", aniStatus=" + std::to_string(aniStatus));
+
+        // 2. check error
+        if (aniStatus == ani_status::ANI_INVALID_DESCRIPTOR) {
+            AniCheckAndThrowToDynamic(env, aniStatus,
+                                      "FindModule failed, invalid moduleName: moduleName=" + moduleName +
+                                          ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
         }
 
-        if (aniModule == nullptr) {
-            STValueThrowJSError(env, "Cannot find module: moduleName=" + moduleName);
+        if (aniStatus != ani_status::ANI_NOT_FOUND) {
+            AniCheckAndThrowToDynamic(env, aniStatus,
+                                      "FindModule failed: moduleName=" + moduleName +
+                                          ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
         }
-        return aniModule;
+
+        // 3. find it by interop runtime linker
+        ani_ref ref = nullptr;
+        aniStatus = GetClassFromInteropDefaultLinker(env, aniEnv, moduleName + ".ETSGLOBAL", &ref);
+        if (aniStatus == ani_status::ANI_OK && ref != nullptr) {
+            return ref;
+        }
+
+        AniCheckAndThrowToDynamic(
+            env, aniStatus, "FindModule failed: moduleName=" + moduleName + ", aniStatus=" + std::to_string(aniStatus));
+        return nullptr;
     };
 
     return STValueTemplateFindElement(env, info, findModule);
@@ -1516,22 +1626,39 @@ napi_value STValueFindClassImpl(napi_env env, napi_callback_info info)
 {
     auto findClass = [env](const std::string &className) -> ani_ref {
         auto aniEnv = GetAniEnv();
+
+        // 1. find it by default classlinker
         ani_class aniClass = nullptr;
         ani_status aniStatus = aniEnv->FindClass(className.c_str(), &aniClass);
-
-        if (aniClass == nullptr) {
-            aniClass = static_cast<ani_class>(GetClassFromInteropDefaultLinker(env, aniEnv, className));
-            if (aniClass != nullptr) {
-                return aniClass;
-            }
+        if (aniStatus == ani_status::ANI_OK && aniClass != nullptr) {
+            return aniClass;
         }
-        if (aniStatus != ani_status::ANI_OK) {
-            STValueThrowJSError(env, "FindClass failed: className=" + className +
-                                         ", aniStatus=" + std::to_string(aniStatus));
+
+        // 2. check error
+        if (aniStatus == ani_status::ANI_INVALID_DESCRIPTOR) {
+            AniCheckAndThrowToDynamic(env, aniStatus,
+                                      "FindClass failed, invalid className: className=" + className +
+                                          ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
         }
 
-        return aniClass;
+        if (aniStatus != ani_status::ANI_NOT_FOUND) {
+            AniCheckAndThrowToDynamic(env, aniStatus,
+                                      "FindClass failed: className=" + className +
+                                          ", aniStatus=" + std::to_string(aniStatus));
+            return nullptr;
+        }
+
+        // 3. find it by interop runtime linker
+        ani_ref ref = nullptr;
+        aniStatus = GetClassFromInteropDefaultLinker(env, aniEnv, className, &ref);
+        if (aniStatus == ani_status::ANI_OK && ref != nullptr) {
+            return ref;
+        }
+
+        AniCheckAndThrowToDynamic(
+            env, aniStatus, "FindClass failed: className=" + className + ", aniStatus=" + std::to_string(aniStatus));
+        return nullptr;
     };
 
     return STValueTemplateFindElement(env, info, findClass);
@@ -1540,24 +1667,40 @@ napi_value STValueFindClassImpl(napi_env env, napi_callback_info info)
 napi_value STValueFindNamespaceImpl(napi_env env, napi_callback_info info)
 {
     auto findNamespace = [env](const std::string &namespaceName) -> ani_ref {
+        // 1. find it by default classlinker
         auto aniEnv = GetAniEnv();
         ani_namespace aniNamespace = nullptr;
         ani_status aniStatus = aniEnv->FindNamespace(namespaceName.c_str(), &aniNamespace);
-
-        if (aniNamespace == nullptr) {
-            aniNamespace = static_cast<ani_namespace>(GetClassFromInteropDefaultLinker(env, aniEnv, namespaceName));
-            if (aniNamespace != nullptr) {
-                return aniNamespace;
-            }
+        if (aniStatus == ani_status::ANI_OK && aniNamespace != nullptr) {
+            return aniNamespace;
         }
 
-        if (aniStatus != ani_status::ANI_OK) {
-            STValueThrowJSError(env, "FindNamespace failed: namespace=" + namespaceName +
-                                         ", aniStatus=" + std::to_string(aniStatus));
+        // 2. check error
+        if (aniStatus == ani_status::ANI_INVALID_DESCRIPTOR) {
+            AniCheckAndThrowToDynamic(env, aniStatus,
+                                      "FindNamespace failed, invalid namespaceName: namespaceName=" + namespaceName +
+                                          ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
         }
 
-        return aniNamespace;
+        if (aniStatus != ani_status::ANI_NOT_FOUND) {
+            AniCheckAndThrowToDynamic(env, aniStatus,
+                                      "FindNamespace failed: namespaceName=" + namespaceName +
+                                          ", aniStatus=" + std::to_string(aniStatus));
+            return nullptr;
+        }
+
+        // 3. find it by interop runtime linker
+        ani_ref ref = nullptr;
+        aniStatus = GetClassFromInteropDefaultLinker(env, aniEnv, namespaceName, &ref);
+        if (aniStatus == ani_status::ANI_OK && ref != nullptr) {
+            return ref;
+        }
+
+        AniCheckAndThrowToDynamic(env, aniStatus,
+                                  "FindNamespace failed: namespaceName=" + namespaceName +
+                                      ", aniStatus=" + std::to_string(aniStatus));
+        return nullptr;
     };
 
     return STValueTemplateFindElement(env, info, findNamespace);
@@ -1566,23 +1709,38 @@ napi_value STValueFindNamespaceImpl(napi_env env, napi_callback_info info)
 napi_value STValueFindEnumImpl(napi_env env, napi_callback_info info)
 {
     auto findEnum = [env](const std::string &enumName) -> ani_ref {
+        // 1. find it by default classlinker
         auto aniEnv = GetAniEnv();
         ani_enum aniEnum = nullptr;
         ani_status aniStatus = aniEnv->FindEnum(enumName.c_str(), &aniEnum);
-
-        if (aniEnum == nullptr) {
-            aniEnum = static_cast<ani_enum>(GetClassFromInteropDefaultLinker(env, aniEnv, enumName));
-            if (aniEnum != nullptr) {
-                return aniEnum;
-            }
+        if (aniStatus == ani_status::ANI_OK && aniEnum != nullptr) {
+            return aniEnum;
         }
-        if (aniStatus != ani_status::ANI_OK) {
-            STValueThrowJSError(env, "FindEnum failed: enumName = " + enumName +
-                                         ", aniStatus = " + std::to_string(aniStatus));
+
+        // 2. check error
+        if (aniStatus == ani_status::ANI_INVALID_DESCRIPTOR) {
+            AniCheckAndThrowToDynamic(env, aniStatus,
+                                      "FindEnum failed, invalid enumName: enumName=" + enumName +
+                                          ", aniStatus=" + std::to_string(aniStatus));
             return nullptr;
         }
 
-        return aniEnum;
+        if (aniStatus != ani_status::ANI_NOT_FOUND) {
+            AniCheckAndThrowToDynamic(
+                env, aniStatus, "FindEnum failed: enumName=" + enumName + ", aniStatus=" + std::to_string(aniStatus));
+            return nullptr;
+        }
+
+        // 3. find it by interop runtime linker
+        ani_ref ref = nullptr;
+        aniStatus = GetClassFromInteropDefaultLinker(env, aniEnv, enumName, &ref);
+        if (aniStatus == ani_status::ANI_OK && ref != nullptr) {
+            return ref;
+        }
+
+        AniCheckAndThrowToDynamic(env, aniStatus,
+                                  "FindEnum failed: enumName=" + enumName + ", aniStatus=" + std::to_string(aniStatus));
+        return nullptr;
     };
 
     return STValueTemplateFindElement(env, info, findEnum);

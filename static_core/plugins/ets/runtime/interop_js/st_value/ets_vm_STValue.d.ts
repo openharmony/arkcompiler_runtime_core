@@ -22,6 +22,8 @@ export declare enum SType {
     LONG,
     FLOAT,
     DOUBLE,
+    REFERENCE,
+    VOID,
 }
 
 export declare class STValue {
@@ -34,7 +36,8 @@ export declare class STValue {
     static wrapShort(b: number): STValue
     static wrapInt(b: number): STValue
     static wrapLong(l: number): STValue  // may lose precision if abs > 2^53
-    static wrapLong(l: bigint): STValue
+    static wrapLong(b: bigint): STValue
+    static wrapBoolean(b: boolean): STValue
     static wrapFloat(b: number): STValue
     static wrapNumber(b: number): STValue
     static wrapBigInt(b: bigint): STValue
@@ -64,13 +67,9 @@ export declare class STValue {
     fixedArrayGetLength(): number
 
     enumGetIndexByName(name: string): number
-    enumGetNameByIndex(idx: number): string
     enumGetValueByName(name: string, valueType: SType): STValue
-    enumGetValueByIndex(idx: number, valueType: SType): STValue
 
     functionalObjectInvoke(args: Array<STValue>): STValue
-
-    moduleInvokeFunction(name: string, signature: string, args: STValue[]): STValue
 
     namespaceInvokeFunction(name: string, signature: string, args: STValue[]): STValue
     objectInvokeMethod(name: string, signature: string, args: Array<STValue>): STValue
@@ -95,8 +94,8 @@ export declare class STValue {
     isBigInt(): boolean
     isString(): boolean
 
-    toNumber(): number
-    toString(): string
-    toBigInt(): bigint
-    toBoolean(): boolean
+    unwrapToNumber(): number
+    unwrapToString(): string
+    unwrapToBigInt(): bigint
+    unwrapToBoolean(): boolean
 }
