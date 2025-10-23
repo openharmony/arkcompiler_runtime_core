@@ -2332,6 +2332,7 @@
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_5_1.ets
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_5_2.ets
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_6_6.ets
+17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_6_8.ets
 
 #28824
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_8.ets
