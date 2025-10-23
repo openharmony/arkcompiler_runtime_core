@@ -100,6 +100,47 @@ function registerTest(registry: FinalizationRegistry<String> | null): void {
     doFullGC();
 }
 
+
+let jobsNoToken = new Array<CompletableJob<void> | undefined>(undefined, undefined, undefined);
+let resultsNoToken = new Array<int>();
+let finRegNoToken = new FinalizationRegistry<int>((i: int) => {
+    resultsNoToken.push(i);
+    jobsNoToken[i]!.finish();
+});
+function registerNoTokenTest() {
+
+    for (let seq of [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]) {
+        arktest.assertEQ(finRegNoToken.getSize(), 0);
+        arktest.assertEQ(resultsNoToken.length, 0);
+
+        // Fill finReg
+        let objects = new Array<Object>({}, {}, {});
+        finRegNoToken.register(objects[0], 0);
+        finRegNoToken.register(objects[1], 1);
+        finRegNoToken.register(objects[2], 2);
+
+        for (let i of seq) {
+            jobsNoToken[i] = new CompletableJob<void>();
+        }
+
+        // Cleanup finReg in given order
+        for (let i of seq) {
+            objects[i] = {};
+            doFullGC();
+            jobsNoToken[i]!.Await();
+
+            arktest.assertEQ(resultsNoToken.length, 1);
+            arktest.assertEQ(resultsNoToken[0], i);
+            resultsNoToken.pop();
+            for (let i = 0; i < 2; i++) {
+                doFullGC();
+                Coroutine.Schedule();
+            }
+            arktest.assertEQ(resultsNoToken.length, 0);
+        }
+    }
+}
+
 //========================= CTOR tests ===========================================
 let is_empty = false;
 let is_param = false;
@@ -284,4 +325,5 @@ function main(): void {
     getSizeTests();
     unregisterTests();
 
+    registerNoTokenTest();
 }
