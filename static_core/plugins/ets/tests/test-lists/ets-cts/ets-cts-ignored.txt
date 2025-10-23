@@ -888,6 +888,14 @@
 09.classes/07.method_declarations/01.static_methods/static_method_with_body_type_parameter_0.ets
 09.classes/07.method_declarations/01.static_methods/static_method_with_body_type_parameter_1.ets
 
+#30939
+09.classes/07.method_declarations/01.static_methods/use_instance_field_4.ets
+09.classes/07.method_declarations/01.static_methods/use_instance_field_7.ets
+09.classes/07.method_declarations/01.static_methods/use_instance_field_9.ets
+09.classes/07.method_declarations/01.static_methods/use_instance_method_4.ets
+09.classes/07.method_declarations/01.static_methods/use_instance_method_7.ets
+09.classes/07.method_declarations/01.static_methods/use_instance_method_9.ets
+
 #23238 Method returning 'this' returns wrong instance
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_8.ets
 
