@@ -619,12 +619,6 @@
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_n.ets
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_n3.ets
 
-#28792
-09.classes/03.class_implementation_clause/03.implementing_optional_interface_properties/example.ets
-09.classes/03.class_implementation_clause/03.implementing_optional_interface_properties/example_neg.ets
-09.classes/03.class_implementation_clause/03.implementing_optional_interface_properties/override_optional_property_4.ets
-09.classes/03.class_implementation_clause/03.implementing_optional_interface_properties/override_optional_property_11.ets
-
 #28771
 09.classes/03.class_implementation_clause/two_superinterfaces_from_same_generic_interface.ets
 
