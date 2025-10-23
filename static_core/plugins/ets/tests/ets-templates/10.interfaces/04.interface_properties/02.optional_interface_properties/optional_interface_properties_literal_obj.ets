@@ -13,19 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: Optional interface properties should be undefined
+desc: Literal object has its own getter and setter
 ---*/
 
-enum Color { Red, Green, Blue }
-
 interface I {
-  a?: {{c}}
+  a?: number
 }
 
 function main() {
   let i: I = {}
   arktest.assertEQ(i.a, undefined)
+  i.a = 5
+  arktest.assertEQ(i.a, 5)
 }
-{% endfor %}
