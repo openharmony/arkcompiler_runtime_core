@@ -198,7 +198,7 @@ export final class Class {
     public native isUnion(): boolean
 
     /**
-     * Gets only public instance methods of a class
+     * Gets public instance methods declared in the class
      *
      * @returns Immutable array of instance {@link reflect.InstanceMethod} objects
      */
@@ -207,14 +207,59 @@ export final class Class {
     }
 
     /**
-     * Looks up an public instance method by name
+     * Looks up a public instance method among the methods declared in the class
      *
      * @param name - The method name to search for
      *
-     * @returns The {@link reflect.InstanceMethod} if found, `undefined` otherwise
+     * @param signature - Array of parameter classes defining the method signature.
+     *
+     * @throws {Error} When signature is omitted and multiple overloads exist
+     *
+     * @returns The {@link reflect.StaticMethod} if found, `undefined` otherwise
      */
-    public getInstanceMethodByName(name: string): reflect.InstanceMethod | undefined {
-        return this.getInstanceMethodByNameInternal(name, true)
+    public getInstanceMethod(name: string, signature?: FixedArray<Class>): reflect.InstanceMethod | undefined {
+        let methods = this.getInstanceMethods()
+        if (methods.length == 0) {
+            return undefined
+        }
+        if (signature == undefined) {
+            return Class.findInstanceMethodByNameUnchecked(methods, name)
+        }
+        return Class.findInstanceMethodBySignatureUnchecked(methods, name, signature)
+    }
+
+    /**
+     * Gets public static methods declared in the class
+     *
+     * @returns Immutable array of static {@link reflect.StaticMethod} objects
+     */
+    public getStaticMethods(): FixedArray<reflect.StaticMethod> {
+        if (this.isInterface()) {
+            return []
+        }
+        return this.getStaticMethodsInternal(true)
+    }
+
+    /**
+     * Looks up a public static method among the methods declared in the class
+     *
+     * @param name - The method name to search for
+     *
+     * @param signature - Array of parameter classes defining the method signature.
+     *
+     * @throws {Error} When signature is omitted and multiple overloads exist
+     *
+     * @returns The {@link reflect.StaticMethod} if found, `undefined` otherwise
+     */
+    public getStaticMethod(name: string, signature?: FixedArray<Class>): reflect.StaticMethod | undefined {
+        let methods = this.getStaticMethods()
+        if (methods.length == 0) {
+            return undefined
+        }
+        if (signature == undefined) {
+            return Class.findStaticMethodByNameUnchecked(methods, name)
+        }
+        return Class.findStaticMethodBySignatureUnchecked(methods, name, signature)
     }
 
     /**
@@ -229,29 +274,6 @@ export final class Class {
     }
 
     /**
-     * Looks up an public static method by name
-     *
-     * @param name - The method name to search for
-     * @param signature - The method signature to search for (optional). If omitted, first match is returned
-     *
-     * @returns The {@link reflect.StaticMethod} if found, `undefined` otherwise
-     */
-    public getStaticMethodByName(name: string, signature?: FixedArray<Class>): reflect.StaticMethod | undefined {
-        let cls: Class | undefined = this
-        while (cls != undefined) {
-            let methodFoundByName = cls.getDirectStaticMethodByNameInternal(name, undefined, true)
-            if (methodFoundByName != undefined) {
-                if (signature == undefined) {
-                    return methodFoundByName
-                }
-                return cls.getDirectStaticMethodByNameInternal(name, signature, true)
-            }
-            cls = cls.getSuper()
-        }
-        return undefined
-    }
-
-    /**
      * Gets only public instance fields of a class
      *
      * @returns Immutable array of instance {@link reflect.InstanceField} objects
@@ -261,15 +283,6 @@ export final class Class {
             return []
         }
         return this.getInstanceFieldsInternal(true)
-    }
-
-    /**
-     * Gets only public static methods of a class
-     *
-     * @returns Immutable array of static {@link reflect.StaticMethod} objects
-     */
-    public getStaticMethods(): FixedArray<reflect.StaticMethod> {
-        return this.getStaticMethodsInternal(true)
     }
 
     /**
@@ -323,7 +336,7 @@ export final class Class {
 
     /**
      * Check the class is abstract
-     */ 
+     */
     public native isAbstract(): boolean
 
     /**
@@ -333,10 +346,95 @@ export final class Class {
      */
     public native isPrimitive(): boolean
 
+    // NOTE(kurnevichstanislav): squash two implementations into one after #31016 is fixed.
+    private static findStaticMethodByNameUnchecked(
+        methods: FixedArray<reflect.StaticMethod>,
+        name: string
+    ): reflect.StaticMethod | undefined {
+        let candidate: reflect.StaticMethod | undefined = undefined
+
+        for (let method of methods) {
+            if (method.getName() == name) {
+                if (candidate != undefined) {
+                    throw new Error(`Found two methods with the same name '${name}'. Please specify signature.`)
+                }
+                candidate = method
+            }
+        }
+        return candidate
+    }
+
+    private static findInstanceMethodByNameUnchecked(
+        methods: FixedArray<reflect.InstanceMethod>,
+        name: string
+    ): reflect.InstanceMethod | undefined {
+        let candidate: reflect.InstanceMethod | undefined = undefined
+
+        for (let method of methods) {
+            if (method.getName() == name) {
+                if (candidate != undefined) {
+                    throw new Error(`Found two methods with the same name '${name}'. Please specify signature.`)
+                }
+                candidate = method
+            }
+        }
+        return candidate
+    }
+
+    // NOTE(kurnevichstanislav): squash two implementations into one after #31016 is fixed.
+    private static findStaticMethodBySignatureUnchecked(
+        methods: FixedArray<reflect.StaticMethod>,
+        name: string,
+        signature: FixedArray<Class>
+    ): reflect.StaticMethod | undefined {
+        for (let method of methods) {
+            if (method.getName() == name && Class.compareSignatureStatic(method, signature)) {
+                return method
+            }
+        }
+        return undefined
+    }
+
+    private static findInstanceMethodBySignatureUnchecked(
+        methods: FixedArray<reflect.InstanceMethod>,
+        name: string,
+        signature: FixedArray<Class>
+    ): reflect.InstanceMethod | undefined {
+        for (let method of methods) {
+            if (method.getName() == name && Class.compareSignatureInstance(method, signature)) {
+                return method
+            }
+        }
+        return undefined
+    }
+
+    // NOTE(kurnevichstanislav): squash two implementations into one after #31016 is fixed.
+    private static compareSignatureStatic(method: reflect.StaticMethod, signature: FixedArray<Class>): boolean {
+        if (method.getParametersNum() != signature.length) {
+            return false
+        }
+        for (let idx = 0; idx < signature.length; ++idx) {
+            if (method.getParameterType(idx) != signature[idx]) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private static compareSignatureInstance(method: reflect.InstanceMethod, signature: FixedArray<Class>): boolean {
+        if (method.getParametersNum() != signature.length) {
+            return false
+        }
+        for (let idx = 0; idx < signature.length; ++idx) {
+            if (method.getParameterType(idx) != signature[idx]) {
+                return false
+            }
+        }
+        return true
+    }
+
     private native getInstanceMethodsInternal(publicOnly: boolean): FixedArray<reflect.InstanceMethod>
-    private native getInstanceMethodByNameInternal(name: string, publicOnly: boolean): reflect.InstanceMethod | undefined
     private native getInstanceFieldByNameInternal(name: string, publicOnly: boolean): reflect.InstanceField | undefined
-    private native getDirectStaticMethodByNameInternal(name: string, signature: FixedArray<Class> | undefined, publicOnly: boolean): reflect.StaticMethod | undefined
     private native getInstanceFieldsInternal(publicOnly: boolean): FixedArray<reflect.InstanceField>
     private native getStaticMethodsInternal(publicOnly: boolean): FixedArray<reflect.StaticMethod>
     private native getStaticFieldsInternal(publicOnly: boolean): FixedArray<reflect.StaticField>

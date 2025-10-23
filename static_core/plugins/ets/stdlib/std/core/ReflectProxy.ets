@@ -161,11 +161,11 @@ export class Proxy {
         let namesSet = new Set<string>()
 
         for(let idx = 0; idx < ifaces.length; ++idx) {
-            let arr: FixedArray<reflect.InstanceMethod> = ifaces[idx].getInstanceMethods()
-            for (let i = 0; i < arr.length; ++i) {
-                if (!namesSet.has(arr[i].getName())) {
-                    namesSet.add(arr[i].getName())
-                    instanceMethods.pushOne(arr[i])
+            let methodsSet = Proxy.getInstanceMethodsForInterface(ifaces[idx])
+            for (let method of methodsSet) {
+                if (!namesSet.has(method.getName())) {
+                    namesSet.add(method.getName())
+                    instanceMethods.pushOne(method)
                 } else {
                     throw new Error("Proxy does not support overloads and overrides.")
                 }
@@ -197,6 +197,70 @@ export class Proxy {
             }
         }
         return true
+    }
+
+    private static getInstanceMethodsForInterface(iface: Class): Set<reflect.InstanceMethod> {
+        return Proxy.getInstanceMethodsForInterfaceRecursive(iface, new Set<Class>())
+    }
+
+    // NOTE(kurnevichstanisalv): Support overloads and override-compatible
+    private static getInstanceMethodsForInterfaceRecursive(iface: Class, visited: Set<Class>): Set<reflect.InstanceMethod> {
+        let methods = new Set<reflect.InstanceMethod>()
+        if (!visited.add(iface)) {
+            return methods
+        }
+
+        // First, collect all methods from parent interfaces
+        let superIfaces = iface.getInterfaces()
+        let inheritedMethods = new Set<reflect.InstanceMethod>()
+
+        for (let superIntf of superIfaces) {
+            let superMethods = Proxy.getInstanceMethodsForInterfaceRecursive(superIntf, visited)
+            for (let superMethod of superMethods) {
+                inheritedMethods.add(superMethod)
+            }
+        }
+
+        // Add direct methods first (these have highest priority)
+        let directMethods = iface.getInstanceMethods();
+        for (let directMethod of directMethods) {
+            methods.add(directMethod)
+        }
+
+        // Add inherited methods that aren't overridden by direct methods
+        for (let inheritedMethod of inheritedMethods) {
+            let overridden = false
+
+            // Check if any direct method overrides this specific inherited method
+            for (let directMethod of directMethods) {
+                if (Proxy.hasSameSignature(inheritedMethod, directMethod)) {
+                    overridden = true
+                    break
+                }
+            }
+
+            // Also check if we already have a method with the same signature from another parent interface
+            if (!overridden) {
+                let alreadyExists = false
+                for (let existingMethod of methods) {
+                    if (Proxy.hasSameSignature(inheritedMethod, existingMethod)) {
+                        alreadyExists = true
+                        break
+                    }
+                }
+                if (!alreadyExists) {
+                    methods.add(inheritedMethod)
+                }
+            }
+        }
+
+        return methods
+    }
+
+    private static hasSameSignature(method1: reflect.InstanceMethod, method2: reflect.InstanceMethod): boolean {
+        return method1.getName() === method2.getName() &&
+               method1.getParametersNum() == method2.getParametersNum() &&
+               Proxy.compareTypesUnchecked(method1.getParametersTypes(), method2.getParametersTypes())
     }
 } // export class Proxy
 
