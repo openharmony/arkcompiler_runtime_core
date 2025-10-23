@@ -47,3 +47,46 @@ class G {
     return a + b;
   }
 }
+
+// enumeration
+class EnumTestWithoutInit{
+    value: number;
+    constructor() { this.value = 0; }
+    Index (a: number, b: number): number {
+        enum Sys {
+            Index,
+            Ablility,
+            Callee
+        }
+        this.value += 1;
+        return 0;
+    }
+}
+
+class EnumTestWithNumber{
+    value: number;
+    constructor() { this.value = 0; }
+    Index (a: number, b: number): number {
+        enum Sys {
+            Index = 0,
+            Ablility = 1,
+            Callee = 2
+        }
+        this.value += 1;
+        return 0;
+    }
+}
+
+class EnumTestWithString{
+    value: number;
+    constructor() { this.value = 0; }
+    Index (a: number, b: number): number {
+        enum Sys {
+            Index = 'Index',
+            Ablility = 'Ablility',
+            Callee = 'Callee'
+        }
+        this.value += 1;
+        return 0;
+    }
+}
