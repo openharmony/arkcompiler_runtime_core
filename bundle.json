@@ -60,7 +60,8 @@
                 "//arkcompiler/runtime_core:ark_device_packages",
                 "//arkcompiler/runtime_core/static_core/static_linker:static_linker",
                 "//arkcompiler/runtime_core:app_static_runtime_enable_list",
-                "//arkcompiler/runtime_core/static_core/compiler/tools/paoc:ark_aot_host_tool"
+                "//arkcompiler/runtime_core/static_core/compiler/tools/paoc:ark_aot_host_tool",
+                "//arkcompiler/runtime_core:static_aot_methods_black_list.json"
             ],
             "inner_kits": [
                 {
