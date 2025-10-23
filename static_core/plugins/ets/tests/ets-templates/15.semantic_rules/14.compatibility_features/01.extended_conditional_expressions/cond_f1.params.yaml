@@ -42,11 +42,13 @@ cases:
     - 'new float'
     - 'new double'
     - 'new number'
+    - 'new char'
 
     - '""'
     - '``'
     - new String("abc").substring(0, 0)
     - '"" + ""'
+    - c'\u0000'
 
     - 'false'
     - '!true'
@@ -65,4 +67,5 @@ cases:
     - new Float()
     - new Double()
     - new Number()
+    - new Char()
     - 0n

@@ -72,6 +72,7 @@ cases:
     - { val: 'new String("abc").substring(0, 1)', type: 'string' }
     - { val: '"\u0000"', type: 'string' }
     - { val: '"\x00"', type: 'string' }
+    - { val: "c'\\u0001'", type: 'char' }
 
     - { val: '!false', type: 'boolean' }
     - { val: 'true', type: 'boolean' }

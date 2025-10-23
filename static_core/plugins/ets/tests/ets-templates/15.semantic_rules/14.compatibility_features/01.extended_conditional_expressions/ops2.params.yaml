@@ -38,6 +38,11 @@ cases:
     - { val: 'new String("\u0000\u0000").substring(0, 0)', type: 'string', truthy: false }
     - { val: 'new String("\u0000\u0000").substring(0, 1)', type: 'string', truthy: true }
 
+    - { val: "c'\\u0000'", type: 'char', truthy: false }
+    - { val: "c' '", type: 'char', truthy: true }
+    - { val: "new Char(c'\\u0000')", type: 'Char', truthy: false }
+    - { val: "new Char(c' ')", type: 'Char', truthy: true }
+
     - { val: '!false', type: 'boolean', truthy: true }
     - { val: '!true', type: 'boolean', truthy: false }
     - { val: 'new Boolean(!false)', type: 'Boolean', truthy: true }

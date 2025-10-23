@@ -59,6 +59,7 @@ cases:
     - new String("abc").substring(0, 1)
     - '"\u0000"'
     - '"\x00"'
+    - c'1'
 
     - '!false'
     - 'true'

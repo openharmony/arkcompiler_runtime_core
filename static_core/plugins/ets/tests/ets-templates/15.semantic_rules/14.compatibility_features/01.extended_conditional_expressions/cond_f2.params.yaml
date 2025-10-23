@@ -38,6 +38,7 @@ cases:
     - { val: 'new Long()', type: 'long' }
     - { val: 'new Float()', type: 'float' }
     - { val: 'new Double()', type: 'double' }
+    - { val: 'new Char()', type: 'char' }
 
     - { val: '""', type: 'string' }
     - { val: 'new String("abc").substring(0, 0)', type: 'string' }
@@ -49,6 +50,7 @@ cases:
     - { val: '!true', type: 'boolean' }
     - { val: '42 - 21 - 21', type: 'number' }
     - { val: '42 * (21 - 11 - 10)', type: 'number' }
+    - { val: "c'\u0000'", type: 'char' }
 
     - decl: |-
         class A {}
