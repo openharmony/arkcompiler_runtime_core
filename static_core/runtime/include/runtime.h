@@ -178,6 +178,8 @@ public:
     static bool GetLiteralTagAndValue(const panda_file::File &pf, uint32_t id, panda_file::LiteralTag *tag,
                                       panda_file::LiteralDataAccessor::LiteralValue *value);
 
+    static void SetDebuggerOptions(RuntimeOptions &options);
+
     uintptr_t GetPointerToConstArrayData(const panda_file::File &pf, uint32_t id) const;
 
     coretypes::Array *ResolveLiteralArray(PandaVM *vm, const Method &caller, uint32_t id);
