@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+{% yaml "values_of_inter_type_on_predefined_common.yaml" as common_test_data %}
+
+/*---
+desc: >-
+    Checking that the values of intersection type A & B
+    are all values that belong to both A and B
+    by checking values of type A | B
+    (which includes values from types A & B, A - B, B - A)
+    in case of usage ! instanceof on predefined types
+    with ternary expression usage in function call
+    and smart type compatibility check
+---*/
+
+{% for c in common_test_data.cases %}
+{%- set c_id = loop.index %}
+
+namespace testNS{{c_id}} {
+  {{c.check_variant_decl_data|indent(width=2)}}
+
+  // Checks that value of computed smart type A & B is assignable to TypeA
+  function check_type_A_inter_B_as_TypeA(v: TypeA,
+                                          v_type: VarType,
+                                          v_id: int): void {
+    arktest.assertEQ(v_type, VarType.A_inter_B)
+    arktest.assertTrue(v instanceof TypeA)
+    arktest.assertTrue(v instanceof TypeB)
+    arktest.assertEQ(v, check_values[v_id][0])
+  }
+
+  // Checks that value of computed smart type A & B is assignable to TypeB
+  function check_type_A_inter_B_as_TypeB(v: TypeB,
+                                          v_type: VarType,
+                                          v_id: int): void {
+    arktest.assertEQ(v_type, VarType.A_inter_B)
+    arktest.assertTrue(v instanceof TypeA)
+    arktest.assertTrue(v instanceof TypeB)
+    arktest.assertEQ(v, check_values[v_id][0])
+  }
+
+  // Checks values of type A | B
+  function check(v: TypeA | TypeB,
+                  v_type: VarType,
+                  v_id: int): void {
+    (!(v instanceof TypeA)) ?
+      arktest.assertEQ(v_type, VarType.B_diff_A) :
+        ((!(v instanceof TypeB)) ?
+          arktest.assertEQ(v_type, VarType.A_diff_B) :
+            {{c.check_value_by_expression_as_type_A_inter_B}});
+    (!(v instanceof TypeA)) ?
+      arktest.assertEQ(v_type, VarType.B_diff_A) :
+        ((!(v instanceof TypeB)) ?
+          arktest.assertEQ(v_type, VarType.A_diff_B) :
+            check_type_A_inter_B_as_TypeA(v, v_type, v_id));
+    (!(v instanceof TypeA)) ?
+      arktest.assertFalse(v instanceof TypeA) :
+        ((!(v instanceof TypeB)) ?
+          arktest.assertTrue(v instanceof TypeA) :
+            check_type_A_inter_B_as_TypeB(v, v_type, v_id));
+    (!(v instanceof TypeA)) ?
+      arktest.assertTrue(v instanceof TypeB) :
+        ((!(v instanceof TypeB)) ?
+          arktest.assertFalse(v instanceof TypeB) :
+            arktest.assertTrue(v instanceof TypeA));
+    (!(v instanceof TypeA)) ?
+      arktest.assertEQ(v, check_values[v_id][0]) :
+        ((!(v instanceof TypeB)) ?
+          arktest.assertEQ(v, check_values[v_id][0]) :
+            arktest.assertTrue(v instanceof TypeB));
+  }
+
+  export function runTest() {
+    let checks_number: int = 0
+    for (let v_id: int = 0; v_id < check_values.length; v_id++) {
+      check(check_values[v_id][0],
+        check_values[v_id][1],
+        v_id)
+      checks_number++
+    }
+    arktest.assertEQ(checks_number, check_values_number)
+  }
+}
+
+{%- endfor %}
+
+function main(): int {
+  let testSuite = new arktest.ArkTestsuite('values_of_inter_type_on_predefined_in_trn');
+  {%- for c in common_test_data.cases %}
+  {%- set c_id = loop.index %}
+  testSuite.addTest('testNS{{c_id}}.runTest()', testNS{{c_id}}.runTest)
+  {%- endfor %}
+  let res = testSuite.run()
+  return res
+}
