@@ -25,7 +25,7 @@ export class ErrorOptionsImpl implements ErrorOptions {
         return this.cause_
     }
 
-    set cause(cause?: Object) {
+    set cause(cause: Object | undefined) {
         this.cause_ = cause
     }
 
