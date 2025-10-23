@@ -394,17 +394,6 @@
 07.expressions/15.instanceof_expression/instanceof-cte_3.ets
 07.expressions/15.instanceof_expression/instanceof-cte_4.ets
 
-#30095 const enum instanceof is not a base type
-07.expressions/15.instanceof_expression/instanceof_137.ets
-07.expressions/15.instanceof_expression/instanceof_138.ets
-07.expressions/15.instanceof_expression/instanceof_145.ets
-07.expressions/15.instanceof_expression/instanceof_146.ets
-07.expressions/15.instanceof_expression/instanceof_152.ets
-07.expressions/15.instanceof_expression/instanceof_153.ets
-07.expressions/15.instanceof_expression/instanceof_139.ets
-07.expressions/15.instanceof_expression/instanceof_147.ets
-07.expressions/15.instanceof_expression/instanceof_155.ets
-
 #29203 Warning: Type parameter is erased from type 'Array' when used in instanceof expression
 07.expressions/15.instanceof_expression/instanceof_161.ets
 07.expressions/15.instanceof_expression/instanceof_169.ets
