@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -20,8 +20,16 @@ desc: A compile-time error occurs if a generic instantiation leads to instantiat
 tags: [compile-only, negative]
 ---*/
 
-class A <T> {
-    foo (p: FixedArray<T>) {}
+class A<T> {
+    foo(p: FixedArray<T>) {}
+}
+
+class B<T> {
+    foo(p: T): FixedArray<T> {
+        // Note new FixedArray<T> would throw CTE per spec 17.2
+        let res: FixedArray<T> = [p]
+        return res
+    }
 }
 
 {{c.decl}}

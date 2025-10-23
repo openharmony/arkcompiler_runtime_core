@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -90,3 +90,79 @@ cases:
   - decl: |-
       function foo (p: A<char>) {}
 
+  # Class method with return value of interest
+  # new object
+  - decl: |-
+      let v = new B<double>
+      function foo (p: B<int>) {}
+
+  - decl: |-
+      let v = new B<float>
+
+  - decl: |-
+      let v = new B<long>
+
+  - decl: |-
+      let v = new B<int>
+
+  - decl: |-
+      let v = new B<short>
+
+  - decl: |-
+      let v = new B<byte>
+
+  - decl: |-
+      let v = new B<boolean>
+
+  - decl: |-
+      let v = new B<char>
+
+  # declare object
+  - decl: |-
+      let a: B<double>|undefined
+
+  - decl: |-
+      let a: B<float>|undefined
+
+  - decl: |-
+      let a: B<long>|undefined
+
+  - decl: |-
+      let a: B<int>|undefined
+
+  - decl: |-
+      let a: B<short>|undefined
+
+  - decl: |-
+      let a: B<byte>|undefined
+
+  - decl: |-
+      let a: B<boolean>|undefined
+
+  - decl: |-
+      let a: B<char>|undefined
+
+  # declare function
+  - decl: |-
+      function foo (p: B<double>) {}
+
+  - decl: |-
+      function foo (p: B<float>) {}
+
+  - decl: |-
+      function foo (p: B<long>) {}
+
+  - decl: |-
+      function foo (p: B<int>) {}
+
+  - decl: |-
+      function foo (p: B<short>) {}
+
+  - decl: |-
+      function foo (p: B<byte>) {}
+
+  - decl: |-
+      function foo (p: B<boolean>) {}
+
+  - decl: |-
+      function foo (p: B<char>) {}
