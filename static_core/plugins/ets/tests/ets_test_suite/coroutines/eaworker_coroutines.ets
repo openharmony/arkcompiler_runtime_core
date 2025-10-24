@@ -218,6 +218,16 @@ function testNestedEAWorker(): void {
     arktest.assertEQ(EXPECTED_VALUE, result);
 }
 
+function testOfPrioritySetting(): void {
+    let e = new EAWorker();
+    arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_DEFAULT);
+    e.setPriority(WorkerPriority.PRIORITY_HIGH);
+    arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_HIGH);
+    e.start();
+    arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_HIGH);
+    e.join();
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('EAWorker Test Suite');
 

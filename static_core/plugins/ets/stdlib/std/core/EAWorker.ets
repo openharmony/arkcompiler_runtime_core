@@ -63,6 +63,7 @@ class ExclusiveLauncher {
  */
 export class EAWorker {
     private worker: InternalWorker;
+    private priority: WorkerPriority = WorkerPriority.PRIORITY_DEFAULT;
     private loopStarted = new AtomicFlag(false);
     private loopJoined = new AtomicFlag(false);
     private initialTask: Task = () => {};
@@ -154,6 +155,7 @@ export class EAWorker {
             EAWorker.getWorkers().set(CoroutineExtras.getWorkerId(), this);
             this.initialTask();
         });
+        this.worker.setPriority(this.priority);
         this.loopStarted.set(true);
     }
 
@@ -170,10 +172,10 @@ export class EAWorker {
      * @param { WorkerPriority } priority The new priority value for the worker
      */
     public setPriority(priority: WorkerPriority) {
-        if (!this.loopStarted.get()) {
-            throw new Error("Can not set worker priority when not started");
+        this.priority = priority;
+        if (this.loopStarted.get()) {
+            this.worker.setPriority(priority);
         }
-        this.worker.setPriority(priority);
     }
 
     /**
@@ -181,7 +183,7 @@ export class EAWorker {
      * @returns { WorkerPriority } The current priority value of the worker
      */
     public getPriority(): WorkerPriority {
-        return this.worker.getPriority();
+        return this.priority;
     }
 
     /**
@@ -313,13 +315,11 @@ export class EAWorker {
 abstract class InternalWorker {
     private readonly name: string;
     protected workerId: int;
-    private priority: WorkerPriority;
     private errorHandler: ErrorHandlerType | undefined = undefined;
 
-    constructor(name: string, workerId: int, priority: WorkerPriority) {
+    constructor(name: string, workerId: int) {
         this.name = name;
         this.workerId = workerId;
-        this.priority = priority;
     }
 
     run<R>(task: Function, ...args: FixedArray<Any>): Job<R> {
@@ -338,13 +338,8 @@ abstract class InternalWorker {
         return this.workerId;
     }
 
-    getPriority(): WorkerPriority {
-        return this.priority;
-    }
-
     setPriority(priority: WorkerPriority) {
         this.runImpl<void>(() => { InternalWorker.setCurrentWorkerPriority(priority); });
-        this.priority = priority;
     }
 
     setErrorHandler(handler: ErrorHandlerType) {
@@ -382,7 +377,7 @@ abstract class InternalWorker {
 
 class InteropWorker extends InternalWorker {
     constructor(name: string) {
-        super(name, INVALID_WORKER_ID, WorkerPriority.PRIORITY_DEFAULT);
+        super(name, INVALID_WORKER_ID);
     }
 
     start(initialTask: Task) {
@@ -412,7 +407,7 @@ class StaticWorker extends InternalWorker {
     private joiningEvent = new Event();
 
     constructor(name: string) {
-        super(name, INVALID_WORKER_ID, WorkerPriority.PRIORITY_DEFAULT);
+        super(name, INVALID_WORKER_ID);
     }
 
     start(initialTask: Task) {
@@ -438,7 +433,7 @@ class MainEAWorker extends EAWorker {
 
 class MainWorker extends InternalWorker {
     constructor() {
-        super("main", MAIN_WORKER_ID, WorkerPriority.PRIORITY_DEFAULT);
+        super("main", MAIN_WORKER_ID);
     }
 
     start(initialTask: Task) {
