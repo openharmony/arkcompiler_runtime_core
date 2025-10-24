@@ -28,6 +28,8 @@ cases:
   - { use: "1023", use_type: ": int | long" }
   # value fits within int
   - { use: "2000000", use_type: ": int | long" }
+  # value fits within float
+  - { use: "1.0", use_type: ": float | double" }
 
 # whether to use const to initialise
 const_to_initialise:
