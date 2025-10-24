@@ -1,6 +1,12 @@
 #30572
 escompat/MathClz32Test.ets
 
+#28345
+escompat/JsonParseTest.ets
+
+#24357 Koala related issues
+koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
+
 #24986 (16 tests)
 std/core/Object.ets
 std/core/TypedArrayConstructorNumbersInts.ets

@@ -1,9 +1,6 @@
 #24352
 algorithms/SampleAppTest.ets
 
-#24357 Koala related issues
-koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
-
 #24358 Koala related issues
 koala-related-benchmarks/arkts-phase1.ets
 
@@ -50,9 +47,6 @@ spec/03.types/References_Types/Type_undefined/set-add/add-undefined-to-undefined
 #19962
 spec/03.types/References_Types/Type_undefined/undefined-union-array-type_2.ets
 spec/03.types/References_Types/Type_undefined/undefined-union-array-type_3.ets
-
-#26717
-spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-in-other-class_1.ets
 
 ### tuples
 spec/03.types/References_Types/Tuples_type/tuple_as_rest_param_0.ets
@@ -103,9 +97,6 @@ spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_01.ets
 
 #16535
 spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_02.ets
-
-#25889
-spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda2.ets
 
 ### Negative tests lambda issues
 spec/07.expressions/7.32.Lambda_Expressions/incorrectVariableDeclaration.ets
@@ -275,20 +266,11 @@ std/concurrency/messageHandler_basic_interface.ets
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
-#29117
-std/containers/BlockingQueue/AddAndPollStress.ets
-
-#27586
-std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
-
 #25264
 std/core/ConsoleArrayTest.ets
 
 #25130
 std/core/dateformat/DateTimeFormatTest.ets
-
-#29145
-std/core/json/JsonStringifyParseBigIntTest.ets
 
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
@@ -356,19 +338,6 @@ spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 std/core/NumberTest.ets
 escompat/JsonStringifyTest.ets
 
-#30140
-std/core/DeepCopyTest.ets
-ets_func_tests/std/core/DeepCopyTest.ets
-
-#28345
-escompat/JsonParseTest.ets
-
-#29995
-escompat/JsonAnnotationTest.ets
-
-#26910
-escompat/ProxyTest.ets
-
 ############
 # temporary place for the tests related to primitive types refactoring
 ############
@@ -376,19 +345,6 @@ escompat/ProxyTest.ets
 # 3.
 # TypeError: Value is possibly nullish
 std/core/TypeCreateErasedBodyTest.ets
-
-# 4.
-# TypeError: Reference to lastIndexOf is ambiguous
-std/core/std_core_typedarrays_methods__Float32Array.ets
-std/core/std_core_typedarrays_methods__Float64Array.ets
-std/core/std_core_typedarrays_methods__Float64Array_001.ets
-std/core/std_core_typedarrays_methods__Int16Array.ets
-std/core/std_core_typedarrays_methods__Int32Array.ets
-std/core/std_core_typedarrays_methods__Int8Array.ets
-std/core/std_core_typeduarrays_methods__Uint16Array.ets
-std/core/std_core_typeduarrays_methods__Uint32Array.ets
-std/core/std_core_typeduarrays_methods__Uint8Array.ets
-std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
 
 # 5.
 # TypeError: Unresolved reference compareWrapperObjectValue
@@ -436,7 +392,6 @@ std/core/std_core_string_String_repeat_int.ets
 std/core/std_core_string_String_repeat_number.ets
 escompat/JsonReplacerTest.ets
 std/core/regexp/JsonStringifyRegExpExecArrayTest.ets
-std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 regression/15278_0.ets
 
 #30585
