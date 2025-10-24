@@ -63,7 +63,7 @@ extern "C" ani_status CreateExternalArrayBuffer(ani_env *env, void *externalData
     }
 
     ani_class cls {};
-    if (auto status = env->FindClass("escompat.ArrayBuffer", &cls); status != ANI_OK) {
+    if (auto status = env->FindClass("std.core.ArrayBuffer", &cls); status != ANI_OK) {
         return status;
     }
     ani_method ctor {};
@@ -93,7 +93,7 @@ extern "C" ani_status CreateFinalizableArrayBuffer(ani_env *env, void *externalD
     }
 
     ani_class cls {};
-    if (auto status = env->FindClass("escompat.ArrayBuffer", &cls); status != ANI_OK) {
+    if (auto status = env->FindClass("std.core.ArrayBuffer", &cls); status != ANI_OK) {
         return status;
     }
     ani_method ctor {};

@@ -25,7 +25,7 @@ namespace class_descriptors {
 
 // Base classes
 static constexpr std::string_view ERROR                                = "Lescompat/Error;";
-static constexpr std::string_view ARRAY_BUFFER                         = "Lescompat/ArrayBuffer;";
+static constexpr std::string_view ARRAY_BUFFER                         = "Lstd/core/ArrayBuffer;";
 static constexpr std::string_view BIG_INT                              = "Lstd/core/BigInt;";
 static constexpr std::string_view ASYNC                                = "Lets/coroutine/Async;";
 static constexpr std::string_view OBJECT                               = "Lstd/core/Object;";

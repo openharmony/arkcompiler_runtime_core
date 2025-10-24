@@ -181,7 +181,7 @@ TEST_F(TypedArrayRelatedMemberOffsetTest, UBigUInt64ArrayLayout)
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, ArrayBufferLayout)
 {
-    auto *klass = GetClass("Lescompat/ArrayBuffer;");
+    auto *klass = GetClass("Lstd/core/ArrayBuffer;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetArrayBufferMembers(), false);
 }
 

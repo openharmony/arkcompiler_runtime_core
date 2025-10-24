@@ -1015,7 +1015,7 @@ static inline EtsByteArray *CreateByteArrayNonMov(EtsInt byteLen)
 /// @brief Creates a new ArrayBuffer with specified ByteArray and size.
 static inline EtsEscompatArrayBuffer *CreateArrayBufferExternalData(EtsInt byteLen, EtsByteArray *externalData)
 {
-    auto *klass = PlatformTypes(EtsCoroutine::GetCurrent())->escompatArrayBuffer->GetRuntimeClass();
+    auto *klass = PlatformTypes(EtsCoroutine::GetCurrent())->coreArrayBuffer->GetRuntimeClass();
     auto *buffer =
         reinterpret_cast<EtsEscompatArrayBuffer *>(Thread::GetCurrent()->GetVM()->GetHeapManager()->AllocateObject(
             klass, sizeof(EtsEscompatArrayBuffer), DEFAULT_ALIGNMENT, ManagedThread::GetCurrent(),

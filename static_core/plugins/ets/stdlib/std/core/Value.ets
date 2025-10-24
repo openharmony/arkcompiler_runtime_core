@@ -285,7 +285,7 @@ export final class ClassValue extends reflect.Value {
     public override getData(): Any {
         return this.data
     }
-    
+
     public constructor(typ: ClassType, data: Object) {
         this.typ = typ
         this.data = data
@@ -513,12 +513,12 @@ export final class ClassValue extends reflect.Value {
     }
 
     public override toPrint(depth: int): string {
-        
-        if (this.typ.getName() == "escompat.ArrayBuffer") {
+
+        if (this.typ.getName() == "std.core.ArrayBuffer") {
             if (depth == 0) {
-                return "escompat.ArrayBuffer {...}";
+                return "std.core.ArrayBuffer {...}";
             }
-            const result = new StringBuilder("escompat.ArrayBuffer {");
+            const result = new StringBuilder("std.core.ArrayBuffer {");
             const dataField = this.getFieldByName('data');
             result.append("data: ").append(dataField.toPrint(depth - 1));
             const byteLengthField = this.getFieldByName('_byteLength');

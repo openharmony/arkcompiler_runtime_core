@@ -35,7 +35,7 @@ public:
 
 TEST_F(EtsArrayBufferTest, MemoryLayout)
 {
-    EtsClass *klass = GetPlatformTypes()->escompatArrayBuffer;
+    EtsClass *klass = GetPlatformTypes()->coreArrayBuffer;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 }  // namespace ark::ets::test
