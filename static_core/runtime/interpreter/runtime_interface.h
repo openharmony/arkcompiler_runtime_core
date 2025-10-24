@@ -327,7 +327,7 @@ public:
         if (thread->IsSuspended()) {
             ThreadSuspension(thread);
         }
-        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), false));
     }
 
     static void Safepoint()
