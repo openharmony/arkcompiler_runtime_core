@@ -117,6 +117,13 @@ size_t GCTriggerHeap::ComputeTarget(size_t heapSizeBeforeGc, size_t heapSize)
     return heapSize + std::max(delta, minExtraSize_);
 }
 
+void GCTriggerHeap::FinishPostponeGCIfNeeded(GC *gc)
+{
+    if (gc->IsPostponeEnabled() && ++gcPostponeCount_ == POSTPONE_GC_LIMIT) {
+        gc->PostponeGCEnd();
+    }
+}
+
 void GCTriggerHeap::TriggerGcIfNeeded(GC *gc)
 {
     if (skipGcCount_ > 0) {
@@ -125,6 +132,7 @@ void GCTriggerHeap::TriggerGcIfNeeded(GC *gc)
     }
 
     if (!gc->CanAddGCTask()) {
+        FinishPostponeGCIfNeeded(gc);
         return;
     }
 
