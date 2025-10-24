@@ -513,73 +513,6 @@ EtsMethod *EtsClass::ResolveVirtualMethod(const EtsMethod *method) const
     return reinterpret_cast<EtsMethod *>(GetRuntimeClass()->ResolveVirtualMethod(method->GetPandaMethod()));
 }
 
-static std::pair<char const *, EtsClassRoot> GetNameAndClassRoot(char hash)
-{
-    const char *primitiveName = nullptr;
-    EtsClassRoot classRoot;
-
-    switch (hash) {
-        case 'v':
-            primitiveName = "void";
-            classRoot = EtsClassRoot::VOID;
-            break;
-        case 'b':
-            primitiveName = "boolean";
-            classRoot = EtsClassRoot::BOOLEAN;
-            break;
-        case 'B':
-            primitiveName = "byte";
-            classRoot = EtsClassRoot::BYTE;
-            break;
-        case 'c':
-            primitiveName = "char";
-            classRoot = EtsClassRoot::CHAR;
-            break;
-        case 's':
-            primitiveName = "short";
-            classRoot = EtsClassRoot::SHORT;
-            break;
-        case 'i':
-            primitiveName = "int";
-            classRoot = EtsClassRoot::INT;
-            break;
-        case 'l':
-            primitiveName = "long";
-            classRoot = EtsClassRoot::LONG;
-            break;
-        case 'f':
-            primitiveName = "float";
-            classRoot = EtsClassRoot::FLOAT;
-            break;
-        case 'd':
-            primitiveName = "double";
-            classRoot = EtsClassRoot::DOUBLE;
-            break;
-        default:
-            break;
-    }
-
-    return {primitiveName, classRoot};
-}
-
-/* static */
-EtsClass *EtsClass::GetPrimitiveClass(EtsString *name)
-{
-    if (name == nullptr || name->GetMUtf8Length() < 2) {  // MUtf8Length must be >= 2
-        return nullptr;
-    }
-    // StringIndexOutOfBoundsException is not thrown by At method, because index (0, 1) < length (>= 2)
-    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    char hash = name->At(0) ^ ((name->At(1) & 0x10) << 1);  // NOLINT(hicpp-signed-bitwise, readability-magic-numbers)
-    auto [primitiveName, classRoot] = GetNameAndClassRoot(hash);
-
-    if (primitiveName != nullptr && name->IsEqual(primitiveName)) {  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
-        return PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(classRoot);
-    }
-
-    return nullptr;
-}
-
 EtsString *EtsClass::CreateEtsClassName([[maybe_unused]] const char *descriptor)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
@@ -592,39 +525,9 @@ EtsString *EtsClass::CreateEtsClassName([[maybe_unused]] const char *descriptor)
         std::replace(etsName.begin(), etsName.end(), '/', '.');
         return EtsString::CreateFromMUtf8(etsName.data(), etsName.length());
     }
-    if (*descriptor == '[') {
-        PandaString etsName(descriptor);
-        std::replace(etsName.begin(), etsName.end(), '/', '.');
-        return EtsString::CreateFromMUtf8(etsName.data(), etsName.length());
-    }
 
-    switch (*descriptor) {
-        case 'Z':
-            return EtsString::CreateFromMUtf8("boolean");
-        case 'B':
-            return EtsString::CreateFromMUtf8("byte");
-        case 'C':
-            return EtsString::CreateFromMUtf8("char");
-        case 'S':
-            return EtsString::CreateFromMUtf8("short");
-        case 'I':
-            return EtsString::CreateFromMUtf8("int");
-        case 'J':
-            return EtsString::CreateFromMUtf8("long");
-        case 'F':
-            return EtsString::CreateFromMUtf8("float");
-        case 'D':
-            return EtsString::CreateFromMUtf8("double");
-        case 'V':
-            return EtsString::CreateFromMUtf8("void");
-        case 'Y':
-            return EtsString::CreateFromMUtf8("Y");
-        case 'N':
-            return EtsString::CreateFromMUtf8("N");
-        default:
-            LOG(FATAL, RUNTIME) << "Incorrect primitive name" << descriptor;
-            UNREACHABLE();
-    }
+    ark::ets::RuntimeDescriptorParser nameParser(descriptor);
+    return EtsString::CreateFromMUtf8(nameParser.Resolve().c_str());
 }
 
 EtsString *EtsClass::GetName()
@@ -632,20 +535,17 @@ EtsString *EtsClass::GetName()
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
 
     EtsString *name = nullptr;
-    bool success = false;
 
-    do {
-        name = reinterpret_cast<EtsString *>(GetObjectHeader()->GetFieldObject(GetNameOffset()));
-        if (name != nullptr) {
-            return name;
-        }
+    name = reinterpret_cast<EtsString *>(GetObjectHeader()->GetFieldObject(GetNameOffset()));
+    if (name != nullptr) {
+        return name;
+    }
 
-        name = CreateEtsClassName(GetDescriptor());
-        if (name == nullptr) {
-            return nullptr;
-        }
-        success = CompareAndSetName(nullptr, name);
-    } while (!success);
+    name = CreateEtsClassName(GetDescriptor());
+    if (name == nullptr) {
+        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        return nullptr;
+    }
     return name;
 }
 

@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_abc_file.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -58,9 +59,9 @@ void EtsAbcRuntimeLinkerAddNewAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, Objec
 EtsClass *EtsAbcRuntimeLinkerLoadClassFromAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, EtsString *clsName,
                                                    EtsBoolean init)
 {
-    const auto name = clsName->GetMutf8();
-    PandaString descriptor;
-    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);
+    ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
+    const auto name = parser.Resolve();
+    auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
     if (classDescriptor == nullptr) {
         return nullptr;
     }

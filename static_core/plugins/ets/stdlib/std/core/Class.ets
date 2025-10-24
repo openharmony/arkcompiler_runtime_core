@@ -96,8 +96,16 @@ export final class Class {
     private native getNameInternal(): string
     private native getLinkerInternal(): RuntimeLinker | undefined
 
+    /**
+     * Gets the name of a class in assembly
+     *
+     * @returns The name of a Class in assembly
+     */
     public getName(): string {
-        return this.name ?? this.getNameInternal()
+        if (this.name === undefined) {
+            this.name = this.getNameInternal()
+        }
+        return this.name!
     }
 
     /**

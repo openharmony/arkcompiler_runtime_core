@@ -20,6 +20,7 @@
 
 #include "types/ets_class.h"
 #include "types/ets_method.h"
+#include "ets_utils.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -630,30 +631,6 @@ TEST_F(EtsClassTest, GetMethods)
     ASSERT_TRUE(etsMethodsC.empty());
 }
 
-static void TestGetPrimitiveClass(const char *primitiveName)
-{
-    EtsString *inputName = EtsString::CreateFromMUtf8(primitiveName);
-    ASSERT_NE(inputName, nullptr);
-
-    auto *klass = EtsClass::GetPrimitiveClass(inputName);
-    ASSERT_NE(klass, nullptr);
-
-    ASSERT_TRUE(inputName->StringsAreEqual(klass->GetName()->AsObject()));
-}
-
-TEST_F(EtsClassTest, GetPrimitiveClass)
-{
-    TestGetPrimitiveClass("void");
-    TestGetPrimitiveClass("boolean");
-    TestGetPrimitiveClass("byte");
-    TestGetPrimitiveClass("char");
-    TestGetPrimitiveClass("short");
-    TestGetPrimitiveClass("int");
-    TestGetPrimitiveClass("long");
-    TestGetPrimitiveClass("float");
-    TestGetPrimitiveClass("double");
-}
-
 TEST_F(EtsClassTest, SetAndGetName)
 {
     const char *source = R"(
@@ -976,6 +953,42 @@ TEST_F(EtsClassTest, EnumerateVTable)
     for (std::size_t i = 0; i < methodsVectorSize; ++i) {
         ASSERT_EQ(methods[i], enumerateMethods[i]);
     }
+}
+
+TEST_F(EtsClassTest, NameFromDescriptor)
+{
+    ark::ets::RuntimeDescriptorParser nameParser("[Lstd/core/Object;");
+    ASSERT_EQ(nameParser.Resolve(), "std.core.Object[]");
+
+    nameParser = RuntimeDescriptorParser("{U[I[J[Lstd/core/String;}");
+    ASSERT_EQ(nameParser.Resolve(), "{Ui32[],i64[],std.core.String[]}");
+
+    nameParser = RuntimeDescriptorParser("{ULLLL/L;LLLL/N;}");
+    ASSERT_EQ(nameParser.Resolve(), "{ULLL.L,LLL.N}");
+
+    nameParser = RuntimeDescriptorParser("[[{U[I[J[Lstd/core/String;}");
+    ASSERT_EQ(nameParser.Resolve(), "{Ui32[],i64[],std.core.String[]}[][]");
+
+    nameParser = RuntimeDescriptorParser("{ULstd/core/String;[{ULstd/core/String;[Lstd/core/String;}}");
+    ASSERT_EQ(nameParser.Resolve(), "{Ustd.core.String,{Ustd.core.String,std.core.String[]}[]}");
+}
+
+TEST_F(EtsClassTest, NameToDescriptor)
+{
+    ark::ets::ClassPublicNameParser tdParser("std.core.Object[]");
+    ASSERT_EQ(tdParser.Resolve(), "[Lstd/core/Object;");
+
+    tdParser = ClassPublicNameParser("{Ui32[],i64[],std.core.String[]}");
+    ASSERT_EQ(tdParser.Resolve(), "{U[I[J[Lstd/core/String;}");
+
+    tdParser = ClassPublicNameParser("{ULLL.L,LLL.N}");
+    ASSERT_EQ(tdParser.Resolve(), "{ULLLL/L;LLLL/N;}");
+
+    tdParser = ClassPublicNameParser("{Ui32[],i64[],std.core.String[]}[][]");
+    ASSERT_EQ(tdParser.Resolve(), "[[{U[I[J[Lstd/core/String;}");
+
+    tdParser = ClassPublicNameParser("{Ustd.core.String,{Ustd.core.String,std.core.String[]}[]}");
+    ASSERT_EQ(tdParser.Resolve(), "{ULstd/core/String;[{ULstd/core/String;[Lstd/core/String;}}");
 }
 
 }  // namespace ark::ets::test

@@ -135,9 +135,9 @@ EtsObject *StdCoreClassCreateInstance(EtsClass *cls)
 
 EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsString *clsName)
 {
-    const auto name = clsName->GetMutf8();
-    PandaString descriptor;
-    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);
+    ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
+    const auto name = parser.Resolve();
+    const auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
     if (classDescriptor == nullptr) {
         return nullptr;
     }
@@ -171,9 +171,9 @@ void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
 
 EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsString *clsName, EtsBoolean init)
 {
-    const auto name = clsName->GetMutf8();
-    PandaString descriptor;
-    auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);
+    ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
+    const auto name = parser.Resolve();
+    auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
     if (classDescriptor == nullptr) {
         return nullptr;
     }
