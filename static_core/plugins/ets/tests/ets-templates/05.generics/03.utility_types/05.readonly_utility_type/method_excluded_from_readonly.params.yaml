@@ -21,6 +21,7 @@ cases:
     check: |-
       let a: Readonly<AC> = { i: 1.1 }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       class C {
@@ -30,6 +31,7 @@ cases:
     check: |-
       let a: Readonly<C> = { i: 1.1 }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       interface I {
@@ -39,6 +41,7 @@ cases:
     check: |-
       let a: Readonly<I> = { i: 1.1 }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       interface I {
@@ -53,6 +56,7 @@ cases:
     check: |-
       let a: Readonly<A> = { i: 1.1 }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       interface I {
@@ -67,6 +71,7 @@ cases:
     check: |-
       let a: Readonly<C> = { i: 1.1 }
       a.bar()
+    tags: compile-only,negative
 
   - decl: |-
       abstract class AC {
@@ -80,6 +85,7 @@ cases:
     check: |-
       let a: Readonly<C> = { i: 1.1, j: "str2" }
       a.bar()
+    tags: compile-only,negative
 
   - decl: |-
       abstract class AC {
@@ -93,6 +99,7 @@ cases:
     check: |-
       let a: Readonly<C> = { i: 1.1, j: "str2" }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       class A {
@@ -106,6 +113,7 @@ cases:
     check: |-
       let a: Readonly<B> = { i: 1.1, j: "str2" }
       a.foo()
+    tags: compile-only,negative
 
   - decl: |-
       class A {
@@ -119,6 +127,7 @@ cases:
     check: |-
       let a: Readonly<B> = { i: 1.1, j: "str2" }
       a.bar()
+    tags: compile-only,negative
 
   - decl: |-
       class C {
@@ -127,18 +136,19 @@ cases:
         get i(): number|undefined { return this._i; }
       }
     check: |-
-      let a: Readonly<C> = {_i: 1.9}
-      arktest.assertEQ( a.i , 1.9 )
+      let a: Readonly<C> = {i: 1.9}
+      arktest.assertEQ(a.i, 1.9)
 
   - decl: |-
       class C {
         _i: number|undefined
-        set i(i: number|undefined) { this._i = i; }
+        set i(i: number|undefined) { this._i = 1; }
         get i(): number|undefined { return this._i; }
       }
     check: |-
-      let a: Readonly<C> = {_i: 1.9}
+      let a: Readonly<C> = {i: 1.9}
       a.i = 1.9
+    tags: compile-only,negative
 
   - decl: |-
       abstract class C {
@@ -148,7 +158,10 @@ cases:
       }
     check: |-
       let a: Readonly<C> = {_i: 1.9}
-      arktest.assertEQ( a.i , 1.9 )
+      arktest.assertEQ(a.i, 1.9)
+      a.i = 3.5
+      arktest.assertEQ(a.i, 3.5)
+    tags: compile-only,negative
 
   - decl: |-
       abstract class C {
@@ -158,4 +171,7 @@ cases:
       }
     check: |-
       let a: Readonly<C> = {_i: 1.9}
-      a.i = 1.9
+      arktest.assertEQ(a.i, 1.9)
+      a.i = 3.5
+      arktest.assertEQ(a.i, 3.5)
+    tags: compile-only,negative

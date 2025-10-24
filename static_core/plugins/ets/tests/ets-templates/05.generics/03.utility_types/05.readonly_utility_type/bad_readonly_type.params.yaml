@@ -18,3 +18,5 @@ types:
   - TSI
   - ABU
   - never
+  - A | B
+  - AB
