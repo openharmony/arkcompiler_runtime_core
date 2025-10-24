@@ -15,7 +15,7 @@
     },
     {
       "componentsName": "arkoala",
-      "enableHostAot": true,
+      "enableHostAot": false,
       "abcPath": "/system/framework/arkoala.abc",
       "hapPath": "",
       "modulePath": "",
