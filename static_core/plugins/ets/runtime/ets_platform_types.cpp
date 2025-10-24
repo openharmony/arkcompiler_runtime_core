@@ -174,6 +174,8 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::coreTupleN, TUPLEN);
 
     findType(&EtsPlatformTypes::coreRuntimeLinker, RUNTIME_LINKER);
+    findMethod(&EtsPlatformTypes::coreRuntimeLinkerLoadClass, coreRuntimeLinker, "loadClass",
+               "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;", false);
     findType(&EtsPlatformTypes::coreBootRuntimeLinker, BOOT_RUNTIME_LINKER);
     findType(&EtsPlatformTypes::coreAbcRuntimeLinker, ABC_RUNTIME_LINKER);
     findType(&EtsPlatformTypes::coreMemoryRuntimeLinker, MEMORY_RUNTIME_LINKER);
