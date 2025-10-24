@@ -14,13 +14,21 @@
  */
 
 /*---
-desc: >-
-    Only an object literal of interface type can contain object literal methods. An attempt to declare
-    a method in an object literal of class type causes a compile-time error
-tags: [negative, compile-only]
+desc: Initialize tuple with literals
+
 ---*/
 
-class Base1 {}
+class AClass {
+    name: string = ''
+}
 
-const o1: Base1 = { m(): void {} } // compile-time error
+interface IIntf {
+    age: int
+}
 
+type TTuple = [AClass, IIntf]
+
+function main() {
+
+    let x: TTuple = [{name: 'Alice'}, {age: 16}]
+}

@@ -15,12 +15,19 @@
 
 /*---
 desc: >-
-    Only an object literal of interface type can contain object literal methods. An attempt to declare
-    a method in an object literal of class type causes a compile-time error
-tags: [negative, compile-only]
+    A method reference refers to a static or instance method of a class or an interface.
+
+tags: [compile-only, negative]
 ---*/
 
-class Base1 {}
 
-const o1: Base1 = { m(): void {} } // compile-time error
 
+class Aliases {
+    fooE(): void {}
+    fooS(par: string): void {}
+    overload foo {fooE, fooS }
+}
+
+function main() {
+    let ref = Aliases.fooE //  TypeError: 'fooE' is an instance property of 'Aliases'
+}

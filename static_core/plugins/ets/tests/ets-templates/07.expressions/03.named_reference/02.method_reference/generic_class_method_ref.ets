@@ -15,12 +15,20 @@
 
 /*---
 desc: >-
-    Only an object literal of interface type can contain object literal methods. An attempt to declare
-    a method in an object literal of class type causes a compile-time error
-tags: [negative, compile-only]
+    A method reference refers to a static or instance method of a class or an interface.
+    A compile-time error occurs if a method overload alias is used in a named reference
+
 ---*/
 
-class Base1 {}
 
-const o1: Base1 = { m(): void {} } // compile-time error
 
+
+class Aliases<T> {
+    foo(par: T): T { return par }
+}
+
+function main() {
+    let alias: Aliases<string> = new Aliases<string>()
+    let ref = alias.foo
+    arktest.assertEQ('Test', ref('Test'))
+}

@@ -13,14 +13,20 @@
  * limitations under the License.
  */
 
-/*---
-desc: >-
-    Only an object literal of interface type can contain object literal methods. An attempt to declare
-    a method in an object literal of class type causes a compile-time error
-tags: [negative, compile-only]
----*/
 
-class Base1 {}
+ /*---
+ desc: A function reference refers to a declared or imported function.
+       A compile-time error occurs if an overload alias is used in a named reference
 
-const o1: Base1 = { m(): void {} } // compile-time error
+ ---*/
 
+function fooE(): void { console.log('I am fooE') }
+
+class Holder {
+    static ref: Function
+}
+
+function main() {
+    Holder.ref = fooE
+    Holder.ref()
+}

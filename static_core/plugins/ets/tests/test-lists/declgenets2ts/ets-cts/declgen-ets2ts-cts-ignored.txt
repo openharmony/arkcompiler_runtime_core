@@ -161,6 +161,8 @@
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_19.ets
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_20.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/scope_5.ets
+07.expressions/03.named_reference/01.function_reference/overload_function_reference_3.ets
+07.expressions/03.named_reference/01.function_reference/overload_function_reference_4.ets
 07.expressions/06.spread_expression/spex_meth_13.ets
 07.expressions/09.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_2.ets
 07.expressions/09.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_6.ets
