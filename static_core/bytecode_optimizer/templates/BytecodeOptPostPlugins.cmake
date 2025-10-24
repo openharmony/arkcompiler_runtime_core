@@ -54,6 +54,21 @@ add_custom_target(bytecode_optimizer_codegen_intrinsics_cpp DEPENDS
     ${CODEGEN_INTRINSICS_CPP}
 )
 
+set(RUNTIME_ADAPTER_INC ${PANDA_BINARY_ROOT}/bytecode_optimizer/generated/runtime_adapter_inc.h)
+panda_gen_file(
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
+    API ${PANDA_ROOT}/templates/plugin_options.rb
+    TEMPLATE ${PANDA_ROOT}/bytecode_optimizer/templates/runtime_adapter_inc.h.erb
+    EXTRA_DEPENDENCIES plugin_options_merge
+    OUTPUTFILE ${RUNTIME_ADAPTER_INC}
+)
+
+add_custom_target(bytecode_optimizer_runtime_adapter_inc DEPENDS
+    plugin_options_gen
+    ${RUNTIME_ADAPTER_INC}
+)
+
+
 panda_gen(
     DATA
         ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
@@ -84,10 +99,12 @@ add_dependencies(arkbytecodeopt_obj
     bytecode_optimizer_codegen_intrinsics_cpp
     bytecode_optimizer_codegen_call_intrinsics_inc
     bytecode_optimizer_get_intrinsic_id_inc
+    bytecode_optimizer_runtime_adapter_inc
 )
 
 add_dependencies(panda_gen_files
     bytecode_optimizer_codegen_visitors_inc
     bytecode_optimizer_reg_encoder_visitors_inc
     bytecode_optimizer_codegen_intrinsics_cpp
+    bytecode_optimizer_runtime_adapter_inc
 )

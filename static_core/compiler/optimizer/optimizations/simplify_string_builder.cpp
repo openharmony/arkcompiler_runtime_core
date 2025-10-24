@@ -103,6 +103,13 @@ bool SimplifyStringBuilder::RunImpl()
 
     COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Simplify StringBuilder complete";
 
+    if (GetGraph()->IsBytecodeOptimizer()) {
+        // Cleanup should be done inside pass, to satisfy GraphChecker
+        GetGraph()->RunPass<compiler::Cleanup>();
+        return isApplied_;
+    }
+
+    /// NOTE: (mivanov) The loop below will be removed after #30940 is implemented
     // Remove save state inserted in loop post exit block at IR builder
     for (auto block : GetGraph()->GetBlocksRPO()) {
         for (auto inst : block->Insts()) {
@@ -845,6 +852,16 @@ void SimplifyStringBuilder::ReconnectStringBuilderCascades(const ConcatenationLo
     }
 }
 
+RuntimeInterface::FieldPtr SimplifyStringBuilder::GetGetterStringBuilderStringLength()
+{
+    if (UNLIKELY(sbStringLengthField_ == nullptr)) {
+        auto runtime = GetGraph()->GetRuntime();
+        sbStringLengthField_ = runtime->GetGetterStringBuilderStringLength(runtime->GetStringBuilderClass());
+        ASSERT(sbStringLengthField_ != nullptr);
+    }
+    return sbStringLengthField_;
+}
+
 void SimplifyStringBuilder::ReconnectToStringLengthChains(const ConcatenationLoopMatch &match)
 {
     if (match.loop.toStringLengthChains.empty()) {
@@ -859,28 +876,48 @@ void SimplifyStringBuilder::ReconnectToStringLengthChains(const ConcatenationLoo
     MarkerHolder chainsVisited {GetGraph()};
     for (auto &chain : match.loop.toStringLengthChains) {
         ASSERT(chain.toStringCallOrPhi == match.accValue);
-        ASSERT(chain.nullCheckCall != nullptr);
 
-        if (chain.nullCheckCall->SetMarker(chainsVisited.GetMarker())) {
+        auto nullCheckOrLenArray = chain.nullCheckCall != nullptr ? chain.nullCheckCall : chain.lenArrayCall;
+        if (nullCheckOrLenArray->SetMarker(chainsVisited.GetMarker())) {
             continue;
         }
 
-        auto checkLoop = chain.nullCheckCall->GetBasicBlock()->GetLoop();
+        auto checkLoop = nullCheckOrLenArray->GetBasicBlock()->GetLoop();
         if (checkLoop != loop && !checkLoop->IsInside(loop)) {
             continue;
         }
 
-        chain.nullCheckCall->ReplaceInput(match.accValue, match.preheader.instance);
-        Inst *lengthInst =
-            GetGraph()->CreateInstLoadObject(DataType::INT32, chain.lenArrayCall->GetPc(), chain.nullCheckCall,
-                                             TypeIdMixin {runtime->GetFieldId(lengthField), GetGraph()->GetMethod()},
-                                             lengthField, runtime->IsFieldVolatile(lengthField));
+        if (chain.nullCheckCall != nullptr) {
+            chain.nullCheckCall->ReplaceInput(match.accValue, match.preheader.instance);
+        }
+        Inst *lengthInst = nullptr;
+        if (lengthField != nullptr) {
+            ASSERT(chain.nullCheckCall != nullptr);
+            lengthInst = GetGraph()->CreateInstLoadObject(
+                DataType::INT32, chain.lenArrayCall->GetPc(), chain.nullCheckCall,
+                TypeIdMixin {runtime->GetFieldId(lengthField), GetGraph()->GetMethod()}, lengthField,
+                runtime->IsFieldVolatile(lengthField));
+            chain.nullCheckCall->InsertAfter(lengthInst);
+        } else {
+            auto methodId = runtime->GetMethodId(GetGetterStringBuilderStringLength());
+
+            auto lengthCallInst = GetGraph()->CreateInstCallStatic(DataType::INT32, chain.lenArrayCall->GetPc(),
+                                                                   methodId, GetGetterStringBuilderStringLength());
+
+            auto saveState = match.loop.appendInstructions.front()->CastToCallStatic()->GetSaveState();
+            auto saveStateClone = CopySaveState(GetGraph(), saveState);
+            lengthCallInst->SetInputs(GetGraph()->GetAllocator(),
+                                      {{match.preheader.instance, match.preheader.instance->GetType()},
+                                       {saveStateClone, saveStateClone->GetType()}});
+
+            lengthInst = lengthCallInst;
+            InsertAfterWithSaveState(lengthInst, chain.lenArrayCall);
+        }
 
         COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length] Replace string.length call (id=" << chain.lenArrayCall->GetId()
                                          << ") to sb.length (id=" << lengthInst->GetId() << ")";
 
         Inst *chainTail = (chain.shrLengthShift != nullptr) ? chain.shrLengthShift : chain.lenArrayCall;
-        chain.nullCheckCall->InsertAfter(lengthInst);
         chainTail->ReplaceUsers(lengthInst);
         chain.lenArrayCall->ClearFlag(inst_flags::NO_DCE);
         chainTail->ClearFlag(inst_flags::NO_DCE);
@@ -1048,7 +1085,7 @@ void SimplifyStringBuilder::HoistInstructionsToPreHeader(const ConcatenationLoop
     }
 }
 
-void HoistCheckInsturctionInputs(Inst *inst, BasicBlock *loopBlock, BasicBlock *postExit)
+void HoistCheckInstructionInputs(Inst *inst, BasicBlock *loopBlock, BasicBlock *postExit)
 {
     for (auto &input : inst->GetInputs()) {
         auto inputInst = input.GetInst();
@@ -1109,7 +1146,8 @@ void SimplifyStringBuilder::HoistCheckCastInstructionUsers(Inst *inst, BasicBloc
         COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Hoist instruction id=" << userInst->GetId() << " ("
                                          << GetOpcodeString(userInst->GetOpcode())
                                          << ") from loop block id=" << loopBlock->GetId()
-                                         << " to post exit block id=" << postExit->GetId();
+                                         << " to post exit block id=" << postExit->GetId()
+                                         << " after inst id=" << inst->GetId();
     }
 }
 
@@ -1143,7 +1181,7 @@ void SimplifyStringBuilder::HoistInstructionsToPostExit(const ConcatenationLoopM
                                      << " to post exit block id=" << postExit->GetId();
 
     // Hoist all the toString-call Check instructions inputs
-    HoistCheckInsturctionInputs(match.exit.toStringCall, loopBlock, postExit);
+    HoistCheckInstructionInputs(match.exit.toStringCall, loopBlock, postExit);
 
     // Hoist toString-call instructions users
     HoistCheckCastInstructionUsers(match.exit.toStringCall, loopBlock, postExit);
@@ -1682,10 +1720,6 @@ bool SimplifyStringBuilder::ValidateTemporaryStringLengthPhis(const Concatenatio
             COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length][reject] Hostment to non-acc is not supported";
             return false;
         }
-        if (chain.nullCheckCall == nullptr) {
-            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "[.length][reject] LenArray w/o NullCheck is not supported";
-            return false;
-        }
     }
     return true;
 }
@@ -2217,14 +2251,9 @@ void SimplifyStringBuilder::Cleanup(Inst *instance, Inst *instanceFirstAppendCal
     // Mark 'instance' append call as dead
     instanceFirstAppendCall->ClearFlag(inst_flags::NO_DCE);
 
-    // Mark 'inputInstance' toString call as dead
-    inputInstanceToStringCall->ClearFlag(inst_flags::NO_DCE);
-    for (auto &user : inputInstanceToStringCall->GetUsers()) {
-        auto userInst = user.GetInst();
-        if (!IsCheckCastWithoutUsers(userInst)) {
-            continue;
-        }
-        userInst->ClearFlag(inst_flags::NO_DCE);
+    if (!GetGraph()->IsBytecodeOptimizer()) {
+        // Mark 'inputInstance' toString call as dead with it's users
+        CleanupInstruction(inputInstanceToStringCall);
     }
 
     // Mark 'instance' itself as dead
@@ -2234,14 +2263,30 @@ void SimplifyStringBuilder::Cleanup(Inst *instance, Inst *instanceFirstAppendCal
     RemoveFromSaveStateInputs(instance);
     RemoveFromSaveStateInputs(instanceFirstAppendCall);
 
-    // Remove inputInstance.toString() call from save states only if it is not used anywhere else
+    // Remove inputInstance.toString() call only if it is not used anywhere else
     if (!HasUser(inputInstanceToStringCall, [instanceFirstAppendCall](auto &user) {
             auto userInst = user.GetInst();
             auto isSaveState = userInst->IsSaveState();
             auto isAppend = userInst == instanceFirstAppendCall;
             return !isSaveState && !isAppend;
         })) {
+        if (GetGraph()->IsBytecodeOptimizer()) {
+            // Mark 'inputInstance' toString call as dead with it's users
+            CleanupInstruction(inputInstanceToStringCall);
+        }
         RemoveFromSaveStateInputs(inputInstanceToStringCall);
+    }
+}
+
+void SimplifyStringBuilder::CleanupInstruction(Inst *inst)
+{
+    inst->ClearFlag(inst_flags::NO_DCE);
+    for (auto &user : inst->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (!IsCheckCastWithoutUsers(userInst)) {
+            continue;
+        }
+        userInst->ClearFlag(inst_flags::NO_DCE);
     }
 }
 

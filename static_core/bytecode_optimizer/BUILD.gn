@@ -109,6 +109,7 @@ ohos_shared_library("libarktsbytecodeopt") {
     ":isa_gen_arkbytecodeopt_insn_selection_cpp",
     ":isa_gen_arkbytecodeopt_insn_selection_h",
     ":reg_encoder_visitors_inc",
+    ":runtime_adapter_inc",
     "$ark_root/assembler:libarktsassembler",
     "$ark_root/compiler:libarktscompiler",
     "$ark_root/libarkbase:libarktsbase",
@@ -147,6 +148,7 @@ ohos_static_library("libarktsbytecodeopt_frontend_static") {
     ":isa_gen_arkbytecodeopt_insn_selection_cpp",
     ":isa_gen_arkbytecodeopt_insn_selection_h",
     ":reg_encoder_visitors_inc",
+    ":runtime_adapter_inc",
     "$ark_root/assembler:libarktsassembler_frontend_static",
     "$ark_root/compiler:libarktscompiler_frontend_static",
     "$ark_root/libarkbase:libarktsbase_frontend_static",
@@ -193,6 +195,14 @@ ark_gen_file("reg_encoder_visitors_inc") {
   data = [ ark_plugin_options_yaml ]
   api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/reg_encoder_visitors.inc"
+}
+
+ark_gen_file("runtime_adapter_inc") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "templates/runtime_adapter_inc.h.erb"
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/generated/runtime_adapter_inc.h"
 }
 
 ark_gen_file("codegen_visitors_inc") {

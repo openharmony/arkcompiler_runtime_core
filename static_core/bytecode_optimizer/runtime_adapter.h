@@ -341,6 +341,13 @@ public:
         return typeId.GetOffset();
     }
 
+    FieldId GetFieldId([[maybe_unused]] FieldPtr field) const override
+    {
+        panda_file::FieldDataAccessor fda(pandaFile_, FieldCast(field));
+
+        return fda.GetFieldId().GetOffset();
+    }
+
     bool IsFieldVolatile(FieldPtr field) const override
     {
         panda_file::FieldDataAccessor fda(pandaFile_, FieldCast(field));
@@ -411,7 +418,7 @@ public:
         return utf::Mutf8AsCString(stringData.data);
     }
 
-private:
+protected:
     static compiler::DataType::Type ToCompilerType(panda_file::Type type)
     {
         switch (type.GetId()) {

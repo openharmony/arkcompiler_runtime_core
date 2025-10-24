@@ -15,6 +15,7 @@
 
 //! CHECKER     AOT: Verify StringBuilder hoisting optimization for string concatenation in loop
 //! SKIP_IF     @architecture == "arm32"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC    options: "--compiler-regex='.*will_hoist[0-9]+'"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
@@ -27,6 +28,7 @@
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting optimization for string concatenation in loop
+//! SKIP_IF     @architecture == "arm32"
 //! RUN         force_jit: true, options: "--compiler-regex='.*will_hoist[0-9]+'", entry: "ets_string_builder_hoist.ETSGLOBAL::main"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
@@ -62,6 +64,7 @@ function will_hoist1() {
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting is not performed in some case
+//! SKIP_IF     @architecture == "arm32"
 //! RUN         force_jit: true, options: "--compiler-regex='.*will_not_hoist[0-9]+'", entry: "ets_string_builder_hoist.ETSGLOBAL::main"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist1"
@@ -97,3 +100,25 @@ function main() {
     arktest.assertEQ(will_not_hoist1(), "test:123456789")
     arktest.assertEQ(will_not_hoist2(), "test:012345678")
 }
+
+//! CHECKER     BCO: Verify StringBuilder hoisting optimizations
+//! SKIP_IF     @architecture == "arm32"
+//! RUN_BCO     output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
+//!
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
+//! PASS_AFTER  "SimplifyStringBuilder"
+//! IN_BLOCK    "prehead"
+//! INST        /Load.*std\.core\.StringBuilder/
+//! INST_NEXT   /NewObject/
+//! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
+//! INST_NEXT   /StringBuilder::append/
+//!
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist1"
+//! PASS_AFTER  "SimplifyStringBuilder"
+//! IN_BLOCK    "prehead"
+//! INST_NOT    /LoadAndInitClass 'std\.core\.StringBuilder'/
+//!
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist2"
+//! PASS_AFTER  "SimplifyStringBuilder"
+//! IN_BLOCK    "prehead"
+//! INST_NOT    /LoadAndInitClass 'std\.core\.StringBuilder'/

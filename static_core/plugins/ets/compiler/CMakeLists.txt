@@ -23,6 +23,7 @@ set(COMPILER_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/optimizer/ets_intrinsics_peephole.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/optimizer/ets_codegen_extensions.cpp
   ${PANDA_ETS_PLUGIN_SOURCE}/compiler/ir_build_intrinsics_ets.cpp
+  ${PANDA_ETS_PLUGIN_SOURCE}/compiler/runtime_adapter_ets.cpp
 )
 
 if (NOT PANDA_TARGET_MACOS)

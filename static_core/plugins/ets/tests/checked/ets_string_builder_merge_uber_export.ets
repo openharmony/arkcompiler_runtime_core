@@ -15,6 +15,7 @@
 
 //! CHECKER       AOT IR Builder, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC      options: "--compiler-regex='.*chain_concat[0-9]*' --compiler-inlining=false"
 //!
 //! METHOD        "ets_string_builder_merge_uber_export.ETSGLOBAL::uber_chain_concat4"
@@ -28,6 +29,8 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",5
+//!
+//! RUN           entry: "ets_string_builder_merge_uber_export.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
@@ -207,3 +210,25 @@ export function uber_chain_concat4(do_exit: boolean, a: String, n: int, b: Strin
 function main() {
     uber_chain_concat4(true, "", 0, "", 0, "", 0, "", 0, false, false, false, false);
 }
+
+//! CHECKER       BCO, check String Builders merging
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
+//!
+//! METHOD        "ets_string_builder_merge_uber_export.ETSGLOBAL::uber_chain_concat4"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",64
+//! INST_COUNT    /StringBuilder::append/,128
+//! INST_COUNT    /StringBuilder::toString/,64
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",59
+//! INST_COUNT    /StringBuilder::append/,123
+//! INST_COUNT    /StringBuilder::toString/,64
+
+//! CHECKER       INTERP-IRTOC, check String Builders merging
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_builder_merge_uber_export.ETSGLOBAL::main"
+
+//! CHECKER       INTERP-CPP, check String Builders merging
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_builder_merge_uber_export.ETSGLOBAL::main"

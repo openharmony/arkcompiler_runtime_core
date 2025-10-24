@@ -432,6 +432,11 @@ public:
         return false;
     }
 
+    virtual bool IsMethodStringGetLength([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual Field *GetFieldPtrByName([[maybe_unused]] ClassPtr klass, [[maybe_unused]] std::string_view name) const
     {
         return nullptr;
@@ -608,6 +613,11 @@ public:
     }
 
     virtual FieldPtr GetFieldStringBuilderCompress([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetGetterStringBuilderStringLength([[maybe_unused]] ClassPtr klass) const
     {
         return nullptr;
     }

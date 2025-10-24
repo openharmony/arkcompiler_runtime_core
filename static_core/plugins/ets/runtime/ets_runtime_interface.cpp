@@ -166,6 +166,13 @@ bool EtsRuntimeInterface::IsMethodStringConcat(MethodPtr method) const
            MethodCast(method)->GetProto().GetSignature() == "([Lstd/core/String;)Lstd/core/String;";
 }
 
+bool EtsRuntimeInterface::IsMethodStringGetLength(MethodPtr method) const
+{
+    auto methodName = GetMethodFullName(method, false);
+    return (methodName == "std.core.String::<get>length" || methodName == "std.core.String::getLength") &&
+           MethodCast(method)->GetProto().GetSignature() == "()I";
+}
+
 Field *EtsRuntimeInterface::GetFieldPtrByName(ClassPtr klass, std::string_view name) const
 {
     if (klass == nullptr) {
@@ -428,6 +435,11 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderCompress
 {
     ASSERT(IsClassStringBuilder(klass));
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("compress"));
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetGetterStringBuilderStringLength(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetClassMethod(utf::CStringAsMutf8("<get>stringLength"));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayActualLength(ClassPtr klass) const

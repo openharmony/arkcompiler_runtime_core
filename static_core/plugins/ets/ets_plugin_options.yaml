@@ -16,6 +16,9 @@
         codegen_intrinsics_inc: plugins/ets/bytecode_optimizer/visitors/ets_codegen_intrinsics.inc
         codegen_visitors_inc: plugins/ets/bytecode_optimizer/visitors/codegen_visitors.inc
         reg_encoder_visitors_inc: plugins/ets/bytecode_optimizer/visitors/reg_encoder_visitors.inc
+        runtime_adapter_inc: plugins/ets/compiler/runtime_adapter_ets.h
+        runtime_adapter_class: ark::EtsBytecodeOptimizerRuntimeAdapter
+        need_to_run_simplify_string_builder_inl: plugins/ets/compiler/optimizer/optimizations/need_to_run_simplify_string_builder.inl
       lang_enum_id: 5
       lang_context_class: ark::ets::EtsLanguageContext
       lang_context_header_path: plugins/ets/runtime/ets_language_context.h

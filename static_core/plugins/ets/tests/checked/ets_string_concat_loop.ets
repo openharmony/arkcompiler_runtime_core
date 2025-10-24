@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+// NOTE: next RUN_BCO recompiles input abc with options required for this test for all AOT/JIT checkers below
 //! CHECKER       AOT IR Builder, check String concatenation loop
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           entry: "ets_string_concat_loop.ETSGLOBAL::main"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC      options: "--compiler-regex='.*concat_loop[0-9]*' --compiler-inlining=false"
 //!
 //! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop0"
@@ -525,6 +525,8 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
+//!
+//! RUN           entry: "ets_string_concat_loop.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check String concatenation loop
 //! SKIP_IF       @architecture == "arm32"
@@ -1061,6 +1063,8 @@
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! IN_BLOCK      /loop 1/
 //! INST_NOT      /StringBuilder::<ctor>/
+//!
+//! RUN           entry: "ets_string_concat_loop.ETSGLOBAL::main"
 
 function concat_loop0(a: String, n: int): String {
     let str: String = "";
@@ -1573,6 +1577,7 @@ function main() {
 //! CHECKER       Invalid save states AOT (I9NI8P/16707)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*bugfix_concat_loop2_test[0-9]+' --compiler-inlining=true"
+//! RUN           entry: "ets_string_concat_loop.ETSGLOBAL::main"
 
 //! CHECKER       Invalid save states JIT (I9NI8P/16707)
 //! SKIP_IF       @architecture == "arm32"
@@ -1664,6 +1669,7 @@ function bugfix_concat_loop2() {
 //! CHECKER       Invalid phi instruction AOT (IARN2S/19226)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*bugfix_concat_loop3' --compiler-loop-unroll=false --compiler-inlining=true"
+//! RUN           entry: "ets_string_concat_loop.ETSGLOBAL::main"
 
 //! CHECKER       Invalid phi instruction JIT (IARN2S/19226)
 //! SKIP_IF       @architecture == "arm32"
@@ -1682,3 +1688,469 @@ function bugfix_concat_loop3() {
 
     arktest.assertEQ(str, "ddd");
 }
+
+
+// NOTE: next RUN_BCO recompiles input abc with SimplifyStringBuilder BCO pass for all INT checkers below
+//! CHECKER       BCO, check String concatenation loop
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop0"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST          /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /StringBuilder::append/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::append/
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::toString/
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop1"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST          /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /StringBuilder::append/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::append/
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::toString/
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop2"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /head, loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST          /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /StringBuilder::append/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /head, loop/
+//! INST          /StringBuilder::append/
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::toString/
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop3"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST          /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /StringBuilder::append/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::append/
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::toString/
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop4"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST          /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /StringBuilder::append/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST          /StringBuilder::append/
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::toString/
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop5"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /StringBuilder::append/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::toString/
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop7"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::equivalent_concat_loop7"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop8"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /StringBuilder::append/,12
+//! INST_COUNT    /StringBuilder::toString/,6
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop/
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::toString/,3
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::nested_concat_loop0"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop 3/
+//! INST          /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST          /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST          /StringBuilder::<ctor>/
+//! INST          /StringBuilder::append/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 3/
+//! INST          /StringBuilder::append/
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 2/
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1/
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST          /StringBuilder::toString/
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::try_catch_concat_loop0"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /StringBuilder::append/,14
+//! INST_COUNT    /StringBuilder::toString/,6
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /StringBuilder::append/,14
+//! INST_COUNT    /StringBuilder::toString/,6
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::try_catch_concat_loop1"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::try_catch_concat_loop2"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,5
+//! INST_COUNT    /StringBuilder::toString/,2
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::try_catch_concat_loop3"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::try_catch_concat_loop4"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::try_catch_concat_loop5"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,5
+//! INST_COUNT    /StringBuilder::append/,10
+//! INST_COUNT    /StringBuilder::toString/,5
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,4
+//! INST_COUNT    /StringBuilder::append/,9
+//! INST_COUNT    /StringBuilder::toString/,5
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop0"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,4
+//! INST_COUNT    /StringBuilder::append/,8
+//! INST_COUNT    /StringBuilder::toString/,4
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,5
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop1"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop2"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop3"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop4"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,3
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop5"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop6"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop7"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop8"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop9"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop10"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop 1, depth 1/,2
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1, depth 1/,2
+//! INST_COUNT    /StringBuilder::append/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::if_concat_loop11"
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop 1, depth 1/,2
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead/
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1, depth 1/,2
+//! INST_COUNT    /StringBuilder::append/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::switch_concat_loop0"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /StringBuilder::append/,12
+//! INST_COUNT    /StringBuilder::toString/,6
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,7
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::switch_concat_loop1"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,6
+//! INST_COUNT    /StringBuilder::append/,12
+//! INST_COUNT    /StringBuilder::toString/,6
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,7
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop0"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,2
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop1"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop2"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop3"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop4"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,2
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop5"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,1
+//! INST_COUNT    /StringBuilder::append/,3
+//! INST_COUNT    /StringBuilder::toString/,2
+//!
+//! METHOD        "ets_string_concat_loop.ETSGLOBAL::args_concat_loop0"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::<ctor>/,2
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,2
+
+//! CHECKER       INTERP-IRTOC, check String concatenation loop
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_concat_loop.ETSGLOBAL::main"
+
+//! CHECKER       INTERP-CPP, check String concatenation loop
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_concat_loop.ETSGLOBAL::main"
