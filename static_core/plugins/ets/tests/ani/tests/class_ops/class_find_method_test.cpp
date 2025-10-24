@@ -419,11 +419,11 @@ TEST_F(ClassFindMethodTest, find_intrinsics)
         CheckIntrinsicsFindMethod(moduleName, className, "repeat", "i:C{std.core.String}");
     }
     {
-        const char *moduleName = "escompat";
+        const char *moduleName = "std.core";
         const char *className = "ArrayBuffer";
 
         CheckIntrinsicsFindMethod(moduleName, className, "set", "ib:");
-        CheckIntrinsicsFindMethod(moduleName, className, "setValues", "C{escompat.ArrayBuffer}i:");
+        CheckIntrinsicsFindMethod(moduleName, className, "setValues", "C{std.core.ArrayBuffer}i:");
     }
     {
         const char *moduleName = "std.core";
@@ -433,7 +433,7 @@ TEST_F(ClassFindMethodTest, find_intrinsics)
         CheckIntrinsicsFindMethod(moduleName, className, "getDescriptor", ":C{std.core.String}");
     }
     {
-        const char *moduleName = "escompat";
+        const char *moduleName = "std.core";
         const char *className = "ArrayBuffer";
 
         CheckIntrinsicsFindMethod(moduleName, className, "atomicAndI32", "iii:d");

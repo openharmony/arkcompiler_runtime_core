@@ -154,7 +154,7 @@ static ani_status BindTextDecoder(ani_env *env)
     std::array barMethods = {
         ani_native_function {
             "doEncodeInto",
-            "C{std.core.String}C{std.core.String}:C{escompat.ArrayBuffer}",
+            "C{std.core.String}C{std.core.String}:C{std.core.ArrayBuffer}",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeInto),
         },
         ani_native_function {

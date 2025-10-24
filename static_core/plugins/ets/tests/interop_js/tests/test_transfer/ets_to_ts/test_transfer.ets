@@ -163,7 +163,7 @@ function testNoSeamlessForClass(func: ESValue, arg: Object, className: String): 
 
 function testDirectTransferStaticToDynamic(): void {
     let buffer = new ArrayBuffer(100);
-    testNoSeamlessForClass(testDirectTransfer, buffer, 'Lescompat/ArrayBuffer;');
+    testNoSeamlessForClass(testDirectTransfer, buffer, 'Lstd/core/ArrayBuffer;');
     testNoSeamlessForClass(testDirectTransfer, new Uint8Array(buffer), 'Lescompat/Uint8Array;');
     testNoSeamlessForClass(testDirectTransfer, new DataView(buffer), 'Lstd/core/DataView;');
 }

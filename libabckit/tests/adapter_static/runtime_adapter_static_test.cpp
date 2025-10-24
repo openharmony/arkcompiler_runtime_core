@@ -3224,110 +3224,110 @@ TEST_F(RuntimeAdapterStaticTest, EscompatArrayGetBufferTest)
 TEST_F(RuntimeAdapterStaticTest, EscompatArrayBufferAllocateNonMovableTest)
 {
     std::string source = R"(
-        .record escompat.ArrayBuffer {}
-        .function i8[] escompat.ArrayBuffer.allocateNonMovable(i32 a0) <native>
+        .record std.core.ArrayBuffer {}
+        .function i8[] std.core.ArrayBuffer.allocateNonMovable(i32 a0) <native>
     )";
     MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_BUFFER_ALLOCATE_NON_MOVABLE,
-                 "escompat.ArrayBuffer");
+                 "std.core.ArrayBuffer");
 
     source = R"(
-        .record escompat.ArrayBuffer {}
-        .function void escompat.ArrayBuffer.allocateNonMovable() <native>
+        .record std.core.ArrayBuffer {}
+        .function void std.core.ArrayBuffer.allocateNonMovable() <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.ArrayBuffer");
 }
 
 TEST_F(RuntimeAdapterStaticTest, EscompatArrayBufferGetAddressTest)
 {
     std::string source = R"(
-        .record escompat.ArrayBuffer {}
-        .function i64 escompat.ArrayBuffer.getAddress(i8[] a0) <native>
+        .record std.core.ArrayBuffer {}
+        .function i64 std.core.ArrayBuffer.getAddress(i8[] a0) <native>
     )";
     MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_BUFFER_GET_ADDRESS,
-                 "escompat.ArrayBuffer");
+                 "std.core.ArrayBuffer");
 
     source = R"(
-        .record escompat.ArrayBuffer {}
-        .function void escompat.ArrayBuffer.getAddress() <native>
+        .record std.core.ArrayBuffer {}
+        .function void std.core.ArrayBuffer.getAddress() <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.ArrayBuffer");
 }
 
 TEST_F(RuntimeAdapterStaticTest, EscompatArrayBufferFromEncodedStringTest)
 {
     std::string source = R"(
-        .record escompat.ArrayBuffer {}
+        .record std.core.ArrayBuffer {}
         .record std.core.String {}
-        .function escompat.ArrayBuffer escompat.ArrayBuffer.from(std.core.String a0, std.core.String a1) <native>
+        .function std.core.ArrayBuffer std.core.ArrayBuffer.from(std.core.String a0, std.core.String a1) <native>
     )";
     MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_BUFFER_FROM_ENCODED_STRING,
-                 "escompat.ArrayBuffer");
+                 "std.core.ArrayBuffer");
 
     source = R"(
-        .record escompat.ArrayBuffer {}
-        .function void escompat.ArrayBuffer.from() <native>
+        .record std.core.ArrayBuffer {}
+        .function void std.core.ArrayBuffer.from() <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.ArrayBuffer");
 }
 
 TEST_F(RuntimeAdapterStaticTest, EscompatArrayBufferFromBufferSliceTest)
 {
     std::string source = R"(
-        .record escompat.ArrayBuffer {}
-        .function void escompat.ArrayBuffer.from() <native>
+        .record std.core.ArrayBuffer {}
+        .function void std.core.ArrayBuffer.from() <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.ArrayBuffer");
 }
 
 TEST_F(RuntimeAdapterStaticTest, EtsStringBytesLengthTest)
 {
     std::string source = R"(
-        .record escompat.ArrayBuffer {}
+        .record std.core.ArrayBuffer {}
         .record std.core.String {}
-        .function i32 escompat.ArrayBuffer.bytesLength(std.core.String a0, std.core.String a1) <native>
+        .function i32 std.core.ArrayBuffer.bytesLength(std.core.String a0, std.core.String a1) <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_ETS_STRING_BYTES_LENGTH, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_ETS_STRING_BYTES_LENGTH, "std.core.ArrayBuffer");
 
     source = R"(
-        .record escompat.ArrayBuffer {}
-        .function void escompat.ArrayBuffer.bytesLength() <native>
+        .record std.core.ArrayBuffer {}
+        .function void std.core.ArrayBuffer.bytesLength() <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.ArrayBuffer");
 }
 
 TEST_F(RuntimeAdapterStaticTest, EtsArrayBufferToStringTest)
 {
     std::string source = R"(
-        .record escompat.ArrayBuffer {}
-        .function void escompat.ArrayBuffer.stringify() <native>
+        .record std.core.ArrayBuffer {}
+        .function void std.core.ArrayBuffer.stringify() <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.ArrayBuffer");
 }
 
 TEST_F(RuntimeAdapterStaticTest, EtsArrayBufferRegisterWeakRefTest)
 {
     std::string source = R"(
-        .record escompat.ArrayBuffer {}
-        .function void escompat.ArrayBuffer.registerWeakRef() <native>
+        .record std.core.ArrayBuffer {}
+        .function void std.core.ArrayBuffer.registerWeakRef() <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.ArrayBuffer");
 }
 
 TEST_F(RuntimeAdapterStaticTest, EtsArrayBufferUnregisterWeakRefTest)
 {
     std::string source = R"(
-        .record escompat.ArrayBuffer {}
+        .record std.core.ArrayBuffer {}
         .record std.core.Object {}
-        .function i64 escompat.ArrayBuffer.unregisterWeakRef(std.core.Object a0) <native>
+        .function i64 std.core.ArrayBuffer.unregisterWeakRef(std.core.Object a0) <native>
     )";
     MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_ETS_ARRAY_BUFFER_UNREGISTER_WEAK_REF,
-                 "escompat.ArrayBuffer");
+                 "std.core.ArrayBuffer");
 
     source = R"(
-        .record escompat.ArrayBuffer {}
-        .function void escompat.ArrayBuffer.unregisterWeakRef() <native>
+        .record std.core.ArrayBuffer {}
+        .function void std.core.ArrayBuffer.unregisterWeakRef() <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.ArrayBuffer");
 }
 
 TEST_F(RuntimeAdapterStaticTest, Uint8ClampedArrayToUint8ClampedTest)
@@ -8942,9 +8942,9 @@ TEST_F(RuntimeAdapterStaticTest, InteropTransferHelperTransferArrayBufferToStati
 {
     std::string source = R"(
         .record std.interop.js.InteropTransferHelper {}
-        .record escompat.ArrayBuffer {}
+        .record std.core.ArrayBuffer {}
         .record std.interop.ESValue {}
-        .function escompat.ArrayBuffer std.interop.js.InteropTransferHelper.transferArrayBufferToStaticImpl(std.interop.ESValue a0) <native>
+        .function std.core.ArrayBuffer std.interop.js.InteropTransferHelper.transferArrayBufferToStaticImpl(std.interop.ESValue a0) <native>
     )";
     MainTestFunc(source,
                  RuntimeInterface::IntrinsicId::INTRINSIC_INTEROP_TRANSFER_HELPER_TRANSFER_ARRAY_BUFFER_TO_STATIC_IMPL,
@@ -8962,8 +8962,8 @@ TEST_F(RuntimeAdapterStaticTest, InteropTransferHelperTransferArrayBufferToDynam
     std::string source = R"(
         .record std.interop.js.InteropTransferHelper {}
         .record std.core.Object {}
-        .record escompat.ArrayBuffer {}
-        .function std.core.Object std.interop.js.InteropTransferHelper.transferArrayBufferToDynamicImpl(escompat.ArrayBuffer a0) <native>
+        .record std.core.ArrayBuffer {}
+        .function std.core.Object std.interop.js.InteropTransferHelper.transferArrayBufferToDynamicImpl(std.core.ArrayBuffer a0) <native>
     )";
     MainTestFunc(source,
                  RuntimeInterface::IntrinsicId::INTRINSIC_INTEROP_TRANSFER_HELPER_TRANSFER_ARRAY_BUFFER_TO_DYNAMIC_IMPL,
@@ -8981,8 +8981,8 @@ TEST_F(RuntimeAdapterStaticTest, InteropTransferHelperCreateDynamicTypedArrayTes
     std::string source = R"(
         .record std.interop.js.InteropTransferHelper {}
         .record std.core.Object {}
-        .record escompat.ArrayBuffer {}
-        .function std.core.Object std.interop.js.InteropTransferHelper.createDynamicTypedArray(escompat.ArrayBuffer a0, i32 a1, f64 a2, f64 a3) <native>
+        .record std.core.ArrayBuffer {}
+        .function std.core.Object std.interop.js.InteropTransferHelper.createDynamicTypedArray(std.core.ArrayBuffer a0, i32 a1, f64 a2, f64 a3) <native>
     )";
     MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_INTEROP_TRANSFER_HELPER_CREATE_DYNAMIC_TYPED_ARRAY,
                  "std.interop.js.InteropTransferHelper");
@@ -8999,8 +8999,8 @@ TEST_F(RuntimeAdapterStaticTest, InteropTransferHelperCreateDynamicDataViewTest)
     std::string source = R"(
         .record std.interop.js.InteropTransferHelper {}
         .record std.core.Object {}
-        .record escompat.ArrayBuffer {}
-        .function std.core.Object std.interop.js.InteropTransferHelper.createDynamicDataView(escompat.ArrayBuffer a0, f64 a1, f64 a2) <native>
+        .record std.core.ArrayBuffer {}
+        .function std.core.Object std.interop.js.InteropTransferHelper.createDynamicDataView(std.core.ArrayBuffer a0, f64 a1, f64 a2) <native>
     )";
     MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_INTEROP_TRANSFER_HELPER_CREATE_DYNAMIC_DATA_VIEW,
                  "std.interop.js.InteropTransferHelper");
@@ -9191,10 +9191,10 @@ TEST_F(RuntimeAdapterStaticTest, InvalidTest2)
     MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.Array");
 
     source = R"(
-        .record escompat.ArrayBuffer {}
-        .function void escompat.ArrayBuffer.test() <native>
+        .record std.core.ArrayBuffer {}
+        .function void std.core.ArrayBuffer.test() <native>
     )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "escompat.ArrayBuffer");
+    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.ArrayBuffer");
 
     source = R"(
         .record escompat.Uint8ClampedArray {}

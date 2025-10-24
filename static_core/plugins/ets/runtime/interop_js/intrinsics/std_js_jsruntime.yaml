@@ -33,7 +33,7 @@ coretypes:
 - managed_class: std.core.Type
   mirror_class: ark::ets::EtsTypeAPIType
 
-- managed_class: escompat.ArrayBuffer
+- managed_class: std.core.ArrayBuffer
   mirror_class: ark::ets::EtsEscompatArrayBuffer
 
 - managed_class: std.interop.ESValue
@@ -1130,7 +1130,7 @@ intrinsics:
     method_name: transferArrayBufferToStaticImpl
     static: true
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [std.interop.ESValue]
     impl: ark::ets::interop::js::intrinsics::InteropTransferHelperTransferArrayBufferToStaticImplIntrinsic
     clear_flags: []
@@ -1142,7 +1142,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
-      args: [escompat.ArrayBuffer]
+      args: [std.core.ArrayBuffer]
     impl: ark::ets::interop::js::intrinsics::InteropTransferHelperTransferArrayBufferToDynamicImplIntrinsic
     clear_flags: []
 
@@ -1153,7 +1153,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
-      args: [escompat.ArrayBuffer, i32, f64, f64]
+      args: [std.core.ArrayBuffer, i32, f64, f64]
     impl: ark::ets::interop::js::intrinsics::InteropTransferHelperCreateDynamicTypedArrayIntrinsic
     clear_flags: []
 
@@ -1164,7 +1164,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
-      args: [escompat.ArrayBuffer, f64, f64]
+      args: [std.core.ArrayBuffer, f64, f64]
     impl: ark::ets::interop::js::intrinsics::InteropTransferHelperCreateDynamicDataViewIntrinsic
     clear_flags: []
 

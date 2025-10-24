@@ -75,7 +75,7 @@ public:
         ASSERT(!coro->HasPendingException());
 
         [[maybe_unused]] EtsHandleScope scope(coro);
-        auto *cls = PlatformTypes(coro)->escompatArrayBuffer;
+        auto *cls = PlatformTypes(coro)->coreArrayBuffer;
         EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
         if (UNLIKELY(handle.GetPtr() == nullptr)) {
             ASSERT(coro->HasPendingException());

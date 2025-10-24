@@ -206,7 +206,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     findType(&EtsPlatformTypes::escompatArray, ARRAY);
     findMethod(&EtsPlatformTypes::escompatArrayPush, escompatArray, "pushSingle", "Lstd/core/Object;:V", false);
     findMethod(&EtsPlatformTypes::escompatArrayPop, escompatArray, "pop", ":Lstd/core/Object;", false);
-    findType(&EtsPlatformTypes::escompatArrayBuffer, ARRAY_BUFFER);
+    findType(&EtsPlatformTypes::coreArrayBuffer, ARRAY_BUFFER);
     findType(&EtsPlatformTypes::escompatInt8Array, INT8_ARRAY);
     findType(&EtsPlatformTypes::escompatUint8Array, UINT8_ARRAY);
     findType(&EtsPlatformTypes::escompatUint8ClampedArray, UINT8_CLAMPED_ARRAY);

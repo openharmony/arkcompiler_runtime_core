@@ -101,7 +101,7 @@ public:
     EtsClass *escompatArray {};
     EtsMethod *escompatArrayPush {};
     EtsMethod *escompatArrayPop {};
-    EtsClass *escompatArrayBuffer {};
+    EtsClass *coreArrayBuffer {};
     EtsClass *escompatInt8Array {};
     EtsClass *escompatUint8Array {};
     EtsClass *escompatUint8ClampedArray {};

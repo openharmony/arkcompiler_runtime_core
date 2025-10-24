@@ -105,7 +105,7 @@ coretypes:
 - managed_class: escompat.Array
   mirror_class: ark::ets::EtsEscompatArray
 
-- managed_class: escompat.ArrayBuffer
+- managed_class: std.core.ArrayBuffer
   mirror_class: ark::ets::EtsEscompatArrayBuffer
 
 - managed_class: escompat.Int8Array
@@ -1689,11 +1689,11 @@ intrinsics:
     safe_intrinsic: true
 
 ########################
-# escompat.ArrayBuffer #
+# std.core.ArrayBuffer #
 ########################
   - name: EscompatArrayBufferAt
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atImpl
     static: false
     signature:
@@ -1703,7 +1703,7 @@ intrinsics:
 
   - name: EscompatArrayBufferSet
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: setImpl
     static: false
     signature:
@@ -1713,17 +1713,17 @@ intrinsics:
 
   - name: EscompatArrayBufferSetValues
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: setValues
     static: false
     signature:
       ret: void
-      args: [escompat.ArrayBuffer, i32]
+      args: [std.core.ArrayBuffer, i32]
     impl: ark::ets::intrinsics::EtsEscompatArrayBufferSetValues
 
   - name: EscompatArrayBufferAllocateNonMovable
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: allocateNonMovable
     static: true
     signature:
@@ -1733,7 +1733,7 @@ intrinsics:
 
   - name: EscompatArrayBufferGetAddress
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: getAddress
     static: true
     signature:
@@ -1744,27 +1744,27 @@ intrinsics:
 
   - name: EscompatArrayBufferFromEncodedString
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: from
     static: true
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [std.core.String, std.core.String]
     impl: ark::ets::intrinsics::EtsArrayBufferFromEncodedString
 
   - name: EscompatArrayBufferFromBufferSlice
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: from
     static: true
     signature:
-      ret: escompat.ArrayBuffer
-      args: [escompat.ArrayBuffer, i32, i32]
+      ret: std.core.ArrayBuffer
+      args: [std.core.ArrayBuffer, i32, i32]
     impl: ark::ets::intrinsics::EtsArrayBufferFromBufferSlice
 
   - name: EtsStringBytesLength
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: bytesLength
     static: true
     signature:
@@ -1774,27 +1774,27 @@ intrinsics:
 
   - name: EtsArrayBufferToString
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: stringify
     static: true
     signature:
       ret: std.core.String
-      args: [escompat.ArrayBuffer, std.core.String, i32, i32]
+      args: [std.core.ArrayBuffer, std.core.String, i32, i32]
     impl: ark::ets::intrinsics::EtsArrayBufferToString
 
   - name: EtsArrayBufferRegisterWeakRef
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: registerWeakRef
     static: true
     signature:
       ret: std.core.Object
-      args: [ escompat.ArrayBuffer, i64, i64 ]
+      args: [ std.core.ArrayBuffer, i64, i64 ]
     impl: ark::ets::intrinsics::EtsArrayBufferRegisterWeakRef
 
   - name: EtsArrayBufferUnregisterWeakRef
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: unregisterWeakRef
     static: true
     signature:
@@ -3103,7 +3103,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatInt8ArrayAllocReversedBuffer
 
@@ -3113,7 +3113,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatInt16ArrayAllocReversedBuffer
 
@@ -3123,7 +3123,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatInt32ArrayAllocReversedBuffer
 
@@ -3133,7 +3133,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayAllocReversedBuffer
 
@@ -3143,7 +3143,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayAllocReversedBuffer
 
@@ -3153,7 +3153,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayAllocReversedBuffer
 
@@ -3163,7 +3163,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayAllocReversedBuffer
 
@@ -3173,7 +3173,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayAllocReversedBuffer
 
@@ -3183,7 +3183,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayAllocReversedBuffer
 
@@ -3193,7 +3193,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayAllocReversedBuffer
 
@@ -3203,7 +3203,7 @@ intrinsics:
     method_name: allocReversedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: []
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayAllocReversedBuffer
 
@@ -3217,7 +3217,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArrayAllocSlicedBuffer
 
@@ -3227,7 +3227,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArrayAllocSlicedBuffer
 
@@ -3237,7 +3237,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArrayAllocSlicedBuffer
 
@@ -3247,7 +3247,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayAllocSlicedBuffer
 
@@ -3257,7 +3257,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayAllocSlicedBuffer
 
@@ -3267,7 +3267,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayAllocSlicedBuffer
 
@@ -3277,7 +3277,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayAllocSlicedBuffer
 
@@ -3287,7 +3287,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayAllocSlicedBuffer
 
@@ -3297,7 +3297,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayAllocSlicedBuffer
 
@@ -3307,7 +3307,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayAllocSlicedBuffer
 
@@ -3317,7 +3317,7 @@ intrinsics:
     method_name: allocSlicedBuffer
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayAllocSlicedBuffer
 
@@ -3331,7 +3331,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i8]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArrayAllocBufferWith
 
@@ -3341,7 +3341,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i16]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArrayAllocBufferWith
 
@@ -3351,7 +3351,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArrayAllocBufferWith
 
@@ -3361,7 +3361,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i64]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayAllocBufferWith
 
@@ -3371,7 +3371,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, f32]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayAllocBufferWith
 
@@ -3381,7 +3381,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, f64]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayAllocBufferWith
 
@@ -3391,7 +3391,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayAllocBufferWith
 
@@ -3401,7 +3401,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayAllocBufferWith
 
@@ -3411,7 +3411,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayAllocBufferWith
 
@@ -3421,7 +3421,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i64]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayAllocBufferWith
 
@@ -3431,7 +3431,7 @@ intrinsics:
     method_name: allocBufferWith
     static: false
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [i32, i64]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayAllocBufferWith
 
@@ -5872,12 +5872,12 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsWriteUnlock
 
 ############################
-#   escompat.ArrayBuffer  #
+#   std.core.ArrayBuffer  #
 ############################
 
   - name: ArrayBufferAddI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddI8
     static: false
     signature:
@@ -5887,7 +5887,7 @@ intrinsics:
 
   - name: ArrayBufferAndI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndI8
     static: false
     signature:
@@ -5897,7 +5897,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeI8
     static: false
     signature:
@@ -5907,7 +5907,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeI8
     static: false
     signature:
@@ -5917,7 +5917,7 @@ intrinsics:
 
   - name: ArrayBufferLoadI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadI8
     static: false
     signature:
@@ -5927,7 +5927,7 @@ intrinsics:
 
   - name: ArrayBufferrI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrI8
     static: false
     signature:
@@ -5937,7 +5937,7 @@ intrinsics:
 
   - name: ArrayBufferStoreI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreI8
     static: false
     signature:
@@ -5947,7 +5947,7 @@ intrinsics:
 
   - name: ArrayBufferSubI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubI8
     static: false
     signature:
@@ -5957,7 +5957,7 @@ intrinsics:
 
   - name: ArrayBufferXorI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorI8
     static: false
     signature:
@@ -5967,7 +5967,7 @@ intrinsics:
 
   - name: ArrayBufferAddI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddI16
     static: false
     signature:
@@ -5977,7 +5977,7 @@ intrinsics:
 
   - name: ArrayBufferAndI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndI16
     static: false
     signature:
@@ -5987,7 +5987,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeI16
     static: false
     signature:
@@ -5997,7 +5997,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeI16
     static: false
     signature:
@@ -6007,7 +6007,7 @@ intrinsics:
 
   - name: ArrayBufferLoadI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadI16
     static: false
     signature:
@@ -6017,7 +6017,7 @@ intrinsics:
 
   - name: ArrayBufferOrI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrI16
     static: false
     signature:
@@ -6027,7 +6027,7 @@ intrinsics:
 
   - name: ArrayBufferStoreI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreI16
     static: false
     signature:
@@ -6037,7 +6037,7 @@ intrinsics:
 
   - name: ArrayBufferSubI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubI16
     static: false
     signature:
@@ -6047,7 +6047,7 @@ intrinsics:
 
   - name: ArrayBufferXorI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorI16
     static: false
     signature:
@@ -6057,7 +6057,7 @@ intrinsics:
 
   - name: ArrayBufferAddI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddI32
     static: false
     signature:
@@ -6067,7 +6067,7 @@ intrinsics:
 
   - name: ArrayBufferAndI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndI32
     static: false
     signature:
@@ -6077,7 +6077,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeI32
     static: false
     signature:
@@ -6087,7 +6087,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeI32
     static: false
     signature:
@@ -6097,7 +6097,7 @@ intrinsics:
 
   - name: ArrayBufferLoadI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadI32
     static: false
     signature:
@@ -6107,7 +6107,7 @@ intrinsics:
 
   - name: ArrayBufferOrI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrI32
     static: false
     signature:
@@ -6117,7 +6117,7 @@ intrinsics:
 
   - name: ArrayBufferStoreI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreI32
     static: false
     signature:
@@ -6127,7 +6127,7 @@ intrinsics:
 
   - name: ArrayBufferSubI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubI32
     static: false
     signature:
@@ -6137,7 +6137,7 @@ intrinsics:
 
   - name: ArrayBufferXorI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorI32
     static: false
     signature:
@@ -6147,7 +6147,7 @@ intrinsics:
 
   - name: ArrayBufferAddI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddI64
     static: false
     signature:
@@ -6157,7 +6157,7 @@ intrinsics:
 
   - name: ArrayBufferAndI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndI64
     static: false
     signature:
@@ -6167,7 +6167,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeI64
     static: false
     signature:
@@ -6177,7 +6177,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeI64
     static: false
     signature:
@@ -6187,7 +6187,7 @@ intrinsics:
 
   - name: ArrayBufferLoadI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadI64
     static: false
     signature:
@@ -6197,7 +6197,7 @@ intrinsics:
 
   - name: ArrayBufferOrI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrI64
     static: false
     signature:
@@ -6207,7 +6207,7 @@ intrinsics:
 
   - name: ArrayBufferStoreI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreI64
     static: false
     signature:
@@ -6217,7 +6217,7 @@ intrinsics:
 
   - name: ArrayBufferSubI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubI64
     static: false
     signature:
@@ -6227,7 +6227,7 @@ intrinsics:
 
   - name: ArrayBufferXorI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorI64
     static: false
     signature:
@@ -6237,7 +6237,7 @@ intrinsics:
 
   - name: ArrayBufferAddU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddU8
     static: false
     signature:
@@ -6247,7 +6247,7 @@ intrinsics:
 
   - name: ArrayBufferAndU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndU8
     static: false
     signature:
@@ -6257,7 +6257,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeU8
     static: false
     signature:
@@ -6267,7 +6267,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeU8
     static: false
     signature:
@@ -6277,7 +6277,7 @@ intrinsics:
 
   - name: ArrayBufferLoadU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadU8
     static: false
     signature:
@@ -6287,7 +6287,7 @@ intrinsics:
 
   - name: ArrayBufferOrU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrU8
     static: false
     signature:
@@ -6297,7 +6297,7 @@ intrinsics:
 
   - name: ArrayBufferStoreU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreU8
     static: false
     signature:
@@ -6307,7 +6307,7 @@ intrinsics:
 
   - name: ArrayBufferSubU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubU8
     static: false
     signature:
@@ -6317,7 +6317,7 @@ intrinsics:
 
   - name: ArrayBufferXorU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorU8
     static: false
     signature:
@@ -6327,7 +6327,7 @@ intrinsics:
 
   - name: ArrayBufferAddU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddU16
     static: false
     signature:
@@ -6337,7 +6337,7 @@ intrinsics:
 
   - name: ArrayBufferAndU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndU16
     static: false
     signature:
@@ -6347,7 +6347,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeU16
     static: false
     signature:
@@ -6357,7 +6357,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeU16
     static: false
     signature:
@@ -6367,7 +6367,7 @@ intrinsics:
 
   - name: ArrayBufferLoadU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadU16
     static: false
     signature:
@@ -6377,7 +6377,7 @@ intrinsics:
 
   - name: ArrayBufferOrU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrU16
     static: false
     signature:
@@ -6387,7 +6387,7 @@ intrinsics:
 
   - name: ArrayBufferStoreU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreU16
     static: false
     signature:
@@ -6397,7 +6397,7 @@ intrinsics:
 
   - name: ArrayBufferSubU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubU16
     static: false
     signature:
@@ -6407,7 +6407,7 @@ intrinsics:
 
   - name: ArrayBufferXorU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorU16
     static: false
     signature:
@@ -6417,7 +6417,7 @@ intrinsics:
 
   - name: ArrayBufferAddU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddU32
     static: false
     signature:
@@ -6427,7 +6427,7 @@ intrinsics:
 
   - name: ArrayBufferAndU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndU32
     static: false
     signature:
@@ -6437,7 +6437,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeU32
     static: false
     signature:
@@ -6447,7 +6447,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeU32
     static: false
     signature:
@@ -6457,7 +6457,7 @@ intrinsics:
 
   - name: ArrayBufferLoadU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadU32
     static: false
     signature:
@@ -6467,7 +6467,7 @@ intrinsics:
 
   - name: ArrayBufferOrU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrU32
     static: false
     signature:
@@ -6477,7 +6477,7 @@ intrinsics:
 
   - name: ArrayBufferStoreU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreU32
     static: false
     signature:
@@ -6487,7 +6487,7 @@ intrinsics:
 
   - name: ArrayBufferSubU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubU32
     static: false
     signature:
@@ -6497,7 +6497,7 @@ intrinsics:
 
   - name: ArrayBufferXorU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorU32
     static: false
     signature:
@@ -6507,7 +6507,7 @@ intrinsics:
 
   - name: ArrayBufferAddU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddU64
     static: false
     signature:
@@ -6517,7 +6517,7 @@ intrinsics:
 
   - name: ArrayBufferAndU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndU64
     static: false
     signature:
@@ -6527,7 +6527,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeU64
     static: false
     signature:
@@ -6537,7 +6537,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeU64
     static: false
     signature:
@@ -6547,7 +6547,7 @@ intrinsics:
 
   - name: ArrayBufferLoadU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadU64
     static: false
     signature:
@@ -6557,7 +6557,7 @@ intrinsics:
 
   - name: ArrayBufferOrU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrU64
     static: false
     signature:
@@ -6567,7 +6567,7 @@ intrinsics:
 
   - name: ArrayBufferStoreU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreU64
     static: false
     signature:
@@ -6577,7 +6577,7 @@ intrinsics:
 
   - name: ArrayBufferSubU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubU64
     static: false
     signature:
@@ -6587,7 +6587,7 @@ intrinsics:
 
   - name: ArrayBufferXorU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorU64
     static: false
     signature:

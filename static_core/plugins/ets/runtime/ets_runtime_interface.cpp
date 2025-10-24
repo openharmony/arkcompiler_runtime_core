@@ -364,7 +364,7 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayLengthIn
 
 EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayBufferClass() const
 {
-    return PlatformTypes(PandaEtsVM::GetCurrent())->escompatArrayBuffer->GetRuntimeClass();
+    return PlatformTypes(PandaEtsVM::GetCurrent())->coreArrayBuffer->GetRuntimeClass();
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferDataAddress(ClassPtr klass) const
