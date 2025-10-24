@@ -22,7 +22,7 @@ import { AppDispatch } from '../../store';
 import { removeMessage } from '../../store/slices/notifications';
 import { ErrorIconSvg, InfoIconSvg, SuccessIconSvg } from './icons';
 
-const getIcon = (type: TNotificationType) => {
+const getIcon = (type: TNotificationType): JSX.Element => {
     switch(type) {
         case 'success':
             return (
@@ -42,11 +42,11 @@ const getIcon = (type: TNotificationType) => {
     }
 };
 
-export const Notifications = () => {
+export const Notifications = (): JSX.Element => {
     const messages = useSelector(selectMessages);
     const dispatch = useDispatch<AppDispatch>();
 
-    const handleClose = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClose = (event: React.MouseEvent<HTMLButtonElement>): void => {
         const target = event.currentTarget as HTMLButtonElement;
         const { id } = target.dataset;
         if (!id) {

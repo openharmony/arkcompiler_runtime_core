@@ -15,4 +15,4 @@
 
 import { RootState } from '../index';
 
-export const selectMessages = (state: RootState) => state.notifications.messages;
+export const selectMessages = (state: RootState): Array<string> => state.notifications.messages;

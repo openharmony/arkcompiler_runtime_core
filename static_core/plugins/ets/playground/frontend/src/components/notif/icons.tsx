@@ -22,7 +22,7 @@ export interface ISvgProps {
 
 export const SuccessIconSvg = ({
     className
-}: ISvgProps) => {
+}: ISvgProps): JSX.Element => {
     return (
         <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2Z" fill="#5B8E69"/>
@@ -33,7 +33,7 @@ export const SuccessIconSvg = ({
 
 export const InfoIconSvg = ({
     className
-}: ISvgProps) => {
+}: ISvgProps): JSX.Element => {
     return (
         <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2Z" fill="#8D7D72"/>
@@ -45,7 +45,7 @@ export const InfoIconSvg = ({
 
 export const ErrorIconSvg = ({
     className
-}: ISvgProps) => {
+}: ISvgProps): JSX.Element => {
     return (
         <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21.7045 17.0054L14.377 4.34048C13.6533 3.074 11.9345 2.62168 10.668 3.34539C10.2157 3.61678 9.85385 3.97863 9.67292 4.34048L2.34539 17.0054C1.62168 18.2718 2.074 19.9906 3.34048 20.7144C3.7928 20.9857 4.24512 21.0762 4.69744 21.0762H19.262C20.7999 21.0762 21.9759 19.8097 21.9759 18.3623C22.0664 17.8195 21.8855 17.3672 21.7045 17.0054Z" fill="#FB5D5D"/>
