@@ -411,7 +411,7 @@ export default namespace buffer {
      */
     export function alloc(
         size: int,
-        fill?: string | Buffer | Uint8Array | int | double | long,
+        fill?: string | Buffer | int | double | long,
         encoding?: BufferEncoding
     ): Buffer
     {
@@ -721,7 +721,7 @@ export default namespace buffer {
          * @param {int} [end=buffer.length] - Where to stop decoding
          * @returns {string} The decoded string
          */
-        public toString(encoding?: BufferEncoding, start?: double, end?: double): string {
+        public toString(encoding?: BufferEncoding, start?: int, end?: int): string {
             let resolvedEncoding: string = encoding ?? "utf8";
             let resolvedStart: int = 0;
             let resolvedEnd: int = (this.length).toInt();
