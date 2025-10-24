@@ -20,37 +20,11 @@ desc: >-
     $_get and $_set, and signatures (index: Type1): Type2 and
     (index: Type1, value: Type2) respectively, then an indexing expression
     can be applied to variables of such types
-tags: [{{c.tags}}]
 ---*/
 {{c.decl}}
 
-type Key = {{c.ind_type}}
-type Value = {{c.val_type}} | undefined
-
-interface I {
-    $_get(i: Key | undefined): Value;
-    $_set(i: Key, v: {{c.val_type}}): void;
-}
-class A implements I {
-    ind: Key | undefined
-    val: Value
-    $_get(i: Key | undefined): Value {
-        return i == this.ind ? this.val : undefined
-    }
-    $_set(i: Key, v: {{c.val_type}}) {
-        this.ind = i
-        this.val = v
-    }
-}
-
 function main() {
-
-    let i: I = new A
-    {% for t in c['values'] %}
-	arktest.assertEQ(i[{{t.ind}}], undefined)
-	i[{{t.ind}}] = {{t.val}}
-	arktest.assertEQ(i[{{t.ind}}], {{t.val}})
-    {% endfor %}
-    
+    {{c.code|indent}}
 }
+
 {% endfor %}

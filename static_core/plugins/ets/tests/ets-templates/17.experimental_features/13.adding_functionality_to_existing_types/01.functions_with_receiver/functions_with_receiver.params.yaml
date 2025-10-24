@@ -207,3 +207,55 @@ cases:
       arktest.assertEQ(f(b), 2)
       a = b as A
       arktest.assertEQ(f(a), 1)
+
+  - decl: |
+      // Derived classes or interfaces can be used as receivers
+      interface IReceiver {}
+      interface IExReceiver extends IReceiver {} 
+      function callOn(this: IReceiver): void {
+      }
+    use: |
+      let br: IReceiver = {}
+      let er: IExReceiver = {}
+      
+      callOn(br)
+      br.callOn()
+      callOn(er)
+      er.callOn()
+
+  - decl: |
+      interface IReceiver {}
+      class A implements IReceiver {
+        foo(): string { return 'Call A: foo' }
+      }
+      class B extends A {}      
+      function foo(this: IReceiver): string { return 'Call receiver' }
+    use: |
+      let bb: B = new B;
+      arktest.assertEQ('Call A: foo', bb.foo())
+
+  - decl: |
+      class DSL {
+      }      
+      function run(this: DSL, call: (this: DSL) => string): string {
+        return this.call() + '-' + call(this)
+      }
+
+    use: |
+      let dsl = new DSL      
+      arktest.assertEQ('Call A: run-Call A: run', dsl.run((this: DSL) => 'Call A: run'))
+
+  - decl: |
+      type TR = (this: DSL) => string
+      class DSL {
+      }      
+      function run(this: DSL, call: (this: DSL) => string): string {
+        return this.call() + '-' + call(this)
+      }
+
+    use: |
+      let dsl = new DSL
+      let alias = run
+      let tc: TR = (this: DSL) => 'Call A: run'
+      
+      arktest.assertEQ('Call A: run-Call A: run', dsl.alias(tc))

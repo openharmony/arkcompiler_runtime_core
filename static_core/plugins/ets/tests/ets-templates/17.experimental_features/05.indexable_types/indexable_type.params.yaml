@@ -29,9 +29,9 @@ cases:
       code: |-
           let a: A = new A
           a['a'] = 42.0
-          if (a['a'] != 42.0) return 1
+          arktest.assertEQ(42.0, a['a'])
           a['a'] = 43.0
-          if (a['a'] != 43.0) return 1
+          arktest.assertEQ(43.0, a['a'])
 
     # positive case, read-only, no $_set
     - decl: |-
@@ -44,23 +44,8 @@ cases:
           }
       code: |-
           let a: A = new A
-          if (!Number.isNaN(a['a'])) return 1
-          if (a[''] != 0.0) return 1
-
-    # negative case, read-only, no $_set
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              ind: string = ''
-              val: number
-              $_get(i: string): number {
-                  return i == this.ind ? this.val : Number.NaN
-              }
-          }
-      code: |-
-          let a: A = new A
-          a['a'] = 42.0  // CTE
-          if (a['a'] != 42.0) return 1
+          arktest.assertTrue(Number.isNaN(a['a']))
+          arktest.assertEQ(0.0, a[''])
 
     # positive case, read-only, private $_set
     - decl: |-
@@ -77,27 +62,8 @@ cases:
           }
       code: |-
           let a: A = new A
-          if (!Number.isNaN(a['a'])) return 1
-          if (a[''] != 0.0) return 1
-
-    # negative case, read-only, private $_set
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              ind: string = ''
-              val: number
-              $_get(i: string): number {
-                  return i == this.ind ? this.val : Number.NaN
-              }
-              private $_set(i: string, v: number) {
-                  this.ind = i
-                  this.val = v
-              }
-          }
-      code: |-
-          let a: A = new A
-          a['a'] = 42.0  // CTE
-          if (a['a'] != 42.0) return 1
+          arktest.assertTrue(Number.isNaN(a['a']))
+          arktest.assertEQ(0.0, a[''])
 
     # positive case, write-only, no $_get
     - decl: |-
@@ -112,23 +78,7 @@ cases:
       code: |-
           let a: A = new A
           a['a'] = 42.0
-          if (a.val != 42.0) return 1
-
-    # negative case, write-only, no $_get
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              ind: string = ''
-              val: number
-              $_set(i: string, v: number) {
-                  this.ind = i
-                  this.val = v
-              }
-          }
-      code: |-
-          let a: A = new A
-          a['a'] = 42.0
-          if (a['a'] != 42.0) return 1  // CTE
+          arktest.assertEQ(42.0, a.val)
 
     # positive case, write-only, private $_get
     - decl: |-
@@ -146,69 +96,7 @@ cases:
       code: |-
           let a: A = new A
           a['a'] = 42.0
-          if (a.val != 42.0) return 1
-
-    # negative case, write-only, private $_get
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              ind: string = ''
-              val: number
-              private $_get(i: string): number {
-                  return i == this.ind ? this.val : Number.NaN
-              }
-              $_set(i: string, v: number) {
-                  this.ind = i
-                  this.val = v
-              }
-          }
-      code: |-
-          let a: A = new A
-          a['a'] = 42.0
-          if (a['a'] != 42.0) return 1  // CTE
-
-    # negative cases, static is not allowed
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              static $_get(i: string): number {
-                  return 42.0
-              }
-          }
-      code: |-
-          let x = A['a']  // CTE
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              static $_get(i: string): number {
-                  return 42.0
-              }
-          }
-      code: |-
-          let a = new A
-          let x = a['a']  // CTE
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              static $_set(i: string, v: number) {
-                  return
-              }
-          }
-      code: |-
-          A['a'] = 42.0  // CTE
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              static $_set(i: string, v: number) {
-                  return
-              }
-          }
-      code: |-
-          let a = new A
-          a['a'] = 42.0  // CTE
+          arktest.assertEQ(42.0, a.val)
 
     # positive case, public read-write
     - decl: |-
@@ -235,7 +123,7 @@ cases:
       code: |-
           let b = new B
           b.push('a', 11.0)
-          if (b.pull('a') != 11.0) return 1
+          arktest.assertEQ(11.0, b.pull('a'));
 
     # positive case, protected read-write
     - decl: |-
@@ -262,7 +150,7 @@ cases:
       code: |-
           let b = new B
           b.push('a', 11.0)
-          if (b.pull('a') != 11.0) return 1
+          arktest.assertEQ(11.0, b.pull('a'));
 
     # positive case, private read-write
     - decl: |-
@@ -286,7 +174,7 @@ cases:
       code: |-
           let b = new B
           b.push('a', 11.0)
-          if (b.pull('a') != 11.0) return 1
+          arktest.assertEQ(11.0, b.pull('a'));
 
     # positive case, calling as ordinary methods
     - decl: |-
@@ -304,30 +192,9 @@ cases:
       code: |-
           let a: A = new A
           a.$_set('a', 42.0)
-          if (a.$_get('a') != 42.0) return 1
+          arktest.assertEQ(42.0, a.$_get('a'))
           a.$_set('a', 43.0)
-          if (a.$_get('a') != 43.0) return 1
-
-    # negative cases, async is not allowed
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              async $_get(i: string): number {  // CTE
-                  return 42.0
-              }
-          }
-      code: |-
-          let a = new A
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              async $_set(i: string, v: number) {  // CTE
-                  return
-              }
-          }
-      code: |-
-          let a = new A
+          arktest.assertEQ(43.0, a.$_get('a'))
 
     # positive case, array value
     - decl: |-
@@ -346,9 +213,9 @@ cases:
       code: |-
           let a: A = new A
           a['a'] = [42.0]
-          if (a['a'][0] != 42.0) return 1
+          arktest.assertEQ(42.0, a['a'][0])
           a['a'] = [43.0, 44.0]
-          if (a['a'][1] != 44.0) return 1
+          arktest.assertEQ(44.0, a['a'][1])
 
     - decl: |-
           let empty: number[] = []
@@ -366,9 +233,9 @@ cases:
       code: |-
           let a: A = new A
           a[0] = [42.0]
-          if (a[0][0] != 42.0) return 1
+          arktest.assertEQ(42.0, a[0][0]) 
           a[1] = [43.0, 44.0]
-          if (a[1][1] != 44.0) return 1
+          arktest.assertEQ(44.0, a[1][1]) 
 
     - decl: |-
           let empty: number[] = []
@@ -386,9 +253,9 @@ cases:
       code: |-
           let a: A[] = [new A, new A]
           a[0][0] = [42.0]
-          if (a[0][0][0] != 42.0) return 1
+          arktest.assertEQ(42.0, a[0][0][0]) 
           a[1][1] = [43.0, 44.0]
-          if (a[1][1][1] != 44.0) return 1
+          arktest.assertEQ(44.0, a[1][1][1]) 
 
     # positive case, another indexable class value
     - decl: |-
@@ -420,8 +287,160 @@ cases:
           let b1: B = new B
           a[0] = b1
           a[0][0] = [42.0]
-          if (a[0][0][0] != 42.0) return 1
+          arktest.assertEQ(42.0, a[0][0][0]) 
           let b2: B = new B
           a[1] = b2
           a[1][1] = [43.0, 44.0]
-          if (a[1][1][1] != 44.0) return 1
+          arktest.assertEQ(44.0, a[1][1][1])
+
+    # positive case, calling as ordinary methods via method reference
+    - decl: |-
+        class A {
+            ind: string = ''
+            val: number
+            $_get(i: string): number {
+                return i == this.ind ? this.val : Number.NaN
+            }
+            $_set(i: string, v: number) {
+                this.ind = i
+                this.val = v
+            }
+        }
+      code: |-
+        let a: A = new A
+        let sa = a.$_set
+        let sg = a.$_get
+        
+        sa('a', 42.0)
+        arktest.assertEQ(42.0, sg('a'))
+        sa('a', 43.0)
+        arktest.assertEQ(43.0, sg('a'))
+
+    # positive case, calling as ordinary methods
+    - decl: |-
+        type NOS = number | string
+        class A {
+            ind: string = ''
+            val: NOS = Number.NaN
+        
+            $_get(i: string): NOS {
+                return i == this.ind ? this.val : Number.NaN
+            }
+            $_set(i: string, v: number) {
+                this.ind = i
+                this.val = v
+            }
+            $_set(i: string, v: string) {
+                this.ind = i
+                this.val = v
+            }
+        
+        }
+      code: |-
+        let a: A = new A
+        a.$_set('a', 42.0)
+        arktest.assertEQ(42.0, a.$_get('a'))
+        a.$_set('a', '43.0')
+        arktest.assertEQ('43.0', a.$_get('a'))
+
+    # positive case, provide multiple setters
+    - decl: |-
+        type NOS = number | string
+        class A {
+            ind: string = ''
+            val: NOS = Number.NaN
+        
+            $_get(i: string): NOS {
+                return i == this.ind ? this.val : Number.NaN
+            }
+            $_set(i: string, v: number) {
+                this.ind = i
+                this.val = v
+            }
+            $_set(i: string, v: string) {
+                this.ind = i
+                this.val = v
+            }
+        
+        }
+      code: |-
+        let a: A = new A
+        a['a'] = 42.0
+        arktest.assertEQ(42.0, a.$_get('a'))
+        a['a'] = '43.0'
+        arktest.assertEQ('43.0', a.$_get('a'))   
+
+    # positive case, calling as ordinary methods with trailing lambda arg
+    - decl: |-
+        type TL = () => number
+        class A {
+            ind: string = ''
+            val: number
+            $_get(i: string): number {
+                return i == this.ind ? this.val : Number.NaN
+            }
+            $_set(i: string, v: TL) {
+                this.ind = i
+                this.val = v()
+            }
+        }
+      code: |-
+        let a: A = new A
+        a.$_set('a') {
+          return 42.0
+        }
+        arktest.assertEQ(42.0, a.$_get('a'))
+        a.$_set('a') {
+          return 43.0
+        }
+        arktest.assertEQ(43.0, a.$_get('a'))
+
+    # positive case, provide multiple setters with overload
+    - decl: |-
+        type NOS = number | string
+        class A {
+            ind: string = ''
+            val: NOS = Number.NaN
+        
+            $_get(i: string): NOS {
+                return i == this.ind ? this.val : Number.NaN
+            }
+        
+            set_N(i: string, v: number) {
+                this.ind = i
+                this.val = v
+            }
+            set_S(i: string, v: string) {
+                this.ind = i
+                this.val = v
+            }
+            overload $_set { set_N, set_S }
+        
+        }
+      code: |-
+        let a: A = new A
+        a['a'] = 42.0
+        arktest.assertEQ(42.0, a.$_get('a'))
+        a.$_set('a', '43.0')
+        arktest.assertEQ('43.0', a.$_get('a'))
+
+    # positive case, calling as indexed with IIFE
+    - decl: |-
+        type TL = () => number
+        class A {
+            ind: string = ''
+            val: number
+            $_get(i: string): number {
+                return i == this.ind ? this.val : Number.NaN
+            }
+            $_set(i: string, v: TL) {
+                this.ind = i
+                this.val = v()
+            }
+        }
+      code: |-
+        let a: A = new A
+        a['a'] = (() => { return 42.0 })
+        arktest.assertEQ(42.0, a.$_get('a'))        
+        a['a'] = (() => { return 43.0 })
+        arktest.assertEQ(43.0, a.$_get('a'))
