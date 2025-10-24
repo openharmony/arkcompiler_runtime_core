@@ -14,9 +14,17 @@
  */
 
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: >-
+    Static initialization must be performed or started before the first execution of one of the following operations:
+    - invocation of a function of the module
+    - access to a variable of the module
+tags: [no-warmup]
+files:
+- ./modules/init_module.ets
 ---*/
 
-static {
+import {seqstr} from "./modules/init_module"
+
+function main() {
+  arktest.assertEQ(seqstr, "MOD")
 }

@@ -14,9 +14,23 @@
  */
 
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: >-
+      For namespaces, the code in a static block is executed only when namespace members are used in the program
+      (an example is provided in Namespace Declarations).
+      Call namespace function
+tags: [no-warmup]
 ---*/
 
-static {
+namespace ns {
+  export function foo() {
+    return v
+  }
+  let v: int
+  static {
+    v = 1
+  }
+}
+
+function main() {
+  arktest.assertEQ(ns.foo(), 1)
 }

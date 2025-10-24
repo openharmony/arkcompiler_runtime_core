@@ -14,9 +14,11 @@
  */
 
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: Test file.
+tags:
+- compile-only
+- not-a-test
 ---*/
 
-static {
-}
+export let str: string
+export let obj: Object

@@ -15,14 +15,14 @@
 
 /*---
 desc: >-
-    Among all package modules there can be one to contain a code that performs initialization actions (e.g., setting
-    initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
-    and in Initializer Block
-tags: [compile-only]
+      Static initialization is not working with non-static fields
+tags: [compile-only, negative]
 ---*/
 
-package p4
+class C {
+  v: int = 0
 
-const pi: float = 3.14159f
-
-export { pi }
+  static {
+    v += 1
+  }
+}

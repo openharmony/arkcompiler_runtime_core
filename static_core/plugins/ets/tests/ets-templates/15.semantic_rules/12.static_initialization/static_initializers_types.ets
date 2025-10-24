@@ -13,10 +13,21 @@
  * limitations under the License.
  */
 
-/*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
----*/
+{% for c in cases %}
 
-static {
+/*---
+desc: >-
+      Static initialization works with numerous types
+---*/
+{{c.def}}
+class C {
+  static v: {{c.type}}
+  static {
+    C.v = {{c.init}}
+  }
 }
+
+function main() {
+{{c.check}}
+}
+{% endfor %}

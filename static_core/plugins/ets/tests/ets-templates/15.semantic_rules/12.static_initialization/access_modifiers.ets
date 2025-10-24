@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Static block cannot be used out of the class or namespace
-tags: [compile-only, negative]
+desc: >-
+      Verify static initializer works correctly according to the access modifier configured
+tags: [{{c.tags}}]
 ---*/
 
-static {
-}
+{{c.decl}}
+{% endfor %}
