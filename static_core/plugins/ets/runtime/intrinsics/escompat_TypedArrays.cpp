@@ -51,7 +51,6 @@ static void *GetNativeData(T *array)
         ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "ArrayBuffer was detached");
         return nullptr;
     }
-
     return arrayBuffer->GetData();
 }
 
@@ -1064,30 +1063,6 @@ REVERSE_CALL_DECL(BigUInt64)
 
 #undef REVERSE_CALL_DECL
 
-/// @brief Creates a new ByteArray (for ArrayBuffer) with specified size. Should be nonMovable.
-static inline EtsByteArray *CreateByteArrayNonMov(EtsInt byteLen)
-{
-    auto klass = EtsByteArray::GetComponentClass()->GetRuntimeClass();
-    auto *array =
-        reinterpret_cast<EtsByteArray *>(Thread::GetCurrent()->GetVM()->GetHeapManager()->AllocateNonMovableObject(
-            klass, sizeof(EtsByteArray) + byteLen, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent(),
-            mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT));
-    array->UpdateLength(byteLen);
-    return array;
-}
-
-/// @brief Creates a new ArrayBuffer with specified ByteArray and size.
-static inline EtsEscompatArrayBuffer *CreateArrayBufferExternalData(EtsInt byteLen, EtsByteArray *externalData)
-{
-    auto *klass = PlatformTypes(EtsCoroutine::GetCurrent())->coreArrayBuffer->GetRuntimeClass();
-    auto *buffer =
-        reinterpret_cast<EtsEscompatArrayBuffer *>(Thread::GetCurrent()->GetVM()->GetHeapManager()->AllocateObject(
-            klass, sizeof(EtsEscompatArrayBuffer), DEFAULT_ALIGNMENT, ManagedThread::GetCurrent(),
-            mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT, false));
-    buffer->Initialize(EtsCoroutine::GetCurrent(), byteLen, externalData);
-    return buffer;
-}
-
 /*
  * Typed Arrays: reversed alloc data implementation: needs for toReversed().
  */
@@ -1098,17 +1073,19 @@ static EtsEscompatArrayBuffer *EtsEscompatTypedArrayAllocReversedBuffer(T *thisA
     const EtsInt srcLength = thisArray->GetLengthInt();
     const ElementType *src = static_cast<ElementType *>(GetNativeData(thisArray));
     const EtsInt lenBytes = srcLength * sizeof(ElementType);
-    EtsByteArray *data = CreateByteArrayNonMov(lenBytes);
-    if (UNLIKELY(src == nullptr || data == nullptr)) {
+
+    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(EtsCoroutine::GetCurrent(), lenBytes);
+    if (UNLIKELY(arrayBuffer == nullptr)) {
         return nullptr;
     }
-    auto *dest = data->GetData<ElementType>();
-    ASSERT(dest != nullptr);
-    for (int i = 0; i < srcLength; i++) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, clang-analyzer-core.NullDereference)
-        dest[i] = src[(srcLength - 1) - i];
+    auto *dest = arrayBuffer->GetData<ElementType *>();
+    if (LIKELY(lenBytes > 0 && dest != nullptr)) {
+        for (int i = 0; i < srcLength; i++) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, clang-analyzer-core.NullDereference)
+            dest[i] = src[(srcLength - 1) - i];
+        }
     }
-    return CreateArrayBufferExternalData(lenBytes, data);
+    return arrayBuffer;
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -1152,19 +1129,18 @@ static EtsEscompatArrayBuffer *EtsEscompatTypedArrayAllocBufferWith(T *thisArray
     }
     const ElementType *src = static_cast<ElementType *>(GetNativeData(thisArray));
     const EtsInt lenBytes = srcLength * sizeof(ElementType);
-    EtsByteArray *data = CreateByteArrayNonMov(lenBytes);
-    if (UNLIKELY(src == nullptr || data == nullptr)) {
+
+    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(EtsCoroutine::GetCurrent(), lenBytes);
+    if (UNLIKELY(arrayBuffer == nullptr)) {
         return nullptr;
     }
-    auto *dest = data->GetData<ElementType>();
-    ASSERT(dest != nullptr);
-    if (LIKELY(lenBytes > 0)) {
+    auto *dest = arrayBuffer->GetData<ElementType *>();
+    if (LIKELY(lenBytes > 0 && dest != nullptr)) {
         [[maybe_unused]] auto err = memcpy_s(dest, lenBytes, src, lenBytes);
         ASSERT(err == EOK);
+        dest[pos] = val;
     }
-    // NOLINTNEXTLINE (cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    dest[pos] = val;
-    return CreateArrayBufferExternalData(lenBytes, data);
+    return arrayBuffer;
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -1229,17 +1205,17 @@ static EtsEscompatArrayBuffer *EtsEscompatTypedArrayAllocSlicedBufferImpl(T *thi
     // NOLINTNEXTLINE (cppcoreguidelines-pro-bounds-pointer-arithmetic)
     const ElementType *src = static_cast<ElementType *>(GetNativeData(thisArray)) + beg;
     const EtsInt lenBytes = lengthInt * sizeof(ElementType);
-    EtsByteArray *data = CreateByteArrayNonMov(lenBytes);
-    if (UNLIKELY(src == nullptr || data == nullptr)) {
+
+    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(EtsCoroutine::GetCurrent(), lenBytes);
+    if (UNLIKELY(arrayBuffer == nullptr)) {
         return nullptr;
     }
-    auto *dest = data->GetData<ElementType>();
-    ASSERT(dest != nullptr);
-    if (LIKELY(lenBytes > 0)) {
+    auto *dest = arrayBuffer->GetData<ElementType *>();
+    if (LIKELY(lenBytes > 0 && dest != nullptr)) {
         [[maybe_unused]] auto err = memcpy_s(dest, lenBytes, src, lenBytes);
         ASSERT(err == EOK);
     }
-    return CreateArrayBufferExternalData(lenBytes, data);
+    return arrayBuffer;
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

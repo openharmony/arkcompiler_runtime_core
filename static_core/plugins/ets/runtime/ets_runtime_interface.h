@@ -89,6 +89,7 @@ public:
     FieldPtr GetEscompatTypedArrayLengthInt(ClassPtr klass) const override;
     ClassPtr GetEscompatArrayBufferClass() const override;
     FieldPtr GetEscompatArrayBufferDataAddress(ClassPtr klass) const override;
+    FieldPtr GetEscompatArrayBufferManagedData(ClassPtr klass) const override;
     bool IsIntrinsicStringBuilderToString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppendString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppend(IntrinsicId id) const override;

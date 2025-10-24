@@ -16,14 +16,10 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_H
 
-#include "include/mem/allocator.h"
 #include "include/object_accessor.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/ets_platform_types.h"
 
 #include <cstdint>
 
@@ -56,12 +52,16 @@ public:
     /**
      * Creates a byte array in non-movable space.
      * @param length of created array.
-     * NOTE: non-movable creation ensures that native code can obtain raw pointer to buffer.
+     * NOTE: Non-movable creation ensures that native code can obtain raw pointer to buffer.
      */
-    ALWAYS_INLINE static EtsByteArray *AllocateNonMovableArray(EtsInt length)
-    {
-        return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-    }
+    ALWAYS_INLINE static EtsByteArray *AllocateNonMovableArray(EtsInt length);
+
+    /**
+     * Creates a managed byte array.
+     * @param length of created array.
+     * NOTE: Uses common allocation for objects.
+     */
+    ALWAYS_INLINE static EtsByteArray *AllocateArray(EtsInt length);
 
     ALWAYS_INLINE static EtsLong GetAddress(const EtsByteArray *array)
     {
@@ -69,47 +69,32 @@ public:
     }
 
     /// Creates ArrayBuffer with managed buffer.
-    static EtsEscompatArrayBuffer *Create(EtsCoroutine *coro, size_t length, void **resultData)
-    {
-        ASSERT_MANAGED_CODE();
-        ASSERT(!coro->HasPendingException());
+    static EtsEscompatArrayBuffer *Create(EtsCoroutine *coro, size_t length);
+    static EtsEscompatArrayBuffer *CreateNonMovable(EtsCoroutine *coro, size_t length, void **resultData);
 
-        [[maybe_unused]] EtsHandleScope scope(coro);
-        auto *cls = PlatformTypes(coro)->coreArrayBuffer;
-        EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
-        if (UNLIKELY(handle.GetPtr() == nullptr)) {
-            ASSERT(coro->HasPendingException());
-            return nullptr;
-        }
+    static bool IsNonMovableArray(EtsCoroutine *coro, EtsEscompatArrayBuffer *self);
+    static bool IsNativeArray(EtsEscompatArrayBuffer *self);
 
-        auto *buf = AllocateNonMovableArray(length);
-        handle->Initialize(coro, length, buf);
-        *resultData = handle->GetData();
-        return handle.GetPtr();
-    }
+    static void ReallocateNonMovableArray(EtsCoroutine *coro, EtsEscompatArrayBuffer *self, EtsInt bytesLen);
 
     EtsObject *AsObject()
     {
         return this;
     }
 
-    EtsInt GetByteLength() const
-    {
-        return ObjectAccessor::GetPrimitive<EtsInt>(this, GetByteLengthOffset());
-    }
+    EtsInt GetByteLength() const;
 
-    /// @brief Returns non-null data for a non-detached buffer
-    void *GetData() const
+    /// @brief Returns managed or native data. Data can be movable in memory or empty.
+    ALWAYS_INLINE void *GetData() const;
+
+    template <typename T>
+    ALWAYS_INLINE T GetData() const
     {
-        ASSERT(!WasDetached());
-        return GetNativeDataImpl();
+        return reinterpret_cast<T>(GetData());
     }
 
     /// NOTE: behavior of this method must repeat implementation of `detached` property in ArkTS `ArrayBuffer`
-    bool WasDetached() const
-    {
-        return GetNativeDataImpl() == 0;
-    }
+    ALWAYS_INLINE bool WasDetached() const;
 
     bool IsExternal() const
     {
@@ -121,40 +106,10 @@ public:
         return !WasDetached() && IsExternal();
     }
 
-    EtsByte At(EtsInt pos) const
-    {
-        if (!DoBoundaryCheck(pos)) {
-            return 0;
-        }
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return reinterpret_cast<int8_t *>(GetData())[pos];
-    }
+    EtsByte At(EtsInt pos) const;
+    void Set(EtsInt pos, EtsByte val);
 
-    void Set(EtsInt pos, EtsByte val)
-    {
-        if (!DoBoundaryCheck(pos)) {
-            return;
-        }
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        reinterpret_cast<int8_t *>(GetData())[pos] = val;
-    }
-
-    void SetValues(EtsEscompatArrayBuffer *other, EtsInt begin)
-    {
-        ASSERT(!WasDetached());
-        ASSERT(other != nullptr);
-        ASSERT(!other->WasDetached());
-        ASSERT(begin >= 0);
-        auto thisByteLength = GetByteLength();
-        ASSERT(begin + thisByteLength <= other->GetByteLength());
-
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto *srcData = reinterpret_cast<int8_t *>(other->GetData()) + begin;
-        auto *dstData = GetData();
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        [[maybe_unused]] errno_t res = memcpy_s(dstData, thisByteLength, srcData, thisByteLength);
-        ASSERT(res == 0);
-    }
+    void SetValues(EtsEscompatArrayBuffer *other, EtsInt begin);
 
     static constexpr size_t GetByteLengthOffset()
     {
@@ -177,16 +132,7 @@ public:
     }
 
     /// Initializes ArrayBuffer with its own non-movable array
-    void Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array)
-    {
-        ASSERT(array != nullptr);
-        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), array->GetCoreType());
-        ObjectAccessor::SetPrimitive(this, GetByteLengthOffset(), static_cast<decltype(byteLength_)>(length));
-        decltype(nativeData_) addr = GetAddress(array);
-        ObjectAccessor::SetPrimitive(this, GetNativeDataOffset(), addr);
-        ASSERT(GetNativeDataImpl() != 0);
-        ObjectAccessor::SetPrimitive(this, GetIsResizableOffset(), ToEtsBoolean(false));
-    }
+    void Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array);
 
     template <typename T>
     T GetElement(uint32_t index, uint32_t offset);
@@ -213,26 +159,14 @@ public:
     T GetAndBitwiseXor(uint32_t index, uint32_t offset, T element);
 
 private:
-    void *GetNativeDataImpl() const
-    {
-        return ObjectAccessor::GetPrimitive<void *>(this, GetNativeDataOffset());
-    }
+    ALWAYS_INLINE ObjectPointer<EtsByteArray> GetManagedDataImpl() const;
+    ALWAYS_INLINE void *GetNativeDataImpl() const;
 
     /**
      * @brief Checks position is inside array, throws ets exception if not.
      * NOTE: behavior of this method must repeat initialization from managed `doBoundaryCheck`.
      */
-    bool DoBoundaryCheck(EtsInt pos) const
-    {
-        if (pos < 0 || pos >= GetByteLength()) {
-            PandaString message = "ArrayBuffer position ";
-            message.append(ToPandaString(pos)).append(" is out of bounds");
-            ThrowEtsException(EtsCoroutine::GetCurrent(),
-                              panda_file_items::class_descriptors::INDEX_OUT_OF_BOUNDS_ERROR, message.c_str());
-            return false;
-        }
-        return true;
-    }
+    bool DoBoundaryCheck(EtsInt pos) const;
 
 private:
     // Managed array used in this `ArrayBuffer`, null if buffer is external

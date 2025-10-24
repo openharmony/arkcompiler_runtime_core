@@ -5709,7 +5709,8 @@ static ani_status DoCreateArrayBuffer(ani_env *env, size_t length, void **result
     ScopedManagedCodeFix s(env);
     EtsCoroutine *coro = s.GetCoroutine();
 
-    EtsEscompatArrayBuffer *internalArrayBuffer = EtsEscompatArrayBuffer::Create(coro, length, resultData);
+    // ArrayBuffer should be allocated with non-movable internal data.
+    EtsEscompatArrayBuffer *internalArrayBuffer = EtsEscompatArrayBuffer::CreateNonMovable(coro, length, resultData);
 
     ASSERT(coro->HasPendingException() == false);
     ANI_CHECK_RETURN_IF_EQ(internalArrayBuffer, nullptr, ANI_OUT_OF_MEMORY);
@@ -5745,9 +5746,16 @@ NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(ani_env *env, ani_arraybuff
     CHECK_PTR_ARG(lengthResult);
 
     ScopedManagedCodeFix s(env);
-    auto *internalArrayBuffer = s.ToInternalType(arraybuffer);
-    *dataResult = internalArrayBuffer->GetData();
+    EtsCoroutine *coroutine = s.GetCoroutine();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    EtsHandle<EtsEscompatArrayBuffer> internalArrayBuffer(coroutine, s.ToInternalType(arraybuffer));
+
     *lengthResult = internalArrayBuffer->GetByteLength();
+    bool isMovableData = !EtsEscompatArrayBuffer::IsNonMovableArray(coroutine, internalArrayBuffer.GetPtr());
+    if (isMovableData) {  // Should still return a valid pointer
+        EtsEscompatArrayBuffer::ReallocateNonMovableArray(coroutine, internalArrayBuffer.GetPtr(), *lengthResult);
+    }
+    *dataResult = internalArrayBuffer->GetData();
     return ANI_OK;
 }
 

@@ -276,9 +276,10 @@ protected:
         *static_cast<EtsDouble *>(ToVoidPtr(ToUintPtr(array) + TypedArray::GetByteLengthOffset())) =
             static_cast<EtsDouble>(byteLength);
 
-        void *buffer = nullptr;
-        auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coroutine_, byteLength, &buffer);
+        auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coroutine_, byteLength);
         ASSERT(arrayBuffer != nullptr);
+        auto *buffer = arrayBuffer->GetData();
+        ASSERT(buffer != nullptr);
 
         *static_cast<ObjectPointer<EtsObject> *>(ToVoidPtr(ToUintPtr(array) + TypedArray::GetBufferOffset())) =
             arrayBuffer;
