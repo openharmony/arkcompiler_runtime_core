@@ -79,8 +79,8 @@
 #ifdef ARK_HYBRID
 #include "base_runtime.h"
 #endif
-#ifdef OHOS_PANDA_DEBUG_MODE_ENABLE
-#include "base/startup/init/interfaces/innerkits/include/syspara/parameters.h"
+#ifdef PANDA_OHOS_GET_PARAMETER
+#include "syspara/parameters.h"
 #endif
 
 namespace ark {
@@ -389,7 +389,7 @@ bool Runtime::Create(const RuntimeOptions &options)
     return true;
 }
 
-#ifdef OHOS_PANDA_DEBUG_MODE_ENABLE
+#ifdef PANDA_OHOS_GET_PARAMETER
 void Runtime::SetDebuggerOptions(RuntimeOptions &options)
 {
     const std::string debugLibraryPathMode = "/system/lib64/libarkinspector.so";

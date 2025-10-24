@@ -521,7 +521,7 @@ if (is_ohos && is_standard_system) {
   ]
   if (!(ark_standalone_build || ark_static_standalone_build)) {
     _libarkruntime_calculated_defines += [
-      "OHOS_PANDA_DEBUG_MODE_ENABLE",
+      "PANDA_OHOS_GET_PARAMETER",
     ]
     _libarkruntime_calculated_external_deps += [
       "init:libbegetutil",
@@ -529,6 +529,8 @@ if (is_ohos && is_standard_system) {
     _libarkruntime_calculated_deps += [
       "$ark_root/runtime/para:RuntimeEnableDebugger.para",
       "$ark_root/runtime/para:RuntimeEnableDebugger.para.dac",
+      "$ark_root/runtime/para:RuntimeGCLogEnable.para",
+      "$ark_root/runtime/para:RuntimeGCLogEnable.para.dac",
     ]
   }
 }

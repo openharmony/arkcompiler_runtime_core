@@ -18,6 +18,9 @@
 #include "generated/runtime_options_gen.h"
 #include "libarkbase/utils/logger.h"
 #include "runtime/plugins.h"
+#ifdef PANDA_OHOS_GET_PARAMETER
+#include "syspara/parameters.h"
+#endif
 
 namespace ark {
 
@@ -135,13 +138,21 @@ public:
     bool IsG1TrackFreedObjects() const
     {
         bool track = false;
+        bool g1TrackFreedObjects = false;
         auto option = GetG1TrackFreedObjects();
         if (option == "default") {
-#ifdef NDEBUG
-            track = false;
-#else
-            track = true;
+#ifdef PANDA_OHOS_GET_PARAMETER
+            g1TrackFreedObjects = OHOS::system::GetBoolParameter("persist.sta.gc.SetG1TrackFreedObjects", false);
 #endif
+            if (g1TrackFreedObjects) {
+                track = true;
+            } else {
+#ifdef NDEBUG
+                track = false;
+#else
+                track = true;
+#endif
+            }
         } else if (option == "true") {
             track = true;
         } else if (option == "false") {
