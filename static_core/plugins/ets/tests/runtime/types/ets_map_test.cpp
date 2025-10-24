@@ -59,7 +59,8 @@ public:
                                              MIRROR_FIELD_INFO(EtsEscompatMap, buckets_, "buckets"),
                                              MIRROR_FIELD_INFO(EtsEscompatMap, cap_, "cap"),
                                              MIRROR_FIELD_INFO(EtsEscompatMap, numEntries_, "numEntries"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMap, sizeVal_, "sizeVal")};
+                                             MIRROR_FIELD_INFO(EtsEscompatMap, sizeVal_, "sizeVal"),
+                                             MIRROR_FIELD_INFO(EtsEscompatMap, initialCapacity_, "initialCapacity")};
     }
 
     static std::vector<MirrorFieldInfo> GetMapEntryMembers()

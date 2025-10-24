@@ -128,8 +128,8 @@ class SearchTuple {
 }
 
 export final class MapIterator<K, V, R> implements IterableIterator<R> {
-    private data: FixedArray<Any> | undefined
-    private buckets: FixedArray<int> | undefined
+    private data: FixedArray<Any>
+    private buckets: FixedArray<int>
     private curIndex: int
 
     private mapper: (k: K, v: V) => R
@@ -143,21 +143,19 @@ export final class MapIterator<K, V, R> implements IterableIterator<R> {
     }
 
     override next(): IteratorResult<R> {
+        if (this.curIndex < 1) {
+            return new IteratorResult<R>()
+        }
         let data = this.data
         let buckets = this.buckets
-        while (data !== undefined && data[data.length - 1] !== undefined) {
+        while (data[data.length - 1] !== undefined) {
             if (this.curIndex > 2) {
                 this.curIndex -= 2 * getNumOfDeleted(buckets!, this.curIndex - 2)
             }            
-            data = data[data.length - 1] as (FixedArray<Any> | undefined)
-            if (data !== undefined) {
-                buckets = data[data.length - 2] as FixedArray<int>
-            }
+            data = data[data.length - 1] as FixedArray<Any> 
+            buckets = data[data.length - 2] as FixedArray<int>
         }
         this.data = data
-        if (data === undefined) {
-            return new IteratorResult<R>()
-        }
         this.buckets = buckets
         
         for (; this.curIndex <= this.buckets!.length - 1; this.curIndex += 2) {
@@ -170,7 +168,7 @@ export final class MapIterator<K, V, R> implements IterableIterator<R> {
                 return res
             }
         }
-        this.data = undefined
+        this.curIndex = 0
         --this.buckets![this.buckets!.length - 1]
         return new IteratorResult<R>()
     }
@@ -196,17 +194,22 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     private cap: int
     private numEntries: int = 0
     private sizeVal: int = 0
+    private initialCapacity: int = Map.MIN_CAPACITY
 
     private static readonly MIN_CAPACITY = 4
     private static readonly MIN_SHRINK_CAPACITY = 16
     private static readonly ENTRY_KEY = 0
     private static readonly ENTRY_VAL = 1
 
-    private static computeCapacity(numEntries: int): int {
-        const capacity = Math.ceilPow2(numEntries + numEntries / 2)
-        return (capacity >= Map.MIN_CAPACITY) ? capacity : Map.MIN_CAPACITY
+    private static adjustCapacity(numEntries: int): int {
+        if (numEntries <= Map.MIN_CAPACITY)
+            return Map.MIN_CAPACITY
+        return Math.ceilPow2(numEntries)
     }
 
+    private static computeCapacity(numEntries: int): int {
+        return Map.adjustCapacity(numEntries + numEntries / 2)
+    }
 
     private static computeCapacityForGrow(capacity: int, size: int, numEntries: int): int {
         const deleted = numEntries - size
@@ -305,6 +308,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                 this.set(e[Map.ENTRY_KEY] as K, e[Map.ENTRY_VAL] as V)
             })
         }
+        this.initialCapacity = this.cap
     }
 
     /**
@@ -317,6 +321,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         this.buckets = new int[capacity * 2 + 1]
         this.data[this.data.length - 2] = this.buckets
         this.cap = capacity
+        this.initialCapacity = this.cap
 
         map.forEach((v: V, k: K) => {
             this.set(k, v)
@@ -333,6 +338,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         this.buckets = new int[capacity * 2 + 1]
         this.data[this.data.length - 2] = this.buckets
         this.cap = capacity
+        this.initialCapacity = this.cap
 
         entries.forEach((entry: [K, V]) => {
             this.set(entry[Map.ENTRY_KEY] as K, entry[Map.ENTRY_VAL] as V)
@@ -348,6 +354,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         this.buckets = new int[capacity * 2 + 1]
         this.data[this.data.length - 2] = this.buckets
         this.cap = capacity
+        this.initialCapacity = this.cap
         for (let i = 0; i < values.length; ++i) {
             let pair = values[i]
             if (pair == null) {
@@ -359,10 +366,12 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     // NOTE: This API may be removed someday due #28030 internal issue
     constructor(initialCapacity: int) {
-        this.data = new Any[initialCapacity * 2 + 2]
-        this.buckets = new int[initialCapacity * 2 + 1]
+        const capacity = Map.adjustCapacity(initialCapacity)
+        this.data = new Any[capacity * 2 + 2]
+        this.buckets = new int[capacity * 2 + 1]
         this.data[this.data.length - 2] = this.buckets
-        this.cap = initialCapacity
+        this.cap = capacity
+        this.initialCapacity = this.cap
     }
 
     override toString(): String {
@@ -533,12 +542,15 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         if (cap <= Map.MIN_SHRINK_CAPACITY) {  // too small
             return
         }
-        if (this.sizeVal >= cap / Map.MIN_CAPACITY) {  // filled enough
+        if (this.sizeVal >= cap / 4) {  // filled enough
             return
         }
 
-        // quarter filled, shrink
-        this.rehash(cap / 2)
+        // quarter filled
+        const newCap = cap / 2
+        if (newCap >= this.initialCapacity) {
+            this.rehash(newCap)
+        }
     }
 
     /**
@@ -575,16 +587,17 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * Deletes all elements from the Map
      */
     clear(): void {
-        if (this.sizeVal === 0 && this.cap === Map.MIN_CAPACITY) {
+        const cap = this.initialCapacity
+        if (this.sizeVal === 0 && this.cap === cap) {
             return
         }
 
         const oldData = this.data
-        this.data = new Any[Map.MIN_CAPACITY * 2 + 2]
+        this.data = new Any[cap * 2 + 2]
 
         const oldBuckets = this.buckets
         const itersCounter = oldBuckets[oldBuckets.length - 1]
-        this.buckets = new int[Map.MIN_CAPACITY * 2 + 1]
+        this.buckets = new int[cap * 2 + 1]
         if (itersCounter) {
             this.buckets[this.buckets.length - 1] = itersCounter
             oldData[oldData.length - 1] = this.data
@@ -592,7 +605,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         }
 
         this.data[this.data.length - 2] = this.buckets
-        this.cap = Map.MIN_CAPACITY
+        this.cap = cap
         this.sizeVal = 0
         this.numEntries = 0
     }
