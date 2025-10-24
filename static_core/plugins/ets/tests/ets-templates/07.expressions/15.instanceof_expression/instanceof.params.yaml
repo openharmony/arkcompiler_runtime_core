@@ -222,9 +222,9 @@ cases:
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
       - { type: 'string', res: 0 }
-      - { type: 'int', res: 1 }
-      - { type: 'Int', res: 1 }
-      - { type: 'Color', res: cte }
+      - { type: 'int', res: 0 }
+      - { type: 'Int', res: 0 }
+      - { type: 'Color', res: 1 }
 
   - decl: |-
       const enum Rating: double { A = 1.0, B = 1.5 }
@@ -235,9 +235,9 @@ cases:
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
       - { type: 'string', res: 0 }
-      - { type: 'double', res: 1 }
-      - { type: 'Double', res: 1 }
-      - { type: 'Rating', res: cte }
+      - { type: 'double', res: 0 }
+      - { type: 'Double', res: 0 }
+      - { type: 'Rating', res: 1 }
 
   - decl: |-
       const enum Color { Red = 'r', Green = 'g' }
@@ -247,10 +247,10 @@ cases:
       - { type: 'null', res: 0 }
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
-      - { type: 'string', res: 1 }
-      - { type: 'String', res: 1 }
+      - { type: 'string', res: 0 }
+      - { type: 'String', res: 0 }
       - { type: 'int', res: 0 }
-      - { type: 'Color', res: cte }
+      - { type: 'Color', res: 1 }
 
   - expr: '[1, 2]'
     types:
