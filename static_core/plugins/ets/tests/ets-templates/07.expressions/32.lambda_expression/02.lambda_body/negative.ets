@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: |-
- A compile-time error occurs if a local variable is used
- in a lambda body but is neither declared in nor assigned before it
-tags:
-- compile-only
-- negative
+desc: {{c.desc}}
+assertion: {{c.assertion}} 
+tags: [compile-only, negative]
 ---*/
 
-let f = (a: int, b: int) => a + b + c
+{{c.call}}
+
+{% endfor %}
