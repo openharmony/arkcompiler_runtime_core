@@ -18,6 +18,7 @@ list-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/parser
 test-root: ${parameters.parser-root}
 
 parameters:
+  validator: runner.extensions.validators.parser.parser_validator.ParserValidator
   parser-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test
   work-dir: ${WORK_DIR}/${suite-name}
   enable-verifier: false
@@ -49,7 +50,6 @@ collections:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
   #  ts tests
   parser/ts:
     parameters:
@@ -66,7 +66,6 @@ collections:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
   # as/ts tests
   parser/as:
     parameters:
@@ -76,24 +75,16 @@ collections:
         - "--extension=${parameters.extension}"
         - "--thread=0"
         - "--parse-only"
-  # sts tests
+  # ets tests
   compiler/ets:
     parameters:
-      arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
       extension: ets
-      es2panda-workflow-args:
+      es2panda-test-suite-args:
         - "--dump-ast"
-        - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
-        - "--arktsconfig=${parameters.arktsconfig}"
   parser/ets:
     parameters:
-      arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
       extension: ets
-      es2panda-workflow-args:
+      es2panda-test-suite-args:
         - "--dump-ast"
-        - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
-        - "--arktsconfig=${parameters.arktsconfig}"

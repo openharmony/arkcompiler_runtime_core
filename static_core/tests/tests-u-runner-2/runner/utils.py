@@ -147,7 +147,10 @@ def copy(source_path: Path, dest_path: Path, remove_if_exist: bool = True) -> No
     if source_path.is_file():
         shutil.copy(source_path, dest_path)
     else:
-        shutil.copytree(source_path, dest_path, dirs_exist_ok=not remove_if_exist)
+        shutil.copytree(source_path, dest_path,
+                        symlinks=True,
+                        ignore=lambda _, _2: [".git"],
+                        dirs_exist_ok=not remove_if_exist)
 
 
 def read_file(file_path: Path | str) -> str:
@@ -164,6 +167,7 @@ def read_expected_file(path_to_file: Path) -> str:
 def get_opener(mode: int) -> Callable[[str | Path, int], int]:
     def opener(path_name: str | Path, flags: int) -> int:
         return os.open(path_name, os.O_RDWR | os.O_APPEND | os.O_CREAT | flags, mode)
+
     return opener
 
 
@@ -261,6 +265,13 @@ def has_macro(prop_value: str) -> bool:
     pattern = r"\$\{([^\}]+)\}"
     match = re.search(pattern, str(prop_value))
     return match is not None
+
+
+def list_has_macros(args: list[str]) -> bool:
+    for arg in args:
+        if has_macro(arg):
+            return True
+    return False
 
 
 def get_all_macros(prop_value: str) -> list[str]:

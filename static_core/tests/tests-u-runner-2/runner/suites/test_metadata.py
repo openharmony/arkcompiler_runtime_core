@@ -111,6 +111,8 @@ class TestMetadata:     # type: ignore[explicit-any]
     author: str | None = None
     info: str | None = None
     locale: str | None = None
+    # ark_tests/parser
+    issues: str | None = None
 
     @classmethod
     def get_metadata(cls, path: Path) -> 'TestMetadata':
