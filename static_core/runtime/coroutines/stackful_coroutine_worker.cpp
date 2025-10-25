@@ -89,7 +89,6 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
     Coroutine *waiter = Coroutine::GetCurrent();
     ASSERT(GetCurrentContext()->GetWorker() == this);
     ASSERT(awaitee != nullptr);
-    ASSERT(!awaitee->Happened());
     ASSERT(waiter->IsInNativeCode());
 
     ProcessTimerEvents();
@@ -99,6 +98,8 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::WaitForEvent finished (no await happened)";
         return;
     }
+
+    ASSERT(!awaitee->Happened());
 
     waitersLock_.Lock();
     awaitee->Unlock();

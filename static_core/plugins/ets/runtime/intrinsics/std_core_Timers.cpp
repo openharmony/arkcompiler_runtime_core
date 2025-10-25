@@ -38,6 +38,11 @@ public:
     NO_COPY_SEMANTIC(TimerInfo);
     NO_MOVE_SEMANTIC(TimerInfo);
 
+    mem::Reference *GetCallback() const
+    {
+        return callback_;
+    }
+
     int GetDelay() const
     {
         return delay_;
@@ -52,8 +57,6 @@ public:
     {
         return &event_;
     }
-
-    void InvokeCallback() const;
 
     bool IsCancelled() const;
 
@@ -109,11 +112,11 @@ private:
 static TimerTable g_timerTable = {};
 static std::atomic<TimerId> nextTimerId_ = 1;
 
-void TimerInfo::InvokeCallback() const
+static void InvokeCallback(mem::Reference *callback)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ScopedManagedCodeThread managedScope(coro);
-    auto *lambda = coro->GetVM()->GetGlobalObjectStorage()->Get(callback_);
+    auto *lambda = coro->GetVM()->GetGlobalObjectStorage()->Get(callback);
     LambdaUtils::InvokeVoid(coro, EtsObject::FromCoreType(lambda));
 }
 
@@ -135,11 +138,12 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
 
     auto timerEntrypoint = [](void *param) {
         auto *timer = static_cast<TimerInfo *>(param);
+        auto *timerCoro = Coroutine::GetCurrent();
         while (true) {
             auto *timerEvent = timer->GetEvent();
             if (timer->GetDelay() != 0) {
                 if (!timerEvent->IsExpired()) {
-                    auto *coroMan = Coroutine::GetCurrent()->GetManager();
+                    auto *coroMan = timerCoro->GetManager();
                     timerEvent->SetNotHappened();
                     timerEvent->Lock();
                     timerEvent->SetExpirationTime(coroMan->GetCurrentTime() + timer->GetDelay());
@@ -150,15 +154,16 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
                 break;
             }
 
-            timer->InvokeCallback();
+            InvokeCallback(timer->GetCallback());
 
             if (!timer->IsPeriodic()) {
                 break;
             }
-            Coroutine::GetCurrent()->GetManager()->Schedule();
+            timerCoro->GetManager()->Schedule();
         }
 
         g_timerTable.RemoveTimer(timer->GetEvent()->GetId());
+        timerCoro->GetVM()->GetGlobalObjectStorage()->Remove(timer->GetCallback());
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(timer);
     };
 
