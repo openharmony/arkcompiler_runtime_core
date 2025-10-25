@@ -1350,7 +1350,7 @@ void CodeGenStatic::VisitStoreObjectIntrinsic(GraphVisitor *v, Inst *instBase)
             if (isAccType) {
                 enc->result_.emplace_back(pandasm::Create_STOBJ(vd, id));
             } else {
-                enc->result_.emplace_back(pandasm::Create_STOBJ_V(vd, vs, id));
+                enc->result_.emplace_back(pandasm::Create_STOBJ_V(vs, vd, id));
             }
             break;
         case compiler::DataType::INT64:
@@ -1359,14 +1359,14 @@ void CodeGenStatic::VisitStoreObjectIntrinsic(GraphVisitor *v, Inst *instBase)
             if (isAccType) {
                 enc->result_.emplace_back(pandasm::Create_STOBJ_64(vd, id));
             } else {
-                enc->result_.emplace_back(pandasm::Create_STOBJ_V_64(vd, vs, id));
+                enc->result_.emplace_back(pandasm::Create_STOBJ_V_64(vs, vd, id));
             }
             break;
         case compiler::DataType::REFERENCE:
             if (isAccType) {
                 enc->result_.emplace_back(pandasm::Create_STOBJ_OBJ(vd, id));
             } else {
-                enc->result_.emplace_back(pandasm::Create_STOBJ_V_OBJ(vd, vs, id));
+                enc->result_.emplace_back(pandasm::Create_STOBJ_V_OBJ(vs, vd, id));
             }
             break;
         default:

@@ -324,6 +324,13 @@ TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateStoreArrayWide)
     helpers_mode::TestMode(g_isaApiStaticImp->iCreateStoreArrayWide, false);
 }
 
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadObject,
+// abc-kind=NoABC, category=negative-mode, extension=c
+TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateLoadObject)
+{
+    helpers_mode::TestMode(g_isaApiStaticImp->iCreateLoadObject, false);
+}
+
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateSub,
 // abc-kind=NoABC, category=negative-mode, extension=c
 TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateSub)
@@ -357,6 +364,13 @@ TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateXor)
 TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateXorI)
 {
     helpers_mode::TestMode(g_isaApiStaticImp->iCreateXorI, false);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreObject,
+// abc-kind=NoABC, category=negative-mode, extension=c
+TEST_F(LibAbcKitWrongModeTestsIsaApiStaticImpl0, iCreateStoreObject)
+{
+    helpers_mode::TestMode(g_isaApiStaticImp->iCreateStoreObject, false);
 }
 
 }  // namespace libabckit::test

@@ -459,7 +459,7 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `litArr` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for literal emitted not for target
-     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`..
+     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
      */
     bool (*literalArrayEnumerateElements)(AbckitLiteralArray *litArr, void *data,
                                           bool (*cb)(AbckitFile *file, AbckitLiteral *lit, void *data));
@@ -515,6 +515,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for module not for target
+     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
      */
     bool (*moduleEnumerateImports)(AbckitCoreModule *m, void *data,
                                    bool (*cb)(AbckitCoreImportDescriptor *i, void *data));
@@ -529,6 +531,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for module not for target
+     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
      */
     bool (*moduleEnumerateExports)(AbckitCoreModule *m, void *data,
                                    bool (*cb)(AbckitCoreExportDescriptor *i, void *data));
@@ -569,6 +573,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for module not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*moduleEnumerateInterfaces)(AbckitCoreModule *m, void *data,
                                       bool (*cb)(AbckitCoreInterface *iface, void *data));
@@ -583,6 +589,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for module not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*moduleEnumerateEnums)(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data));
 
@@ -596,6 +604,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for module not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*moduleEnumerateFields)(AbckitCoreModule *m, void *data,
                                   bool (*cb)(AbckitCoreModuleField *field, void *data));
@@ -668,6 +678,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given namespace `ns` is defined in another binary and `false` if defined locally.
      * @param [ in ] ns - Namespace to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ns` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for namespaces not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*namespaceIsExternal)(AbckitCoreNamespace *ns);
 
@@ -718,6 +730,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for namespaces not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*namespaceEnumerateInterfaces)(AbckitCoreNamespace *n, void *data,
                                          bool (*cb)(AbckitCoreInterface *iface, void *data));
@@ -732,6 +746,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for namespaces not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*namespaceEnumerateEnums)(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data));
 
@@ -745,6 +761,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for namespaces not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*namespaceEnumerateFields)(AbckitCoreNamespace *n, void *data,
                                      bool (*cb)(AbckitCoreNamespaceField *field, void *data));
@@ -774,6 +792,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for namespaces not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*namespaceEnumerateAnnotationInterfaces)(AbckitCoreNamespace *n, void *data,
                                                    bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
@@ -787,6 +807,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitFile` that the import `i` is a part of.
      * @param [ in ] i - Import descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `i` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for import descriptor `i` emitted not for target
+     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
      */
     AbckitFile *(*importDescriptorGetFile)(AbckitCoreImportDescriptor *i);
 
@@ -795,6 +817,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitCoreModule` that holds the module that the import `i` is a part of.
      * @param [ in ] i - Import descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `i` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for import descriptor `i` emitted not for target
+     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
      */
     AbckitCoreModule *(*importDescriptorGetImportingModule)(AbckitCoreImportDescriptor *i);
 
@@ -803,6 +827,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitCoreModule` that holds the module that the import `i` imports from.
      * @param [ in ] i - Import descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `i` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for import descriptor `i` emitted not for target
+     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
      */
     AbckitCoreModule *(*importDescriptorGetImportedModule)(AbckitCoreImportDescriptor *i);
 
@@ -837,6 +863,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitFile` that the export `e` is a part of.
      * @param [ in ] e - Export descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `e` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for export descriptor `e` emitted not for target
+     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
      */
     AbckitFile *(*exportDescriptorGetFile)(AbckitCoreExportDescriptor *e);
 
@@ -845,6 +873,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitCoreModule` that holds the module that the export `e` is a part of.
      * @param [ in ] e - Export descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `e` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for export descriptor `e` emitted not for target
+     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
      */
     AbckitCoreModule *(*exportDescriptorGetExportingModule)(AbckitCoreExportDescriptor *e);
 
@@ -854,6 +884,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * entity export equals to the exporting module. For re-exports may be different.
      * @param [ in ] e - Export descriptor to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `e` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for export descriptor `e` emitted not for target
+     * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`.
      */
     AbckitCoreModule *(*exportDescriptorGetExportedModule)(AbckitCoreExportDescriptor *e);
 
@@ -913,6 +945,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given class `klass` is defined in another binary and `false` if defined locally.
      * @param [ in ] klass - Class to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classIsExternal)(AbckitCoreClass *klass);
 
@@ -921,6 +955,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given class `klass` is final and `false` otherwise.
      * @param [ in ] klass - Class to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classIsFinal)(AbckitCoreClass *klass);
 
@@ -929,6 +965,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given class `klass` is abstract and `false` otherwise.
      * @param [ in ] klass - Class to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classIsAbstract)(AbckitCoreClass *klass);
 
@@ -994,6 +1032,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classEnumerateSubClasses)(AbckitCoreClass *klass, void *data,
                                      bool (*cb)(AbckitCoreClass *subClass, void *data));
@@ -1008,6 +1048,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classEnumerateInterfaces)(AbckitCoreClass *klass, void *data,
                                      bool (*cb)(AbckitCoreInterface *iface, void *data));
@@ -1022,6 +1064,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classEnumerateFields)(AbckitCoreClass *klass, void *data,
                                  bool (*cb)(AbckitCoreClassField *field, void *data));
@@ -1051,6 +1095,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitString`.
      * @param [ in ] iface - Interface to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for interface not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      * @note Allocates
      */
     AbckitString *(*interfaceGetName)(AbckitCoreInterface *iface);
@@ -1060,6 +1106,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given interface `iface` is defined in another binary and `false` if defined locally.
      * @param [ in ] iface - Interface to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for interface not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*interfaceIsExternal)(AbckitCoreInterface *iface);
 
@@ -1081,6 +1129,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for interface not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*interfaceEnumerateSuperInterfaces)(AbckitCoreInterface *iface, void *data,
                                               bool (*cb)(AbckitCoreInterface *iface, void *data));
@@ -1095,6 +1145,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for interface not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*interfaceEnumerateSubInterfaces)(AbckitCoreInterface *iface, void *data,
                                             bool (*cb)(AbckitCoreInterface *iface, void *data));
@@ -1109,6 +1161,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for interface not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*interfaceEnumerateClasses)(AbckitCoreInterface *iface, void *data,
                                       bool (*cb)(AbckitCoreClass *klass, void *data));
@@ -1123,6 +1177,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for interface not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*interfaceEnumerateMethods)(AbckitCoreInterface *iface, void *data,
                                       bool (*cb)(AbckitCoreFunction *func, void *data));
@@ -1137,6 +1193,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for interface not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*interfaceEnumerateAnnotations)(AbckitCoreInterface *iface, void *data,
                                           bool (*cb)(AbckitCoreAnnotation *anno, void *data));
@@ -1151,6 +1209,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for interface not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*interfaceEnumerateFields)(AbckitCoreInterface *iface, void *data,
                                      bool (*cb)(AbckitCoreInterfaceField *field, void *data));
@@ -1180,6 +1240,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitString`.
      * @param [ in ] enm - Enum to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for enum not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      * @note Allocates
      */
     AbckitString *(*enumGetName)(AbckitCoreEnum *enm);
@@ -1189,6 +1251,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given class `enm` is defined in another binary and `false` if defined locally.
      * @param [ in ] enm - Enum to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for enum not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*enumIsExternal)(AbckitCoreEnum *enm);
 
@@ -1210,6 +1274,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for enum not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*enumEnumerateMethods)(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreFunction *func, void *data));
 
@@ -1223,6 +1289,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for enum not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*enumEnumerateFields)(AbckitCoreEnum *enm, void *data, bool (*cb)(AbckitCoreEnumField *field, void *data));
 
@@ -1243,6 +1311,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitString`.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for module not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     AbckitString *(*moduleFieldGetName)(AbckitCoreModuleField *field);
 
@@ -1279,6 +1349,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitString`.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for namespace not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     AbckitString *(*namespaceFieldGetName)(AbckitCoreNamespaceField *field);
 
@@ -1287,6 +1359,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitType`.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for namespace not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     AbckitType *(*namespaceFieldGetType)(AbckitCoreNamespaceField *field);
 
@@ -1307,6 +1381,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitString`.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     AbckitString *(*classFieldGetName)(AbckitCoreClassField *field);
 
@@ -1323,6 +1399,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitValue`.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     AbckitValue *(*classFieldGetValue)(AbckitCoreClassField *field);
 
@@ -1331,6 +1409,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return `true` if field `field` is public.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classFieldIsPublic)(AbckitCoreClassField *field);
 
@@ -1339,6 +1419,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return `true` if field `field` is protected.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classFieldIsProtected)(AbckitCoreClassField *field);
 
@@ -1347,6 +1429,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return `true` if field `field` is private.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classFieldIsPrivate)(AbckitCoreClassField *field);
 
@@ -1355,6 +1439,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return `true` if field `field` is internal.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classFieldIsInternal)(AbckitCoreClassField *field);
 
@@ -1363,6 +1449,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return `true` if field `field` is static.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classFieldIsStatic)(AbckitCoreClassField *field);
 
@@ -1376,6 +1464,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for class not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*classFieldEnumerateAnnotations)(AbckitCoreClassField *field, void *data,
                                            bool (*cb)(AbckitCoreAnnotation *anno, void *data));
@@ -1413,6 +1503,7 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return `true` if field `field` is readonly.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for interface not for target
      */
     bool (*interfaceFieldIsReadonly)(AbckitCoreInterfaceField *field);
 
@@ -1447,6 +1538,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitString`.
      * @param [ in ] field - Field to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for enum not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     AbckitString *(*enumFieldGetName)(AbckitCoreEnumField *field);
 
@@ -1500,6 +1593,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitCoreClass`.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V1`.
      */
     AbckitCoreFunction *(*functionGetParentFunction)(AbckitCoreFunction *function);
 
@@ -1508,6 +1603,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitCoreClass`.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V1`.
      */
     AbckitCoreClass *(*functionGetParentClass)(AbckitCoreFunction *function);
 
@@ -1516,6 +1613,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitCoreNamespace`.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V1`.
      */
     AbckitCoreNamespace *(*functionGetParentNamespace)(AbckitCoreFunction *function);
 
@@ -1591,6 +1690,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given function `function` is static constructor and `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*functionIsCctor)(AbckitCoreFunction *function);
 
@@ -1599,6 +1700,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given function `function` is anonymous and `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*functionIsAnonymous)(AbckitCoreFunction *function);
 
@@ -1607,6 +1710,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given function `function` is public and `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*functionIsPublic)(AbckitCoreFunction *function);
 
@@ -1615,6 +1720,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given function `function` is protected and `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*functionIsProtected)(AbckitCoreFunction *function);
 
@@ -1623,6 +1730,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given function `function` is private and `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*functionIsPrivate)(AbckitCoreFunction *function);
 
@@ -1631,6 +1740,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given function `function` is internal and `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*functionIsInternal)(AbckitCoreFunction *function);
 
@@ -1639,6 +1750,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Returns `true` if given function `function` is external and `false` otherwise.
      * @param [ in ] function - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*functionIsExternal)(AbckitCoreFunction *function);
 
@@ -1652,6 +1765,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     bool (*functionEnumerateParameters)(AbckitCoreFunction *func, void *data,
                                         bool (*cb)(AbckitCoreFunctionParam *param, void *data));
@@ -1661,6 +1776,8 @@ struct CAPI_EXPORT AbckitInspectApi {
      * @return Pointer to the `AbckitType`.
      * @param [ in ] func - Function to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for function not for target
+     * `ABCKIT_TARGET_ARK_TS_V2`.
      */
     AbckitType *(*functionGetReturnType)(AbckitCoreFunction *func);
 
@@ -2133,6 +2250,7 @@ struct CAPI_EXPORT AbckitModifyApi {
      * @param [ in ] litarr - Literal array that will be stored in the literal to be created.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `litarr` is NULL.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for target `ABCKIT_TARGET_JS`.
      * @note Allocates
      */
     AbckitLiteral *(*createLiteralLiteralArray)(AbckitFile *file, AbckitLiteralArray *litarr);

@@ -342,6 +342,13 @@ TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateStoreArrayWide)
     helpers_nullptr::TestNullptr(g_isaApiStaticImp->iCreateStoreArrayWide);
 }
 
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadObject,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateLoadObject)
+{
+    helpers_nullptr::TestNullptr(g_isaApiStaticImp->iCreateLoadObject);
+}
+
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateSub,
 // abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateSub)
@@ -424,6 +431,13 @@ TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iSetConditionCode)
 TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iSetTargetType)
 {
     helpers_nullptr::TestNullptr(g_isaApiStaticImp->iSetTargetType);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreObject,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsIsaApiStaticImpl0, iCreateStoreObject)
+{
+    helpers_nullptr::TestNullptr(g_isaApiStaticImp->iCreateStoreObject);
 }
 
 }  // namespace libabckit::test

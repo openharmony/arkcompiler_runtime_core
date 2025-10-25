@@ -1755,12 +1755,16 @@ AbckitInst *IcreateDynDefinemethodStatic(AbckitGraph *graph, AbckitInst *acc, Ab
                          compiler::IntrinsicInst::IntrinsicId::DYN_DEFINEMETHOD_IMM16_ID16_IMM8, true);
 }
 
-AbckitInst *IcreateNewArrayStatic(AbckitGraph *graph, AbckitCoreClass *inputClass, AbckitInst * /*inputSize*/)
+AbckitInst *IcreateNewArrayStatic(AbckitGraph *graph, AbckitCoreClass *inputClass, AbckitInst *inputSize)
 {
     LIBABCKIT_LOG_FUNC;
 
-    return CreateDynInst(graph, GetClassOffset(graph, inputClass), compiler::DataType::REFERENCE,
-                         compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_NEW_ARRAY, false);
+    auto typeId = GetClassOffset(graph, inputClass);
+    if (statuses::GetLastError() != ABCKIT_STATUS_NO_ERROR) {
+        return nullptr;
+    }
+    return CreateDynInst(graph, typeId, inputSize, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_NEW_ARRAY,
+                         false);
 }
 
 AbckitInst *IcreateNewObjectStatic(AbckitGraph *graph, AbckitCoreClass *inputClass)
@@ -1822,6 +1826,53 @@ AbckitInst *IcreateInitObjectStatic(AbckitGraph *graph, AbckitCoreFunction *inpu
     va_end(argp);
 
     return inst;
+}
+
+AbckitInst *IcreateStoreObjectStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId, AbckitInst *value,
+                                     AbckitTypeId typeId)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_INTERNAL_ERROR(graph->impl, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(inputObj->impl, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(value->impl, nullptr);
+
+    compiler::IntrinsicInst *intrImpl {nullptr};
+    auto type = TypeIdToType(typeId);
+    switch (type) {
+        case compiler::DataType::BOOL:
+        case compiler::DataType::UINT8:
+        case compiler::DataType::INT8:
+        case compiler::DataType::UINT16:
+        case compiler::DataType::INT16:
+        case compiler::DataType::UINT32:
+        case compiler::DataType::INT32:
+        case compiler::DataType::FLOAT32:
+            intrImpl = graph->impl->CreateInstIntrinsic(
+                type, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_STORE_OBJECT);
+            break;
+        case compiler::DataType::INT64:
+        case compiler::DataType::UINT64:
+        case compiler::DataType::FLOAT64:
+            intrImpl = graph->impl->CreateInstIntrinsic(
+                type, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_STORE_OBJECT_WIDE);
+            break;
+        case compiler::DataType::REFERENCE:
+            intrImpl = graph->impl->CreateInstIntrinsic(
+                type, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_STORE_OBJECT_OBJECT);
+            break;
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+
+    size_t argsCount {2U};
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetFieldOffset(graph, fieldId));
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(value->impl, type);
+    intrImpl->AppendInput(inputObj->impl, ark::compiler::DataType::REFERENCE);
+    intrImpl->SetMethod(graph->impl->GetMethod());
+
+    return CreateInstFromImpl(graph, intrImpl);
 }
 
 AbckitInst *IcreateIfStaticStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
@@ -1928,6 +1979,57 @@ AbckitInst *IcreateStoreArrayWideStatic([[maybe_unused]] AbckitGraph *graph, Abc
     }
 
     return IcreateStoreArrayBody(arrayRef, idx, value, valueTypeId, true);
+}
+
+AbckitInst *IcreateLoadObjectStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *field,
+                                    AbckitTypeId returnTypeId)
+{
+    LIBABCKIT_LOG_FUNC;
+    LIBABCKIT_LOG(DEBUG) << "IcreateLoadObjectStatic" << '\n';
+
+    if (returnTypeId == ABCKIT_TYPE_ID_INVALID || IsDynamic(graph->function->owningModule->target) ||
+        inputObj->impl->GetType() != compiler::DataType::REFERENCE) {
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+    auto dataType = TypeIdToType(returnTypeId);
+    ark::compiler::IntrinsicInst *loadObjectImpl {nullptr};
+    switch (dataType) {
+        case ark::compiler::DataType::BOOL:
+        case ark::compiler::DataType::UINT8:
+        case ark::compiler::DataType::INT8:
+        case ark::compiler::DataType::UINT16:
+        case ark::compiler::DataType::INT16:
+        case ark::compiler::DataType::UINT32:
+        case ark::compiler::DataType::INT32:
+        case ark::compiler::DataType::FLOAT32: {
+            loadObjectImpl = graph->impl->CreateInstIntrinsic(
+                dataType, 0, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT);
+            break;
+        }
+        case ark::compiler::DataType::INT64:
+        case ark::compiler::DataType::UINT64:
+        case ark::compiler::DataType::FLOAT64: {
+            loadObjectImpl = graph->impl->CreateInstIntrinsic(
+                dataType, 0, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT_WIDE);
+            break;
+        }
+        case ark::compiler::DataType::REFERENCE: {
+            loadObjectImpl = graph->impl->CreateInstIntrinsic(
+                dataType, 0, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT_OBJECT);
+            break;
+        }
+        default:
+            UNREACHABLE();
+    }
+
+    size_t argsCount {1U};
+    loadObjectImpl->ReserveInputs(argsCount);
+    loadObjectImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    loadObjectImpl->AppendInput(inputObj->impl, compiler::DataType::REFERENCE);
+    loadObjectImpl->AddImm(graph->impl->GetAllocator(), GetFieldOffset(graph, field));
+
+    return CreateInstFromImpl(graph, loadObjectImpl);
 }
 
 AbckitInst *IcreateLenArrayStatic(AbckitGraph *graph, AbckitInst *arr)
@@ -2337,89 +2439,6 @@ AbckitInst *IcreateCmpStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst 
     auto cmpImpl =
         graph->impl->CreateInstCmp(compiler::DataType::INT32, 0, input0->impl, input1->impl, input0->impl->GetType());
     return CreateInstFromImpl(graph, cmpImpl);
-}
-
-AbckitInst *IcreateLoadObjectStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreClassField *field)
-{
-    LIBABCKIT_LOG_FUNC;
-
-    if (inputObj->impl->GetType() != compiler::DataType::REFERENCE) {
-        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
-        return nullptr;
-    }
-
-    auto fieldOffset = GetFieldOffset(graph, field);
-    if (statuses::GetLastError() != ABCKIT_STATUS_NO_ERROR) {
-        return nullptr;
-    }
-    LIBABCKIT_LOG(DEBUG) << fieldOffset << '\n';
-    auto dataType = TypeIdToType(field->type->id);
-    auto intrinsic = compiler::IntrinsicInst::IntrinsicId::INVALID;
-    switch (dataType) {
-        case compiler::DataType::REFERENCE:
-            intrinsic = compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT_OBJECT;
-            break;
-        case compiler::DataType::UINT64:
-        case compiler::DataType::INT64:
-        case compiler::DataType::FLOAT64:
-            intrinsic = compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT_WIDE;
-            break;
-        case compiler::DataType::BOOL:
-        case compiler::DataType::UINT8:
-        case compiler::DataType::INT8:
-        case compiler::DataType::UINT16:
-        case compiler::DataType::INT16:
-        case compiler::DataType::UINT32:
-        case compiler::DataType::INT32:
-        case compiler::DataType::FLOAT32:
-            intrinsic = compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT;
-            break;
-        default:
-            LIBABCKIT_UNREACHABLE;
-    }
-
-    auto loadObjImpl = graph->impl->CreateInstIntrinsic(dataType, 0, intrinsic);
-
-    size_t argsCount {1U};
-    loadObjImpl->ReserveInputs(argsCount);
-    loadObjImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    loadObjImpl->AppendInput(inputObj->impl, inputObj->impl->GetType());
-    loadObjImpl->AddImm(graph->impl->GetAllocator(), fieldOffset);
-
-    return CreateInstFromImpl(graph, loadObjImpl);
-}
-
-AbckitInst *IcreateStobjObjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, AbckitString *keyString)
-{
-    LIBABCKIT_LOG_FUNC;
-    auto intrImpl = graph->impl->CreateInstIntrinsic(
-        compiler::DataType::REFERENCE, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_STORE_OBJECT_OBJECT);
-
-    size_t argsCount {2U};
-
-    intrImpl->ReserveInputs(argsCount);
-    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, input0->impl->GetType());
-    intrImpl->AppendInput(input1->impl, input1->impl->GetType());
-    intrImpl->AddImm(graph->impl->GetAllocator(), GetFieldOffset(graph, keyString));
-
-    return CreateInstFromImpl(graph, intrImpl);
-}
-
-AbckitInst *IcreateLdobjObjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString)
-{
-    LIBABCKIT_LOG_FUNC;
-    auto intrImpl = graph->impl->CreateInstIntrinsic(
-        compiler::DataType::REFERENCE, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT_OBJECT);
-
-    size_t argsCount {1U};
-
-    intrImpl->ReserveInputs(argsCount);
-    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
-    intrImpl->AppendInput(input0->impl, input0->impl->GetType());
-    intrImpl->AddImm(graph->impl->GetAllocator(), GetFieldOffset(graph, keyString));
-
-    return CreateInstFromImpl(graph, intrImpl);
 }
 
 }  // namespace libabckit

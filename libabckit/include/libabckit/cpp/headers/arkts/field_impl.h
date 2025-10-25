@@ -54,23 +54,6 @@ inline bool ModuleField::SetValue(const Value &value) const
     return ret;
 }
 
-inline bool ModuleField::AddAnnotation(const AnnotationInterface &ai) const
-{
-    const struct AbckitArktsAnnotationCreateParams params {
-        ai.TargetCast()
-    };
-    auto ret = GetApiConfig()->cArktsMapi_->moduleFieldAddAnnotation(TargetCast(), &params);
-    CheckError(GetApiConfig());
-    return ret;
-}
-
-inline bool ModuleField::RemoveAnnotation(const arkts::Annotation &anno) const
-{
-    auto ret = GetApiConfig()->cArktsMapi_->moduleFieldRemoveAnnotation(TargetCast(), anno.TargetCast());
-    CheckError(GetApiConfig());
-    return ret;
-}
-
 inline NamespaceField::NamespaceField(const core::NamespaceField &coreOther)
     : core::NamespaceField(coreOther), targetChecker_(this)
 {

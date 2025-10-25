@@ -510,6 +510,12 @@ void AssertModuleFieldVisitor(AbckitCoreModuleField *mf, void *data)
     ASSERT_TRUE(data != nullptr);
 }
 
+void AssertNamespaceFieldVisitor(AbckitCoreNamespaceField *cnf, void *data)
+{
+    ASSERT_TRUE(cnf != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
 void AssertInterfaceFieldVisitor(AbckitCoreInterfaceField *cif, void *data)
 {
     ASSERT_TRUE(cif != nullptr);
@@ -582,7 +588,7 @@ bool NamespaceByNameFinder(AbckitCoreNamespace *n, void *data)
 {
     AssertNamespaceVisitor(n, data);
 
-    auto ctxFinder = reinterpret_cast<NamepsaceByNameContext *>(data);
+    auto ctxFinder = reinterpret_cast<NamespaceByNameContext *>(data);
     auto name = helpers::AbckitStringToString(g_implI->namespaceGetName(n));
     if (name == ctxFinder->name) {
         ctxFinder->n = n;
@@ -714,6 +720,21 @@ bool InterfaceFieldByNameFinder(AbckitCoreInterfaceField *cif, void *data)
     auto name = helpers::AbckitStringToString(str);
     if (name == ctxFinder->name) {
         ctxFinder->cif = cif;
+        return false;
+    }
+
+    return true;
+}
+
+bool NamespaceFieldByNameFinder(AbckitCoreNamespaceField *cnf, void *data)
+{
+    AssertNamespaceFieldVisitor(cnf, data);
+
+    auto ctxFinder = reinterpret_cast<NamespaceFieldByNameContext *>(data);
+    auto str = g_implI->namespaceFieldGetName(cnf);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->cnf = cnf;
         return false;
     }
 

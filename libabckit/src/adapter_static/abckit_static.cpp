@@ -1329,22 +1329,6 @@ void CloseFileStatic(AbckitFile *file)
         }
     }
 
-    if (file->needOptimize) {
-        std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap = file->functionsMap;
-        for (auto &[_, status] : functionsMap) {
-            DestroyGraphStaticSync(status->graph);
-            delete status;
-        }
-        functionsMap.clear();
-
-        if (file->generateStatus.pf != nullptr) {
-            delete static_cast<panda_file::File *>(file->generateStatus.pf);
-        }
-        if (file->generateStatus.maps != nullptr) {
-            delete static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
-        }
-    }
-
     if ((file->destoryData != nullptr) && (file->data != nullptr)) {
         file->destoryData(file->data);
     }

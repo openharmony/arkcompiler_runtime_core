@@ -1364,7 +1364,6 @@ bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *abckitTy
     LIBABCKIT_INTERNAL_ERROR(prog, false);
 
     std::string oldMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    // ark::pandasm::Type type(abckit::util::GetTypeName(coreFunc, abckitType, false), abckitType->rank);
     auto typeDescriptor = abckit::util::GetTypeName(coreFunc, abckitType, false);
     for (size_t i = 0; i < abckitType->rank; i++) {
         typeDescriptor += "[]";

@@ -547,50 +547,6 @@ uint32_t GetMethodOffset(AbckitGraph *graph, AbckitCoreFunction *function)
     return methodOffset;
 }
 
-uint32_t GetFieldOffset(AbckitGraph *graph, AbckitCoreClassField *field)
-{
-    LIBABCKIT_LOG_FUNC;
-
-    if (graph == nullptr || field == nullptr) {
-        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
-        return 0;
-    }
-
-    auto *arktsField = field->GetArkTSImpl();
-    if (arktsField == nullptr) {
-        LIBABCKIT_LOG(DEBUG) << "GetArkTSImpl returned nullptr\n";
-        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
-        return 0;
-    }
-
-    auto *pandasmField = arktsField->GetStaticImpl();
-    if (pandasmField == nullptr) {
-        LIBABCKIT_LOG(DEBUG) << "GetStaticImpl returned nullptr\n";
-        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
-        return 0;
-    }
-
-    std::string ownerClassName = field->owner->GetArkTSImpl()->impl.GetStaticClass()->name;
-    std::string fullFieldName = ownerClassName + "." + pandasmField->name;
-
-    LIBABCKIT_LOG(DEBUG) << "full field name: " << fullFieldName << '\n';
-
-    uint32_t fieldOffset = 0;
-    for (auto &[id, s] : graph->irInterface->fields) {
-        if (s == fullFieldName) {
-            fieldOffset = id;
-            break;
-        }
-    }
-
-    if (fieldOffset == 0) {
-        LIBABCKIT_LOG(DEBUG) << "fieldOffset == 0\n";
-        LIBABCKIT_UNREACHABLE;
-    }
-
-    return fieldOffset;
-}
-
 uint32_t GetStringOffset(AbckitGraph *graph, AbckitString *string)
 {
     uint32_t stringOffset = 0;
@@ -774,6 +730,22 @@ AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, ark::compiler::Data
                           ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
 {
     auto intrImpl = graph->impl->CreateInstIntrinsic(retType, 0, intrinsicId);
+    if (hasIC) {
+        intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
+    }
+    intrImpl->AddImm(graph->impl->GetAllocator(), imm0);
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
+AbckitInst *CreateDynInst(AbckitGraph *graph, uint64_t imm0, AbckitInst *inputSize,
+                          ark::compiler::IntrinsicInst::IntrinsicId intrinsicId, bool hasIC)
+{
+    auto intrImpl = graph->impl->CreateInstIntrinsic(ark::compiler::DataType::REFERENCE, 0, intrinsicId);
+
+    size_t argsCount {1U};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(inputSize->impl, ark::compiler::DataType::INT32);
     if (hasIC) {
         intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     }

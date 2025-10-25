@@ -17,6 +17,10 @@ const moduleField1: string = "ModuleFieldOne";
 const moduleField2: string = "ModuleFieldTwo";
 const moduleField3: number = 5.5;
 
+namespace NS1 {
+    export const nS1F1: string[] = ['NamespaceFieldOne'];
+}
+
 class c1 {
     c1F1: string = "Anno1";
     c1F2: number = 999;
@@ -76,6 +80,10 @@ function moduleFieldSetName() {
 
 function moduleFieldSetValue() {
     console.log(moduleField1);
+}
+
+function namespaceFieldSetName() {
+    console.log(NS1.nS1F1);
 }
 
 function printLogStr(a: string) {

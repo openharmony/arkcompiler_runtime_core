@@ -22,7 +22,7 @@
 namespace abckit::arkts {
 
 /**
- * @brief Interface
+ * @brief enum
  */
 class Enum final : public core::Enum {
     // To access private constructor.

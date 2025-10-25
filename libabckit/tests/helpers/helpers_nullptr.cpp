@@ -2907,6 +2907,20 @@ void TestNullptr(AbckitInst *(*apiToCheck)(AbckitGraph *, AbckitInst *, AbckitIn
     ASSERT_EQ(apiToCheck(g_abckitGraph, g_abckitInst, g_abckitInst, g_abckitInst, ABCKIT_TYPE_ID_INVALID), nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(AbckitInst *(*apiToCheck)(AbckitGraph *, AbckitInst *inputObj, AbckitString *field, AbckitTypeId))
+{
+    ASSERT_EQ(apiToCheck(nullptr, g_abckitInst, g_abckitString, ABCKIT_TYPE_ID_INVALID), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(g_abckitGraph, nullptr, g_abckitString, ABCKIT_TYPE_ID_INVALID), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(g_abckitGraph, g_abckitInst, nullptr, ABCKIT_TYPE_ID_INVALID), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    ASSERT_EQ(apiToCheck(g_abckitGraph, g_abckitInst, g_abckitString, ABCKIT_TYPE_ID_INVALID), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 void TestNullptr(AbckitCoreClass *(*apiToCheck)(AbckitInst *))
 {
     ASSERT_EQ(apiToCheck(nullptr), nullptr);
@@ -3443,4 +3457,17 @@ void TestNullptr(void (*apiToCheck)(AbckitType *, size_t))
     apiToCheck(nullptr, 0);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId,
+                                           AbckitInst *value, AbckitTypeId typeId))
+{
+    ASSERT_EQ(apiToCheck(nullptr, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_INVALID), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    ASSERT_EQ(apiToCheck(g_abckitGraph, nullptr, nullptr, nullptr, ABCKIT_TYPE_ID_INVALID), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    ASSERT_EQ(apiToCheck(g_abckitGraph, g_abckitInst, nullptr, nullptr, ABCKIT_TYPE_ID_INVALID), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    ASSERT_EQ(apiToCheck(g_abckitGraph, g_abckitInst, g_abckitString, nullptr, ABCKIT_TYPE_ID_INVALID), nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+
 }  // namespace libabckit::test::helpers_nullptr

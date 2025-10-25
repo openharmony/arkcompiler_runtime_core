@@ -365,7 +365,12 @@ void PandasmProgramDumper::DumpValues(const pandasm::LiteralArray &litArray, con
             os << LiteralValueToString(l) << separator;
         }
     } else {
+        bool skipTag = false;
         for (const auto &l : litArray.literals) {
+            skipTag = !skipTag;
+            if (skipTag) {
+                continue;
+            }
             os << "\t" << LiteralTagToString(l.tag, program) << " " << LiteralValueToString(l) << separator;
         }
     }

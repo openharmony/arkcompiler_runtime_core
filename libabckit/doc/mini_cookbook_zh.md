@@ -101,7 +101,7 @@ implI->classEnumerateMethods(klass, data, [](AbckitCoreMethod *method, void *dat
 // AbckitCoreModule *module
 std::vector<AbckitCoreClass *> classes;
 implI->moduleEnumerateClasses(module, (void*)&classes, [](AbckitCoreClass *klass, void *data) {
-    ((std::vector<AbckitCoreClass*>*)data)->emplace.back(klass);
+    ((std::vector<AbckitCoreClass*>*)data)->emplace_back(klass);
     return true;
 });
 ```

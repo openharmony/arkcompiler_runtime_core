@@ -548,6 +548,13 @@ public:
      */
     Type GetType() const;
 
+    /**
+     * @brief Returns Value.
+     * @return abckit::Value
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Value GetValue() const;
+
 private:
     EnumField(AbckitCoreEnumField *field, const ApiConfig *conf, const File *file) : ViewInResource(field), conf_(conf)
     {

@@ -699,4 +699,32 @@ void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj
     g_impl->closeFile(file);
 }
 
+void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *field,
+                                        AbckitTypeId returnTypeId),
+              bool isDynamic)
+{
+    auto *graph = OpenWrongModeFile(isDynamic);
+    g_dummyInsT1->graph = graph;
+    auto *inst = apiToCheck(graph, g_dummyInsT1, g_dummyString, ABCKIT_TYPE_ID_I32);
+    ASSERT_EQ(inst, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_MODE);
+    auto *file = graph->file;
+    g_impl->destroyGraph(graph);
+    g_impl->closeFile(file);
+}
+
+void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId,
+                                        AbckitInst *value, AbckitTypeId typeId),
+              bool isDynamic)
+{
+    auto *graph = OpenWrongModeFile(isDynamic);
+    g_dummyInsT1->graph = graph;
+    auto *inst = apiToCheck(graph, g_dummyInsT1, g_dummyString, g_dummyInsT1, ABCKIT_TYPE_ID_INVALID);
+    ASSERT_EQ(inst, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_MODE);
+    auto *file = graph->file;
+    g_impl->destroyGraph(graph);
+    g_impl->closeFile(file);
+}
+
 }  // namespace libabckit::test::helpers_mode

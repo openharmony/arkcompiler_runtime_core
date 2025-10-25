@@ -66,6 +66,7 @@ TEST_F(LibAbcKitLoadNullValueStaticTest, LibAbcKitTestLoadNullValue)
             TransformLoadNullValueIr(graph);
         },
         [](AbckitGraph *graph) {
+            g_implG->gDump(graph, 1);
             std::vector<helpers::InstSchema<AbckitIsaApiStaticOpcode>> insts1({
                 {2, ABCKIT_ISA_API_STATIC_OPCODE_LOADNULLVALUE, {}},
             });

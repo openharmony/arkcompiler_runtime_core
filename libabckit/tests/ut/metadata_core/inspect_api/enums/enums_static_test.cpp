@@ -26,6 +26,30 @@ namespace libabckit::test {
 
 class LibAbcKitInspectApiEnumsTest : public ::testing::Test {};
 
+// Test: test-kind=api, api=InspectApiImpl::enumGetFile, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiEnumsTest, EnumGetFileStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enums/enums_static.abc");
+    for (const auto &module : file.GetModules()) {
+        for (const auto &enm : module.GetEnums()) {
+            [[maybe_unused]] auto filePtr = enm.GetFile();
+            ASSERT_EQ(filePtr, &file);
+        }
+    }
+}
+
+// Test: test-kind=api, api=InspectApiImpl::enumGetModule, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiEnumsTest, EnumGetModuleStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enums/enums_static.abc");
+    for (const auto &module : file.GetModules()) {
+        for (const auto &enm : module.GetEnums()) {
+            [[maybe_unused]] auto modulePtr = enm.GetModule();
+            ASSERT_EQ(modulePtr, module);
+        }
+    }
+}
+
 // Test: test-kind=api, api=InspectApiImpl::enumGetName, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiEnumsTest, EnumGetNameStatic)
 {
@@ -115,4 +139,26 @@ TEST_F(LibAbcKitInspectApiEnumsTest, EnumIsExternalStatic)
     ASSERT_EQ(gotEnumNames, expectEnumNames);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::enumGetParentNamespace, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitInspectApiEnumsTest, EnumGetParentNamespaceStatic)
+{
+    abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enums/enums_static.abc");
+
+    std::set<std::string> gotNames;
+    std::set<std::string> expectNames = {"Ns1"};
+
+    for (const auto &module : file.GetModules()) {
+        if (module.IsExternal()) {
+            continue;
+        }
+        auto result = helpers::GetNamespaceByName(module, "Ns1");
+        ASSERT_NE(result, std::nullopt);
+        const auto &ns = result.value();
+        for (const auto &enm : ns.GetEnums()) {
+            gotNames.emplace(enm.GetParentNamespace().GetName());
+        }
+    }
+
+    ASSERT_EQ(gotNames, expectNames);
+}
 }  // namespace libabckit::test

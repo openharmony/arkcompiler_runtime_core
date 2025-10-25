@@ -399,7 +399,9 @@ void TestNullptr(AbckitArktsInterfaceField *(*apiToCheck)(AbckitArktsInterface *
 void TestNullptr(AbckitArktsEnumField *(*apiToCheck)(AbckitArktsEnum *, const struct AbckitArktsFieldCreateParams *));
 void TestNullptr(void (*apiToCheck)(AbckitType *, const char *, size_t));
 void TestNullptr(void (*apiToCheck)(AbckitType *, size_t));
-// void TestNullptr(AbckitType *(*apiToCheck)(AbckitType *, AbckitType **, size_t));
+void TestNullptr(AbckitInst *(*apiToCheck)(AbckitGraph *, AbckitInst *inputObj, AbckitString *field, AbckitTypeId));
+void TestNullptr(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId,
+                                           AbckitInst *value, AbckitTypeId typeId));
 
 }  // namespace libabckit::test::helpers_nullptr
 

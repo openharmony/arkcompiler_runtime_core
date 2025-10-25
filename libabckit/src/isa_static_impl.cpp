@@ -343,8 +343,7 @@ extern "C" AbckitInst *IcreateNewArray(AbckitGraph *graph, AbckitCoreClass *inpu
     LIBABCKIT_WRONG_CTX(graph->file, inputClass->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 
-    statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-    return nullptr;
+    return IcreateNewArrayStatic(graph, inputClass, inputSize);
 }
 
 extern "C" AbckitInst *IcreateNewObject(AbckitGraph *graph, AbckitCoreClass *inputClass)
@@ -383,6 +382,44 @@ extern "C" AbckitInst *IcreateInitObject(AbckitGraph *graph, AbckitCoreFunction 
     va_end(args);
 
     return inst;
+}
+
+extern "C" AbckitInst *IcreateLoadObject(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *field,
+                                         AbckitTypeId returnTypeId)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputObj, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
+    if (returnTypeId == ABCKIT_TYPE_ID_INVALID) {
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
+    LIBABCKIT_WRONG_CTX(graph, inputObj->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
+    return IcreateLoadObjectStatic(graph, inputObj, field, returnTypeId);
+}
+
+extern "C" AbckitInst *IcreateStoreObject(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId,
+                                          AbckitInst *value, AbckitTypeId typeId)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputObj, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(fieldId, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(value, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, inputObj->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, value->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
+    return IcreateStoreObjectStatic(graph, inputObj, fieldId, value, typeId);
 }
 
 extern "C" AbckitInst *IcreateLoadArray(AbckitGraph *graph, AbckitInst *arrayRef, AbckitInst *idx,
@@ -912,54 +949,6 @@ extern "C" AbckitInst *IcreateNullCheck(AbckitGraph *graph, AbckitInst *inputObj
     return IcreateNullCheckStatic(graph, inputObj);
 }
 
-extern "C" AbckitInst *IcreateLoadObject(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreClassField *field)
-{
-    LIBABCKIT_CLEAR_LAST_ERROR;
-    LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_TIME_EXEC;
-
-    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputObj, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(field, nullptr);
-
-    LIBABCKIT_WRONG_CTX(graph, inputObj->graph, nullptr);
-    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
-    return IcreateLoadObjectStatic(graph, inputObj, field);
-}
-
-extern "C" AbckitInst *IcreateStobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
-                                       AbckitString *keyString)
-{
-    LIBABCKIT_CLEAR_LAST_ERROR;
-    LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_TIME_EXEC;
-
-    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(input1, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(keyString, nullptr);
-
-    LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
-    LIBABCKIT_WRONG_CTX(graph, input1->graph, nullptr);
-    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
-    return IcreateStobjObjStatic(graph, input0, input1, keyString);
-}
-
-extern "C" AbckitInst *IcreateLdobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString)
-{
-    LIBABCKIT_CLEAR_LAST_ERROR;
-    LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_TIME_EXEC;
-
-    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(keyString, nullptr);
-
-    LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
-    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
-    return IcreateLdobjObjStatic(graph, input0, keyString);
-}
-
 AbckitIsaApiStatic g_isaApiStaticImpl = {
 
     IgetClass,
@@ -992,6 +981,8 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateNewArray,
     IcreateNewObject,
     IcreateInitObject,
+    IcreateLoadObject,
+    IcreateStoreObject,
     IcreateLoadArray,
     IcreateStoreArray,
     IcreateStoreArrayWide,
@@ -1019,9 +1010,6 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateThrow,
     IcreateIsUndefined,
     IcreateNullCheck,
-    IcreateLoadObject,
-    IcreateStobjObj,
-    IcreateLdobjObj,
 };
 
 }  // namespace libabckit
