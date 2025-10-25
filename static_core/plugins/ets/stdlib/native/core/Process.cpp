@@ -36,8 +36,8 @@ enum Signals : uint32_t { SIG_INT = 2, SIG_QUIT = 3, SIG_KILL = 9, SIG_TERM = 15
 // constexpr variables used by isAppUid & isIsolatedProcess, refered to arkts 1.0
 // See: https://gitee.com/openharmony/js_sys_module/blob/master/process/js_process.cpp#L38
 constexpr int PER_USER_RANGE = 100000;
-// See: https://gitee.com/openharmony/js_sys_module/blob/master/process/js_process.h#L242
-constexpr std::pair<int, int> APP_UID_RANGE = {10000, 19999};
+// See: https://gitcode.com/openharmony/commonlibrary_ets_utils/blob/master/js_sys_module/process/js_process.cpp#L31
+constexpr std::pair<int, int> APP_UID_RANGE = {10000, 65535};
 // Only isolateuid numbers between 99000 and 99999.
 // See: https://gitee.com/openharmony/js_sys_module/blob/master/process/js_process.cpp#L290
 constexpr std::pair<int, int> ISOLATE_UID_RANGE = {99000, 99999};
