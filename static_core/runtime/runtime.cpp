@@ -991,6 +991,21 @@ void Runtime::SetThreadClassPointers()
     }
 }
 
+static inline void InitializeCompilerOptions()
+{
+    // NOTE(compiler team): #27075 Remove this after full support of LineString, TreeString and SliceString
+    // Disable String Concat optimizations for new types of string, due to expected performance degradation
+    if (!compiler::g_options.WasSetCompilerOptimizeStringConcat()) {
+        compiler::g_options.SetCompilerOptimizeStringConcat(!Runtime::GetOptions().IsUseAllStrings());
+    }
+
+#if defined(PANDA_COMPILER_DEBUG_INFO) && !defined(NDEBUG)
+    if (!compiler::g_options.WasSetCompilerEmitDebugInfo()) {
+        compiler::g_options.SetCompilerEmitDebugInfo(true);
+    }
+#endif
+}
+
 bool Runtime::Initialize()
 {
     trace::ScopedTrace scopedTrace("Runtime::Initialize");
@@ -1005,15 +1020,11 @@ bool Runtime::Initialize()
 
     CheckOptionsFromOs();
 
+    InitializeCompilerOptions();
+
     if (!CreatePandaVM(GetRuntimeType())) {
         return false;
     }
-
-#if defined(PANDA_COMPILER_DEBUG_INFO) && !defined(NDEBUG)
-    if (!compiler::g_options.WasSetCompilerEmitDebugInfo()) {
-        compiler::g_options.SetCompilerEmitDebugInfo(true);
-    }
-#endif
 
     // We must load AOT file before InitializePandaVM, because during initialization, code execution may be called.
     if (!HandleAotOptions()) {
