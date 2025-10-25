@@ -1766,11 +1766,6 @@
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/export_source/re_export_6.ets
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/type_binding_neg.ets
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/type_binding_neg_2.ets
-#29393
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/re_export_test_3.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/re_export_test_4.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/re_export_test_5.ets
-#end of 29393
 13.modules_and_namespaces/01.import_directives/chaining_import_0.ets
 13.modules_and_namespaces/01.import_directives/chaining_import_1.ets
 13.modules_and_namespaces/01.import_directives/chaining_import_2.ets
