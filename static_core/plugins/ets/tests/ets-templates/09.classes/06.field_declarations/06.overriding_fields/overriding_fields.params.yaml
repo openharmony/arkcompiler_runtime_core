@@ -604,7 +604,7 @@ cases:
         static field: [check_type] = [base_value]
       }
       class A extends Base {
-        override static field: [check_type] = [override_value]
+        static field: [check_type] = [override_value]
       }
     logic: |-
       arktest.assertTrue(A.field instanceof [check_type])
