@@ -984,6 +984,11 @@
 
 #16840
 10.interfaces/03.interface_members/methods_overriding.ets
+
+#30972
+10.interfaces/04.interface_properties/02.optional_interface_properties/optional_interface_properties_class_3.ets
+
+#16840
 10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
 
 #30924

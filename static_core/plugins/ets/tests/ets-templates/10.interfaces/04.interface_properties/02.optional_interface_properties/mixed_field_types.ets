@@ -13,19 +13,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
 /*---
-desc: Optional interface properties should be undefined
+desc: >-
+    If the default setter is not overridden in a class that implements the interface, InvalidStoreAccessError is
+    thrown at attempt to set value of an optional property.
+    Class declares mandatory Interface fields, some optional fields and has own fields.
 ---*/
 
-enum Color { Red, Green, Blue }
-
 interface I {
-  a?: {{c}}
+  a?: number
+  b?: number
+  c: number
+}
+
+class C implements I {
+  a: number|undefined = 2
+  c: number = 1
+  d: number = 3
+  e?: number = undefined
 }
 
 function main() {
-  let i: I = {}
-  arktest.assertEQ(i.a, undefined)
+  let i: C = new C()
+  arktest.assertEQ(i.a, 2)
+  arktest.assertEQ(i.b, undefined)
+  arktest.assertEQ(i.c, 1)
+  arktest.assertEQ(i.d, 3)
+  arktest.assertEQ(i.e, undefined)
 }
-{% endfor %}

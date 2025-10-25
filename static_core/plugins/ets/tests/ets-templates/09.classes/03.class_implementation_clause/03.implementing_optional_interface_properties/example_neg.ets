@@ -15,7 +15,7 @@
 
 /*---
 desc: >-
-      A class can implement Optional Interface Properties) from superinterfaces
+      A class can implement Optional Interface Properties from superinterfaces
       or use implicitly defined accessors from an interface.
 ---*/
 

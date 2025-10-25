@@ -14,19 +14,16 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Optional interface properties should be undefined
+desc: Literal object has its own getter and setter
 ---*/
 
 interface I {
-  a?: int
-}
-
-class A implements I {
-  get a(): int | undefined { return this.a }
+  a?: number
 }
 
 function main() {
-  let i: I = {}
-  i.a = 1
-  arktest.assertEQ(i.a, 1)
+  let i: I = {a: 5}
+  arktest.assertEQ(i.a, 5)
+  i.a = undefined
+  arktest.assertEQ(i.a, undefined)
 }
