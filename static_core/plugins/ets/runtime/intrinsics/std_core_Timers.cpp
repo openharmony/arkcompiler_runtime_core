@@ -142,13 +142,11 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
         while (true) {
             auto *timerEvent = timer->GetEvent();
             if (timer->GetDelay() != 0) {
-                if (!timerEvent->IsExpired()) {
-                    auto *coroMan = timerCoro->GetManager();
-                    timerEvent->SetNotHappened();
-                    timerEvent->Lock();
-                    timerEvent->SetExpirationTime(coroMan->GetCurrentTime() + timer->GetDelay());
-                    coroMan->Await(timerEvent);
-                }
+                auto *coroMan = timerCoro->GetManager();
+                timerEvent->SetNotHappened();
+                timerEvent->Lock();
+                timerEvent->SetExpirationTime(coroMan->GetCurrentTime() + timer->GetDelay());
+                coroMan->Await(timerEvent);
             }
             if (timer->IsCancelled()) {
                 break;
