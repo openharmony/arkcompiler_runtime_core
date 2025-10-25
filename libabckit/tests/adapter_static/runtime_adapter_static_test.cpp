@@ -4706,39 +4706,6 @@ TEST_F(RuntimeAdapterStaticTest, StdGCRegisterNativeFreeTest)
     MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.GC");
 }
 
-TEST_F(RuntimeAdapterStaticTest, StdFinalizationRegistryRegisterInstanceTest)
-{
-    std::string source = R"(
-        .record std.core.FinalizationRegistry {}
-        .record std.core.Object {}
-        .function i32 std.core.FinalizationRegistry.registerInstance(std.core.Object a0) <native>
-    )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_STD_FINALIZATION_REGISTRY_REGISTER_INSTANCE,
-                 "std.core.FinalizationRegistry");
-
-    source = R"(
-        .record std.core.FinalizationRegistry {}
-        .function void std.core.FinalizationRegistry.registerInstance() <native>
-    )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.FinalizationRegistry");
-}
-
-TEST_F(RuntimeAdapterStaticTest, StdFinalizationRegistryFinishCleanupTest)
-{
-    std::string source = R"(
-        .record std.core.FinalizationRegistry {}
-        .function void std.core.FinalizationRegistry.finishCleanup() <native>
-    )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INTRINSIC_STD_FINALIZATION_REGISTRY_FINISH_CLEANUP,
-                 "std.core.FinalizationRegistry");
-
-    source = R"(
-        .record std.core.FinalizationRegistry {}
-        .function i32 std.core.FinalizationRegistry.finishCleanup() <native>
-    )";
-    MainTestFunc(source, RuntimeInterface::IntrinsicId::INVALID, "std.core.FinalizationRegistry");
-}
-
 TEST_F(RuntimeAdapterStaticTest, StdCoroutineScheduleTest)
 {
     std::string source = R"(

@@ -48,6 +48,8 @@ public:
     /// @brief Decreases the counter of called cleanup coroutines
     void CleanupCoroFinished();
 
+    static CoroutineWorkerDomain GetCoroDomain(EtsCoroutine *coro);
+
 private:
     void SortInstancies();
 

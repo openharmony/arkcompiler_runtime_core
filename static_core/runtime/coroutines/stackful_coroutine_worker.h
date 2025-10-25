@@ -168,7 +168,7 @@ public:
     }
 
     /// @brief get exclusive status of worker
-    bool InExclusiveMode() const
+    bool InExclusiveMode() const override
     {
         // Atomic with relaxed order reason: sync is not needed here
         return inExclusiveMode_.load(std::memory_order_relaxed);

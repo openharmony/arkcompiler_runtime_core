@@ -19,6 +19,7 @@
 #include "include/external_callback_poster.h"
 #include "runtime/include/runtime.h"
 #include "runtime/coroutines/local_storage.h"
+#include "runtime/coroutines/coroutine_worker_domain.h"
 
 namespace ark {
 
@@ -85,6 +86,11 @@ public:
     bool IsMainWorker() const
     {
         return isMainWorker_;
+    }
+
+    virtual bool InExclusiveMode() const
+    {
+        return false;
     }
 
     LocalStorage &GetLocalStorage()

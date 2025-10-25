@@ -73,7 +73,7 @@ bool ReflectFieldSetPrimitive(EtsCoroutine *coro, EtsObject *thisObj, T primVal,
         field->GetDeclaringClass()->SetStaticFieldPrimitive<T>(field, primVal);
         return true;
     } else if (ValidateInstanceField(coro, thisObjH.GetPtr(), field)) {
-        thisObjH->SetFieldPrimitive<T>(field, primVal);
+        thisObjH->template SetFieldPrimitive<T>(field, primVal);
         return true;
     }
     return false;
