@@ -1772,13 +1772,14 @@ export namespace taskpool {
         if (isTaskPoolUseLaunch) {
             return;
         }
-        for (let w : TaskPoolWorker of workers) {
-            w.join();
-        }
         managerWorker?.stopManagerWorker();
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            for (let w : TaskPoolWorker of workers) {
+                w.join();
+            }
             workers.clear();
-        })
+            idleWorkers.clear();
+        });
     }
 
     /**
