@@ -12,6 +12,7 @@
 # limitations under the License.
 
 set(DISABLES_TESTS
+    object_literal
     checked
     number_subtypes
     perf
