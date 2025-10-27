@@ -1326,10 +1326,46 @@ void Aarch32Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr double HALF = 0.5;
     // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double NEG_HALF = -0.5;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr double ONE = 1.0;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double ZERO = 0.0;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double NEG_ZERO = -0.0;
 
     ScopedTmpRegF64 ceil(this);
     vixl::aarch32::DRegister tmp(ceil.GetReg().GetId() + 1);
+
+    auto skipZero = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto negZeroCase = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto done = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+
+    GetMasm()->Vmov(tmp, NEG_HALF);
+    GetMasm()->Vcmp(VixlVReg(src), tmp);
+    GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
+    GetMasm()->B(vixl::aarch32::lt, skipZero);
+
+    GetMasm()->Vmov(tmp, HALF);
+    GetMasm()->Vcmp(VixlVReg(src), tmp);
+    GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
+    GetMasm()->B(vixl::aarch32::ge, skipZero);
+
+    GetMasm()->Vmov(tmp, NEG_HALF);
+    GetMasm()->Vcmp(VixlVReg(src), tmp);
+    GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
+    GetMasm()->B(vixl::aarch32::lt, negZeroCase);
+
+    GetMasm()->Vmov(tmp, ZERO);
+    GetMasm()->Vmov(VixlVReg(dst), tmp);
+    GetMasm()->B(done);
+
+    GetMasm()->Bind(negZeroCase);
+    GetMasm()->Vmov(tmp, NEG_ZERO);
+    GetMasm()->Vmov(VixlVReg(dst), tmp);
+    GetMasm()->B(done);
+
+    GetMasm()->Bind(skipZero);
 
     // calculate ceil(val)
     GetMasm()->Vrintp(VixlVReg(ceil), VixlVReg(src));
@@ -1346,6 +1382,7 @@ void Aarch32Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
 
     // final value is ceil(val) if le
     GetMasm()->Vmov(Convert(Condition::LE), VixlVReg(dst), VixlVReg(ceil));  // ceil(val)
+    GetMasm()->Bind(done);
 }
 
 void Aarch32Encoder::EncodeReverseBits(Reg dst, Reg src)

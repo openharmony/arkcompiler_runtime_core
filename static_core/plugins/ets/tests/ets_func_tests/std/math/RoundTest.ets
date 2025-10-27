@@ -49,4 +49,8 @@ function roundBoundaries() {
     arktest.assertEQ(Math.round(-5.4999999999999999999999999999), -5.0, "round(-5.4999999999999999999999999999)")    //Exceeds double storage precision, actual storage is -5.5
     arktest.assertEQ(Math.round(5.499999999999), 5.0, "round(5.499999999999)")
     arktest.assertEQ(Math.round(-5.499999999999), -5.0, "round(-5.499999999999)")
+    arktest.assertEQ(Math.round(0.5 - Number.EPSILON / 4), 0.0, "round(0.5 - Number.EPSILON / 4)")
+    arktest.assertEQ(Math.round(0.5 + Number.EPSILON / 4), 1.0, "round(0.5 + Number.EPSILON / 4)")
+    arktest.assertEQ(Math.round(-0.5 - Number.EPSILON / 4), 0.0, "round(-0.5 - Number.EPSILON / 4)")
+    arktest.assertEQ(Math.round(-0.5 + Number.EPSILON / 4), 0.0, "round(-0.5 + Number.EPSILON / 4)")
 }

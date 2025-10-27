@@ -950,9 +950,40 @@ void Aarch64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr double HALF = 0.5;
     // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double NEG_HALF = -0.5;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr double ONE = 1.0;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double ZERO = 0.0;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double NEG_ZERO = -0.0;
 
     ScopedTmpRegF64 ceil(this);
+
+    auto skipZero = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto negZeroCase = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto done = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+
+    GetMasm()->Fmov(VixlVReg(ceil), NEG_HALF);
+    GetMasm()->Fcmp(VixlVReg(src), VixlVReg(ceil));
+    GetMasm()->B(vixl::aarch64::lt, skipZero);
+
+    GetMasm()->Fmov(VixlVReg(ceil), HALF);
+    GetMasm()->Fcmp(VixlVReg(src), VixlVReg(ceil));
+    GetMasm()->B(vixl::aarch64::ge, skipZero);
+
+    GetMasm()->Fmov(VixlVReg(ceil), ZERO);
+    GetMasm()->Fcmp(VixlVReg(src), VixlVReg(ceil));
+    GetMasm()->B(vixl::aarch64::lt, negZeroCase);
+
+    GetMasm()->Fmov(VixlVReg(dst), ZERO);
+    GetMasm()->B(done);
+
+    GetMasm()->Bind(negZeroCase);
+    GetMasm()->Fmov(VixlVReg(dst), NEG_ZERO);
+    GetMasm()->B(done);
+
+    GetMasm()->Bind(skipZero);
 
     // calculate ceil(val)
     GetMasm()->Frintp(VixlVReg(ceil), VixlVReg(src));
@@ -967,6 +998,7 @@ void Aarch64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
 
     // select final value based on comparison result
     GetMasm()->Fcsel(VixlVReg(dst), VixlVReg(dst), VixlVReg(ceil), vixl::aarch64::Condition::gt);
+    GetMasm()->Bind(done);
 }
 
 void Aarch64Encoder::EncodeCrc32Update(Reg dst, Reg crcReg, Reg valReg)

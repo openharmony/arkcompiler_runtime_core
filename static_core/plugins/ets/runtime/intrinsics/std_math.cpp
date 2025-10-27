@@ -138,6 +138,9 @@ extern "C" double StdMathFloor(double val)
 
 extern "C" double StdMathRound(double val)
 {
+    if (val < ROUND_BIAS && val >= -ROUND_BIAS) {
+        return 0.0;
+    }
     double res = std::ceil(val);
     if (res - val > ROUND_BIAS) {
         res -= 1.0;
