@@ -105,7 +105,6 @@
 07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
 07.expressions/32.lambda_expression/01.lambda_signature/positive_1.ets
 07.expressions/32.lambda_expression/01.lambda_signature/positive_5.ets
-04.names_declarations_and_scopes/01.names/qualified_name_0.ets
 07.expressions/03.named_reference/qualified_name_0.ets
 13.modules_and_namespaces/04.namespace_declarations/pack1/namespace_package3.ets
 17.experimental_features/packages/02.internal_access_modifier/Test/Test02/class_c.ets
@@ -118,7 +117,6 @@
 17.experimental_features/packages/import_and_overloading_of_function_names/pkg_a/pkg_19.ets
 17.experimental_features/packages/import_and_overloading_of_function_names/pkg_a/pkg_4.ets
 17.experimental_features/packages/import_and_overloading_of_function_names/pkg_a/pkg_9.ets
-04.names_declarations_and_scopes/01.names/qualified_name_2.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/pkg_a/pkg_0.ets
 07.expressions/03.named_reference/qualified_name_2.ets
 17.experimental_features/packages/02.internal_access_modifier/Test/internal_member_access_in_package_0.ets
@@ -822,6 +820,7 @@
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_custom_neg_9.ets
 04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_n_0.ets
 04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_n_1.ets
+04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_n_11.ets
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_neg_10.ets
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_neg_7.ets
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_neg_9.ets

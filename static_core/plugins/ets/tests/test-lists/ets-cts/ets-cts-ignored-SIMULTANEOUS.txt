@@ -1,7 +1,3 @@
 # multi static block #26663
-04.names_declarations_and_scopes/01.names/qualified_name_0.ets
-04.names_declarations_and_scopes/01.names/qualified_name_1.ets
-04.names_declarations_and_scopes/01.names/qualified_name_2.ets
-04.names_declarations_and_scopes/01.names/qualified_name_3.ets
 07.expressions/03.named_reference/qualified_name_2.ets
 07.expressions/03.named_reference/qualified_name_3.ets

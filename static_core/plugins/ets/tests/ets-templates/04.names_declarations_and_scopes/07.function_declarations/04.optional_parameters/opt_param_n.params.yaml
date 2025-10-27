@@ -47,7 +47,7 @@ cases:
         arktest.assertEQ( foo(,,), 6 )
 
     - decl: |-
-        type OptL = () => int 
+        type OptL = () => int
         function foo(i: int, ov?: OptL = () => 0): int { / CTE, ambiguity
             return ov()
         }
@@ -59,7 +59,7 @@ cases:
         class OptionalMethodOwner {
           test(i: int, ov?: OptL = () => 0): int {
               return ov()
-          }        
+          }
         }
 
       call: |-
@@ -71,7 +71,7 @@ cases:
         class OptionalMethodOwner {
           static test(i: int, ov?: OptL = () => 0): int {
               return ov()
-          }        
+          }
         }
 
       call: |-
@@ -89,8 +89,11 @@ cases:
           foo(p: number | undefined = undefined)
           foo(...p: Any[]): Any {}
         }
-      call: let test = new OMO
-            test.foo()
+      call: |-
+        let test = new OMO
+        test.foo()
 
-    - decl: // If type annotation is omited and type can't be inferred, then a compile-time error occurs
-      call: 'function foo (p = {f: 1}) {}'
+    - decl: |-
+        // If type annotation is omitted and type can't be inferred, then a compile-time error occurs
+        function foo (p = {f: 1}) {}
+      call: ''
