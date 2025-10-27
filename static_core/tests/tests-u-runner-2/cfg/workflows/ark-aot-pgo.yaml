@@ -41,6 +41,7 @@ parameters:
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: true
+    boot-panda-files: ""
 steps:
     ark-creates-profile-for-aot-pgo:
         from: ark
@@ -52,6 +53,7 @@ steps:
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
         load-runtimes: ${parameters.load-runtimes}
         compiler-enable-jit: ${parameters.compiler-enable-jit}
+        boot-panda-files: ${parameters.boot-panda-files}
         ark-args:
             - ${parameters.ark-full-args}
     ark-aot-with-profile:
@@ -67,5 +69,5 @@ steps:
             - "--compiler-ignore-failures=false"
             - "--paoc-use-profile:path=${parameters.ark-aot-profdata-file},force"
             - "${parameters.aot-args}"
-            - "--boot-panda-files=${parameters.stdlib}"
+            - "--boot-panda-files=${parameters.stdlib}${parameters.boot-panda-files}"
             - "--paoc-output=${parameters.paoc-output-file}"
