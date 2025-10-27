@@ -78,10 +78,6 @@ DEFINE_VALUE(ESCOMPAT_MAP_NUM_ENTRIES_OFFSET, ark::ets::EtsEscompatMap::GetNumEn
 DEFINE_VALUE(ESCOMPAT_MAP_SIZE_VAL_OFFSET, ark::ets::EtsEscompatMap::GetSizeValOffset())
 DEFINE_VALUE(ESCOMPAT_MAP_INITIAL_CAPACITY_OFFSET, ark::ets::EtsEscompatMap::GetInitialCapacityOffset())
 
-DEFINE_VALUE(ESCOMPAT_MAP_ENTRY_KEY_OFFSET, ark::ets::EtsEscompatMapEntry::GetKeyOffset())
-DEFINE_VALUE(ESCOMPAT_MAP_ENTRY_VAL_OFFSET, ark::ets::EtsEscompatMapEntry::GetValOffset())
-DEFINE_VALUE(ESCOMPAT_MAP_ENTRY_NEXT_OFFSET, ark::ets::EtsEscompatMapEntry::GetNextOffset())
-
 DEFINE_VALUE(ESCOMPAT_SET_ELEMENTS_OFFSET, ark::ets::EtsEscompatSet::GetElementsOffset())
 
 DEFINE_VALUE(ETS_BOX_PRIMITIVE_VALUE_OFFSET, ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>::GetValueOffset())

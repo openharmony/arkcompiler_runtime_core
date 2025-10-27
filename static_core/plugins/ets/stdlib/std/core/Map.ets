@@ -70,106 +70,193 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
     entries(): IterableIterator<[K, V]>;
 }
 
-const EMPTY_ENTRY: int = 0  // Not filled yet - can be used as the margin of empty tail.
-const DELETED_ENTRY: int = -2
-const BUCKET_END: int = -1
 
-const CLEAR_FLAG_IDX: int = 0  // If table has been cleared, there are no numbers of deleted elements - check this flag.
+type DataArrType = FixedArray<Any>
 
-function getKeyAt<K>(data: FixedArray<Any>, at: int): K {
-    return data[at - 2] as K
+type At = int  // (index + pair) if positive, special values otherwise.
+type BucketsArrType = FixedArray<At>
+
+final class Const {
+    // DataArrType
+    static readonly KEY_DATA_OFS: int = 0  // First in the pair
+    static readonly VAL_DATA_OFS: int = 1  // Second in the pair
+    static readonly BUCKETS_FROM_DATA_OFS: int = -2  // From the end
+    static readonly NESTED_DATA_OFS: int = -1  // From the end
+
+    // At
+    static readonly EMPTY_ENTRY: At = 0  // Not filled yet - can be used as the margin for an empty tail (auto set on allocation).
+    static readonly DELETED_ENTRY: At = -2  // Entry has been deleted.
+    static readonly BUCKET_END: At = -1  // End of the chain of buckets with the same hash index.
+
+    // BucketsArrType
+    static readonly DATA_BUCK_OFS: int = 0  // First in the pair
+    static readonly NEXT_BUCK_OFS: int = 1  // Second in the pair
+    static readonly NDEL_BUCK_OFS: int = 1  // Second in the pair (after rehash or clear)
+    static readonly CLEAR_FLAG_IDX: int = 0  // If the table has been cleared, then there are no numbers of deleted elements in it - check this flag.
+    static readonly ITER_CNT_IDX: int = -1  // From the end
 }
 
-function getValueAt<V>(data: FixedArray<Any>, at: int): V {
-    return data[at - 1] as V
+
+function pairs(ofs: int): int {  // There are pairs, so we need to move offset by 2
+    return 2 * ofs
 }
 
-function isDeletedAt(buckets: FixedArray<int>, at: int): boolean {
-    return buckets[at - 1] === DELETED_ENTRY
+function getAtZero(): int {
+    return pairs(1)
 }
 
-function isEmptyAt(buckets: FixedArray<int>, at: int): boolean {
-    return buckets[at - 1] === EMPTY_ENTRY
+function isLegalAt(at: At): boolean {
+    return at > 0
 }
 
-function getNumOfDeleted(buckets: FixedArray<int>, at: int) { // Call only when clear or rehash occured.
-    if (buckets[CLEAR_FLAG_IDX]) {
-        return at / 2
+function isInsideAt(at: At, length: int): boolean {
+    return at <= length
+}
+
+function getIdxAt(at: At): int {
+    return at - pairs(1)
+}
+function getAtByIdx(idx: int): At {
+    return idx + pairs(1)
+}
+
+
+function getDataIdxLength(this: DataArrType): int {
+    return this.length - 2
+}
+
+// Replace with reciver (like getBucketsIdxLength) here and later after issue 31223
+function getKeyByIdx<K>(data: DataArrType, idx: int): K {
+    return data[idx + Const.KEY_DATA_OFS] as K
+}
+function getKeyAt<K>(data: DataArrType, at: At): K {
+    return getKeyByIdx<K>(data, getIdxAt(at))
+}
+
+function getValueByIdx<V>(data: DataArrType, idx: int): V {
+    return data[idx + Const.VAL_DATA_OFS] as V
+}
+function getValueAt<V>(data: DataArrType, at: At): V {
+    return getValueByIdx<V>(data, getIdxAt(at))
+}
+
+
+function getBucketsIdxLength(this: BucketsArrType): int {
+    return this.length - 1
+}
+
+function isDeletedByIdx(this: BucketsArrType, idx: int): boolean {
+    return this[idx + Const.NEXT_BUCK_OFS] === Const.DELETED_ENTRY
+}
+function isDeletedAt(this: BucketsArrType, at: At): boolean {
+    return this.isDeletedByIdx(getIdxAt(at))
+}
+
+function setDeletedByIdx(this: BucketsArrType, idx: int) {
+    this[idx + Const.NEXT_BUCK_OFS] = Const.DELETED_ENTRY
+}
+function setDeletedAt(this: BucketsArrType, at: At) {
+    this.setDeletedByIdx(getIdxAt(at))
+}
+
+function isEmptyAt(this: BucketsArrType, at: int): boolean {
+    return this[getIdxAt(at) + Const.NEXT_BUCK_OFS] === Const.EMPTY_ENTRY
+}
+
+function getClearFlag(this: BucketsArrType): boolean {
+    return this[Const.CLEAR_FLAG_IDX] !== 0
+}
+function setClearFlag(this: BucketsArrType, state: boolean) {
+    return this[Const.CLEAR_FLAG_IDX] = (state ? 1 : 0)
+}
+
+function getNumOfDeletedAt(this: BucketsArrType, at: At): int { // Call only when clear or rehash occured.
+    if (this.getClearFlag()) {
+        return at / pairs(1)
     }
-    return at > 0 ? buckets[at - 1] : 0
+    return isLegalAt(at) ? this[getIdxAt(at) + Const.NDEL_BUCK_OFS] : 0
+}
+function setNumOfDeletedByIdx(this: BucketsArrType, idx: int, num: int) {
+    this[idx + Const.NDEL_BUCK_OFS] = num
 }
 
-final class MapEntry<K, V> {
-    key: K
-    val: V
-    next: int = -1
-
-    constructor() {}
-
-    constructor(key: K, val: V, next: int) {
-        this.key = key
-        this.val = val
-        this.next = next
-    }
-
-    toString(): string {
-        return `{${this.key},${this.val}}`
-    }
+function getItersCounter(this: BucketsArrType): int {
+    return this[this.length + Const.ITER_CNT_IDX]
+}
+function setItersCounter(this: BucketsArrType, cnt: int) {
+    this[this.length + Const.ITER_CNT_IDX] = cnt
+}
+function chgItersCounter(this: BucketsArrType, chg: int) {
+    this.setItersCounter(this.getItersCounter() + chg)
 }
 
-class SearchTuple {
-    first: int
-    second: int
+function getBucketsFromData(this: DataArrType): BucketsArrType {
+    return this[this.length + Const.BUCKETS_FROM_DATA_OFS] as BucketsArrType
+}
+function setBucketsToData(this: DataArrType, buckets: BucketsArrType) {
+    this[this.length + Const.BUCKETS_FROM_DATA_OFS] = buckets
+}
 
-    constructor(first: int, second: int) {
-        this.first = first
-        this.second = second
-    }
+function getNestedData(this: DataArrType): DataArrType | undefined {
+    return this[this.length + Const.NESTED_DATA_OFS] as DataArrType | undefined
+}
+function setNestedData(this: DataArrType, nestedData: DataArrType) {
+    this[this.length + Const.NESTED_DATA_OFS] = nestedData
+    let nestedBuckets = nestedData.getBucketsFromData()
+    let buckets = this.getBucketsFromData()
+    nestedBuckets.setItersCounter(buckets.getItersCounter())
 }
 
 export final class MapIterator<K, V, R> implements IterableIterator<R> {
-    private data: FixedArray<Any>
-    private buckets: FixedArray<int>
-    private curIndex: int
+    private data: DataArrType
+    private buckets: BucketsArrType
+    private curAt: At
 
     private mapper: (k: K, v: V) => R
 
     constructor(data: FixedArray<Any>, mapper: (k: K, v: V) => R) {
         this.data = data
-        this.buckets = data[data.length - 2] as FixedArray<int>
-        this.curIndex = 2
+        this.buckets = data.getBucketsFromData()
+        this.buckets!.chgItersCounter(+1)
+        this.curAt = getAtZero()
         this.mapper = mapper
-        ++this.buckets![this.buckets!.length - 1]
     }
 
     override next(): IteratorResult<R> {
-        if (this.curIndex < 1) {
+        if (!isLegalAt(this.curAt)) {
             return new IteratorResult<R>()
         }
+
         let data = this.data
         let buckets = this.buckets
-        while (data[data.length - 1] !== undefined) {
-            if (this.curIndex > 2) {
-                this.curIndex -= 2 * getNumOfDeleted(buckets!, this.curIndex - 2)
+        while (true) {
+            let nestedData = getNestedData(data)
+            if (nestedData === undefined) {
+                break
             }
-            data = data[data.length - 1] as FixedArray<Any>
-            buckets = data[data.length - 2] as FixedArray<int>
+
+            if (this.curAt > getAtZero()) {
+                this.curAt -= pairs(buckets!.getNumOfDeletedAt(this.curAt - pairs(1)))
+            }
+            data = nestedData as DataArrType
+            buckets = data.getBucketsFromData()
         }
         this.data = data
         this.buckets = buckets
 
-        for (; this.curIndex <= this.buckets!.length - 1; this.curIndex += 2) {
-            if (isEmptyAt(this.buckets!, this.curIndex)) {
+        for (const length = (this.buckets!.getBucketsIdxLength()); isInsideAt(this.curAt, length); this.curAt += pairs(1)) {
+            if (this.buckets!.isEmptyAt(this.curAt)) {
                 break
             }
-            if (!isDeletedAt(this.buckets!, this.curIndex)) {
-                const res = new IteratorResult<R>(this.mapper(getKeyAt<K>(this.data!, this.curIndex), getValueAt<V>(this.data!, this.curIndex)))
-                this.curIndex += 2
+            if (!this.buckets!.isDeletedAt(this.curAt)) {
+                const res = new IteratorResult<R>(this.mapper(getKeyAt<K>(this.data!, this.curAt), getValueAt<V>(this.data!, this.curAt)))
+                this.curAt += pairs(1)
                 return res
             }
         }
-        this.curIndex = 0
-        --this.buckets![this.buckets!.length - 1]
+
+        this.curAt = Const.EMPTY_ENTRY
+        this.buckets!.chgItersCounter(-1)
         return new IteratorResult<R>()
     }
 
@@ -189,12 +276,16 @@ export final class EmptyMapIterator<R> implements IterableIterator<R> {
 }
 
 export class Map<K, V> implements ReadonlyMap<K, V> {
-    private data: FixedArray<Any>
-    private buckets: FixedArray<int>
-    private cap: int
-    private numEntries: int = 0
-    private sizeVal: int = 0
-    private initialCapacity: int = Map.MIN_CAPACITY
+    private data: DataArrType  // Contains [key, value] pairs in a flat array. Last two cells are reference to buckets and reference to new .data if set.
+    private buckets: BucketsArrType  // Contains [at1, at2] pairs in a flat array, where at1 points to data and at2 has differen meanings (see declaration of the type 'At' and special values from class 'Const').
+                                     // After rehash 'at2' contains not a link, but the number of deleted elements in the 'data' up to current position.
+                                     // At the end there is extra element - the number of existing iterators and active calls of 'forEach' function.
+                                     // If it's not zero, we need to prepare old 'data' and 'buckets' arrays, which will be used to move the current position after rehash or clear.
+                                     // If it is zero, no need to waste resources and link old 'data' array to new one.
+    private cap: int  // Maximum number of entries
+    private numEntries: int = 0  // Current number of entries
+    private sizeVal: int = 0  // Current number of elements
+    private initialCapacity: int = Map.MIN_CAPACITY  // The capacity used to create the Map.
 
     private static readonly MIN_CAPACITY = 4
     private static readonly MIN_SHRINK_CAPACITY = 16
@@ -222,47 +313,79 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         return capacity * 2
     }
 
-    private static getNextInBucketAt(buckets: FixedArray<int>, at: int): int {
-        return buckets[at - 1]
+    private static getNextByIdx(buckets: BucketsArrType, idx: int): At {
+        return buckets[idx + Const.NEXT_BUCK_OFS]
+    }
+    private getNextByIdx(idx: int): At {
+        return Map.getNextByIdx(this.buckets, idx)
+    }
+    private getNextAt(at: At): At {
+        return this.getNextByIdx(getIdxAt(at))
+    }
+    private static setNextByIdx(buckets: BucketsArrType, idx: int, next: At) {
+        buckets[idx + Const.NEXT_BUCK_OFS] = next
+    }
+    private setNextByIdx(idx: int, next: At) {
+        Map.setNextByIdx(this.buckets, idx, next)
+    }
+    private setNextAt(at: At, next: At) {
+        this.setNextByIdx(getIdxAt(at), next)
     }
 
-    private static getBucket(buckets: FixedArray<int>, hash: int): int {
-        return buckets[hash]
+    private static getBucketByIdx(buckets: BucketsArrType, idx: int): At {
+        return buckets[idx + Const.DATA_BUCK_OFS]
+    }
+    private getBucketByIdx(idx: int): At {
+        return Map.getBucketByIdx(this.buckets, idx)
+    }
+    private static setBucketByIdx(buckets: BucketsArrType, idx: int, bucket: At) {
+        buckets[idx + Const.DATA_BUCK_OFS] = bucket
+    }
+    private setBucketByIdx(idx: int, bucket: At) {
+        Map.setBucketByIdx(this.buckets, idx, bucket)
     }
 
-    private static setKey<K>(data: FixedArray<Any>, at: int, v: K) {
-        data[at] = v
+    private static setKey(data: DataArrType, idx: int, key: K) {
+        data[idx + Const.KEY_DATA_OFS] = key
+    }
+    private setKey(idx: int, key: K) {
+        Map.setKey(this.data, idx, key)
     }
 
-    private static setValue<V>(data: FixedArray<Any>, at: int, v: V) {
-        data[at + 1] = v
+    private static setValue(data: DataArrType, idx: int, val: V) {
+        data[idx + Const.VAL_DATA_OFS] = val
+    }
+    private setValue(idx: int, val: V) {
+        Map.setValue(this.data, idx, val)
     }
 
-    private static setNextInBucketAt(buckets: FixedArray<int>, at: int, next: int) {
-        buckets[at - 1] = next
-    }
-
-    private static setBucket(buckets: FixedArray<int>, at: int, next: int) {
-        buckets[at] = next
-    }
-
-    private static deleteAt(buckets: FixedArray<int>, at: int) {
+    private deleteAt(at: At) {
         // NOTE(nkholiavin): maybe need to set deleted keys, values to undefined
-        Map.setNextInBucketAt(buckets, at, DELETED_ENTRY)
+        this.buckets.setDeletedAt(at)
     }
 
-    private getBucketIndex(k: Any): int {
+    private static getBucketIndex(capacity: int, k: Any): int {
         if (k === null) {
-            return 0
+            return pairs(0)
         }
         if (k === undefined) {
-            return 2
+            return pairs(1)
         }
 
         const keyHash: int = Runtime.getHashCodeByValue(k! as object).toInt() // #26217
         const t = keyHash >> 31
 
-        return 2 * (((keyHash ^ t) - t) & (this.cap - 1))
+        return pairs(((keyHash ^ t) - t) & (capacity - 1))
+    }
+    private getBucketIndex(k: Any): int {
+        return Map.getBucketIndex(this.cap, k)
+    }
+
+    private allocDataAndBuckets(capacity: int): [DataArrType, BucketsArrType] {
+        const data: DataArrType = new Any[pairs(capacity) + 2]  // extra two elements at the end are: links to buckets and nested data.
+        const buckets: BucketsArrType = new int[pairs(capacity) + 1]  // extra element at the end is: iterators counter.
+        data.setBucketsToData(buckets)
+        return [data, buckets]
     }
 
     /**
@@ -271,17 +394,18 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     constructor(entries?: Iterable<[K, V]> | readonly ((readonly [K, V]) | null | undefined)[] | null) {
         if (entries == null) {
-            this.data = new Any[Map.MIN_CAPACITY * 2 + 2]
-            this.buckets = new int[Map.MIN_CAPACITY * 2 + 1]
-            this.data[this.data.length - 2] = this.buckets
+            const alloc = this.allocDataAndBuckets(Map.MIN_CAPACITY)
+            this.data = alloc[0]
+            this.buckets = alloc[1]
             this.cap = Map.MIN_CAPACITY
         } else if (entries instanceof Array) {
             const array = entries as Array<(readonly [K, V]) | null | undefined>
             const capacity = Map.computeCapacity(array.length.toInt())
-            this.data = new Any[capacity * 2 + 2]
-            this.buckets = new int[capacity * 2 + 1]
-            this.data[this.data.length - 2] = this.buckets
+            const alloc = this.allocDataAndBuckets(capacity)
+            this.data = alloc[0]
+            this.buckets = alloc[1]
             this.cap = capacity
+
             for (let i = 0; i < array.length; ++i) {
                 let pair = array[i]
                 if (pair == undefined || pair == null) {
@@ -299,9 +423,9 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                 }
             }
             const capacity = Map.computeCapacity(entriesBuf.length)
-            this.data = new Any[capacity * 2 + 2]
-            this.buckets = new int[capacity * 2 + 1]
-            this.data[this.data.length - 2] = this.buckets
+            const alloc = this.allocDataAndBuckets(capacity)
+            this.data = alloc[0]
+            this.buckets = alloc[1]
             this.cap = capacity
 
             entriesBuf.forEach((e: [K, V]) => {
@@ -317,11 +441,11 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     constructor(map: Map<K, V>) {
         const capacity = Map.computeCapacity(map.sizeVal)
-        this.data = new Any[capacity * 2 + 2]
-        this.buckets = new int[capacity * 2 + 1]
-        this.data[this.data.length - 2] = this.buckets
+        const alloc = this.allocDataAndBuckets(capacity)
+        this.data = alloc[0]
+        this.buckets = alloc[1]
         this.cap = capacity
-        this.initialCapacity = this.cap
+        this.initialCapacity = capacity
 
         map.forEach((v: V, k: K) => {
             this.set(k, v)
@@ -334,11 +458,11 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     constructor(entries: Array<[K, V]>) {
         const capacity = Map.computeCapacity(entries.length)
-        this.data = new Any[capacity * 2 + 2]
-        this.buckets = new int[capacity * 2 + 1]
-        this.data[this.data.length - 2] = this.buckets
+        const alloc = this.allocDataAndBuckets(capacity)
+        this.data = alloc[0]
+        this.buckets = alloc[1]
         this.cap = capacity
-        this.initialCapacity = this.cap
+        this.initialCapacity = capacity
 
         entries.forEach((entry: [K, V]) => {
             this.set(entry[Map.ENTRY_KEY] as K, entry[Map.ENTRY_VAL] as V)
@@ -350,11 +474,12 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     //  branch at constructor from union type
     constructor(values: FixedArray<[K, V]>) {
         const capacity = Map.computeCapacity(values.length)
-        this.data = new Any[capacity * 2 + 2]
-        this.buckets = new int[capacity * 2 + 1]
-        this.data[this.data.length - 2] = this.buckets
+        const alloc = this.allocDataAndBuckets(capacity)
+        this.data = alloc[0]
+        this.buckets = alloc[1]
         this.cap = capacity
-        this.initialCapacity = this.cap
+        this.initialCapacity = capacity
+
         for (let i = 0; i < values.length; ++i) {
             let pair = values[i]
             if (pair == null) {
@@ -367,11 +492,11 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     // NOTE: This API may be removed someday due #28030 internal issue
     constructor(initialCapacity: int) {
         const capacity = Map.adjustCapacity(initialCapacity)
-        this.data = new Any[capacity * 2 + 2]
-        this.buckets = new int[capacity * 2 + 1]
-        this.data[this.data.length - 2] = this.buckets
+        const alloc = this.allocDataAndBuckets(capacity)
+        this.data = alloc[0]
+        this.buckets = alloc[1]
         this.cap = capacity
-        this.initialCapacity = this.cap
+        this.initialCapacity = capacity
     }
 
     override toString(): String {
@@ -396,11 +521,10 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     private rehash(newCapacity: int) {
         let curDeletedElements: int = 0
-        const itersCounter = this.buckets[this.buckets.length - 1]
 
-        const newData: FixedArray<Any> = new Any[newCapacity * 2 + 2]
-        const newBuckets: FixedArray<int> = new int[newCapacity * 2 + 1]
-        newData[newData.length - 2] = newBuckets
+        let alloc = this.allocDataAndBuckets(newCapacity)
+        const newData = alloc[0]
+        const newBuckets = alloc[1]
 
         const oldNumEntries = this.numEntries
         const oldData = this.data
@@ -409,45 +533,36 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         this.sizeVal = 0
         let sizeVal: int = 0
 
-        for (let i: int = 0; i < 2 * oldNumEntries; i +=2) {
-            if (itersCounter) {
-                if (oldBuckets[i + 1] === DELETED_ENTRY) {
-                    oldBuckets[i + 1] = ++curDeletedElements
+        const hasIters: boolean = (oldBuckets.getItersCounter() != 0)
+        for (let i: int = 0; i < pairs(oldNumEntries); i += pairs(1)) {
+            const isDeleted: boolean = oldBuckets.isDeletedByIdx(i)
+            if (hasIters) {
+                if (isDeleted) {
+                    oldBuckets.setNumOfDeletedByIdx(i, ++curDeletedElements)  // it means number of deleted so far now.
                     continue
                 }
-                oldBuckets[i + 1] = curDeletedElements
+                oldBuckets.setNumOfDeletedByIdx(i, curDeletedElements)  // it means number of deleted so far now.
             } else {
-                if (oldBuckets[i + 1] === DELETED_ENTRY) {
+                if (isDeleted) {
                     continue
                 }
             }
 
-            const key = oldData[i]
-            const val = oldData[i + 1]
-            let bucketIdx = 0
-            if (key !== null) {
-                if (key === undefined) {
-                    bucketIdx = 2
-                } else {
-                    const keyHash: int = Runtime.getHashCodeByValue(key as object).toInt()
-                    const t = keyHash >> 31
-                    bucketIdx = 2 * (((keyHash ^ t) - t) & (newCapacity - 1))
-                }
-            }
-
-            const bucket = newBuckets[bucketIdx]
-            const idx = 2 * sizeVal++
-            Map.setKey(newData, idx, key)
-            Map.setValue(newData, idx, val)
-            newBuckets[idx + 1] = bucket > 0 ? bucket : BUCKET_END
-            newBuckets[bucketIdx] = idx + 2
+            const key = getKeyByIdx<K>(oldData, i)
+            const val = getValueByIdx<V>(oldData, i)
+            let bucketIdx = Map.getBucketIndex(newCapacity, key)
+            const bucket = Map.getBucketByIdx(newBuckets, bucketIdx)
+            const newIdx = pairs(sizeVal++)
+            Map.setKey(newData, newIdx, key)
+            Map.setValue(newData, newIdx, val)
+            Map.setNextByIdx(newBuckets, newIdx, isLegalAt(bucket) ? bucket : Const.BUCKET_END)
+            Map.setBucketByIdx(newBuckets, bucketIdx, getAtByIdx(newIdx))
         }
 
         this.numEntries = this.sizeVal = sizeVal
-        if (itersCounter) {
-            oldBuckets[CLEAR_FLAG_IDX] = 0  // means false
-            newBuckets[newBuckets.length - 1] = itersCounter
-            this.data[this.data.length - 1] = newData
+        if (hasIters) {
+            setNestedData(this.data, newData)
+            oldBuckets.setClearFlag(false)
         }
         this.data = newData
         this.buckets = newBuckets
@@ -468,40 +583,28 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         }
 
         // check bucket
-        const capacity = this.cap
-        let bucketIdx = 0
-        if (key !== null) {
-            if (key === undefined) {
-                bucketIdx = 2
-            } else {
-                const keyHash: int = Runtime.getHashCodeByValue(key as object).toInt()
-                const t = keyHash >> 31
-                bucketIdx = 2 * (((keyHash ^ t) - t) & (capacity - 1))
-            }
-        }
-        const buckets = this.buckets
-        const data = this.data
-        let bucket = buckets[bucketIdx]
-        if (bucket > 0) {
-            let foundIdx: int = bucket - 2
+        let bucketIdx = this.getBucketIndex(key)
+        let bucket = this.getBucketByIdx(bucketIdx)
+        if (isLegalAt(bucket)) {
+            let at = bucket
             do {
-                if (Runtime.sameValueZero(data[foundIdx], key)) {
+                if (Runtime.sameValueZero(getKeyAt<K>(this.data, at), key)) {
                     // found
-                    Map.setValue(data, foundIdx, val)
+                    this.setValue(getIdxAt(at), val)
                     return this
                 }
-                foundIdx = buckets[foundIdx + 1] - 2
-            } while (foundIdx >= 0);
+                at = this.getNextAt(at)
+            } while (isLegalAt(at))
         } else {
-            bucket = BUCKET_END
+            bucket = Const.BUCKET_END
         }
 
         // insert
-        const idx = 2 * this.numEntries++
-        Map.setKey(data, idx, key)
-        Map.setValue(data, idx, val)
-        buckets[idx + 1] = bucket
-        buckets[bucketIdx] = idx + 2
+        const newIdx = pairs(this.numEntries++)
+        this.setKey(newIdx, key)
+        this.setValue(newIdx, val)
+        this.setNextByIdx(newIdx, bucket)
+        this.setBucketByIdx(bucketIdx, getAtByIdx(newIdx))
         this.sizeVal++
         return this
     }
@@ -515,14 +618,13 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     override has(key: K): boolean {
         const bucketIdx = this.getBucketIndex(key)
-        const bucket = Map.getBucket(this.buckets, bucketIdx)
+        let bucket = this.getBucketByIdx(bucketIdx)
 
-        let entryIdx: int = bucket
-        while (entryIdx > 0) {
-            if (Runtime.sameValueZero(getKeyAt<K>(this.data, entryIdx), key)) {
+        while (isLegalAt(bucket)) {
+            if (Runtime.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
                 return true
             }
-            entryIdx = Map.getNextInBucketAt(this.buckets, entryIdx)
+            bucket = this.getNextAt(bucket)
         }
 
         return false
@@ -560,24 +662,23 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     delete(key: K): boolean {
         const bucketIdx = this.getBucketIndex(key)
-        const bucket = Map.getBucket(this.buckets, bucketIdx)
+        let bucket = this.getBucketByIdx(bucketIdx)
+        let prev: At = 0
 
-        let prevEntryIdx: int = 0
-        let entryIdx: int = bucket
-        while (entryIdx > 0) {
-            if (Runtime.sameValueZero(getKeyAt<K>(this.data, entryIdx), key)) {
-                if (prevEntryIdx > 0) {
-                    Map.setNextInBucketAt(this.buckets, prevEntryIdx, Map.getNextInBucketAt(this.buckets, entryIdx))
+        while (isLegalAt(bucket)) {
+            if (Runtime.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
+                if (isLegalAt(prev)) {
+                    this.setNextAt(prev, this.getNextAt(bucket))
                 } else {
-                    Map.setBucket(this.buckets, bucketIdx, Map.getNextInBucketAt(this.buckets, entryIdx))
+                    this.setBucketByIdx(bucketIdx, this.getNextAt(bucket))
                 }
-                Map.deleteAt(this.buckets, entryIdx)
+                this.deleteAt(bucket)
                 this.sizeVal--
                 this.shrink()
                 return true
             }
-            prevEntryIdx = entryIdx
-            entryIdx = Map.getNextInBucketAt(this.buckets, entryIdx)
+            prev = bucket
+            bucket = this.getNextAt(bucket)
         }
 
         return false
@@ -587,25 +688,20 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * Deletes all elements from the Map
      */
     clear(): void {
-        const cap = this.initialCapacity
-        if (this.sizeVal === 0 && this.cap === cap) {
+        const capacity = this.initialCapacity
+        if (this.sizeVal === 0 && this.cap === capacity) {
             return
         }
 
+        let alloc = this.allocDataAndBuckets(capacity)
         const oldData = this.data
-        this.data = new Any[cap * 2 + 2]
-
-        const oldBuckets = this.buckets
-        const itersCounter = oldBuckets[oldBuckets.length - 1]
-        this.buckets = new int[cap * 2 + 1]
-        if (itersCounter) {
-            this.buckets[this.buckets.length - 1] = itersCounter
-            oldData[oldData.length - 1] = this.data
-            oldBuckets[CLEAR_FLAG_IDX] = 1  // means true
+        this.data = alloc[0]
+        if (this.buckets.getItersCounter() != 0) {
+            setNestedData(oldData, this.data)
+            this.buckets.setClearFlag(true)
         }
-
-        this.data[this.data.length - 2] = this.buckets
-        this.cap = cap
+        this.buckets = alloc[1]
+        this.cap = capacity
         this.sizeVal = 0
         this.numEntries = 0
     }
@@ -619,14 +715,13 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     override get(key: K): V | undefined {
         const bucketIdx = this.getBucketIndex(key)
-        const bucket = Map.getBucket(this.buckets, bucketIdx)
+        let bucket = this.getBucketByIdx(bucketIdx)
 
-        let entryIdx: int = bucket
-        while (entryIdx > 0) {
-            if (Runtime.sameValueZero(getKeyAt<K>(this.data, entryIdx), key)) {
-                return getValueAt<V>(this.data, entryIdx)
+        while (isLegalAt(bucket)) {
+            if (Runtime.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
+                return getValueAt<V>(this.data, bucket)
             }
-            entryIdx = Map.getNextInBucketAt(this.buckets, entryIdx)
+            bucket = this.getNextAt(bucket)
         }
 
         return undefined
@@ -691,21 +786,22 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     override forEach(callbackfn: (v: V, k: K, map: Map<K, V>) => void): void {
         let curData = this.data
+        this.buckets.chgItersCounter(+1)
 
-        ++this.buckets[this.buckets.length - 1]
-        for (let curAt = 2; curAt <= 2 * this.numEntries; curAt += 2) {
-            if (isDeletedAt(this.buckets, curAt))
+        // NOTE(nkholiavin): need to use try/finally for decrement the counter back, but it costs too much (issue 31274)
+        for (let curAt = getAtZero(); isInsideAt(curAt, pairs(this.numEntries)); curAt += pairs(1)) {
+            if (this.buckets.isDeletedAt(curAt))
                 continue
 
             callbackfn(getValueAt<V>(this.data, curAt), getKeyAt<K>(this.data, curAt), this)
 
             while (!Runtime.isSameReference(curData, this.data)) {
-                let curBuckets = curData[curData.length - 2] as FixedArray<int>
-                curAt -= 2 * getNumOfDeleted(curBuckets!, curAt)
-                curData = curData[curData.length - 1] as FixedArray<Any>
+                let curBuckets = curData.getBucketsFromData()
+                curAt -= pairs(curBuckets!.getNumOfDeletedAt(curAt))
+                curData = getNestedData(curData) as DataArrType
             }
         }
-        --this.buckets[this.buckets.length - 1]
+        this.buckets.chgItersCounter(-1)
     }
 }
 

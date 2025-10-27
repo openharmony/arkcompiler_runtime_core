@@ -551,8 +551,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         }
         coro->ManagedCodeBegin();
     } else if (desc == panda_file_items::class_descriptors::PROMISE ||
-               desc == panda_file_items::class_descriptors::SET || desc == panda_file_items::class_descriptors::MAP ||
-               desc == panda_file_items::class_descriptors::MAPENTRY) {
+               desc == panda_file_items::class_descriptors::SET || desc == panda_file_items::class_descriptors::MAP) {
         isSuccessful = SerializeEmptyObject();
     } else if (desc == panda_file_items::class_descriptors::NULL_VALUE) {
         isSuccessful = SerializeJSONNullValue();
