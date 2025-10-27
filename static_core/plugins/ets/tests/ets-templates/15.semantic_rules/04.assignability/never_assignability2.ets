@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
-{% for type in types %}
-
 /*---
 desc: Type T1 is assignable to type T2 if T1 is type never;
-tags: [compile-only]
+params: Error expected
+tags: ['negative']
 ---*/
 
-const n: {{type}} = neverFunction(), m = neverFunction();
-let a: {{type}} = neverFunction();
+const n: number = neverFunction(), m = neverFunction();
+let a: string = neverFunction();
 
 class MyClass {
-  i: {{type}} = neverFunction();
-  static j: {{type}} = neverFunction();
+  i: Any = neverFunction();
+  static j: int = neverFunction();
   constructor() {
     test(this.i);
     test(MyClass.j);
@@ -36,10 +35,6 @@ function neverFunction(): never {
   throw new Error("This function never returns");
 }
 
-function test(param: {{type}}) {
+function test(param: Any) {
 
 }
-
-
-
-{% endfor %}
