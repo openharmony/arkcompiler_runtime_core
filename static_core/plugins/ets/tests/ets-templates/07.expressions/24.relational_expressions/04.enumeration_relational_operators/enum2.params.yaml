@@ -88,7 +88,6 @@ cases:
           const b: byte = 1
           const d: double = 1.234
           enum NumT {Doub = d, Next = d + 2, Byt = b}
-      tags: [compile-only, negative]
       use: |-
           arktest.assertTrue(NumT.Doub.valueOf() == d, "Mixed num types problem")
 
