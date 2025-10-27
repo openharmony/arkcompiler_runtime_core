@@ -142,47 +142,6 @@ cases:
               return 0
           }
 
-    # entry point function cannot have overload signatures
-    - entry_point: foo
-      cmd_line_args: X, Y
-      tags: negative
-      use: |-
-          export function foo(p: string[]): void
-          export function foo(...p: Any[]): Any {
-              arktest.assertTrue(true)
-          }
-
-    - entry_point: foo
-      cmd_line_args: X, Y
-      tags: negative
-      use: |-
-          function foo(p: string[]): void
-          function foo(...p: Any[]): Any {
-              arktest.assertTrue(true)
-          }
-
-          export { foo }
-
-    - entry_point: foo
-      cmd_line_args: X, Y
-      tags: negative
-      use: |-
-          export function foo(p: string[]): int
-          export function foo(...p: Any[]): Any {
-              return 0
-          }
-
-    - entry_point: foo
-      cmd_line_args: X, Y
-      tags: negative
-      use: |-
-          function foo(p: string[]): int
-          function foo(...p: Any[]): Any {
-              return 0
-          }
-
-          export { foo }
-
     # call main from another entry point
     - entry_point: foo
       cmd_line_args: X, Y

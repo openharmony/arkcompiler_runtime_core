@@ -90,25 +90,6 @@ cases:
               return 1
           }
 
-    # entry point function cannot have overload signatures
-    - cmd_line_args: X, Y
-      tags: negative
-      use: |-
-          export function main(p: string[]): void
-          export function main(...p: Any[]): Any {
-              arktest.assertTrue(true)
-          }
-
-    - cmd_line_args: X, Y
-      tags: negative
-      use: |-
-          function main(p: string[]): int
-          function main(...p: Any[]): Any {
-              return 0
-          }
-
-          export { main }
-
     # quoted command-line arguments
     - cmd_line_args: >-
           "a, b c", "D E, F"

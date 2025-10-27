@@ -14,11 +14,11 @@ limitations under the License.
 ---*/
 
 /*---
-desc: If a binding uses type, then a compile-time error occurs.
+desc: If a binding uses type in export type directive, then a compile-time error occurs.
 tags: [compile-only, negative]
 ---*/
 
 class C {}
 class D {}
 
-export {C, type D}
+export type {C, type D}
