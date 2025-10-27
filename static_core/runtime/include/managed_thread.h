@@ -172,6 +172,11 @@ public:
         return stackFrameAllocator_;
     }
 
+    static constexpr uint32_t GetStackFrameAllocatorOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, stackFrameAllocator_);
+    }
+
     ark::mem::InternalAllocator<>::LocalSmallObjectAllocator *GetLocalInternalAllocator() const
     {
         return internalLocalAllocator_;

@@ -83,6 +83,7 @@ module Constants
     OBJECT_CLASS_OFFSET = "cross_values::GetObjectHeaderClassPointerOffset(GetArch())"
     WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
     ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
+    ANNOTATE_SANITIZERS_POISON_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_POISON_NO_BRIDGE)"
     GET_CALLEE_METHOD = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::GET_CALLEE_METHOD_DIRECT)"
     INITIALIZE_CLASS_BY_ID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::INITIALIZE_CLASS_BY_ID_DIRECT)"
     RESOLVE_CLASS = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::RESOLVE_CLASS_DIRECT)"
@@ -111,6 +112,9 @@ module Constants
     METHOD_CODE_ID_OFFSET = "cross_values::GetMethodCodeIdOffset(GetArch())"
     METHOD_NATIVE_POINTER_OFFSET = "cross_values::GetMethodNativePointerOffset(GetArch())"
     METHOD_COMPILED_ENTRY_POINT_OFFSET = "cross_values::GetMethodCompiledEntryPointOffset(GetArch())"
+    METHOD_NUM_VREGS_OFFSET = "cross_values::GetMethodNumVregsOffset(GetArch())"
+    METHOD_INSTRUCTIONS_OFFSET = "cross_values::GetMethodInstructionsOffset(GetArch())"
+    METHOD_VREGS_UNKNOWN = "cross_values::GetMethodVregsUnknown(GetArch())"
     FRAME_NUM_VREGS_OFFSET = "cross_values::GetFrameNumVregsOffset(GetArch())"
     FRAME_NUM_ACTUAL_ARGS_OFFSET = "cross_values::GetFrameNumActualArgsOffset(GetArch())"
     FRAME_METHOD_OFFSET = "cross_values::GetFrameMethodOffset(GetArch())"
@@ -227,6 +231,11 @@ module Constants
     # shift one bit less to keep ACC_INTRINSIC bit
     INTRINSIC_MASK_SHIFT = "INTRINSIC_SHIFT - VERIFICATION_STATUS_WIDTH - 1"
     VERIFIED_OK = "static_cast<uint64_t>(Method::VerificationStage::VERIFIED_OK)"
+
+    MANAGED_THREAD_STACK_FRAME_ALLOCATOR_OFFSET = "cross_values::GetManagedThreadStackFrameAllocatorOffset(GetArch())"
+    STACK_FRAME_ALLOCATOR_FREE_POINTER_OFFSET = "cross_values::GetStackFrameAllocatorFreePointerOffset(GetArch())"
+    STACK_FRAME_ALLOCATOR_END_ADDR_OFFSET = "cross_values::GetStackFrameAllocatorEndAddrOffset(GetArch())"
+    STACK_FRAME_ALLOCATOR_RELEASE_PAGES_SHIFT = "ark::mem::StackLikeAllocator<>::RELEASE_PAGES_SHIFT"
 
     # StringBuilder
     SB_BUFFER_OFFSET = "RuntimeInterface::GetSbBufferOffset()"

@@ -203,7 +203,9 @@ Method::Method(Class *klass, const panda_file::File *pf, panda_file::File::Entit
 
       fileId_(fileId),
       codeId_(codeId),
-      shorty_(shorty)
+      shorty_(shorty),
+      instructions_(nullptr),
+      numVregs_(NUM_VREGS_UNKNOWN)
 {
     ResetHotnessCounter();
     ResetSaverTryCounter();

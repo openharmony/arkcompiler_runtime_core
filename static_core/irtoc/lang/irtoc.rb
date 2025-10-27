@@ -42,6 +42,7 @@ FILE_BEGIN = %{
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/mem/gc/g1/g1-allocator.h"
+#include "libarkbase/mem/stack_like_allocator.h"
 
 #ifndef __clang_analyzer__
 
