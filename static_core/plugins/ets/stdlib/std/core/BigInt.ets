@@ -969,7 +969,7 @@ export final class BigInt {
             let b = ((rbytes[i].toLong() & BigInt.maskSys) as Long).toString()
             let temp: FixedArray<int> = new int[b.length.toInt()]
             for (let j = 0; j < b.length; j++) {
-                temp[j] = b.charAt(j).compareTo(c'0');
+                temp[j] = b.charAt(j).toInt() - c'0'.toInt();
             }
 
             digits = BigInt.addDigits(digits, temp)
@@ -1019,7 +1019,7 @@ export final class BigInt {
                     throw new Error("Can't convert number " + s + " to BigInt because it's not an integer")
                 }
             } else {
-                digits.push(s.charAt(i).compareTo(c'0'))
+                digits.push(s.charAt(i).toInt() - c'0'.toInt())
             }
         }
 
@@ -1046,7 +1046,7 @@ export final class BigInt {
         }
 
         for (let i = start; i < end; ++i) {
-            value = value * 10 + (s.charAt(i).compareTo(c'0'))
+            value = value * 10 + (s.charAt(i).toInt() - c'0'.toInt())
         }
 
         return sign * value

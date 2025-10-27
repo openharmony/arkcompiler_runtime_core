@@ -377,11 +377,17 @@ export final class Double extends Floating implements Comparable<Double> {
      *
      * @param other Double object to compare with
      *
-     * @returns result of the comparison
+     * @returns result of the comparison, -1 if this instance is less than provided object, 0 if equal, 1 if greater
      * @tag arkts
      */
     public override compareTo(other: Double): int {
-        return (this.value - other).toInt();
+        if ((this.isNaN() && other.isNaN()) || (abs(this.value - other.value) < Double.EPSILON)) {
+            return 0;
+        }
+        if (this.isNaN() || this.value > other) {
+            return 1;
+        }
+        return -1;
     }
 
     /**

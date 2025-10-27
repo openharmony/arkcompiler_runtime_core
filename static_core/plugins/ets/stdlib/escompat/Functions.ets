@@ -245,13 +245,13 @@ export function escape(str: string): string {
 
 function unhex(c: char): int {
     if ((c.compareTo(c'0') >= 0) && (c.compareTo(c'9') <= 0)) {
-        return c.compareTo(c'0')
+        return c.toInt() - c'0'.toInt()
     }
     if ((c.compareTo(c'A') >= 0) && (c.compareTo(c'F') <= 0)) {
-        return c.compareTo(c'A') + 10
+        return c.toInt() - c'A'.toInt() + 10
     }
     if ((c.compareTo(c'a') >= 0) && (c.compareTo(c'f') <= 0)) {
-        return c.compareTo(c'a') + 10
+        return c.toInt() - c'a'.toInt() + 10
     }
     throw new Error("invalid codepoint")
 }
