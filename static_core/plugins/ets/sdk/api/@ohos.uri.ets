@@ -884,7 +884,9 @@ export namespace uri {
       if (portStr == '') {
         return false;
       }
-
+      if(pos > 0 && this.data.substring(pos-1, pos) == ':') {
+        return false;
+      }
       let port = new Number(portStr);
       if (isNaN(port)) {
         this.data = this.data.substring(0, pos);
