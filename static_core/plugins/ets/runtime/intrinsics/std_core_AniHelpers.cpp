@@ -19,13 +19,14 @@ namespace ark::ets::intrinsics {
 
 void AsyncWorkNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr, uint8_t needNativeScope)
 {
-    auto *nativeCb = reinterpret_cast<void (*)(void *)>(nativeCbPtr);
+    ani_env *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+    auto *nativeCb = reinterpret_cast<void (*)(ani_env *, void *)>(nativeCbPtr);
     if (static_cast<bool>(needNativeScope)) {
         ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
-        nativeCb(reinterpret_cast<void *>(dataPtr));
+        nativeCb(env, reinterpret_cast<void *>(dataPtr));
         return;
     }
-    nativeCb(reinterpret_cast<void *>(dataPtr));
+    nativeCb(env, reinterpret_cast<void *>(dataPtr));
 }
 
 void EventNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr, uint8_t needNativeScope)

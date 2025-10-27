@@ -59,6 +59,23 @@ private:
     GenericEvent event_;
 };
 
+ani_env *GetCurrentEnv()
+{
+    ani_vm *vm = nullptr;
+    ani_size count = 0;
+    auto aniStatus = ANI_GetCreatedVMs(&vm, 1, &count);
+    if (aniStatus != ANI_OK || count != 1) {
+        return nullptr;
+    }
+
+    ani_env *aniEnv = nullptr;
+    aniStatus = vm->GetEnv(ANI_VERSION_1, &aniEnv);
+    if (aniStatus != ANI_OK || count != 1) {
+        return nullptr;
+    }
+    return aniEnv;
+}
+
 }  // namespace
 
 TEST_F(AsyncWorkTest, CreateAsyncWorkInvalidArgs)
@@ -113,8 +130,9 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkTwiceError)
     using TestData = std::tuple<AsyncWorkEvent &, AsyncWork **>;
     auto testData = TestData {event, &work};
     auto status = CreateAsyncWork(
-        env_, []([[maybe_unused]] ani_env *env, [[maybe_unused]] void *data) {},
-        []([[maybe_unused]] ani_env *env, WorkStatus s, void *data) {
+        env_, [](ani_env *env, [[maybe_unused]] void *data) { ASSERT_EQ(env, GetCurrentEnv()); },
+        [](ani_env *env, WorkStatus s, void *data) {
+            ASSERT_EQ(env, GetCurrentEnv());
             auto &[e, w] = *reinterpret_cast<TestData *>(data);
             ASSERT_EQ(s, WorkStatus::OK);
             ASSERT_EQ(DeleteAsyncWork(env, *w), WorkStatus::OK);
@@ -139,13 +157,15 @@ TEST_F(AsyncWorkTest, QueueAsyncWork)
     auto testData = TestData {event, &work, &testCounter};
     auto status = CreateAsyncWork(
         env_,
-        []([[maybe_unused]] ani_env *env, void *data) {
+        [](ani_env *env, void *data) {
+            ASSERT_EQ(env, GetCurrentEnv());
             auto &[_, w, counter] = *reinterpret_cast<TestData *>(data);
             ASSERT_EQ(*counter, 0);
             (*counter)++;
             ASSERT_EQ(*counter, 1);
         },
-        []([[maybe_unused]] ani_env *env, WorkStatus s, void *data) {
+        [](ani_env *env, WorkStatus s, void *data) {
+            ASSERT_EQ(env, GetCurrentEnv());
             auto &[e, w, counter] = *reinterpret_cast<TestData *>(data);
             ASSERT_EQ(s, WorkStatus::OK);
             ASSERT_EQ(*counter, 1);
@@ -197,8 +217,9 @@ TEST_F(MainWorkerAsyncWorkTest, CancelAsyncAfterQueued)
     using TestData = std::tuple<AsyncWorkEvent &, AsyncWork **>;
     auto testData = TestData {event, &work};
     auto status = CreateAsyncWork(
-        env_, []([[maybe_unused]] ani_env *env, [[maybe_unused]] void *data) {},
-        []([[maybe_unused]] ani_env *env, WorkStatus s, void *data) {
+        env_, [](ani_env *env, [[maybe_unused]] void *data) { ASSERT_EQ(env, GetCurrentEnv()); },
+        [](ani_env *env, WorkStatus s, void *data) {
+            ASSERT_EQ(env, GetCurrentEnv());
             auto &[e, w] = *reinterpret_cast<TestData *>(data);
             ASSERT_EQ(s, WorkStatus::CANCELED);
             ASSERT_EQ(DeleteAsyncWork(env, *w), WorkStatus::OK);
@@ -223,11 +244,13 @@ TEST_F(AsyncWorkTest, CancelAsyncAfterRunning)
     auto testData = TestData {eventRun, eventCompleted, &work};
     auto status = CreateAsyncWork(
         env_,
-        []([[maybe_unused]] ani_env *env, [[maybe_unused]] void *data) {
+        [](ani_env *env, [[maybe_unused]] void *data) {
+            ASSERT_EQ(env, GetCurrentEnv());
             auto &[eR, eC, w] = *reinterpret_cast<TestData *>(data);
             eR.Fire();
         },
-        []([[maybe_unused]] ani_env *env, WorkStatus s, void *data) {
+        [](ani_env *env, WorkStatus s, void *data) {
+            ASSERT_EQ(env, GetCurrentEnv());
             auto &[eR, eC, w] = *reinterpret_cast<TestData *>(data);
             ASSERT_EQ(s, WorkStatus::OK);
             ASSERT_EQ(DeleteAsyncWork(env, *w), WorkStatus::OK);
