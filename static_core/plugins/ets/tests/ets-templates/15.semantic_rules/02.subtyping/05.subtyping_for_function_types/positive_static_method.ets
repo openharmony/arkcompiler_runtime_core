@@ -25,18 +25,61 @@ desc: >-
         - Parameter type of SPi is a subtype of parameter type of FPi (contravariance), and
         – FPi is a rest parameter if SPi is a rest parameter.
         – FPi is an optional parameter if SPi is an optional parameter.
-    • FR can be any type if SR is type void. Otherwise, the resultant type FR is a subtype of SR (covariance).
+    • Type FR is a subtype of SR (covariance).
 ---*/
 
-class Base {}
-class Derived extends Base {}
+class Base {
+    b: string = 'b'
+}
+class Derived extends Base {
+    b: string = 'd'
+}
+
 class C {
     //static method reference
-    static fooBB(p: Base): Base { return p};
-    static fooBD(p: Base): Derived { return new Derived()};
+    static fooBB(p: Base): Base {return p};
+    static fooBD(p: Base): Derived {return new Derived()};
     static fooDB(p: Derived): Base { return new Base()};
     static fooDD(p: Derived): Derived { return p};
+
+    //method with extra param
+    static fooBBN(p: Base, n: number): Base {return p};
+    static fooBDN(p: Base, n: number): Derived {return new Derived()};
+    static fooDBN(p: Derived, n: number): Base { return new Base()};
+    static fooDDN(p: Derived, n: number): Derived { return p};
+
+    //method with extra optional param
+    static fooBBO(p: Base, n?: number): Base {return p};
+    static fooBDO(p: Base, n?: number): Derived {return new Derived()};
+    static fooDBO(p: Derived, n?: number): Base { return new Base()};
+    static fooDDO(p: Derived, n?: number): Derived { return p};
+
+    //method with extra rest param
+    static fooBBR(p: Base, ...n: number[]): Base {return p};
+    static fooBDR(p: Base, ...n: number[]): Derived {return new Derived()};
+    static fooDBR(p: Derived, ...n: number[]): Base { return new Base()};
+    static fooDDR(p: Derived, ...n: number[]): Derived { return p};
 }
+
+let foobb = C.fooBB
+let foobd = C.fooBD
+let foodb = C.fooDB
+let foodd = C.fooDD
+
+let foobbn = C.fooBBN
+let foobdn = C.fooBDN
+let foodbn = C.fooDBN
+let fooddn = C.fooDDN
+
+let foobbo = C.fooBBO
+let foobdo = C.fooBDO
+let foodbo = C.fooDBO
+let fooddo = C.fooDDO
+
+let foobbr = C.fooBBR
+let foobdr = C.fooBDR
+let foodbr = C.fooDBR
+let fooddr = C.fooDDR
 
 {{c.decl}}
 

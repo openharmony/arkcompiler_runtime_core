@@ -25,17 +25,39 @@ desc: >-
         - Parameter type of SPi is a subtype of parameter type of FPi (contravariance), and
         – FPi is a rest parameter if SPi is a rest parameter.
         – FPi is an optional parameter if SPi is an optional parameter.
-    • FR can be any type if SR is type void. Otherwise, the resultant type FR is a subtype of SR (covariance).
+    • Type FR is a subtype of SR (covariance).
 ---*/
 
-class Base {}
-class Derived extends Base {}
+class Base {
+    b: string = 'b'
+}
+class Derived extends Base {
+    b: string = 'd'
+}
 
-//lambdas
-let bb: (p: Base) => Base = (p: Base) => { return new Base }
-let bd: (p: Base) => Derived = (p: Base) => { return new Derived }
-let db: (p: Derived) => Base = (p: Derived) => { return new Base }
-let dd: (p: Derived) => Derived = (p: Derived) => { return new Derived }
+//lambdas reference
+let foobb: (p: Base) => Base = (p: Base) => { return new Base }
+let foobd: (p: Base) => Derived = (p: Base) => { return new Derived }
+let foodb: (p: Derived) => Base = (p: Derived) => { return new Base }
+let foodd: (p: Derived) => Derived = (p: Derived) => { return new Derived }
+
+// Lambdas with extra param
+let foobbn: (p: Base, n: number) => Base = (p: Base, n: number) => { return new Base() };
+let foobdn: (p: Base, n: number) => Derived = (p: Base, n: number) => { return new Derived() };
+let foodbn: (p: Derived, n: number) => Base = (p: Derived, n: number) => { return new Base() };
+let fooddn: (p: Derived, n: number) => Derived = (p: Derived, n: number) => { return new Derived() };
+
+// Lambdas with extra optional param
+let foobbo: (p: Base, n?: number) => Base = (p: Base, n?: number) => { return new Base() };
+let foobdo: (p: Base, n?: number) => Derived = (p: Base, n?: number) => { return new Derived() };
+let foodbo: (p: Derived, n?: number) => Base = (p: Derived, n?: number) => { return new Base() };
+let fooddo: (p: Derived, n?: number) => Derived = (p: Derived, n?: number) => { return new Derived() };
+
+// Lambdas with extra rest param
+let foobbr: (p: Base, ...n: number[]) => Base = (p: Base, ...n: number[]) => { return new Base() };
+let foobdr: (p: Base, ...n: number[]) => Derived = (p: Base, ...n: number[]) => { return new Derived() };
+let foodbr: (p: Derived, ...n: number[]) => Base = (p: Derived, ...n: number[]) => { return new Base() };
+let fooddr: (p: Derived, ...n: number[]) => Derived = (p: Derived, ...n: number[]) => { return new Derived() };
 
 {{c.decl}}
 

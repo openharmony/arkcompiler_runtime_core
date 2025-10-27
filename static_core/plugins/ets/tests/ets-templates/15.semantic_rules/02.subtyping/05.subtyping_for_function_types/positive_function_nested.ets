@@ -59,31 +59,59 @@ function fooBDR(p: Base, ...n: number[]): Derived {return new Derived()};
 function fooDBR(p: Derived, ...n: number[]): Base { return new Base()};
 function fooDDR(p: Derived, ...n: number[]): Derived { return p};
 
+//function type
+type fooBBtype = (p: Base) => Base;
+type fooBDtype = (p: Base) => Derived;
+type fooDBtype = (p: Derived) => Base;
+type fooDDtype = (p: Derived) => Derived;
 
-let foobb = fooBB
-let foobd = fooBD
-let foodb = fooDB
-let foodd = fooDD
+//function with extra param type
+type fooBBNtype = (p: Base, n: number) => Base;
+type fooBDNtype = (p: Base, n: number) => Derived;
+type fooDBNtype = (p: Derived, n: number) => Base;
+type fooDDNtype = (p: Derived, n: number) => Derived;
 
-let foobbn = fooBBN
-let foobdn = fooBDN
-let foodbn = fooDBN
-let fooddn = fooDDN
+//function with extra optional param type
+type fooBBOtype = (p: Base, n: number) => Base;
+type fooBDOtype = (p: Base, n: number) => Derived;
+type fooDBOtype = (p: Derived, n: number) => Base;
+type fooDDOtype = (p: Derived, n: number) => Derived;
 
-let foobbo = fooBBO
-let foobdo = fooBDO
-let foodbo = fooDBO
-let fooddo = fooDDO
+//function with extra rest param type
+type fooBBRtype = (p: Base, ...n: number[]) => Base;
+type fooBDRtype = (p: Base, ...n: number[]) => Derived;
+type fooDBRtype = (p: Derived, ...n: number[]) => Base;
+type fooDDRtype = (p: Derived, ...n: number[]) => Derived;
 
-let foobbr = fooBBR
-let foobdr = fooBDR
-let foodbr = fooDBR
-let fooddr = fooDDR
-
-{{c.decl}}
+let fooSubtype: {{c.subtype}}
+let fooSupertype: {{c.supertype}}
 
 function main() {
-    {{c.check|indent}}
+
+    //call functions before subtype to supertype assignment
+    arktest.assertTrue(fooSubtype({{c.subtype_params}}) instanceof Derived)
+    {% if not c.skip_return_check %}
+    arktest.assertFalse(fooSupertype({{ c.supertype_params }}) instanceof Derived);
+    arktest.assertEQ(fooSupertype({{c.supertype_params}}).b, 'b');
+    {% endif %}
+
+    fooSupertype = fooSubtype
+
+    //call overwritten fooSupertype with initial params
+    arktest.assertTrue(fooSupertype({{c.supertype_params}}) instanceof Derived)
+    arktest.assertEQ(fooSupertype({{c.supertype_params}}).b, 'd')
+
+    {% if c.supertype_params2 %}
+    //call overwritten fooSupertype with subtype params and the same amount of supertype params
+    //if subtype has less params
+    arktest.assertTrue(fooSupertype({{c.supertype_params2}}) instanceof Derived)
+    arktest.assertEQ(fooSupertype({{c.supertype_params2}}).b, 'd')
+    {% endif %}
+
+    //call overwritten fooSupertype with subtype params
+    arktest.assertTrue(fooSupertype({{c.subtype_params}}) instanceof Derived)
+    arktest.assertEQ(fooSupertype({{c.subtype_params}}).b, 'd')
+
 }
 
 {%- endfor %}
