@@ -652,6 +652,10 @@ public:
         return Thread::GetCurrent();
     }
 
+    bool CanUseStringFlatCheck() const override;
+
+    bool IsUseAllStrings() const override;
+
 private:
     static compiler::DataType::Type ToCompilerType(panda_file::Type type)
     {

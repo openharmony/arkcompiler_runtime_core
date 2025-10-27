@@ -65,6 +65,7 @@
 #include "optimizer/optimizations/move_constants.h"
 #include "optimizer/optimizations/adjust_arefs.h"
 #include "optimizer/optimizations/if_merging.h"
+#include "optimizer/optimizations/string_flat_check.h"
 
 #include "compiler/generated/pipeline_includes.h"
 
@@ -251,6 +252,7 @@ bool Pipeline::RunOptimizations()
     if (graph->IsAotMode()) {
         graph->RunPass<Cse>();
     }
+    graph->RunPass<StringFlatCheck>();
     graph->RunPass<SaveStateOptimization>();
     graph->RunPass<Peepholes>();
 #ifndef NDEBUG

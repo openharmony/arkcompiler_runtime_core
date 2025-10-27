@@ -304,6 +304,7 @@ public:
 
     Inst *GetFistThrowableInst() const;
     Inst *FindSaveStateDeoptimize() const;
+    SaveStateInst *FindSaveState(Inst *start = nullptr) const;
 
     void InvalidateLoopIfIrreducible();
 

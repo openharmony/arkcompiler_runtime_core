@@ -172,6 +172,7 @@ bool Pointer::IsEscapingAlias(const Inst *inst)
             case Opcode::NullCheck:
             case Opcode::ObjByIndexCheck:
             case Opcode::AnyTypeCheck:
+            case Opcode::StringFlatCheck:
                 if (IsEscapingAlias(userInst)) {
                     return true;
                 }
@@ -505,6 +506,11 @@ void AliasVisitor::VisitInitEmptyString(GraphVisitor *v, Inst *inst)
 }
 void AliasVisitor::VisitInitString(GraphVisitor *v, Inst *inst)
 {
+    static_cast<AliasVisitor *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
+}
+void AliasVisitor::VisitStringFlatCheck(GraphVisitor *v, Inst *inst)
+{
+    ASSERT(inst->IsReferenceOrAny());
     static_cast<AliasVisitor *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
 }
 

@@ -17,6 +17,7 @@
 #include "optimizer/code_generator/operands.h"
 #include "optimizer/ir/datatype.h"
 #include "libarkbase/utils/regmask.h"
+#include "intrinsic_string_flat_check.inl"
 
 namespace ark::compiler {
 
@@ -2044,6 +2045,13 @@ void EncodeVisitor::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
     auto id = intrinsic->GetIntrinsicId();
     auto arch = codegen->GetGraph()->GetArch();
     auto runtime = codegen->GetGraph()->GetRuntime();
+    if (codegen->GetGraph()->IsStringFlatCheckConstraint() && GetStringFlatCheckArgMask(id) > 0) {
+        // Tree strings are enabled and StringFlatCheck is disabled but IRTOC implementation requires flat string, so
+        // call CPP implementation
+        codegen->CreateCallIntrinsic(intrinsic);
+        return;
+    }
+
     if (EncodesBuiltin(runtime, id, arch) || IsIrtocIntrinsic(id)) {
         codegen->CreateBuiltinIntrinsic(intrinsic);
         return;
@@ -2850,4 +2858,15 @@ void EncodeVisitor::VisitResolveByName(GraphVisitor *visitor, Inst *inst)
     enc->GetCodegen()->ResolveCallByName(inst->CastToResolveByName());
 }
 
+void EncodeVisitor::VisitStringFlatCheck(GraphVisitor *visitor, Inst *inst)
+{
+    auto *cg = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
+    auto dst = cg->ConvertRegister(inst->GetDstReg(), inst->GetType());
+    auto src = cg->ConvertRegister(inst->GetSrcReg(0), inst->GetInputType(0));
+    if (cg->GetArch() == Arch::AARCH32) {
+        cg->CallRuntime(inst, EntrypointId::STRING_FLAT_CHECK_ARM32, dst, RegMask::GetZeroMask(), src);
+    } else {
+        cg->CallFastPath(inst, EntrypointId::STRING_FLAT_CHECK, dst, {}, src);
+    }
+}
 }  // namespace ark::compiler

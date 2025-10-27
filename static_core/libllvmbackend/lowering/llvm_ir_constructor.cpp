@@ -15,6 +15,7 @@
 
 #include <llvm/IR/Intrinsics.h>
 #include "optimizer/code_generator/codegen.h"
+#include "intrinsic_string_flat_check.inl"
 #include "runtime/include/coretypes/string.h"
 
 #include "llvm_ir_constructor.h"
@@ -626,6 +627,12 @@ bool LLVMIrConstructor::IsSafeCast(Inst *inst, unsigned int index)
 
 bool LLVMIrConstructor::TryEmitIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId arkId)
 {
+    if (GetGraph()->IsStringFlatCheckConstraint() && GetStringFlatCheckArgMask(arkId) > 0) {
+        // Tree strings are enabled and StringFlatCheck is disabled but IRTOC implementation requires flat string, so
+        // call CPP implementation
+        return false;
+    }
+
     auto module = func_->getParent();
     auto f32Ty = builder_.getFloatTy();
     auto f64Ty = builder_.getDoubleTy();
@@ -5093,6 +5100,12 @@ void LLVMIrConstructor::VisitLoadImmediate(GraphVisitor *v, Inst *inst)
     auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_,
                                                            loadImm->GetTlsOffset(), ctor->builder_.getPtrTy());
     ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitStringFlatCheck(GraphVisitor *v, Inst *inst)
+{
+    auto *ctor = static_cast<LLVMIrConstructor *>(v);
+    ctor->EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_FLAT_CHECK, 1U);
 }
 
 void LLVMIrConstructor::VisitDefault([[maybe_unused]] Inst *inst)

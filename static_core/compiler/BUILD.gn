@@ -195,6 +195,7 @@ libarkcompiler_sources = [
   "optimizer/optimizations/string_builder_utils.cpp",
   "optimizer/optimizations/try_catch_resolving.cpp",
   "optimizer/optimizations/vn.cpp",
+  "optimizer/optimizations/string_flat_check.cpp",
   "optimizer/pass.cpp",
   "optimizer/pass_manager.cpp",
   "optimizer/pass_manager_statistics.cpp",
@@ -274,6 +275,7 @@ group("arktscompiler_header_deps") {
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_inline_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_peephole_inl",
+    ":libarkcompiler_intrinsics_gen_inl_intrinsic_string_flat_check_inl",
     ":libarkcompiler_opcodes_h_IR-instructions_md",
     ":libarkcompiler_opcodes_h_arch_info_gen_h",
     ":libarkcompiler_opcodes_h_codegen_arm64_gen_inc",
@@ -460,6 +462,7 @@ ark_gen("libarkcompiler_intrinsics_gen_inl") {
     "intrinsics_flags.inl.erb",
     "intrinsics_inline.inl.erb",
     "intrinsics_peephole.inl.erb",
+    "intrinsic_string_flat_check.inl.erb",
   ]
   sources = "optimizer/templates/intrinsics"
   destination = "$target_gen_dir/generated"

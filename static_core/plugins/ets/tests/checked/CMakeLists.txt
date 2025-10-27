@@ -265,6 +265,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         endif()
     endif()
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/invalidate_cha_no_async_jit.ets)
+    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_flat_check.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_const_array.ets)
     if (NOT PANDA_TARGET_OHOS) # TODO: remove. issue 29517
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_phi.ets)

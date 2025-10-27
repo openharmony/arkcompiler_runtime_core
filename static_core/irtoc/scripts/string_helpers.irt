@@ -46,6 +46,14 @@ module FlattenedStringCacheConstants
   VALUE_OFFSET = "cross_values::GetFlattenedStringCacheValueOffset(GetArch())"
 end
 
+macro(:check_not_tree_string_type) do |str|
+  baseClass := LoadI(str).ref
+  stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+  If(stringType, Constants::STRING_TYPE_TREE).EQ {
+    Intrinsic(:UNREACHABLE).void.Terminator
+  }
+end
+
 macro(:try_use_cached_flat_str) do |str|
   baseClass := LoadI(str).ref
   stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
@@ -167,7 +175,14 @@ def GenerateStringEquals(lang, dynamic, compression, cgmode = :FastPath)
         If(str1_orig, str2_orig).EQ.Unlikely.b {
             Return(1).b
         }
-        str1 := try_use_cached_flat_str(str1_orig)
+        if cgmode == :NativePlus
+            str1 := try_use_cached_flat_str(str1_orig)
+        else
+            check_not_tree_string_type(str1_orig) if defines.DEBUG
+            # it still can be slice
+            check_string_type(str1_orig)
+            str1 := str1_orig
+        end
         str2 := try_use_cached_flat_str(str2_orig)
         if dynamic
             length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -956,7 +971,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
   suffix = (string_compression_enabled ? "Compressed" : "")
   available_regs = $panda_mask
   function("SubStringFromStringTlab#{suffix}".to_sym,
-           params: {str_orig: 'ref', begin_index: 'i32', end_index: 'i32'},
+           params: {str: 'ref', begin_index: 'i32', end_index: 'i32'},
            regmap: $full_regmap,
            regalloc_set: available_regs,
            mode: [:FastPath]) {
@@ -967,7 +982,9 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
       next
     end
 
-    str := try_use_cached_flat_str(str_orig)
+    check_not_tree_string_type(str) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str)
 
     # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
     length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -1069,7 +1086,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str_orig, begin_index, end_index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateSubstringFromStringTlab
@@ -1079,7 +1096,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
   suffix = (string_compression_enabled ? "Compressed" : "")
   available_regs = $panda_mask
   function("StringGetCharsTlab#{suffix}".to_sym,
-           params: {str_orig: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
+           params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
            regmap: $full_regmap,
            regalloc_set: available_regs,
            mode: [:FastPath]) {
@@ -1090,7 +1107,9 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
       next
     end
 
-    str := try_use_cached_flat_str(str_orig)
+    check_not_tree_string_type(str) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str)
 
     If(begin_index, end_index).GT.Unlikely.b {
       Goto(:SlowPathEntrypoint)  # Out of range
@@ -1134,7 +1153,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("STRING_GET_CHARS_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str_orig, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetChars4ArgBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetChars4ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateStringGetCharsTlab

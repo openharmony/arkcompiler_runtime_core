@@ -2040,40 +2040,6 @@ Inst *ScalarReplacement::Materialize(Inst *originalInst, Inst *ssAlloc, Inst *ss
     return newAlloc;
 }
 
-CallInst *ScalarReplacement::FindCallerInst(BasicBlock *target, Inst *start)
-{
-    auto block = start == nullptr ? target->GetDominator() : target;
-    size_t depth = 0;
-    while (block != nullptr) {
-        auto iter = InstBackwardIterator<IterationType::INST>(*block, start);
-        for (auto inst : iter) {
-            if (inst == nullptr) {
-                return nullptr;
-            }
-            if (inst == start) {
-                continue;
-            }
-            if (inst->Is(Opcode::ReturnInlined)) {
-                depth++;
-            }
-            if (!inst->IsCall()) {
-                continue;
-            }
-            auto callInst = static_cast<CallInst *>(inst);
-            auto isInlined = callInst->IsInlined();
-            if (isInlined && depth == 0) {
-                return callInst;
-            }
-            if (isInlined) {
-                depth--;
-            }
-        }
-        block = block->GetDominator();
-        start = nullptr;
-    }
-    return nullptr;
-}
-
 void ScalarReplacement::InitializeObject(Inst *alloc, Inst *instBefore, VirtualState *state, Inst *newAlloc)
 {
     for (auto &[fieldVariant, fieldSource] : state->GetFields()) {

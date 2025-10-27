@@ -23,6 +23,7 @@
 #include "marker.h"
 #include "optimizer/code_generator/method_properties.h"
 #include "optimizer/pass_manager.h"
+#include "optimizer/optimizations/string_flat_check.h"
 #include "libarkbase/utils/arena_containers.h"
 #include <algorithm>
 #include <optional>
@@ -199,7 +200,8 @@ public:
           tryBeginBlocks_(args.allocator->Adapter()),
           throwBlocks_(args.allocator->Adapter()),
           spilledConstants_(args.allocator->Adapter()),
-          parentGraph_(parent)
+          parentGraph_(parent),
+          stringFlatCheckConstraint_(runtime_->IsUseAllStrings() && !StringFlatCheck::IsEnable(runtime_))
     {
         SetNeedCleanup(true);
         SetCanOptimizeNativeMethods(g_options.IsCompilerOptimizeNativeCalls() && (GetArch() != Arch::AARCH32) &&
@@ -1374,6 +1376,11 @@ public:
         return maxInliningDepth_;
     }
 
+    bool IsStringFlatCheckConstraint() const
+    {
+        return stringFlatCheckConstraint_;
+    }
+
 private:
     void AddConstInStartBlock(ConstantInst *constInst);
 
@@ -1476,6 +1483,8 @@ private:
     uint32_t vregsCount_ {0};
     // Source language of the method being compiled
     SourceLanguage lang_ {SourceLanguage::PANDA_ASSEMBLY};
+    // true if tree strings are enabled but StringFlatCheck pass is disabled
+    bool stringFlatCheckConstraint_;
 };
 
 class MarkerHolder {

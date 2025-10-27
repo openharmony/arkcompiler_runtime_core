@@ -1079,6 +1079,25 @@ ObjectPointerType PandaRuntimeInterface::GetNonMovableString(MethodPtr method, S
     return ToObjPtrType(vm->GetNonMovableString(*pf, panda_file::File::EntityId {id}));
 }
 
+bool PandaRuntimeInterface::CanUseStringFlatCheck() const
+{
+    if (!IsUseAllStrings()) {
+        // No need StringFlatCheck since TreeString is disabled
+        return false;
+    }
+
+    auto ctx = Runtime::GetCurrent()->GetPandaVM()->GetLanguageContext();
+    // If StringFlatCheck is inserted it replaces all usages.
+    // It can break code in case of reference comparison.
+    // So value equality semantic is required for operator '=='
+    return ctx.HasValueEqualitySemantic();
+}
+
+bool PandaRuntimeInterface::IsUseAllStrings() const
+{
+    return Runtime::GetOptions().IsUseAllStrings();
+}
+
 #ifndef PANDA_PRODUCT_BUILD
 // Exists only for tests purposes, must not be used in release builds
 uint8_t CompileMethodImpl(coretypes::String *fullMethodName, SourceLanguage sourceLang)

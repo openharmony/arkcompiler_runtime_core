@@ -44,6 +44,7 @@
 #include "intrinsics.h"
 #include "runtime/interpreter/vregister_iterator.h"
 #include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/string_flatten.h"
 #include "runtime/include/safepoint_timer.h"
 
 #ifdef ARK_HYBRID
@@ -2081,6 +2082,21 @@ extern "C" int32_t CoreStringCompareTo(coretypes::String *str1, coretypes::Strin
 
     /* use the default implementation otherwise */
     return str1->Compare(str2, Runtime::GetCurrent()->GetPandaVM()->GetLanguageContext());
+}
+
+extern "C" ark::coretypes::String *CoreStringFlatCheck(ark::coretypes::String *str)
+{
+    if (str == nullptr) {
+        return nullptr;
+    }
+    if (!str->IsTreeString()) {
+        return str;
+    }
+    auto *thread = ManagedThread::GetCurrent();
+    HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<coretypes::String> treeStr(thread, str);
+    auto ctx = thread->GetLanguageContext();
+    return coretypes::FlatStringInfo::FlattenTreeString(treeStr, ctx).GetString();
 }
 
 extern "C" void G1GCPostBarrierPushCardToQueue(mem::CardTable::CardPtr card)

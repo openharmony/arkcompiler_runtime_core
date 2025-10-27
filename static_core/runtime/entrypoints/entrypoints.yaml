@@ -1357,3 +1357,35 @@ entrypoints:
     - uint8_t
     - ark::coretypes::String*
     - ark::coretypes::String*
+
+- name: StringFlatCheck
+  entrypoint: StringFlatCheck
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringFlatCheckSlowPath
+  entrypoint: CoreStringFlatCheck
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringFlatCheckOddSaved
+  entrypoint: CoreStringFlatCheck
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringFlatCheckArm32
+  entrypoint: CoreStringFlatCheck
+  bridge: entrypoint
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*

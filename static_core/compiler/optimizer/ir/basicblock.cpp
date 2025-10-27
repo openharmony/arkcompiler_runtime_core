@@ -1452,6 +1452,16 @@ Inst *BasicBlock::FindSaveStateDeoptimize() const
     return nullptr;
 }
 
+SaveStateInst *BasicBlock::FindSaveState(Inst *start) const
+{
+    for (auto inst : InstReverseIter(*this, start)) {
+        if (inst->GetOpcode() == Opcode::SaveState) {
+            return inst->CastToSaveState();
+        }
+    }
+    return nullptr;
+}
+
 void BasicBlock::InvalidateLoopIfIrreducible()
 {
     auto loop = GetLoop();

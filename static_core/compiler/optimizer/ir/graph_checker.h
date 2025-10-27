@@ -107,7 +107,6 @@ private:
     void CheckInputType(Inst *inst);
 #ifdef COMPILER_DEBUG_CHECKS
     bool NeedCheckSaveState();
-    void PrepareUsers(Inst *inst, ArenaVector<User *> *users);
     bool IsPhiSafeToSkipObjectCheck(Inst *inst, Marker visited);
     bool IsPhiUserSafeToSkipObjectCheck(Inst *inst, Marker visited);
     void CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users);
@@ -272,6 +271,7 @@ private:
     static PANDA_PUBLIC_API void VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitCallNative(GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitStringFlatCheck(GraphVisitor *v, Inst *inst);
 
 #include "visitor.inc"
 

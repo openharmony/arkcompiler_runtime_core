@@ -29,6 +29,7 @@ coretypes:
 
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
+  string_class: true
 
 - managed_class: std.core.Promise
   mirror_class: ark::ets::EtsPromise
@@ -738,6 +739,7 @@ intrinsics:
     need_param_locations: true
     clear_flags: [ ]
     set_flags: [ ]
+    require_flat_check: true
 
   - name: StdCoreStringGetBytes
     space: ets
@@ -756,6 +758,7 @@ intrinsics:
     need_param_locations: true
     clear_flags: [ ]
     set_flags: [ ]
+    require_flat_check: true
 
   - name: StdCoreStringGetLength
     space: ets
@@ -812,7 +815,7 @@ intrinsics:
     llvm_codegen_func: EmitStringEquals
     peephole_func: PeepholeStringEquals
     need_param_locations: true
-    safe_intrinsic: true
+    require_flat_check: true
 
   - name: StdCoreStringNormalizeNFC
     space: ets
@@ -917,6 +920,7 @@ intrinsics:
     codegen_arch: [arm64]
     codegen_func: CreateStringIndexOf
     llvm_codegen_func: EmitStringIndexOf
+    require_flat_check: true
 
   - name: StdCoreStringIndexOfAfter
     space: ets
@@ -932,6 +936,7 @@ intrinsics:
     codegen_func: CreateStringIndexOfAfter
     llvm_codegen_func: EmitStringIndexOfAfter
     need_param_locations: true
+    require_flat_check: true
 
   - name: StdCoreStringIndexOfString
     space: ets
@@ -967,6 +972,7 @@ intrinsics:
     llvm_codegen_func: EmitStdStringSubstring
     need_param_locations: true
     peephole_func: PeepholeStringSubstring
+    require_flat_check: true
 
   - name: StdCoreStringCodePointToChar
     space: ets
@@ -1065,6 +1071,7 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreStringCompareTo
     irtoc_impl: StringCompareToNativePlus
     need_param_locations: true
+    require_flat_check: true
 
   - name: StdCoreStringTrimLeft
     space: ets
@@ -1078,6 +1085,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringTrimLeft
     llvm_codegen_func: EmitStringTrimLeft
+    require_flat_check: true
 
   - name: StdCoreStringTrimRight
     space: ets
@@ -1091,6 +1099,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringTrimRight
     llvm_codegen_func: EmitStringTrimRight
+    require_flat_check: true
 
   - name: StdCoreStringTrim
     space: ets
@@ -1104,6 +1113,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringTrim
     llvm_codegen_func: EmitStringTrim
+    require_flat_check: true
 
   - name: StdCoreStringStartsWith
     space: ets
@@ -1118,6 +1128,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringStartsWith
     llvm_codegen_func: EmitStringStartsWith
+    require_flat_check: true
 
   - name: StdCoreStringEndsWith
     space: ets
@@ -1132,6 +1143,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringEndsWith
     llvm_codegen_func: EmitStringEndsWith
+    require_flat_check: true
 
   - name: StdCoreStringFromCharCode
     space: ets
@@ -1169,6 +1181,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringRepeat
     llvm_codegen_func: EmitStringRepeat
+    require_flat_check: true
 
   - name: StdCoreStringGet
     space: ets

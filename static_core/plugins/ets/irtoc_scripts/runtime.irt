@@ -382,7 +382,9 @@ def GenerateSameValueZero(cgmode)
         Goto(:SlowPathEntrypoint)
       }
       ep_offset = get_entrypoint_offset("STRING_EQUALS_COMPRESSED")
-      LiveOut(o1).DstReg(regmap[:arg0]).ref
+      flatStr := try_use_cached_flat_str(o1)
+      # StringEqualsCompressed requires flat string as arg0
+      LiveOut(flatStr).DstReg(regmap[:arg0]).ref
       LiveOut(o2).DstReg(regmap[:arg1]).ref
       Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("StringEqualsCompressed").Terminator.b
       Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
