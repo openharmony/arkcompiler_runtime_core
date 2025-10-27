@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,12 @@
  * limitations under the License.
  */
 
-export interface IVersionsResponse {
-    frontend?: string;
-    backendVersion?: string;
-    arktsVersion?: string;
-    es2pandaVersion?: string;
-}
+export type TNotificationType = 'success' | 'info' | 'error';
 
-export interface IVersionsFetch {
+export interface INotification {
+    id?: number
+    type: TNotificationType
+    title: string
+    message: string
+    duration?: number
 }
-
-export const versionsModel = {
-    fromApi: (data: Partial<IVersionsResponse>): IVersionsResponse => ({
-        frontend: data.frontend || '0.0.5',
-        backendVersion: data.backendVersion || '0.0.1',
-        arktsVersion: data.arktsVersion || '0.0.1',
-        es2pandaVersion: data.es2pandaVersion || '0.0.1',
-    }),
-};
