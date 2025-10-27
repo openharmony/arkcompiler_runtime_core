@@ -26,7 +26,7 @@ static EtsField *GetInstanceFieldByName(EtsClass *cls, EtsString *name)
     return instanceField;
 }
 
-EtsBoolean EscompatJSONGetJSONStringifyIgnoreByIdx(EtsClass *cls, EtsLong idx)
+EtsBoolean StdCoreJSONGetJSONStringifyIgnoreByIdx(EtsClass *cls, EtsLong idx)
 {
     EtsField *field = cls->GetFieldByIndex(idx);
     bool ret = false;
@@ -46,7 +46,7 @@ EtsBoolean EscompatJSONGetJSONStringifyIgnoreByIdx(EtsClass *cls, EtsLong idx)
     return static_cast<EtsBoolean>(ret);
 }
 
-EtsBoolean EscompatJSONGetJSONStringifyIgnoreByName(EtsClass *cls, EtsString *name)
+EtsBoolean StdCoreJSONGetJSONStringifyIgnoreByName(EtsClass *cls, EtsString *name)
 {
     EtsField *field = GetInstanceFieldByName(cls, name);
     bool ret = false;
@@ -66,7 +66,7 @@ EtsBoolean EscompatJSONGetJSONStringifyIgnoreByName(EtsClass *cls, EtsString *na
     return static_cast<EtsBoolean>(ret);
 }
 
-EtsBoolean EscompatJSONGetJSONParseIgnoreFromAnnotation(EtsClass *cls, EtsLong idx)
+EtsBoolean StdCoreJSONGetJSONParseIgnoreFromAnnotation(EtsClass *cls, EtsLong idx)
 {
     EtsField *field = cls->GetFieldByIndex(idx);
     bool ret = false;
@@ -86,7 +86,7 @@ EtsBoolean EscompatJSONGetJSONParseIgnoreFromAnnotation(EtsClass *cls, EtsLong i
     return static_cast<EtsBoolean>(ret);
 }
 
-EtsString *EscompatJSONGetJSONRenameByIdx(EtsClass *cls, EtsLong idx)
+EtsString *StdCoreJSONGetJSONRenameByIdx(EtsClass *cls, EtsLong idx)
 {
     auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -113,7 +113,7 @@ EtsString *EscompatJSONGetJSONRenameByIdx(EtsClass *cls, EtsLong idx)
     return retStrHandle.GetPtr();
 }
 
-EtsString *EscompatJSONGetJSONRenameByName(EtsClass *cls, EtsString *name)
+EtsString *StdCoreJSONGetJSONRenameByName(EtsClass *cls, EtsString *name)
 {
     auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -140,7 +140,7 @@ EtsString *EscompatJSONGetJSONRenameByName(EtsClass *cls, EtsString *name)
     return retStrHandle.GetPtr();
 }
 
-extern "C" EtsString *EscompatJSONStringifyFast(EtsObject *value)
+extern "C" EtsString *StdCoreJSONStringifyFast(EtsObject *value)
 {
     auto coro = EtsCoroutine::GetCurrent();
     ASSERT(coro->HasPendingException() == false);

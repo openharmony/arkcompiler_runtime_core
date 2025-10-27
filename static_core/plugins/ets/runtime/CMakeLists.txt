@@ -51,7 +51,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_TypedArrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_JSON.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_JSON.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Reflect.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Map.cpp

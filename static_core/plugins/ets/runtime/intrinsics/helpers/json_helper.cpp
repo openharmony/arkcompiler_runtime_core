@@ -567,7 +567,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
                 isSuccessful = SerializeJSONObjectArray(result);
             }
             coro->ManagedCodeBegin();
-        } else if (value->IsInstanceOf(platformTypes->escompatJsonReplacer)) {
+        } else if (value->IsInstanceOf(platformTypes->stdcoreJsonReplacer)) {
             PandaVector<Value> args {Value(value->GetCoreType())};
             auto jsonReplacerMethod = valueCls->GetInstanceMethod("jsonReplacer", nullptr)->GetPandaMethod();
             auto ret = jsonReplacerMethod->Invoke(coro, args.data());

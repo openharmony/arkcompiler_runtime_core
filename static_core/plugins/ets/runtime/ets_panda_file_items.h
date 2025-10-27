@@ -220,8 +220,9 @@ static constexpr std::string_view INTEROP_DYNAMIC_FUNCTION             = "Lstd/i
 
 static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/containers/ArrayAsListInt;";
+
 static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lstd/core/RegExpExecArray;";
-static constexpr std::string_view JSON_REPLACER                        = "Lescompat/JsonReplacer;";
+static constexpr std::string_view JSON_REPLACER                        = "Lstd/core/JsonReplacer;";
 static constexpr std::string_view JSON_ELEMENT_SERIALIZABLE            = "Lstd/core/jsonx/JsonElementSerializable;";
 
 // ANI annotation classes
@@ -262,9 +263,9 @@ static constexpr std::string_view BIG_INT64_ARRAY                      = "Lescom
 static constexpr std::string_view BIG_UINT64_ARRAY                     = "Lescompat/BigUint64Array;";
 
 // Json Annotations
-static constexpr std::string_view JSON_STRINGIFY_IGNORE                = "Lescompat/JSONStringifyIgnore;";
-static constexpr std::string_view JSON_PARSE_IGNORE                    = "Lescompat/JSONParseIgnore;";
-static constexpr std::string_view JSON_RENAME                          = "Lescompat/JSONRename;";
+static constexpr std::string_view JSON_STRINGIFY_IGNORE                = "Lstd/core/JSONStringifyIgnore;";
+static constexpr std::string_view JSON_PARSE_IGNORE                    = "Lstd/core/JSONParseIgnore;";
+static constexpr std::string_view JSON_RENAME                          = "Lstd/core/JSONRename;";
 
 // Annotation for optional parameters
 static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =
