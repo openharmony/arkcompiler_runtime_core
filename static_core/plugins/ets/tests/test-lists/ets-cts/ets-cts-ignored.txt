@@ -1542,6 +1542,12 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_12.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_20.ets
 
+#31017 override method in superinterface with the same private in superclass
+15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets
+
+#31018 override protected method in superclass by protected one with the same public in superinterface
+15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_5.ets
+
 #26554 overloads for static methods span the inheritance
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_1.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_3.ets
