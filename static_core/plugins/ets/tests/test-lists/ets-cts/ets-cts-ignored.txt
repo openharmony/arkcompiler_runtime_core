@@ -73,9 +73,6 @@
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_0.ets
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_1.ets
 
-#24448
-05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/wrong_type_parameter_variance_4.ets
-
 #30904 no CTE for FixedArray with the predefined value type
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_0.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_1.ets
