@@ -1220,6 +1220,56 @@ async function testExecuteUndefined() {
     await taskpool.execute(task);
 }
 
+class TestFoo {
+    static total: number = 0;
+    static tag: string = "foo";
+
+    name: string;
+    age: number;
+    active: boolean;
+    nums: number[];
+
+    constructor(name: string, age: number) {
+        this.name = name;
+        this.age = age;
+        this.active = true;
+        this.nums = [];
+        TestFoo.total++;
+    }
+
+    public describe(): string {
+        return `${this.name}:${this.age}:${this.active}`;
+    }
+
+    public static create(name: string): TestFoo {
+        return new TestFoo(name, 0);
+    }
+}
+
+async function useTestFoo() {
+    let task = new taskpool.Task(TestFoo.create, 'test');
+    let res = await taskpool.execute(task) as TestFoo;
+    let type = Type.from<TestFoo>() as ClassType;
+    res.nums.push(1, 2, 3);
+    arktest.assertEQ(res.describe(), 'test:0:true');
+    arktest.assertEQ(RuntimeDebug.countInstancesOfClass(type), 1);
+}
+
+function testTaskpoolReturnObjWithGC() {
+    waitForCompletion(useTestFoo);
+
+    let type = Type.from<TestFoo>() as ClassType;
+    let instanceCount = RuntimeDebug.countInstancesOfClass(type);
+    if (instanceCount != 0) {
+        const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE);
+        if (gcId > 0) {
+            GC.waitForFinishGC(gcId);
+        }
+    }
+
+    arktest.assertEQ(RuntimeDebug.countInstancesOfClass(type), 0);
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1264,6 +1314,7 @@ function main(): int {
     commonTaskSuiteDisabled.addAsyncTest('taskpoolRetriggerShrinkTest', taskpoolRetriggerShrinkTest);
     commonTaskSuiteDisabled.addAsyncTest('taskpoolShrinkTest', taskpoolShrinkTest);
     commonTaskSuite.addAsyncTest('TestExecuteUndefined', testExecuteUndefined);
+    commonTaskSuite.addTest('testTaskpoolReturnObjWithGC', testTaskpoolReturnObjWithGC);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;

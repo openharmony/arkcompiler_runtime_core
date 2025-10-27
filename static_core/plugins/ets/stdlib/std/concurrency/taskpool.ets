@@ -99,6 +99,8 @@ export namespace taskpool {
             let p = Promise.resolve<Any>(new Object()).then<Any, Any>(taskRunner, taskRunner);
             p.then((res: Any) => {
                 InternalTask.of(task!).resolve(res);
+                InternalTask.of(task!).resolve = (_: Any) => {};
+                InternalTask.of(task!).reject = (_: Error) => {};
             }).catch((e) => {
                 InternalTask.of(task!).reject(e);
             }).finally(() => {
