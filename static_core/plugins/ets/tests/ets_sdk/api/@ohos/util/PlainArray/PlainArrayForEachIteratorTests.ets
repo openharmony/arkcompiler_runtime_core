@@ -32,9 +32,9 @@ function main(): int {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
+    static readonly testNumber1: int = 1;
     static readonly testInt1: int = 1;
-    static readonly testNumber6: double | int = 6;
+    static readonly testNumber6: int = 6;
     static readonly testString1: string = "0:0,2:2,4:4,5:5,8:8";
     static readonly forNumber1: Int[] = [0, 2, 4, 5, 8];
     static readonly forNumber2: Int[] = [0, 8, 2, 5, 4];

@@ -34,9 +34,9 @@ class Temp {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber5: int = 5;
+    static readonly testNumber6: int = 6;
     static readonly testNumberLarge: double = 10000;
     static readonly testString1: string = "string";
     static readonly testObject1: Temp = { age: 10, name: "zhang" };

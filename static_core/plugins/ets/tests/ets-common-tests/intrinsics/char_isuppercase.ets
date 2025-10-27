@@ -32,17 +32,17 @@ function main(): int {
             return 4;
         }
     }
-    for (let ch: char = 0; ch < c'A'; ch++) {
+    for (let ch: char = c'\0'; ch != c'A'; ch = (ch.toInt() + 1).toChar()) {
         if (Char.toUpperCase(ch) != ch || Char.toLowerCase(ch) != ch || Char.isUpperCase(ch) || Char.isLowerCase(ch)) {
             return 5;
         }
     }
-    for (let ch: char = c'Z' + 1; ch < c'a'; ch++) {
+    for (let ch: char = (c'Z'.toInt() + 1).toChar(); ch != c'a'; ch = (ch.toInt() + 1).toChar()) {
         if (Char.toUpperCase(ch) != ch || Char.toLowerCase(ch) != ch || Char.isUpperCase(ch) || Char.isLowerCase(ch)) {
             return 6;
         }
     }
-    for (let ch: char = c'z' + 1; ch < 65535; ch++) {
+    for (let ch: char = (c'z'.toInt() + 1).toChar(); ch != Int.toChar(65535); ch = (ch.toInt() + 1).toChar()) {
         if (Char.toUpperCase(ch) != ch || Char.toLowerCase(ch) != ch || Char.isUpperCase(ch) || Char.isLowerCase(ch)) {
             return 6;
         }

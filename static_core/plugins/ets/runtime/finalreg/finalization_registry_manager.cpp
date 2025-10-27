@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
+#include "runtime/coroutines/coroutine_worker_group.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -114,12 +115,14 @@ void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
         auto *objArray = EtsObjectArray::FromCoreType(vm_->GetGlobalObjectStorage()->Get(finRegInstancies_));
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
         Method *cleanup = PlatformTypes(vm_)->coreFinalizationRegistryExecCleanup->GetPandaMethod();
-        auto launchMode =
-            coro->GetWorker()->IsMainWorker() ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
-        auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(launchMode))};
+        auto workerDomain =
+            coro->GetWorker()->IsMainWorker() ? CoroutineWorkerDomain::MAIN : CoroutineWorkerDomain::GENERAL;
+        auto groupId = coro->GetWorker()->IsMainWorker()
+                           ? CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN)
+                           : CoroutineWorkerGroup::AnyId();
+        auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(workerDomain))};
         [[maybe_unused]] bool launchResult =
-            coroManager->Launch(event, cleanup, std::move(args), launchMode, CoroutinePriority::DEFAULT_PRIORITY, false,
-                                CoroutineWorkerGroup::ANY_ID);
+            coroManager->Launch(event, cleanup, std::move(args), groupId, CoroutinePriority::DEFAULT_PRIORITY, false);
         ASSERT(launchResult);
     }
 }

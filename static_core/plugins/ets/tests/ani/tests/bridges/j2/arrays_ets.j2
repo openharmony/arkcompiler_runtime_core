@@ -33,6 +33,8 @@ function test{{ Type }}Arr() {
         let buff: {{ type }}[] = [true, false, true, false, true]
     {% elif type == "string" -%}
         let buff: {{ type }}[] = ["1", "2", "3", "4", "5"]
+    {% elif type == "char" -%}
+        let buff: {{ type }}[] = [Int.toChar(1), Int.toChar(2),Int.toChar(3),Int.toChar(4),Int.toChar(5)]
     {%- else -%}
         let buff: {{ type }}[] = [1, 2, 3, 4, 5]
     {%- endif %}

@@ -21,6 +21,9 @@ params: {{ni.x}} % {{ni.y}} == {{ni.result}}
 ---*/
 
 function main(): void {
-  arktest.assertTrue( {{ni.x}} % {{ni.y}} == {{ni.result}} )
+  let lhs = {{ni.x}}
+  let rhs = {{ni.y}}
+  let res = lhs % rhs
+  arktest.assertTrue( res == {{ni.result}} )
 }
 {% endfor %}

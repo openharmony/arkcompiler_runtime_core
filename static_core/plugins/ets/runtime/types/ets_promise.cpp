@@ -40,10 +40,10 @@ EtsPromise *EtsPromise::Create(EtsCoroutine *coro)
 void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
 {
     auto *cbQueue = GetCallbackQueue(coro);
-    auto *launchModeQueue = GetLaunchModeQueue(coro);
+    auto *workerDomainQueue = GetWorkerDomainQueue(coro);
     auto queueSize = GetQueueSize();
     ASSERT(queueSize == 0 || cbQueue != nullptr);
-    ASSERT(queueSize == 0 || launchModeQueue != nullptr);
+    ASSERT(queueSize == 0 || workerDomainQueue != nullptr);
 
     if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) &&
         state_ == STATE_REJECTED && queueSize == 0) {
@@ -55,14 +55,18 @@ void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
 
     for (int idx = 0; idx < queueSize; ++idx) {
         auto *thenCallback = cbQueue->Get(idx);
-        auto launchMode = static_cast<CoroutineLaunchMode>(launchModeQueue->Get(idx));
-        EtsPromise::LaunchCallback(coro, thenCallback, launchMode);
+        auto workerDomain = static_cast<CoroutineWorkerDomain>(workerDomainQueue->Get(idx));
+        ASSERT(workerDomain == CoroutineWorkerDomain::MAIN || workerDomain == CoroutineWorkerDomain::GENERAL);
+        auto groupId = workerDomain == CoroutineWorkerDomain::MAIN
+                           ? CoroutineWorkerGroup::FromDomain(coro->GetCoroutineManager(), CoroutineWorkerDomain::MAIN)
+                           : CoroutineWorkerGroup::AnyId();
+        EtsPromise::LaunchCallback(coro, thenCallback, groupId);
     }
     ClearQueues(coro);
 }
 
 /* static */
-void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode)
+void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, const CoroutineWorkerGroup::Id &groupId)
 {
     // Launch callback in its own coroutine
     auto *coroManager = coro->GetCoroutineManager();
@@ -73,8 +77,7 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, Corouti
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
     [[maybe_unused]] bool launchResult =
-        coroManager->Launch(event, method, std::move(args), launchMode, EtsCoroutine::PROMISE_CALLBACK, false,
-                            CoroutineWorkerGroup::ANY_ID);
+        coroManager->Launch(event, method, std::move(args), groupId, EtsCoroutine::PROMISE_CALLBACK, false);
     ASSERT(launchResult);
 }
 

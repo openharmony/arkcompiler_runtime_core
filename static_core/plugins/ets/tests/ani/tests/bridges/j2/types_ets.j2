@@ -49,6 +49,8 @@ function test{{ Type }}() {
         {%- endif -%}
     {%- elif type == "string" -%}
         "{{ loop.index }}"
+    {%- elif type == "char" -%}
+        Int.toChar({{ loop.index }})
     {%- elif type == "float" -%}
         Double.toFloat({{ loop.index }}.{{ loop.index }})
     {%- else -%}

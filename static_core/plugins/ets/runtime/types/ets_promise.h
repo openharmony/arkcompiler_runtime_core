@@ -84,16 +84,16 @@ public:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), callbackQueue->GetCoreType());
     }
 
-    EtsIntArray *GetLaunchModeQueue(EtsCoroutine *coro) const
+    EtsIntArray *GetWorkerDomainQueue(EtsCoroutine *coro) const
     {
         return reinterpret_cast<EtsIntArray *>(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, launchModeQueue_)));
+            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_)));
     }
 
-    void SetLaunchModeQueue(EtsCoroutine *coro, EtsIntArray *launchModeQueue)
+    void SetWorkerDomainQueue(EtsCoroutine *coro, EtsIntArray *workerDomainQueue)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, launchModeQueue_),
-                                  launchModeQueue->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_),
+                                  workerDomainQueue->GetCoreType());
     }
 
     EtsInt GetQueueSize() const
@@ -202,13 +202,13 @@ public:
         OnPromiseCompletion(coro);
     }
 
-    void SubmitCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode)
+    void SubmitCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineWorkerDomain workerDomain)
     {
         ASSERT(IsLocked());
         ASSERT(queueSize_ < static_cast<int>(GetCallbackQueue(coro)->GetLength()));
         auto *cbQueue = GetCallbackQueue(coro);
-        auto *launchModeQueue = GetLaunchModeQueue(coro);
-        launchModeQueue->Set(queueSize_, static_cast<int>(launchMode));
+        auto *workerDomainQueue = GetWorkerDomainQueue(coro);
+        workerDomainQueue->Set(queueSize_, static_cast<int>(workerDomain));
         cbQueue->Set(queueSize_, callback);
         queueSize_++;
     }
@@ -266,7 +266,7 @@ public:
     }
 
     // launch promise then/catch callback: void()
-    static void LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode);
+    static void LaunchCallback(EtsCoroutine *coro, EtsObject *callback, const CoroutineWorkerGroup::Id &groupId);
 
 private:
     void OnPromiseCompletion(EtsCoroutine *coro);
@@ -274,7 +274,7 @@ private:
     void ClearQueues(EtsCoroutine *coro)
     {
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, launchModeQueue_), nullptr);
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_), nullptr);
         queueSize_ = 0;
     }
 
@@ -283,9 +283,9 @@ private:
     ObjectPointer<EtsEvent> event_;
     ObjectPointer<EtsObjectArray>
         callbackQueue_;  // the queue of 'then and catch' calbacks which will be called when the Promise gets fulfilled
-    ObjectPointer<EtsIntArray> launchModeQueue_;  // the queue of callbacks' launch mode
-    ObjectPointer<EtsObject> interopObject_;      // internal object used in js interop
-    ObjectPointer<EtsObject> linkedPromise_;      // linked JS promise as JSValue (if exists)
+    ObjectPointer<EtsIntArray> workerDomainQueue_;  // the queue of callbacks' launch mode
+    ObjectPointer<EtsObject> interopObject_;        // internal object used in js interop
+    ObjectPointer<EtsObject> linkedPromise_;        // linked JS promise as JSValue (if exists)
     EtsInt queueSize_;
     uint32_t state_;  // the Promise's state
 

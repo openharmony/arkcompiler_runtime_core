@@ -40,12 +40,12 @@ class Temp {
 }
 
 class TestData {
-    static readonly testNumber1: double | int = 1;
-    static readonly testNumber2: double | int = 2;
-    static readonly testNumber3: double | int = 3;
-    static readonly testNumber5: double | int = 5;
-    static readonly testNumber6: double | int = 6;
-    static readonly testNumber12: double | int = 12;
+    static readonly testNumber1: int = 1;
+    static readonly testNumber2: int = 2;
+    static readonly testNumber3: int = 3;
+    static readonly testNumber5: int = 5;
+    static readonly testNumber6: int = 6;
+    static readonly testNumber12: int = 12;
     static readonly testString1: string = "string";
     static readonly testString2: string = "";
     static readonly testString3: string = "`";

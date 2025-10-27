@@ -1615,3 +1615,13 @@
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_10.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_11.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_12.ets
+
+#30971
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_3.ets
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_7.ets
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_11.ets
+02.lexical_elements/09.literals/02.integer_literals/incorrect_int_literals_16.ets
+02.lexical_elements/09.literals/03.floating_point_literals/float_literal_too_large_1.ets
+02.lexical_elements/09.literals/03.floating_point_literals/float_literal_too_large_3.ets
+09.literals/03.floating_point_literals/float_literal_too_large_1.ets
+09.literals/03.floating_point_literals/float_literal_too_large_3.ets

@@ -183,7 +183,7 @@ export class JSON {
         let sb = new StringBuilder([c'\"'] as FixedArray<char>)
         let len = d.getLength()
 
-        let prevChar: char = 0
+        let prevChar: char = c'\0'
         for (let i = 0; i < len; ++i) {
             let currChar = d.charAt(i)
 
@@ -207,13 +207,13 @@ export class JSON {
                 if (escapedCharIndex != -1) {
                     sb.append(c'\\')
                     sb.append(JSON.NON_ESCAPED_CHARS[escapedCharIndex])
-                } else if (currChar <= c'\x1f' && currChar >= c'\x00') {
-                    if (currChar <= c'\x0f') {
+                } else if ((currChar.compareTo(c'\x1f') <= 0) && (currChar.compareTo(c'\x00') >= 0)) {
+                    if (currChar.compareTo(c'\x0f') <= 0) {
                         sb.append('\\u000')
                     } else {
                         sb.append('\\u00')
                     }
-                    sb.append(Number.toString(currChar, 16))
+                    sb.append(currChar.toInt().toString(16))
                 } else {
                     sb.append(currChar)
                 }
@@ -233,7 +233,7 @@ export class JSON {
     }
 
     private static appendCharHex(buffer: StringBuilder, chr: char): StringBuilder {
-        buffer.append("\\u").append(new Int(chr).toString(16))
+        buffer.append("\\u").append(chr.toInt().toString(16))
         return buffer
     }
 
@@ -1402,7 +1402,7 @@ function escapeString(str: string): string {
                 result += "\\t"
                 break
             default:
-                if (ch < 32) {
+                if (ch.toInt() < 32) {
                     let int_value = new Int(ch.toInt());
                     result += "\\u" + int_value.toString(16).padStart(4, "0")
                 } else {
@@ -1582,7 +1582,7 @@ export class JSONParser {
                 case c'}':
                     return res
                 default:
-                    throw new SyntaxError("Expected \",\" or \"" + JSONObject.END_CHAR + "\" at " + this.getCurPosDescr() + ", got \"" + this.curChar + "\"")
+                    throw new SyntaxError("Expected \",\" or \"" + JSONObject.END_CHAR.toString() + "\" at " + this.getCurPosDescr() + ", got \"" + this.curChar.toString() + "\"")
             }
         }
         return res
@@ -1607,7 +1607,7 @@ export class JSONParser {
                 case c']':
                     return res
                 default:
-                    throw new SyntaxError("Expected , or " + JSONArray.END_CHAR + " at " + this.getCurPosDescr() + ", got " + this.curChar)
+                    throw new SyntaxError("Expected , or " + JSONArray.END_CHAR.toString() + " at " + this.getCurPosDescr() + ", got " + this.curChar.toString())
             }
         }
         return res
@@ -2328,7 +2328,7 @@ export class JsonLexer
      * @returns true if character is a digit
      */
     private isDigit(ch: char): boolean {
-        return ch >= c'0' && ch <= c'9'
+        return (ch.compareTo(c'0') >= 0) && (ch.compareTo(c'9') <= 0)
     }
 
     /**
@@ -2337,9 +2337,9 @@ export class JsonLexer
      * @returns true if character is a hex digit
      */
     private isHexDigit(ch: char): boolean {
-        return (ch >= c'0' && ch <= c'9') ||
-                (ch >= c'A' && ch <= c'F') ||
-                (ch >= c'a' && ch <= c'f')
+        return ((ch.compareTo(c'0') >= 0) && (ch.compareTo(c'9') <= 0)) ||
+                ((ch.compareTo(c'A') >= 0) && (ch.compareTo(c'F') <= 0)) ||
+                ((ch.compareTo(c'a') >= 0) && (ch.compareTo(c'f') <= 0))
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -180,12 +180,11 @@ struct LiteralArray {
         }
     };
 
-    std::vector<ark::pandasm::LiteralArray::Literal> literals;  // NOLINT(misc-non-private-member-variables-in-classes)
+    using LiteralVector = std::vector<ark::pandasm::LiteralArray::Literal>;
 
-    explicit LiteralArray(std::vector<ark::pandasm::LiteralArray::Literal> literalsVec)
-        : literals(std::move(literalsVec))
-    {
-    }
+    LiteralVector literals;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+    explicit LiteralArray(LiteralVector literalsVec) : literals(std::move(literalsVec)) {}
     explicit LiteralArray() = default;
 
     static constexpr panda_file::LiteralTag GetArrayTagFromComponentType(panda_file::Type::TypeId type)

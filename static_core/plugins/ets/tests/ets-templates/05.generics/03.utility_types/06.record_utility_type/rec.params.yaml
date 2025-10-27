@@ -132,7 +132,7 @@ cases:
               12345.0: "1 2 3 4 5",
               67890.0: "6 7 8 9 0",
           });
-          arktest.assertTrue(b.meth()[12345] == "1 2 3 4 5")
+          arktest.assertTrue(b.meth()[new Short(12345)] == "1 2 3 4 5")
           arktest.assertTrue(b.meth()[67890] == "6 7 8 9 0")
           arktest.assertTrue(b.meth()[11111] == undefined)
           b.put({ 1.0: "A", 2.0: "B" })

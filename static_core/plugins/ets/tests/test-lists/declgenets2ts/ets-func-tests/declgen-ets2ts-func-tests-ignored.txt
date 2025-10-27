@@ -216,3 +216,6 @@ std/core/ProxyExtraTest1.ets
 std/core/ProxyExtraTest2.ets
 std/core/ProxyExtraTest3.ets
 std/core/ProxyBasicTests.ets
+
+#30971
+non_null_number_as_index.ets

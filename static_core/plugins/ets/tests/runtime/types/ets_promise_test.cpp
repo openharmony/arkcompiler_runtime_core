@@ -62,7 +62,7 @@ public:
             MIRROR_FIELD_INFO(EtsPromise, mutex_, "mutex"),
             MIRROR_FIELD_INFO(EtsPromise, event_, "event"),
             MIRROR_FIELD_INFO(EtsPromise, callbackQueue_, "callbackQueue"),
-            MIRROR_FIELD_INFO(EtsPromise, launchModeQueue_, "launchModeQueue"),
+            MIRROR_FIELD_INFO(EtsPromise, workerDomainQueue_, "workerDomainQueue"),
             MIRROR_FIELD_INFO(EtsPromise, interopObject_, "interopObject"),
             MIRROR_FIELD_INFO(EtsPromise, linkedPromise_, "linkedPromise"),
             MIRROR_FIELD_INFO(EtsPromise, queueSize_, "queueSize"),

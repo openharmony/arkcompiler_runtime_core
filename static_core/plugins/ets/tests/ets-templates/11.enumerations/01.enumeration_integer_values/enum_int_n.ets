@@ -16,7 +16,6 @@
 {%- for c in cases %}
 /*---
 desc: The integer value of an enum constant is set implicitly if an enumeration constant specifies no value.
-tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}

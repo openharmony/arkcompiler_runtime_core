@@ -14,41 +14,93 @@
 ---
 cases:
     - decl: |-
+          enum Enum { first, second, third }
+      use: |-
+          arktest.assertEQ( Enum.first.valueOf(), 0 )
+          arktest.assertEQ( Enum.second.valueOf(), 1 )
+          arktest.assertEQ( Enum.third.valueOf(), 2 )
+
+    - decl: |-
+          enum Enum { first, second = -2147483648, third}
+      use: |-
+          arktest.assertEQ( Enum.first.valueOf(), 0 )
+          arktest.assertEQ( Enum.second.valueOf(), -2147483648 )
+          arktest.assertEQ( Enum.third.valueOf(), -2147483647 )
+
+    - decl: |-
+          enum Enum { first = 0x7fffffff - 2, second, third }
+      use: |-
+          arktest.assertEQ( Enum.first.valueOf(), 2147483645 )
+          arktest.assertEQ( Enum.second.valueOf(), 2147483646 )
+          arktest.assertEQ( Enum.third.valueOf(), 2147483647 ) // Int.MAX_VALUE
+
+    - decl: |-
           const a: int = 2147483647
           const b: int = 2147483647 - 1
-          let c: int = 2147483647 - 2   // not a constant expression
-          enum Enum { first = a, second = b, third = c }
+          enum Enum { first = a, second = b, third = b - 1 }
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), a )
           arktest.assertEQ( Enum.second.valueOf(), b )
-          arktest.assertEQ( Enum.third.valueOf(), c )
+          arktest.assertEQ( Enum.third.valueOf(), b - 1 )
 
     - decl: |-
-          enum Enum { first = 1, second = 1.2, third }  // wrong init type
+          enum Enum { first, second = -1, third }
       use: |-
-          arktest.assertEQ( Enum.second.valueOf(), 1.2 )
+          arktest.assertTrue( Enum.first.valueOf() == 0 )
+          arktest.assertTrue( Enum.second.valueOf() == -1 )
+          arktest.assertTrue( Enum.third == Enum.first )
 
     - decl: |-
-          enum Enum { first = true, second = false }  // wrong init type
+          enum Enum { first = -1, second, third = -42 }
       use: |-
-          arktest.assertTrue( true )
+          arktest.assertEQ( "" + Enum.first, "-1" )
+          arktest.assertEQ( "" + Enum.second, "0" )
+          arktest.assertEQ( "" + Enum.third, "-42" )
 
     - decl: |-
-          enum Enum1 { first = 42, second }
-          enum Enum2 { first = Enum1.first.valueOf(), second }  // not a constant expression
+          enum Enum { first = -1, second, third = -42 }
       use: |-
-          arktest.assertEQ( Enum2.first.valueOf(), 42 )
-          arktest.assertEQ( Enum2.second.valueOf(), 43 )
+          arktest.assertEQ( Enum.first + Enum.second + Enum.third, -43 )
 
     - decl: |-
-          enum Enum1 { first = 42, second }
-          enum Enum2 { first = 42, second }
+          enum Enum { first = 0b0011, second = 0o731, third = 0x00FE_CAFE, fourth = 1_123_456 }
       use: |-
-          let v: Enum2 = Enum1.first  // wrong type
+          arktest.assertEQ( Enum.first.toString(), "3" )
+          arktest.assertEQ( Enum.second.toString(), "473" )
+          arktest.assertEQ( Enum.third.toString(), "16698110" )
+          arktest.assertEQ( Enum.fourth.toString(), "1123456" )
 
     - decl: |-
-          enum Enum1 { first = -1, second, third = -42 }
-          enum Enum2 { first = -1, second, third = -42 }
+          enum Color { Red = 700, Green = 500, Blue = 400 }
       use: |-
-          let v: Enum1 = Enum1.first
-          let q: Enum2 = v as Enum2   // not allowed conversion
+          let v: Color = Color.Green
+          switch(v) {
+              case Color.Green: arktest.assertEQ( v.toString(), "500"); break;
+              default: arktest.assertTrue( false); break;
+          }
+
+    - decl: |-
+          enum Enum { first = -1, second, third = -42 }
+      use: |-
+          arktest.assertTrue( Enum.first == -1 )
+          arktest.assertTrue( Enum.second == 0 )
+          arktest.assertTrue( Enum.third == -42 )
+
+    - decl: |-
+          enum Enum { first = -1, second = 12345678910, third }
+      use: |-
+          arktest.assertEQ( Enum.first + Enum.second - Enum.third, -2 )
+
+    - decl: |-
+          enum Enum { first = -1, second = 12345678910, third }
+      use: |-
+          arktest.assertEQ( Enum.first.valueOf(), -1 )
+          arktest.assertEQ( Enum.second.valueOf(), 12345678910 )
+          arktest.assertEQ( Enum.third.valueOf(), 12345678911 )
+
+    - decl: |-
+          enum Enum { first = -1, second = 12345678910, third }
+      use: |-
+          arktest.assertEQ( Enum.first.toString(), "-1" )
+          arktest.assertEQ( Enum.second.toString(), "12345678910" )
+          arktest.assertEQ( Enum.third.toString(), "12345678911" )

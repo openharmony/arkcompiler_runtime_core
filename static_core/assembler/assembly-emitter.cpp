@@ -1851,14 +1851,14 @@ std::unique_ptr<const panda_file::File> AsmEmitter::Emit(Program &program, Panda
 
 /* static */
 bool AsmEmitter::AssignProfileInfo(std::unordered_map<size_t, std::vector<Ins *>> &instMap,
-                                   const std::map<std::string, pandasm::Function> &functionTable)
+                                   std::map<std::string, pandasm::Function> &functionTable)
 {
     constexpr auto SIZES = profiling::GetOrderedProfileSizes();
     for (auto &func : functionTable) {
         for (auto &inst : func.second.ins) {
             auto profSize = INST_PROFILE_SIZES[static_cast<unsigned>(inst.opcode)];
             if (profSize != 0) {
-                instMap[profSize].push_back(const_cast<Ins *>(&inst));
+                instMap[profSize].push_back(&inst);
             }
         }
         size_t index = 0;
@@ -1871,7 +1871,7 @@ bool AsmEmitter::AssignProfileInfo(std::unordered_map<size_t, std::vector<Ins *>
             vec.clear();
         }
 
-        const_cast<pandasm::Function *>(&(functionTable.at(func.first)))->profileSize = index;
+        functionTable.at(func.first).profileSize = index;
     }
     return true;
 }

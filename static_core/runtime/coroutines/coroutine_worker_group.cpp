@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-/*---
-desc: Bitwise complement operator
-tags: [negative, compile-only]
----*/
+#include "runtime/coroutines/coroutine_manager.h"
+#include "runtime/coroutines/coroutine_worker_group.h"
 
-function main(): void {
-  let a: double = 9223372036854775808;
-  arktest.assertEQ(~a, -9223372036854775808);
+namespace ark {
 
-  let b: double = 9223372036854775809;
-  arktest.assertEQ(~b, -9223372036854775808);
+CoroutineWorkerGroup::Id CoroutineWorkerGroup::FromDomain(CoroutineManager *coroman, CoroutineWorkerDomain domain,
+                                                          const PandaVector<CoroutineWorker::Id> &hint)
+{
+    ASSERT(coroman != nullptr);
+    return coroman->GenerateWorkerGroupId(domain, hint);
 }
+
+}  // namespace ark
