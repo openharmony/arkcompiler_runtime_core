@@ -84,6 +84,7 @@ class Builder {
 public:
     static Type BuildUndefined();
     static Type BuildNull();
+    static Type BuildAny();
 
     static Type BuildBoolean();
     static Type BuildChar();
@@ -140,6 +141,7 @@ public:
 
     SignatureBuilder &AddUndefined();
     SignatureBuilder &AddNull();
+    SignatureBuilder &AddAny();
 
     SignatureBuilder &AddBoolean();
     SignatureBuilder &AddChar();
@@ -164,6 +166,7 @@ public:
 
     SignatureBuilder &SetReturnUndefined();
     SignatureBuilder &SetReturnNull();
+    SignatureBuilder &SetReturnAny();
 
     SignatureBuilder &SetReturnBoolean();
     SignatureBuilder &SetReturnChar();

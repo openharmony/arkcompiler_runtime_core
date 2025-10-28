@@ -195,6 +195,11 @@ Type Builder::BuildNull()
     return CreateType("std.core.Null", "C");
 }
 
+Type Builder::BuildAny()
+{
+    return CreateType("Y");
+}
+
 Type Builder::BuildBoolean()
 {
     return CreateType("z");
@@ -481,6 +486,12 @@ SignatureBuilder &SignatureBuilder::AddNull()
     return *this;
 }
 
+SignatureBuilder &SignatureBuilder::AddAny()
+{
+    impl_->AddParam(Builder::BuildAny());
+    return *this;
+}
+
 SignatureBuilder &SignatureBuilder::AddBoolean()
 {
     impl_->AddParam(Builder::BuildBoolean());
@@ -598,6 +609,12 @@ SignatureBuilder &SignatureBuilder::SetReturnUndefined()
 SignatureBuilder &SignatureBuilder::SetReturnNull()
 {
     impl_->SetReturn(Builder::BuildNull());
+    return *this;
+}
+
+SignatureBuilder &SignatureBuilder::SetReturnAny()
+{
+    impl_->SetReturn(Builder::BuildAny());
     return *this;
 }
 
