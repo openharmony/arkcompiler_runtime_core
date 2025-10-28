@@ -16,11 +16,10 @@ types:
   - |-
     () => string
   - |-
-    (par0: string) => void
+    (par0: string) => undefined
   - |-
     (par0: string, par1: string) => int
   - |-
     (par0: string, par1: string, par2: string) => boolean
   - |-
     (par0: string, par1: string, par2: string, par3: string) => bigint
-
