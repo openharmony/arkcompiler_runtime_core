@@ -47,3 +47,6 @@ std/core/json/JsonStringifyBigIntTest.ets
 
 #29146
 algorithms/SortingTest.ets
+
+#31076
+escompat/JsonParseTest.ets
