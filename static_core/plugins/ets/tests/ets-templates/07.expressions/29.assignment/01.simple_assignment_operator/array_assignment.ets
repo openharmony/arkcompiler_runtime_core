@@ -37,6 +37,7 @@ desc: >-
 
   {{c.desc}}
 params: abrupt completion, left-hand operand, static
+tags: [no-warmup]
 ---*/
 
 let result: string = ""
