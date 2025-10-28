@@ -137,7 +137,7 @@ class Test {
 
     static testCustomAbcRuntimeLinker() {
         // Cut out "additional1.ets" from the ABC files list
-        const reducedAbcFiles = Array.from(Test.getAdditionalFilesList()).slice(1);
+        const reducedAbcFiles = Test.getAdditionalFilesList().slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
         reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linkers
@@ -157,7 +157,7 @@ class Test {
 
     static testClassInitializationFail() {
         // Cut out "additional1.ets" from the ABC files list
-        const reducedAbcFiles = Array.from(Test.getAdditionalFilesList()).slice(1);
+        const reducedAbcFiles = Test.getAdditionalFilesList().slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
         reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker
@@ -247,7 +247,7 @@ class Test {
     static testRuntimeLinkerAddAbcFiles() {
         const allAbcFiles = Test.getAdditionalFilesList();
         // Cut out "additional1.ets" from the ABC files list
-        const reducedAbcFiles = Array.from(allAbcFiles).slice(1);
+        const reducedAbcFiles = allAbcFiles.slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
         reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker
@@ -258,7 +258,7 @@ class Test {
     static testMemoryRuntimeLinkerAddAbcFiles() {
         const allAbcFiles = Test.getAdditionalFilesList();
         // Cut out "additional1.ets" from the ABC files list
-        const reducedAbcFiles = Array.from(allAbcFiles).slice(1);
+        const reducedAbcFiles = allAbcFiles.slice(1);
         const abcFiles = new string[reducedAbcFiles.length];
         reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker

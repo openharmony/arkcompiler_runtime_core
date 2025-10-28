@@ -222,13 +222,17 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
 
     auto clsName = ClassHelper::GetName(descriptor);
     auto etsClsName = EtsString::CreateFromMUtf8(clsName.c_str());
+    if (UNLIKELY(etsClsName == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
     const auto *runtimeLinker = GetRuntimeLinker();
     ASSERT(runtimeLinker != nullptr);
-    ASSERT(etsClsName != nullptr);
-    std::array args {Value(runtimeLinker->GetCoreType()), Value(etsClsName->GetCoreType()), Value(ANI_TRUE)};
+    // `nullptr` for default value.
+    std::array args {Value(runtimeLinker->GetCoreType()), Value(etsClsName->GetCoreType()), Value(nullptr)};
 
-    auto *loadClass = runtimeLinker->GetClass()->GetInstanceMethod("loadClass", "Lstd/core/String;Z:Lstd/core/Class;");
-    ASSERT(loadClass != nullptr);
+    // Valid to use method from base class because `loadClass` is final.
+    auto *loadClass = PlatformTypes(coro)->coreRuntimeLinkerLoadClass;
     auto res = loadClass->GetPandaMethod()->Invoke(coro, args.data());
     if (!coro->HasPendingException()) {
         return Class::FromClassObject(res.GetAs<ObjectHeader *>());

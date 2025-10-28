@@ -66,6 +66,7 @@ public:
 
     /* Runtime linkage classes */
     EtsClass *coreRuntimeLinker {};
+    EtsMethod *coreRuntimeLinkerLoadClass {};
     EtsClass *coreBootRuntimeLinker {};
     EtsClass *coreAbcRuntimeLinker {};
     EtsClass *coreMemoryRuntimeLinker {};
