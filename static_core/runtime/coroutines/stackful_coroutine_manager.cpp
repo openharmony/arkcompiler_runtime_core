@@ -502,7 +502,6 @@ void StackfulCoroutineManager::UnblockWaiters(CoroutineEvent *blocker)
     // hence using the "weak" stats collector
     ScopedCoroutineStats s(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL, true);
 
-    os::memory::LockHolder lkWorkers(workersLock_);
     ASSERT(blocker != nullptr);
 #ifndef NDEBUG
     {
@@ -511,6 +510,7 @@ void StackfulCoroutineManager::UnblockWaiters(CoroutineEvent *blocker)
     }
 #endif
 
+    os::memory::LockHolder lkWorkers(workersLock_);
     for (auto *w : workers_) {
         w->UnblockWaiters(blocker);
     }
