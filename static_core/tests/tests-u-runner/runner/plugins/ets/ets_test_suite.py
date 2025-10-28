@@ -20,9 +20,12 @@ from __future__ import annotations
 import logging
 import shutil
 from abc import abstractmethod, ABC
+from datetime import datetime
 from functools import cached_property
 from pathlib import Path
 from typing import List, Any
+
+import pytz
 
 from runner.logger import Log
 from runner.options.config import Config
@@ -107,14 +110,18 @@ class EtsTestSuite(ABC):
             shutil.rmtree(self.test_root)
 
         tests: List[str] = []
+        start = datetime.now(pytz.UTC)
         for step in self._preparation_steps:
             tests = step.transform(force_generate)
 
         util.create_report(self.test_root, tests)
+        finish = datetime.now(pytz.UTC)
         if is_sudo_user():
             chown2user(self.test_root)
         if len(tests) == 0:
             Log.exception_and_raise(_LOGGER, "Failed generating and updating tests for ets templates or stdlib")
+        else:
+            Log.default(_LOGGER, f"Generated {len(tests)} tests for {round((finish - start).total_seconds())} sec")
 
 
 class RuntimeEtsTestSuite(EtsTestSuite):
