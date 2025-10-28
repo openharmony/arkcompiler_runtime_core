@@ -86,6 +86,45 @@ function testUrlHref005() {
  arktest.assertEQ(result, "http://myhost:99/path#ff")
 }
 
+//Sourced from Xts ActsUrlStaticTest#urlTest2#testUrlConstruction012
+function testUrlHref006() {
+    let params = url.URL.parseURL('htt1p://www.0902zy.cn/path?abc=123&def=456#yyyy')
+    let params1 = url.URL.parseURL('//www.baidu.com/ssaa',params)
+    const result = params1.href
+	arktest.assertEQ(result, 'htt1p://www.baidu.com/ssaa')
+}
+
+//Sourced from Xts ActsUrlStaticTest#Escape_Url#testUrlParseUrl9Escape0021
+function testUrlHref007() {
+	let urlString1 = '\\b/path2';
+	let urlString2 = '/\\b/path2';
+	let url1 = url.URL.parseURL(urlString1, 'https://www.example.com/test/test1');
+	let url2 = url.URL.parseURL(urlString2, 'https://www.example.com/test/test1');
+	let temp1 = '\\b/path2';
+	let rstUrl1 = 'https://www.example.com/test/' + temp1;
+	let rstUrl2 = 'https://b/path2';
+	arktest.assertEQ(url1.toString(), rstUrl1);
+	arktest.assertEQ(url2.toString(), rstUrl2);
+}
+
+//Sourced from Xts ActsUrlStaticTest#urlTest2#testUrlparseURL0065
+function testUrlHrefColonFinal() {
+	let params = url.URL.parseURL('../h:', 'http://www.example.com');
+    const result= params.href;
+	arktest.assertEQ(result, 'http://www.example.com/h:');
+}
+
+//Sourced from Xts ActsUrlStaticTest#urlTest2#testUrlConstruction006
+function testUrlDelete()
+{
+	const obj = url.URL.parseURL('https://sssw.dasf?key2=val&key');
+	obj.params.sort();
+	obj.params.delete('key2');
+	obj.params.delete('key');
+	obj.params.sort();
+	arktest.assertEQ(obj.toString(),'https://sssw.dasf/');
+}
+
 /**
 * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_18200
 * @tc.name: testUrlOrigin001
@@ -399,6 +438,10 @@ function main(): int {
 	suite.addTest("testUrlHref003", testUrlHref003);
 	suite.addTest("testUrlHref004", testUrlHref004);
 	suite.addTest("testUrlHref005", testUrlHref005);
+	suite.addTest("testUrlHref006", testUrlHref006);
+	suite.addTest("testUrlHref007", testUrlHref007);
+	suite.addTest("testUrlHrefColonFinal", testUrlHrefColonFinal);
+	suite.addTest("testUrlDelete", testUrlDelete);
 	suite.addTest("testUrlOrigin001", testUrlOrigin001);
 	suite.addTest("testUrlOrigin002", testUrlOrigin002);
 	suite.addTest("testUrlOrigin003", testUrlOrigin003);
