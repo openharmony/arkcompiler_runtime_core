@@ -81,6 +81,7 @@ public:
             auto *timerEvent = timerIter->second;
             timerEvent->SetExpired();
             timers_.erase(timerIter);
+            os::memory::LockHolder lk(*timerEvent);
             timerEvent->Happen();
         }
     }
