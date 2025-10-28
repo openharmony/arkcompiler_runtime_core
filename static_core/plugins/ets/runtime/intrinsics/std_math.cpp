@@ -91,7 +91,17 @@ extern "C" double StdMathAcos(double val)
     return std::acos(val);
 }
 
+extern "C" float StdMathAcosFloat(float val)
+{
+    return std::acos(val);
+}
+
 extern "C" double StdMathAcosh(double val)
+{
+    return std::acosh(val);
+}
+
+extern "C" float StdMathAcoshFloat(float val)
 {
     return std::acosh(val);
 }
@@ -101,7 +111,17 @@ extern "C" double StdMathAsin(double val)
     return std::asin(val);
 }
 
+extern "C" float StdMathAsinFloat(float val)
+{
+    return std::asin(val);
+}
+
 extern "C" double StdMathAsinh(double val)
+{
+    return std::asinh(val);
+}
+
+extern "C" float StdMathAsinhFloat(float val)
 {
     return std::asinh(val);
 }
@@ -111,7 +131,17 @@ extern "C" double StdMathAtan2(double val1, double val2)
     return std::atan2(val1, val2);
 }
 
+extern "C" float StdMathAtan2Float(float val1, float val2)
+{
+    return std::atan2(val1, val2);
+}
+
 extern "C" double StdMathAtanh(double val)
+{
+    return std::atanh(val);
+}
+
+extern "C" float StdMathAtanhFloat(float val)
 {
     return std::atanh(val);
 }
@@ -121,12 +151,27 @@ extern "C" double StdMathAtan(double val)
     return std::atan(val);
 }
 
+extern "C" float StdMathAtanFloat(float val)
+{
+    return std::atan(val);
+}
+
 extern "C" double StdMathSinh(double val)
 {
     return std::sinh(val);
 }
 
+extern "C" float StdMathSinhFloat(float val)
+{
+    return std::sinh(val);
+}
+
 extern "C" double StdMathCosh(double val)
+{
+    return std::cosh(val);
+}
+
+extern "C" float StdMathCoshFloat(float val)
 {
     return std::cosh(val);
 }
@@ -161,7 +206,17 @@ extern "C" double StdMathCbrt(double val)
     return std::cbrt(val);
 }
 
+extern "C" float StdMathCbrtFloat(float val)
+{
+    return std::cbrt(val);
+}
+
 extern "C" double StdMathTan(double val)
+{
+    return std::tan(val);
+}
+
+extern "C" float StdMathTanFloat(float val)
 {
     return std::tan(val);
 }
@@ -171,7 +226,17 @@ extern "C" double StdMathTanh(double val)
     return std::tanh(val);
 }
 
+extern "C" float StdMathTanhFloat(float val)
+{
+    return std::tanh(val);
+}
+
 extern "C" double StdMathExp(double val)
+{
+    return std::exp(val);
+}
+
+extern "C" float StdMathExpFloat(float val)
 {
     return std::exp(val);
 }
@@ -181,7 +246,17 @@ extern "C" double StdMathLog10(double val)
     return std::log10(val);
 }
 
+extern "C" float StdMathLog10Float(float val)
+{
+    return std::log10(val);
+}
+
 extern "C" double StdMathExpm1(double val)
+{
+    return std::expm1(val);
+}
+
+extern "C" float StdMathExpm1Float(float val)
 {
     return std::expm1(val);
 }
@@ -221,6 +296,11 @@ extern "C" double StdMathLog(double val)
     return std::log(val);
 }
 
+extern "C" float StdMathLogFloat(float val)
+{
+    return std::log(val);
+}
+
 extern "C" double StdMathRem(double val, double val2)
 {
     return std::remainder(val, val2);
@@ -252,8 +332,15 @@ extern "C" double StdMathFround(double val)
 
     return static_cast<float>(val);
 }
+
 extern "C" double StdMathHypot(double val1, double val2)
 {
     return std::hypot(val1, val2);
 }
+
+extern "C" float StdMathHypotFloat(float val1, float val2)
+{
+    return std::hypot(val1, val2);
+}
+
 }  // namespace ark::ets::intrinsics
