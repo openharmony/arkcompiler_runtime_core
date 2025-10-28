@@ -45,7 +45,7 @@ end
 
 def print_help
     puts $optparse
-    puts 'NOTE: this program requires node version 21.4, you can use `n` tool to install it'
+    puts 'NOTE: this program requires minimal node version 22, you can use `n` tool to install it'
 end
 
 $optparse = OptionParser.new do |opts|
@@ -53,7 +53,7 @@ $optparse = OptionParser.new do |opts|
     opts.on '--run-ets=PANDA', 'used to instantly run es2panda&ark on generated file, PANDA is a path to panda build directory'
     opts.on '--out=DIR', String, 'path to .ets files output directory'
     opts.on '--tmp=DIR', String, 'path to temporary directory (where to output .ts and .json files)'
-    opts.on '--chunk-size=NUM', Integer, 'amout of tests in a single file'
+    opts.on '--chunk-size=NUM', Integer, 'amount of tests in a single file'
     opts.on '--proc=PROC', Integer, 'number of ruby threads to use, defaults to max available' do |v|
         $options[:proc] = [v, 1].max
     end
@@ -175,7 +175,7 @@ class Generator
             print_help
             raise
         end
-        unless version =~ /21\.4(\..*|\s*$)/
+        unless version =~ /22(\..*|\s*$)/
             puts "Invalid node version #{version}"
             puts
             print_help
@@ -214,7 +214,7 @@ class Generator
                 name = conf.category + sub["expr"].gsub(/\s+/, '').gsub(/[^a-zA-Z0-9_=]/, '_')
                 is_expr = true
             else
-                name = conf.category + sub["method"]
+                name = conf.category + sub["method"].gsub(/\s+/, '').gsub(/[^a-zA-Z0-9_=]/, '_')
                 is_expr = false
             end
             return if not (@filter_pattern =~ name)
