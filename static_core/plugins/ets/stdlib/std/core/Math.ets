@@ -62,6 +62,96 @@ export class Math {
      */
     public static readonly SQRT2: double = SQRT2;
 
+        /**
+     * Absolute value
+     *
+     * @param v - Some number value
+     *
+     * @returns Absolute value of `v`
+     *
+     * @example
+     * ```
+     * Math.abs(-1) = 1
+     * Math.abs(1) = 1
+     * Math.abs(0) = 0
+     * ```
+     */
+    public static abs(x: byte): byte {
+        return abs(x);
+    }
+
+    /**
+     * Absolute value
+     *
+     * @param v - Some number value
+     *
+     * @returns Absolute value of `v`
+     *
+     * @example
+     * ```
+     * Math.abs(-1) = 1
+     * Math.abs(1) = 1
+     * Math.abs(0) = 0
+     * ```
+     */
+    public static abs(x: short): short {
+        return abs(x);
+    }
+
+    /**
+     * Absolute value
+     *
+     * @param v - Some number value
+     *
+     * @returns Absolute value of `v`
+     *
+     * @example
+     * ```
+     * Math.abs(-1) = 1
+     * Math.abs(1) = 1
+     * Math.abs(0) = 0
+     * ```
+     */
+    public static abs(x: int): int {
+        return abs(x);
+    }
+
+    /**
+     * Absolute value
+     *
+     * @param v - Some number value
+     *
+     * @returns Absolute value of `v`
+     *
+     * @example
+     * ```
+     * Math.abs(-1) = 1
+     * Math.abs(1) = 1
+     * Math.abs(0) = 0
+     * ```
+     */
+    public static abs(x: long): long {
+        return abs(x);
+    }
+
+    /**
+     * Absolute value
+     *
+     * @param v - Some number value
+     *
+     * @returns Absolute value of `v`
+     *
+     * @example
+     * ```
+     * Math.abs(-1) = 1
+     * Math.abs(1) = 1
+     * Math.abs(0) = 0
+     * ```
+     */
+    public static abs(x: float): float {
+        return abs(x);
+    }
+
     /**
      * Absolute value
      *
@@ -101,6 +191,26 @@ export class Math {
     }
 
     /**
+     * Arccosine of angle `v`
+     *
+     * @param v angle in radians
+     *
+     * @returns Arccosine of angle `v`
+     *
+     * @remark
+     * Implemented as native function,  @see `acos()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+     *
+     * @example
+     * ```
+     * acos(doubleNaN) = -nan
+     * acos(doubleInf) = nan
+     * acos(doubleNegInf) = nan
+     */
+    public static acos(x: float): float {
+        return acos(x);
+    }
+
+    /**
      * Hyperbolic arccosine of an angle `v`
      *
      * @param v angle in radians
@@ -119,6 +229,24 @@ export class Math {
     }
 
     /**
+     * Hyperbolic arccosine of an angle `v`
+     *
+     * @param v angle in radians
+     *
+     * @returns Hyperbolic arccosine of angle `v`
+     *
+     * @example
+     * ```
+     * Math.acosh(doubleNaN) = -NaN
+     * Math.acosh(doubleInf) = Inf
+     * Math.acosh(doubleNegInf) = -NaN
+     * ```
+     */
+    public static acosh(x: float): float {
+        return acosh(x);
+    }
+
+    /**
      * Arcsine of angle `v`
      *
      * @param v angle in radians
@@ -126,6 +254,17 @@ export class Math {
      * @returns Arcsine of angle `v`
      */
     public static asin(x: double): double {
+        return asin(x);
+    }
+
+    /**
+     * Arcsine of angle `v`
+     *
+     * @param v angle in radians
+     *
+     * @returns Arcsine of angle `v`
+     */
+    public static asin(x: float): float {
         return asin(x);
     }
 
@@ -148,6 +287,24 @@ export class Math {
     }
 
     /**
+     * Hyperbolic arcsine of angle `v`
+     *
+     * @param v angle in radians
+     *
+     * @returns Hyperbolic arcsine of angle `v`
+     *
+     * @example
+     * ```
+     * Math.asinh(doubleNaN) = -NaN
+     * Math.asinh(doubleInf) = Inf
+     * Math.asinh(doubleNegInf) = -Inf
+     * ```
+     */
+    public static asinh(x: float): float {
+        return asinh(x);
+    }
+
+    /**
      * Arctangent of angle `v`
      *
      * @param v angle in radians
@@ -166,6 +323,24 @@ export class Math {
     }
 
     /**
+     * Arctangent of angle `v`
+     *
+     * @param v angle in radians
+     *
+     * @returns Arctangent of angle `v`
+     *
+     * @example
+     * ```
+     * Math.atan(doubleNaN) = -NaN
+     * Math.atan(doubleInf) = 1.5708
+     * Math.atan(doubleNegInf) = -1.5708
+     * ```
+     */
+    public static atan(x: float): float {
+        return atan(x);
+    }
+
+    /**
      * Method returns the angle in the plane (in radians) between the positive x-axis and the ray from (0, 0) to the point (x, y), for Math.atan2(y, x).
      *
      * @returns The angle in radians (between -π and π, inclusive) between the positive x-axis and the ray from (0, 0) to the point (x, y).
@@ -175,6 +350,19 @@ export class Math {
      * Note that the arguments to this function pass the y-coordinate first and the x-coordinate second.
      */
     public static atan2(y: double, x: double): double {
+        return atan2(y, x);
+    }
+
+    /**
+     * Method returns the angle in the plane (in radians) between the positive x-axis and the ray from (0, 0) to the point (x, y), for Math.atan2(y, x).
+     *
+     * @returns The angle in radians (between -π and π, inclusive) between the positive x-axis and the ray from (0, 0) to the point (x, y).
+     *
+     * @remark
+     * The atan2() method measures the counterclockwise angle θ, in radians, between the positive x-axis and the point (x, y).
+     * Note that the arguments to this function pass the y-coordinate first and the x-coordinate second.
+     */
+    public static atan2(y: float, x: float): float {
         return atan2(y, x);
     }
 
@@ -197,6 +385,24 @@ export class Math {
     }
 
     /**
+     * Hyperbolic arctangent of angle `v`
+     *
+     * @param v angle in radians
+     *
+     * @returns Hyperbolic arctangent of angle `v`
+     *
+     * @example
+     * ```
+     * Math.atanh(doubleNaN) = -NaN
+     * Math.atanh(doubleInf) = -NaN
+     * Math.atanh(doubleNegInf) = -NaN
+     * ```
+     */
+    public static atanh(x: float): float {
+        return atanh(x);
+    }
+
+    /**
      * Cube root of a number.
      *
      * @param x arbitrary number
@@ -206,6 +412,19 @@ export class Math {
      */
     public static cbrt(x: double): double {
         if (isNaN(x) || x == Infinity || x == -Infinity) return x;
+        return cbrt(x);
+    }
+
+    /**
+     * Cube root of a number.
+     *
+     * @param x arbitrary number
+     *
+     * @remark
+     * Math.𝚌brt(𝚡) = ∛x = the unique y such that y³ = x.
+     */
+    public static cbrt(x: float): float {
+        if (isNaN(x) || x == Float.POSITIVE_INFINITY || x == Float.NEGATIVE_INFINITY) return x;
         return cbrt(x);
     }
 
@@ -329,6 +548,25 @@ export class Math {
     public static cosh(x: double): double {
         return cosh(x);
     }
+
+    /**
+     * Hyperbolic cosine of an angle `x`
+     *
+     * @param x angle in radians
+     *
+     * @returns Hyperbolic cosine of angle `x`
+     *
+     * @example
+     * ```
+     * Math.cosh(doubleNaN) = -NaN
+     * Math.cosh(doubleInf) = Inf
+     * Math.cosh(doubleNegInf) = Inf
+     * ```
+     */
+    public static cosh(x: float): float {
+        return cosh(x);
+    }
+
     /**
      * e raised to power `x`
      *
@@ -362,6 +600,24 @@ export class Math {
      * ```
      */
     public static expm1(x: double): double {
+        return expm1(x);
+    }
+
+    /**
+     * (`e` raised to power `v`) - 1
+     *
+     * @param x power value
+     *
+     * @returns {@link Math.E} raised to the power of a number `x`, subtracted by `1`.
+     *
+     * @example
+     * ```
+     * Math.expm1(doubleNaN) = -NaN
+     * Math.expm1(doubleInf) = Inf
+     * Math.expm1(doubleNegInf) = -1
+     * ```
+     */
+    public static expm1(x: float): float {
         return expm1(x);
     }
 
@@ -463,6 +719,24 @@ export class Math {
     }
 
     /**
+     * Natural logarithm of `v`
+     *
+     * @param v: double - arbitrary number
+     *
+     * @returns The natural logarithm (base e) of x. If x is ±0, returns -Infinity. If x < 0, returns NaN.
+     *
+     * @example
+     * ```
+     * Math.log(doubleNaN) = -nan
+     * Math.log(doubleInf) = inf
+     * Math.log(doubleNegInf) = -nan
+     * ```
+     */
+    public static log(x: float): float {
+        return log(x);
+    }
+
+    /**
      * Base 10 logarithm of `x`
      *
      * @param v arbitrary number
@@ -477,6 +751,24 @@ export class Math {
      * ```
      */
     public static log10(x: double): double {
+        return log10(x);
+    }
+
+    /**
+     * Base 10 logarithm of `x`
+     *
+     * @param v arbitrary number
+     *
+     * @returns The base 10 logarithm of x. If x < 0, returns NaN.
+     *
+     * @example
+     * ```
+     * Math.log10(doubleNaN) = -NaN
+     * Math.log10(doubleInf) = Inf
+     * Math.log10(doubleNegInf) = -NaN
+     * ```
+     */
+    public static log10(x: float): float {
         return log10(x);
     }
 
@@ -499,6 +791,24 @@ export class Math {
     }
 
     /**
+     * Natural logarithm of (1 + `x`)
+     *
+     * @param x arbitrary number
+     *
+     * @returns The natural logarithm (base e) of x + 1. If x is -1, returns -Infinity. If x < -1, returns NaN.
+     *
+     * @example
+     * ```
+     * Math.log1p(doubleNaN) = -NaN
+     * Math.log1p(doubleInf) = Inf
+     * Math.log1p(doubleNegInf) = -NaN
+     * ```
+     */
+    public static log1p(x: float): float {
+        return log1p(x);
+    }
+
+    /**
      * Base 2 logarithm of `x`
      *
      * @param x arbitrary number
@@ -513,6 +823,24 @@ export class Math {
      * ```
      */
     public static log2(x: double): double {
+        return log2(x);
+    }
+
+    /**
+     * Base 2 logarithm of `x`
+     *
+     * @param x arbitrary number
+     *
+     * @returns The base 2 logarithm of x. If x < 0, returns NaN.
+     *
+     * @example
+     * ```
+     * Math.log2(doubleNaN) = -nan
+     * Math.log2(doubleInf) = inf
+     * Math.log2(doubleNegInf) = -nan
+     * ```
+     */
+    public static log2(x: float): float {
         return log2(x);
     }
 
@@ -692,6 +1020,24 @@ export class Math {
     }
 
     /**
+     * Hyperbolic sine of angle `v`
+     *
+     * @param v angle in radians
+     *
+     * @returns Hyperbolic sine of angle `v`
+     *
+     * @example
+     * ```
+     * Math.sinh(doubleNaN) = -nan
+     * Math.sinh(doubleInf) = inf
+     * Math.sinh(doubleNegInf) = -inf
+     * ```
+     */
+    public static sinh(x: float): float {
+        return sinh(x);
+    }
+
+    /**
      * Square root of `x`
      *
      * @param x number greater or equal to zero.
@@ -744,6 +1090,25 @@ export class Math {
      */
     public static tanh(x: double): double {
         if (isNaN(x)) return NaN;
+        return tanh(x);
+    }
+
+    /**
+     * Hyperbolic arctangent of angle `x`
+     *
+     * @param x angle in radians
+     *
+     * @returns Hyperbolic arctangent of angle `x`
+     *
+     * @example
+     * ```
+     * Math.atanh(doubleNaN) = -nan
+     * Math.atanh(doubleInf) = -nan
+     * Math.atanh(doubleNegInf) = -nan
+     * ```
+     */
+    public static tanh(x: float): float {
+        if (isNaN(x)) return Float.NaN;
         return tanh(x);
     }
 

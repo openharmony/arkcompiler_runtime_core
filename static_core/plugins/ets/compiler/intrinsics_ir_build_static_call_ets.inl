@@ -37,6 +37,9 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_FLOAT_IS_FINITE: {
     break;
 }
 
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ABS_INT:
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ABS_LONG:
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ABS_FLOAT:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ABS: {
     Builder()->BuildAbsIntrinsic(bcInst_, ACC_READ);
     break;

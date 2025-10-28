@@ -24,6 +24,60 @@ import {PI, E, LN10, LN2, LOG2E, SQRT1_2, SQRT2} from "std/math/consts";
  *
  * @returns Absolute value of `v`
  *
+ */
+export function abs(v: byte): byte {
+    return abs(v.toInt()).toByte()
+}
+
+/**
+ * Absolute value
+ *
+ * @param v Some double value
+ *
+ * @returns Absolute value of `v`
+ *
+ */
+export function abs(v: short): short {
+    return abs(v.toInt()).toShort()
+}
+
+/**
+ * Absolute value
+ *
+ * @param v Some double value
+ *
+ * @returns Absolute value of `v`
+ *
+ */
+export native function abs(v: int): int;
+
+/**
+ * Absolute value
+ *
+ * @param v Some double value
+ *
+ * @returns Absolute value of `v`
+ *
+ */
+export native function abs(v: long): long;
+
+/**
+ * Absolute value
+ *
+ * @param v Some double value
+ *
+ * @returns Absolute value of `v`
+ *
+ */
+export native function abs(v: float): float;
+
+/**
+ * Absolute value
+ *
+ * @param v Some double value
+ *
+ * @returns Absolute value of `v`
+ *
  * @remark
  * Implemented as native function,  @see `abs()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L76).
  *
@@ -51,7 +105,43 @@ export native function abs(v: double): double;
  * acosh(doubleInf) = inf
  * acosh(doubleNegInf) = -nan
  */
+export native function acosh(v: float): float;
+
+/**
+ * Hyperbolic arccosine of an angle `v`
+ *
+ * @param v angle in radians
+ *
+ * @returns Hyperbolic arccosine of angle `v`
+ *
+ * @remark
+ * Implemented as native function,  @see `acosh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ *
+ * @example
+ * ```
+ * acosh(doubleNaN) = -nan
+ * acosh(doubleInf) = inf
+ * acosh(doubleNegInf) = -nan
+ */
 export native function acosh(v: double): double;
+
+/**
+ * Arccosine of angle `v`
+ *
+ * @param v angle in radians
+ *
+ * @returns Arccosine of angle `v`
+ *
+ * @remark
+ * Implemented as native function,  @see `acos()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ *
+ * @example
+ * ```
+ * acos(floatNaN) = -nan
+ * acos(floatInf) = nan
+ * acos(floatNegInf) = nan
+ */
+export native function acos(v: float): float;
 
 /**
  * Arccosine of angle `v`
@@ -87,7 +177,43 @@ export native function acos(v: double): double;
  * asinh(doubleInf) = inf
  * asinh(doubleNegInf) = -inf
  */
+export native function asinh(v: float): float;
+
+/**
+ * Hyperbolic arcsine of angle `v`
+ *
+ * @param v angle in radians
+ *
+ * @returns Hyperbolic arcsine of angle `v`
+ *
+ * @remark
+ * Implemented as native function,  @see `asinh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ *
+ * @example
+ * ```
+ * asinh(doubleNaN) = -nan
+ * asinh(doubleInf) = inf
+ * asinh(doubleNegInf) = -inf
+ */
 export native function asinh(v: double): double;
+
+/**
+ * Arcsine of angle `v`
+ *
+ * @param v angle in radians
+ *
+ * @returns Arcsine of angle `v`
+ *
+ * @example
+ * ```
+ * asin(doubleInf) = nan
+ * asin(doubleNegInf) = nan
+ * asin(doubleNaN) = nan
+ *
+ * @remark
+ * Implemented as native function,  @see `asin()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ */
+export native function asin(v: float): float;
 
 /**
  * Arcsine of angle `v`
@@ -121,7 +247,41 @@ export native function asin(v: double): double;
  * atan2(doubleNegInf, doubleNegInf)= -0.7853981633974483
  * atan2(doubleNaN, doubleNaN)= -nan
  */
+export native function atan2(y: float, x: float): float;
+
+/**
+ *
+ * @returns The angle in radians (between -π and π, inclusive) between the positive x-axis and the ray from (0, 0) to the point (x, y).
+ *
+ * @remark
+ * The atan2() method measures the counterclockwise angle θ, in radians, between the positive x-axis and the point (x, y).
+ * Note that the arguments to this function pass the y-coordinate first and the x-coordinate second.
+ *
+ * @example
+ * ```
+ * atan2(doubleInf, doubleInf)= 0.7853981633974483
+ * atan2(doubleNegInf, doubleNegInf)= -0.7853981633974483
+ * atan2(doubleNaN, doubleNaN)= -nan
+ */
 export native function atan2(y: double, x: double): double;
+
+/**
+ * Hyperbolic arctangent of angle `v`
+ *
+ * @param v angle in radians
+ *
+ * @returns Hyperbolic arctangent of angle `v`
+ *
+ * @remark
+ * Implemented as native function,  @see `atanh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ *
+ * @example
+ * ```
+ * atanh(doubleNaN) = -nan
+ * atanh(doubleInf) = -nan
+ * atanh(doubleNegInf) = -nan
+ */
+export native function atanh(v: float): float;
 
 /**
  * Hyperbolic arctangent of angle `v`
@@ -157,7 +317,44 @@ export native function atanh(v: double): double;
  * atan(doubleInf) = 1.5708
  * atan(doubleNegInf) = -1.5708
  */
+export native function atan(v: float): float;
+
+/**
+ * Arctangent of angle `v`
+ *
+ * @param v angle in radians
+ *
+ * @returns Arctangent of angle `v`
+ *
+ * @remark
+ * Implemented as native function,  @see `atan()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ *
+ * @example
+ * ```
+ * atan(doubleNaN) = -nan
+ * atan(doubleInf) = 1.5708
+ * atan(doubleNegInf) = -1.5708
+ */
 export native function atan(v: double): double;
+
+/**
+ * The cbrt() function returns the cube root of a number.
+ *
+ * @param v arbitrary number.
+ *
+ * @returns Returns the cube root of number.
+ *
+ * @remark
+ * 𝚌uberoot(𝚡) = ∛x = the unique y such that y³ = x.
+ *
+ * @example
+ * ```
+ * cbrt(doubleNaN) = nan
+ * cbrt(doubleInf) = inf
+ * cbrt(doubleNegInf) = -inf
+ * cbrt(-1) = -1
+ */
+export native function cbrt(v: float): float;
 
 /**
  * The cbrt() function returns the cube root of a number.
@@ -285,6 +482,24 @@ export native function clz32Double(v: double): double;
  * cosh(doubleInf) = inf
  * cosh(doubleNegInf) = inf
  */
+export native function cosh(v: float): float;
+
+/**
+ * Hyperbolic cosine of an angle `v`
+ *
+ * @param v angle in radians
+ *
+ * @returns Hyperbolic cosine of angle `v`
+ *
+ * @remark
+ * Implemented as native function,  @see `cosh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ *
+ * @example
+ * ```
+ * cosh(doubleNaN) = -nan
+ * cosh(doubleInf) = inf
+ * cosh(doubleNegInf) = inf
+ */
 export native function cosh(v: double): double;
 
 /**
@@ -335,7 +550,37 @@ export function power2(v: double): double {
  * expm1(doubleInf) = inf
  * expm1(doubleNegInf) = -1
  */
+export native function expm1(v: float): float;
+
+/**
+ * (e raised to power `v`) - 1
+ *
+ * @param v power value
+ *
+ * @returns {@link E} raised to the power of a number v, subtracted by 1.
+ *
+ * @example
+ * ```
+ * expm1(doubleNaN) = -nan
+ * expm1(doubleInf) = inf
+ * expm1(doubleNegInf) = -1
+ */
 export native function expm1(v: double): double;
+
+/**
+ * e raised to power `v`
+ *
+ * @param v power value
+ *
+ * @returns {@link e} raised to the power of a number `v`.
+ *
+ * @example
+ * ```
+ * exp(doubleNaN) = -nan
+ * exp(doubleInf) = inf
+ * exp(doubleNegInf) = 0
+ */
+export native function exp(v: float): float;
 
 /**
  * e raised to power `v`
@@ -386,27 +631,40 @@ export native function floor(v: double): double;
  * hypot(doubleNegInf) = inf
  * hypot(doubleNaN) = nan
  */
+export native function hypot(u: float, v: float): float;
+
+/**
+ * Square root of the sum of squares of `v` and `u`
+ *
+ * @param u arbitrary number
+ * @param v arbitrary number
+ *
+ * @returns The square root of the sum of squares of its arguments
+ *
+ * @remark
+ * Implemented as native function,  @see `hypot()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L540).
+ *
+ * @example
+ * hypot(doubleInf) = inf
+ * hypot(doubleNegInf) = inf
+ * hypot(doubleNaN) = nan
+ */
 export native function hypot(u: double, v: double): double;
 
 /**
- * Base 10 logarithm of a number
+ * Base 10 logarithm of `v`
  *
- * @param v An integer expression.
+ * @param v arbitrary number
  *
- * @throws ArgumentOutOfRangeError if v < 1.
+ * @returns The square root of the sum of squares of its arguments
  *
- * @returns Returns the base 10 logarithm of a number.
- *
+ * @example
+ * ```
+ * log10(doubleNaN) = -nan
+ * log10(doubleInf) = inf
+ * log10(doubleNegInf) = -nan
  */
-export function log10(v: int): int {
-    if (v < 1) {
-        throw new ArgumentOutOfRangeError("Integer argument for log10 should be positive");
-    }
-    return (v >= 1000000000) ? 9 : (v >= 100000000) ? 8 :
-        (v >= 10000000) ? 7 : (v >= 1000000) ? 6 :
-        (v >= 100000) ? 5 : (v >= 10000) ? 4 :
-        (v >= 1000) ? 3 : (v >= 100) ? 2 : (v >= 10) ? 1 : 0;
-}
+export native function log10(v: float): float;
 
 /**
  * Base 10 logarithm of `v`
@@ -436,8 +694,42 @@ export native function log10(v: double): double;
  * log1p(doubleInf) = inf
  * log1p(doubleNegInf) = nan
  */
+export function log1p(v: float): float {
+    return log(1.0f + v);
+}
+
+/**
+ * Natural logarithm of (1 + `v`)
+ *
+ * @param v A numeric expression.
+ *
+ * @returns Returns the natural logarithm of 1 + x.
+ *
+ * @example
+ * ```
+ * log1p(doubleNaN) = nan
+ * log1p(doubleInf) = inf
+ * log1p(doubleNegInf) = nan
+ */
 export function log1p(v: double): double {
-    return log(1.0 + v);
+    return log((1.0).toDouble() + v);
+}
+
+/**
+ * Base 2 logarithm of `v`
+ *
+ * @param v arbitrary number
+ *
+ * @returns The square root of the sum of squares of its arguments
+ *
+ * @example
+ * ```
+ * log2(doubleNaN) = -nan
+ * log2(doubleInf) = inf
+ * log2(doubleNegInf) = -nan
+ */
+export function log2(v: float): float {
+    return log(v) / log(2.0f);
 }
 
 /**
@@ -454,8 +746,26 @@ export function log1p(v: double): double {
  * log2(doubleNegInf) = -nan
  */
 export function log2(v: double): double {
-    return log(v) / log(2.0);
+    return log(v) / log((2.0).toDouble());
 }
+
+/**
+ * Natural logarithm of `v`
+ *
+ * @param v arbitrary number
+ *
+ * @returns The square root of the sum of squares of its arguments
+ *
+ * @example
+ * ```
+ * log(doubleNaN) = -nan
+ * log(doubleInf) = inf
+ * log(doubleNegInf) = -nan
+ *
+ * @remark
+ * Implemented as native function,  @see `log()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ */
+export native function log(v: float): float;
 
 /**
  * Natural logarithm of `v`
@@ -851,6 +1161,24 @@ export function sign(v: double): int {
  * sinh(doubleNegInf) = -inf
  * sinh(doubleNaN) = nan
  */
+export native function sinh(v: float): float;
+
+/**
+ * Hyperbolic sine of a number
+ *
+ * @param v A numeric expression that contains an angle measured in radians.
+ *
+ * @returns Returns the hyperbolic sine of a number.
+ *
+ * @remark
+ * Implemented as native function,  @see `sinh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ *
+ * @example
+ * ```
+ * sinh(doubleInf) = inf
+ * sinh(doubleNegInf) = -inf
+ * sinh(doubleNaN) = nan
+ */
 export native function sinh(v: double): double;
 
 /**
@@ -906,7 +1234,42 @@ export native function sqrt(v: double): double;
  * tanh(doubleNegInf) = -1.0
  * tanh(doubleNaN) = nan
  */
+export native function tanh(v: float): float;
+
+/**
+ * Hyperbolic tangent of a number.
+ *
+ * @param v A numeric expression that contains an angle measured in radians.
+ *
+ * @returns Returns the hyperbolic tangent of a number.
+ *
+ * @remark
+ * Implemented as native function,  @see `tanh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * @example
+ * ```
+ * tanh(doubleInf) = 1.0
+ * tanh(doubleNegInf) = -1.0
+ * tanh(doubleNaN) = nan
+ */
 export native function tanh(v: double): double;
+
+/**
+ * Tangent of a number
+ *
+ * @param v A numeric expression that contains an angle measured in radians.
+ *
+ * @returns Returns the tangent of a number.
+ *
+ * @remark
+ * Implemented as native function,  @see `tan()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ *
+ * @example
+ * ```
+ * tan(doubleInf) = nan
+ * tan(doubleNegInf) = nan
+ * tan(doubleNaN) = nan
+ */
+export native function tan(v: float): float;
 
 /**
  * Tangent of a number
