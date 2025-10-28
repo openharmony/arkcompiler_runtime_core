@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,27 +15,27 @@
 
 {%- for c in cases %}
 /*---
-desc: >-
-    Method overload declaration allows declaring an overload alias as a class member for a set of static or instance methods.
-    Special tests.
+desc: Async and static method modifiers can be applied to overload methods.
 ---*/
 
-class B {
-    m1(p: int): string { return 'int' }
-    m2(p: int, q: object): string { return 'i+o' }
-    m3(p: int, q: object, r?: object): string { return 'i+o+o?' }
+class A {
+    static num: number = 0;
+    static str: string = '';
 
-    overload meth { m1, m2 }
-}
-
-class A extends B {
-    m4(p: object): string { return "object" }
-
-    overload meth { m1, m2, m3, m4 }
+    {{c.modifier}} one(n: number) { A.num = n }
+    {{c.modifier}} two(s: string) { A.str = s }
+    {{c.modifier}} overload foo { one, two }
 }
 
 function main() {
+    let x: number = 12.6;
+    let y: string = 'Hello!';
     let a: A = new A();
-    arktest.assertEQ('{{c.value}}', a.meth({{c.param}}));
+
+    {{c.class}}.foo(x);
+    {{c.class}}.foo(y);
+    
+    arktest.assertEQ(x, A.num);
+    arktest.assertEQ(y, A.str);
 }
 {%- endfor %}
