@@ -2121,6 +2121,9 @@
 15.semantic_rules/10.overloading/first_match/first_match_union_subtyping_2.ets
 15.semantic_rules/10.overloading/first_match/first_match_union_subtyping_3.ets
 15.semantic_rules/10.overloading/first_match/first_match_union_subtyping_4.ets
+15.semantic_rules/10.overloading/first_match/first_match_2c_4i.ets
+15.semantic_rules/10.overloading/first_match/first_match_2c_5i.ets
+15.semantic_rules/10.overloading/first_match/first_match_3c_8i.ets
 15.semantic_rules/12.static_initialization/bad-static-location.ets
 15.semantic_rules/12.static_initialization/base_and_derived/extended_with_static_initializer.ets
 15.semantic_rules/12.static_initialization/base_and_derived/extended_with_static_initializer_2.ets
