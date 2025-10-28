@@ -623,10 +623,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return this.actualLength
     }
 
-    private pushSingle(value: T): void {
-        this.pushOne(value)
-    }
-
     /**
      * Adds the specified element to the end of an array and returns the new length of the array.
      *
@@ -677,10 +673,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         const itemsLength = items.length
         this.ensureUnusedCapacity(itemsLength - delete)
         const oldLen = this.actualLength
-        this.actualLength = this.actualLength - delete + itemsLength
+        const newLen = this.actualLength - delete + itemsLength
+        // Extend `actualLength` to ensure correct operations.
+        // Note that shrinking the array will lead to incorrect behavior
+        if (newLen > oldLen) {
+            this.actualLength = newLen
+        }
 
         let ret = new Array<T>(delete)
-        let lastSet = start
         // left part remains unchanged
         // copy excluded part
         for (let i = 0; i < delete; i++) {
@@ -690,7 +690,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         const rightLen = oldLen - start - delete
         if (itemsLength > delete) {
             for (let i = 0; i < rightLen; i++) {
-                this.$_set_unsafe(this.actualLength - 1 - i, this.$_get_unsafe(oldLen - 1 - i))
+                // This operation is correct because `actualLength` was extended before
+                this.$_set_unsafe(newLen - 1 - i, this.$_get_unsafe(oldLen - 1 - i))
             }
         } else {
             for (let i = 0; i < rightLen; i++) {
@@ -701,6 +702,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         for (let i = 0; i < itemsLength; i++) {
             this.$_set_unsafe(start + i, items.$_get_unsafe(i))
         }
+        // Update length in the end to ensure correct `this` operations
+        this.actualLength = newLen
         return ret
     }
 
@@ -758,17 +761,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public unshift(...values: T[]): int {
         if (this.buffer.length <= values.actualLength + this.actualLength) {
             let buffer: FixedArray<Any> = new Any[this.buffer.length * 2 + values.actualLength]
-            this.unshiftInternal(buffer, values)
+            Array.unshiftInternal(this.buffer, this.actualLength, buffer, values)
             this.buffer = buffer
         } else {
-            this.unshiftInternal(this.buffer, values)
+            Array.unshiftInternal(this.buffer, this.actualLength, this.buffer, values)
         }
 
         this.actualLength += values.actualLength
         return this.actualLength
     }
 
-    private final native unshiftInternal(buffer: FixedArray<Any>, values: T[]): void
+    private static native unshiftInternal(self: FixedArray<Any>, selfLen: int, buffer: FixedArray<Any>, values: Array<T>): void
 
     /**
      * Returns an iterator over all indices

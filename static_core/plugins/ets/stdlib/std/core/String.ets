@@ -1154,7 +1154,14 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns string consisting of the specified UTF-16 code units.
      *
      */
-    public static native fromCharCode(...codes: number[]): String;
+    public static fromCharCode(...codes: number[]): String {
+        if (codes.length < 0) {
+            throw new NegativeArraySizeError("The value must be non negative")
+        }
+        return String.fromCharCodeImpl(codes)
+    }
+
+    public static native fromCharCodeImpl(codes: Array<number>): String;
 
     /**
      * The String.fromCharCode() static method returns a string created from the specified UTF-16 code unit

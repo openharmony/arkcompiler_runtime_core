@@ -149,41 +149,82 @@ ALWAYS_INLINE inline uint64_t CallJSHandler::Handle()
     return static_cast<uint64_t>(etsRes.value().GetAsLong());
 }
 
+class ArrayView final {
+public:
+    static std::optional<ArrayView> Create(EtsCoroutine *coro, EtsHandle<EtsObject> &ref)
+    {
+        auto *klass = ref->GetClass();
+        bool isFixedArray = klass->IsArrayClass();
+        size_t length = 0;
+        if (isFixedArray) {
+            length = EtsObjectArray::FromEtsObject(ref.GetPtr())->GetLength();
+        } else {
+            auto *array = EtsEscompatArray::FromEtsObject(ref.GetPtr());
+            EtsInt result = 0;
+            if (UNLIKELY(!array->GetLength(coro, &result))) {
+                ASSERT(InteropCtx::SanityETSExceptionPending());
+                return {};
+            }
+            if (UNLIKELY(result < 0)) {
+                InteropCtx::ThrowETSError(coro, "cannot work with arrays of negative length");
+                return {};
+            }
+            length = static_cast<size_t>(result);
+        }
+        return ArrayView(ref, isFixedArray, length);
+    }
+
+    size_t GetLength() const
+    {
+        return length_;
+    }
+
+    std::optional<EtsObject *> Get(EtsCoroutine *coro, size_t index)
+    {
+        if (isFixedArray_) {
+            return EtsObjectArray::FromEtsObject(ref_.GetPtr())->Get(index);
+        }
+        return EtsEscompatArray::FromEtsObject(ref_.GetPtr())->GetRef(coro, index);
+    }
+
+private:
+    explicit ArrayView(EtsHandle<EtsObject> &ref, bool isFixedArray, size_t length)
+        : ref_(ref), isFixedArray_(isFixedArray), length_(length)
+    {
+    }
+
+private:
+    EtsHandle<EtsObject> &ref_;
+    bool isFixedArray_ {false};
+    size_t length_ {0};
+};
+
 template <bool IS_NEWCALL, typename FRead>
 ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndCall(FRead &readVal,
                                                                                     Span<napi_value> jsargs)
 {
     auto *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
-    auto *klass = ref->template ClassAddr<Class>();
-    if (!klass->IsArrayClass()) {
-        ASSERT(klass == ctx_->GetArrayClass());
-        VMHandle<EtsEscompatArray> etsArr(coro_, ref);
-        ASSERT(etsArr.GetPtr() != nullptr);
-        auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetActualLength() + jsargs.size());
-        for (uint32_t el = 0; el < jsargs.size(); ++el) {
-            allJsArgs[el] = jsargs[el];
-        }
-        for (uint32_t el = 0; el < etsArr->GetActualLength(); ++el) {
-            EtsObject *etsElem = nullptr;
-            etsArr->GetRef(el, &etsElem);
-            auto refConv = JSRefConvertResolve<true>(ctx_, etsElem->GetClass()->GetRuntimeClass());
-            ASSERT(refConv != nullptr);
-            allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
-        }
-        return CallConverted<IS_NEWCALL>(*allJsArgs);
+    EtsHandle<EtsObject> arrayReference(coro_, EtsObject::FromCoreType(ref));
+    auto optArrayView = ArrayView::Create(coro_, arrayReference);
+    if (UNLIKELY(!optArrayView.has_value())) {
+        ASSERT(InteropCtx::SanityETSExceptionPending());
+        return {};
     }
 
-    LocalObjectHandle<coretypes::Array> etsArr(coro_, ref);
-
-    auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetLength() + jsargs.size());
-    for (uint32_t el = 0; el < jsargs.size(); ++el) {
-        allJsArgs[el] = jsargs[el];
+    const auto arrayLength = optArrayView->GetLength();
+    auto allJsArgs = ctx_->GetTempArgs<napi_value>(arrayLength + jsargs.size());
+    for (size_t i = 0; i < jsargs.size(); ++i) {
+        allJsArgs[i] = jsargs[i];
     }
-    for (uint32_t el = 0; el < etsArr->GetLength(); ++el) {
-        auto *etsElem = EtsObject::FromCoreType(etsArr->Get<ObjectHeader *>(el));
-        auto refConv = JSRefConvertResolve<true>(ctx_, etsElem->GetClass()->GetRuntimeClass());
+    for (size_t i = 0; i < arrayLength; ++i) {
+        auto optEtsArg = optArrayView->Get(coro_, i);
+        if (!optEtsArg.has_value()) {
+            ASSERT(InteropCtx::SanityETSExceptionPending());
+            return {};
+        }
+        auto refConv = JSRefConvertResolve<true>(ctx_, optEtsArg.value()->GetClass()->GetRuntimeClass());
         ASSERT(refConv != nullptr);
-        allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
+        allJsArgs[i + jsargs.size()] = refConv->Wrap(ctx_, optEtsArg.value());
     }
     return CallConverted<IS_NEWCALL>(*allJsArgs);
 }

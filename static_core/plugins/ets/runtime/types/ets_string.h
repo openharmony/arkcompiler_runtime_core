@@ -41,10 +41,6 @@ public:
 
     static EtsString *CreateFromUtf16(const uint16_t *utf16, EtsInt length);
 
-    using CharCodeArray = EtsObjectArray;
-
-    static EtsString *CreateNewStringFromCharCode(CharCodeArray *charCodes, size_t actualLength);
-
     static EtsString *CreateNewStringFromCharCode(EtsDouble charCode);
 
     static EtsString *CreateNewStringFromChars(uint32_t offset, uint32_t length, EtsArray *chararray);

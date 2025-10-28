@@ -644,10 +644,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return this.actualLength
     }
 
-    private pushSingle(value: T): void {
-        this.pushOne(value)
-    }
-
     /**
      * Adds the specified element to the end of an array and returns the new length of the array.
      *
@@ -698,10 +694,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         const itemsLength = items.length
         this.ensureUnusedCapacity(itemsLength - delete)
         const oldLen = this.actualLength
-        this.actualLength = this.actualLength - delete + itemsLength
+        const newLen = this.actualLength - delete + itemsLength
+        // Extend `actualLength` to ensure correct operations.
+        // Note that shrinking the array will lead to incorrect behavior
+        if (newLen > oldLen) {
+            this.actualLength = newLen
+        }
 
         let ret = new Array<T>(delete)
-        let lastSet = start
         // left part remains unchanged
         // copy excluded part
         for (let i = 0; i < delete; i++) {
@@ -711,7 +711,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         const rightLen = oldLen - start - delete
         if (itemsLength > delete) {
             for (let i = 0; i < rightLen; i++) {
-                this.$_set_unsafe(this.actualLength - 1 - i, this.$_get_unsafe(oldLen - 1 - i))
+                // This operation is correct because `actualLength` was extended before
+                this.$_set_unsafe(newLen - 1 - i, this.$_get_unsafe(oldLen - 1 - i))
             }
         } else {
             for (let i = 0; i < rightLen; i++) {
@@ -722,6 +723,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         for (let i = 0; i < itemsLength; i++) {
             this.$_set_unsafe(start + i, items.$_get_unsafe(i))
         }
+        // Update length in the end to ensure correct `this` operations
+        this.actualLength = newLen
         return ret
     }
 
@@ -779,17 +782,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public unshift(...values: T[]): int {
         if (this.buffer.length <= values.actualLength + this.actualLength) {
             let buffer: FixedArray<Any> = new Any[this.buffer.length * 2 + values.actualLength]
-            this.unshiftInternal(buffer, values)
+            Array.unshiftInternal(this.buffer, this.actualLength, buffer, values)
             this.buffer = buffer
         } else {
-            this.unshiftInternal(this.buffer, values)
+            Array.unshiftInternal(this.buffer, this.actualLength, this.buffer, values)
         }
 
         this.actualLength += values.actualLength
         return this.actualLength
     }
 
-    private final native unshiftInternal(buffer: FixedArray<Any>, values: T[]): void
+    private static native unshiftInternal(self: FixedArray<Any>, selfLen: int, buffer: FixedArray<Any>, values: Array<T>): void
 
     /**
      * Returns an iterator over all indices
@@ -1032,11 +1035,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns this array after transformation
      */
     public fill(value: T, start?: int, end?: int): this {
-        this.fillImpl(value, start ?? 0, end ?? this.actualLength);
-        return this;
+        Array.fillImpl(this.buffer, this.actualLength, value, start ?? 0, end ?? this.actualLength)
+        return this
     }
 
-    private native fillImpl(value: T, start: int, end: int): this;
+    private static native fillImpl(buffer: FixedArray<Any>, actualLength: int, value: T, start: int, end: int): void;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -1255,6 +1258,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Returns the last index at which a given element can be found in the array,
      * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
      *
+     * @param buffer Array's underlying buffer.
+     *
+     * @param actualLength Array's underlying length, might be greater than buffer's length.
+     *
      * @param searchElement element to locate in the array.
      *
      * @param fromIndex zero-based index at which to start searching backwards.
@@ -1266,7 +1273,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-     private native lastIndexOfImpl(searchElement: T, fromIndex: int): int;
+    private static native lastIndexOfImpl(buffer: FixedArray<Any>, actualLength: int, searchElement: T, fromIndex: int): int;
 
     /**
      * Returns the last index at which a given element can be found in the array,
@@ -1284,7 +1291,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns The last index of the element in the array; -1 if not found.
      */
     public lastIndexOf(searchElement: T, fromIndex?: int): int {
-        return this.lastIndexOfImpl(searchElement, fromIndex ?? 0);
+        return Array.lastIndexOfImpl(this.buffer, this.actualLength, searchElement, fromIndex ?? 0)
     }
 
     /**
@@ -1302,7 +1309,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public native lastIndexOf(searchElement: T): int;
+    public lastIndexOf(searchElement: T): int {
+        return Array.lastIndexOfImpl(this.buffer, this.actualLength, searchElement, this.actualLength - 1)
+    }
 
     private isPrimitive(element: T): boolean {
         return (element instanceof String ||
@@ -1316,7 +1325,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 element instanceof Byte ||
                 element == null);
     }
-    private native joinInternal(sep: String): string;
+    private static native joinInternal(buffer: FixedArray<Any>, actualLength: int, sep: string): string;
 
     private joinObject(sep?: String): string {
         const sepReal = sep === undefined ? "," : sep!
@@ -1367,7 +1376,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             return this.joinObject(sep);
         }
 
-        return this.joinInternal(sep === undefined ? "," : sep!);
+        return Array.joinInternal(this.buffer, this.actualLength, sep === undefined ? "," : sep!);
     }
 
     /**
@@ -1523,7 +1532,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of val, -1 otherwise
      */
-    private native indexOfImpl(val: T, fromIndex1: int): int;
+    private static native indexOfImpl(buffer: FixedArray<Any>, actualLength: int, val: T, fromIndex1: int): int;
 
     /**
      * Returns the first index at which a given element
@@ -1536,10 +1545,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns index of val, -1 otherwise
      */
     public override indexOf(val: T, fromIndex?: int): int {
-        return this.indexOfImpl(val, asIntOrDefault(fromIndex, 0))
+        return Array.indexOfImpl(this.buffer, this.actualLength, val, asIntOrDefault(fromIndex, 0))
     }
 
-    public native indexOf(val: T): int;
+    public indexOf(val: T): int {
+        return Array.indexOfImpl(this.buffer, this.actualLength, val, 0)
+    }
 
     /**
      * Copying version of the sort() method.
@@ -1574,13 +1585,15 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @note Mutating method
      */
     public reverse(): this {
+        /* otherwise the result will be exactly the same as it is */
         if (this.actualLength > 1) {
-            this.reverseImpl();
+            Array.reverseImpl(this.buffer, this.actualLength)
         }
-        return this;
+
+        return this
     }
 
-    private final native reverseImpl(): void;
+    private static native reverseImpl(buffer: FixedArray<Any>, actualLength: int): void;
 
     /**
      * Copying version of the reverse() method.

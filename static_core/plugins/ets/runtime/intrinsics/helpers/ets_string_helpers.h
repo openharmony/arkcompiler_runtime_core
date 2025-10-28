@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-package std.core;
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_STRING_HELPERS
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_STRING_HELPERS
 
-/**
- * @class RuntimeLinker backed by in-memory ABC files.
- */
-export class MemoryRuntimeLinker extends AbcRuntimeLinker {
-    public constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: Array<FixedArray<byte>>) {
-        super(parentLinker, [])
-        const abcFiles : FixedArray<AbcFile | undefined> = new (AbcFile | undefined)[Double.toInt(rawAbcFiles.length)]
-        for (let i = 0; i < rawAbcFiles.length; i++) {
-            abcFiles[i] = AbcFile.loadFromMemory(this, rawAbcFiles[i])
-        }
-        this.addAbcFiles(abcFiles)
-    }
-}
+#include "plugins/ets/runtime/types/ets_string.h"
+
+namespace ark::ets {
+class EtsEscompatArray;
+}  // namespace ark::ets
+
+namespace ark::ets::intrinsics::helpers {
+
+EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes);
+EtsString *CreateNewStringFromCharCode(EtsObjectArray *charCodes, size_t actualLength);
+
+}  // namespace ark::ets::intrinsics::helpers
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_STRING_HELPERS

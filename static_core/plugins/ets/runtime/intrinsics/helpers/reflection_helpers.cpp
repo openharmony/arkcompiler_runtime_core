@@ -15,6 +15,7 @@
 
 #include "reflection_helpers.h"
 #include "types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 
 namespace ark::ets::intrinsics::helpers {
 

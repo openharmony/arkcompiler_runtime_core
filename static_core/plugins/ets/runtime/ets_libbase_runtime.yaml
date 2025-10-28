@@ -1136,7 +1136,7 @@ intrinsics:
   - name: StdCoreStringFromCharCode
     space: ets
     class_name: std.core.String
-    method_name: fromCharCode
+    method_name: fromCharCodeImpl
     static: true
     signature:
       ret: std.core.String
@@ -1560,60 +1560,56 @@ intrinsics:
     space: ets
     class_name: escompat.Array
     method_name: joinInternal
-    static: false
+    static: true
     signature:
       ret: std.core.String
-      args: [ std.core.String ]
+      args:
+        - std.core.Object[]
+        - i32
+        - std.core.String
     impl: ark::ets::intrinsics::EtsEscompatArrayJoinInternal
-
-  - name: EscompatArrayIndexOf
-    space: ets
-    class_name: escompat.Array
-    method_name: indexOf
-    static: false
-    signature:
-      ret: i32
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatArrayIndexOf
 
   - name: EscompatInternalArrayIndexOf
     space: ets
     class_name: escompat.Array
     method_name: indexOfImpl
-    static: false
+    static: true
     signature:
       ret: i32
-      args: [ std.core.Object, i32 ]
+      args:
+        - std.core.Object[]
+        - i32
+        - std.core.Object
+        - i32
     impl: ark::ets::intrinsics::EtsEscompatArrayInternalIndexOf
-
-  - name: EscompatArrayLastIndexOf
-    space: ets
-    class_name: escompat.Array
-    method_name: lastIndexOf
-    static: false
-    signature:
-      ret: i32
-      args: [ std.core.Object]
-    impl: ark::ets::intrinsics::EtsEscompatArrayLastIndexOf
 
   - name: EscompatArrayInternalLastIndexOf
     space: ets
     class_name: escompat.Array
     method_name: lastIndexOfImpl
-    static: false
+    static: true
     signature:
       ret: i32
-      args: [ std.core.Object, i32]
+      args:
+        - std.core.Object[]
+        - i32
+        - std.core.Object
+        - i32
     impl: ark::ets::intrinsics::EtsEscompatArrayInternalLastIndexOf
 
   - name: EscompatArrayFillImpl
     space: ets
     class_name: escompat.Array
     method_name: fillImpl
-    static: false
+    static: true
     signature:
-      ret: escompat.Array
-      args: [ std.core.Object, i32, i32 ]
+      ret: void
+      args:
+        - std.core.Object[]
+        - i32
+        - std.core.Object
+        - i32
+        - i32
     impl: ark::ets::intrinsics::EtsEscompatArrayFillImpl
 
   - name: EscompatArrayGetUnsafe
@@ -1640,10 +1636,12 @@ intrinsics:
     space: ets
     class_name: escompat.Array
     method_name: unshiftInternal
-    static: false
+    static: true
     signature:
       ret: void
       args:
+        - std.core.Object[]
+        - i32
         - std.core.Object[]
         - escompat.Array
     impl: ark::ets::intrinsics::EtsEscompatArrayUnshiftInternal
@@ -1652,10 +1650,12 @@ intrinsics:
     space: ets
     class_name: escompat.Array
     method_name: reverseImpl
-    static: false
+    static: true
     signature:
       ret: void
-      args: []
+      args:
+        - std.core.Object[]
+        - i32
     impl: ark::ets::intrinsics::EtsEscompatArrayReverse
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateEscompatArrayReverse

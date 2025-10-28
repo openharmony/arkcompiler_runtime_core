@@ -848,7 +848,7 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
     EtsHandle<EtsAbcRuntimeLinker> linkerHandle(coro, EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(klass)));
     ASSERT(linkerHandle.GetPtr() != nullptr);
 
-    EtsHandle<EtsEscompatArray> pathsHandle(coro, EtsEscompatArray::Create(abcFiles.size()));
+    EtsHandle<EtsEscompatArray> pathsHandle(coro, EtsEscompatArray::Create(coro, abcFiles.size()));
     for (size_t idx = 0; idx < abcFiles.size(); ++idx) {
         auto utf8Data = reinterpret_cast<const uint8_t *>(abcFiles[idx].data());
         auto *str = EtsString::CreateFromMUtf8(abcFiles[idx].data(), utf::MUtf8ToUtf16Size(utf8Data));
@@ -856,7 +856,7 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
             // Handle possible OOM
             exceptionHandler();
         }
-        pathsHandle->SetRef(idx, str->AsObject());
+        pathsHandle->EscompatArraySetUnsafe(idx, str->AsObject());
     }
     std::array args {Value(linkerHandle->GetCoreType()), Value(nullptr), Value(pathsHandle->GetCoreType())};
 

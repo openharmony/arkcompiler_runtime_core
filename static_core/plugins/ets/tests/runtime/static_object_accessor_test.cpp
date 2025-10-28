@@ -111,11 +111,11 @@ public:
     template <typename T, typename BoxType>
     void CheckSetAndGetElementByIdx(T val)
     {
-        auto *array = EtsEscompatArray::Create(ARRAY_LENGTH);
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto *array = EtsEscompatArray::Create(coro, ARRAY_LENGTH);
         auto *baseObject = reinterpret_cast<common::BaseObject *>(array);
         ASSERT_NE(baseObject, nullptr);
         StaticObjectAccessor staticObjectAccessor;
-        auto *coro = EtsCoroutine::GetCurrent();
         EtsObject *valueObject = BoxType::Create(coro, val);
         staticObjectAccessor.SetElementByIdx(nullptr, nullptr, 1, reinterpret_cast<common::BaseObject *>(valueObject));
         staticObjectAccessor.SetElementByIdx(nullptr, baseObject, 1,
@@ -266,10 +266,10 @@ TEST_F(StaticObjectAccessorTest, SetAndGetElementByIdx1)
 {
     EtsClass *klass = GetTestClass("Triangle");
     ASSERT_NE(klass, nullptr);
-    auto *array = EtsEscompatArray::Create(ARRAY_LENGTH);
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *array = EtsEscompatArray::Create(coro, ARRAY_LENGTH);
     ASSERT_NE(array, nullptr);
     auto obj = EtsObject::Create(klass);
-    auto *coro = EtsCoroutine::GetCurrent();
     EtsObject *valueObject = EtsBoxPrimitive<EtsDouble>::Create(coro, VAL_DOUBLE);
     StaticObjectAccessor staticObjectAccessor;
     staticObjectAccessor.SetProperty(nullptr, reinterpret_cast<common::BaseObject *>(obj), "firSide",

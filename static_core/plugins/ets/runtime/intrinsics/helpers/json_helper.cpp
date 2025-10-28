@@ -21,6 +21,7 @@
 #include "types/ets_object.h"
 #include "json_helper.h"
 #include "ets_to_string_cache.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 namespace ark::ets::intrinsics::helpers {
 
 bool JSONStringifier::AppendJSONString(EtsHandle<EtsObject> &value, bool hasContent)
@@ -115,12 +116,19 @@ bool JSONStringifier::SerializeJSONObjectArray(EtsHandle<EtsObject> &value)
     buffer_ += "[";
 
     auto array = EtsHandle<EtsEscompatArray>(coro, EtsEscompatArray::FromEtsObject(value.GetPtr()));
-    auto realArray = EtsHandle<EtsObjectArray>(coro, array->GetData());
-    ASSERT(realArray.GetPtr() != nullptr);
-    auto length = array->GetActualLength();
+    EtsInt length = 0;
+    if (UNLIKELY(!array->GetLength(coro, &length))) {
+        ASSERT(coro->HasPendingException());
+        return false;
+    }
 
-    for (size_t i = 0; i < length; ++i) {
-        auto elem = EtsHandle<EtsObject>(coro, realArray->Get(i));
+    for (EtsInt i = 0; i < length; ++i) {
+        auto optElement = array->GetRef(coro, i);
+        if (UNLIKELY(!optElement)) {
+            ASSERT(coro->HasPendingException());
+            return false;
+        }
+        auto elem = EtsHandle<EtsObject>(coro, optElement.value());
         if (elem.GetPtr() == nullptr || elem->GetClass()->IsFunction()) {
             buffer_ += "null";
             isSuccessful = true;
@@ -593,13 +601,6 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
             {
                 ScopedManagedCodeThread v(coro);
                 isSuccessful = SerializeJSONRecord(retobj);
-            }
-            coro->ManagedCodeBegin();
-        } else if (value->IsArrayClass()) {
-            coro->ManagedCodeEnd();
-            {
-                ScopedManagedCodeThread v(coro);
-                isSuccessful = SerializeJSONObjectArray(value);
             }
             coro->ManagedCodeBegin();
         } else if (value->GetClass()->IsFunction()) {
