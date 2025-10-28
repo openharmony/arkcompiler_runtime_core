@@ -273,7 +273,10 @@ bool XmlPullParser::ParseAttr(ani_env *env) const
         ani_string value = CreateStringUtf8(env, attributes_[i * 4 + 3]);  // 4 and 3: number of args
         std::vector<ani_ref> argv {key, value};
         ani_ref returnVal {};
-        env->FunctionalObject_Call(attrFunc_, argv.size(), argv.data(), &returnVal);
+        auto status = env->FunctionalObject_Call(attrFunc_, argv.size(), argv.data(), &returnVal);
+        if (status != ANI_OK) {
+            return false;
+        }
         if (!static_cast<bool>(ToBoolean(env, static_cast<ani_object>(returnVal)))) {
             return false;
         }
