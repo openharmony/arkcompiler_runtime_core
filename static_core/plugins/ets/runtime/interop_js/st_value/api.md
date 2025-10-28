@@ -1741,7 +1741,7 @@ let bool2 = zeroValue.unwrapToBoolean(); // false
 
 `unwrapToBigInt(): bigint`
 
-用于将STValue中的大整数对象解包为BigInt类型，不接受任何参数，返回大整数值结果。支持特定的大整数类（`escompat.BigInt`），其他类型会抛出异常。
+用于将STValue中的大整数对象解包为BigInt类型，不接受任何参数，返回大整数值结果。支持特定的大整数类（`std.core.BigInt`），其他类型会抛出异常。
 
 参数: 无
 

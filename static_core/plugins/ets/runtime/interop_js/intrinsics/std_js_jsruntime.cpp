@@ -448,6 +448,11 @@ void InteropContextSetInteropRuntimeLinkerImplIntrinsic(EtsRuntimeLinker *linker
     SetInteropRuntimeLinker(linker);
 }
 
+EtsRuntimeLinker *InteropContextGetInteropRuntimeLinkerImplIntrinsic()
+{
+    return GetInteropRuntimeLinker();
+}
+
 EtsBoolean InteropSerializeHelperIsJSInteropRefImplIntrinsic(EtsObject *value)
 {
     return IsJSInteropRef(value);
