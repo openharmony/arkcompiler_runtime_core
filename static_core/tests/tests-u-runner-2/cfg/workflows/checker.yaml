@@ -23,10 +23,11 @@ parameters:
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
     stdlib: "${parameters.build}/plugins/ets/etsstdlib.abc"
     checker-timeout: 180
+    checker-frontend-relpath: "bin/es2panda"
     checker-repeat-args:
         - "--panda ${parameters.build}/bin/ark"
         - "--paoc ${parameters.build}/bin/ark_aot"
-        - "--frontend ${parameters.build}/bin/es2panda"
+        - "--frontend ${parameters.build}/${parameters.checker-frontend-relpath}"
     checker-run-prefix: "''"
     checker-boot_self: ""
     checker-compiler-check-final: "--compiler-check-final=true"
