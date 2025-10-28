@@ -1067,10 +1067,6 @@
 #30787
 13.modules_and_namespaces/01.import_directives/type_binding_type_import_neg.ets
 
-#29735
-13.modules_and_namespaces/05.export_directives/03.export_type_directive/type_binding_neg.ets
-13.modules_and_namespaces/05.export_directives/03.export_type_directive/type_binding_neg_2.ets
-
 #29725
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_2.ets
@@ -1084,30 +1080,18 @@
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/import_all_from_reexport_3.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/import_all_from_reexport_4.ets
 
-#26730 overload signatures not implemented
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_9.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_6.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_7.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_16.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_17.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_18.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_19.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_10.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_11.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_12.ets
-
 #28972 CTE on string[] type parameter
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_13.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_14.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_15.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_16.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_3.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_4.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_7.ets
+13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_9.ets
+13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_10.ets
+13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_11.ets
+13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_12.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_0.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_1.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_10.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_11.ets
+13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_6.ets
+13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_7.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_8.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_9.ets
 
