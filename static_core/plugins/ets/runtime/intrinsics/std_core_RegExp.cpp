@@ -16,21 +16,70 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/regexp/ecmascript/regexp_parser.h"
 #include "runtime/include/mem/panda_string.h"
+#include "ets_exceptions.h"
 
 namespace ark::ets::intrinsics {
 using RegExpParser = ark::RegExpParser;
 
-extern "C" EtsString *StdCoreRegExpParse(EtsString *pattern)
+// Helper function to check for duplicate flags and set the flag
+static void CheckAndSetFlag(char flagChar, uint32_t flagMask, int &nativeFlags)
+{
+    if ((nativeFlags & flagMask) != 0) {
+        PandaString error_msg = "SyntaxError: Duplicate RegExp flag '";
+        error_msg += flagChar;
+        error_msg += "'";
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::SYNTAX_ERROR, error_msg);
+    }
+    nativeFlags |= flagMask;
+}
+
+extern "C" void StdCoreRegExpParse(EtsString *pattern, EtsString *flags)
 {
     RegExpParser parse = RegExpParser();
     auto patternstr = ark::PandaStringToStd(pattern->GetUtf8());
-    parse.Init(const_cast<char *>(reinterpret_cast<const char *>(patternstr.c_str())), patternstr.length(), 0);
+    auto flags_str = ark::PandaStringToStd(flags->GetUtf8());
+
+    // Parse string flag into integer bit mask
+    int nativeFlags = 0;
+    for (char c : flags_str) {
+        switch (c) {
+            case 'g':
+                CheckAndSetFlag('g', ark::RegExpParser::FLAG_GLOBAL, nativeFlags);
+                break;
+            case 'i':
+                CheckAndSetFlag('i', ark::RegExpParser::FLAG_IGNORECASE, nativeFlags);
+                break;
+            case 'm':
+                CheckAndSetFlag('m', ark::RegExpParser::FLAG_MULTILINE, nativeFlags);
+                break;
+            case 's':
+                CheckAndSetFlag('s', ark::RegExpParser::FLAG_DOTALL, nativeFlags);
+                break;
+            case 'u':
+                CheckAndSetFlag('u', ark::RegExpParser::FLAG_UTF16, nativeFlags);
+                break;
+            case 'y':
+                CheckAndSetFlag('y', ark::RegExpParser::FLAG_STICKY, nativeFlags);
+                break;
+            case 'd':
+                CheckAndSetFlag('d', ark::RegExpParser::FLAG_HASINDICES, nativeFlags);
+                break;
+            default:
+                PandaString error_msg = "SyntaxError: Invalid RegExp flag '";
+                error_msg += c;
+                error_msg += "'";
+                ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::SYNTAX_ERROR,
+                                  error_msg);
+        }
+    }
+
+    parse.Init(const_cast<char *>(reinterpret_cast<const char *>(patternstr.c_str())), patternstr.length(),
+               nativeFlags);
     parse.Parse();
     if (parse.IsError()) {
         auto errormsg = ark::PandaStringToStd(parse.GetErrorMsg());
-        return EtsString::CreateFromMUtf8(errormsg.c_str(), errormsg.length());
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::SYNTAX_ERROR, errormsg);
     }
-    return nullptr;
 }
 
 }  // namespace ark::ets::intrinsics
