@@ -1,0 +1,77 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+runner-api-level: 0.0.0.1
+type: workflow
+workflow-name: es2panda-checker
+parameters:
+    arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
+    build: ${PANDA_BUILD}
+    checked: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/tests/checked
+    enable-es2panda: true
+    enable-verifier: true
+    enable-checker: true
+    es2panda-args: []
+    es2panda-workflow-args:
+        - "--thread=${parameters.thread}"
+        - "--extension=${parameters.extension}"
+        - "--output=${parameters.output-file}"
+        - "${parameters.es2panda-args}"
+    thread: 0
+    extension: sts
+    load-runtimes: ets
+    opt-level: 2
+    output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
+    es2panda-timeout: 60
+    verifier-timeout: 60
+    checker-timeout: 180
+    checker-run-prefix: "''"
+    checker-boot_self: ""
+    checker-compiler-check-final: "--compiler-check-final=true"
+    checker-command-token: "//!"
+    checker-test-dir: "${parameters.work-dir}/intermediate/${test-id}"
+    checker-arch: x64
+    checker-build-config: Static
+    checker-is-llvm: "false"
+    checker-is-verbose: "false"
+    checker-is-release: "false"
+    work-dir: ${parameters.work-dir}
+    # adds --boot-panda-files option to verifier with all dependent and the current abc files
+    is-panda: true
+steps:
+    compile:
+        from: es2panda-verifier
+        opt-level: ${parameters.opt-level}
+        work-dir: ${parameters.work-dir}
+        enable-es2panda: ${parameters.enable-es2panda}
+        enable-verifier: ${parameters.enable-verifier}
+        extension: ${parameters.extension}
+        es2panda-workflow-args: ${parameters.es2panda-workflow-args}
+        es2panda-timeout: ${parameters.es2panda-timeout}
+        verifier-timeout: ${parameters.verifier-timeout}
+    ruby_checker:
+        from: checker
+        enable-checker: ${parameters.enable-checker}
+        extension: ${parameters.extension}
+        load-runtimes: ${parameters.load-runtimes}
+        checker-timeout: ${parameters.checker-timeout}
+        checker-run-prefix: ${parameters.checker-run-prefix}
+        checker-boot_self: ${parameters.checker-boot_self}
+        checker-compiler-check-final: ${parameters.checker-compiler-check-final}
+        checker-command-token: ${parameters.checker-command-token}
+        checker-arch: ${parameters.checker-arch}
+        checker-build-config: ${parameters.checker-build-config}
+        checker-is-llvm: ${parameters.checker-is-llvm}
+        checker-is-verbose: ${parameters.checker-is-verbose}
+        checker-is-release: ${parameters.checker-is-release}
+        work-dir: ${parameters.work-dir}

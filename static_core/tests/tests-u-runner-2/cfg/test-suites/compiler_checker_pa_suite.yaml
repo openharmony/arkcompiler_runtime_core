@@ -13,28 +13,14 @@
 
 version: 0.0.0.1
 type: test-suite
-suite-name: compiler_checker_suite
+suite-name: compiler_checker_pa_suite
 test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/checked_urunner
 list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/compiler_checker_suite
 
 parameters:
-    extension: ets
+    extension: pa
     load-runtimes: ets
     work-dir: ${WORK_DIR}/${suite-name}
 
 collections:
-    simple_run: |-
-    simple_run/optimize_doubled_xor.ets:
-        parameters:
-            es2panda-test-suite-args:
-                - "--opt-level=0"
-    ets_strings_concat:
-        parameters:
-            es2panda-test-suite-args:
-                - "--opt-level=2"
-                - "--ets-strings-concat=false"
-    ets_strings_concat/ets_stringbuilder_loop_branch.ets:
-        parameters:
-            es2panda-test-suite-args:
-                - "--opt-level=1"
-                - "--ets-strings-concat=false"
+    pa_folder: |-
