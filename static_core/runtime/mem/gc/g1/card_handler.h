@@ -25,11 +25,12 @@
 namespace ark::mem {
 class Region;
 
-template <typename LanguageConfig>
+template <typename Handler, typename LanguageConfig>
 class CardHandler {
 public:
-    explicit CardHandler(CardTable *cardTable, size_t regionSizeBits, const std::atomic_bool &deferCards)
-        : cardTable_(cardTable), regionSizeBits_(regionSizeBits), deferCards_(deferCards)
+    explicit CardHandler(CardTable *cardTable, size_t regionSizeBits, const std::atomic_bool &deferCards,
+                         const Handler &handler)
+        : cardTable_(cardTable), regionSizeBits_(regionSizeBits), deferCards_(deferCards), handler_(handler)
     {
     }
 
@@ -39,14 +40,15 @@ private:
     CardTable *cardTable_;
     size_t regionSizeBits_;
     const std::atomic_bool &deferCards_;
+    const Handler &handler_;
 };
 
-template <typename LanguageConfig>
+template <typename Handler, typename LanguageConfig>
 class RegionRemsetBuilder {
 public:
     RegionRemsetBuilder(Region *fromRegion, void *startAddress, void *endAddress, size_t regionSizeBits,
-                        const std::atomic_bool &deferCards, bool *result)
-        : objectPointerHandler_(fromRegion, regionSizeBits, deferCards),
+                        const std::atomic_bool &deferCards, const Handler &handler, bool *result)
+        : objectPointerHandler_(fromRegion, regionSizeBits, deferCards, handler),
           startAddress_(startAddress),
           endAddress_(endAddress),
           result_(result)
@@ -67,14 +69,14 @@ public:
     }
 
 private:
-    RemsetObjectPointerHandler<LanguageConfig> objectPointerHandler_;
+    RemsetObjectPointerHandler<Handler, LanguageConfig> objectPointerHandler_;
     void *startAddress_;
     void *endAddress_;
     bool *result_;
 };
 
-template <typename LanguageConfig>
-bool CardHandler<LanguageConfig>::Handle(CardTable::CardPtr cardPtr)
+template <typename Handler, typename LanguageConfig>
+bool CardHandler<Handler, LanguageConfig>::Handle(CardTable::CardPtr cardPtr)
 {
     bool result = true;
     auto *startAddress = ToVoidPtr(cardTable_->GetCardStartAddress(cardPtr));
@@ -85,8 +87,8 @@ bool CardHandler<LanguageConfig>::Handle(CardTable::CardPtr cardPtr)
     ASSERT(region != nullptr);
     ASSERT_PRINT(region->GetLiveBitmap() != nullptr, "Region " << region << " GetLiveBitmap() == nullptr");
     auto *endAddress = ToVoidPtr(cardTable_->GetCardEndAddress(cardPtr));
-    RegionRemsetBuilder<LanguageConfig> remsetBuilder(region, startAddress, endAddress, regionSizeBits_, deferCards_,
-                                                      &result);
+    RegionRemsetBuilder<Handler, LanguageConfig> remsetBuilder(region, startAddress, endAddress, regionSizeBits_,
+                                                               deferCards_, handler_, &result);
     if (region->HasFlag(RegionFlag::IS_LARGE_OBJECT)) {
         region->GetLiveBitmap()->CallForMarkedChunkInHumongousRegion<true>(ToVoidPtr(region->Begin()), remsetBuilder);
     } else {

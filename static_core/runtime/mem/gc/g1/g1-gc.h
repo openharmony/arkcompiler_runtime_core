@@ -173,6 +173,8 @@ private:
 
     void CreateUpdateRemsetWorker();
     void ProcessDirtyCards();
+    template <typename Handler>
+    void ProcessDirtyCards(const Handler &handler);
     bool HaveGarbageRegions();
     size_t GetOldCollectionSetCandidatesNumber();
 
