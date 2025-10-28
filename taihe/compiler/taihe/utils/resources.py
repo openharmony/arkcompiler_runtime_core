@@ -384,8 +384,8 @@ class _LegacyPandaVm(PathResource):
 class PandaVm(CachedResource):
     CLI_NAME = "panda-vm"
     PATH_CACHE = "panda-vm"
-    VERSION: Final = "sdk-1.5.0-dev.50843"
-    URL: Final = "https://gitcode.com/m0_52007851/panda_vm/releases/download/50843"
+    VERSION: Final = "sdk-1.5.0-dev.51158"
+    URL: Final = "https://gitcode.com/m0_52007851/panda_vm/releases/download/51158"
 
     # Computed attributes
     ani_header_dir: Path = field(init=False)
