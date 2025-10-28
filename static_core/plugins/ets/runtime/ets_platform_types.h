@@ -154,6 +154,7 @@ public:
 
     EtsClass *stdcoreRegExpExecArray {};
     EtsClass *escompatJsonReplacer {};
+    EtsClass *coreJsonElementSerializable {};
     EtsClass *escompatErrorOptions {};
     EtsClass *escompatErrorOptionsImpl {};
 

@@ -19,12 +19,12 @@ desc: Test cases for various usage scenarios of asynchronous method.
 ---*/     
 
 class MethodWithAllSettled {
-    async methodWithAllSettled(): Promise<string>{
-        const results = await Promise.allSettled([
-            Promise.resolve("Resolved!"),
-            Promise.reject(new Error("Rejected!")),
-        ]);
-        return JSON.stringify(results);
+    async methodWithAllSettled(): Promise<PromiseSettledResult<string>[]> {
+        const promises: FixedArray<string | PromiseLike<string>> = [
+            Promise.resolve("Resolved!"), 
+            Promise.reject(new Error("Rejected!"))
+        ]
+        return Promise.allSettled(promises)
     }
 }
 
@@ -32,25 +32,21 @@ async function startTest() {
     const example = new MethodWithAllSettled();
     const result = await example.methodWithAllSettled();
 
-    const jsonObj = JSON.parseJsonElement(result)
-    arktest.assertEQ(jsonObj.jsonType, jsonx.JsonType.JsonArray, "Root jsonElement type is not instanceof JsonArray");
+    arktest.assertEQ(result.length, 2)
 
-    const rootObj = jsonObj.asArray()
-    arktest.assertTrue(Array.isArray(rootObj), "Root json-value is not instanceof Array");
-    arktest.assertEQ(rootObj.length, 2)
+    const fulfilledResult = result[0]
+    arktest.assertTrue(fulfilledResult instanceof PromiseFulfilledResult)
+    if (fulfilledResult instanceof PromiseFulfilledResult) {
+        arktest.assertEQ(fulfilledResult.value, "Resolved!")
+    }
 
-
-    const el1 = rootObj[0]
-    const el2 = rootObj[1]
-
-    arktest.assertEQ(el1.getString("status"), 'fulfilled');
-    arktest.assertEQ(el2.getString("status"), 'rejected');
-    arktest.assertEQ(el1.getString("value"), 'Resolved!');
-    const el2_reason = el2.getElement("reason")
-    arktest.assertEQ(el2_reason.jsonType, jsonx.JsonType.JsonObject, "jsonType of 'reason' is not instanceof JsonObject");
-    arktest.assertEQ(el2_reason.getString("message_"), "Rejected!");
-    arktest.assertEQ(el2_reason.getString("name_"), "Error");
-
+    const rejectedResult = result[1]
+    arktest.assertTrue(rejectedResult instanceof PromiseRejectedResult)
+    if (rejectedResult instanceof PromiseRejectedResult) {
+        const rejectionError = rejectedResult.reason
+        arktest.assertEQ(rejectionError.name, "Error")
+        arktest.assertEQ(rejectionError.message, "Rejected!")
+    }
 }
 
 function main(): void {

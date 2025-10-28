@@ -48,7 +48,6 @@ private:
 private:
     bool AppendJSONString(EtsHandle<EtsObject> &value, bool hasContent);
     void AppendJSONPrimitive(const PandaString &value, bool hasContent);
-    void AppendJSONPointPrimitive(const PandaString &value, bool hasContent);
 
     bool SerializeFields(EtsHandle<EtsObject> &value);
 
