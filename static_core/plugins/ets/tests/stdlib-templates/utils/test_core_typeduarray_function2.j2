@@ -668,13 +668,7 @@ function testTypedUArrayIncludesOneParamWithAbnormalNum(): number {
 
   //with large Number
   let large_number: FixedArray<number> = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
-  {%- if item.objectType == 'Uint32Array' %}
-    let convertedValues: FixedArray<number> = [0, 4294967295];
-  {%- elif item.objectType == 'Uint16Array'%}
-    let convertedValues: FixedArray<number> = [0, 0xFFFF];
-  {%- else %}
-    let convertedValues: FixedArray<number> = [0, 0xFF];
-  {%- endif %}
+  let convertedValues: FixedArray<number> = [0, 0];
   typedUArray = new {{.item.objectType}}(large_number);
 
   for (let i = 0; i < convertedValues.length; i++) {
