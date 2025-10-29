@@ -50,7 +50,9 @@ class TestStandardFlow(Test):
                  parent_test_id: str = "") -> None:
         Test.__init__(self, test_env, test_path, params, test_id)
 
-        self.metadata: TestMetadata = TestMetadata.get_metadata(test_path)
+        self.metadata: TestMetadata = TestMetadata.get_metadata(test_path) \
+            if test_env.config.test_suite.use_metadata \
+            else TestMetadata.create_empty_metadata(test_path)
         self.test_cli: list[str] = self.metadata.test_cli or []
         self.main_entry_point: str = (
             f"ETSGLOBAL::{self.metadata.entry_point}"
