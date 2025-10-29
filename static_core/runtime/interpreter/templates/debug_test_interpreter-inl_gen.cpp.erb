@@ -18,7 +18,7 @@
 #include "runtime/interpreter/interpreter_impl.h"
 
 #include "libarkbase/macros.h"
-#include "runtime/interpreter/interpreter-inl.h"
+#include "plugins/ets/runtime/interpreter/interpreter-inl.h"
 #include "runtime/interpreter/runtime_interface.h"
 #include "irtoc_interpreter_utils.h"
 
@@ -36,13 +36,13 @@ namespace ark::interpreter {
 %   mnemonic = i.mnemonic.split('.').map { |p| p == '64' ? 'Wide' : p.capitalize }.join
 void CSA_BUILD_ANALYZE_ONLY_DO_NOT_CALL_DYNAMIC_<%= i.handler_name %>(ManagedThread *thread, const uint8_t *pc, Frame *frame, const void *const *dispatch_table) {
     InstructionHandlerState state(thread, pc, frame, dispatch_table);
-    <%= namespace %>InstructionHandler<RuntimeInterface, true> handler(&state);
+    <%= namespace %>InstructionHandler<RuntimeInterface, true, true, false> handler(&state);
     handler.template Handle<%= mnemonic %><BytecodeInstruction::Format::<%= i.format.pretty.upcase %>>();
 }
 
 void CSA_BUILD_ANALYZE_ONLY_DO_NOT_CALL_STATIC_<%= i.handler_name %>(ManagedThread *thread, const uint8_t *pc, Frame *frame, const void *const *dispatch_table) {
     InstructionHandlerState state(thread, pc, frame, dispatch_table);
-    <%= namespace %>InstructionHandler<RuntimeInterface, false> handler(&state);
+    <%= namespace %>InstructionHandler<RuntimeInterface, false, true, false> handler(&state);
     handler.template Handle<%= mnemonic %><BytecodeInstruction::Format::<%= i.format.pretty.upcase %>>();
 }
 %   if i.namespace != 'core'
@@ -57,4 +57,3 @@ void CSA_BUILD_ANALYZE_ONLY_DO_NOT_CALL_STATIC_<%= i.handler_name %>(ManagedThre
 }  // namespace ark::interpreter
 
 #endif // NDEBUG
-

@@ -22,10 +22,10 @@ tags: []
 ---*/
 
 
-class Buffer {
+export class TestBuffer {
 }
 
-class TestArrayBuffer extends Buffer {
+class TestArrayBuffer extends TestBuffer {
     constructor(size:  number) {
     }
 }
@@ -41,7 +41,7 @@ export final class ArrayBackedConstructor {
         this(new TestArrayBuffer(0), 0, 0);
     }
 
-    public constructor(buf: Buffer, offset: number, length: number) {
+    public constructor(buf: TestBuffer, offset: number, length: number) {
     }
 }
 

@@ -20,7 +20,7 @@ type RejectedObjectListener = StdProcess.RejectedObjectListener;
 /**
  * @class Stores EventListener that handles rejected promises and jobs
  */
-class RejectedHandler {
+export class RejectedHandler {
     /**
      * Constructs a new RejectedHandler with an empty listener set.
      */

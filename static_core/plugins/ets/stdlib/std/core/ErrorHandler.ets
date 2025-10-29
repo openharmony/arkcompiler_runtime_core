@@ -20,7 +20,7 @@ type UncaughtErrorListener = StdProcess.UncaughtErrorListener;
 /**
  * @class Stores EventListener that invokes when unhandled exception occurs
  */
-class ErrorHandler {
+export class ProcessErrorHandler {
     private constructor() {}
 
     /**

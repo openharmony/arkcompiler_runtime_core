@@ -151,13 +151,13 @@ export final class MapIterator<K, V, R> implements IterableIterator<R> {
         while (data[data.length - 1] !== undefined) {
             if (this.curIndex > 2) {
                 this.curIndex -= 2 * getNumOfDeleted(buckets!, this.curIndex - 2)
-            }            
-            data = data[data.length - 1] as FixedArray<Any> 
+            }
+            data = data[data.length - 1] as FixedArray<Any>
             buckets = data[data.length - 2] as FixedArray<int>
         }
         this.data = data
         this.buckets = buckets
-        
+
         for (; this.curIndex <= this.buckets!.length - 1; this.curIndex += 2) {
             if (isEmptyAt(this.buckets!, this.curIndex)) {
                 break
@@ -396,7 +396,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     private rehash(newCapacity: int) {
         let curDeletedElements: int = 0
-        const itersCounter = this.buckets[this.buckets.length - 1]        
+        const itersCounter = this.buckets[this.buckets.length - 1]
 
         const newData: FixedArray<Any> = new Any[newCapacity * 2 + 2]
         const newBuckets: FixedArray<int> = new int[newCapacity * 2 + 1]
@@ -692,11 +692,11 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     override forEach(callbackfn: (v: V, k: K, map: Map<K, V>) => void): void {
         let curData = this.data
 
-        ++this.buckets[this.buckets.length - 1]        
+        ++this.buckets[this.buckets.length - 1]
         for (let curAt = 2; curAt <= 2 * this.numEntries; curAt += 2) {
             if (isDeletedAt(this.buckets, curAt))
                 continue
-                
+
             callbackfn(getValueAt<V>(this.data, curAt), getKeyAt<K>(this.data, curAt), this)
 
             while (!Runtime.isSameReference(curData, this.data)) {
@@ -705,7 +705,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                 curData = curData[curData.length - 1] as FixedArray<Any>
             }
         }
-        --this.buckets[this.buckets.length - 1]        
+        --this.buckets[this.buckets.length - 1]
     }
 }
 

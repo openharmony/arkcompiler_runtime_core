@@ -110,7 +110,7 @@ export abstract class TypeCreator {
 /**
  * semantically same as Type | TypeCreator, but provides unified way to get descriptor
  */
-abstract class TypeOrCreator {
+export abstract class TypeOrCreator {
     /**
      * @returns type descriptor or future type descriptor
      */
@@ -158,7 +158,7 @@ final class TypeOrCreator_Creator extends TypeOrCreator {
     }
 }
 
-final class TypeCreatorCtx {
+export final class TypeCreatorCtx {
     public ctxPtr: long
     /** all objects that were passed to cpp code as their ids (indexes in this `Array`) */
     private objects: Array<Object> = new Array<Object>();
@@ -742,7 +742,7 @@ export final class LambdaTypeCreator extends TypeCreator {
 /**
  * interface that is used to freeze creators
  */
-interface Freezable {
+export interface Freezable {
     isFrozen(): boolean;
 }
 
@@ -782,7 +782,7 @@ final class FreezableCreator extends TypeCreator implements Freezable {
 /**
  * Freezable used in features. It stores a boolean flag
  */
-final class FreezableImpl implements Freezable {
+export final class FreezableImpl implements Freezable {
     private frozen: boolean = false
 
     override isFrozen(): boolean {
@@ -797,7 +797,7 @@ final class FreezableImpl implements Freezable {
 /**
  * Storage for attributes
  */
-class HasAttributes {
+export class HasAttributes {
     /** Freezable that prevents modification */
     private frozen: Freezable
     /** attributes */
