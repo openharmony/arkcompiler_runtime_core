@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-SyntaxError: A required parameter cannot follow an optional parameter.
+Syntax error ESY0219: A required parameter cannot follow an optional parameter.

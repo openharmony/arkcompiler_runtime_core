@@ -112,5 +112,6 @@ class CollectionsOptions(IOptions):
             if isinstance(param_value, str):
                 try:
                     self.__parameters[param_name] = Macros.correct_macro(param_value, self)
+                # NOTE(pronai): who is responsible for logging the error?  can it truly be ignored?
                 except ParameterNotFound:
                     pass

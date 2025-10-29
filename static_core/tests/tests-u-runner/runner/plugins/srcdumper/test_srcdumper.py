@@ -17,7 +17,6 @@
 
 import json
 import os
-import re
 from typing import List, Any
 import traceback
 
@@ -26,6 +25,7 @@ from runner.enum_types.params import TestEnv
 from runner.enum_types.fail_kind import FailKind
 from runner.plugins.srcdumper.util_srcdumper import AstComparator, PathConverter
 from runner.enum_types.params import TestReport
+from runner.parser import START_ERRORS
 
 
 class TestSRCDumper(TestFileBased):
@@ -40,23 +40,19 @@ class TestSRCDumper(TestFileBased):
 
 
     def do_run(self) -> TestFileBased:
-        if self.check_for_parser_error():
-            return self
-
-        self.path_conv.init_artefact_dirs()
-        self.compile_original_with_dump_src()
-        self.compile_original_with_dump_ast()
-        self.compile_dumped_with_dump_ast()
-        self.compare_ast()
+        if not self.expects_error():
+            self.path_conv.init_artefact_dirs()
+            self.compile_original_with_dump_src()
+            self.compile_original_with_dump_ast()
+            self.compile_dumped_with_dump_ast()
+            self.compare_ast()
 
         return self
 
 
-    def check_for_parser_error(self) -> bool:
-        with os.fdopen(os.open(self.path, os.O_RDONLY, mode=511), "r", encoding="utf-8") as file:
-            data = file.read()
-            regex = r"\/\*\s+@@(@|\?)\s+.*?\s+Error\s+(SyntaxError|TypeError|Error):\s+.*?\s+\*\/"
-            return re.search(regex, data) is not None
+    def expects_error(self) -> bool:
+        with os.fdopen(os.open(self.path, os.O_RDONLY, mode=511), "rb") as file:
+            return START_ERRORS.search(file.read()) is not None
 
 
     def compare_ast(self) -> None:
@@ -73,7 +69,7 @@ class TestSRCDumper(TestFileBased):
 
         except json.JSONDecodeError:
             self.passed = False
-            self.report = TestReport(f"{loading_json}", traceback.format_exc(), -1)
+            self.report = TestReport(str(loading_json), traceback.format_exc(), -1)
             self.fail_kind = FailKind.INVALID_JSON
 
 

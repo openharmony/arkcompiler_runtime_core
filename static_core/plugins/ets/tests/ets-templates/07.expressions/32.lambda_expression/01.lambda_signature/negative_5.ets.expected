@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-SyntaxError: Rest parameter should be either array or tuple type.
+Syntax error ESY0193: Rest parameter should be either array or tuple type.

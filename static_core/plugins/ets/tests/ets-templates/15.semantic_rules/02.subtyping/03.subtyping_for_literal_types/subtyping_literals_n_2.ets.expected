@@ -11,4 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: foo(v: String): "a"|"b" in B cannot override foo(v: "a"|"b"): "a" in A because overriding return type is not compatible with the other return type.
+Semantic error ESE0141: foo(v: String): "a"|"b" in B cannot override foo(v: "a"|"b"): "a" in A because overriding return type is not compatible with the other return type.
+Semantic error ESE0136: Method foo(v: String): "a"|"b" in B not overriding any method

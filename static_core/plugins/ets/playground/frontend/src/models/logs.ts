@@ -43,7 +43,7 @@ export enum ELogType {
 }
 
 export interface ILog {
-    message: {message: string, line?: number, column?: number}[];
+    message: { message: string, line?: number, column?: number }[];
     isRead?: boolean;
     from?: ELogType;
 }
@@ -88,13 +88,30 @@ const collectHighlights = (str?: string): HighlightItem[] => {
         return [];
     }
 
-    const re =
-    /(?<type>\w+(?:Error|Exception|Warning|Notice|Info|Debug|Fatal)?):\s+(?<msg>[\s\S]*?)\s+\[(?<file>[^\[\]]+?):(?<line>\d+):(?<col>\d+)\]/g;
+    // keep in sync with DiagnosticType in ets_frontend/ets2panda/util/diagnostic/diagnostic.h.erb
+    const diag_types = [
+        "ArkTS config error",
+        "Error",
+        "Fatal",
+        "Semantic error",
+        "SUGGESTION",
+        "Syntax error",
+        "Warning",
+    ];
+
+    // emulate Python's rf strings to make regex more readable
+    const r = String.raw;
+    const diag_type = r`(?:${diag_types.join("|")})`;
+    const loc = r`\[(?<file>[^\[\]]+?):(?<line>\d+):(?<col>\d+)\]`;
+    const shortid = r`(?:[A-Za-z]+\d+)`
+
+    const re_str = r`(?:${loc}\s*)(?<type>${diag_type})\s*(?<shortid>${shortid})\s*:\s*(?<msg>[\s\S]*?)`;
+    const re = new RegExp(re_str, "g");
 
     const out: HighlightItem[] = [];
 
     const pushPlainSegments = (text: string): void => {
-        const parts = text.match(/(?:[\s\S]*?\n|[^\n]+$)/g) ?? [];
+        const parts = text.split('\n')
         for (const p of parts) {
             if (p === '') {
                 continue;
@@ -211,14 +228,14 @@ export const handleResponseLogs = createAsyncThunk(
             } else if (data.exit_code === 0 && !data.error && !data.output) {
                 thunkAPI.dispatch(setOutAction(
                     logsState.out.concat({
-                        message: [{message: successMessage}],
+                        message: [{ message: successMessage }],
                         isRead: false,
                         from: logTypeOut
                     })
                 ));
                 thunkAPI.dispatch(setOutLogs(
                     logsState.out.concat({
-                        message: [{message: successMessage}],
+                        message: [{ message: successMessage }],
                         isRead: false,
                         from: logTypeOut
                     })

@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Type 'String' cannot be assigned to type '"a"'
+Semantic error ESE0318: Type 'String' cannot be assigned to type '"a"'

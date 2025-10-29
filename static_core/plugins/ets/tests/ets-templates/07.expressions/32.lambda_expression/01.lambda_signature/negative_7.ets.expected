@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Object type doesn't have proper index access method.
+Semantic error ESE0250: Object type doesn't have proper index access method.

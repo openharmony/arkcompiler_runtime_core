@@ -13,5 +13,6 @@
 #
 Unhandled exception: escompat.Error
 Error: concurrent_nested.ets: task A failed
-	at escompat.Error.<ctor> (Error.ets:56:0)
-	at concurrent_nested.ETSGLOBAL.%async-A (concurrent_nested.ets:1:0)
+        at escompat.Error.<ctor> (Error.ets:56:0)
+        at concurrent_nested.ETSGLOBAL.%async-A (concurrent_nested.ets:1:0)
+

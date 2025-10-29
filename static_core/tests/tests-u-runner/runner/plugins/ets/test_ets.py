@@ -29,6 +29,11 @@ from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.params import TestEnv, TestReport, Params
 from runner.test_file_based import TestFileBased
 
+def update_expected(expected_path: Path, contents: str) -> None:
+    print(f"Updating expected file: {expected_path}")
+    with open(expected_path, "w", encoding="utf-8") as expected_file:
+        expected_file.write(contents)
+
 
 class TestETS(TestFileBased):
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str,
@@ -150,7 +155,7 @@ class TestETS(TestFileBased):
 
     @staticmethod
     def _normalize_error_report(report: str) -> str:
-        pattern = r"\[TID [0-9a-fA-F]{6,}\]\s*"
+        pattern = r"\[TID \w{6,}\]\s*"
         result = re.sub(pattern, "", report)
         return TestETS._remove_tabs_and_spaces_from_begin(result)
 
@@ -270,7 +275,6 @@ class TestETS(TestFileBased):
 
     def _determine_test_status(self, output: str, err_output: str) -> bool:
 
-        passed = True
         output = output.strip()
         err_output = err_output.strip()
 
@@ -286,28 +290,30 @@ class TestETS(TestFileBased):
 
             return expected_lines.issubset(actual_lines)
 
+        normalized_out = self.normalize_output(output)
+        normalized_err = self.normalize_output(err_output)
+        normalized_expected_out = self.normalize_output(self.expected)
+        normalized_expected_err = self.normalize_output(self.expected_err)
+
         if self.expected and not self.expected_err and output:
             # Compare with output from std.OUT
-            report_output = self._remove_file_info_from_error(self._normalize_error_report(output))
-            passed = compare(self._remove_file_info_from_error(self._normalize_error_report(self.expected)),
-                             report_output) and not err_output
-        elif self.expected_err and not self.expected and err_output:
+            return compare(normalized_expected_out,
+                             normalized_out) and not err_output
+        if self.expected_err and not self.expected and err_output:
             # Compare with output from std.ERR
-            report_error = self._remove_file_info_from_error(self._normalize_error_report(err_output))
-            passed = compare(self._remove_file_info_from_error(self._normalize_error_report(self.expected_err)),
-                             report_error)
-        elif self.expected and self.expected_err and output and err_output:
+            return compare(normalized_expected_err,
+                             normalized_err)
+        if self.expected and self.expected_err and output and err_output:
             # Compare .expected file with std.OUT and .expected.err with std.ERR
-            report_output = self._remove_file_info_from_error(self._normalize_error_report(output))
-            passed_stdout = compare(self._remove_file_info_from_error(self._normalize_error_report(self.expected)),
-                                    report_output)
+            passed_stdout = compare(normalized_expected_out,
+                                    normalized_out)
+            passed_stderr = compare(normalized_expected_err,
+                                    normalized_err)
+            return passed_stdout and passed_stderr
+        return True
 
-            report_error = self._remove_file_info_from_error(self._normalize_error_report(err_output))
-            passed_stderr = compare(self._remove_file_info_from_error(self._normalize_error_report(self.expected_err)),
-                                    report_error)
-            passed = passed_stdout and passed_stderr
-
-        return bool(passed)
+    def normalize_output(self, output: str)-> str:
+        return self._remove_file_info_from_error(self._normalize_error_report(output))
 
     def _read_expected_file(self) -> None:
         if self.has_expected:
@@ -377,7 +383,7 @@ class TestETS(TestFileBased):
                 # for passed tests stderr should be empty or there should be .expected.err file to compare with
                 return True
 
-            self.log_cmd("The test has passed but stdeError is not empty. "
+            self.log_cmd("The test has passed but stdError is not empty. "
                          "There is no .expected.err file to compare with stdError output.")
             return False
 
@@ -415,7 +421,7 @@ class TestETS(TestFileBased):
             params=params,
             result_validator=lambda output, error, rc: self._validate_compiler(output, error, rc, test_abc)
         )
-        if fail_kind == FailKind.ES2PANDA_FAIL and report and report.return_code == 0:
+        if fail_kind == FailKind.ES2PANDA_FAIL and report.return_code == 0:
             fail_kind = FailKind.ES2PANDA_NEG_FAIL
         return passed, report, fail_kind
 
@@ -429,6 +435,15 @@ class TestETS(TestFileBased):
         else:
             test_passed = return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
 
+        if self.update_expected:
+            if self.has_expected:
+                update_expected(self.test_expected, output)
+            # NOTE(pronai) #29808 might affect this
+            # positive tests can have warnings!
+            if self.is_negative_compile:
+                # negative tests must have an .expected.err
+                update_expected(self.test_expected_err, err)
+
         if not (negative_test_passed or test_passed):
             return False
 
@@ -440,6 +455,7 @@ class TestETS(TestFileBased):
                 return False
             return True
 
+        # NOTE(pronai) #29808 might affect this
         if not err:
             # for passed tests stderr should be empty or there should be .expected.err file to compare with
             return True

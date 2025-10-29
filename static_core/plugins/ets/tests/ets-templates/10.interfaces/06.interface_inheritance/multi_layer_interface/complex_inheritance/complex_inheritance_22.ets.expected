@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Cannot inherit from class Parent, because field MESSAGE is inherited with a different declaration type
+Semantic error ESE0216: Cannot inherit from class Parent, because field MESSAGE is inherited with a different declaration type

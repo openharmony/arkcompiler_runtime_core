@@ -17,7 +17,7 @@
 
 import logging
 from os import makedirs, path
-from typing import List, Any
+from typing import List
 
 from runner.descriptor import Descriptor
 from runner.utils import write_2_file
@@ -50,7 +50,6 @@ class TestETSSystem(TestFileBased):
             test_abc=self.get_tests_abc(),
             result_validator=self.es2panda_result_validator
         )
-
         if self.update_expected and self.report:
             self.update_expected_files(self.report.output)
 
@@ -59,11 +58,12 @@ class TestETSSystem(TestFileBased):
     def update_expected_files(self, output: str) -> None:
         write_2_file(self.expected_path, output)
 
-    def es2panda_result_validator(self, actual_output: str, _: Any, actual_return_code: int) -> bool:
+    def es2panda_result_validator(self, actual_stdout: str, _actual_stderr: str, actual_return_code: int) -> bool:
         try:
             with open(self.expected_path, 'r', encoding="utf-8") as file_pointer:
                 self.expected = file_pointer.read()
-            passed = self.expected == actual_output and actual_return_code in [0, 1]
+            # NOTE(pronai) add stderr support in #29808
+            passed = self.expected == actual_stdout and actual_return_code in [0, 1]
         except OSError:
             passed = False
 

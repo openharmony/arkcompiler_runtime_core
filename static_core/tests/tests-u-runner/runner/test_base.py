@@ -28,6 +28,7 @@ from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
 from runner.logger import Log
 from runner.reports.report import ReportGenerator
 from runner.reports.report_format import ReportFormat
+from runner.utils import unlines
 
 _LOGGER = logging.getLogger("runner.test_base")
 
@@ -51,7 +52,6 @@ class Test:
         self.path = test_path
         self.flags = flags
         self.test_id = test_id
-        self.update_expected = self.test_env.config.test_lists.update_expected
         self.expected = ""
         self.expected_err = ""
         # Contains fields output, error, and return_code of the last executed step
@@ -71,9 +71,18 @@ class Test:
         self.reports: Dict[ReportFormat, str] = {}
         self.coverage = self.test_env.coverage
 
-    def steps_to_reproduce(self) -> str:
-        return "\n".join(self.reproduce)
+    @property
+    def update_expected(self) -> bool:
+        b = self.test_env.config.test_lists.update_expected
+        # NOTE(pronai) mypy erroneously thinks `b` is Any
+        assert isinstance(b, bool)
+        return b
 
+    def steps_to_reproduce(self) -> str:
+        return unlines(iter(self.reproduce))
+
+    # this is used as a general text log and it also doesn't escape whitespace
+    # NOTE(pronai) use List[str] and escape for pasting into bash
     def log_cmd(self, cmd: str) -> None:
         self.reproduce.append(cmd)
 

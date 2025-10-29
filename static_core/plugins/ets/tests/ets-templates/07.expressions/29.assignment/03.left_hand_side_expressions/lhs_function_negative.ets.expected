@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TypeError: Function name 'test_function' used in the wrong context
+Semantic error ESE0144: Function name 'test_function' used in the wrong context

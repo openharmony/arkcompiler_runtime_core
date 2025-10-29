@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Variable 'a' has already been declared.
+Semantic error ESE0351: Variable 'a' has already been declared.

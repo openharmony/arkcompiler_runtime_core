@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Type 'Boolean' cannot be assigned to type 'Double|String'
+Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'Double|String'

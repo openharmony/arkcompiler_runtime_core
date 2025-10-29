@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-SyntaxError: Invalid left-hand side in prefix operation.
+Syntax error ESY0071: Invalid left-hand side in prefix operation.

@@ -11,4 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-SyntaxError: Rest parameter must be the last formal parameter.
+Syntax error ESY0067: Rest parameter must be the last formal parameter.
+Syntax error ESY0230: Expected '=>', got 'identification literal'.
+Semantic error ESE0143: Unresolved reference b
+Syntax error ESY0227: Unexpected token ':'.
+Syntax error ESY0227: Unexpected token 'string'.
+Semantic error ESE0144: Type name 'string' used in the wrong context
+Syntax error ESY0227: Unexpected token ')'.
+Syntax error ESY0227: Unexpected token '=>'.

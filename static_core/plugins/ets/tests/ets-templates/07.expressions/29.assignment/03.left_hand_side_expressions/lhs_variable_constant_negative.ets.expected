@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TypeError: Cannot assign to a constant variable constantVariable
+Semantic error ESE4001: Cannot assign to a constant variable constantVariable

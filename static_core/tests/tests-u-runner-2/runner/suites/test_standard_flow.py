@@ -196,7 +196,7 @@ class TestStandardFlow(Test):
 
     @staticmethod
     def _remove_file_info_from_error(error_message: str) -> str:
-        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:\d+:\d+\s*[\]\)]|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]'
+        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:\d+:\d+\s*[\]\)]\s*|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]\s*'
         return re.sub(pattern, '', error_message)
 
     @staticmethod
@@ -311,6 +311,7 @@ class TestStandardFlow(Test):
             self._read_expected_file()
             passed = self._determine_test_status(output, error_output)
 
+        # NOTE(pronai): this might silence errors it shouldn't, add logging
         except OSError:
             passed = False
 
@@ -481,37 +482,54 @@ class TestStandardFlow(Test):
     def _determine_test_status(self, output: str | None, error: str | None) -> bool:
         passed = True
 
-        def compare(expected: str, actual: str) -> bool:
+        def compare_line_sets(expected: str, actual: str, expected_path: Path) -> bool:
             expected_lines = set(filter(None, expected.splitlines()))
             actual_lines = set(filter(None, actual.splitlines()))
 
             if not actual_lines and not expected_lines:
                 return True
 
-            if not expected_lines or not actual_lines:
+            if not expected_lines:
+                _LOGGER.all(f"{expected_path} is empty after normalization")
+                return False
+            if not actual_lines:
+                _LOGGER.all(f"{expected_path} is not empty, but actual output is")
                 return False
 
-            return expected_lines.issubset(actual_lines)
+            is_subset = expected_lines.issubset(actual_lines)
+            if not is_subset:
+                _LOGGER.all(f"{expected_path} is not a subset of actual, the missing lines (after normalization) are:")
+                for line in expected_lines.difference(actual_lines):
+                    _LOGGER.all(line)
+                _LOGGER.all("(end of missing lines)")
+            return is_subset
+
+        def normalize_output_lines(output: str) -> str:
+            return ''.join(normalize_line(line) + '\n' for line in output.splitlines())
+
+        def normalize_line(line: str) -> str:
+            return self._remove_file_info_from_error(self._normalize_error_report(line))
 
         if self.expected and not self.expected_err and output:
             # Compare with output from std.OUT
-            output_normalized_info = self._remove_file_info_from_error(self._normalize_error_report(output.strip()))
-            expected_normalized_info = self._remove_file_info_from_error(self._normalize_error_report(self.expected))
-            passed = compare(expected_normalized_info, output_normalized_info) and not error
+            output_normalized_info = normalize_output_lines(output)
+            expected_normalized_info = normalize_output_lines(self.expected)
+            passed = compare_line_sets(expected_normalized_info, output_normalized_info,
+                                       self.path_to_expected) and not error
         elif not self.expected and self.expected_err and error:
             # Compare with output from std.ERR
-            report_error = self._remove_file_info_from_error(self._normalize_error_report(error))
-            expected_error = self._remove_file_info_from_error(self._normalize_error_report(self.expected_err))
-            passed = compare(expected_error, report_error.strip())
+            report_error = normalize_output_lines(error)
+            expected_error = normalize_output_lines(self.expected_err)
+            passed = compare_line_sets(expected_error, report_error, self.path_to_expected_err)
         elif self.expected and self.expected_err and output and error:
             # Compare .expected with std.Output and .expected.err with std.Error
-            output_normalized_info = self._remove_file_info_from_error(self._normalize_error_report(output.strip()))
-            expected_normalized_info = self._remove_file_info_from_error(self._normalize_error_report(self.expected))
-            passed_output = compare(expected_normalized_info, output_normalized_info)
+            output_normalized_info = normalize_output_lines(output)
+            expected_normalized_info = normalize_output_lines(self.expected)
+            passed_output = compare_line_sets(expected_normalized_info, output_normalized_info, self.path_to_expected)
 
-            report_error = self._remove_file_info_from_error(self._normalize_error_report(error))
-            expected_error = self._remove_file_info_from_error(self._normalize_error_report(self.expected_err))
-            passed_error = compare(expected_error, report_error.strip())
+            report_error = normalize_output_lines(error)
+            expected_error = normalize_output_lines(self.expected_err)
+            passed_error = compare_line_sets(expected_error, report_error, self.path_to_expected_err)
             passed = passed_output and passed_error
 
         return bool(passed)

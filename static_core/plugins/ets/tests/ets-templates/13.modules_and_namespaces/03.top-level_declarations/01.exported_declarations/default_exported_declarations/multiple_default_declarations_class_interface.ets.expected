@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-TypeError: Only one default export is allowed in a module
+Semantic error ESE0374: Only one default export is allowed in a module
