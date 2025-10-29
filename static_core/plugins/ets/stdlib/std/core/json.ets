@@ -50,18 +50,18 @@ class FieldMetadata {
     readonly ignore: boolean
     readonly rename: string | undefined
     readonly name: string
-    
+
     constructor(field: reflect.InstanceField, ignore: boolean, rename: string | undefined) {
         this.field = field
         this.ignore = ignore
         this.rename = rename
         this.name = field.getName()
     }
-    
+
     getValue(obj: object): Any {
         return this.field.getValue(obj)
     }
-    
+
     getName(): string {
         return this.rename ?? this.name
     }
@@ -70,7 +70,7 @@ class FieldMetadata {
 class ClassMetadata {
     readonly metadata: Array<FieldMetadata>;
     readonly nameMap: Map<string, FieldMetadata>;
-    
+
     constructor(metadata: Array<FieldMetadata>) {
         this.metadata = metadata;
         this.nameMap = new Map<string, FieldMetadata>();
@@ -84,7 +84,7 @@ class ClassMetadata {
 class FieldMetadataCache {
     private static readonly CACHE_CAPACITY: int = 200;
     private static readonly cache: ConcurrentLRUCache<Class, ClassMetadata> = new ConcurrentLRUCache<Class, ClassMetadata>(FieldMetadataCache.CACHE_CAPACITY);
-    
+
     static getMetadata(cls: Class): Array<FieldMetadata> {
         const classMeta = FieldMetadataCache.cache.computeIfAbsent(cls, (c: Class) => {
             const fields = reflect.getInstanceFieldsRecursive(c);
@@ -99,7 +99,7 @@ class FieldMetadataCache {
         });
         return classMeta.metadata;
     }
-    
+
     static getMetadataByName(cls: Class, name: string): FieldMetadata | undefined {
         const classMeta = FieldMetadataCache.cache.computeIfAbsent(cls, (c: Class) => {
             const fields = reflect.getInstanceFieldsRecursive(c);
@@ -680,7 +680,7 @@ export class JSON {
         }
         if (type === BigIntType ||
                 type === TypeColor.STRING_CLASS ||
-                Types.isPrimitiveType(type) ||
+                reflect.internals.Types.isPrimitiveType(type) ||
                 type === TypeColor.NULL_CLASS) {
             return
         }
@@ -2810,8 +2810,6 @@ class UnifiedJsonParser {
     }
 }
 
-type Types = reflect.internals.Types
-
 class JSONValueParser {
     private reviver: ((key: string, value: Any) => Any) | undefined
     private bigIntMode: int
@@ -2891,8 +2889,8 @@ class JSONValueParser {
 
     private isParseableObjectType(type: Class): boolean {
         return !(type === TypeColor.STRING_CLASS ||
-                Types.isPrimitiveType(type) ||
-                Types.isCharType(type) ||
+                reflect.internals.Types.isPrimitiveType(type) ||
+                reflect.internals.Types.isCharType(type) ||
                 type === TypeColor.NULL_CLASS ||
                 type.isSubtypeOf(TypeColor.ARRAY_CLASS) ||
                 type.isFixedArray() ||

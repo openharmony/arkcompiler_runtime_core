@@ -14,30 +14,31 @@
  */
 
 //! CHECKER       Array fill intrinsic
+//! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,
 //!               options: "--compiler-regex=.*testFill.*",
-//!               entry: "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testMain"
-//! METHOD        "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testFillBigInt64Array"
+//!               entry: "ets_std_core_typed_arrays_fill_part2.ETSGLOBAL::testMain"
+//! METHOD        "ets_std_core_typed_arrays_fill_part2.ETSGLOBAL::testFillBigInt64Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.BigInt64ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-//! METHOD        "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testFillUint8Array"
+//! METHOD        "ets_std_core_typed_arrays_fill_part2.ETSGLOBAL::testFillUint8Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.UInt8ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-//! METHOD        "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testFillUint8ClampedArray"
+//! METHOD        "ets_std_core_typed_arrays_fill_part2.ETSGLOBAL::testFillUint8ClampedArray"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.UInt8ClampedArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-//! METHOD        "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testFillUint16Array"
+//! METHOD        "ets_std_core_typed_arrays_fill_part2.ETSGLOBAL::testFillUint16Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.UInt16ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-//! METHOD        "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testFillUint32Array"
+//! METHOD        "ets_std_core_typed_arrays_fill_part2.ETSGLOBAL::testFillUint32Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.UInt32ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-//! METHOD        "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testFillBigUint64Array"
+//! METHOD        "ets_std_core_typed_arrays_fill_part2.ETSGLOBAL::testFillBigUint64Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.BigUInt64ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/

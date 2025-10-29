@@ -16,50 +16,50 @@
 //! CHECKER       JIT: indexOf() and lastIndexOf()
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,  options: "--compiler-regex=.*::test.*array.*",
-//!               entry: "ets_escompat_typed_arrays_index_of.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_index_of.ETSGLOBAL::main"
 //! METHOD        "testInt8arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int8Array::indexOf/
+//! INST          /Call.* std.core.Int8Array::indexOf/
 //! METHOD        "testInt16arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int16Array::indexOf/
+//! INST          /Call.* std.core.Int16Array::indexOf/
 //! METHOD        "testInt32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int32Array::indexOf/
+//! INST          /Call.* std.core.Int32Array::indexOf/
 //! METHOD        "testBigint64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.BigInt64Array::indexOf/
+//! INST          /Call.* std.core.BigInt64Array::indexOf/
 //!
 //! METHOD        "testFloat32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float32Array::indexOf/
+//! INST          /Call.* std.core.Float32Array::indexOf/
 //! METHOD        "testFloat64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float64Array::indexOf/
+//! INST          /Call.* std.core.Float64Array::indexOf/
 
 
 //! CHECKER       AOT: indexOf() and lastIndexOf()
 //! RUN_PAOC      options: "--compiler-regex=.*::test.*array.*",
-//!               entry: "ets_escompat_typed_arrays_index_of.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_index_of.ETSGLOBAL::main"
 //! METHOD        "testInt8arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int8Array::indexOf/
+//! INST          /Call.* std.core.Int8Array::indexOf/
 //! METHOD        "testInt16arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int16Array::indexOf/
+//! INST          /Call.* std.core.Int16Array::indexOf/
 //! METHOD        "testInt32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Int32Array::indexOf/
+//! INST          /Call.* std.core.Int32Array::indexOf/
 //! METHOD        "testBigint64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.BigInt64Array::indexOf/
+//! INST          /Call.* std.core.BigInt64Array::indexOf/
 //!
 //! METHOD        "testFloat32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float32Array::indexOf/
+//! INST          /Call.* std.core.Float32Array::indexOf/
 //! METHOD        "testFloat64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.Float64Array::indexOf/
+//! INST          /Call.* std.core.Float64Array::indexOf/
 
 function testInt8arrayIndexOf() {
     let array = new Int8Array([1, 2, 3, 3, 3, 4, 5])

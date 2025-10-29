@@ -59,7 +59,7 @@ def GenerateTypedArrayFillInternal(name, prefix, type, outType, scale, cgmode)
 
       Label(:SlowPathEntrypoint)
         if cgmode == :NativePlus
-          Call(arr, val, startPos, endPos).Method("EtsEscompat#{name}ArrayFillInternal").void
+          Call(arr, val, startPos, endPos).Method("EtsStdCore#{name}ArrayFillInternal").void
           Goto(:End)
         else
           ep_offset = get_entrypoint_offset("#{prefix}_ARRAY_FILL_INTERNAL_USUAL")
@@ -344,8 +344,8 @@ def GenerateArrayCopyWithin(name, uname, type, scale)
         do_array_copy_bare(1 << scale, scale, addr, dst_start, src_start, count, arr)
         Goto(:End)
       Label(:SlowPathEntrypoint)
-        ep_offset = get_entrypoint_offset('ETS_ESCOMPAT_' + uname + '_ARRAY_COPY_WITHIN_IMPL_USUAL')
-        ep_name = 'EtsEscompat' + name + 'ArrayCopyWithinImplUsualBridge'
+        ep_offset = get_entrypoint_offset('ETS_STD_CORE_' + uname + '_ARRAY_COPY_WITHIN_IMPL_USUAL')
+        ep_name = 'EtsStdCore' + name + 'ArrayCopyWithinImplUsualBridge'
         Intrinsic(:SLOW_PATH_ENTRY, arr, dst_start, src_start, count).AddImm(ep_offset).MethodAsImm(ep_name).Terminator.void
         Intrinsic(:UNREACHABLE).Terminator.ref if defines.DEBUG
      Label(:End)

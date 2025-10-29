@@ -37,7 +37,7 @@ coretypes:
   mirror_class: ark::ets::EtsTypeAPIType
 
 - managed_class: std.core.ArrayBuffer
-  mirror_class: ark::ets::EtsEscompatArrayBuffer
+  mirror_class: ark::ets::EtsStdCoreArrayBuffer
 
 - managed_class: std.interop.ESValue
   mirror_class: ark::ets::interop::js::ESValue

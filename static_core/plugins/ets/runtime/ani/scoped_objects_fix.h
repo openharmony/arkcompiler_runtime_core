@@ -102,10 +102,10 @@ public:
         return reinterpret_cast<EtsEscompatArray *>(GetInternalType(array));
     }
 
-    EtsEscompatArrayBuffer *ToInternalType(ani_arraybuffer arraybuffer)
+    EtsStdCoreArrayBuffer *ToInternalType(ani_arraybuffer arraybuffer)
     {
         ASSERT(!IsNullishValue(arraybuffer));
-        return reinterpret_cast<EtsEscompatArrayBuffer *>(GetInternalType(arraybuffer));
+        return reinterpret_cast<EtsStdCoreArrayBuffer *>(GetInternalType(arraybuffer));
     }
 
     EtsObject *ToInternalType(ani_ref ref)

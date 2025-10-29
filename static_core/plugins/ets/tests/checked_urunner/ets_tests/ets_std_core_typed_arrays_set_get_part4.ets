@@ -14,89 +14,89 @@
  */
 
 //! CHECKER       JIT Test cpp intrinsics
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get_part4.ETSGLOBAL::main",
+//! RUN           force_jit: true, entry: "ets_std_core_typed_arrays_set_get_part4.ETSGLOBAL::main",
 //!               options: "--compiler-encode-intrinsics=false --compiler-regex='.*test.*ArrayGetUnsafe'"
 //!
 //! METHOD        "testUint8ArrayGetUnsafe"
-//! METHOD        "escompat_Uint8Array::at"
+//! METHOD        "std_core_Uint8Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
 //!
 //! METHOD        "testUint8ClampedArrayGetUnsafe"
-//! METHOD        "escompat_Uint8ClampedArray::at"
+//! METHOD        "std_core_Uint8ClampedArray::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ClampedArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
 //!
 //! METHOD        "testUint16ArrayGetUnsafe"
-//! METHOD        "escompat_Uint16Array::at"
+//! METHOD        "std_core_Uint16Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt16ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
 //!
 //! METHOD        "testUint32ArrayGetUnsafe"
-//! METHOD        "escompat_Uint32Array::at"
+//! METHOD        "std_core_Uint32Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt32ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
 
 //! CHECKER       JIT Test IR intrinsics
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get_part4.ETSGLOBAL::main",
-//!               options: "--compiler-regex='(.*test.*ArrayGetUnsafe)|(escompat\.*Array::at)'"
+//! RUN           force_jit: true, entry: "ets_std_core_typed_arrays_set_get_part4.ETSGLOBAL::main",
+//!               options: "--compiler-regex='(.*test.*ArrayGetUnsafe)|(std\.core\.*Array::at)'"
 //!
 //! METHOD        "testUint8ArrayGetUnsafe"
-//! METHOD        "escompat_Uint8Array::at"
+//! METHOD        "std_core_Uint8Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt8ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testUint8ClampedArrayGetUnsafe"
-//! METHOD        "escompat_Uint8ClampedArray::at"
+//! METHOD        "std_core_Uint8ClampedArray::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt8ClampedArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.Uint[\d]+ClampedArray\.buffer/
-//! INST          /LoadObject.*escompat\.Uint[\d]+ClampedArray\.lengthInt/
-//! INST          /LoadObject.*escompat\.Uint[\d]+ClampedArray\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+ClampedArray\.buffer/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+ClampedArray\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+ClampedArray\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testUint16ArrayGetUnsafe"
-//! METHOD        "escompat_Uint16Array::at"
+//! METHOD        "std_core_Uint16Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt16ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testUint32ArrayGetUnsafe"
-//! METHOD        "escompat_Uint32Array::at"
+//! METHOD        "std_core_Uint32Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt32ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Uint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Uint[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testBigUint64ArrayGetUnsafe"
-//! METHOD        "escompat_BigUint64Array::at"
+//! METHOD        "std_core_BigUint64Array::at"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGetUnsafe "
 //! INST_NOT      /Call.*Array::getUnsafe/
-//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.BigUint[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.BigUint[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.BigUint[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.BigUint[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 

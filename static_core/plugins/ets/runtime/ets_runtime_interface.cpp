@@ -248,84 +248,79 @@ bool EtsRuntimeInterface::IsClassEscompatArray(ClassPtr klass) const
     return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatArray;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatInt8Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreInt8Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatInt8Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreInt8Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatUint8Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreUint8Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatUint8Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreUint8Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatUint8ClampedArray(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreUint8ClampedArray(ClassPtr klass) const
 {
     return EtsClass::FromRuntimeClass(ClassCast(klass)) ==
-           PlatformTypes(PandaEtsVM::GetCurrent())->escompatUint8ClampedArray;
+           PlatformTypes(PandaEtsVM::GetCurrent())->coreUint8ClampedArray;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatInt16Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreInt16Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatInt16Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreInt16Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatUint16Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreUint16Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatUint16Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreUint16Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatInt32Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreInt32Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatInt32Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreInt32Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatUint32Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreUint32Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatUint32Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreUint32Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatFloat32Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreFloat32Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) ==
-           PlatformTypes(PandaEtsVM::GetCurrent())->escompatFloat32Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreFloat32Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatFloat64Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreFloat64Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) ==
-           PlatformTypes(PandaEtsVM::GetCurrent())->escompatFloat64Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreFloat64Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatBigInt64Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreBigInt64Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) ==
-           PlatformTypes(PandaEtsVM::GetCurrent())->escompatBigInt64Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreBigInt64Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatBigUint64Array(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreBigUint64Array(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) ==
-           PlatformTypes(PandaEtsVM::GetCurrent())->escompatBigUint64Array;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreBigUint64Array;
 }
 
-bool EtsRuntimeInterface::IsClassEscompatTypedArray(ClassPtr klass) const
+bool EtsRuntimeInterface::IsClassStdCoreTypedArray(ClassPtr klass) const
 {
-    return IsClassEscompatInt8Array(klass) || IsClassEscompatUint8Array(klass) ||
-           IsClassEscompatUint8ClampedArray(klass) || IsClassEscompatInt16Array(klass) ||
-           IsClassEscompatUint16Array(klass) || IsClassEscompatInt32Array(klass) ||
-           IsClassEscompatUint32Array((klass)) || IsClassEscompatFloat32Array(klass) ||
-           IsClassEscompatFloat64Array(klass) || IsClassEscompatBigInt64Array(klass) ||
-           IsClassEscompatBigUint64Array(klass);
+    return IsClassStdCoreInt8Array(klass) || IsClassStdCoreUint8Array(klass) ||
+           IsClassStdCoreUint8ClampedArray(klass) || IsClassStdCoreInt16Array(klass) ||
+           IsClassStdCoreUint16Array(klass) || IsClassStdCoreInt32Array(klass) || IsClassStdCoreUint32Array((klass)) ||
+           IsClassStdCoreFloat32Array(klass) || IsClassStdCoreFloat64Array(klass) ||
+           IsClassStdCoreBigInt64Array(klass) || IsClassStdCoreBigUint64Array(klass);
 }
 
 bool EtsRuntimeInterface::IsMethodTypedArrayCtor(MethodPtr method) const
 {
-    return MethodCast(method)->IsConstructor() && IsClassEscompatTypedArray(MethodCast(method)->GetClass());
+    return MethodCast(method)->IsConstructor() && IsClassStdCoreTypedArray(MethodCast(method)->GetClass());
 }
 
 bool EtsRuntimeInterface::IsFieldTypedArrayLengthInt(FieldPtr field) const
 {
-    return IsClassEscompatTypedArray(FieldCast(field)->GetClass()) && GetFieldName(field) == FIELDS_LENGTH_INT;
+    return IsClassStdCoreTypedArray(FieldCast(field)->GetClass()) && GetFieldName(field) == FIELDS_LENGTH_INT;
 }
 
 uint32_t EtsRuntimeInterface::GetClassOffsetObjectsArray(MethodPtr method) const
@@ -344,38 +339,38 @@ EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayClass() const
     return PlatformTypes(PandaEtsVM::GetCurrent())->escompatArray->GetRuntimeClass();
 }
 
-EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayBuffer(ClassPtr klass) const
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreTypedArrayBuffer(ClassPtr klass) const
 {
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BUFFER.data()));
 }
 
-EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayByteOffset(ClassPtr klass) const
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreTypedArrayByteOffset(ClassPtr klass) const
 {
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BYTE_OFFSET.data()));
 }
 
-EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatUnsignedTypedArrayByteOffsetInt(ClassPtr klass) const
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreUnsignedTypedArrayByteOffsetInt(ClassPtr klass) const
 {
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BYTE_OFFSET_INT.data()));
 }
 
-EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayLengthInt(ClassPtr klass) const
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreTypedArrayLengthInt(ClassPtr klass) const
 {
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_LENGTH_INT.data()));
 }
 
-EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayBufferClass() const
+EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStdCoreArrayBufferClass() const
 {
     return PlatformTypes(PandaEtsVM::GetCurrent())->coreArrayBuffer->GetRuntimeClass();
 }
 
-EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferDataAddress(ClassPtr klass) const
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreArrayBufferDataAddress(ClassPtr klass) const
 {
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_DATA_ADDRESS.data()));
 }
 
 // NOTE(@volkovanton, #31053) Will be refactored as a follow-up.
-EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferManagedData(ClassPtr klass) const
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreArrayBufferManagedData(ClassPtr klass) const
 {
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_DATA.data()));
 }
@@ -456,7 +451,7 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayActualLength(
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_ACTUAL_LENGTH.data()));
 }
 
-EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBuffer(ClassPtr klass) const
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreArrayBuffer(ClassPtr klass) const
 {
     ASSERT(IsClassEscompatArray(klass));
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BUFFER.data()));

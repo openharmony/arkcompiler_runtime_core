@@ -19,52 +19,52 @@ const expectedRangeErrors = (e: Error): boolean => {
 
 //! CHECKER       AOT: TypedArray.with()
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex=.*::test.*", entry: "ets_escompat_typed_arrays_with.ETSGLOBAL::main"
-//! RUN           entry: "ets_escompat_typed_arrays_with.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex=.*::test.*", entry: "ets_std_core_typed_arrays_with.ETSGLOBAL::main"
+//! RUN           entry: "ets_std_core_typed_arrays_with.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU8ClampedArray"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testU8ClampedArray"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testI8Array"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testI8Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU8Array"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testU8Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testI16Array"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testI16Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU16Array"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testU16Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 
 //! CHECKER       JIT: TypedArray.with()
 //! RUN           force_jit: true, options: "--compiler-regex=.*::test.*",
-//!               entry: "ets_escompat_typed_arrays_with.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_with.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU8ClampedArray"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testU8ClampedArray"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testI8Array"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testI8Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU8Array"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testU8Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testI16Array"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testI16Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU16Array"
+//! METHOD        "ets_std_core_typed_arrays_with.ETSGLOBAL::testU16Array"
 //! PASS_AFTER    "IrBuilder"
-//! INST          /Call.* escompat.*Array::with/
+//! INST          /Call.* std.core.*Array::with/
 
 function testU8ClampedArray() {
     let src  = new Uint8ClampedArray([0, 7, 74, 181, 255])
@@ -82,10 +82,10 @@ function testU8ClampedArrayRangeerror() {
     let src = new Uint8ClampedArray([1, 1, 1])
     let val: int = 0;
     arktest.expectThrow(() => {
- src.with(-1 as int, val) 
+ src.with(-1 as int, val)
 }, expectedRangeErrors)
     arktest.expectThrow(() => {
- src.with(src.length.toInt(), val) 
+ src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
 }
 
@@ -102,10 +102,10 @@ function testI8ArrayRangeerror() {
     let src = new Int8Array([1, 1, 1])
     let val: byte = 0;
     arktest.expectThrow(() => {
- src.with(-1 as int, val) 
+ src.with(-1 as int, val)
 }, expectedRangeErrors)
     arktest.expectThrow(() => {
- src.with(src.length.toInt(), val) 
+ src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
 }
 
@@ -122,10 +122,10 @@ function testU8ArrayRangeerror() {
     let src = new Uint8Array([1, 1, 1])
     let val: int = 0;
     arktest.expectThrow(() => {
- src.with(-1 as int, val) 
+ src.with(-1 as int, val)
 }, expectedRangeErrors)
     arktest.expectThrow(() => {
- src.with(src.length.toInt(), val) 
+ src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
 }
 
@@ -142,10 +142,10 @@ function testI16ArrayRangeerror() {
     let src = new Int16Array([1, 1, 1])
     let val: short = 0;
     arktest.expectThrow(() => {
- src.with(-1 as int, val) 
+ src.with(-1 as int, val)
 }, expectedRangeErrors)
     arktest.expectThrow(() => {
- src.with(src.length.toInt(), val) 
+ src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
 }
 
@@ -162,10 +162,10 @@ function testU16ArrayRangeerror() {
     let src = new Uint16Array([1, 1, 1])
     let val: int = 0;
     arktest.expectThrow(() => {
- src.with(-1 as int, val) 
+ src.with(-1 as int, val)
 }, expectedRangeErrors)
     arktest.expectThrow(() => {
- src.with(src.length.toInt(), val) 
+ src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
 }
 

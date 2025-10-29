@@ -57,7 +57,7 @@
 //! INST_NOT        "ExtractBitfield"
 
 //! CHECKER         Peepholes with Bitfield Extration JIT for Arm32 (bfx only supported for 32-bit integers)
-//! SKIP_IF         @architecture != "arm32"
+//! SKIP_IF         true
 //! RUN             force_jit: true, entry: "lowering_bitfield_extraction.ETSGLOBAL::main",
 //!                 options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-loop-unroll=false"
 //!

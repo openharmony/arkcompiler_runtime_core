@@ -24,14 +24,14 @@
 namespace ark::ets {
 
 /*static*/
-EtsEscompatArrayBuffer *EtsEscompatArrayBuffer::Create(EtsCoroutine *coro, size_t length)
+EtsStdCoreArrayBuffer *EtsStdCoreArrayBuffer::Create(EtsCoroutine *coro, size_t length)
 {
     ASSERT_MANAGED_CODE();
     ASSERT(!coro->HasPendingException());
 
     [[maybe_unused]] EtsHandleScope scope(coro);
     auto *cls = PlatformTypes(coro)->coreArrayBuffer;
-    EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
+    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, EtsStdCoreArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
     if (UNLIKELY(handle.GetPtr() == nullptr)) {
         ASSERT(coro->HasPendingException());
         return nullptr;
@@ -46,14 +46,14 @@ EtsEscompatArrayBuffer *EtsEscompatArrayBuffer::Create(EtsCoroutine *coro, size_
 }
 
 /*static*/
-EtsEscompatArrayBuffer *EtsEscompatArrayBuffer::CreateNonMovable(EtsCoroutine *coro, size_t length, void **resultData)
+EtsStdCoreArrayBuffer *EtsStdCoreArrayBuffer::CreateNonMovable(EtsCoroutine *coro, size_t length, void **resultData)
 {
     ASSERT_MANAGED_CODE();
     ASSERT(!coro->HasPendingException());
 
     [[maybe_unused]] EtsHandleScope scope(coro);
     auto *cls = PlatformTypes(coro)->coreArrayBuffer;
-    EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
+    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, EtsStdCoreArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
     if (UNLIKELY(handle.GetPtr() == nullptr)) {
         ASSERT(coro->HasPendingException());
         return nullptr;
@@ -69,10 +69,10 @@ EtsEscompatArrayBuffer *EtsEscompatArrayBuffer::CreateNonMovable(EtsCoroutine *c
 }
 
 /*static*/
-bool EtsEscompatArrayBuffer::IsNonMovableArray(EtsCoroutine *coro, EtsEscompatArrayBuffer *self)
+bool EtsStdCoreArrayBuffer::IsNonMovableArray(EtsCoroutine *coro, EtsStdCoreArrayBuffer *self)
 {
     ASSERT(self != nullptr);
-    EtsHandle<EtsEscompatArrayBuffer> handle(coro, self);
+    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, self);
     if (LIKELY(IsNativeArray(handle.GetPtr()))) {
         return true;
     }
@@ -81,18 +81,17 @@ bool EtsEscompatArrayBuffer::IsNonMovableArray(EtsCoroutine *coro, EtsEscompatAr
 }
 
 /*static*/
-bool EtsEscompatArrayBuffer::IsNativeArray(EtsEscompatArrayBuffer *self)
+bool EtsStdCoreArrayBuffer::IsNativeArray(EtsStdCoreArrayBuffer *self)
 {
     ASSERT(self != nullptr);
     return self->GetNativeDataImpl() != nullptr;
 }
 
 /*static*/
-void EtsEscompatArrayBuffer::ReallocateNonMovableArray(EtsCoroutine *coro, EtsEscompatArrayBuffer *self,
-                                                       EtsInt bytesLen)
+void EtsStdCoreArrayBuffer::ReallocateNonMovableArray(EtsCoroutine *coro, EtsStdCoreArrayBuffer *self, EtsInt bytesLen)
 {
     ASSERT(self != nullptr);
-    EtsHandle<EtsEscompatArrayBuffer> handle(coro, self);
+    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, self);
     if (UNLIKELY(bytesLen <= 0 || handle.GetPtr() == nullptr)) {
         return;
     }
@@ -127,12 +126,12 @@ void EtsEscompatArrayBuffer::ReallocateNonMovableArray(EtsCoroutine *coro, EtsEs
     ASSERT(IsNonMovableArray(coro, handle.GetPtr()));
 }
 
-EtsInt EtsEscompatArrayBuffer::GetByteLength() const
+EtsInt EtsStdCoreArrayBuffer::GetByteLength() const
 {
     return ObjectAccessor::GetPrimitive<EtsInt>(this, GetByteLengthOffset());
 }
 
-EtsByte EtsEscompatArrayBuffer::At(EtsInt pos) const
+EtsByte EtsStdCoreArrayBuffer::At(EtsInt pos) const
 {
     if (!DoBoundaryCheck(pos)) {
         return 0;
@@ -141,7 +140,7 @@ EtsByte EtsEscompatArrayBuffer::At(EtsInt pos) const
     return reinterpret_cast<int8_t *>(GetData())[pos];
 }
 
-void EtsEscompatArrayBuffer::Set(EtsInt pos, EtsByte val)
+void EtsStdCoreArrayBuffer::Set(EtsInt pos, EtsByte val)
 {
     if (!DoBoundaryCheck(pos)) {
         return;
@@ -150,7 +149,7 @@ void EtsEscompatArrayBuffer::Set(EtsInt pos, EtsByte val)
     reinterpret_cast<int8_t *>(GetData())[pos] = val;
 }
 
-void EtsEscompatArrayBuffer::Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array)
+void EtsStdCoreArrayBuffer::Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array)
 {
     ASSERT(array != nullptr);
     ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), array->GetCoreType());
@@ -163,7 +162,7 @@ void EtsEscompatArrayBuffer::Initialize(EtsCoroutine *coro, size_t length, EtsBy
     arch::FullMemoryBarrier();
 }
 
-void EtsEscompatArrayBuffer::SetValues(EtsEscompatArrayBuffer *other, EtsInt begin)
+void EtsStdCoreArrayBuffer::SetValues(EtsStdCoreArrayBuffer *other, EtsInt begin)
 {
     ASSERT(!WasDetached());
     ASSERT(other != nullptr);
@@ -180,7 +179,7 @@ void EtsEscompatArrayBuffer::SetValues(EtsEscompatArrayBuffer *other, EtsInt beg
     ASSERT(res == 0);
 }
 
-bool EtsEscompatArrayBuffer::DoBoundaryCheck(EtsInt pos) const
+bool EtsStdCoreArrayBuffer::DoBoundaryCheck(EtsInt pos) const
 {
     if (pos < 0 || pos >= GetByteLength()) {
         PandaString message = "ArrayBuffer position ";

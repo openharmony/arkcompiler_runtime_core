@@ -14,7 +14,8 @@
  */
 
 //! CHECKER       JIT Test cpp intrinsics
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get.ETSGLOBAL::main",
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, entry: "ets_std_core_typed_arrays_set_get.ETSGLOBAL::main",
 //!               options: "--compiler-encode-intrinsics=false --compiler-loop-idioms=false \
 //!               --compiler-regex=.*::test.*ArraySet.*Cpp"
 //!
@@ -97,27 +98,27 @@
 //! METHOD        "testFloat64ArraySetRangeErrorCpp"
 //!
 //! METHOD        "testBigInt64ArraySetIntCpp"
-//! METHOD        "escompat_BigInt64Array::__get"
+//! METHOD        "std_core_BigInt64Array::__get"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
 //!
 //! METHOD        "testBigInt64ArraySetLongCpp"
-//! METHOD        "escompat_BigInt64Array::__set"
+//! METHOD        "std_core_BigInt64Array::__set"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArraySetLong "
 //! INST_NOT      /Call.*Array::\$_set/
-//! METHOD        "escompat_BigInt64Array::__get"
+//! METHOD        "std_core_BigInt64Array::__get"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
 //!
 //! METHOD        "testBigInt64ArraySetRangeErrorCpp"
-//! METHOD        "escompat_BigInt64Array::__set"
+//! METHOD        "std_core_BigInt64Array::__set"
 
 
 //! CHECKER       JIT Test IR intrinsics
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get.ETSGLOBAL::main",
+//! RUN           force_jit: true, entry: "ets_std_core_typed_arrays_set_get.ETSGLOBAL::main",
 //!               options: "--compiler-regex=.*::test.*ArraySet.*Ir"
 //!
 //! METHOD        "testInt8ArraySetByteIr"
@@ -127,9 +128,9 @@
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
@@ -140,9 +141,9 @@
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
@@ -153,9 +154,9 @@
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
@@ -166,9 +167,9 @@
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
@@ -178,9 +179,9 @@
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Int[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Int[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
@@ -190,9 +191,9 @@
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
@@ -202,28 +203,28 @@
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.Float[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.Float[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
 //! METHOD        "testBigInt64ArraySetLongIr"
-//! METHOD        "escompat_BigInt64Array::__set"
+//! METHOD        "std_core_BigInt64Array::__set"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigInt64ArraySetLong "
 //! INST_NOT      /Call.*Array::\$_set/
-//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.BigInt[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.BigInt[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.BigInt[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
-//! METHOD        "escompat_BigInt64Array::__get"
+//! METHOD        "std_core_BigInt64Array::__get"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
-//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.buffer/
-//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.lengthInt/
-//! INST          /LoadObject.*escompat\.BigInt[\d]+Array\.byteOffset/
+//! INST          /LoadObject.*std\.core\.BigInt[\d]+Array\.buffer/
+//! INST          /LoadObject.*std\.core\.BigInt[\d]+Array\.lengthInt/
+//! INST          /LoadObject.*std\.core\.BigInt[\d]+Array\.byteOffset/
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 

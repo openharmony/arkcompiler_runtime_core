@@ -1,6 +1,6 @@
 # coding=utf-8
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1949,7 +1949,7 @@ class TypedArrayTypeAniInfo(TypeAniInfo):
         self.t = t
         self.typedarray_attr = typedarray_attr
         self.ani_type = ANI_OBJECT
-        self.sig_type = AniRuntimeClassType(f"escompat.{self.typedarray_attr.sts_type}")
+        self.sig_type = AniRuntimeClassType(f"std.core.{self.typedarray_attr.sts_type}")
 
     @override
     def sts_type_in(self, target: StsWriter) -> str:

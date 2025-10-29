@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 #include "include/mem/panda_containers.h"
 
 namespace ark::ets {
-class EtsEscompatArrayBuffer;
+class EtsStdCoreArrayBuffer;
 }  // namespace ark::ets
 
 namespace ark::ets::intrinsics::helpers {
@@ -60,7 +60,7 @@ namespace base64 {
 
 namespace encoding {
 
-[[nodiscard]] Result<bool> ValidateBuffer(const EtsEscompatArrayBuffer *buffer) noexcept;
+[[nodiscard]] Result<bool> ValidateBuffer(const EtsStdCoreArrayBuffer *buffer) noexcept;
 [[nodiscard]] Result<bool> ValidateIndices(int byteLength, int start, int end);
 
 /**

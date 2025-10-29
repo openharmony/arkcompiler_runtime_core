@@ -1672,7 +1672,7 @@ JSValue *JSRuntimeGetPropertyJSValueyByKey(JSValue *objectValue, JSValue *keyVal
     return res.value();
 }
 
-EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
+EtsStdCoreArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -1699,7 +1699,7 @@ EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
     // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
     NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, dynamicArrayBuffer, &data, &byteLength));
 
-    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coro, byteLength);
+    auto *arrayBuffer = EtsStdCoreArrayBuffer::Create(coro, byteLength);
     if (UNLIKELY(arrayBuffer == nullptr)) {
         return nullptr;
     }
@@ -1710,7 +1710,7 @@ EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
     return arrayBuffer;
 }
 
-EtsObject *TransferArrayBufferToDynamic(EtsEscompatArrayBuffer *staticArrayBuffer)
+EtsObject *TransferArrayBufferToDynamic(EtsStdCoreArrayBuffer *staticArrayBuffer)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -1733,7 +1733,7 @@ EtsObject *TransferArrayBufferToDynamic(EtsEscompatArrayBuffer *staticArrayBuffe
     return reinterpret_cast<EtsObject *>(etsJSValue);
 }
 
-EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, int32_t typedArrayType, double length,
+EtsObject *CreateDynamicTypedArray(EtsStdCoreArrayBuffer *staticArrayBuffer, int32_t typedArrayType, double length,
                                    double byteOffset)
 {
     auto coro = EtsCoroutine::GetCurrent();
@@ -1760,7 +1760,7 @@ EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, in
     return reinterpret_cast<EtsObject *>(etsJSValue);
 }
 
-EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset)
+EtsObject *CreateDynamicDataView(EtsStdCoreArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);

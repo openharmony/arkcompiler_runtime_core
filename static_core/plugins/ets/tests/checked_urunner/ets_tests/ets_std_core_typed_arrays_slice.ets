@@ -18,89 +18,89 @@ const endMinus : int = 1
 
 //! CHECKER       JIT TypedArray slice intrinsic
 //! RUN           force_jit: true,  options: "--compiler-regex=.*::testSlice.*array",
-//!               entry: "ets_escompat_typed_arrays_slice.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_slice.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceInt8array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceInt8array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceInt16array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceInt16array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceInt32array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceInt32array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceBigint64array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceBigint64array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceFloat32array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceFloat32array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceFloat64array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceFloat64array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceUint8array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceUint8array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceUint16array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceUint16array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceUint32array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceUint32array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceBiguint64array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceBiguint64array"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceUint8clampedarray"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceUint8clampedarray"
 //! PASS_AFTER    "Inline"
-//! INST          /Call.* escompat.*Array::slice/
+//! INST          /Call.* std.core.*Array::slice/
 
 
 //! CHECKER       AOT TypedArray slice intrinsic
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex=.*::testSlice.*array",
-//!               entry: "ets_escompat_typed_arrays_slice.ETSGLOBAL::main"
+//!               entry: "ets_std_core_typed_arrays_slice.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceInt8array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceInt8array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceInt16array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceInt16array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceInt32array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceInt32array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceBigint64array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceBigint64array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceFloat32array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceFloat32array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceFloat64array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceFloat64array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceUint8array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceUint8array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceUint16array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceUint16array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceUint32array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceUint32array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceBiguint64array"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceBiguint64array"
 //! PASS_AFTER    "IrBuilder"
 //!
-//! METHOD        "ets_escompat_typed_arrays_slice.ETSGLOBAL::testSliceUint8clampedarray"
+//! METHOD        "ets_std_core_typed_arrays_slice.ETSGLOBAL::testSliceUint8clampedarray"
 //! PASS_AFTER    "IrBuilder"
 
 function testSliceInt8array() {

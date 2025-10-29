@@ -245,7 +245,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * Converts this object to a string
      *
      * @param radix the radix base for string representation
-     * 
+     *
      * @returns result of the conversion
      */
     public toString(radix: int): string {

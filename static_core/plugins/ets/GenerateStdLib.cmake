@@ -15,7 +15,6 @@ function(regenerate_and_check_stdlib)
     # NOTE(ivan-tyulyandin): add array.sh and related generated files
     # Preparations to check generated against used code equality
     set(ESCOMPAT "stdlib/escompat")
-    set(ESCOMPAT_GEN_FILES "TypedUArrays.ets" "TypedArrays.ets" )
     set(STD_CORE "stdlib/std/core")
     set(STD_CORE_GEN_FILES "DataView.ets" "Function.ets" "Tuple.ets" "BuiltinArraySort.ets" "BuiltinArrayAlgorithms.ets" )
     set(STD_INTEROP "stdlib/std/interop/js")

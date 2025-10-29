@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,45 +22,45 @@
 namespace ark::ets {
 
 namespace test {
-class EtsEscompatTypedUArrayBaseTest;
+class EtsStdCoreTypedUArrayBaseTest;
 }  // namespace test
 
-class EtsEscompatTypedUArrayBase : public EtsObject {
+class EtsStdCoreTypedUArrayBase : public EtsObject {
 public:
-    EtsEscompatTypedUArrayBase() = delete;
-    ~EtsEscompatTypedUArrayBase() = delete;
+    EtsStdCoreTypedUArrayBase() = delete;
+    ~EtsStdCoreTypedUArrayBase() = delete;
 
-    NO_COPY_SEMANTIC(EtsEscompatTypedUArrayBase);
-    NO_MOVE_SEMANTIC(EtsEscompatTypedUArrayBase);
+    NO_COPY_SEMANTIC(EtsStdCoreTypedUArrayBase);
+    NO_MOVE_SEMANTIC(EtsStdCoreTypedUArrayBase);
 
     static constexpr size_t GetClassSize()
     {
-        return sizeof(EtsEscompatTypedUArrayBase);
+        return sizeof(EtsStdCoreTypedUArrayBase);
     }
 
     static constexpr size_t GetBufferOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, buffer_);
+        return MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, buffer_);
     }
 
     static constexpr size_t GetBytesPerElementOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, bytesPerElement_);
+        return MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, bytesPerElement_);
     }
 
     static constexpr size_t GetByteOffsetOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, byteOffset_);
+        return MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, byteOffset_);
     }
 
     static constexpr size_t GetByteLengthOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, byteLength_);
+        return MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, byteLength_);
     }
 
     static constexpr size_t GetLengthIntOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, lengthInt_);
+        return MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, lengthInt_);
     }
 
     ObjectPointer<EtsObject> GetBuffer() const
@@ -111,7 +111,7 @@ public:
     ObjectPointer<EtsString> GetName() const
     {
         return reinterpret_cast<EtsString *>(
-            ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsEscompatTypedUArrayBase, name_)));
+            ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, name_)));
     }
 
     void Initialize(EtsCoroutine *coro, EtsInt lengthInt, EtsInt bytesPerElement, EtsInt byteOffset, EtsObject *buffer,
@@ -119,7 +119,7 @@ public:
     {
         ASSERT(buffer != nullptr);
         ObjectAccessor::SetObject(coro, this, GetBufferOffset(), buffer->GetCoreType());
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsEscompatTypedUArrayBase, name_),
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsStdCoreTypedUArrayBase, name_),
                                   name != nullptr ? name->GetCoreType() : nullptr);
         bytesPerElement_ = bytesPerElement;
         byteOffset_ = byteOffset;
@@ -135,24 +135,24 @@ private:
     EtsInt byteLength_;
     EtsInt lengthInt_;
 
-    friend class test::EtsEscompatTypedUArrayBaseTest;
+    friend class test::EtsStdCoreTypedUArrayBaseTest;
 };
 
 template <typename T>
-class EtsEscompatTypedUArray : public EtsEscompatTypedUArrayBase {
+class EtsStdCoreTypedUArray : public EtsStdCoreTypedUArrayBase {
 public:
     using ElementType = T;
 };
 
-class EtsEscompatUInt8ClampedArray : public EtsEscompatTypedUArray<uint8_t> {
+class EtsStdCoreUInt8ClampedArray : public EtsStdCoreTypedUArray<uint8_t> {
 public:
     static constexpr int MIN = 0;
     static constexpr int MAX = 255;
 };
-class EtsEscompatUInt8Array : public EtsEscompatTypedUArray<uint8_t> {};
-class EtsEscompatUInt16Array : public EtsEscompatTypedUArray<uint16_t> {};
-class EtsEscompatUInt32Array : public EtsEscompatTypedUArray<uint32_t> {};
-class EtsEscompatBigUInt64Array : public EtsEscompatTypedUArray<uint64_t> {};
+class EtsStdCoreUInt8Array : public EtsStdCoreTypedUArray<uint8_t> {};
+class EtsStdCoreUInt16Array : public EtsStdCoreTypedUArray<uint16_t> {};
+class EtsStdCoreUInt32Array : public EtsStdCoreTypedUArray<uint32_t> {};
+class EtsStdCoreBigUInt64Array : public EtsStdCoreTypedUArray<uint64_t> {};
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_UNSIGNED_ARRAYS_H

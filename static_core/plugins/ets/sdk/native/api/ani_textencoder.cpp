@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ ani_object NewUint8Array(ani_env *env, const char *signature, Args... args)
 {
     ani_class arrayClass;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_RETURN_NULLPTR_ON_FAILURE(env->FindClass("escompat.Uint8Array", &arrayClass),
+    ANI_RETURN_NULLPTR_ON_FAILURE(env->FindClass("std.core.Uint8Array", &arrayClass),
                                   "Internal failure: env->FindClass()");
     ani_method arrayCtor;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)

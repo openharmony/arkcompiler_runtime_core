@@ -123,12 +123,14 @@ add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-
 if (NOT CMAKE_CROSSCOMPILING)
     add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "AOT")
 endif()
+
 # NOTE(@srokashevich, #29137): enable with tsan after fix
 if (NOT PANDA_ENABLE_THREAD_SANITIZER)
     add_ets_gc_test(FILE heap_info_test.ets OPTIONS MODE "INT")
 endif()
 add_ets_gc_test(FILE free_heap_size_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--gc-workers-count=1" MODE "INT")
 add_ets_gc_test(FILE alloc_pinned.ets OPTIONS "--gc-type=g1-gc" "--heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post" MODE "INT")
+
 # Running tests via API calls
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
     add_native_gc_test(FILE pending_exception_gc_test.ets CPP_SOURCE pending_exception_test.cpp OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never")

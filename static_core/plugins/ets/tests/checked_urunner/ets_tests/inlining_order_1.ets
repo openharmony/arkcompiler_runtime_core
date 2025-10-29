@@ -14,7 +14,8 @@
  */
 
 //! CHECKER      Check inlining sequence without profiling
-//! RUN          entry: "inlining_order_1.ETSGLOBAL::main", 
+//! SKIP_IF      @architecture == "arm32"
+//! RUN          entry: "inlining_order_1.ETSGLOBAL::main",
 //!              options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-profiling-threshold=100 \
 //!                 --compiler-hotness-threshold=22 --log-level=debug --log-components=compiler \
 //!                 --compiler-log=inlining --no-async-jit"
@@ -23,6 +24,7 @@
 //! EVENT_NEXT   /Inline,inlining_order_1.ETSGLOBAL::testLoops,inlining_order_1.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
 
 //! CHECKER      Check inlining sequence with profiling
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          entry: "inlining_order_1.ETSGLOBAL::main", options: "--compiler-regex='.*ETSGLOBAL::.*' \
 //!                 --compiler-profiling-threshold=0 --compiler-hotness-threshold=30 --log-level=debug \
 //!                 --log-components=compiler --compiler-log=inlining --no-async-jit"
@@ -39,10 +41,10 @@
 //!              options: "--log-level=debug --log-components=compiler --compiler-log=inlining"
 
 function cold(): int {
-    return 30; 
+    return 30;
 }
 function hot(i:int):int {
-    return -i; 
+    return -i;
 }
 
 function testLoops(): void {

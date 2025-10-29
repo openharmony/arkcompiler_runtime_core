@@ -158,17 +158,17 @@
     /* ArrayBuffer */                                                                                                 \
     TP("Lstd/core/ArrayBuffer;", coreArrayBuffer)                                                                     \
     TP("Lstd/core/DataView;", coreDataView)                                                                           \
-    TP("Lescompat/Int8Array;", escompatInt8Array)                                                                     \
-    TP("Lescompat/Uint8Array;", escompatUint8Array)                                                                   \
-    TP("Lescompat/Uint8ClampedArray;", escompatUint8ClampedArray)                                                     \
-    TP("Lescompat/Int16Array;", escompatInt16Array)                                                                   \
-    TP("Lescompat/Uint16Array;", escompatUint16Array)                                                                 \
-    TP("Lescompat/Int32Array;", escompatInt32Array)                                                                   \
-    TP("Lescompat/Uint32Array;", escompatUint32Array)                                                                 \
-    TP("Lescompat/Float32Array;", escompatFloat32Array)                                                               \
-    TP("Lescompat/Float64Array;", escompatFloat64Array)                                                               \
-    TP("Lescompat/BigInt64Array;", escompatBigInt64Array)                                                             \
-    TP("Lescompat/BigUint64Array;", escompatBigUint64Array)                                                           \
+    TP("Lstd/core/Int8Array;", coreInt8Array)                                                                         \
+    TP("Lstd/core/Uint8Array;", coreUint8Array)                                                                       \
+    TP("Lstd/core/Uint8ClampedArray;", coreUint8ClampedArray)                                                         \
+    TP("Lstd/core/Int16Array;", coreInt16Array)                                                                       \
+    TP("Lstd/core/Uint16Array;", coreUint16Array)                                                                     \
+    TP("Lstd/core/Int32Array;", coreInt32Array)                                                                       \
+    TP("Lstd/core/Uint32Array;", coreUint32Array)                                                                     \
+    TP("Lstd/core/Float32Array;", coreFloat32Array)                                                                   \
+    TP("Lstd/core/Float64Array;", coreFloat64Array)                                                                   \
+    TP("Lstd/core/BigInt64Array;", coreBigInt64Array)                                                                 \
+    TP("Lstd/core/BigUint64Array;", coreBigUint64Array)                                                               \
     /* Containers */                                                                                                  \
     TP("Lstd/containers/containers/ArrayAsListInt;", containersArrayAsListInt)                                        \
     TP("Lstd/core/ArrayLike;", coreArrayLike)                                                                         \

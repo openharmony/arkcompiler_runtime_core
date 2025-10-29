@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,7 +253,7 @@ constexpr std::array UTF16_ENCODINGS = {"utf16le"sv, "ucs2"sv, "ucs-2"sv};  // U
 constexpr std::array BASE64_ENCODINGS = {"base64"sv, "base64url"sv};        // Base64 variants
 constexpr std::array LATIN_ENCODINGS = {"latin1"sv, "binary"sv};            // Latin1/binary encodings
 
-[[nodiscard]] Result<bool> ValidateBuffer(const EtsEscompatArrayBuffer *buffer) noexcept
+[[nodiscard]] Result<bool> ValidateBuffer(const EtsStdCoreArrayBuffer *buffer) noexcept
 {
     if (buffer == nullptr) {
         return Err<PandaString>(PandaString("Buffer is null"));

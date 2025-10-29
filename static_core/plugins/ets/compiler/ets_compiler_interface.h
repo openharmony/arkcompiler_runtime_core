@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ virtual ClassPtr GetEscompatArrayClass() const
     return nullptr;
 }
 
-virtual FieldPtr GetEscompatArrayBuffer([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetStdCoreArrayBuffer([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }
@@ -30,37 +30,37 @@ virtual FieldPtr GetEscompatArrayActualLength([[maybe_unused]] ClassPtr klass) c
     return nullptr;
 }
 
-virtual FieldPtr GetEscompatTypedArrayBuffer([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetStdCoreTypedArrayBuffer([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }
 
-virtual FieldPtr GetEscompatTypedArrayByteOffset([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetStdCoreTypedArrayByteOffset([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }
 
-virtual FieldPtr GetEscompatUnsignedTypedArrayByteOffsetInt([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetStdCoreUnsignedTypedArrayByteOffsetInt([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }
 
-virtual FieldPtr GetEscompatTypedArrayLengthInt([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetStdCoreTypedArrayLengthInt([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }
 
-virtual ClassPtr GetEscompatArrayBufferClass() const
+virtual ClassPtr GetStdCoreArrayBufferClass() const
 {
     return nullptr;
 }
 
-virtual FieldPtr GetEscompatArrayBufferDataAddress([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetStdCoreArrayBufferDataAddress([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }
 
-virtual FieldPtr GetEscompatArrayBufferManagedData([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetStdCoreArrayBufferManagedData([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }

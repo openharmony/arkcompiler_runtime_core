@@ -31,22 +31,22 @@ class EtsArrayBufferTest;
 
 using EtsFinalize = void (*)(void *, void *);
 
-class EtsEscompatArrayBuffer : public EtsObject {
+class EtsStdCoreArrayBuffer : public EtsObject {
 public:
-    EtsEscompatArrayBuffer() = delete;
-    ~EtsEscompatArrayBuffer() = delete;
+    EtsStdCoreArrayBuffer() = delete;
+    ~EtsStdCoreArrayBuffer() = delete;
 
-    NO_COPY_SEMANTIC(EtsEscompatArrayBuffer);
-    NO_MOVE_SEMANTIC(EtsEscompatArrayBuffer);
+    NO_COPY_SEMANTIC(EtsStdCoreArrayBuffer);
+    NO_MOVE_SEMANTIC(EtsStdCoreArrayBuffer);
 
-    static EtsEscompatArrayBuffer *FromEtsObject(EtsObject *arrayBuffer)
+    static EtsStdCoreArrayBuffer *FromEtsObject(EtsObject *arrayBuffer)
     {
-        return reinterpret_cast<EtsEscompatArrayBuffer *>(arrayBuffer);
+        return reinterpret_cast<EtsStdCoreArrayBuffer *>(arrayBuffer);
     }
 
     static constexpr size_t GetClassSize()
     {
-        return sizeof(EtsEscompatArrayBuffer);
+        return sizeof(EtsStdCoreArrayBuffer);
     }
 
     /**
@@ -75,13 +75,13 @@ public:
     }
 
     /// Creates ArrayBuffer with managed buffer.
-    static EtsEscompatArrayBuffer *Create(EtsCoroutine *coro, size_t length);
-    static EtsEscompatArrayBuffer *CreateNonMovable(EtsCoroutine *coro, size_t length, void **resultData);
+    static EtsStdCoreArrayBuffer *Create(EtsCoroutine *coro, size_t length);
+    static EtsStdCoreArrayBuffer *CreateNonMovable(EtsCoroutine *coro, size_t length, void **resultData);
 
-    static bool IsNonMovableArray(EtsCoroutine *coro, EtsEscompatArrayBuffer *self);
-    static bool IsNativeArray(EtsEscompatArrayBuffer *self);
+    static bool IsNonMovableArray(EtsCoroutine *coro, EtsStdCoreArrayBuffer *self);
+    static bool IsNativeArray(EtsStdCoreArrayBuffer *self);
 
-    static void ReallocateNonMovableArray(EtsCoroutine *coro, EtsEscompatArrayBuffer *self, EtsInt bytesLen);
+    static void ReallocateNonMovableArray(EtsCoroutine *coro, EtsStdCoreArrayBuffer *self, EtsInt bytesLen);
 
     EtsObject *AsObject()
     {
@@ -123,26 +123,26 @@ public:
     EtsByte At(EtsInt pos) const;
     void Set(EtsInt pos, EtsByte val);
 
-    void SetValues(EtsEscompatArrayBuffer *other, EtsInt begin);
+    void SetValues(EtsStdCoreArrayBuffer *other, EtsInt begin);
 
     static constexpr size_t GetByteLengthOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatArrayBuffer, byteLength_);
+        return MEMBER_OFFSET(EtsStdCoreArrayBuffer, byteLength_);
     }
 
     static constexpr size_t GetNativeDataOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatArrayBuffer, nativeData_);
+        return MEMBER_OFFSET(EtsStdCoreArrayBuffer, nativeData_);
     }
 
     static constexpr size_t GetManagedDataOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_);
+        return MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_);
     }
 
     static constexpr size_t GetIsResizableOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatArrayBuffer, isResizable_);
+        return MEMBER_OFFSET(EtsStdCoreArrayBuffer, isResizable_);
     }
 
     /// Initializes ArrayBuffer with its own non-movable array
