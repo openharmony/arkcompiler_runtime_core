@@ -1051,7 +1051,7 @@ export namespace url {
             if (tempInput.indexOf(':') != -1) {
                 let pos = tempInput.indexOf(':').toInt();
                 pos++;
-                this.flags[INDEX_DOUBLE_SLASH] = (input.charAt(pos.toInt()) == c'/' && input.charAt(pos.toInt() + 1) == c'/');
+                this.flags[INDEX_DOUBLE_SLASH] = (pos.toInt() +1 < tempInput.length && input.charAt(pos.toInt()) == c'/' && input.charAt(pos.toInt() + 1) == c'/');
                 let scheme: string = tempInput.substring(0, pos);
                 if (!this.analysizeScheme(scheme)) {
                     return tempInput;
@@ -1948,7 +1948,9 @@ export namespace url {
                 return result;
             }
             let needReturn = false;
-            const firstChar = URL.parseBaseInner(input, possibleBaseURL, resUrl, result, needReturn);
+            const baseResults = URL.parseBaseInner(input, possibleBaseURL, resUrl, result, needReturn);
+	        let firstChar = baseResults[0];
+	        needReturn = baseResults[1];
             if (needReturn) {
                 return result;
             }
@@ -1989,7 +1991,9 @@ export namespace url {
                 return result;
             }
             let needReturn = false;
-            const firstChar = URL.parseBaseInner(input, base, resUrl, result, needReturn);
+            const baseResults = URL.parseBaseInner(input, base, resUrl, result, needReturn);
+	        let firstChar = baseResults[0];
+	        needReturn = baseResults[1];
             if (needReturn) {
                 return result;
             }
@@ -2019,7 +2023,7 @@ export namespace url {
             return result;
         }
 
-        private static parseBaseInner(input: string, base: InnerURL, resUrl: InnerURL, result: URL, needReturn: Boolean): Char | '' {
+        private static parseBaseInner(input: string, base: InnerURL, resUrl: InnerURL, result: URL, needReturn: Boolean): [Char | '' , Boolean] {
             const firstChar = input.length > 0 ? input.charAt(0) : '';
             const secondChar = input.length > 1 ? input.charAt(1) : '';
             if ((input.length > 0) && (firstChar == c'/') && (secondChar == c'/' || (secondChar == c'\\' && base.flags[INDEX_SPECIAL]))) {
@@ -2029,7 +2033,7 @@ export namespace url {
                 result.urlInner = resUrl;
                 needReturn = true;
             }
-            return firstChar;
+            return [firstChar, needReturn];
         }
     }
 
@@ -2157,6 +2161,16 @@ export namespace url {
         */
         sort(): void {
             this.head = this.doMergeSort(this.head);
+            if (this.head) {
+		        let current = this.head;
+		        while (current!.next) {
+			        current = current!.next;
+		        }
+                this.tail = current;
+	        } 
+            else {
+		        this.tail = undefined;
+	        }
             if (this.parentUrl != null) {
                 this.parentUrl!.urlInner.setSearch(this.toString());
                 this.parentUrl!.cSearch = this.parentUrl!.urlInner.getSearch();
