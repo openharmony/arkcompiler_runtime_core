@@ -123,9 +123,6 @@
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_46.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_47.ets
 
-#24444
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/interface_type_parameter_variance.ets
-
 #24446
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_0.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_1.ets
