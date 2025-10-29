@@ -1688,6 +1688,22 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsEscompatArrayGetBuffer
     safe_intrinsic: true
 
+
+####################
+# escompat.WeakMap #
+####################
+  - name: EscompatWeakMapValidateKey
+    space: ets
+    class_name: escompat.WeakMap
+    method_name: validateKey
+    static: true
+    signature:
+      ret: u1
+      args: 
+        - std.core.Object
+    impl: ark::ets::intrinsics::EtsEscompatWeakMapValidateKey
+
+
 ########################
 # std.core.ArrayBuffer #
 ########################

@@ -70,8 +70,14 @@ export final class WeakMap<K extends Object, V> {
     /**
      * The set() method adds a new element with a specified key
      * and value to a WeakMap object.
+     *
+     * @throws TypeError if key is not garbage-collectable
      */
     set(key: K, val: V): WeakMap<K, V> {
+        if (!WeakMap.validateKey(key)) {
+            throw new TypeError(`Invalid value used as weak map key: ${key}`)
+        } 
+        
         const keyHash = Runtime.getHashCode(key)
 
         const keyRefs = this.keyHashToKeyRefs.get(keyHash)
@@ -203,6 +209,8 @@ export final class WeakMap<K extends Object, V> {
             this.keyHashToKeyRefs.delete(keyHash)
         }
     }
+
+    private native static validateKey(key: Object): boolean
 }
 
 class WeakMapEntry<V> {
