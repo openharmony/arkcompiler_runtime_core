@@ -37,9 +37,10 @@ async function methodConcurrentExecution(): Promise<Array<String | number>> {
 async function startTest() {
   const result = await methodConcurrentExecution();
   const resTemp = new Array<number | string>("Hello", 42);
-  arktest.assertEQ(result === resTemp, true);
+  arktest.assertEQ(result[0], resTemp[0]);
+  arktest.assertEQ(result[1], resTemp[1]);
 }
 
 function main(): void {
-  startTest();
+  waitForCompletion(startTest);
 }

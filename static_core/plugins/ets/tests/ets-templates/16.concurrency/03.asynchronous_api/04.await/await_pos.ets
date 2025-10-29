@@ -16,6 +16,7 @@
 {% for c in cases %}
 /*---
 desc: The expressions await and wait are used while a previously launched coroutine finishes and returns a value.
+tags: [no-warmup]
 ---*/
 
 {{c.decl}}

@@ -16,7 +16,6 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous functions.
       Promise.allSettled in asynchronous functions.
-tags: [compile-only, positive]
 ---*/
 
 async function allSettledExample(): Promise<void> {
@@ -32,5 +31,5 @@ async function startTest() {
 }
 
 function main(): void {
-    startTest();
+  waitForCompletion(startTest);
 }
