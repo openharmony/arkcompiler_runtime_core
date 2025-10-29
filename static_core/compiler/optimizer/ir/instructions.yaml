@@ -686,6 +686,12 @@ instructions:
     flags: [can_throw, no_dce, no_cse, is_check, no_hoist, require_state, runtime_call, can_deoptimize]
     description: Check that hclass of object is suitable for dynamic call.
 
+  - opcode: StringFlatCheck
+    base: FixedInputsInst<2>
+    signature: [d-ref, ref, save_state]
+    flags: [can_throw, no_hoist, no_cse, require_state, runtime_call]
+    description: Make sure result string is flat
+
   - opcode: Deoptimize
     base: DeoptimizeInst
     signature: [save_state]

@@ -900,6 +900,8 @@ TEST_F(DeoptimizeEliminationTest, ReplaceByDeoptimizeInliningTest)
             INST(8U, Opcode::Deoptimize).Inputs(4U);
         }
     }
+    INS(4U).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(3U)));
+    INS(4U).CastToSaveState()->SetInliningDepth(1U);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

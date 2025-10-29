@@ -345,6 +345,11 @@ public:
     {
         return std::make_unique<PtEtsExtension>();
     }
+
+    bool HasValueEqualitySemantic() const override
+    {
+        return true;
+    }
 };
 
 }  // namespace ark::ets

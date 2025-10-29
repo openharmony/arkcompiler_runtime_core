@@ -49,8 +49,18 @@ def GenerateStringCompareTo(cgmode)
       next
     end
 
-    str1 := try_use_cached_flat_str(str1_orig)
-    str2 := try_use_cached_flat_str(str2_orig)
+    if cgmode == :NativePlus
+        str1 := try_use_cached_flat_str(str1_orig)
+        str2 := try_use_cached_flat_str(str2_orig)
+    else
+        check_not_tree_string_type(str1_orig) if defines.DEBUG
+        check_not_tree_string_type(str2_orig) if defines.DEBUG
+        # it still can be slice
+        check_string_type(str1_orig)
+        check_string_type(str2_orig)
+        str1 := str1_orig
+        str2 := str2_orig
+    end
 
     Return(macroStringCompareTo(str1, str2)).i32
 
@@ -67,5 +77,51 @@ end
 
 GenerateStringCompareTo(:FastPath)
 GenerateStringCompareTo(:NativePlus)
+
+function(:StringFlatCheck,
+          params: {str: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void.Terminator
+      next
+    end
+
+    If(str, 0).EQ {
+      Return(str).ref
+    }
+
+    baseClass := LoadI(str).ref
+    stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+    If(stringType, Constants::STRING_TYPE_TREE).EQ {
+        stringCache := LoadI(%tr).Imm(Constants::THREAD_FLATTENED_STRING_CACHE_OFFSET).ref
+        If(stringCache, 0).EQ {
+            Goto(:SlowPathEntrypoint)
+        }
+
+        # cannot cast directly from ref to uint
+        strPtr := Cast(str).ptr
+        strUint := Bitcast(strPtr).word
+        strShifted := ShrI(strUint).Imm(FlattenedStringCacheConstants::ADDRESS_SHIFT).word
+        strMasked := AndI(strShifted).Imm(FlattenedStringCacheConstants::ADDRESS_MASK).word
+        strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
+        key := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+        If(key, str).NE {
+            Goto(:SlowPathEntrypoint)
+        }
+        strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
+        strCached := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+
+        Return(strCached).ref
+    }
+    Return(str).ref
+
+Label(:SlowPathEntrypoint)
+    ep_offset = get_entrypoint_offset("STRING_FLAT_CHECK_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(ep_offset).MethodAsImm("StringFlatCheckOddSavedBridge").Terminator.ref
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
 
 include_plugin 'ets_string'

@@ -1809,6 +1809,11 @@ public:
         return false;
     }
 
+    virtual bool CanUseStringFlatCheck() const
+    {
+        return false;
+    }
+
     virtual bool IsUseAllStrings() const
     {
         return false;

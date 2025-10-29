@@ -26,6 +26,7 @@
 #include "optimizer/ir/inst.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "inst_checker_gen.h"
+#include "intrinsic_string_flat_check.inl"
 
 namespace ark::compiler {
 
@@ -970,32 +971,6 @@ void GraphChecker::CheckSaveStatesWithRuntimeCallUsers(BasicBlock *block, SaveSt
 }
 
 #ifdef COMPILER_DEBUG_CHECKS
-void GraphChecker::PrepareUsers(Inst *inst, ArenaVector<User *> *users)
-{
-    for (auto &user : inst->GetUsers()) {
-        users->push_back(&user);
-    }
-    auto i = std::find_if(users->begin(), users->end(), [](User *user) { return user->GetInst()->IsCheck(); });
-    while (i != users->end()) {
-        auto userInst = (*i)->GetInst();
-        // erase before push_backs to avoid iterator invalidation
-        users->erase(i);
-        // skip AnyTypeChecks with primitive type
-        if (userInst->GetOpcode() != Opcode::AnyTypeCheck || userInst->IsReferenceOrAny()) {
-            for (auto &u : userInst->GetUsers()) {
-                users->push_back(&u);
-            }
-        }
-        i = std::find_if(users->begin(), users->end(), [](User *user) { return user->GetInst()->IsCheck(); });
-    }
-    for (auto &it : (*users)) {
-        [[maybe_unused]] auto user = it->GetInst();
-        CHECKER_IF_NOT_PRINT(!user->IsCheck());
-    }
-}
-#endif
-
-#ifdef COMPILER_DEBUG_CHECKS
 // If all indirect (through other Phis) inputs of Phi cannot be moved by GC, result of Phi itself
 // also cannot be moved (and does not need to be checked in CheckSaveStateInputs as input of its users)
 bool GraphChecker::IsPhiSafeToSkipObjectCheck(Inst *inst, Marker visited)
@@ -1849,8 +1824,21 @@ void GraphChecker::VisitInitClass([[maybe_unused]] GraphVisitor *v, [[maybe_unus
                                         (std::cerr << "InitClass doesn't have type", inst->Dump(&std::cerr)));
 }
 
-void GraphChecker::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, Inst *inst)
+void GraphChecker::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
+    auto *checker = static_cast<GraphChecker *>(v);
+    auto stringFlatCheckArgMask = GetStringFlatCheckArgMask(inst->CastToIntrinsic()->GetIntrinsicId());
+    if (checker->GetPassName() == StringFlatCheck::NAME && checker->GetGraph()->GetRuntime()->CanUseStringFlatCheck() &&
+        stringFlatCheckArgMask != 0) {
+        auto argsCount = inst->RequireState() ? inst->GetInputsCount() - 1 : inst->GetInputsCount();
+        for (size_t i = 0; i < argsCount; i++) {
+            if ((stringFlatCheckArgMask & (1 << i)) != 0) {
+                CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+                    v, inst->GetInput(i).GetInst()->Is(Opcode::StringFlatCheck),
+                    (std::cerr << "\nInput must be StringFlatCheck instruction\n", inst->Dump(&std::cerr)));
+            }
+        }
+    }
     switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
 #include "intrinsics_graph_checker.inl"
         default: {
@@ -2910,4 +2898,13 @@ void GraphChecker::VisitNegSR(GraphVisitor *v, [[maybe_unused]] Inst *inst)
                                         (std::cerr << "Operation has invalid shift type\n", inst->Dump(&std::cerr)));
 }
 
+void GraphChecker::VisitStringFlatCheck([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+{
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, inst->GetType() == DataType::REFERENCE,
+        (std::cerr << "\nStringFlatCheck must have reference type\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, inst->GetInput(0).GetInst()->GetType() == DataType::REFERENCE,
+        (std::cerr << "\nStringFlatCheck input must have reference type\n", inst->Dump(&std::cerr)));
+}
 }  // namespace ark::compiler

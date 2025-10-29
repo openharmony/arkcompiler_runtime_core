@@ -96,6 +96,7 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
             intrinsics_codegen.inl.erb
             intrinsics_inline.inl.erb
             intrinsics_peephole.inl.erb
+            intrinsic_string_flat_check.inl.erb
         SOURCE ${COMPILER_TEMPLATES_DIR}/intrinsics
         DESTINATION ${GENERATED_DIR}
         API ${COMPILER_TEMPLATES_DIR}/intrinsics/compiler_intrinsics.rb
@@ -221,6 +222,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/inline_intrinsics.cpp
         optimizer/optimizations/vn.cpp
         optimizer/optimizations/cse.cpp
+        optimizer/optimizations/string_flat_check.cpp
         tools/debug/jit_writer.cpp
         compiler_logger.cpp
         compiler_options.cpp

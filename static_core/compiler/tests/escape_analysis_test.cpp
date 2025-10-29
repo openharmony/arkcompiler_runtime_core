@@ -2163,11 +2163,11 @@ OUT_GRAPH(RemoveVirtualObjectFromSaveStates, Graph *graph)
         {
             INST(6U, Opcode::SaveState);
             INST(7U, Opcode::CallStatic).v0id().InputsAutoType(18U, 6U).Inlined();
-            INST(8U, Opcode::SaveState);
+            INST(8U, Opcode::SaveState).Caller(7U);
             INST(9U, Opcode::CallStatic).v0id().InputsAutoType(18U, 8U).Inlined();
-            INST(41U, Opcode::SaveState);
+            INST(41U, Opcode::SaveState).Caller(9U);
             INST(42U, Opcode::NewObject).ref().Inputs(2U, 41U);
-            INST(10U, Opcode::SaveState).Inputs(42U).SrcVregs({0U});
+            INST(10U, Opcode::SaveState).Caller(9U).Inputs(42U).SrcVregs({0U});
             INST(11U, Opcode::CallStatic).v0id().InputsAutoType(42U, 10U);
             INST(12U, Opcode::ReturnInlined).Inputs(8U);
             INST(13U, Opcode::ReturnInlined).Inputs(6U);
@@ -2885,6 +2885,8 @@ TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
 
     auto graph = CreateEmptyGraph();
     out_graph::MaterializeBeforeReferencedObjectMaterialization::CREATE(graph);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 SRC_GRAPH(FillSaveStateBetweenSaveState, Graph *graph)
@@ -3883,6 +3885,8 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationP9)
 
     auto graph = CreateEmptyGraph();
     out_graph::MaterializeBeforeReferencedObjectMaterialization::CREATE(graph);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -3900,6 +3904,8 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationP10)
 
     auto graph = CreateEmptyGraph();
     out_graph::SplitDeoptimizationP10::CREATE(graph);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -3916,6 +3922,7 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationP11)
 
     auto graph = CreateEmptyGraph();
     out_graph::SplitDeoptimizationP11::CREATE(graph);
+    INS(SS_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST2_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -3934,6 +3941,8 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationN1)
 
     auto graph = CreateEmptyGraph();
     src_graph::SplitDeoptimizationN1::CREATE(graph, CALL_INST1_ID, CALL_INST2_ID, SS1_ID, SS2_ID);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST1_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST2_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -3949,6 +3958,7 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationN2)
 
     auto graph = CreateEmptyGraph();
     src_graph::SplitDeoptimizationN2::CREATE(graph, CALL_INST_ID, SS_ID);
+    INS(SS_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

@@ -45,6 +45,7 @@
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "optimizer/optimizations/try_catch_resolving.h"
 #include "optimizer/optimizations/vn.h"
+#include "optimizer/optimizations/string_flat_check.h"
 #include "optimizer/analysis/monitor_analysis.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "runtime/include/method.h"
@@ -323,6 +324,12 @@ bool LLVMAotCompiler::RunArkPasses(compiler::Graph *graph)
         if (llvmPreOpt == 2U) {
             PreOpt2(graph);
         }
+        // Run after LSE, LICM etc to avoid redundant StringFlatCheck instruction insertions
+        // and before SaveStateOptimization since it might optimize save states inserted here
+        graph->RunPass<compiler::StringFlatCheck>();
+        if (llvmPreOpt == 2U) {
+            PreOpt2Epilog(graph);
+        }
     }
 #ifndef NDEBUG
     if (compiler::g_options.IsCompilerCheckGraph() && compiler::g_options.IsCompilerCheckFinal()) {
@@ -368,6 +375,10 @@ void LLVMAotCompiler::PreOpt2(compiler::Graph *graph)
     graph->RunPass<compiler::BranchElimination>();
     graph->RunPass<compiler::BalanceExpressions>();
     graph->RunPass<compiler::ValNum>();
+}
+
+void LLVMAotCompiler::PreOpt2Epilog(compiler::Graph *graph)
+{
     graph->RunPass<compiler::SaveStateOptimization>();
     graph->RunPass<compiler::Peepholes>();
 #ifndef NDEBUG

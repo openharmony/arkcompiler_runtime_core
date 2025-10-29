@@ -288,6 +288,11 @@ public:
     }
 
     virtual void WrapClassInitializerException(ClassLinker *classLinker, ManagedThread *thread) const;
+
+    virtual bool HasValueEqualitySemantic() const
+    {
+        return false;
+    }
 };
 
 class LanguageContext {
@@ -665,6 +670,12 @@ public:
     void WrapClassInitializerException(ClassLinker *classLinker, ManagedThread *thread) const
     {
         base_->WrapClassInitializerException(classLinker, thread);
+    }
+
+    /// operator '==' has value equality semantic
+    bool HasValueEqualitySemantic() const
+    {
+        return base_->HasValueEqualitySemantic();
     }
 
 private:

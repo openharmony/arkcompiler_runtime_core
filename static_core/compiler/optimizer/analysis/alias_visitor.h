@@ -317,6 +317,7 @@ public:
     static void VisitMultiArray(GraphVisitor *v, Inst *inst);
     static void VisitInitEmptyString(GraphVisitor *v, Inst *inst);
     static void VisitInitString(GraphVisitor *v, Inst *inst);
+    static void VisitStringFlatCheck(GraphVisitor *v, Inst *inst);
     /**
      * Instructions that can introduce references that are an alias of
      * something already existed.

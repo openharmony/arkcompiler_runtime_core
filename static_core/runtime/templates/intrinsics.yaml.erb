@@ -31,13 +31,20 @@
     args: <%= full_args %>
 % static = intrinsic.respond_to?(:static) && intrinsic.static
   static: <%= static %>
+% if intrinsic.respond_to?(:require_flat_check)
+  require_flat_check: <%= intrinsic.require_flat_check %>
+% end
 % if intrinsic.has_impl?
+% if not static and intrinsic.respond_to?(:class_name) and is_string_type(intrinsic.class_name)
+  this_string: true
+% end
   impl: <%= intrinsic.wrapper_impl %>
   impl_signature:
     ret: "<%= get_ret_effective_type(intrinsic.signature.ret) %>"
 %   impl_args = intrinsic.signature.impl_args
 %   impl_args_str = full_args.each_with_index.map { |t, i| get_effective_type(t, impl_args ? impl_args[i] : nil ) }.flatten
     args: <%= ((!static && !compiler_only)? [get_effective_type(intrinsic.class_name)] : []) + impl_args_str %>
+    strings: <%= full_args.each_with_index.select { |t, i| is_string_type(t) }.map { |t, i| i }.flatten %>
 %   if intrinsic.need_abi_wrapper?
   orig_impl: <%= intrinsic.impl %>
   orig_impl_signature:

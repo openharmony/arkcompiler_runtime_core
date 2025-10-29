@@ -104,6 +104,14 @@ String *FlatStringInfo::SlowFlattenWithNativeMemory(VMHandle<String> &str, const
 FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, const LanguageContext &ctx,
                                                  bool withNativeMemory)
 {
+    auto *thread = ManagedThread::GetCurrent();
+    VMHandle<coretypes::Array> cache(thread, coretypes::Array::Cast(thread->GetFlattenedStringCache()));
+    auto *cachedFlatStr = FlattenedStringCache::Get(cache.GetPtr(), treeStr.GetPtr());
+    // cache hitted
+    if (cachedFlatStr != nullptr) {
+        return FlatStringInfo(cachedFlatStr, 0, cachedFlatStr->GetLength());
+    }
+
     common::TreeString *treeString = treeStr->ToTreeString();
     auto readBarrier = [](void *obj, size_t offset) {
         return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
@@ -113,17 +121,9 @@ FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, cons
             return reinterpret_cast<common::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
-        // NOLINTNEXTLINE(modernize-use-auto)
-        common::BaseString *first = treeString->GetLeftSubString<common::BaseString *>(std::move(readBarrierLeft));
-        return FlatStringInfo(String::Cast(first), 0, treeString->GetLength());
-    }
-
-    auto *thread = ManagedThread::GetCurrent();
-    VMHandle<coretypes::Array> cache(thread, coretypes::Array::Cast(thread->GetFlattenedStringCache()));
-    auto *cachedFlatStr = FlattenedStringCache::Get(cache.GetPtr(), treeStr.GetPtr());
-    // cache hitted
-    if (cachedFlatStr != nullptr) {
-        return FlatStringInfo(cachedFlatStr, 0, cachedFlatStr->GetLength());
+        auto *first = String::Cast(treeString->GetLeftSubString<common::BaseString *>(std::move(readBarrierLeft)));
+        FlattenedStringCache::Update(cache.GetPtr(), treeStr.GetPtr(), first);
+        return FlatStringInfo(first, 0, treeString->GetLength());
     }
 
     // cached missed , no need to cache native memory string
@@ -134,8 +134,11 @@ FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, cons
 
     // cache it
     String *s = SlowFlatten(treeStr, ctx);
-    FlattenedStringCache::Update(cache.GetPtr(), treeStr.GetPtr(), s);
-    return FlatStringInfo(s, 0, s->GetLength());
+    // check for OOME
+    if (s != nullptr) {
+        FlattenedStringCache::Update(cache.GetPtr(), treeStr.GetPtr(), s);
+    }
+    return FlatStringInfo(s, 0, treeStr->GetLength());
 }
 
 /* static */

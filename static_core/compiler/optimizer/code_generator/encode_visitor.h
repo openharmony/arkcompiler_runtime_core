@@ -377,6 +377,7 @@ protected:
 
     static void VisitLoadObjectDynamic(GraphVisitor *visitor, Inst *inst);
     static void VisitStoreObjectDynamic(GraphVisitor *visitor, Inst *inst);
+    static void VisitStringFlatCheck(GraphVisitor *visitor, Inst *inst);
 
     void VisitDefault([[maybe_unused]] Inst *inst) override
     {

@@ -18,6 +18,7 @@ if(PANDA_COMPILER_ENABLE)
         SOURCES
             ${PANDA_ROOT}/compiler/tests/unit_test.cpp
             ets_loop_idioms_test.cpp
+            string_flat_check_test.cpp
         LIBRARIES
             arkcompiler arkruntime
         SANITIZERS

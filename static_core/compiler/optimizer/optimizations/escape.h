@@ -477,7 +477,6 @@ private:
     void FillLiveInsts(BasicBlock *block, ArenaSet<Inst *> &liveIns, ArenaVector<ArenaSet<Inst *>> &liveness);
     void PatchSaveState(SaveStateInst *saveState, ArenaSet<Inst *> &liveInstructions);
     void AddLiveInputs(Inst *inst, ArenaSet<Inst *> &liveIns);
-    CallInst *FindCallerInst(BasicBlock *target, Inst *start = nullptr);
     void FixPhiInputTypes();
     bool HasUsageOutsideBlock(Inst *inst, BasicBlock *initialBlock);
 };

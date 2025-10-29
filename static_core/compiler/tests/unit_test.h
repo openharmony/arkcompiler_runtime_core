@@ -106,6 +106,11 @@ struct RuntimeInterfaceMock : public compiler::RuntimeInterface {
         return classes_ == nullptr ? nullptr : (*classes_)[id];
     }
 
+    bool CanUseStringFlatCheck() const override
+    {
+        return true;
+    }
+
 private:
     static constexpr uintptr_t METHOD = 0xdead;
     static constexpr uintptr_t CALLEE = 0xdeadc;

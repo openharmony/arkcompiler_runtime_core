@@ -804,6 +804,11 @@ options:
   default: true
   description: Enable optimize-memory-barriers optimization
 
+- name: compiler-string-flat-check
+  type: bool
+  default: true
+  description: Enable StringFlatCheck instructions to ensure flat string is passed as input to specified intrinsics
+
 - name: compiler-profile
   type: std::string
   default: ""
