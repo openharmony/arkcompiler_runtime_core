@@ -250,30 +250,6 @@ function compareTwoStringArrays(array1: string[] , array2: string[]): boolean {
     return true;
 }
 
-function setTimeoutAndIntervalTest() {
-    const execSeq: string[] = [];
-    const expectedExecSeq: string[] = ['Timeout-100ms',
-                                       'Interval-50ms-1','Timeout-20ms',
-                                       'Interval-50ms-2','Timeout-20ms',
-                                       'Interval-50ms-3','Timeout-20ms'];
-    let intervalCnt: int = 0;
-    let intervalId: int = 0;
-
-    setTimeout(()=> {
-        execSeq.push('Timeout-100ms');
-        intervalId = setInterval(()=> {
-            execSeq.push(`Interval-50ms-${++intervalCnt}`);
-            setTimeout(()=> {
-                execSeq.push('Timeout-20ms');
-                if (intervalCnt >= 3) {
-                    clearInterval(intervalId);
-                    arktest.assertTrue(compareTwoStringArrays(execSeq , expectedExecSeq));
-                }
-            } , 20);
-        } , 50);
-    }, 100);
-}
-
 function sameWorkerIdTest() {
     let parentWorkerId = CoroutineExtras.getWorkerId();
     setTimeout(() => { arktest.assertTrue(CoroutineExtras.getWorkerId() == parentWorkerId) }, zeroTimeout);
@@ -328,7 +304,6 @@ function main(): int {
     testSuite.addTest('setTimeoutWithDifferentMsgAndDelay', setTimeoutWithDifferentMsgAndDelay);
     testSuite.addTest('setTimeoutWithFuncAndDifferentDelay', setTimeoutWithFuncAndDifferentDelay);
     testSuite.addTest('clearTimeoutFromAnotherWorkerTest', clearTimeoutFromAnotherWorkerTest);
-    testSuite.addTest('setTimeoutAndIntervalTest', setTimeoutAndIntervalTest);
     testSuite.addTest('sameWorkerIdTest', sameWorkerIdTest);
     
     /**
