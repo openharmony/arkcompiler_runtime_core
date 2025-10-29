@@ -106,6 +106,7 @@ EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, in
                                    double byteOffset);
 EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset);
 void SetInteropRuntimeLinker(EtsRuntimeLinker *linker);
+EtsRuntimeLinker *GetInteropRuntimeLinker();
 EtsBoolean IsJSInteropRef(EtsObject *value);
 EtsLong SerializeHandle(JSValue *value);
 JSValue *DeserializeHandle(EtsLong value);

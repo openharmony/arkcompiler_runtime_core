@@ -1182,6 +1182,17 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::InteropContextSetInteropRuntimeLinkerImplIntrinsic
     clear_flags: []
 
+  - name: InteropContextGetInteropRuntimeLinkerImpl
+    space: ets
+    class_name: std.interop.InteropContext
+    method_name: getInteropRuntimeLinker
+    static: true
+    signature:
+      ret: std.core.RuntimeLinker
+      args: []
+    impl: ark::ets::interop::js::intrinsics::InteropContextGetInteropRuntimeLinkerImplIntrinsic
+    clear_flags: []
+
 ####################
 # std.interop.InteropSerializeHelper #
 ####################

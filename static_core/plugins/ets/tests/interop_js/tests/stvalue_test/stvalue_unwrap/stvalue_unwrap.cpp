@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-package std.interop;
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
 
-export class InteropContext {
-    static setDefaultInteropLinker(linker: RuntimeLinker): void {
-        // Note: This interface should only be called from system component
-        InteropContext.setInteropRuntimeLinker(linker);
-    }
+namespace ark::ets::interop::js::testing {
 
-    private static native getInteropRuntimeLinker(): RuntimeLinker;
-    
-    private static native setInteropRuntimeLinker(linker: RuntimeLinker): void;
+class STValueEtsToTsTest : public EtsInteropTest {};
+
+TEST_F(STValueEtsToTsTest, check_ets_stvalue_unwrap)
+{
+    ASSERT_TRUE(RunJsTestSuite("test_stvalue_unwrap.ts"));
 }
+
+}  // namespace ark::ets::interop::js::testing
