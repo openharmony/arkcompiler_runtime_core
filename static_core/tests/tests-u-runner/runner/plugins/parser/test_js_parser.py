@@ -50,7 +50,7 @@ class TestJSParser(TestFileBased):
             test_abc=self.get_tests_abc(),
             result_validator=self.es2panda_result_validator
         )
-        if self.update_expected and self.report:
+        if self.should_update_expected and self.report:
             expected_contents = self.report.output
             # NOTE(pronaip) this is needed because run_es2panda uses .strip() on all outputs
             if expected_contents != "":

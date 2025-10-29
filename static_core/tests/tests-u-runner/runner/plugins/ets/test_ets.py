@@ -22,17 +22,13 @@ from os import path, makedirs
 from pathlib import Path
 from typing import Tuple, Optional, Sequence, List, Dict
 
-from runner.utils import compare_files
+from runner.utils import compare_files, unlines
 from runner.plugins.ets.ets_templates.test_metadata import get_metadata, TestMetadata
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.params import TestEnv, TestReport, Params
 from runner.test_file_based import TestFileBased
 
-def update_expected(expected_path: Path, contents: str) -> None:
-    print(f"Updating expected file: {expected_path}")
-    with open(expected_path, "w", encoding="utf-8") as expected_file:
-        expected_file.write(contents)
 
 
 class TestETS(TestFileBased):
@@ -166,7 +162,7 @@ class TestETS(TestFileBased):
 
     @staticmethod
     def _remove_file_info_from_error(error_message: str) -> str:
-        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:\d+:\d+\s*[\]\)]|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]'
+        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:\d+:\d+\s*[\]\)]\s*|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]'
         return re.sub(pattern, '', error_message)
 
     def get_all_abc_dependent_files(self) -> List[str]:
@@ -278,17 +274,32 @@ class TestETS(TestFileBased):
         output = output.strip()
         err_output = err_output.strip()
 
-        def compare(expected: str, actual: str) -> bool:
+        def compare_line_sets(expected: str, actual: str, expected_path: Path) -> bool:
             expected_lines = set(filter(None, expected.splitlines()))
             actual_lines = set(filter(None, actual.splitlines()))
 
             if not actual_lines and not expected_lines:
                 return True
 
-            if not expected_lines or not actual_lines:
+            if not expected_lines:
+                self.log_cmd(f"{expected_path} is empty after normalization")
+                return False
+            if not actual_lines:
+                self.log_cmd(f"{expected_path} is not empty, but actual output is")
                 return False
 
-            return expected_lines.issubset(actual_lines)
+            is_subset = expected_lines.issubset(actual_lines)
+            if not is_subset:
+                self.log_cmd(f"{expected_path} is not a subset of actual, the missing lines (after normalization) are:")
+                for line in expected_lines.difference(actual_lines):
+                    self.log_cmd(line)
+                self.log_cmd("(end of missing lines)")
+                self.log_cmd("actual lines:")
+                for line in actual_lines:
+                    self.log_cmd(line)
+                self.log_cmd("(end of actual lines)")
+
+            return is_subset
 
         normalized_out = self.normalize_output(output)
         normalized_err = self.normalize_output(err_output)
@@ -297,23 +308,26 @@ class TestETS(TestFileBased):
 
         if self.expected and not self.expected_err and output:
             # Compare with output from std.OUT
-            return compare(normalized_expected_out,
-                             normalized_out) and not err_output
+            return compare_line_sets(normalized_expected_out,
+                             normalized_out, self.test_expected) and not err_output
         if self.expected_err and not self.expected and err_output:
             # Compare with output from std.ERR
-            return compare(normalized_expected_err,
-                             normalized_err)
+            return compare_line_sets(normalized_expected_err,
+                             normalized_err, self.test_expected_err)
         if self.expected and self.expected_err and output and err_output:
             # Compare .expected file with std.OUT and .expected.err with std.ERR
-            passed_stdout = compare(normalized_expected_out,
-                                    normalized_out)
-            passed_stderr = compare(normalized_expected_err,
-                                    normalized_err)
+            passed_stdout = compare_line_sets(normalized_expected_out,
+                                    normalized_out, self.test_expected)
+            passed_stderr = compare_line_sets(normalized_expected_err,
+                                    normalized_err, self.test_expected_err)
             return passed_stdout and passed_stderr
         return True
 
     def normalize_output(self, output: str)-> str:
-        return self._remove_file_info_from_error(self._normalize_error_report(output))
+        return unlines(self.normalize_line(line) for line in output.splitlines())
+
+    def normalize_line(self, line: str)-> str:
+        return self._remove_file_info_from_error(self._normalize_error_report(line))
 
     def _read_expected_file(self) -> None:
         if self.has_expected:
@@ -425,6 +439,13 @@ class TestETS(TestFileBased):
             fail_kind = FailKind.ES2PANDA_NEG_FAIL
         return passed, report, fail_kind
 
+
+    def update_expected(self, expected_path: Path, contents: str) -> None:
+        self.log_cmd(f"Updating expected file: {expected_path}")
+        with open(expected_path, "w", encoding="utf-8") as expected_file:
+            expected_file.write(contents)
+
+
     def _validate_compiler(self, output: str, err: str, return_code: int, output_path: str) -> bool:
         dep_package = self.metadata.get_package_name()
         package_compile = self.dependent_packages.get(dep_package, False)
@@ -435,14 +456,14 @@ class TestETS(TestFileBased):
         else:
             test_passed = return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
 
-        if self.update_expected:
+        if self.should_update_expected:
             if self.has_expected:
-                update_expected(self.test_expected, output)
+                self.update_expected(self.test_expected, output)
             # NOTE(pronai) #29808 might affect this
             # positive tests can have warnings!
             if self.is_negative_compile:
                 # negative tests must have an .expected.err
-                update_expected(self.test_expected_err, err)
+                self.update_expected(self.test_expected_err, err)
 
         if not (negative_test_passed or test_passed):
             return False

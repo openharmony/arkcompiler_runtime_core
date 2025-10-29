@@ -50,7 +50,7 @@ class TestETSSystem(TestFileBased):
             test_abc=self.get_tests_abc(),
             result_validator=self.es2panda_result_validator
         )
-        if self.update_expected and self.report:
+        if self.should_update_expected and self.report:
             self.update_expected_files(self.report.output)
 
         return self
