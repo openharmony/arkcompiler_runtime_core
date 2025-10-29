@@ -344,6 +344,10 @@ spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 std/core/NumberTest.ets
 std/core/json/JsonStringifyTest1.ets
 
+#29995
+escompat/JsonAnnotationTest.ets
+ets_func_tests/escompat/JsonAnnotationTest.ets
+
 ############
 # temporary place for the tests related to primitive types refactoring
 ############
