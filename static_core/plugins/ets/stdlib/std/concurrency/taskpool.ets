@@ -505,11 +505,11 @@ export namespace taskpool {
         tryTriggerRunner(): void {
             // handle sequenceRunner
             if (this.seqId != 0) {
-                if (this.runner.tasks.length == 0) {
-                    this.runner.isRunning = false;
+                if (this.runnerImpl.tasks.length == 0) {
+                    this.runnerImpl.isRunning = false;
                 } else {
-                    let nextTask = this.runner.tasks.shift()
-                    InternalTask.of(nextTask!).enqueue(this.runner.priority);
+                    let nextTask = this.runnerImpl.tasks.shift();
+                    InternalTask.of(nextTask!).enqueue(this.runnerImpl.priority);
                 }
             }
 
@@ -517,7 +517,7 @@ export namespace taskpool {
             if (this.asyncId != 0) {
                 const asyncRunner = AsyncRunnerImpl.getAsyncRunnerById(this.asyncId);
                 if (asyncRunner) {
-                    AsyncRunnerImpl.of(asyncRunner).handleTaskCompletionFromTryTriggerRunner();
+                    asyncRunner.handleTaskCompletionFromTryTriggerRunner();
                 }
             }
         }
@@ -539,7 +539,7 @@ export namespace taskpool {
         /// identifier of worker which starts to execute the task
         workerId: int = -1;
         /// an instance of the task is running
-        private isRunning: boolean = false;
+        isRunning: boolean = false;
         /// start time of the task
         private startTime: long = 0;
         /// the task has been executed periodically
@@ -558,12 +558,12 @@ export namespace taskpool {
 
         priority: Priority;
 
-        private runner: SequenceRunner;
-        private runnerAsync: AsyncRunner;
+        runnerImpl: SeqRunnerImpl;
+        runnerAsyncImpl: AsyncRunnerImpl;
 
-        private onReceiveCallback?: Function;
-        private dataMutex: Object = ConcurrencyHelpers.mutexCreate();
-        private argsArray: Array<FixedArray<Any>> = new Array<FixedArray<Any>>();
+        onReceiveCallback?: Function;
+        dataMutex: Object = ConcurrencyHelpers.mutexCreate();
+        argsArray: Array<FixedArray<Any>> = new Array<FixedArray<Any>>();
 
         onEnqueueCallback?: CallbackFunction;
         onStartCallback?: CallbackFunction;
@@ -952,6 +952,11 @@ export namespace taskpool {
             this.id = id;
             this.seqPromise = Promise.resolve<Any>(new Object());
         }
+
+        priority: Priority;
+        isRunning: Boolean = false;
+        tasks: Array<Task>;
+
         readonly id: int;
         seqPromise: Promise<Any>;
     }
@@ -969,19 +974,19 @@ export namespace taskpool {
 
         constructor(name: string, priority?: Priority) {
             this.impl = SequenceRunner.getOrCreateSeqRunnerImpl(name);
-            this.priority = priority === undefined ? Priority.MEDIUM : priority;
-            this.tasks = new Array<Task>();
+            this.impl.priority = priority === undefined ? Priority.MEDIUM : priority;
+            this.impl.tasks = new Array<Task>();
         }
 
         execute(task: Task): Promise<Any> {
             initWorkerPool();
             this.checkExecution(task);
             InternalTask.of(task).seqId = this.impl.id;
-            InternalTask.of(task).runner = this;
+            InternalTask.of(task).runnerImpl = this.impl;
             taskSubmitted(task);
             InternalTask.of(task).isSubmitted = true;
             if (isTaskPoolUseLaunch) {
-                InternalTask.of(task).enqueue(this.priority);
+                InternalTask.of(task).enqueue(this.impl.priority);
                 const taskRunner = (value: Any): Any => {
                     return InternalTask.of(task).execute();
                 };
@@ -996,11 +1001,11 @@ export namespace taskpool {
                 InternalTask.of(task).resolve = resolve;
                 InternalTask.of(task).reject = reject;
             });
-            if (this.isRunning) {
-                this.tasks.push(task);
+            if (this.impl.isRunning) {
+                this.impl.tasks.push(task);
             } else {
-                this.isRunning = true;
-                InternalTask.of(task).enqueue(this.priority);
+                this.impl.isRunning = true;
+                InternalTask.of(task).enqueue(this.impl.priority);
             }
             notifyExecuteTask();
             return InternalTask.of(task).getOnReceivePromise(promise);
@@ -1038,9 +1043,6 @@ export namespace taskpool {
         }
 
         private impl: SeqRunnerImpl;
-        private priority: Priority;
-        private isRunning: Boolean = false;
-        private tasks: Array<Task>;
 
         static namedRunners: Map<string, SeqRunnerImpl> = new Map<string, SeqRunnerImpl>();
         static mutex: Object = ConcurrencyHelpers.mutexCreate();
@@ -1056,11 +1058,7 @@ export namespace taskpool {
             this.implInnerMutex = ConcurrencyHelpers.mutexCreate();
         }
 
-        static of(runner: AsyncRunner) {
-            return (runner.impl as AsyncRunnerImpl);
-        }
-
-        static getAsyncRunnerById(id: int): AsyncRunner | undefined {
+        static getAsyncRunnerById(id: int): AsyncRunnerImpl | undefined {
             ConcurrencyHelpers.mutexLock(AsyncRunnerImpl.implMutex);
             let r = AsyncRunnerImpl.asyncRunners.get(id);
             ConcurrencyHelpers.mutexUnlock(AsyncRunnerImpl.implMutex);
@@ -1107,8 +1105,8 @@ export namespace taskpool {
         waitingQueue: Array<Task>;
         implInnerMutex: Object;
         static implMutex: Object = ConcurrencyHelpers.mutexCreate();
-        // Find the corresponding asyncRunner by task.asyncID
-        static asyncRunners: Map<number, AsyncRunner> = new Map<number, AsyncRunner>();
+        // Find the corresponding asyncRunnerImpl by task.asyncID
+        static asyncRunners: Map<number, AsyncRunnerImpl> = new Map<number, AsyncRunnerImpl>();
     }
 
     /**
@@ -1144,7 +1142,7 @@ export namespace taskpool {
             this.priority = Priority.MEDIUM;
 
             ConcurrencyHelpers.lockGuard(AsyncRunner.mutex, () => {
-                AsyncRunnerImpl.asyncRunners.set(this.impl.id, this);
+                AsyncRunnerImpl.asyncRunners.set(this.impl.id, this.impl);
             });
         }
 
@@ -1158,7 +1156,7 @@ export namespace taskpool {
             initWorkerPool();
             this.checkExecution(task);
             
-            InternalTask.of(task).runnerAsync = this;
+            InternalTask.of(task).runnerAsyncImpl = this.impl;
             InternalTask.of(task).asyncId = this.impl.id; 
             taskSubmitted(task);
             InternalTask.of(task).isSubmitted = true;
@@ -1231,7 +1229,6 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_SQUENCE, "taskpool:: asyncRunner cannot execute seqenceRunnerTask");
             }
         }
-
 
         private impl: AsyncRunnerImpl;
         private priority: Priority;
