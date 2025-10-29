@@ -97,4 +97,3 @@ function testParseNoBigIntParseAsBigint() {
 function testParseNoBigIntAlwaysParseAsBigint() {
     arktest.expectThrow(() => { doTest2(jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT) })
 }
-

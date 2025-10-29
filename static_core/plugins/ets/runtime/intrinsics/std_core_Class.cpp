@@ -277,14 +277,12 @@ EtsReflectField *StdCoreClassGetInstanceFieldByNameInternal(EtsClass *cls, EtsSt
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    EtsField *field = cls->GetFieldIDByName(name->GetUtf8().c_str(), nullptr);
-    if (field == nullptr) {
+    Field *field = cls->GetRuntimeClass()->GetDeclaredInstanceFieldByName(name->GetDataMUtf8(), name->GetUtf16Length());
+    if (field == nullptr || (FromEtsBoolean(publicOnly) && !field->IsPublic())) {
         return nullptr;
     }
-    if (FromEtsBoolean(publicOnly) && !field->IsPublic()) {
-        return nullptr;
-    }
-    return EtsReflectField::CreateFromEtsField(coro, field);
+
+    return EtsReflectField::CreateFromEtsField(coro, EtsField::FromRuntimeField(field));
 }
 
 EtsReflectField *StdCoreClassGetStaticFieldByNameInternal(EtsClass *cls, EtsString *name, EtsBoolean publicOnly)
@@ -295,14 +293,12 @@ EtsReflectField *StdCoreClassGetStaticFieldByNameInternal(EtsClass *cls, EtsStri
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    EtsField *field = cls->GetStaticFieldIDByName(name->GetUtf8().data(), nullptr);
-    if (field == nullptr) {
+    Field *field = cls->GetRuntimeClass()->GetDeclaredStaticFieldByName(name->GetDataMUtf8(), name->GetUtf16Length());
+    if (field == nullptr || (FromEtsBoolean(publicOnly) && !field->IsPublic())) {
         return nullptr;
     }
-    if (FromEtsBoolean(publicOnly) && !field->IsPublic()) {
-        return nullptr;
-    }
-    return EtsReflectField::CreateFromEtsField(coro, field);
+
+    return EtsReflectField::CreateFromEtsField(coro, EtsField::FromRuntimeField(field));
 }
 
 static PandaVector<EtsMethod *> GetConstructors(EtsClass *cls, bool onlyPublic)
@@ -354,52 +350,6 @@ ObjectHeader *StdCoreClassGetStaticMethodsInternal(EtsClass *cls, EtsBoolean pub
     return CreateEtsReflectMethodArray<true, false>(coro, staticMethods);
 }
 
-static PandaVector<EtsField *> GetInstanceFields(EtsClass *cls, bool onlyPublic)
-{
-    PandaVector<EtsField *> instanceFields;
-    PandaUnorderedSet<PandaString> uniqNames;
-
-    EnumerateBaseClassesReverseOrder(cls, [&](EtsClass *c) {
-        auto fields = c->GetRuntimeClass()->GetInstanceFields();
-        auto fnum = fields.Size();
-        for (uint32_t i = 0; i < fnum; i++) {
-            if (onlyPublic && !fields[i].IsPublic()) {
-                continue;
-            }
-            PandaString fieldName = utf::Mutf8AsCString(fields[i].GetName().data);
-            if (!uniqNames.count(fieldName)) {
-                instanceFields.push_back(EtsField::FromRuntimeField(&fields[i]));
-                uniqNames.emplace(fieldName);
-            }
-        }
-        return false;
-    });
-    return instanceFields;
-}
-
-static PandaVector<EtsField *> GetStaticFields(EtsClass *cls, bool onlyPublic)
-{
-    PandaVector<EtsField *> staticFields;
-    PandaUnorderedSet<PandaString> uniqNames;
-
-    EnumerateBaseClassesReverseOrder(cls, [&](EtsClass *c) {
-        auto fields = c->GetRuntimeClass()->GetStaticFields();
-        auto fnum = fields.Size();
-        for (uint32_t i = 0; i < fnum; i++) {
-            if (onlyPublic && !fields[i].IsPublic()) {
-                continue;
-            }
-            PandaString fieldName = utf::Mutf8AsCString(fields[i].GetName().data);
-            if (!uniqNames.count(fieldName)) {
-                staticFields.push_back(EtsField::FromRuntimeField(&fields[i]));
-                uniqNames.emplace(fieldName);
-            }
-        }
-        return false;
-    });
-    return staticFields;
-}
-
 template <bool IS_STATIC = false>
 static ObjectHeader *CreateEtsReflectFieldArray(EtsCoroutine *coro, const PandaVector<EtsField *> &fields)
 {
@@ -413,7 +363,6 @@ static ObjectHeader *CreateEtsReflectFieldArray(EtsCoroutine *coro, const PandaV
         ASSERT(coro->HasPendingException());
         return nullptr;
     }
-    ASSERT(arrayH.GetPtr() != nullptr);
 
     for (size_t idx = 0; idx < fields.size(); ++idx) {
         auto *reflectField = EtsReflectField::CreateFromEtsField(coro, fields[idx]);
@@ -431,7 +380,16 @@ ObjectHeader *StdCoreClassGetInstanceFieldsInternal(EtsClass *cls, EtsBoolean pu
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    auto instanceFields = GetInstanceFields(cls, FromEtsBoolean(publicOnly));
+    bool collectPublic = FromEtsBoolean(publicOnly);
+
+    PandaVector<EtsField *> instanceFields;
+    Span<Field> fields(cls->GetRuntimeClass()->GetInstanceFields());
+
+    for (auto &field : fields) {
+        if (!collectPublic || field.IsPublic()) {
+            instanceFields.push_back(EtsField::FromRuntimeField(&field));
+        }
+    }
 
     return CreateEtsReflectFieldArray(coro, instanceFields);
 }
@@ -444,7 +402,16 @@ ObjectHeader *StdCoreClassGetStaticFieldsInternal(EtsClass *cls, EtsBoolean publ
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    auto staticFields = GetStaticFields(cls, FromEtsBoolean(publicOnly));
+    bool collectPublic = FromEtsBoolean(publicOnly);
+
+    PandaVector<EtsField *> staticFields;
+    Span<Field> fields(cls->GetRuntimeClass()->GetStaticFields());
+
+    for (auto &field : fields) {
+        if (!collectPublic || field.IsPublic()) {
+            staticFields.push_back(EtsField::FromRuntimeField(&field));
+        }
+    }
 
     return CreateEtsReflectFieldArray<true>(coro, staticFields);
 }

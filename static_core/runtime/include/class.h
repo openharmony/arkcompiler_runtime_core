@@ -716,6 +716,14 @@ public:
 
     Field *GetDeclaredFieldByName(const uint8_t *mutf8Name) const;
 
+    Field *GetDeclaredInstanceFieldByName(const uint8_t *mutf8Name) const;
+
+    Field *GetDeclaredInstanceFieldByName(const uint8_t *mutf8Name, uint32_t mutf16Length) const;
+
+    Field *GetDeclaredStaticFieldByName(const uint8_t *mutf8Name) const;
+
+    Field *GetDeclaredStaticFieldByName(const uint8_t *mutf8Name, uint32_t mutf16Length) const;
+
     Method *GetClassMethod(const uint8_t *mutf8Name) const;
 
     Method *GetStaticClassMethod(const uint8_t *mutf8Name) const;

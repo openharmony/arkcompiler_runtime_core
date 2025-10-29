@@ -276,8 +276,8 @@ function testGetStaticMethod() {
 }
 
 function testGetStaticFields() {
-    let info = Class.of(new B())
-    let expectedFldSet: Set<string> = new Set<string>([ "stfooFld1", "stfooFld2", "stbooFld1", "stbooFld2"]);
+    let info = Class.from<B>()
+    let expectedFldSet: Set<string> = new Set<string>([ "stbooFld1", "stbooFld2"]);
 
     let fields: FixedArray<reflect.StaticField> = info.getStaticFields()
     arktest.assertEQ(fields.length, expectedFldSet.size)
@@ -287,8 +287,8 @@ function testGetStaticFields() {
 }
 
 function testGetInstanceFields() {
-    let info = Class.of(new B())
-    let expectedFldSet: Set<string> = new Set<string>([ "fooFld1", "fooFld2", "booFld1", "booFld2"]);
+    let info = Class.from<B>()
+    let expectedFldSet: Set<string> = new Set<string>([ "booFld1", "booFld2" ]);
 
     let fields: FixedArray<reflect.InstanceField> = info.getInstanceFields()
     arktest.assertEQ(fields.length, expectedFldSet.size)
@@ -300,13 +300,13 @@ function testGetInstanceFields() {
 function testInstanceFieldEquals(): void {
     const aCls = Class.of(new A())
 
-    const fld1 = aCls.getInstanceFieldByName("fooFld1")!
-    const fld2 = aCls.getInstanceFieldByName("fooFld1")!
+    const fld1 = aCls.getInstanceField("fooFld1")!
+    const fld2 = aCls.getInstanceField("fooFld1")!
 
     arktest.assertFalse(fld1 == fld2)
     arktest.assertTrue(fld1.equals(fld2))
 
-    const fld3 = aCls.getInstanceFieldByName("fooFld2")!
+    const fld3 = aCls.getInstanceField("fooFld2")!
 
     arktest.assertFalse(fld1 == fld3)
     arktest.assertFalse(fld1.equals(fld3))
@@ -371,61 +371,61 @@ function testIsUnion() {
     let clsC = new C<B>()
     let classType = Class.of(clsC)
 
-    let fldInfo1 = classType.getInstanceFieldByName('fld1')
+    let fldInfo1 = classType.getInstanceField('fld1')
     let uniInfo1 = fldInfo1!.getType()
     let constituentTypes1 = uniInfo1!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo1!.isUnion())
     arktest.assertNE(constituentTypes1, undefined)
 
-    let fldInfo2 = classType.getInstanceFieldByName('fld2')
+    let fldInfo2 = classType.getInstanceField('fld2')
     let uniInfo2 = fldInfo2!.getType()
     let constituentTypes2 = uniInfo2!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo2!.isUnion())
     arktest.assertEQ(constituentTypes2, undefined)
 
-    let fldInfo3 = classType.getInstanceFieldByName('fld3')
+    let fldInfo3 = classType.getInstanceField('fld3')
     let uniInfo3 = fldInfo3!.getType()
     let constituentTypes3 = uniInfo3!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo3!.isUnion())
     arktest.assertNE(constituentTypes3, undefined)
 
-    let fldInfo4 = classType.getInstanceFieldByName('fld4')
+    let fldInfo4 = classType.getInstanceField('fld4')
     let uniInfo4 = fldInfo4!.getType()
     let constituentTypes4 = uniInfo4!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo4!.isUnion())
     arktest.assertEQ(constituentTypes4, undefined)
 
-    let fldInfo5 = classType.getInstanceFieldByName('fld5')
+    let fldInfo5 = classType.getInstanceField('fld5')
     let uniInfo5 = fldInfo5!.getType()
     let constituentTypes5 = uniInfo5!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo5!.isUnion())
     arktest.assertNE(constituentTypes5, undefined)
 
-    let fldInfo6 = classType.getInstanceFieldByName('fld6')
+    let fldInfo6 = classType.getInstanceField('fld6')
     let uniInfo6 = fldInfo6!.getType()
     let constituentTypes6 = uniInfo6!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo6!.isUnion())
     arktest.assertEQ(constituentTypes6, undefined)
 
-    let fldInfo7 = classType.getInstanceFieldByName('fld7')
+    let fldInfo7 = classType.getInstanceField('fld7')
     let uniInfo7 = fldInfo7!.getType()
     let constituentTypes7 = uniInfo7!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo7!.isUnion())
     arktest.assertEQ(constituentTypes7, undefined)
 
-    let fldInfo8 = classType.getInstanceFieldByName('fld8')
+    let fldInfo8 = classType.getInstanceField('fld8')
     let uniInfo8 = fldInfo8!.getType()
     let constituentTypes8 = uniInfo8!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo8!.isUnion())
     arktest.assertEQ(constituentTypes8, undefined)
 
-    let fldInfo9 = classType.getInstanceFieldByName('fld9')
+    let fldInfo9 = classType.getInstanceField('fld9')
     let uniInfo9 = fldInfo9!.getType()
     let constituentTypes9 = uniInfo9!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo9!.isUnion())
     arktest.assertNE(constituentTypes9, undefined)
 
-    let fldInfo10 = classType.getInstanceFieldByName('fld10')
+    let fldInfo10 = classType.getInstanceField('fld10')
     let uniInfo10 = fldInfo10!.getType()
     let constituentTypes10 = uniInfo10!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo10!.isUnion())
@@ -434,31 +434,31 @@ function testIsUnion() {
     arktest.assertEQ(constituentTypes10![0].getName(), 'ReflectTypeTest.A')
     arktest.assertEQ(constituentTypes10![1].getName(), 'std.core.Null')
 
-    let fldInfo11 = classType.getInstanceFieldByName('fld11')
+    let fldInfo11 = classType.getInstanceField('fld11')
     let uniInfo11 = fldInfo11!.getType()
     let constituentTypes11 = uniInfo11!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo11!.isUnion())
     arktest.assertEQ(constituentTypes11, undefined)
 
-    let fldInfo12 = classType.getInstanceFieldByName('fld12')
+    let fldInfo12 = classType.getInstanceField('fld12')
     let uniInfo12 = fldInfo12!.getType()
     let constituentTypes12 = uniInfo12!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo12!.isUnion())
     arktest.assertEQ(constituentTypes12, undefined)
 
-    let fldInfo13 = classType.getInstanceFieldByName('fld13')
+    let fldInfo13 = classType.getInstanceField('fld13')
     let uniInfo13 = fldInfo13!.getType()
     let constituentTypes13 = uniInfo13!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo13!.isUnion())
     arktest.assertEQ(constituentTypes13, undefined)
 
-    let fldInfo14 = classType.getInstanceFieldByName('fld14')
+    let fldInfo14 = classType.getInstanceField('fld14')
     let uniInfo14 = fldInfo14!.getType()
     let constituentTypes14 = uniInfo14!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo14!.isUnion())
     arktest.assertEQ(constituentTypes14, undefined)
 
-    let fldInfo15 = classType.getInstanceFieldByName('fld15')
+    let fldInfo15 = classType.getInstanceField('fld15')
     let uniInfo15 = fldInfo15!.getType()
     let constituentTypes15 = uniInfo15!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo15!.isUnion())
@@ -468,7 +468,7 @@ function testIsUnion() {
 function testUnionField() {
     let clsC = new C<String>()
     let classType = Class.of(clsC)
-    let fldInfo = classType.getInstanceFieldByName('fld')
+    let fldInfo = classType.getInstanceField('fld')
     let uniInfo = fldInfo!.getType()
     arktest.assertTrue(uniInfo!.isUnion())
     let uniTypes = uniInfo!.getUnionConstituentTypes()
@@ -556,42 +556,42 @@ function testPrimitive() {
     arktest.assertEQ(componentType4.getName(), 'std.core.Boolean')
 
     const pCls = Class.of(new P())
-    const fld1 = pCls.getInstanceFieldByName('fldBoolean')!
+    const fld1 = pCls.getInstanceField('fldBoolean')!
     const fldType1 = fld1.getType()
     arktest.assertTrue(fldType1.isPrimitive())
     arktest.assertEQ(fldType1, Class.PRIMITIVE_BOOLEAN)
     arktest.assertEQ(fldType1.getName(), 'u1')
-    const fld2 = pCls.getInstanceFieldByName('fldByte')!
+    const fld2 = pCls.getInstanceField('fldByte')!
     const fldType2 = fld2.getType()
     arktest.assertTrue(fldType2.isPrimitive())
     arktest.assertEQ(fldType2, Class.PRIMITIVE_BYTE)
     arktest.assertEQ(fldType2.getName(), 'i8')
-    const fld3 = pCls.getInstanceFieldByName('fldShort')!
+    const fld3 = pCls.getInstanceField('fldShort')!
     const fldType3 = fld3.getType()
     arktest.assertTrue(fldType3.isPrimitive())
     arktest.assertEQ(fldType3, Class.PRIMITIVE_SHORT)
     arktest.assertEQ(fldType3.getName(), 'i16')
-    const fld4 = pCls.getInstanceFieldByName('fldChar')!
+    const fld4 = pCls.getInstanceField('fldChar')!
     const fldType4 = fld4.getType()
     arktest.assertTrue(fldType4.isPrimitive())
     arktest.assertEQ(fldType4, Class.PRIMITIVE_CHAR)
     arktest.assertEQ(fldType4.getName(), 'u16')
-    const fld5 = pCls.getInstanceFieldByName('fldInt')!
+    const fld5 = pCls.getInstanceField('fldInt')!
     const fldType5 = fld5.getType()
     arktest.assertTrue(fldType5.isPrimitive())
     arktest.assertEQ(fldType5, Class.PRIMITIVE_INT)
     arktest.assertEQ(fldType5.getName(), 'i32')
-    const fld6 = pCls.getInstanceFieldByName('fldLong')!
+    const fld6 = pCls.getInstanceField('fldLong')!
     const fldType6 = fld6.getType()
     arktest.assertTrue(fldType6.isPrimitive())
     arktest.assertEQ(fldType6, Class.PRIMITIVE_LONG)
     arktest.assertEQ(fldType6.getName(), 'i64')
-    const fld7 = pCls.getInstanceFieldByName('fldFloat')!
+    const fld7 = pCls.getInstanceField('fldFloat')!
     const fldType7 = fld7.getType()
     arktest.assertTrue(fldType7.isPrimitive())
     arktest.assertEQ(fldType7, Class.PRIMITIVE_FLOAT)
     arktest.assertEQ(fldType7.getName(), 'f32')
-    const fld8 = pCls.getInstanceFieldByName('fldDouble')!
+    const fld8 = pCls.getInstanceField('fldDouble')!
     const fldType8 = fld8.getType()
     arktest.assertTrue(fldType8.isPrimitive())
     arktest.assertEQ(fldType8, Class.PRIMITIVE_DOUBLE)

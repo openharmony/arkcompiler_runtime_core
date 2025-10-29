@@ -442,7 +442,9 @@ inline bool operator==(const File::StringData &stringData1, const File::StringDa
         return false;
     }
 
-    return utf::IsEqual(stringData1.data, stringData2.data);
+    // NOTE(kurnevichstanislav): #31218
+    return utf::IsEqual(Span<const uint8_t>(stringData1.data, stringData1.utf16Length),
+                        Span<const uint8_t>(stringData2.data, stringData2.utf16Length));
 }
 
 inline bool operator!=(const File::StringData &stringData1, const File::StringData &stringData2)
