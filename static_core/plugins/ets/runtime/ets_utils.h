@@ -143,7 +143,7 @@ private:
     }
 
 public:
-    RuntimeDescriptorParser(const PandaString &name) : name(name), pos(0) {}
+    RuntimeDescriptorParser(const PandaString &inputStr) : name(inputStr), pos(0) {}
 
     PandaString Resolve()
     {
@@ -248,7 +248,7 @@ private:
     }
 
 public:
-    ClassPublicNameParser(const PandaString &name) : left(0), right(name.length() - 1), name(name) {}
+    ClassPublicNameParser(const PandaString &inputStr) : left(0), right(inputStr.length() - 1), name(inputStr) {}
 
     PandaString Resolve()
     {
