@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-package escompat
+package std.core
 
-import { jsonx } from "std/core"
-
-// initialized in _initializerBlock_.ets
 const BigIntType: Type;
 
 export interface JsonReplacer {

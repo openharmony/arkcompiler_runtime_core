@@ -27,7 +27,7 @@ spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.D
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0006.ets
 std/core/TypeCreatePrimitiveNameTest.ets
 escompat/ArrayProxyTest.ets
-escompat/JsonParseTest.ets
+std/core/JsonParseTest.ets
 escompat/ProcessTest.ets
 escompat/ProxyTest.ets
 escompat/WeakMapGCTest.ets
@@ -214,7 +214,7 @@ std/core/std_core_typedarrays__Int16Array.ets
 std/core/std_core_typedarrays__Int32Array.ets
 std/core/std_core_typedarrays__Int8Array.ets
 std/core/ReadonlyArrayProxyTest.ets
-escompat/JsonReplacerTest.ets
+std/core/JsonReplacerTest.ets
 regression/23623.ets
 regression/23735.ets
 std/core/DeepCopyTest.ets

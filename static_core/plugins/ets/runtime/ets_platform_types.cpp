@@ -259,7 +259,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
                "Lstd/core/Object;:V", true);
 
     findType(&EtsPlatformTypes::stdcoreRegExpExecArray, REG_EXP_EXEC_ARRAY);
-    findType(&EtsPlatformTypes::escompatJsonReplacer, JSON_REPLACER);
+    findType(&EtsPlatformTypes::stdcoreJsonReplacer, JSON_REPLACER);
     findType(&EtsPlatformTypes::coreJsonElementSerializable, JSON_ELEMENT_SERIALIZABLE);
     findType(&EtsPlatformTypes::escompatErrorOptions, ERROR_OPTIONS);
     findType(&EtsPlatformTypes::escompatErrorOptionsImpl, ERROR_OPTIONS_IMPL);

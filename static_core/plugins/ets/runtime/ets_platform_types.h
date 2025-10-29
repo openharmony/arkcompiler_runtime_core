@@ -153,7 +153,8 @@ public:
     EtsMethod *coreProcessHandleUncaughtError {};
 
     EtsClass *stdcoreRegExpExecArray {};
-    EtsClass *escompatJsonReplacer {};
+
+    EtsClass *stdcoreJsonReplacer {};
     EtsClass *coreJsonElementSerializable {};
     EtsClass *escompatErrorOptions {};
     EtsClass *escompatErrorOptionsImpl {};
