@@ -370,6 +370,13 @@ config("ark_common_config") {
       "PANDA_TARGET_AMD64",
     ]
   }
+
+  if (is_gcov_tools) {
+      cflags = [
+          "-fprofile-instr-generate",
+          "-fcoverage-mapping",
+      ]
+  }
 }
 
 config("ark_config") {

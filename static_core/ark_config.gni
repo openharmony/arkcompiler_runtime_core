@@ -56,6 +56,10 @@ if (is_standard_system || ark_standalone_build) {
 }
 
 declare_args() {
+  is_gcov_tools = false
+}
+
+declare_args() {
   ark_enabled_plugins = default_ark_enabled_plugins
   extras = []
   if (!defined(is_ohos)) {
