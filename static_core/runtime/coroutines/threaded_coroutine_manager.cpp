@@ -25,14 +25,14 @@
 
 namespace ark {
 
-void ThreadedCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
+void ThreadedCoroutineManager::Initialize(Runtime *runtime, PandaVM *vm)
 {
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
-    size_t targetNumberOfWorkers = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
+    size_t targetNumberOfWorkers = (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
                                        ? numberOfAvailableCores
-                                       : config.workersCount;
-    if (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
+                                       : GetConfig().workersCount;
+    if (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager(): AUTO mode selected, will set number of coroutine "
                                   "workers to number of CPUs / 4, but not less than 2 = "
                                << targetNumberOfWorkers;
@@ -137,6 +137,8 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
     co->NativeCodeEnd();
     co->UpdateStatus(ThreadStatus::TERMINATING);
 
+    ProcessTimerEvents();
+
     os::memory::LockHolder l(coroSwitchLock_);
     if (co->HasManagedEntrypoint()) {
         // entrypointless coros should be destroyed manually
@@ -180,45 +182,55 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
     // NOTE(konstanting): issue debug notifications to runtime
 }
 
-bool ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
-                                      PandaVector<Value> &&arguments,
-                                      [[maybe_unused]] const CoroutineWorkerGroup::Id &groupId,
-                                      CoroutinePriority priority, [[maybe_unused]] bool abortFlag)
+LaunchResult ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
+                                              PandaVector<Value> &&arguments,
+                                              [[maybe_unused]] const CoroutineWorkerGroup::Id &groupId,
+                                              CoroutinePriority priority, [[maybe_unused]] bool abortFlag)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch started";
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
-    bool result = LaunchImpl(std::move(epInfo), entrypoint->GetFullName(), priority);
-    if (!result) {
-        // let's count all launch failures as "limit exceeded" for now.
-        // Later on we can think of throwing different errors for different reasons.
-        ThrowCoroutinesLimitExceedError(
-            "Unable to create a new coroutine: reached the limit for the number of existing coroutines.");
+    LaunchResult result = LaunchImpl(std::move(epInfo), entrypoint->GetFullName(), priority);
+    switch (result) {
+        case LaunchResult::COROUTINES_LIMIT_EXCEED:
+            ThrowCoroutinesLimitExceedError(
+                "Unable to create a new coroutine: reached the limit for the number of existing coroutines.");
+            break;
+        case LaunchResult::OK:
+            break;
+        default:
+            UNREACHABLE();
     }
 
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch finished";
     return result;
 }
 
-bool ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] CompletionEvent *completionEvent,
-                                                 [[maybe_unused]] Method *entrypoint,
-                                                 [[maybe_unused]] PandaVector<Value> &&arguments,
-                                                 [[maybe_unused]] const CoroutineWorkerGroup::Id &groupId,
-                                                 [[maybe_unused]] CoroutinePriority priority,
-                                                 [[maybe_unused]] bool abortFlag)
+LaunchResult ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] CompletionEvent *completionEvent,
+                                                         [[maybe_unused]] Method *entrypoint,
+                                                         [[maybe_unused]] PandaVector<Value> &&arguments,
+                                                         [[maybe_unused]] const CoroutineWorkerGroup::Id &groupId,
+                                                         [[maybe_unused]] CoroutinePriority priority,
+                                                         [[maybe_unused]] bool abortFlag)
 {
     LOG(FATAL, COROUTINES) << "ThreadedCoroutineManager::LaunchImmediately not supported";
-    return false;
+    return LaunchResult::NOT_SUPPORTED;
 }
 
-bool ThreadedCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                                            [[maybe_unused]] const CoroutineWorkerGroup::Id &groupId,
-                                            CoroutinePriority priority, [[maybe_unused]] bool abortFlag)
+LaunchResult ThreadedCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                                                    [[maybe_unused]] const CoroutineWorkerGroup::Id &groupId,
+                                                    CoroutinePriority priority, [[maybe_unused]] bool abortFlag)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchNative started";
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
-    bool result = LaunchImpl(epInfo, std::move(coroName), priority);
-    if (!result) {
-        ThrowOutOfMemoryError("Launch failed");
+    LaunchResult result = LaunchImpl(epInfo, std::move(coroName), priority);
+    switch (result) {
+        case LaunchResult::COROUTINES_LIMIT_EXCEED:
+            ThrowOutOfMemoryError("Launch failed");
+            break;
+        case LaunchResult::OK:
+            break;
+        default:
+            UNREACHABLE();
     }
 
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchNative finished";
@@ -245,6 +257,8 @@ void ThreadedCoroutineManager::Await(CoroutineEvent *awaitee)
     ASSERT(awaitee != nullptr);
     ASSERT_NATIVE_CODE();
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Await started";
+
+    ProcessTimerEvents();
 
     auto *waiter = Coroutine::GetCurrent();
     ASSERT(waiter != nullptr);
@@ -382,6 +396,8 @@ void ThreadedCoroutineManager::ScheduleImpl()
     ASSERT(currentCo != nullptr);
     auto *currentCtx = currentCo->GetContext<ThreadedCoroutineContext>();
 
+    ProcessTimerEvents();
+
     coroSwitchLock_.Lock();
     if (RunnableCoroutinesExist()) {
         currentCo->RequestSuspend(false);
@@ -404,8 +420,8 @@ CoroutineWorker *ThreadedCoroutineManager::ChooseWorkerForCoroutine([[maybe_unus
     return workers_[0];
 }
 
-bool ThreadedCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutinePriority priority,
-                                          bool startSuspended)
+LaunchResult ThreadedCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName,
+                                                  CoroutinePriority priority, bool startSuspended)
 {
     os::memory::LockHolder l(coroSwitchLock_);
 #ifndef NDEBUG
@@ -415,7 +431,7 @@ bool ThreadedCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchImpl: failed to create a coroutine!";
-        return false;
+        return LaunchResult::COROUTINES_LIMIT_EXCEED;
     }
     // assign a worker
     auto *w = ChooseWorkerForCoroutine(co);
@@ -436,7 +452,7 @@ bool ThreadedCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &
 #ifndef NDEBUG
     PrintRunnableQueue("LaunchImpl end");
 #endif
-    return true;
+    return LaunchResult::OK;
 }
 
 void ThreadedCoroutineManager::MainCoroutineCompleted()
@@ -474,5 +490,26 @@ void ThreadedCoroutineManager::MainCoroutineCompleted()
 }
 
 void ThreadedCoroutineManager::Finalize() {}
+
+void ThreadedCoroutineManager::ProcessTimerEvents()
+{
+    PandaVector<TimerEvent *> timerEvents;
+    {
+        os::memory::LockHolder lh(waitersLock_);
+        auto curTime = GetCurrentTime();
+        for (auto &[evt, _] : waiters_) {
+            if (evt->GetType() == CoroutineEvent::Type::TIMER) {
+                auto *timerEvent = static_cast<TimerEvent *>(evt);
+                timerEvent->SetCurrentTime(curTime);
+                timerEvents.push_back(timerEvent);
+            }
+        }
+    }
+    for (auto *evt : timerEvents) {
+        if (evt->IsExpired()) {
+            evt->Happen();
+        }
+    }
+}
 
 }  // namespace ark

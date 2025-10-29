@@ -36,21 +36,25 @@ public:
     NO_COPY_SEMANTIC(ThreadedCoroutineManager);
     NO_MOVE_SEMANTIC(ThreadedCoroutineManager);
 
-    explicit ThreadedCoroutineManager(CoroutineFactory factory) : CoroutineManager(factory) {}
+    explicit ThreadedCoroutineManager(const CoroutineManagerConfig &config, CoroutineFactory factory)
+        : CoroutineManager(config, factory)
+    {
+    }
     ~ThreadedCoroutineManager() override = default;
 
     /* CoroutineManager interfaces, see CoroutineManager class for the details */
-    void Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm) override;
+    void Initialize(Runtime *runtime, PandaVM *vm) override;
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
-    bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
-    bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                           const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                           bool abortFlag) override;
-    bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                      const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
+    LaunchResult Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                        const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) override;
+    LaunchResult LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                                   const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                   bool abortFlag) override;
+    LaunchResult LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                              const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                              bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -94,8 +98,8 @@ protected:
     CoroutineWorker *ChooseWorkerForCoroutine([[maybe_unused]] Coroutine *co);
 
 private:
-    bool LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutinePriority priority,
-                    bool startSuspended = true);
+    LaunchResult LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutinePriority priority,
+                            bool startSuspended = true);
     void ScheduleImpl();
     void UnblockWaitersImpl(CoroutineEvent *blocker) REQUIRES(coroSwitchLock_);
 
@@ -115,6 +119,8 @@ private:
     bool RegisterWaiter(Coroutine *waiter, CoroutineEvent *awaitee) RELEASE(awaitee);
     void ScheduleNextCoroutine();
     void MainCoroutineCompleted();
+
+    void ProcessTimerEvents();
 
     os::memory::Mutex coroSwitchLock_;
     os::memory::Mutex waitersLock_;

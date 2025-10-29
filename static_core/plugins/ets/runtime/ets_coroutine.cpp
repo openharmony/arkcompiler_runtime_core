@@ -264,7 +264,7 @@ void EtsCoroutine::OnHostWorkerChanged()
 void EtsCoroutine::OnContextSwitchedTo()
 {
     if ((GetPriority() == CoroutinePriority::MEDIUM_PRIORITY) && (GetType() == Coroutine::Type::MUTATOR)) {
-        ProcessUnhandledPromiseRejections();
+        ProcessUnhandledRejectedPromises(false);
     }
 }
 
@@ -277,6 +277,12 @@ void EtsCoroutine::OnContextSwitchedTo()
 
 void EtsCoroutine::ListUnhandledEventsOnProgramExit()
 {
+    ProcessUnhandledFailedJobs();
+    ProcessUnhandledRejectedPromises(true);
+}
+
+void EtsCoroutine::ProcessUnhandledFailedJobs()
+{
     if (Runtime::GetOptions().IsArkAot()) {
         return;
     }
@@ -286,7 +292,7 @@ void EtsCoroutine::ListUnhandledEventsOnProgramExit()
         Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
     if (listJobs) {
         ASSERT_NATIVE_CODE();
-        while (umanager->HasFailedJobObjects()) {
+        if (umanager->HasFailedJobObjects()) {
             {
                 [[maybe_unused]] ScopedManagedCodeThread sc(this);
                 umanager->ListFailedJobs(this);
@@ -299,7 +305,7 @@ void EtsCoroutine::ListUnhandledEventsOnProgramExit()
     }
 }
 
-void EtsCoroutine::ProcessUnhandledPromiseRejections()
+void EtsCoroutine::ProcessUnhandledRejectedPromises(bool listAllObjects)
 {
     if (Runtime::GetOptions().IsArkAot()) {
         return;
@@ -310,10 +316,11 @@ void EtsCoroutine::ProcessUnhandledPromiseRejections()
         Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
     if (listPromises) {
         ASSERT_NATIVE_CODE();
-        while (umanager->HasRejectedPromiseObjects(this)) {
+        if (umanager->HasRejectedPromiseObjects(this, listAllObjects)) {
+            LOG(DEBUG, COROUTINES) << "Start processing unhandled promises in " << GetName();
             {
                 [[maybe_unused]] ScopedManagedCodeThread sc(this);
-                umanager->ListRejectedPromises(this);
+                umanager->ListRejectedPromises(this, listAllObjects);
             }
             if (HasPendingException()) {
                 HandleUncaughtException();

@@ -259,7 +259,7 @@ function testMessageCallback() {
 function testRemoveMultipleMessages() {
     let eaw = new EAWorker();
     eaw.start();
-    let waiter1 = new Event();
+    let waiter1 = new AtomicFlag(false);
     let waiter2 = new Event();
     let executeCount = 0;
     let handler: concurrency.MessageHandler;
@@ -274,7 +274,7 @@ function testRemoveMultipleMessages() {
     }, eaw);
     
     let callback = () => {
-        waiter1.wait();
+        while (waiter1.get() != true) {}
         arktest.assertEQ(handler.removeMessages(MessageType.STRING, "test"), true);
         arktest.assertEQ(handler.removeMessages(MessageType.NUMBER, 100), true);
         arktest.assertEQ(handler.removeMessages(MessageType.BOOLEAN, true), true);
@@ -289,15 +289,16 @@ function testRemoveMultipleMessages() {
     handler.sendMessage(new concurrency.Message(MessageType.NUMBER, 100, handler));
     handler.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler));
 
-    waiter1.fire();
     let countCallback = () => {
         arktest.assertEQ(executeCount, 2);//only callback and countCallback are executed
         waiter2.fire();
     };
     
     handler.sendMessage(new concurrency.Message(countCallback, handler));
+    waiter1.set(true);
     waiter2.wait();
-    eaw.join();
+    eaw.quitSafely();
+    arktest.assertEQ(executeCount, 2);
 }
 
 function testHasMessage2() {

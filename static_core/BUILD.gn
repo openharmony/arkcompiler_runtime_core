@@ -183,6 +183,11 @@ config("ark_common_config") {
     defines += [ "PANDA_TARGET_OHOS" ]
   }
 
+  # panda build in full ohos tree
+  if (!ark_static_standalone_build && !ark_standalone_build) {
+    defines += [ "PANDA_BUILD_IN_OHOS_TREE" ]
+  }
+
   cflags_cc = []
 
   if (is_linux) {
@@ -378,9 +383,7 @@ config("ark_common_config") {
 
 config("ark_config") {
   defines = []
-  configs = [
-    ":ark_common_config",
-  ]
+  configs = [ ":ark_common_config" ]
   if (is_linux) {
     if (enable_irtoc) {
       defines += [ "PANDA_WITH_IRTOC" ]
@@ -390,9 +393,8 @@ config("ark_config") {
 
 config("ark_host_config") {
   defines = []
-  configs = [
-    ":ark_common_config",
-  ]
+  configs = [ ":ark_common_config" ]
+
   # For host tools, IRTOC requires both conditions to avoid link errors
   if (is_linux) {
     if (enable_irtoc && (ark_static_standalone_build || ark_standalone_build)) {

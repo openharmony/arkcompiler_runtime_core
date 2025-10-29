@@ -247,19 +247,16 @@ bool StackfulCoroutineManager::IsCoroutineSwitchDisabled()
     return GetCurrentWorker()->IsCoroutineSwitchDisabled();
 }
 
-void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
+void StackfulCoroutineManager::Initialize(Runtime *runtime, PandaVM *vm)
 {
     // enable stats collection if needed
-    if (config.enablePerfStats) {
+    if (GetConfig().enablePerfStats) {
         stats_.Enable();
     }
+    if (GetConfig().workersCount == 1U) {
+        SetSchedulingPolicy(CoroutineSchedulingPolicy::ANY_WORKER);
+    }
     ScopedCoroutineStats s(&stats_, CoroutineTimeStats::INIT);
-    // set feature flags
-    enableDrainQueueIface_ = config.enableDrainQueueIface;
-    enableMigration_ = config.enableMigration;
-    migrateAwakenedCoros_ = config.migrateAwakenedCoros;
-    externalTimerEnabled_ = config.enableExternalTimer;
-
     // set limits
     coroStackSizeBytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();
     if (coroStackSizeBytes_ != AlignUp(coroStackSizeBytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
@@ -270,7 +267,7 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     size_t coroStackAreaSizeBytes = Runtime::GetCurrent()->GetOptions().GetCoroutinesStackMemLimit();
     coroutineCountLimit_ = coroStackAreaSizeBytes / coroStackSizeBytes_;
 
-    CalculateWorkerLimits(config, exclusiveWorkersLimit_, commonWorkersCount_);
+    CalculateWorkerLimits(exclusiveWorkersLimit_, commonWorkersCount_);
     CalculateUserCoroutinesLimits(userCoroutineCountLimit_,
                                   Runtime::GetCurrent()->GetOptions().GetCoroutinesUserLimit());
 
@@ -283,7 +280,7 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
                                << " coroutine workers";
         programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(this);
     }
-    if (enableMigration_) {
+    if (GetConfig().enableMigration) {
         StartManagerThread();
     }
 }
@@ -399,6 +396,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
         CheckProgramCompletion();
         GetCurrentWorker()->RequestFinalization(co);
     } else if (co->HasNativeEntrypoint()) {
+        CheckProgramCompletion();  // Should be removed after #29944
         GetCurrentWorker()->RequestFinalization(co);
     } else {
         // entrypointless and NOT native: e.g. MAIN
@@ -457,26 +455,26 @@ size_t StackfulCoroutineManager::GetCoroutineCountLimit()
     return coroutineCountLimit_;
 }
 
-bool StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
-                                      PandaVector<Value> &&arguments, const CoroutineWorkerGroup::Id &groupId,
-                                      CoroutinePriority priority, bool abortFlag)
+LaunchResult StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
+                                              PandaVector<Value> &&arguments, const CoroutineWorkerGroup::Id &groupId,
+                                              CoroutinePriority priority, bool abortFlag)
 {
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
     return LaunchWithGroupId(std::move(epInfo), entrypoint->GetFullName(), groupId, priority, false, abortFlag);
 }
 
-bool StackfulCoroutineManager::LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint,
-                                                 PandaVector<Value> &&arguments,
-                                                 const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                                                 bool abortFlag)
+LaunchResult StackfulCoroutineManager::LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint,
+                                                         PandaVector<Value> &&arguments,
+                                                         const CoroutineWorkerGroup::Id &groupId,
+                                                         CoroutinePriority priority, bool abortFlag)
 {
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
     return LaunchWithGroupId(std::move(epInfo), entrypoint->GetFullName(), groupId, priority, true, abortFlag);
 }
 
-bool StackfulCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                                            const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                                            bool abortFlag)
+LaunchResult StackfulCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                                                    const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                                    bool abortFlag)
 {
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
     return LaunchWithGroupId(epInfo, std::move(coroName), groupId, priority, false, abortFlag);
@@ -492,12 +490,6 @@ void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
     [[maybe_unused]] auto *waiter = Coroutine::GetCurrent();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await started by " + waiter->GetName();
 
-    if (awaitee->Happened()) {
-        awaitee->Unlock();
-        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await finished (no await happened)";
-        return;
-    }
-
     GetCurrentWorker()->WaitForEvent(awaitee);
     // NB: at this point the awaitee is likely already deleted
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await finished by " + waiter->GetName();
@@ -509,7 +501,6 @@ void StackfulCoroutineManager::UnblockWaiters(CoroutineEvent *blocker)
     // hence using the "weak" stats collector
     ScopedCoroutineStats s(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL, true);
 
-    os::memory::LockHolder lkWorkers(workersLock_);
     ASSERT(blocker != nullptr);
 #ifndef NDEBUG
     {
@@ -518,6 +509,7 @@ void StackfulCoroutineManager::UnblockWaiters(CoroutineEvent *blocker)
     }
 #endif
 
+    os::memory::LockHolder lkWorkers(workersLock_);
     for (auto *w : workers_) {
         w->UnblockWaiters(blocker);
     }
@@ -609,7 +601,9 @@ AffinityMask StackfulCoroutineManager::CalcAffinityMask(const CoroutineWorkerGro
     AffinityMask mask = AffinityMask::FromGroupId(groupId);
     switch (GetSchedulingPolicy()) {
         case CoroutineSchedulingPolicy::NON_MAIN_WORKER: {
-            mask.SetWorkerNotAllowed(MAIN_WORKER_ID);
+            if (!CoroutineWorkerGroup::HasOnlyWorker(groupId, MAIN_WORKER_ID)) {
+                mask.SetWorkerNotAllowed(MAIN_WORKER_ID);
+            }
             break;
         }
         default:
@@ -643,9 +637,9 @@ Coroutine *StackfulCoroutineManager::GetCoroutineInstanceForLaunch(EntrypointInf
     return co;
 }
 
-bool StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName,
-                                          const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                                          bool abortFlag)
+LaunchResult StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName,
+                                                  const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                                  bool abortFlag)
 {
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl begin");
@@ -655,23 +649,28 @@ bool StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &
     co = GetCoroutineInstanceForLaunch(std::move(epInfo), std::move(coroName), priority, affinityMask, abortFlag);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImpl: failed to create a coroutine!";
-        return false;
+        return LaunchResult::COROUTINES_LIMIT_EXCEED;
     }
     {
         os::memory::LockHolder lkWorkers(workersLock_);
         auto *w = ChooseWorkerForCoroutine(co);
-        ASSERT(w != nullptr);
+        if UNLIKELY (w == nullptr) {
+            // We use this workaround for correct coroutine destruction, should be fixed by #29944
+            co->SetEntrypointData(Coroutine::NativeEntrypointInfo {[]([[maybe_unused]] void *data) {}, co});
+            GetCurrentWorker()->AddRunnableCoroutine(co);
+            return LaunchResult::NO_SUITABLE_WORKER;
+        }
         w->AddRunnableCoroutine(co);
     }
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl end");
 #endif
-    return true;
+    return LaunchResult::OK;
 }
 
-bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName,
-                                                     const CoroutineWorkerGroup::Id &groupId,
-                                                     CoroutinePriority priority, bool abortFlag)
+LaunchResult StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName,
+                                                             const CoroutineWorkerGroup::Id &groupId,
+                                                             CoroutinePriority priority, bool abortFlag)
 {
     Coroutine *co = nullptr;
     ASSERT(CoroutineWorkerGroup::HasOnlyWorker(groupId, Coroutine::GetCurrent()->GetWorker()->GetId()));
@@ -680,7 +679,7 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, Pa
     co = GetCoroutineInstanceForLaunch(std::move(epInfo), std::move(coroName), priority, affinityMask, abortFlag);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImmediatelyImpl: failed to create a coroutine!";
-        return false;
+        return LaunchResult::COROUTINES_LIMIT_EXCEED;
     }
     StackfulCoroutineWorker *w = nullptr;
     {
@@ -695,12 +694,12 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, Pa
     // resume the interval once we schedule the original coro again
     GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::LAUNCH);
 
-    return true;
+    return LaunchResult::OK;
 }
 
-bool StackfulCoroutineManager::LaunchWithGroupId(Coroutine::EntrypointInfo &&epInfo, PandaString &&coroName,
-                                                 CoroutineWorkerGroup::Id groupId, CoroutinePriority priority,
-                                                 bool launchImmediately, bool abortFlag)
+LaunchResult StackfulCoroutineManager::LaunchWithGroupId(Coroutine::EntrypointInfo &&epInfo, PandaString &&coroName,
+                                                         CoroutineWorkerGroup::Id groupId, CoroutinePriority priority,
+                                                         bool launchImmediately, bool abortFlag)
 {
     // profiling: scheduler and launch time
     ScopedCoroutineStats sSch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
@@ -714,17 +713,24 @@ bool StackfulCoroutineManager::LaunchWithGroupId(Coroutine::EntrypointInfo &&epI
     if (groupId == CoroutineWorkerGroup::AnyId() && w->InExclusiveMode()) {
         groupId = ark::CoroutineWorkerGroup::GenerateExactWorkerId(w->GetId());
     }
-    bool result = false;
+    LaunchResult result = LaunchResult::OK;
     if (launchImmediately) {
         result = LaunchImmediatelyImpl(std::move(epInfo), std::move(coroName), groupId, priority, abortFlag);
     } else {
         result = LaunchImpl(std::move(epInfo), std::move(coroName), groupId, priority, abortFlag);
     }
-    if (!result) {
-        // let's count all launch failures as "limit exceeded" for now.
-        // Later on we can think of throwing different errors for different reasons.
-        ThrowCoroutinesLimitExceedError(
-            "Unable to create a new coroutine: reached the limit for the number of existing coroutines.");
+    switch (result) {
+        case LaunchResult::COROUTINES_LIMIT_EXCEED:
+            ThrowCoroutinesLimitExceedError(
+                "Unable to create a new coroutine: reached the limit for the number of existing coroutines.");
+            break;
+        case LaunchResult::NO_SUITABLE_WORKER:
+            ThrowRuntimeException("Unable to launch coroutine: no suitable worker was found");
+            break;
+        case LaunchResult::OK:
+            break;
+        default:
+            UNREACHABLE();
     }
 
     Tracer::Count(Tracer::LAUNCH, 1U);
@@ -764,7 +770,9 @@ void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
             // NOTE(konstanting, #IAD5MH): test for the spurious wakeup
             programCompletionLock_.Lock();
         }
+        programCompletionLock_.Unlock();
         ListUnhandledEventsOnProgramExit();
+        programCompletionLock_.Lock();
     } while (GetActiveWorkersCount() + 1 < coroutineCount_);  // 1 is for MAIN
     // coroutineCount_ < 1 + GetActiveWorkersCount() in case of concurrent EWorker destroy
     // in this case coroutineCount_ >= 1 + GetActiveWorkersCount() - ExclusiveWorkersCount()
@@ -778,8 +786,9 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
     // block till only schedule loop coroutines are present
     LOG(DEBUG, COROUTINES)
         << "StackfulCoroutineManager::MainCoroutineCompleted(): waiting for other coroutines to complete";
+    GetCurrentWorker()->DestroyCallbackPoster();
     WaitForNonMainCoroutinesCompletion();
-    if (enableMigration_) {
+    if (GetConfig().enableMigration) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): stop manager thread";
         StopManagerThread();
     }
@@ -919,7 +928,7 @@ void StackfulCoroutineManager::OnCoroBecameNonActive([[maybe_unused]] Coroutine 
 
 void StackfulCoroutineManager::OnNativeCallExit(Coroutine *co)
 {
-    if (IsDrainQueueInterfaceEnabled()) {
+    if (GetConfig().enableDrainQueueIface) {
         // A temporary hack for draining the coroutine queue on the current worker.
         // Will stay there until we have the proper design for the execution model and
         // the rules for interaction with the app framework.
@@ -981,7 +990,6 @@ Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *run
     }
     ASSERT(eWorker != nullptr);
     eWorker->SetExclusiveMode(true);
-    eWorker->DisableForCrossWorkersLaunch();
     auto *eCoro = CreateEntrypointlessCoroutine(runtime, vm, true, "[ea_coro] " + eWorker->GetName(),
                                                 Coroutine::Type::MUTATOR, CoroutinePriority::MEDIUM_PRIORITY);
     ASSERT(eCoro != nullptr);
@@ -1001,6 +1009,12 @@ bool StackfulCoroutineManager::DestroyExclusiveWorker()
         return false;
     }
 
+    {
+        os::memory::LockHolder lock(workersLock_);
+        eWorker->DisableForCrossWorkersLaunch();
+    }
+
+    eWorker->DestroyCallbackPoster();
     eWorker->CompleteAllAffinedCoroutines();
 
     eWorker->SetActive(false);
@@ -1028,7 +1042,8 @@ bool StackfulCoroutineManager::IsExclusiveWorkersLimitReached() const
 bool StackfulCoroutineManager::IsUserCoroutineLimitReached() const
 {
     bool limitIsReached = userCoroutineCount_ >= userCoroutineCountLimit_;
-    LOG_IF(limitIsReached, DEBUG, COROUTINES) << "The programm reached the limit of user coroutines";
+    LOG_IF(limitIsReached, DEBUG, COROUTINES)
+        << "The programm reached the limit of user coroutines " << userCoroutineCountLimit_;
     return limitIsReached;
 }
 
@@ -1113,14 +1128,7 @@ bool StackfulCoroutineManager::MigrateCoroutinesOutward(StackfulCoroutineWorker 
 
 StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerImpl(WorkerSelectionPolicy policy, AffinityMask mask)
 {
-    auto preferFirstOverSecond = [mask, policy](const StackfulCoroutineWorker *first,
-                                                const StackfulCoroutineWorker *second) {
-        if (!mask.IsWorkerAllowed(first->GetId())) {
-            return false;
-        }
-        if (!mask.IsWorkerAllowed(second->GetId())) {
-            return true;
-        }
+    auto preferFirstOverSecond = [policy](const StackfulCoroutineWorker *first, const StackfulCoroutineWorker *second) {
         // choosing the least loaded worker from the allowed worker set
         if (policy == WorkerSelectionPolicy::LEAST_LOADED) {
             return first->GetLoadFactor() < second->GetLoadFactor();
@@ -1140,11 +1148,14 @@ StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerImpl(WorkerSelect
     }
 #endif
     std::vector<StackfulCoroutineWorker *> suitableWorkers;
-    // skip exclusive and finalizing workers
-    std::copy_if(workers_.begin(), workers_.end(), std::back_inserter(suitableWorkers),
-                 [mask](auto *w) { return !w->IsDisabledForCrossWorkersLaunch() || mask.IsWorkerAllowed(w->GetId()); });
-    ASSERT(!suitableWorkers.empty());
-
+    std::copy_if(workers_.begin(), workers_.end(), std::back_inserter(suitableWorkers), [this, mask](auto *w) {
+        auto isMasked = mask.IsWorkerAllowed(w->GetId());
+        auto isSameWorker = !GetConfig().enableMigration && (GetCurrentWorker() == w);
+        return isMasked && (isSameWorker || !w->IsDisabledForCrossWorkersLaunch());
+    });
+    if (UNLIKELY(suitableWorkers.empty())) {
+        return nullptr;
+    }
     auto wIt = std::min_element(suitableWorkers.begin(), suitableWorkers.end(), preferFirstOverSecond);
     LOG(DEBUG, COROUTINES) << "Chose worker: " << (*wIt)->GetName();
 
@@ -1157,7 +1168,7 @@ void StackfulCoroutineManager::TriggerMigration()
     if (worker->IsMainWorker() || worker->InExclusiveMode()) {
         return;
     }
-    if (!IsMigrationEnabled()) {
+    if (!GetConfig().enableMigration) {
         LOG(DEBUG, COROUTINES) << "Migration is not supported.";
         return;
     }
@@ -1240,7 +1251,7 @@ CoroutineWorkerGroup::Id StackfulCoroutineManager::GenerateWorkerGroupId(Corouti
 void StackfulCoroutineManager::PreZygoteFork()
 {
     WaitForNonMainCoroutinesCompletion();
-    if (enableMigration_) {
+    if (GetConfig().enableMigration) {
         StopManagerThread();
     }
 
@@ -1252,7 +1263,7 @@ void StackfulCoroutineManager::PostZygoteFork()
     os::memory::LockHolder lh(workersLock_);
     Runtime *runtime = Runtime::GetCurrent();
     CreateWorkers(commonWorkersCount_ - 1, runtime, runtime->GetPandaVM());
-    if (enableMigration_) {
+    if (GetConfig().enableMigration) {
         StartManagerThread();
     }
 }
@@ -1280,15 +1291,14 @@ void StackfulCoroutineManager::CalculateUserCoroutinesLimits(size_t &userCorouti
     userCoroutineCountLimit = limit;
 }
 
-void StackfulCoroutineManager::CalculateWorkerLimits(const CoroutineManagerConfig &config,
-                                                     size_t &exclusiveWorkersLimit, size_t &commonWorkersLimit)
+void StackfulCoroutineManager::CalculateWorkerLimits(size_t &exclusiveWorkersLimit, size_t &commonWorkersLimit)
 {
     // 1 is for MAIN
     size_t eWorkersLimit =
-        std::min(AffinityMask::MAX_WORKERS_COUNT - 1, static_cast<size_t>(config.exclusiveWorkersLimit));
+        std::min(AffinityMask::MAX_WORKERS_COUNT - 1, static_cast<size_t>(GetConfig().exclusiveWorkersLimit));
 
     // add preallocated exclusive workers count
-    eWorkersLimit += config.preallocatedExclusiveWorkersCount;
+    eWorkersLimit += GetConfig().preallocatedExclusiveWorkersCount;
 
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
@@ -1297,10 +1307,10 @@ void StackfulCoroutineManager::CalculateWorkerLimits(const CoroutineManagerConfi
     const size_t maxCommonWorkers =
         std::max(AffinityMask::MAX_WORKERS_COUNT - eWorkersLimit, static_cast<size_t>(2ULL));
 
-    commonWorkersLimit = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
+    commonWorkersLimit = (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
                              ? std::min(numberOfAvailableCores, maxCommonWorkers)
-                             : std::min(static_cast<size_t>(config.workersCount), maxCommonWorkers);
-    if (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
+                             : std::min(static_cast<size_t>(GetConfig().workersCount), maxCommonWorkers);
+    if (GetConfig().workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): AUTO mode selected, will set number of coroutine "
                                   "common workers to number of CPUs / 4, but not less than 2 and no more than "
                                << maxCommonWorkers << " = " << commonWorkersLimit;

@@ -131,27 +131,7 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         u_setDataDirectory(icuPath.c_str());
     }
 
-    CoroutineManagerConfig cfg {
-        // enable drain queue interface
-        options.IsCoroutineEnableFeaturesAniDrainQueue(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // enable migration
-        options.IsCoroutineEnableFeaturesMigration(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // enable migrate awakened coroutines
-        options.IsCoroutineEnableFeaturesMigrateAwait(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // workers_count
-        options.GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // exclusive workers limit
-        options.GetCoroutineEWorkersLimit(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // enable perf stats
-        options.IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
-        // enable taskpool eaworker mode
-        options.GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) ==
-                ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE
-            ? ets::intrinsics::taskpool::TASKPOOL_EAWORKER_INIT_NUM
-            : 0,
-        // enable external timer implementation
-        options.IsCoroutineEnableFeaturesEnableExternalTimer(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))};
-    vm->coroutineManager_->Initialize(cfg, runtime, vm);
+    vm->coroutineManager_->Initialize(runtime, vm);
 
     return vm;
 }
@@ -206,10 +186,30 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
 
     auto langStr = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
     const auto &coroType = options.GetCoroutineImpl(langStr);
+    CoroutineManagerConfig cfg {
+        // enable drain queue interface
+        options.IsCoroutineEnableFeaturesAniDrainQueue(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable migration
+        options.IsCoroutineEnableFeaturesMigration(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable migrate awakened coroutines
+        options.IsCoroutineEnableFeaturesMigrateAwait(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // workers_count
+        options.GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // exclusive workers limit
+        options.GetCoroutineEWorkersLimit(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable perf stats
+        options.IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable external timer implementation
+        options.IsCoroutineEnableFeaturesEnableExternalTimer(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // number of reserved workers for taskpool
+        options.GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) ==
+                ets::intrinsics::taskpool::TASKPOOL_EAWORKER_MODE
+            ? ets::intrinsics::taskpool::TASKPOOL_EAWORKER_INIT_NUM
+            : 0};
     if (coroType == "stackful") {
-        coroutineManager_ = allocator->New<StackfulCoroutineManager>(EtsCoroutine::Create<Coroutine>);
+        coroutineManager_ = allocator->New<StackfulCoroutineManager>(cfg, EtsCoroutine::Create<Coroutine>);
     } else {
-        coroutineManager_ = allocator->New<ThreadedCoroutineManager>(EtsCoroutine::Create<Coroutine>);
+        coroutineManager_ = allocator->New<ThreadedCoroutineManager>(cfg, EtsCoroutine::Create<Coroutine>);
     }
     rendezvous_ = allocator->New<Rendezvous>(this);
     objStateTable_ = MakePandaUnique<EtsObjectStateTable>(allocator);

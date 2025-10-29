@@ -22,4 +22,6 @@ static {
     ObjectType = Type.of(new Object()) as ClassType;
     console = Console.getInstance();
     coroutine = new Coroutine();
+
+    mainEAWorker = new MainEAWorker();
 }
