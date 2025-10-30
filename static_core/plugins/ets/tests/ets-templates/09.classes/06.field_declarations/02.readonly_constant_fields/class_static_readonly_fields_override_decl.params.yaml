@@ -53,7 +53,7 @@ cases:
           static readonly field: [type] = [base_value]
         }
         class A extends Base {
-          static override readonly field: [type] = [check_value]
+          static readonly field: [type] = [check_value]
         }
     sub_cases_logic:
       - |-
