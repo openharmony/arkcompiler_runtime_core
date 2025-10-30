@@ -134,7 +134,10 @@ function testGetLowerKeyEmptyStringOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
     try {
         let result = treeMap.getLowerKey("");
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -144,7 +147,10 @@ function testGetLowerKeyNonExistingKeyOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
     try {
         let result = treeMap.getLowerKey("key");
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -155,7 +161,10 @@ function testGetLowerKeyWithOnlyKeyInMap() {
     treeMap.set("squirrel", 123);
     try {
         let result = treeMap.getLowerKey("squirrel");
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -187,7 +196,10 @@ function testGetHigherKeyEmptyStringOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
     try {
         let result = treeMap.getHigherKey("");
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -197,7 +209,10 @@ function testGetHigherKeyNonExistingKeyOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
     try {
         let result = treeMap.getHigherKey('key');
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -208,7 +223,10 @@ function testGetHigherKeyWithOnlyKeyInMap() {
     treeMap.set("AAA", 123);
     try {
         let result = treeMap.getHigherKey('AAA');
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

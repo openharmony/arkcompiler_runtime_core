@@ -18,7 +18,7 @@ function checkESvalueLoadRTE(): boolean {
     try {
         let illegalModule = ESValue.load('./esvalue_load_rte1');
         res = true;
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === "I dont know what error";
     }
     return res;
