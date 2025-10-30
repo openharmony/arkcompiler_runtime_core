@@ -68,10 +68,11 @@ std::string GenUuid4(ani_env *env)
 {
     std::array<char, UUID_LEN> uuidStr = {0};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    int n = snprintf_s(
-        uuidStr.begin(), UUID_LEN, UUID_LEN - 1, "%08x-%04x-%04x-%04x-%012x", GenRandUint<uint32_t>(),
-        GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
-        (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
+    int n = snprintf_s(uuidStr.begin(), UUID_LEN, UUID_LEN - 1, "%08x-%04x-%04x-%04x-%08x%04x", GenRandUint<uint32_t>(),
+                       GenRandUint<uint16_t>(),
+                       (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
+                       (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS,
+                       GenRandUint<uint32_t>(), GenRandUint<uint16_t>());
     if ((n < 0) || (n > static_cast<int>(UUID_LEN))) {
         stdlib::ThrowNewError(env, "std.core.RuntimeError", "GenerateRandomUUID failed", "C{std.core.String}:");
         return std::string();
@@ -86,10 +87,11 @@ std::array<uint8_t, UUID_BINARY_LEN> GenUuid4Binary(ani_env *env)
 {
     std::array<char, UUID_STR_LEN_NO_DASH> uuidStr = {0};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    int charsWritten = snprintf_s(
-        uuidStr.data(), uuidStr.size(), UUID_STR_LEN_NO_DASH - 1, "%08x%04x%04x%04x%012x", GenRandUint<uint32_t>(),
-        GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
-        (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
+    int charsWritten = snprintf_s(uuidStr.data(), uuidStr.size(), UUID_STR_LEN_NO_DASH - 1, "%08x%04x%04x%04x%08x%04x",
+                                  GenRandUint<uint32_t>(), GenRandUint<uint16_t>(),
+                                  (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
+                                  (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS,
+                                  GenRandUint<uint32_t>(), GenRandUint<uint16_t>());
     if ((charsWritten < 0) || (charsWritten > UUID_STR_LEN_NO_DASH)) {
         stdlib::ThrowNewError(env, "std.core.RuntimeError", "generateRandomBinaryUUID failed",
                               "C{escompat.Uint8Array}:");
@@ -132,12 +134,9 @@ ani_object NewUint8Array(ani_env *env, const char *signature, Args... args)
 
 extern "C" {
 ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_unused]] ani_class klass,
-                                                         ani_boolean entropyCache)
+                                                         [[maybe_unused]] ani_boolean entropyCache)
 {
-    static std::string lastGeneratedUUID;
-    if (entropyCache != ANI_TRUE || lastGeneratedUUID.empty()) {
-        lastGeneratedUUID = GenUuid4(env);
-    }
+    std::string lastGeneratedUUID = GenUuid4(env);
     return stdlib::CreateUtf8String(env, lastGeneratedUUID.data(), lastGeneratedUUID.size());
 }
 
