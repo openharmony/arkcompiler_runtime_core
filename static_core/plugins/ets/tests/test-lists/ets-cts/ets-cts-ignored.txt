@@ -1855,9 +1855,6 @@
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_8.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_9.ets
 
-#28486
-17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con1_8.ets
-
 #28490
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_0.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con2_10.ets
@@ -1935,6 +1932,22 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_7.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_8.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_9.ets
+
+#29160 byte or short types in enums not supported
+17.experimental_features/03.resizable_array_creation_expressions/expr_10.ets
+17.experimental_features/03.resizable_array_creation_expressions/expr_11.ets
+
+#31150 cannot create array of enums
+17.experimental_features/03.resizable_array_creation_expressions/expr_8.ets
+
+#31152 int enum cannot be used in dimension expression
+17.experimental_features/03.resizable_array_creation_expressions/expr_9.ets
+
+#31154 no CTE on float or double type dimension
+17.experimental_features/03.resizable_array_creation_expressions/expr_n_14.ets
+17.experimental_features/03.resizable_array_creation_expressions/expr_n_15.ets
+17.experimental_features/03.resizable_array_creation_expressions/expr_n_16.ets
+17.experimental_features/03.resizable_array_creation_expressions/expr_n_17.ets
 
 #29161
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_cte_20.ets

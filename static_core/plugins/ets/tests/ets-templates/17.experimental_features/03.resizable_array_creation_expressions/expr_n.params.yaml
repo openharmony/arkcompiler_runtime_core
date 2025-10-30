@@ -14,56 +14,99 @@
 ---
 cases:
     - use: |-
-          let v: number[] = new number[false]  // CTE: dimension is not convertible to integer type
+          let v: number[] = new number[false]  // CTE: dimension is not assignable to int type
 
     - use: |-
-          let v: number[] = new number[true]  // CTE: dimension is not convertible to integer type
+          let v: number[] = new number[true]  // CTE: dimension is not assignable to int type
 
     - use: |-
-          let v: number[] = new number[new Object()]   // CTE: dimension is not convertible to integer type
+          let v: number[] = new number[new Object()]   // CTE: dimension is not assignable to int type
 
     - use: |-
-          let v: number[] = new number[new Error()]  // CTE: dimension is not convertible to integer type
+          let v: number[] = new number[new Error()]  // CTE: dimension is not assignable to int type
 
     - use: |-
-          let v: number[][] = new number[null][undefined]  // CTE: dimension is not convertible to integer type
+          let v: number[][] = new number[null][undefined]  // CTE: dimension is not assignable to int type
 
     - use: |-
-          let v: number[][] = new number[new Boolean(false)][1]  // CTE: dimension is not convertible to integer type
+          let v: number[][] = new number[new Boolean(false)][1]  // CTE: dimension is not assignable to int type
 
     - use: |-
-          let v: number[][] = new number["abc"]["def"]   // CTE: dimension is not convertible to integer type
+          let v: number[][] = new number["abc"]["def"]   // CTE: dimension is not assignable to int type
 
-    - defs: |-
-          enum Color { Red, Green, Blue }
+    - decl: |-
+          let size: int|short = 42 as short
       use: |-
-          let v: string[][] = new string[Color.Green][Color.Blue]  // CTE: not a numeric conversion
+          let v = new Object[size]  // CTE: dimension is not assignable to int type
 
-    - use: |-
-          let size: bigint = 1n  // CTE: not convertible to int
-          let v: number[] = new number[size]
+    - decl: |-
+          let size: BigInt = new BigInt(1n)
+      use: |-
+          let v: number[] = new number[size]   // CTE: dimension is not assignable to int type
 
-    - use: |-
-          let size: BigInt = new BigInt(1n)  // CTE: not convertible to int
-          let v: number[] = new number[size]
+    - decl: |-
+          let size: bigint = 1n
+      use: |-
+          let v: number[] = new number[size]  // CTE: dimension is not assignable to int type
 
     - use: |-
           let v: number[][][] = new number[2][2][-1]  // CTE: constant expression, negative value
 
-    - use: |-
+    - decl: |-
           const size: int = -10
+      use: |-
           let v: number[][] = new number[size][-size]  // CTE: constant expression, negative value
 
-    - use: |-
-          let size: Long = new Long(1 as long)  // unboxing and narrowing dimension conversion
-          let v: Byte[] = new Byte[size]
+    - decl: |-
+          let size: Long = new Long(1 as long)
+      use: |-
+          let v: Byte[] = new Byte[size]  // CTE: dimension is not assignable to int type
 
-          v[0] = new Byte(42 as byte)
-            arktest.assertTrue( v[0] instanceof Byte && v[0] == 42 )
+    - decl: |-
+          let size: long = 1
+      use: |-
+          let v: byte[] = new byte[size]  // CTE: dimension is not assignable to int type
 
-    - use: |-
-          let size: long = 1 as long  // narrowing dimension conversion
-          let v: Byte[] = new Byte[size]
+    - decl: |-
+          let size: Number = new Number(1.0)
+      use: |-
+          let v: Byte[] = new Byte[size]  // CTE: dimension is not assignable to int type
 
-          v[0] = new Byte(42 as byte)
-            arktest.assertTrue( v[0] instanceof Byte && v[0] == 42 )
+    - decl: |-
+          let size: number = 1.0
+      use: |-
+          let v: string[] = new string[size]  // CTE: dimension is not assignable to int type
+
+    - decl: |-
+          let size: Float = new Float(1.0f)
+      use: |-
+          let v: Byte[] = new Byte[size]  // CTE: dimension is not assignable to int type
+
+    - decl: |-
+          let size: float = 1.0f
+      use: |-
+          let v: Object[] = new Object[size]  // CTE: dimension is not assignable to int type
+
+    - decl: |-
+          // enum constants of string type
+          enum Color { Red = 'r', Green = 'g', Blue = 'b' }
+      use: |-
+          let v: string[][] = new string[Color.Green][Color.Blue]  // CTE: dimension is not assignable to int type
+
+    - decl: |-
+          // enum constants of long type
+          enum Color { Red = 9223372036854775807, Green = 9223372036854775806, Blue = 9223372036854775805 }
+      use: |-
+          let v: string[][] = new string[Color.Green][Color.Blue]  // CTE: dimension is not assignable to int type
+
+    - decl: |-
+          // enum constants of float type
+          enum Color: float { Red = 1.0f, Green = 2.0f, Blue = 3.0f }
+      use: |-
+          let v: string[][] = new string[Color.Green][Color.Blue]  // CTE: dimension is not assignable to int type
+
+    - decl: |-
+          // enum constants of double type
+          enum Color: double { Red = 1.0, Green = 2.0, Blue = 3.0 }
+      use: |-
+          let v: string[][] = new string[Color.Green][Color.Blue]  // CTE: dimension is not assignable to int type

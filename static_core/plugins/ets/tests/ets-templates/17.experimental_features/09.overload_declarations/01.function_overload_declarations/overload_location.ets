@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: All overloaded functions must be in the same module or namespace scope. Otherwise, a compile-time error occurs.
-tags: [compile-only, {{c.tag}}]
+tags: [{{c.tags}}]
 ---*/
 
 import {foo1} from "./module.ets"

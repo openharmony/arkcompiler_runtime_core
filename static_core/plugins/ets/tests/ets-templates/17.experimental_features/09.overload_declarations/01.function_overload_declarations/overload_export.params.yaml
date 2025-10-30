@@ -13,15 +13,15 @@
 
 ---
 cases:
-  - { export: '',       list: 'foo1',       tag: ''         }
-  - { export: '',       list: 'foo1, foo2', tag: ''         }
-  - { export: '',       list: 'foo3',       tag: ''         }
-  - { export: '',       list: 'foo1, foo4', tag: ''         }
-  - { export: '',       list: 'foo3, foo2', tag: ''         }
-  - { export: '',       list: 'foo3, foo4', tag: ''         }
-  - { export: 'export', list: 'foo1',       tag: ''         }
-  - { export: 'export', list: 'foo1, foo2', tag: ''         }
-  - { export: 'export', list: 'foo3',       tag: 'negative' }
-  - { export: 'export', list: 'foo1, foo4', tag: 'negative' }
-  - { export: 'export', list: 'foo3, foo2', tag: 'negative' }
-  - { export: 'export', list: 'foo3, foo4', tag: 'negative' }
+  - { export: '',       list: 'foo1',       tags: ''         }
+  - { export: '',       list: 'foo1, foo2', tags: ''         }
+  - { export: '',       list: 'foo3',       tags: ''         }
+  - { export: '',       list: 'foo1, foo4', tags: ''         }
+  - { export: '',       list: 'foo3, foo2', tags: ''         }
+  - { export: '',       list: 'foo3, foo4', tags: ''         }
+  - { export: 'export', list: 'foo1',       tags: ''         }
+  - { export: 'export', list: 'foo1, foo2', tags: ''         }
+  - { export: 'export', list: 'foo3',       tags: 'compile-only, negative' }
+  - { export: 'export', list: 'foo1, foo4', tags: 'compile-only, negative' }
+  - { export: 'export', list: 'foo3, foo2', tags: 'compile-only, negative' }
+  - { export: 'export', list: 'foo3, foo4', tags: 'compile-only, negative' }

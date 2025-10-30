@@ -13,14 +13,14 @@
 
 ---
 cases:
-  - { nlist: 'fooN',           list: 'foo2',           tag: ''         }
-  - { nlist: 'fooN, Math.abs', list: 'foo2',           tag: 'negative' }
-  - { nlist: 'M.fooM, fooN',   list: 'foo2',           tag: 'negative' }
-  - { nlist: 'foo1, fooN',     list: 'foo2',           tag: 'negative' }
-  - { nlist: 'foo2, fooN',     list: 'foo2',           tag: 'negative' }
-  - { nlist: 'fooN',           list: 'foo1, foo2',     tag: 'negative' }
-  - { nlist: 'fooN',           list: 'foo2, N.fooN',   tag: 'negative' }
-  - { nlist: 'fooN',           list: 'foo1',           tag: 'negative' }
-  - { nlist: 'fooN',           list: 'N.fooN',         tag: 'negative' }
-  - { nlist: 'fooN',           list: 'Math.abs',       tag: 'negative' }
-  - { nlist: 'fooN',           list: 'Math.abs, foo2', tag: 'negative' }
+  - { nlist: 'fooN',           list: 'foo2',           tags: ''         }
+  - { nlist: 'fooN, Math.abs', list: 'foo2',           tags: 'compile-only, negative' }
+  - { nlist: 'M.fooM, fooN',   list: 'foo2',           tags: 'compile-only, negative' }
+  - { nlist: 'foo1, fooN',     list: 'foo2',           tags: 'compile-only, negative' }
+  - { nlist: 'foo2, fooN',     list: 'foo2',           tags: 'compile-only, negative' }
+  - { nlist: 'fooN',           list: 'foo1, foo2',     tags: 'compile-only, negative' }
+  - { nlist: 'fooN',           list: 'foo2, N.fooN',   tags: 'compile-only, negative' }
+  - { nlist: 'fooN',           list: 'foo1',           tags: 'compile-only, negative' }
+  - { nlist: 'fooN',           list: 'N.fooN',         tags: 'compile-only, negative' }
+  - { nlist: 'fooN',           list: 'Math.abs',       tags: 'compile-only, negative' }
+  - { nlist: 'fooN',           list: 'Math.abs, foo2', tags: 'compile-only, negative' }

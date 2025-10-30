@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: A compile-time error occurs, if an overload alias is exported but an overloaded function is not.
-tags: [compile-only, {{c.tag}}]
+tags: [{{c.tags}}]
 ---*/
 
 export function foo1(p: string): int {
