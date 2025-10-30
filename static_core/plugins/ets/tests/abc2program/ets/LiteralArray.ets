@@ -14,10 +14,10 @@
  */
 
 export @interface ClassAnno {
-    names: String[] = ["name01", "name02"]
+    names: String[] = ['name01', 'name02']
 }
 
-@ClassAnno({names: ["test"]})
+@ClassAnno({names: ['test']})
 export class Cls {
-    name: string = ""
+    name: string = ''
 }

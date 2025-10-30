@@ -535,6 +535,11 @@ if(PANDA_TEST_COMPILE_STDLIB)
     add_dependencies(ets_tests ets-compile-stdlib)
 endif()
 
+
+if(NOT CMAKE_CROSSCOMPILING)
+    add_subdirectory(abc2program)
+endif()
+
 add_subdirectory(common)
 add_subdirectory(equals)
 add_subdirectory(lookup_by_name)
