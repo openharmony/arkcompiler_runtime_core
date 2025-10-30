@@ -15,6 +15,7 @@
 #ifndef PANDA_RUNTIME_TIMER_TABLE_H_
 #define PANDA_RUNTIME_TIMER_TABLE_H_
 
+#ifdef SAFEPOINT_TIME_CHECKER_ENABLED
 #include <chrono>
 
 #include "libarkbase/os/mutex.h"
@@ -78,5 +79,6 @@ private:
 };
 
 }  // namespace ark
+#endif  // SAFEPOINT_TIME_CHECKER_ENABLED
 
 #endif  // PANDA_RUNTIME_TIMER_TABLE_H_

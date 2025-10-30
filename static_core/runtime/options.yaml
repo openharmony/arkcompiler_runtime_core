@@ -972,11 +972,6 @@ options:
   default: true
   description: Whether to create strings with LineString/SlicedString/TreeString or only LineString.
 
-- name: safepoint-checkers-recording-time
-  type: uint32_t
-  default: 500
-  description: The minimum amount of time in microseconds to be recorded between safepoints
-
 - name: use-boot-class-filter
   type: bool
   default: true
