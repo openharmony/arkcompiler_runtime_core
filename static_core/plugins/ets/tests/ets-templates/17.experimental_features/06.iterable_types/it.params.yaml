@@ -578,3 +578,127 @@ cases:
               }
           }
           arktest.assertEQ(res, 18)
+
+    # example from the spec
+    - decl: |-
+        class C implements Iterable<string> {
+            data: string[] = ['a', 'b', 'c']
+            $_iterator() { // Function type is inferred from its body
+                return new CIterator(this)
+            }
+        }
+        class CIterator implements Iterator<string> {
+            index = 0
+            base: C
+            constructor (base: C) {
+                this.base = base
+            }
+            next(): IteratorResult<string> {
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                }
+            }
+        }
+      use: |-
+        let c = new C()
+        let res = ''
+        for (let x of c) {
+            res += x
+        }
+        arktest.assertEQ(res, 'abc')
+
+    - decl: |-
+        class C implements Iterable<string> {
+            data: string[] = ['a', 'b', 'c']
+            $_iterator() { // Function type is inferred from its body
+                return new CIterator(this)
+            }
+        }
+        class CIterator implements Iterator<string> {
+            index = 0
+            base: C
+            constructor (base: C) {
+                this.base = base
+            }
+            next(): IteratorResult<string> {
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                }
+            }
+        }
+      use: |-
+        let c = new C()
+        let iref = c.$_iterator();
+        
+        let next = iref.next();
+        let result = ''
+        while(!next.done) {
+          result += next.value
+          next = iref.next()
+        }
+        arktest.assertEQ(result, 'abc')
+
+    - decl: |-
+        // Class implements iterable and also is indexable
+        class C implements Iterable<string> {
+            data: string[] = ['a', 'b', 'c']
+            $_iterator() { // Function type is inferred from its body
+                return new CIterator(this)
+            }
+            $_get(index: int): string {
+                return this.data[index]
+            }
+            
+        }
+        class CIterator implements Iterator<string> {
+            index = 0
+            base: C
+            constructor (base: C) {
+                this.base = base
+            }
+            next(): IteratorResult<string> {
+                return {
+                    done: this.index >= this.base.data.length,
+                    value: this.index >= this.base.data.length ? undefined : this.base[this.index++]
+                }
+            }
+        }
+      use: |-
+        let c = new C()
+        let res = ''
+        for (let x of c) {
+            res += x
+        }
+        arktest.assertEQ(res, 'abc')
+
+
+    - decl: |-
+        // Class implements iterable with interface literal implementation
+        class C implements Iterable<string> {
+            data: string[] = ['a', 'b', 'c']
+            index: int = 0;
+        
+            next(): IteratorResult<string> {
+                return {
+                    done: this.index >= this.data.length,
+                    value: this.index >= this.data.length ? undefined : this.data[this.index++]
+                }
+            }
+        
+            $_iterator(): Iterator<string> {
+                this.index = 0;
+                let t: Iterator<string> = { next(): IteratorResult<string> { return this.next() } }
+                return t;
+            }
+ 
+        }
+
+      use: |-
+        let c = new C()
+        let res = ''
+        for (let x of c) {
+            res += x
+        }
+        arktest.assertEQ(res, 'abc')

@@ -24,16 +24,19 @@ tags: [{{c.tags}}]
 ---*/
 {{c.decl}}
 
-let m: Map<{{c.ind_type}}, {{c.val_type}}|undefined> = new Map<{{c.ind_type}}, {{c.val_type}}|undefined>
+type Key = {{c.ind_type}}
+type Value = {{c.val_type}} | undefined
+
+let m: Map<Key, Value> = new Map<Key, Value>
 
 interface I {
-    $_set(i: {{c.ind_type}}, v: {{c.val_type}}|undefined) {
+    $_set(i: Key, v: Value) {
         m.set(i, v)
     }
 }
 
 class A implements I {
-    $_get(i: {{c.ind_type}}): {{c.val_type}}|undefined {
+    $_get(i: Key): Value {
         return m.get(i)
     }
 }
@@ -43,7 +46,7 @@ function foo(): A {
 }
 
 {%- for t in c['values'] %}
-let ind{{loop.index}} = (): {{c.ind_type}} => {{t.ind}}
+let ind{{loop.index}} = (): Key => {{t.ind}}
 {%- endfor %}
 
 function main(): void {

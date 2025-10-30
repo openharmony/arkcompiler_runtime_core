@@ -2444,6 +2444,9 @@
 #18767 Cannot use $_iterator from superclass
 17.experimental_features/06.iterable_types/it_4.ets
 
+#30900
+17.experimental_features/06.iterable_types/it_20.ets
+
 #27999
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_1.ets
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_5_0.ets
@@ -2533,6 +2536,9 @@
 
 #28758 new overloaded functions with receiver don't work with numeric types
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_23.ets
+
+#31072
+17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_negative_9.ets
 
 #22951
 17.experimental_features/13.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_1.ets

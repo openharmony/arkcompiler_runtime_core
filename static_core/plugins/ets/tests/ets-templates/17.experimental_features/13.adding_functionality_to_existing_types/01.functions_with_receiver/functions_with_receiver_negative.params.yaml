@@ -44,3 +44,29 @@ cases:
         f: number = 1
       }
       function f(this: A): void {}
+
+  - decl: |
+      class A {}
+      class B {}
+      function f(this: A | B): void {}
+
+  - decl: |
+      class A {}
+      function f(first: string, this: A): void {}
+
+  - decl: |
+      class A {
+        foo(): void {}
+      }
+      class B extends A {}
+      
+      function foo(this: A): void {}
+      let bb: B = new B;
+      bb.foo() // TypeError: The extension function 'foo' has the same name with public method in class A
+
+  - decl: |
+      class A {
+      }
+      function foo(): void {}
+      function foo(this: A): void {}
+
