@@ -1,6 +1,9 @@
 #30775
 07.expressions/29.assignment/01.simple_assignment_operator/array_assignment_6.ets
 
+#26038
+10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
+
 #28746
 16.concurrency/03.asynchronous_api/01.async_functions/async_functions0.ets
 16.concurrency/03.asynchronous_api/01.async_functions/async_functions1.ets
