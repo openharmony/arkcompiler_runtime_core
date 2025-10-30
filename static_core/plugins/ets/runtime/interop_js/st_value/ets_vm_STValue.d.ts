@@ -49,6 +49,8 @@ export declare class STValue {
     static newFixedArrayPrimitive(len: number, elementType: SType): STValue
     static newFixedArrayReference(len: number, elementType: STValue, initialElement: STValue): STValue
 
+    static typeIsAssignableFrom(from_type: STValue, to_type: STValue): boolean
+
     classInstantiate(ctorSignature: string, args: Array<STValue>): STValue
 
     namespaceGetVariable(name: string, variableType: SType): STValue
@@ -77,7 +79,6 @@ export declare class STValue {
 
     objectInstanceOf(typeArg: STValue): boolean
     objectGetType(): STValue
-    typeIsAssignableFrom(from_type: STValue, to_type: STValue): boolean
     isNull(): boolean
     isUndefined(): boolean
     isEqualTo(other: STValue): boolean

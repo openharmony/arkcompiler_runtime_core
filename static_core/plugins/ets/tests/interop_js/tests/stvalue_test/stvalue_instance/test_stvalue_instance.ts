@@ -16,7 +16,7 @@
 const etsVm = globalThis.gtest.etsVm;
 
 let STValue = etsVm.STValue;
-let module = STValue.findModule('stvalue_instance');
+let ns = STValue.findNamespace('stvalue_instance.Instance');
 let SType = etsVm.SType;
 
 let studentCls = STValue.findClass('stvalue_instance.Student');
@@ -27,28 +27,28 @@ function testNewFixedArrayPrimitive(): void {
     let checkRes = true;
 
     let boolArray = STValue.newFixedArrayPrimitive(5, SType.BOOLEAN);
-    checkRes = checkRes && module.moduleInvokeFunction('checkFixPrimitiveBooleanArray', 'A{z}:z', [boolArray]).unwrapToBoolean();
+    checkRes = checkRes && ns.namespaceInvokeFunction('checkFixPrimitiveBooleanArray', 'A{z}:z', [boolArray]).unwrapToBoolean();
 
     let byteArray = STValue.newFixedArrayPrimitive(5, SType.BYTE);
-    checkRes = checkRes && module.moduleInvokeFunction('checkFixPrimitiveByteArray', 'A{b}:z', [byteArray]).unwrapToBoolean();
+    checkRes = checkRes && ns.namespaceInvokeFunction('checkFixPrimitiveByteArray', 'A{b}:z', [byteArray]).unwrapToBoolean();
 
     let charArray = STValue.newFixedArrayPrimitive(5, SType.CHAR);
-    checkRes = checkRes && module.moduleInvokeFunction('checkFixPrimitiveCharArray', 'A{c}:z', [charArray]).unwrapToBoolean();
+    checkRes = checkRes && ns.namespaceInvokeFunction('checkFixPrimitiveCharArray', 'A{c}:z', [charArray]).unwrapToBoolean();
 
     let shortArray = STValue.newFixedArrayPrimitive(5, SType.SHORT);
-    checkRes = checkRes && module.moduleInvokeFunction('checkFixPrimitiveShortArray', 'A{s}:z', [shortArray]).unwrapToBoolean();
+    checkRes = checkRes && ns.namespaceInvokeFunction('checkFixPrimitiveShortArray', 'A{s}:z', [shortArray]).unwrapToBoolean();
 
     let intArray = STValue.newFixedArrayPrimitive(5, SType.INT);
-    checkRes = checkRes && module.moduleInvokeFunction('checkFixPrimitiveIntArray', 'A{i}:z', [intArray]).unwrapToBoolean();
+    checkRes = checkRes && ns.namespaceInvokeFunction('checkFixPrimitiveIntArray', 'A{i}:z', [intArray]).unwrapToBoolean();
 
     let longArray = STValue.newFixedArrayPrimitive(5, SType.LONG);
-    checkRes = checkRes && module.moduleInvokeFunction('checkFixPrimitiveLongArray', 'A{l}:z', [longArray]).unwrapToBoolean();
+    checkRes = checkRes && ns.namespaceInvokeFunction('checkFixPrimitiveLongArray', 'A{l}:z', [longArray]).unwrapToBoolean();
 
     let floatArray = STValue.newFixedArrayPrimitive(5, SType.FLOAT);
-    checkRes = checkRes && module.moduleInvokeFunction('checkFixPrimitiveFloatArray', 'A{f}:z', [floatArray]).unwrapToBoolean();
+    checkRes = checkRes && ns.namespaceInvokeFunction('checkFixPrimitiveFloatArray', 'A{f}:z', [floatArray]).unwrapToBoolean();
 
     let doubleArray = STValue.newFixedArrayPrimitive(5, SType.DOUBLE);
-    checkRes = checkRes && module.moduleInvokeFunction('checkFixPrimitiveDoubleArray', 'A{d}:z', [doubleArray]).unwrapToBoolean();
+    checkRes = checkRes && ns.namespaceInvokeFunction('checkFixPrimitiveDoubleArray', 'A{d}:z', [doubleArray]).unwrapToBoolean();
     ASSERT_TRUE(checkRes);
 
     checkRes = false;
@@ -89,11 +89,16 @@ function testNewFixedArrayReference(): void {
     let intClass = STValue.findClass('std.core.Int');
     let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(5)]);
     let refArray = STValue.newFixedArrayReference(3, intClass, intObj);
-    let res = module.moduleInvokeFunction('checkFixReferenceObjectArray', 'A{C{std.core.Object}}:z', [refArray]);
+    let res = ns.namespaceInvokeFunction('checkFixReferenceObjectArray', 'A{C{std.core.Object}}:z', [refArray]);
     ASSERT_TRUE(res.unwrapToBoolean());
 
     let undefArray = STValue.newFixedArrayReference(3, intClass, STValue.getUndefined());
-    res = module.moduleInvokeFunction('checkFixReferenceUndefinedArray', 'A{C{std.core.Object}}:z', [undefArray]);
+    res = ns.namespaceInvokeFunction('checkFixReferenceUndefinedArray', 'A{C{std.core.Object}}:z', [undefArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let strClass = STValue.findClass('std.core.String');
+    let strArray = STValue.newFixedArrayReference(3, strClass, STValue.wrapString('hello world!'));
+    res = ns.namespaceInvokeFunction('checkFixReferenceStringArray', 'A{C{std.core.String}}:z', [strArray]);
     ASSERT_TRUE(res.unwrapToBoolean());
 
     let checkRes = false;
@@ -124,6 +129,17 @@ function testNewFixedArrayReference(): void {
         checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
     }
     ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        STValue.newFixedArrayReference(999, STValue.getUndefined(), intObj);
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('elementType');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+        checkRes = checkRes && e.message.includes('reference');
+    }
+    ASSERT_TRUE(checkRes);
 }
 
 // classFull.classInstantiateImpl(ctorSinature, array<Stvalue>): STValue
@@ -148,9 +164,7 @@ function testClassInstantiate(): void {
     res = false;
     try {
         studentCls.classInstantiate(':', STValue.wrapNumber(1));
-        print('Not Error2');
     } catch (e: Error) {
-        print('Error1:', e.message)
         res = true;
         res = res && e.message.includes('param are not array type');
     }
@@ -164,7 +178,6 @@ function testClassInstantiate(): void {
         res = res && e.message.includes('STValue instance does not wrap a value of type reference');
     }
     ASSERT_TRUE(res);
-
 }
 
 function main(): void {

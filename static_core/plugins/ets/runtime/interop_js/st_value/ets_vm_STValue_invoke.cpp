@@ -175,24 +175,6 @@ static napi_value STValueTemplateInvokeFunction(
     return nullptr;
 }
 
-napi_value STValueModuleInvokeFunctionImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
-{
-    auto moduleFindFunction = [env](STValueData *data, std::string &functionName,
-                                    std::string &signatureName) -> ani_function {
-        auto aniEnv = GetAniEnv();
-        ani_module aniModule = reinterpret_cast<ani_module>(data->GetAniRef());
-        ani_function aniFunction = nullptr;
-        ani_status status =
-            aniEnv->Module_FindFunction(aniModule, functionName.c_str(), signatureName.c_str(), &aniFunction);
-        AniCheckAndThrowToDynamic(env, status,
-                                  "Failed to find function when module invoke function;functionName=" + functionName +
-                                      ";signatureName=" + signatureName);
-        return aniFunction;
-    };
-
-    return STValueTemplateInvokeFunction(env, info, moduleFindFunction);
-}
-
 napi_value STValueNamespaceInvokeFunctionImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
     auto namespaceFindFunction = [env](STValueData *data, std::string &functionName,

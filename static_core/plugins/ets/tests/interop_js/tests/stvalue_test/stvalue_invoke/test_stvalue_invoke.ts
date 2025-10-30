@@ -17,14 +17,14 @@ const etsVm = globalThis.gtest.etsVm;
 
 let SType = etsVm.SType;
 let STValue = etsVm.STValue;
-let module = STValue.findModule('stvalue_invoke');
+let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 
 let studentCls = STValue.findClass('stvalue_invoke.Student');
 let subStudentCls = STValue.findClass('stvalue_invoke.SubStudent');
 
 // functionalObjectInvoke(args: Array<STValue>): STValue
 function testFunctionalObjectInvoke(): void {
-    let getNumberFn = module.moduleGetVariable('getNumberFn', SType.REFERENCE);
+    let getNumberFn = nsp.namespaceGetVariable('getNumberFn', SType.REFERENCE);
     let numRes = getNumberFn.functionalObjectInvoke([]);
     let jsNum = numRes.objectInvokeMethod('toInt', ':i', []);
     ASSERT_TRUE(jsNum.unwrapToNumber() === 123);
@@ -32,7 +32,7 @@ function testFunctionalObjectInvoke(): void {
     let numberCls = STValue.findClass('std.core.Double');
     let numberObj3 = numberCls.classInstantiate('d:', [STValue.wrapNumber(3)]);
     let numberObj5 = numberCls.classInstantiate('d:', [STValue.wrapNumber(5)]);
-    let getSumFn = module.moduleGetVariable('getSumFn', SType.REFERENCE);
+    let getSumFn = nsp.namespaceGetVariable('getSumFn', SType.REFERENCE);
     let sumRes = getSumFn.functionalObjectInvoke([numberObj3, numberObj5]);
     let sumNum = sumRes.objectInvokeMethod('toDouble', ':d', []);
     ASSERT_TRUE(sumNum.unwrapToNumber() === 8);
@@ -169,161 +169,6 @@ function testClassInvokeStaticMethod(): void {
     ASSERT_TRUE(res);
 }
 
-function testModuleBooleanInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let b1 = STValue.wrapBoolean(false);
-    let b2 = STValue.wrapBoolean(false);
-    let b = mod.moduleInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]);
-    ASSERT_TRUE(b.unwrapToBoolean() === false);
-
-    b1 = STValue.wrapBoolean(false);
-    b2 = STValue.wrapBoolean(true);
-    b = mod.moduleInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]);
-    ASSERT_TRUE(b.unwrapToBoolean() === false);
-
-    b1 = STValue.wrapBoolean(true);
-    b2 = STValue.wrapBoolean(false);
-    b = mod.moduleInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]);
-    ASSERT_TRUE(b.unwrapToBoolean() === false);
-
-    b1 = STValue.wrapBoolean(true);
-    b2 = STValue.wrapBoolean(true);
-    b = mod.moduleInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]);
-    ASSERT_TRUE(b.unwrapToBoolean() === true);
-
-    b = mod.moduleInvokeFunction('BooleanEmptyInvoke', ':z', []);
-    ASSERT_TRUE(b.unwrapToBoolean() === true);
-}
-
-function testModuleCharInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let c = STValue.wrapChar('c');
-    let r = mod.moduleInvokeFunction('CharInvoke', 'c:c', [c]);
-    let charKlass = STValue.findClass('std.core.Char');
-    let charObj = charKlass.classInstantiate('c:', [r]);
-    let str = charObj.objectInvokeMethod('toString', ':C{std.core.String}', []);
-    ASSERT_TRUE(str.unwrapToString() === 'c');
-
-    r = mod.moduleInvokeFunction('CharEmptyInvoke', ':c', []);
-    charKlass = STValue.findClass('std.core.Char');
-    charObj = charKlass.classInstantiate('c:', [r]);
-    str = charObj.objectInvokeMethod('toString', ':C{std.core.String}', []);
-    ASSERT_TRUE(str.unwrapToString() === 'c');
-}
-
-function testModuleByteInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let b = STValue.wrapByte(112);
-    let r = mod.moduleInvokeFunction('ByteInvoke', 'b:b', [b]);
-    ASSERT_TRUE(r.unwrapToNumber() === 112);
-
-    r = mod.moduleInvokeFunction('ByteEmptyInvoke', ':b', []);
-    ASSERT_TRUE(r.unwrapToNumber() === 112);
-}
-
-function testModuleShortInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let s = STValue.wrapShort(3456);
-    let r = mod.moduleInvokeFunction('ShortInvoke', 's:s', [s]);
-    ASSERT_TRUE(r.unwrapToNumber() === 3456);
-
-    r = mod.moduleInvokeFunction('ShortEmptyInvoke', ':s', []);
-    ASSERT_TRUE(r.unwrapToNumber() === 3456);
-}
-
-function testModuleIntInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let a1 = STValue.wrapInt(123);
-    let a2 = STValue.wrapInt(345);
-    let r = mod.moduleInvokeFunction('IntInvoke', 'ii:i', [a1, a2]);
-    ASSERT_TRUE(r.unwrapToNumber() === 468);
-
-    r = mod.moduleInvokeFunction('IntEmptyInvoke', ':i', []);
-    ASSERT_TRUE(r.unwrapToNumber() === 468);
-}
-
-function testModuleLongInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let a1 = STValue.wrapLong(123);
-    let a2 = STValue.wrapLong(345);
-    let r = mod.moduleInvokeFunction('LongInvoke', 'll:l', [a1, a2]);
-    ASSERT_TRUE(r.unwrapToNumber() === 468);
-
-    r = mod.moduleInvokeFunction('LongEmptyInvoke', ':l', []);
-    ASSERT_TRUE(r.unwrapToNumber() === 468);
-}
-
-function testModuleFloatInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let a1 = STValue.wrapFloat(1.4567);
-    let a2 = STValue.wrapFloat(4.5678);
-    mod.moduleInvokeFunction('FloatInvoke', 'ff:f', [a1, a2]);
-
-    mod.moduleInvokeFunction('FloatEmptyInvoke', ':f', []);
-
-}
-
-function testModuleDoubleInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let a1 = STValue.wrapNumber(1.4567);
-    let a2 = STValue.wrapNumber(4.5678);
-    mod.moduleInvokeFunction('DoubleInvoke', 'dd:d', [a1, a2]);
-
-    mod.moduleInvokeFunction('DoubleEmptyInvoke', ':d', []);
-}
-
-function testModuleNumberInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let a1 = STValue.wrapNumber(1.4567);
-    let a2 = STValue.wrapNumber(4.5678);
-    mod.moduleInvokeFunction('NumberInvoke', 'dd:d', [a1, a2]);
-
-    mod.moduleInvokeFunction('NumberEmptyInvoke', ':d', []);
-}
-
-function testModuleStringInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let s1 = STValue.wrapString('ABCDEFG');
-    let s2 = STValue.wrapString('HIJKLMN');
-    let s = mod.moduleInvokeFunction('StringInvoke', 'C{std.core.String}C{std.core.String}:C{std.core.String}', [s1, s2]);
-    ASSERT_TRUE(s.unwrapToString() === 'ABCDEFGHIJKLMN');
-
-    s = mod.moduleInvokeFunction('StringEmptyInvoke', ':C{std.core.String}', []);
-    ASSERT_TRUE(s.unwrapToString() === 'string');
-}
-
-function testModuleBigIntInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let b1 = STValue.wrapBigInt(BigInt('12345678'));
-    let b2 = STValue.wrapBigInt(BigInt(12345678n));
-    let s = mod.moduleInvokeFunction('BigIntInvoke','C{std.core.BigInt}C{std.core.BigInt}:C{std.core.BigInt}',[b1,b2]);
-    ASSERT_TRUE(s.unwrapToBigInt() === BigInt(24691356n));
-}
-
-function testModuleVoidInvokeFunction(): void {
-    let mod = STValue.findModule('stvalue_invoke');
-    let s1 = STValue.wrapString('ABCDEFG');
-    let s2 = STValue.wrapString('HIJKLMN');
-    mod.moduleInvokeFunction('VoidInvoke', 'C{std.core.String}C{std.core.String}:', [s1, s2]);
-
-    mod.moduleInvokeFunction('VoidEmptyInvoke', ':', []);
-}
-
-function testModuleInvokeFunction(): void {
-    testModuleBooleanInvokeFunction();
-    testModuleCharInvokeFunction();
-    testModuleByteInvokeFunction();
-    testModuleShortInvokeFunction();
-    testModuleIntInvokeFunction();
-    testModuleLongInvokeFunction();
-    testModuleFloatInvokeFunction();
-    testModuleDoubleInvokeFunction();
-    testModuleNumberInvokeFunction();
-    testModuleStringInvokeFunction();
-    testModuleBigIntInvokeFunction();
-    testModuleVoidInvokeFunction();
-}
-
 function testNspFunctionMismatch(): void {
     let b1 = STValue.wrapBoolean(false);
     let b2 = STValue.wrapBoolean(false);
@@ -337,20 +182,9 @@ function testNspFunctionMismatch(): void {
         print('Error code: ', e.code);
         print('Error message: ', e.message);
     }
-
-    // 2. use module to invoke namespaceInvokeFunction method
-    mod = STValue.findModule('stvalue_invoke');
-    try {
-        b = mod.namespaceInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]);
-        ASSERT_TRUE(b.unwrapToBoolean() === false);
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
 }
 
 function testNspFunctionInvalidParamCount(): void {
-    let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
     let b = null;
     let b1 = STValue.wrapBoolean(false);
     let b2 = STValue.wrapBoolean(false);
@@ -739,7 +573,7 @@ function testNspBigIntInvokeFunction(): void {
     let b1 = STValue.wrapBigInt(BigInt('12345678'));
     let b2 = STValue.wrapBigInt(BigInt(12345678n));
     //let s = nsp.namespaceInvokeFunction('BigIntInvoke','C{std.core.BigInt}C{std.core.BigInt}:C{std.core.BigInt}',[b1,b2]);
-    let s = nsp.namespaceInvokeFunction('BigIntInvoke','C{std.core.BigInt}C{std.core.BigInt}:C{std.core.BigInt}',[b1,b2]);
+    let s = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{std.core.BigInt}C{std.core.BigInt}:C{std.core.BigInt}', [b1, b2]);
     ASSERT_TRUE(s.unwrapToBigInt() === BigInt(24691356n));
 
     s = nsp.namespaceInvokeFunction('BigIntEmptyInvoke', ':C{std.core.BigInt}', []);
@@ -776,7 +610,6 @@ function main(): void {
     testFunctionalObjectInvoke();
     testObjectInvokeMethod();
     testClassInvokeStaticMethod();
-    testModuleInvokeFunction();
     testNamespaceInvokeFunction();
 }
 
