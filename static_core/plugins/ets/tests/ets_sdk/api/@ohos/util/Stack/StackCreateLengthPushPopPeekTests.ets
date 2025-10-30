@@ -111,7 +111,10 @@ function testPopFromEmptyStack() {
     arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
     try {
         let first = stack.pop();
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -138,7 +141,10 @@ function testPeekEmptyStack() {
     arktest.assertEQ(stack.length, 0, "Initial stack length should be 0");
     try {
         let first = stack.peek();
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

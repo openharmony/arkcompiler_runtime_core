@@ -43,7 +43,10 @@ function testGetFirstFromEmptyDeque() {
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     try {
         let first = deque.getFirst();
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -63,7 +66,10 @@ function testGetLastFromEmptyDeque() {
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
     try {
         let first = deque.getLast();
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

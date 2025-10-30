@@ -116,7 +116,10 @@ function testQueueGetFirstEmpty() {
     arktest.assertEQ(queue.length, 0, "Initial queue length should be 0");
     try {
         let first = queue.getFirst();
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

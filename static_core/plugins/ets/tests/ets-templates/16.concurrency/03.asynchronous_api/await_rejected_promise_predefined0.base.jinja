@@ -29,7 +29,7 @@ async function startTest() {
     try {
         await rejectedPromise;
         arktest.assertTrue(false, "Should have thrown");
-    } catch (e: Error) {
+    } catch (e) {
         arktest.assertEQ(e.message, errorText, "Incorrect promise.reject error message");
     }
 }

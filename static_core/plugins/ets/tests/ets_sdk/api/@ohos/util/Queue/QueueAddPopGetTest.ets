@@ -97,7 +97,10 @@ function testQueuePopWithoutElements() {
     let queue = new Queue<double | string | object>();
     try {
         let result = queue.pop();
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -122,7 +125,10 @@ function testQueueGetFirstWithoutElements() {
     let queue = new Queue<double | string | object>();
     try {
         let result = queue.getFirst();
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

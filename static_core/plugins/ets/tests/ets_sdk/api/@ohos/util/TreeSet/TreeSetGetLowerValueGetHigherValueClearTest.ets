@@ -47,7 +47,10 @@ function testGetLowerValueEmptyStringOnEmptySet() {
     let treeSet = new TreeSet<string>();
     try {
         let result = treeSet.getLowerValue("");
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -57,7 +60,10 @@ function testGetLowerValueNumberOnEmptySet1() {
     let treeSet = new TreeSet<double>();
     try {
         let result = treeSet.getLowerValue(123);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -67,7 +73,10 @@ function testGetLowerValueNumberOnEmptySet2() {
     let treeSet = new TreeSet<double>();
     try {
         let result = treeSet.getLowerValue(123);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -99,7 +108,10 @@ function testGetHigherValueEmptyStringOnEmptySet() {
     let treeSet = new TreeSet<string>();
     try {
         let result = treeSet.getHigherValue("");
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -109,7 +121,10 @@ function testGetHigherValueNumberOnEmptySet1() {
     let treeSet = new TreeSet<double>();
     try {
         let result = treeSet.getHigherValue(123);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -119,7 +134,10 @@ function testGetHigherValueNumberOnEmptySet2() {
     let treeSet = new TreeSet<double>();
     try {
         let result = treeSet.getHigherValue(123);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

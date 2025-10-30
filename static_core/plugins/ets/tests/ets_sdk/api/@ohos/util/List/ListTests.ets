@@ -162,7 +162,10 @@ function testBasicOperationsAndMethods() {
 
     try {
         let result = list1.get(200);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.code, 10200001);
     }
     arktest.assertEQ(list1.getLastIndexOf(3333), -1);

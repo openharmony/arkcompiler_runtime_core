@@ -52,7 +52,10 @@ function testGetFirstEmptyContainer() {
     let linkedList = new LinkedList<double>();
     try {
         let first = linkedList.getFirst();
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -74,7 +77,10 @@ function testGetLastEmptyContainer() {
     let linkedList = new LinkedList<double>();
     try {
         let first = linkedList.getLast();
-    } catch (e: BusinessError) {
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
