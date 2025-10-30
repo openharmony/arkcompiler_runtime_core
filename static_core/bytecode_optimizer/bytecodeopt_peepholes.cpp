@@ -90,6 +90,27 @@ void ReplaceNewObjectUsers(Inst *newObject, Inst *nullCheck, CallInst *initObjec
     }
 }
 
+static bool IsSafeInstBetweenNewAndCtor(const Inst *inst, const Inst *newObj)
+{
+    if (inst->IsSaveState()) {
+        return true;
+    }
+
+    if (inst->GetOpcode() == Opcode::NullCheck) {
+        return inst->GetDataFlowInput(0) == newObj;
+    }
+
+    return !inst->HasSideEffectsFlags();
+}
+
+/*
+ * This peephole replaces a `newobj` followed by its constructor call with a single `InitObject` bytecode instruction.
+ * It applies only when both instructions are in the same basic block and no unsafe instructions appear in between.
+ * Safe instructions in between are allowed: SaveState, a single NullCheck on the new object,
+ * and any instruction without forbidden flags (no throw, allocation, call, store, barrier, deopt, etc.).
+ * The transformation rewires all uses of `newobj` (and NullCheck if present) to the new `InitObject`.
+ * This reduces overhead by folding allocation and initialization into one safe instruction.
+ */
 void BytecodeOptPeepholes::VisitNewObject(GraphVisitor *v, Inst *inst)
 {
     ASSERT(inst != nullptr);
@@ -98,10 +119,6 @@ void BytecodeOptPeepholes::VisitNewObject(GraphVisitor *v, Inst *inst)
         return;
     }
 
-    // The optimization is correct only if there are no side-effects between NewObject and constructor call.
-    // For simplicity, we abort it if any instruction except NullCheck and SaveState appears in-between.
-    // Moreover, when we are inside a try block, local register state also matters, because it may be used inside
-    // catch blocks. In such case we also abort if there are any instructions in corresponding bytecode.
     const auto graph = static_cast<BytecodeOptPeepholes *>(v)->GetGraph();
     const size_t newobjSize =
         BytecodeInstruction::Size(  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -112,22 +129,11 @@ void BytecodeOptPeepholes::VisitNewObject(GraphVisitor *v, Inst *inst)
 
     Inst *nullCheck = nullptr;
     for (auto *i = inst->GetNext(); i != callInit; i = i->GetNext()) {
-        if (i->GetOpcode() != Opcode::SaveState && i->GetOpcode() != Opcode::NullCheck) {
+        if (!IsSafeInstBetweenNewAndCtor(i, inst)) {
             return;
         }
-
-        if (i->GetOpcode() == Opcode::SaveState) {
-            continue;
-        }
-
-        for (auto nullCheckInput : i->GetInputs()) {
-            if (nullCheckInput.GetInst() == inst) {
-                ASSERT(nullCheck == nullptr);
-                nullCheck = i;
-            }
-        }
-        if (nullCheck == nullptr) {
-            return;
+        if (i->IsNullCheck() && nullCheck == nullptr) {
+            nullCheck = i;
         }
     }
 

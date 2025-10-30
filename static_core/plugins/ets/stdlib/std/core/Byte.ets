@@ -313,6 +313,17 @@ export final class Byte extends Integral implements Comparable<Byte> {
     }
 
     /**
+     * Converts the primitive to a string
+     *
+     * @param v value to be converted
+     *
+     * @returns result of the conversion
+     */
+    public static toString(v: byte): string {
+        return StringBuilder.toString(v);
+    }
+
+    /**
      * Converts this object to a string
      *
      * @returns result of the conversion
