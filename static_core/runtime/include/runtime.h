@@ -29,6 +29,7 @@
 #include "libpandabase/utils/dfx.h"
 #include "libpandafile/file_items.h"
 #include "libpandafile/literal_data_accessor.h"
+#include "platforms/target_defaults/default_target_options.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -123,7 +124,9 @@ public:
 
     static Runtime *GetCurrent();
 
-    static bool GetCoverageEnable();
+    static bool GetCoverageEnable(RuntimeOptions &options);
+    static std::string GetCodeCoverageOutput();
+    static void InitCoverageOptions(RuntimeOptions &options);
     static void StartCoverageListener();
     static void StopCoverageListener();
 
@@ -518,7 +521,6 @@ private:
     static std::string runtimeType_;
     static os::memory::Mutex mutex_;
     static bool isTaskManagerUsed_;
-    static tooling::CoverageListener *coverageListener_;
 
     // NOTE(dtrubenk): put all of it in the permanent space
     mem::InternalAllocatorPtr internalAllocator_;

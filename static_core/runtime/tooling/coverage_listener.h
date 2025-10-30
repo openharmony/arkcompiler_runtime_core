@@ -42,7 +42,7 @@ namespace ark::tooling {
 using BytecodeCountMap = std::unordered_map<std::pair<panda_file::File::EntityId, uint32_t>, uint32_t>;
 class BytecodeCounter;
 
-class CoverageListener : public RuntimeListener {
+class CoverageListener final : public RuntimeListener {
 public:
     explicit CoverageListener(const std::string &fileName);
     ~CoverageListener();
@@ -58,7 +58,7 @@ private:
     void DumpThreadWorker();
     void DumpCoverageInfoToFile(BytecodeCountMap &bytecodeCountMap);
 
-    std::unique_ptr<BytecodeCounter> delegate_;
+    PandaUniquePtr<BytecodeCounter> delegate_;
 
     std::string fileName_;
     std::ofstream outFile;
@@ -66,7 +66,7 @@ private:
     std::atomic<bool> stopThread_ = false;
 };
 
-class BytecodeCounter : public RuntimeListener {
+class BytecodeCounter final : public RuntimeListener {
 public:
     static constexpr uint32_t byteCodeDataBufferSize = 20000;
     static constexpr uint32_t maxDumpIntervalMs = 1000;
@@ -81,15 +81,15 @@ public:
     std::optional<std::queue<BytecodeCountMap>> GetQueue();
 
 private:
-    void TriggerDump();
+    NO_THREAD_SAFETY_ANALYSIS void TriggerDump();
 
     os::memory::Mutex mapMutex_;
     os::memory::Mutex queueMutex_;
     os::memory::ConditionVariable queueConditionalVar_;
 
     uint32_t bufferSize_;
-    BytecodeCountMap bytecodeCountMap_;
-    std::queue<BytecodeCountMap> dumpQueue_;
+    BytecodeCountMap bytecodeCountMap_ GUARDED_BY(mapMutex_);
+    std::queue<BytecodeCountMap> dumpQueue_ GUARDED_BY(queueMutex_);
     std::atomic<std::chrono::system_clock::time_point> lastDumpTime_;
 };
 

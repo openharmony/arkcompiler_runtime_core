@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,5 +25,15 @@ uint32_t GetGcWorkersCount(const std::map<std::string, uint32_t> &modelMap)
 uint32_t GetTaskmanagerWorkersCount(const std::map<std::string, uint32_t> &modelMap)
 {
     return modelMap.at("default");
+}
+
+bool GetCoverageEnable()
+{
+    return false;
+}
+
+std::string GetCodeCoverageOutput()
+{
+    return "";
 }
 }  // namespace ark::default_target_options

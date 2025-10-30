@@ -92,7 +92,6 @@ RuntimeOptions Runtime::options_;   // NOLINT(fuchsia-statically-constructed-obj
 std::string Runtime::runtimeType_;  // NOLINT(fuchsia-statically-constructed-objects)
 os::memory::Mutex Runtime::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
 bool Runtime::isTaskManagerUsed_ = false;
-tooling::CoverageListener *Runtime::coverageListener_ = nullptr;
 
 const LanguageContextBase *g_ctxsJsRuntime = nullptr;  // Deprecated. Only for capability with js_runtime.
 
@@ -325,44 +324,66 @@ bool Runtime::Create(const RuntimeOptions &options, const std::vector<LanguageCo
 }
 
 /* static */
-bool Runtime::GetCoverageEnable()
+bool Runtime::GetCoverageEnable(RuntimeOptions &options)
 {
-    bool codeCoverageEnable = false;
-#if defined(PANDA_GET_PARAMETER)
-    codeCoverageEnable = OHOS::system::GetBoolParameter("persist.ark.static.codecoverage.enable", false);
-#endif
-    if (!codeCoverageEnable) {
-        codeCoverageEnable = options_.IsCodeCoverageEnabled();
+    bool coverageEnable = options.IsCodeCoverageEnabled();
+    if (!coverageEnable) {
+        coverageEnable = default_target_options::GetCoverageEnable();
     }
-    return codeCoverageEnable;
+    return coverageEnable;
+}
+
+/* static */
+std::string Runtime::GetCodeCoverageOutput()
+{
+    std::string outPutPath = options_.GetCodeCoverageOutput();
+    if (outPutPath.empty()) {
+        outPutPath = default_target_options::GetCodeCoverageOutput();
+    }
+    return outPutPath;
+}
+
+/* static */
+void Runtime::InitCoverageOptions(RuntimeOptions &options)
+{
+    if (!GetCoverageEnable(options)) {
+        return;
+    }
+    options.SetInterpreterType("cpp");
+    options.SetDebuggerEnable(true);
 }
 
 /* static */
 void Runtime::StartCoverageListener()
 {
-    if (!GetCoverageEnable()) {
+    if (!GetCoverageEnable(options_)) {
         return;
     }
-    std::filesystem::path filePath = options_.GetCodeCoverageOutput();
-    coverageListener_ = new tooling::CoverageListener(filePath.string());
-    instance_->GetNotificationManager()->AddListener(coverageListener_,
+    std::string codeCoverageOutput = instance_->GetCodeCoverageOutput();
+    instance_->GetTools().CreateCoverageListener(codeCoverageOutput);
+    auto coverageListener = instance_->GetTools().GetCoverageListener();
+    if (coverageListener == nullptr) {
+        return;
+    }
+    instance_->GetNotificationManager()->AddListener(coverageListener,
                                                      RuntimeNotificationManager::Event::BYTECODE_PC_CHANGED);
 }
 
 /* static */
 void Runtime::StopCoverageListener()
 {
-    if (!GetCoverageEnable() || coverageListener_ == nullptr) {
+    auto coverageListener = instance_->GetTools().GetCoverageListener();
+    if (coverageListener == nullptr) {
         return;
     }
-    instance_->GetNotificationManager()->RemoveListener(coverageListener_,
+    instance_->GetNotificationManager()->RemoveListener(coverageListener,
                                                         RuntimeNotificationManager::Event::BYTECODE_PC_CHANGED);
-    coverageListener_->StopCoverage();
-    delete coverageListener_;
-    coverageListener_ = nullptr;
+    coverageListener->StopCoverage();
+    instance_->GetTools().DestroyCoverageListener();
 }
 
 /* static */
+// CC-OFFNXT(huge_method, G.FUN.01) solid logic
 bool Runtime::Create(const RuntimeOptions &options)
 {
     if (instance_ != nullptr) {
@@ -372,6 +393,8 @@ bool Runtime::Create(const RuntimeOptions &options)
     IntrusiveTestOption::SetTestId(options);
 
     SetDebuggerOptions(const_cast<RuntimeOptions &>(options));
+
+    instance_->InitCoverageOptions(const_cast<RuntimeOptions &>(options));
 
     const_cast<RuntimeOptions &>(options).InitializeRuntimeSpacesAndType();
     trace::ScopedTrace scopedTrace("Runtime::Create");
@@ -415,7 +438,9 @@ bool Runtime::Create(const RuntimeOptions &options)
     instance_->GetNotificationManager()->VmStartEvent();
     instance_->GetNotificationManager()->VmInitializationEvent(thread);
     instance_->GetNotificationManager()->ThreadStartEvent(thread);
-    instance_->StartCoverageListener();
+    if (options_.IsCodeCoverageEnabled()) {
+        instance_->StartCoverageListener();
+    }
 
     if (options_.IsSamplingProfilerCreate()) {
         instance_->GetTools().CreateSamplingProfiler();
@@ -533,6 +558,8 @@ bool Runtime::Destroy()
     // Stop debugger first to correctly remove it as listener.
     instance_->UnloadDebugger();
 
+    instance_->StopCoverageListener();
+
     PreFiniBaseRuntime();
 
     // Note JIT thread (compiler) may access to thread data,
@@ -550,8 +577,6 @@ bool Runtime::Destroy()
     // UninitializeThreads may execute managed code which
     // uses barriers
     instance_->GetPandaVM()->StopGC();
-
-    instance_->StopCoverageListener();
 
     if (verifier::IsEnabled(verifier::VerificationModeFromString(options_.GetVerificationMode()))) {
         verifier::DestroyService(instance_->verifierService_, options_.IsVerificationUpdateCache());

@@ -21,6 +21,7 @@
 #include "sampler/sample_writer.h"
 
 namespace ark::tooling {
+class CoverageListener;
 
 namespace sampler {
 class Sampler;
@@ -38,11 +39,16 @@ public:
     void DestroySamplingProfiler();
     bool IsSamplingProfilerCreate();
 
+    void CreateCoverageListener(const std::string &filePath);
+    CoverageListener *GetCoverageListener();
+    void DestroyCoverageListener();
+
 private:
     NO_COPY_SEMANTIC(Tools);
     NO_MOVE_SEMANTIC(Tools);
 
     sampler::Sampler *sampler_ {nullptr};
+    CoverageListener *coverageListener_ {nullptr};
 };
 
 }  // namespace ark::tooling

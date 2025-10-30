@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "runtime/tooling/coverage_listener.h"
 #include "runtime/tooling/tools.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"
 
@@ -84,4 +85,22 @@ bool Tools::IsSamplingProfilerCreate()
     return sampler_ != nullptr;
 }
 
+void Tools::CreateCoverageListener(const std::string &filePath)
+{
+    coverageListener_ = new tooling::CoverageListener(filePath);
+}
+
+CoverageListener *Tools::GetCoverageListener()
+{
+    return coverageListener_;
+}
+
+void Tools::DestroyCoverageListener()
+{
+    if (coverageListener_ == nullptr) {
+        return;
+    }
+    delete coverageListener_;
+    coverageListener_ = nullptr;
+}
 }  // namespace ark::tooling
