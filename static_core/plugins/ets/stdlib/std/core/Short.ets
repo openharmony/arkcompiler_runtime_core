@@ -271,10 +271,16 @@ export final class Short extends Integral implements Comparable<Short> {
      *
      * @param other Short object to compare with
      *
-     * @returns result of the comparison
+     * @returns result of the comparison, -1 if this instance is less than provided object, 0 if equal, 1 if greater
      */
     public override compareTo(other: Short): int {
-        return this.toInt() - other.toInt();
+        if (this.value < other) {
+            return -1;
+        }
+        if (this.value == other) {
+            return 0;
+        }
+        return 1;
     }
 
     /**

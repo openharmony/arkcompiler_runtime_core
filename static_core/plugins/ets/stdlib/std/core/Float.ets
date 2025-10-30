@@ -300,10 +300,16 @@ export final class Float extends Floating implements Comparable<Float> {
      *
      * @param other Float object to compare with
      *
-     * @returns result of the comparison
+     * @returns result of the comparison, -1 if this instance is less than provided object, 0 if equal, 1 if greater
      */
     public override compareTo(other: Float): int {
-        return (this.value - other).toInt();
+        if ((this.isNaN() && other.isNaN()) || (abs(this.value - other.value) < Float.EPSILON)) {
+            return 0;
+        }
+        if (this.isNaN() || this.value > other) {
+            return 1;
+        }
+        return -1;
     }
 
     /**

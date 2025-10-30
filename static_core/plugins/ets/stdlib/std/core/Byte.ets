@@ -273,10 +273,16 @@ export final class Byte extends Integral implements Comparable<Byte> {
      *
      * @param other Byte object to compare with
      *
-     * @returns result of the comparison
+     * @returns result of the comparison, -1 if this instance is less than provided object, 0 if equal, 1 if greater
      */
     public override compareTo(other: Byte): int {
-        return this.toInt() - other.toInt();
+        if (this.value < other) {
+            return -1;
+        }
+        if (this.value == other) {
+            return 0;
+        }
+        return 1;
     }
 
     /**
