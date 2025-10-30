@@ -17,7 +17,8 @@
             "SystemCapability.ArkCompiler.ANI"
         ],
         "features": [
-            "runtime_core_enable_codegen"
+            "runtime_core_enable_codegen",
+            "runtime_core_enable_ffrt"
         ],
         "adapted_system_type": [
             "standard"
@@ -46,7 +47,8 @@
                 "musl",
                 "elfio",
                 "node",
-                "qos_manager"
+                "qos_manager",
+                "ffrt"
             ],
             "third_party": []
         },

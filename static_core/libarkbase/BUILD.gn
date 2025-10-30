@@ -244,6 +244,11 @@ ohos_source_set("libarktsbase_static") {
 
   external_deps = [ sdk_libc_secshared_dep ]
 
+  if (is_ohos && is_standard_system && (current_cpu == "arm" || current_cpu == "arm64") && runtime_core_enable_ffrt) {
+    external_deps += [ "ffrt:libffrt" ]
+    defines = ["PANDA_USE_FFRT"]
+  }
+
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }

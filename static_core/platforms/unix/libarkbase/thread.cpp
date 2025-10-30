@@ -17,6 +17,11 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
+#ifdef PANDA_USE_FFRT
+#include "c/executor_task.h"
+#include "ffrt.h"
+#include "ffrt_inner.h"
+#endif
 #include "libarkbase/os/thread.h"
 #include "libarkbase/utils/logger.h"
 #ifdef PANDA_TARGET_OHOS
@@ -33,6 +38,8 @@
 #include <unistd.h>
 
 namespace ark::os::thread {
+[[maybe_unused]] constexpr size_t NO_GUARD_SIZE = 0;
+
 ThreadId GetCurrentThreadId()
 {
 #if defined(HAVE_GETTID)
@@ -162,6 +169,18 @@ void ThreadSendSignal(NativeHandleType pthreadHandle, int sig)
 
 int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackSize, size_t *guardSize)
 {
+#ifdef PANDA_USE_FFRT
+    /**
+     * ffrt_get_current_coroutine_stack is a function that returns the stack information of the ffrt coroutine.
+     * If the stack information is not available, it returns 0.
+     * If the stack information is available, it returns the stack addr.
+     * Currently lots of sdk codes using the ffrt to submit their task which will casuse native stack overflow.
+     */
+    if (ffrt_get_current_coroutine_stack(stackAddr, stackSize)) {
+        *guardSize = NO_GUARD_SIZE;
+        return 0;
+    }
+#endif /*PANDA_USE_FFRT*/
     pthread_attr_t attr;
     int s = pthread_attr_init(&attr);
 #ifndef PANDA_TARGET_MACOS
