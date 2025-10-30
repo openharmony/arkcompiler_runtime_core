@@ -26,6 +26,7 @@ TEST(BuilderTest, PrimitiveTypes)
 {
     ASSERT_EQ(Builder::BuildUndefined().Descriptor(), "std.core.Object");
     ASSERT_EQ(Builder::BuildNull().Descriptor(), "std.core.Null");
+    ASSERT_EQ(Builder::BuildAny().Descriptor(), "Y");
     ASSERT_EQ(Builder::BuildBoolean().Descriptor(), "z");
     ASSERT_EQ(Builder::BuildChar().Descriptor(), "c");
     ASSERT_EQ(Builder::BuildByte().Descriptor(), "b");
