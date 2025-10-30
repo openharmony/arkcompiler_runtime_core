@@ -382,12 +382,8 @@ napi_value GetSTValueClass(napi_env env)
         napi_property_descriptor {"unwrapToString", 0, STValueUnwrapToStringImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"unwrapToBigInt", 0, STValueUnwrapToBigIntImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"unwrapToBoolean", 0, STValueUnwrapToBooleanImpl, 0, 0, 0, napi_default, 0},
-
-        napi_property_descriptor {"moduleGetVariable", 0, STValueModuleGetVariableImpl, 0, 0, 0, napi_default, 0},
-        napi_property_descriptor {"moduleSetVariable", 0, STValueModuleSetVariableImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"namespaceGetVariable", 0, STValueNamespaceGetVariableImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"namespaceSetVariable", 0, STValueNamespcaeSetVariableImpl, 0, 0, 0, napi_default, 0},
-        napi_property_descriptor {"moduleInvokeFunction", 0, STValueModuleInvokeFunctionImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"namespaceInvokeFunction", 0, STValueNamespaceInvokeFunctionImpl, 0, 0, 0,
                                   napi_default, 0},
 
@@ -416,9 +412,7 @@ napi_value GetSTValueClass(napi_env env)
         napi_property_descriptor {"classGetSuperClass", 0, ClassGetSuperClassImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"fixedArrayGetLength", 0, FixedArrayGetLengthImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"enumGetIndexByName", 0, EnumGetIndexByNameImpl, 0, 0, 0, napi_default, 0},
-        napi_property_descriptor {"enumGetNameByIndex", 0, EnumGetNameByIndexImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"enumGetValueByName", 0, EnumGetValueByNameImpl, 0, 0, 0, napi_default, 0},
-        napi_property_descriptor {"enumGetValueByIndex", 0, EnumGetValueByIndexImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"classGetStaticField", 0, ClassGetStaticFieldImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"classSetStaticField", 0, ClassSetStaticFieldImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"objectGetProperty", 0, ObjectGetPropertyImpl, 0, 0, 0, napi_default, 0},
@@ -430,7 +424,6 @@ napi_value GetSTValueClass(napi_env env)
                                        instanceProperties.size(), instanceProperties.data(), &STValueCtor));
 
     const std::array staticProperties = {
-        napi_property_descriptor {"findModule", 0, STValueFindModuleImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"findClass", 0, STValueFindClassImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"findNamespace", 0, STValueFindNamespaceImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"findEnum", 0, STValueFindEnumImpl, 0, 0, 0, napi_default, 0},

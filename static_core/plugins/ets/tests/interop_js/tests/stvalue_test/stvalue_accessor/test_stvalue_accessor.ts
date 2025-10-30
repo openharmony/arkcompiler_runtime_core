@@ -16,17 +16,17 @@
 const etsVm = globalThis.gtest.etsVm;
 
 let STValue = etsVm.STValue;
-let module = STValue.findModule('stvalue_accessor');
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
 let ns = STValue.findNamespace('stvalue_accessor.magicNamespace');
 
 let SType = etsVm.SType;
 let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');
 let mediaEnum = STValue.findEnum('stvalue_accessor.MEDIA');
-let zeroArray = module.moduleGetVariable('zeroArray', SType.REFERENCE);
-let intArray = module.moduleGetVariable('intArray', SType.REFERENCE);
-let boolArray = module.moduleGetVariable('boolArray', SType.REFERENCE);
-let strArray = module.moduleGetVariable('strArray', SType.REFERENCE);
-let stuArray = module.moduleGetVariable('stuArray', SType.REFERENCE);
+let zeroArray = tns.namespaceGetVariable('zeroArray', SType.REFERENCE);
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+let boolArray = tns.namespaceGetVariable('boolArray', SType.REFERENCE);
+let strArray = tns.namespaceGetVariable('strArray', SType.REFERENCE);
+let stuArray = tns.namespaceGetVariable('stuArray', SType.REFERENCE);
 let studentCls = STValue.findClass('stvalue_accessor.Student');
 
 function testFixedArrayGetLength(): void {
@@ -51,17 +51,8 @@ function testEnumAll(): void {
     ASSERT_TRUE(colorEnum.enumGetIndexByName('Yellow') === 3);
     ASSERT_TRUE(mediaEnum.enumGetIndexByName('YAML') === 2);
 
-    ASSERT_TRUE(colorEnum.enumGetNameByIndex(0) === 'Red');
-    ASSERT_TRUE(colorEnum.enumGetNameByIndex(1) === 'Green');
-    ASSERT_TRUE(colorEnum.enumGetNameByIndex(2) === 'Blue');
-    ASSERT_TRUE(colorEnum.enumGetNameByIndex(3) === 'Yellow');
-    ASSERT_TRUE(mediaEnum.enumGetNameByIndex(0) === 'JSON');
-
     ASSERT_TRUE(colorEnum.enumGetValueByName('Red', SType.INT).unwrapToNumber() === 1);
     ASSERT_TRUE(mediaEnum.enumGetValueByName('XML', SType.REFERENCE).unwrapToString() === 'app/xml');
-
-    ASSERT_TRUE(colorEnum.enumGetValueByIndex(0, SType.INT).unwrapToNumber() === 1);
-    ASSERT_TRUE(mediaEnum.enumGetValueByIndex(1, SType.REFERENCE).unwrapToString() === 'app/xml');
 
     try {
         colorEnum.enumGetIndexByName('Black', SType.INT);
@@ -69,10 +60,6 @@ function testEnumAll(): void {
 
     try {
         colorEnum.enumGetIndexByName('Black');
-    } catch (e: Error) { }
-
-    try {
-        colorEnum.enumGetNameByIndex(-1);
     } catch (e: Error) { }
 
     try {
@@ -144,7 +131,7 @@ function testClassGetAndSetStaticField(): void {
 }
 
 function testObjectGetAndSetProperty(): void {
-    let studentInstance = module.moduleGetVariable('student', SType.REFERENCE);
+    let studentInstance = tns.namespaceGetVariable('student', SType.REFERENCE);
     ASSERT_TRUE(studentInstance.objectGetProperty('name', SType.REFERENCE).unwrapToString() === 'Student');
     ASSERT_TRUE(studentInstance.objectGetProperty('age', SType.INT).unwrapToNumber() === 18);
     ASSERT_TRUE(studentInstance.objectGetProperty('male', SType.BOOLEAN).unwrapToBoolean() === true);
@@ -228,12 +215,6 @@ function testFixedArrayGetAndSet(): void {
         intArray.fixedArrayGet(-1, SType.INT);
     } catch (e: Error) { }
 
-    // try {
-    //     intArray.fixedArrayGet(0, SType.REFERENCE);
-    // } catch (e: Error) {
-    //     print("ErrorTest: fixedArray gets wrong type: " + e.message);
-    // }
-
     try {
         let nullArray = STValue.getNull();
         nullArray.fixedArraySet(0, STValue.wrapNumber(111), SType.FLOAT);
@@ -257,89 +238,6 @@ function testFixedArrayGetAndSet(): void {
 
 }
 
-// Module variable get/set tests
-function testModuleVariables() {
-    ASSERT_TRUE(module.moduleGetVariable('magic_int', SType.INT).unwrapToNumber() === 42);
-    ASSERT_TRUE(module.moduleGetVariable('magic_boolean', SType.BOOLEAN).unwrapToBoolean() === true);
-    ASSERT_TRUE(module.moduleGetVariable('magic_byte', SType.BYTE).unwrapToNumber() === 72);
-    ASSERT_TRUE(module.moduleGetVariable('magic_short', SType.SHORT).unwrapToNumber() === 128);
-    ASSERT_TRUE(module.moduleGetVariable('magic_long', SType.LONG).unwrapToNumber() === 1024);
-    ASSERT_TRUE(module.moduleGetVariable('magic_float', SType.FLOAT).unwrapToNumber() - 3.14 < 0.01);
-    ASSERT_TRUE(Math.abs(module.moduleGetVariable('magic_double', SType.DOUBLE).unwrapToNumber() - 3.141592) < 0.000001);
-    ASSERT_TRUE(module.moduleGetVariable('magic_float', SType.FLOAT).unwrapToNumber() - 3.14 < 0.01);
-
-    module.moduleSetVariable('magic_int', STValue.wrapInt(44), SType.INT);
-    module.moduleSetVariable('magic_boolean', STValue.wrapBoolean(false), SType.BOOLEAN);
-    module.moduleSetVariable('magic_byte', STValue.wrapByte(74), SType.BYTE);
-    module.moduleSetVariable('magic_short', STValue.wrapShort(124), SType.SHORT);
-    module.moduleSetVariable('magic_long', STValue.wrapLong(1020), SType.LONG);
-    module.moduleSetVariable('magic_float', STValue.wrapFloat(3.15), SType.FLOAT);
-    module.moduleSetVariable('magic_double', STValue.wrapNumber(3.141593), SType.DOUBLE);
-
-    ASSERT_TRUE(module.moduleGetVariable('magic_int', SType.INT).unwrapToNumber() === 44);
-    ASSERT_TRUE(module.moduleGetVariable('magic_boolean', SType.BOOLEAN).unwrapToBoolean() === false);
-    ASSERT_TRUE(module.moduleGetVariable('magic_byte', SType.BYTE).unwrapToNumber() === 74);
-    ASSERT_TRUE(module.moduleGetVariable('magic_short', SType.SHORT).unwrapToNumber() === 124);
-    ASSERT_TRUE(module.moduleGetVariable('magic_long', SType.LONG).unwrapToNumber() === 1020);
-    ASSERT_TRUE(module.moduleGetVariable('magic_float', SType.FLOAT).unwrapToNumber() - 3.15 < 0.01);
-    ASSERT_TRUE(Math.abs(module.moduleGetVariable('magic_double', SType.DOUBLE).unwrapToNumber() - 3.141593) < 0.000001);
-}
-
-function testModuleVariablesInvailidParam(): void {
-    // variable not string type
-    ASSERT_THROWS(Error, () => module.moduleGetVariable(null, SType.INT));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable(1, SType.INT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable(null, STValue.wrapInt(44), SType.INT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable(1, STValue.wrapInt(44), SType.INT));
-
-    // variable not found
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('', SType.INT));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('', SType.BOOLEAN));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('', SType.BYTE));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('', SType.SHORT));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('', SType.LONG));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('', SType.FLOAT));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('', SType.DOUBLE));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('', STValue.wrapBoolean(false), SType.BOOLEAN));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('', STValue.wrapByte(74), SType.BYTE));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('', STValue.wrapShort(74), SType.SHORT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('', STValue.wrapLong(1020), SType.LONG));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('', STValue.wrapFloat(3.15), SType.FLOAT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('', STValue.wrapNumber(3.141593), SType.DOUBLE));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('', STValue.wrapInt(44), SType.INT));
-
-    // stype not match
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('magic_int', SType.DOUBLE));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('magic_boolean', SType.BYTE));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('magic_byte', SType.SHORT));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('magic_short', SType.LONG));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('magic_long', SType.FLOAT));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('magic_float', SType.DOUBLE));
-    ASSERT_THROWS(Error, () => module.moduleGetVariable('magic_double', SType.INT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_int', STValue.wrapInt(44), SType.DOUBLE));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_boolean', STValue.wrapBoolean(false), SType.INT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_byte', STValue.wrapByte(74), SType.BOOLEAN));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_short', STValue.wrapShort(124), SType.BYTE));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_long', STValue.wrapLong(1020), SType.SHORT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_float', STValue.wrapFloat(3.15), SType.LONG));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_double', STValue.wrapNumber(3.141593), SType.FLOAT));
-
-    // stvalue not match
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_int', STValue.wrapBoolean(false), SType.INT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_boolean', STValue.wrapByte(74), SType.BOOLEAN));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_byte', STValue.wrapShort(124), SType.BYTE));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_short', STValue.wrapLong(1020), SType.SHORT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_long', STValue.wrapFloat(3.15), SType.LONG));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_float', STValue.wrapNumber(3.141593), SType.FLOAT));
-    ASSERT_THROWS(Error, () => module.moduleSetVariable('magic_double', STValue.wrapInt(44), SType.DOUBLE));
-
-    // invalid call
-    ASSERT_THROWS(Error, () => STValue.wrapInt(44).moduleGetVariable('magic_int', SType.INT));
-}
-
-/*
- * moduleGetSetVariableTest
- */
 function testNamespaceVariable(): void {
     ASSERT_TRUE(ns.namespaceGetVariable('magic_int_n', SType.INT).unwrapToNumber() === 42);
     ASSERT_TRUE(ns.namespaceGetVariable('magic_boolean_n', SType.BOOLEAN).unwrapToBoolean() === true);
@@ -591,88 +489,6 @@ function testClassGetSuperClass(): void {
     } catch (e: Error) { }
 }
 
-function testFindModuleInvalidParam(): void {
-    // 1. no param
-    let klass = null;
-    try {
-        klass = STValue.findModule();
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
-
-    // 2. param args not match
-    try {
-        klass = STValue.findModule('stvalue_accessor', 'stvalue_accessor');
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
-
-    // 3.1 param not string type
-    try {
-        klass = STValue.findModule(null);
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
-
-    // 3.2 param not string type
-    try {
-        klass = STValue.findModule(BigInt(123456n));
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
-
-    // 3.3 param not string type
-    try {
-        klass = STValue.findModule(1);
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
-
-    // 4.1 empty param
-    try {
-        klass = STValue.findModule('');
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
-
-    // 5.1 param contains special charactor
-    try {
-        klass = STValue.findModule('stvalue_accessor;');
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
-
-    // 5.2 param contains special charactor
-    try {
-        klass = STValue.findModule('stvalue_accessor/');
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
-}
-
-function testFindModuleNotFound(): void {
-    let klass = null;
-    try {
-        klass = STValue.findModule('NOT_FOUND');
-    } catch (e) {
-        print('Error code: ', e.code);
-        print('Error message: ', e.message);
-    }
-}
-
-function testFindModule(): void {
-    testFindModuleInvalidParam();
-    testFindModuleNotFound();
-}
-
 function testFindNamespaceInvalidParam(): void {
     // 1. no param
     let klass = null;
@@ -874,13 +690,10 @@ function stvalueAccessor() {
     testClassGetAndSetStaticField();
     testObjectGetAndSetProperty();
     testFixedArrayGetAndSet();
-    testModuleVariables();
-    testModuleVariablesInvailidParam();
     testNamespaceVariable();
     testNamespaceVariablesInvailidParam();
     testObjectGetType();
     testFindClass();
-    testFindModule();
     testFindNamespace();
     testFindEnum();
 }
