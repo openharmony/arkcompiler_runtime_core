@@ -11,16 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of integer comparison tests
+--- # List of non numeric comparison tests
 integer_comparison:
-  - {xtype: Any, xvalue: = Object, ytype: Any, yvalue: = Object, op: ">=", result: "true"}
-  - {xtype: Any, xvalue: = never, ytype: Any, yvalue: = never, op: ">=", result: "true"}
-  - {xtype: Any, xvalue: = void, ytype: Any, yvalue: = void, op: ">=", result: "true"}
-  - {xtype: Any, xvalue: = undefined, ytype: Any, yvalue: = undefined, op: ">=", result: "true"}
-  - {xtype: Any, xvalue: = null, ytype: Any, yvalue: = null, op: ">=", result: "true"}
-  - {xtype: Any, xvalue: = c'1', ytype: string, yvalue: = '1', op: ">=", result: "true"}
-  - {xtype: never, xvalue: "", ytype: never, yvalue: "", op: ">=", result: "true"}
-  - {xtype: void, xvalue: "", ytype: void, yvalue: "", op: ">=", result: "false"}
+  - {xtype: 'readonly number []', ytype: number, op: ">=", declare: 'inner'}
+  - {xtype: 'void', ytype: number, op: ">=", declare: 'inner'}
+  - {xtype: 'undefined', ytype: number, op: ">=", declare: 'inner'}
+  - {xtype: 'Any', ytype: number, op: ">=", declare: 'inner'}
+  - {xtype: 'int[]', ytype: number, op: ">=", declare: 'inner'}
+  - {xtype: 'never', ytype: number, op: ">=", declare: 'inner'}
+  - {xtype: 'Object', ytype: number, op: ">=", declare: 'inner'}
+  - {xtype: '(n: number) => number', ytype: number, op: ">=", declare: 'inner'}
+  # Smart casts are not applied to global variabes and class fields
+  - {xtype: 'number|string', ytype: number, op: ">=", declare: 'outer'}
+
+  
 
 
 

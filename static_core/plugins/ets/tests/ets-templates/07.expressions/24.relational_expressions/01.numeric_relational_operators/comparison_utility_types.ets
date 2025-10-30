@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
-{% for ic in integer_comparison %}
-
 /*---
-desc: Non numeric comparison 
-{% if ":" in ic.xtype %} function type {% else %} {{ic.xtype}} {% endif %}vs {{ic.ytype}}. CTE expected
-tags: [compile-only, negative]
+desc: comparison with utility types and local smart types
+name: comparison_utulity_types
 ---*/
 
-{% if ic.declare == "outer" %}let x: {{ic.xtype}}{% endif %}
 function main(): void {
-  {% if ic.declare == "inner" %}let x: {{ic.xtype}}{% endif %}
-  let y: {{ic.ytype}}
-  x {{ic.op}} y
-}
+    let one: NonNullable<int> = 1
+    let two: Readonly<int> = 2
+    let three: Required<Readonly<number>> = 3.1
+    let four: Required<NonNullable<Readonly<number>>> = 4.0
+    //local smart type, effectively number
+    let five: number|string = 5
 
-{% endfor %}
+    arktest.assertEQ(one > 0, true)
+    arktest.assertEQ(two <= 3, true)
+    arktest.assertEQ(three >= 3, true)
+    arktest.assertEQ(four < 5, true)
+    arktest.assertEQ(five <= 5, true)
+}

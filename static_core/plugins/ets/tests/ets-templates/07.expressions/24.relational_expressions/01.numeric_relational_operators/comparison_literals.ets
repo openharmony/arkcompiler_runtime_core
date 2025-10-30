@@ -13,19 +13,25 @@
  * limitations under the License.
  */
 
-{% for ic in integer_comparison %}
+{% for ic in literals_comparison %}
 
 /*---
-desc: Non numeric comparison 
-{% if ":" in ic.xtype %} function type {% else %} {{ic.xtype}} {% endif %}vs {{ic.ytype}}. CTE expected
-tags: [compile-only, negative]
+desc: comparison with literals - {{ic.type}}
 ---*/
 
-{% if ic.declare == "outer" %}let x: {{ic.xtype}}{% endif %}
 function main(): void {
-  {% if ic.declare == "inner" %}let x: {{ic.xtype}}{% endif %}
-  let y: {{ic.ytype}}
-  x {{ic.op}} y
+    const one: int = 1
+    {% if ic.type != 'NaN' %}
+    arktest.assertLT(one, {{ic.value}})
+    arktest.assertLT(-{{ic.value}}, one)
+    arktest.assertLT(one, {{ic.valueWithUndercore}})
+    arktest.assertLT(-{{ic.valueWithUndercore}}, one)
+    {% else %}
+    arktest.assertFalse(one > {{ic.value}})
+    arktest.assertFalse(one < {{ic.value}})
+    arktest.assertFalse(one > -{{ic.value}})
+    arktest.assertFalse(one < -{{ic.value}})
+    {% endif %}
 }
 
 {% endfor %}
