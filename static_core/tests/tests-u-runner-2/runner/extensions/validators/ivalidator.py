@@ -19,6 +19,8 @@ from abc import ABC
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from runner.enum_types.validation_result import ValidationResult
+
 if TYPE_CHECKING:
     from runner.suites.test_standard_flow import TestStandardFlow
 
@@ -28,7 +30,7 @@ if TYPE_CHECKING:
 # output: str - what stdout contains
 # error: str - what stderr contains
 # return_code: int - return code of the binary run on the step for the test
-ValidatorFunction = Callable[["TestStandardFlow", str, str, str, int], bool]
+ValidatorFunction = Callable[["TestStandardFlow", str, str, str, int], ValidationResult]
 
 
 class IValidator(ABC):  # noqa: B024
