@@ -37,6 +37,7 @@ parameters:
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: true
+    boot-panda-files: ""
 steps:
     compile:
         from: es2panda-verifier
@@ -50,6 +51,7 @@ steps:
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
         es2panda-args: ${parameters.es2panda-args}
+        boot-panda-files: ${parameters.boot-panda-files}
     runtime:
         from: ark
         ark-timeout: ${parameters.ark-timeout}
@@ -60,3 +62,4 @@ steps:
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
         load-runtimes: ${parameters.load-runtimes}
         ark-args: ${parameters.ark-args}
+        boot-panda-files: ${parameters.boot-panda-files}

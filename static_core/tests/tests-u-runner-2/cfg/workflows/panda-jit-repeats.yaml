@@ -46,6 +46,7 @@ parameters:
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: true
+    boot-panda-files: ""
 steps:
     compile:
         from: es2panda-verifier
@@ -58,6 +59,7 @@ steps:
         enable-verifier: ${parameters.enable-verifier}
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-with-jit-repeats:
         from: ark
         ark-timeout: ${parameters.ark-timeout}
@@ -69,3 +71,4 @@ steps:
         load-runtimes: ${parameters.load-runtimes}
         ark-args: ${parameters.ark-workflow-args}
         compiler-enable-jit: ${parameters.compiler-enable-jit}
+        boot-panda-files: ${parameters.boot-panda-files}

@@ -30,6 +30,7 @@ parameters:
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: true
+    boot-panda-files: ""
 steps:
     ark:
         executable-path: ${parameters.build}/bin/ark
@@ -39,7 +40,7 @@ steps:
             - "--gc-type=${parameters.gc-type}"
             - "--heap-verifier=${parameters.heap-verifier}"
             - "--full-gc-bombing-frequency=${parameters.full-gc-bombing-frequency}"
-            - "--boot-panda-files=${parameters.stdlib}"
+            - "--boot-panda-files=${parameters.stdlib}${parameters.boot-panda-files}"
             - "--load-runtimes=${parameters.load-runtimes}"
             - "--compiler-enable-jit=${parameters.compiler-enable-jit}"
             - "${parameters.ark-args}"

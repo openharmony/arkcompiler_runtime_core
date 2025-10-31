@@ -34,6 +34,7 @@ parameters:
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: true
+    boot-panda-files: ""
 
     # ark - for int mode
     ark-int-timeout: 80
@@ -64,6 +65,7 @@ steps:
         es2panda-timeout: ${parameters.es2panda-timeout}
         verifier-timeout: ${parameters.verifier-timeout}
         es2panda-args: ${parameters.es2panda-args}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-int-cpp-stw:
         from: panda-int
         build: ${parameters.build}
@@ -80,6 +82,7 @@ steps:
             - ${parameters.ark-int-args}
             - "--interpreter-type=cpp"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-int-irtoc-stw:
         from: panda-int
         build: ${parameters.build}
@@ -96,6 +99,7 @@ steps:
             - ${parameters.ark-int-args}
             - "--interpreter-type=irtoc"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-int-cpp-g1-gc:
         from: panda-int
         build: ${parameters.build}
@@ -112,6 +116,7 @@ steps:
             - ${parameters.ark-int-args}
             - "--interpreter-type=cpp"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-int-irtoc-g1-gc:
         from: panda-int
         build: ${parameters.build}
@@ -128,6 +133,7 @@ steps:
             - ${parameters.ark-int-args}
             - "--interpreter-type=irtoc"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-with-aot-cpp:
         from: panda-aot
         build: ${parameters.build}
@@ -146,6 +152,7 @@ steps:
             - ${parameters.ark-aot-args}
             - "--interpreter-type=cpp"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-with-aot-irtoc:
         from: panda-aot
         build: ${parameters.build}
@@ -164,6 +171,7 @@ steps:
             - ${parameters.ark-aot-args}
             - "--interpreter-type=irtoc"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-with-aot-pgo:
         from: panda-aot-pgo
         build: ${parameters.build}
@@ -180,6 +188,7 @@ steps:
         aot-args: ${parameters.aot-pgo-args}
         ark-args: ${parameters.ark-pgo-args}
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-with-jit-cpp-stw:
         from: panda-jit
         build: ${parameters.build}
@@ -196,6 +205,7 @@ steps:
             - ${parameters.ark-jit-args}
             - "--interpreter-type=cpp"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-with-jit-irtoc-stw:
         from: panda-jit
         build: ${parameters.build}
@@ -212,6 +222,7 @@ steps:
             - ${parameters.ark-jit-args}
             - "--interpreter-type=irtoc"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-with-jit-cpp-g1-gc:
         from: panda-jit
         build: ${parameters.build}
@@ -228,6 +239,7 @@ steps:
             - ${parameters.ark-jit-args}
             - "--interpreter-type=cpp"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
     ark-with-jit-irtoc-g1-gc:
         from: panda-jit
         build: ${parameters.build}
@@ -244,3 +256,4 @@ steps:
             - ${parameters.ark-jit-args}
             - "--interpreter-type=irtoc"
         is-panda: ${parameters.is-panda}
+        boot-panda-files: ${parameters.boot-panda-files}
