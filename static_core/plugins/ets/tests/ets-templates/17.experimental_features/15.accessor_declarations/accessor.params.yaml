@@ -15,7 +15,7 @@
 cases:
   # Below tests are based on code examples from chapter 17.15 spec version 1.2.0-alpha2 TECHNICAL PREVIEW 9
   - decl: |-
-      let saved_age = 0        
+      let saved_age : number = 0
       get age(): number { return saved_age }
       set age(a: number) {
         if (a < 0) { throw new Error("wrong age") }
@@ -23,12 +23,13 @@ cases:
       }
     tags: []
     use: |-
+      saved_age = 0
       arktest.assertEQ(age, 0)
       age = 1
       arktest.assertEQ(age, 1)
 
   - decl: |-
-      let saved_age = 0        
+      let saved_age : number = 0        
       export get age(): number { return saved_age }
       export set age(a: number) {
         if (a < 0) { throw new Error("wrong age") }
@@ -36,6 +37,7 @@ cases:
       }
     tags: []
     use: |-
+      saved_age = 0
       arktest.assertEQ(age, 0)
       age = 1
       arktest.assertEQ(age, 1)
@@ -55,7 +57,7 @@ cases:
 
   - decl: |-
       namespace N {
-        let saved_age = 0
+        let saved_age : number = 0
         export get age(): number { return saved_age }
         export set age(a: number) {
           if (a < 0) { throw new Error("wrong age") }
@@ -64,6 +66,7 @@ cases:
       }
     tags: []
     use: |-
+      N.age = 0
       arktest.assertEQ(N.age, 0)
       N.age = 18
       arktest.assertEQ(N.age, 18)
