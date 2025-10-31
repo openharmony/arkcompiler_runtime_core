@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,8 @@
 #include <sys/stat.h>
 #include <tchar.h>
 #include <share.h>
+#include <filesystem>
+#include <windows.h>
 
 namespace ark::os::file {
 
@@ -84,6 +86,38 @@ Expected<std::string, Error> File::GetExecutablePath()
     std::string::size_type pos = std::string(ws.begin(), ws.end()).find_last_of(File::GetPathDelim());
 
     return (pos != std::string::npos) ? std::string(ws.begin(), ws.end()).substr(0, pos) : std::string("");
+}
+
+bool File::HasStatMode(const std::string &path, uint16_t mode)
+{
+    std::filesystem::path p(path);
+    std::wstring filename = p.filename().wstring();
+    std::filesystem::path dir = p.parent_path();
+
+    WIN32_FIND_DATAW findFileData;
+    HANDLE hFind = FindFirstFileW((dir / L"*").c_str(), &findFileData);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    bool result = false;
+
+    do {
+        std::wstring currentFileName = findFileData.cFileName;
+
+        if (currentFileName == filename) {
+            bool isDir = (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+            if ((mode & _S_IFDIR) && isDir) {
+                result = true;
+            } else if ((mode & _S_IFREG) && !isDir) {
+                result = true;
+            }
+            break;
+        }
+    } while (FindNextFileW(hFind, &findFileData));
+
+    FindClose(hFind);
+    return result;
 }
 
 }  // namespace ark::os::windows::file
