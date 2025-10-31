@@ -54,9 +54,6 @@ public:
           fieldCacheSize_(DEFAULT_FIELD_CACHE_SIZE),
           classCacheSize_(DEFAULT_CLASS_CACHE_SIZE)
     {
-        methodCache_.resize(methodCacheSize_, MethodCachePair());
-        fieldCache_.resize(fieldCacheSize_, FieldCachePair());
-        classCache_.resize(classCacheSize_, ClassCachePair());
     }
 
     ~PandaCache() = default;
@@ -77,11 +74,16 @@ public:
         return ark::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), classCacheSize_);
     }
 
-    inline Method *GetMethodFromCache(File::EntityId id) const
+    Method *GetMethodFromCache(File::EntityId id) const
     {
         // Emulator target doesn't support atomic operations with 128bit structures like MethodCachePair.
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
+        // Atomic with acquire order reason: pairs with ready_ store(release); ensures init is visible and prevents
+        // reordering before vector access
+        if (!methodCacheReady_.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
         uint32_t index = GetMethodIndex(id);
         auto *pairPtr =
             reinterpret_cast<std::atomic<MethodCachePair> *>(reinterpret_cast<uintptr_t>(&(methodCache_[index])));
@@ -95,11 +97,15 @@ public:
         return nullptr;
     }
 
-    inline void SetMethodCache(File::EntityId id, Method *method)
+    void SetMethodCache(File::EntityId id, Method *method)
     {
         // Emulator target doesn't support atomic operations with 128bit structures like MethodCachePair.
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
+        // Atomic with acquire order reason: pairs with ready_ store(release) to observe init
+        if (!methodCacheReady_.load(std::memory_order_acquire)) {
+            InitializeMethodCacheIfNeeded();
+        }
         MethodCachePair pair;
         pair.id = id;
         pair.ptr = method;
@@ -112,11 +118,16 @@ public:
 #endif
     }
 
-    inline Field *GetFieldFromCache(File::EntityId id) const
+    Field *GetFieldFromCache(File::EntityId id) const
     {
         // Emulator target doesn't support atomic operations with 128bit structures like FieldCachePair.
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
+        // Atomic with acquire order reason: pairs with ready_ store(release); ensures init is visible and prevents
+        // reordering before vector access
+        if (!fieldCacheReady_.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
         uint32_t index = GetFieldIndex(id);
         auto *pairPtr =
             reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(fieldCache_[index])));
@@ -130,11 +141,15 @@ public:
         return nullptr;
     }
 
-    inline void SetFieldCache(File::EntityId id, Field *field)
+    void SetFieldCache(File::EntityId id, Field *field)
     {
         // Emulator target doesn't support atomic operations with 128bit structures like FieldCachePair.
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
+        // Atomic with acquire order reason: pairs with ready_ store(release) to observe init
+        if (!fieldCacheReady_.load(std::memory_order_acquire)) {
+            InitializeFieldCacheIfNeeded();
+        }
         uint32_t index = GetFieldIndex(id);
         auto *pairPtr =
             reinterpret_cast<std::atomic<FieldCachePair> *>(reinterpret_cast<uintptr_t>(&(fieldCache_[index])));
@@ -147,11 +162,16 @@ public:
 #endif
     }
 
-    inline Class *GetClassFromCache(File::EntityId id) const
+    Class *GetClassFromCache(File::EntityId id) const
     {
         // Emulator target doesn't support atomic operations with 128bit structures like ClassCachePair.
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
+        // Atomic with acquire order reason: pairs with ready_ store(release); ensures init is visible and prevents
+        // reordering before vector access
+        if (!classCacheReady_.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
         uint32_t index = GetClassIndex(id);
         auto *pairPtr =
             reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(classCache_[index])));
@@ -165,11 +185,15 @@ public:
         return nullptr;
     }
 
-    inline void SetClassCache(File::EntityId id, Class *clazz)
+    void SetClassCache(File::EntityId id, Class *clazz)
     {
         // Emulator target doesn't support atomic operations with 128bit structures like ClassCachePair.
         // Compiler __atomic_load call which is not implemented in emulator target.
 #ifndef PANDA_TARGET_EMULATOR
+        // Atomic with acquire order reason: pairs with ready_ store(release) to observe init
+        if (!classCacheReady_.load(std::memory_order_acquire)) {
+            InitializeClassCacheIfNeeded();
+        }
         ClassCachePair pair;
         pair.id = id;
         pair.ptr = clazz;
@@ -182,8 +206,17 @@ public:
 #endif
     }
 
-    inline void Clear()
+    void Clear()
     {
+        // The current Clear method is not thread safe
+        os::memory::LockHolder lock(initMutex_);
+        // Atomic with release order reason: publishes reset before clearing vectors
+        methodCacheReady_.store(false, std::memory_order_release);
+        // Atomic with release order reason: publishes reset before clearing vectors
+        fieldCacheReady_.store(false, std::memory_order_release);
+        // Atomic with release order reason: publishes reset before clearing vectors
+        classCacheReady_.store(false, std::memory_order_release);
+
         methodCache_.clear();
         fieldCache_.clear();
         classCache_.clear();
@@ -196,6 +229,10 @@ public:
     template <class Callback>
     bool EnumerateCachedClasses(const Callback &cb)
     {
+        // Atomic with acquire order reason: pairs with ready_ store(release) to observe init
+        if (!classCacheReady_.load(std::memory_order_acquire)) {
+            return true;
+        }
         for (uint32_t i = 0; i < classCacheSize_; i++) {
             auto *pairPtr =
                 reinterpret_cast<std::atomic<ClassCachePair> *>(reinterpret_cast<uintptr_t>(&(classCache_[i])));
@@ -212,6 +249,51 @@ public:
     }
 
 private:
+    void InitializeMethodCacheIfNeeded()
+    {
+        // Atomic with acquire order reason: pairs with ready_ store(release); early out if already inited
+        if (methodCacheReady_.load(std::memory_order_acquire)) {
+            return;
+        }
+        os::memory::LockHolder lock(initMutex_);
+        // Atomic with relaxed order reason: mutex-protected double-check, no sync needed as lock is held
+        if (!methodCacheReady_.load(std::memory_order_relaxed)) {
+            methodCache_.resize(methodCacheSize_, MethodCachePair());
+            // Atomic with release order reason: publishes vector initialization to readers
+            methodCacheReady_.store(true, std::memory_order_release);
+        }
+    }
+
+    void InitializeFieldCacheIfNeeded()
+    {
+        // Atomic with acquire order reason: pairs with ready_ store(release); early out if already inited
+        if (fieldCacheReady_.load(std::memory_order_acquire)) {
+            return;
+        }
+        os::memory::LockHolder lock(initMutex_);
+        // Atomic with relaxed order reason: mutex-protected double-check, no sync needed as lock is held
+        if (!fieldCacheReady_.load(std::memory_order_relaxed)) {
+            fieldCache_.resize(fieldCacheSize_, FieldCachePair());
+            // Atomic with release order reason: publishes vector initialization to readers
+            fieldCacheReady_.store(true, std::memory_order_release);
+        }
+    }
+
+    void InitializeClassCacheIfNeeded()
+    {
+        // Atomic with acquire order reason: pairs with ready_ store(release); early out if already inited
+        if (classCacheReady_.load(std::memory_order_acquire)) {
+            return;
+        }
+        os::memory::LockHolder lock(initMutex_);
+        // Atomic with relaxed order reason: mutex-protected double-check, no sync needed as lock is held
+        if (!classCacheReady_.load(std::memory_order_relaxed)) {
+            classCache_.resize(classCacheSize_, ClassCachePair());
+            // Atomic with release order reason: publishes vector initialization to readers
+            classCacheReady_.store(true, std::memory_order_release);
+        }
+    }
+
     static constexpr uint32_t DEFAULT_FIELD_CACHE_SIZE = 1024U;
     static constexpr uint32_t DEFAULT_METHOD_CACHE_SIZE = 1024U;
     static constexpr uint32_t DEFAULT_CLASS_CACHE_SIZE = 1024U;
@@ -226,6 +308,12 @@ private:
     std::vector<MethodCachePair> methodCache_ {};
     std::vector<FieldCachePair> fieldCache_ {};
     std::vector<ClassCachePair> classCache_ {};
+
+    std::atomic<bool> methodCacheReady_ {false};
+    std::atomic<bool> fieldCacheReady_ {false};
+    std::atomic<bool> classCacheReady_ {false};
+
+    mutable ark::os::memory::Mutex initMutex_;
 };
 
 }  // namespace panda_file
