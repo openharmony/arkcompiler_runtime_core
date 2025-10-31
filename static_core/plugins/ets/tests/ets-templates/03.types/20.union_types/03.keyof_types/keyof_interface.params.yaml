@@ -66,6 +66,7 @@ cases:
     # Not included
   - check:
     - never
+    tags: compile-only,negative
 
     # Different types check
   - def: |-

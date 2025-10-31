@@ -110,6 +110,7 @@ cases:
       constructor(i: int) {}
     check: 
       - never
+    tags: compile-only,negative
 
   - def: |-
       constructor() {}
@@ -121,6 +122,7 @@ cases:
       static {}
     check: 
       - never
+    tags: compile-only,negative
 
   - def: |-
       static {}
