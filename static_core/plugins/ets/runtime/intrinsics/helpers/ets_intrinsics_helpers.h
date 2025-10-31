@@ -110,6 +110,12 @@ inline double PowHelper(uint64_t number, int exponent, uint8_t radix)
     const double log2Radix {std::log2(radix)};
 
     double expRem = log2Radix * exponent;
+
+    // Check for overflow before casting to int
+    if (expRem > static_cast<double>(INT32_MAX)) {
+        return POSITIVE_INFINITY;
+    }
+
     int expI = static_cast<int>(expRem);
     expRem = expRem - expI;
 
