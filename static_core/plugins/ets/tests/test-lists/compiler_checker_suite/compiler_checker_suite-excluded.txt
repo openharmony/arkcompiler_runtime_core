@@ -26,3 +26,6 @@ simple_run/ets_typeof_compare6.ets
 
 # 24004 jit assert
 simple_run/ets_promise_launch.ets
+
+#Disabled - Replace typedarray length LoadObject with constant with external inlining support.issue 28689
+simple_run/typedarray_get_length_loadobject.ets
