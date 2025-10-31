@@ -237,5 +237,6 @@
   "plugins/ets/tests/ts-templates/05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_extends_class_2.ts": "*",
   "static_linker/tests/data/ets/filesinfo/generate_filesinfo.py": "*",
   "tools/ark_js_napi_cli/tests/trigger_xgc_test.ts": "*",
+  "plugins/ets/runtime/interop_js/logger.h": {"G.FUU.12": "*"},
   "*": ["G.CMT.03", "G.FMT.03-CPP", "G.FMT.04", "G.FMT.11", "G.NAM.03", "huge_headerfile", "huge_non_headerfile", "bc-30001", "G.FUD.06"]
 }
