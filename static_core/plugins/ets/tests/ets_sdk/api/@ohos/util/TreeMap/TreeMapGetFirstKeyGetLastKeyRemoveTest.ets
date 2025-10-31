@@ -50,10 +50,7 @@ function testGetFirstKeyOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
     try {
         let result = treeMap.getFirstKey();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -112,10 +109,7 @@ function testGetLastKeyOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
     try {
         let result = treeMap.getLastKey();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

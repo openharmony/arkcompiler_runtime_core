@@ -25,7 +25,7 @@ function main(): void {
     }
     try {
         arr.at(50)
-    } catch (e) {
+    } catch (e: Error) {
         arktest.assertEQ(e.message, "Invalid index");
     }
     arktest.assertEQ( arr.length, 30)

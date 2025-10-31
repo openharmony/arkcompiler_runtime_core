@@ -98,10 +98,7 @@ function testStackPopWithoutElements() {
     let stack = new Stack<double | string | object>();
     try {
         let first = stack.pop();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -127,10 +124,7 @@ function testStackPeekWithoutElements() {
     let stack = new Stack<double | string | object>();
     try {
         let first = stack.peek();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

@@ -51,10 +51,7 @@ function testGetFirstValueOnEmptySet() {
     let treeSet = new TreeSet<string>();
     try {
         let result = treeSet.getFirstValue();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -94,10 +91,7 @@ function testGetLastValueOnEmptySet() {
     let treeSet = new TreeSet<string>();
     try {
         let result = treeSet.getLastValue();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

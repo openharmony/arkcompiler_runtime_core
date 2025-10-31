@@ -56,10 +56,7 @@ function testGetFirstEmptyContainer() {
     let list = new List<double>();
     try {
         let result = list.getFirst();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -81,10 +78,7 @@ function testGetLastEmptyContainer() {
     let list = new List<double>();
     try {
         let result = list.getLast();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }

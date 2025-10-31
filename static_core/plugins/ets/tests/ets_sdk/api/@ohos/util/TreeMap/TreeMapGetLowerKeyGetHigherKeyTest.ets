@@ -77,18 +77,12 @@ function testGetLowerKeyAndHigherKeyEmptyTreeMap() {
         });
     try {
         let lower = treeMap.getLowerKey("bb");
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     try {
         let higher = treeMap.getHigherKey("aa");
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
@@ -140,18 +134,12 @@ function testGetLowerKeyAndHigherKeyEmptyStringKey() {
         });
     try {
         let lower = treeMap.getLowerKey("");
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     try {
         let higher = treeMap.getHigherKey("");
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");

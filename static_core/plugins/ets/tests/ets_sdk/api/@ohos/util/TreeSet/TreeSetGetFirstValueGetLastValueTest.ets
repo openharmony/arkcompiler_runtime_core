@@ -71,18 +71,12 @@ function testGetFirstValueGetLastValueEmptyTreeSet() {
         secondValue: string): double => { return secondValue.compareTo(firstValue) });
     try {
         let result1 = treeSet.getFirstValue();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     try {
         let result2 = treeSet.getLastValue();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")

@@ -107,10 +107,7 @@ function testQueuePopEmpty() {
     arktest.assertEQ(queue.length, 0, "Initial queue length should be 0");
     try {
         let result = queue.pop();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
