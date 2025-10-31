@@ -25,7 +25,7 @@ import stat
 import subprocess
 import threading
 import zipfile
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from concurrent.futures import Future
 from dataclasses import dataclass
 from filecmp import cmp
@@ -538,3 +538,7 @@ def is_executable_file(path_to_file: Path) -> bool:
         return False
     mode = path_to_file.stat().st_mode
     return bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+
+
+def unlines(lines: Iterable[str]) -> str:
+    return ''.join(line + "\n" for line in lines)

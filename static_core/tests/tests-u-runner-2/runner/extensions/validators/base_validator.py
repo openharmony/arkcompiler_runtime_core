@@ -55,15 +55,11 @@ class BaseValidator(IValidator):
     @staticmethod
     def check_stderr(test: "TestStandardFlow", step_value: str, _1: str,
                             error_output: str, _2: int) -> ValidationResult:
-
-        if error_output.strip():
-            _LOGGER.all(f"Step validator {step_value}: get error output '{error_output}'")
-        # if output.find('[Fail]Device not founded or connected') > -1:
-        #     return ValidationResult(False, ValidatorFailKind.DEVICE_NOT_FOUND, "Device not founded or connected")
-
+        error_output = error_output.strip()
         if not error_output:
             return ValidationResult(True, ValidatorFailKind.NONE, "")
 
+        _LOGGER.all(f"Step validator {step_value}: get error output '{error_output}'")
         if test.has_expected_err:
             comparison_res = test.compare_with_stderr(error_output)
             if comparison_res:

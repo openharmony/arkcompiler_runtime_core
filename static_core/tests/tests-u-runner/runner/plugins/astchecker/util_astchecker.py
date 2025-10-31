@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,13 +17,14 @@
 
 from __future__ import annotations
 
-import logging
 import json
-from dataclasses import dataclass
-from typing import Set, TextIO, Tuple, Optional, List, Dict, Any
-import re
-from enum import Enum
+import logging
 import os
+import re
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Dict, List, Optional, Set, TextIO, Tuple
+
 from typing_extensions import assert_never
 
 from runner.logger import Log
@@ -31,7 +32,8 @@ from runner.logger import Log
 _LOGGER = logging.getLogger('runner.astchecker.util_astchecker')
 
 # NOTE(pronai) use runner.parser #30090
-_error_msg_pattern = re.compile(r"[\w\s]*error:.*",re.IGNORECASE)
+_error_msg_pattern = re.compile(r"[\w\s]*error:.*", re.IGNORECASE)
+
 
 class UtilASTChecker:
     skip_options = {'SkipErrors': False, 'SkipWarnings': False}
@@ -94,6 +96,7 @@ class UtilASTChecker:
 
     def __init__(self) -> None:
         self.regex = re.compile(r'/\*\s*@@\s*(?P<pattern>.*?)\s*\*/[ ]*', re.DOTALL)
+        self.not_a_test = re.compile(r'\s*tags:\s*\[\s*not-a-test.*]')
         self.reset_skips()
 
     @staticmethod
@@ -141,7 +144,7 @@ class UtilASTChecker:
 
     # NOTE(pronai) Use runner.parser instead #30090
     @staticmethod
-    def get_actual_errors(error: str) -> Set[Tuple[str,str]]:
+    def get_actual_errors(error: str) -> Set[Tuple[str, str]]:
         actual_errors = set()
         for error_str in error.splitlines():
             if error_str.strip():
@@ -271,12 +274,21 @@ class UtilASTChecker:
             pattern=UtilASTChecker._Pattern(pattern_type, pattern, line, col, error_file)
         )
 
-    def parse_tests(self, file: TextIO) -> UtilASTChecker.TestCasesList:
+    def is_not_a_test(self, file_text: str) -> bool:
+        matches = re.search(self.not_a_test, file_text)
+        return matches is not None
+
+    def parse_tests(self, file: TextIO) -> Tuple[UtilASTChecker.TestCasesList, bool]:
         """
         Takes .ets file with tests and parses them into a list of TestCases.
         """
         self.reset_skips()
         test_text = file.read()
+        if self.is_not_a_test(test_text):
+            test_case_list = UtilASTChecker.TestCasesList(set())
+            test_case_list.skip_errors = self.check_skip_error()
+            test_case_list.skip_warnings = self.check_skip_warning()
+            return test_case_list, False
         link_defs_map: Dict[str, List[Tuple[UtilASTChecker._TestType, str]]] = {}
         link_sources_map: Dict[str, re.Match[str]] = {}
         test_cases = set()
@@ -301,7 +313,7 @@ class UtilASTChecker:
         test_case_list = UtilASTChecker.TestCasesList(test_cases)
         test_case_list.skip_errors = self.check_skip_error()
         test_case_list.skip_warnings = self.check_skip_warning()
-        return test_case_list
+        return test_case_list, True
 
     def find_nodes_by_start_location(self, root: dict, line: int, col: int) -> List[dict]:
         """
@@ -356,7 +368,7 @@ class UtilASTChecker:
         return False
 
     def _count_failures(self, test_file: str, test_cases: TestCasesList, ast: dict,
-                        actual_errors: Set[Tuple[str, str]], tests_set: Set[_TestCase])-> int:
+                        actual_errors: Set[Tuple[str, str]], tests_set: Set[_TestCase]) -> int:
         failed_tests = 0
         for i, test in enumerate(tests_set):
             if test.test_type == UtilASTChecker._TestType.NODE:

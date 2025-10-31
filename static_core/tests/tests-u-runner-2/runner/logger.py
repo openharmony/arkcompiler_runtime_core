@@ -89,3 +89,9 @@ class Log:
         Logs on the level verbose=SILENT
         """
         self.logger.log(DEFAULT_LOG_LEVEL, message)
+
+    def error(self, message: str) -> None:
+        """
+        Logs on the level verbose=None
+        """
+        self.logger.error(message)

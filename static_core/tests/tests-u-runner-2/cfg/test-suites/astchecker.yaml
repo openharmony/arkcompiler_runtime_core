@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -76,24 +76,16 @@ collections:
         - "--extension=as"
         - "--thread=0"
         - "--parse-only"
-  # sts tests
+  # ets tests
   ast/compiler/ets:
     parameters:
-      arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
       extension: ets
-      es2panda-workflow-args:
+      es2panda-test-suite-args:
         - "--dump-ast"
-        - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
-        - "--arktsconfig=${parameters.arktsconfig}"
   ast/parser/ets:
     parameters:
-      arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
       extension: ets
-      es2panda-workflow-args:
+      es2panda-test-suite-args:
         - "--dump-ast"
-        - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
-        - "--arktsconfig=${parameters.arktsconfig}"

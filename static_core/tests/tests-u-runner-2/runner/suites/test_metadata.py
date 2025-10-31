@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from yaml.scanner import ScannerError
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.base_enum import BaseEnum
@@ -122,12 +123,14 @@ class TestMetadata:     # type: ignore[explicit-any]
     def get_metadata(cls, path: Path) -> 'TestMetadata':
         data = Path.read_text(path)
         yaml_text = "\n".join(re.findall(METADATA_PATTERN, data))
+        if not yaml_text:
+            return cls.create_empty_metadata(path)
         try:
             metadata = yaml.safe_load(yaml_text)
             if metadata is None or isinstance(metadata, str):
                 return cls.create_empty_metadata(path)
             return cls.create_filled_metadata(metadata, path)
-        except (FileNotFoundError, TypeError, AttributeError) as error:
+        except (FileNotFoundError, TypeError, AttributeError, ScannerError) as error:
             logger = globals().get('__LOGGER')
             if isinstance(logger, Log):
                 raise InvalidConfiguration(f"Yaml parsing: '{path}' - error: '{error}'") from error

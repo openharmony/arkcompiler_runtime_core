@@ -79,7 +79,7 @@ def main() -> None:
     config = Config(args)
     logger = Log.setup(config.general.verbose, config.general.work_dir)
     config.log_warnings()
-    Log.short(logger, f"Loaded configuration: {config}")
+    Log.all(logger, f"Loaded configuration: {config}")
     config.generate_config()
 
     registry = PluginsRegistry()

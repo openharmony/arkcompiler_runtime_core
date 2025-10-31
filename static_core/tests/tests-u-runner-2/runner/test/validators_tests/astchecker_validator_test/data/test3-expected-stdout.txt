@@ -1,0 +1,812 @@
+{
+  "type" : "Program",
+  "statements" : [ {
+    "type" : "ClassDeclaration",
+    "definition" : {
+      "id" : {
+        "type" : "Identifier",
+        "name" : "ETSGLOBAL",
+        "loc" : {
+          "start" : {
+            "line" : 1,
+            "column" : 1,
+            "program" : "test3.ets"
+          },
+          "end" : {
+            "line" : 1,
+            "column" : 1,
+            "program" : "test3.ets"
+          }
+        }
+      },
+      "superClass" : null,
+      "implements" : [ ],
+      "body" : [ {
+        "type" : "MethodDefinition",
+        "key" : {
+          "type" : "Identifier",
+          "name" : "main",
+          "loc" : {
+            "start" : {
+              "line" : 1,
+              "column" : 1,
+              "program" : null
+            },
+            "end" : {
+              "line" : 1,
+              "column" : 1,
+              "program" : null
+            }
+          }
+        },
+        "kind" : "method",
+        "static" : true,
+        "optional" : false,
+        "computed" : false,
+        "value" : {
+          "type" : "FunctionExpression",
+          "function" : {
+            "type" : "ScriptFunction",
+            "id" : {
+              "type" : "Identifier",
+              "name" : "main",
+              "loc" : {
+                "start" : {
+                  "line" : 1,
+                  "column" : 1,
+                  "program" : null
+                },
+                "end" : {
+                  "line" : 1,
+                  "column" : 1,
+                  "program" : null
+                }
+              }
+            },
+            "generator" : false,
+            "async" : false,
+            "expression" : false,
+            "params" : [ ],
+            "body" : {
+              "type" : "BlockStatement",
+              "statements" : [ ],
+              "loc" : {
+                "start" : {
+                  "line" : 1,
+                  "column" : 1,
+                  "program" : "test3.ets"
+                },
+                "end" : {
+                  "line" : 1,
+                  "column" : 1,
+                  "program" : "test3.ets"
+                }
+              }
+            },
+            "loc" : {
+              "start" : {
+                "line" : 1,
+                "column" : 1,
+                "program" : "test3.ets"
+              },
+              "end" : {
+                "line" : 1,
+                "column" : 1,
+                "program" : "test3.ets"
+              }
+            }
+          },
+          "loc" : {
+            "start" : {
+              "line" : 1,
+              "column" : 1,
+              "program" : "test3.ets"
+            },
+            "end" : {
+              "line" : 1,
+              "column" : 1,
+              "program" : "test3.ets"
+            }
+          }
+        },
+        "overloads" : [ ],
+        "loc" : {
+          "start" : {
+            "line" : 1,
+            "column" : 1,
+            "program" : "test3.ets"
+          },
+          "end" : {
+            "line" : 1,
+            "column" : 1,
+            "program" : "test3.ets"
+          }
+        }
+      }, {
+        "type" : "ClassProperty",
+        "key" : {
+          "type" : "Identifier",
+          "name" : "p",
+          "loc" : {
+            "start" : {
+              "line" : 16,
+              "column" : 5,
+              "program" : "test3.ets"
+            },
+            "end" : {
+              "line" : 16,
+              "column" : 6,
+              "program" : "test3.ets"
+            }
+          }
+        },
+        "value" : {
+          "type" : "CallExpression",
+          "callee" : {
+            "type" : "MemberExpression",
+            "object" : {
+              "type" : "CallExpression",
+              "callee" : {
+                "type" : "MemberExpression",
+                "object" : {
+                  "type" : "Identifier",
+                  "name" : "Promise",
+                  "loc" : {
+                    "start" : {
+                      "line" : 16,
+                      "column" : 9,
+                      "program" : "test3.ets"
+                    },
+                    "end" : {
+                      "line" : 16,
+                      "column" : 16,
+                      "program" : "test3.ets"
+                    }
+                  }
+                },
+                "property" : {
+                  "type" : "Identifier",
+                  "name" : "resolve",
+                  "loc" : {
+                    "start" : {
+                      "line" : 16,
+                      "column" : 17,
+                      "program" : "test3.ets"
+                    },
+                    "end" : {
+                      "line" : 16,
+                      "column" : 24,
+                      "program" : "test3.ets"
+                    }
+                  }
+                },
+                "computed" : false,
+                "optional" : false,
+                "loc" : {
+                  "start" : {
+                    "line" : 16,
+                    "column" : 9,
+                    "program" : "test3.ets"
+                  },
+                  "end" : {
+                    "line" : 16,
+                    "column" : 24,
+                    "program" : "test3.ets"
+                  }
+                }
+              },
+              "arguments" : [ {
+                "type" : "NumberLiteral",
+                "value" : 7,
+                "loc" : {
+                  "start" : {
+                    "line" : 16,
+                    "column" : 33,
+                    "program" : "test3.ets"
+                  },
+                  "end" : {
+                    "line" : 16,
+                    "column" : 34,
+                    "program" : "test3.ets"
+                  }
+                }
+              } ],
+              "optional" : false,
+              "typeParameters" : {
+                "type" : "TSTypeParameterInstantiation",
+                "params" : [ {
+                  "type" : "ETSTypeReference",
+                  "part" : {
+                    "type" : "ETSTypeReferencePart",
+                    "name" : {
+                      "type" : "Identifier",
+                      "name" : "number",
+                      "loc" : {
+                        "start" : {
+                          "line" : 16,
+                          "column" : 25,
+                          "program" : "test3.ets"
+                        },
+                        "end" : {
+                          "line" : 16,
+                          "column" : 31,
+                          "program" : "test3.ets"
+                        }
+                      }
+                    },
+                    "loc" : {
+                      "start" : {
+                        "line" : 16,
+                        "column" : 25,
+                        "program" : "test3.ets"
+                      },
+                      "end" : {
+                        "line" : 16,
+                        "column" : 31,
+                        "program" : "test3.ets"
+                      }
+                    }
+                  },
+                  "loc" : {
+                    "start" : {
+                      "line" : 16,
+                      "column" : 25,
+                      "program" : "test3.ets"
+                    },
+                    "end" : {
+                      "line" : 16,
+                      "column" : 31,
+                      "program" : "test3.ets"
+                    }
+                  }
+                } ],
+                "loc" : {
+                  "start" : {
+                    "line" : 16,
+                    "column" : 24,
+                    "program" : "test3.ets"
+                  },
+                  "end" : {
+                    "line" : 16,
+                    "column" : 32,
+                    "program" : "test3.ets"
+                  }
+                }
+              },
+              "loc" : {
+                "start" : {
+                  "line" : 16,
+                  "column" : 9,
+                  "program" : "test3.ets"
+                },
+                "end" : {
+                  "line" : 16,
+                  "column" : 35,
+                  "program" : "test3.ets"
+                }
+              }
+            },
+            "property" : {
+              "type" : "Identifier",
+              "name" : "then",
+              "loc" : {
+                "start" : {
+                  "line" : 16,
+                  "column" : 36,
+                  "program" : "test3.ets"
+                },
+                "end" : {
+                  "line" : 16,
+                  "column" : 40,
+                  "program" : "test3.ets"
+                }
+              }
+            },
+            "computed" : false,
+            "optional" : false,
+            "loc" : {
+              "start" : {
+                "line" : 16,
+                "column" : 9,
+                "program" : "test3.ets"
+              },
+              "end" : {
+                "line" : 16,
+                "column" : 40,
+                "program" : "test3.ets"
+              }
+            }
+          },
+          "arguments" : [ {
+            "type" : "ArrowFunctionExpression",
+            "function" : {
+              "type" : "ScriptFunction",
+              "id" : null,
+              "generator" : false,
+              "async" : false,
+              "expression" : false,
+              "params" : [ {
+                "type" : "ETSParameterExpression",
+                "name" : {
+                  "type" : "Identifier",
+                  "name" : "value",
+                  "typeAnnotation" : {
+                    "type" : "ETSTypeReference",
+                    "part" : {
+                      "type" : "ETSTypeReferencePart",
+                      "name" : {
+                        "type" : "Identifier",
+                        "name" : "number",
+                        "loc" : {
+                          "start" : {
+                            "line" : 16,
+                            "column" : 61,
+                            "program" : "test3.ets"
+                          },
+                          "end" : {
+                            "line" : 16,
+                            "column" : 67,
+                            "program" : "test3.ets"
+                          }
+                        }
+                      },
+                      "loc" : {
+                        "start" : {
+                          "line" : 16,
+                          "column" : 61,
+                          "program" : "test3.ets"
+                        },
+                        "end" : {
+                          "line" : 16,
+                          "column" : 67,
+                          "program" : "test3.ets"
+                        }
+                      }
+                    },
+                    "loc" : {
+                      "start" : {
+                        "line" : 16,
+                        "column" : 61,
+                        "program" : "test3.ets"
+                      },
+                      "end" : {
+                        "line" : 16,
+                        "column" : 67,
+                        "program" : "test3.ets"
+                      }
+                    }
+                  },
+                  "loc" : {
+                    "start" : {
+                      "line" : 16,
+                      "column" : 54,
+                      "program" : "test3.ets"
+                    },
+                    "end" : {
+                      "line" : 16,
+                      "column" : 67,
+                      "program" : "test3.ets"
+                    }
+                  }
+                },
+                "loc" : {
+                  "start" : {
+                    "line" : 16,
+                    "column" : 54,
+                    "program" : "test3.ets"
+                  },
+                  "end" : {
+                    "line" : 16,
+                    "column" : 67,
+                    "program" : "test3.ets"
+                  }
+                }
+              } ],
+              "returnType" : {
+                "type" : "ETSPrimitiveType",
+                "loc" : {
+                  "start" : {
+                    "line" : 16,
+                    "column" : 70,
+                    "program" : "test3.ets"
+                  },
+                  "end" : {
+                    "line" : 16,
+                    "column" : 74,
+                    "program" : "test3.ets"
+                  }
+                }
+              },
+              "body" : {
+                "type" : "BlockStatement",
+                "statements" : [ {
+                  "type" : "IfStatement",
+                  "test" : {
+                    "type" : "BinaryExpression",
+                    "operator" : "!=",
+                    "left" : {
+                      "type" : "Identifier",
+                      "name" : "value",
+                      "loc" : {
+                        "start" : {
+                          "line" : 17,
+                          "column" : 9,
+                          "program" : "test3.ets"
+                        },
+                        "end" : {
+                          "line" : 17,
+                          "column" : 14,
+                          "program" : "test3.ets"
+                        }
+                      }
+                    },
+                    "right" : {
+                      "type" : "NumberLiteral",
+                      "value" : 7,
+                      "loc" : {
+                        "start" : {
+                          "line" : 17,
+                          "column" : 18,
+                          "program" : "test3.ets"
+                        },
+                        "end" : {
+                          "line" : 17,
+                          "column" : 19,
+                          "program" : "test3.ets"
+                        }
+                      }
+                    },
+                    "loc" : {
+                      "start" : {
+                        "line" : 17,
+                        "column" : 9,
+                        "program" : "test3.ets"
+                      },
+                      "end" : {
+                        "line" : 17,
+                        "column" : 19,
+                        "program" : "test3.ets"
+                      }
+                    }
+                  },
+                  "consequent" : {
+                    "type" : "BlockStatement",
+                    "statements" : [ {
+                      "type" : "ReturnStatement",
+                      "argument" : null,
+                      "loc" : {
+                        "start" : {
+                          "line" : 18,
+                          "column" : 68,
+                          "program" : "test3.ets"
+                        },
+                        "end" : {
+                          "line" : 18,
+                          "column" : 75,
+                          "program" : "test3.ets"
+                        }
+                      }
+                    } ],
+                    "loc" : {
+                      "start" : {
+                        "line" : 17,
+                        "column" : 21,
+                        "program" : "test3.ets"
+                      },
+                      "end" : {
+                        "line" : 19,
+                        "column" : 6,
+                        "program" : "test3.ets"
+                      }
+                    }
+                  },
+                  "alternate" : null,
+                  "loc" : {
+                    "start" : {
+                      "line" : 17,
+                      "column" : 5,
+                      "program" : "test3.ets"
+                    },
+                    "end" : {
+                      "line" : 19,
+                      "column" : 6,
+                      "program" : "test3.ets"
+                    }
+                  }
+                } ],
+                "loc" : {
+                  "start" : {
+                    "line" : 16,
+                    "column" : 78,
+                    "program" : "test3.ets"
+                  },
+                  "end" : {
+                    "line" : 20,
+                    "column" : 2,
+                    "program" : "test3.ets"
+                  }
+                }
+              },
+              "loc" : {
+                "start" : {
+                  "line" : 16,
+                  "column" : 53,
+                  "program" : "test3.ets"
+                },
+                "end" : {
+                  "line" : 20,
+                  "column" : 2,
+                  "program" : "test3.ets"
+                }
+              }
+            },
+            "loc" : {
+              "start" : {
+                "line" : 16,
+                "column" : 53,
+                "program" : "test3.ets"
+              },
+              "end" : {
+                "line" : 20,
+                "column" : 2,
+                "program" : "test3.ets"
+              }
+            }
+          }, {
+            "type" : "ArrowFunctionExpression",
+            "function" : {
+              "type" : "ScriptFunction",
+              "id" : null,
+              "generator" : false,
+              "async" : false,
+              "expression" : false,
+              "params" : [ {
+                "type" : "ETSParameterExpression",
+                "name" : {
+                  "type" : "Identifier",
+                  "name" : "err",
+                  "typeAnnotation" : {
+                    "type" : "ETSTypeReference",
+                    "part" : {
+                      "type" : "ETSTypeReferencePart",
+                      "name" : {
+                        "type" : "Identifier",
+                        "name" : "Object",
+                        "loc" : {
+                          "start" : {
+                            "line" : 20,
+                            "column" : 10,
+                            "program" : "test3.ets"
+                          },
+                          "end" : {
+                            "line" : 20,
+                            "column" : 16,
+                            "program" : "test3.ets"
+                          }
+                        }
+                      },
+                      "loc" : {
+                        "start" : {
+                          "line" : 20,
+                          "column" : 10,
+                          "program" : "test3.ets"
+                        },
+                        "end" : {
+                          "line" : 20,
+                          "column" : 16,
+                          "program" : "test3.ets"
+                        }
+                      }
+                    },
+                    "loc" : {
+                      "start" : {
+                        "line" : 20,
+                        "column" : 10,
+                        "program" : "test3.ets"
+                      },
+                      "end" : {
+                        "line" : 20,
+                        "column" : 16,
+                        "program" : "test3.ets"
+                      }
+                    }
+                  },
+                  "loc" : {
+                    "start" : {
+                      "line" : 20,
+                      "column" : 5,
+                      "program" : "test3.ets"
+                    },
+                    "end" : {
+                      "line" : 20,
+                      "column" : 16,
+                      "program" : "test3.ets"
+                    }
+                  }
+                },
+                "loc" : {
+                  "start" : {
+                    "line" : 20,
+                    "column" : 5,
+                    "program" : "test3.ets"
+                  },
+                  "end" : {
+                    "line" : 20,
+                    "column" : 16,
+                    "program" : "test3.ets"
+                  }
+                }
+              } ],
+              "returnType" : {
+                "type" : "ETSPrimitiveType",
+                "loc" : {
+                  "start" : {
+                    "line" : 20,
+                    "column" : 19,
+                    "program" : "test3.ets"
+                  },
+                  "end" : {
+                    "line" : 20,
+                    "column" : 23,
+                    "program" : "test3.ets"
+                  }
+                }
+              },
+              "body" : {
+                "type" : "BlockStatement",
+                "statements" : [ ],
+                "loc" : {
+                  "start" : {
+                    "line" : 20,
+                    "column" : 27,
+                    "program" : "test3.ets"
+                  },
+                  "end" : {
+                    "line" : 21,
+                    "column" : 2,
+                    "program" : "test3.ets"
+                  }
+                }
+              },
+              "loc" : {
+                "start" : {
+                  "line" : 20,
+                  "column" : 4,
+                  "program" : "test3.ets"
+                },
+                "end" : {
+                  "line" : 21,
+                  "column" : 2,
+                  "program" : "test3.ets"
+                }
+              }
+            },
+            "loc" : {
+              "start" : {
+                "line" : 20,
+                "column" : 4,
+                "program" : "test3.ets"
+              },
+              "end" : {
+                "line" : 21,
+                "column" : 2,
+                "program" : "test3.ets"
+              }
+            }
+          } ],
+          "optional" : false,
+          "typeParameters" : {
+            "type" : "TSTypeParameterInstantiation",
+            "params" : [ {
+              "type" : "ETSPrimitiveType",
+              "loc" : {
+                "start" : {
+                  "line" : 16,
+                  "column" : 41,
+                  "program" : "test3.ets"
+                },
+                "end" : {
+                  "line" : 16,
+                  "column" : 45,
+                  "program" : "test3.ets"
+                }
+              }
+            }, {
+              "type" : "ETSPrimitiveType",
+              "loc" : {
+                "start" : {
+                  "line" : 16,
+                  "column" : 47,
+                  "program" : "test3.ets"
+                },
+                "end" : {
+                  "line" : 16,
+                  "column" : 51,
+                  "program" : "test3.ets"
+                }
+              }
+            } ],
+            "loc" : {
+              "start" : {
+                "line" : 16,
+                "column" : 40,
+                "program" : "test3.ets"
+              },
+              "end" : {
+                "line" : 16,
+                "column" : 52,
+                "program" : "test3.ets"
+              }
+            }
+          },
+          "loc" : {
+            "start" : {
+              "line" : 16,
+              "column" : 9,
+              "program" : "test3.ets"
+            },
+            "end" : {
+              "line" : 21,
+              "column" : 3,
+              "program" : "test3.ets"
+            }
+          }
+        },
+        "static" : true,
+        "readonly" : false,
+        "declare" : false,
+        "optional" : false,
+        "computed" : false,
+        "definite" : false,
+        "loc" : {
+          "start" : {
+            "line" : 16,
+            "column" : 5,
+            "program" : "test3.ets"
+          },
+          "end" : {
+            "line" : 21,
+            "column" : 3,
+            "program" : "test3.ets"
+          }
+        }
+      } ],
+      "loc" : {
+        "start" : {
+          "line" : 1,
+          "column" : 1,
+          "program" : "test3.ets"
+        },
+        "end" : {
+          "line" : 1,
+          "column" : 1,
+          "program" : "test3.ets"
+        }
+      }
+    },
+    "loc" : {
+      "start" : {
+        "line" : 1,
+        "column" : 1,
+        "program" : "test3.ets"
+      },
+      "end" : {
+        "line" : 1,
+        "column" : 1,
+        "program" : "test3.ets"
+      }
+    }
+  } ],
+  "loc" : {
+    "start" : {
+      "line" : 1,
+      "column" : 1,
+      "program" : "test3.ets"
+    },
+    "end" : {
+      "line" : 22,
+      "column" : 1,
+      "program" : "test3.ets"
+    }
+  }
+}

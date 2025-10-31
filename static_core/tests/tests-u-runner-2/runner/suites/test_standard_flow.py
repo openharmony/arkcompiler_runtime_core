@@ -173,7 +173,7 @@ class TestStandardFlow(ITestFlow, Test):
         self.flow_utils = StandardFlowUtils(test_env)
         self.validator_utils = ValidatorUtils(self, test_env)
         self.runtime_steps = [step for step in self.test_env.config.workflow.steps
-                                if step.step_kind not in (StepKind.COMPILER, StepKind.VERIFIER)]
+                              if step.step_kind not in (StepKind.COMPILER, StepKind.VERIFIER)]
         self._dependent_tests: list[TestStandardFlow] = []
         self.__is_dependent = is_dependent
         self.__boot_panda_files: str = ""
@@ -548,8 +548,8 @@ class TestStandardFlow(ITestFlow, Test):
             name=step.name,
             step_kind=step.step_kind,
             params=params,
-            result_validator=lambda out, err, return_code: self.validator_utils.step_validator(step, out, err,
-                                                                                               return_code),
+            result_validator=lambda out, err, return_code:
+                self.validator_utils.step_validator(step, out, err, return_code),
             return_code_interpreter=lambda out, err, return_code: self._get_return_code_from_device(out, return_code)
         )
         self.reproduce += test_runner.reproduce
