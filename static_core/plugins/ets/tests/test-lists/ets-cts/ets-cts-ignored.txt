@@ -165,6 +165,16 @@
 
 #24165
 05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_int.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex4.ets
+
+#30900
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_15.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex2_1_1.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex2_1_2.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex2_1_3.ets
+
+#30924
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_7.ets
 
 #24168 no methods should be inherited using required utility type
 05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_1.ets
@@ -215,24 +225,6 @@
 
 #28484 Interface has methods
 07.expressions/05.object_literal/spec_ex6.ets
-
-#30900
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_15.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex2_1_1.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex2_1_2.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex2_1_3.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_21.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_22.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_19.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_17.ets
-
-#30924
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_7.ets
-
-#31024
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_20.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_18.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex6.ets
 
 #25990
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
@@ -595,6 +587,10 @@
 #22428
 08.statements/15.try_statements/01.catch_clause/catch_6.ets
 08.statements/15.try_statements/01.catch_clause/catch_9.ets
+
+#30181
+09.classes/01.class_declaration/01.abstract_classes/abstract_object_literal_1.ets
+09.classes/01.class_declaration/01.abstract_classes/abstract_object_literal_3.ets
 
 #30295
 09.classes/02.class_extension_clause/extension_clause_negative_5.ets
