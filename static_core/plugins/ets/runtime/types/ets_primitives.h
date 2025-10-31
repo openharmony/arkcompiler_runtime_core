@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include "libarkbase/macros.h"
 
 namespace ark::ets {
 // Primitive types association got from runtime/class_linker.cpp:InitializeFields()
@@ -35,6 +36,11 @@ using EtsDouble = double;
 constexpr EtsBoolean ToEtsBoolean(bool b)
 {
     return static_cast<EtsBoolean>(b);
+}
+
+constexpr bool FromEtsBoolean(EtsBoolean b)
+{
+    return b != 0U;
 }
 
 }  // namespace ark::ets

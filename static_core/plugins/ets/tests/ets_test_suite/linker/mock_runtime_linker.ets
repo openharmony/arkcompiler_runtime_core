@@ -41,6 +41,6 @@ function main() {
     const linker = new MockAbcRuntimeLinker(getAppFilesList(), mockMap)
 
     const cls = linker.loadClass("app.ETSGLOBAL")
-    const result = cls.getStaticMethodByName("app")!.invoke()
+    const result = cls.getStaticMethod("app")!.invoke()
     arktest.assertEQ(result, "mock class")
 }

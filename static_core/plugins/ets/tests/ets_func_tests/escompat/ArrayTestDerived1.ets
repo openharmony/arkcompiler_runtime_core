@@ -58,7 +58,7 @@ function testArrayDerivedUnshift() {
 function testFromCharCodeWithArrayDerived() {
     // Using reflection to invoke the method on the overridden class instance
     const stringClass = Class.from<string>();
-    const staticMethod = stringClass.getStaticMethodByName("fromCharCode", [Class.from<Array<number>>()])
+    const staticMethod = stringClass.getStaticMethod("fromCharCode", [Class.from<Array<number>>()])
 
     let emptyArray = new ArrayDerived<number>([])
     arktest.assertEQ(staticMethod!.invoke([emptyArray]), "")

@@ -102,16 +102,6 @@ class ReferenceValueHolder {
     public static readonly objArrReference = [ReferenceValueHolder.intReference, ReferenceValueHolder.longReference, ReferenceValueHolder.doubleReference]
 }
 
-// Remove when Class.getStaticMethodByName will be delivered
-function getStaticMethodByName(methods: FixedArray<reflect.StaticMethod>, name: string): reflect.StaticMethod | undefined {
-    for (let m of methods) {
-        if (m.getName() == name) {
-            return m
-        }
-    }
-    return undefined
-}
-
 interface InvokeTester {
     funcEmpty(): Class
     funcObj(v: Object): Class
@@ -486,33 +476,33 @@ class DerivedInvokeTester extends BaseInvokeTester {
 function invokeByBaseTester(tester: BaseInvokeTester) {
     let testerType = Class.of(tester)
 
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcEmpty")!.invoke(tester), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcObj")!.invoke(tester, [ ReferenceValueHolder.objReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.booleanReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcByte")!.invoke(tester, [ ReferenceValueHolder.byteReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcChar")!.invoke(tester, [ ReferenceValueHolder.charReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcShort")!.invoke(tester, [ ReferenceValueHolder.shortReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcInt")!.invoke(tester, [ ReferenceValueHolder.intReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcLong")!.invoke(tester, [ ReferenceValueHolder.longReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcFloat")!.invoke(tester, [ ReferenceValueHolder.floatReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcDouble")!.invoke(tester, [ ReferenceValueHolder.doubleReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, undefined, undefined ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, undefined, undefined ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, undefined, ReferenceValueHolder.objReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, ReferenceValueHolder.objReference, undefined ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcRestParams")!.invoke(tester, [ ReferenceValueHolder.objArrReference ]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcRestParamsObj")!.invoke(tester, [ReferenceValueHolder.objReference, ReferenceValueHolder.objArrReference]), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("funcRestParamsObj")!.invoke(tester, [undefined, ReferenceValueHolder.objArrReference]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcEmpty")!.invoke(tester), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcObj")!.invoke(tester, [ ReferenceValueHolder.objReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.booleanReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcByte")!.invoke(tester, [ ReferenceValueHolder.byteReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcChar")!.invoke(tester, [ ReferenceValueHolder.charReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcShort")!.invoke(tester, [ ReferenceValueHolder.shortReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcInt")!.invoke(tester, [ ReferenceValueHolder.intReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcLong")!.invoke(tester, [ ReferenceValueHolder.longReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcFloat")!.invoke(tester, [ ReferenceValueHolder.floatReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcDouble")!.invoke(tester, [ ReferenceValueHolder.doubleReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, undefined, undefined ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, undefined, undefined ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, undefined, ReferenceValueHolder.objReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, ReferenceValueHolder.objReference, undefined ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcRestParams")!.invoke(tester, [ ReferenceValueHolder.objArrReference ]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcRestParamsObj")!.invoke(tester, [ReferenceValueHolder.objReference, ReferenceValueHolder.objArrReference]), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("funcRestParamsObj")!.invoke(tester, [undefined, ReferenceValueHolder.objArrReference]), testerType)
 
-    arktest.assertEQ(testerType.getInstanceMethodByName("<get>getter")!.invoke(tester), testerType)
-    arktest.assertEQ(testerType.getInstanceMethodByName("<set>setter")!.invoke(tester, [ ReferenceValueHolder.objReference ]), undefined)
+    arktest.assertEQ(testerType.getInstanceMethod("<get>getter")!.invoke(tester), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("<set>setter")!.invoke(tester, [ ReferenceValueHolder.objReference ]), undefined)
 
     arktest.expectError(() => {
-        testerType.getInstanceMethodByName("funcEmpty")!.invoke(new Object())
+        testerType.getInstanceMethod("funcEmpty")!.invoke(new Object())
     }, new TypeError("Object type is not compatible with method owner type"))
 
-    let notVirtualDerived = testerType.getInstanceMethodByName("notVirtualDerived")
+    let notVirtualDerived = testerType.getInstanceMethod("notVirtualDerived")
     if (notVirtualDerived == undefined) {
         arktest.assertEQ(testerType, Class.of(new BaseInvokeTester()))
     } else {
@@ -520,32 +510,31 @@ function invokeByBaseTester(tester: BaseInvokeTester) {
         arktest.assertEQ(testerType, Class.of(new DerivedInvokeTester))
     }
 
-    // Refactor when `Class.getStaticMethodByName() will be merged`
     let methods = testerType.getStaticMethods();
-    arktest.assertEQ(getStaticMethodByName(methods, "funcEmpty")!.invoke(), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcObj")!.invoke([ ReferenceValueHolder.objReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcBoolean")!.invoke([ ReferenceValueHolder.booleanReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcByte")!.invoke([ ReferenceValueHolder.byteReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcChar")!.invoke([ ReferenceValueHolder.charReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcShort")!.invoke([ ReferenceValueHolder.shortReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcInt")!.invoke([ ReferenceValueHolder.intReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcLong")!.invoke([ ReferenceValueHolder.longReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcFloat")!.invoke([ ReferenceValueHolder.floatReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcDouble")!.invoke([ ReferenceValueHolder.doubleReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcOptional")!.invoke([ ReferenceValueHolder.objReference, undefined, undefined, undefined ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcOptional")!.invoke([ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, undefined, undefined ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcOptional")!.invoke([ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcOptional")!.invoke([ ReferenceValueHolder.objReference, undefined, undefined, ReferenceValueHolder.objReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcOptional")!.invoke([ ReferenceValueHolder.objReference, undefined, ReferenceValueHolder.objReference, undefined ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcRestParams")!.invoke([ ReferenceValueHolder.objArrReference ]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcRestParamsObj")!.invoke([ReferenceValueHolder.objReference, ReferenceValueHolder.objArrReference]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcRestParamsObj")!.invoke([undefined, ReferenceValueHolder.objArrReference]), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "<get>staticGetter")!.invoke(), testerType)
-    arktest.assertEQ(getStaticMethodByName(methods, "<set>staticSetter")!.invoke([ ReferenceValueHolder.objReference ]), undefined)
-    arktest.assertEQ(getStaticMethodByName(methods, "funcTestStatic")!.invoke(), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcEmpty")!.invoke(), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcObj")!.invoke([ ReferenceValueHolder.objReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcBoolean")!.invoke([ ReferenceValueHolder.booleanReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcByte")!.invoke([ ReferenceValueHolder.byteReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcChar")!.invoke([ ReferenceValueHolder.charReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcShort")!.invoke([ ReferenceValueHolder.shortReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcInt")!.invoke([ ReferenceValueHolder.intReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcLong")!.invoke([ ReferenceValueHolder.longReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcFloat")!.invoke([ ReferenceValueHolder.floatReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcDouble")!.invoke([ ReferenceValueHolder.doubleReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcOptional")!.invoke([ ReferenceValueHolder.objReference, undefined, undefined, undefined ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcOptional")!.invoke([ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, undefined, undefined ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcOptional")!.invoke([ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcOptional")!.invoke([ ReferenceValueHolder.objReference, undefined, undefined, ReferenceValueHolder.objReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcOptional")!.invoke([ ReferenceValueHolder.objReference, undefined, ReferenceValueHolder.objReference, undefined ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcRestParams")!.invoke([ ReferenceValueHolder.objArrReference ]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcRestParamsObj")!.invoke([ReferenceValueHolder.objReference, ReferenceValueHolder.objArrReference]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("funcRestParamsObj")!.invoke([undefined, ReferenceValueHolder.objArrReference]), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("<get>staticGetter")!.invoke(), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("<set>staticSetter")!.invoke([ ReferenceValueHolder.objReference ]), undefined)
+    arktest.assertEQ(testerType.getStaticMethod("funcTestStatic")!.invoke(), testerType)
 
     arktest.expectError(() => {
-        testerType.getInstanceMethodByName("funcEmpty")!.invoke(new Object())
+        testerType.getInstanceMethod("funcEmpty")!.invoke(new Object())
     }, new TypeError("Object type is not compatible with method owner type"))
 
     let constructors = testerType.getConstructors()
@@ -603,34 +592,34 @@ function invokeByInterface(tester: InvokeTester, ifaceType: Class) {
     let testerType = Class.of(tester)
     arktest.assertTrue(testerType.isSubtypeOf(ifaceType))
 
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcEmpty")!.invoke(tester), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcObj")!.invoke(tester, [ ReferenceValueHolder.objReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.booleanReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcByte")!.invoke(tester, [ ReferenceValueHolder.byteReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcChar")!.invoke(tester, [ ReferenceValueHolder.charReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcShort")!.invoke(tester, [ ReferenceValueHolder.shortReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcInt")!.invoke(tester, [ ReferenceValueHolder.intReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcLong")!.invoke(tester, [ ReferenceValueHolder.longReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcFloat")!.invoke(tester, [ ReferenceValueHolder.floatReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcDouble")!.invoke(tester, [ ReferenceValueHolder.doubleReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, undefined, undefined ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, undefined, undefined ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, undefined, ReferenceValueHolder.objReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, ReferenceValueHolder.objReference, undefined ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcRestParams")!.invoke(tester, [ ReferenceValueHolder.objArrReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcRestParamsObj")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objArrReference ]), testerType)
-    arktest.assertEQ(ifaceType.getInstanceMethodByName("funcRestParamsObj")!.invoke(tester, [ undefined, ReferenceValueHolder.objArrReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcEmpty")!.invoke(tester), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcObj")!.invoke(tester, [ ReferenceValueHolder.objReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.booleanReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcByte")!.invoke(tester, [ ReferenceValueHolder.byteReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcChar")!.invoke(tester, [ ReferenceValueHolder.charReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcShort")!.invoke(tester, [ ReferenceValueHolder.shortReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcInt")!.invoke(tester, [ ReferenceValueHolder.intReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcLong")!.invoke(tester, [ ReferenceValueHolder.longReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcFloat")!.invoke(tester, [ ReferenceValueHolder.floatReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcDouble")!.invoke(tester, [ ReferenceValueHolder.doubleReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, undefined, undefined ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, undefined, undefined ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference, ReferenceValueHolder.objReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, undefined, ReferenceValueHolder.objReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcOptional")!.invoke(tester, [ ReferenceValueHolder.objReference, undefined, ReferenceValueHolder.objReference, undefined ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcRestParams")!.invoke(tester, [ ReferenceValueHolder.objArrReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcRestParamsObj")!.invoke(tester, [ ReferenceValueHolder.objReference, ReferenceValueHolder.objArrReference ]), testerType)
+    arktest.assertEQ(ifaceType.getInstanceMethod("funcRestParamsObj")!.invoke(tester, [ undefined, ReferenceValueHolder.objArrReference ]), testerType)
 
     arktest.expectError(() => {
-        ifaceType.getInstanceMethodByName("funcEmpty")!.invoke(new Object())
+        ifaceType.getInstanceMethod("funcEmpty")!.invoke(new Object())
     }, new TypeError("Object type is not compatible with method owner type"))
 
     arktest.expectError(() => {
-        ifaceType.getInstanceMethodByName("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.floatReference ])
+        ifaceType.getInstanceMethod("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.floatReference ])
     }, new TypeError("Invalid operand type: Lstd/core/Float;"))
 
-    let notVirtualDerived = testerType.getInstanceMethodByName("notVirtualDerived")
+    let notVirtualDerived = testerType.getInstanceMethod("notVirtualDerived")
     if (notVirtualDerived == undefined) {
         arktest.assertEQ(testerType, Class.of(new BaseInvokeTester()))
     } else {
@@ -655,12 +644,12 @@ function testReflectMethod(): void {
     let typeHWriter = Class.of(new HTMLWriter(10))
     let typeWriter = typeHWriter.getSuper()!
 
-    let serializeMethod = typePoint.getInstanceMethodByName("serialize")!
-    let addMethod = typePoint.getInstanceMethodByName("add")!
-    let unionMethod = typePoint.getInstanceMethodByName("testUnion")!
-    let getter = typeHWriter.getInstanceMethodByName("<get>state")!
-    let setter = typeHWriter.getInstanceMethodByName("<set>state")!
-    let optionalParamsMethod = typePoint.getInstanceMethodByName("optionalParams")!
+    let serializeMethod = typePoint.getInstanceMethod("serialize")!
+    let addMethod = typePoint.getInstanceMethod("add")!
+    let unionMethod = typePoint.getInstanceMethod("testUnion")!
+    let getter = typeHWriter.getInstanceMethod("<get>state")!
+    let setter = typeHWriter.getInstanceMethod("<set>state")!
+    let optionalParamsMethod = typePoint.getInstanceMethod("optionalParams")!
 
     arktest.assertEQ(serializeMethod.getReturnType(), Class.of(""))
     arktest.assertEQ(serializeMethod.getOwner(), typePoint)
@@ -683,14 +672,14 @@ function testMethodAttributes(): void {
     let typeHWriter = Class.of(new HTMLWriter(10))
     let typeWriter = typeHWriter.getSuper()!
 
-    let getterMethod = typeHWriter.getInstanceMethodByName("<get>state")!
-    let setterMethod = typeHWriter.getInstanceMethodByName("<set>state")!
-    let abstractWriteMethod = typeWriter.getInstanceMethodByName("write")!
-    let overrideWriteMethod = typeHWriter.getInstanceMethodByName("write")!
-    let closeMethod = typeHWriter.getInstanceMethodByName("close")!
-    let finalMethod = typeHWriter.getInstanceMethodByName("finalMethod")!
-    let nativeMethod = typeHWriter.getInstanceMethodByName("nativeMethod")!
-    let asyncMethod = typeHWriter.getInstanceMethodByName("asyncMethod")!
+    let getterMethod = typeHWriter.getInstanceMethod("<get>state")!
+    let setterMethod = typeHWriter.getInstanceMethod("<set>state")!
+    let abstractWriteMethod = typeWriter.getInstanceMethod("write")!
+    let overrideWriteMethod = typeHWriter.getInstanceMethod("write")!
+    let closeMethod = typeWriter.getInstanceMethod("close")!
+    let finalMethod = typeHWriter.getInstanceMethod("finalMethod")!
+    let nativeMethod = typeHWriter.getInstanceMethod("nativeMethod")!
+    let asyncMethod = typeHWriter.getInstanceMethod("asyncMethod")!
     let constructors = typeHWriter.getConstructors()
     let constructorOfClass = constructors[0]
 
@@ -702,7 +691,7 @@ function testMethodAttributes(): void {
             return false
         }
         let baseType = type.getSuper()!
-        return baseType.getInstanceMethodByName(m.getName()) != undefined
+        return baseType.getInstanceMethod(m.getName()) != undefined
     }
 
     arktest.assertEQ(getterMethod.getName(), "<get>state")
@@ -811,9 +800,9 @@ function testMethodAttributes(): void {
 function testParameters() {
     let typePoint = Class.of(new Point())
 
-    let optionalParamsMethod = typePoint.getInstanceMethodByName("optionalParams")!
-    let restParamsMethod = typePoint.getInstanceMethodByName("restParams")!
-    let optReadonlyRestParamsMethod = typePoint.getInstanceMethodByName("optReadonlyRestParams")!
+    let optionalParamsMethod = typePoint.getInstanceMethod("optionalParams")!
+    let restParamsMethod = typePoint.getInstanceMethod("restParams")!
+    let optReadonlyRestParamsMethod = typePoint.getInstanceMethod("optReadonlyRestParams")!
 
     let res = 0
     let paramsOpt = optionalParamsMethod.getParametersTypes()
@@ -826,13 +815,13 @@ function testParameters() {
 function testInstanceMethodEquals(): void {
     const pointCls = Class.of(new Point())
 
-    const addMeth1 = pointCls.getInstanceMethodByName('add')!
-    const addMeth2 = pointCls.getInstanceMethodByName('add')!
+    const addMeth1 = pointCls.getInstanceMethod('add')!
+    const addMeth2 = pointCls.getInstanceMethod('add')!
 
     arktest.assertFalse(addMeth1 == addMeth2)
     arktest.assertTrue(addMeth1.equals(addMeth2))
 
-    const meth = pointCls.getInstanceMethodByName('serialize')!
+    const meth = pointCls.getInstanceMethod('serialize')!
 
     arktest.assertFalse(addMeth1 == meth)
     arktest.assertFalse(addMeth1.equals(meth))
@@ -842,16 +831,16 @@ function testOverriddenInstanceMethodEquals(): void {
     const baseCls = Class.of(new Base())
     const derivedCls = Class.of(new Derived())
 
-    const baseFoo = baseCls.getInstanceMethodByName('foo')!
-    const derivedFoo = derivedCls.getInstanceMethodByName('foo')!
+    const baseFoo = baseCls.getInstanceMethod('foo')!
+    const derivedFoo = derivedCls.getInstanceMethod('foo')!
 
     arktest.assertTrue(baseFoo.equals(baseFoo))
     arktest.assertTrue(derivedFoo.equals(derivedFoo))
     arktest.assertFalse(baseFoo.equals(derivedFoo))
     arktest.assertFalse(derivedFoo.equals(baseFoo))
 
-    const baseBar = baseCls.getInstanceMethodByName('bar')!
-    const derivedBar = baseCls.getInstanceMethodByName('bar')!
+    const baseBar = baseCls.getInstanceMethod('bar')!
+    const derivedBar = baseCls.getInstanceMethod('bar')!
 
     arktest.assertTrue(baseBar.equals(baseBar))
     arktest.assertTrue(derivedBar.equals(derivedBar))
@@ -874,13 +863,13 @@ function testReturn() {
     let typeHWriter = Class.of(new HTMLWriter(10))
     let typeWriter = typeHWriter.getSuper()!
 
-    let getterMethod = typeHWriter.getInstanceMethodByName("<get>state")!
-    let setterMethod = typeHWriter.getInstanceMethodByName("<set>state")!
-    let abstractWriteMethod = typeWriter.getInstanceMethodByName("write")!
-    let overrideWriteMethod = typeHWriter.getInstanceMethodByName("write")!
-    let closeMethod = typeHWriter.getInstanceMethodByName("close")!
-    let finalMethod = typeHWriter.getInstanceMethodByName("finalMethod")!
-    let nativeMethod = typeHWriter.getInstanceMethodByName("nativeMethod")!
+    let getterMethod = typeHWriter.getInstanceMethod("<get>state")!
+    let setterMethod = typeHWriter.getInstanceMethod("<set>state")!
+    let abstractWriteMethod = typeWriter.getInstanceMethod("write")!
+    let overrideWriteMethod = typeHWriter.getInstanceMethod("write")!
+    let closeMethod = typeWriter.getInstanceMethod("close")!
+    let finalMethod = typeHWriter.getInstanceMethod("finalMethod")!
+    let nativeMethod = typeHWriter.getInstanceMethod("nativeMethod")!
     let constructors = typeHWriter.getConstructors()
     let constructorOfClass = constructors[0]
 

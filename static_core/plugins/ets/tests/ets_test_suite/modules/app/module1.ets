@@ -128,12 +128,12 @@ function testUnionClass() {
     const holder = Class.of(new UnionHolder())
 
     // May rewrite it with `Class.from<Dummy | foo.Dummy | string>` after implementation of the latter
-    const bootUnionClass = holder.getInstanceMethodByName("bootUnionHolder")!.getReturnType()
+    const bootUnionClass = holder.getInstanceMethod("bootUnionHolder")!.getReturnType()
     // Union is loaded into boot because it contains `std.core.String` as a constituent type
     arktest.assertEQ(bootUnionClass.getLinker(), getBootRuntimeLinker())
 
     // May rewrite it with `Class.from<Dummy | UnionHolder>` after implementation of the latter
-    const appUnionClass = holder.getInstanceMethodByName("appUnionHolder")!.getReturnType()
+    const appUnionClass = holder.getInstanceMethod("appUnionHolder")!.getReturnType()
     const appLinker = Class.of(dummy()).getLinker()
     arktest.assertEQ(appUnionClass.getLinker(), appLinker)
 }
