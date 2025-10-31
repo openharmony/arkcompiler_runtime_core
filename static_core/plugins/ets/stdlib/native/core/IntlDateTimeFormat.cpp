@@ -37,6 +37,7 @@ constexpr const char *FORMAT_HOUR_SYMBOLS = "hHkK";
 constexpr const char *FORMAT_AM_PM_SYMBOLS = "a";
 
 constexpr const char *OPTIONS_FIELD_HOUR_CYCLE = "hourCycle_";
+constexpr const char *OPTIONS_PROPERTY_HOUR_CYCLE = "hourCycle";
 
 constexpr const char *LOCALE_KEYWORD_HOUR_CYCLE = "hours";
 constexpr const char *LOCALE_KEYWORD_CALENDAR = "calendar";
@@ -730,7 +731,7 @@ static ani_object FormatResolvedOptionsImpl(ani_env *env, ani_object self)
         ani_string hourCycle = CreateUtf8String(env, localeHours.data(), localeHours.size());
 
         ani_method setter = nullptr;
-        ANI_FATAL_IF_ERROR(env->Class_FindSetter(optsClass, OPTIONS_FIELD_HOUR_CYCLE, &setter));
+        ANI_FATAL_IF_ERROR(env->Class_FindSetter(optsClass, OPTIONS_PROPERTY_HOUR_CYCLE, &setter));
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_FATAL_IF_ERROR(env->Object_CallMethod_Void(resolvedOpts, setter, hourCycle));
