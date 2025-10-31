@@ -72,10 +72,11 @@ class Test:
         self.coverage = self.test_env.coverage
 
     @property
-    def update_expected(self) -> bool:
+    def should_update_expected(self) -> bool:
         b = self.test_env.config.test_lists.update_expected
         # NOTE(pronai) mypy erroneously thinks `b` is Any
-        assert isinstance(b, bool)
+        if not isinstance(b, bool):
+            raise TypeError("expected a bool, got something else:", b)
         return b
 
     def steps_to_reproduce(self) -> str:
