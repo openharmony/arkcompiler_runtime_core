@@ -25,6 +25,7 @@ set(abc2progTestFiles
 )
 
 add_custom_target(abc2program_gen)
+add_dependencies(abc2program_gen etsstdlib)
 
 # --ets-strings-concat options #26986
 foreach(NAME ${abc2progTestFiles})
