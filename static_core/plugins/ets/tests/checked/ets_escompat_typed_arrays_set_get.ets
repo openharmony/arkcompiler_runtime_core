@@ -63,9 +63,9 @@ function test_int8array_set_byte_ir(): void {
 //! INST_NOT      /Call.*Array::\$_get/
 function test_int8array_set_int_cpp(): void {
     let ar = new Int8Array(10)
-    ar[2] = -128
+    ar[2] = -128 as int
     ar[3] = -129
-    ar[4] = 127
+    ar[4] = 127 as int
     ar[5] = 128
     arktest.assertEQ(-128, ar[2])
     arktest.assertEQ(127, ar[3])
@@ -888,8 +888,8 @@ function testUint16ArrayGetUnsafe(): void {
 //! INST_NOT      /Call.*Array::\$_get/
 function test_uint32array_set_int_cpp(): void {
     let ar = new Uint32Array(10)
-    ar[2] = -1
-    ar[3] = 2147483647
+    ar[2] = -1 as int
+    ar[3] = 2147483647 as int
     arktest.assertEQ(4294967295, ar[2])
     arktest.assertEQ(2147483647, ar[3])
 }

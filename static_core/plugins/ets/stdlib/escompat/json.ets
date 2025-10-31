@@ -103,6 +103,17 @@ export class JSON {
     }
 
     /**
+     * Converts bigint to JSON format
+     *
+     * @param d: bigint - bigint to be converted to a JSON as a Number
+     *
+     * @returns String - JSON representation of bigint
+     */
+    public static stringify(d: bigint): String {
+        return d.toString()
+    }
+
+    /**
      * Converts float to JSON format
      *
      * @param d: float - float to be converted to a JSON as a Number
@@ -130,17 +141,6 @@ export class JSON {
         } else {
             return "null"
         }
-    }
-
-    /**
-     * Converts bigint to JSON format
-     *
-     * @param d: bigint - bigint to be converted to a JSON as a Number
-     *
-     * @returns String - JSON representation of bigint
-     */
-    public static stringify(d: bigint): String {
-        return d.toString()
     }
 
     /**
@@ -237,24 +237,6 @@ export class JSON {
         return buffer
     }
 
-    /**
-     * Converts an object to a JavaScript Object Notation (JSON) string.
-     *
-     * @param obj: Object An object to be converted.
-     *
-     * @returns String - JSON representation of Object
-     */
-    public static stringify(obj: NullishType): String {
-        if (obj === undefined) {
-            return "undefined"
-        }
-        let output = JSON.stringifyFast(obj)
-        if (output !== undefined) {
-            return output
-        }
-        return new JSONWriter().write(obj)
-    }
-
     private static native stringifyFast(obj: NullishType): String;
 
     public static stringify(obj: JsonReplacer): String {
@@ -275,9 +257,9 @@ export class JSON {
      * @returns String - JSON representation of Object
      */
     public static stringify(
-                obj: NullishType,
-                replacer: ((key: string, value: NullishType) => NullishType) | undefined | null,
-                space?: string | int): string {
+        obj: NullishType,
+        replacer: ((key: string, value: NullishType) => NullishType) | undefined | null,
+        space?: string | int): string {
         const replacerOpt: ((key: string, value: NullishType) => NullishType) | undefined = (replacer === null) ? undefined : replacer
 
         if (space instanceof String || space === undefined) {
@@ -301,7 +283,7 @@ export class JSON {
      * @returns String - JSON representation of Object
      */
     public static stringify(obj: NullishType, replacer: FixedArray<double | string>, space?: int | string): string {
-        const filter : FixedArray<string> = new string[replacer.length]
+        const filter: FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
         }
@@ -314,7 +296,7 @@ export class JSON {
     }
 
     public static stringify(obj: NullishType, replacer: Array<double | string>, space?: int | string): string {
-        const filter : FixedArray<string> = new string[replacer.length]
+        const filter: FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
         }
@@ -328,7 +310,7 @@ export class JSON {
 
     private static spaceFromNumber(space: int): String {
         let spacesCount = 0
-        if (space > 0)  {
+        if (space > 0) {
             spacesCount = (space > JSON.JSON_SPACE_INDENT_LIMIT) ? JSON.JSON_SPACE_INDENT_LIMIT : space
         }
 
@@ -530,18 +512,36 @@ export class JSON {
         let s = new StringBuilder("{")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
-            s.append("\""+JSON.stringify(i)+"\"");
+            s.append("\"" + JSON.stringify(i) + "\"");
             s.append(":");
             s.append(JSON.stringify(d[i]));
             s.append(",");
         }
         if (d.length > 0) {
-            s.append("\""+JSON.stringify(last_elem)+"\"");
+            s.append("\"" + JSON.stringify(last_elem) + "\"");
             s.append(":");
             s.append(JSON.stringify(d[last_elem]));
         }
         s.append('}');
         return s.toString()
+    }
+
+    /**
+     * Converts an object to a JavaScript Object Notation (JSON) string.
+     *
+     * @param obj: Object An object to be converted.
+     *
+     * @returns String - JSON representation of Object
+     */
+    public static stringify(obj: NullishType): String {
+        if (obj === undefined) {
+            return "undefined"
+        }
+        let output = JSON.stringifyFast(obj)
+        if (output !== undefined) {
+            return output
+        }
+        return new JSONWriter().write(obj)
     }
 
     /**
@@ -584,15 +584,15 @@ export class JSON {
         return stringifyElementRecursively(elem, replacer, space, 0)
     }
 
-    private static IsBoxedType(typ : Type) : boolean {
+    private static IsBoxedType(typ: Type): boolean {
         return typ instanceof BooleanType
-                || typ instanceof ByteType
-                || typ instanceof CharType
-                || typ instanceof ShortType
-                || typ instanceof IntType
-                || typ instanceof LongType
-                || typ instanceof FloatType
-                || typ instanceof DoubleType
+            || typ instanceof ByteType
+            || typ instanceof CharType
+            || typ instanceof ShortType
+            || typ instanceof IntType
+            || typ instanceof LongType
+            || typ instanceof FloatType
+            || typ instanceof DoubleType
     }
 
     // TODO(kirill-mitkin): Map<Long, Long> blocked by internal issue
@@ -622,14 +622,14 @@ export class JSON {
             // NOTE(lyupaanastasia) parse union #27136
             throw new Error("UnionType is not supported yet")
         } else if (typ instanceof StringType
-                    || typ instanceof DoubleType
-                    || typ instanceof BooleanType
-                    || typ instanceof NullType
-                    || typ instanceof IntType
-                    || typ instanceof LongType
-                    || typ instanceof ByteType
-                    || typ instanceof ShortType
-                    || typ instanceof FloatType) {
+            || typ instanceof DoubleType
+            || typ instanceof BooleanType
+            || typ instanceof NullType
+            || typ instanceof IntType
+            || typ instanceof LongType
+            || typ instanceof ByteType
+            || typ instanceof ShortType
+            || typ instanceof FloatType) {
             ok = true
         } else {
             ok = false
@@ -695,7 +695,7 @@ class JSONWriter {
     private static readonly ESCOMPAT_ARRAY_TYPE = Type.of(new Array<Object>(0))
     private static readonly ESCOMPAT_SET_TYPE = Type.of(new Set<Object>())
     private static readonly ESCOMPAT_MAP_TYPE = Type.of(new Map<Object, Object>())
-    private static readonly STD_CORE_PROMISE_TYPE = Type.of(new Promise<Object>((res) => {}))
+    private static readonly STD_CORE_PROMISE_TYPE = Type.of(new Promise<Object>((res) => { }))
 
     private readonly replacer: ((key: String, value: NullishType) => NullishType) | undefined
     private readonly fieldsFilter: FixedArray<string>
@@ -750,7 +750,7 @@ class JSONWriter {
             this.buffer.append(JSON.stringify(obj as String))
         } else if (obj instanceof RegExpResultArray) {
             this.buffer.append(JSON.stringify((obj as RegExpResultArray).result))
-        } else if(obj instanceof Tuple) {
+        } else if (obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
             this.writeESCompatRecord(obj)
@@ -776,8 +776,8 @@ class JSONWriter {
             } else if (objType.getName() == JSONWriter.ESCOMPAT_ARRAY_TYPE.getName()) {
                 this.writeEscompatArray(obj as Array<Object>)
             } else if (objType.getName() == JSONWriter.ESCOMPAT_SET_TYPE.getName() ||
-                       objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName() ||
-                       objType.getName() == JSONWriter.ESCOMPAT_MAP_TYPE.getName()) {
+                objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName() ||
+                objType.getName() == JSONWriter.ESCOMPAT_MAP_TYPE.getName()) {
                 this.buffer.append(JSONObject.EMPTY)
             } else if (objType instanceof ClassType) {
                 this.writeClassValue(obj, objType as ClassType)
@@ -1042,19 +1042,19 @@ class JSONWriter {
     }
 
     private checkSameRename(field: Field, fields: Array<[Field, reflect.Value]>): boolean {
-        return fields.some((value: [Field, reflect.Value], index: number, array:Array<[Field, reflect.Value]>)
-            => {return value[0].getName() == field.getName()});
+        return fields.some((value: [Field, reflect.Value], index: number, array: Array<[Field, reflect.Value]>)
+            => { return value[0].getName() == field.getName() });
     }
 
     private findKeyIndex(field: Field, fields: Array<[Field, reflect.Value]>): number {
-        return fields.findIndex((value: [Field, reflect.Value], index: number, array:Array<[Field, reflect.Value]>)
-            => {return value[0].getName() == field.getName()});
+        return fields.findIndex((value: [Field, reflect.Value], index: number, array: Array<[Field, reflect.Value]>)
+            => { return value[0].getName() == field.getName() });
     }
 
     private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, reflect.Value]> {
         const writableFields = new Array<[Field, reflect.Value]>()
         let hasJsonIgnore: boolean = false
-        let fieldRename : string | undefined = undefined
+        let fieldRename: string | undefined = undefined
 
         if (this.useFieldsFilter) {
             for (let fieldIdx = 0; fieldIdx < this.fieldsFilter.length; fieldIdx++) {
@@ -1420,8 +1420,7 @@ function getIndentation(space?: int | string, depth: int = 0): string {
     if (space == undefined) {
         return ""
     }
-    if (space! instanceof string)
-    {
+    if (space! instanceof string) {
         let unit = (space! as string).substring(0, 10)
         return unit.repeat(depth)
     }
@@ -1436,10 +1435,10 @@ function getIndentation(space?: int | string, depth: int = 0): string {
 
 
 class TypeColor {
-    readonly static VISITED : int = 1
-    readonly static AT_STACK : int = 2
-    typ : Type
-    color : int
+    readonly static VISITED: int = 1
+    readonly static AT_STACK: int = 2
+    typ: Type
+    color: int
     constructor(typ: Type, color: int) {
         this.typ = typ
         this.color = color
@@ -1515,76 +1514,13 @@ export class JSONParser {
         return parser.parse(res)
     }
 
-    private parse(res: JSONValue): JSONValue {
-        // Fetch next symbol and call related parse method
-        // TODO(ivan-tyulyandin): replace with switch, does not work due to frontend bug with switch over static fields with equal names
-        this.getNextChar()
-        if (this.curChar == JSONObject.START_CHAR) {
-            let obj = new JSONObject()
-            this.parse(obj)
-            res = obj
-        } else if (this.curChar  == JSONArray.START_CHAR) {
-            let arr = new JSONArray()
-            this.parse(arr)
-            res = arr
-        } else if (this.curChar == JSONString.START_CHAR) {
-            let str = new JSONString()
-            this.parse(str)
-            res = str
-        } else if (this.curChar == JSONTrue.START_CHAR) {
-            let tr = new JSONTrue()
-            this.parse(tr)
-            res = tr
-        } else if (this.curChar == JSONFalse.START_CHAR) {
-            let fls = new JSONFalse()
-            this.parse(fls)
-            res = fls
-        } else if (this.curChar == JSONNull.START_CHAR) {
-            let nl = new JSONNull()
-            this.parse(nl)
-            res = nl
-        } else if (Char.isDecDigit(this.curChar) || this.curChar == c'-') {
-            let n = new JSONNumber()
-            this.parse(n)
-            res = n
-        } else {
-            throw new SyntaxError("Unexpected char \"" + this.curChar + "\" at " + this.getCurPosDescr())
-        }
-        return res
-    }
-
     private parseKeyValue(res: JSONObject): JSONObject {
         res.keys_.push(this.parse(new JSONValue()) as JSONString)
         this.getNextChar()
-        if (this.curChar  != c':') {
+        if (this.curChar != c':') {
             throw new SyntaxError("Expected : \",\" at " + this.getCurPosDescr() + " got \"" + this.curChar + "\"")
         }
         res.values.push(this.parse(new JSONValue()))
-        return res
-    }
-
-    private parse(res: JSONObject): JSONObject {
-        let posCopy = this.curPos.makeCopy()
-        this.getNextChar()
-        if (this.curChar == JSONObject.END_CHAR) {
-            return res
-        }
-        this.curPos.restoreFromCopy(posCopy)
-
-        res = this.parseKeyValue(res)
-        // Parse JSONObject until }
-        while (this.getNextChar()) {
-            switch (this.curChar) {
-                case c',':
-                    res = this.parseKeyValue(res)
-                    break
-                // TODO(ivan-tyulyandin): replace by JSONObject.END_CHAR, frontend bug
-                case c'}':
-                    return res
-                default:
-                    throw new SyntaxError("Expected \",\" or \"" + JSONObject.END_CHAR.toString() + "\" at " + this.getCurPosDescr() + ", got \"" + this.curChar.toString() + "\"")
-            }
-        }
         return res
     }
 
@@ -1620,10 +1556,10 @@ export class JSONParser {
             number.append(this.curChar)
             posCopy = this.curPos.makeCopy()
         } while (this.getNextChar() && (Char.isDecDigit(this.curChar) ||
-                                               this.curChar == c'.' ||
-                                               this.curChar == c'e' ||
-                                               this.curChar == c'-' ||
-                                               this.curChar == c'+' ))
+            this.curChar == c'.' ||
+                this.curChar == c'e' ||
+                    this.curChar == c'-' ||
+                        this.curChar == c'+' ))
         res.value = Double.parseFloat(number.toString())
         res.bigintValue = Double.isInteger(res.value) ? new BigInt(res.value) : new BigInt()
         this.curPos.restoreFromCopy(posCopy)
@@ -1663,8 +1599,8 @@ export class JSONParser {
 
     private parse(res: JSONTrue): JSONTrue {
         let metTrue = this.getNextChar() && this.curChar == c'r'
-                    && this.getNextChar() && this.curChar == c'u'
-                    && this.getNextChar() && this.curChar == c'e'
+            && this.getNextChar() && this.curChar == c'u'
+                && this.getNextChar() && this.curChar == c'e'
         if (!metTrue) {
             throw new SyntaxError("Expected true at " + this.getCurPosDescr())
         }
@@ -1673,8 +1609,8 @@ export class JSONParser {
 
     private parse(res: JSONFalse): JSONFalse {
         let metFalse = this.getNextChar() && this.curChar == c'a'
-                    && this.getNextChar() && this.curChar == c'l'
-                    && this.getNextChar() && this.curChar == c's'
+            && this.getNextChar() && this.curChar == c'l'
+                && this.getNextChar() && this.curChar == c's'
                     && this.getNextChar() && this.curChar == c'e'
         if (!metFalse) {
             throw new SyntaxError("Expected false at " + this.getCurPosDescr())
@@ -1684,10 +1620,73 @@ export class JSONParser {
 
     private parse(res: JSONNull): JSONNull {
         let metNull = this.getNextChar() && this.curChar == c'u'
-                    && this.getNextChar() && this.curChar == c'l'
-                    && this.getNextChar() && this.curChar == c'l'
+            && this.getNextChar() && this.curChar == c'l'
+                && this.getNextChar() && this.curChar == c'l'
         if (!metNull) {
             throw new SyntaxError("Expected null at " + this.getCurPosDescr())
+        }
+        return res
+    }
+
+    private parse(res: JSONObject): JSONObject {
+        let posCopy = this.curPos.makeCopy()
+        this.getNextChar()
+        if (this.curChar == JSONObject.END_CHAR) {
+            return res
+        }
+        this.curPos.restoreFromCopy(posCopy)
+
+        res = this.parseKeyValue(res)
+        // Parse JSONObject until }
+        while (this.getNextChar()) {
+            switch (this.curChar) {
+                case c',':
+                    res = this.parseKeyValue(res)
+                    break
+                // TODO(ivan-tyulyandin): replace by JSONObject.END_CHAR, frontend bug
+                case c'}':
+                    return res
+                default:
+                    throw new SyntaxError("Expected \",\" or \"" + JSONObject.END_CHAR.toString() + "\" at " + this.getCurPosDescr() + ", got \"" + this.curChar.toString() + "\"")
+            }
+        }
+        return res
+    }
+
+    private parse(res: JSONValue): JSONValue {
+        // Fetch next symbol and call related parse method
+        // TODO(ivan-tyulyandin): replace with switch, does not work due to frontend bug with switch over static fields with equal names
+        this.getNextChar()
+        if (this.curChar == JSONObject.START_CHAR) {
+            let obj = new JSONObject()
+            this.parse(obj)
+            res = obj
+        } else if (this.curChar == JSONArray.START_CHAR) {
+            let arr = new JSONArray()
+            this.parse(arr)
+            res = arr
+        } else if (this.curChar == JSONString.START_CHAR) {
+            let str = new JSONString()
+            this.parse(str)
+            res = str
+        } else if (this.curChar == JSONTrue.START_CHAR) {
+            let tr = new JSONTrue()
+            this.parse(tr)
+            res = tr
+        } else if (this.curChar == JSONFalse.START_CHAR) {
+            let fls = new JSONFalse()
+            this.parse(fls)
+            res = fls
+        } else if (this.curChar == JSONNull.START_CHAR) {
+            let nl = new JSONNull()
+            this.parse(nl)
+            res = nl
+        } else if (Char.isDecDigit(this.curChar) || this.curChar == c'-') {
+            let n = new JSONNumber()
+            this.parse(n)
+            res = n
+        } else {
+            throw new SyntaxError("Unexpected char \"" + this.curChar + "\" at " + this.getCurPosDescr())
         }
         return res
     }
@@ -1819,29 +1818,26 @@ class JSONValueParser {
     }
 }
 
-export enum JsonTokenKind
-{
-    CurlyOpen    = 0,
-    CurlyClose   = 1,
-    SquareOpen   = 2,
-    SquareClose  = 3,
-    Colon        = 4,
-    Comma        = 5,
-    String       = 6,
-    Number       = 7,
-    True         = 8,
-    False        = 9,
-    Null         = 10
+export enum JsonTokenKind {
+    CurlyOpen = 0,
+    CurlyClose = 1,
+    SquareOpen = 2,
+    SquareClose = 3,
+    Colon = 4,
+    Comma = 5,
+    String = 6,
+    Number = 7,
+    True = 8,
+    False = 9,
+    Null = 10
 }
 
-export class JsonTokenSpan
-{
+export class JsonTokenSpan {
     start: int
     end: int
 }
 
-export class JsonToken
-{
+export class JsonToken {
     kind: JsonTokenKind
     span: JsonTokenSpan
     value: string
@@ -1874,8 +1870,7 @@ export class JsonParseError extends Error {
     }
 }
 
-class JsonElementParser
-{
+class JsonElementParser {
     source: string
     tokens: Array<JsonToken>
     position: int
@@ -1894,16 +1889,14 @@ class JsonElementParser
         this.reviver = reviver
     }
 
-    public lookahead(offset: int): JsonToken | undefined
-    {
+    public lookahead(offset: int): JsonToken | undefined {
         if (this.position + offset >= this.tokens.length) {
             return undefined
         }
         return this.tokens[this.position + offset]
     }
 
-    public expect(kind: JsonTokenKind): JsonToken
-    {
+    public expect(kind: JsonTokenKind): JsonToken {
         let token = this.lookahead(0)
         if (token == undefined || token.kind != kind) {
             let start = token?.span.start ?? 0;
@@ -1914,8 +1907,7 @@ class JsonElementParser
         return token
     }
 
-    public parse(): jsonx.JsonElement
-    {
+    public parse(): jsonx.JsonElement {
         let result = this.parseValue()
         if (this.reviver != undefined) {
             return this.reviver!("", result)
@@ -1923,8 +1915,7 @@ class JsonElementParser
         return result
     }
 
-    private parseValue(): jsonx.JsonElement
-    {
+    private parseValue(): jsonx.JsonElement {
         let maybe_token = this.lookahead(0)
         if (maybe_token == undefined) {
             throw new JsonParseError("Unexpected end of input", 0, 0)
@@ -1953,8 +1944,7 @@ class JsonElementParser
         throw new JsonParseError("Expected string, number, true, false, null, object, or array", maybe_token.span.start, maybe_token.span.end)
     }
 
-    private parseArray(): jsonx.JsonElement
-    {
+    private parseArray(): jsonx.JsonElement {
         this.expect(JsonTokenKind.SquareOpen)
         let array = new Array<jsonx.JsonElement>()
         let index = 0
@@ -1973,8 +1963,7 @@ class JsonElementParser
         return jsonx.JsonElement.createArray(array)
     }
 
-    private parseObject(): jsonx.JsonElement
-    {
+    private parseObject(): jsonx.JsonElement {
         this.expect(JsonTokenKind.CurlyOpen)
         let object = new Map<string, jsonx.JsonElement>()
         while (this.lookahead(0)?.kind != JsonTokenKind.CurlyClose) {
@@ -1993,22 +1982,19 @@ class JsonElementParser
         return jsonx.JsonElement.createObject(object)
     }
 
-    private parsePair(): [string, jsonx.JsonElement]
-    {
+    private parsePair(): [string, jsonx.JsonElement] {
         let key = this.parseString().asString()
         this.expect(JsonTokenKind.Colon)
         let value = this.parseValue()
         return [key, value] as [string, jsonx.JsonElement]
     }
 
-    private parseString(): jsonx.JsonElement
-    {
+    private parseString(): jsonx.JsonElement {
         let token = this.expect(JsonTokenKind.String)
         return jsonx.JsonElement.createString(token.value)
     }
 
-    private parseNumber(): jsonx.JsonElement
-    {
+    private parseNumber(): jsonx.JsonElement {
         // can be extended with bigints later
         let token = this.expect(JsonTokenKind.Number)
         if (token.value.includes(".")) {
@@ -2017,8 +2003,7 @@ class JsonElementParser
         return jsonx.JsonElement.createInteger(Double.parseInt(token.value).toInt())
     }
 
-    private parseBool(): jsonx.JsonElement
-    {
+    private parseBool(): jsonx.JsonElement {
         let maybe_token = this.lookahead(0)
         if (maybe_token == undefined) {
             throw new JsonParseError("Unexpected end of input", 0, 0)
@@ -2034,15 +2019,13 @@ class JsonElementParser
         throw new JsonParseError("Expected true or false", maybe_token.span.start, maybe_token.span.end)
     }
 
-    private parseNull(): jsonx.JsonElement
-    {
+    private parseNull(): jsonx.JsonElement {
         this.expect(JsonTokenKind.Null)
         return jsonx.JsonElement.createNull()
     }
 }
 
-export class JsonLexer
-{
+export class JsonLexer {
     chars: char[]
     index: int
     constructor(chars: char[]) {
@@ -2338,12 +2321,12 @@ export class JsonLexer
      */
     private isHexDigit(ch: char): boolean {
         return ((ch.compareTo(c'0') >= 0) && (ch.compareTo(c'9') <= 0)) ||
-                ((ch.compareTo(c'A') >= 0) && (ch.compareTo(c'F') <= 0)) ||
-                ((ch.compareTo(c'a') >= 0) && (ch.compareTo(c'f') <= 0))
+            ((ch.compareTo(c'A') >= 0) && (ch.compareTo(c'F') <= 0)) ||
+            ((ch.compareTo(c'a') >= 0) && (ch.compareTo(c'f') <= 0))
     }
 }
 
-export class JSONValue extends Object {}
+export class JSONValue extends Object { }
 
 export class JSONObject extends JSONValue {
     keys_: Array<JSONString> = new Array<JSONString>()

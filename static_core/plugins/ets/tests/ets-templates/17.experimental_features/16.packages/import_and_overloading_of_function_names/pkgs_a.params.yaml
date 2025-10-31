@@ -93,6 +93,7 @@ cases:
     - sig1: 'p1: Object, ...p2: FixedArray<boolean>'
       arg1: 'new Object(), true, false, true'
       arg2: 'new Boolean(), new Boolean(true), new Boolean(false)'
+      tags: 'compile-only'
 
     # 12
     - sig1: 'p1: Byte|null'

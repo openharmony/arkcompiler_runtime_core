@@ -65,7 +65,7 @@
 //! METHOD        "ets_string_builder_append_merge_part4.ETSGLOBAL::append18"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",14
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",4
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"
@@ -132,7 +132,7 @@
 //! METHOD        "ets_string_builder_append_merge_part4.ETSGLOBAL::append18"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",14
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",4
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString "
 //! INST_NEXT     "Intrinsic.StdCoreSbAppendString2"

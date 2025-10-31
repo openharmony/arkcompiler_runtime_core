@@ -78,8 +78,8 @@ cases:
           import { A10, B10 } from './pkg_a/pkg_10.ets'
 
     # 11
-    - arg1: 'new Object(), true, false, true'
-      arg2: 'new Boolean(), new Boolean(true), new Boolean(false)'
+    - arg1: 'new Boolean(), new Boolean(true), new Boolean(false)'
+      arg2: 'new Object(), true, false, true'
 
     # 12
     - arg1: 'new Byte()'

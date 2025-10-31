@@ -28,6 +28,15 @@ interface OverloadInterface {
     OverloadFuncI8(a: i8, b: i8): i8;
 
     @overload("overloadFunc")
+    OverloadFuncI8I16(a: i8, b: i16): i8;
+
+    @overload("overloadFunc")
+    OverloadFuncI8F32(a: i8, b: f32): i8;
+
+    @overload("overloadFunc")
+    OverloadFuncI8String(a: i8, b: String): i8;
+
+    @overload("overloadFunc")
     OverloadFuncI16(a: i16, b: i16): i16;
 
     @overload("overloadFunc")
@@ -44,15 +53,6 @@ interface OverloadInterface {
 
     @overload("overloadFunc")
     OverloadFuncString(a: String, b: String): String;
-
-    @overload("overloadFunc")
-    OverloadFuncI8I16(a: i8, b: i16): i8;
-
-    @overload("overloadFunc")
-    OverloadFuncI8F32(a: i8, b: f32): i8;
-
-    @overload("overloadFunc")
-    OverloadFuncI8String(a: i8, b: String): i8;
 
     @overload("overloadFunc")
     OverloadFuncEnum(p0: Color): i32;

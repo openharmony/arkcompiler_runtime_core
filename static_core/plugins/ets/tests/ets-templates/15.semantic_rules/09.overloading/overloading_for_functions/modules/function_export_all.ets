@@ -58,10 +58,6 @@ export function foo(i: string): int {
     return 16;
 }
 
-export function foo(i: Object): int {
-    return 17;
-}
-
 export function foo(i: number[]): int {
     return 18;
 }
@@ -70,12 +66,16 @@ export function foo(i: TPL): int {
     return 19;
 }
 
-export function foo<T, S>(i: T, j: S): int {
-    return 20;
-}
-
 export function foo(i: () => boolean ): int {
     return 21;
+}
+
+export function foo(i: Object): int {
+    return 17;
+}
+
+export function foo<T, S>(i: T, j: S): int {
+    return 20;
 }
 
 export function foo(i: int, j: double, k?: String ): int {

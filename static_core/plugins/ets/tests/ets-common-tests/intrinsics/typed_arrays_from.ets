@@ -536,10 +536,10 @@ function testIU64FromIterableBigInt() {
     checkBigIntArray(iexpected, BigInt64Array.from(u64Arr));
 }
 
-function prepareTestData(length: int, from: number): [Set<number>, Array<number>] {
-    let set: Set<number> = new Set<number>();
-    let arr: Array<number> = new Array<number>();
-    let v: number = from;
+function prepareTestData(length: int, from: int): [Set<int>, Array<int>] {
+    let set: Set<int> = new Set<int>();
+    let arr: Array<int> = new Array<int>();
+    let v: int = from;
     for (let i = 0; i < length; i++) {
         arr.push(v);
         set.add(v);
@@ -548,10 +548,10 @@ function prepareTestData(length: int, from: number): [Set<number>, Array<number>
     return [set, arr];
 }
 
-function prepareTestData(length: int, from: int): [Set<int>, Array<int>] {
-    let set: Set<int> = new Set<int>();
-    let arr: Array<int> = new Array<int>();
-    let v: int = from;
+function prepareTestData(length: int, from: number): [Set<number>, Array<number>] {
+    let set: Set<number> = new Set<number>();
+    let arr: Array<number> = new Array<number>();
+    let v: number = from;
     for (let i = 0; i < length; i++) {
         arr.push(v);
         set.add(v);

@@ -44,15 +44,15 @@ cases:
     - decl: |-
           // primitives and boxed
           class A {
-              meth(p: Object): string { return "Object" } // should never be called
+              meth(p: Boolean): string { return "boolean" }
               meth(p: byte): string { return "byte" }
               meth(p: Short): string { return "short" }
               meth(p: int): string { return "int" }
               meth(p: Long): string { return "long" }
               meth(p: char): string { return "char" }
-              meth(p: Boolean): string { return "boolean" }
               meth(p: float): string { return "float" }
               meth(p: Double): string { return "double" }
+              meth(p: Object): string { return "Object" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -76,26 +76,26 @@ cases:
     - decl: |-
           // primitives and boxed, with sub/superclass
           abstract class B {
-              meth(p: Object): string { return "" } // should never be called
+              meth(p: boolean): string { return "boolean" }
               meth(p: byte): string { return "byte" }
               meth(p: short): string { return "short" }
               meth(p: int): string { return "int" }
               meth(p: long): string { return "long" }
               meth(p: char): string { return "char" }
-              meth(p: boolean): string { return "boolean" }
               meth(p: float): string { return "float" }
               meth(p: double): string { return "double" }
+              meth(p: Object): string { return "" } // should never be called
           }
           class A extends B {
-              meth(p: Object): string { return "" } // should never be called
+              meth(p: Boolean): string { return "boolean" }
               meth(p: byte): string { return "byte" }
               meth(p: short): string { return "short" }
               meth(p: int): string { return "int" }
               meth(p: long): string { return "long" }
               meth(p: char): string { return "char" }
-              meth(p: Boolean): string { return "boolean" }
               meth(p: Float): string { return "float" }
               meth(p: Double): string { return "double" }
+              meth(p: Object): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -121,11 +121,11 @@ cases:
           enum Color { Red, Green=82, Blue }
           enum Size { S="small", M="medium", L="large" }
           class A {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: int): string { return "int" }
               meth(p: string): string { return "string" }
               meth(p: Color): string { return "Color" }
               meth(p: Size): string { return "Size" }
+              meth(p: Object): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -141,11 +141,11 @@ cases:
           enum Color { Red, Green=82, Blue }
           enum Size { S="small", M="medium", L="large" }
           abstract class B {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: int): string { return "int" }
               meth(p: Color): string { return "" }
               meth(p: Size): string { return "Size" }
               abstract meth(p: string): string
+              meth(p: Object): string { return "" } // should never be called
           }
           class A extends B {
               meth(p: Object): string { return "" } // should never be called
@@ -166,19 +166,19 @@ cases:
           enum Color { Red, Green = 82, Blue }
           enum Size { S="small", M="medium", L="large" }
           class A {
-              meth(p: Object): string { return "" } // should never be called
+              meth(p: FixedArray<Boolean>): string { return "Boolean" }
               meth(p: FixedArray<A>): string { return "A" }
               meth(p: FixedArray<Color>): string { return "Color" }
               meth(p: FixedArray<Size>): string { return "Size" }
-              meth(p: FixedArray<Object>): string { return "Object" }
-              meth(p: FixedArray<Int>): string { return "Int" }
-              meth(p: FixedArray<Short>): string { return "Short" }
               meth(p: FixedArray<Byte>): string { return "Byte" }          
+              meth(p: FixedArray<Short>): string { return "Short" }
+              meth(p: FixedArray<Int>): string { return "Int" }
               meth(p: FixedArray<Long>): string { return "Long" }
               meth(p: FixedArray<Char>): string { return "Char" }
-              meth(p: FixedArray<Boolean>): string { return "Boolean" }
               meth(p: FixedArray<Float>): string { return "Float" }
               meth(p: FixedArray<Double>): string { return "Double" }
+              meth(p: FixedArray<Object>): string { return "Object" }
+              meth(p: Object): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -200,44 +200,44 @@ cases:
           enum Color { Red, Green = 82, Blue }
           enum Size { S="small", M="medium", L="large" }
           class B {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: FixedArray<A>): string { return "A" }
-              meth(p: FixedArray<Object>): string { return "" }
+              meth(p: FixedArray<boolean>): string { return "boolean" }
               meth(p: FixedArray<byte>): string { return "" }
               meth(p: FixedArray<short>): string { return "short" }
               meth(p: FixedArray<int>): string { return "int" }
               meth(p: FixedArray<long>): string { return "" }
               meth(p: FixedArray<char>): string { return "" }
-              meth(p: FixedArray<boolean>): string { return "boolean" }
               meth(p: FixedArray<float>): string { return "" }
               meth(p: FixedArray<double>): string { return "" }
+              meth(p: FixedArray<Boolean>): string { return "" }
               meth(p: FixedArray<Byte>): string { return "" }
               meth(p: FixedArray<Short>): string { return "" }
               meth(p: FixedArray<Int>): string { return "" }
               meth(p: FixedArray<Long>): string { return "" }
               meth(p: FixedArray<Char>): string { return "" }
-              meth(p: FixedArray<Boolean>): string { return "" }
               meth(p: FixedArray<Float>): string { return "Float" }
               meth(p: FixedArray<Double>): string { return "" }
               meth(p: FixedArray<Color>): string { return "" }
               meth(p: FixedArray<Size>): string { return "Size" }
+              meth(p: FixedArray<Object>): string { return "" }
+              meth(p: Object): string { return "" } // should never be called
           }
           class A extends B {
               meth(p: Object): string { return "" } // should never be called
-              meth(p: FixedArray<Object>): string { return "Object" }
+              meth(p: FixedArray<Boolean>): string { return "Boolean" }
               meth(p: FixedArray<byte>): string { return "byte" }
-              meth(p: FixedArray<long>): string { return "long" }
+              meth(p: FixedArray<Short>): string { return "Short" }
               meth(p: FixedArray<char>): string { return "char" }
+              meth(p: FixedArray<long>): string { return "long" }
               meth(p: FixedArray<float>): string { return "float" }
               meth(p: FixedArray<double>): string { return "double" }
               meth(p: FixedArray<Byte>): string { return "Byte" }
-              meth(p: FixedArray<Short>): string { return "Short" }
               meth(p: FixedArray<Int>): string { return "Int" }
               meth(p: FixedArray<Long>): string { return "Long" }
               meth(p: FixedArray<Char>): string { return "Char" }
-              meth(p: FixedArray<Boolean>): string { return "Boolean" }
               meth(p: FixedArray<Double>): string { return "Double" }
               meth(p: FixedArray<Color>): string { return "Color" }
+              meth(p: FixedArray<Object>): string { return "Object" }
           }
       use: |-
           let a: A = new A()
@@ -267,12 +267,12 @@ cases:
           type T = [number, string]
           type R = [number, boolean]
           class A {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: T): string { return "T" }
               meth(p: R): string { return "R" }
               meth(p: FixedArray<number>): string { return "number" }
               meth(p: FixedArray<string>): string { return "string" }
               meth(p: boolean): string { return "boolean" }
+              meth(p: Object): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -289,17 +289,17 @@ cases:
           type T = [number, string]
           type R = [number, boolean]
           abstract class B {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: T): string { return "" }
               meth(p: R): string { return "R" }
               meth(p: FixedArray<number>): string { return "" }
               meth(p: FixedArray<string>): string { return "string" }
               meth(p: boolean): string { return "boolean" }
+              meth(p: Object): string { return "" } // should never be called
           }
           class A extends B {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: [number, string]): string { return "T" }
               meth(p: FixedArray<number>): string { return "number" }
+              meth(p: Object): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -316,12 +316,12 @@ cases:
           type U=number|string
           type V=Boolean|Double
           class A {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: U): string { return "U" }
               meth(p: V): string { return "V" }
-              meth(p: number): string { return "number" }
               meth(p: Boolean): string { return "Boolean" }
+              meth(p: number): string { return "number" }
               meth(p: string): string { return "string" }
+              meth(p: Object): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -342,17 +342,17 @@ cases:
           type U=number|string
           type V=Boolean|Double
           class B {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: U): string { return "U" }
               meth(p: V): string { return "" }
               meth(p: Boolean): string { return "" }
               meth(p: string): string { return "string" }
+              meth(p: Object): string { return "" } // should never be called
           }
           class A extends B {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: V): string { return "V" }
-              meth(p: number): string { return "number" }
               meth(p: Boolean): string { return "Boolean" }
+              meth(p: number): string { return "number" }
+              meth(p: Object): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -373,11 +373,11 @@ cases:
           type FF=(p: number) => string
           type EE=(p: string) => number
           class A {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: () => void): string { return "void-void" }
               meth(p: (p: number) => void): string { return "number-void" }
               meth(p: FF): string { return "FF" }
               meth(p: EE): string { return "EE" }
+              meth(p: Object): string { return "" } // should never be called
           }
           function fff(v: number): string {
               return " " + v + " "
@@ -400,16 +400,16 @@ cases:
           type FF=(p: number) => string
           type EE=(p: string) => number
           abstract class B {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: () => void): string { return "" }
               meth(p: FF): string { return "FF" }
               meth(p: EE): string { return "" }
+              meth(p: Object): string { return "" } // should never be called
           }
           class A extends B {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: () => void): string { return "void-void" }
               meth(p: (p: number) => void): string { return "number-void" }
               meth(p: (p: string) => number): string { return "EE" }
+              meth(p: Object): string { return "" } // should never be called
           }
           function fff(v: number): string {
               return " " + v + " "
@@ -435,11 +435,11 @@ cases:
           type SU=string|undefined
           type SNU=string|null|undefined
           class A {
-              meth(p: Object|null|undefined): string { return "" } // should never be called
               meth(p: SN): string { return "SN" }
               meth(p: SU): string { return "SU" }
               meth(p: SNU): string { return "SNU" }
               meth(p: S): string { return "S" }
+              meth(p: Object|null|undefined): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -465,16 +465,16 @@ cases:
           type SU=string|undefined
           type SNU=string|null|undefined
           class B {
-              meth(p: Object|null|undefined): string { return "" } // should never be called
               meth(p: SN): string { return "" }
               meth(p: SU): string { return "SU" }
               meth(p: S): string { return "" }
+              meth(p: Object|null|undefined): string { return "" } // should never be called
           }
           class A extends B {
-              meth(p: Object|null|undefined): string { return "" } // should never be called
               meth(p: SN): string { return "SN" }
               meth(p: SNU): string { return "SNU" }
               meth(p: S): string { return "S" }
+              meth(p: Object|null|undefined): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()

@@ -45,7 +45,7 @@ cases:
               m2(p: int, a: Object): int { return 2 }
               m3(p: int, a: Object, b?: Object): int { return 3 }
               m4(p: int, a?: Object, b?: Object, c: Object = new Error()): int { return 4 }
-              overload m { m1, m2, m3, m4 }
+              overload m { m2, m3, m4, m1 }
           }
           class A implements J {}
       use: |-

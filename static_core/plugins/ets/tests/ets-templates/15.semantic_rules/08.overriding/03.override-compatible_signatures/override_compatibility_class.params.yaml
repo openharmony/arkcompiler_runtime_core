@@ -63,11 +63,11 @@ cases:
           res = 1;
       }
     derived: |-
-      foo(i: Base): void {
-          res = 2;
-      }
       foo(i: Derived): void {
           res = 3;
+      }
+      foo(i: Base): void {
+          res = 2;
       }
     call: |-
       new Derived().foo(new Base())
@@ -214,18 +214,18 @@ cases:
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
-      foo(i: IBase): void {
-          res = 1;
-      }
       bar(i: IDerived): void {
           res = 2;
       }
-    derived: |-
       foo(i: IBase): void {
-          res = 3;
+          res = 1;
       }
+    derived: |-
       foo(i: IDerived): void {
           res = 4;
+      }
+      foo(i: IBase): void {
+          res = 3;
       }
     call: |-
       new Derived().foo(new A())
@@ -301,22 +301,22 @@ cases:
       class A implements IBase {}
       class B implements IDerived {}
     base: |-
-      foo(): IBase {
-          res = 1;
-          return new A();
-      }
       bar(): IDerived {
           res = 2;
           return new B();
       }
-    derived: |-
       foo(): IBase {
-          res = 3;
+          res = 1;
           return new A();
       }
+    derived: |-
       bar(): IDerived {
           res = 4;
           return new B();
+      }
+      foo(): IBase {
+          res = 3;
+          return new A();
       }
     call: |-
       new Derived().foo()

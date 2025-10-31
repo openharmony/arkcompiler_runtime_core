@@ -516,6 +516,24 @@ export class Math {
         return log2(x);
     }
 
+    public static max(): double {
+        return -Infinity;
+    }
+
+    public static max(val: double): double {
+        return val;
+    }
+
+    public static max(val1: double, val2: double): double {
+        if (isNaN(val1) || isNaN(val2)) {
+            return NaN
+        }
+        if (val1 > val2) {
+            return val1
+        }
+        return val2;
+    }
+
     /**
      * Largest value of `u` and `v`
      *
@@ -538,19 +556,19 @@ export class Math {
         return max;
     }
 
-    public static max(): double {
-        return -Infinity;
+    public static min(): double {
+        return Infinity;
     }
 
-    public static max(val: double): double {
+    public static min(val: double): double {
         return val;
     }
 
-    public static max(val1: double, val2: double): double {
+    public static min(val1: double, val2: double): double {
         if (isNaN(val1) || isNaN(val2)) {
             return NaN
         }
-        if (val1 > val2) {
+        if (val1 < val2) {
             return val1
         }
         return val2;
@@ -576,24 +594,6 @@ export class Math {
             }
         }
         return min;
-    }
-
-    public static min(): double {
-        return Infinity;
-    }
-
-    public static min(val: double): double {
-        return val;
-    }
-
-    public static min(val1: double, val2: double): double {
-        if (isNaN(val1) || isNaN(val2)) {
-            return NaN
-        }
-        if (val1 < val2) {
-            return val1
-        }
-        return val2;
     }
 
     /**

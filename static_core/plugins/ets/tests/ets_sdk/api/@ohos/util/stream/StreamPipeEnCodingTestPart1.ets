@@ -92,10 +92,10 @@ class MyWrite1 extends CustomWritable {
     }
 
     doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
-        this.doWrite(chunk as Uint8Array, encoding, callback)
+        this._doWriteImpl(chunk as Uint8Array, encoding, callback)
     }
 
-    private doWrite(chunk: Uint8Array, encoding: string, callback: Function): void {
+    private _doWriteImpl(chunk: Uint8Array, encoding: string, callback: Function): void {
         callCount_MyWrite1++;
         arktest.assertEQ(JSON.stringify(chunk), this.str);
         callback.unsafeCall();

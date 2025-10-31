@@ -757,6 +757,15 @@ export class Date {
     }
 
     /**
+     * Gets a string with a language-sensitive representation of this date.
+     *
+     * @returns a language-sensitive representation of this date.
+     */
+    public toLocaleString(): string {
+        return this.toLocaleString(undefined)
+    }
+
+    /**
      * Gets a string with a language-sensitive representation of this date with respect to locale.
      *
      * @param locale
@@ -766,15 +775,6 @@ export class Date {
     public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
         const formatter = new Intl.DateTimeFormat(intlLocalesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
         return formatter.format(this.getTime())
-    }
-
-    /**
-     * Gets a string with a language-sensitive representation of this date.
-     *
-     * @returns a language-sensitive representation of this date.
-     */
-    public toLocaleString(): string {
-        return this.toLocaleString(undefined)
     }
 
     /**
@@ -996,6 +996,18 @@ export class Date {
      *
      * @param value new year
      */
+    public setUTCFullYear(value: int): void {
+        let year = ecmaYearFromTime(this.ms);
+        let month = ecmaMonthFromTime(this.ms)
+        this.ms -= ecmaMakeDay(year, month, 1) * msPerDay as long
+        this.ms += ecmaMakeDay(value, month, 1) * msPerDay as long
+    }
+
+    /**
+     * Sets the full year for a specified date according to universal time.
+     *
+     * @param value new year
+     */
     public setUTCFullYear(value: number, month?: number, date?: number): number {
         this.setUTCFullYear(value.toInt());
         if (month !== undefined) {
@@ -1008,15 +1020,12 @@ export class Date {
     }
 
     /**
-     * Sets the full year for a specified date according to universal time.
+     * This function is an alias to @link{setFullYear} and left for compatibility with ECMA-262.
      *
      * @param value new year
      */
-    public setUTCFullYear(value: int): void {
-        let year = ecmaYearFromTime(this.ms);
-        let month = ecmaMonthFromTime(this.ms)
-        this.ms -= ecmaMakeDay(year, month, 1) * msPerDay as long
-        this.ms += ecmaMakeDay(value, month, 1) * msPerDay as long
+    public setYear(value: int): void {
+        this.setFullYear(value);
     }
 
     /**
@@ -1029,12 +1038,16 @@ export class Date {
     }
 
     /**
-     * This function is an alias to @link{setFullYear} and left for compatibility with ECMA-262.
+     * Sets the full year for a specified date according to local time.
      *
      * @param value new year
      */
-    public setYear(value: int): void {
-        this.setFullYear(value);
+    public setFullYear(value: int): void {
+        let local_time = this.ms - this.TZOffset * 60 * msPerSecond
+        let year = ecmaYearFromTime(local_time)
+        let month = ecmaMonthFromTime(local_time)
+        this.ms -= ecmaMakeDay(year, month, 1) * msPerDay as long
+        this.ms += ecmaMakeDay(value, month, 1) * msPerDay as long
     }
 
     /**
@@ -1051,19 +1064,6 @@ export class Date {
             this.setDate(date.toByte());
         }
         return this.ms.toDouble();
-    }
-
-    /**
-     * Sets the full year for a specified date according to local time.
-     *
-     * @param value new year
-     */
-    public setFullYear(value: int): void {
-        let local_time = this.ms - this.TZOffset * 60 * msPerSecond
-        let year = ecmaYearFromTime(local_time)
-        let month = ecmaMonthFromTime(local_time)
-        this.ms -= ecmaMakeDay(year, month, 1) * msPerDay as long
-        this.ms += ecmaMakeDay(value, month, 1) * msPerDay as long
     }
 
     /**
@@ -1327,12 +1327,10 @@ export class Date {
      *
      * @param value new seconds
      */
-    public setSeconds(value: number, ms?: number): number {
-        this.setSeconds(value.toByte());
-        if (ms !== undefined) {
-            this.setMilliseconds(ms.toShort());
-        }
-        return this.ms.toDouble();
+    public setSeconds(value: byte): void {
+        let sec = ecmaSecFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
+        this.ms -= sec * msPerSecond;
+        this.ms += value * msPerSecond;
     }
 
     /**
@@ -1340,10 +1338,12 @@ export class Date {
      *
      * @param value new seconds
      */
-    public setSeconds(value: byte): void {
-        let sec = ecmaSecFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
-        this.ms -= sec * msPerSecond;
-        this.ms += value * msPerSecond;
+    public setSeconds(value: number, ms?: number): number {
+        this.setSeconds(value.toByte());
+        if (ms !== undefined) {
+            this.setMilliseconds(ms.toShort());
+        }
+        return this.ms.toDouble();
     }
 
     /**
@@ -1495,6 +1495,19 @@ export class Date {
      *
      * @param month new month
      */
+    public setMonth(month: int): void {
+        let inLeapYear = ecmaInLeapYear(this.getFullYear().toInt());
+        let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms - this.TZOffset * 60 * msPerSecond));
+        let daysNew: int = getFirstDayInMonth(inLeapYear, month);
+        this.ms -= daysNow * msPerDay;
+        this.ms += daysNew * msPerDay;
+    }
+
+    /**
+     * Sets the month for a specified date according to the currently set year.
+     *
+     * @param month new month
+     */
     public setMonth(month: number, date?: number): number {
         this.setMonth(month.toInt());
         if (date !== undefined) {
@@ -1504,13 +1517,13 @@ export class Date {
     }
 
     /**
-     * Sets the month for a specified date according to the currently set year.
+     * Sets the month for a specified date according to universal time.
      *
      * @param month new month
      */
-    public setMonth(month: int): void {
+    public setUTCMonth(month: int): void {
         let inLeapYear = ecmaInLeapYear(this.getFullYear().toInt());
-        let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms - this.TZOffset * 60 * msPerSecond));
+        let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms));
         let daysNew: int = getFirstDayInMonth(inLeapYear, month);
         this.ms -= daysNow * msPerDay;
         this.ms += daysNew * msPerDay;
@@ -1527,19 +1540,6 @@ export class Date {
             this.setUTCDate(date.toByte());
         }
         return this.ms.toDouble();
-    }
-
-    /**
-     * Sets the month for a specified date according to universal time.
-     *
-     * @param month new month
-     */
-    public setUTCMonth(month: int): void {
-        let inLeapYear = ecmaInLeapYear(this.getFullYear().toInt());
-        let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms));
-        let daysNew: int = getFirstDayInMonth(inLeapYear, month);
-        this.ms -= daysNow * msPerDay;
-        this.ms += daysNew * msPerDay;
     }
 
     /**

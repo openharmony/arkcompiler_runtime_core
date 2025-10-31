@@ -47,7 +47,7 @@ cases:
       use: |-
           let a: A = new A()
           arktest.assertEQ( a.m(a), 1 )
-          arktest.assertEQ( a.m(1), 4 )
+          arktest.assertEQ( a.m(1), 1 )
           arktest.assertEQ( a.m(1, a), 2 )
           arktest.assertEQ( a.m(1, a, a), 3 )
           arktest.assertEQ( a.m(1, a, a, a), 4 )
@@ -102,12 +102,12 @@ cases:
           class Y extends X {}
           class Z extends Y {}
           class A {
-              m(a: X, b: Y, c: Z): int { return 1 }
-              m(a: Y, b: Y, c: Y): int { return 2 }
-              m(a: X, b: Y): int { return 3 }
-              m(a: Y, b: Y): int { return 4 }
-              m(a: X): int { return 5 }
               m(a: Y): int { return 6 }
+              m(a: X): int { return 5 }
+              m(a: Y, b: Y): int { return 4 }
+              m(a: X, b: Y): int { return 3 }
+              m(a: Y, b: Y, c: Y): int { return 2 }
+              m(a: X, b: Y, c: Z): int { return 1 }
           }
       use: |-
           let x: X = new X()

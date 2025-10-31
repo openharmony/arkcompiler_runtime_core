@@ -125,13 +125,13 @@ function testByte(input: Byte): byte {
 }
 
 function testChar(input: Char): char {
-    let result: char = c'A';
+    let result: Int = c'A'.toInt();
 
     for (let i = 0; i < 5000; i++) {
-        result += Char.valueOf(input);
+        result += Char.valueOf(input).toInt();
     }
 
-    return result;
+    return result.toChar();
 }
 
 function testShort(input: Short): short {
@@ -207,18 +207,18 @@ function testByteVN(a: Byte, b: Byte): byte {
 }
 
 function testCharVN(a: Char, b: Char): char {
-    let x: char = (Char.valueOf(a) + Char.valueOf(b)).toChar();
+    let x: char = (Char.valueOf(a).toInt() + Char.valueOf(b).toInt()).toChar();
     __noinline__dummy(x);
-    let y: char = (Char.valueOf(a) + Char.valueOf(b)).toChar();
+    let y: char = (Char.valueOf(a).toInt() + Char.valueOf(b).toInt()).toChar();
     __noinline__dummy(y);
-    let z: char = (Char.valueOf(b) + Char.valueOf(a)).toChar();
+    let z: char = (Char.valueOf(b).toInt() + Char.valueOf(a).toInt()).toChar();
     __noinline__dummy(z);
 
     for (let i = 0; i < 5000; i++) {
         let t: Int = __noinline__dummyReturn()
     }
 
-    return (x + y + z).toChar();
+    return (x.toInt() + y.toInt() + z.toInt()).toChar();
 }
 
 function testShortVN(a: Short, b: Short): short {

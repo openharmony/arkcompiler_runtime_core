@@ -72,15 +72,15 @@ cases:
               getType(): string {
                   return this.t
               }
-              constructor(p: Object) { this.t = "should never be called" }
+              constructor(p: boolean) { this.t = "boolean" }
               constructor(p: Byte) { this.t = "Byte" }
               constructor(p: short) { this.t = "short" }
               constructor(p: Int) { this.t = "Int" }
               constructor(p: long) { this.t = "long" }
               constructor(p: Char) { this.t = "Char" }
-              constructor(p: boolean) { this.t = "boolean" }
               constructor(p: Float) { this.t = "Float" }
               constructor(p: double) { this.t = "double" }
+              constructor(p: Object) { this.t = "should never be called" }
           }
       use: |-
           arktest.assertTrue(new A(new Byte(-1 as byte)).getType() == "Byte")
@@ -104,10 +104,10 @@ cases:
               getType(): string {
                   return this.t
               }
-              constructor(p: Object) { this.t = "should never be called" }
               constructor(p: Color) { if (p.valueOf() == 1) throw ex; else this.t = "Color" }
               constructor(p: Size) { this.t = "Size" }
               constructor(p: Status) { if (p.valueOf() == 1) throw ex; else this.t = "Status" }
+              constructor(p: Object) { this.t = "should never be called" }
           }
       use: |-
           try {
@@ -126,13 +126,13 @@ cases:
                   return this.t
               }
               constructor() {}
-              constructor(p: Object) { this.t = "should never be called" }
               constructor(p: FixedArray<A>) { this.t = "A" }
               constructor(p: FixedArray<char>) { this.t = "char" }
+              constructor(p: FixedArray<boolean>) { this.t = "boolean" }
               constructor(p: FixedArray<byte>) { this.t = "byte" }
               constructor(p: FixedArray<int>) { this.t = "int" }
-              constructor(p: FixedArray<boolean>) { this.t = "boolean" }
               constructor(p: FixedArray<Double>) { this.t = "Double" }
+              constructor(p: Object) { this.t = "should never be called" }
           }
       use: |-
           arktest.assertTrue(new A([-1 as byte]).getType() == "byte")

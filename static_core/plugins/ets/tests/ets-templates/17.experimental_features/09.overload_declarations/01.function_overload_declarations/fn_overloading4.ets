@@ -28,11 +28,11 @@ class A {}
 class B extends A implements I {}
 class C extends B {}
 
-function foo(a: A): int {
-  return 1;
-}
 function foo(a: B): int {
   return 2;
+}
+function foo(a: A): int {
+  return 1;
 }
 function foo(a: I): int {
   return 3;

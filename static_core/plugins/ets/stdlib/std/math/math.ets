@@ -389,6 +389,26 @@ export native function floor(v: double): double;
 export native function hypot(u: double, v: double): double;
 
 /**
+ * Base 10 logarithm of a number
+ *
+ * @param v An integer expression.
+ *
+ * @throws ArgumentOutOfRangeError if v < 1.
+ *
+ * @returns Returns the base 10 logarithm of a number.
+ *
+ */
+export function log10(v: int): int {
+    if (v < 1) {
+        throw new ArgumentOutOfRangeError("Integer argument for log10 should be positive");
+    }
+    return (v >= 1000000000) ? 9 : (v >= 100000000) ? 8 :
+        (v >= 10000000) ? 7 : (v >= 1000000) ? 6 :
+        (v >= 100000) ? 5 : (v >= 10000) ? 4 :
+        (v >= 1000) ? 3 : (v >= 100) ? 2 : (v >= 10) ? 1 : 0;
+}
+
+/**
  * Base 10 logarithm of `v`
  *
  * @param v arbitrary number
@@ -463,55 +483,7 @@ export native function log(v: double): double;
  *
  * @returns Largest value of `u` and `v`
  */
-export function max(v: double, u: double): double {
-    if (v > u) {
-        return v;
-    } else {
-        return u;
-    }
-}
-
-/**
- * Largest value of `u` and `v`
- *
- * @param u arbitrary number
- * @param v arbitrary number
- *
- * @returns Largest value of `u` and `v`
- */
-export function max(v: float, u: float): float {
-    if (v > u) {
-        return v;
-    } else {
-        return u;
-    }
-}
-
-/**
- * Largest value of `u` and `v`
- *
- * @param u arbitrary number
- * @param v arbitrary number
- *
- * @returns Largest value of `u` and `v`
- */
-export function max(v: long, u: long): long {
-    if (v > u) {
-        return v;
-    } else {
-        return u;
-    }
-}
-
-/**
- * Largest value of `u` and `v`
- *
- * @param u arbitrary number
- * @param v arbitrary number
- *
- * @returns Largest value of `u` and `v`
- */
-export function max(v: int, u: int): int {
+export function max(v: byte, u: byte): byte {
     if (v > u) {
         return v;
     } else {
@@ -543,7 +515,55 @@ export function max(v: short, u: short): short {
  *
  * @returns Largest value of `u` and `v`
  */
-export function max(v: byte, u: byte): byte {
+export function max(v: int, u: int): int {
+    if (v > u) {
+        return v;
+    } else {
+        return u;
+    }
+}
+
+/**
+ * Largest value of `u` and `v`
+ *
+ * @param u arbitrary number
+ * @param v arbitrary number
+ *
+ * @returns Largest value of `u` and `v`
+ */
+export function max(v: long, u: long): long {
+    if (v > u) {
+        return v;
+    } else {
+        return u;
+    }
+}
+
+/**
+ * Largest value of `u` and `v`
+ *
+ * @param u arbitrary number
+ * @param v arbitrary number
+ *
+ * @returns Largest value of `u` and `v`
+ */
+export function max(v: float, u: float): float {
+    if (v > u) {
+        return v;
+    } else {
+        return u;
+    }
+}
+
+/**
+ * Largest value of `u` and `v`
+ *
+ * @param u arbitrary number
+ * @param v arbitrary number
+ *
+ * @returns Largest value of `u` and `v`
+ */
+export function max(v: double, u: double): double {
     if (v > u) {
         return v;
     } else {
@@ -575,55 +595,7 @@ export function max(v: char, u: char): char {
  *
  * @returns Smallest value of `u` and `v`
  */
-export function min(v: double, u: double): double {
-    if (v < u) {
-        return v;
-    } else {
-        return u;
-    }
-}
-
-/**
- * Smallest value of `u` and `v`
- *
- * @param u arbitrary number
- * @param v arbitrary number
- *
- * @returns Smallest value of `u` and `v`
- */
-export function min(v: float, u: float): float {
-    if (v < u) {
-        return v;
-    } else {
-        return u;
-    }
-}
-
-/**
- * Smallest value of `u` and `v`
- *
- * @param u arbitrary number
- * @param v arbitrary number
- *
- * @returns Smallest value of `u` and `v`
- */
-export function min(v: long, u: long): long {
-    if (v < u) {
-        return v;
-    } else {
-        return u;
-    }
-}
-
-/**
- * Smallest value of `u` and `v`
- *
- * @param u arbitrary number
- * @param v arbitrary number
- *
- * @returns Smallest value of `u` and `v`
- */
-export function min(v: int, u: int): int {
+export function min(v: byte, u: byte): byte {
     if (v < u) {
         return v;
     } else {
@@ -655,7 +627,55 @@ export function min(v: short, u: short): short {
  *
  * @returns Smallest value of `u` and `v`
  */
-export function min(v: byte, u: byte): byte {
+export function min(v: int, u: int): int {
+    if (v < u) {
+        return v;
+    } else {
+        return u;
+    }
+}
+
+/**
+ * Smallest value of `u` and `v`
+ *
+ * @param u arbitrary number
+ * @param v arbitrary number
+ *
+ * @returns Smallest value of `u` and `v`
+ */
+export function min(v: long, u: long): long {
+    if (v < u) {
+        return v;
+    } else {
+        return u;
+    }
+}
+
+/**
+ * Smallest value of `u` and `v`
+ *
+ * @param u arbitrary number
+ * @param v arbitrary number
+ *
+ * @returns Smallest value of `u` and `v`
+ */
+export function min(v: float, u: float): float {
+    if (v < u) {
+        return v;
+    } else {
+        return u;
+    }
+}
+
+/**
+ * Smallest value of `u` and `v`
+ *
+ * @param u arbitrary number
+ * @param v arbitrary number
+ *
+ * @returns Smallest value of `u` and `v`
+ */
+export function min(v: double, u: double): double {
     if (v < u) {
         return v;
     } else {
@@ -931,26 +951,6 @@ export function seedRandom(value: long): void {}
  * Implemented as native function,  @see `random()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
  */
 export native function random(): double;
-
-/**
- * Base 10 logarithm of a number
- *
- * @param v An integer expression.
- *
- * @throws ArgumentOutOfRangeError if v < 1.
- *
- * @returns Returns the base 10 logarithm of a number.
- *
- */
-export function log10(v: int): int {
-    if (v < 1) {
-        throw new ArgumentOutOfRangeError("Integer argument for log10 should be positive");
-    }
-    return (v >= 1000000000) ? 9 : (v >= 100000000) ? 8 :
-        (v >= 10000000) ? 7 : (v >= 1000000) ? 6 :
-        (v >= 100000) ? 5 : (v >= 10000) ? 4 :
-        (v >= 1000) ? 3 : (v >= 100) ? 2 : (v >= 10) ? 1 : 0;
-}
 
 /**
  * C-like 32-bit manipulation of the two numbers

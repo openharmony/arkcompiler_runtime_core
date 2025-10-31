@@ -232,15 +232,15 @@ function heapVerificationTest() {
 }
 
 function stringFromCharVarTest() {
-    let alpha: char = 0x3B1;
-    let beta: char = 0x3B2;
-    arktest.assertEQ(string.fromCharCode(alpha, beta), 'αβ', "Must be 'αβ'");
+    let alpha: char = 0x3B1.toChar();
+    let beta: char = 0x3B2.toChar();
+    arktest.assertEQ(string.fromCharCode(alpha.toInt(), beta.toInt()), 'αβ', "Must be 'αβ'");
     arktest.assertEQ(string.fromCharCode(Char.toDouble(alpha), Char.toDouble(beta)), 'αβ', "Must be 'αβ'");
 }
 
 function stringFromSingleCharVarTest() {
-    let beta: char = 0x3B2;
-    arktest.assertEQ(string.fromCharCode(beta), 'β', "Must be 'β'");
+    let beta: char = 0x3B2.toChar();
+    arktest.assertEQ(string.fromCharCode(beta.toInt()), 'β', "Must be 'β'");
     arktest.assertEQ(string.fromCharCode(Char.toDouble(beta)), 'β', "Must be 'β'");
 }
 

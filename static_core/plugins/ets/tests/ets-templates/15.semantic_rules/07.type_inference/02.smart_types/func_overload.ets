@@ -50,20 +50,20 @@ class D extends A implements K {
     }
 }
 
-function foo(p: I): string {
-    return 'I'
-}
-function foo(p: A): string {
-    return 'A'
-}
-function foo(p: C): string {
-    return 'C'
+function foo(p: D): string {
+    return 'D'
 }
 function foo(p: K): string {
     return 'K'
 }
-function foo(p: D): string {
-    return 'D'
+function foo(p: C): string {
+    return 'C'
+}
+function foo(p: A): string {
+    return 'A'
+}
+function foo(p: I): string {
+    return 'I'
 }
 
 function main(): int {

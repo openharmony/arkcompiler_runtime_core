@@ -21,8 +21,8 @@ desc: >-
 tags: [{{c.tags}}]
 ---*/
 
-function foo(p: Object|null): Object {
-    return p!
+function foo(p: Boolean): boolean {
+    return p ^ p
 }
 function foo(p: Number): number {
     return p + p
@@ -30,8 +30,8 @@ function foo(p: Number): number {
 function foo(p: String): string {
     return p + p
 }
-function foo(p: Boolean): boolean {
-    return p ^ p
+function foo(p: Object|null): Object {
+    return p!
 }
 
 {{c.decl}}

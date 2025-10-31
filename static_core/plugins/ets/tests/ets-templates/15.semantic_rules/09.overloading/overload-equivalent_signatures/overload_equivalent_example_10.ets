@@ -22,12 +22,12 @@ let res: int = 0;
 class A {}
 
 class B extends A {
-  foo(x: A): void {
-    res = 1;
-  }
-
   foo(y: B): void {
     res = 2;
+  }
+
+  foo(x: A): void {
+    res = 1;
   }
 }
 
