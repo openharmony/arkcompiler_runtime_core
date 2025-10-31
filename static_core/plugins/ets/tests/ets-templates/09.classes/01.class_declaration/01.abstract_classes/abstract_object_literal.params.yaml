@@ -31,6 +31,29 @@ cases:
       arktest.assertEQ(c.c2, 'c2')
       arktest.assertEQ(c.foo(1), 2)
 
+  # overriding method in object literal
+  - decl: |-
+      c1: int;
+      c2: string;
+      constructor() {
+        this.c1 = 1
+        this.c2 = 'c'
+      }
+      foo(f: int): string|number {
+        return f + 1
+      }
+    call: |-
+      let c: C = { 
+        c1: 2,
+        c2: 'c2',  
+        foo(f: int): string|number {
+          return f - 1
+        }
+      }
+      arktest.assertEQ(c.c1, 2)
+      arktest.assertEQ(c.c2, 'c2')
+      arktest.assertEQ(c.foo(1), 0)
+
   - decl: |-
       c1: A;
       c2: B;
@@ -52,3 +75,26 @@ cases:
       arktest.assertEQ(c.foo(c.c1), 'aa')
       arktest.assertEQ(c.foo(c.c2), 'aaa')
 
+  # overriding method in object literal    
+  - decl: |-
+      c1: A;
+      c2: B;
+      constructor() {
+        this.c1 = new A()
+        this.c2 = new B()
+      }
+      foo(f: B): string|number {
+        return f.a
+      }
+    call: |-
+      let c: C = { 
+        c1: { a: 'aa'},
+        c2: { a: 'aaa', b: 'bb'},
+        foo(f: A): string {
+          return f.a
+        }
+      }
+      arktest.assertEQ(c.c1.a, 'aa')
+      arktest.assertEQ(c.c2.a, 'aaa')
+      arktest.assertEQ(c.c2.b, 'bb')
+      arktest.assertEQ(c.foo(c.c2), 'aaa')
