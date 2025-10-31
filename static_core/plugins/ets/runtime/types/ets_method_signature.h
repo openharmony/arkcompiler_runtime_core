@@ -54,12 +54,20 @@ public:
         }
     }
 
-    bool IsValid()
+    explicit EtsMethodSignature(Method::Proto &&pandaProto, PandaSmallVector<PandaString> &&paramTypes)
+        : paramTypes_(std::move(paramTypes)), pandaProto_(std::move(pandaProto)), isValid_(true)
+    {
+        for (auto &paramType : paramTypes_) {
+            pandaProto_.GetRefTypes().push_back(paramType);
+        }
+    }
+
+    bool IsValid() const
     {
         return isValid_;
     }
 
-    Method::Proto &GetProto()
+    const Method::Proto &GetProto() const
     {
         return pandaProto_;
     }

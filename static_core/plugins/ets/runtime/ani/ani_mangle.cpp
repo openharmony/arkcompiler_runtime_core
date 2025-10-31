@@ -16,6 +16,8 @@
 #include "assembler/assembly-type.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/types/ets_method_signature.h"
+#include "plugins/ets/runtime/types/ets_type.h"
 
 namespace ark::ets::ani {
 
@@ -209,6 +211,112 @@ std::optional<PandaString> Mangle::ConvertSignature(const std::string_view descr
         str.push_back('V');
     }
     return str;
+}
+
+static EtsType GetTypeByFirstChar(char c)
+{
+    switch (c) {
+        case 'Y':
+        case 'N':
+        case 'U':
+        case 'A':
+        case 'X':
+        case 'C':
+        case 'E':
+        case 'P':
+            return EtsType::OBJECT;
+        case 'z':
+            return EtsType::BOOLEAN;
+        case 'b':
+            return EtsType::BYTE;
+        case 'c':
+            return EtsType::CHAR;
+        case 's':
+            return EtsType::SHORT;
+        case 'i':
+            return EtsType::INT;
+        case 'l':
+            return EtsType::LONG;
+        case 'f':
+            return EtsType::FLOAT;
+        case 'd':
+            return EtsType::DOUBLE;
+        default:
+            return EtsType::UNKNOWN;
+    }
+}
+
+static size_t ProcessObjectParameter(PandaSmallVector<PandaString> &paramTypes, const std::string_view signature,
+                                     size_t i)
+{
+    PandaString str;
+    str.reserve(signature.size() - i);
+    size_t typeSize = ParseType(signature[i], signature.substr(i), str);
+    if (typeSize == PandaString::npos) {
+        return typeSize;
+    }
+    paramTypes.push_back(str);
+    return typeSize + i;
+}
+
+static size_t ProcessParameter(Method::Proto &proto, PandaSmallVector<PandaString> &paramTypes,
+                               const std::string_view signature, size_t i)
+{
+    EtsType paramType = GetTypeByFirstChar(signature[i]);
+    // Check that type is valid
+    if (paramType == EtsType::UNKNOWN) {
+        return std::string_view::npos;
+    }
+    proto.GetShorty().push_back(ets::ConvertEtsTypeToPandaType(paramType));
+
+    if (paramType != EtsType::OBJECT) {
+        return i + 1;
+    }
+
+    return ProcessObjectParameter(paramTypes, signature, i);
+}
+
+static size_t ParseReturnValue(Method::Proto &proto, PandaSmallVector<PandaString> &paramTypes,
+                               const std::string_view signature)
+{
+    size_t dots = signature.rfind(':');
+    // Return if ':' wasn't founded
+    if (dots == std::string_view::npos) {
+        return dots;
+    }
+
+    if (dots == signature.size() - 1) {
+        proto.GetShorty().push_back(ets::ConvertEtsTypeToPandaType(EtsType::VOID));
+        return dots;
+    }
+    // Process return type after ':'
+    auto nextPos = ProcessParameter(proto, paramTypes, signature, dots + 1);
+    if (nextPos == std::string_view::npos || nextPos != signature.size()) {
+        return std::string_view::npos;
+    }
+
+    return dots;
+}
+
+void Mangle::ConvertSignatureToProto(std::optional<EtsMethodSignature> &methodSignature,
+                                     const std::string_view signature)
+{
+    Method::Proto proto;
+    PandaSmallVector<PandaString> paramTypes;
+
+    size_t dots = ParseReturnValue(proto, paramTypes, signature);
+    if (dots == std::string_view::npos) {
+        return;
+    }
+
+    // Process parameters before ':'
+    for (size_t i = 0; i < dots;) {
+        i = ProcessParameter(proto, paramTypes, signature, i);
+        if (i == std::string_view::npos) {
+            return;
+        }
+    }
+    methodSignature.emplace(std::move(proto), std::move(paramTypes));
 }
 
 }  // namespace ark::ets::ani

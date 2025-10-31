@@ -18,12 +18,18 @@
 
 #include "runtime/include/mem/panda_string.h"
 
+namespace ark::ets {
+class EtsMethodSignature;
+}
+
 namespace ark::ets::ani {
 
 class Mangle {
 public:
     static std::optional<PandaString> ConvertDescriptor(const std::string_view descriptor, bool allowArray = false);
     static std::optional<PandaString> ConvertSignature(const std::string_view descriptor);
+    static void ConvertSignatureToProto(std::optional<EtsMethodSignature> &methodSignature,
+                                        const std::string_view descriptor);
 };
 
 }  // namespace ark::ets::ani
