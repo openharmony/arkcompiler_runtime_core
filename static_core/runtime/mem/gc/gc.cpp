@@ -643,7 +643,7 @@ void GC::PreStartup()
         GetPandaVm()->GetGCTrigger()->SetMinTargetFootprint(startupLimit);
         PreStartupImp();
         size_t originSize = AdujustStartupLimit(startupLimit);
-        constexpr uint64_t DISABLE_GC_DURATION_NS = 3000ULL * 1000 * 1000;
+        constexpr uint64_t DISABLE_GC_DURATION_NS = 3000ULL;
         auto task = MakePandaUnique<PostForkGCTask>(GCTaskCause::STARTUP_COMPLETE_CAUSE,
                                                     time::GetCurrentTimeInNanos() + DISABLE_GC_DURATION_NS, originSize);
         AddGCTask(true, std::move(task));
