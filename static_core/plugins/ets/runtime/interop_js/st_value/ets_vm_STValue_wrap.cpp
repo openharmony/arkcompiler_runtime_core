@@ -220,30 +220,28 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
         ani_class bigIntClass;
         auto aniEnv = GetAniEnv();
 
-        AniCheckAndThrowToDynamic(env, aniEnv->FindClass(className, &bigIntClass));
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass(className, &bigIntClass));
         ani_method bigIntCtor {};
-        AniCheckAndThrowToDynamic(env,
-                                  aniEnv->Class_FindMethod(bigIntClass, "<ctor>", "C{std.core.String}:", &bigIntCtor));
+        ANI_CHECK_ERROR_RETURN(env,
+                               aniEnv->Class_FindMethod(bigIntClass, "<ctor>", "C{std.core.String}:", &bigIntCtor));
         ani_object staticBigIntObject;
 
         ani_string aniBigIntString;
-        AniCheckAndThrowToDynamic(
-            env, aniEnv->String_NewUTF8(bigIntString.c_str(), bigIntString.length(), &aniBigIntString));
-        AniCheckAndThrowToDynamic(env,
-                                  aniEnv->Object_New(bigIntClass, bigIntCtor, &staticBigIntObject, aniBigIntString));
+        ANI_CHECK_ERROR_RETURN(env,
+                               aniEnv->String_NewUTF8(bigIntString.c_str(), bigIntString.length(), &aniBigIntString));
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &staticBigIntObject, aniBigIntString));
 
         std::string INT64_MAX_STR = "9223372036854775807";
         ani_string INT64_MAX_STR_ANI {};
         ani_object INT64_MAX_ANI_OBJ {};
-        AniCheckAndThrowToDynamic(
+        ANI_CHECK_ERROR_RETURN(
             env, aniEnv->String_NewUTF8(INT64_MAX_STR.c_str(), INT64_MAX_STR.length(), &INT64_MAX_STR_ANI));
-        AniCheckAndThrowToDynamic(env,
-                                  aniEnv->Object_New(bigIntClass, bigIntCtor, &INT64_MAX_ANI_OBJ, INT64_MAX_STR_ANI));
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &INT64_MAX_ANI_OBJ, INT64_MAX_STR_ANI));
         ani_boolean isGreaterThanInt64Max = ANI_FALSE;
         auto status =
             aniEnv->Object_CallMethodByName_Boolean(staticBigIntObject, "operatorGreaterThan", "C{std.core.BigInt}:z",
                                                     &isGreaterThanInt64Max, INT64_MAX_ANI_OBJ);
-        AniCheckAndThrowToDynamic(env, status);
+        ANI_CHECK_ERROR_RETURN(env, status);
         if (isGreaterThanInt64Max == ANI_TRUE) {
             STValueThrowJSError(env, "Value is out of range for long type.");
             return nullptr;
@@ -252,10 +250,9 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
         std::string INT64_MIN_STR = "-9223372036854775808";
         ani_string INT64_MIN_STR_ANI {};
         ani_object INT64_MIN_ANI_OBJ {};
-        AniCheckAndThrowToDynamic(
+        ANI_CHECK_ERROR_RETURN(
             env, aniEnv->String_NewUTF8(INT64_MIN_STR.c_str(), INT64_MIN_STR.length(), &INT64_MIN_STR_ANI));
-        AniCheckAndThrowToDynamic(env,
-                                  aniEnv->Object_New(bigIntClass, bigIntCtor, &INT64_MIN_ANI_OBJ, INT64_MIN_STR_ANI));
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &INT64_MIN_ANI_OBJ, INT64_MIN_STR_ANI));
         ani_boolean isLessThanInt64Min = ANI_FALSE;
         AniCheckAndThrowToDynamic(env, aniEnv->Object_CallMethodByName_Boolean(staticBigIntObject, "operatorLessThan",
                                                                                "C{std.core.BigInt}:z",
@@ -265,7 +262,7 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
             return nullptr;
         }
 
-        AniCheckAndThrowToDynamic(env, aniEnv->Object_CallMethodByName_Long(staticBigIntObject, "getLong", ":l", &res));
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Long(staticBigIntObject, "getLong", ":l", &res));
     } else {
         STValueThrowJSError(env, "input is neither a number or a bigint.");
         return nullptr;
@@ -305,7 +302,7 @@ napi_value WrapStringImpl(napi_env env, napi_callback_info info)
 
     auto aniEnv = GetAniEnv();
     ani_string aniString;
-    AniCheckAndThrowToDynamic(env, aniEnv->String_NewUTF8(variableName.c_str(), variableName.length(), &aniString));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->String_NewUTF8(variableName.c_str(), variableName.length(), &aniString));
 
     return CreateSTValueInstance(env, aniString);
 }
@@ -338,15 +335,14 @@ napi_value WrapBigIntImpl(napi_env env, napi_callback_info info)
     ani_class bigIntClass;
     auto aniEnv = GetAniEnv();
 
-    AniCheckAndThrowToDynamic(env, aniEnv->FindClass(className, &bigIntClass));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass(className, &bigIntClass));
     ani_method bigIntCtor {};
-    AniCheckAndThrowToDynamic(env, aniEnv->Class_FindMethod(bigIntClass, "<ctor>", "C{std.core.String}:", &bigIntCtor));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Class_FindMethod(bigIntClass, "<ctor>", "C{std.core.String}:", &bigIntCtor));
     ani_object staticBigIntObject;
 
     ani_string aniBigIntString;
-    AniCheckAndThrowToDynamic(env,
-                              aniEnv->String_NewUTF8(bigIntString.c_str(), bigIntString.length(), &aniBigIntString));
-    AniCheckAndThrowToDynamic(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &staticBigIntObject, aniBigIntString));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->String_NewUTF8(bigIntString.c_str(), bigIntString.length(), &aniBigIntString));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &staticBigIntObject, aniBigIntString));
 
     return CreateSTValueInstance(env, staticBigIntObject);
 }
@@ -366,7 +362,7 @@ napi_value GetNullImpl(napi_env env, napi_callback_info info)
     auto *aniEnv = GetAniEnv();
     ani_ref result;
     ani_status status = aniEnv->GetNull(&result);
-    AniCheckAndThrowToDynamic(env, status);
+    ANI_CHECK_ERROR_RETURN(env, status);
 
     return CreateSTValueInstance(env, result);
 }
@@ -386,7 +382,7 @@ napi_value GetUndefinedImpl(napi_env env, napi_callback_info info)
     auto *aniEnv = GetAniEnv();
     ani_ref result;
     ani_status status = aniEnv->GetUndefined(&result);
-    AniCheckAndThrowToDynamic(env, status);
+    ANI_CHECK_ERROR_RETURN(env, status);
 
     return CreateSTValueInstance(env, result);
 }

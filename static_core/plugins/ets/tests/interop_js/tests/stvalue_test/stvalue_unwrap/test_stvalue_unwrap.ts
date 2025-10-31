@@ -19,18 +19,7 @@ let STValue = etsVm.STValue;
 let module = STValue.findModule("stvalue_unwrap");
 let stvalueWrap;
 const epsilon = 1e-5;
-enum SType {
-    BOOLEAN,
-    CHAR,
-    BYTE,
-    SHORT,
-    INT,
-    LONG,
-    FLOAT,
-    DOUBLE,
-    REFERENCE,
-    VOID
-};
+let SType = etsVm.SType;
 
 function testUnwrapToNumber(): void {
     stvalueWrap = STValue.wrapByte(1);
@@ -59,14 +48,149 @@ function testUnwrapToNumber(): void {
     ASSERT_TRUE(Math.abs(stvalueWrap.unwrapToNumber() - 44.4) <= epsilon);
 
     stvalueWrap = STValue.wrapBoolean(true);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
+
+    let res = false;
+    try {
+        let magicSTValueNull = STValue.getNull();
+        let magicNull = magicSTValueNull.unwrapToNumber();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type primitive");
+    }
+    ASSERT_TRUE(res);
+
+    res = false;
+    try {
+        let magicSTValueBigIntFromString = module.moduleGetVariable('bigIntFromString', SType.REFERENCE); 
+        let magicDouble = magicSTValueBigIntFromString.unwrapToNumber();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type primitive");
+    }
+    ASSERT_TRUE(res);
 }
 
 function testUnwrapToString(): void {
-    // successfully trigger the exception: cannot unwrap a primitive value to string
-    // let magicSTValueInt = module.moduleGetVariable('magicInt', SType.INT); 
-    // let magicInt = magicSTValueInt.unwrapToString();
-    // print('magicInt: ', magicInt);
+    let res = false;
+    try {
+        let magicSTValueNull = STValue.getNull();
+        let magicNull = magicSTValueNull.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type std.core.String");
+    }
+    ASSERT_TRUE(res);
+
+    res = false;
+    try {
+        let magicSTValueUndefined = STValue.getUndefined();
+        let magicUndefined = magicSTValueUndefined.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type std.core.String");
+    }
+    ASSERT_TRUE(res);
+
+    res =false;
+    try {
+        let magicSTValueBoolean = module.moduleGetVariable('magicBoolean', SType.BOOLEAN); 
+        let magicFloat = magicSTValueBoolean.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type reference");
+    }
+    ASSERT_TRUE(res);
+
+    res =false;
+    try {
+        let magicSTValueByte = module.moduleGetVariable('magicByte', SType.BYTE); 
+        let magicByte = magicSTValueByte.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type reference");
+    }
+    ASSERT_TRUE(res);
+
+    res =false;
+    try {
+        let magicSTValueChar = module.moduleGetVariable('magicChar', SType.CHAR); 
+        let magicChar = magicSTValueChar.unwrapToString();    
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type reference");
+    }
+    ASSERT_TRUE(res);
+
+    res =false;
+    try {
+        let magicSTValueShort = module.moduleGetVariable('magicShort', SType.SHORT);
+        let magicShort = magicSTValueShort.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type reference");
+    }
+    ASSERT_TRUE(res);
+
+    res =false;
+    try {
+        let magicSTValueInt = module.moduleGetVariable('magicInt', SType.INT); 
+        let magicInt = magicSTValueInt.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type reference");
+    }
+    ASSERT_TRUE(res);
+
+    res =false; 
+    try {
+        let magicSTValueLong = module.moduleGetVariable('magicLong', SType.LONG); 
+        let magicLong = magicSTValueLong.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type reference");
+    }
+    ASSERT_TRUE(res);
+
+    res =false;
+    try {
+        let magicSTValueFloat = module.moduleGetVariable('magicFloat', SType.FLOAT); 
+        let magicFloat = magicSTValueFloat.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type reference");
+    }
+    ASSERT_TRUE(res);
+
+    res =false;
+    try {
+        let magicSTValueDouble = module.moduleGetVariable('magicDouble', SType.DOUBLE); 
+        let magicDouble = magicSTValueDouble.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type reference");
+    }
+    ASSERT_TRUE(res);
+
+    res =false;
+    try {
+        let magicSTValueBigIntFromString = module.moduleGetVariable('bigIntFromString', SType.REFERENCE); 
+        let magicDouble = magicSTValueBigIntFromString.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type std.core.String");
+    }
+    ASSERT_TRUE(res);
+
+    res =false;
+    try {
+        let magicSTValueBigIntFromLiteral = module.moduleGetVariable('bigIntFromLiteral', SType.REFERENCE); 
+        let magicDouble = magicSTValueBigIntFromLiteral.unwrapToString();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type std.core.String");
+    }
+    ASSERT_TRUE(res);
 
     let magicSTValue1 = module.moduleGetVariable('magicString1', SType.REFERENCE);
     let magicString1 = magicSTValue1.unwrapToString();
@@ -77,6 +201,7 @@ function testUnwrapToString(): void {
     let magicString2 = magicSTValue2.unwrapToString();
     print('magicString2: ', magicString2);
     ASSERT_TRUE(magicString2 === 'Hello World!!!');
+
 }
 
 function testUnwrapToBigInt(): void {
@@ -134,6 +259,16 @@ function testUnwrapToBigInt(): void {
     let negativeBigInt = negativeSTValue.unwrapToBigInt();
 
     ASSERT_TRUE(negativeBigInt === -1234567890123456789n);
+
+    let res =false;
+    try {
+        let magicSTValueNull = STValue.getNull();
+        magicSTValueNull.unwrapToBigInt();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("Expected BigInt object, but got different type.");
+    }
+    ASSERT_TRUE(res);
 }
 function testUnwrapToBoolean(): void {
     stvalueWrap = STValue.wrapByte(127);
@@ -191,7 +326,17 @@ function testUnwrapToBoolean(): void {
     ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
 
     stvalueWrap = STValue.wrapNumber(0);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == false);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === false);
+
+    let res =false;
+    try {
+        let magicSTValueNull = STValue.getNull();
+        magicSTValueNull.unwrapToBoolean();
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type primitive");
+    }
+    ASSERT_TRUE(res);
     print('UnwrapToBoolean Test SUCCESS!')
 }
 

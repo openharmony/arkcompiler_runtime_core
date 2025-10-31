@@ -26,6 +26,9 @@
 
 namespace ark::ets::interop::js {
 
+#define STVALUE_DATA_PTR_LOW "_STValueDataPtrLow"
+#define STVALUE_DATA_PTR_HIGH "_STValueDataPtrHigh"
+
 constexpr uint32_t UINT32_BIT_SHIFT = 32;
 
 class STValueData {
@@ -132,6 +135,8 @@ public:
         return std::holds_alternative<ani_double>(dataRef);
     }
 
+    bool IsAniNullOrUndefined(napi_env env) const;
+
     double ToDouble() const
     {
         ASSERT(!IsAniRef());
@@ -168,12 +173,11 @@ PANDA_PUBLIC_API napi_value GetSTValueClass(napi_env env);
 PANDA_PUBLIC_API napi_value CreateSTypeObject(napi_env env);
 ani_env *GetAniEnv();
 uintptr_t GetSTValueDataPtr(napi_env env, napi_value jsSTValue);
-void AniCheckAndThrowToDynamic(napi_env env, ani_status status);
+bool AniCheckAndThrowToDynamic(napi_env env, ani_status status);
+bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::string &errorMsg);
 void AniExpectOK(ani_status status);
-SType ParseReturnTypeFromSignature(napi_env env, const std::string &input);
 SType GetTypeFromType(napi_env env, napi_value stNapiType);
-bool GetArrayFromNapiValue(napi_env env, napi_value jsObject, std::vector<ani_value> &argArray);
-ani_value GetAniValueFromSTValue(napi_env env, napi_value element);
+bool GetAniValueFromSTValue(napi_env env, napi_value element, ani_value &value);
 bool IsSTValueInstance(napi_env env, napi_value value);
 bool CheckNapiIsArray(napi_env env, napi_value jsObject);
 void STValueThrowJSError(napi_env env, const std::string &msg);
@@ -216,6 +220,14 @@ void ThrowJSOtherNonObjectError(napi_env env);
         }                                                       \
     } while (0);                                                \
     INTEROP_CODE_SCOPE_JS_TO_ETS(EtsCoroutine::GetCurrent())
+
+#define ANI_CHECK_ERROR_RETURN(env, status)                     \
+    do {                                                        \
+        auto hasError = AniCheckAndThrowToDynamic(env, status); \
+        if (!hasError) {                                        \
+            return {};                                          \
+        }                                                       \
+    } while (0)
 
 template <typename T>
 napi_value CreateSTValueInstance(napi_env env, T &&arg)

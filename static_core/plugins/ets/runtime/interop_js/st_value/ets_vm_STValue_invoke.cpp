@@ -37,6 +37,7 @@
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue_param_getter.h"
 
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
@@ -63,93 +64,108 @@ static napi_value STValueTemplateInvokeFunction(
 
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
-    // 1. extract function name and signature
-    napi_value jsFunctionName = jsArgv[0];
-    napi_value jsSignatureName = jsArgv[1];
-    auto functionName = GetString(env, jsFunctionName);
-    auto signatureName = GetString(env, jsSignatureName);
+    // 1. extract function name and signature name
+    std::string functionName;
+    std::string signatureName;
+    if (!GetString(env, jsArgv[0], "functionName", functionName)) {
+        return nullptr;
+    }
 
-    // 2. extract function
+    if (!GetString(env, jsArgv[1], "signatureName", signatureName)) {
+        return nullptr;
+    }
+
+    // 2. extract invoke params
+    std::vector<ani_value> args;
+    if (!GetArray(env, jsArgv[2U], "args", args)) {
+        return nullptr;
+    }
+
+    // 3. extract returnType
+    SType returnType;
+    if (!GetReturnType(env, signatureName, returnType)) {
+        return nullptr;
+    }
+
+    // 4. extract function
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     ani_function aniFunction = findFunction(data, functionName, signatureName);
     if (aniFunction == nullptr) {
         return nullptr;
     }
 
-    // 3. extract invoke params
-    napi_value jsInputParams = jsArgv[2];
-    bool isArray = false;
-    NAPI_CHECK_FATAL(napi_is_array(env, jsInputParams, &isArray));
-    if (!isArray) {
-        STValueThrowJSError(env, "Input params are not array type.");
-        return nullptr;
-    }
-
-    uint32_t arrayLength = 0;
-    NAPI_CHECK_FATAL(napi_get_array_length(env, jsInputParams, &arrayLength));
-    std::vector<ani_value> args(arrayLength);
-    for (uint32_t i = 0; i < arrayLength; i++) {
-        napi_value element;
-        NAPI_CHECK_FATAL(napi_get_element(env, jsInputParams, i, &element));
-        args[i] = GetAniValueFromSTValue(env, element);
-    }
-
-    // 4. extract returnType
-    SType returnType = ParseReturnTypeFromSignature(env, signatureName);
-
     // 5. invoke func according to returnType
     auto aniEnv = GetAniEnv();
-    switch (returnType) {  //    std::variant<ani_ref, ani_boolean, ani_char, ani_byte, ani_short, ani_int, ani_long,
-                           //    ani_float, ani_double> DataRef;
+    switch (returnType) {
         case SType::BOOLEAN: {
             ani_boolean invokeResult = ANI_FALSE;
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Boolean_A(aniFunction, &invokeResult, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Boolean(aniFunction, &invokeResult)
+                                             : aniEnv->Function_Call_Boolean_A(aniFunction, &invokeResult, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance<ani_boolean>(env, static_cast<ani_boolean>(invokeResult));
         }
         case SType::CHAR: {
             ani_char invokeResult = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Char_A(aniFunction, &invokeResult, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Char(aniFunction, &invokeResult)
+                                             : aniEnv->Function_Call_Char_A(aniFunction, &invokeResult, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance<ani_char>(env, static_cast<ani_char>(invokeResult));
         }
         case SType::BYTE: {
             ani_byte invokeResult = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Byte_A(aniFunction, &invokeResult, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Byte(aniFunction, &invokeResult)
+                                             : aniEnv->Function_Call_Byte_A(aniFunction, &invokeResult, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance<ani_byte>(env, static_cast<ani_byte>(invokeResult));
         }
         case SType::SHORT: {
             ani_short invokeResult = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Short_A(aniFunction, &invokeResult, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Short(aniFunction, &invokeResult)
+                                             : aniEnv->Function_Call_Short_A(aniFunction, &invokeResult, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance<ani_short>(env, static_cast<ani_short>(invokeResult));
         }
         case SType::INT: {
             ani_int invokeResult = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Int_A(aniFunction, &invokeResult, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Int(aniFunction, &invokeResult)
+                                             : aniEnv->Function_Call_Int_A(aniFunction, &invokeResult, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance<ani_int>(env, static_cast<ani_int>(invokeResult));
         }
         case SType::LONG: {
             ani_long invokeResult = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Long_A(aniFunction, &invokeResult, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Long(aniFunction, &invokeResult)
+                                             : aniEnv->Function_Call_Long_A(aniFunction, &invokeResult, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance<ani_long>(env, static_cast<ani_long>(invokeResult));
         }
         case SType::FLOAT: {
             ani_float invokeResult = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Float_A(aniFunction, &invokeResult, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Float(aniFunction, &invokeResult)
+                                             : aniEnv->Function_Call_Float_A(aniFunction, &invokeResult, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance<ani_float>(env, static_cast<ani_float>(invokeResult));
         }
         case SType::DOUBLE: {
             ani_double invokeResult = 0;
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Double_A(aniFunction, &invokeResult, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Double(aniFunction, &invokeResult)
+                                             : aniEnv->Function_Call_Double_A(aniFunction, &invokeResult, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance<ani_double>(env, static_cast<ani_double>(invokeResult));
         }
         case SType::REFERENCE: {
             ani_ref invokeResult {};
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Ref_A(aniFunction, &invokeResult, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Ref(aniFunction, &invokeResult)
+                                             : aniEnv->Function_Call_Ref_A(aniFunction, &invokeResult, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance<ani_ref>(env, std::move(invokeResult));
         }
         case SType::VOID: {
-            AniCheckAndThrowToDynamic(env, aniEnv->Function_Call_Void_A(aniFunction, args.data()));
+            ani_status status = args.empty() ? aniEnv->Function_Call_Void(aniFunction)
+                                             : aniEnv->Function_Call_Void_A(aniFunction, args.data());
+            ANI_CHECK_ERROR_RETURN(env, status);
             ani_ref undefinedRef {};
-            AniCheckAndThrowToDynamic(env, aniEnv->GetUndefined(&undefinedRef));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->GetUndefined(&undefinedRef));
             return CreateSTValueInstance<ani_ref>(env, std::move(undefinedRef));
         }
         default: {
@@ -166,9 +182,11 @@ napi_value STValueModuleInvokeFunctionImpl(napi_env env, [[maybe_unused]] napi_c
         auto aniEnv = GetAniEnv();
         ani_module aniModule = reinterpret_cast<ani_module>(data->GetAniRef());
         ani_function aniFunction = nullptr;
-        AniCheckAndThrowToDynamic(
-            env, aniEnv->Module_FindFunction(aniModule, functionName.c_str(), signatureName.c_str(), &aniFunction));
-
+        ani_status status =
+            aniEnv->Module_FindFunction(aniModule, functionName.c_str(), signatureName.c_str(), &aniFunction);
+        AniCheckAndThrowToDynamic(env, status,
+                                  "Failed to find function when module invoke function;functionName=" + functionName +
+                                      ";signatureName=" + signatureName);
         return aniFunction;
     };
 
@@ -182,8 +200,11 @@ napi_value STValueNamespaceInvokeFunctionImpl(napi_env env, [[maybe_unused]] nap
         auto aniEnv = GetAniEnv();
         ani_namespace aniNsp = reinterpret_cast<ani_namespace>(data->GetAniRef());
         ani_function aniFunction = nullptr;
-        AniCheckAndThrowToDynamic(
-            env, aniEnv->Namespace_FindFunction(aniNsp, functionName.c_str(), signatureName.c_str(), &aniFunction));
+        ani_status status =
+            aniEnv->Namespace_FindFunction(aniNsp, functionName.c_str(), signatureName.c_str(), &aniFunction);
+        AniCheckAndThrowToDynamic(env, status,
+                                  "Failed to find function when namespace invoke function;functionName=" +
+                                      functionName + ";signatureName=" + signatureName);
         return aniFunction;
     };
 
@@ -226,14 +247,14 @@ napi_value STValueFunctionalObjectInvokeImpl(napi_env env, [[maybe_unused]] napi
     }
 
     STValueData *fnData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (fnData == nullptr || !fnData->IsAniRef()) {
+    if (fnData == nullptr || !fnData->IsAniRef() || fnData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_fn_object fnObj = static_cast<ani_fn_object>(fnData->GetAniRef());
 
     ani_ref fnResult {};
-    AniCheckAndThrowToDynamic(env, aniEnv->FunctionalObject_Call(fnObj, argLength, argArray.data(), &fnResult));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->FunctionalObject_Call(fnObj, argLength, argArray.data(), &fnResult));
 
     return CreateSTValueInstance(env, fnResult);
 }
@@ -247,57 +268,53 @@ napi_value ObjectInvokeMethodWithNoArgs(napi_env env, ani_object invokeObj, cons
     switch (returnType) {
         case SType::BOOLEAN: {
             ani_boolean fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Object_CallMethodByName_Boolean(invokeObj, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Boolean(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::CHAR: {
             ani_char fnResult {};
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_CallMethodByName_Char(invokeObj, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Char(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::BYTE: {
             ani_byte fnResult {};
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_CallMethodByName_Byte(invokeObj, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Byte(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::SHORT: {
             ani_short fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Object_CallMethodByName_Short(invokeObj, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Short(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::INT: {
             ani_int fnResult {};
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_CallMethodByName_Int(invokeObj, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Int(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::LONG: {
             ani_long fnResult {};
-            AniCheckAndThrowToDynamic(env, aniEnv->Object_CallMethodByName_Long(invokeObj, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Long(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::FLOAT: {
             ani_float fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Object_CallMethodByName_Float(invokeObj, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Float(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::DOUBLE: {
             ani_double fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Object_CallMethodByName_Double(invokeObj, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Double(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::REFERENCE: {
             ani_ref fnResult {};
-            aniEnv->Object_CallMethodByName_Ref(invokeObj, name, signature, &fnResult);
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Ref(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::VOID: {
-            aniEnv->Object_CallMethodByName_Void(invokeObj, name, signature);
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Void(invokeObj, name, signature));
             ani_ref result {};
-            AniCheckAndThrowToDynamic(env, aniEnv->GetUndefined(&result));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->GetUndefined(&result));
             return CreateSTValueInstance(env, result);
         }
         default: {
@@ -318,61 +335,63 @@ napi_value ObjectInvokeMethodWithArgs(napi_env env, ani_object invokeObj, const 
     switch (returnType) {
         case SType::BOOLEAN: {
             ani_boolean fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Object_CallMethodByName_Boolean_A(invokeObj, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::CHAR: {
             ani_char fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Object_CallMethodByName_Char_A(invokeObj, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::BYTE: {
             ani_byte fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Object_CallMethodByName_Byte_A(invokeObj, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::SHORT: {
             ani_short fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Object_CallMethodByName_Short_A(invokeObj, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::INT: {
             ani_int fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Object_CallMethodByName_Int_A(invokeObj, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::LONG: {
             ani_long fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Object_CallMethodByName_Long_A(invokeObj, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::FLOAT: {
             ani_float fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Object_CallMethodByName_Float_A(invokeObj, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::DOUBLE: {
             ani_double fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Object_CallMethodByName_Double_A(invokeObj, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::REFERENCE: {
             ani_ref fnResult {};
-            aniEnv->Object_CallMethodByName_Ref_A(invokeObj, name, signature, &fnResult, argArrayData);
+            ANI_CHECK_ERROR_RETURN(
+                env, aniEnv->Object_CallMethodByName_Ref_A(invokeObj, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::VOID: {
-            aniEnv->Object_CallMethodByName_Void_A(invokeObj, name, signature, argArrayData);
+            ANI_CHECK_ERROR_RETURN(env,
+                                   aniEnv->Object_CallMethodByName_Void_A(invokeObj, name, signature, argArrayData));
             ani_ref result {};
-            AniCheckAndThrowToDynamic(env, aniEnv->GetUndefined(&result));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->GetUndefined(&result));
             return CreateSTValueInstance(env, result);
         }
         default: {
@@ -400,20 +419,29 @@ napi_value STValueObjectInvokeMethodImpl(napi_env env, [[maybe_unused]] napi_cal
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
     std::vector<ani_value> argArray;
-    if (!GetArrayFromNapiValue(env, jsArgv[2U], argArray)) {
+    if (!GetArray(env, jsArgv[2U], "args", argArray)) {
         return nullptr;
     }
 
-    std::string nameString = GetString(env, jsArgv[0]);
-    std::string signatureString = GetString(env, jsArgv[1]);
+    std::string nameString {};
+    if (!GetString(env, jsArgv[0], "methodName", nameString)) {
+        return nullptr;
+    }
+    std::string signatureString {};
+    if (!GetString(env, jsArgv[1], "signatureName", signatureString)) {
+        return nullptr;
+    }
     STValueData *objData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (objData == nullptr || !objData->IsAniRef()) {
+    if (objData == nullptr || !objData->IsAniRef() || objData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_object invokeObj = reinterpret_cast<ani_object>(objData->GetAniRef());
 
-    SType returnType = ParseReturnTypeFromSignature(env, signatureString);
+    SType returnType;
+    if (!GetReturnType(env, signatureString, returnType)) {
+        return nullptr;
+    }
     if (argArray.empty()) {
         return ObjectInvokeMethodWithNoArgs(env, invokeObj, nameString, signatureString, returnType);
     }
@@ -429,62 +457,60 @@ napi_value ClassInvokeStaticMethodWithNoArgs(napi_env env, ani_class clsClass, c
     switch (returnType) {
         case SType::BOOLEAN: {
             ani_boolean fnResult {};
-            AniCheckAndThrowToDynamic(
-                env, aniEnv->Class_CallStaticMethodByName_Boolean(clsClass, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env,
+                                   aniEnv->Class_CallStaticMethodByName_Boolean(clsClass, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::CHAR: {
             ani_char fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Class_CallStaticMethodByName_Char(clsClass, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env,
+                                   aniEnv->Class_CallStaticMethodByName_Char(clsClass, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::BYTE: {
             ani_byte fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Class_CallStaticMethodByName_Byte(clsClass, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env,
+                                   aniEnv->Class_CallStaticMethodByName_Byte(clsClass, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::SHORT: {
             ani_short fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Class_CallStaticMethodByName_Short(clsClass, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env,
+                                   aniEnv->Class_CallStaticMethodByName_Short(clsClass, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::INT: {
             ani_int fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Class_CallStaticMethodByName_Int(clsClass, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Class_CallStaticMethodByName_Int(clsClass, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::LONG: {
             ani_long fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Class_CallStaticMethodByName_Long(clsClass, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env,
+                                   aniEnv->Class_CallStaticMethodByName_Long(clsClass, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::FLOAT: {
             ani_float fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Class_CallStaticMethodByName_Float(clsClass, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env,
+                                   aniEnv->Class_CallStaticMethodByName_Float(clsClass, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::DOUBLE: {
             double fnResult {};
-            AniCheckAndThrowToDynamic(
-                env, aniEnv->Class_CallStaticMethodByName_Double(clsClass, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env,
+                                   aniEnv->Class_CallStaticMethodByName_Double(clsClass, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::REFERENCE: {
             ani_ref fnResult {};
-            AniCheckAndThrowToDynamic(env,
-                                      aniEnv->Class_CallStaticMethodByName_Ref(clsClass, name, signature, &fnResult));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Class_CallStaticMethodByName_Ref(clsClass, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::VOID: {
-            AniCheckAndThrowToDynamic(env, aniEnv->Class_CallStaticMethodByName_Void(clsClass, name, signature));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Class_CallStaticMethodByName_Void(clsClass, name, signature));
             ani_ref result {};
-            AniCheckAndThrowToDynamic(env, aniEnv->GetUndefined(&result));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->GetUndefined(&result));
             return CreateSTValueInstance(env, result);
         }
         default: {
@@ -505,63 +531,63 @@ napi_value ClassInvokeStaticMethodWitArgs(napi_env env, ani_class clsClass, cons
     switch (returnType) {
         case SType::BOOLEAN: {
             ani_boolean fnResult {};
-            AniCheckAndThrowToDynamic(env, aniEnv->Class_CallStaticMethodByName_Boolean_A(clsClass, name, signature,
-                                                                                          &fnResult, argArrayData));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Class_CallStaticMethodByName_Boolean_A(clsClass, name, signature,
+                                                                                       &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::CHAR: {
             ani_char fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Class_CallStaticMethodByName_Char_A(clsClass, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::BYTE: {
             ani_byte fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Class_CallStaticMethodByName_Byte_A(clsClass, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::SHORT: {
             ani_short fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Class_CallStaticMethodByName_Short_A(clsClass, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::INT: {
             ani_int fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Class_CallStaticMethodByName_Int_A(clsClass, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::LONG: {
             ani_long fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Class_CallStaticMethodByName_Long_A(clsClass, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::FLOAT: {
             ani_float fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Class_CallStaticMethodByName_Float_A(clsClass, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::DOUBLE: {
             ani_double fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Class_CallStaticMethodByName_Double_A(clsClass, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::REFERENCE: {
             ani_ref fnResult {};
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Class_CallStaticMethodByName_Ref_A(clsClass, name, signature, &fnResult, argArrayData));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::VOID: {
-            AniCheckAndThrowToDynamic(
+            ANI_CHECK_ERROR_RETURN(
                 env, aniEnv->Class_CallStaticMethodByName_Void_A(clsClass, name, signature, argArrayData));
             ani_ref result {};
-            AniCheckAndThrowToDynamic(env, aniEnv->GetUndefined(&result));
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->GetUndefined(&result));
             return CreateSTValueInstance(env, result);
         }
         default: {
@@ -589,20 +615,29 @@ napi_value STValueClassInvokeStaticMethodImpl(napi_env env, [[maybe_unused]] nap
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
     std::vector<ani_value> argArray;
-    if (!GetArrayFromNapiValue(env, jsArgv[2U], argArray)) {
+    if (!GetArray(env, jsArgv[2U], "args", argArray)) {
         return nullptr;
     }
 
-    std::string nameString = GetString(env, jsArgv[0]);
-    std::string signatureString = GetString(env, jsArgv[1]);
+    std::string nameString {};
+    if (!GetString(env, jsArgv[0], "methodName", nameString)) {
+        return nullptr;
+    }
+    std::string signatureString {};
+    if (!GetString(env, jsArgv[1], "signatureName", signatureString)) {
+        return nullptr;
+    }
     STValueData *clsData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (clsData == nullptr || !clsData->IsAniRef()) {
+    if (clsData == nullptr || !clsData->IsAniRef() || clsData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     ani_class clsClass = reinterpret_cast<ani_class>(clsData->GetAniRef());
 
-    SType returnType = ParseReturnTypeFromSignature(env, signatureString);
+    SType returnType;
+    if (!GetReturnType(env, signatureString, returnType)) {
+        return nullptr;
+    }
     if (argArray.empty()) {
         return ClassInvokeStaticMethodWithNoArgs(env, clsClass, nameString, signatureString, returnType);
     }

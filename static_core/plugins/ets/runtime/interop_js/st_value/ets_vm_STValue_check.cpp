@@ -78,13 +78,24 @@ napi_value STValueIsStringImpl(napi_env env, napi_callback_info info)
 {
     auto checkIsString = [env](ani_ref ref) -> ani_boolean {
         auto aniEnv = GetAniEnv();
+        ani_boolean isString = ANI_FALSE;
+        ani_boolean isNull = ANI_FALSE;
+        ani_boolean isUndefined = ANI_FALSE;
+        AniCheckAndThrowToDynamic(env, aniEnv->Reference_IsNull(ref, &isNull));
+        if (isNull) {
+            return isString;
+        }
+
+        AniCheckAndThrowToDynamic(env, aniEnv->Reference_IsUndefined(ref, &isUndefined));
+        if (isUndefined) {
+            return isString;
+        }
 
         ani_class stringCls = nullptr;
-        ani_boolean isString = ANI_FALSE;
-        AniCheckAndThrowToDynamic(env, aniEnv->FindClass("std.core.String", &stringCls));
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("std.core.String", &stringCls));
         auto stringClsType = reinterpret_cast<ani_type>(stringCls);
-        AniCheckAndThrowToDynamic(
-            env, aniEnv->Object_InstanceOf(reinterpret_cast<ani_object>(ref), stringClsType, &isString));
+        ANI_CHECK_ERROR_RETURN(env,
+                               aniEnv->Object_InstanceOf(reinterpret_cast<ani_object>(ref), stringClsType, &isString));
         return isString;
     };
 
@@ -95,14 +106,25 @@ napi_value STValueIsBigIntImpl(napi_env env, napi_callback_info info)
 {
     auto checkIsBigInt = [env](ani_ref ref) -> ani_boolean {
         auto aniEnv = GetAniEnv();
+        ani_boolean isBigint = ANI_FALSE;
+        ani_boolean isNull = ANI_FALSE;
+        ani_boolean isUndefined = ANI_FALSE;
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_IsNull(ref, &isNull));
+        if (isNull) {
+            return isBigint;
+        }
+
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_IsUndefined(ref, &isUndefined));
+        if (isUndefined) {
+            return isBigint;
+        }
 
         ani_class bigintCls = nullptr;
-        ani_boolean isBigint = ANI_FALSE;
 
         AniCheckAndThrowToDynamic(env, aniEnv->FindClass("std.core.BigInt", &bigintCls));
         auto bigintClsType = reinterpret_cast<ani_type>(bigintCls);
-        AniCheckAndThrowToDynamic(
-            env, aniEnv->Object_InstanceOf(reinterpret_cast<ani_object>(ref), bigintClsType, &isBigint));
+        ANI_CHECK_ERROR_RETURN(env,
+                               aniEnv->Object_InstanceOf(reinterpret_cast<ani_object>(ref), bigintClsType, &isBigint));
         return isBigint;
     };
 
@@ -115,7 +137,7 @@ napi_value IsNullImpl(napi_env env, napi_callback_info info)
     auto checkIsNull = [env](ani_ref ref) -> ani_boolean {
         auto aniEnv = GetAniEnv();
         ani_boolean isNull = ANI_FALSE;
-        AniCheckAndThrowToDynamic(env, aniEnv->Reference_IsNull(ref, &isNull));
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_IsNull(ref, &isNull));
         return isNull;
     };
 
@@ -128,7 +150,7 @@ napi_value IsUndefinedImpl(napi_env env, napi_callback_info info)
     auto checkIsUndefined = [env](ani_ref ref) -> ani_boolean {
         auto aniEnv = GetAniEnv();
         ani_boolean isUndefined = ANI_FALSE;
-        AniCheckAndThrowToDynamic(env, aniEnv->Reference_IsUndefined(ref, &isUndefined));
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_IsUndefined(ref, &isUndefined));
         return isUndefined;
     };
 
@@ -166,7 +188,7 @@ napi_value IsEqualToImpl(napi_env env, napi_callback_info info)
     }
 
     ani_boolean isEqual = ANI_FALSE;
-    AniCheckAndThrowToDynamic(env, aniEnv->Reference_Equals(data->GetAniRef(), otherData->GetAniRef(), &isEqual));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_Equals(data->GetAniRef(), otherData->GetAniRef(), &isEqual));
 
     napi_value jsBool {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, (isEqual == ANI_TRUE), &jsBool));
@@ -204,7 +226,7 @@ napi_value IsStrictlyEqualToImpl(napi_env env, napi_callback_info info)
     }
 
     ani_boolean isEqual = ANI_FALSE;
-    AniCheckAndThrowToDynamic(env, aniEnv->Reference_Equals(data->GetAniRef(), otherData->GetAniRef(), &isEqual));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_StrictEquals(data->GetAniRef(), otherData->GetAniRef(), &isEqual));
 
     napi_value js_bool {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, (isEqual == ANI_TRUE), &js_bool));
@@ -418,12 +440,12 @@ napi_value STValueTypeIsAssignableFromImpl(napi_env env, napi_callback_info info
     napi_get_cb_info(env, info, &jsArgc, jsArgv, nullptr, nullptr);
 
     STValueData *fromData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
-    if (fromData == nullptr || !fromData->IsAniRef()) {
+    if (fromData == nullptr || !fromData->IsAniRef() || fromData->IsAniNullOrUndefined(env)) {
         ThrowJSNonObjectError(env, "fromType");
         return nullptr;
     }
     STValueData *toData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[1]));
-    if (toData == nullptr || !toData->IsAniRef()) {
+    if (toData == nullptr || !toData->IsAniRef() || toData->IsAniNullOrUndefined(env)) {
         ThrowJSNonObjectError(env, "toType");
         return nullptr;
     }
@@ -431,7 +453,7 @@ napi_value STValueTypeIsAssignableFromImpl(napi_env env, napi_callback_info info
     ani_type toType = static_cast<ani_type>(toData->GetAniRef());
 
     ani_boolean resBoolean {};
-    AniCheckAndThrowToDynamic(env, aniEnv->Type_IsAssignableFrom(fromType, toType, &resBoolean));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Type_IsAssignableFrom(fromType, toType, &resBoolean));
 
     napi_value jsBoolean {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, resBoolean == ANI_TRUE, &jsBoolean));
@@ -455,19 +477,19 @@ napi_value STValueObjectInstanceOfImpl(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr);
 
     STValueData *objectData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    if (objectData == nullptr || !objectData->IsAniRef()) {
+    if (objectData == nullptr || !objectData->IsAniRef() || objectData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
     STValueData *typeData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
-    if (typeData == nullptr || !typeData->IsAniRef()) {
+    if (typeData == nullptr || !typeData->IsAniRef() || typeData->IsAniNullOrUndefined(env)) {
         ThrowJSNonObjectError(env, "type");
         return nullptr;
     }
     ani_object objObject = static_cast<ani_object>(objectData->GetAniRef());
     ani_type typeObject = static_cast<ani_type>(typeData->GetAniRef());
     ani_boolean resBoolean {};
-    AniCheckAndThrowToDynamic(env, aniEnv->Object_InstanceOf(objObject, typeObject, &resBoolean));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_InstanceOf(objObject, typeObject, &resBoolean));
 
     napi_value jsBoolean {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, resBoolean == ANI_TRUE, &jsBoolean));

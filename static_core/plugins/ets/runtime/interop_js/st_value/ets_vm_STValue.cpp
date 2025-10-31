@@ -97,28 +97,50 @@ static std::string GetErrorMessage(ani_env *aniEnv, ani_error aniError)
     return propertyValue;
 }
 
-void AniCheckAndThrowToDynamic(napi_env env, ani_status status)
+bool AniCheckAndThrowToDynamic(napi_env env, ani_status status)
 {
-    if (status != ANI_OK) {
-        ani_env *aniEnv = GetAniEnv();
-
-        ani_boolean hasError = false;
-        AniExpectOK(aniEnv->ExistUnhandledError(&hasError));
-
-        // if error exists, clear it and throw to JS
-        if (hasError) {
-            ani_error error = nullptr;
-            AniExpectOK(aniEnv->GetUnhandledError(&error));
-            AniExpectOK(aniEnv->ResetError());
-
-            std::string errorDescription = GetErrorMessage(aniEnv, error);
-            std::string errorMessage = "ANI error occurred, got error: " + errorDescription;
-            STValueThrowJSError(env, errorMessage);
-            return;
-        }
-
-        STValueThrowJSError(env, "Unknown ANI error occurred, status: " + std::to_string(status));
+    if (status == ANI_OK) {
+        return true;
     }
+
+    ani_env *aniEnv = GetAniEnv();
+    ani_boolean hasError = false;
+    AniExpectOK(aniEnv->ExistUnhandledError(&hasError));
+    if (!hasError) {
+        STValueThrowJSError(env, "Unknown ANI error occurred, status: " + std::to_string(status));
+        return false;
+    }
+
+    ani_error error = nullptr;
+    AniExpectOK(aniEnv->GetUnhandledError(&error));
+    AniExpectOK(aniEnv->ResetError());
+
+    std::string errorDescription = GetErrorMessage(aniEnv, error);
+    std::string errorMessage = "ANI error occurred, got error: " + errorDescription;
+    STValueThrowJSError(env, errorMessage);
+    return false;
+}
+
+bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::string &errorMsg)
+{
+    if (status == ANI_OK) {
+        return true;
+    }
+
+    ani_env *aniEnv = GetAniEnv();
+    ani_boolean hasError = false;
+    AniExpectOK(aniEnv->ExistUnhandledError(&hasError));
+    if (!hasError) {
+        STValueThrowJSError(env, errorMsg);
+        return false;
+    }
+
+    // if error exists, clear it and throw to js
+    ani_error error = nullptr;
+    AniExpectOK(aniEnv->GetUnhandledError(&error));
+    AniExpectOK(aniEnv->ResetError());
+    STValueThrowJSError(env, errorMsg);
+    return false;
 }
 
 STValueData::STValueData([[maybe_unused]] napi_env env, ani_ref refData)
@@ -174,12 +196,24 @@ STValueData::STValueData([[maybe_unused]] napi_env env, ani_double doubleData)
 
 STValueData::~STValueData() {}
 
+bool STValueData::IsAniNullOrUndefined(napi_env env) const
+{
+    auto *aniEnv = GetAniEnv();
+    ani_boolean isNullOrUndefined = ANI_FALSE;
+    AniCheckAndThrowToDynamic(env, aniEnv->Reference_IsNullishValue(this->GetAniRef(), &isNullOrUndefined));
+    return isNullOrUndefined == ANI_TRUE;
+}
+
 uintptr_t GetSTValueDataPtr(napi_env env, napi_value jsSTValue)
 {
+    if (!IsSTValueInstance(env, jsSTValue)) {
+        return false;
+    }
+
     napi_value stvalueDataPtrLow {};
     napi_value stvalueDataPtrHigh {};
-    NAPI_CHECK_FATAL(napi_get_named_property(env, jsSTValue, "_STValueDataPtrLow", &stvalueDataPtrLow));
-    NAPI_CHECK_FATAL(napi_get_named_property(env, jsSTValue, "_STValueDataPtrHigh", &stvalueDataPtrHigh));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsSTValue, STVALUE_DATA_PTR_LOW, &stvalueDataPtrLow));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsSTValue, STVALUE_DATA_PTR_HIGH, &stvalueDataPtrHigh));
 
     uint32_t low = 0;
     uint32_t high = 0;
@@ -191,49 +225,33 @@ uintptr_t GetSTValueDataPtr(napi_env env, napi_value jsSTValue)
     return static_cast<uintptr_t>(ptr);
 }
 
-ani_value GetAniValueFromSTValue(napi_env env, napi_value element)
+bool GetAniValueFromSTValue(napi_env env, napi_value element, ani_value &value)
 {
     STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, element));
-
-    ani_value aniResult;
-    if (data->IsAniRef()) {
-        aniResult.r = data->GetAniRef();
-    } else if (data->IsAniBoolean()) {
-        aniResult.z = data->GetAniBoolean();
-    } else if (data->IsAniChar()) {
-        aniResult.c = data->GetAniChar();
-    } else if (data->IsAniByte()) {
-        aniResult.b = data->GetAniByte();
-    } else if (data->IsAniShort()) {
-        aniResult.s = data->GetAniShort();
-    } else if (data->IsAniInt()) {
-        aniResult.i = data->GetAniInt();
-    } else if (data->IsAniLong()) {
-        aniResult.l = data->GetAniLong();
-    } else if (data->IsAniFloat()) {
-        aniResult.f = data->GetAniFloat();
-    } else if (data->IsAniDouble()) {
-        aniResult.d = data->GetAniDouble();
-    } else {
-        STValueThrowJSError(env, "Unsupported STValue instance");
-    }
-    return aniResult;
-}
-
-bool GetArrayFromNapiValue(napi_env env, napi_value jsObject, std::vector<ani_value> &argArray)
-{
-    if (!CheckNapiIsArray(env, jsObject)) {
+    if (data == nullptr) {
         return false;
     }
 
-    uint32_t arrLength = 0;
-    NAPI_CHECK_FATAL(napi_get_array_length(env, jsObject, &arrLength));
-
-    argArray.reserve(arrLength);
-    for (size_t arrIdx = 0; arrIdx < arrLength; arrIdx++) {
-        napi_value jsVal {};
-        NAPI_CHECK_FATAL(napi_get_element(env, jsObject, arrIdx, &jsVal));
-        argArray.push_back(GetAniValueFromSTValue(env, jsVal));
+    if (data->IsAniRef()) {
+        value.r = data->GetAniRef();
+    } else if (data->IsAniBoolean()) {
+        value.z = data->GetAniBoolean();
+    } else if (data->IsAniChar()) {
+        value.c = data->GetAniChar();
+    } else if (data->IsAniByte()) {
+        value.b = data->GetAniByte();
+    } else if (data->IsAniShort()) {
+        value.s = data->GetAniShort();
+    } else if (data->IsAniInt()) {
+        value.i = data->GetAniInt();
+    } else if (data->IsAniLong()) {
+        value.l = data->GetAniLong();
+    } else if (data->IsAniFloat()) {
+        value.f = data->GetAniFloat();
+    } else if (data->IsAniDouble()) {
+        value.d = data->GetAniDouble();
+    } else {
+        return false;
     }
     return true;
 }
@@ -254,36 +272,6 @@ SType GetTypeFromType(napi_env env, napi_value stNapiType)
     uint32_t sType;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, stNapiType, &sType));
     return static_cast<SType>(sType);
-}
-
-SType ParseReturnTypeFromSignature(napi_env env, const std::string &input)
-{
-    constexpr size_t colonPositionFromEnd = 2;
-    size_t colonPos = input.find(':');
-    if (colonPos == std::string::npos) {
-        STValueThrowJSError(env, "Illegal signature, no ':' found.");
-        return SType::VOID;
-    }
-
-    if (colonPos == input.length() - 1) {
-        return SType::VOID;
-    }
-    if (colonPos == input.length() - colonPositionFromEnd) {
-        static const std::unordered_map<char, SType> CHAR_MAP = {
-            {'z', SType::BOOLEAN}, {'b', SType::BYTE}, {'c', SType::CHAR},  {'s', SType::SHORT},
-            {'i', SType::INT},     {'l', SType::LONG}, {'f', SType::FLOAT}, {'d', SType::DOUBLE}};
-        auto returnTypeSign = input[colonPos + 1];
-        auto it = CHAR_MAP.find(returnTypeSign);
-        if (it == CHAR_MAP.end()) {
-            std::string msg = "Illegal signature, no matching type for \'";
-            msg = msg + returnTypeSign + "\'";
-            STValueThrowJSError(env, msg);
-            return SType::VOID;
-        }
-        return it->second;
-    }
-
-    return SType::REFERENCE;
 }
 
 static void STValueDataFinilizer([[maybe_unused]] napi_env env, void *nativeObject,
@@ -314,8 +302,8 @@ static napi_value STValueCtorImpl(napi_env env, napi_callback_info info)
     napi_value STValueDataPtrHigh = argv[1];
 
     // set property to the instance
-    NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, "_STValueDataPtrLow", STValueDataPtrLow));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, "_STValueDataPtrHigh", STValueDataPtrHigh));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, STVALUE_DATA_PTR_LOW, STValueDataPtrLow));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, STVALUE_DATA_PTR_HIGH, STValueDataPtrHigh));
 
     // unwrap the native object and set finalizer
     STValueData *dataPtr = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
@@ -332,16 +320,17 @@ bool IsSTValueInstance(napi_env env, napi_value value)
         return false;
     }
 
-    napi_value constructor = GetSTValueClass(env);
-    if (constructor == nullptr) {
-        return false;
-    }
+    napi_value ptrLowKey;
+    napi_value ptrHighKey;
+    bool hasLowKey;
+    bool hasHighKey;
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, STVALUE_DATA_PTR_LOW, NAPI_AUTO_LENGTH, &ptrLowKey));
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, STVALUE_DATA_PTR_HIGH, NAPI_AUTO_LENGTH, &ptrHighKey));
 
-    bool isInstance = false;
-    if (napi_instanceof(env, value, constructor, &isInstance) != napi_ok) {
-        return false;
-    }
-    return isInstance;
+    NAPI_CHECK_FATAL(napi_has_property(env, value, ptrLowKey, &hasLowKey));
+    NAPI_CHECK_FATAL(napi_has_property(env, value, ptrHighKey, &hasHighKey));
+
+    return hasLowKey && hasHighKey;
 }
 
 napi_value CreateSTypeObject(napi_env env)
@@ -428,6 +417,7 @@ napi_value GetSTValueClass(napi_env env)
         napi_property_descriptor {"enumGetIndexByName", 0, EnumGetIndexByNameImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"enumGetNameByIndex", 0, EnumGetNameByIndexImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"enumGetValueByName", 0, EnumGetValueByNameImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"enumGetValueByIndex", 0, EnumGetValueByIndexImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"classGetStaticField", 0, ClassGetStaticFieldImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"classSetStaticField", 0, ClassSetStaticFieldImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"objectGetProperty", 0, ObjectGetPropertyImpl, 0, 0, 0, napi_default, 0},
@@ -472,7 +462,8 @@ napi_value GetSTValueClass(napi_env env)
 
 void ThrowJSBadArgCountError(napi_env env, size_t jsArgc, size_t expectedArgc)
 {
-    STValueThrowJSError(env, "Expect " + std::to_string(expectedArgc) + "args, but got " + std::to_string(jsArgc));
+    STValueThrowJSError(env, "Expect " + std::to_string(expectedArgc) + " args, but got " + std::to_string(jsArgc) +
+                                 " args");
 }
 
 std::string GetSTypeName(SType stype)

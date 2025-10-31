@@ -275,6 +275,7 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/st_value/ets_vm_STValue_accessor.cpp",
     "runtime/interop_js/st_value/ets_vm_STValue_unwrap.cpp",
     "runtime/interop_js/st_value/ets_vm_STValue_wrap.cpp",
+    "runtime/interop_js/st_value/ets_vm_STValue_param_getter.cpp",
     "runtime/interop_js/timer_helper/timer.cpp",
     "runtime/interop_js/timer_helper/interop_timer_helper.cpp",
     "runtime/interop_js/interop_common.cpp",
