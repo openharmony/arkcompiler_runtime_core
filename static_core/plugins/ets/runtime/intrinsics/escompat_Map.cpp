@@ -23,18 +23,18 @@ namespace ark::ets::intrinsics {
 extern "C" EtsLong GetHashCodeString(EtsObject *obj)
 {
     ASSERT(obj->GetClass()->IsStringClass());
-    return static_cast<EtsLong>(EtsString::FromEtsObject(obj)->GetCoreType()->GetHashcode());
+    return static_cast<EtsInt>(EtsString::FromEtsObject(obj)->GetCoreType()->GetHashcode());
 }
 
 extern "C" EtsLong GetHashCodeBigint(EtsObject *obj)
 {
     ASSERT(obj->GetClass()->IsBigInt());
-    return static_cast<EtsLong>(reinterpret_cast<EtsBigInt *>(obj)->GetHashCode());
+    return static_cast<EtsInt>(reinterpret_cast<EtsBigInt *>(obj)->GetHashCode());
 }
 
 extern "C" EtsLong GetHashCodeObject(EtsObject *obj)
 {
-    return static_cast<EtsLong>(obj->GetHashCode());
+    return static_cast<EtsInt>(obj->GetHashCode());
 }
 
 }  // namespace ark::ets::intrinsics
