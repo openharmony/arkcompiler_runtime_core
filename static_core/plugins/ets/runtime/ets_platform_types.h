@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_PLATFORM_TYPES_H_
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types_defs.h"
 
 namespace ark::ets {
 
@@ -28,136 +29,29 @@ template <typename T>
 class EtsTypedObjectArray;
 
 // A set of types defined and used in platform implementation, owned by the VM
+// All the definitions are listed in ets_platform_types_defs.h
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class PANDA_PUBLIC_API EtsPlatformTypes {
 public:
-    // Classes should follow the common naming schema
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.09) macro expansion
+#define T(descr, name) EtsClass *name;
+// CC-OFFNXT(G.PRE.09) macro expansion
+#define I(descr, mname, msig, name) EtsMethod *name;
+// CC-OFFNXT(G.PRE.09) macro expansion
+#define S(descr, mname, msig, name) EtsMethod *name;
+    ETS_PLATFORM_TYPES_LIST(T, I, S)
+#undef T
+#undef I
+#undef S
+    // NOLINTEND(cppcoreguidelines-macro-usage)
 
     // Arity threshold for functional types
     static constexpr uint32_t CORE_FUNCTION_ARITY_THRESHOLD = 17U;
     static constexpr uint32_t ASCII_CHAR_TABLE_SIZE = 128;
 
-    /* Core runtime type system */
-    EtsClass *coreObject {};        // IsObjectClass
-    EtsClass *coreClass {};         // IsClassClass
-    EtsClass *coreString {};        // IsStringClass
-    EtsClass *coreLineString {};    // IsLineStringClass
-    EtsClass *coreSlicedString {};  // IsSlicedStringClass
-    EtsClass *coreTreeString {};    // IsTreeStringClass
-
-    /* ets numeric classes */
-    EtsClass *coreBoolean {};
-    EtsClass *coreByte {};
-    EtsClass *coreChar {};
-    EtsClass *coreShort {};
-    EtsClass *coreInt {};
-    EtsClass *coreLong {};
-    EtsClass *coreFloat {};
-    EtsClass *coreDouble {};
-
-    /* ets base language classes */
-    EtsClass *coreBigint {};
-    EtsClass *escompatError {};
-    EtsClass *coreFunction {};
     std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctions {};
     std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctionRs {};
-    EtsClass *coreTuple {};
-    EtsClass *coreTupleN {};
-
-    /* Runtime linkage classes */
-    EtsClass *coreRuntimeLinker {};
-    EtsMethod *coreRuntimeLinkerLoadClass {};
-    EtsClass *coreBootRuntimeLinker {};
-    EtsClass *coreAbcRuntimeLinker {};
-    EtsClass *coreMemoryRuntimeLinker {};
-    EtsClass *coreAbcFile {};
-
-    /* Error handling */
-    EtsClass *coreOutOfMemoryError {};
-    EtsClass *coreStackTraceElement {};
-    EtsClass *coreLinkerClassNotFoundError {};
-
-    /* StringBuilder */
-    EtsClass *coreStringBuilder {};
-
-    /* Concurrency classes */
-    EtsClass *corePromise {};
-    EtsClass *coreJob {};
-    EtsMethod *corePromiseSubscribeOnAnotherPromise {};
-    EtsClass *corePromiseRef {};
-    EtsClass *coreWaitersList {};
-    EtsClass *coreMutex {};
-    EtsClass *coreEvent {};
-    EtsClass *coreCondVar {};
-    EtsClass *coreQueueSpinlock {};
-    EtsClass *coreRWLock {};
-
-    /* Finalization */
-    EtsClass *coreFinalizableWeakRef {};
-    EtsClass *coreFinalizationRegistry {};
-    EtsMethod *coreFinalizationRegistryExecCleanup {};
-
-    /* Containers */
-
-    EtsClass *escompatArray {};
-    EtsMethod *escompatArrayPop {};
-    EtsMethod *escompatArrayGetLength {};
-    EtsMethod *escompatArrayGet {};
-    EtsMethod *escompatArraySet {};
-    EtsClass *coreArrayBuffer {};
-    EtsClass *escompatInt8Array {};
-    EtsClass *escompatUint8Array {};
-    EtsClass *escompatUint8ClampedArray {};
-    EtsClass *escompatInt16Array {};
-    EtsClass *escompatUint16Array {};
-    EtsClass *escompatInt32Array {};
-    EtsClass *escompatUint32Array {};
-    EtsClass *escompatFloat32Array {};
-    EtsClass *escompatFloat64Array {};
-    EtsClass *escompatBigInt64Array {};
-    EtsClass *escompatBigUint64Array {};
-    EtsClass *containersArrayAsListInt {};
-    EtsClass *coreRecord {};
-    EtsMethod *coreRecordGetter {};
-    EtsMethod *coreRecordSetter {};
-    EtsClass *coreMap {};
-    EtsClass *coreMapEntry {};
-    EtsClass *coreSet {};
-
-    /* InteropJS */
-    EtsClass *interopJSValue {};
-
-    /* TypeAPI */
-    EtsClass *coreField {};
-    EtsClass *coreMethod {};
-    EtsClass *coreParameter {};
-    EtsClass *coreClassType {};
-
-    EtsClass *reflectInstanceField {};
-    EtsClass *reflectInstanceMethod {};
-    EtsClass *reflectStaticField {};
-    EtsClass *reflectStaticMethod {};
-    EtsClass *reflectConstructor {};
-
-    /* Proxy */
-    EtsClass *coreReflectProxy {};
-    EtsMethod *coreReflectProxyConstructor {};
-    EtsMethod *coreReflectProxyInvoke {};
-    EtsMethod *coreReflectProxyInvokeSet {};
-    EtsMethod *coreReflectProxyInvokeGet {};
-
-    /* std.core.Process */
-    EtsClass *coreProcess {};
-    EtsMethod *coreProcessListUnhandledJobs {};
-    EtsMethod *coreProcessListUnhandledPromises {};
-    EtsMethod *coreProcessHandleUncaughtError {};
-
-    EtsClass *stdcoreRegExpExecArray {};
-
-    EtsClass *stdcoreJsonReplacer {};
-    EtsClass *coreJsonElementSerializable {};
-    EtsClass *escompatErrorOptions {};
-    EtsClass *escompatErrorOptionsImpl {};
 
     struct Entry {
         size_t slotIndex {};
