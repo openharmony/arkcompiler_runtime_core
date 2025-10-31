@@ -53,9 +53,18 @@ void NativeCallOptimization::VisitCallStatic(GraphVisitor *v, Inst *inst)
     }
 
     // NOTE: workaround, need to enable back after fixing stack walker & gc roots issue
+    // #24400 Compiler ANI segfault in StackWalker
     if (runtime->IsNecessarySwitchThreadState(callInst->GetCallMethod())) {
         COMPILER_LOG(DEBUG, NATIVE_CALL_OPT)
             << "CallStatic with id=" << callInst->GetId() << " needs to switch exec state, skip (workaround)";
+        return;
+    }
+
+    // NOTE: workaround, need to enable back after fixing stack walker & gc roots issue
+    // #24400 Compiler ANI segfault in StackWalker
+    if (runtime->CanNativeMethodUseObjects(callInst->GetCallMethod())) {
+        COMPILER_LOG(DEBUG, NATIVE_CALL_OPT)
+            << "CallStatic with id=" << callInst->GetId() << " has objects, skip (workaround)";
         return;
     }
 
