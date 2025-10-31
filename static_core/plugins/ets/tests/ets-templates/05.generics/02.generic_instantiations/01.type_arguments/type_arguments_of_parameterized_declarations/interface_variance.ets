@@ -27,7 +27,9 @@ params: interface arguments, use-site variance
 
 class X {}
 
-interface I<{{c.variance}} T> {
+class Y extends X {}
+
+interface I<T> {
     methIn(t: T): void
     methOut(): T
     methInOut(t: T): T
@@ -57,6 +59,6 @@ class A<T> implements I<T> {
 function main() {
 
     {{c.use|indent}}
-    
+
 }
 {% endfor %}

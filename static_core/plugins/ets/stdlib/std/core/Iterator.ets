@@ -15,9 +15,9 @@
 
 package std.core;
 
-export class IteratorResult<T> {
+export class IteratorResult<out T> {
     done: boolean
-    value: T | undefined
+    readonly value: T | undefined
 
     constructor() {
         this.done = true

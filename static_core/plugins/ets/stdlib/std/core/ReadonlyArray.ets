@@ -18,14 +18,14 @@ package std.core;
 export interface ReadonlyArray<out T> extends ConcatArray<T> {
     // concat(...items: (T | ConcatArray<T>)[]): T[];
     // concat(...items: (T | ConcatArray<T>)[]): Array<T>;
-    concat(...items: FixedArray<ConcatArray<T>>): Array<T>;
+    concat(...items: FixedArray<ConcatArray<@types.SkipVarianceCheckDontUseItWillBeRemoved T>>): Array<@types.SkipVarianceCheckDontUseItWillBeRemoved T>;
     // Typing and previous overload have to cover it
 
-    entries(): IterableIterator<[number, T]>;
+    entries(): IterableIterator<[number, @types.SkipVarianceCheckDontUseItWillBeRemoved T]>;
 
     every(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): boolean;
 
-    filter(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): Array<T>;
+    filter(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): Array<@types.SkipVarianceCheckDontUseItWillBeRemoved T>;
 
     find(predicate: (value: T, index: int, obj: ReadonlyArray<T>) => boolean): T | undefined;
 
@@ -51,25 +51,25 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     join(separator?: string): string;
 
-    includes(searchElement: T, fromIndex?: int): boolean;
+    includes(searchElement: @types.SkipVarianceCheckDontUseItWillBeRemoved T, fromIndex?: int): boolean;
 
-    indexOf(searchElement: T, fromIndex?: int): int;
+    indexOf(searchElement: @types.SkipVarianceCheckDontUseItWillBeRemoved T, fromIndex?: int): int;
 
     keys(): IterableIterator<number>;
 
-    lastIndexOf(searchElement: T, fromIndex?: int): int;
+    lastIndexOf(searchElement: @types.SkipVarianceCheckDontUseItWillBeRemoved T, fromIndex?: int): int;
 
     map<U>(mapper: (value: T, index: int, array: ReadonlyArray<T>) => U): Array<U>;
 
-    reduce(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => T): T;
+    reduce(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => @types.SkipVarianceCheckDontUseItWillBeRemoved T): T;
 
     reduce<U>(reducer: (previousValue: U, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => U, initialValue: U): U;
 
-    reduceRight(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => T): T;
+    reduceRight(reducer: (previousValue: T, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => @types.SkipVarianceCheckDontUseItWillBeRemoved T): T;
 
     reduceRight<U>(reducer: (previousValue: U, currentValue: T, currentIndex: int, array: ReadonlyArray<T>) => U, initialValue: U): U;
 
-    slice(start?: int, end?: int): Array<T>;
+    slice(start?: int, end?: int): Array<@types.SkipVarianceCheckDontUseItWillBeRemoved T>;
 
     some(predicate: (value: T, index: int, array: ReadonlyArray<T>) => boolean): boolean;
 

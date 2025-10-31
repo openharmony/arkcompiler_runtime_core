@@ -15,6 +15,10 @@
 cases:
   - variance: "in "
     use: |-
+        let i: I<X> = new A<Object>(new X())
+        i.methIn(new X())
+  - variance: "in "
+    use: |-
         let i: I<Y> = new A<X>(new X())
         let z: X = i.methOut()
   - variance: "in "
@@ -24,17 +28,13 @@ cases:
 
   - variance: "out "
     use: |-
+        let i: I<Object> = new A<X>(new X())
+        let z: X = i.methOut()
+  - variance: "out "
+    use: |-
         let i: I<X> = new A<Y>(new Y())
         i.methIn(new Y())
   - variance: "out "
     use: |-
         let i: I<X> = new A<X>(new X())
         let z: X = i.methInOut(new X())
-
-  - use: |-
-        let i: I<Object|null> = new A<Object|null>(new X())
-        i.methIn(new X())
-
-  - use: |-
-        let i: I<Object|null> = new A<Object|null>(new X())
-        let z: Object|null = i.methInOut(new X())

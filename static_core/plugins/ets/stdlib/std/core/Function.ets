@@ -138,7 +138,7 @@ function __lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
 export interface FunctionR0<in PR, out R>
     extends Function, FunctionR1<Any, Any, Any>
 {
-    invokeR0(...r: FixedArray<PR>): R;
+    invokeR0(...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function0<out R>
     extends FunctionR0<Any, R>, Function1<Any, Any>
@@ -330,7 +330,7 @@ export abstract class Lambda0<out R>
 export interface FunctionR1<in P1, in PR, out R>
     extends Function, FunctionR2<Any, Any, Any, Any>
 {
-    invokeR1(p1: P1, ...r: FixedArray<PR>): R;
+    invokeR1(p1: P1, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function1<in P1, out R>
     extends FunctionR1<P1, Any, R>, Function2<Any, Any, Any>
@@ -514,7 +514,7 @@ export abstract class Lambda1<in P1, out R>
 export interface FunctionR2<in P1, in P2, in PR, out R>
     extends Function, FunctionR3<Any, Any, Any, Any, Any>
 {
-    invokeR2(p1: P1, p2: P2, ...r: FixedArray<PR>): R;
+    invokeR2(p1: P1, p2: P2, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function2<in P1, in P2, out R>
     extends FunctionR2<P1, P2, Any, R>, Function3<Any, Any, Any, Any>
@@ -688,7 +688,7 @@ export abstract class Lambda2<in P1, in P2, out R>
 export interface FunctionR3<in P1, in P2, in P3, in PR, out R>
     extends Function, FunctionR4<Any, Any, Any, Any, Any, Any>
 {
-    invokeR3(p1: P1, p2: P2, p3: P3, ...r: FixedArray<PR>): R;
+    invokeR3(p1: P1, p2: P2, p3: P3, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function3<in P1, in P2, in P3, out R>
     extends FunctionR3<P1, P2, P3, Any, R>, Function4<Any, Any, Any, Any, Any>
@@ -852,7 +852,7 @@ export abstract class Lambda3<in P1, in P2, in P3, out R>
 export interface FunctionR4<in P1, in P2, in P3, in P4, in PR, out R>
     extends Function, FunctionR5<Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR4(p1: P1, p2: P2, p3: P3, p4: P4, ...r: FixedArray<PR>): R;
+    invokeR4(p1: P1, p2: P2, p3: P3, p4: P4, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function4<in P1, in P2, in P3, in P4, out R>
     extends FunctionR4<P1, P2, P3, P4, Any, R>, Function5<Any, Any, Any, Any, Any, Any>
@@ -1006,7 +1006,7 @@ export abstract class Lambda4<in P1, in P2, in P3, in P4, out R>
 export interface FunctionR5<in P1, in P2, in P3, in P4, in P5, in PR, out R>
     extends Function, FunctionR6<Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR5(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, ...r: FixedArray<PR>): R;
+    invokeR5(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function5<in P1, in P2, in P3, in P4, in P5, out R>
     extends FunctionR5<P1, P2, P3, P4, P5, Any, R>, Function6<Any, Any, Any, Any, Any, Any, Any>
@@ -1150,7 +1150,7 @@ export abstract class Lambda5<in P1, in P2, in P3, in P4, in P5, out R>
 export interface FunctionR6<in P1, in P2, in P3, in P4, in P5, in P6, in PR, out R>
     extends Function, FunctionR7<Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR6(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, ...r: FixedArray<PR>): R;
+    invokeR6(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
     extends FunctionR6<P1, P2, P3, P4, P5, P6, Any, R>, Function7<Any, Any, Any, Any, Any, Any, Any, Any>
@@ -1284,7 +1284,7 @@ export abstract class Lambda6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
 export interface FunctionR7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in PR, out R>
     extends Function, FunctionR8<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR7(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, ...r: FixedArray<PR>): R;
+    invokeR7(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, out R>
     extends FunctionR7<P1, P2, P3, P4, P5, P6, P7, Any, R>, Function8<Any, Any, Any, Any, Any, Any, Any, Any, Any>
@@ -1408,7 +1408,7 @@ export abstract class Lambda7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, o
 export interface FunctionR8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in PR, out R>
     extends Function, FunctionR9<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR8(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, ...r: FixedArray<PR>): R;
+    invokeR8(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, out R>
     extends FunctionR8<P1, P2, P3, P4, P5, P6, P7, P8, Any, R>, Function9<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
@@ -1522,7 +1522,7 @@ export abstract class Lambda8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, i
 export interface FunctionR9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in PR, out R>
     extends Function, FunctionR10<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR9(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, ...r: FixedArray<PR>): R;
+    invokeR9(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, out R>
     extends FunctionR9<P1, P2, P3, P4, P5, P6, P7, P8, P9, Any, R>, Function10<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
@@ -1626,7 +1626,7 @@ export abstract class Lambda9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, i
 export interface FunctionR10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in PR, out R>
     extends Function, FunctionR11<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR10(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, ...r: FixedArray<PR>): R;
+    invokeR10(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, out R>
     extends FunctionR10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, Any, R>, Function11<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
@@ -1720,7 +1720,7 @@ export abstract class Lambda10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
 export interface FunctionR11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in PR, out R>
     extends Function, FunctionR12<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR11(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, ...r: FixedArray<PR>): R;
+    invokeR11(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, out R>
     extends FunctionR11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, Any, R>, Function12<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
@@ -1804,7 +1804,7 @@ export abstract class Lambda11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
 export interface FunctionR12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in PR, out R>
     extends Function, FunctionR13<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR12(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, ...r: FixedArray<PR>): R;
+    invokeR12(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, out R>
     extends FunctionR12<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, Any, R>, Function13<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
@@ -1878,7 +1878,7 @@ export abstract class Lambda12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
 export interface FunctionR13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in PR, out R>
     extends Function, FunctionR14<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR13(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, ...r: FixedArray<PR>): R;
+    invokeR13(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, out R>
     extends FunctionR13<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Any, R>, Function14<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
@@ -1942,7 +1942,7 @@ export abstract class Lambda13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
 export interface FunctionR14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in PR, out R>
     extends Function, FunctionR15<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR14(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, ...r: FixedArray<PR>): R;
+    invokeR14(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, out R>
     extends FunctionR14<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, Any, R>, Function15<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
@@ -1996,7 +1996,7 @@ export abstract class Lambda14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
 export interface FunctionR15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in PR, out R>
     extends Function, FunctionR16<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR15(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, ...r: FixedArray<PR>): R;
+    invokeR15(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, out R>
     extends FunctionR15<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, Any, R>, Function16<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
@@ -2040,7 +2040,7 @@ export abstract class Lambda15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
 export interface FunctionR16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, in PR, out R>
     extends Function, FunctionN<Any>
 {
-    invokeR16(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16, ...r: FixedArray<PR>): R;
+    invokeR16(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, out R>
     extends FunctionR16<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, Any, R>

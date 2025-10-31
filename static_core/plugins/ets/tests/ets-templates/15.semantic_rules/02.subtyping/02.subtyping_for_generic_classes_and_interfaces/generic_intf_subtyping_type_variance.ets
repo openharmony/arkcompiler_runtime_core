@@ -17,6 +17,7 @@ limitations under the License.
 
 /*---
 desc: Subtyping relation between generic classes and interfaces with type variance
+tags: [negative, compile-only]
 ---*/
 
 class D {

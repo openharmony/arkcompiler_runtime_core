@@ -40,7 +40,7 @@ P{{i + 1}}, {{""}}
 ({% for i in range(narg) -%}
 p{{i + 1}}: P{{i + 1}}{% if not loop.last or rest %}, {% endif %}
 {%- endfor -%}
-{%- if rest %}...r: FixedArray<PR>{% endif %}): R
+{%- if rest %}...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>{% endif %}): R
 {%- endmacro %}
 
 {%- macro erasedSignature(narg, rest) -%}
