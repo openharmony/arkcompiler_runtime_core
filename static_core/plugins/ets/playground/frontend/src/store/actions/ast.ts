@@ -16,7 +16,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '..';
 import { astService } from '../../services/ast';
-import { handleASTLogs, handleResponseLogs, IApiResponse } from '../../models/logs';
+import { handleASTLogs } from '../../models/logs';
 import { clearErrLogs, clearOutLogs } from './logs';
 import { setClearHighLightErrs } from '../slices/logs';
 import { setAstLoading, setAstRes } from '../slices/ast';

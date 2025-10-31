@@ -17,6 +17,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import {setOptionsLoading, setOptionsPicked, setOptionsResponse} from '../slices/options';
 import {optionsService} from '../../services/options';
 import {TObj} from '../../models/options';
+import { RootState } from '..';
 
 export const fetchOptions = createAsyncThunk(
     '@options/fetch',
@@ -28,13 +29,22 @@ export const fetchOptions = createAsyncThunk(
             return;
         }
         thunkAPI.dispatch(setOptionsResponse(response.data));
-        const picked: TObj = {};
-        response.data?.forEach((el) => {
-            if (el.isSelected?.toString()) {
-                picked[el.flag] = el.isSelected;
-            }
-        });
-        thunkAPI.dispatch(pickOptions(picked));
+
+        const state: RootState = thunkAPI.getState() as RootState;
+        const currentPickedOptions = state.options?.pickedOptions || {};
+
+        const hasExistingOptions = Object.keys(currentPickedOptions).length > 0;
+
+        if (!hasExistingOptions) {
+            const picked: TObj = {};
+            response.data?.forEach((el) => {
+                if (el.isSelected?.toString()) {
+                    picked[el.flag] = el.isSelected;
+                }
+            });
+            thunkAPI.dispatch(pickOptions(picked));
+        }
+
         thunkAPI.dispatch(setOptionsLoading(false));
     },
 );

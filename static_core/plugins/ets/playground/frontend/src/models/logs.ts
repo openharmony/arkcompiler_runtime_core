@@ -27,7 +27,6 @@ import {
 } from '../store/slices/logs';
 import { RootState } from '../store';
 import { IAstReq } from './ast';
-import { IServiceResponse } from '../services/types';
 
 export enum ELogType {
     COMPILE_OUT = 'compileOut',
