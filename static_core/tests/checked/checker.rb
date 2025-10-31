@@ -92,7 +92,6 @@ OptionParser.new do |opts|
   opts.on('--interop', 'Do interop-specific actions')
     options.interop = true
 end.parse!(into: options)
-options.verbose = true
 $LOG_LEVEL = options.verbose ? Logger::DEBUG : Logger::ERROR
 $curr_cmd = nil
 
