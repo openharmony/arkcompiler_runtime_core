@@ -908,16 +908,10 @@ NO_UB_SANITIZE static ani_status Array_GetLength(ani_env *env, ani_array array, 
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsObject *objArray = s.ToInternalType(static_cast<ani_object>(array));
-    if (!objArray->IsArrayClass()) {
-        auto escompatArray = EtsEscompatArray::FromEtsObject(objArray);
-        EtsInt actualLength = 0;
-        ANI_CHECK_RETURN_IF_EQ(escompatArray->GetLength(s.GetCoroutine(), &actualLength), false, ANI_PENDING_ERROR);
-        *result = static_cast<ani_size>(actualLength);
-    } else {
-        auto etsArray = reinterpret_cast<EtsArray *>(objArray);
-        *result = etsArray->GetLength();
-    }
+    auto *objArray = s.ToInternalType(array);
+    EtsInt actualLength = 0;
+    ANI_CHECK_RETURN_IF_EQ(objArray->GetLength(s.GetCoroutine(), &actualLength), false, ANI_PENDING_ERROR);
+    *result = static_cast<ani_size>(actualLength);
 
     return ANI_OK;
 }
