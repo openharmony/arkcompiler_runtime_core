@@ -132,7 +132,7 @@ function at(): int {
         try {
             arr.at(50)
             return fail;
-        } catch (e) {
+        } catch (e: Error) {
             arktest.assertEQ(e.message, "Invalid index");
         }
         a.pushECMA(1, 2, 3, 4, 5)
@@ -147,13 +147,13 @@ function at(): int {
         try {
             arr.at(arr.length);
             return fail;
-        } catch (e) {
+        } catch (e: Error) {
             arktest.assertEQ(e.message, "Invalid index");
         }
         try {
             arr.at(-arr.length - 1);
             return fail;
-        } catch (e) {
+        } catch (e: Error) {
             arktest.assertEQ(e.message, "Invalid index");
         }
         if (arr.at(-arr.length)! != arr[0] || arr.at(-arr.length + 1)! != arr[1]) {

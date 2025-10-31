@@ -391,10 +391,7 @@ function testXmlMethod018() {
         };
         that.parseXml(options);
         arktest.assertTrue(false);
-    } catch (err) {
-        if (!(err instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (err: BusinessError) {
         arktest.assertEQ(err.toString(), "BusinessError: Cannot find the ']]>' in xml string.");
         arktest.assertEQ(err.code, 401);
     }

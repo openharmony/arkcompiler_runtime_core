@@ -76,18 +76,12 @@ function testGetLowerValueGetHigherValueEmptyTreeSet() {
         secondValue: string): double => { return secondValue.compareTo(firstValue) });
     try {
         let lower = treeSet.getLowerValue("bb");
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     try {
         let higher = treeSet.getHigherValue("aa");
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")
@@ -133,18 +127,12 @@ function testGetLowerValueGetHigherValueEmptyStringValue() {
         secondValue: string): double => { return secondValue.compareTo(firstValue) });
     try {
         let lower = treeSet.getLowerValue("");
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     try {
         let higher = treeSet.getHigherValue("");
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")

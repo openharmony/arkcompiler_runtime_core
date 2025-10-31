@@ -49,10 +49,7 @@ function testPopFirstOnEmptySet() {
     let treeSet = new TreeSet<string>();
     try {
         let result = treeSet.popLast();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -97,10 +94,7 @@ function testPopFirstAfterRemoveMakesEmpty() {
     treeSet.remove("squirrel");
     try {
         let result = treeSet.popFirst();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     let result = treeSet.has("squirrel");
@@ -116,10 +110,7 @@ function testPopFirstAfterClear() {
     treeSet.clear();
     try {
         let result = treeSet.popFirst();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     let resultOne = treeSet.has("squirrel");
@@ -133,10 +124,7 @@ function testPopLastOnEmptySet() {
     let treeSet = new TreeSet<string>();
     try {
         let result = treeSet.popLast();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
 }
@@ -181,10 +169,7 @@ function testPopLastAfterRemoveMakesEmpty() {
     treeSet.remove("squirrel");
     try {
         let result = treeSet.popLast();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     let result = treeSet.has("squirrel");
@@ -200,10 +185,7 @@ function testPopLastAfterClear() {
     treeSet.clear();
     try {
         let result = treeSet.popLast();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     let resultOne = treeSet.has("squirrel");

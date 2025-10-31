@@ -65,18 +65,12 @@ function testGetFirstKeyAndLastKeyEmptyTreeMap() {
         });
     try {
         let first = treeMap.getFirstKey();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     try {
         let last = treeMap.getLastKey();
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.message, "Container is empty");
     }
     arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");

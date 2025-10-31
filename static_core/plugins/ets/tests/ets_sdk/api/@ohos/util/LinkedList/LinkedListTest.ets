@@ -113,10 +113,7 @@ function testLinkedListBasicCRUD() {
     });
     try {
         let result = list.get(1232);
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.code, 10200001);
     }
     arktest.assertEQ(list.getLastIndexOf(3333), -1);

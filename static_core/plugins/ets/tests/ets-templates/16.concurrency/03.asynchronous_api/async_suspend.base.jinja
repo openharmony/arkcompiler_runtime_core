@@ -27,7 +27,7 @@
         await new Promise<void>((resolve, reject) => {
             reject(new Error("Error occurred"));
         });
-    } catch (e) {
+    } catch (e: Error) {
         return "Caught: " + e.message;
     }
     return "Should not reach here";',

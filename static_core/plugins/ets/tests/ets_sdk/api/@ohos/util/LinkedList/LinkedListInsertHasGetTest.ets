@@ -185,10 +185,7 @@ function testGetOutsideRange() {
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     try {
         let result = linkedList.get(TestData.testNumber1w);
-    } catch (e) {
-        if (!(e instanceof BusinessError)) {
-            arktest.assertTrue(false);
-        }
+    } catch (e: BusinessError) {
         arktest.assertEQ(e.code, 10200001);
     }
 }
