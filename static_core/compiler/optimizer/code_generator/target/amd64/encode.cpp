@@ -2803,6 +2803,11 @@ bool Amd64Encoder::CanEncodeBitCount()
     return asmjit::CpuInfo::host().hasFeature(asmjit::x86::Features::kPOPCNT);
 }
 
+bool Amd64Encoder::CanEncodeCompressedStringCharAt()
+{
+    return true;
+}
+
 bool Amd64Encoder::CanOptimizeImmDivMod(uint64_t imm, bool isSigned) const
 {
     return CanOptimizeImmDivModCommon(imm, isSigned);
@@ -3415,4 +3420,26 @@ size_t Amd64Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t codeOf
 
     return pc + instruction.length;
 }
+
+void Amd64Encoder::EncodeCompressedStringCharAt(ArgsCompressedStringCharAt &&args)
+{
+    auto [dst, str, idx, length, tmp, dataOffset, shift] = args;
+    ASSERT(dst.GetSize() == HALF_SIZE);
+
+    auto labelNotCompressed = CreateLabel();
+    auto labelCharLoaded = CreateLabel();
+
+    EncodeAdd(tmp, str, Imm(dataOffset));
+
+    EncodeJumpTest(labelNotCompressed, length, Imm(1U), Condition::TST_NE);
+
+    GetMasm()->movzx(ArchReg(dst, WORD_SIZE), asmjit::x86::byte_ptr(ArchReg(tmp), ArchReg(idx)));
+    EncodeJump(labelCharLoaded);
+
+    BindLabel(labelNotCompressed);
+    GetMasm()->movzx(ArchReg(dst, WORD_SIZE), asmjit::x86::word_ptr(ArchReg(tmp), ArchReg(idx), shift));
+
+    BindLabel(labelCharLoaded);
+}
+
 }  // namespace ark::compiler::amd64

@@ -2247,3 +2247,46 @@ Label(:SlowPathEntrypoint)
     Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(ep_offset).MethodAsImm("StringConcat2UsualBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
+
+function(:StringCharAt,
+        params: {strOrig: 'ref', indexOrig: 'i32'},
+        regmap: $full_regmap,
+        regalloc_set: $panda_mask,
+        mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    next
+  end
+
+  check_not_tree_string_type(strOrig) if defines.DEBUG
+
+  baseClass := load_class(strOrig)
+  stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+  If(stringType, Constants::STRING_TYPE_SLICE).EQ {
+    parentStr := LoadI(strOrig).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+    startIndexAndFlags := LoadI(strOrig).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).i32
+    startIndex := ShrI(startIndexAndFlags).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).i32
+    slicedIndex := Add(startIndex, indexOrig).i32
+  } Else {
+    str0 := strOrig
+    index0 := indexOrig
+  }
+
+  str := Phi(parentStr, str0).ref
+  index := Phi(slicedIndex, index0).i32
+
+  lengthPacked := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  length := ShrI(lengthPacked).Imm(Constants::STRING_LENGTH_SHIFT).i32
+
+  If(index, length).GE.b {
+    Goto(:SlowPathEntrypoint)
+  }
+
+  Return(LoadCompressedStringChar(str, index, lengthPacked).u16).u16
+
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_CHAR_AT_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, strOrig, indexOrig).AddImm(entrypoint).MethodAsImm("StringCharAtUsualBridge").Terminator.u16
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}

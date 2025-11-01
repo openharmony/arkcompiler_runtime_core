@@ -248,8 +248,6 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
 #panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / memory_coalescing3.ets)
 # 26982 64 - bit pointer support
         if (NOT PANDA_USE_64_BIT_POINTER)
-#Disabled as not support fast charAt.issue 28281
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / charAt.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing1.ets)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing2.ets)
