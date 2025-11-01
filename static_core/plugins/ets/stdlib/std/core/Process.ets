@@ -52,6 +52,8 @@ export namespace StdProcess {
 
     const MAX_BUFFER_SIZE: int = 1024 * 1024;
 
+    const DEFAULT_JOB_HANDLER_CALLBACK = (reason: Error, job: Object) => { console.error("Unhandled Job fail:", reason) };
+
     const DEFAULT_ERROR_HANDLER_CALLBACK = (error: Object): void => {
         console.error('Unhandled exception:', Class.of(error).getName());
         let out = new String();
@@ -602,7 +604,7 @@ export namespace StdProcess {
         errorHandler.handleUncaughtError(error);
     }
 
-    let failedJobHandler: RejectedHandler = new RejectedHandler();
+    let failedJobHandler: RejectedHandler = new RejectedHandler(DEFAULT_JOB_HANDLER_CALLBACK);
     let rejectedPromiseHandler: RejectedHandler = new RejectedHandler();
     let errorHandler: ProcessErrorHandler = new ProcessErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
 }

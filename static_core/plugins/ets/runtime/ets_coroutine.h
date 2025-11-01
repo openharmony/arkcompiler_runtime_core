@@ -135,6 +135,9 @@ public:
     void UpdateCachedObjects() override;
     void ListUnhandledEventsOnProgramExit() override;
 
+    /// @brief traverse current unhandled failed jobs with custom handler
+    void ProcessUnhandledFailedJobs();
+
     LocalStorage &GetLocalStorage()
     {
         return localStorage_;
@@ -176,7 +179,6 @@ private:
     void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
     void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
 
-    void ProcessUnhandledFailedJobs();
     void ProcessUnhandledRejectedPromises(bool listAllObjects);
 
     PandaEtsNapiEnv *etsNapiEnv_ {nullptr};

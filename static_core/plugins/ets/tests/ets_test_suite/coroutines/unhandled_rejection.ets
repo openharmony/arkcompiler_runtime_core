@@ -93,6 +93,7 @@ function testUnhandledRejection(): void {
 }
 
 function main(): int {
+    StdProcess.off('unhandledJobRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection');
     testSuite.addTest('testUnhandledRejection', testUnhandledRejection);
     let res = testSuite.run();
