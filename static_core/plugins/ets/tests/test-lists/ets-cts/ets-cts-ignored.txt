@@ -2170,3 +2170,13 @@
 #59 verifier in lambda
 07.expressions/06.spread_expression/spex_lmbd_37.ets
 07.expressions/06.spread_expression/spex_lmbd_39.ets
+
+#31475
+07.expressions/19.nullish-coalescing_expression/lazy_operator_2.ets
+07.expressions/19.nullish-coalescing_expression/lazy_operator_1.ets
+07.expressions/27.conditional-and_expression/conditional_and_boolean_3.ets
+07.expressions/27.conditional-and_expression/conditional_and_bool_3.ets
+07.expressions/28.conditional-or_expression/conditional_or_boolean_3.ets
+07.expressions/28.conditional-or_expression/conditional_or_bool_3.ets
+09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
+09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
