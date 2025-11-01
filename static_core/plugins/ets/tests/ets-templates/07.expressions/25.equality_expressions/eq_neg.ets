@@ -13,30 +13,24 @@
  * limitations under the License.
  */
 
-{%- for op in operators %}
-    {%- for index1 in range( types|length ) %}
-        {%- for index2 in range( (index1 + 1), types|length ) %}
-            {%- for t1 in types[index1].types %}
-                {%- for t2 in types[index2].types %}
+{%- for index1 in range( types|length ) %}
+    {%- for index2 in range( (index1 + 1), types|length ) %}
+        {%- for t1 in types[index1].types %}
+            {%- for t2 in types[index2].types %}
+                {%- for op in operators %}
 
 /*---
 desc: |-
-    Negative cases for equality expressions.
-    Comparison of {{types[index1].name}} vs. {{types[index2].name}}
+    if types A and B do not overlap (and therefore an expression always evaluated to false at compile time), then:
+    - if each of A and B is either a predefined type or a union of predefined types, a compile-time-error is issued.
 tags: [compile-only, negative]
 ---*/
 
+let v: boolean = false
+
 function compare(a: {{t1}}, b: {{t2}}) {
-    return a {{op}} b
+    v = a {{op}} b;
 }
-
-// Auxiliary stuff
-class C {}
-interface I {}
-
-enum EN { a, b, c }
-enum ES { a = "a" , b = "b", c = "c" }
-
                 {%- endfor %}
             {%- endfor %}
         {%- endfor %}

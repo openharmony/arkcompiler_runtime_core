@@ -17,9 +17,7 @@
 /*---
 desc: >-
     A compile-time error occurs if:
-    - There is no function to select; or
-    - There are more than one applicable functions.
-
+    - There is no function to select
 tags: [negative, compile-only]
 ---*/
 

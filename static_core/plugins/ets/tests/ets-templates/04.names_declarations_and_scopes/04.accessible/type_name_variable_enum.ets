@@ -62,10 +62,6 @@ function foo(i: int[]) {
     return 21;
 }
 
-function foo(i: Int[][]) {
-    return 22;
-}
-
 function foo(i: Colors) {
     return 23;
 }

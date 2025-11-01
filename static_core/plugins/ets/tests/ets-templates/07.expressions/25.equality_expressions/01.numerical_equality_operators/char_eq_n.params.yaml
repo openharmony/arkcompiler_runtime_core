@@ -17,15 +17,15 @@ cases:
     - { c1: "c'\\u0000'", c2: "true", op: "==" }
     # boolean and char
     - { c1: "false", c2: "c'\\u000D'", op: "!=" }
-    # char and Object
-    - { c1: "c'ㇰ'", c2: "new Error()", op: "!=" }
+    # char and string
+    - { c1: "c'ㇰ'", c2: "'ㇰ'", op: "!=" }
     # char and bigint
     - { c1: "c'a'", c2: "97n", op: "!==" }
     # char and boolean
     - { c1: "c'\\u0000'", c2: "true", op: "===" }
     # boolean and char
     - { c1: "false", c2: "c'\\u000D'", op: "!==" }
-    # char and Object
-    - { c1: "c'ㇰ'", c2: "new Error()", op: "!==" }
+    # char and string
+    - { c1: "c'ㇰ'", c2: "'ㇰ'", op: "!==" }
     # bigint and char
     - { c1: "97n", c2: "c'a'", op: "!==" }

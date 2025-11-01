@@ -14,9 +14,10 @@
  */
 
 /*---
-desc: A compile-time error occurs if casting conversion cannot convert the type
-      of either operand to the type of the other.
-tags: [compile-only, negative]
+desc: |-
+    if types A and B do not overlap (and therefore an expression always evaluated to false at compile time), then:
+    - if each of A and B is either a predefined type or a union of predefined types, a compile-time-error is issued.
+    - in all other cases, a compile-time warning is issued.
 ---*/
 
 class A {}
@@ -25,5 +26,8 @@ class B {}
 function main() {
   let a: A = new A();
   let b: B = new B();
-  arktest.assertTrue(a != b) //CTE expected, A cannot be cast to B
+  arktest.assertTrue(a != b)
+  arktest.assertTrue(a !== b)
+  arktest.assertFalse(a == b)
+  arktest.assertFalse(a === b)
 }
