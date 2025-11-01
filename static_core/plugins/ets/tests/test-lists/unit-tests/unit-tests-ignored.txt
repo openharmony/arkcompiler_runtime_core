@@ -17,6 +17,9 @@ ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
 ets-common-tests/atomics/base_operation_add.ets
 ets-common-tests/atomics/base_operation_and.ets
 
+#31217
+ets-common-tests/atomics/base_operation_sub.ets
+
 #31104
 ets-common-tests/atomics/base_operation_or.ets
 
