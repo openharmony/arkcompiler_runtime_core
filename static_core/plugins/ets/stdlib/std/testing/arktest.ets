@@ -337,17 +337,15 @@ export namespace arktest {
                 const failedMsg = this.addTermColor(TermColor.RED, "FAILED")
                 const msgFail = "[ " + failedMsg + " ] " + testcaseName + " (" + (Date.now() - startMs) + " ms)";
                 if (!(e instanceof AssertionError)) {
-                    console.log("Unexpected error: " + e);
+                    console.error("Unexpected error: " + e);
                 } else {
-                    // AssertionError already print message in constructor,
+                    // AssertionError already print message in constructor console.error,
                     // so set message to empty to avoid double printing
                     e.message = "";
                 }
                 if (e instanceof Error) {
                     if (e.stack) {
-                        console.log(e.stack);
-                        console.log(msgFail)
-                        return false;
+                        console.error(e.stack);
                     }
                 }
                 console.log(msgFail);
