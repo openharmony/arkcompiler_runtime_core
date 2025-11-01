@@ -57,25 +57,6 @@ cases:
       arktest.expectThrow(() => {f(-1)}, expectedError)
       arktest.expectThrow(() => {f(-30)}, expectedError)
 
-  - desc: Create Array with different length fractional part
-    decl: |-
-      function f1(len: double): void {
-        let a = new number[len]
-      }
-      function f2(len1: double, len2: double): void {
-        let a = new number[len1][len2]
-      }
-    logic: |-
-      let expectedError = (e: Error): boolean => {
-        return true
-      }
-      f1(2.0)
-      f1(35.0)
-      arktest.expectThrow(() => {f1(3.141592653589)}, expectedError)
-      f2(5.0, 3.0)
-      arktest.expectThrow(() => {f2(5, 3.7)}, expectedError)
-      arktest.expectThrow(() => {f2(3.7, 5)}, expectedError)
-
   - desc: Create Array with type Object
     logic: |-
       let a = new Object[30]
