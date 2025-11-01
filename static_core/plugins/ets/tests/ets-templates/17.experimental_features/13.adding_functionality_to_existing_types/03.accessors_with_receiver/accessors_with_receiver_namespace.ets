@@ -16,10 +16,10 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A function with receiver declaration is a top-level declaration (see Top-Level Declarations) that looks almost the same
-    as Function Declarations, except that the first parameter is mandatory, and the keyword this is used as its name
+    If the accessor with receiver is an entity of a namespace, then the same rules apply to it when exporting and
+    using qualified names as the rules that apply to other namespace entities
+
     {{c.desc}}
-tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}
@@ -27,5 +27,4 @@ tags: [compile-only, negative]
 function main() {
     {{c.use|indent}}
 }
-
 {%- endfor %}
