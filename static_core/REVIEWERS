@@ -58,7 +58,7 @@ static_core/tests/                    @Prof
 static_core/tests/cts-*               @igelhaus
 static_core/tests/irtoc-interpreter-* @mbolshov ^igelhaus
 static_core/tests/vm-benchmarks       @ignatenkooleg @Prof @mr_aramis @giteeman46 ^asidorov ^dingding5
-static_core/verification/             @nazarovkonstantin ^igelhaus @oatuwwutao ^seeuiceland
+static_core/verification/             @slynkodenis @groshevmaksim ^igelhaus @oatuwwutao ^seeuiceland
 static_core/docs/coroutines/                             @dmitriitr
 static_core/docs/diagrams/                               @dmitriitr
 static_core/libarkbase/mem/                              ^dmitriitr @udav ^ipetrov
@@ -110,7 +110,7 @@ static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
 static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @yuan-yao14
 static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^jokerxd-liu ^lijin1039
 static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
-static_core/plugins/ets/verification/                    @igelhaus @oatuwwutao ^seeuiceland
+static_core/plugins/ets/verification/                    @igelhaus @oatuwwutao @slynkodenis @groshevmaksim ^seeuiceland
 static_core/runtime/include/mem/                         ^dmitriitr @udav
 static_core/runtime/include/tooling/                     @slynkodenis
 static_core/runtime/tests/tooling/                       @slynkodenis
