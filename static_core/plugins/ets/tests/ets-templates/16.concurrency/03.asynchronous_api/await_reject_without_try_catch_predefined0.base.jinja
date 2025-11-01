@@ -24,7 +24,7 @@ desc: Test to wait reject Promise<{{type_name}}> without try-catch.
 const errorText = "Operation failed"
 
 async function rejectedPromise(): Promise<{{type_name}}> {
-    await Promise.reject(new Error(errorText));
+    return await Promise.reject(new Error(errorText));
 }
 
 async function startTest() {
