@@ -1722,6 +1722,9 @@
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
 
+# 27930
+15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/union_types.ets
+
 # 27209
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
 
@@ -1741,15 +1744,13 @@
 05.generics/03.utility_types/incorrect_utility_type_usage_3.ets
 05.generics/03.utility_types/incorrect_utility_type_usage_4.ets
 
-# 27383
-15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/consecutive_arrays.ets
+#29866
+09.classes/07.method_declarations/method_declaration_with_existed_name_3.ets
 
-# 27390
-15.semantic_rules/01.semantic_essentials/01.type_of_standalone_expression/union_types.ets
-15.semantic_rules/01.semantic_essentials/03.specifics_of_variable_initialization_context/expression_type_evaluation_2.ets
+#29939
+13.compilation_units/02.import_directives/05.import_path/file/import_path_file_global_0.ets
+13.compilation_units/02.import_directives/05.import_path/file/import_path_file_global_1.ets
 
-# 27628
-15.semantic_rules/01.semantic_essentials/04.specifics_of_numeric_operator_contexts/negative_unary_operator.ets
 
 #29727
 10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_12.ets

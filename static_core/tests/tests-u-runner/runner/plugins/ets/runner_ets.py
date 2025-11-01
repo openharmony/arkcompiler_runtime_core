@@ -131,21 +131,11 @@ class RunnerETS(RunnerFileBased):
 
     def _check_binary_artifacts(self) -> None:
         stdlib_path_obj = Path(self.stdlib_path)
-        stdlib_src_path_obj = Path(self._get_std_from_arktsconfig())
 
         if not stdlib_path_obj.is_file():
             Log.exception_and_raise(
                 _LOGGER,
                 f"Standard library at {self.stdlib_path} was not found",
-                FileNotFoundError)
-
-        if not stdlib_src_path_obj.is_dir():
-            path_as_string = str(stdlib_src_path_obj)
-
-            Log.exception_and_raise(
-                _LOGGER,
-                f"Source code of standard library at {path_as_string} was not found, "
-                "please set the correct eTS stdlib root!",
                 FileNotFoundError)
 
     # We use Log.exception_and_raise which throws exception. no need in return

@@ -63,13 +63,11 @@ class RunnerJSParser(RunnerJS):
         test_dirs: List[TestDirectory] = [
             TestDirectory('compiler/ets', 'ets', flags=[
                 '--extension=ets',
-                f'--arktsconfig={self.arktsconfig}',
-                f'--ets-path={es2panda_test}'
+                f'--arktsconfig={self.arktsconfig}'
             ]),
             TestDirectory('parser/ets', 'ets', flags=[
                 '--extension=ets',
-                f'--arktsconfig={self.arktsconfig}',
-                f'--ets-path={es2panda_test}'
+                f'--arktsconfig={self.arktsconfig}'
             ]),
         ]
 

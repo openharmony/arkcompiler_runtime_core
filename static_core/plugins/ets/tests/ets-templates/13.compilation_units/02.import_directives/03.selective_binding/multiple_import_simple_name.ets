@@ -17,7 +17,8 @@
 desc: import multiple simple names
 ---*/
 
-import {sin, PI} from "std/math";
+import {sin} from "std/math";
+import {PI} from "std/math/consts";
 
 function main(): void {
     let x = sin(PI);

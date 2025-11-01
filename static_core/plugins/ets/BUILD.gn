@@ -64,7 +64,7 @@ if (!(ark_standalone_build ||
       (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) ||
       (defined(ark_static_standalone_build) && ark_static_standalone_build))) {
   generate_static_abc("ets2abc_etsstdlib_bootabc") {
-    arktsconfig = "$ark_root/plugins/ets/stdlib/arktsconfig.json"
+    arktsconfig = "$ark_root/plugins/ets/stdlib/stdconfig.json"
     dst_file = "$target_out_dir/etsstdlib_bootabc.abc"
     out_puts = [ "$target_out_dir/etsstdlib_bootabc.abc" ]
     is_boot_abc = "True"

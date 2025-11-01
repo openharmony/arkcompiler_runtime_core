@@ -151,6 +151,8 @@ function(panda_configure_host_tools)
     set(CHECK_COMMAND "${PANDA_ROOT}/cross_values/diff_check_values.sh ${TARGET_CROSS_VALUES} ${HOST_CROSS_VALUES}")
     separate_arguments(CHECK_COMMAND UNIX_COMMAND ${CHECK_COMMAND})
 
+    message(STATUS "Host-tools configure args: '${HOST_TOOLS_CMAKE_ARGS}'")
+
     # In case of dependency on panda_host_tools it's mandatory to use the panda_host_tools-build target as the dependency target
     ExternalProject_Add(panda_host_tools
         DEPENDS           host_tools_depends

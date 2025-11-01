@@ -20,6 +20,7 @@ include(cmake/import.cmake)
 
 add_custom_target(ets_tests COMMENT "Running ets test suites")
 set(DEFAULT_TEST_GROUP ets_tests)
+set(STDLIB ${CMAKE_CURRENT_SOURCE_DIR}/stdlib)
 
 function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
     set(oneValueArgs ARKTS_CONFIG ETSPATH OPT_LEVEL ETS_STRINGS_CONCAT)
@@ -41,41 +42,47 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
         list(APPEND ES2PANDA_ARGUMENTS "--arktsconfig=${ARG_ARKTS_CONFIG}")
         list(APPEND ES2PANDA_ARGUMENTS "--stdlib=${PANDA_ROOT}/plugins/ets/stdlib")
     endif()
+
     if (DEFINED ARG_ETSPATH)
         list(APPEND ES2PANDA_ARGUMENTS "--ets-path=${ARG_ETSPATH}")
     endif()
 
-    if(DEFINED ARG_ETS_STRINGS_CONCAT)
-       list(APPEND ES2PANDA_ARGUMENTS "--ets-strings-concat=${ARG_ETS_STRINGS_CONCAT}")
+    if (DEFINED ARG_ETS_STRINGS_CONCAT)
+        list(APPEND ES2PANDA_ARGUMENTS "--ets-strings-concat=${ARG_ETS_STRINGS_CONCAT}")
     endif()
 
-    set(COMPILE_DEPENDENCIES
-        ${es2panda_target}
-    )
-
+    set(COMPILE_DEPENDENCIES)
+    set(E2P)
     get_filename_component(OUTPUT_DIR ${OUTPUT_ABC} DIRECTORY)
     file(MAKE_DIRECTORY ${OUTPUT_DIR})
 
     if ("${ETS_SRC}" STREQUAL "GEN_STD_LIB")
+        set(E2P ${es2panda_bin_stdlib})
+        set(DECLS_DST_DIR "${OUTPUT_DIR}/stdlib/decls")
+        file(MAKE_DIRECTORY ${DECLS_DST_DIR})
         list(APPEND ES2PANDA_ARGUMENTS "--gen-stdlib=true")
+        list(APPEND ES2PANDA_ARGUMENTS "--generate-decl:enabled,path=${DECLS_DST_DIR}")
+        list(APPEND ES2PANDA_ARGUMENTS "--arktsconfig=${STDLIB}/stdconfig.json")
+
         set(STAMP "${OUTPUT_ABC}.stamp")
-        set(STDLIB ${CMAKE_CURRENT_LIST_DIR}/stdlib/)
         file(WRITE ${STAMP} "")
         add_custom_target(${TARGET}.stamp
             BYPRODUCTS ${STAMP}
             COMMAND find ${STDLIB} -newer ${STAMP} -exec touch ${STAMP} ";" || touch ${STAMP}
             VERBATIM
         )
-        list(APPEND COMPILE_DEPENDENCIES ${TARGET}.stamp ${STAMP})
+        list(APPEND COMPILE_DEPENDENCIES ${es2panda_target_stdlib} ${TARGET}.stamp ${STAMP})
     else()
+        set(E2P ${es2panda_bin})
         list(APPEND ES2PANDA_ARGUMENTS ${ETS_SRC})
-        list(APPEND COMPILE_DEPENDENCIES etsstdlib ${ETS_SRC})
+        list(APPEND COMPILE_DEPENDENCIES ${es2panda_target} etsstdlib ${ETS_SRC})
     endif()
+
 
     add_custom_command(
         OUTPUT ${OUTPUT_ABC}
         COMMENT "Running es2panda for ets file: ${ETS_SRC}"
-        COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS}
+        COMMAND ${E2P} ${ES2PANDA_ARGUMENTS}
         DEPENDS ${COMPILE_DEPENDENCIES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
@@ -83,6 +90,7 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
     add_custom_target(${TARGET} DEPENDS ${OUTPUT_ABC})
 
     if(TARGET etsstdlib)
+        add_dependencies(es2panda etsstdlib)
         if (NOT TARGET regenerate_and_check_stdlib AND ${CMAKE_GENERATOR} MATCHES "Ninja")
             # Note(ivan-tyulyandin): -P replaces CMAKE_CURRENT_SOURCE_DIR so using ETS_PLUGIN_SOURCE_DIR
             add_custom_target(regenerate_and_check_stdlib
@@ -174,7 +182,8 @@ if(TARGET es2panda)
     add_dependencies(ark etsstdlib)
     add_subdirectory(sdk)
 
-    if(NOT CMAKE_CROSSCOMPILING)
+    # host-tools cannot have libarkruntime as for and verifier as well.
+    if(NOT CMAKE_CROSSCOMPILING AND NOT HOST_TOOLS)
         set(verifier_target verifier)
         set(verifier_bin    $<TARGET_FILE:${verifier_target}>)
 
