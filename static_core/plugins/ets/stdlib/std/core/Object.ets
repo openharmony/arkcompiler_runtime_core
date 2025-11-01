@@ -451,17 +451,17 @@ export class Object {
     * @returns true if the object has the specified element; false otherwise
     */
     public hasOwnProperty(index: number): boolean {
+        const idx = index.toLong()
         if ((this) instanceof String) {
             const sv = this as String
             const len = sv.getLength()
-            const idx = index.toLong()
             return (0 <= idx && idx < len)
         }
         const t = Type.of(this)
+        const cls = Class.of(this)
         if (t instanceof ArrayType) {
             const av = reflect.Value.of(this) as ArrayValue
             const len = av.getLength()
-            const idx = index.toLong()
             return (0 <= idx && idx < len)
         } else if (t instanceof EnumType) {
             // NOTE(shumilov-petr): Not implemented
@@ -472,6 +472,10 @@ export class Object {
         } else if (t instanceof TupleType) {
             // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
+        } else if (cls === Class.from<Array<Any>>()) {
+            let arr = this as Array<Any>
+            let len = arr.length
+            return (0 <= idx && idx < len)
         }
         return false
     }
