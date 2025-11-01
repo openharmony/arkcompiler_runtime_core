@@ -48,3 +48,11 @@ cases:
           }
       use: |-
           let a: A = {} // CTE, non-optional property must be assigned a value.
+
+    - decl: |-
+        interface A {
+            name: string | null
+            foo(): void
+        }
+      use: |-
+        let a: A = { name: 'John' } // CTE, empty method foo is not specified in literal

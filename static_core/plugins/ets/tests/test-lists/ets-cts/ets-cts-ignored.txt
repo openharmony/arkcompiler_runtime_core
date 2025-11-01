@@ -208,7 +208,7 @@
 07.expressions/04.array_literal/arr_n_2.ets
 07.expressions/04.array_literal/arr_n_3.ets
 
-#28441 Method in object literal rejected
+#31022 Method in object literal rejected
 07.expressions/05.object_literal/spec_ex1.ets
 07.expressions/05.object_literal/spec_ex3.ets
 07.expressions/05.object_literal/spec_ex7.ets
@@ -216,23 +216,8 @@
 #28484 Interface has methods
 07.expressions/05.object_literal/spec_ex6.ets
 
-#30900
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_15.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex2_1_1.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex2_1_2.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex2_1_3.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_21.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_22.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_19.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_17.ets
-
 #30924
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_7.ets
-
-#31024
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_20.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_18.ets
-07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex6.ets
 
 #25990
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
@@ -2457,7 +2442,7 @@
 #18767 Cannot use $_iterator from superclass
 17.experimental_features/06.iterable_types/it_4.ets
 
-#30900
+#31022
 17.experimental_features/06.iterable_types/it_20.ets
 
 #27999

@@ -119,7 +119,6 @@ cases:
         arktest.assertTrue( a instanceof A && a.name == "John" )
         let c: B = {age: 0}
         arktest.assertTrue( c instanceof B && c.age == 0 && c.name == undefined )
-        
 
     - decl: |-
           interface A {}
@@ -198,14 +197,6 @@ cases:
           arktest.assertEQ(a.name, undefined)
 
     - decl: |-
-        interface A {
-            name: string | null
-            foo(): void
-        }
-      use: |-
-        let a: A = { name: 'John' } // CTE, is not abstract and does not override abstract method foo
-
-    - decl: |-
         type FR = (input: string) => string
         interface A {
             name: string | null
@@ -214,7 +205,7 @@ cases:
       use: |-
         let a: A = { name: 'John', func: (input: string) => { return input + input } }
         arktest.assertEQ('JohnJohn', a.func('John'))
-    
+
     # interface with declared method
     - decl: |-
         interface I {
@@ -223,9 +214,9 @@ cases:
             foo(f: number): string|number
         }
       use: |-
-        let c: I = { 
+        let c: I = {
             c1: 2,
-            c2: 'c2',  
+            c2: 'c2',
             foo(f: number): string|number {
                 return f - 1
             }
@@ -244,9 +235,9 @@ cases:
             }
         }
       use: |-
-        let c: I = { 
+        let c: I = {
             c1: 2,
-            c2: 'c2'  
+            c2: 'c2'
         }
         arktest.assertEQ(c.c1, 2)
         arktest.assertEQ(c.c2, 'c2')
@@ -261,9 +252,9 @@ cases:
             }
         }
       use: |-
-        let c: I = { 
+        let c: I = {
             c1: 2,
-            c2: 'c2',  
+            c2: 'c2',
             foo(f: number): string|number {
                 return f - 1
             }
@@ -272,7 +263,7 @@ cases:
         arktest.assertEQ(c.c2, 'c2')
         arktest.assertEQ(c.foo(1), 0)
 
-    # interface with declared method    
+    # interface with declared method
     - decl: |-
         class A {
             a: string = 'a'
@@ -295,7 +286,7 @@ cases:
             }
         }
       use: |-
-        let c: I = { 
+        let c: I = {
             c1: { a: 'aa'},
             c2: { a: 'aaa', b: 'bb'}
         }
@@ -304,7 +295,7 @@ cases:
         arktest.assertEQ(c.c2.b, 'bb')
         arktest.assertEQ(c.foo(c.c2), 'aaa')
 
-    # overriding declared method in object literal    
+    # overriding declared method in object literal
     - decl: |-
         class A {
             a: string = 'a'
@@ -325,7 +316,7 @@ cases:
             foo(f: B): string|number
         }
       use: |-
-        let c: I = { 
+        let c: I = {
             c1: { a: 'aa'},
             c2: { a: 'aaa', b: 'bb'},
             foo(f: A): string {
@@ -360,7 +351,7 @@ cases:
             }
         }
       use: |-
-        let c: I = { 
+        let c: I = {
             c1: { a: 'aa'},
             c2: { a: 'aaa', b: 'bb'},
             foo(f: A): string {
