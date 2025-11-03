@@ -72,15 +72,40 @@ export function parseFloat(s: String): number {
 }
 
 /**
- * Checks if double is `NaN` (not a number)
+ * Checks if `byte` value is `NaN` (not a number)
  *
- * @param d the `double` to test
+ * @param b the `byte` value to test
  *
- * @returns `true` if the argument is `NaN`, `false` otherwise.
+ * @returns unconditionally returns `false`. Integral types can not be `NaN`.
  */
-export function isNaN(d: number): boolean {
-    return d.isNaN();
-}
+export function isNaN(b: byte): boolean { return false; }
+
+/**
+ * Checks if `short` value is `NaN` (not a number)
+ *
+ * @param s the `short` value to test
+ *
+ * @returns unconditionally returns `false`. Integral types can not be `NaN`.
+ */
+export function isNaN(s: short): boolean { return false; }
+
+/**
+ * Checks if `int` value is `NaN` (not a number)
+ *
+ * @param i the `int` value to test
+ *
+ * @returns unconditionally returns `false`. Integral types can not be `NaN`.
+ */
+export function isNaN(i: int): boolean { return false; }
+
+/**
+ * Checks if `long` value is `NaN` (not a number)
+ *
+ * @param l the `long` value to test
+ *
+ * @returns unconditionally returns `false`. Integral types can not be `NaN`.
+ */
+export function isNaN(l: long): boolean { return false; }
 
 /**
  * Checks if `float` value is `NaN` (not a number)
@@ -94,51 +119,51 @@ export function isNaN(f: float): boolean {
 }
 
 /**
- * Checks if `byte` value is `NaN` (not a number)
+ * Checks if double is `NaN` (not a number)
+ *
+ * @param d the `double` to test
+ *
+ * @returns `true` if the argument is `NaN`, `false` otherwise.
+ */
+export function isNaN(d: number): boolean {
+    return d.isNaN();
+}
+
+/**
+ * Checks if `byte` value is a floating point value (not a `NaN` or `Infinity`)
  *
  * @param b the `byte` value to test
  *
- * @returns unconditionally returns `false`. Integral types can not be `NaN`.
+ * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
  */
-export function isNaN(b: byte): boolean { return false; }
+export function isFinite(b: byte): boolean { return true; }
 
 /**
- * Checks if `int` value is `NaN` (not a number)
- *
- * @param i the `int` value to test
- *
- * @returns unconditionally returns `false`. Integral types can not be `NaN`.
- */
-export function isNaN(i: int): boolean { return false; }
-
-/**
- * Checks if `short` value is `NaN` (not a number)
+ * Checks if `short` value is a floating point value (not a `NaN` or `Infinity`)
  *
  * @param s the `short` value to test
  *
- * @returns unconditionally returns `false`. Integral types can not be `NaN`.
+ * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
  */
-export function isNaN(s: short): boolean { return false; }
+export function isFinite(s: short): boolean { return true; }
 
 /**
- * Checks if `long` value is `NaN` (not a number)
+ * Checks if `int` value is a floating point value (not a `NaN` or `Infinity`)
+ *
+ * @param i the `int` value to test
+ *
+ * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
+ */
+export function isFinite(i: int): boolean { return true; }
+
+/**
+ * Checks if `long` value is a floating point value (not a `NaN` or `Infinity`)
  *
  * @param l the `long` value to test
  *
- * @returns unconditionally returns `false`. Integral types can not be `NaN`.
+ * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
  */
-export function isNaN(l: long): boolean { return false; }
-
-/**
- * Checks if `double` value is a floating point value (not a `NaN` or `Infinity`)
- *
- * @param d the `double` value to test
- *
- * @returns `true` if the argument is a floating point value, `false` otherwise.
- */
-export function isFinite(d: number): boolean {
-    return d.isFinite();
-}
+export function isFinite(l: long): boolean { return true; }
 
 /**
  * Checks if `Float` value is a floating point value (not a `NaN` or `Infinity`)
@@ -152,40 +177,51 @@ export function isFinite(f: float): boolean {
 }
 
 /**
- * Checks if `byte` value is a floating point value (not a `NaN` or `Infinity`)
+ * Checks if `double` value is a floating point value (not a `NaN` or `Infinity`)
+ *
+ * @param d the `double` value to test
+ *
+ * @returns `true` if the argument is a floating point value, `false` otherwise.
+ */
+export function isFinite(d: number): boolean {
+    return d.isFinite();
+}
+
+/**
+ * Checks if `byte` is similar to an integer value
  *
  * @param b the `byte` value to test
  *
- * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
+ * @returns boolean - unconditionally returns `true` as integral types are integer.
  */
-export function isFinite(b: byte): boolean { return true; }
+export function isInteger(b: byte): boolean { return true; }
 
 /**
- * Checks if `int` value is a floating point value (not a `NaN` or `Infinity`)
- *
- * @param i the `int` value to test
- *
- * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
- */
-export function isFinite(i: int): boolean { return true; }
-
-/**
- * Checks if `short` value is a floating point value (not a `NaN` or `Infinity`)
+ * Checks if `short` is similar to an integer value
  *
  * @param s the `short` value to test
  *
- * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
+ * @returns boolean - unconditionally returns `true` as integral types are integer.
  */
-export function isFinite(s: short): boolean { return true; }
+export function isInteger(s: short): boolean { return true; }
 
 /**
- * Checks if `long` value is a floating point value (not a `NaN` or `Infinity`)
+ * Checks if `int` is similar to an integer value
+ *
+ * @param i the `int` value to test
+ *
+ * @returns boolean - unconditionally returns `true` as integral types are integer.
+ */
+export function isInteger(i: int): boolean { return true; }
+
+/**
+ * Checks if `long` value is similar to an integer value
  *
  * @param l the `long` value to test
  *
- * @returns unconditionally returns `true`. Integral types can not be `NaN` or `Infinity`.
+ * @returns boolean - unconditionally returns `true` as integral types are integer.
  */
-export function isFinite(l: long): boolean { return true; }
+export function isInteger(l: long): boolean { return true; }
 
 /**
  * Checks if float is similar to an integer value
@@ -210,40 +246,26 @@ export function isInteger(v: number): boolean {
 }
 
 /**
- * Checks if `byte` is similar to an integer value
+ * Checks if int can be represented in float without lossing precision
  *
- * @param b the `byte` value to test
+ * @param v: int - the int to test
  *
- * @returns boolean - unconditionally returns `true` as integral types are integer.
+ * @returns boolean - true if the argument is less than Float.MAX_SAFE_INTEGER
  */
-export function isInteger(b: byte): boolean { return true; }
+export function isSafeInteger(v: int): boolean {
+    return v <= Float.MAX_SAFE_INTEGER as int;
+}
 
 /**
- * Checks if `int` is similar to an integer value
+ * Checks if long can be represented in double without lossing precision
  *
- * @param i the `int` value to test
+ * @param v: long - the long to test
  *
- * @returns boolean - unconditionally returns `true` as integral types are integer.
+ * @returns boolean - true if the argument is less than Double.MAX_SAFE_INTEGER
  */
-export function isInteger(i: int): boolean { return true; }
-
-/**
- * Checks if `short` is similar to an integer value
- *
- * @param s the `short` value to test
- *
- * @returns boolean - unconditionally returns `true` as integral types are integer.
- */
-export function isInteger(s: short): boolean { return true; }
-
-/**
- * Checks if `long` value is similar to an integer value
- *
- * @param l the `long` value to test
- *
- * @returns boolean - unconditionally returns `true` as integral types are integer.
- */
-export function isInteger(l: long): boolean { return true; }
+export function isSafeInteger(v: long): boolean {
+    return v <= Double.MAX_SAFE_INTEGER.toLong();
+}
 
 /**
  * Checks if float is a safe integer value
@@ -265,28 +287,6 @@ export function isSafeInteger(v: float): boolean {
  */
 export function isSafeInteger(v: number): boolean {
     return v.isSafeInteger();
-}
-
-/**
- * Checks if int can be represented in float without lossing precision
- *
- * @param v: int - the int to test
- *
- * @returns boolean - true if the argument is less than Float.MAX_SAFE_INTEGER
- */
-export function isSafeInteger(v: int): boolean {
-    return v <= Float.MAX_SAFE_INTEGER as int;
-}
-
-/**
- * Checks if long can be represented in double without lossing precision
- *
- * @param v: long - the long to test
- *
- * @returns boolean - true if the argument is less than Double.MAX_SAFE_INTEGER
- */
-export function isSafeInteger(v: long): boolean {
-    return v <= Double.MAX_SAFE_INTEGER.toLong();
 }
 
 /**

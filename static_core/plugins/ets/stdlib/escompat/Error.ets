@@ -47,17 +47,6 @@ export class Error {
     private code_: int
 
     /**
-    * Constructs a new error instance with provided message and cause
-    *
-    * @param message message of the error
-    *
-    * @param options options of the error
-    */
-    constructor(message?: String, options?: ErrorOptions) {
-        this("Error", 0, message, options)
-    }
-
-    /**
      * Constructs a new error instance with provided code, message and cause
      *
      * @param code code of the error
@@ -71,16 +60,14 @@ export class Error {
     }
 
     /**
-    * Constructs a new error instance with provided message, options and name
-    *
-    * @param name name of the error
+    * Constructs a new error instance with provided message and cause
     *
     * @param message message of the error
     *
     * @param options options of the error
     */
-    constructor(name: String, message: String | undefined, options?: ErrorOptions) {
-        this(name, 0, message, options)
+    constructor(message?: String, options?: ErrorOptions) {
+        this("Error", 0, message, options)
     }
 
     /**
@@ -100,6 +87,19 @@ export class Error {
         this.cause_ = (options == undefined) ? undefined : options.cause
         this.name_ = name
         this.stackLines = StackTrace.provisionStackTrace()
+    }
+
+    /**
+    * Constructs a new error instance with provided message, options and name
+    *
+    * @param name name of the error
+    *
+    * @param message message of the error
+    *
+    * @param options options of the error
+    */
+    constructor(name: String, message: String | undefined, options?: ErrorOptions) {
+        this(name, 0, message, options)
     }
 
     /**

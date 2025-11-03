@@ -445,17 +445,17 @@ export class EAWorker {
 
     public static postToMain<R>(
         coroFun: Function,
-        ...args: FixedArray<NullishType>
-    ) : Job<R> {
-        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<NullishType>, false);
-    }
-
-    public static postToMain<R>(
-        coroFun: Function,
         launchParams: LaunchParams,
         ...args: FixedArray<NullishType>
     ) : Job<R> {
         return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<NullishType>, launchParams.abortFlag);
+    }
+
+    public static postToMain<R>(
+        coroFun: Function,
+        ...args: FixedArray<NullishType>
+    ) : Job<R> {
+        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<NullishType>, false);
     }
 
     /**

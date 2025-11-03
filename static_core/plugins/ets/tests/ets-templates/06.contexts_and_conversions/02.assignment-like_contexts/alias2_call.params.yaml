@@ -38,18 +38,22 @@ cases:
   - type: int
     ref_type: Char
     values: ["new Char(c'\\u0000')", "new Char(c'X')", "new Char(c'\\uffff')"]
+    tags: 'compile-only, negative'
 
   - type: long
     ref_type: Char
     values: ["new Char(c'\\u0000')", "new Char(c'X')", "new Char(c'\\uffff')"]
+    tags: 'compile-only, negative'
 
   - type: float
     ref_type: Char
     values: ["new Char(c'\\u0000')", "new Char(c'X')", "new Char(c'\\uffff')"]
+    tags: 'compile-only, negative'
 
   - type: double
     ref_type: Char
     values: ["new Char(c'\\u0000')", "new Char(c'X')", "new Char(c'\\uffff')"]
+    tags: 'compile-only, negative'
 
 
   - type: int

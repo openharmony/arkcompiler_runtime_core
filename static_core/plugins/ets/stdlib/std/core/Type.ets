@@ -365,17 +365,6 @@ export abstract class Type extends Object {
         return DoubleType.VAL
     }
 
-    // -----
-
-    public static of(o: NullishType): Type {
-        const td = TypeAPI.getTypeDescriptor(o)
-        const contextClass = o == undefined ? Class.ofCaller() : Class.of(__narrowAny<object>(o))
-        const contextLinker = contextClass == undefined ? getBootRuntimeLinker() : contextClass.getLinker()
-        return Type.resolve(td, contextLinker)!
-    }
-
-    // -----
-
     /**
      * Returns Type of value
      *
@@ -489,6 +478,17 @@ export abstract class Type extends Object {
     public static of(v: FixedArray<Object>): Type {
         return ArrayType.getInstance(Class.of(v))
     }
+
+    // -----
+
+    public static of(o: NullishType): Type {
+        const td = TypeAPI.getTypeDescriptor(o)
+        const contextClass = o == undefined ? Class.ofCaller() : Class.of(__narrowAny<object>(o))
+        const contextLinker = contextClass == undefined ? getBootRuntimeLinker() : contextClass.getLinker()
+        return Type.resolve(td, contextLinker)!
+    }
+
+    // -----
 
     public abstract isPrimitive(): boolean // Or Composite
 

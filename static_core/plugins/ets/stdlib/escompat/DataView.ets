@@ -212,8 +212,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setInt16(byteOffset: int, value: number, littleEndian?: boolean): void {
-        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+    public setInt16(byteOffset: int, value: int, littleEndian: boolean): void {
+        if (littleEndian) {
             this.setInt16Little(byteOffset, value)
         } else {
             this.setInt16Big(byteOffset, value)
@@ -225,8 +225,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setInt16(byteOffset: int, value: int, littleEndian: boolean): void {
-        if (littleEndian) {
+    public setInt16(byteOffset: int, value: number, littleEndian?: boolean): void {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             this.setInt16Little(byteOffset, value)
         } else {
             this.setInt16Big(byteOffset, value)
@@ -345,8 +345,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setUint16(byteOffset: int, value: number, littleEndian?: boolean): void {
-        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+    public setUint16(byteOffset: int, value: int, littleEndian: boolean): void {
+        if (littleEndian) {
             this.setUint16Little(byteOffset, value)
         } else {
             this.setUint16Big(byteOffset, value)
@@ -358,8 +358,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setUint16(byteOffset: int, value: int, littleEndian: boolean): void {
-        if (littleEndian) {
+    public setUint16(byteOffset: int, value: number, littleEndian?: boolean): void {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             this.setUint16Little(byteOffset, value)
         } else {
             this.setUint16Big(byteOffset, value)
@@ -476,8 +476,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setInt32(byteOffset: int, value: number, littleEndian?: boolean): void {
-        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+    public setInt32(byteOffset: int, value: int, littleEndian: boolean): void {
+        if (littleEndian) {
             this.setInt32Little(byteOffset, value)
         } else {
             this.setInt32Big(byteOffset, value)
@@ -489,8 +489,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setInt32(byteOffset: int, value: int, littleEndian: boolean): void {
-        if (littleEndian) {
+    public setInt32(byteOffset: int, value: number, littleEndian?: boolean): void {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             this.setInt32Little(byteOffset, value)
         } else {
             this.setInt32Big(byteOffset, value)
@@ -609,8 +609,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setUint32(byteOffset: int, value: number, littleEndian?: boolean): void {
-        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+    public setUint32(byteOffset: int, value: long, littleEndian: boolean): void {
+        if (littleEndian) {
             this.setUint32Little(byteOffset, value)
         } else {
             this.setUint32Big(byteOffset, value)
@@ -622,8 +622,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setUint32(byteOffset: int, value: long, littleEndian: boolean): void {
-        if (littleEndian) {
+    public setUint32(byteOffset: int, value: number, littleEndian?: boolean): void {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             this.setUint32Little(byteOffset, value)
         } else {
             this.setUint32Big(byteOffset, value)
@@ -740,8 +740,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setFloat32(byteOffset: int, value: number, littleEndian?: boolean): void {
-        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+    public setFloat32(byteOffset: int, value: float, littleEndian: boolean): void {
+        if (littleEndian) {
             this.setFloat32Little(byteOffset, value)
         } else {
             this.setFloat32Big(byteOffset, value)
@@ -753,8 +753,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setFloat32(byteOffset: int, value: float, littleEndian: boolean): void {
-        if (littleEndian) {
+    public setFloat32(byteOffset: int, value: number, littleEndian?: boolean): void {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             this.setFloat32Little(byteOffset, value)
         } else {
             this.setFloat32Big(byteOffset, value)
@@ -865,8 +865,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setBigInt64(byteOffset: int, value: bigint, littleEndian?: boolean): void {
-        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+    public setBigInt64(byteOffset: int, value: long, littleEndian: boolean): void {
+        if (littleEndian) {
             this.setBigInt64Little(byteOffset, value)
         } else {
             this.setBigInt64Big(byteOffset, value)
@@ -878,8 +878,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setBigInt64(byteOffset: int, value: long, littleEndian: boolean): void {
-        if (littleEndian) {
+    public setBigInt64(byteOffset: int, value: bigint, littleEndian?: boolean): void {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             this.setBigInt64Little(byteOffset, value)
         } else {
             this.setBigInt64Big(byteOffset, value)
@@ -988,8 +988,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setBigUint64(byteOffset: int, value: bigint, littleEndian?: boolean): void {
-        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
+    public setBigUint64(byteOffset: int, value: long, littleEndian: boolean): void {
+        if (littleEndian) {
             this.setBigUint64Little(byteOffset, value)
         } else {
             this.setBigUint64Big(byteOffset, value)
@@ -1001,8 +1001,8 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to write
      * @param littleEndian read as little or big endian
      */
-    public setBigUint64(byteOffset: int, value: long, littleEndian: boolean): void {
-        if (littleEndian) {
+    public setBigUint64(byteOffset: int, value: bigint, littleEndian?: boolean): void {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             this.setBigUint64Little(byteOffset, value)
         } else {
             this.setBigUint64Big(byteOffset, value)

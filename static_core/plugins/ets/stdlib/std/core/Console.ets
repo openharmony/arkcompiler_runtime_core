@@ -151,32 +151,32 @@ export final class Console {
      * @public
      * @deprecated Will be removed in future. Please use log instead
      */
-    public print(i: String): void {
-        this.addToBuffer(i, LogLevel.PRINTLN)
-    };
     public print(i: boolean): void {
         this.addToBuffer(new Boolean(i).toString(), LogLevel.PRINTLN)
-    };
+    }
     public print(i: byte): void {
         this.addToBuffer(new Byte(i).toString(), LogLevel.PRINTLN)
-    };
+    }
     public print(i: short): void {
         this.addToBuffer(new Short(i).toString(), LogLevel.PRINTLN)
-    };
+    }
     public print(i: char): void {
         this.addToBuffer(new Char(i).toString(), LogLevel.PRINTLN)
-    };
+    }
     public print(i: int): void {
         this.addToBuffer(new Int(i).toString(), LogLevel.PRINTLN)
-    };
+    }
     public print(i: long): void {
         this.addToBuffer(new Long(i).toString(), LogLevel.PRINTLN)
-    };
+    }
     public print(i: float): void {
         this.addToBuffer(new Float(i).toString(), LogLevel.PRINTLN)
     }
     public print(i: double): void {
         this.addToBuffer(new Double(i).toString(), LogLevel.PRINTLN)
+    }
+    public print(i: String): void {
+        this.addToBuffer(i, LogLevel.PRINTLN)
     }
     public print(o: NullishType): void {
         this.print(Console.NullishTypeToPrint(o))
@@ -203,14 +203,6 @@ export final class Console {
      * @public
      * @deprecated Will be removed in future. Please use log instead
      */
-    public println(i: NullishType): void {
-        this.print(i)
-        this.println()
-    }
-    public println(i: String): void {
-        this.print(i)
-        this.println()
-    }
     public println(i: boolean): void {
         this.print(i)
         this.println()
@@ -243,6 +235,14 @@ export final class Console {
         this.print(i)
         this.println()
     }
+    public println(i: String): void {
+        this.print(i)
+        this.println()
+    }
+    public println(i: NullishType): void {
+        this.print(i)
+        this.println()
+    }
 
     /**
      * @section Console logging API
@@ -256,9 +256,6 @@ export final class Console {
      */
     // NOTE(ivan-tyulyandin): overload are added for performance reasons
     // To optimize `debug`, `warn`, `info` and `error` the same technique can be applied
-    public log(i: String): void {
-        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
-    }
     public log(i: boolean): void {
         this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
@@ -281,6 +278,9 @@ export final class Console {
         this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: double): void {
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
+    }
+    public log(i: String): void {
         this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(): void {

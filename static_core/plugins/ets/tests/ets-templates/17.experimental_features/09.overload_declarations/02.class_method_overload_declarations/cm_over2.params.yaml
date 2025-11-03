@@ -138,9 +138,9 @@ cases:
           class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: T): int { return 33 }
               meth(p: R): string { if (p[0] == 0) throw ex; else return "R" }
+              meth(p: Object): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -164,7 +164,6 @@ cases:
           class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: U): int {
                   if (p instanceof Number) {
                       throw ex
@@ -173,6 +172,7 @@ cases:
                   }
               }
               meth(p: V): number { return 1.0 }
+              meth(p: Object): string { return "" } // should never be called
           }
       use: |-
           let a: A = new A()
@@ -194,7 +194,6 @@ cases:
           class Ex extends Error {}
           let ex: Ex = new Ex()
           class A {
-              meth(p: Object): string { return "" } // should never be called
               meth(p: FF): string {
                   if (ex instanceof Ex) {
                       return "FF"
@@ -203,6 +202,7 @@ cases:
                   }
               }
               meth(p: EE): int { return 12 }
+              meth(p: Object): string { return "" } // should never be called
           }
           function fff(v: number): string {
               return " " + v + " "

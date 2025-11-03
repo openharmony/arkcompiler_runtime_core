@@ -90,12 +90,12 @@ function test_i32() : int {
 }
 
 function test_i64() : int {
-    if (max(Long.MAX_VALUE, 0) != Long.MAX_VALUE) return 11;
-    if (max(Long.MIN_VALUE, 0) != 0) return 12;
-    if (max(0, -2) != 0) return 13;
-    if (max(0, 3) != 3) return 14;
-    if (max(-2, -4) != -2) return 15;
-    if (max(1, 4) != 4) return 16;
+    if (max(Long.MAX_VALUE, 0 as int) != Long.MAX_VALUE) return 11;
+    if (max(Long.MIN_VALUE, 0 as int) != 0) return 12;
+    if (max(0 as int, -2 as int) != 0) return 13;
+    if (max(0 as int, 3 as int) != 3) return 14;
+    if (max(-2 as int, -4 as int) != -2) return 15;
+    if (max(1 as int, 4 as int) != 4) return 16;
 
     return 0;
 }
@@ -121,8 +121,8 @@ function test_f64() : int {
     if (max(0, Double.NEGATIVE_INFINITY) != 0) return 33;
     if (max(0, Double.MIN_VALUE) != Double.MIN_VALUE) return 34;
     if (max(Double.MAX_VALUE, Double.MIN_VALUE) != Double.MAX_VALUE) return 35;
-    if (max(0, 2) != 2) return 36;
-    if (max(0, -4) != 0) return 37;
+    if (max(0 as int, 2 as int) != 2) return 36;
+    if (max(0 as int, -4 as int) != 0) return 37;
     if (max(1.e-100, 2.e+200) != 2.e+200) return 38;
     if (!Double.isNaN(max(Double.NaN, Double.NaN))) return 39;
     if (!Double.isNaN(max(Double.MAX_VALUE, Double.NaN))) return 40;

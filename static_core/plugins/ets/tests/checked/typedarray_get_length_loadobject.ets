@@ -250,10 +250,10 @@ function testUint32Array_iterable_ctor() : int {
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 0
-//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
-//! INST_COUNT      "BoundsCheck D", 2
-//! INST_COUNT      "BoundsCheck", 2
+//! INST_COUNT      "BoundsCheck D", 0
+//! INST_COUNT      "BoundsCheck", 0
 //! RUN             options: "", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32Array_iterable_ctor"
 function testFloat32Array_iterable_ctor() : int {
   let count: int = 20;
@@ -284,10 +284,10 @@ function testFloat32Array_iterable_ctor() : int {
 //! PASS_AFTER_NEXT "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 0
-//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 2
+//! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 0
 //! PASS_AFTER      "ChecksElimination"
-//! INST_COUNT      "BoundsCheck D", 2
-//! INST_COUNT      "BoundsCheck", 2
+//! INST_COUNT      "BoundsCheck D", 0
+//! INST_COUNT      "BoundsCheck", 0
 //! RUN             options: "", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64Array_iterable_ctor"
 function testFloat64Array_iterable_ctor() : int {
   let count: int = 20;
@@ -1149,8 +1149,8 @@ function testUint32Array_typedarray_ctor() : int {
 //! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
 //! INST_COUNT      /LoadObject.*escompat\.Float32Array\.lengthInt/, 2
 //! PASS_AFTER      "ChecksElimination"
-//! INST_COUNT      "BoundsCheck D", 3
-//! INST_COUNT      "BoundsCheck", 3
+//! INST_COUNT      "BoundsCheck D", 2
+//! INST_COUNT      "BoundsCheck", 2
 //! RUN             options: "", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat32Array_typedarray_ctor"
 function testFloat32Array_typedarray_ctor() : int {
   let count: int = 20;
@@ -1185,8 +1185,8 @@ function testFloat32Array_typedarray_ctor() : int {
 //! INST_COUNT      /LoadObject.*escompat\.Int32Array\.lengthInt/, 2
 //! INST_COUNT      /LoadObject.*escompat\.Float64Array\.lengthInt/, 2
 //! PASS_AFTER      "ChecksElimination"
-//! INST_COUNT      "BoundsCheck D", 3
-//! INST_COUNT      "BoundsCheck", 3
+//! INST_COUNT      "BoundsCheck D", 2
+//! INST_COUNT      "BoundsCheck", 2
 //! RUN             options: "", entry: "typedarray_get_length_loadobject.ETSGLOBAL::testFloat64Array_typedarray_ctor"
 function testFloat64Array_typedarray_ctor() : int {
   let count: int = 20;

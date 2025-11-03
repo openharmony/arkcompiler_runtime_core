@@ -24,6 +24,33 @@
  * @returns The element in the array matching the given index.
  * Returns undefined if `index` < `-length()` or `index` >= `length()`.
  */
+<%= access_public %> at<%= this_generic %>(<%= this_arg %>index: int): <%= el_type_boxed %> | undefined {
+    let len = <%= this_len_int %>;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        return undefined;
+    }
+
+    return <%= get_unsafe.(this, 'k') %>;
+}
+
+/**
+ * Takes an integer value and returns the item at that index,
+ * allowing for positive and negative integers. Negative integers count back
+ * from the last item in the array.
+ *
+ * @param index Zero-based index of the array element to be returned.
+ * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
+ *
+ * @returns The element in the array matching the given index.
+ * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ */
 <%= access_public %> <%= override %> at<%= this_generic %>(<%= this_arg %>index: number): <%= el_type_boxed %> | undefined {
     return <%= this_call.('at') %>index.toInt())
 }
@@ -64,30 +91,15 @@
 }
 
 /**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
  *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
+ * @param target index at which to copy the sequence
  *
- * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * @returns this array after transformation
  */
-<%= access_public %> at<%= this_generic %>(<%= this_arg %>index: int): <%= el_type_boxed %> | undefined {
-    let len = <%= this_len_int %>;
-    let k: int;
-    if (index >= 0) {
-        k = index;
-    } else {
-        k = len + index;
-    }
-
-    if (k < 0 || k >= len) {
-        return undefined;
-    }
-
-    return <%= get_unsafe.(this, 'k') %>;
+<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: int): <%= this_return_type %> {
+    <%= this_call.('copyWithin') %>target, 0, <%= this_len_int %>);
+    return <%= this %>;
 }
 
 /**
@@ -97,12 +109,10 @@
  *
  * @param start index at which to start copying elements from
  *
- * @param end index at which to end copying elements from
- *
  * @returns this array after transformation
  */
-<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: number, start: number, end?: Number): <%= this_return_type %> {
-    <%= this_call.('copyWithin') %>target.toInt(), start.toInt(), asIntOrDefault(end, <%= this_len_int %>));
+<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: int, start: int): <%= this_return_type %> {
+    <%= this_call.('copyWithin') %>target, start, <%= this_len_int %>);
     return <%= this %>;
 }
 
@@ -152,38 +162,12 @@
  *
  * @param start index at which to start copying elements from
  *
- * @returns this array after transformation
- */
-<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: int, start: int): <%= this_return_type %> {
-    <%= this_call.('copyWithin') %>target, start, <%= this_len_int %>);
-    return <%= this %>;
-}
-
-/**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
+ * @param end index at which to end copying elements from
  *
  * @returns this array after transformation
  */
-<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: int): <%= this_return_type %> {
-    <%= this_call.('copyWithin') %>target, 0, <%= this_len_int %>);
-    return <%= this %>;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-<%= access_public %> fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start?: Number, end?: Number): <%= this_return_type %> {
-    <%= this_call.('fill') %>value, asIntOrDefault(start, 0), asIntOrDefault(end, <%= this_len_int %>));
+<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: number, start: number, end?: Number): <%= this_return_type %> {
+    <%= this_call.('copyWithin') %>target.toInt(), start.toInt(), asIntOrDefault(end, <%= this_len_int %>));
     return <%= this %>;
 }
 
@@ -213,6 +197,22 @@
 % else
 <%= access_public %> native fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start: int, end: int): <%= this_return_type %>;
 % end
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index
+ *
+ * @param value to fill the array with
+ *
+ * @param start index at which to start filling
+ *
+ * @param end index at which to end filling, but not including
+ *
+ * @returns this array after transformation
+ */
+<%= access_public %> fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start?: Number, end?: Number): <%= this_return_type %> {
+    <%= this_call.('fill') %>value, asIntOrDefault(start, 0), asIntOrDefault(end, <%= this_len_int %>));
+    return <%= this %>;
+}
 
 % TemplateData::get_lambda_data.each { |lambda_args_params|
 %   lambda_params_num, lambda_args, lambda_params, lambda_args2 = lambda_args_params
@@ -380,6 +380,18 @@
 }
 
 /**
+ * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
+ * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ *
+ * @param start zero-based index at which to start extraction
+ *
+ * @returns `Array` instance, constructed from extracted elements of `this` instance.
+ */
+<%= access_public %> slice<%= this_generic %>(<%= this_arg %>start: int): <%= this_type %> {
+    return <%= this_call.('slice') %>start, Int.MAX_VALUE);
+}
+
+/**
  * Performs the specified action for each element in an array.
  *
  * @param callbackfn  A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
@@ -395,21 +407,6 @@
 }
 
 % }
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-<%= access_public %> <%= override %> slice<%= this_generic %>(<%= this_arg %>start?: Number, end?: Number): <%= this_type %> {
-    const len: int = <%= this_len_int %>;
-    return <%= this_call.('slice') %>asIntOrDefault(start, 0), asIntOrDefault(end, len))
-}
 
 /**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
@@ -440,14 +437,17 @@
 
 /**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
  *
  * @param start zero-based index at which to start extraction
  *
+ * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
+ *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-<%= access_public %> slice<%= this_generic %>(<%= this_arg %>start: int): <%= this_type %> {
-    return <%= this_call.('slice') %>start, Int.MAX_VALUE);
+<%= access_public %> <%= override %> slice<%= this_generic %>(<%= this_arg %>start?: Number, end?: Number): <%= this_type %> {
+    const len: int = <%= this_len_int %>;
+    return <%= this_call.('slice') %>asIntOrDefault(start, 0), asIntOrDefault(end, len))
 }
 
 <% if access_public == "export function" %><% #generate code for BuiltinArray.ets %>
@@ -516,9 +516,7 @@
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-<%= access_public %> lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>, fromIndex?: int): int {
-    return <%= this_call.('lastIndexOfImpl') %>searchElement, fromIndex ?? 0);
-}
+<%= access_public %> native lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>): int;
 
 /**
  * Returns the last index at which a given element can be found in the array,
@@ -535,7 +533,10 @@
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-<%= access_public %> native lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>): int;
+<%= access_public %> lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>, fromIndex?: int): int {
+    return <%= this_call.('lastIndexOfImpl') %>searchElement, fromIndex ?? 0);
+}
+
 <% end %>
 
 <% if el_type == "T" %>
@@ -675,27 +676,10 @@ private joinObject(sep?: String): string {
  *
  * @param start index
  *
- * @param delete number of items after start index
- *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start?: Number, delete?: Number): <%= this_type %> {
-    const len = <%= this_len_int %>;
-    return <%= this_call.('toSpliced') %>asIntOrDefault(start, len), asIntOrDefault(delete, len))
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: number, delete: number, ...items: FixedArray<<%= el_type %>>): <%= this_type %> {
-    const len = <%= this_len_int %>;
-    return <%= this_call.('toSpliced') %>start.toInt(), delete.toInt(), ...items)
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: int): <%= this_type %> {
+    return <%= this_call.('toSpliced') %>start, <%= this_len_int %>)
 }
 
 /**
@@ -736,10 +720,27 @@ private joinObject(sep?: String): string {
  *
  * @param start index
  *
+ * @param delete number of items after start index
+ *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: int): <%= this_type %> {
-    return <%= this_call.('toSpliced') %>start, <%= this_len_int %>)
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: number, delete: number, ...items: FixedArray<<%= el_type %>>): <%= this_type %> {
+    const len = <%= this_len_int %>;
+    return <%= this_call.('toSpliced') %>start.toInt(), delete.toInt(), ...items)
+}
+
+/**
+ * Copying version of the splice() method.
+ *
+ * @param start index
+ *
+ * @param delete number of items after start index
+ *
+ * @returns a new Array with some elements removed and/or replaced at a given index.
+ */
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start?: Number, delete?: Number): <%= this_type %> {
+    const len = <%= this_len_int %>;
+    return <%= this_call.('toSpliced') %>asIntOrDefault(start, len), asIntOrDefault(delete, len))
 }
 
 /**
@@ -825,6 +826,11 @@ private joinObject(sep?: String): string {
 % end
 
 % if this_array == 'escompat_array'
+
+% if this_array == 'escompat_array'
+<%= access_public %> native indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>): int;
+%end
+
 /**
  * Returns the first index at which a given element
  * can be found in the array, or -1 if it is not present.
@@ -838,10 +844,6 @@ private joinObject(sep?: String): string {
 <%= access_public %> <%= override %> indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex?: int): int {
     return <%= this_call.('indexOfImpl') %>val, asIntOrDefault(fromIndex, 0))
 }
-%end
-
-% if this_array == 'escompat_array'
-<%= access_public %> native indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>): int;
 %end
 
 /**
@@ -911,8 +913,16 @@ private joinObject(sep?: String): string {
  *
  * @returns a new Array with the element at the given index replaced with the given value
  */
-<%= access_public %> with<%= this_generic %>(<%= this_arg %>index: number, value: <%= el_type %>): <%= this_type %> {
-    return <%= this_call.('with') %>index.toInt(), value)
+<%= access_public %> with<%= this_generic %>(<%= this_arg %>index: int, value: <%= el_type %>): <%= this_type %> {
+    if (index < 0) {
+        index += <%= this_len_int %>;
+    }
+    if (index < 0 || index >= <%= this_len_int %>) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = <%= clone_this %>;
+    <%= set_unsafe.('arr', 'index', 'value') %>;
+    return arr
 }
 
 /**
@@ -925,16 +935,8 @@ private joinObject(sep?: String): string {
  *
  * @returns a new Array with the element at the given index replaced with the given value
  */
-<%= access_public %> with<%= this_generic %>(<%= this_arg %>index: int, value: <%= el_type %>): <%= this_type %> {
-    if (index < 0) {
-        index += <%= this_len_int %>;
-    }
-    if (index < 0 || index >= <%= this_len_int %>) {
-        throw new RangeError("Invalid index")
-    }
-    let arr = <%= clone_this %>;
-    <%= set_unsafe.('arr', 'index', 'value') %>;
-    return arr
+<%= access_public %> with<%= this_generic %>(<%= this_arg %>index: number, value: <%= el_type %>): <%= this_type %> {
+    return <%= this_call.('with') %>index.toInt(), value)
 }
 
 /**

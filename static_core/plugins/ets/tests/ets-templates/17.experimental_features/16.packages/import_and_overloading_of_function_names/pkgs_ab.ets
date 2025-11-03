@@ -20,8 +20,8 @@ files: ['./pkg_a/pkg_{{loop.index0}}.ets', './pkg_b/pkg_{{loop.index0}}.ets']
 tags: [{{c.tags}}]
 ---*/
 
-import { foo{{loop.index0}} } from './pkg_a/pkg_{{loop.index0}}.ets'
 import { foo{{loop.index0}} } from './pkg_b/pkg_{{loop.index0}}.ets'
+import { foo{{loop.index0}} } from './pkg_a/pkg_{{loop.index0}}.ets'
 
 {{c.decl}}
 

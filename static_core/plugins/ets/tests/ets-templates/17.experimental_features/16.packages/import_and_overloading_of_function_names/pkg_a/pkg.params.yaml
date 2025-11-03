@@ -61,7 +61,7 @@ cases:
           export class B10 {}
 
     # 11
-    - sig2: '...p2: FixedArray<Boolean>'
+    - sig2: 'p1: Object, ...p2: boolean[]'
 
     # 12
     - sig2: 'p1: Object|null'

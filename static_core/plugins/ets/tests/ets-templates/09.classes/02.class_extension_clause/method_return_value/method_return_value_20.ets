@@ -20,7 +20,7 @@ name: method_return_value_20
 
 class Parent {
     public getValue(): char {
-        return 100;
+        return Int.toChar(100);
     }
 }
 

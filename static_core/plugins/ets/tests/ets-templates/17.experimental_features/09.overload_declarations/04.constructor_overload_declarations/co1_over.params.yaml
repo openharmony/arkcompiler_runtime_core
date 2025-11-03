@@ -65,15 +65,15 @@ cases:
               getType(): string {
                   return this.t
               }
-              constructor(p: Object) { this.t = "should never be called" }
+              constructor(p: boolean) { this.t = "boolean" }
               constructor(p: byte) { this.t = "byte" }
               constructor(p: short) { this.t = "short" }
               constructor(p: int) { this.t = "int" }
               constructor(p: long) { this.t = "long" }
               constructor(p: char) { this.t = "char" }
-              constructor(p: boolean) { this.t = "boolean" }
               constructor(p: float) { this.t = "float" }
               constructor(p: double) { this.t = "double" }
+              constructor(p: Object) { this.t = "should never be called" }
           }
       use: |-
           arktest.assertTrue(new A(new Byte(-1 as byte)).getType() == "byte")
@@ -85,7 +85,7 @@ cases:
           arktest.assertTrue(new A(new Float(3.14 as float)).getType() == "float")
           arktest.assertTrue(new A(new Double(3.14)).getType() == "double")
           arktest.assertTrue(new A(-1 as long).getType() == "long")
-          arktest.assertTrue(new A(-1).getType() == "int")
+          arktest.assertTrue(new A(-1).getType() == "byte")
           arktest.assertTrue(new A(-1 as short).getType() == "short")
           arktest.assertTrue(new A(-1 as byte).getType() == "byte")
           arktest.assertTrue(new A(c'A').getType() == "char")
@@ -100,7 +100,8 @@ cases:
               getType(): string {
                   return this.t
               }
-              constructor(p: Object) { this.t = "should never be called" }
+              constructor(p: boolean) { this.t = "boolean" }
+              constructor(p: Boolean) { this.t = "Boolean" }
               constructor(p: byte) { this.t = "byte" }
               constructor(p: Byte) { this.t = "Byte" }
               constructor(p: short) { this.t = "short" }
@@ -111,12 +112,11 @@ cases:
               constructor(p: Long) { this.t = "Long" }
               constructor(p: char) { this.t = "char" }
               constructor(p: Char) { this.t = "Char" }
-              constructor(p: boolean) { this.t = "boolean" }
-              constructor(p: Boolean) { this.t = "Boolean" }
               constructor(p: float) { this.t = "float" }
               constructor(p: Float) { this.t = "Float" }
               constructor(p: double) { this.t = "double" }
               constructor(p: Double) { this.t = "Double" }
+              constructor(p: Object) { this.t = "should never be called" }
           }
           class A extends B {
               constructor(p: Object) { super(p) }
@@ -138,16 +138,16 @@ cases:
               constructor(p: Double) { super(p) }
           }
       use: |-
-          arktest.assertTrue(new A(new Byte(-1 as byte)).getType() == "Byte")
-          arktest.assertTrue(new A(new Short(-1 as short)).getType() == "Short")
-          arktest.assertTrue(new A(new Int(-1 as int)).getType() == "Int")
-          arktest.assertTrue(new A(new Long(-1 as long)).getType() == "Long")
-          arktest.assertTrue(new A(new Char(c'A')).getType() == "Char")
-          arktest.assertTrue(new A(new Boolean(false)).getType() == "Boolean")
-          arktest.assertTrue(new A(new Float(3.14 as float)).getType() == "Float")
+          arktest.assertTrue(new A(new Byte(-1 as byte)).getType() == "byte")
+          arktest.assertTrue(new A(new Short(-1 as short)).getType() == "short")
+          arktest.assertTrue(new A(new Int(-1 as int)).getType() == "int")
+          arktest.assertTrue(new A(new Long(-1 as long)).getType() == "long")
+          arktest.assertTrue(new A(new Char(c'A')).getType() == "char")
+          arktest.assertTrue(new A(new Boolean(false)).getType() == "boolean")
+          arktest.assertTrue(new A(new Float(3.14.toFloat())).getType() == "float")
           arktest.assertTrue(new A(new Double(3.14)).getType() == "Double")
           arktest.assertTrue(new A(-1 as long).getType() == "long")
-          arktest.assertTrue(new A(-1).getType() == "int")
+          arktest.assertTrue(new A(-1).getType() == "byte")
           arktest.assertTrue(new A(-1 as short).getType() == "short")
           arktest.assertTrue(new A(-1 as byte).getType() == "byte")
           arktest.assertTrue(new A(c'A').getType() == "char")
@@ -164,12 +164,12 @@ cases:
               getType(): string {
                   return this.t
               }
-              constructor(p: Object) { this.t = "should never be called" }
+              constructor(p: short) { this.t = "short" }
               constructor(p: int) { this.t = "int" }
               constructor(p: Color) { this.t = "Color" }
               constructor(p: string) { this.t = "string" }
               constructor(p: Size) { this.t = "Size" }
-              constructor(p: short) { this.t = "short" }
+              constructor(p: Object) { this.t = "should never be called" }
           }
       use: |-
           arktest.assertTrue(new A(-1).getType() == "int")
@@ -190,19 +190,19 @@ cases:
                   return this.t
               }
               constructor() {}
-              constructor(p: Object) { this.t = "should never be called" }
               constructor(p: FixedArray<A>) { this.t = "A" }
               constructor(p: FixedArray<Color>) { this.t = "Color" }
               constructor(p: FixedArray<Size>) { this.t = "Size" }
-              constructor(p: FixedArray<Object>) { this.t = "Object" }
-              constructor(p: FixedArray<Int>) { this.t = "Int" }
-              constructor(p: FixedArray<Short>) { this.t = "Short" }
-              constructor(p: FixedArray<Byte>) { this.t = "Byte" }
-              constructor(p: FixedArray<Long>) { this.t = "Long" }
-              constructor(p: FixedArray<Char>) { this.t = "Char" }
               constructor(p: FixedArray<Boolean>) { this.t = "Boolean" }
+              constructor(p: FixedArray<Byte>) { this.t = "Byte" }
+              constructor(p: FixedArray<Short>) { this.t = "Short" }
+              constructor(p: FixedArray<Int>) { this.t = "Int" }
+              constructor(p: FixedArray<Long>) { this.t = "Long" }
               constructor(p: FixedArray<Float>) { this.t = "Float" }
               constructor(p: FixedArray<Double>) { this.t = "Double" }
+              constructor(p: FixedArray<Char>) { this.t = "Char" }
+              constructor(p: FixedArray<Object>) { this.t = "Object" }
+              constructor(p: Object) { this.t = "should never be called" }
           }
       use: |-
           arktest.assertEQ(new A([(-1).toByte()]).getType(), "Byte")

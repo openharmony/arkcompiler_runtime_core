@@ -83,27 +83,6 @@ export final class StringBuilder {
      */
     public static native concatStrings(lhs: String, rhs: String): String;
 
-    /**
-     * Appends an object representation as string to the builder's internal buffer
-     *
-     * @param o object that will be converted to a string
-     *
-     * @returns builder with updated internal buffer
-     */
-    public append(o: Object): StringBuilder {
-        this.append(o.toString());
-        return this;
-    }
-
-    /**
-     * Appends a string to the builder's internal buffer
-     *
-     * @param s string to be appended
-     *
-     * @returns builder with updated internal buffer
-     */
-    public native append(s: String): StringBuilder;
-
     private native append(s0: String, s1: String): StringBuilder;
     private native append(s0: String, s1: String, s2: String): StringBuilder;
     private native append(s0: String, s1: String, s2: String, s3: String): StringBuilder;
@@ -133,7 +112,7 @@ export final class StringBuilder {
      *
      * @returns builder with updated internal buffer
      */
-    public native append(i: short): StringBuilder;
+    public native append(i: char): StringBuilder;
 
     /**
      * Appends a char to the builder's internal buffer
@@ -142,7 +121,7 @@ export final class StringBuilder {
      *
      * @returns builder with updated internal buffer
      */
-    public native append(i: char): StringBuilder;
+    public native append(i: short): StringBuilder;
 
     /**
      * Appends an int as string to the builder's internal buffer
@@ -179,6 +158,27 @@ export final class StringBuilder {
      * @returns builder with updated internal buffer
      */
     public native append(i: double): StringBuilder;
+
+    /**
+     * Appends a string to the builder's internal buffer
+     *
+     * @param s string to be appended
+     *
+     * @returns builder with updated internal buffer
+     */
+    public native append(s: String): StringBuilder;
+
+    /**
+     * Appends an object representation as string to the builder's internal buffer
+     *
+     * @param o object that will be converted to a string
+     *
+     * @returns builder with updated internal buffer
+     */
+    public append(o: Object): StringBuilder {
+        this.append(o.toString());
+        return this;
+    }
 
     /**
      * Returns the string that was formed as a result of all append operations

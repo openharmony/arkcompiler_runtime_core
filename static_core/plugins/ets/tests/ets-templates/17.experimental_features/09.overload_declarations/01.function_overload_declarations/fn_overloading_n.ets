@@ -20,7 +20,7 @@ desc: >-
     have the same name but different signatures that are not
     override-equivalent, then the function name is said to be overloaded.
 params: same-signature functions
-tags: [compile-only, negative]
+tags: [{{c.tags}}]
 ---*/
 
 {{c.defs}}

@@ -29,8 +29,7 @@ cases:
       arktest.assertEQ( res, 2 )
     params: override-compatible with itself parameter
 
-  - tags: 'negative, compile-only'
-    base: |-
+  - base: |-
       foo(i: Base[]) {
           res = 1
       }
@@ -42,8 +41,7 @@ cases:
       new Derived().foo([new Derived()])
     params: override-compatible parameter (covariance)
 
-  - tags: 'negative, compile-only'
-    base: |-
+  - base: |-
       foo(i: Derived[]) {
           res = 1
       }

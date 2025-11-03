@@ -147,7 +147,7 @@
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendInt/
+//! INST_NEXT     /Intrinsic.StdCoreSbAppendByte/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
@@ -294,7 +294,7 @@
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendInt/
+//! INST_NEXT     /Intrinsic.StdCoreSbAppendByte/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
@@ -427,7 +427,7 @@ function toString11(str: String): String {
     let sb = new StringBuilder(str);
     sb.toString();                              // applied
     if (str.getLength() > 0)
-        sb.append(1);
+        sb.append(1 as int);
     return sb.toString();                       // not applied, due to dominating append()-call
 }
 

@@ -107,10 +107,10 @@ cases:
           class B {}
 
     # 11
-    - sig1: 'p1: Object, ...p2: FixedArray<boolean>'
-      arg1: 'new Object(), true, false, true'
-      sig2: '...p2: FixedArray<Boolean>'
-      arg2: 'new Boolean(), new Boolean(true), new Boolean(false)'
+    - sig1: '...p2: FixedArray<Boolean>'
+      arg1: 'new Boolean(), new Boolean(true), new Boolean(false)'
+      sig2: 'p1: Object, ...p2: FixedArray<boolean>'
+      arg2: 'new Object(), true, false, true'
 
     # 12
     - sig1: 'p1: Byte|null'

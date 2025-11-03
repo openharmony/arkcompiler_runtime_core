@@ -56,7 +56,7 @@ cases:
           import { A10, B10 } from '../pkg_a/pkg_10.ets'
 
     # 11
-    - sig1: 'p1: Object, ...p2: boolean[]'
+    - sig1: '...p2: FixedArray<Boolean>'
 
     # 12
     - sig1: 'p1: Byte|null'

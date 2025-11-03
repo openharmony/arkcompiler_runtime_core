@@ -17,6 +17,7 @@
 /*---
 desc: Assignment contexts followed by a widening primitive conversion.
 params: from '{{case.src_type}}' to '{{case.dst_type}}'
+tags: [{{case.tags}}]
 ---*/
 
 function main(): void {

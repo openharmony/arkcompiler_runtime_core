@@ -23,14 +23,14 @@ params: {{c.type}}
 tags: [{{c.tags}}]
 ---*/
 
+function foo(a: boolean): int {
+  return 8;
+}
 function foo(a: byte): int {
   return 1;
 }
 function foo(a: short): int {
   return 2;
-}
-function foo(a: char): int {
-  return 3;
 }
 function foo(a: int): int {
   return 4;
@@ -44,26 +44,23 @@ function foo(a: float): int {
 function foo(a: double): int {
   return 7;
 }
-function foo(a: boolean): int {
-  return 8;
-}
 function foo(a: bigint): int {
   return 9;
+}
+function foo(a: char): int {
+  return 3;
 }
 function foo(a: string): int {
   return 10;
 }
-function foo(a: Object): int {
-  return 11;
+function foo(a: FixedArray<boolean>): int {
+  return 108;
 }
 function foo(a: FixedArray<byte>): int {
   return 101;
 }
 function foo(a: FixedArray<short>): int {
   return 102;
-}
-function foo(a: FixedArray<char>): int {
-  return 103;
 }
 function foo(a: FixedArray<int>): int {
   return 104;
@@ -77,11 +74,14 @@ function foo(a: FixedArray<float>): int {
 function foo(a: FixedArray<double>): int {
   return 107;
 }
-function foo(a: FixedArray<boolean>): int {
-  return 108;
+function foo(a: FixedArray<char>): int {
+  return 103;
 }
 function foo(a: FixedArray<Object>): int {
   return 109;
+}
+function foo(a: Object): int {
+  return 11;
 }
 
 function main(): void {

@@ -44,5 +44,5 @@ function main(): void {
 		)
 	const ty = creator.create()
 	const i = ty.make() as I
- arktest.assertEQ(i.i(19), 30)
+ arktest.assertEQ(i.i(19), 0)
 }

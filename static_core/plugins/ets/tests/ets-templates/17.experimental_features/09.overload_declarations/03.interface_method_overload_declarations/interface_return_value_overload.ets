@@ -42,6 +42,6 @@ class A implements J {
 
 function main(): void {
   let a: A = new A();
-  arktest.assertEQ( a.foo(1), 2.1 );
+  arktest.assertEQ( a.foo(1 as int), 2.1 );
   arktest.assertEQ( a.foo(1 as byte), "str" );
 }

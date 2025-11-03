@@ -19,7 +19,6 @@ cases:
   - {type1: 'float',  type2: 'int',    val1: '42.42f', val2: '2'}
   - {type1: 'double', type2: 'float',  val1: '13.13',  val2: '3.14f'}
   - {type1: 'number', type2: 'double', val1: '1.1',    val2: '2.2'}
-  - {type1: 'number', type2: 'char',   val1: '1',      val2: c'\x7F'}
   - {type1: 'bigint', type2: 'bigint', val1: '2n',     val2: 'new BigInt(13)'}
   - {type1: 'Object', type2: 'bigint', val1: 'new Object()', val2: '13n'}
   - {type1: 'Any',    type2: 'int',    val1: '1',      val2: '2'}

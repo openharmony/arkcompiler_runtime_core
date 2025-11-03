@@ -676,12 +676,22 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @param start index
      *
-     * @param delete number of items after start index
-     *
-     * @returns an Array with deleted elements
+     * @returns an Array with deleted elements from start to the last element of the current instance
      */
-    public splice(start: number, delete: Number | undefined, ...items: T[]): Array<T> {
-        return this.splice(start.toInt(), asIntOrDefault(delete, 0), ...items)
+    public splice(start: int): Array<T> {
+        return this.splice(start, this.actualLength)
+    }
+
+    /**
+     * Changes the contents of an array by removing or replacing existing elements
+     * and/or adding new elements in place.
+     *
+     * @param start index
+     *
+     * @returns an Array with deleted elements from start to the last element of the current instance
+     */
+    public splice(start: number): Array<T> {
+        return this.splice(start.toInt())
     }
 
     /**
@@ -739,22 +749,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @param start index
      *
-     * @returns an Array with deleted elements from start to the last element of the current instance
-     */
-    public splice(start: number): Array<T> {
-        return this.splice(start.toInt())
-    }
-
-    /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
+     * @param delete number of items after start index
      *
-     * @param start index
-     *
-     * @returns an Array with deleted elements from start to the last element of the current instance
+     * @returns an Array with deleted elements
      */
-    public splice(start: int): Array<T> {
-        return this.splice(start, this.actualLength)
+    public splice(start: number, delete: Number | undefined, ...items: T[]): Array<T> {
+        return this.splice(start.toInt(), asIntOrDefault(delete, 0), ...items)
     }
 
     /**

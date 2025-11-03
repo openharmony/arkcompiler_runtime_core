@@ -39,6 +39,10 @@ export final class Double extends Floating implements Comparable<Double> {
         this.value = value;
     }
 
+    public constructor(value: BigInt) {
+        this.value = value.doubleValue()
+    }
+
     /**
      * Constructs a new Double instance from string
      *
@@ -46,10 +50,6 @@ export final class Double extends Floating implements Comparable<Double> {
      */
     public constructor(value: String) {
         this.value = Double.numberFromString(value);
-    }
-
-    public constructor(value: BigInt) {
-        this.value = value.doubleValue()
     }
 
     /**
@@ -395,19 +395,6 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * toString(d: double, r: int): String -- returns a string representation of d by radix r
-     * @tag arkts
-     */
-    public static native toString(d: double, r: int): String;
-
-    /**
-     * @tag arkts
-     */
-    public static toString(d: double): String {
-        return Double.toString(d, 10);
-    }
-
-    /**
      * @tag arkts
      */
     public toString(r: int): String {
@@ -417,6 +404,19 @@ export final class Double extends Floating implements Comparable<Double> {
     public toString(d: Number): String {
         return Double.toString(this.value, d.toInt());
     }
+
+    /**
+     * @tag arkts
+     */
+    public static toString(d: double): String {
+        return Double.toString(d, 10);
+    }
+
+    /**
+     * toString(d: double, r: int): String -- returns a string representation of d by radix r
+     * @tag arkts
+     */
+    public static native toString(d: double, r: int): String;
 
     /**
      * Converts this object to a string
@@ -732,14 +732,11 @@ export final class Double extends Floating implements Comparable<Double> {
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
      *
     */
-    public static parseInt(s: String, r: double): double {
-        if (!Double.isFinite(r)) {
-            r = 0.0;
-        }
-        if ((r < 2.0 || r > 36.0) && r != 0.0) {
+    public static parseInt(s: String, r: int): double {
+        if ((r < 2 || r > 36) && r != 0.0) {
             return NaN;
         } else {
-            return Double.parseIntCore(s.trim(), Double.toInt(r));
+            return Double.parseIntCore(s, r);
         }
     }
 
@@ -764,11 +761,14 @@ export final class Double extends Floating implements Comparable<Double> {
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
      *
     */
-    public static parseInt(s: String, r: int): double {
-        if ((r < 2 || r > 36) && r != 0.0) {
+    public static parseInt(s: String, r: double): double {
+        if (!Double.isFinite(r)) {
+            r = 0.0;
+        }
+        if ((r < 2.0 || r > 36.0) && r != 0.0) {
             return NaN;
         } else {
-            return Double.parseIntCore(s, r);
+            return Double.parseIntCore(s.trim(), Double.toInt(r));
         }
     }
 
