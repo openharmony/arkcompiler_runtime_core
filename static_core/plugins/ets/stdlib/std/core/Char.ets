@@ -86,6 +86,16 @@ export final class Char extends Object implements Comparable<Char> {
     }
 
     /**
+     * The `toLocaleString()` method returns the string representation of the given Char
+     * in the form of a copy of the original object.
+     *
+     * @returns a copy of the original Char as a String
+     */
+    public override toLocaleString(): String {
+        return this.toString();
+    }
+
+    /**
      * compare(Char, Char) compares two Chars by their underlying chars.
      *
      * @param lhs the first Char to compare.

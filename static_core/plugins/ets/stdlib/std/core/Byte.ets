@@ -357,6 +357,15 @@ export final class Byte extends Integral implements Comparable<Byte> {
 
         return this.value == (other as Byte).value
     }
+    
+    /**
+     * Converts this object to a locale-specific string representation
+     *
+     * @returns result of the locale-specific conversion
+     */
+    public override toLocaleString(): String {
+        return this.toString();
+    }
 
     /**
      * Performs integral addition of this instance with provided one, returns the result as new instance
