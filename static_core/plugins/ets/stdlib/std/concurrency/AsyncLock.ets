@@ -110,7 +110,6 @@ export final class AsyncLock {
                 this.held.add(asyncLockInfo);
                 this.holderCID = callerCID;
                 this.mode = mode;
-                this.event = ConcurrencyHelpers.eventCreate();
                 return true;
             }
             if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED) {
@@ -201,7 +200,6 @@ export final class AsyncLock {
                 this.counter = 1;
                 this.pending.delete(asyncLockInfo);
                 this.held.add(asyncLockInfo);
-                this.event = ConcurrencyHelpers.eventCreate();
                 isDone = true;
             } else if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED) {
                 this.counter++;
@@ -210,17 +208,18 @@ export final class AsyncLock {
                 isDone = true;
             }
 
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-
             if (isDone == false) {
-                ConcurrencyHelpers.eventWait(this.event)
+                ConcurrencyHelpers.condVarWait(this.condVar, this.mutex);
             }
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
         } 
     }
 
     private fireCondEvent()
     {
-        ConcurrencyHelpers.eventFire(this.event);
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        ConcurrencyHelpers.condVarNotifyAll(this.condVar, this.mutex);
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
     private unlock(asyncLockInfo: AsyncLockInfo): void {
@@ -230,7 +229,7 @@ export final class AsyncLock {
         if (this.counter == 0) {
             this.holderCID = 0;
             this.mode = AsyncLockMode.UNLOCKED;
-            this.fireCondEvent();
+            ConcurrencyHelpers.condVarNotifyAll(this.condVar, this.mutex);
         }
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
@@ -301,7 +300,7 @@ export final class AsyncLock {
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private held: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
     private pending: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
-    private event: Object = ConcurrencyHelpers.eventCreate();
+    private condVar: Object = ConcurrencyHelpers.condVarCreate();
     private deadLockPrinter: DeadLockInfo = new DeadLockInfo();
 }
 
