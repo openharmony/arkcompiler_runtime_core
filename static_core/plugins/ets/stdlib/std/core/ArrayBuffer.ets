@@ -378,8 +378,10 @@ export class ArrayBuffer
     * @throws {Error} If the input object type is unsupported or the arguments are incorrect.
     */
     public static fromObject(obj: Object, byteOffsetOrEncoding: int | string, length: int): ArrayBuffer {
-        if (obj instanceof string && byteOffsetOrEncoding instanceof string) {
-            return ArrayBuffer.from(obj, byteOffsetOrEncoding as string);
+        if (obj instanceof string) {
+            const resolvedEncoding: string = byteOffsetOrEncoding instanceof string ? byteOffsetOrEncoding as string : "utf8";
+            const resolvedbyteOffset: int = byteOffsetOrEncoding instanceof int ? byteOffsetOrEncoding as int : 0;
+            return ArrayBuffer.from(ArrayBuffer.from(obj, resolvedEncoding), resolvedbyteOffset as int, length);
         }
         if (!(obj instanceof ArrayBuffer)) {
             throw Error("Incorrect args");
