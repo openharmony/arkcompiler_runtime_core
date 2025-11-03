@@ -16,3 +16,5 @@
 export let boxNum = new Number(123);
 export let boxBool = new Boolean(false);
 export let boxStr = new String(' 11 ');
+export let undefValue = undefined;
+export let nullValue = null;

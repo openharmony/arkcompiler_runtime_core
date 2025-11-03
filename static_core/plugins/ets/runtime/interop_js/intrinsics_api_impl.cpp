@@ -1037,7 +1037,13 @@ uint8_t ESValueAnyHasPropertyObject(EtsObject *etsObject, EtsObject *property)
 uint8_t ESValueAnyInstanceOf(EtsObject *etsObject, EtsObject *ctor)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    bool result = EtsIsinstance(coro, etsObject, ctor);
+    bool result = false;
+    if (etsObject == nullptr || ctor == nullptr) {
+        PandaString message = "Need object";
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, message.c_str());
+    } else {
+        result = EtsIsinstance(coro, etsObject, ctor);
+    }
     return static_cast<uint8_t>(result);
 }
 

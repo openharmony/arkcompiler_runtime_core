@@ -361,6 +361,32 @@ function checkInstanceOfDynamic(): boolean {
     return user.instanceOf(jsUser);
 }
 
+function checkInstanceOfNullOrUndefined(): boolean {
+    let undefValue = module2.getProperty('undefValue');
+    let nullValue = module2.getProperty('nullValue');
+    let res = true;
+    res = res && !nullValue.instanceOf(nullValue);
+    try {
+        res = res && undefValue.instanceOf(nullValue);
+        res = false;
+    } catch (e: Error) {
+        res = res && e.message.includes('Need object');
+    }
+    try {
+        res = res && nullValue.instanceOf(undefValue);
+        res = false;
+    } catch (e: Error) {
+        res = res && e.message.includes('Need object');
+    }
+    try {
+        res = res && undefValue.instanceOf(undefValue);
+        res = false;
+    } catch (e: Error) {
+        res = res && e.message.includes('Need object');
+    }
+    return res;
+}
+
 function checkInstaniate(): boolean {
     let num = ESValue.wrapInt(123);
     let user = jsUser.instantiate(num);
