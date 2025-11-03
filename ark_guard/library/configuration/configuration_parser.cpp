@@ -16,6 +16,7 @@
 #include "configuration_parser.h"
 
 #include <regex>
+#include <algorithm>
 
 #include "libarkbase/utils/json_parser.h"
 
@@ -45,31 +46,47 @@ constexpr std::string_view FILE_NAME_OBFUSCATION = "fileNameObfuscation";
 constexpr std::string_view RESERVED_FILE_NAMES = "reservedFileNames";
 constexpr std::string_view UNIVERSAL_RESERVED_FILE_NAMES = "universalReservedFileNames";
 
-constexpr std::string_view KEEP_OPTION = "keepOption";
+constexpr std::string_view KEEP_OPTIONS = "keepOptions";
 constexpr std::string_view KEEP_PATH = "keepPath";
-constexpr std::string_view RESERVED_PATH = "reservedPath";
-constexpr std::string_view UNIVERSAL_RESERVED_PATH = "universalReservedPath";
+constexpr std::string_view RESERVED_PATHS = "reservedPaths";
+constexpr std::string_view UNIVERSAL_RESERVED_PATHS = "universalReservedPaths";
 
-constexpr std::string_view KEEP = "keep";
-constexpr std::string_view KEEP_CLASS_WITH_MEMBERS = "keepclasswithmembers";
-constexpr std::string_view KEEP_CLASS_MEMBERS = "keepclassmembers";
+constexpr std::string_view KEEPS = "keeps";
+
+constexpr std::string_view PATH_END = ".";
+constexpr std::string_view UNIVERSAL_PATH_END = "\\.";
+constexpr std::string_view UNIVERSAL_PATH_START = "^";
+
+std::string NormalizeFilePath(const std::string &input)
+{
+    return ark::guard::StringUtil::EnsureEndWithSuffix(input, PATH_END.data());
+}
+
+std::string NormalizeUniversalPath(const std::string &input)
+{
+    return ark::guard::StringUtil::EnsureStartWithPrefix(
+        ark::guard::StringUtil::EnsureEndWithSuffix(ark::guard::StringUtil::ConvertWildcardToRegex(input),
+                                                    UNIVERSAL_PATH_END.data()),
+        UNIVERSAL_PATH_START.data());
+}
 }  // namespace
 
 void ark::guard::ConfigurationParser::Parse(Configuration &configuration)
 {
     std::string fileContent = FileUtil::GetFileContent(configPath_);
     ARK_GUARD_ASSERT(fileContent.empty(), ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
-                     "configuration file is empty:" + configPath_);
+                     "Configuration parsing failed: configuration file is empty:" + configPath_);
 
     ParseConfigurationFile(fileContent, configuration);
-    ARK_GUARD_ASSERT(!configuration.IsValid(), ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR, "configuration is invalid");
+    ARK_GUARD_ASSERT(!configuration.IsValid(), ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
+                     "Configuration parsing failed: configuration is invalid");
 }
 
 void ark::guard::ConfigurationParser::ParseConfigurationFile(const std::string &content, Configuration &configuration)
 {
     JsonObject object(content);
     ARK_GUARD_ASSERT(!object.IsValid(), ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
-                     "the configuration file is not a valid json");
+                     "Configuration parsing failed: the configuration file is not a valid json");
 
     configuration.abcPath = JsonUtil::GetStringValue(&object, ABC_PATH, false);
     configuration.obfAbcPath = JsonUtil::GetStringValue(&object, OBF_ABC_PATH, false);
@@ -108,47 +125,42 @@ void ark::guard::ConfigurationParser::ParseFileNameObfuscation(const ark::JsonOb
         return;
     }
     auto option = &configuration.obfuscationRules.fileNameOption;
-    option->enable = JsonUtil::GetBoolValue(innerObject, ENABLE);
-    option->reservedFileNames = JsonUtil::GetArrayStringValue(innerObject, RESERVED_FILE_NAMES);
-    option->universalReservedFileNames = JsonUtil::GetArrayStringValue(innerObject, UNIVERSAL_RESERVED_FILE_NAMES);
+    option->enable = JsonUtil::GetBoolValue(innerObject, ENABLE, true);
+    option->reservedFileNames =
+        StringUtil::ReplaceSlashWithDot(JsonUtil::GetArrayStringValue(innerObject, RESERVED_FILE_NAMES));
+    option->universalReservedFileNames =
+        StringUtil::ReplaceSlashWithDot(JsonUtil::GetArrayStringValue(innerObject, UNIVERSAL_RESERVED_FILE_NAMES));
+    std::transform(option->universalReservedFileNames.begin(), option->universalReservedFileNames.end(),
+                   option->universalReservedFileNames.begin(), StringUtil::ConvertWildcardToRegex);
 }
 
 void ark::guard::ConfigurationParser::ParseKeepOption(const ark::JsonObject *object, Configuration &configuration)
 {
-    auto innerObject = JsonUtil::GetJsonObject(object, KEEP_OPTION);
+    auto innerObject = JsonUtil::GetJsonObject(object, KEEP_OPTIONS);
     if (!innerObject) {
         return;
     }
     auto keepPathObject = JsonUtil::GetJsonObject(innerObject, KEEP_PATH);
     if (keepPathObject) {
-        auto pathOption = &configuration.obfuscationRules.keepOption.pathOption;
+        auto pathOption = &configuration.obfuscationRules.keepOptions.pathOption;
         pathOption->reservedPaths =
-            StringUtil::ReplaceSlashWithDot(JsonUtil::GetArrayStringValue(keepPathObject, RESERVED_PATH));
+            StringUtil::ReplaceSlashWithDot(JsonUtil::GetArrayStringValue(keepPathObject, RESERVED_PATHS));
+        std::transform(pathOption->reservedPaths.begin(), pathOption->reservedPaths.end(),
+                       pathOption->reservedPaths.begin(), NormalizeFilePath);
+
         pathOption->universalReservedPaths =
-            StringUtil::ReplaceSlashWithDot(JsonUtil::GetArrayStringValue(keepPathObject, UNIVERSAL_RESERVED_PATH));
+            StringUtil::ReplaceSlashWithDot(JsonUtil::GetArrayStringValue(keepPathObject, UNIVERSAL_RESERVED_PATHS));
+        std::transform(pathOption->universalReservedPaths.begin(), pathOption->universalReservedPaths.end(),
+                       pathOption->universalReservedPaths.begin(), NormalizeUniversalPath);
     }
 
-    auto keeps = JsonUtil::GetArrayStringValue(innerObject, KEEP);
-    auto keepClassMembers = JsonUtil::GetArrayStringValue(innerObject, KEEP_CLASS_MEMBERS);
-    auto keepClassWithMembers = JsonUtil::GetArrayStringValue(innerObject, KEEP_CLASS_WITH_MEMBERS);
-
-    size_t keepOptionSize = keeps.size() + keepClassMembers.size() + keepClassWithMembers.size();
-
-    std::vector<std::string> keepOptionStrList;
-    keepOptionStrList.reserve(keepOptionSize);
-    keepOptionStrList.insert(keepOptionStrList.end(), std::make_move_iterator(keeps.begin()),
-                             std::make_move_iterator(keeps.end()));
-    keepOptionStrList.insert(keepOptionStrList.end(), std::make_move_iterator(keepClassMembers.begin()),
-                             std::make_move_iterator(keepClassMembers.end()));
-    keepOptionStrList.insert(keepOptionStrList.end(), std::make_move_iterator(keepClassWithMembers.begin()),
-                             std::make_move_iterator(keepClassWithMembers.end()));
-
-    configuration.obfuscationRules.keepOption.classSpecifications.reserve(keepOptionSize);
-    for (const auto &keepOptionStr : keepOptionStrList) {
+    auto keeps = JsonUtil::GetArrayStringValue(innerObject, KEEPS);
+    configuration.obfuscationRules.keepOptions.classSpecifications.reserve(keeps.size());
+    for (const auto &keepOptionStr : keeps) {
         KeepOptionParser parser(keepOptionStr);
         auto result = parser.Parse();
         if (result.has_value()) {
-            configuration.obfuscationRules.keepOption.classSpecifications.emplace_back(result.value());
+            configuration.obfuscationRules.keepOptions.classSpecifications.emplace_back(result.value());
         }
     }
 }

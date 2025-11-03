@@ -23,15 +23,12 @@ namespace ark::guard {
 namespace AccessFlagsConstants {
 constexpr std::string_view PUBLIC = "public";
 constexpr std::string_view PROTECTED = "protected";
-constexpr std::string_view INTERNAL = "internal";
 constexpr std::string_view PRIVATE = "private";
 constexpr std::string_view STATIC = "static";
-constexpr std::string_view READONLY = "readonly";
 constexpr std::string_view ASYNC = "async";
 constexpr std::string_view ABSTRACT = "abstract";
 constexpr std::string_view NATIVE = "native";
 constexpr std::string_view FINAL = "final";
-constexpr std::string_view OVERRIDE = "override";
 constexpr std::string_view ANNOTATION = "@";
 constexpr std::string_view DECLARE = "declare";
 }  // namespace AccessFlagsConstants
@@ -72,6 +69,8 @@ constexpr std::string_view NULL_TYPE = "null";
 constexpr std::string_view NEVER = "never";
 constexpr std::string_view UNDEFINED = "undefined";
 constexpr std::string_view ARRAY = "[]";
+constexpr std::string_view PROMISE = "Promise";
+constexpr std::string_view PROMISE_LIKE = "PromiseLike";
 }  // namespace PrimitiveTypesConstants
 
 namespace PandaFileTypesConstants {
@@ -85,11 +84,13 @@ constexpr std::string_view DOUBLE = "f64";
 constexpr std::string_view CHAR = "u16";
 constexpr std::string_view BOOLEAN = "u1";
 constexpr std::string_view STRING = "std.core.String";
-constexpr std::string_view BIGINT = "escompat.BigInt";
+constexpr std::string_view BIGINT = "std.core.BigInt";
 constexpr std::string_view NULL_TYPE = "std.core.Null";
 constexpr std::string_view NEVER = "std.core.Object";
 constexpr std::string_view UNDEFINED = "std.core.Object";
 constexpr std::string_view ARRAY = "escompat.Array";
+constexpr std::string_view PROMISE = "std.core.Promise";
+constexpr std::string_view PROMISE_LIKE = "std.core.PromiseLike";
 }  // namespace PandaFileTypesConstants
 
 namespace PandaFileUnionTypesConstants {
@@ -103,12 +104,14 @@ constexpr std::string_view DOUBLE = "std.core.Double";
 constexpr std::string_view CHAR = "std.core.Char";
 constexpr std::string_view BOOLEAN = "std.core.Boolean";
 constexpr std::string_view STRING = "std.core.String";
-constexpr std::string_view BIGINT = "escompat.BigInt";
+constexpr std::string_view BIGINT = "std.core.BigInt";
 constexpr std::string_view NULL_TYPE = "std.core.Null";
 constexpr std::string_view NEVER = "";
 constexpr std::string_view UNDEFINED = "";
 constexpr std::string_view ARRAY = "escompat.Array";
-}  // namespace PandaFileTypesConstants
+constexpr std::string_view PROMISE = "std.core.Promise";
+constexpr std::string_view PROMISE_LIKE = "std.core.PromiseLike";
+}  // namespace PandaFileUnionTypesConstants
 
 namespace ConfigurationConstants {
 constexpr std::string_view KEEP_OPTION_PREFIX = "-";
@@ -122,7 +125,6 @@ constexpr std::string_view ANNOTATION_KEYWORD = "@";
 
 constexpr std::string_view ANY_CLASS_KEYWORD = "*";
 constexpr std::string_view ANY_CLASS_MEMBER_KEYWORD = "*";
-constexpr std::string_view ANY_CONSTRUCTOR_KEYWORD = "<constructor>";
 constexpr std::string_view ANY_FIELD_KEYWORD = "<fields>";
 constexpr std::string_view ANY_METHOD_KEYWORD = "<methods>";
 

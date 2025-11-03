@@ -3,8 +3,8 @@
   "obfAbcPath": "xxx",
   "defaultNameCachePath": "xxx",
   "obfuscationRules": {
-    "keepOption": {
-      "keep": [
+    "keepOptions": {
+      "keeps": [
         "-keep class XXX {\n    foo1(int|string):void;\n    }",
         "-keep class XXX {\n    foo2(byte|string):void;\n    }",
         "-keep class XXX {\n    foo3(short|string):void;\n    }",
@@ -20,7 +20,9 @@
         "-keep class XXX {\n    foo13(undefined|string):void;\n    }",
         "-keep class XXX {\n    foo14(int[]|string):void;\n    }",
         "-keep class XXX {\n    foo15(undefined|never):void;\n    }",
-        "-keep class XXX {\n    foo16(undefined|never|int):void;\n    }"
+        "-keep class XXX {\n    foo16(undefined|never|int):void;\n    }",
+        "-keep class XXX {\n    foo17(PromiseLike):void;\n    }",
+        "-keep class XXX {\n    foo18(int|PromiseLike):void;\n    }"
       ]
     }
   }

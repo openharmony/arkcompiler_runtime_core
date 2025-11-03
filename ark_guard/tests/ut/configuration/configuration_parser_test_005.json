@@ -3,15 +3,15 @@
   "obfAbcPath": "xxx",
   "defaultNameCachePath": "xxx",
   "obfuscationRules": {
-    "keepOption": {
+    "keepOptions": {
       "keepPath": {
-        "reservedPath": [
+        "reservedPaths": [
           "entry/src/main/Main1",
           "entry/src/main/Main2"
         ],
-        "universalReservedPath": [
-          "entry/src/main/Main.",
-          "entry/.*/main/Main4"
+        "universalReservedPaths": [
+          "entry/src/main/Main?",
+          "entry/**/main/Main4"
         ]
       }
     }

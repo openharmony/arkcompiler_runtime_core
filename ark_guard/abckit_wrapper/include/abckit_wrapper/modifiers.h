@@ -33,7 +33,6 @@ enum AccessFlags {
     ASYNC = 1 << 8,
     ABSTRACT = 1 << 9,
     FINAL = 1 << 10,
-    OVERRIDE = 1 << 11,
     NATIVE = 1 << 12,
     ANNOTATION = 1 << 13,
     DECLARE = 1 << 14,

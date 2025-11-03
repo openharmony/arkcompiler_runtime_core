@@ -68,26 +68,10 @@ public:
     }
 
     /**
-     * @brief Set keep constructor not be obfuscated
-     * @param keep whether to keep constructor to be obfuscated. false: obfuscated, true: not obfuscated
-     */
-    void SetKeepConstructor(bool keep)
-    {
-        keepConstructor_ = keep;
-    }
-
-    /**
      * @brief keep member not be obfuscated
      * The Default value is false, when the value is true, all members will not be obfuscated.
      */
     bool keepMember_ = false;
-
-    /**
-     * @brief keep constructor not be obfuscated
-     * The default value is false, and when the value is true, all constructors will not be obfuscated.
-     * This field takes effect when member is a method.
-     */
-    bool keepConstructor_ = false;
 
     /**
      * @brief annotation name

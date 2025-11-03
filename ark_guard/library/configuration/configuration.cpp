@@ -21,6 +21,7 @@
 #include "error.h"
 #include "logger.h"
 #include "util/assert_util.h"
+#include "util/string_util.h"
 
 namespace {
 bool IsReserved(const std::vector<std::string> &reservedNames, const std::vector<std::string> &universalReservedNames,
@@ -31,31 +32,45 @@ bool IsReserved(const std::vector<std::string> &reservedNames, const std::vector
     }
 
     return std::any_of(universalReservedNames.begin(), universalReservedNames.end(), [str](const auto &field) {
-        std::regex pattern(field);
-        return std::regex_search(str, pattern);
+        std::regex pattern(field, std::regex_constants::ECMAScript);
+        return std::regex_match(str, pattern);
     });
 }
+
+std::string FindLongestReservedPath(const std::vector<std::string> &reservedNames,
+                                    const std::vector<std::string> &universalReservedNames, const std::string &str)
+{
+    size_t maxLength = std::max(ark::guard::StringUtil::FindLongestMatchedPrefix(reservedNames, str),
+                                ark::guard::StringUtil::FindLongestMatchedPrefixReg(universalReservedNames, str));
+    if (maxLength == 0) {
+        return "";
+    }
+    return str.substr(0, maxLength);
+}
+
 }  // namespace
 
 bool ark::guard::Configuration::IsValid() const
 {
-    LOG_D << "abcPath:" << abcPath;
-    LOG_D << "obfAbcPath:" << obfAbcPath;
-    LOG_D << "defaultNameCachePath:" << defaultNameCachePath;
-    LOG_D << "disableObfuscation:" << obfuscationRules.disableObfuscation;
-    LOG_D << "printNameCache:" << obfuscationRules.printNameCache;
-    LOG_D << "applyNameCache:" << obfuscationRules.applyNameCache;
-    LOG_D << "removeLog:" << obfuscationRules.removeLog;
-    LOG_D << "printSeeds enable:" << obfuscationRules.printSeedsOption.enable;
-    LOG_D << "printSeeds filePath:" << obfuscationRules.printSeedsOption.filePath;
-    LOG_D << "fileNameObfuscation enable:" << obfuscationRules.fileNameOption.enable;
+    LOG_I << "abcPath:" << abcPath;
+    LOG_I << "obfAbcPath:" << obfAbcPath;
+    LOG_I << "defaultNameCachePath:" << defaultNameCachePath;
+    LOG_I << "disableObfuscation:" << obfuscationRules.disableObfuscation;
+    LOG_I << "printNameCache:" << obfuscationRules.printNameCache;
+    LOG_I << "applyNameCache:" << obfuscationRules.applyNameCache;
+    LOG_I << "removeLog:" << obfuscationRules.removeLog;
+    LOG_I << "printSeeds enable:" << obfuscationRules.printSeedsOption.enable;
+    LOG_I << "printSeeds filePath:" << obfuscationRules.printSeedsOption.filePath;
+    LOG_I << "fileNameObfuscation enable:" << obfuscationRules.fileNameOption.enable;
 
     ARK_GUARD_ASSERT(abcPath.empty(), ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
-                     "the value of field abcPath in the configuration file is invalid");
-    ARK_GUARD_ASSERT(obfAbcPath.empty(), ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
-                     "the value of field obfAbcPath in the configuration file is invalid");
-    ARK_GUARD_ASSERT(defaultNameCachePath.empty(), ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
-                     "the value of field defaultNameCachePath in the configuration file is invalid");
+                     "Configuration parsing failed: the value of field abcPath in the configuration file is invalid");
+    ARK_GUARD_ASSERT(
+        obfAbcPath.empty(), ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
+        "Configuration parsing failed: the value of field obfAbcPath in the configuration file is invalid");
+    ARK_GUARD_ASSERT(
+        defaultNameCachePath.empty(), ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR,
+        "Configuration parsing failed: the value of field defaultNameCachePath in the configuration file is invalid");
 
     return true;
 }
@@ -110,18 +125,20 @@ bool ark::guard::Configuration::IsKeepFileName(const std::string &str) const
     return IsReserved(fileNameOption->reservedFileNames, fileNameOption->universalReservedFileNames, str);
 }
 
-bool ark::guard::Configuration::IsKeepPath(const std::string &str) const
+bool ark::guard::Configuration::IsKeepPath(const std::string &str, std::string &keptPath) const
 {
-    const auto pathOption = &obfuscationRules.keepOption.pathOption;
+    const auto pathOption = &obfuscationRules.keepOptions.pathOption;
     if (pathOption->reservedPaths.empty() && pathOption->universalReservedPaths.empty()) {
         return false;
     }
-    return IsReserved(pathOption->reservedPaths, pathOption->universalReservedPaths, str);
+
+    keptPath = FindLongestReservedPath(pathOption->reservedPaths, pathOption->universalReservedPaths, str);
+    return !keptPath.empty();
 }
 
 std::vector<ark::guard::ClassSpecification> ark::guard::Configuration::GetClassSpecifications() const
 {
-    return obfuscationRules.keepOption.classSpecifications;
+    return obfuscationRules.keepOptions.classSpecifications;
 }
 
 bool ark::guard::Configuration::HasKeepConfiguration() const
@@ -130,7 +147,7 @@ bool ark::guard::Configuration::HasKeepConfiguration() const
     const bool hasFileNameKeep =
         !fileNameOption.reservedFileNames.empty() || !fileNameOption.universalReservedFileNames.empty();
 
-    const auto &keepPathOption = obfuscationRules.keepOption.pathOption;
+    const auto &keepPathOption = obfuscationRules.keepOptions.pathOption;
     const bool hasPathKeep = !keepPathOption.reservedPaths.empty() || !keepPathOption.universalReservedPaths.empty();
 
     const bool hasClassSpecs = !GetClassSpecifications().empty();

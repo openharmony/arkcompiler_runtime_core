@@ -59,6 +59,12 @@ public:
      */
     bool MemberAccept(MemberVisitor &visitor);
 
+    /**
+     * @brief Tells if Member is constructor
+     * @return `true` if Member is constructor
+     */
+    virtual bool IsConstructor() const;
+
 protected:
     /**
      * @brief Init member's signature, signature contains rawName and descriptor

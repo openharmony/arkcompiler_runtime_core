@@ -87,8 +87,10 @@ std::string ReplaceNumericWildcards(const std::string &str, const std::vector<st
         result.append(searchStart, match[0].first);
         auto matchNum = std::stoi(match[1].str());
         // CC-OFFNXT(G.STD.16) fatal error
-        ARK_GUARD_ASSERT(matchNum <= 0, ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                         "Back reference can not be 0, found invalid back reference" + match[0].str());
+        ARK_GUARD_ASSERT(
+            matchNum <= 0, ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
+            "ClassSpecification parsing failed: Back reference can not be 0, found invalid back reference" +
+                match[0].str());
         size_t num = matchNum - 1;
         if (num < matchedPatterns.size()) {
             result.append(matchedPatterns[num]);
@@ -184,8 +186,9 @@ std::string ark::guard::StringUtil::ConvertWildcardToRegexEx(const std::string &
         {"*", "[^/\\.]*"},
         {"?", "[^/\\.]"},
         {"%",
-         "(f64|i8|i16|i32|i64|i32|i64|u16|u1|std\\.core\\.string|escompat\\.BigInt|void|std\\.core\\.Null|std\\.core\\."
-         "Object|std\\.core\\.Object)"}};
+         "(f64|i8|i16|i32|i64|i32|i64|u16|u1|std\\.core\\.String|std\\.core\\.BigInt|void|std\\.core\\.Null|std\\."
+         "core\\.Object|std\\.core\\.Int|std\\.core\\.Byte|std\\.core\\.Short|std\\.core\\.Long|std\\.core\\.Double|"
+         "std\\.core\\.Float|std\\.core\\.Char|std\\.core\\.Boolean)"}};
     return ReplaceWildcardToRegex(wildcardRules, input);
 }
 

@@ -86,7 +86,8 @@ std::shared_ptr<ark::guard::ObjectNameCache> GetParentObjectNameCache(ark::guard
 ark::guard::ErrorCode ark::guard::NameCacheDumper::Dump()
 {
     if (defaultNameCache_.empty() && printNameCache_.empty()) {
-        LOG_E << "the value of field defaultNameCachePath and printNameCache in the configuration file is invalid";
+        LOG_E << "Configuration parsing failed: the value of field defaultNameCachePath and printNameCache in the "
+                 "configuration file is invalid";
         return ErrorCode::CONFIGURATION_FILE_FORMAT_ERROR;
     }
 
