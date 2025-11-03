@@ -11,5 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(ets_to_ts)
-add_subdirectory(ts_to_ets)
+panda_ets_interop_js_gtest(ets_interop_js__shared_reference_ts_to_ets
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ets_shared_reference.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ets_shared_reference.ets
+    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_ts_shared_reference.ts
+)
