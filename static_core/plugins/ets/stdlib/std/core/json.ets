@@ -1664,7 +1664,11 @@ export class JSONParser {
                                                this.curChar == c'-' ||
                                                this.curChar == c'+' ))
         res.value = Double.parseFloat(number.toString())
-        res.bigintValue = Double.isInteger(res.value) ? new BigInt(res.value) : new BigInt()
+        try {
+            res.bigintValue = new BigInt(number.toString())
+        } catch (e) {
+            res.bigintValue = new BigInt()
+        }
         this.curPos.restoreFromCopy(posCopy)
         return res
     }
