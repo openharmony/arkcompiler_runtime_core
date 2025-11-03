@@ -40,11 +40,13 @@ def main() -> None:
     if init_runner.should_runner_initialize(sys.argv):
         init_runner.initialize(RunnerEnv.get_mandatory_props())
         sys.exit(0)
+
+    runner_help_mode = init_runner.request_runner_help(set(sys.argv))
     try:
         RunnerEnv(
             local_env=Path.cwd().with_name(".env"),
             urunner_path=Path(__file__).parent,
-            global_env=init_runner.urunner_env_path).load_environment()
+            global_env=init_runner.urunner_env_path).load_environment(runner_help_mode)
     except InvalidInitialization as exc:
         logging.critical(exc)
         sys.exit(1)
