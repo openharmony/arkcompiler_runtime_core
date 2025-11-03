@@ -249,7 +249,9 @@ void EtsClassLinkerContext::EnumeratePandaFilesImpl(const std::function<bool(con
     auto *contextAbcFiles = EtsAbcRuntimeLinker::FromEtsObject(runtimeLinker)->GetAbcFiles();
     ASSERT(contextAbcFiles != nullptr);
     for (size_t i = 0, end = contextAbcFiles->GetLength(); i < end; ++i) {
-        auto *pf = EtsAbcFile::FromEtsObject(contextAbcFiles->Get(i))->GetPandaFile();
+        auto *currentFile = contextAbcFiles->Get(i);
+        ASSERT(currentFile != nullptr);
+        auto *pf = EtsAbcFile::FromEtsObject(currentFile)->GetPandaFile();
         if (!cb(*pf)) {
             break;
         }
