@@ -41,7 +41,7 @@ class ReportOptions(IOptions):
 
     @staticmethod
     def add_report_cli(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
-        report_config = parser.add_argument_group(title="URunner options report config")
+        report_config = parser.add_argument_group(title="URunner report options")
         report_config.add_argument(
             f'--{ReportOptionsDefaults.DETAILED_REPORT.value}', action='store_true',
             default=ReportOptionsDefaults.DEFAULT_DETAILED_REPORT.value,
