@@ -173,7 +173,7 @@ private:
     TagEnum DealLtGroup();
     void DealWhiteSpace(unsigned char c);
 
-    ani_env *env_ {};
+    [[maybe_unused]] ani_env *env_ {};
     ParseInfoClassCache infoClass_;
     ani_enum enumTypeClass_ {};
     bool bDoctype_ {};

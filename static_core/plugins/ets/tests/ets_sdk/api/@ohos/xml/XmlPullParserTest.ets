@@ -30,6 +30,7 @@ function main(): int {
     suite.addTest("Test XmlPullParser getNamespace", testGetNamespace)
     suite.addTest("Test XmlPullParser name:value tag pair", testTagValue)
     suite.addTest("Testing XML isWhitespace with valid whitespace.", testXmlIsWhitespace0001)
+    suite.addTest("Testing XmlPullParser startElement", testStartElement)
 
     return suite.run()
 }
@@ -549,4 +550,19 @@ let testXml =
             arktest.assertTrue(false)
         }
     }
+
+function testStartElement() {
+    let thatSer = new xml.XmlDynamicSerializer();
+    let max = 100000;
+    let value = 10200062;
+    let result = 0;
+    for (let i = 0; i < max / 25; ++i) {
+        thatSer.setNamespace("h", "aaa");
+        thatSer.startElement("note");
+        thatSer.endElement();
+    }
+    arktest.expectError(() => {
+	    thatSer.startElement("note1");
+	}, 'The length has exceeded the upper limit');
+}
 
