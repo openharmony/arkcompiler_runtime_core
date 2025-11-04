@@ -123,6 +123,7 @@ if (enable_codegen) {
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsic_codegen_test_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
+      "$ark_root/compiler:libarkcompiler_opcodes_h_arch_info_gen_h",
       "$ark_root/libpandabase:libarktsbase",
     ]
 
