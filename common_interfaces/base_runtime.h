@@ -81,6 +81,7 @@ inline const char* GCREASON_STRING[] = {
     "native_alloc_sync",
     "force",
     "appspawn",
+    "xref",
     "backgound",
     "hint",
     "idle",
