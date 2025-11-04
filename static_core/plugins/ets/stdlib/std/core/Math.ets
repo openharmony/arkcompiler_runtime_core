@@ -88,7 +88,7 @@ export class Math {
      * @returns Arccosine of angle `v`
      *
      * @remark
-     * Implemented as native function,  @see `acos()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+     * Implemented as native function,  @see `acos()` intrinsic [declaration].
      *
      * @example
      * ```
