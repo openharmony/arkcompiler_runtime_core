@@ -132,12 +132,10 @@ function testSetTimeoutExecuteOrder(isExternalTimer: boolean) : void {
     globalTest = new Test(6);
     globalTest!.checkpoint(0);
     setTimeout((): void => {
-        globalTest!.checkpoint(5);
-        globalTest!.setPassed();
-    }, 1);
-    setTimeout((): void => {
         globalTest!.checkpoint(2);
-    }, 0);
+    }, 1);
+    let now = Date.now();
+    while(Date.now() - now < 2) {}
     setTimeout((): void => {
         globalTest!.checkpoint(3);
     }, 0);
