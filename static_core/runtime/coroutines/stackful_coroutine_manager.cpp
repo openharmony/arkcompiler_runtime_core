@@ -475,10 +475,10 @@ LaunchResult StackfulCoroutineManager::LaunchImmediately(CompletionEvent *comple
 
 LaunchResult StackfulCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
                                                     const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                                                    bool abortFlag)
+                                                    bool launchImmediately, bool abortFlag)
 {
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
-    return LaunchWithGroupId(epInfo, std::move(coroName), groupId, priority, false, abortFlag);
+    return LaunchWithGroupId(epInfo, std::move(coroName), groupId, priority, launchImmediately, abortFlag);
 }
 
 void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)

@@ -187,7 +187,8 @@ void JoinExclusiveWorker(EtsInt workerId, EtsObject *finalTask)
         RunExclusiveTask(ref, eaCoro->GetVM()->GetGlobalObjectStorage());
         eaCoro->GetWorker()->DestroyCallbackPoster();
     };
-    coroMan->LaunchNative(joiningFunc, taskRef, "joining ea-coro", eaGroup, CoroutinePriority::DEFAULT_PRIORITY, true);
+    coroMan->LaunchNative(joiningFunc, taskRef, "joining ea-coro", eaGroup, CoroutinePriority::DEFAULT_PRIORITY, false,
+                          true);
 }
 
 }  // namespace ark::ets::intrinsics

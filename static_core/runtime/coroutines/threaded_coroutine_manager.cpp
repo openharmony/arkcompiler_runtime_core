@@ -218,7 +218,8 @@ LaunchResult ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] Comple
 
 LaunchResult ThreadedCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
                                                     [[maybe_unused]] const CoroutineWorkerGroup::Id &groupId,
-                                                    CoroutinePriority priority, [[maybe_unused]] bool abortFlag)
+                                                    CoroutinePriority priority, [[maybe_unused]] bool launchImmediately,
+                                                    [[maybe_unused]] bool abortFlag)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchNative started";
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
