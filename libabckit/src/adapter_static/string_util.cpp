@@ -27,7 +27,7 @@ constexpr std::string_view RIGHT_SQUARE_BRACKET = "]";
 constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 }  // namespace
 
-bool libabckit::StringUtil::IsEndWith(const std::string &str, const std::string &subStr)
+bool libabckit::StringUtil::IsEndWith(const std::string &str, const std::string_view &subStr)
 {
     if (subStr.size() > str.size()) {
         return false;
@@ -37,7 +37,7 @@ bool libabckit::StringUtil::IsEndWith(const std::string &str, const std::string 
 
 std::string libabckit::StringUtil::RemoveBracketsSuffix(const std::string &str)
 {
-    if (IsEndWith(str, ARRAY_ENUM_SUFFIX.data())) {
+    if (IsEndWith(str, ARRAY_ENUM_SUFFIX)) {
         return str.substr(0, str.size() - ARRAY_ENUM_SUFFIX.size());
     }
     return str;
@@ -70,6 +70,9 @@ std::string libabckit::StringUtil::GetFuncNameWithSquareBrackets(const char *nam
 
 std::string libabckit::StringUtil::ReplaceAll(const std::string &str, const std::string &from, const std::string &to)
 {
+    if (from.empty()) {
+        return str;
+    }
     std::string result = str;
     size_t startPos = 0;
 

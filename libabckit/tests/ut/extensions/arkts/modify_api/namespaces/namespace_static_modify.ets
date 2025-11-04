@@ -12,25 +12,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@interface MyAnno1 {}
 
-@MyAnno1()
-class ClassA {
-    public field1: int = 3;
-    private field2: string = 'hello';
-}
-
-class ClassB {
-    public field1: int = 3;
-    private field2: string = 'hello';
-}
-
-class ClassC {
-    @MyAnno1()
-    public field1: int = 3;
-    private field2: string = 'hello';
-}
-
-class ClassD {
-    public final field1: int = 1;
-}
+namespace NS1 {}

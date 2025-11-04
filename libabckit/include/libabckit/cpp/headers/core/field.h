@@ -330,18 +330,11 @@ public:
     bool IsStatic() const;
 
     /**
-     * @brief Tell if field is Readonly.
-     * @return Return `true` if field is Readonly otherwise false
+     * @brief Tell if field is Final.
+     * @return Return `true` if field is Final otherwise false
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    bool IsReadonly() const;
-
-    /**
-     * @brief Tell if field is Override.
-     * @return Return `true` if field is Override otherwise false
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
-     */
-    bool IsOverride() const;
+    bool IsFinal() const;
 
     /**
      * @brief Get vector with all Annotations
@@ -547,6 +540,13 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     Type GetType() const;
+
+    /**
+     * @brief Returns Value.
+     * @return abckit::Value
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Value GetValue() const;
 
 private:
     EnumField(AbckitCoreEnumField *field, const ApiConfig *conf, const File *file) : ViewInResource(field), conf_(conf)

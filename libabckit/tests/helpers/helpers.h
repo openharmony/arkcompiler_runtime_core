@@ -248,7 +248,7 @@ struct MethodByNameContext {
     bool fullSign = false;
 };
 
-struct NamepsaceByNameContext {
+struct NamespaceByNameContext {
     AbckitCoreNamespace *n;
     const char *name;
 };
@@ -302,6 +302,11 @@ struct ClassFieldByNameContext {
     const char *name;
 };
 
+struct NamespaceFieldByNameContext {
+    AbckitCoreNamespaceField *cnf;
+    const char *name;
+};
+
 AbckitCoreFunction *FindMethodByName(AbckitFile *file, const std::string &name);
 AbckitCoreNamespace *FindNamespaceByName(AbckitFile *file, const std::string &name);
 bool ModuleByNameFinder(AbckitCoreModule *module, void *data);
@@ -319,6 +324,7 @@ bool ModuleImportsCollector(AbckitCoreImportDescriptor *id, void *data);
 bool ModuleExportsCollector(AbckitCoreExportDescriptor *ed, void *data);
 bool ModuleFieldByNameFinder(AbckitCoreModuleField *mf, void *data);
 bool InterfaceFieldByNameFinder(AbckitCoreInterfaceField *cif, void *data);
+bool NamespaceFieldByNameFinder(AbckitCoreNamespaceField *cnf, void *data);
 bool EnumByNameFinder(AbckitCoreEnum *ce, void *data);
 bool EnumFieldByNameFinder(AbckitCoreEnumField *cef, void *data);
 bool ClassFieldByNameFinder(AbckitCoreClassField *ccf, void *data);

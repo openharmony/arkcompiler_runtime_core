@@ -23,6 +23,7 @@
 
 namespace {
 constexpr std::string_view OBJECT_LITERAL_SUFFIX = "$ObjectLiteral";
+constexpr std::string_view PARTIAL_SUFFIX = "$partial";
 constexpr std::string_view NAME_DELIMITER = ".";
 constexpr std::string_view GLOBAL_CLASS = "ETSGLOBAL";
 }  // namespace
@@ -69,7 +70,7 @@ std::string libabckit::NameUtil::GetFullName(
     const std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreClassField *, AbckitCoreEnum *,
                        AbckitCoreInterface *, AbckitCoreAnnotationInterface *, AbckitCoreFunction *,
                        AbckitCoreAnnotation *> &object,
-    const std::string &newName, bool isObjectLiteral)
+    const std::string &newName, bool isObjectLiteral, bool isPartial)
 {
     if (const auto coreNameSpace = std::get_if<AbckitCoreNamespace *>(&object)) {
         return NamespaceGetFullName(*coreNameSpace, newName);
@@ -78,6 +79,9 @@ std::string libabckit::NameUtil::GetFullName(
     if (const auto coreClass = std::get_if<AbckitCoreClass *>(&object)) {
         if (isObjectLiteral) {
             return ObjectLiteralGetFullName(*coreClass, newName);
+        }
+        if (isPartial) {
+            return PartialGetFullName(newName);
         }
         return ClassGetFullName(*coreClass, newName);
     }
@@ -120,6 +124,11 @@ std::string libabckit::NameUtil::ObjectLiteralGetFullName(const AbckitCoreClass 
 {
     auto objectLiteralName = std::regex_replace(newName, std::regex(R"(\.)"), "$") + OBJECT_LITERAL_SUFFIX.data();
     return std::string {objectLiteral->owningModule->moduleName->impl} + NAME_DELIMITER.data() + objectLiteralName;
+}
+
+std::string libabckit::NameUtil::PartialGetFullName(const std::string &newName)
+{
+    return newName + std::string(PARTIAL_SUFFIX);
 }
 
 std::string libabckit::NameUtil::NamespaceGetPackageName(AbckitCoreNamespace *ns)

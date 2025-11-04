@@ -154,7 +154,6 @@ HWTEST(NameMarkerTest, name_marker_class_test_003, TestSize.Level1)
 
     AssertKept(fileView, "class_test_003.ClassA");
     AssertKept(fileView, "class_test_003.ClassA.field1");
-    AssertKept(fileView, "class_test_003.ClassA.field1");
 
     AssertKept(fileView, "class_test_003.ClassB");
     AssertKept(fileView, "class_test_003.ClassB.field1");
@@ -163,6 +162,9 @@ HWTEST(NameMarkerTest, name_marker_class_test_003, TestSize.Level1)
     AssertKept(fileView, "class_test_003.ClassC");
     AssertKept(fileView, "class_test_003.ClassC.field1");
     AssertNotKept(fileView, "class_test_003.ClassC.field2");
+
+    AssertKept(fileView, "class_test_003.ClassD");
+    AssertKept(fileView, "class_test_003.ClassD.field1");
 }
 
 /**

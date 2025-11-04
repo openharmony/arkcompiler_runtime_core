@@ -35,7 +35,7 @@ constexpr std::string_view UNION_TYPE_SUFFIX = "}";
 
 constexpr uint32_t VALID_FLAGS_FIELD = abckit_wrapper::AccessFlags::PUBLIC | abckit_wrapper::AccessFlags::PROTECTED |
                                        abckit_wrapper::AccessFlags::PRIVATE | abckit_wrapper::AccessFlags::STATIC |
-                                       abckit_wrapper::AccessFlags::READONLY;
+                                       abckit_wrapper::AccessFlags::FINAL;
 
 constexpr uint32_t VALID_FLAGS_METHOD = abckit_wrapper::AccessFlags::PUBLIC | abckit_wrapper::AccessFlags::PROTECTED |
                                         abckit_wrapper::AccessFlags::PRIVATE | abckit_wrapper::AccessFlags::STATIC |
@@ -421,7 +421,7 @@ void ark::guard::KeepOptionParser::GetExtensionInfo(uint32_t &extensionType, std
  * parse class_specification member section
  * {
  *      [@annotationName]
- *      [[!]public|private|protected|intenal|static ...]
+ *      [[!]public|private|protected|internal|static|final ...]
  *      <fields> | fieldName [:fieldType] [=fieldValue];
  *
  *      [@annotationName]
@@ -456,7 +456,7 @@ void ark::guard::KeepOptionParser::ParseMemberSpecificationArguments(ClassSpecif
 
 /*
  * parse class_specification member with wildcard
- * Format: [@annotationName] [[!]public|private|protected|intenal|static|native|final|abstract|async|override ...]
+ * Format: [@annotationName] [[!]public|private|protected|internal|static|native|final|abstract|async|override ...]
  */
 void ark::guard::KeepOptionParser::GetMemberAnnotationNameAndAccessFlags(std::string &annotationName,
                                                                          uint32_t &setAccessFlags,

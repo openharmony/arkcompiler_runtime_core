@@ -502,3 +502,43 @@ HWTEST(KeepOptionParserTest, keep_option_parser_test_012, TestSize.Level0)
         }
     }
 }
+
+/**
+ * @tc.name: keep_option_parser_test_013
+ * @tc.desc: verify whether the class_specification with final field is successfully parsed.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(KeepOptionParserTest, keep_option_parser_test_013, TestSize.Level0)
+{
+    static const std::string keepStr = R"(-keep class classA {
+        @Annotation1
+        public final field1: string = 'test';
+    })";
+
+    ark::guard::KeepOptionParser parser(keepStr);
+    auto info = parser.Parse();
+    ASSERT_TRUE(info.has_value());
+    const auto &specification = info.value();
+    ASSERT_EQ(specification.annotationName_, "");
+    ASSERT_EQ(specification.setAccessFlags_, 0);
+    ASSERT_EQ(specification.unSetAccessFlags_, 0);
+    ASSERT_EQ(specification.setTypeDeclarations_, abckit_wrapper::TypeDeclarations::CLASS);
+    ASSERT_EQ(specification.unSetTypeDeclarations_, 0);
+    ASSERT_EQ(specification.className_, "classA");
+    ASSERT_EQ(specification.extensionType_, 0);
+    ASSERT_EQ(specification.extensionAnnotationName_, "");
+    ASSERT_EQ(specification.extensionClassName_, "");
+
+    ASSERT_EQ(specification.fieldSpecifications_.size(), 1);
+    ASSERT_EQ(specification.fieldSpecifications_[0].keepMember_, false);
+    ASSERT_EQ(specification.fieldSpecifications_[0].annotationName_, "Annotation1");
+    ASSERT_EQ(specification.fieldSpecifications_[0].setAccessFlags_,
+              abckit_wrapper::AccessFlags::PUBLIC | abckit_wrapper::AccessFlags::FINAL);
+    ASSERT_EQ(specification.fieldSpecifications_[0].unSetAccessFlags_, 0);
+    ASSERT_EQ(specification.fieldSpecifications_[0].memberName_, "field1");
+    ASSERT_EQ(specification.fieldSpecifications_[0].memberType_, "std.core.String");
+    ASSERT_EQ(specification.fieldSpecifications_[0].memberValue_, "test");
+
+    ASSERT_EQ(specification.methodSpecifications_.size(), 0);
+}

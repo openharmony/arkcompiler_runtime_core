@@ -426,8 +426,6 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_014, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("export_file2.process_field:export_file2.A;void;", "process_field");
     AddElement<abckit_wrapper::Class>("export_file2.A", "A");
     AddElement<abckit_wrapper::Method>("export_file2.A.foo:export_file2.A;std.core.String;", "foo");
-    AddElement<abckit_wrapper::Class>("export_file2.%%partial-B", "%%partial-B");
-    AddElement<abckit_wrapper::Field>("export_file2.%%partial-B.a", "a");
     AddElement<abckit_wrapper::Class>("export_file2.B", "B");
     AddElement<abckit_wrapper::Field>("export_file2.B.a", "a");
     AddElement<abckit_wrapper::Method>("export_file2.B.foo:export_file2.B;void;", "foo");
@@ -452,14 +450,10 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_014, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("export_file.Space1.variable", "variable");
     AddElement<abckit_wrapper::Field>("export_file.Space1.constant", "constant");
     AddElement<abckit_wrapper::Method>("export_file.Space1.foo:void;", "foo");
-    AddElement<abckit_wrapper::Class>("export_file.%%partial-ExportClass", "%%partial-ExportClass");
-    AddElement<abckit_wrapper::Field>("export_file.%%partial-ExportClass.memA", "memA");
-    AddElement<abckit_wrapper::Field>("export_file.%%partial-ExportClass.memC", "memC");
     AddElement<abckit_wrapper::Namespace>("export_file.Space2", "Space2");
     AddElement<abckit_wrapper::Field>("export_file.Space2.tag", "tag");
     AddElement<abckit_wrapper::Field>("export_file.Space2.variable", "variable");
     AddElement<abckit_wrapper::AnnotationInterface>("export_file.MyAnno", "MyAnno");
-    AddElement<abckit_wrapper::Class>("export_file.%%partial-SomeClass", "%%partial-SomeClass");
     AddElement<abckit_wrapper::Class>("export_file.SomeClass", "SomeClass");
     AddElement<abckit_wrapper::Method>("export_file.SomeClass.foo:export_file.SomeClass;void;", "foo");
     AddElement<abckit_wrapper::Class>("export_file.ExportClass", "ExportClass");
@@ -943,7 +937,6 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_025, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("generics_demo2.constY", "constY");
     AddElement<abckit_wrapper::Field>("generics_demo2.recordX", "recordX");
     AddElement<abckit_wrapper::Field>("generics_demo2.myIssue", "myIssue");
-    AddElement<abckit_wrapper::Method>("generics_demo2.process:generics_demo2.%%partial-Issue;void;", "process");
     AddElement<abckit_wrapper::Class>("generics_demo2.Issue", "Issue");
     AddElement<abckit_wrapper::Field>("generics_demo2.Issue.%%property-title", "title");
     AddElement<abckit_wrapper::Field>("generics_demo2.Issue.%%property-description", "description");
@@ -965,19 +958,6 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_025, TestSize.Level1)
                                        "title");
     AddElement<abckit_wrapper::Method>("generics_demo2.Issue2.%%set-title:generics_demo2.Issue2;std.core.String;void;",
                                        "title");
-    AddElement<abckit_wrapper::Class>("generics_demo2.%%partial-Issue", "%%partial-Issue");
-    addelement<abckit_wrapper::field>("generics_demo2.%%partial-issue.%%property-title", "title");
-    addelement<abckit_wrapper::field>("generics_demo2.%%partial-issue.%%property-description", "description");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%get-description:generics_demo2.%%partial-Issue;std.core.String;",
-        "description");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%get-title:generics_demo2.%%partial-Issue;std.core.String;", "title");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%set-description:generics_demo2.%%partial-Issue;std.core.String;void;",
-        "description");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%set-title:generics_demo2.%%partial-Issue;std.core.String;void;", "title");
 
     this->VerifyObfuscated();
 }
@@ -1090,6 +1070,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_027, TestSize.Level1)
     AddElement<abckit_wrapper::Class>("class_demo3.BWPoint", "BWPoint");
     AddElement<abckit_wrapper::Field>("class_demo3.pt1", "pt1");
     AddElement<abckit_wrapper::Field>("class_demo3.pt2", "pt2");
+    AddElement<abckit_wrapper::Class>("class_demo3.AbstractClass", "AbstractClass");
 
     this->VerifyObfuscated();
 }

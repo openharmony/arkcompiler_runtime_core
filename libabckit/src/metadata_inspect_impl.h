@@ -338,6 +338,11 @@ struct AbckitCoreClass {
     AbckitCoreClass *superClass = nullptr;
 
     /*
+     * To refer to the partial.
+     */
+    std::unique_ptr<AbckitCoreClass> partial;
+
+    /*
      * To store sub classes.
      */
     std::vector<AbckitCoreClass *> subClasses;
@@ -1485,6 +1490,10 @@ struct AbckitCoreInterface {
      */
     AbckitString *name = nullptr;
     /*
+     * To refer to the partial.
+     */
+    std::unique_ptr<AbckitCoreClass> partial;
+    /*
      * Table to store the methods of the interface.
      */
     std::vector<std::unique_ptr<AbckitCoreFunction>> methods;
@@ -1626,6 +1635,10 @@ struct AbckitCoreEnum {
      * Name of the enum.
      */
     AbckitString *name = nullptr;
+    /*
+     * To refer to the partial.
+     */
+    std::unique_ptr<AbckitCoreClass> partial;
     /*
      * Table to store the methods of the enum.
      */

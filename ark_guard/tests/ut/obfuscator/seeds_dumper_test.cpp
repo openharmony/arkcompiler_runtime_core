@@ -76,15 +76,15 @@ public:
     {
         return
             "seeds_dumper_test\n"
-            "  cl1\n"
-            "    clField1\n"
-            "    cl1Foo1()void\n"
-            "  anno1\n"
-            "  foo1()void\n"
-            "  field1\n"
-            "  ns1\n"
-            "    nsField1\n"
-            "    nsFoo1()void\n";
+            "seeds_dumper_test.cl1\n"
+            "seeds_dumper_test.cl1.clField1\n"
+            "seeds_dumper_test.cl1.cl1Foo1:seeds_dumper_test.cl1;void;\n"
+            "seeds_dumper_test.anno1\n"
+            "seeds_dumper_test.foo1:void;\n"
+            "seeds_dumper_test.field1\n"
+            "seeds_dumper_test.ns1\n"
+            "seeds_dumper_test.ns1.nsField1\n"
+            "seeds_dumper_test.ns1.nsFoo1:void;\n";
     }
 };
 

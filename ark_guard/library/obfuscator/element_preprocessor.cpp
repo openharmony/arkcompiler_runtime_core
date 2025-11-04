@@ -102,6 +102,9 @@ bool ark::guard::ElementPreProcessor::VisitClass(abckit_wrapper::Class *clazz)
         LOG_E << "Get class obfuscate data failed, class:" << clazz->GetFullyQualifiedName();
         return false;
     }
+    if (clazz->IsExternal()) {
+        obfuscateData->SetKept();
+    }
 
     clazzManager.SetNameAndObfuscatedName(name, name);
     const auto obfName = obfuscateData->GetObfName();

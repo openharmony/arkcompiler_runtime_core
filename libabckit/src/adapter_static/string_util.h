@@ -34,7 +34,7 @@ public:
      * @param subStr sub string
      * @return true: match, false: not match
      */
-    static bool IsEndWith(const std::string &str, const std::string &subStr);
+    static bool IsEndWith(const std::string &str, const std::string_view &subStr);
 
     /**
      * @brief Remove square brackets suffix from string
