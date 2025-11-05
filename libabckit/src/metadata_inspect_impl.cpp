@@ -1294,6 +1294,19 @@ extern "C" bool ClassFieldIsStatic(AbckitCoreClassField *field)
     return ClassFieldIsStaticStatic(field);
 }
 
+extern "C" bool ClassFieldIsFinal(AbckitCoreClassField *field)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+    LIBABCKIT_BAD_ARGUMENT(field, false);
+    if (IsDynamic(field->owner->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
+    return ClassFieldIsFinalStatic(field);
+}
+
 extern "C" bool ClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
                                                bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
@@ -2716,6 +2729,7 @@ AbckitInspectApi g_inspectApiImpl = {
     ClassFieldIsPrivate,
     ClassFieldIsInternal,
     ClassFieldIsStatic,
+    ClassFieldIsFinal,
     ClassFieldEnumerateAnnotations,
 
     // ========================================

@@ -24,14 +24,23 @@ constexpr std::string_view UNIO_TYPE_SUFFIX = "}";
 constexpr std::string_view UNIO_TYPE_DELIMITER = ",";
 constexpr std::string_view LEFT_SQUARE_BRACKET = "[";
 constexpr std::string_view RIGHT_SQUARE_BRACKET = "]";
+constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 }  // namespace
 
-bool libabckit::StringUtil::IsEndWith(const std::string &str, const std::string &subStr)
+bool libabckit::StringUtil::IsEndWith(const std::string &str, const std::string_view &subStr)
 {
     if (subStr.size() > str.size()) {
         return false;
     }
     return str.compare(str.size() - subStr.size(), subStr.size(), subStr) == 0;
+}
+
+std::string libabckit::StringUtil::RemoveBracketsSuffix(const std::string &str)
+{
+    if (IsEndWith(str, ARRAY_ENUM_SUFFIX)) {
+        return str.substr(0, str.size() - ARRAY_ENUM_SUFFIX.size());
+    }
+    return str;
 }
 
 std::string libabckit::StringUtil::GetTypeNameStr(const AbckitType *type)
@@ -57,4 +66,20 @@ std::string libabckit::StringUtil::GetTypeNameStr(const AbckitType *type)
 std::string libabckit::StringUtil::GetFuncNameWithSquareBrackets(const char *name)
 {
     return LEFT_SQUARE_BRACKET.data() + std::string(name) + RIGHT_SQUARE_BRACKET.data() + " ";
+}
+
+std::string libabckit::StringUtil::ReplaceAll(const std::string &str, const std::string &from, const std::string &to)
+{
+    if (from.empty()) {
+        return str;
+    }
+    std::string result = str;
+    size_t startPos = 0;
+
+    while ((startPos = result.find(from, startPos)) != std::string::npos) {
+        result.replace(startPos, from.length(), to);
+        startPos += to.length();  // Prevent infinite loops when 'to' contains 'from'
+    }
+
+    return result;
 }

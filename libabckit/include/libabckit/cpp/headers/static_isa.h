@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_STATIC_ISA_H
 
 #include <memory>
+#include "instruction.h"
 
 namespace abckit {
 
@@ -60,6 +61,13 @@ public:
      * @brief Destructor
      */
     ~StaticIsa() = default;
+
+    /**
+     * @brief Returns opcode of `inst`.
+     * @return enum value of `AbckitIsaApiStaticOpcode`.
+     * @param [ in ] inst - Inst to be inspected.
+     */
+    AbckitIsaApiStaticOpcode GetOpCode(Instruction inst) &&;
 
 private:
     // All static methods impl

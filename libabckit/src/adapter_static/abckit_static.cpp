@@ -51,6 +51,7 @@ constexpr std::string_view OBJECT_CLASS = "std.core.Object";
 constexpr std::string_view OBJECT_LITERAL_NAME = "$ObjectLiteral";
 constexpr std::string_view INTERFACE_FIELD_PREFIX = "<property>";
 constexpr std::string_view ASYNC_ORIGINAL_RETURN = "std.core.Promise;";
+constexpr std::string_view PARTIAL = "$partial";
 const std::unordered_set<std::string> GLOBAL_CLASS_NAMES = {"ETSGLOBAL", "_GLOBAL"};
 }  // namespace
 
@@ -66,6 +67,8 @@ struct Container {
     std::vector<std::unique_ptr<AbckitCoreFunction>> functions;
     std::vector<std::unique_ptr<AbckitCoreClass>> objectLiterals;
     std::vector<std::unique_ptr<AbckitCoreAnnotationInterface>> annotationInterfaces;
+    std::vector<std::unique_ptr<AbckitCoreClass>> partials;
+    std::unordered_map<std::string, AbckitCoreClass *> nameToPartials;
     std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> nameToModule;
     std::unordered_map<std::string, AbckitCoreNamespace *> nameToNamespace;
     std::unordered_map<std::string, AbckitCoreClass *> nameToClass;
@@ -88,6 +91,11 @@ static bool IsModuleName(const std::string &name)
 static bool IsEnum(const pandasm::Record &record)
 {
     return record.metadata->GetBase() == ENUM_BASE;
+}
+
+static bool IsPartial(const std::string &name)
+{
+    return StringUtil::IsEndWith(name, PARTIAL);
 }
 
 AbckitString *CreateNameString(AbckitFile *file, const std::string &name)
@@ -120,6 +128,10 @@ static std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *, 
     }
 
     if (const auto it = container->nameToEnum.find(typeName); it != container->nameToEnum.end()) {
+        return it->second;
+    }
+
+    if (const auto it = container->nameToPartials.find(typeName); it != container->nameToPartials.end()) {
         return it->second;
     }
 
@@ -229,9 +241,8 @@ static std::unique_ptr<AbckitCoreAnnotation> CreateAnnotation(
     const std::string &name)
 {
     LIBABCKIT_LOG(DEBUG) << "Found annotation :'" << name << "'\n";
-    auto [_, annotationName] = ClassGetNames(name);
     auto anno = std::make_unique<AbckitCoreAnnotation>();
-    anno->name = CreateNameString(file, annotationName);
+    anno->name = CreateNameString(file, name);
     anno->owner = owner;
     anno->impl = std::make_unique<AbckitArktsAnnotation>();
     anno->GetArkTSImpl()->core = anno.get();
@@ -264,8 +275,7 @@ std::unique_ptr<AbckitCoreFunction> CollectFunction(AbckitFile *file, const std:
     LIBABCKIT_LOG(DEBUG) << "  Found function. module: '" << moduleName << "' class: '" << className << "' function: '"
                          << functionName << "'\n";
     ASSERT(container->nameToModule.find(moduleName) != container->nameToModule.end());
-    auto &functionModule = container->nameToModule[moduleName];
-    function->owningModule = functionModule.get();
+    function->owningModule = container->nameToModule[moduleName].get();
     function->impl = std::make_unique<AbckitArktsFunction>();
     function->GetArkTSImpl()->impl = &functionImpl;
     function->GetArkTSImpl()->core = function.get();
@@ -469,7 +479,7 @@ static void AssignArrayEnum(AbckitFile *file)
     const auto container = static_cast<Container *>(file->data);
     for (auto item = container->classes.begin(); item != container->classes.end();) {
         auto name = GetStaticImplRecord(item->get())->name;
-        if (!StringUtil::IsEndWith(name, ARRAY_ENUM_SUFFIX.data())) {
+        if (!StringUtil::IsEndWith(name, ARRAY_ENUM_SUFFIX)) {
             ++item;
             continue;
         }
@@ -502,7 +512,7 @@ static void AssignAnnotationInterfaceToAnnotation(AbckitFile *file)
 {
     const auto container = static_cast<Container *>(file->data);
 
-    auto assign = [&](const std::string &annotationName, AbckitCoreAnnotation *annotation) {
+    auto assign = [container](const std::string &annotationName, AbckitCoreAnnotation *annotation) {
         if (container->nameToAnnotationInterface.find(annotationName) != container->nameToAnnotationInterface.end()) {
             auto &ai = container->nameToAnnotationInterface.at(annotationName);
             annotation->ai = ai;
@@ -562,8 +572,8 @@ static void AssignSuperClass(std::unordered_map<std::string, AbckitCoreClass *> 
     }
 }
 
-static void AssignSuperInerface(std::unordered_map<std::string, AbckitCoreInterface *> &nameToInterface,
-                                const std::vector<std::unique_ptr<AbckitCoreInterface>> &interfaces)
+static void AssignSuperInterface(std::unordered_map<std::string, AbckitCoreInterface *> &nameToInterface,
+                                 const std::vector<std::unique_ptr<AbckitCoreInterface>> &interfaces)
 {
     for (const auto &interface : interfaces) {
         auto record = GetStaticImplRecord(interface.get());
@@ -580,16 +590,25 @@ static void AssignSuperInerface(std::unordered_map<std::string, AbckitCoreInterf
 
 static void AssignObjectLiteral(std::vector<std::unique_ptr<AbckitCoreClass>> &objectLiterals,
                                 std::unordered_map<std::string, AbckitCoreClass *> &nameToClass,
-                                std::unordered_map<std::string, AbckitCoreInterface *> &nameToInterface)
+                                std::unordered_map<std::string, AbckitCoreInterface *> &nameToInterface,
+                                std::unordered_map<std::string, AbckitCoreClass *> &nameToPartial)
 {
     for (auto &objectLiteral : objectLiterals) {
-        auto record = GetStaticImplRecord(objectLiteral.get());
+        const auto record = GetStaticImplRecord(objectLiteral.get());
+        LIBABCKIT_LOG(DEBUG) << "Assign Object Literal: " << record->name << '\n';
         auto implements = record->metadata->GetAttributeValues(ETS_IMPLEMENTS.data());
         if (!implements.empty()) {
-            auto interfaceName = implements.front();
-            ASSERT(nameToInterface.find(interfaceName) != nameToInterface.end());
-            LIBABCKIT_LOG(DEBUG) << "Assign Interface Object Literal: " << record->name << '\n';
-            nameToInterface[interfaceName]->objectLiterals.emplace_back(std::move(objectLiteral));
+            const auto &interfaceName = implements.front();
+            if (IsPartial(interfaceName)) {
+                nameToPartial[interfaceName]->objectLiterals.emplace_back(std::move(objectLiteral));
+                continue;
+            }
+            auto it = nameToInterface.find(interfaceName);
+            if (it != nameToInterface.end()) {
+                it->second->objectLiterals.emplace_back(std::move(objectLiteral));
+            } else {
+                nameToClass[interfaceName]->objectLiterals.emplace_back(std::move(objectLiteral));
+            }
             continue;
         }
         for (const auto &className : record->metadata->GetAttributeValues(ETS_EXTENDS.data())) {
@@ -597,9 +616,29 @@ static void AssignObjectLiteral(std::vector<std::unique_ptr<AbckitCoreClass>> &o
                 continue;
             }
             ASSERT(nameToClass.find(className) != nameToClass.end());
-            LIBABCKIT_LOG(DEBUG) << "Assign Class Object Literal: " << record->name << '\n';
             nameToClass[className]->objectLiterals.emplace_back(std::move(objectLiteral));
         }
+    }
+}
+
+static void AssignPartial(AbckitFile *file)
+{
+    const auto container = static_cast<Container *>(file->data);
+    auto &nameToClass = file->nameToClass;
+    auto &partials = container->partials;
+
+    for (auto &partial : partials) {
+        std::string name = GetStaticImplRecord(partial.get())->name;
+        LIBABCKIT_LOG(DEBUG) << "Assign Partial: " << name << '\n';
+        std::string originalName = name.substr(0, name.size() - PARTIAL.size());
+        auto it = nameToClass.find(originalName);
+        ASSERT(it != nameToClass.end());
+        std::visit(
+            [&partial](auto &&object) {
+                partial->parentNamespace = object->parentNamespace;
+                object->partial = std::move(partial);
+            },
+            it->second);
     }
 }
 
@@ -615,6 +654,9 @@ static void AssignInstance(const std::unordered_map<std::string, std::unique_ptr
             LIBABCKIT_LOG(DEBUG) << "namespaceName, className, fullName: " << moduleName << ", " << instanceName << ", "
                                  << fullName << '\n';
             instance->parentNamespace = nameToNamespace.at(moduleName);
+            if constexpr (std::is_same_v<AbckitCoreType, AbckitCoreEnum>) {
+                instance->arrayEnum->parentNamespace = instance->parentNamespace;
+            }
             nameToNamespace.at(moduleName)->InsertInstance(instanceName, std::move(instance));
             continue;
         }
@@ -661,6 +703,13 @@ struct HandlerInfo {
     std::function<bool(AbckitCoreType *, const std::string &)> condition;
 };
 
+static void AssignAsyncImplParent(const AbckitCoreFunction *function)
+{
+    if (function->asyncImpl) {
+        function->asyncImpl->parent = function->parent;
+    }
+}
+
 template <typename AbckitCoreType>
 static void HandleGlobalFunction(AbckitCoreType *owningInstance, std::unique_ptr<AbckitCoreFunction> &&function,
                                  const std::string &className, const std::string &functionName)
@@ -668,6 +717,7 @@ static void HandleGlobalFunction(AbckitCoreType *owningInstance, std::unique_ptr
     LIBABCKIT_LOG(DEBUG) << "Assign Module Function. module: '" << className << "' function: '" << functionName
                          << "'\n";
     function->parent = owningInstance;
+    AssignAsyncImplParent(function.get());
     owningInstance->functions.emplace_back(std::move(function));
 }
 
@@ -678,6 +728,7 @@ static void HandleClassFunction(AbckitCoreType *owningInstance, std::unique_ptr<
     LIBABCKIT_LOG(DEBUG) << "Assign Class Function. class: '" << className << "' function: '" << functionName << "'\n";
     auto &klass = owningInstance->ct[className];
     function->parent = klass.get();
+    AssignAsyncImplParent(function.get());
     klass->methods.emplace_back(std::move(function));
 }
 
@@ -689,6 +740,7 @@ static void HandleNamespaceFunction(AbckitCoreType *owningInstance, std::unique_
                          << functionName << "'\n";
     auto &ns = owningInstance->nt[namespaceName];
     function->parent = ns.get();
+    AssignAsyncImplParent(function.get());
     ns->functions.emplace_back(std::move(function));
 }
 
@@ -701,6 +753,7 @@ static void HandleInterfaceFunction(AbckitCoreType *owningInstance, std::unique_
     auto &interface = owningInstance->it[interfaceName];
     CreateAndAssignInterfaceField(interface, function.get(), functionName);
     function->parent = interface.get();
+    AssignAsyncImplParent(function.get());
     interface->methods.emplace_back(std::move(function));
 }
 
@@ -711,6 +764,7 @@ static void HandleEnumFunction(AbckitCoreType *owningInstance, std::unique_ptr<A
     LIBABCKIT_LOG(DEBUG) << "Assign Enum Function. enum: '" << enumName << "' function: '" << functionName << "'\n";
     auto &enm = owningInstance->et[enumName];
     function->parent = enm.get();
+    AssignAsyncImplParent(function.get());
     enm->methods.emplace_back(std::move(function));
 }
 
@@ -745,12 +799,14 @@ static void ProcessFunction(AbckitCoreType *owningInstance, std::unique_ptr<Abck
     }
 }
 
-static void AssignFunctions(std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
+static void AssignFunctions(AbckitFile *file,
+                            std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
                             std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace,
                             std::unordered_map<std::string, AbckitCoreClass *> &nameToObjectLiteral,
                             std::vector<std::unique_ptr<AbckitCoreFunction>> &functions)
 {
     LIBABCKIT_LOG_FUNC;
+    const auto container = static_cast<Container *>(file->data);
     for (auto &function : functions) {
         std::string functionName = FunctionGetImpl(function.get())->name;
         auto [moduleName, className] = FuncGetNames(functionName);
@@ -760,6 +816,12 @@ static void AssignFunctions(std::unordered_map<std::string, std::unique_ptr<Abck
             auto &objectLiteral = nameToObjectLiteral.at(recordName);
             function->parent = objectLiteral;
             objectLiteral->methods.emplace_back(std::move(function));
+            continue;
+        }
+        if (IsPartial(recordName)) {
+            auto partial = container->nameToPartials[recordName];
+            function->parent = partial;
+            partial->methods.emplace_back(std::move(function));
             continue;
         }
         if (nameToNamespace.find(moduleName) != nameToNamespace.end()) {
@@ -1117,9 +1179,37 @@ static void CollectAllInstanceFields(AbckitFile *file)
         AssignField<AbckitCoreClass, AbckitCoreClassField>(file, objectLiteral);
     }
 
+    for (const auto &[_, partial] : container->nameToPartials) {
+        AssignField<AbckitCoreClass, AbckitCoreClassField>(file, partial);
+    }
+
     for (const auto &[_, klass] : container->nameToClass) {
         AssignField<AbckitCoreClass, AbckitCoreClassField>(file, klass);
     }
+}
+
+static void CollectPartial(AbckitFile *file, const std::string &moduleName, const std::string &className,
+                           const std::string &recordName, ark::pandasm::Record &record)
+{
+    LIBABCKIT_LOG_FUNC;
+    const auto container = static_cast<Container *>(file->data);
+    auto partial =
+        CreateInstance<AbckitCoreClass, AbckitArktsClass>(container->nameToModule, moduleName, className, record);
+    container->nameToPartials.emplace(recordName, partial.get());
+    file->nameToClass.emplace(recordName, partial.get());
+    container->partials.emplace_back(std::move(partial));
+}
+
+static void CollectObjectLiteral(AbckitFile *file, const std::string &moduleName, const std::string &className,
+                                 const std::string &recordName, ark::pandasm::Record &record)
+{
+    LIBABCKIT_LOG_FUNC;
+    const auto container = static_cast<Container *>(file->data);
+    auto objectLiteral =
+        CreateInstance<AbckitCoreClass, AbckitArktsClass>(container->nameToModule, moduleName, className, record);
+    container->nameToObjectLiteral.emplace(recordName, objectLiteral.get());
+    file->nameToClass.emplace(recordName, objectLiteral.get());
+    container->objectLiterals.emplace_back(std::move(objectLiteral));
 }
 
 static void CollectAllInstances(AbckitFile *file, pandasm::Program *prog)
@@ -1143,6 +1233,12 @@ static void CollectAllInstances(AbckitFile *file, pandasm::Program *prog)
         }
 
         auto &nameToModule = container->nameToModule;
+        // Collect partial
+        if (IsPartial(recordName)) {
+            CollectPartial(file, moduleName, className, recordName, record);
+            continue;
+        }
+
         // Collect Interface
         if (IsInterface(record)) {
             auto iface =
@@ -1173,11 +1269,7 @@ static void CollectAllInstances(AbckitFile *file, pandasm::Program *prog)
 
         // Collect Local ObjectLiteral
         if (IsObjectLiteral(recordName) && !record.metadata->IsForeign()) {
-            auto objectLiteral =
-                CreateInstance<AbckitCoreClass, AbckitArktsClass>(nameToModule, moduleName, className, record);
-            container->nameToObjectLiteral.emplace(recordName, objectLiteral.get());
-            file->nameToClass.emplace(recordName, objectLiteral.get());
-            container->objectLiterals.emplace_back(std::move(objectLiteral));
+            CollectObjectLiteral(file, moduleName, className, recordName, record);
             continue;
         }
 
@@ -1243,14 +1335,16 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     AssignArrayEnum(file);
     AssignAnnotationInterfaceToAnnotation(file);
     AssignSuperClass(containerPtr->nameToClass, containerPtr->nameToInterface, containerPtr->classes);
-    AssignSuperInerface(containerPtr->nameToInterface, containerPtr->interfaces);
-    AssignObjectLiteral(containerPtr->objectLiterals, containerPtr->nameToClass, containerPtr->nameToInterface);
+    AssignSuperInterface(containerPtr->nameToInterface, containerPtr->interfaces);
+    AssignObjectLiteral(containerPtr->objectLiterals, containerPtr->nameToClass, containerPtr->nameToInterface,
+                        containerPtr->nameToPartials);
     AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->classes);
     AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->interfaces);
     AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->annotationInterfaces);
     AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->enums);
     AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->namespaces);
-    AssignFunctions(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->nameToObjectLiteral,
+    AssignPartial(file);
+    AssignFunctions(file, containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->nameToObjectLiteral,
                     containerPtr->functions);
 
     // NOTE: AbckitCoreExportDescriptor

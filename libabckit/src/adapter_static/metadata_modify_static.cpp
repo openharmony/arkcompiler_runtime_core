@@ -485,6 +485,20 @@ bool EnumFieldSetNameStatic(AbckitCoreEnumField *field, const char *newName)
     return true;
 }
 
+bool FunctionSetNameStatic(AbckitCoreFunction *function, const char *name)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FunctionRefreshName(function, name)) {
+        return false;
+    }
+
+    InstModifier modifier(function->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
 void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 {
     if (function->owningModule->file->needOptimize) {
@@ -868,8 +882,7 @@ bool ClassFieldAddAnnotationStatic(AbckitArktsClassField *field, const AbckitArk
 
 bool ClassFieldRemoveAnnotationStatic(AbckitArktsClassField *field, AbckitArktsAnnotation *anno)
 {
-    auto name = anno->core->name->impl.data();
-    auto annotationName = NameUtil::GetFullName(anno->core->ai, name);
+    auto annotationName = NameUtil::GetFullName(anno->core->ai);
     auto it = field->core->annotationTable.find(annotationName);
     if (it == field->core->annotationTable.end()) {
         LIBABCKIT_LOG(ERROR) << "Can not find the annotation in annotationTable to delete\n";
@@ -1215,11 +1228,10 @@ bool InterfaceFieldAddAnnotationStatic(AbckitArktsInterfaceField *field,
 
 bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno)
 {
-    auto name = anno->core->name->impl.data();
-    auto annotationName = NameUtil::GetFullName(anno->core->ai, name);
+    auto annotationName = NameUtil::GetFullName(anno->core->ai);
     auto &annotations = field->core->annotations;
     auto iter = std::find_if(annotations.begin(), annotations.end(),
-                             [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+                             [&annotationName](auto &annoIt) { return annotationName == annoIt.get()->name->impl; });
     if (iter == annotations.end()) {
         LIBABCKIT_LOG(ERROR) << "Can not find the annotation to delete\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1239,8 +1251,9 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
             progFunc->metadata->DeleteAnnotationByName(annotationName);
             // Also remove from method's annotation collections
             auto &methodAnnotations = method->annotations;
-            auto methodIter = std::find_if(methodAnnotations.begin(), methodAnnotations.end(),
-                                           [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+            auto methodIter =
+                std::find_if(methodAnnotations.begin(), methodAnnotations.end(),
+                             [&annotationName](auto &annoIt) { return annotationName == annoIt.get()->name->impl; });
             if (methodIter != methodAnnotations.end()) {
                 methodAnnotations.erase(methodIter);
             }
@@ -1250,8 +1263,9 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
             progFunc->metadata->DeleteAnnotationByName(annotationName);  // Use full annotation name
             // Also remove from method's annotation collections
             auto &methodAnnotations = method->annotations;
-            auto methodIter = std::find_if(methodAnnotations.begin(), methodAnnotations.end(),
-                                           [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+            auto methodIter =
+                std::find_if(methodAnnotations.begin(), methodAnnotations.end(),
+                             [&annotationName](auto &annoIt) { return annotationName == annoIt.get()->name->impl; });
             if (methodIter != methodAnnotations.end()) {
                 methodAnnotations.erase(methodIter);
             }
@@ -1265,33 +1279,6 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
 // ========================================
 // Function
 // ========================================
-bool FunctionSetNameStatic(AbckitArktsFunction *function, const char *name)
-{
-    LIBABCKIT_LOG_FUNC;
-
-    AbckitCoreFunction *coreFunc = function->core;
-    auto *funcImpl = function->GetStaticImpl();
-    LIBABCKIT_INTERNAL_ERROR(funcImpl, false);
-
-    auto *prog = coreFunc->owningModule->file->GetStaticProgram();
-    LIBABCKIT_INTERNAL_ERROR(prog, false);
-
-    std::string oldMangleName = abckit::util::GenerateFunctionMangleName(funcImpl->name, *funcImpl);
-    std::string oldfuncNamewithModule = funcImpl->name;
-    std::string newfuncNamewithModule = abckit::util::ReplaceFunctionModuleName(oldfuncNamewithModule, name);
-    funcImpl->name = newfuncNamewithModule;
-
-    std::string newMangleName = abckit::util::GenerateFunctionMangleName(newfuncNamewithModule, *funcImpl);
-    if (!abckit::util::UpdateFunctionTableKey(prog, funcImpl, newfuncNamewithModule, oldMangleName, newMangleName)) {
-        LIBABCKIT_LOG(ERROR) << "[FunctionSetName] Failed to update function table key" << std::endl;
-        return false;
-    }
-
-    abckit::util::ReplaceInstructionIds(prog, funcImpl, oldMangleName, newMangleName);
-    abckit::util::UpdateFileMap(coreFunc->owningModule->file, oldMangleName, newMangleName);
-
-    return true;
-}
 
 bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
 {

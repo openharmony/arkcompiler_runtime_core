@@ -42,12 +42,14 @@ private:
     static bool ModuleRefreshClasses(AbckitCoreModule *m);
     static bool ModuleRefreshInterfaces(AbckitCoreModule *m);
     static bool ModuleRefreshEnums(AbckitCoreModule *m);
+    static bool ModuleRefreshAnnotationInterfaces(AbckitCoreModule *m);
 
     static bool NamespaceRefreshNamespaces(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshFunctions(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshClasses(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshInterfaces(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshEnums(AbckitCoreNamespace *ns);
+    static bool NamespaceRefreshAnnotationInterfaces(AbckitCoreNamespace *ns);
 
     static bool FunctionRefreshParams(AbckitCoreFunction *function);
     static bool FunctionRefreshReturnType(AbckitCoreFunction *function);
@@ -70,7 +72,10 @@ private:
     static bool InterfaceRefreshSubInterfaces(AbckitCoreInterface *iface);
 
     static bool AnnotationInterfaceRefreshAnnotation(AbckitCoreAnnotationInterface *ai);
+    static bool RefreshPartial(const std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *> &object);
+
     static bool ObjectLiteralRefreshName(AbckitCoreClass *objectLiteral, const std::string &newName = "");
+    static bool PartialRefreshName(AbckitCoreClass *partial, const std::string &newName = "");
 
     static bool ClassFieldRefreshAnnotations(AbckitCoreClassField *classField, const std::string &oldName,
                                              const std::string &newName);

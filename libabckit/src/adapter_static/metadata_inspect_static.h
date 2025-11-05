@@ -76,6 +76,7 @@ bool ClassFieldIsProtectedStatic(AbckitCoreClassField *field);
 bool ClassFieldIsPrivateStatic(AbckitCoreClassField *field);
 bool ClassFieldIsInternalStatic(AbckitCoreClassField *field);
 bool ClassFieldIsStaticStatic(AbckitCoreClassField *field);
+bool ClassFieldIsFinalStatic(AbckitCoreClassField *field);
 bool InterfaceFieldIsReadonlyStatic(AbckitCoreInterfaceField *field);
 
 // ========================================

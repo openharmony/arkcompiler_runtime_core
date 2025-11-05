@@ -28,6 +28,11 @@ namespace abckit {
 
 class ApiConfig;
 
+/**
+ * @brief Status to status desc str
+ * @param status AbckitStatus
+ * @return status desc str
+ */
 // CC-OFFNXT(G.FUD.06) perf critical
 // NOLINTBEGIN(performance-unnecessary-value-param)
 inline std::string StatusToString(AbckitStatus status)

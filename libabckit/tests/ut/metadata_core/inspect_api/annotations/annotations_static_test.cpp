@@ -75,7 +75,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTest, AnnotationIsExternalStatic)
     std::set<std::string> gotInternalAnnotationNames;
     std::set<std::string> gotExternalAnnotationNames;
     std::set<std::string> expectInternalAnnotationNames = {"AI4"};
-    std::set<std::string> expectExternalAnnotationNames = {"EnclosingClass", "InnerClass"};
+    std::set<std::string> expectExternalAnnotationNames = {"ets.annotation.EnclosingClass",
+                                                           "ets.annotation.InnerClass"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
