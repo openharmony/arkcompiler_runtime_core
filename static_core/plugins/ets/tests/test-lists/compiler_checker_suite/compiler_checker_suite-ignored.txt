@@ -3,3 +3,6 @@ simple_run/llvm_infer_flags.ets
 
 # NOTE #24986
 simple_run/optimize_load_object_boxed.ets
+
+#31215
+simple_run/escompat_array_fill.ets
