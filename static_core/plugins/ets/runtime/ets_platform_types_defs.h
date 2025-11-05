@@ -100,7 +100,6 @@
     I("Lstd/core/Record;", "$_get", nullptr, coreRecordGetter) /* naming! */                                          \
     I("Lstd/core/Record;", "$_set", nullptr, coreRecordSetter) /* naming! */                                          \
     T("Lstd/core/Map;", coreMap)                                                                                      \
-    T("Lstd/core/MapEntry;", coreMapEntry)                                                                            \
     T("Lstd/core/Set;", coreSet)                                                                                      \
     /* Interop */                                                                                                     \
     T("Lstd/interop/js/JSValue;", interopJSValue)                                                                     \

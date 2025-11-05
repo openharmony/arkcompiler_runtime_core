@@ -453,7 +453,6 @@ public:
 
         RegisterDate();
         // #IC4UO2
-        RegisterClassWithLeafMatcher(descriptors::MAPENTRY, nullptr);
         RegisterClassWithLeafMatcher(descriptors::MAPITERATOR, nullptr);
         RegisterClassWithLeafMatcher(descriptors::EMPTYMAPITERATOR, nullptr);
         RegisterClassWithLeafMatcher(descriptors::SETITERATOR, nullptr);

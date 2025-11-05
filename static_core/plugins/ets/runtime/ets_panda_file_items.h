@@ -243,7 +243,6 @@ static constexpr std::string_view ITERATOR_RESULT                      = "Lstd/c
 static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lescompat/ArrayKeysIterator;";
 static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lescompat/ArrayValuesIterator_T;";
 static constexpr std::string_view MAP                                  = "Lstd/core/Map;";
-static constexpr std::string_view MAPENTRY                             = "Lstd/core/MapEntry;";
 static constexpr std::string_view MAPITERATOR                          = "Lstd/core/MapIterator;";
 static constexpr std::string_view SETITERATOR                          = "Lstd/core/SetIterator;";
 static constexpr std::string_view EMPTYMAPITERATOR                     = "Lstd/core/EmptyMapIterator;";

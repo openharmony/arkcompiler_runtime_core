@@ -157,9 +157,6 @@ coretypes:
 - managed_class: std.core.Map
   mirror_class: ark::ets::EtsEscompatMap
 
-- managed_class: std.core.MapEntry
-  mirror_class: ark::ets::EtsEscompatMapEntry
-
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:

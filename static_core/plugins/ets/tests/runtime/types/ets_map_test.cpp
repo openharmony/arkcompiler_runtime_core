@@ -63,13 +63,6 @@ public:
                                              MIRROR_FIELD_INFO(EtsEscompatMap, initialCapacity_, "initialCapacity")};
     }
 
-    static std::vector<MirrorFieldInfo> GetMapEntryMembers()
-    {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatMapEntry, key_, "key"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMapEntry, val_, "val"),
-                                             MIRROR_FIELD_INFO(EtsEscompatMapEntry, next_, "next")};
-    }
-
 protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
@@ -79,13 +72,6 @@ TEST_F(EtsMapTest, MapMemoryLayout)
 {
     EtsClass *mapClass = PlatformTypes(vm_)->coreMap;
     MirrorFieldInfo::CompareMemberOffsets(mapClass, GetMapMembers());
-}
-
-// Check both EtsEscompatMapEntry and ark::Class<MapEntry> has the same number of fields and at the same offsets
-TEST_F(EtsMapTest, MapEntryMemoryLayout)
-{
-    EtsClass *mapEntryClass = PlatformTypes(vm_)->coreMapEntry;
-    MirrorFieldInfo::CompareMemberOffsets(mapEntryClass, GetMapEntryMembers());
 }
 
 }  // namespace ark::ets::test
