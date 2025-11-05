@@ -14,9 +14,29 @@
  */
 
 function testRegExpParserCase1() {
-    const str2: string = "a𐐀b𐐁"
+    const str1: string = '😀abc';
+    const regex1 = new RegExp('\\p{Emoji}', 'u');
+    const result1: number = str1.search(regex1);
+    arktest.assertEQ(result1, 0);
+
+    const str2: string = 'a𐐀b𐐁'
     const regex2 = new RegExp('([a-z\\u{10400}-\\u{1041F}])', 'gu');
     const result2 = Array.from(str2.matchAll(regex2))
+
+    let str3: string = '你好';
+    let regex3 = new RegExp('\\p{L}', 'u');
+    arktest.assertEQ(regex3.test(str3), true);
+    arktest.assertEQ(regex3.test('123'), false);
+
+    let str4: string = 'Hello 𐐷 World';
+    let regex4 = new RegExp('\\p{Script=Deseret}', 'gu');
+    let result4 = str4.match(regex4);
+    arktest.assertEQ(result4![0], ['𐐷'][0]);
+
+    const str5 = 'hello\u0007world';
+    const regex5 = new RegExp('[\x00-\x1F]', 'g');
+    const result5 = str5.match(regex5);
+    arktest.assertEQ(result5![0], ['\u0007'][0]);
 }
 
 function testRegExpParserCase2() {
