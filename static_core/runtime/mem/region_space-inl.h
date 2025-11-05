@@ -90,8 +90,8 @@ void *Region::Alloc(size_t alignedSize)
 inline void Region::UndoAlloc(void *addr)
 {
     RegionAllocCheck alloc(this);
+    ASSERT(HasFlag(RegionFlag::IS_OLD));
     top_ = ToUintPtr(addr);
-    RmvFlag(RegionFlag::IS_ZEROED);
 }
 
 template <typename ObjectVisitor>

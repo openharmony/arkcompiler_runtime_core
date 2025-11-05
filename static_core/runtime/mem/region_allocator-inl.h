@@ -201,8 +201,9 @@ RegionMem RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t alignS
     }
 
     os::memory::LockHolder lock(this->regionLock_);
+    RegionFlag properties = (REGION_TYPE == RegionFlag::IS_PINNED) ? RegionFlag::IS_PINNED : RegionFlag::IS_UNUSED;
     regionTo = this->template CreateAndSetUpNewRegion<AllocConfigT, OSPagesAllocPolicy::ZEROED_MEMORY>(
-        REGION_SIZE, RegionFlag::IS_OLD);
+        REGION_SIZE, RegionFlag::IS_OLD, properties);
     if (LIKELY(regionTo != nullptr)) {
         // Here we need memory barrier to make the allocation visible
         // in all threads before SetCurrentRegion
