@@ -15,27 +15,13 @@
 
 {%- for c in cases %}
 /*---
-desc: >-
-    Method overload declaration allows declaring an overload alias as a class member for a set of static or instance methods.
-    Special tests.
+desc: Names of all static and non-static entities in a class declaration scope must be unique.
+tags: [compile-only, negative]
 ---*/
 
-class B {
-    m1(p: int): string { return 'int' }
-    m2(p: int, q: object): string { return 'i+o' }
-    m3(p: int, q: object, r?: object): string { return 'i+o+o?' }
-
-    overload meth { m1, m2 }
-}
-
-class A extends B {
-    m4(p: object): string { return "object" }
-
-    overload meth { m1, m2, m3, m4 }
-}
+{{c.decl}}
 
 function main() {
     let a: A = new A();
-    arktest.assertEQ('{{c.value}}', a.meth({{c.param}}));
 }
 {%- endfor %}

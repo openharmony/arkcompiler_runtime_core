@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,26 +16,22 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    Method overload declaration allows declaring an overload alias as a class member for a set of static or instance methods.
-    Special tests.
+    Methods with special names (see Indexable Types, Iterable Types, and Callable Types) can be overloaded like ordinary methods.
+    Callable Types: $_invoke
 ---*/
 
-class B {
-    m1(p: int): string { return 'int' }
-    m2(p: int, q: object): string { return 'i+o' }
-    m3(p: int, q: object, r?: object): string { return 'i+o+o?' }
-
-    overload meth { m1, m2 }
+class G1 {
+    static greetI(i: int): string { return 'Hi ' + i + '!' }
+    static greetS(s: string): string { return 'Hey ' + s + '!' }
+    static overload $_invoke { greetI, greetS }
 }
 
-class A extends B {
-    m4(p: object): string { return "object" }
-
-    overload meth { m1, m2, m3, m4 }
+class G2 extends G1 {
+    static greetB(b: boolean): string { return b ? 'Hi!' : 'Bye!' }
+    static overload $_invoke { greetI, greetS, greetB }
 }
 
 function main() {
-    let a: A = new A();
-    arktest.assertEQ('{{c.value}}', a.meth({{c.param}}));
+    arktest.assertEQ('{{c.value}}', {{c.call}});
 }
 {%- endfor %}
