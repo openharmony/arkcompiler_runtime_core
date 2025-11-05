@@ -14,40 +14,17 @@
  */
 
 #include "platforms/target_defaults/default_target_options.h"
+#include <string>
 
 namespace ark::default_target_options {
 
-template <class ModelMap>
-static typename ModelMap::mapped_type GetHardwareSpecificValue(const ModelMap &modelMap)
+std::string GetTargetString()
 {
     std::string model = "default";
 #ifdef PANDA_TARGET_ARM32
     model = "arm32";
 #endif
-    if (modelMap.count(model) == 0) {
-        return modelMap.at("default");
-    }
-    return modelMap.at(model);
-}
-
-uint32_t GetGcWorkersCount(const std::map<std::string, uint32_t> &modelMap)
-{
-    return GetHardwareSpecificValue(modelMap);
-}
-
-uint32_t GetTaskmanagerWorkersCount(const std::map<std::string, uint32_t> &modelMap)
-{
-    return GetHardwareSpecificValue(modelMap);
-}
-
-uint64_t GetInternalMemorySizeLimit(const std::map<std::string, uint64_t> &modelMap)
-{
-    return GetHardwareSpecificValue(modelMap);
-}
-
-uint64_t GetCoroutinesStackMemLimit(const std::map<std::string, uint64_t> &modelMap)
-{
-    return GetHardwareSpecificValue(modelMap);
+    return model;
 }
 
 }  // namespace ark::default_target_options

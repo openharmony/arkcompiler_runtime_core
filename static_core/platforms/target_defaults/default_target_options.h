@@ -19,15 +19,28 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <functional>
+
+#include "libarkbase/macros.h"
 
 namespace ark::default_target_options {
-uint32_t GetGcWorkersCount(const std::map<std::string, uint32_t> &modelMap);
 
-uint32_t GetTaskmanagerWorkersCount(const std::map<std::string, uint32_t> &modelMap);
+using TargetGetterCallback = std::function<std::string()>;
 
-uint64_t GetInternalMemorySizeLimit(const std::map<std::string, uint64_t> &modelMap);
+std::string GetTargetString();
 
-uint64_t GetCoroutinesStackMemLimit(const std::map<std::string, uint64_t> &modelMap);
+template <class ModelMap>
+static typename ModelMap::mapped_type GetTargetSpecificOptionValue(const ModelMap &modelMap,
+                                                                   TargetGetterCallback getTargetString)
+{
+    std::string model = getTargetString();
+    if (modelMap.count(model) != 0) {
+        return modelMap.at(model);
+    } else if (modelMap.count("default") != 0) {
+        return modelMap.at("default");
+    }
+    UNREACHABLE();
+}
 
 }  // namespace ark::default_target_options
 
