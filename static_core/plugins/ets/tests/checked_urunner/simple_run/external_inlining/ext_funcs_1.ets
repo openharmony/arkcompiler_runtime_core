@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 import { add } from "./ext_funcs.ets";
 
 export function get_element(arr: int[], idx: int): int {

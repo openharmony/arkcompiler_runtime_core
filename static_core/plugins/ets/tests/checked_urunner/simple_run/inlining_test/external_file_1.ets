@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
-export class B {
+/*---
+  tags: [not-a-test]
+---*/
+
+export class A {
     static array_test(a: int[]): int {
-        let res: int = a[0] + 200;
+        let res: int = a[0] + 100;
         res += a[1];
         res += a[2];
         res += a[3];

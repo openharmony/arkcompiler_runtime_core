@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
+/*---
+  files: [ext_funcs_3.ets]
+---*/
+
 import { A } from "./ext_funcs_3.ets";
 import { risky } from "./ext_funcs_3.ets";
 import { maybe_throw } from "./ext_funcs_3.ets";
 import { sum_array } from "./ext_funcs_3.ets";
 
 //! CHECKER    Check deep external inlining
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_0"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_0"
 //! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::B,ext_funcs_3.ETSGLOBAL::C,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::A,ext_funcs_3.ETSGLOBAL::B,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main_0,ext_funcs_3.ETSGLOBAL::A,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc", entry: "ext_inlining_4.ETSGLOBAL::main_0"
+//! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main_0"
 
 function main_0(): int { 
     if (A(5) == 6) {
@@ -34,10 +38,10 @@ function main_0(): int {
 }
 
 //! CHECKER    Check inline external method and inline internal method inside (no exception)
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_1"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_1"
 //! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::risky,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main_1,ext_funcs_3.ETSGLOBAL::risky,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc", entry: "ext_inlining_4.ETSGLOBAL::main_1"
+//! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main_1"
 
 function main_1(): int {
     let a: int[] = [1, 2, 3];
@@ -49,10 +53,10 @@ function main_1(): int {
 }
 
 //! CHECKER    Check inline external method and inline internal method inside (exception)
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_2"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_2"
 //! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::risky,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main_2,ext_funcs_3.ETSGLOBAL::risky,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc", entry: "ext_inlining_4.ETSGLOBAL::main_2"
+//! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main_2"
 //! EVENT      /Exception,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,THROW/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main_2,.*,IFRAME/
 
@@ -67,9 +71,9 @@ function main_2(): int {
 }
 
 //! CHECKER    Check exception inside of external inlined method
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_3"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_3"
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main_3,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc", entry: "ext_inlining_4.ETSGLOBAL::main_3"
+//! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main_3"
 //! EVENT      /Exception,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,THROW/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main_3,.*,IFRAME/
 
@@ -90,9 +94,9 @@ function main_3(): int {
 }
 
 //! CHECKER    Check deoptimization inside of external inlined method
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_4"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_4.ETSGLOBAL::main_4"
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main_4,ext_funcs_3.ETSGLOBAL::sum_array,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_4.checked/ext_funcs_3.abc", entry: "ext_inlining_4.ETSGLOBAL::main_4"
+//! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main_4"
 //! EVENT      /DeoptimizationReason,ext_funcs_3.ETSGLOBAL::sum_array,BOUNDS_CHECK_WITH_DEOPT/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main_4,.*,IFRAME/
 
