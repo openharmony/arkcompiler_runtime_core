@@ -15,7 +15,7 @@
 
 export @interface FieldAnno {
     names: String[] = ["name01", "name02"]
-	addr: string = "shanghai"
+	addr: string = "testaddress"
 	d_int: int = 11
 	d_long: long = 22
 	d_float: float = 33.3f
@@ -24,7 +24,7 @@ export @interface FieldAnno {
 
 export @interface MethodAnno {
     names: String[] = ["name01", "name02"]
-	addr: string = "shanghai"
+	addr: string = "testaddress"
 	d_int: int = 11
 	d_long: long = 22
 	d_float: float = 33.3f
@@ -33,7 +33,7 @@ export @interface MethodAnno {
 
 export @interface ClassAnno {
     names: String[] = ["name01", "name02"]
-	addr: string = "shanghai"
+	addr: string = "testaddress"
 	d_int: int = 11
 	d_long: long = 22
 	d_float: float = 33.3f
@@ -50,9 +50,9 @@ const const_long: long = 22;
 const const_float: float = 33.3f;
 const const_double: double = 55.55;
 
-@ClassAnno({names: ["test"], addr: "taiwan", d_int: 11, d_long: 22, d_float: 33.3f, d_double: 55.55})
+@ClassAnno({names: ["test"], addr: "testaddress", d_int: 11, d_long: 22, d_float: 33.3f, d_double: 55.55})
 export class Cls extends Base {
-    @FieldAnno({names: ["test"], addr: "taiwan", d_int: 11, d_long: 22, d_float: 33.3f, d_double: 55.55})
+    @FieldAnno({names: ["test"], addr: "testaddress", d_int: 11, d_long: 22, d_float: 33.3f, d_double: 55.55})
     name: string = "alice"
     name2: string = const_name
 	d_int: int = 11
@@ -84,7 +84,7 @@ export class Cls extends Base {
         }
     }
 
-    @MethodAnno({names: ["test"], addr: "taiwan", d_int: 11, d_long: 22, d_float: 33.3f, d_double: 55.55})
+    @MethodAnno({names: ["test"], addr: "testaddress", d_int: 11, d_long: 22, d_float: 33.3f, d_double: 55.55})
     add(a: int, b: int): int {
         return a + b;
     }
