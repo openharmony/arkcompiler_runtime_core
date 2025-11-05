@@ -13,30 +13,24 @@
  * limitations under the License.
  */
 
-// deep inlining
-export function C(x: int): int { return x + 1; }
-export function B(x: int): int { return C(x); }
-export function A(x: int): int { return B(x); }
+/*---
+  tags: [not-a-test]
+---*/
 
+import { risky_array } from "./ext_funcs_4.ets";
 
-// deopt
-export function risky(arr: int[], i: int): int {
-    return maybe_throw(arr[i]);
+export function middle(arr: int[]): int {
+    return risky_array(arr); // inline will be here
 }
 
-// deopt
-export function maybe_throw(x: int): int {
-    if (x == 0) {
-        throw new Error("Error message");
-    }
-    return 100 / x;
+export function compute(x: int): int {
+    return x * x + 1;
 }
 
-// bounds check fails
-export function sum_array(arr: int[]): int {
-    let sum = 0;
-    for (let i = 0; i <= arr.length; i++) {
-        sum += arr[i];
+// potential deoptimization
+export function compute2(x: int): int {
+    if (false) { // SaveState will be created
+        throw new Error("Unreachable!");
     }
-    return sum;
+    return x * x + 1;
 }

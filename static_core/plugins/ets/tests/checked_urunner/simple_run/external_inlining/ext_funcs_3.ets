@@ -13,10 +13,34 @@
  * limitations under the License.
  */
 
-export function add(x: int, y: int): int {
-    return x + y;
+/*---
+  tags: [not-a-test]
+---*/
+
+// deep inlining
+export function C(x: int): int { return x + 1; }
+export function B(x: int): int { return C(x); }
+export function A(x: int): int { return B(x); }
+
+
+// deopt
+export function risky(arr: int[], i: int): int {
+    return maybe_throw(arr[i]);
 }
 
-export function get_sum_element(arr: int[], idx: int): int {
-    return add(arr[idx], arr[idx]);
+// deopt
+export function maybe_throw(x: int): int {
+    if (x == 0) {
+        throw new Error("Error message");
+    }
+    return 100 / x;
+}
+
+// bounds check fails
+export function sum_array(arr: int[]): int {
+    let sum = 0;
+    for (let i = 0; i <= arr.length; i++) {
+        sum += arr[i];
+    }
+    return sum;
 }

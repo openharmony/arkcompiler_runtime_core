@@ -52,7 +52,7 @@ class TestLists:
         self.cache: list[str] = self.__gn_cache() if self.config.general.gn_build else self.cmake_cache()
         self.sanitizer = self.search_sanitizer()
         _LOGGER.default(f"Initialize TestLists: sanitizer = {self.sanitizer}")
-        self.architecture = detect_architecture()
+        self.architecture = detect_architecture(self.config.general.qemu)
         _LOGGER.default(f"Initialize TestLists: architecture = {self.architecture}")
         self.operating_system = detect_operating_system()
         _LOGGER.default(f"Initialize TestLists: operating_system = {self.operating_system}")

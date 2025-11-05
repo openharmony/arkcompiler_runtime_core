@@ -179,97 +179,14 @@ endfunction()
 #Disable checked tests with sanitizers for arm64, since it takes too long time running.
 if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     if (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64)
-# 26982 64 - bit pointer support
-        if (PANDA_32_BIT_MANAGED_POINTER OR NOT PANDA_TARGET_ARM64)
-#No deoptimization occurs in String.split on arm32
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_split_test.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_idioms/memmove_unsupported.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_idioms/memmove_supported.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_idioms/memmove_bailout.ets)
-#Causes regalloc verification failure on ARM32
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_set_get.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_set_values.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_index_of.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_copy_within.ets)
-        endif()
-        if (PANDA_TARGET_ARM64)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/if_conversion_1.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/if_conversion_2.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lowering_bitfield_extraction.ets)
-        endif()
 #inlining of the following intrinsics is only enabled for these two targets
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isFinite.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isNaN.ets)
 #AOT mode for arm32 is not supported
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_equals.ets SUPPORT_RELEASE)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_1.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_2.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_3.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_infiniteLoop.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_from_char_code.ets)
-        if (NOT PANDA_TARGET_OHOS) # TODO: remove. issue 29517
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/branch_elimination_protect_returninlined.ets)
-        endif()
-        if (NOT PANDA_TARGET_OHOS) # TODO: remove. issue 29517
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_inlining_1.ets EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_inlining_2.ets EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs.ets ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs_1.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_inlining_3.ets EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs_2.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_inlining_4.ets EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs_3.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_inlining_5.ets EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs_4.ets ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs_4_1.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_inlining_6.ets EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs_4.ets ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs_4_1.ets ${CMAKE_CURRENT_SOURCE_DIR}/external_inlining/ext_funcs_5.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inline_external_test.ets EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/external_file_1.ets ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/external_file_2.ets ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/external_file_3.ets)
-        endif()
         if (NOT PANDA_PRODUCT_BUILD)
 #Disabled as stdlib API was required to change.issue 25232
 #panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / string_tlab_allocations.ets JITINTERFACE)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_repeat.ets JITINTERFACE)
         endif()
 #LoadAndInitClass in AOT mode for arm32 is not supported
-#NOTE(pantos) Issue #17103 reassign readonly property
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / optimize_load_readonly_static.ets)
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / optimize_load_readonly_instance.ets)
-
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_reverse.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_slice.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_with.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_of.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_typed_arrays_fill.ets)
-        if (NOT PANDA_TARGET_OHOS) # TODO: remove. issue 29517
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_map_inheritance_intrinsics.ets)
-        endif()
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_map_no_inline_array_calls.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_set_inlining.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_escompat_set_inheritance_intrinsics.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/hash_code_double_float.ets)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_from_primitive.ets)
-    endif()
-    if (PANDA_TARGET_ARM64)
-#Disabled as stdlib API was required to change.issue 25232
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / memory_coalescing3.ets)
-# 26982 64 - bit pointer support
-        if (NOT PANDA_USE_64_BIT_POINTER)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing1.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing2.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory_coalescing4.ets)
-            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_get.ets)
-        endif()
-    endif()
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_runtime_equals.ets SUPPORT_RELEASE)
-    if (PANDA_COMPILER_TARGET_AARCH64)
-# 26982 64 - bit pointer support
-        if (PANDA_32_BIT_MANAGED_POINTER OR NOT PANDA_TARGET_ARM64)
-#issue #25345
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / checks_elimination_no_hoist.ets)
-        endif()
-    endif()
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_const_array.ets)
-    if (NOT PANDA_TARGET_OHOS) # TODO: remove. issue 29517
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_phi.ets)
-    endif()
-# 26982 64 - bit pointer support
-    if (PANDA_32_BIT_MANAGED_POINTER OR NOT PANDA_TARGET_ARM64)
-        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_test.ets SUPPORT_RELEASE)
     endif()
 endif()
 
