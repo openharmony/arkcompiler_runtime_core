@@ -26,7 +26,7 @@ from typing import Union, Iterable, Optional, List, Set, Dict, Tuple, Any
 from dataclasses import dataclass
 from statistics import geometric_mean, mean
 from pathlib import Path
-from vmb.helpers import Jsonable, pad_left, read_list_file, create_file, Timer
+from vmb.helpers import Jsonable, pad_left, read_list_file, create_file, Timer, check_file_exists
 from vmb.unit import BenchUnit
 from vmb.result import RunReport, TestResult, AotStatEntry, AotPasses, \
     MachineMeta, BUStatus
@@ -646,6 +646,8 @@ def compare_reports(args):
     if len(args.paths) != 2:
         print('Need 2 reports for comparison')
         sys.exit(1)
+    check_file_exists(args.paths[0])
+    check_file_exists(args.paths[1])
     with open(args.paths[0], 'r', encoding="utf-8") as f1:
         r1 = VMBReport.parse(f1.read(), tags=args.tags, skip_tags=args.skip_tags)
     with open(args.paths[1], 'r', encoding="utf-8") as f2:
@@ -732,6 +734,7 @@ def report_main(args: Args,
         compare_reports(args)
     else:
         flaky = read_list_file(args.flaky_list) if args.flaky_list else []
+        check_file_exists(args.paths[0])
         with open(args.paths[0], 'r', encoding="utf-8") as f:
             r = VMBReport.parse(f.read(), exclude=flaky, tags=args.tags, skip_tags=args.skip_tags)
         if args.compile_time:
