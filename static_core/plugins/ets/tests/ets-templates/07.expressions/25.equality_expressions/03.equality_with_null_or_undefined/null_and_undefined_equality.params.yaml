@@ -228,3 +228,21 @@ cases:
         }
       use: |-
         arktest.assertTrue( foo(null) )
+
+    - use: |-
+        //local smart cast
+        let x: string|undefined = "test"
+        arktest.assertFalse(x == undefined)
+        arktest.assertFalse(x === undefined)
+
+    - use: |-
+        //local smart cast
+        let x: string|null = "test"
+        arktest.assertFalse(x == null)
+        arktest.assertFalse(x === null)
+
+    - use: |-
+        arktest.assertTrue(!undefined)
+        arktest.assertTrue(!null)
+    
+    
