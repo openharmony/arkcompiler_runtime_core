@@ -95,6 +95,10 @@ export const setCodeAction = createAsyncThunk(
     },
 );
 
+export const flushPendingCodeUpdate = (): void => {
+    window.dispatchEvent(new Event('flushPendingCodeUpdate'));
+};
+
 export const fetchShareCode = createAsyncThunk(
     '@code/shareCode',
     async (_, thunkAPI): Promise<string> => {
