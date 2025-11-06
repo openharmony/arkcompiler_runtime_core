@@ -29,6 +29,16 @@ export class RejectedHandler {
     }
 
     /**
+     * Constructs a new RejectedHandler with one listener.
+     *
+     * @param cb the listener
+     */
+    constructor(cb: RejectedObjectListener) {
+        this.handlers = new containers.ConcurrentSet<RejectedObjectListener>();
+        this.handlers.add(cb);
+    }
+
+    /**
      * Registers a new rejection handler.
      *
      * @param cb new callback

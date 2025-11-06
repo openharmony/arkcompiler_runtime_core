@@ -12,32 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const COUNTER_MODULO = 61;
-const rejectionReason = 'get unhandled job rejection';
-let count = 0;
 
-async function testUnhandledJobRejection1(): Promise<void> {
-
-     StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+function testDumpUnhandledJobs(): void {
+    let event = new CompletableJob<void>();
+    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
-        arktest.assertEQ(reason.message, rejectionReason);
-        arktest.assertTrue(count >= COUNTER_MODULO);
+        event.finish();
     });
 
-    let job1 = new CompletableJob<int>();
-    job1.fail(new Error('get unhandled job rejection'));
-  
-    for (; count <= COUNTER_MODULO + 1  ; ++count) {
-        setTimeout( () => {
-            Coroutine.Schedule();
-        });
-    }
+    (new CompletableJob<void>()).fail();
+    CoroutineExtras.dumpUnhandledFailedJobs();
+    event.Await();
 }
 
 function main(): int {
-    let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_job_rejection');
-    testSuite.addAsyncTest('testUnhandledJobRejection123', testUnhandledJobRejection1);
+    StdProcess.off('unhandledJobRejection');
+    let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection');
+    testSuite.addTest('testDumpUnhandledJobs', testDumpUnhandledJobs);
     let res = testSuite.run();
-
     return res;
 }

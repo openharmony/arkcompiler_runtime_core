@@ -396,6 +396,14 @@ extern "C" EtsBoolean StdSystemIsExternalTimerEnabled()
     return extTimerOption && coro->GetWorker()->IsExternalSchedulingEnabled();
 }
 
+extern "C" void StdSystemDumpUhandledFailedJobs()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    ScopedNativeCodeThread snct(coro);
+    coro->ProcessUnhandledFailedJobs();
+}
+
 static void SetPrimitiveFieldInClass(const char *name, ClassRoot root)
 {
     auto *ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(panda_file::SourceLang::ETS);
