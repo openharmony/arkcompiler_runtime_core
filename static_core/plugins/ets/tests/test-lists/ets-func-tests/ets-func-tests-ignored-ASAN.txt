@@ -26,9 +26,6 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_ConstructorTest.ets
 std/core/NumberTest.ets
 std/core/json/JsonStringifyTest1.ets
 
-#29145
-std/core/json/JsonStringifyParseBigIntTest.ets
-
 #29144
 std/core/json/JsonStringifyBigIntTest.ets
 

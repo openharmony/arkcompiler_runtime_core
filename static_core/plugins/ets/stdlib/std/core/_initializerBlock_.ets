@@ -18,7 +18,7 @@ package std.core;
 static {
     // 5 lower bits stores kind's id
     TypeKindMask = ((1 << 6) - 1).toByte();
-    BigIntType = Type.of(new BigInt());
+    BigIntType = Class.from<BigInt>();
     ObjectType = Type.of(new Object()) as ClassType;
     console = Console.getInstance();
     coroutine = new Coroutine();

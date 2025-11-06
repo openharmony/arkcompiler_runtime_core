@@ -15,114 +15,45 @@
 
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/types/ets_reflect_field.h"
 #include "helpers/json_helper.h"
 
 namespace ark::ets::intrinsics {
 
-static EtsField *GetInstanceFieldByName(EtsClass *cls, EtsString *name)
+static EtsBoolean IsFieldHasAnnotation(EtsReflectField *reflectField, const std::string_view &annotClassDescriptor)
 {
-    auto fieldName = name->GetMutf8();
-    auto instanceField = ManglingUtils::GetFieldIDByDisplayName(cls, fieldName);
-    return instanceField;
-}
-
-EtsBoolean StdCoreJSONGetJSONStringifyIgnoreByIdx(EtsClass *cls, EtsLong idx)
-{
-    EtsField *field = cls->GetFieldByIndex(idx);
-    bool ret = false;
-    if (field == nullptr) {
-        return static_cast<EtsBoolean>(ret);
-    }
+    EtsField *field = reflectField->GetEtsField();
+    bool result = false;
     auto *runtimeClass = field->GetDeclaringClass()->GetRuntimeClass();
     const panda_file::File &pf = *runtimeClass->GetPandaFile();
     panda_file::FieldDataAccessor fda(pf, field->GetRuntimeField()->GetFileId());
-    fda.EnumerateAnnotations([&pf, &ret](panda_file::File::EntityId annId) {
+    fda.EnumerateAnnotations([&pf, &result, &annotClassDescriptor](panda_file::File::EntityId annId) {
         panda_file::AnnotationDataAccessor ada(pf, annId);
         const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
-        if (className == panda_file_items::class_descriptors::JSON_STRINGIFY_IGNORE) {
-            ret = true;
+        if (className == annotClassDescriptor) {
+            result = true;
         }
     });
-    return static_cast<EtsBoolean>(ret);
+    return static_cast<EtsBoolean>(result);
 }
 
-EtsBoolean StdCoreJSONGetJSONStringifyIgnoreByName(EtsClass *cls, EtsString *name)
+EtsBoolean StdCoreJSONGetJSONStringifyIgnore(EtsReflectField *reflectField)
 {
-    EtsField *field = GetInstanceFieldByName(cls, name);
-    bool ret = false;
-    if (field == nullptr) {
-        return static_cast<EtsBoolean>(ret);
-    }
-    auto *runtimeClass = field->GetDeclaringClass()->GetRuntimeClass();
-    const panda_file::File &pf = *runtimeClass->GetPandaFile();
-    panda_file::FieldDataAccessor fda(pf, field->GetRuntimeField()->GetFileId());
-    fda.EnumerateAnnotations([&pf, &ret](panda_file::File::EntityId annId) {
-        panda_file::AnnotationDataAccessor ada(pf, annId);
-        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
-        if (className == panda_file_items::class_descriptors::JSON_STRINGIFY_IGNORE) {
-            ret = true;
-        }
-    });
-    return static_cast<EtsBoolean>(ret);
+    return IsFieldHasAnnotation(reflectField, panda_file_items::class_descriptors::JSON_STRINGIFY_IGNORE);
 }
 
-EtsBoolean StdCoreJSONGetJSONParseIgnoreFromAnnotation(EtsClass *cls, EtsLong idx)
+EtsBoolean StdCoreJSONGetJSONParseIgnore(EtsReflectField *reflectField)
 {
-    EtsField *field = cls->GetFieldByIndex(idx);
-    bool ret = false;
-    if (field == nullptr) {
-        return static_cast<EtsBoolean>(ret);
-    }
-    auto *runtimeClass = field->GetDeclaringClass()->GetRuntimeClass();
-    const panda_file::File &pf = *runtimeClass->GetPandaFile();
-    panda_file::FieldDataAccessor fda(pf, field->GetRuntimeField()->GetFileId());
-    fda.EnumerateAnnotations([&pf, &ret](panda_file::File::EntityId annId) {
-        panda_file::AnnotationDataAccessor ada(pf, annId);
-        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
-        if (className == panda_file_items::class_descriptors::JSON_PARSE_IGNORE) {
-            ret = true;
-        }
-    });
-    return static_cast<EtsBoolean>(ret);
+    return IsFieldHasAnnotation(reflectField, panda_file_items::class_descriptors::JSON_PARSE_IGNORE);
 }
 
-EtsString *StdCoreJSONGetJSONRenameByIdx(EtsClass *cls, EtsLong idx)
+EtsString *StdCoreJSONGetJSONRename(EtsReflectField *reflectField)
 {
     auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
 
-    EtsField *field = cls->GetFieldByIndex(idx);
+    EtsField *field = reflectField->GetEtsField();
     VMHandle<EtsString> retStrHandle;
-    if (field == nullptr) {
-        return VMHandle<EtsString>(thread, EtsString::CreateNewEmptyString()->GetCoreType()).GetPtr();
-    }
-    auto *runtimeClass = field->GetDeclaringClass()->GetRuntimeClass();
-    const panda_file::File &pf = *runtimeClass->GetPandaFile();
-    panda_file::FieldDataAccessor fda(pf, field->GetRuntimeField()->GetFileId());
-    fda.EnumerateAnnotations([&pf, &retStrHandle, &thread](panda_file::File::EntityId annId) {
-        panda_file::AnnotationDataAccessor ada(pf, annId);
-        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
-        if (className == panda_file_items::class_descriptors::JSON_RENAME) {
-            const auto value = ada.GetElement(0).GetScalarValue();
-            const auto id = value.Get<panda_file::File::EntityId>();
-            auto stringData = pf.GetStringData(id);
-            retStrHandle = VMHandle<EtsString>(
-                thread, EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(stringData.data))->GetCoreType());
-        }
-    });
-    return retStrHandle.GetPtr();
-}
-
-EtsString *StdCoreJSONGetJSONRenameByName(EtsClass *cls, EtsString *name)
-{
-    auto *thread = ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-
-    EtsField *field = GetInstanceFieldByName(cls, name);
-    VMHandle<EtsString> retStrHandle;
-    if (field == nullptr) {
-        return VMHandle<EtsString>(thread, EtsString::CreateNewEmptyString()->GetCoreType()).GetPtr();
-    }
     auto *runtimeClass = field->GetDeclaringClass()->GetRuntimeClass();
     const panda_file::File &pf = *runtimeClass->GetPandaFile();
     panda_file::FieldDataAccessor fda(pf, field->GetRuntimeField()->GetFileId());
