@@ -32,5 +32,5 @@ namespace anyns {
 }
 
 namespace anyns {
-    export let testValue: String = "HongKong";
+    export let testValue: String = "imijah";
 }
