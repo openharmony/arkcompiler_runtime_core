@@ -294,6 +294,7 @@ template("concat_yamls") {
     ]
 
     foreach(yaml, invoker.add_yamls) {
+      inputs += [ yaml ]
       args += [ rebase_path(yaml, root_build_dir) ]
     }
 
