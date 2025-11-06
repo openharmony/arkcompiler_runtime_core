@@ -30,23 +30,6 @@ cases:
         }
 
   - desc: |-
-      Checking for changing the value from static block.
-    check_variants:
-      - {type: "int", check_value: "5"}
-      - {type: "double", check_value: "7.3"}
-      - {type: "Object | undefined",
-        check_value: "undefined"}
-      - {type: "Any", check_value: "5"}
-    decl_variants:
-      - |-
-        class A {
-          static readonly field: [type]
-          static {
-            A.field = [check_value]
-          }
-        }
-
-  - desc: |-
       Checking for changing the value from constructor.
     check_variants:
       - {type: "int", check_value: "5"}
@@ -232,13 +215,16 @@ cases:
 
   - desc: |-
       >-
-        Checking for changing the value from outside of class
-        with subtype usage.
+        Checking for changing the value in derived class.
     check_variants:
       - {type: "int",
         base_value: "0", check_value: "5"}
       - {type: "double",
         base_value: "0", check_value: "7.3"}
+      - {type: "bigint",
+        base_value: "0n", check_value: "5n"}
+      - {type: "string",
+        base_value: "\"\"", check_value: "\"abc\""}
       - {type: "Object | undefined",
         base_value: "0", check_value: "5"}
       - {type: "Any",
@@ -253,18 +239,116 @@ cases:
     sub_cases_logic:
       - |-
         A.field = [check_value]
+      - |-
+        const lambda = () => {
+          A.field = [check_value]
+        }
 
   - desc: |-
-      Readonly fields initialization never uses default values.
+      >-
+        Checking for changing the value in derived class.
     check_variants:
-      - {type: "int"}
-      - {type: "double"}
-      - {type: "Object | undefined"}
-      - {type: "Any"}
+      - {type: "int",
+        check_value: "5"}
+      - {type: "double",
+        check_value: "7.3"}
+      - {type: "Object | undefined",
+        check_value: "5"}
+      - {type: "Any",
+        check_value: "5"}
     decl_variants:
       - |-
-        class A {
+        class Base {
           static readonly field: [type]
+        }
+        class A extends Base {
+        }
+    sub_cases_logic:
+      - |-
+        A.field = [check_value]
+      - |-
+        const lambda = () => {
+          A.field = [check_value]
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value in derived class.
+    check_variants:
+      - {type: "int",
+        base_value: "0", check_value: "5"}
+      - {type: "double",
+        base_value: "0", check_value: "7.3"}
+      - {type: "bigint",
+        base_value: "0n", check_value: "5n"}
+      - {type: "string",
+        base_value: "\"\"", check_value: "\"abc\""}
+      - {type: "Object | undefined",
+        base_value: "0", check_value: "5"}
+      - {type: "Any",
+        base_value: "0", check_value: "5"}
+    decl_variants:
+      - |-
+        class Base {
+          static readonly field: [type] = [base_value]
+        }
+        class A extends Base {
+          static {
+            A.field = [check_value]
+          }
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value in derived class.
+    check_variants:
+      - {type: "int",
+        check_value: "5"}
+      - {type: "double",
+        check_value: "7.3"}
+      - {type: "Object | undefined",
+        check_value: "5"}
+      - {type: "Any",
+        check_value: "5"}
+    decl_variants:
+      - |-
+        class Base {
+          static readonly field: [type]
+        }
+        class A extends Base {
+          static {
+            A.field = [check_value]
+          }
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value in derived class.
+    check_variants:
+      - {type: "int",
+        base_value: "0", check_value: "5"}
+      - {type: "double",
+        base_value: "0", check_value: "7.3"}
+      - {type: "bigint",
+        base_value: "0n", check_value: "5n"}
+      - {type: "string",
+        base_value: "\"\"", check_value: "\"abc\""}
+      - {type: "Object | undefined",
+        base_value: "0", check_value: "5"}
+      - {type: "Any",
+        base_value: "0", check_value: "5"}
+    decl_variants:
+      - |-
+        class Base {
+          static readonly field: [type]
+          static {
+            Base.field = [base_value]
+          }
+        }
+        class A extends Base {
+          static {
+            A.field = [check_value]
+          }
         }
 
   - desc: |-
@@ -286,4 +370,88 @@ cases:
         class C {}
         class A {
           static readonly field: C
+        }
+
+  - desc: |-
+      >-
+        Checking for initialization with field initializer
+        by assign this directly.
+    decl_variants:
+      - |-
+        class A {
+          static readonly field = this
+        }
+
+  - desc: |-
+      >-
+        Checking for initialization with field initializer
+        with call methods of this or supper.
+    check_variants:
+      - {type: "int", check_value: "5"}
+      - {type: "double", check_value: "7.3"}
+      - {type: "Object | undefined", check_value: "5"}
+      - {type: "Any", check_value: "5"}
+    decl_variants:
+      - |-
+        class A {
+          foo (): [type] {
+            return [check_value]
+          }
+          static readonly field: [type] = this.foo()
+        }
+      - |-
+        class Base {
+          foo (): [type] {
+            return [check_value]
+          }
+        }
+        class A extends Base {
+          static readonly field: [type] = super.foo()
+        }
+
+  - desc: |-
+      >-
+        Checking for initialization with field initializer
+        with capture this.
+    decl_variants:
+      - |-
+        class B {}
+        function foo (f: () => B) { return f() }
+        class A {
+          static readonly field1 = foo(() => this.field2)
+          readonly field2 = new B
+        }
+
+  - desc: |-
+      >-
+        Checking for initialization with field initializer
+        with usage this or super.
+    check_variants:
+      - {type: "int", check_value: "5"}
+      - {type: "double", check_value: "7.3"}
+      - {type: "Object | undefined", check_value: "5"}
+      - {type: "Any", check_value: "5"}
+    decl_variants:
+      - |-
+        class A {
+          v: [type] = [check_value]
+          static readonly field: [type] = this.v
+        }
+      - |-
+        class A {
+          private readonly _v: [type] = [check_value]
+          get v(): [type] {
+            return this._v
+          }
+          static readonly field: [type] = this.v
+        }
+      - |-
+        class Base {
+          private readonly _v: [type] = [check_value]
+          get v(): [type] {
+            return this._v
+          }
+        }
+        class A extends Base {
+          static readonly field: [type] = super.v
         }

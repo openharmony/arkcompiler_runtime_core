@@ -13,6 +13,44 @@
 
 cases:
   - desc: |-
+      Checking for initialization with default values.
+    check_variants:
+      - {check_type: "long",
+        base_value: "0"}
+      - {check_type: "int",
+        base_value: "0"}
+      - {check_type: "byte",
+        base_value: "0"}
+      - {check_type: "short",
+        base_value: "0"}
+      - {check_type: "double",
+        base_value: "0"}
+      - {check_type: "number",
+        base_value: "0"}
+      - {check_type: "float",
+        base_value: "0.0f"}
+      - {check_type: "char",
+        base_value: "c'\\u0000'"}
+      - {check_type: "boolean",
+        base_value: "false"}
+      - {check_type: "Object | undefined",
+        base_value: "undefined"}
+      - {check_type: "Object | undefined | null",
+        base_value: "undefined"}
+      - {check_type: "Any",
+        base_value: "undefined"}
+    decl_variants:
+      - |-
+        class A {
+          readonly field: [check_type]
+        }
+    sub_cases_logic:
+      - |-
+        let a: A = new A()
+        arktest.assertTrue(a.field instanceof [check_type])
+        arktest.assertEQ(a.field, [base_value])
+
+  - desc: |-
       Checking for initialization with field initializer.
     check_variants:
       - {type: "long", check_type: "long", check_value: "5"}
@@ -130,6 +168,7 @@ cases:
         class A extends Base {
           readonly field: [type]
           constructor () {
+            super()
             this.field = super.v
           }
         }
@@ -190,6 +229,7 @@ cases:
         class A extends Base {
           readonly field: [check_type]
           constructor () {
+            super()
             this.field = super.v
           }
         }
@@ -202,254 +242,6 @@ cases:
           }
           constructor () {
             this._field = [init_value]
-          }
-        }
-    sub_cases_logic:
-      - |-
-        let a: A = new A()
-        arktest.assertTrue(a.field instanceof [check_type])
-        arktest.assertTrue(a.field.data instanceof [data_type])
-        arktest.assertEQ(a.field.data, [check_value])
-
-  - desc: |-
-      Checking for initialization from constructor.
-    check_variants:
-      - {type: "long", check_type: "long", check_value: "5"}
-      - {type: "int", check_type: "int", check_value: "5"}
-      - {type: "byte", check_type: "byte", check_value: "5"}
-      - {type: "short", check_type: "short", check_value: "5"}
-      - {type: "double", check_type: "double", check_value: "7.3"}
-      - {type: "number", check_type: "number", check_value: "5"}
-      - {type: "float", check_type: "float", check_value: "7.3f"}
-      - {type: "char", check_type: "char", check_value: "c'a'"}
-      - {type: "boolean", check_type: "boolean", check_value: "true"}
-      - {type: "Object | undefined", check_type: "undefined",
-        check_value: "undefined"}
-      - {type: "Object | undefined | null", check_type: "Object",
-        check_value: "5"}
-      - {type: "Any", check_type: "Any", check_value: "5"}
-    decl_variants:
-      - |-
-        class Base {
-          protected readonly _field: [type]
-          get field(): [type] {
-            return this._field
-          }
-        }
-        class A extends Base {
-          constructor () {
-            this._field = [check_value]
-          }
-        }
-    sub_cases_logic:
-      - |-
-        let a: A = new A()
-        arktest.assertTrue(a.field instanceof [check_type])
-        arktest.assertEQ(a.field, [check_value])
-
-  - desc: |-
-      Checking for initialization from constructor.
-    check_variants:
-      - {type: "long", check_type: "long",
-        base_value: "0", check_value: "5"}
-      - {type: "int", check_type: "int",
-        base_value: "0", check_value: "5"}
-      - {type: "byte", check_type: "byte",
-        base_value: "0", check_value: "5"}
-      - {type: "short", check_type: "short",
-        base_value: "0", check_value: "5"}
-      - {type: "double", check_type: "double",
-        base_value: "0", check_value: "7.3"}
-      - {type: "number", check_type: "number",
-        base_value: "0", check_value: "5"}
-      - {type: "float", check_type: "float",
-        base_value: "0.0f", check_value: "7.3f"}
-      - {type: "bigint", check_type: "bigint",
-        base_value: "0n", check_value: "5n"}
-      - {type: "string", check_type: "string",
-        base_value: "\"\"", check_value: "\"abc\""}
-      - {type: "char", check_type: "char",
-        base_value: "c'\u0000'", check_value: "c'a'"}
-      - {type: "boolean", check_type: "boolean",
-        base_value: "false", check_value: "true"}
-      - {type: "Object", check_type: "Object",
-        base_value: "0", check_value: "5"}
-      - {type: "Object | null", check_type: "null",
-        base_value: "0", check_value: "null"}
-      - {type: "Object | undefined", check_type: "undefined",
-        base_value: "0", check_value: "undefined"}
-      - {type: "Object | undefined | null", check_type: "Object",
-        base_value: "0", check_value: "5"}
-      - {type: "Any", check_type: "Any",
-        base_value: "0", check_value: "5"}
-    decl_variants:
-      - |-
-        class Base {
-          protected readonly _field: [type]
-          get field(): [type] {
-            return this._field
-          }
-          constructor () {
-            this._field = [base_value]
-          }
-        }
-        class A extends Base {
-          constructor () {
-            this._field = [check_value]
-          }
-        }
-    sub_cases_logic:
-      - |-
-        let a: A = new A()
-        arktest.assertTrue(a.field instanceof [check_type])
-        arktest.assertEQ(a.field, [check_value])
-
-  - desc: |-
-      Checking for initialization from constructor.
-    check_variants:
-      - {check_type: "C", data_type: "int",
-        base_init_value: "{data: 0}", init_value: "{data: 5}",
-        check_value: "5", cv_decl_data: "class C {readonly data: int = 0}"}
-    decl_variants:
-      - |-
-        [cv_decl_data]
-        class Base {
-          protected readonly _field: [check_type]
-          get field(): [check_type] {
-            return this._field
-          }
-          constructor () {
-            this._field = [base_init_value]
-          }
-        }
-        class A extends Base {
-          constructor () {
-            this._field = [init_value]
-          }
-        }
-    sub_cases_logic:
-      - |-
-        let a: A = new A()
-        arktest.assertTrue(a.field instanceof [check_type])
-        arktest.assertTrue(a.field.data instanceof [data_type])
-        arktest.assertEQ(a.field.data, [check_value])
-
-  - desc: |-
-      Checking for initialization from constructor.
-    check_variants:
-      - {type: "long", check_type: "long",
-        base_value: "3", check_value: "5"}
-      - {type: "int", check_type: "int",
-        base_value: "3", check_value: "5"}
-      - {type: "byte", check_type: "byte",
-        base_value: "3", check_value: "5"}
-      - {type: "short", check_type: "short",
-        base_value: "3", check_value: "5"}
-      - {type: "double", check_type: "double",
-        base_value: "3", check_value: "7.3"}
-      - {type: "number", check_type: "number",
-        base_value: "3", check_value: "5"}
-      - {type: "float", check_type: "float",
-        base_value: "3.0f", check_value: "7.3f"}
-      - {type: "bigint", check_type: "bigint",
-        base_value: "3n", check_value: "5n"}
-      - {type: "string", check_type: "string",
-        base_value: "\"a\"", check_value: "\"abc\""}
-      - {type: "char", check_type: "char",
-        base_value: "c'a'", check_value: "c'b'"}
-      - {type: "boolean", check_type: "boolean",
-        base_value: "false", check_value: "true"}
-      - {type: "Object", check_type: "Object",
-        base_value: "3", check_value: "5"}
-      - {type: "Object | null", check_type: "null",
-        base_value: "3", check_value: "null"}
-      - {type: "Object | undefined", check_type: "undefined",
-        base_value: "3", check_value: "undefined"}
-      - {type: "Object | undefined | null", check_type: "Object",
-        base_value: "3", check_value: "5"}
-      - {type: "Any", check_type: "Any",
-        base_value: "3", check_value: "5"}
-    decl_variants:
-      - |-
-        class A {
-          readonly field: [type] = [base_value]
-          constructor (v: [type] = [base_value]) {
-            if (v == [check_value]) {
-              this.field = v
-            }
-          }
-        }
-    sub_cases_logic:
-      - |-
-        let a: A = new A()
-        let b: A = new A([check_value])
-        arktest.assertTrue(a.field instanceof [check_type])
-        arktest.assertEQ(a.field, [base_value])
-        arktest.assertTrue(b.field instanceof [check_type])
-        arktest.assertEQ(b.field, [check_value])
-
-  - desc: |-
-      Checking for initialization from constructor.
-    check_variants:
-      - {type: "long", check_type: "long",
-        base_value: "0", check_value: "5"}
-      - {type: "int", check_type: "int",
-        base_value: "0", check_value: "5"}
-      - {type: "byte", check_type: "byte",
-        base_value: "0", check_value: "5"}
-      - {type: "short", check_type: "short",
-        base_value: "0", check_value: "5"}
-      - {type: "double", check_type: "double",
-        base_value: "0", check_value: "7.3"}
-      - {type: "number", check_type: "number",
-        base_value: "0", check_value: "5"}
-      - {type: "float", check_type: "float",
-        base_value: "0.0f", check_value: "7.3f"}
-      - {type: "bigint", check_type: "bigint",
-        base_value: "0n", check_value: "5n"}
-      - {type: "string", check_type: "string",
-        base_value: "\"\"", check_value: "\"abc\""}
-      - {type: "char", check_type: "char",
-        base_value: "c'\u0000'", check_value: "c'a'"}
-      - {type: "boolean", check_type: "boolean",
-        base_value: "false", check_value: "true"}
-      - {type: "Object", check_type: "Object",
-        base_value: "0", check_value: "5"}
-      - {type: "Object | null", check_type: "null",
-        base_value: "0", check_value: "null"}
-      - {type: "Object | undefined", check_type: "undefined",
-        base_value: "0", check_value: "undefined"}
-      - {type: "Object | undefined | null", check_type: "Object",
-        base_value: "0", check_value: "5"}
-      - {type: "Any", check_type: "Any",
-        base_value: "0", check_value: "5"}
-    decl_variants:
-      - |-
-        class A {
-          readonly field: [type] = [base_value]
-          constructor () {
-            this.field = [check_value]
-          }
-        }
-    sub_cases_logic:
-      - |-
-        let a: A = new A()
-        arktest.assertTrue(a.field instanceof [check_type])
-        arktest.assertEQ(a.field, [check_value])
-
-  - desc: |-
-      Checking for initialization from constructor.
-    check_variants:
-      - {check_type: "C", data_type: "int",
-        base_init_value: "{data: 0}", init_value: "{data: 5}",
-        check_value: "5", cv_decl_data: "class C {readonly data: int = 0}"}
-    decl_variants:
-      - |-
-        [cv_decl_data]
-        class A {
-          readonly field: [check_type] = [base_init_value]
-          constructor () {
-            this.field = [init_value]
           }
         }
     sub_cases_logic:
@@ -544,77 +336,6 @@ cases:
         [cv_decl_data]
         class A {
           readonly field: [check_type] = [base_init_value]
-        }
-    sub_cases_logic:
-      - |-
-        let a: A = {field: [init_value]}
-        arktest.assertTrue(a.field instanceof [check_type])
-        arktest.assertTrue(a.field.data instanceof [data_type])
-        arktest.assertEQ(a.field.data, [check_value])
-
-  - desc: |-
-      Checking for initialization from object literal.
-    check_variants:
-      - {type: "long", check_type: "long",
-        base_value: "0", check_value: "5"}
-      - {type: "int", check_type: "int",
-        base_value: "0", check_value: "5"}
-      - {type: "byte", check_type: "byte",
-        base_value: "0", check_value: "5"}
-      - {type: "short", check_type: "short",
-        base_value: "0", check_value: "5"}
-      - {type: "double", check_type: "double",
-        base_value: "0", check_value: "7.3"}
-      - {type: "number", check_type: "number",
-        base_value: "0", check_value: "5"}
-      - {type: "float", check_type: "float",
-        base_value: "0.0f", check_value: "7.3f"}
-      - {type: "bigint", check_type: "bigint",
-        base_value: "0n", check_value: "5n"}
-      - {type: "string", check_type: "string",
-        base_value: "\"\"", check_value: "\"abc\""}
-      - {type: "char", check_type: "char",
-        base_value: "c'\u0000'", check_value: "c'a'"}
-      - {type: "boolean", check_type: "boolean",
-        base_value: "false", check_value: "true"}
-      - {type: "Object", check_type: "Object",
-        base_value: "0", check_value: "5"}
-      - {type: "Object | null", check_type: "null",
-        base_value: "0", check_value: "null"}
-      - {type: "Object | undefined", check_type: "undefined",
-        base_value: "0", check_value: "undefined"}
-      - {type: "Object | undefined | null", check_type: "Object",
-        base_value: "0", check_value: "5"}
-      - {type: "Any", check_type: "Any",
-        base_value: "0", check_value: "5"}
-    decl_variants:
-      - |-
-        class A {
-          readonly field: [type] = [base_value]
-          constructor () {
-            this.field = [base_value]
-          }
-        }
-    sub_cases_logic:
-      - |-
-        let a: A = {field: [check_value]}
-        arktest.assertTrue(a.field instanceof [check_type])
-        arktest.assertEQ(a.field, [check_value])
-
-  - desc: |-
-      Checking for initialization from object literal.
-    check_variants:
-      - {check_type: "C", data_type: "int",
-        base_init_value: "{data: 0}", init_value: "{data: 5}",
-        check_value: "5", cv_decl_data: "class C {readonly data: int = 0}"}
-    decl_variants:
-      - |-
-        [cv_decl_data]
-        class A {
-          readonly field: [check_type] = [base_init_value]
-          constructor () {
-            this.field = [base_init_value]
-          }
         }
     sub_cases_logic:
       - |-
@@ -738,11 +459,13 @@ cases:
         }
         class Dog extends Animal {
           constructor () {
+            super()
             this.name = "dog"
           }
         }
         class Cat extends Animal {
           constructor () {
+            super()
             this.name = "cat"
           }
         }
@@ -755,11 +478,13 @@ cases:
         }
         class Dog extends Animal {
           constructor () {
+            super()
             this.name = "dog"
           }
         }
         class Cat extends Animal {
           constructor () {
+            super()
             this.name = "cat"
           }
         }

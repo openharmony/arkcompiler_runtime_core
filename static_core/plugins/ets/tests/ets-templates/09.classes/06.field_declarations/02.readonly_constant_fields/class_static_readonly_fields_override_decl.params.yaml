@@ -55,6 +55,19 @@ cases:
         class A extends Base {
           static readonly field: [type] = [check_value]
         }
+      - |-
+        class Base {
+          static readonly field: [type]
+          static {
+            Base.field = [base_value]
+          }
+        }
+        class A extends Base {
+          static readonly field: [type]
+          static {
+            A.field = [check_value]
+          }
+        }
     sub_cases_logic:
       - |-
         arktest.assertTrue(A.field instanceof [check_type])

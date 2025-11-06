@@ -40,6 +40,56 @@ cases:
         }
 
   - desc: |-
+      Checking for changing the value from constructor.
+    check_variants:
+      - {type: "int",
+        base_value: "0", check_value: "5"}
+      - {type: "double",
+        base_value: "0", check_value: "7.3"}
+      - {type: "bigint",
+        base_value: "0n", check_value: "5n"}
+      - {type: "string",
+        base_value: "\"\"", check_value: "\"abc\""}
+      - {type: "Object | undefined",
+        base_value: "0", check_value: "5"}
+      - {type: "Any",
+        base_value: "0", check_value: "5"}
+    decl_variants:
+      - |-
+        class A {
+          readonly field: [type] = [base_value]
+          constructor (v: [type] = [base_value]) {
+            if (v == [check_value]) {
+              this.field = v
+            }
+          }
+        }
+
+  - desc: |-
+      Checking for changing the value from constructor.
+    check_variants:
+      - {type: "int",
+        base_value: "0", check_value: "5"}
+      - {type: "double",
+        base_value: "0", check_value: "7.3"}
+      - {type: "bigint",
+        base_value: "0n", check_value: "5n"}
+      - {type: "string",
+        base_value: "\"\"", check_value: "\"abc\""}
+      - {type: "Object | undefined",
+        base_value: "0", check_value: "5"}
+      - {type: "Any",
+        base_value: "0", check_value: "5"}
+    decl_variants:
+      - |-
+        class A {
+          readonly field: [type] = [base_value]
+          constructor () {
+            this.field = [check_value]
+          }
+        }
+
+  - desc: |-
       Checking for changing the value from outside of class.
     check_variants:
       - {type: "int",
@@ -196,13 +246,16 @@ cases:
 
   - desc: |-
       >-
-        Checking for changing the value from outside of class
-        with subtype usage.
+        Checking for changing the value in derived class.
     check_variants:
       - {type: "int",
         base_value: "0", check_value: "5"}
       - {type: "double",
         base_value: "0", check_value: "7.3"}
+      - {type: "bigint",
+        base_value: "0n", check_value: "5n"}
+      - {type: "string",
+        base_value: "\"\"", check_value: "\"abc\""}
       - {type: "Object | undefined",
         base_value: "0", check_value: "5"}
       - {type: "Any",
@@ -226,16 +279,128 @@ cases:
 
   - desc: |-
       >-
-        Checking for changing the value by setter.
+        Checking for changing the value in derived class.
+    check_variants:
+      - {type: "int",
+        check_value: "5"}
+      - {type: "double",
+        check_value: "7.3"}
+      - {type: "Object | undefined",
+        check_value: "5"}
+      - {type: "Any",
+        check_value: "5"}
+    decl_variants:
+      - |-
+        class Base {
+          readonly field: [type]
+        }
+        class A extends Base {
+        }
+    sub_cases_logic:
+      - |-
+        let a: A = new A()
+        a.field = [check_value]
+      - |-
+        let a: A = new A()
+        const lambda = () => {
+          a.field = [check_value]
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value in derived class.
     check_variants:
       - {type: "int",
         base_value: "0", check_value: "5"}
       - {type: "double",
         base_value: "0", check_value: "7.3"}
+      - {type: "bigint",
+        base_value: "0n", check_value: "5n"}
+      - {type: "string",
+        base_value: "\"\"", check_value: "\"abc\""}
       - {type: "Object | undefined",
         base_value: "0", check_value: "5"}
       - {type: "Any",
         base_value: "0", check_value: "5"}
+    decl_variants:
+      - |-
+        class Base {
+          readonly field: [type] = [base_value]
+        }
+        class A extends Base {
+          constructor() {
+            super()
+            this.field = [check_value]
+          }
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value in derived class.
+    check_variants:
+      - {type: "int",
+        check_value: "5"}
+      - {type: "double",
+        check_value: "7.3"}
+      - {type: "Object | undefined",
+        check_value: "5"}
+      - {type: "Any",
+        check_value: "5"}
+    decl_variants:
+      - |-
+        class Base {
+          readonly field: [type]
+        }
+        class A extends Base {
+          constructor() {
+            super()
+            this.field = [check_value]
+          }
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value in derived class.
+    check_variants:
+      - {type: "int",
+        base_value: "0", check_value: "5"}
+      - {type: "double",
+        base_value: "0", check_value: "7.3"}
+      - {type: "bigint",
+        base_value: "0n", check_value: "5n"}
+      - {type: "string",
+        base_value: "\"\"", check_value: "\"abc\""}
+      - {type: "Object | undefined",
+        base_value: "0", check_value: "5"}
+      - {type: "Any",
+        base_value: "0", check_value: "5"}
+    decl_variants:
+      - |-
+        class Base {
+          readonly field: [type]
+          constructor() {
+            this.field = [base_value]
+          }
+        }
+        class A extends Base {
+          constructor() {
+            super()
+            this.field = [check_value]
+          }
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value by setter.
+    check_variants:
+      - {type: "int",
+        base_value: "0"}
+      - {type: "double",
+        base_value: "0"}
+      - {type: "Object | undefined",
+        base_value: "0"}
+      - {type: "Any",
+        base_value: "0"}
     decl_variants:
       - |-
         class A {
@@ -246,6 +411,72 @@ cases:
           set field(a: [type]) {
             this._field = a
           }
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value by setter.
+    check_variants:
+      - {type: "int"}
+      - {type: "double"}
+      - {type: "Object | undefined"}
+      - {type: "Any"}
+    decl_variants:
+      - |-
+        class A {
+          private readonly _field: [type]
+          get field(): [type] {
+            return this._field
+          }
+          set field(a: [type]) {
+            this._field = a
+          }
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value
+        by accessor with receiver.
+    check_variants:
+      - {type: "int",
+        base_value: "0"}
+      - {type: "double",
+        base_value: "0"}
+      - {type: "Object | undefined",
+        base_value: "0"}
+      - {type: "Any",
+        base_value: "0"}
+    decl_variants:
+      - |-
+        class A {
+          readonly _field: [type] = [base_value]
+        }
+        get field(this: A): [type] {
+          return this._field
+        }
+        set field(this: A, a: [type]) {
+          this._field = a
+        }
+
+  - desc: |-
+      >-
+        Checking for changing the value
+        by accessor with receiver.
+    check_variants:
+      - {type: "int"}
+      - {type: "double"}
+      - {type: "Object | undefined"}
+      - {type: "Any"}
+    decl_variants:
+      - |-
+        class A {
+          readonly _field: [type]
+        }
+        get field(this: A): [type] {
+          return this._field
+        }
+        set field(this: A, a: [type]) {
+          this._field = a
         }
 
   - desc: |-
@@ -351,19 +582,6 @@ cases:
           get field(): [type] {
             return this._field
           }
-        }
-
-  - desc: |-
-      Readonly fields initialization never uses default values.
-    check_variants:
-      - {type: "int"}
-      - {type: "double"}
-      - {type: "Object | undefined"}
-      - {type: "Any"}
-    decl_variants:
-      - |-
-        class A {
-          readonly field: [type]
         }
 
   - desc: |-

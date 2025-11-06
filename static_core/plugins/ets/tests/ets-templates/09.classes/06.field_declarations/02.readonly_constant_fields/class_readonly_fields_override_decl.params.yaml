@@ -65,6 +65,7 @@ cases:
         class A extends Base {
           override readonly field: [type]
           constructor () {
+            super()
             this.field = [check_value]
           }
         }
@@ -155,6 +156,7 @@ cases:
         class A extends Base {
           override readonly field!: [check_type]
           constructor () {
+            super()
             this.field = [check_value]
           }
         }
@@ -168,6 +170,7 @@ cases:
         class A extends Base {
           override readonly field!: [check_type]
           constructor () {
+            super()
             this.field = [check_value]
           }
         }
@@ -181,6 +184,7 @@ cases:
         class A extends Base {
           override readonly field: [check_type]
           constructor () {
+            super()
             this.field = [check_value]
           }
         }
