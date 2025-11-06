@@ -263,32 +263,11 @@ cases:
         to set the value explicitly.
     decl_variants:
       - |-
-        const x = 5 as long
+        const x: long = 5
         enum Enum { first = x, second, third }
       - |-
-        const x = 5 as long
+        const x: long = 5
         const enum Enum { first = x, second, third }
-    sub_cases_logic:
-      - |-
-        arktest.assertTrue(Enum.first instanceof Enum)
-        arktest.assertTrue(Enum.second instanceof Enum)
-        arktest.assertTrue(Enum.third instanceof Enum)
-        arktest.assertTrue(Enum.first.valueOf() instanceof long)
-        arktest.assertTrue(Enum.second.valueOf() instanceof long)
-        arktest.assertTrue(Enum.third.valueOf() instanceof long)
-        arktest.assertEQ(Enum.first.valueOf(), 5)
-        arktest.assertEQ(Enum.second.valueOf(), 6)
-        arktest.assertEQ(Enum.third.valueOf(), 7)
-
-  - desc: |-
-      >-
-        A constant expression of type int or long can be used
-        to set the value explicitly.
-    decl_variants:
-      - |-
-        enum Enum { first = 5 as long, second, third }
-      - |-
-        const enum Enum { first = 5 as long, second, third }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)

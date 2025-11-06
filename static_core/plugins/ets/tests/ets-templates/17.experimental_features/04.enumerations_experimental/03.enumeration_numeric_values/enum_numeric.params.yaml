@@ -14,19 +14,19 @@
 ---
 cases:
     - decl: |-
-          enum Enum { first = 1.1, second = 1.2, third = 1.3 }
+          enum Enum: double { first = 1.1, second = 1.2, third = 1.3 }
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), 1.1 )
           arktest.assertEQ( Enum.second.valueOf(), 1.2 )
           arktest.assertEQ( Enum.third.valueOf(), 1.3 )
 
     - decl: |-
-          enum Enum { first = 10e1, second = 1.2, third = 1.1 } 
+          enum Enum: double { first = 10e1, second = 1.2, third = 1.1 } 
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), 100 )
 
     - decl: |-
-          enum Enum { first =  1.7976931348623155e+308, second = 1.7976931348623157e+308 }
+          enum Enum: double { first =  1.7976931348623155e+308, second = 1.7976931348623157e+308 }
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), 1.7976931348623155e+308 )
           arktest.assertEQ( Enum.second.valueOf(), 1.7976931348623157e+308 )
@@ -34,14 +34,14 @@ cases:
     - decl: |-
           const a: double = 1.23
           const b: double = 1.234
-          enum Enum { first = a, second = b, third = b - 1.1 }
+          enum Enum: double { first = a, second = b, third = b - 1.1 }
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), a )
           arktest.assertEQ( Enum.second.valueOf(), b )
           arktest.assertEQ( Enum.third.valueOf(), b - 1.1 )
 
     - decl: |-
-          enum Enum { first = -1.1, second = -1.2, third = -42.43 }
+          enum Enum: double { first = -1.1, second = -1.2, third = -42.43 }
       use: |-
           arktest.assertEQ( "" + Enum.first, "-1.1" )
           arktest.assertEQ( "" + Enum.second, "-1.2" )

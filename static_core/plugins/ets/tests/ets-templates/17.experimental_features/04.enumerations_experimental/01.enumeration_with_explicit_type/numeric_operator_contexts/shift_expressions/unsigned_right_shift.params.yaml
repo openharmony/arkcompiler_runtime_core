@@ -20,8 +20,8 @@ cases:
     - enum_values: |-
         int { A = -4, B = 1, C = 2147483646}
     - enum_values: |-
-        long { A = -4, B = 1, C = 2147483646}
+        long { A = -4, B = 1, C = 9223372036854775806}
     - enum_values: |-
         float { A = -4.0f, B = 1.0f, C = 2147483646.0f}
     - enum_values: |-
-        double { A = -4.0, B = 1.0, C = -2.0}
+        double { A = -4.0, B = 1.0, C = 9223372036854775806.0}
