@@ -67,6 +67,7 @@ if (enable_irtoc) {
     }
 
     sources = irtoc_scripts + [ irtoc_plugins_file ]
+    sources += plugin_irtoc_plugins
     inputs = sources
     inputs += [ "scripts/common.irt" ]
 
