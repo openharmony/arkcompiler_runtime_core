@@ -15,8 +15,8 @@
 
 /*---
 desc: Overriding abstract method.
-assert: A compile-time error occurs if an abstract method overrides a non-abstract instance method
-tags: [compile-only, negative]
+assert: An abstract method can also override non-abstract methods inherited from base classes or base inferfaces
+tags: [compile-only]
 ---*/
 
 class A {
@@ -26,10 +26,5 @@ class A {
 }
 
 abstract class B extends A {
-  abstract run/* @ label */(): number;
+  abstract run(): number;
 }
-
-/* @@@ label Error TypeError: run(): Double in B cannot override run():
-  Double in A because an abstract method cannot override a non-abstract instance method.*/
-/* @@@ label Error TypeError: run(): Double in B cannot override run(): Double in A
-  because an abstract method cannot override a non-abstract instance method.*/
