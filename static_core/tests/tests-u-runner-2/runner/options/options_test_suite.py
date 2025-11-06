@@ -45,7 +45,7 @@ class TestSuiteOptions(IOptions):
 
     __PARAMETERS = "parameters"
     __EXTENSION = "extension"
-    __DEFAULT_EXTENSION = "sts"
+    __DEFAULT_EXTENSION = "ets"
     __FILTER = "filter"
     __DEFAULT_FILTER = "*"
     __LOAD_RUNTIMES = "load-runtimes"
@@ -59,6 +59,8 @@ class TestSuiteOptions(IOptions):
     __SKIP_COMPILE_ONLY_NEG = "skip-compile-only-neg"
     __DEFAULT_SKIP_COMPILE_ONLY = False
     __WORK_DIR = "work-dir"
+    __USE_METADATA = "use-metadata"
+    __DEFAULT_USE_METADATA = True
 
     def __init__(self, args: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
         super().__init__(None)
@@ -174,6 +176,10 @@ class TestSuiteOptions(IOptions):
     @cached_property
     def filter(self) -> str:
         return str(self.__parameters.get(self.__FILTER, self.__DEFAULT_FILTER))
+
+    @cached_property
+    def use_metadata(self) -> bool:
+        return bool(self.__parameters.get(self.__USE_METADATA, self.__DEFAULT_USE_METADATA))
 
     @cached_property
     def parameters(self) -> dict[str, Any]:  # type: ignore[explicit-any]
