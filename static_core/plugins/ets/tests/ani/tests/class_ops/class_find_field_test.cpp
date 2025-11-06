@@ -203,4 +203,38 @@ TEST_F(ClassFindFieldTest, check_initialization)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_find_field_test.Point"));
 }
 
+TEST_F(ClassFindFieldTest, check_hierarchy)
+{
+    ani_class clsParent {};
+    ASSERT_EQ(env_->FindClass("class_find_field_test.Parent", &clsParent), ANI_OK);
+    ani_class clsChild {};
+    ASSERT_EQ(env_->FindClass("class_find_field_test.Child", &clsChild), ANI_OK);
+
+    // |-----------------------------------------------------------------------------------------|
+    // |                 |    Parent class   |     Child class   |    The same field is found    |
+    // |-----------------|-------------------|-------------------|-------------------------------|
+    // |  Parent field   |       ANI_OK      |       ANI_OK      |              Yes              |
+    // |   Child field   |   ANI_NOT_FOUND   |       ANI_OK      |               No              |
+    // | Overrided field |       ANI_OK      |       ANI_OK      |              Yes              |
+    // |-----------------|-------------------|-------------------|-------------------------------|
+
+    ani_field parentFieldInParent {};
+    ASSERT_EQ(env_->Class_FindField(clsParent, "parentField", &parentFieldInParent), ANI_OK);
+    ani_field childFieldInParent {};
+    ASSERT_EQ(env_->Class_FindField(clsParent, "childField", &childFieldInParent), ANI_NOT_FOUND);
+    ani_field overridedFieldInParent {};
+    ASSERT_EQ(env_->Class_FindField(clsParent, "overridedField", &overridedFieldInParent), ANI_OK);
+
+    ani_field parentFieldInChild {};
+    ASSERT_EQ(env_->Class_FindField(clsChild, "parentField", &parentFieldInChild), ANI_OK);
+    ani_field childFieldInChild {};
+    ASSERT_EQ(env_->Class_FindField(clsChild, "childField", &childFieldInChild), ANI_OK);
+    ani_field overridedFieldInChild {};
+    ASSERT_EQ(env_->Class_FindField(clsChild, "overridedField", &overridedFieldInChild), ANI_OK);
+
+    ASSERT_EQ(parentFieldInParent, parentFieldInChild);
+    ASSERT_NE(childFieldInParent, childFieldInChild);
+    ASSERT_EQ(overridedFieldInParent, overridedFieldInChild);
+}
+
 }  // namespace ark::ets::ani::testing

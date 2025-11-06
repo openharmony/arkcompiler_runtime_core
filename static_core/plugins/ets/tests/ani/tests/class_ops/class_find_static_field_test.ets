@@ -16,3 +16,12 @@
 class Singleton {
     static instance: int = 0;
 }
+
+class Parent {
+    static parentStaticField: int;
+    static overridedStaticField: int;
+}
+class Child extends Parent {
+    static childStaticField: int;
+    static overridedStaticField: int;
+}
