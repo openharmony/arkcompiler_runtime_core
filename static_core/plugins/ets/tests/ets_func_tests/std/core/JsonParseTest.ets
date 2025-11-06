@@ -201,6 +201,26 @@ function jsonParseWithInterface(): int {
     return RESULT_SUCCESS
 }
 
+class BigIntTest {
+    a: bigint = new BigInt(0)
+}
+
+function jsonParseWithBigInt(): int {
+    const integerStr = "{\"a\": 949491916515615615646465644892374983279473243480923840328049823094}"
+    const integerStr2 = "{\"a\": 949491916515615615646465644892374983279473243480923840328049823094.0}"
+    const nonIntergerStr = "{\"a\": 949491916515615615646465644892374983279473243480923840328049823094.1}"
+    const objI = JSON.parse<BigIntTest>(integerStr, undefined, Type.from<BigIntTest>(),
+        { bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT } as jsonx.ParseOptions) as BigIntTest
+    const objI2 = JSON.parse<BigIntTest>(integerStr2, undefined, Type.from<BigIntTest>(),
+        { bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT } as jsonx.ParseOptions) as BigIntTest
+    const objNI = JSON.parse<BigIntTest>(nonIntergerStr, undefined, Type.from<BigIntTest>(),
+        { bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT } as jsonx.ParseOptions) as BigIntTest
+    arktest.assertEQ(objI.a, 949491916515615615646465644892374983279473243480923840328049823094n)
+    arktest.assertEQ(objI2.a, 949491916515615615646465644892374983279473243480923840328049823094n)
+    arktest.assertEQ(objNI.a, 0n)
+    return RESULT_SUCCESS
+}
+
 function main(): int {
     let failures = RESULT_SUCCESS
 
@@ -213,6 +233,7 @@ function main(): int {
     failures += test(jsonParseArrayWithReplacingReviver, "JSON.parse(array) using replacing 'reviver'")
     failures += test(jsonParseWithBoolean, 'JSON.parse boolean in class')
     failures += test(jsonParseWithInterface, 'JSON.parse interface(ignore) in class')
+    failures += test(jsonParseWithBigInt, 'JSON.parse BigInt')
 
     if (failures == RESULT_SUCCESS) {
         consolePrint(Color.Green, "PASSED: ")
