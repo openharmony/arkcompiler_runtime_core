@@ -28,6 +28,7 @@ class VObject;
 class VClass;
 class VString;
 class VMethod;
+class VStaticMethod;
 class VError;
 class VFixedArrayBoolean;
 class VFixedArrayChar;
@@ -97,6 +98,11 @@ struct TypeMapping<VObject **> {
 };
 
 template <>
+struct TypeMapping<VObject *> {
+    using Type = ani_object;
+};
+
+template <>
 struct TypeMapping<VClass **> {
     using Type = ani_class *;
 };
@@ -109,6 +115,16 @@ struct TypeMapping<VString **> {
 template <>
 struct TypeMapping<VMethod *> {
     using Type = ani_method;
+};
+
+template <>
+struct TypeMapping<VStaticMethod **> {
+    using Type = ani_static_method *;
+};
+
+template <>
+struct TypeMapping<VMethod **> {
+    using Type = ani_method *;
 };
 
 template <>

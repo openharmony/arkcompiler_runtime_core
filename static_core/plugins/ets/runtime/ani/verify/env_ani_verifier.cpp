@@ -16,13 +16,14 @@
 #include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
 
 #include "plugins/ets/runtime/ani/verify/ani_verifier.h"
+#include "plugins/ets/runtime/ani/ani_converters.h"
 
 namespace ark::ets::ani::verify {
 
 EnvANIVerifier::EnvANIVerifier(ANIVerifier *verifier, const __ani_interaction_api *interactionAPI)
     : verifier_(verifier), interactionAPI_(interactionAPI)
 {
-    DoPushNatveFrame();
+    DoPushNativeFrame();
 }
 
 VEnv *EnvANIVerifier::GetEnv(ani_env *env)
@@ -37,7 +38,7 @@ VEnv *EnvANIVerifier::AttachThread(ani_env *env)
     return reinterpret_cast<VEnv *>(env);
 }
 
-void EnvANIVerifier::DoPushNatveFrame()
+void EnvANIVerifier::DoPushNativeFrame()
 {
     Frame frame {
         SubFrameType::NATIVE_FRAME, 0, {}, MakePandaUnique<ArenaAllocator>(SpaceType::SPACE_TYPE_INTERNAL), nullptr};
@@ -45,10 +46,10 @@ void EnvANIVerifier::DoPushNatveFrame()
     frames_.push_back(std::move(frame));
 }
 
-void EnvANIVerifier::PushNatveFrame()
+void EnvANIVerifier::PushNativeFrame()
 {
     ASSERT(!frames_.empty());
-    DoPushNatveFrame();
+    DoPushNativeFrame();
 }
 
 std::optional<PandaString> EnvANIVerifier::PopNativeFrame()
@@ -127,6 +128,15 @@ VRef *EnvANIVerifier::DoAddLocalVerifiedRef(ani_ref ref, ANIRefType type)
     return vref;
 }
 
+VMethod *EnvANIVerifier::GetVerifiedMethod(ani_method method)
+{
+    return reinterpret_cast<VMethod *>(verifier_->AddMethod(ToInternalMethod(method)));
+}
+VStaticMethod *EnvANIVerifier::GetVerifiedStaticMethod(ani_static_method staticMethod)
+{
+    return reinterpret_cast<VStaticMethod *>(verifier_->AddMethod(ToInternalMethod(staticMethod)));
+}
+
 void EnvANIVerifier::DeleteLocalVerifiedRef(VRef *vref)
 {
     ASSERT(!frames_.empty());
@@ -137,7 +147,7 @@ void EnvANIVerifier::DeleteLocalVerifiedRef(VRef *vref)
     frame.refs.erase(it);
 }
 
-bool EnvANIVerifier::IsValidInCurrentFrame(VRef *vref)
+bool EnvANIVerifier::IsValidRefInCurrentFrame(VRef *vref)
 {
     ASSERT(!frames_.empty());
     for (auto it = frames_.crbegin(); it != frames_.crend(); ++it) {
@@ -146,6 +156,22 @@ bool EnvANIVerifier::IsValidInCurrentFrame(VRef *vref)
         }
         if (it->frameType == SubFrameType::NATIVE_FRAME) {
             break;
+        }
+    }
+    return false;
+}
+
+bool EnvANIVerifier::IsGlobalRef(VRef *vref)
+{
+    return verifier_->IsValidGlobalVerifiedRef(vref);
+}
+
+bool EnvANIVerifier::IsValidMethod(VMethod *vmethod)
+{
+    ASSERT(!frames_.empty());
+    for (auto it = frames_.crbegin(); it != frames_.crend(); ++it) {
+        if (verifier_->IsValidVerifiedMethod(vmethod)) {
+            return true;
         }
     }
     return false;

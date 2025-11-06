@@ -43,6 +43,34 @@ bool ANIVerifier::IsValidGlobalVerifiedRef(VRef *vgref)
     return grefsMap_.find(vgref) != grefsMap_.cend();
 }
 
+impl::VMethod *ANIVerifier::AddMethod(EtsMethod *method)
+{
+    auto vmethodHolder = MakePandaUnique<impl::VMethod>(method);
+    impl::VMethod *vmethod = vmethodHolder.get();
+    {
+        os::memory::WriteLockHolder lock(methodsSetLock_);
+
+        methodsSet_[vmethod] = std::move(vmethodHolder);
+    }
+    return vmethod;
+}
+
+void ANIVerifier::DeleteMethod(impl::VMethod *vmethod)
+{
+    os::memory::WriteLockHolder lock(methodsSetLock_);
+
+    auto it = methodsSet_.find(vmethod);
+    ASSERT(it != methodsSet_.cend());
+    methodsSet_.erase(it);
+}
+
+bool ANIVerifier::IsValidVerifiedMethod(impl::VMethod *vmethod)
+{
+    os::memory::ReadLockHolder lock(methodsSetLock_);
+
+    return methodsSet_.find(vmethod) != methodsSet_.cend();
+}
+
 void ANIVerifier::Abort(const std::string_view message)
 {
     PandaStringStream ss;

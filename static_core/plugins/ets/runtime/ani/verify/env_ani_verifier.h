@@ -19,6 +19,7 @@
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vmethod.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -39,7 +40,7 @@ public:
     VEnv *GetEnv(ani_env *env);
     VEnv *AttachThread(ani_env *env);
 
-    void PushNatveFrame();
+    void PushNativeFrame();
     [[nodiscard]] std::optional<PandaString> PopNativeFrame();
 
     void CreateLocalScope();
@@ -85,9 +86,16 @@ public:
     VRef *DoAddLocalVerifiedRef(ani_ref ref, ANIRefType type);
     void DeleteLocalVerifiedRef(VRef *vref);
 
+    VMethod *GetVerifiedMethod(ani_method method);
+    VStaticMethod *GetVerifiedStaticMethod(ani_static_method staticMethod);
+
     VRef *AddGloablVerifiedRef(ani_ref gref);
     void DeleteDeleteGlobalRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
+
+    bool IsValidRefInCurrentFrame(VRef *vref);
+    bool IsGlobalRef(VRef *vref);
+    bool IsValidMethod(VMethod *vmethod);
 
     bool IsValidInCurrentFrame(VRef *vref);
     bool CanBeDeletedFromCurrentScope(VRef *vref);
@@ -112,7 +120,7 @@ private:
         ArenaAllocator *refsAllocator;
     };
 
-    void DoPushNatveFrame();
+    void DoPushNativeFrame();
     static bool IsValidVerifiedRef(const Frame &frame, VRef *vref);
 
     ANIVerifier *verifier_ {};

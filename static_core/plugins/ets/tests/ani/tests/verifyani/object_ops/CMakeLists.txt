@@ -11,6 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ani_verify_add_gtest(ani_verify_test_object_call_method_boolean
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_call_method_boolean_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_call_method_boolean_test.ets
+)
+
 ani_verify_add_gtest(ani_verify_test_object_new
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_new_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_object_new_test.ets

@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/ani/ani.h"
 #include "runtime/include/mem/panda_containers.h"
+#include "plugins/ets/runtime/types/ets_type.h"
 #include "runtime/include/mem/panda_string.h"
 
 // clang-format off
@@ -35,6 +36,7 @@
     X(VERIFY_STRING,                        VerifyString)                         \
     X(VERIFY_ERROR,                         VerifyError)                          \
     X(VERIFY_DEL_LOCAL_REF,                 VerifyDelLocalRef)                    \
+    X(VERIFY_THIS_OBJECT,                   VerifyThisObject)                     \
     X(VERIFY_CTOR,                          VerifyCtor)                           \
     X(VERIFY_METHOD,                        VerifyMethod)                         \
     X(VERIFY_METHOD_A_ARGS,                 VerifyMethodAArgs)                    \
@@ -77,7 +79,9 @@
     X(ANI_DOUBLE,                       Double,                    ani_double)               \
     X(ANI_REF,                          Ref,                       VRef *)                   \
     X(ANI_CLASS,                        Class,                     VClass *)                 \
-    X(ANI_METHOD,                       Method,                    ani_method)               \
+    X(ANI_OBJECT,                       Object,                    VObject *)                \
+    X(ANI_METHOD,                       Method,                    VMethod *)                \
+    X(ANI_STATIC_METHOD,                StaticMethod,              VStaticMethod *)          \
     X(ANI_STRING,                       String,                    VString *)                \
     X(ANI_ERROR,                        Error,                     VError *)                 \
     X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
@@ -111,9 +115,8 @@
     X(ANI_FIXED_ARRAY_LONG_STORAGE,     FixedArrayLongStorage,     VFixedArrayLong **)       \
     X(ANI_FIXED_ARRAY_FLOAT_STORAGE,    FixedArrayFloatStorage,    VFixedArrayFloat **)      \
     X(ANI_FIXED_ARRAY_DOUBLE_STORAGE,   FixedArrayDoubleStorage,   VFixedArrayDouble **)     \
-
 // NOLINTEND(cppcoreguidelines-macro-usage)
-// clang-format on
+    // clang-format on
 
 namespace ark::ets {
 class EtsMethod;
@@ -127,6 +130,8 @@ class VEnv;
 class VRef;
 class VObject;
 class VClass;
+class VMethod;
+class VStaticMethod;
 class VString;
 class VError;
 class VFixedArrayBoolean;
@@ -141,7 +146,7 @@ class VFixedArrayDouble;
 class ANIArg {
 public:
     struct AniMethodArgs {
-        ani_method method;
+        EtsMethod *method;
         const ani_value *vargs;  // NOTE: Reblace ani_value by VValue
         PandaSmallVector<ani_value> argsStorage;
         bool isVaArgs;
@@ -242,12 +247,17 @@ public:
         return ANIArg(ArgValueByRef(vref), name, Action::VERIFY_DEL_LOCAL_REF);
     }
 
-    static ANIArg MakeForMethod(ani_method method, std::string_view name, bool isConstructor = false)
+    static ANIArg MakeForObject(VObject *vobject, std::string_view name)
+    {
+        return ANIArg(ArgValueByObject(vobject), name, Action::VERIFY_THIS_OBJECT);
+    }
+
+    static ANIArg MakeForMethod(VMethod *vmethod, std::string_view name, EtsType returnType, bool isConstructor = false)
     {
         if (isConstructor) {
-            return ANIArg(ArgValueByMethod(method), name, Action::VERIFY_CTOR);
+            return ANIArg(ArgValueByMethod(vmethod), name, Action::VERIFY_CTOR, returnType);
         }
-        return ANIArg(ArgValueByMethod(method), name, Action::VERIFY_METHOD);
+        return ANIArg(ArgValueByMethod(vmethod), name, Action::VERIFY_METHOD, returnType);
     }
 
     static ANIArg MakeForMethodArgs(AniMethodArgs *aniMethodArgs, std::string_view name)
@@ -362,6 +372,11 @@ public:
         return reinterpret_cast<void *>(value_.vVm);  // NOLINT(cppcoreguidelines-pro-type-union-access)
     }
 
+    EtsType GetReturnType() const
+    {
+        return returnType_;
+    }
+
 private:
     // NOLINTBEGIN(cppcoreguidelines-macro-usage)
     union RawValue {
@@ -390,6 +405,11 @@ private:
     {
     }
 
+    explicit ANIArg(ArgValue value, std::string_view name, Action action, EtsType returnType)
+        : value_(value.value), type_(value.type), name_(name), action_(action), returnType_(returnType)
+    {
+    }
+
     // NOLINTBEGIN(cppcoreguidelines-macro-usage,cppcoreguidelines-pro-type-union-access)
     // Generate methods:
     //   static ArgValue ArgValueBy<Name>(<Type> value);
@@ -408,6 +428,8 @@ private:
     ValueType type_;
     std::string_view name_;
     Action action_ {};
+
+    EtsType returnType_ {EtsType::UNKNOWN};
 };
 
 bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> args);

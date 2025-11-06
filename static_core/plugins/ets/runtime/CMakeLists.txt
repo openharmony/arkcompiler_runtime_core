@@ -23,6 +23,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ani/verify/ani_verifier.cpp
     ${ETS_EXT_SOURCES}/ani/verify/env_ani_verifier.cpp
     ${ETS_EXT_SOURCES}/ani/verify/types/venv.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/types/vmethod.cpp
     ${ETS_EXT_SOURCES}/ani/verify/verify_ani_checker.cpp
     ${ETS_EXT_SOURCES}/ani/verify/verify_ani_interaction_api.cpp
     ${ETS_EXT_SOURCES}/ani/verify/verify_ani_vm_api.cpp

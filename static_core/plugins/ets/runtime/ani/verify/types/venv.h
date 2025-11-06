@@ -48,6 +48,16 @@ public:
     }
     void DeleteLocalVerifiedRef(VRef *vref);
 
+    VMethod *GetVerifiedMethod(ani_method method)
+    {
+        return GetEnvANIVerifier()->GetVerifiedMethod(method);
+    }
+
+    VStaticMethod *GetVerifiedStaticMethod(ani_static_method staticMethod)
+    {
+        return GetEnvANIVerifier()->GetVerifiedStaticMethod(staticMethod);
+    }
+
     // Global refs
     VRef *AddGloablVerifiedRef(ani_ref gref);
     void DeleteDeleteGlobalRef(VRef *vgref);

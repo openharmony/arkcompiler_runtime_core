@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 namespace ark::ets::ani::verify {
 
@@ -89,6 +90,18 @@ std::string_view ANIRefTypeToString(ANIRefType refType)
     UNREACHABLE();
 }
 
+std::string_view ANIFuncTypeToString(impl::VMethod::ANIMethodType funcType)
+{
+    // clang-format off
+    switch (funcType) {
+        case impl::VMethod::ANIMethodType::FUNCTION:      return "ani_function";
+        case impl::VMethod::ANIMethodType::METHOD:        return "ani_method";
+        case impl::VMethod::ANIMethodType::STATIC_METHOD: return "ani_static_method";
+    }
+    // clang-format on
+    UNREACHABLE();
+}
+
 template <class T>
 void FormatPointer(PandaStringStream &ss, T *ptr)
 {
@@ -138,6 +151,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_REF:                          return "ani_ref";
         case ValueType::ANI_CLASS:                        return "ani_class";
         case ValueType::ANI_METHOD:                       return "ani_method";
+        case ValueType::ANI_OBJECT:                       return "ani_object";
         case ValueType::ANI_STRING:                       return "ani_string";
         case ValueType::ANI_VALUE_ARGS:                   return "const ani_value *";
         case ValueType::ANI_UTF8_BUFFER:                  return "char *";
@@ -199,7 +213,7 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
             case panda_file::Type::TypeId::F32: return true;  // uses double
             case panda_file::Type::TypeId::F64: return true;
             case panda_file::Type::TypeId::REFERENCE:
-                return envANIVerifier->IsValidInCurrentFrame(reinterpret_cast<VRef *>(v.r));
+                return envANIVerifier->IsValidRefInCurrentFrame(reinterpret_cast<VRef *>(v.r));
             // clang-format on
             default:
                 break;
@@ -216,7 +230,7 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
             case panda_file::Type::TypeId::F32: return true;
             case panda_file::Type::TypeId::F64: return true;
             case panda_file::Type::TypeId::REFERENCE:
-                return envANIVerifier->IsValidInCurrentFrame(reinterpret_cast<VRef *>(v.r));
+                return envANIVerifier->IsValidRefInCurrentFrame(reinterpret_cast<VRef *>(v.r));
             // clang-format on
             default:
                 break;
@@ -292,22 +306,22 @@ public:
     }
 
     template <typename Type>
-    std::optional<PandaString> VerifyTypeStorage(Type value, std::string_view TypeName)
+    std::optional<PandaString> VerifyTypeStorage(Type value, std::string_view typeName)
     {
         if (value == nullptr) {
             PandaStringStream ss;
-            ss << "wrong pointer for storing '" << TypeName << "'";
+            ss << "wrong pointer for storing '" << typeName << "'";
             return ss.str();
         }
         return {};
     }
 
     template <typename Type>
-    std::optional<PandaString> VerifyTypePtr(Type value, std::string_view TypeName)
+    std::optional<PandaString> VerifyTypePtr(Type value, std::string_view typeName)
     {
         if (value == nullptr) {
             PandaStringStream ss;
-            ss << "wrong pointer to use as argument in '" << TypeName << "'";
+            ss << "wrong pointer to use as argument in '" << typeName << "'";
             return ss.str();
         }
         return {};
@@ -336,7 +350,7 @@ public:
 
     std::optional<PandaString> VerifyRef(VRef *vref)
     {
-        if (GetEnvANIVerifier()->IsValidInCurrentFrame(vref)) {
+        if (GetEnvANIVerifier()->IsValidRefInCurrentFrame(vref)) {
             return {};
         }
         if (GetEnvANIVerifier()->IsValidGlobalVerifiedRef(vref)) {
@@ -357,6 +371,9 @@ public:
             ss << "wrong reference type: " << ANIRefTypeToString(refType);
             return ss.str();
         }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        class_ = s.ToInternalType(vclass->GetRef());
         return {};
     }
 
@@ -393,7 +410,7 @@ public:
     std::optional<PandaString> VerifyDelLocalRef(VRef *vref)
     {
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
-        if (!envANIVerifier->IsValidInCurrentFrame(vref)) {
+        if (!envANIVerifier->IsValidRefInCurrentFrame(vref)) {
             return "it is not local reference";
         }
         if (!envANIVerifier->CanBeDeletedFromCurrentScope(vref)) {
@@ -402,21 +419,76 @@ public:
         return {};
     }
 
-    std::optional<PandaString> VerifyCtor(ani_method ctor)
+    std::optional<PandaString> VerifyThisObject(VObject *vobject)
     {
-        if (ctor == nullptr) {
-            return "wrong ctor value";
+        auto err = VerifyRef(vobject);
+        if (err) {
+            return err;
         }
-        // NOTE: Add ctor verification, #26993
+        ANIRefType refType = vobject->GetRefType();
+        if (refType != ANIRefType::OBJECT) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(refType);
+            return ss.str();
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        EtsObject *etsObject = s.ToInternalType(vobject->GetRef());
+        class_ = etsObject->GetClass();
         return {};
     }
 
-    std::optional<PandaString> VerifyMethod(ani_method method)
+    std::optional<PandaString> DoVerifyMethod(VMethod *vmethod, impl::VMethod::ANIMethodType type, EtsType returnType)
     {
-        if (method == nullptr) {
-            return "wrong method value";
+        impl::VMethod::ANIMethodType methodType = vmethod->GetType();
+        if (methodType != type) {
+            PandaStringStream ss;
+            ss << "wrong type: " << ANIFuncTypeToString(methodType) << ", expected: " << ANIFuncTypeToString(type);
+            return ss.str();
         }
-        // NOTE: Add method verification, #26993
+
+        EtsType methodReturnType = vmethod->GetEtsMethod()->GetReturnValueType();
+        if (methodReturnType != returnType) {
+            return "wrong return type";
+        }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyCtor(VMethod *vctor, EtsType returnType)
+    {
+        if (!GetEnvANIVerifier()->IsValidMethod(vctor)) {
+            return "wrong ctor";
+        }
+        std::optional<PandaString> err = DoVerifyMethod(vctor, impl::VMethod::ANIMethodType::METHOD, returnType);
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr) {
+            return "wrong class";
+        }
+        if (vctor->GetEtsMethod()->GetClass() != class_) {
+            return "wrong class for ctor";
+        }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyMethod(VMethod *vmethod, EtsType returnType)
+    {
+        if (!GetEnvANIVerifier()->IsValidMethod(vmethod)) {
+            return "wrong method";
+        }
+        std::optional<PandaString> err = DoVerifyMethod(vmethod, impl::VMethod::ANIMethodType::METHOD, returnType);
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr) {
+            return "wrong object";
+        }
+        if (!vmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
+            return "wrong object for method";
+        }
         return {};
     }
 
@@ -437,7 +509,11 @@ public:
 
     std::optional<PandaString> DoVerifyMethodArgs(ANIArg::AniMethodArgs *methodArgs)
     {
-        CallArgs callArgs(ToInternalMethod(methodArgs->method), methodArgs->vargs);
+        if (methodArgs->method == nullptr) {
+            return "wrong method";
+        }
+
+        CallArgs callArgs(methodArgs->method, methodArgs->vargs);
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
         std::optional<PandaString> err;
         callArgs.ForEachArgs([&](ani_value value, panda_file::Type type) -> bool {
@@ -460,6 +536,8 @@ private:
 
     VVm *vvm_ {};
     VEnv *venv_ {};
+
+    EtsClass *class_ {};
 };
 
 using CheckerHandler = std::optional<PandaString> (*)(Verifier &, const ANIArg &);
@@ -554,16 +632,22 @@ static std::optional<PandaString> VerifyDelLocalRef(Verifier &v, const ANIArg &a
     return v.VerifyDelLocalRef(arg.GetValueRef());
 }
 
+static std::optional<PandaString> VerifyThisObject(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_THIS_OBJECT);
+    return v.VerifyThisObject(arg.GetValueObject());
+}
+
 static std::optional<PandaString> VerifyCtor(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_CTOR);
-    return v.VerifyCtor(arg.GetValueMethod());
+    return v.VerifyCtor(arg.GetValueMethod(), arg.GetReturnType());
 }
 
 static std::optional<PandaString> VerifyMethod(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD);
-    return v.VerifyMethod(arg.GetValueMethod());
+    return v.VerifyMethod(arg.GetValueMethod(), arg.GetReturnType());
 }
 
 static std::optional<PandaString> VerifyMethodAArgs(Verifier &v, const ANIArg &arg)
@@ -826,8 +910,11 @@ static PandaVector<ExtArgInfo> MakeExtArgInfoList(EnvANIVerifier *envANIVerifier
 
     PandaVector<ExtArgInfo> extArgInfoList;
     size_t i = 0;
-    CallArgs callArgs(ToInternalMethod(methodArgs->method), methodArgs->vargs);
+    if (methodArgs->method == nullptr) {
+        return {};
+    }
 
+    CallArgs callArgs(methodArgs->method, methodArgs->vargs);
     callArgs.ForEachArgs([&](ani_value value, panda_file::Type type) -> bool {
         PandaString name = getName(i++);
         bool isValid = IsValidRawAniValue(envANIVerifier, value, type, methodArgs->isVaArgs);

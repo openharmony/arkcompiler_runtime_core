@@ -49,6 +49,14 @@
             *(vresult) = (venv)->AddLocalVerifiedRef(result);       \
         }                                                           \
     } while (false)
+
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ADD_VERIFIED_LOCAL_METHOD_IF_OK(status, venv, result, vresult) \
+    do {                                                               \
+        if (LIKELY((status) == ANI_OK)) {                              \
+            *(vresult) = (venv)->GetVerifiedMethod(result);            \
+        }                                                              \
+    } while (false)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 namespace ark::ets::ani::verify {
@@ -58,10 +66,21 @@ static const __ani_interaction_api *GetInteractionAPI(VEnv *venv)
     return PandaEnv::FromAniEnv(venv->GetEnv())->GetEnvANIVerifier()->GetInteractionAPI();
 }
 
+static EtsMethod *GetEtsMethodIfPointerValid(VMethod *vmethod)
+{
+    ani_env *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+    EnvANIVerifier *envANIVerifier = PandaEnv::FromAniEnv(env)->GetEnvANIVerifier();
+    if (!envANIVerifier->IsValidMethod(vmethod)) {
+        return nullptr;
+    }
+    return vmethod->GetEtsMethod();
+}
+
 static PandaSmallVector<ani_value> GetVValueArgs(VEnv *venv, const ANIArg::AniMethodArgs &methodArgs)
 {
     (void)venv;
-    EtsMethod *etsMethod = ToInternalMethod(methodArgs.method);
+    EtsMethod *etsMethod = methodArgs.method;
+    ASSERT(etsMethod != nullptr);
 
     PandaSmallVector<ani_value> args;
     // NOTE: Check correcting number of args for ani_method/ani_static_method/ani_function
@@ -90,17 +109,17 @@ static PandaSmallVector<ani_value> GetVValueArgs(VEnv *venv, const ANIArg::AniMe
 }
 
 // CC-OFFNXT(G.FUD.05) solid logic
-static ANIArg::AniMethodArgs GetVArgsByVVAArgs(ani_method method, va_list vvaArgs)
+static ANIArg::AniMethodArgs GetVArgsByVVAArgs(VMethod *vmethod, va_list vvaArgs)
 {
-    // NOTE: Add method validation
-    ASSERT(method != nullptr);
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), nullptr, {}, true};
+    if (methodArgs.method == nullptr) {
+        return methodArgs;
+    }
 
-    ANIArg::AniMethodArgs methodArgs {method, nullptr, {}, true};
     auto &args = methodArgs.argsStorage;
-    EtsMethod *etsMethod = ToInternalMethod(method);
     // NOTE: Check correcting number of args for ani_method/ani_static_method/ani_function
-    args.reserve(etsMethod->GetNumArgs());
-    panda_file::ShortyIterator it(etsMethod->GetPandaMethod()->GetShorty());
+    args.reserve(vmethod->GetEtsMethod()->GetNumArgs());
+    panda_file::ShortyIterator it(vmethod->GetEtsMethod()->GetPandaMethod()->GetShorty());
     panda_file::ShortyIterator end;
     ++it;  // skip the return value
     for (; it != end; ++it) {
@@ -165,20 +184,20 @@ NO_UB_SANITIZE static ani_status GetVM(VEnv *venv, ani_vm **result)
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_New(VEnv *venv, VClass *vclass, ani_method ctor, VObject **vresult, ...)
+NO_UB_SANITIZE static ani_status Object_New(VEnv *venv, VClass *vclass, VMethod *vctor, VObject **vresult, ...)
 {
     // NOTE: Validate ctor method before usage
 
     va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(vvaArgs, vresult);
-    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(ctor, vvaArgs);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vctor, vvaArgs);
     va_end(vvaArgs);
 
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vclass, "cls"),
-        ANIArg::MakeForMethod(ctor, "ctor", true),
+        ANIArg::MakeForMethod(vctor, "ctor", EtsType::VOID, true),
         ANIArg::MakeForObjectStorage(vresult, "result"),
         ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
     );
@@ -186,22 +205,22 @@ NO_UB_SANITIZE static ani_status Object_New(VEnv *venv, VClass *vclass, ani_meth
 
     auto args = GetVValueArgs(venv, methodVArgs);
     ani_object result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), ctor, &result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), vctor->GetMethod(),
+                                                              &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_New_A(VEnv *venv, VClass *vclass, ani_method ctor, VObject **vresult,
+NO_UB_SANITIZE static ani_status Object_New_A(VEnv *venv, VClass *vclass, VMethod *vctor, VObject **vresult,
                                               const ani_value *vargs)
 {
-    ANIArg::AniMethodArgs methodArgs {ctor, vargs, {}, false};
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vctor), vargs, {}, false};
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vclass, "cls"),
-        ANIArg::MakeForMethod(ctor, "ctor", true),
+        ANIArg::MakeForMethod(vctor, "ctor", EtsType::VOID, true),
         ANIArg::MakeForObjectStorage(vresult, "result"),
         ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
     );
@@ -209,22 +228,22 @@ NO_UB_SANITIZE static ani_status Object_New_A(VEnv *venv, VClass *vclass, ani_me
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_object result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), ctor, &result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), vctor->GetMethod(),
+                                                              &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_New_V(VEnv *venv, VClass *vclass, ani_method ctor, VObject **vresult,
+NO_UB_SANITIZE static ani_status Object_New_V(VEnv *venv, VClass *vclass, VMethod *vctor, VObject **vresult,
                                               va_list vvaArgs)
 {
-    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(ctor, vvaArgs);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vctor, vvaArgs);
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
         ANIArg::MakeForClass(vclass, "cls"),
-        ANIArg::MakeForMethod(ctor, "ctor", true),
+        ANIArg::MakeForMethod(vctor, "ctor", EtsType::VOID, true),
         ANIArg::MakeForObjectStorage(vresult, "result"),
         ANIArg::MakeForMethodArgs(&methodArgs, "args"),
     );
@@ -232,8 +251,8 @@ NO_UB_SANITIZE static ani_status Object_New_V(VEnv *venv, VClass *vclass, ani_me
 
     auto args = GetVValueArgs(venv, methodArgs);
     ani_object result {};
-    ani_status status =
-        GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), ctor, &result, args.data());
+    ani_status status = GetInteractionAPI(venv)->Object_New_A(venv->GetEnv(), vclass->GetRef(), vctor->GetMethod(),
+                                                              &result, args.data());
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -1573,18 +1592,30 @@ NO_UB_SANITIZE static ani_status Class_FindStaticField(VEnv *venv, VClass *vclas
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_FindMethod(VEnv *venv, VClass *vclass, const char *name, const char *signature,
-                                                  ani_method *result)
+                                                  VMethod **vresult)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_FindMethod(venv->GetEnv(), vclass->GetRef(), name, signature, result);
+    ani_method result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Class_FindMethod(venv->GetEnv(), vclass->GetRef(), name, signature, &result);
+    if (LIKELY((status) == ANI_OK)) {
+        *vresult = venv->GetVerifiedMethod(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status Class_FindStaticMethod(VEnv *venv, VClass *vclass, const char *name,
-                                                        const char *signature, ani_static_method *result)
+                                                        const char *signature, VStaticMethod **vresult)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Class_FindStaticMethod(venv->GetEnv(), vclass->GetRef(), name, signature, result);
+    ani_static_method result {};
+    ani_status status =
+        GetInteractionAPI(venv)->Class_FindStaticMethod(venv->GetEnv(), vclass->GetRef(), name, signature, &result);
+    if (LIKELY((status) == ANI_OK)) {
+        *vresult = venv->GetVerifiedStaticMethod(result);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2947,286 +2978,669 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Ref(VEnv *venv, ani_ob
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean(VEnv *venv, ani_object object, ani_method method,
+NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean(VEnv *venv, VObject *vobject, VMethod *vmethod,
                                                            ani_boolean *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status =
-        GetInteractionAPI(venv)->Object_CallMethod_Boolean_V(venv->GetEnv(), object, method, result, args);
-    va_end(args);
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BOOLEAN, false),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
+                                                                             vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_A(VEnv *venv, ani_object object, ani_method method,
-                                                             ani_boolean *result, const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                             ani_boolean *result, const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BOOLEAN, false),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
+                                                                             vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_V(VEnv *venv, ani_object object, ani_method method,
-                                                             ani_boolean *result, va_list args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                             ani_boolean *result, va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Boolean_V(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BOOLEAN, false),
+        ANIArg::MakeForBooleanStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Boolean_A(venv->GetEnv(), vobject->GetRef(),
+                                                                             vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Char(VEnv *venv, ani_object object, ani_method method,
+NO_UB_SANITIZE static ani_status Object_CallMethod_Char(VEnv *venv, VObject *vobject, VMethod *vmethod,
                                                         ani_char *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_V(venv->GetEnv(), object, method, result, args);
-    va_end(args);
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::CHAR, false),
+        // ANIArg::MakeForCharStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Char_A(VEnv *venv, ani_object object, ani_method method,
-                                                          ani_char *result, const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Char_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                          ani_char *result, const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::CHAR, false),
+        // ANIArg::MakeForCharStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Char_V(VEnv *venv, ani_object object, ani_method method,
-                                                          ani_char *result, va_list args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Char_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                          ani_char *result, va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Char_V(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::CHAR, false),
+        // ANIArg::MakeForCharStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Char_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Byte(VEnv *venv, ani_object object, ani_method method,
+NO_UB_SANITIZE static ani_status Object_CallMethod_Byte(VEnv *venv, VObject *vobject, VMethod *vmethod,
                                                         ani_byte *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_V(venv->GetEnv(), object, method, result, args);
-    va_end(args);
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BYTE, false),
+        // ANIArg::MakeForByteStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_A(VEnv *venv, ani_object object, ani_method method,
-                                                          ani_byte *result, const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                          ani_byte *result, const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BYTE, false),
+        // ANIArg::MakeForByteStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_V(VEnv *venv, ani_object object, ani_method method,
-                                                          ani_byte *result, va_list args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                          ani_byte *result, va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Byte_V(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::BYTE, false),
+        // ANIArg::MakeForByteStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Byte_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Short(VEnv *venv, ani_object object, ani_method method,
+NO_UB_SANITIZE static ani_status Object_CallMethod_Short(VEnv *venv, VObject *vobject, VMethod *vmethod,
                                                          ani_short *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status =
-        GetInteractionAPI(venv)->Object_CallMethod_Short_V(venv->GetEnv(), object, method, result, args);
-    va_end(args);
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::SHORT, false),
+        // ANIArg::MakeForShortStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
+                                                                           vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Short_A(VEnv *venv, ani_object object, ani_method method,
-                                                           ani_short *result, const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Short_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                           ani_short *result, const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), object, method, result, args);
-}
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::SHORT, false),
+        // ANIArg::MakeForShortStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Short_V(VEnv *venv, ani_object object, ani_method method,
-                                                           ani_short *result, va_list args)
-{
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Short_V(venv->GetEnv(), object, method, result, args);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Int(VEnv *venv, ani_object object, ani_method method,
-                                                       ani_int *result, ...)
-{
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_V(venv->GetEnv(), object, method, result, args);
-    va_end(args);
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
+                                                                           vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Int_A(VEnv *venv, ani_object object, ani_method method,
-                                                         ani_int *result, const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Short_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                           ani_short *result, va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::SHORT, false),
+        // ANIArg::MakeForShortStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Short_A(venv->GetEnv(), vobject->GetRef(),
+                                                                           vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Int_V(VEnv *venv, ani_object object, ani_method method,
-                                                         ani_int *result, va_list args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Int(VEnv *venv, VObject *vobject, VMethod *vmethod, ani_int *result,
+                                                       ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Int_V(venv->GetEnv(), object, method, result, args);
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::INT, false),
+        // ANIArg::MakeForIntStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
+                                                                         vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Long(VEnv *venv, ani_object object, ani_method method,
+NO_UB_SANITIZE static ani_status Object_CallMethod_Int_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                         ani_int *result, const ani_value *vargs)
+{
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::INT, false),
+        // ANIArg::MakeForIntStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
+                                                                         vmethod->GetMethod(), result, args.data());
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Int_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                         ani_int *result, va_list vvaArgs)
+{
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::INT, false),
+        // ANIArg::MakeForIntStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Int_A(venv->GetEnv(), vobject->GetRef(),
+                                                                         vmethod->GetMethod(), result, args.data());
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Long(VEnv *venv, VObject *vobject, VMethod *vmethod,
                                                         ani_long *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_V(venv->GetEnv(), object, method, result, args);
-    va_end(args);
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::LONG, false),
+        // ANIArg::MakeForLongStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Long_A(VEnv *venv, ani_object object, ani_method method,
-                                                          ani_long *result, const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Long_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                          ani_long *result, const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::LONG, false),
+        // ANIArg::MakeForLongStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Long_V(VEnv *venv, ani_object object, ani_method method,
-                                                          ani_long *result, va_list args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Long_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                          ani_long *result, va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Long_V(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::LONG, false),
+        // ANIArg::MakeForLongStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Long_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Float(VEnv *venv, ani_object object, ani_method method,
+NO_UB_SANITIZE static ani_status Object_CallMethod_Float(VEnv *venv, VObject *vobject, VMethod *vmethod,
                                                          ani_float *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status =
-        GetInteractionAPI(venv)->Object_CallMethod_Float_V(venv->GetEnv(), object, method, result, args);
-    va_end(args);
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::FLOAT, false),
+        // ANIArg::MakeForFloatStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
+                                                                           vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Float_A(VEnv *venv, ani_object object, ani_method method,
-                                                           ani_float *result, const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Float_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                           ani_float *result, const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::FLOAT, false),
+        // ANIArg::MakeForFloatStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
+                                                                           vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Float_V(VEnv *venv, ani_object object, ani_method method,
-                                                           ani_float *result, va_list args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Float_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                           ani_float *result, va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Float_V(venv->GetEnv(), object, method, result, args);
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::FLOAT, false),
+        // ANIArg::MakeForFloatStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Float_A(venv->GetEnv(), vobject->GetRef(),
+                                                                           vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Double(VEnv *venv, ani_object object, ani_method method,
+NO_UB_SANITIZE static ani_status Object_CallMethod_Double(VEnv *venv, VObject *vobject, VMethod *vmethod,
                                                           ani_double *result, ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status =
-        GetInteractionAPI(venv)->Object_CallMethod_Double_V(venv->GetEnv(), object, method, result, args);
-    va_end(args);
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::DOUBLE, false),
+        // ANIArg::MakeForDoubleStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
+                                                                            vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Double_A(VEnv *venv, ani_object object, ani_method method,
-                                                            ani_double *result, const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Double_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                            ani_double *result, const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), object, method, result, args);
-}
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::DOUBLE, false),
+        // ANIArg::MakeForDoubleStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Double_V(VEnv *venv, ani_object object, ani_method method,
-                                                            ani_double *result, va_list args)
-{
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Double_V(venv->GetEnv(), object, method, result, args);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Ref(VEnv *venv, ani_object object, ani_method method,
-                                                       ani_ref *result, ...)
-{
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, result);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_V(venv->GetEnv(), object, method, result, args);
-    va_end(args);
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
+                                                                            vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_A(VEnv *venv, ani_object object, ani_method method,
-                                                         ani_ref *result, const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Double_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                            ani_double *result, va_list vvaArgs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), object, method, result, args);
-}
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::DOUBLE, false),
+        // ANIArg::MakeForDoubleStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_V(VEnv *venv, ani_object object, ani_method method,
-                                                         ani_ref *result, va_list args)
-{
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Ref_V(venv->GetEnv(), object, method, result, args);
-}
-
-// NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Void(VEnv *venv, ani_object object, ani_method method, ...)
-{
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_start(args, method);
-    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_V(venv->GetEnv(), object, method, args);
-    va_end(args);
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Double_A(venv->GetEnv(), vobject->GetRef(),
+                                                                            vmethod->GetMethod(), result, args.data());
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Void_A(VEnv *venv, ani_object object, ani_method method,
-                                                          const ani_value *args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Ref(VEnv *venv, VObject *vobject, VMethod *vmethod, ani_ref *result,
+                                                       ...)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), object, method, args);
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, result);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::OBJECT, false),
+        // ANIArg::MakeForRefStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), vobject->GetRef(),
+                                                                         vmethod->GetMethod(), result, args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethod_Void_V(VEnv *venv, ani_object object, ani_method method,
-                                                          va_list args)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                         ani_ref *result, const ani_value *vargs)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethod_Void_V(venv->GetEnv(), object, method, args);
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::OBJECT, false),
+        // ANIArg::MakeForRefStorage(result, "result"),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), vobject->GetRef(),
+                                                                         vmethod->GetMethod(), result, args.data());
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                         ani_ref *result, va_list vvaArgs)
+{
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::OBJECT, false),
+        // ANIArg::MakeForRefStorage(result, "result"),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Ref_A(venv->GetEnv(), vobject->GetRef(),
+                                                                         vmethod->GetMethod(), result, args.data());
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Void(VEnv *venv, VObject *vobject, VMethod *vmethod, ...)
+{
+    va_list vvaArgs;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_start(vvaArgs, vmethod);
+    ANIArg::AniMethodArgs methodVArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    va_end(vvaArgs);
+
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::VOID, false),
+        ANIArg::MakeForMethodArgs(&methodVArgs, "..."),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodVArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), args.data());
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Void_A(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                          const ani_value *vargs)
+{
+    ANIArg::AniMethodArgs methodArgs {GetEtsMethodIfPointerValid(vmethod), vargs, {}, false};
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::VOID, false),
+        ANIArg::MakeForMethodAArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), args.data());
+    return status;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Object_CallMethod_Void_V(VEnv *venv, VObject *vobject, VMethod *vmethod,
+                                                          va_list vvaArgs)
+{
+    ANIArg::AniMethodArgs methodArgs = GetVArgsByVVAArgs(vmethod, vvaArgs);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForObject(vobject, "object"),
+        ANIArg::MakeForMethod(vmethod, "method", EtsType::VOID, false),
+        ANIArg::MakeForMethodArgs(&methodArgs, "args"),
+    );
+    // clang-format on
+
+    auto args = GetVValueArgs(venv, methodArgs);
+    ani_status status = GetInteractionAPI(venv)->Object_CallMethod_Void_A(venv->GetEnv(), vobject->GetRef(),
+                                                                          vmethod->GetMethod(), args.data());
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -3541,11 +3955,12 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_A(VEnv *venv, ani_
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_V(VEnv *venv, ani_object object, const char *name,
+NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void_V(VEnv *venv, VObject *object, const char *name,
                                                                 const char *signature, va_list args)
 {
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_V(venv->GetEnv(), object, name, signature, args);
+    return GetInteractionAPI(venv)->Object_CallMethodByName_Void_V(venv->GetEnv(), object->GetRef(), name, signature,
+                                                                   args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
