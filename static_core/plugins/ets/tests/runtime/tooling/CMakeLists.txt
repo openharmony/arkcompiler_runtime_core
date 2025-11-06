@@ -18,6 +18,7 @@ if (NOT TARGET es2panda OR PANDA_TARGET_ARM32)
 endif()
 
 add_subdirectory(sampler)
+add_subdirectory(coverage)
 
 # test that stdlib is generated successfully with debug info
 panda_ets_add_gtest(

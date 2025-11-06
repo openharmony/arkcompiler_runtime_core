@@ -86,7 +86,7 @@ function main()
 
 Executing the ABC file generates the coverageBytecodeInfo.csv file, which stores execution information for bytecode lines and functions.
 
-### 4.2.1. Implementation Details
+#### 4.2.1. Implementation Details
 
 During program execution, the InstrumentInstruction() stub within the interpreter records each executed bytecode instruction. A data structure is used to capture essential information including method_Id, bcOffset, and count. This data is dumped to a file either when specific thresholds are reached during execution or upon program termination.
 - Runtime Schematic
@@ -96,7 +96,7 @@ During program execution, the InstrumentInstruction() stub within the interprete
 ![runtime flowchart](images/runtime_flowchart.png)
 
 
-### 4.2.2. Data Storage Structure
+#### 4.2.2. Data Storage Structure
 
 A map is defined, utilizing std::pair<method_Id, bcOffset> as the key and the execution count as the corresponding value. The data storage structure is defined as follows:
 ```c++
@@ -135,7 +135,7 @@ DA:716088,24,6
 DA:716088,19,6
 ```
 
-### 4.2.3. New Parameters
+#### 4.2.3. New Parameters
 
 New options parameter:
 ```yaml

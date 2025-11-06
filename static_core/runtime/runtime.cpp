@@ -393,8 +393,7 @@ bool Runtime::Create(const RuntimeOptions &options)
     IntrusiveTestOption::SetTestId(options);
 
     SetDebuggerOptions(const_cast<RuntimeOptions &>(options));
-
-    instance_->InitCoverageOptions(const_cast<RuntimeOptions &>(options));
+    InitCoverageOptions(const_cast<RuntimeOptions &>(options));
 
     const_cast<RuntimeOptions &>(options).InitializeRuntimeSpacesAndType();
     trace::ScopedTrace scopedTrace("Runtime::Create");

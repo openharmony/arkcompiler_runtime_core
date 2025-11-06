@@ -31,26 +31,49 @@
 ```
 
 ## 指令说明
-
-指令1：生成全量覆盖率html文件
+### 1.生成ast文件
+host侧生成ast文件:
 
 ```
-python coverage.py gen_report --all
+python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --mode=host
+```
+
+真机侧生成ast文件:
+
+```
+python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --mode=hap
+```
+
+### 2.生成pa文件
+
+abc文件反编译生成pa文件:
+
+```
+python3 coverage.py gen_pa --src=./abc --output=./pa --ark_disasm-path=../../../out/bin/ark_disasm
+```
+
+### 3.生成html文件
+
+host侧:
+- 生成全量覆盖率html文件:
+
+```
+python coverage.py gen_report --src=./src --mode=host --all
 或
-python coverage.py gen_report -a
+python coverage.py gen_report --src=./src --mode=host -a
 ```
 
-指令2：生成增量覆盖率html文件
+- 生成增量覆盖率html文件
 
 ```
-python coverage.py gen_report --diff
+python coverage.py gen_report --src=./src --mode=host --diff
 或
-python coverage.py gen_report -d
+python coverage.py gen_report --src=./src --mode=host -d
 ```
 
-注：指令2 需要传入diff.txt文件；
-执行如下指令，生成diff.txt，将此文件放到脚本当前目录。
+注：真机侧使用需要将`--mode=host`替换为`--mode=hap`；生成增量覆盖率html文件需要生成diff.txt文件并放到coverage.py的同级目录。
 
+生成diff.txt指令：
 ```
 git diff HEAD^ HEAD > diff.txt
 ```
