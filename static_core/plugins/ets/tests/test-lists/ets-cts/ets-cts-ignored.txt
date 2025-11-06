@@ -1388,12 +1388,6 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_28.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_29.ets
 
-#26229
-15.semantic_rules/09.overriding/02.overriding_and_overloading_in_interfaces/im_overriding1_1.ets
-15.semantic_rules/09.overriding/02.overriding_and_overloading_in_interfaces/im_overriding1_2.ets
-15.semantic_rules/09.overriding/02.overriding_and_overloading_in_interfaces/im_overriding1_8.ets
-15.semantic_rules/09.overriding/02.overriding_and_overloading_in_interfaces/interface_return_value_overload_2.ets
-
 #27583
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_8.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_9.ets
