@@ -38,7 +38,7 @@ public:
 
     ~SkipReferentHandler() = default;
 
-    bool ProcessObjectPointer(ObjectPointerType *p)
+    bool ProcessObjectPointer([[maybe_unused]] ObjectHeader *obj, ObjectPointerType *p)
     {
         if (p == weakReferentPointer_) {
             // skip referent
@@ -62,7 +62,7 @@ public:
 
     ~Handler() = default;
 
-    bool ProcessObjectPointer(ObjectPointerType *p)
+    bool ProcessObjectPointer([[maybe_unused]] ObjectHeader *obj, ObjectPointerType *p)
     {
         if (*p != 0) {
             visitor_(reinterpret_cast<common::RefField<> &>(*reinterpret_cast<common::BaseObject **>(p)));

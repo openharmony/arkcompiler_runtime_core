@@ -78,7 +78,8 @@ public:
      * @brief Process all cards in the GC thread.
      * Can be called only if UpdateRemsetWorker is suspended
      */
-    void GCProcessCards();
+    template <typename Handler>
+    void GCProcessCards(const Handler &handler);
 
     using RegionVector = PandaVector<Region *>;
 
@@ -116,10 +117,12 @@ protected:
     size_t ProcessAllCards() REQUIRES(updateRemsetLock_);
 
     /// @brief Try to process hot cards in one thread
-    size_t ProcessHotCards() REQUIRES(updateRemsetLock_);
+    template <typename Handler>
+    size_t ProcessHotCards(const Handler &handler) REQUIRES(updateRemsetLock_);
 
     /// @brief Try to process cards from barriers in one thread
-    size_t ProcessCommonCards() REQUIRES(updateRemsetLock_);
+    template <typename Handler>
+    size_t ProcessCommonCards(const Handler &handler) REQUIRES(updateRemsetLock_);
 
     /**
      * @brief Notify UpdateRemsetWorker to continue process cards

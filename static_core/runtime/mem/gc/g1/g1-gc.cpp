@@ -26,6 +26,7 @@
 #include "runtime/mem/gc/g1/ref_cache_builder.h"
 #include "runtime/mem/gc/g1/update_remset_task_queue.h"
 #include "runtime/mem/gc/g1/update_remset_thread.h"
+#include "runtime/mem/gc/g1/update_remset_worker-inl.h"
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 #include "runtime/mem/gc/generational-gc-base-inl.h"
 #include "runtime/mem/gc/static/gc_marker_static-inl.h"
@@ -1116,7 +1117,15 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::ProcessDirtyCards()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    updateRemsetWorker_->GCProcessCards();
+    updateRemsetWorker_->GCProcessCards([](ObjectHeader *, size_t) {});
+}
+
+template <class LanguageConfig>
+template <typename Handler>
+void G1GC<LanguageConfig>::ProcessDirtyCards(const Handler &handler)
+{
+    ScopedTiming t(__FUNCTION__, *this->GetTiming());
+    updateRemsetWorker_->GCProcessCards(handler);
 }
 
 template <class LanguageConfig>
@@ -1595,7 +1604,18 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
     analytics_.ReportMarkingEnd(ark::time::GetCurrentTimeInNanos(), GetUniqueRemsetRefsCount());
 
     // HandleReferences could write a new barriers - so we need to handle them before moving
-    ProcessDirtyCards();
+    auto *refVector = this->GetInternalAllocator()->template New<RefVector>();
+    uniqueRefsFromRemsets_.push_back(refVector);
+    ProcessDirtyCards([this, refVector](ObjectHeader *object, size_t offset) {
+        if (this->InGCSweepRange(object)) {
+            return;
+        }
+        auto field = *reinterpret_cast<ObjectPointerType *>(ToUintPtr(object) + offset);
+        if (!this->InGCSweepRange(reinterpret_cast<ObjectHeader *>(static_cast<uintptr_t>(field)))) {
+            return;
+        }
+        refVector->emplace_back(object, offset);
+    });
 }
 
 template <class LanguageConfig>

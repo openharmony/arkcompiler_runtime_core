@@ -90,6 +90,7 @@ ObjectHeader *G1EvacuateRegionsWorkerState<LanguageConfig>::Evacuate(ObjectHeade
     TSAN_ANNOTATE_IGNORE_WRITES_END();
 
     if (forwardAddr == nullptr) {
+        LOG_DEBUG_OBJECT_EVENTS << "MOVE object " << obj << " -> " << newObj;
         ObjectIterator<LanguageConfig::LANG_TYPE>::template IterateAndDiscoverReferences(
             GetGC(), newObj, &evacuationObjectPointerHandler_);
 
@@ -228,9 +229,9 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::PrintObjectEvents(const Colle
         auto objectVisitor = [region](ObjectHeader *obj) {
             MarkWord markWord = obj->GetMark();
             if (markWord.IsForwarded()) {
-                auto dst = reinterpret_cast<ObjectHeader *>(markWord.GetForwardingAddress());
-                LOG_DEBUG_OBJECT_EVENTS << "MOVE object " << obj << " -> " << dst << " region " << region;
-            } else if (region->HasFlag(RegionFlag::IS_OLD)) {
+                return;
+            }
+            if (region->HasFlag(RegionFlag::IS_OLD)) {
                 LOG_DEBUG_OBJECT_EVENTS << "DELETE tenured object " << obj << " region " << region;
             } else {
                 ASSERT(region->HasFlag(RegionFlag::IS_EDEN));

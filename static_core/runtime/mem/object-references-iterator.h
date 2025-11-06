@@ -60,11 +60,12 @@ private:
     static bool IterateClassReferences(Class *cls, Handler *handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateRange(ObjectPointerType *refStart, const ObjectPointerType *refEnd, Handler *handler);
+    static bool IterateRange(ObjectHeader *fromObject, ObjectPointerType *refStart, const ObjectPointerType *refEnd,
+                             Handler *handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateRange(ObjectPointerType *refStart, ObjectPointerType *refEnd, Handler *handler, void *begin,
-                             void *end);
+    static bool IterateRange(ObjectHeader *fromObject, ObjectPointerType *refStart, ObjectPointerType *refEnd,
+                             Handler *handler, void *begin, void *end);
 };
 
 /// Provides functionality to iterate through references in object for dynamic languages
