@@ -26,3 +26,17 @@ ohos_prebuilt_etc("RuntimeEnableDebugger.para.dac") {
   subsystem_name = "arkcompiler"
   module_install_dir = "etc/param"
 }
+
+ohos_prebuilt_etc("RuntimeGCLogEnable.para") {
+  source = "$ark_root/runtime/para/RuntimeGCLogEnable.para"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+  module_install_dir = "etc/param"
+}
+
+ohos_prebuilt_etc("RuntimeGCLogEnable.para.dac") {
+  source = "$ark_root/runtime/para/RuntimeGCLogEnable.para.dac"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+  module_install_dir = "etc/param"
+}
