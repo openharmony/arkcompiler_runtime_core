@@ -16,29 +16,29 @@
 const etsVm = globalThis.gtest.etsVm;
 
 let STValue = etsVm.STValue;
-let module = STValue.findModule("stvalue_unwrap");
+let ns = STValue.findNamespace("stvalue_unwrap.Unwrap");
 let stvalueWrap;
 const epsilon = 1e-5;
 let SType = etsVm.SType;
 
 function testUnwrapToNumber(): void {
     stvalueWrap = STValue.wrapByte(1);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == 1);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === 1);
 
     stvalueWrap = STValue.wrapChar('1');
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == 49); // ASCII code for '1'
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === 49); // ASCII code for '1'
 
     stvalueWrap = STValue.wrapShort(32767);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == 32767);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === 32767);
 
     stvalueWrap = STValue.wrapShort(-32768);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == -32768);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === -32768);
 
     stvalueWrap = STValue.wrapInt(44);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == 44);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === 44);
 
     stvalueWrap = STValue.wrapLong(44);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == 44);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === 44);
 
 
     stvalueWrap = STValue.wrapFloat(44.4);
@@ -62,7 +62,7 @@ function testUnwrapToNumber(): void {
 
     res = false;
     try {
-        let magicSTValueBigIntFromString = module.moduleGetVariable('bigIntFromString', SType.REFERENCE); 
+        let magicSTValueBigIntFromString = ns.namespaceGetVariable('bigIntFromString', SType.REFERENCE);
         let magicDouble = magicSTValueBigIntFromString.unwrapToNumber();
     } catch (e: Error) {
         res = true;
@@ -92,9 +92,9 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    res =false;
+    res = false;
     try {
-        let magicSTValueBoolean = module.moduleGetVariable('magicBoolean', SType.BOOLEAN); 
+        let magicSTValueBoolean = ns.namespaceGetVariable('magicBoolean', SType.BOOLEAN);
         let magicFloat = magicSTValueBoolean.unwrapToString();
     } catch (e: Error) {
         res = true;
@@ -102,9 +102,9 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    res =false;
+    res = false;
     try {
-        let magicSTValueByte = module.moduleGetVariable('magicByte', SType.BYTE); 
+        let magicSTValueByte = ns.namespaceGetVariable('magicByte', SType.BYTE);
         let magicByte = magicSTValueByte.unwrapToString();
     } catch (e: Error) {
         res = true;
@@ -112,19 +112,19 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    res =false;
+    res = false;
     try {
-        let magicSTValueChar = module.moduleGetVariable('magicChar', SType.CHAR); 
-        let magicChar = magicSTValueChar.unwrapToString();    
+        let magicSTValueChar = ns.namespaceGetVariable('magicChar', SType.CHAR);
+        let magicChar = magicSTValueChar.unwrapToString();
     } catch (e: Error) {
         res = true;
         res = res && e.message.includes("\'this\' STValue instance does not wrap a value of type reference");
     }
     ASSERT_TRUE(res);
 
-    res =false;
+    res = false;
     try {
-        let magicSTValueShort = module.moduleGetVariable('magicShort', SType.SHORT);
+        let magicSTValueShort = ns.namespaceGetVariable('magicShort', SType.SHORT);
         let magicShort = magicSTValueShort.unwrapToString();
     } catch (e: Error) {
         res = true;
@@ -132,9 +132,9 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    res =false;
+    res = false;
     try {
-        let magicSTValueInt = module.moduleGetVariable('magicInt', SType.INT); 
+        let magicSTValueInt = ns.namespaceGetVariable('magicInt', SType.INT);
         let magicInt = magicSTValueInt.unwrapToString();
     } catch (e: Error) {
         res = true;
@@ -142,9 +142,9 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    res =false; 
+    res = false;
     try {
-        let magicSTValueLong = module.moduleGetVariable('magicLong', SType.LONG); 
+        let magicSTValueLong = ns.namespaceGetVariable('magicLong', SType.LONG);
         let magicLong = magicSTValueLong.unwrapToString();
     } catch (e: Error) {
         res = true;
@@ -152,9 +152,9 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    res =false;
+    res = false;
     try {
-        let magicSTValueFloat = module.moduleGetVariable('magicFloat', SType.FLOAT); 
+        let magicSTValueFloat = ns.namespaceGetVariable('magicFloat', SType.FLOAT);
         let magicFloat = magicSTValueFloat.unwrapToString();
     } catch (e: Error) {
         res = true;
@@ -162,9 +162,9 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    res =false;
+    res = false;
     try {
-        let magicSTValueDouble = module.moduleGetVariable('magicDouble', SType.DOUBLE); 
+        let magicSTValueDouble = ns.namespaceGetVariable('magicDouble', SType.DOUBLE);
         let magicDouble = magicSTValueDouble.unwrapToString();
     } catch (e: Error) {
         res = true;
@@ -172,9 +172,9 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    res =false;
+    res = false;
     try {
-        let magicSTValueBigIntFromString = module.moduleGetVariable('bigIntFromString', SType.REFERENCE); 
+        let magicSTValueBigIntFromString = ns.namespaceGetVariable('bigIntFromString', SType.REFERENCE);
         let magicDouble = magicSTValueBigIntFromString.unwrapToString();
     } catch (e: Error) {
         res = true;
@@ -182,9 +182,9 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    res =false;
+    res = false;
     try {
-        let magicSTValueBigIntFromLiteral = module.moduleGetVariable('bigIntFromLiteral', SType.REFERENCE); 
+        let magicSTValueBigIntFromLiteral = ns.namespaceGetVariable('bigIntFromLiteral', SType.REFERENCE);
         let magicDouble = magicSTValueBigIntFromLiteral.unwrapToString();
     } catch (e: Error) {
         res = true;
@@ -192,12 +192,12 @@ function testUnwrapToString(): void {
     }
     ASSERT_TRUE(res);
 
-    let magicSTValue1 = module.moduleGetVariable('magicString1', SType.REFERENCE);
+    let magicSTValue1 = ns.namespaceGetVariable('magicString1', SType.REFERENCE);
     let magicString1 = magicSTValue1.unwrapToString();
     print('magicString1: ', magicString1);
     ASSERT_TRUE(magicString1 === 'Hello World');
 
-    let magicSTValue2 = module.moduleGetVariable('magicString2', SType.REFERENCE);
+    let magicSTValue2 = ns.namespaceGetVariable('magicString2', SType.REFERENCE);
     let magicString2 = magicSTValue2.unwrapToString();
     print('magicString2: ', magicString2);
     ASSERT_TRUE(magicString2 === 'Hello World!!!');
@@ -206,20 +206,20 @@ function testUnwrapToString(): void {
 
 function testUnwrapToBigInt(): void {
     // testUnwrapToBigInt
-    const bigIntFromStringValue = module.moduleGetVariable('bigIntFromString', SType.REFERENCE);
+    const bigIntFromStringValue = ns.namespaceGetVariable('bigIntFromString', SType.REFERENCE);
     const bigIntFromString = bigIntFromStringValue.unwrapToBigInt();
 
     ASSERT_TRUE(bigIntFromString === 999999999999999999n);
     ASSERT_TRUE(typeof bigIntFromString === 'bigint');
 
-    const bigIntFromLiteralValue = module.moduleGetVariable('bigIntFromLiteral', SType.REFERENCE);
+    const bigIntFromLiteralValue = ns.namespaceGetVariable('bigIntFromLiteral', SType.REFERENCE);
     const bigIntFromLiteral = bigIntFromLiteralValue.unwrapToBigInt();
 
     ASSERT_TRUE(bigIntFromLiteral === 123456789012345678901234567890n);
     ASSERT_TRUE(typeof bigIntFromLiteral === 'bigint');
 
     // testArithmeticOperations
-    const bigIntValue = module.moduleGetVariable('bigIntFromString', SType.REFERENCE).unwrapToBigInt();
+    const bigIntValue = ns.namespaceGetVariable('bigIntFromString', SType.REFERENCE).unwrapToBigInt();
 
     const additionResult = bigIntValue + 1n;
     const multiplicationResult = bigIntValue * 2n;
@@ -231,7 +231,7 @@ function testUnwrapToBigInt(): void {
 
     // testTypeCheck
     try {
-        const numberValue = module.moduleGetVariable('defaultNumber', SType.REFERENCE);
+        const numberValue = ns.namespaceGetVariable('defaultNumber', SType.REFERENCE);
         const result = numberValue.unwrapToBigInt();
         ASSERT_TRUE(false, 'Should have thrown error for non-BigInt conversion');
     } catch (error) {
@@ -240,7 +240,7 @@ function testUnwrapToBigInt(): void {
     }
 
     try {
-        const stringVariable = module.moduleGetVariable('stringVariable', SType.REFERENCE);
+        const stringVariable = ns.namespaceGetVariable('stringVariable', SType.REFERENCE);
         const result = stringVariable.unwrapToBigInt();
         print('Non-BigInt conversion result:', result);
         ASSERT_TRUE(false, 'Should have thrown error for non-BigInt conversion');
@@ -250,17 +250,17 @@ function testUnwrapToBigInt(): void {
     }
 
     // testEdgeCases
-    let zeroSTValue = module.moduleGetVariable('zeroBigInt', SType.REFERENCE);
+    let zeroSTValue = ns.namespaceGetVariable('zeroBigInt', SType.REFERENCE);
     let zeroBigInt = zeroSTValue.unwrapToBigInt();
 
     ASSERT_TRUE(zeroBigInt === 0n);
 
-    let negativeSTValue = module.moduleGetVariable('negativeBigInt', SType.REFERENCE);
+    let negativeSTValue = ns.namespaceGetVariable('negativeBigInt', SType.REFERENCE);
     let negativeBigInt = negativeSTValue.unwrapToBigInt();
 
     ASSERT_TRUE(negativeBigInt === -1234567890123456789n);
 
-    let res =false;
+    let res = false;
     try {
         let magicSTValueNull = STValue.getNull();
         magicSTValueNull.unwrapToBigInt();
@@ -272,63 +272,63 @@ function testUnwrapToBigInt(): void {
 }
 function testUnwrapToBoolean(): void {
     stvalueWrap = STValue.wrapByte(127);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapByte(0);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == false);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === false);
 
     stvalueWrap = STValue.wrapByte(-44);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapByte(-128);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true); // -128 = 0b(10000000) ?
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true); // -128 = 0b(10000000) ?
 
     stvalueWrap = STValue.wrapInt(44);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapInt(0);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == false);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === false);
 
     stvalueWrap = STValue.wrapInt(-44);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapInt(-2147483648);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == false);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === false);
 
     stvalueWrap = STValue.wrapShort(32767);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapShort(-32767);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapShort(-32768);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == false); //-32768 = 0b(10000000 00000000)
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === false); //-32768 = 0b(10000000 00000000)
 
     stvalueWrap = STValue.wrapLong(44);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapLong(-44);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapChar('1');
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true); // ASCII code for '1'
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true); // ASCII code for '1'
 
     stvalueWrap = STValue.wrapChar('0');
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true); // ASCII code for '0'
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true); // ASCII code for '0'
 
     stvalueWrap = STValue.wrapFloat(44.4);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapFloat(0);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == false);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === false);
 
     stvalueWrap = STValue.wrapNumber(44.4);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 
     stvalueWrap = STValue.wrapNumber(0);
     ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === false);
 
-    let res =false;
+    let res = false;
     try {
         let magicSTValueNull = STValue.getNull();
         magicSTValueNull.unwrapToBoolean();

@@ -39,6 +39,64 @@ export final class City {
   static name: string = 'Shanghai';
 }
 
+// generic class
+export class Container<T> {
+  calArea(area: T): T {
+    return area;
+  }
+}
+
+// classGet/SetStaticField
+export class Person {
+  static name: string = 'Person';
+  static age: int = 18;
+  static male: boolean = true;
+  static bits: byte = 0x01;
+  static id: long = 1000000000;
+  static grade: float = 3.14f;
+  static height: double = 1.78;
+  static pet: Dog = new Dog();
+}
+
+// objectGet/SetProperty
+export class Child {
+  isChild: boolean = true;
+}
+export class Student extends Child {
+  name: string = 'Student';
+  age: int = 18;
+  male: boolean = true
+  bits: byte = 0x01;
+  id: long = 1000000000;
+  grade: float = 3.14f;
+  height: double = 1.78;
+}
+
+export namespace testNameSpace {
+  export let student: Student = new Student();
+  // fixedArrayGetLength
+  export let zeroArray: FixedArray<int> = [];
+  export let intArray: FixedArray<int> = [1, 2, 3, 4, 5];
+  export let boolArray: FixedArray<boolean> = [true, false, true, false];
+  export let strArray: FixedArray<string> = ['ab', 'cd', 'ef'];
+  export let stuArray: FixedArray<Student> = [student];
+}
+
+// enumGetIndexByName, enumGetNameByIndex, enumGetValueByIndex, enumGetIndexByValue
+export enum COLOR {
+  Red = 1,
+  Green = 3,
+  Blue = 5,
+  Yellow = 7,
+  White = 9,
+}
+
+export enum MEDIA {
+  JSON = 'app/json',
+  XML = 'app/xml',
+  YAML = 'app/yaml'
+}
+
 // class and method in namespace
 export namespace Language {
 
@@ -51,7 +109,7 @@ export namespace Language {
   }
 
   export namespace DynamicLanguage {
-     
+
     export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {
       return b1 || b2;
     }
@@ -62,90 +120,22 @@ export namespace Language {
 
     export namespace Python {
       export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {
-      return b1 && b2;
-    }
+        return b1 && b2;
+      }
     }
   }
 }
-
-// generic class
-export class Container<T> {
-  calArea(area: T): T {
-    return area;
-  }
-}
-
-// classGet/SetStaticField
-export class Person {
-    static name: string = 'Person';
-    static age: int = 18;
-    static male: boolean = true;
-    static bits: byte = 0x01;
-    static id: long = 1000000000;
-    static grade: float = 3.14f;
-    static height: double = 1.78;
-    static pet: Dog = new Dog();
-}
-
-// objectGet/SetProperty
-export class Child {
-   isChild: boolean = true;
-}
-export class Student extends Child{
-    name: string = 'Student';
-    age: int = 18;
-    male: boolean = true
-    bits: byte = 0x01;
-    id: long = 1000000000;
-    grade: float = 3.14f;
-    height: double = 1.78;
-}
-export let student: Student = new Student();
-
-// fixedArrayGetLength
-export let zeroArray: FixedArray<int> = [];
-export let intArray: FixedArray<int> = [1, 2, 3, 4, 5];
-export let boolArray: FixedArray<boolean> = [true, false, true, false];
-export let strArray: FixedArray<string> = ['ab', 'cd', 'ef'];
-export let stuArray: FixedArray<Student> = [student];
-
-
-// enumGetIndexByName, enumGetNameByIndex, enumGetValueByIndex, enumGetIndexByValue
-export enum COLOR {
-    Red = 1,
-    Green = 3,
-    Blue = 5,
-    Yellow = 7,
-    White = 9,
-}
-
-export enum MEDIA {
-  JSON = 'app/json',
-  XML = 'app/xml',
-  YAML = 'app/yaml'
-}
-
-/*
- * moduleGetSetVariableTest
- */
-export let magic_int: int = 42;
-export let magic_boolean: boolean = true;
-export let magic_byte: byte = 72;
-export let magic_short: short = 128;
-export let magic_long: long = 1024;
-export let magic_float: float = 3.14f as float; 
-export let magic_double: double = 3.141592;
 
 /*
  *
  */
 // Lets_namespace.ets
 export namespace magicNamespace {
-    export let magic_int_n: int = 42;
-    export let magic_boolean_n: boolean = true;
-    export let magic_byte_n: byte = 72;
-    export let magic_short_n: short = 128;
-    export let magic_long_n: long = 1024;
-    export let magic_float_n: float = 3.14f as float;
-    export let magic_double_n: double = 3.141592;
+  export let magic_int_n: int = 42;
+  export let magic_boolean_n: boolean = true;
+  export let magic_byte_n: byte = 72;
+  export let magic_short_n: short = 128;
+  export let magic_long_n: long = 1024;
+  export let magic_float_n: float = 3.14f as float;
+  export let magic_double_n: double = 3.141592;
 }

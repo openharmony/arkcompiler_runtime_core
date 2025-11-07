@@ -16,7 +16,7 @@
 const etsVm = globalThis.gtest.etsVm;
 
 let STValue = etsVm.STValue;
-let module = STValue.findModule('stvalue_check');
+let ns = STValue.findNamespace('stvalue_check.Check')
 let SType = etsVm.SType;
 
 let studentCls = STValue.findClass('stvalue_check.Student');
@@ -25,14 +25,14 @@ let subStudentCls = STValue.findClass('stvalue_check.SubStudent');
 function testIsStringInvalidParam(): void {
     // invalid method
     try {
-        ASSERT_TRUE(STValue.isString() == false);
+        ASSERT_TRUE(STValue.isString() === false);
     } catch (e) {
         print('Error code: ', e.code);
         print('Error message: ', e.message);
     }
 
     try {
-        ASSERT_TRUE('STValue'.isString() == false);
+        ASSERT_TRUE('STValue'.isString() === false);
     } catch (e) {
         print('Error code: ', e.code);
         print('Error message: ', e.message);
@@ -41,7 +41,7 @@ function testIsStringInvalidParam(): void {
     // param arg invalid
     let data = STValue.wrapString('I am a Chinese');
     try {
-        ASSERT_TRUE(data.isString(1) == false);
+        ASSERT_TRUE(data.isString(1) === false);
     } catch (e) {
         print('Error code: ', e.code);
         print('Error message: ', e.message);
@@ -54,46 +54,46 @@ function testIsString(): void {
 
     // 2. null and undefined
     let data = STValue.getNull();
-    ASSERT_TRUE(data.isString() == false);
+    ASSERT_TRUE(data.isString() === false);
 
     data = STValue.getUndefined();
-    ASSERT_TRUE(data.isString() == false);
+    ASSERT_TRUE(data.isString() === false);
 
     // 3. not string type
     data = STValue.wrapInt(123);
-    ASSERT_TRUE(data.isString() == false);
+    ASSERT_TRUE(data.isString() === false);
 
     data = STValue.wrapBigInt(123456789n);
-    ASSERT_TRUE(data.isString() == false);
+    ASSERT_TRUE(data.isString() === false);
 
-    data = module.moduleGetVariable('subStu', SType.REFERENCE);
-    ASSERT_TRUE(data.isString() == false);
+    data = ns.namespaceGetVariable('subStu', SType.REFERENCE);
+    ASSERT_TRUE(data.isString() === false);
 
     // 4. linestring , treestring and slicedstring
     data = STValue.wrapString('I am a Chinese');
-    ASSERT_TRUE(data.isString() == true);
+    ASSERT_TRUE(data.isString() === true);
 
-    data = module.moduleGetVariable('shouldBeString', SType.REFERENCE);
-    ASSERT_TRUE(data.isString() == true);
+    data = ns.namespaceGetVariable('shouldBeString', SType.REFERENCE);
+    ASSERT_TRUE(data.isString() === true);
 
-    data = module.moduleGetVariable('treeString', SType.REFERENCE);
-    ASSERT_TRUE(data.isString() == true);
+    data = ns.namespaceGetVariable('treeString', SType.REFERENCE);
+    ASSERT_TRUE(data.isString() === true);
 
-    data = module.moduleGetVariable("slicedString", SType.REFERENCE);
-    ASSERT_TRUE(data.isString() == true);
+    data = ns.namespaceGetVariable("slicedString", SType.REFERENCE);
+    ASSERT_TRUE(data.isString() === true);
 }
 
 function testIsBigIntInvalidParam(): void {
     // invalid method
     try {
-        ASSERT_TRUE(STValue.isBigInt() == false);
+        ASSERT_TRUE(STValue.isBigInt() === false);
     } catch (e) {
         print('Error code: ', e.code);
         print('Error message: ', e.message);
     }
 
     try {
-        ASSERT_TRUE('STValue'.isBigInt() == false);
+        ASSERT_TRUE('STValue'.isBigInt() === false);
     } catch (e) {
         print('Error code: ', e.code);
         print('Error message: ', e.message);
@@ -102,7 +102,7 @@ function testIsBigIntInvalidParam(): void {
     // param arg invalid
     let data = STValue.wrapBigInt(1234567n);
     try {
-        ASSERT_TRUE(data.isBigInt(1) == false);
+        ASSERT_TRUE(data.isBigInt(1) === false);
     } catch (e) {
         print('Error code: ', e.code);
         print('Error message: ', e.message);
@@ -113,100 +113,100 @@ function testIsBigInt(): void {
     // 1. invalid param
     testIsBigIntInvalidParam();
     let data = STValue.wrapInt(123);
-    ASSERT_TRUE(data.isBigInt() == false);
+    ASSERT_TRUE(data.isBigInt() === false);
 
     // 2. null and undefined check
     data = STValue.getNull();
-    ASSERT_TRUE(data.isBigInt() == false);
+    ASSERT_TRUE(data.isBigInt() === false);
 
     data = STValue.getUndefined();
-    ASSERT_TRUE(data.isBigInt() == false);
+    ASSERT_TRUE(data.isBigInt() === false);
 
     // 3. not bigint type
-    data = module.moduleGetVariable('shouldBeBooleanTrue', SType.BOOLEAN);
-    ASSERT_TRUE(data.isBigInt() == false);
+    data = ns.namespaceGetVariable('shouldBeBooleanTrue', SType.BOOLEAN);
+    ASSERT_TRUE(data.isBigInt() === false);
 
     data = STValue.wrapString('I am a Chinese');
-    ASSERT_TRUE(data.isBigInt() == false);
+    ASSERT_TRUE(data.isBigInt() === false);
 
-    data = module.moduleGetVariable('shouldBeString', SType.REFERENCE);
-    ASSERT_TRUE(data.isBigInt() == false);
+    data = ns.namespaceGetVariable('shouldBeString', SType.REFERENCE);
+    ASSERT_TRUE(data.isBigInt() === false);
 
-    data = module.moduleGetVariable('subStu', SType.REFERENCE);
-    ASSERT_TRUE(data.isBigInt() == false);
+    data = ns.namespaceGetVariable('subStu', SType.REFERENCE);
+    ASSERT_TRUE(data.isBigInt() === false);
 
     // 4. bigint type
     data = STValue.wrapBigInt(123456789n);
-    ASSERT_TRUE(data.isBigInt() == true);
+    ASSERT_TRUE(data.isBigInt() === true);
 
     data = STValue.wrapBigInt(BigInt('123456789'));
-    ASSERT_TRUE(data.isBigInt() == true);
+    ASSERT_TRUE(data.isBigInt() === true);
 
-    data = module.moduleGetVariable('shouldBeBigInt', SType.REFERENCE);
-    ASSERT_TRUE(data.isBigInt() == true);
+    data = ns.namespaceGetVariable('shouldBeBigInt', SType.REFERENCE);
+    ASSERT_TRUE(data.isBigInt() === true);
 }
 
 function testIsBoolean(): void {
-    let shouldBeBooleanTrue = module.moduleGetVariable("shouldBeBooleanTrue", SType.BOOLEAN);
-    let shouldBeByte = module.moduleGetVariable("shouldBeByte", SType.BYTE);
+    let shouldBeBooleanTrue = ns.namespaceGetVariable("shouldBeBooleanTrue", SType.BOOLEAN);
+    let shouldBeByte = ns.namespaceGetVariable("shouldBeByte", SType.BYTE);
     ASSERT_TRUE(shouldBeBooleanTrue.isBoolean());
     ASSERT_TRUE(!shouldBeByte.isBoolean());
 }
 
 function testIsByte(): void {
-    let shouldBeByte = module.moduleGetVariable("shouldBeByte", SType.BYTE);
-    let shouldBeBooleanTrue = module.moduleGetVariable("shouldBeBooleanTrue", SType.BOOLEAN);
+    let shouldBeByte = ns.namespaceGetVariable("shouldBeByte", SType.BYTE);
+    let shouldBeBooleanTrue = ns.namespaceGetVariable("shouldBeBooleanTrue", SType.BOOLEAN);
     ASSERT_TRUE(shouldBeByte.isByte());
     ASSERT_TRUE(!shouldBeBooleanTrue.isByte());
 }
 
 function testIsChar(): void {
-    let shouldBeChar = module.moduleGetVariable("shouldBeChar", SType.CHAR);
-    let shouldBeByte = module.moduleGetVariable("shouldBeByte", SType.BYTE);
+    let shouldBeChar = ns.namespaceGetVariable("shouldBeChar", SType.CHAR);
+    let shouldBeByte = ns.namespaceGetVariable("shouldBeByte", SType.BYTE);
     ASSERT_TRUE(shouldBeChar.isChar());
     ASSERT_TRUE(!shouldBeByte.isChar());
 }
 
 function testIsShort(): void {
-    let shouldBeShort = module.moduleGetVariable("shouldBeShort", SType.SHORT);
-    let shouldBeChar = module.moduleGetVariable("shouldBeChar", SType.CHAR);
+    let shouldBeShort = ns.namespaceGetVariable("shouldBeShort", SType.SHORT);
+    let shouldBeChar = ns.namespaceGetVariable("shouldBeChar", SType.CHAR);
     ASSERT_TRUE(shouldBeShort.isShort());
     ASSERT_TRUE(!shouldBeChar.isShort());
 }
 
 function testIsInt(): void {
-    let shouldBeInt = module.moduleGetVariable("shouldBeInt", SType.INT);
-    let shouldBeShort = module.moduleGetVariable("shouldBeShort", SType.SHORT);
+    let shouldBeInt = ns.namespaceGetVariable("shouldBeInt", SType.INT);
+    let shouldBeShort = ns.namespaceGetVariable("shouldBeShort", SType.SHORT);
     ASSERT_TRUE(shouldBeInt.isInt());
     ASSERT_TRUE(!shouldBeShort.isInt());
 }
 
 function testIsLong(): void {
-    let shouldBeLong = module.moduleGetVariable("shouldBeLong", SType.LONG);
-    let shouldBeInt = module.moduleGetVariable("shouldBeInt", SType.INT);
+    let shouldBeLong = ns.namespaceGetVariable("shouldBeLong", SType.LONG);
+    let shouldBeInt = ns.namespaceGetVariable("shouldBeInt", SType.INT);
     ASSERT_TRUE(shouldBeLong.isLong());
     ASSERT_TRUE(!shouldBeInt.isLong());
 }
 
 function testIsFloat(): void {
-    let shouldBeFloat = module.moduleGetVariable("shouldBeFloat", SType.FLOAT);
-    let shouldBeLong = module.moduleGetVariable("shouldBeLong", SType.LONG);
+    let shouldBeFloat = ns.namespaceGetVariable("shouldBeFloat", SType.FLOAT);
+    let shouldBeLong = ns.namespaceGetVariable("shouldBeLong", SType.LONG);
     ASSERT_TRUE(shouldBeFloat.isFloat());
     ASSERT_TRUE(!shouldBeLong.isFloat());
 }
 
 function testIsNumber(): void {
-    let shouldBeNumber = module.moduleGetVariable("shouldBeNumber", SType.DOUBLE);
-    let shouldBeFloat = module.moduleGetVariable("shouldBeFloat", SType.FLOAT);
+    let shouldBeNumber = ns.namespaceGetVariable("shouldBeNumber", SType.DOUBLE);
+    let shouldBeFloat = ns.namespaceGetVariable("shouldBeFloat", SType.FLOAT);
     ASSERT_TRUE(shouldBeNumber.isNumber());
     ASSERT_TRUE(!shouldBeFloat.isNumber());
 }
 
 function testIsNullishValue(): void {
-    let shouldBeNull = module.moduleGetVariable('shouldBeNull', SType.REFERENCE);
-    let shouldBeUndefined = module.moduleGetVariable('shouldBeUndefined', SType.REFERENCE);
-    let shouldBePrimitive = module.moduleGetVariable('shouldBePrimitive', SType.INT);
-    let shouldBeRef = module.moduleGetVariable('shouldBeRef', SType.REFERENCE);
+    let shouldBeNull = ns.namespaceGetVariable('shouldBeNull', SType.REFERENCE);
+    let shouldBeUndefined = ns.namespaceGetVariable('shouldBeUndefined', SType.REFERENCE);
+    let shouldBePrimitive = ns.namespaceGetVariable('shouldBePrimitive', SType.INT);
+    let shouldBeRef = ns.namespaceGetVariable('shouldBeRef', SType.REFERENCE);
 
     ASSERT_TRUE(shouldBeNull.isNull());
     ASSERT_TRUE(!shouldBePrimitive.isNull());
@@ -220,23 +220,23 @@ function testIsNullishValue(): void {
 
     try {
         shouldBeNull.isNull(11);
-    } catch(e: Error){}
+    } catch (e: Error) { }
 
     try {
         shouldBeUndefined.isUndefined(11);
-    } catch(e: Error){}
+    } catch (e: Error) { }
 }
 
 function testIsEqualTo(): void {
-    let leftRef = module.moduleGetVariable('leftRef', SType.REFERENCE);
+    let leftRef = ns.namespaceGetVariable('leftRef', SType.REFERENCE);
     ASSERT_TRUE(leftRef.isEqualTo(leftRef));
-    let rightRef = module.moduleGetVariable('rightRef', SType.REFERENCE);
+    let rightRef = ns.namespaceGetVariable('rightRef', SType.REFERENCE);
     ASSERT_TRUE(leftRef.isEqualTo(rightRef));
 
-    let rightRefNotEqual = module.moduleGetVariable('rightRefNotEqual', SType.REFERENCE);
+    let rightRefNotEqual = ns.namespaceGetVariable('rightRefNotEqual', SType.REFERENCE);
     ASSERT_TRUE(!leftRef.isEqualTo(rightRefNotEqual));
 
-    let rightRefNotSameType = module.moduleGetVariable('rightRefNotSameType', SType.REFERENCE);
+    let rightRefNotSameType = ns.namespaceGetVariable('rightRefNotSameType', SType.REFERENCE);
     ASSERT_TRUE(!leftRef.isEqualTo(rightRefNotSameType));
 
     let equalNull = STValue.getNull();
@@ -250,22 +250,22 @@ function testIsEqualTo(): void {
 
     try {
         leftRef.isEqualTo(rightRef, 111);
-    } catch(e: Error){}
+    } catch (e: Error) { }
 }
 
 function testIsStrictlyEqualTo(): void {
     let magicNull = STValue.getNull();
     let magicUndefined = STValue.getUndefined();
-    let magicBoolean = module.moduleGetVariable('magicBoolean', SType.BOOLEAN);
-    let magicByte = module.moduleGetVariable('magicByte', SType.BYTE);
-    let magicChar = module.moduleGetVariable('magicChar', SType.CHAR);
-    let magicShort = module.moduleGetVariable('magicShort', SType.SHORT);
-    let magicInt = module.moduleGetVariable('magicInt', SType.INT);
-    let magicLong = module.moduleGetVariable('magicLong', SType.LONG);
-    let magicFloat = module.moduleGetVariable('magicFloat', SType.FLOAT);
-    let magicDouble = module.moduleGetVariable('magicDouble', SType.DOUBLE);
-    let magicString1 = module.moduleGetVariable('magicString1', SType.REFERENCE);
-    let magicString2 = module.moduleGetVariable('magicString2', SType.REFERENCE);
+    let magicBoolean = ns.namespaceGetVariable('magicBoolean', SType.BOOLEAN);
+    let magicByte = ns.namespaceGetVariable('magicByte', SType.BYTE);
+    let magicChar = ns.namespaceGetVariable('magicChar', SType.CHAR);
+    let magicShort = ns.namespaceGetVariable('magicShort', SType.SHORT);
+    let magicInt = ns.namespaceGetVariable('magicInt', SType.INT);
+    let magicLong = ns.namespaceGetVariable('magicLong', SType.LONG);
+    let magicFloat = ns.namespaceGetVariable('magicFloat', SType.FLOAT);
+    let magicDouble = ns.namespaceGetVariable('magicDouble', SType.DOUBLE);
+    let magicString1 = ns.namespaceGetVariable('magicString1', SType.REFERENCE);
+    let magicString2 = ns.namespaceGetVariable('magicString2', SType.REFERENCE);
 
     let result1 = magicNull.isStrictlyEqualTo(magicUndefined);
     ASSERT_TRUE(!result1);
@@ -414,7 +414,7 @@ function testTypeIsAssignableFrom(): void {
     ASSERT_TRUE(STValue.typeIsAssignableFrom(subStudentCls, studentCls));
     ASSERT_TRUE(STValue.typeIsAssignableFrom(subStudentCls, subStudentCls))
     ASSERT_EQ(STValue.typeIsAssignableFrom(studentCls, subStudentCls), false)
-    ASSERT_EQ(STValue.typeIsAssignableFrom(studentCls, module), false)
+    ASSERT_EQ(STValue.typeIsAssignableFrom(studentCls, ns), false)
 
     let res = false;
     try {
