@@ -166,7 +166,8 @@ private:
     void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
     void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
 
-    void ProcessUnhandledPromiseRejections();
+    void ProcessUnhandledFailedJobs();
+    void ProcessUnhandledRejectedPromises(bool listAllObjects);
 
     PandaEtsNapiEnv *etsNapiEnv_ {nullptr};
     void *promiseClassPtr_ {nullptr};

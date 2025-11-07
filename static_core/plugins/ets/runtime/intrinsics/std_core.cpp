@@ -360,7 +360,9 @@ extern "C" EtsInt EtsEscompatUint8ClampedArrayToUint8Clamped(EtsDouble val)
 
 extern "C" EtsBoolean StdSystemIsExternalTimerEnabled()
 {
-    return ark::ets::ToEtsBoolean(EtsCoroutine::GetCurrent()->GetManager()->IsExternalTimerEnabled());
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto extTimerOption = ark::ets::ToEtsBoolean(coro->GetManager()->GetConfig().enableExternalTimer);
+    return extTimerOption && coro->GetWorker()->IsExternalSchedulingEnabled();
 }
 
 }  // namespace ark::ets::intrinsics

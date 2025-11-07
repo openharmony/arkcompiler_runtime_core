@@ -25,27 +25,35 @@
 
 namespace ark {
 
+// For now, it is much more readable to store the config in a struct with constants, instead of having
+// a class with numerous accessors. Can be reconsidered in future if the config becomes something more than POD.
+// The member naming is directly related: THIS_MEMBER_NAME_CASE_STYLE has poor redability in this case.
+// NOLINTBEGIN(readability-identifier-naming, misc-non-private-member-variables-in-classes)
+
 /// @brief describes the set of adjustable parameters for CoroutineManager and its descendants initialization
 struct CoroutineManagerConfig {
     static constexpr uint32_t WORKERS_COUNT_AUTO = 0;
 
     /// enable the experimental task execution interface
-    bool enableDrainQueueIface = false;
+    const bool enableDrainQueueIface = false;
     /// enable migration
-    bool enableMigration = false;
+    const bool enableMigration = false;
     /// migrate coroutines that resumed from wait
-    bool migrateAwakenedCoros = false;
+    const bool migrateAwakenedCoros = false;
     /// Number of coroutine workers for the N:M mode
-    uint32_t workersCount = WORKERS_COUNT_AUTO;
+    const uint32_t workersCount = WORKERS_COUNT_AUTO;
     /// Limit on the number of exclusive coroutines workers
-    uint32_t exclusiveWorkersLimit = 0;
+    const uint32_t exclusiveWorkersLimit = 0;
     /// Collection of performance statistics
-    bool enablePerfStats = false;
-    // number of exclusive workers created for runtime needs
-    uint32_t preallocatedExclusiveWorkersCount = 0;
+    const bool enablePerfStats = false;
     /// Enable external timer implementation
-    bool enableExternalTimer = false;
+    const bool enableExternalTimer = false;
+    /// Number of exclusive workers created for runtime needs
+    const uint32_t preallocatedExclusiveWorkersCount = 0;
+
+    CoroutineManagerConfig() = delete;
 };
+// NOLINTEND(readability-identifier-naming, misc-non-private-member-variables-in-classes)
 
 /// @brief defines the scheduling policy for a coroutine. Maybe in future we would like to add more types.
 enum class CoroutineSchedulingPolicy {
@@ -64,6 +72,24 @@ enum class WorkerSelectionPolicy {
     LEAST_LOADED,
     /// choose the busiest worker
     MOST_LOADED
+};
+
+/// @brief defines result of launch
+enum class LaunchResult : uint8_t {
+    /// coroutine was created and scheduled successfully
+    OK,
+    /**
+     * coroutine was not created because of coroutines limit was exceeded
+     * NOTE: in case of this error coroutine was not created and "completionEvent" should be removed externally
+     */
+    COROUTINES_LIMIT_EXCEED,
+    /// coroutine was not scheduled because no suitable worker was found
+    NO_SUITABLE_WORKER,
+    /**
+     * coroutine was not created because it's launch method is not supported, for example take a look at
+     * ThreadedCoroutineManager::LaunchImmediately
+     */
+    NOT_SUPPORTED
 };
 
 /**
@@ -108,7 +134,7 @@ public:
     NO_MOVE_SEMANTIC(CoroutineManager);
 
     /// Factory is used to create coroutines when needed. See CoroutineFactory for details.
-    explicit CoroutineManager(CoroutineFactory factory);
+    explicit CoroutineManager(const CoroutineManagerConfig &config, CoroutineFactory factory);
     ~CoroutineManager() override = default;
 
     /**
@@ -117,7 +143,7 @@ public:
      *
      * @param config describes the CoroutineManager operation mode
      */
-    virtual void Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm) = 0;
+    virtual void Initialize(Runtime *runtime, PandaVM *vm) = 0;
     /// Should be called after all execution is finished. Destroys the main coroutine.
     virtual void Finalize() = 0;
     /// Add coroutine to registry (used for enumeration and tracking) and perform all the required actions
@@ -138,8 +164,9 @@ public:
      * @param abortFlag if true, finishing with an exception will abort the program
      * @param groupId target worker group for the coroutine (see CoroutineWorkerGroup)
      */
-    virtual bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                        const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) = 0;
+    virtual LaunchResult Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                                const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                bool abortFlag) = 0;
     /**
      * @brief The public coroutine creation and execution interface. Switching to the newly created coroutine occurs
      * immediately. Coroutine launch mode should correspond to the use of parent's worker.
@@ -149,9 +176,9 @@ public:
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
      */
-    virtual bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                                   const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                                   bool abortFlag) = 0;
+    virtual LaunchResult LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint,
+                                           PandaVector<Value> &&arguments, const CoroutineWorkerGroup::Id &groupId,
+                                           CoroutinePriority priority, bool abortFlag) = 0;
 
     /**
      * @brief The public coroutine creation and execution interface with native entrypoint.
@@ -162,8 +189,9 @@ public:
      * @param groupId target worker group for the coroutine (see CoroutineWorkerGroup)
      * NOTE: native function can have Managed scopes
      */
-    virtual bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                              const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority, bool abortFlag) = 0;
+    virtual LaunchResult LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                                      const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
+                                      bool abortFlag) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**
@@ -331,11 +359,17 @@ public:
     virtual void PreZygoteFork() = 0;
     /// Called after Zygote fork to reinitialize and restart worker threads.
     virtual void PostZygoteFork() = 0;
-    /// NOTE(ivagin): all config-related stuff should be moved to some special class member
-    virtual bool IsExternalTimerEnabled()
+
+    /// read only (implying no const_casts!) version of the initial config
+    const CoroutineManagerConfig &GetConfig() const
     {
-        return false;
-    };
+        return config_;
+    }
+
+    uint64_t GetCurrentTime() const
+    {
+        return os::time::GetClockTimeInMilli();
+    }
 
 protected:
     using EntrypointInfo = Coroutine::EntrypointInfo;
@@ -377,6 +411,9 @@ private:
     os::memory::Mutex idsLock_;
     std::bitset<MAX_COROUTINE_ID> coroutineIds_ GUARDED_BY(idsLock_);
     uint32_t lastCoroutineId_ GUARDED_BY(idsLock_) = UNINITIALIZED_COROUTINE_ID;
+
+    // the coroutine manager config
+    CoroutineManagerConfig config_;
 };
 
 /// Disables coroutine switch on the current worker for some scope. Can be used recursively.

@@ -172,10 +172,15 @@ protected:
     size_t maxExtraSize_ {DEFAULT_MAX_EXTRA_HEAP_SIZE};        // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
+    void FinishPostponeGCIfNeeded(GC *gc);
+
+    static constexpr uint32_t POSTPONE_GC_LIMIT = 10;
+
     HeapSpace *heapSpace_ {nullptr};
     size_t minTargetFootprint_ {DEFAULT_MIN_TARGET_FOOTPRINT};
     MemStatsType *memStats_;
     uint8_t skipGcCount_ {0};
+    uint32_t gcPostponeCount_ {0};
 
     friend class ark::test::GCTriggerTest;
 };

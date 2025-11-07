@@ -54,11 +54,7 @@ public:
     }
     virtual ~CoroutineWorker()
     {
-        os::memory::LockHolder l(posterLock_);
-        if (extSchedulingPoster_ != nullptr) {
-            extSchedulingPoster_->SetDestroyInPlace();
-            extSchedulingPoster_.reset(nullptr);
-        }
+        DestroyCallbackPoster();
     }
 
     Runtime *GetRuntime()
@@ -102,14 +98,27 @@ public:
         extSchedulingPoster_ = std::move(poster);
     }
 
-    bool IsExternalSchedulingEnabled() const
+    void DestroyCallbackPoster();
+
+    bool IsExternalSchedulingEnabled()
     {
+        os::memory::LockHolder l(posterLock_);
         return extSchedulingPoster_ != nullptr;
     }
 
     void OnCoroBecameActive(Coroutine *co);
 
     void TriggerSchedulerExternally(Coroutine *requester);
+
+    /**
+     * This method perform ready asynchronous work of the coroutine worker.
+     * If there is no ready async work but pending exists, the method blocks until it gets ready.
+     * @return true if some async work still exists, false otherwise
+     */
+    virtual bool ProcessAsyncWork()
+    {
+        return false;
+    }
 
 private:
     Runtime *runtime_ = nullptr;

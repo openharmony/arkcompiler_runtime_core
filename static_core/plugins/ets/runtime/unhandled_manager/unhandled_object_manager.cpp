@@ -73,6 +73,22 @@ void UnhandledObjectManager::VisitObjects(const GCRootVisitor &visitor)
     }
 }
 
+static PandaUnorderedSet<EtsObject *> FlattenMapOfSets(
+    PandaUnorderedMap<CoroutineWorker::Id, PandaUnorderedSet<EtsObject *>> &mapOfSets)
+{
+    PandaUnorderedSet<EtsObject *> result;
+    size_t count = 0;
+    for (const auto &[_, set] : mapOfSets) {
+        count += set.size();
+    }
+    result.reserve(count);
+
+    for (auto &[_, set] : mapOfSets) {
+        result.merge(std::move(set));
+    }
+    return result;
+}
+
 static void AddObjectImpl(PandaUnorderedSet<EtsObject *> &objects, EtsObject *object)
 {
     objects.insert(object);
@@ -107,9 +123,6 @@ static EtsHandle<EtsEscompatArray> CreateEtsObjectArrayFromHandles(EtsCoroutine 
     EtsHandle<EtsEscompatArray> harray(coro, array);
     size_t i = 0;
     for (auto hobj : handles) {
-        ASSERT(hobj.GetPtr() != nullptr);
-        ASSERT(!hobj->GetCoreType()->IsForwarded());
-
         auto *objAndReason = EtsEscompatArray::Create(2U);
         ASSERT(objAndReason != nullptr);
         objAndReason->SetRef(0, T::FromEtsObject(hobj.GetPtr())->GetValue(coro));
@@ -136,8 +149,19 @@ static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsCoroutine
         LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
     }
     ASSERT(method != nullptr);
-    std::array args = {Value(hobjects->GetCoreType())};
-    method->InvokeVoid(coro, args.data());
+    auto *coroManager = coro->GetCoroutineManager();
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
+    PandaVector<Value> args = {Value(hobjects->GetCoreType())};
+    LaunchResult launchRes = coroManager->LaunchImmediately(
+        evt, method, std::move(args), ark::CoroutineWorkerGroup::GenerateExactWorkerId(coro->GetWorker()->GetId()),
+        EtsCoroutine::ASYNC_CALL, true);
+
+    if UNLIKELY (launchRes != LaunchResult::OK) {
+        LOG(DEBUG, COROUTINES) << "Failed to list unhandled rejections";
+        ASSERT(launchRes == LaunchResult::COROUTINES_LIMIT_EXCEED);
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        return;
+    }
     LOG(DEBUG, COROUTINES) << "List unhandled rejections end";
 }
 
@@ -202,21 +226,34 @@ void UnhandledObjectManager::RemoveRejectedPromise(EtsPromise *promise, EtsCorou
     }
 }
 
-void UnhandledObjectManager::ListRejectedPromises(EtsCoroutine *coro)
+void UnhandledObjectManager::ListRejectedPromises(EtsCoroutine *coro, bool listAllObjects)
 {
     ASSERT_MANAGED_CODE();
     ASSERT(coro != nullptr);
-    auto workerId = coro->GetWorker()->GetId();
     PandaUnorderedSet<EtsObject *> unhandledObjects {};
-    {
-        os::memory::LockHolder lh(mutex_);
-        auto it = rejectedPromises_.find(workerId);
-        if (it == rejectedPromises_.end() || it->second.empty()) {
-            return;
+    if (listAllObjects) {
+        PandaUnorderedMap<CoroutineWorker::Id, PandaUnorderedSet<EtsObject *>> rejectedPromisesLocal {};
+        {
+            os::memory::LockHolder lh(mutex_);
+            if (rejectedPromises_.empty()) {
+                return;
+            }
+            rejectedPromisesLocal.swap(rejectedPromises_);
         }
-        unhandledObjects.swap(it->second);
-        rejectedPromises_.erase(it);
+        unhandledObjects = FlattenMapOfSets(rejectedPromisesLocal);
+    } else {
+        auto workerId = coro->GetWorker()->GetId();
+        {
+            os::memory::LockHolder lh(mutex_);
+            auto it = rejectedPromises_.find(workerId);
+            if (it == rejectedPromises_.end() || it->second.empty()) {
+                return;
+            }
+            unhandledObjects.swap(it->second);
+            rejectedPromises_.erase(it);
+        }
     }
+
     ListUnhandledObjectsImpl<EtsPromise>(vm_->GetClassLinker(), coro, unhandledObjects);
 }
 
@@ -226,9 +263,12 @@ bool UnhandledObjectManager::HasFailedJobObjects() const
     return !(failedJobs_.empty());
 }
 
-bool UnhandledObjectManager::HasRejectedPromiseObjects(EtsCoroutine *coro) const
+bool UnhandledObjectManager::HasRejectedPromiseObjects(EtsCoroutine *coro, bool listAllObjects) const
 {
     os::memory::LockHolder lh(mutex_);
+    if (listAllObjects) {
+        return !(rejectedPromises_.empty());
+    }
     auto workerId = coro->GetWorker()->GetId();
     auto it = rejectedPromises_.find(workerId);
     if (it != rejectedPromises_.end()) {

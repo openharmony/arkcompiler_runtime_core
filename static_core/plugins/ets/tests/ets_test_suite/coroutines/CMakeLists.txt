@@ -483,3 +483,4 @@ add_ets_coroutines_test(FILE worker_group.ets
 )
 
 add_subdirectory(dfx)
+add_subdirectory(no_suitable_worker)

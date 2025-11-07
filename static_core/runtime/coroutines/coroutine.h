@@ -344,6 +344,12 @@ public:
         return abortFlag_;
     }
 
+    /**
+     * a converter function that stores the data from EntrypointInfo in the member variables
+     * NOTE: should be made private after #29944
+     */
+    void SetEntrypointData(std::optional<EntrypointInfo> &&epInfo);
+
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
     explicit Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
@@ -353,8 +359,6 @@ protected:
     void SetCoroutineStatus(Status newStatus);
 
 private:
-    /// a converter function that stores the data from EntrypointInfo in the member variables
-    void SetEntrypointData(std::optional<EntrypointInfo> &&epInfo);
     /// Method starts or ends tracing base on statuses
     void IssueTracingEvents(Status oldStatus, Status newStatus);
 
