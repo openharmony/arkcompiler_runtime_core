@@ -3104,347 +3104,129 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayReverse
 
 ############################################
-# escompat.TypedArrays.allocReversedBuffer #
+# escompat.TypedArrays.reverseCopyBuffer #
 ############################################
 
-  - name: Int8ArrayAllocReversedBuffer
+  - name: Int8ArrayReverseCopyBuffer
     space: ets
     class_name: escompat.Int8Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: Int16ArrayAllocReversedBuffer
+  - name: Int16ArrayReverseCopyBuffer
     space: ets
     class_name: escompat.Int16Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: Int32ArrayAllocReversedBuffer
+  - name: Int32ArrayReverseCopyBuffer
     space: ets
     class_name: escompat.Int32Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: BigInt64ArrayAllocReversedBuffer
+  - name: BigInt64ArrayReverseCopyBuffer
     space: ets
     class_name: escompat.BigInt64Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: Float32ArrayAllocReversedBuffer
+  - name: Float32ArraReverseCopyBuffer
     space: ets
     class_name: escompat.Float32Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: Float64ArrayAllocReversedBuffer
+  - name: Float64ArrayReverseCopyBuffer
     space: ets
     class_name: escompat.Float64Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: UInt8ArrayAllocReversedBuffer
+  - name: UInt8ArrayReverseCopyBuffer
     space: ets
     class_name: escompat.Uint8Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: UInt8ClampedArrayAllocReversedBuffer
+  - name: UInt8ClampedArrayReverseCopyBuffer
     space: ets
     class_name: escompat.Uint8ClampedArray
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: UInt16ArrayAllocReversedBuffer
+  - name: UInt16ArrayReverseCopyBuffer
     space: ets
     class_name: escompat.Uint16Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: UInt32ArrayAllocReversedBuffer
+  - name: UInt32ArrayReverseCopyBuffer
     space: ets
     class_name: escompat.Uint32Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayAllocReversedBuffer
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
-  - name: BigUInt64ArrayAllocReversedBuffer
+  - name: BigUInt64ArrayReverseCopyBuffer
     space: ets
     class_name: escompat.BigUint64Array
-    method_name: allocReversedBuffer
-    static: false
+    method_name: reverseCopyBuffer
+    static: true
     signature:
-      ret: std.core.ArrayBuffer
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayAllocReversedBuffer
-
-##########################################
-# escompat.TypedArrays.allocSlicedBuffer #
-##########################################
-
-  - name: Int8ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.Int8Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayAllocSlicedBuffer
-
-  - name: Int16ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.Int16Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayAllocSlicedBuffer
-
-  - name: Int32ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.Int32Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayAllocSlicedBuffer
-
-  - name: BigInt64ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.BigInt64Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayAllocSlicedBuffer
-
-  - name: Float32ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.Float32Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayAllocSlicedBuffer
-
-  - name: Float64ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.Float64Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayAllocSlicedBuffer
-
-  - name: UInt8ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.Uint8Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayAllocSlicedBuffer
-
-  - name: UInt8ClampedArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.Uint8ClampedArray
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayAllocSlicedBuffer
-
-  - name: UInt16ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.Uint16Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayAllocSlicedBuffer
-
-  - name: UInt32ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.Uint32Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayAllocSlicedBuffer
-
-  - name: BigUInt64ArrayAllocSlicedBuffer
-    space: ets
-    class_name: escompat.BigUint64Array
-    method_name: allocSlicedBuffer
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayAllocSlicedBuffer
-
-########################################
-# escompat.TypedArrays.allocBufferWith #
-########################################
-
-  - name: Int8ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.Int8Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i8]
-    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayAllocBufferWith
-
-  - name: Int16ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.Int16Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i16]
-    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayAllocBufferWith
-
-  - name: Int32ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.Int32Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayAllocBufferWith
-
-  - name: BigInt64ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.BigInt64Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i64]
-    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayAllocBufferWith
-
-  - name: Float32ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.Float32Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, f32]
-    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayAllocBufferWith
-
-  - name: Float64ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.Float64Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, f64]
-    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayAllocBufferWith
-
-  - name: UInt8ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.Uint8Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayAllocBufferWith
-
-  - name: UInt8ClampedArrayAllocBufferWith
-    space: ets
-    class_name: escompat.Uint8ClampedArray
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayAllocBufferWith
-
-  - name: UInt16ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.Uint16Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i32]
-    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayAllocBufferWith
-
-  - name: UInt32ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.Uint32Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i64]
-    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayAllocBufferWith
-
-  - name: BigUInt64ArrayAllocBufferWith
-    space: ets
-    class_name: escompat.BigUint64Array
-    method_name: allocBufferWith
-    static: false
-    signature:
-      ret: std.core.ArrayBuffer
-      args: [i32, i64]
-    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayAllocBufferWith
-
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
 
 ###################################
 # escompat.TypedArrays.copyWithin #
