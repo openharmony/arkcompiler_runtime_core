@@ -11,4 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-persist.ark.enableDebugMode=false
+persist.ark.enableDebugMode=root:root:0777
+persist.sta.gc.SetG1TrackFreedObjects=root:root:0777
+persist.sta.gc.SetGCUseLargerYoungSpace=root:root:0777

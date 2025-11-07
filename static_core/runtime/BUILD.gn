@@ -527,10 +527,8 @@ if (is_ohos && is_standard_system) {
       "init:libbegetutil",
     ]
     _libarkruntime_calculated_deps += [
-      "$ark_root/runtime/para:RuntimeEnableDebugger.para",
-      "$ark_root/runtime/para:RuntimeEnableDebugger.para.dac",
-      "$ark_root/runtime/para:RuntimeGCLogEnable.para",
-      "$ark_root/runtime/para:RuntimeGCLogEnable.para.dac",
+      "$ark_root/runtime/para:Runtime.para",
+      "$ark_root/runtime/para:Runtime.para.dac",
     ]
   }
 }

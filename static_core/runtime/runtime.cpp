@@ -332,7 +332,7 @@ bool Runtime::Create(const RuntimeOptions &options)
 
     IntrusiveTestOption::SetTestId(options);
 
-    SetDebuggerOptions(const_cast<RuntimeOptions &>(options));
+    SetRuntimeOptions(const_cast<RuntimeOptions &>(options));
 
     const_cast<RuntimeOptions &>(options).InitializeRuntimeSpacesAndType();
     trace::ScopedTrace scopedTrace("Runtime::Create");
@@ -390,6 +390,12 @@ bool Runtime::Create(const RuntimeOptions &options)
 }
 
 #ifdef PANDA_OHOS_GET_PARAMETER
+void Runtime::SetRuntimeOptions(RuntimeOptions &options)
+{
+    SetDebuggerOptions(options);
+    SetUseLargerYoungSpaceOptions(options);
+}
+
 void Runtime::SetDebuggerOptions(RuntimeOptions &options)
 {
     const std::string debugLibraryPathMode = "/system/lib64/libarkinspector.so";
@@ -401,8 +407,21 @@ void Runtime::SetDebuggerOptions(RuntimeOptions &options)
         options.SetDebuggerBreakOnStart(true);
     }
 }
+
+void Runtime::SetUseLargerYoungSpaceOptions(RuntimeOptions &options)
+{
+    bool useLargerYoung = OHOS::system::GetBoolParameter("persist.sta.gc.SetGCUseLargerYoungSpace", false);
+    const size_t initYoungSpaceSize = 16_MB;
+    const size_t youngSpaceSize = 16_MB;
+    if (useLargerYoung) {
+        options.SetInitYoungSpaceSize(initYoungSpaceSize);
+        options.SetYoungSpaceSize(youngSpaceSize);
+    }
+}
 #else
+void Runtime::SetRuntimeOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetDebuggerOptions([[maybe_unused]] RuntimeOptions &options) {}
+void Runtime::SetUseLargerYoungSpaceOptions([[maybe_unused]] RuntimeOptions &options) {}
 #endif
 
 Runtime *Runtime::GetCurrent()
