@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,17 @@
  */
 
 {% for c in cases %}
-{% for use_const in const_to_initialise %}
 /*---
-desc: 
+desc:
     The type of expression of a numeric type for Constant Expressions is first evaluated from the expression.
-    The evaluated numeric result type can be inferred to a numeric target type from the context
+    The evaluated numeric result type can be inferred to a numeric target type from the context. A compile-time error
+    occurs if the context is a union type, and the evaluated value can be treated as value of several of union component types.
+tags: [compile-only, negative]
 ---*/
 
-const value = {{c.use}}
-
-const condition_true = true
-
 function main() {
-{% if "true" in use_const %}
-    let a {{c.use_type}} = value
-{% else %}
     let a {{c.use_type}} = {{c.use}}
-{% endif %}
-    arktest.assertTrue(a instanceof {{c.expected_type}})
+    a = {{c.value}}
 }
 
-{% endfor %}
 {% endfor %}
