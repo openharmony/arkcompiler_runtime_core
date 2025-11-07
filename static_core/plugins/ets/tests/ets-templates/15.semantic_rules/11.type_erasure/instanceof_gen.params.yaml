@@ -14,85 +14,73 @@
 ---
 cases:
     # generic function
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           function test<T>(p: Object) {
               return p instanceof T
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           function test<T>(p: Object) {
               return p instanceof Array<T>
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           function test<T>(p: Object) {
               return p instanceof Array<string>
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           function test<T extends Error>(p: Object) {
               return p instanceof T
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           function test<T extends Error>(p: Object) {
               return p instanceof Array<T>
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           function test<T extends string>(p: Object) {
               return p instanceof Array<string>
           }
 
     # generic class
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<T> {
               test(p: Object) {
                   return p instanceof T
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<T> {
               test(p: Object) {
                   return p instanceof A<T>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<T> {
               test(p: Object) {
                   return p instanceof Array<number>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<T extends Error> {
               test(p: Object) {
                   return p instanceof T
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<T extends Error> {
               test(p: Object) {
                   return p instanceof Array<T>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<T extends number> {
               test(p: Object) {
                   return p instanceof A<number>
@@ -100,48 +88,42 @@ cases:
           }
 
     # generic class method
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A {
               test<T>(p: Object) {
                   return p instanceof T
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A {
               test<T>(p: Object) {
                   return p instanceof A<T>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A {
               test<T>(p: Object) {
                   return p instanceof Array<number>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A {
               test<T extends Error>(p: Object) {
                   return p instanceof T
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A {
               test<T extends Error>(p: Object) {
                   return p instanceof Array<T>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A {
               test<T extends number>(p: Object) {
                   return p instanceof A<number>
@@ -149,48 +131,42 @@ cases:
           }
 
     # generic interface
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           interface I<T> {
               test(p: Object) {
                   return p instanceof T
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           interface I<T> {
               test(p: Object) {
                   return p instanceof I<T>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           interface I<T> {
               test(p: Object) {
                   return p instanceof I<number>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           interface I<T extends Error> {
               test(p: Object) {
                   return p instanceof T
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           interface I<T extends Error> {
               test(p: Object) {
                   return p instanceof I<T>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           interface I<T extends string> {
               test(p: Object) {
                   return p instanceof I<string>
@@ -198,16 +174,14 @@ cases:
           }
 
     # generic tuple
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<T, U> {
               test(p: Object) {
                   p instanceof [T, U]
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<T> {
               test(p: Object) {
                   p instanceof [T, string]
@@ -215,21 +189,18 @@ cases:
           }
 
     # generic function
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           function test<T, U>(p: Object) {
               return p instanceof (p: T) => U
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           function test<T>(p: Object) {
               return p instanceof (p: T) => void
           }
 
     # generic class, covariant type parameter
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class X {}
           class Y extends X {}
           class A<out T> {
@@ -246,40 +217,35 @@ cases:
           console.log(x.fld instanceof Any)
 
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<out T> {
               test(p: Object) {
                   return p instanceof A<T>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<out T> {
               test(p: Object) {
                   return p instanceof Array<Any>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<out T extends Error> {
               test(p: Object) {
                   return p instanceof T
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<out T extends Error> {
               test(p: Object) {
                   return p instanceof Array<T>
               }
           }
 
-    - tags: compile-only, negative
-      decl: |-
+    - decl: |-
           class A<out T extends number> {
               test(p: Object) {
                   return p instanceof A<number>

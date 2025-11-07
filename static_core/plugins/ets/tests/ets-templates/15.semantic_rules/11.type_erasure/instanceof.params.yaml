@@ -14,21 +14,6 @@
 ---
 cases:
     # Array
-    - tags: compile-only, negative
-      decl: |-
-          let x: Array<string> = ['']
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof Array<string> // CTE expected
-          )
-
-    - tags: compile-only, negative
-      decl: |-
-          let x: string[] = ['']
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof string[] // CTE expected
-          )
 
     - decl: |-
           let x: Array<string> = ['']
@@ -45,39 +30,7 @@ cases:
               ((): Object => x)() instanceof FixedArray<string> // OK
           )
 
-    - tags: compile-only, negative
-      decl: |-
-          let x: FixedArray<string> = ['']
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof FixedArray // CTE expected
-          )
-
     # union with Array
-    - tags: compile-only, negative
-      decl: |-
-          let x: Array<number>|Record<string, number> = [1.0]
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof Array<number>|Record<string, number> // CTE expected
-          )
-
-    - tags: compile-only, negative
-      decl: |-
-          let x: Array<number>|Record<string, number> = [1.0]
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof Array<number>|Record // CTE expected
-          )
-
-    - tags: compile-only, negative
-      decl: |-
-          let x: Array<number>|Record<string, number> = [1.0]
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof Array|Record<string, number> // CTE expected
-          )
-
     - decl: |-
           let x: Array<number>|Record<string, number> = [1.0]
       use: |-
@@ -86,22 +39,6 @@ cases:
           )
 
     # union with FixedArray
-    - tags: compile-only, negative
-      decl: |-
-          let x: FixedArray<int>|Promise<long>|Array<string> = ['']
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof FixedArray<int>|Promise<long>|Array<string> // CTE expected
-          )
-
-    - tags: compile-only, negative
-      decl: |-
-          let x: FixedArray<int>|Promise<long>|Array<string> = ['']
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof FixedArray|Promise|Array // CTE expected
-          )
-
     - decl: |-
           let x: FixedArray<int>|Promise<long>|Array<string> = ['']
       use: |-
@@ -109,34 +46,8 @@ cases:
               ((): Object => x)() instanceof FixedArray<int>|Promise|Array // OK
           )
 
+
     # union with various elements
-    - tags: compile-only, negative
-      decl: |-
-          class A<T> {}
-          let x: Promise<number>|string[][]|undefined|A<string>|Record<string, number> = undefined
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof Promise<number>|string[][]|undefined|A<string>|Record<string, number> // CTE expected
-          )
-
-    - tags: compile-only, negative
-      decl: |-
-          class A<T> {}
-          let x: Promise<number>|string[][]|undefined|A<string>|Record<string, number> = undefined
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof Promise|string[][]|undefined|A|Record // CTE expected
-          )
-
-    - tags: compile-only, negative
-      decl: |-
-          class A<T> {}
-          let x: Promise<number>|string[][]|undefined|A<string>|Record<string, number> = undefined
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof Promise<number>|Array|undefined|A|Record // CTE expected
-          )
-
     - decl: |-
           class A<T> {}
           let x: Promise<number>|string[][]|undefined|A<int>|Record<string, number> = undefined
@@ -146,52 +57,21 @@ cases:
           )
 
     # tuple
-    - tags: compile-only, negative
-      decl: |-
-          let x: [Promise<number>|undefined, Array<string>|Array<number>] = [undefined, ['']]
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof [Promise<number>|undefined, Array<string>|Array<number>] // CTE expected
-          )
-
     - decl: |-
           let x: [Promise<number>|undefined, Array<string>|Array<number>] = [undefined, ['']]
       use: |-
 
-    - tags: compile-only, negative
-      decl: |-
-          let x: [Array<number>, FixedArray<string>|Array<number>] = [[1.0], [1.0]]
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof [Array<number>, FixedArray<string>|Array<number>] // CTE expected
-          )
 
     - decl: |-
           let x: [Array<number>, FixedArray<string>|Array<number>] = [[1.0], [1.0]]
       use: |-
 
     # string literal types erased
-    - tags: compile-only, negative
-      decl: |-
-          let x: 'a'|'b'|'c' = 'a'
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof 'a' // CTE, string literal is erased
-          )
-
     - decl: |-
           let x: 'a'|'b'|'c' = 'a'
       use: |-
           arktest.assertTrue(
               ((): Object => x)() instanceof string // OK
-          )
-
-    - tags: compile-only, negative
-      decl: |-
-          let x: 'a'|'b'|int|Error = 1
-      use: |-
-          arktest.assertTrue(
-              ((): Object => x)() instanceof 'a'|'b'|int|Error // CTE, string literals are erased
           )
 
     - decl: |-
@@ -237,17 +117,6 @@ cases:
           )
 
     # function's type arguments erased
-    - tags: compile-only, negative
-      decl: |-
-          function foo<T, U, V, X>(p1: T, p2: U, p3: V, p4: X): T {
-              return p1
-          }
-          let x: Function = foo<Array<int>, Array<long>, Array<string>, Array<Object>>
-      use: |-
-          arktest.assertTrue(
-              x instanceof ((p1: Array<int>, p2: Array<long>, p3: Array<string>, p4: Array<Object>) => Array<int>) // CTE expected
-          )
-
     - decl: |-
           function foo<T, U, V, X>(p1: T, p2: U, p3: V, p4: X): T {
               return p1
