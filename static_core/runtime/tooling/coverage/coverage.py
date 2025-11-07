@@ -16,6 +16,7 @@
 
 import argparse
 import concurrent.futures
+import io
 import json
 import os
 import re
@@ -28,9 +29,6 @@ import time
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-workdir = os.getcwd()
-mode = "host"
 
 
 class Constants:
@@ -117,7 +115,6 @@ class Constants:
 
     # Default values
     DEFAULT_ANONYMOUS_FUNC_NAME = "anonymous"
-    INIT_FUNC_NAME = "_$init$_"
     LAMBDA_INVOKE_1 = "lambda$invoke$"
     LAMBDA_INVOKE_2 = "lambda_invoke-"
     CTOR = "_ctor_"
@@ -146,18 +143,111 @@ class Config:
         """Validate required directories exist"""
         required_dirs = [cls.AST_DIR, cls.PA_DIR, cls.RUNTIME_DIR]
         for directory in required_dirs:
-            if not Path(workdir).joinpath(directory).exists():
+            if not Path(runtime_config.workdir).joinpath(directory).exists():
                 raise FileNotFoundError(f"Directory does not exist: {directory}")
 
     @classmethod
     def get_runtime_dir(cls) -> str:
         """Get output file path"""
-        return Path(workdir).joinpath(cls.RUNTIME_DIR)
+        return str(Path(runtime_config.workdir).joinpath(cls.RUNTIME_DIR))
 
     @classmethod
     def get_output_file(cls) -> str:
         """Get output file path"""
-        return str(Path(workdir).joinpath(cls.OUTPUT_FILE))
+        return str(Path(runtime_config.workdir).joinpath(cls.OUTPUT_FILE))
+
+
+class RuntimeConfig:
+    """
+    Runtime configuration singleton class for managing global variables.
+    Provides methods to get and set global variables.
+    """
+    _instance = None
+    _initialized = False
+
+    def __new__(cls):
+        """Ensure only one instance of the class exists."""
+        if cls._instance is None:
+            cls._instance = super(RuntimeConfig, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        """Initialize configuration variables, executed only when the instance is first created."""
+        if not RuntimeConfig._initialized:
+            self._workdir = os.getcwd()
+            self._mode = 'host'
+            self._report_type = 'all'
+            self._change_info = None
+
+            RuntimeConfig._initialized = True
+
+    # debug related
+    def __str__(self) -> str:
+        """Return string representation of configurations"""
+        return (
+            f"RuntimeConfig("
+            f"workdir='{self._workdir}', "
+            f"mode='{self._mode}', "
+            f"report_type='{self._report_type}', "
+            f"change_info={self._change_info}"
+            f")"
+        )
+
+    # workdir related
+    @property
+    def workdir(self) -> str:
+        """Get current working directory"""
+        return self._workdir
+
+    @workdir.setter
+    def workdir(self, value: str) -> None:
+        """Set current working directory"""
+        self._workdir = value
+
+    # mode related
+    @property
+    def mode(self) -> str:
+        """Get mode"""
+        return self._mode
+
+    @mode.setter
+    def mode(self, value: str) -> None:
+        """Set mode"""
+        self._mode = value
+
+    # report_type related
+    @property
+    def report_type(self) -> str:
+        """Get report type"""
+        return self._report_type
+
+    @report_type.setter
+    def report_type(self, value: str) -> None:
+        """Set report type"""
+        self._report_type = value
+
+    # change_info related
+    @property
+    def change_info(self) -> Optional[Any]:
+        """Get change info"""
+        return self._change_info
+
+    @change_info.setter
+    def change_info(self, value: Optional[Any]) -> None:
+        """Set change info"""
+        self._change_info = value
+
+    # reset related
+    def reset(self) -> None:
+        """Reset all configurations to default values"""
+        self._workdir = os.getcwd()
+        self._mode = 'host'
+        self._report_type = 'all'
+        self._change_info = None
+
+
+# Create a globally accessible instance
+runtime_config = RuntimeConfig()
 
 
 class FileUtils:
@@ -173,11 +263,16 @@ class FileUtils:
             return f.read()
 
     @staticmethod
-    def write_file(file_path: str, content: str, open_mode: str = "w", encoding: str = "utf-8"):
+    def write_file(file_path: str, content: str, open_mode: str = "w", encoding: str = "utf-8") -> bool:
         """Safely write file"""
-        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
-        with open(file_path, open_mode, encoding=encoding) as f:
-            f.write(content)
+        try:
+            Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+            with Path(file_path).open(open_mode, encoding=encoding) as f:
+                f.write(content)
+            return True
+        except Exception as e:
+            print(f"Error writing to file {file_path}: {e}")
+            return False
 
     @staticmethod
     def ensure_extension(file_path: str, extension: str) -> str:
@@ -203,7 +298,8 @@ class CoverageInfo:
         self.function_name_to_lines = defaultdict(set)
         self.branch_stats = {}
         self.process_file_result = False
-        self.source_file_path_trans = ""
+        self.branch_info_for_diff = {}
+        self.related_funcs = set()
 
     def reset_stats(self):
         """Reset statistics"""
@@ -216,27 +312,37 @@ class CoverageInfo:
         self.function_name_to_lines.clear()
         self.branch_stats.clear()
         self.process_file_result = False
+        self.branch_info_for_diff = {}
+        self.related_funcs.clear()
 
-    def export_lcov(self, output_file: str):
+    def export_lcov(self, output_file: str) -> bool:
         """Export coverage report in LCOV format"""
         if not self.process_file_result:
-            raise Exception("Coverage information not parsed")
+            print("Coverage information not parsed")
+            return False
 
-        output_file = FileUtils.ensure_extension(output_file, Constants.EXT_INFO)
-        lcov_content = self._generate_lcov_content()
+        try:
+            output_file = FileUtils.ensure_extension(output_file, Constants.EXT_INFO)
+            lcov_content = self._generate_lcov_content()
 
-        FileUtils.write_file(output_file, lcov_content, "a")
+            if runtime_config.report_type == 'diff':
+                if self.source_file_path not in runtime_config.change_info:
+                    return True
+                lcov_content = self._filter_lcov_content(lcov_content)
+                if lcov_content is None:
+                    print("Failed to generate LCOV content")
+                    return False
+
+            return FileUtils.write_file(output_file, lcov_content, "a")
+        except Exception as e:
+            print(f"Error exporting LCOV: {e}")
+            return False
 
     def process_data(self, src_file_path: str, pa_file_path: str,
                      ast_file_path: str, runtime_info: List[Dict]):
         """Set file paths and parse"""
         self.reset_stats()
         self.source_file_path = src_file_path
-        if mode == 'hap':
-            self._trans_source_path(src_file_path)
-            if self.source_file_path_trans is None:
-                print("source_file_path_trans is none!")
-                return
 
         # Parse files
         self.process_file_result = (
@@ -245,16 +351,79 @@ class CoverageInfo:
                 self._process_runtime_info(runtime_info)
         )
 
-    def _trans_source_path(self, src_file_path):
-        match = re.search(r'entry/.+?\.ets$', src_file_path)
-        if match:
-            file_part = os.path.basename(match.group())
-            dir_part = os.path.dirname(match.group()).replace('/', '.')
-            self.source_file_path_trans = f"{dir_part}.{file_part.replace('.ets', '')}"
-            return self.source_file_path_trans
-        else:
-            print("src path is not expected")
+    def _filter_lcov_content(self, lcov_content: str) -> str:
+        """Filter LCOV content based on change_info"""
+        if runtime_config.change_info is None:
+            print("change_info is none!")
             return None
+
+        if self.source_file_path not in runtime_config.change_info:
+            return None
+
+        filtered_lines = []
+        for line in lcov_content.splitlines():
+            if self._check_should_retain(line):
+                filtered_lines.append(line)
+
+        return "\n".join(filtered_lines) + "\n"
+
+    def _check_should_retain(self, line: str) -> bool:
+        """Process single line"""
+        if line.startswith("SF:"):
+            return True
+        # Match line coverage data line
+        elif line.startswith("DA:"):
+            line_content = line[3:]
+            line_parts = line_content.split(",")
+            if len(line_parts) >= 2:
+                try:
+                    line_num = int(line_parts[0])
+                    change_lines = runtime_config.change_info.get(self.source_file_path, set())
+                    if line_num in change_lines:
+                        return True
+                except ValueError:
+                    return False
+        # Match function line
+        elif line.startswith('FN:'):
+            parts = line[3:].split(',')
+            if len(parts) >= 2:
+                try:
+                    line_num = int(parts[0].strip())
+                    func_name = parts[1].strip()
+                    change_lines = runtime_config.change_info.get(self.source_file_path, set())
+                    if line_num in change_lines:
+                        self.related_funcs.add(func_name)
+                        return True
+                except ValueError:
+                    return False
+        # Match function coverage line
+        elif line.startswith('FNDA:'):
+            parts = line[5:].split(',')
+            if len(parts) >= 2:
+                try:
+                    coverage = parts[0].strip()
+                    func_name = parts[1].strip()
+                    if func_name in self.related_funcs:
+                        return True
+                except ValueError:
+                    return False
+        # Match branch coverage line
+        elif line.startswith('BRDA:'):
+            parts = line[5:].split(',')
+            if len(parts) >= 4:
+                try:
+                    if line in self.branch_info_for_diff:
+                        line_range = self.branch_info_for_diff[line]
+                        change_lines = runtime_config.change_info.get(self.source_file_path, set())
+                        all_included = set(line_range).issubset(change_lines)
+                        if all_included:
+                            return True
+                except ValueError:
+                    return False
+        elif line.startswith("end_of_record"):
+            return True
+
+        return False
 
     def _default_func_info(self) -> Dict:
         """Default function information template"""
@@ -340,6 +509,24 @@ class CoverageInfo:
                         return True
 
         return False
+
+    def _parse_function_info(self, func_name: str, bc_offset: int, line_table_text: str) -> bool:
+        """Validate if the function is defined in the source file and register it if valid."""
+        if func_name == Constants.CTOR:
+            func_name = Constants.CONSTRUCTOR
+        # Function is defined in source file
+        if (
+                func_name in self.function_name_to_lines
+                or func_name == Constants.CCTOR
+                or func_name.startswith(Constants.LAMBDA_INVOKE_1)
+                or Constants.LAMBDA_INVOKE_2 in func_name
+        ):
+            # Parse line table
+            line_table = self._parse_line_table(line_table_text)
+            self.functions[bc_offset] = {
+                Constants.FUNCTION_NAME: func_name,
+                Constants.LINE_TABLE: line_table,
+            }
 
     def _extract_function_name(self, node: Dict) -> str:
         """Extract function name"""
@@ -620,8 +807,10 @@ class CoverageInfo:
         """Create branch entry"""
         if node and Constants.LOC in node:
             line_num = node[Constants.LOC][Constants.START].get(Constants.LINE)
-            if line_num and line_num not in self.branch_stats:
-                self.branch_stats[line_num] = {
+            end_line = node[Constants.LOC][Constants.END].get(Constants.LINE)
+            line_range = (line_num, end_line)
+            if line_range not in self.branch_stats:
+                self.branch_stats[line_range] = {
                     Constants.START_LINE: start_line,
                     Constants.BRANCH_INDEX: 0,
                     Constants.CASE_INDEX: case_index,
@@ -655,8 +844,10 @@ class CoverageInfo:
         line_num = self._find_line_number(func_id, bc_offset)
         if line_num is not None:
             self.line_stats[line_num] += line_count
-            if line_num in self.branch_stats:
-                self.branch_stats[line_num][Constants.COUNT] += line_count
+            for key_range in self.branch_stats.keys():
+                if key_range[0] == line_num:
+                    self.branch_stats[key_range][Constants.COUNT] += line_count
+                    break
 
         func_name = func_info[Constants.FUNCTION_NAME]
         # Record function execution count
@@ -737,19 +928,23 @@ class CoverageInfo:
         """Generate branch coverage-related LCOV lines"""
         lines = []
 
-        for branch in self.branch_stats.values():
-            lines.append(
+        for branch_key, branch in self.branch_stats.items():
+            brda_line = (
                 f"BRDA:{branch[Constants.START_LINE]},"
                 f"{branch[Constants.BRANCH_INDEX]},"
                 f"{branch[Constants.CASE_INDEX]},"
                 f"{branch[Constants.COUNT]}"
             )
+            lines.append(brda_line)
+
+            if runtime_config.report_type == 'diff':
+                self.branch_info_for_diff[brda_line] = branch_key
 
         return lines
 
 
-class HostCoverageInfo(CoverageInfo):
-    """Host coverage information class"""
+class HostSimpleCoverageInfo(CoverageInfo):
+    """Host simple coverage information class"""
 
     def __init__(self):
         super().__init__()
@@ -769,21 +964,7 @@ class HostCoverageInfo(CoverageInfo):
                 func_name = full_signature.split("(")[0]
                 bc_offset = int(match.group(2), 16)
                 line_table_text = match.group(3)
-                if func_name == Constants.CTOR:
-                    func_name = Constants.CONSTRUCTOR
-                # Function is defined in source file
-                if (
-                        func_name in self.function_name_to_lines
-                        or func_name == Constants.INIT_FUNC_NAME
-                        or func_name.startswith(Constants.LAMBDA_INVOKE_1)
-                        or Constants.LAMBDA_INVOKE_2 in func_name
-                ):
-                    # Parse line table
-                    line_table = self._parse_line_table(line_table_text)
-                    self.functions[bc_offset] = {
-                        Constants.FUNCTION_NAME: func_name,
-                        Constants.LINE_TABLE: line_table,
-                    }
+                self._parse_function_info(func_name, bc_offset, line_table_text)
 
             return True
 
@@ -797,8 +978,33 @@ class HapCoverageInfo(CoverageInfo):
 
     def __init__(self):
         super().__init__()
-        self._pa_file_content = None
+        self.source_file_path_trans = None
         self._function_pattern = None
+        pa_file_path = os.path.join(runtime_config.workdir, Config.PA_DIR)
+        self._pa_file_content = FileUtils.read_file(find_first_pa_file(pa_file_path))
+
+    def reset_stats(self):
+        super().reset_stats()
+        self.source_file_path_trans = None
+        self._function_pattern = None
+        pa_file_path = os.path.join(runtime_config.workdir, Config.PA_DIR)
+        self._pa_file_content = FileUtils.read_file(find_first_pa_file(pa_file_path))
+
+    def process_data(self, src_file_path: str, pa_file_path: str,
+                     ast_file_path: str, runtime_info: List[Dict]):
+        """Set file paths and parse"""
+        self.reset_stats()
+        self.source_file_path = src_file_path
+        self.source_file_path_trans = self._trans_source_path(src_file_path)
+        if self.source_file_path_trans is None:
+            print("source_file_path_trans is none!")
+            return
+        # Parse files
+        self.process_file_result = (
+                self._process_ast_file(ast_file_path) and
+                self._process_pa_file() and
+                self._process_runtime_info(runtime_info)
+        )
 
     def _is_valid_path_prefix(self, prefix: str, full_path: str) -> bool:
         """Check if the full path starts with the given prefix"""
@@ -825,11 +1031,6 @@ class HapCoverageInfo(CoverageInfo):
 
         return True
 
-    def _get_pa_file_content(self, pa_file_path: str) -> str:
-        if self._pa_file_content is None:
-            self._pa_file_content = FileUtils.read_file(pa_file_path)
-        return self._pa_file_content
-
     def _get_function_pattern(self):
         if self._function_pattern is None:
             self._function_pattern = re.compile(
@@ -838,15 +1039,27 @@ class HapCoverageInfo(CoverageInfo):
             )
         return self._function_pattern
 
-    def _process_pa_file(self, pa_file_path: str) -> bool:
+    def _trans_source_path(self, src_file_path: str):
+        match = re.search(r'entry/.+?\.ets$', src_file_path)
+        if match:
+            file_path = Path(match.group())
+            file_part = file_path.name
+            dir_part = '.'.join(file_path.parent.parts)
+            return f"{dir_part}.{file_part.replace('.ets', '')}"
+        else:
+            print("src path is not expected")
+            return None
+
+    def _process_pa_file(self) -> bool:
         """Parse assembly file and build function information dictionary"""
         try:
-            # Read the contents of the pa file using a caching mechanism
-            content = self._get_pa_file_content(pa_file_path)
+            if self._pa_file_content is None:
+                print(f"Warning: No PA file content available for {self.source_file_path}")
+                return False
 
             function_pattern = self._get_function_pattern()
 
-            for match in function_pattern.finditer(content):
+            for match in function_pattern.finditer(self._pa_file_content):
                 path_part = match.group(1)
                 if not self._is_valid_path_prefix(self.source_file_path_trans, path_part):
                     continue
@@ -854,28 +1067,28 @@ class HapCoverageInfo(CoverageInfo):
                 func_name = full_signature.split("(")[0]
                 bc_offset = int(match.group(3), 16)
                 line_table_text = match.group(4)
-                if func_name == Constants.CTOR:
-                    func_name = Constants.CONSTRUCTOR
-
-                # Function is defined in source file
-                if (
-                        func_name in self.function_name_to_lines
-                        or func_name == Constants.CCTOR
-                        or func_name.startswith(Constants.LAMBDA_INVOKE_1)
-                        or Constants.LAMBDA_INVOKE_2 in func_name
-                ):
-                    # Parse line table
-                    line_table = self._parse_line_table(line_table_text)
-                    self.functions[bc_offset] = {
-                        Constants.FUNCTION_NAME: func_name,
-                        Constants.LINE_TABLE: line_table,
-                    }
+                self._parse_function_info(func_name, bc_offset, line_table_text)
 
             return True
 
         except Exception as e:
-            print(f"Error parsing PA file {pa_file_path}: {e}")
+            print(f"Error parsing PA file, source_file_path: {self.source_file_path}: {e}")
             return False
+
+
+class HostMultiCoverageInfo(HapCoverageInfo):
+    """HostMulti coverage information class"""
+
+    def _trans_source_path(self, src_file_path: str):
+        match = re.search(r'.+?\.ets$', src_file_path)
+        if match:
+            file_part = Path(match.group()).name
+            dir_part = '.'.join(Path(match.group()).parent.parts)
+            dir_part = dir_part.lstrip('.')
+            return f"{dir_part}.{file_part.replace('.ets', '')}"
+        else:
+            print("src path is not expected")
+            return None
 
 
 # ==================== Utility Functions ====================
@@ -887,7 +1100,14 @@ def create_file_mapping(src_dir: str, ast_dir: str, pa_dir: str) -> List[Dict]:
     for ets_file in src_path.rglob(f"*{Constants.EXT_ETS}"):
         relative_path = ets_file.relative_to(src_path)
 
-        if mode == "host" or (mode == "hap" and "entry/src/main/ets" in str(relative_path).replace("\\", "/")):
+        if (
+            runtime_config.mode == "host"
+            or (
+                runtime_config.mode == "hap"
+                and "entry/src/main/ets" in relative_path.as_posix()
+            )
+            or runtime_config.mode == "host-multi"
+        ):
             data.append({
                 "src": str(src_path / relative_path),
                 "ast": str(Path(ast_dir) / relative_path.with_suffix(Constants.EXT_JSON)),
@@ -895,6 +1115,28 @@ def create_file_mapping(src_dir: str, ast_dir: str, pa_dir: str) -> List[Dict]:
             })
 
     return data
+
+
+def print_file_header(csv_file: Path, f: io.TextIOWrapper, max_lines: int = 10):
+    """Print header information for a CSV file"""
+    total_lines = 0
+    first_lines = []
+
+    # First pass: count lines and collect first 10 lines
+    for line in f:
+        total_lines += 1
+        if total_lines <= max_lines:
+            first_lines.append(line.strip())
+
+    print(f"Total lines in {csv_file.name}: {total_lines}")
+    print(f"First {max_lines} lines:")
+    for i, line_content in enumerate(first_lines, 1):
+        print(f"Line {i}: {line_content}")
+
+    print("-" * 70)
+
+    # Reset file pointer and continue with original processing
+    f.seek(0)
 
 
 def summarize_runtime_data(runtime_dir: str,
@@ -918,6 +1160,8 @@ def summarize_runtime_data(runtime_dir: str,
             print(f"Processing file: {csv_file.name}")
 
             with open(csv_file, 'r', encoding='utf-8') as f:
+                print_file_header(csv_file, f)
+
                 for line_num, line in enumerate(f, 1):
                     try:
                         line = line.strip()
@@ -1006,19 +1250,10 @@ def export_lcov(args):
         # Create file mapping
         file_mappings = create_file_mapping(
             args.src,
-            str(Path(workdir) / Config.AST_DIR),
-            str(Path(workdir) / Config.PA_DIR)
+            str(Path(runtime_config.workdir) / Config.AST_DIR),
+            str(Path(runtime_config.workdir) / Config.PA_DIR)
         )
         print(f"Found {len(file_mappings)} file mappings")
-
-        # get pa file
-        first_pa_file = None
-        if mode == 'hap':
-            first_pa_file = find_first_pa_file(Config.PA_DIR)
-            if first_pa_file is None:
-                print("No .pa file found in PA_DIR")
-                return
-            print(f"First .pa file found: {first_pa_file}")
 
         # Summarize runtime data
         runtime_df = summarize_runtime_data(Config.get_runtime_dir())
@@ -1031,23 +1266,24 @@ def export_lcov(args):
             Path(Config.get_output_file()).unlink()
 
         # Process each file
+
         success_count = 0
-        if mode == 'host':
-            coverage_info = HostCoverageInfo()
+        if runtime_config.mode == 'host':
+            coverage_info = HostSimpleCoverageInfo()
+        elif runtime_config.mode == 'host-multi':
+            coverage_info = HostMultiCoverageInfo()
         else:
             coverage_info = HapCoverageInfo()
 
         for row in file_mappings:
             try:
-                pa_file_path = first_pa_file if mode == 'hap' else row["pa"]
                 coverage_info.process_data(
                     row["src"],
-                    pa_file_path,
+                    row["pa"],
                     row["ast"],
                     runtime_df
                 )
-                if coverage_info.process_file_result:
-                    coverage_info.export_lcov(Config.get_output_file())
+                if coverage_info.export_lcov(Config.get_output_file()):
                     success_count += 1
 
             except FileNotFoundError as e:
@@ -1061,282 +1297,17 @@ def export_lcov(args):
         print(f"Program execution error: {e}")
 
 
-def generate_change_info(diff_file_path, output_info_path):
-    """
-    Read change information from diff.txt file and generate info file containing SF, DA and end_of_record
-
-    Parameters:
-        diff_file_path: diff.txt file path
-        output_info_path: output info file path
-    """
-    # Dictionary to store change information, format: {file_path: {line_number_set}}
-    change_info = {}
-
-    # Regular expressions
-    file_pattern = re.compile(r'^\+\+\+ b/(.*)$')  # Match file path
-    hunk_pattern = re.compile(r'^@@ -(\d+),(\d+) \+(\d+),(\d+) @@')  # Match code block
-    add_line_pattern = re.compile(r'^\+(?!\+\+).*$')  # Match added lines
-
-    current_file = None
-    current_hunk_start = None
-    added_lines_in_hunk = 0
-
-    # Step 1: Parse diff.txt to get change information
-    try:
-        with open(diff_file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                # Match file path
-                file_match = file_pattern.match(line)
-                if file_match:
-                    current_file = file_match.group(1)
-                    # Initialize line number set for this file
-                    change_info[current_file] = set()
-                    current_hunk_start = None
-                    added_lines_in_hunk = 0
-                    continue
-
-                # Match code block, get starting line number in new file
-                hunk_match = hunk_pattern.match(line)
-                if hunk_match and current_file:
-                    current_hunk_start = int(hunk_match.group(3))  # Starting line number in new file
-                    end_hunk = int(hunk_match.group(4))
-                    added_lines_in_hunk = 0
-                    continue
-
-                # Match added lines and calculate actual line number
-                if (current_file and current_hunk_start is not None and
-                        added_lines_in_hunk < end_hunk and
-                        add_line_pattern.match(line) and line.strip() != '+'):
-                    # Calculate actual line number in new file
-                    actual_line_num = current_hunk_start + added_lines_in_hunk
-                    change_info[current_file].add(actual_line_num)
-                    added_lines_in_hunk += 1
-                else:
-                    added_lines_in_hunk += 1
-
-        if not change_info:
-            print("Warning: No change information extracted from diff file")
-            return
-
-    except FileNotFoundError:
-        print(f"Error: Cannot find diff file '{diff_file_path}'")
-        return
-    except Exception as e:
-        print(f"Error parsing diff file: {str(e)}")
-        return
-
-    # Step 2: Generate info file
-    try:
-        with open(output_info_path, 'w', encoding='utf-8') as f_out:
-            # Iterate through each changed file
-            for file_path, line_numbers in change_info.items():
-                # Write file path (SF)
-                f_out.write(f"SF:{file_path}\n")
-
-                # Write changed line information (DA), sorted by line number
-                for line_num in sorted(line_numbers):
-                    f_out.write(f"DA:{line_num},0\n")
-
-                # Write end marker
-                f_out.write("end_of_record\n")
-
-        print(f"Successfully generated change information file: {os.path.abspath(output_info_path)}")
-
-    except Exception as e:
-        print(f"Error generating info file: {str(e)}")
-        return
-
-
-def parse_info_file(file_path):
-    """
-    Parse info file and return structured data containing DA, FN, FNDA and BRDA information
-    """
-    info_data = {}
-    current_file = None
-    file_data = {
-        'DA': {},  # Line coverage {line_number: coverage}
-        'FN': {},  # Functions {line_number: function_name}
-        'FNDA': {},  # Function coverage {function_name: coverage}
-        'BRDA': []  # Branch coverage [line_number, block_number, branch_number, coverage]
-    }
-
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-
-                # Match file path line
-                if line.startswith('SF:'):
-                    # If there's a file being processed, save it first
-                    if current_file:
-                        info_data[current_file] = file_data
-
-                    # Extract file path and normalize
-                    file_path = line[3:]
-                    normalized_path = os.path.normpath(file_path)
-                    current_file = normalized_path
-                    file_data = {
-                        'DA': {},
-                        'FN': {},
-                        'FNDA': {},
-                        'BRDA': []
-                    }
-
-                # Match line coverage data line
-                elif line.startswith('DA:') and current_file:
-                    parts = line[3:].split(',')
-                    if len(parts) >= 2:
-                        try:
-                            line_num = int(parts[0].strip())
-                            coverage = parts[1].strip()
-                            file_data['DA'][line_num] = coverage
-                        except ValueError:
-                            continue
-
-                # Match function line
-                elif line.startswith('FN:') and current_file:
-                    parts = line[3:].split(',')
-                    if len(parts) >= 2:
-                        try:
-                            line_num = int(parts[0].strip())
-                            func_name = parts[1].strip()
-                            file_data['FN'][line_num] = func_name
-                        except ValueError:
-                            continue
-
-                # Match function coverage line
-                elif line.startswith('FNDA:') and current_file:
-                    parts = line[5:].split(',')
-                    if len(parts) >= 2:
-                        try:
-                            coverage = parts[0].strip()
-                            func_name = parts[1].strip()
-                            file_data['FNDA'][func_name] = coverage
-                        except ValueError:
-                            continue
-
-                # Match branch coverage line
-                elif line.startswith('BRDA:') and current_file:
-                    parts = line[5:].split(',')
-                    if len(parts) >= 4:
-                        try:
-                            line_num = int(parts[0].strip())
-                            block_num = int(parts[1].strip())
-                            branch_num = int(parts[2].strip())
-                            coverage = parts[3].strip()
-                            file_data['BRDA'].append([line_num, block_num, branch_num, coverage])
-                        except ValueError:
-                            continue
-
-                # Match record end line
-                elif line == 'end_of_record' and current_file:
-                    info_data[current_file] = file_data
-                    current_file = None
-                    file_data = {
-                        'DA': {},
-                        'FN': {},
-                        'FNDA': {},
-                        'BRDA': []
-                    }
-
-        # Process last file without end_of_record
-        if current_file:
-            info_data[current_file] = file_data
-
-    except FileNotFoundError:
-        print(f"Error: Cannot find file '{file_path}'")
-        return None
-    except Exception as e:
-        print(f"Error parsing file '{file_path}': {str(e)}")
-        return None
-
-    return info_data
-
-
-def get_enhanced_coverage_info(change_info_path, full_info_path, output_info_path):
-    """
-    Extract common line information from two info files, including related FN, FNDA and BRDA information
-    """
-    # Parse both info files
-    change_data = parse_info_file(change_info_path)
-    full_data = parse_info_file(full_info_path)
-
-    if not change_data or not full_data:
-        print("Cannot parse input files, operation terminated")
-        return
-
-    try:
-        with open(output_info_path, 'w', encoding='utf-8') as f_out:
-            # Iterate through each file in change information
-            for file_path, change_details in change_data.items():
-                # Get changed line numbers
-                change_lines = set(change_details['DA'].keys())
-
-                # Normalize path for comparison, ensure it starts with /
-                normalized_path = os.path.normpath(file_path)
-                if not normalized_path.startswith('/'):
-                    normalized_path = '/' + normalized_path
-
-                # Check if file exists in full data
-                found = False
-                for full_file_path, full_details in full_data.items():
-                    normalized_full_path = os.path.normpath(full_file_path)
-                    if not normalized_full_path.startswith('/'):
-                        normalized_full_path = '/' + normalized_full_path
-
-                    if normalized_full_path == normalized_path:
-                        found = True
-                        f_out.write(f"SF:{file_path}\n")
-
-                        # Write related function information (FN)
-                        for line_num, func_name in full_details['FN'].items():
-                            if line_num in change_lines:
-                                f_out.write(f"FN:{line_num},{func_name}\n")
-
-                        # Write related function coverage information (FNDA)
-                        # First collect function names related to changed lines
-                        related_funcs = set()
-                        for line_num, func_name in full_details['FN'].items():
-                            if line_num in change_lines:
-                                related_funcs.add(func_name)
-                        # Write coverage for these functions
-                        for func_name, coverage in full_details['FNDA'].items():
-                            if func_name in related_funcs:
-                                f_out.write(f"FNDA:{coverage},{func_name}\n")
-
-                        # Write related line coverage information (DA)
-                        for line_num in sorted(change_lines):
-                            if line_num in full_details['DA']:
-                                f_out.write(f"DA:{line_num},{full_details['DA'][line_num]}\n")
-
-                        # Write related branch coverage information (BRDA)
-                        for branch in full_details['BRDA']:
-                            line_num, block_num, branch_num, coverage = branch
-                            if line_num in change_lines:
-                                f_out.write(f"BRDA:{line_num},{block_num},{branch_num},{coverage}\n")
-
-                        # Write end marker
-                        f_out.write("end_of_record\n")
-                        break
-
-                if not found:
-                    print(f"Warning: File '{file_path}' not found in full information file")
-
-        print(f"Successfully generated enhanced coverage information file: {os.path.abspath(output_info_path)}")
-
-    except Exception as e:
-        print(f"Error generating enhanced coverage information file: {str(e)}")
-        return
-
-
 def gen_pa(args):
     print(f"Generating PA from {args.src} and outputting to {args.output}")
     src_path = Path(args.src)
     output_path = Path(args.output)
 
-    # Create output directory if it doesn't exist
+    # Clean output directory if it exists
+    if output_path.exists():
+        print(f"Cleaning existing output directory: {output_path}")
+        shutil.rmtree(output_path)
+
+    # Create output directory
     output_path.mkdir(parents=True, exist_ok=True)
     # Find all .abc files in the source directory and its subdirectories
     abc_files = list(src_path.rglob("*.abc"))
@@ -1378,6 +1349,125 @@ def gen_pa(args):
     print(f"Successfully processed all {len(abc_files)} .abc files")
 
 
+class ArktsconfigGenerator:
+    def add_optional_arguments(self, parser: argparse.ArgumentParser) -> None:
+        parser.add_argument("--std-path", required=False, default=None,
+                        help="Path to the standard library")
+        parser.add_argument("--escompat-path", required=False, default=None, help="Path to the escompat library")
+        parser.add_argument("--ets-arkts-path", required=False, nargs='+', default=[],
+                            help="Path to the ets-arkts library")
+        parser.add_argument("--ets-api-path", required=False, nargs='+', default=[],
+                            help="Path to the ets-api library")
+        parser.add_argument("--include", required=False, nargs='+', default=None, help="Files or patterns to include")
+        parser.add_argument("--exclude", required=False, nargs='+', default=None, help="Files or patterns to exclude")
+        parser.add_argument("--files", required=False, default=None,
+                            help="Path to file containing list of files to process")
+        parser.add_argument("--cache-path", type=str, default=None, help="Path to cache directory")
+        parser.add_argument("--package", required=False, default="", help="Package name for the project")
+        
+        parser.add_argument("--paths-keys", nargs="+", required=False, default=[],
+                        help="List of keys for custom paths")
+        parser.add_argument("--paths-values", nargs="+", required=False, default=[],
+                        help="List of values for custom paths. Each value corresponds to a key in --paths-keys")
+
+    def generate(self, args):
+        paths = {}
+        ets_arkts_paths = args.ets_arkts_path
+        ets_api_paths = args.ets_api_path
+
+        for scan_path in ets_arkts_paths + ets_api_paths:
+            scanned_paths = self._scan_directory_for_paths(scan_path)
+            for key, value in scanned_paths.items():
+                if key in paths:
+                    paths[key].extend(value)
+                else:
+                    paths[key] = value
+
+        if args.std_path:
+            paths["std"] = [os.path.abspath(args.std_path)]
+        if args.escompat_path:
+            paths["escompat"] = [os.path.abspath(args.escompat_path)]
+
+        paths_keys = args.paths_keys
+        paths_values = args.paths_values
+        if paths_keys and paths_values:
+            if len(paths_keys) != len(paths_values):
+                class PathsLengthMismatchError(Exception):
+                    pass
+                raise PathsLengthMismatchError(
+                    "paths_keys and paths_values must have the same length"
+                )
+            for key, value in zip(paths_keys, paths_values):
+                paths[key] = [os.path.abspath(value)]
+
+        config = {
+            "compilerOptions": {
+                "rootDir": os.path.abspath(Path(args.src)),
+                "baseUrl": os.path.abspath(Path(args.src).parent),
+                "paths": paths,
+                "outDir": args.cache_path or os.path.join(args.output, 'cache'),
+                "package": args.package,
+                "useEmptyPackage": True
+            }
+        }
+
+        if args.include:
+            config["include"] = args.include
+
+        if args.exclude:
+            config["exclude"] = args.exclude
+
+        files_path = args.files
+        if files_path:
+            if not os.path.exists(files_path):
+                print(f"[IO ERROR] File not found: {files_path}", file=sys.stderr)
+                sys.exit()
+            fd = os.open(files_path, os.O_RDONLY)
+            with os.fdopen(fd, 'r') as f:
+                config["files"] = [line.strip() for line in f.readlines()]
+
+        config_path = os.path.join(args.output, "arktsconfig.json")
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        fd = os.open(config_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o777)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+        return config_path
+
+    def _get_key_from_file_name(self, file_name: str) -> str:
+        if ".d." in file_name:
+            file_name = file_name.replace(".d.", ".")
+        return os.path.splitext(file_name)[0]
+
+    def _is_target_file(self, file_name: str) -> bool:
+        target_extensions = [".d.ets", ".ets"]
+        return any(file_name.endswith(ext) for ext in target_extensions)
+
+    def _scan_directory_for_paths(self, directory: str) -> Dict[str, List[str]]:
+        paths = {}
+        for root, _, files in os.walk(directory):
+            for file in files:
+                if not self._is_target_file(file):
+                    continue
+                file_path = os.path.abspath(os.path.join(root, file))
+                file_name = self._get_key_from_file_name(file)
+                file_abs_path = os.path.abspath(os.path.join(root, file_name))
+                file_rel_path = os.path.relpath(file_abs_path, start=directory)
+                # Split the relative path into components
+                path_components = file_rel_path.split(os.sep)
+                first_level_dir = path_components[0] if len(path_components) > 0 else ""
+                second_level_dir = path_components[1] if len(path_components) > 1 else ""
+                # Determine the key based on directory structure
+                if first_level_dir == "arkui" and second_level_dir == "runtime-api":
+                    key = file_name
+                else:
+                    key = file_rel_path.replace(os.sep, ".")
+                if key in paths:
+                    paths[key].append(file_path)
+                else:
+                    paths[key] = [file_path]
+        return paths
+
+
 class GenAst:
     def __init__(self, init_mode='host'):
         self.mode = init_mode
@@ -1388,25 +1478,33 @@ class GenAst:
         self.es2panda_path = None
         self.ast_dir = None
         self.abc_dir = None
+        self.arktsconfig_path = None
 
-    def gen_ast(self, src_path, es2panda_path, output_path):
+    def gen_ast(self, args):
         start_time = time.time()
         error_occurred = False
+        if self.mode == 'host-multi':
+            self.arktsconfig_path = ArktsconfigGenerator().generate(args)
 
-        self.src_path = Path(src_path).resolve()
+        self.src_path = Path(args.src).resolve()
         if not self.src_path.exists():
             print(f"Error: Source directory '{self.src_path}' does not exist")
             return False
 
-        self.es2panda_path = Path(es2panda_path).resolve()
+        self.es2panda_path = Path(args.es2panda).resolve()
         if not self.es2panda_path.exists():
             print(f"Error: es2panda executable '{self.es2panda_path}' does not exist")
             return False
 
-        output_path = Path(output_path).resolve()
+        output_path = Path(args.output).resolve()
         output_path.mkdir(parents=True, exist_ok=True)
         self.ast_dir = output_path / "ast"
         self.abc_dir = output_path / "abc"
+        # Clear existing ast and abc directories before processing
+        if self.ast_dir.exists():
+            shutil.rmtree(self.ast_dir)
+        if self.abc_dir.exists():
+            shutil.rmtree(self.abc_dir)
         self.ast_dir.mkdir(parents=True, exist_ok=True)
         self.abc_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1438,6 +1536,10 @@ class GenAst:
                     error_occurred = True
                     sys.exit(1)
 
+        if self.mode == 'host-multi':
+            if not self._link_abc(args.ark_link, self.abc_dir, args.abc_link_name):
+                print(f"Error: Failed to link ABC files in {self.abc_dir} to {args.abc_link_name}")
+                sys.exit(1)
         if not error_occurred:
             elapsed_time = time.time() - start_time
             print(f"Processing complete: {self.compile_count}/{len(self.ets_files)} files succeeded")
@@ -1467,11 +1569,15 @@ class GenAst:
             ast_output.parent.mkdir(parents=True, exist_ok=True)
             abc_output.parent.mkdir(parents=True, exist_ok=True)
 
-            cmd = [str(self.es2panda_path), str(ets_file), f"--dump-ast:output={ast_output}", "--opt-level=0",
-                   "--output", str(abc_output)]
+            if self.mode == 'host-multi':
+                cmd = [str(self.es2panda_path), str(ets_file), f"--dump-ast:output={ast_output}", "--opt-level=0",
+                       "--output", str(abc_output), "--extension", "ets", "--arktsconfig", str(self.arktsconfig_path)]
+            else:
+                cmd = [str(self.es2panda_path), str(ets_file), f"--dump-ast:output={ast_output}", "--opt-level=0",
+                       "--output", str(abc_output)]
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-            if result.returncode != 0 and self.mode == 'host':
+            if result.returncode != 0 and self.mode != 'hap':
                 error_msg = (
                         result.stderr.strip()
                         or result.stdout.strip()
@@ -1497,7 +1603,7 @@ class GenAst:
 
     def _handle_compilation_error(self, rel_path, error_info):
         """Handle compilation error information"""
-        if self.mode != 'host' or not error_info:
+        if self.mode == 'hap' or not error_info:
             return False
 
         error_msg, return_code = error_info
@@ -1505,6 +1611,148 @@ class GenAst:
         if return_code is not None:
             print(f"Return code: {return_code}")
         return return_code is not None
+
+    def _clear_abc(self, src_path, abc_dir):
+        if not abc_dir.exists():
+            print(f"Error: ABC directory '{abc_dir}' does not exist")
+            return False
+        src = Path(src_path).resolve()
+        abc_dir_resolved = abc_dir.resolve()
+        if src == abc_dir_resolved or not abc_dir_resolved.is_relative_to(src):
+            print(f"Error: abc_dir must be a subdirectory of src_path")
+            return False
+        for item in src.iterdir():
+            if item != abc_dir_resolved:
+                if item.is_dir():
+                    shutil.rmtree(item)
+                else:
+                    item.unlink()
+        print(f"Cleared all files and directories in '{src_path}' except '{abc_dir}'")
+        return True
+
+    def _link_abc(self, ark_link_path, src_path, output_name):
+        src = Path(src_path).resolve()
+        if not src.exists():
+            print(f"Error: Source directory '{src_path}' does not exist")
+            return False
+
+        ark_link_path = Path(ark_link_path).resolve()
+        if not ark_link_path.exists():
+            print(f"Error: ark_link executable not found at {ark_link_path}")
+            return False
+
+        abc_files = list(src.rglob("*.abc"))
+        if not abc_files:
+            print(f"Error: No .abc files found in '{src_path}'")
+            return False
+
+        output_file = src / output_name
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        cmd = [
+            str(ark_link_path),
+            "--output",
+            str(output_file),
+            "--"
+        ]
+        cmd.extend(str(abc_file) for abc_file in abc_files)
+        print(f"Linking ABC files: {' '.join(cmd)}")
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        if result.returncode != 0:
+            error_msg = result.stderr.strip() or result.stdout.strip() or f"Command failed code {result.returncode}"
+            print(f"Error linking ABC files: {error_msg}")
+            return False
+
+        print(f"Successfully linked ABC files to {output_file}")
+        if not self._clear_abc(src, output_file):
+            print(f"Failed to clear ABC files: {output_file}")
+        return True
+
+
+def get_diff_lines(diff_file_path):
+    """
+    Read change information from diff.txt file and generate info file containing SF, DA and end_of_record
+
+    Parameters:
+        diff_file_path: diff.txt file path
+        output_info_path: output info file path
+    """
+    # Dictionary to store change information, format: {file_path: {line_number_set}}
+    diff_info = {}
+
+    # Regular expressions
+    file_pattern = re.compile(r'^\+\+\+ b/(.*)$')  # Match file path
+    hunk_pattern = re.compile(r'^@@ -(\d+),(\d+) \+(\d+),(\d+) @@')  # Match code block
+    add_line_pattern = re.compile(r'^\+(?!\+\+).*$')  # Match added lines
+    del_line_pattern = re.compile(r'^\-(?!\-\-).*$')  # Match deleted lines
+
+    current_file = None
+    current_hunk_start_new = None  # Starting line number in new file
+    lines_in_hunk_new = 0  # Line counter in new file
+
+    # Step 1: Parse diff.txt to get change information
+    try:
+        with open(diff_file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                # Skip "\ No newline at end of file" line
+                if line.strip() == r'\ No newline at end of file':
+                    continue
+
+                # Match file path
+                file_match = file_pattern.match(line)
+                if file_match:
+                    current_file = file_match.group(1)
+                    # Initialize line number set for this file
+                    diff_info[current_file] = set()
+                    current_hunk_start_new = None
+                    lines_in_hunk_new = 0
+                    continue
+
+                # Match code block, get starting line number in new file
+                hunk_match = hunk_pattern.match(line)
+                if hunk_match and current_file:
+                    current_hunk_start_new = int(hunk_match.group(3))  # Starting line number in new file
+                    lines_in_hunk_new = 0
+                    continue
+
+                # Match deleted lines (but we don't track them in diff_info as they don't exist in new file)
+                if del_line_pattern.match(line) and line.strip() != '-':
+                    continue
+
+                # Match added lines and calculate actual line number
+                if (current_file and current_hunk_start_new is not None and
+                        add_line_pattern.match(line) and line.strip() != '+'):
+                    # Calculate actual line number in new file
+                    actual_line_num = current_hunk_start_new + lines_in_hunk_new
+                    diff_info[current_file].add(actual_line_num)
+                    lines_in_hunk_new += 1
+                else:
+                    # For unchanged lines or other lines, increment both counters
+                    if not del_line_pattern.match(line):  # Skip incrementing new file counter for deleted lines
+                        lines_in_hunk_new += 1
+        return diff_info
+    except FileNotFoundError:
+        print(f"Error: Cannot find diff file '{diff_file_path}'")
+        return None
+    except Exception as e:
+        print(f"Error parsing diff file: {str(e)}")
+        return None
+
+
+def validate_result_file():
+    output_file_path = Config.get_output_file()
+    cmd = ['lcov', '--list', str(output_file_path)]
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        timeout=30
+    )
+
+    if result.returncode != 0:
+        print(f"Warning: {output_file_path} is illegal, and the incremental code may be invalid." \
+              f" return code {result.returncode}")
+        sys.exit(1)
 
 
 def main():
@@ -1515,7 +1763,8 @@ def main():
     report_parser = subparsers.add_parser('gen_report', help='Generate coverage report')
     report_parser.add_argument('--src', required=True, help='Source code directory path')
     report_parser.add_argument('--workdir', '-w', type=str, default='.', help='Work directory')
-    report_parser.add_argument('--mode', '-m', type=str, choices=['host', 'hap'], default='host', help='Mode')
+    report_parser.add_argument('--mode', '-m', type=str, choices=['host', 'host-multi', 'hap'], default='host',
+                               help='Mode')
     report_group = report_parser.add_mutually_exclusive_group()
     report_group.add_argument('--all', '-a', action='store_true', help='Full coverage report')
     report_group.add_argument('--diff', '-d', action='store_true', help='Incremental coverage report')
@@ -1524,8 +1773,12 @@ def main():
     gen_ast_parser = subparsers.add_parser('gen_ast', help='Generate AST and ABC files from .ets source files')
     gen_ast_parser.add_argument('--src', required=True, help='Source code directory path')
     gen_ast_parser.add_argument('--es2panda', required=True, help='Path to es2panda executable')
+    gen_ast_parser.add_argument('--ark-link', help='Path to ark_link executable')
     gen_ast_parser.add_argument('--output', required=True, help='Output directory path')
-    gen_ast_parser.add_argument('--mode', '-m', type=str, choices=['host', 'hap'], default='host', help='Mode')
+    gen_ast_parser.add_argument('--abc-link-name', help='Name of the linked ABC file in host-multi mode')
+    gen_ast_parser.add_argument('--mode', '-m', type=str, choices=['host', 'hap', 'host-multi'], default='host',
+                                help='Mode')
+    ArktsconfigGenerator().add_optional_arguments(gen_ast_parser)
 
     # Add gen_pa subcommand
     pa_parser = subparsers.add_parser('gen_pa', help='Generate PA data')
@@ -1535,29 +1788,43 @@ def main():
 
     args = parser.parse_args()
     if args.command in ['gen_report', 'gen_ast']:
-        global mode
-        mode = args.mode
-        print(f"mode: {mode}")
+        runtime_config.mode = args.mode
+        print(f"mode: {runtime_config.mode}")
 
     if args.command == 'gen_report':
-        global workdir
-        workdir = args.workdir
-        print(f"workdir: {workdir}, mode: {mode}")
-
+        # Check if genhtml command exists
         genhtml_path = shutil.which('genhtml')
         if not genhtml_path:
             print("Error: genhtml command not found. Please install lcov package.")
             sys.exit(1)
-        if (args.all):
+
+        runtime_config.workdir = args.workdir
+        runtime_config.report_type = 'all' if args.all else 'diff'
+        print(f"report_type: {runtime_config.report_type}, workdir: {runtime_config.workdir}")
+
+        # generate full coverage report or incremental coverage report
+        if (args.all or args.diff):
+            # Get the lines that have been changed
+            if (args.diff):
+                runtime_config.change_info = get_diff_lines('diff.txt')
+                if runtime_config.change_info is None:
+                    print("change_info is none!")
+                    sys.exit(1)
+
+            # Get result.info
             export_lcov(args)
-            result_file = os.path.join(workdir, 'result.info')
+            # Check if result.info file exists
+            result_file = os.path.join(runtime_config.workdir, 'result.info')
             if not os.path.exists(result_file):
-                print(f"Error: {workdir}/result.info file does not exist")
+                print(f"Error: {runtime_config.workdir}/result.info file does not exist")
                 sys.exit(1)
 
             try:
-                # Execute genhtml command to generate full coverage report
-                cmd = [genhtml_path, str(result_file), '-o', str(os.path.join(workdir, 'report')), '-s',
+                # Check if there are valid data in result.info
+                validate_result_file()
+
+                # Execute genhtml command to generate full coverage report or incremental coverage report
+                cmd = [genhtml_path, str(result_file), '-o', str(os.path.join(runtime_config.workdir, 'report')), '-s',
                        '--branch-coverage']
                 subprocess.run(
                     cmd,
@@ -1566,58 +1833,19 @@ def main():
                     stderr=subprocess.PIPE,
                     text=True
                 )
-                print("Full coverage report generated in coverage_report directory")
+                print("Coverage report generated in report directory")
             except subprocess.CalledProcessError as e:
-                print(f"Failed to generate full coverage report: {e.stderr}")
+                print(f"Failed to generate coverage report: {e.stderr}")
                 print(f"Command: {' '.join(e.cmd)}")
                 print(f"Return code: {e.returncode}")
                 print(f"Stdout: {e.stdout}")
                 sys.exit(1)
 
-        elif (args.diff):
-            export_lcov(args)
-            if not os.path.exists('result.info'):
-                print("Error: result.info file does not exist")
-                sys.exit(1)
-            if not os.path.exists('diff.txt'):
-                print("Error: diff.txt file does not exist")
-                sys.exit(1)
-            # Execute genhtml command to generate incremental coverage report
-            generate_change_info("diff.txt", "change_info.info")
-            # Extract complete coverage information including FN, FNDA and BRDA
-            get_enhanced_coverage_info("change_info.info", "result.info", "enhanced_coverage.info")
-            print(f"Generating incremental coverage report...")
-
-            try:
-                # Execute genhtml command to generate incremental coverage report
-                subprocess.run(
-                    [
-                        genhtml_path,
-                        'enhanced_coverage.info',
-                        '-o',
-                        'incremental_coverage_report',
-                        '-s',
-                        '--branch-coverage'
-                    ],
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
-                )
-                print("Incremental coverage report generated in incremental_coverage_report directory")
-            except subprocess.CalledProcessError as e:
-                print(f"Failed to generate incremental coverage report: {e.stderr}")
-                print(f"Command: {' '.join(e.cmd)}")
-                print(f"Return code: {e.returncode}")
-                print(f"Stdout: {e.stdout}")
-                sys.exit(1)
         else:
             print("Please specify a parameter")
     elif args.command == 'gen_ast':
-        ast_generator = GenAst(init_mode=mode)
-        success = ast_generator.gen_ast(args.src, args.es2panda, args.output)
-        if not success:
-            sys.exit(1)
+        ast_generator = GenAst(init_mode=runtime_config.mode)
+        ast_generator.gen_ast(args)
     elif args.command == 'gen_pa':
         gen_pa(args)
     else:

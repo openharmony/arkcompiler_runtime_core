@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
 import os
 import re
 import shutil
 import subprocess
+import time
 import unittest
 from pathlib import Path
 
@@ -26,20 +26,29 @@ from pathlib import Path
 class TestCoverageScript(unittest.TestCase):
     def setUp(self):
         """SetUp for the Tests"""
-        self.current_source_dir = os.getenv("CURRENT_SOURCE_DIR")
         self.panda_bin_root = os.getenv("PANDA_BINARY_ROOT")
-        print(f"current_source_dir: {self.current_source_dir}, panda_bin_root: {self.panda_bin_root}")
+        self.panda_root = os.getenv("PANDA_ROOT")
+        print(f"panda_bin_root: {self.panda_bin_root}")
+        print(f"panda_root: {self.panda_root}")
+        self.src_path = "./coverage_spec"
+        if self.panda_bin_root is None:
+            raise EnvironmentError("PANDA_BINARY_ROOT environment variable is not set")
+        if self.panda_root is None:
+            raise EnvironmentError("PANDA_ROOT environment variable is not set")
 
-        self.src_path = "."
         self.es2panda_path = os.path.join(self.panda_bin_root, "bin/es2panda")
+        self.ark_link_path = os.path.join(self.panda_bin_root, "bin/ark_link")
         self.ark_disasm_path = os.path.join(self.panda_bin_root, "bin/ark_disasm")
         self.ark_path = os.path.join(self.panda_bin_root, "bin/ark")
         self.etsstdlib_path = os.path.join(self.panda_bin_root, "plugins/ets/etsstdlib.abc")
+        self.static_core_path = Path(self.panda_root)
         self.script_path = os.path.join(
-            self.current_source_dir,
-            "../../../../../../runtime/tooling/coverage/coverage.py"
+            self.panda_root,
+            "runtime/tooling/coverage/coverage.py"
         )
         self.output_path = os.path.join(self.panda_bin_root, "runtime/tooling/coverage")
+        ark_path = Path(self.ark_path).resolve()
+        self.assertTrue(ark_path.exists(), f"Error: ark executable not found at {self.ark_path}")
 
         if os.path.isdir(self.output_path):
             try:
@@ -52,6 +61,46 @@ class TestCoverageScript(unittest.TestCase):
         """clean up"""
         pass
 
+    def wait_for_csv_content(self, csv_path, max_wait_time = 10, check_interval = 1):
+        """
+        Wait for CSV file to be generated and check its content
+        Args:
+            csv_path: Path to the CSV file
+            max_wait_time: Maximum waiting time in seconds
+            check_interval: Check interval in seconds
+        Raises:
+            AssertionError: If no valid content is detected within timeout
+        """
+        start_time = time.time()
+        while time.time() - start_time < max_wait_time:
+            if not os.path.exists(csv_path):
+                time.sleep(check_interval)
+                print(f"CSV file {csv_path} not exists, waiting for {check_interval} seconds")
+                continue
+
+            # Check file size
+            if os.path.getsize(csv_path) == 0:
+                time.sleep(check_interval)
+                print(f"CSV file {csv_path} is empty, waiting for {check_interval} seconds")
+                continue
+
+            # Check if file has content
+            try:
+                with open(csv_path, 'r', encoding='utf-8') as f:
+                    lines = [line.strip() for line in f if line.strip()]
+                    if len(lines) > 0:
+                        print(f"CSV file {csv_path} has been generated and contains content")
+                        return
+            except Exception as e:
+                print(f"Error reading CSV file: {e}")
+
+            time.sleep(check_interval)
+
+        # Timeout, report failure
+        error_msg = f"Failed to detect valid content in CSV file {csv_path} within {max_wait_time} seconds"
+        print(error_msg)
+        raise AssertionError(error_msg)
+
     def test_host_output(self):
         """test the coverage script"""
         self.assertTrue(os.path.exists(self.es2panda_path), f"{self.es2panda_path} not exists")
@@ -59,10 +108,18 @@ class TestCoverageScript(unittest.TestCase):
         self.assertTrue(os.path.exists(self.ark_path), f"{self.ark_path} not exists")
 
         # execute coverage.py
+        ohos_ets_api_path = os.path.join(self.static_core_path, "plugins/ets/sdk/api/")
+        ohos_ets_arkts_path = os.path.join(self.static_core_path, "plugins/ets/sdk/arkts/")
+        std_path = os.path.join(self.static_core_path, "plugins/ets/stdlib/std/")
+        escompat_path = os.path.join(self.static_core_path, "plugins/ets/stdlib/escompat/")
+
         subprocess.run(
             [
                 "python", self.script_path, "gen_ast", f"--src={self.src_path}", f"--output={self.output_path}",
-                f"--es2panda={self.es2panda_path}", "--mode=host"
+                f"--es2panda={self.es2panda_path}", f"--ark-link={self.ark_link_path}", "--mode=host-multi",
+                "--abc-link-name=coverage_spec.abc",
+                f"--ets-arkts-path={ohos_ets_arkts_path}", f"--ets-api-path={ohos_ets_api_path}",
+                f"--std-path={std_path}", f"--escompat-path={escompat_path}"
             ],
             check=True
         )
@@ -74,19 +131,24 @@ class TestCoverageScript(unittest.TestCase):
             ],
             check=True
         )
+
         ast_output = Path(f"{self.output_path}/runtime_info/coverageBytecodeInfo.csv")
         ast_output.parent.mkdir(parents=True, exist_ok=True)
         cmd = [
             f"{self.ark_path}", f"--boot-panda-files={self.etsstdlib_path}",
-            "--load-runtimes=ets", f"{self.output_path}/abc/coverage_spec.abc", "coverage_spec.ETSGLOBAL::main",
+            "--load-runtimes=ets", f"{self.output_path}/abc/coverage_spec.abc",
+            "coverage_spec.coverage_spec.ETSGLOBAL::main",
             "--code-coverage-enabled=true", f"--code-coverage-output={ast_output}"
         ]
         print(*cmd)
         subprocess.run(cmd, check=True)
+        self.wait_for_csv_content(ast_output)
+
         subprocess.run(
             [
                 "python", self.script_path, "gen_report", f"--src={self.src_path}", f"--workdir={self.output_path}",
-                "--a"
+                "--mode=host-multi",
+                "-a"
             ],
             check=True
         )
