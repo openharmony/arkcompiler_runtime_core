@@ -716,6 +716,7 @@ inline Method *Class::ResolveVirtualMethod(const Method *method) const
             }
 
             resolved = entry.GetMethods()[method->GetVTableIndex()];
+            break;
         }
     } else {
         // find method in vtable
