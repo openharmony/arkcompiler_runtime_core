@@ -49,15 +49,16 @@ class BaseValidator(IValidator):
 
         if BaseValidator._step_passed(test, return_code, step_value):
             # the step has passed
+            test.expected_err_log = ""
 
             if test.has_expected or test.has_expected_err:
                 comparison_res = test.compare_output_with_expected(output, error_output)
 
                 if comparison_res:
-                    test.reproduce += "Comparison with .expected or .expected.err file has passed\n"
+                    test.expected_err_log = "Comparison with .expected or .expected.err file has passed\n"
                     return ValidationResult(True, ValidatorFailKind.NONE, "")
 
-                test.reproduce += "Comparison with .expected or .expected.err file has failed\n"
+                test.expected_err_log = "Comparison with .expected or .expected.err file has failed\n"
                 test.log_comparison_difference(output, error_output)
                 return ValidationResult(False, ValidatorFailKind.COMPARE_OUTPUT, "Comparison with .expected "
                                                                                  "or .expected.err file has failed")
@@ -65,7 +66,7 @@ class BaseValidator(IValidator):
             if not error_output:
                 return ValidationResult(True, ValidatorFailKind.NONE, "")
 
-            test.reproduce += ("\nThe test has passed, but stderr is not empty. "
+            test.expected_err_log = ("\nThe test has passed, but stderr is not empty. "
                                "There is no .expected.err file to compare with\n")
             return ValidationResult(False, ValidatorFailKind.STDERR_NOT_EMPTY, "stderr is not empty")
 
