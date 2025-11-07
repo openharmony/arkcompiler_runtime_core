@@ -463,7 +463,7 @@ def test_perf_degredation_status():
     TestCase().assertEqual('', ''.join(lines),
                            'Compare should NOT signal degradation below 0.5%')
     f1 = io.StringIO()
-    with contextlib.redirect_stdout(f1):
+    with contextlib.redirect_stderr(f1):
         cmp = VMBReport.compare_vmb(r1, r3)
         cmp.process_perf_regressions()
         lines = [line.strip() for line in
@@ -557,7 +557,7 @@ def test_compare_fine_tolerance_status_1():
     r1 = VMBReport.parse(REPORT)
     r2 = VMBReport.parse(REPORT3)
     f = io.StringIO()
-    with contextlib.redirect_stdout(f):
+    with contextlib.redirect_stderr(f):
         cmp = VMBReport.compare_vmb(r1, r2, tolerances=tols)
         exit_code = cmp.process_perf_regressions()
         lines = [line.strip() for line in
