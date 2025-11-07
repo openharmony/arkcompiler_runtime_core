@@ -48,6 +48,10 @@ bool EmitStringRepeat(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_REPEAT, 2U);
 }
+bool EmitStringCharAt(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CHAR_AT, 2U);
+}
 bool EmitInt8ArrayFillInternal(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_FILL_INTERNAL, 4U);

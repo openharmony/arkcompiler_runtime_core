@@ -199,7 +199,10 @@ void Lowering::VisitLoadArray([[maybe_unused]] GraphVisitor *v, Inst *inst)
 void Lowering::VisitLoadCompressedStringChar([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     ASSERT(inst->GetOpcode() == Opcode::LoadCompressedStringChar);
-    LowerConstArrayIndex<LoadCompressedStringCharInstI>(inst, Opcode::LoadCompressedStringCharI);
+    auto *enc = inst->GetBasicBlock()->GetGraph()->GetEncoder();
+    if (enc->CanEncodeCompressedStringCharAtI()) {
+        LowerConstArrayIndex<LoadCompressedStringCharInstI>(inst, Opcode::LoadCompressedStringCharI);
+    }
 }
 
 void Lowering::VisitStoreArray([[maybe_unused]] GraphVisitor *v, Inst *inst)

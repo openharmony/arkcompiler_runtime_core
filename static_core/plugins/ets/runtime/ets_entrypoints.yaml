@@ -925,6 +925,33 @@
     - ark::ObjectHeader*       # src string
     - int32_t                  # count
 
+- name: StringCharAt
+  entrypoint: StringCharAt
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint16_t
+    - ark::coretypes::String*
+    - int32_t
+
+- name: StringCharAtUsual
+  entrypoint: StdCoreStringCharAt
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint16_t
+    - ark::coretypes::String*
+    - int32_t
+
+- name: StringCharAtSlowPath
+  entrypoint: StdCoreStringCharAt
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint16_t
+    - ark::coretypes::String*
+    - int32_t
+
 - name: BeginGeneralNativeMethod
   entrypoint: BeginGeneralNativeMethod
   bridge: none

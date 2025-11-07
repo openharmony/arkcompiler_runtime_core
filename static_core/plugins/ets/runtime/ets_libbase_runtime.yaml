@@ -796,6 +796,10 @@ intrinsics:
       ret: u16
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCharAt
+    llvm_codegen_func: EmitStringCharAt
+    codegen_func: CreateStringCharAt
+    codegen_arch: [arm64, amd64]
+    require_flat_check: true
 
   - name: StdCoreStringEquals
     space: ets

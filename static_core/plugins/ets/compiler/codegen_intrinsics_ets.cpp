@@ -623,6 +623,12 @@ void Codegen::CreateStringRepeat([[maybe_unused]] IntrinsicInst *inst, Reg dst, 
     CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
 }
 
+void Codegen::CreateStringCharAt(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetRuntime()->IsCompressedStringsEnabled());
+    CallFastPath(inst, EntrypointId::STRING_CHAR_AT, dst, {}, src[0], src[1U]);
+}
+
 void Codegen::CreateInt8ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);

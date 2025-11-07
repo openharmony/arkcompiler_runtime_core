@@ -17,10 +17,6 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_GET: {
     Builder()->BuildStringGetIntrinsic(bcInst_, ACC_READ, intrinsicId);
     break;
 }
-case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CHAR_AT: {
-    BuildDefaultVirtualCallIntrinsic(intrinsicId);
-    break;
-}
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_GET_LENGTH: {
     Builder()->BuildStringLengthIntrinsic(bcInst_, ACC_READ);
     break;

@@ -47,7 +47,7 @@ module FlattenedStringCacheConstants
 end
 
 macro(:check_not_tree_string_type) do |str|
-  baseClass := LoadI(str).ref
+  baseClass := load_class(str)
   stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
   If(stringType, Constants::STRING_TYPE_TREE).EQ {
     Intrinsic(:UNREACHABLE).void.Terminator
@@ -55,7 +55,7 @@ macro(:check_not_tree_string_type) do |str|
 end
 
 macro(:try_use_cached_flat_str) do |str|
-  baseClass := LoadI(str).ref
+  baseClass := load_class(str)
   stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
   If(stringType, Constants::STRING_TYPE_SLICE).EQ {
     Goto(:SlowPathEntrypoint)

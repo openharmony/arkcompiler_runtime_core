@@ -338,8 +338,10 @@ public:
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
     bool CanEncodeScale(uint64_t imm, uint32_t size) override;
     bool CanEncodeBitCount() override;
+    bool CanEncodeCompressedStringCharAt() override;
     bool CanOptimizeImmDivMod(uint64_t imm, bool isSigned) const override;
 
+    void EncodeCompressedStringCharAt(ArgsCompressedStringCharAt &&args) override;
     void EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval) override;
     void EncodeCompareAndSwap(Reg dst, Reg addr, Reg val, Reg newval) override;
     void EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val) override;
