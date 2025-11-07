@@ -84,3 +84,9 @@ numeric_eq:
   - {left: "-0.0", right: "+0.0", op: "===", result:  "true"}
   - {left: "+0.0", right: "-0.0", op: "!==", result:  "false"}
   - {left: "-0.0", right: "+0.0", op: "!==", result:  "false"}
+  
+  - {left: "new Number(5)", right: "5", op: "===", result:  "true"}
+  - {left: "1", right: "new Long(1)", op: "==", result:  "true"}
+  - {left: "new Short(11)", right: "new Long(11)", op: "==", result:  "true"}
+  - {left: "new Double(0.5)", right: "0.6", op: "!==", result:  "true"}
+  - {left: "new Byte(127) + 1", right: "128", op: "==", result:  "true"}
