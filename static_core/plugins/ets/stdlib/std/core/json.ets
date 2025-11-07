@@ -773,8 +773,6 @@ class JSONWriter {
             this.buffer.append("undefined")
         } else if (obj instanceof String) {
             this.buffer.append(JSON.stringify(obj as String))
-        } else if (obj instanceof RegExpResultArray) {
-            this.buffer.append(JSON.stringify((obj as RegExpResultArray).result))
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {

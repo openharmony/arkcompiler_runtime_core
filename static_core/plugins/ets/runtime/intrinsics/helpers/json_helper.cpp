@@ -562,8 +562,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
             coro->ManagedCodeEnd();
             {
                 ScopedManagedCodeThread v(coro);
-                auto result = EtsHandle<EtsObject>(coro, value->GetFieldObject(valueCls->GetFieldByIndex(1)));
-                isSuccessful = SerializeJSONObjectArray(result);
+                isSuccessful = SerializeJSONObjectArray(value);
             }
             coro->ManagedCodeBegin();
         } else if (value->IsInstanceOf(platformTypes->stdcoreJsonReplacer)) {
