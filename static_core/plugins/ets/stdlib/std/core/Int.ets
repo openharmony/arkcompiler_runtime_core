@@ -324,6 +324,10 @@ export final class Int extends Integral implements Comparable<Int> {
         return this.value == (other as Int).value
     }
 
+    public toLocaleString(): string {
+        return new Intl.NumberFormat().format(this.value)
+    }
+
     /**
      * Performs integral addition of this instance with provided one, returns the result as new instance
      *

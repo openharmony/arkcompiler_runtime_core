@@ -341,6 +341,15 @@ export final class Float extends Floating implements Comparable<Float> {
     public override toString(): String {
         return Float.toString(this.value, 10);
     }
+    
+    /**
+     * Converts this object to a locale-specific string representation
+     *
+     * @returns result of the locale-specific conversion
+     */
+    public toLocaleString(): String {
+        return new Intl.NumberFormat().format(this.value)
+    }
 
     /**
      * compare(float, float) checks if two floats are differs no more than by Float.DELTA

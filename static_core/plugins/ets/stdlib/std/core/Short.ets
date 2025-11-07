@@ -332,6 +332,15 @@ export final class Short extends Integral implements Comparable<Short> {
         return this.value == (other as Short).value
     }
 
+     /**
+     * Converts this object to a locale-specific string representation
+     *
+     * @returns result of the locale-specific conversion
+     */
+    public toLocaleString(): String {
+        return new Intl.NumberFormat().format(this.value)
+    }
+
     /**
      * Performs shortegral addition of this instance with provided one, returns the result as new instance
      *

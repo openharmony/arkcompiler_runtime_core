@@ -360,6 +360,15 @@ export final class Long extends Integral implements Comparable<Long> {
     }
 
     /**
+     * Converts this object to a locale-specific string representation
+     *
+     * @returns result of the locale-specific conversion
+     */
+    public toLocaleString(): String {
+        return new Intl.NumberFormat().format(this.value)
+    }
+
+    /**
      * Performs integral addition of this instance with provided one, returns the result as new instance
      *
      * @param other Right hand side of the addition

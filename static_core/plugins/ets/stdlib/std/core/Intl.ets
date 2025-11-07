@@ -141,17 +141,24 @@ export namespace Intl {
                 let lowerYToCompare = yToCompare.toLowerCase()
                 if (lowerXToCompare == lowerYToCompare) {
                     let i: int = 0
-                    while (xToCompare[i] == yToCompare[i]) {
+                    while (xToCompare[i] == yToCompare[i] && i < xToCompare.length && i < yToCompare.length) {
                         ++i
                     }
-
-                    if (lowerXToCompare[i] == xToCompare[i] || yToCompare.toUpperCase()[i] == yToCompare[i]) {
-                        return (this.options.caseFirst == "upper") ? 1 : -1
+                    const xChar = xToCompare[i]
+                    const yChar = yToCompare[i]
+                    const xIsUpper = xChar === xChar.toUpperCase() && xChar !== xChar.toLowerCase();
+                    const yIsUpper = yChar === yChar.toUpperCase() && yChar !== yChar.toLowerCase();
+            
+                    if (xIsUpper && !yIsUpper) {
+                        return this.options.caseFirst === "upper" ? -1 : 1;
                     }
-
-                    return (this.options.caseFirst == "upper") ? -1 : 1
+                    if (!xIsUpper && yIsUpper) {
+                        return this.options.caseFirst === "upper" ? 1 : -1;
+                    }
                 }
             }
+            xToCompare = xToCompare.normalize("NFD")
+            yToCompare = yToCompare.normalize("NFD")
             return this.compareByCollation(this.options.collation, this.options.locale, xToCompare, yToCompare)
         }
 
