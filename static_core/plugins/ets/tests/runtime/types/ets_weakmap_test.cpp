@@ -25,7 +25,7 @@
 
 // Include the intrinsic function we're testing
 namespace ark::ets::intrinsics {
-extern "C" EtsBoolean EtsEscompatWeakMapValidateKey(EtsObject *key);
+extern "C" EtsBoolean EtsWeakMapValidateKey(EtsObject *key);
 }
 
 namespace ark::ets::test {
@@ -88,7 +88,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyAcceptsObjects)
     ASSERT_NE(obj, nullptr);
 
     // Object should be a valid WeakMap key
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(obj);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(obj);
     EXPECT_TRUE(result);
 }
 
@@ -98,7 +98,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsBooleanBox)
     EtsObject *boxedBool = EtsBoxPrimitive<EtsBoolean>::Create(coro_, static_cast<EtsBoolean>(1));
     ASSERT_NE(boxedBool, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(boxedBool);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedBool);
     EXPECT_FALSE(result) << "Boxed Boolean should not be a valid WeakMap key";
 }
 
@@ -108,7 +108,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsIntBox)
     EtsObject *boxedInt = EtsBoxPrimitive<EtsInt>::Create(coro_, 42);
     ASSERT_NE(boxedInt, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(boxedInt);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedInt);
     EXPECT_FALSE(result) << "Boxed Int should not be a valid WeakMap key";
 }
 
@@ -118,7 +118,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsLongBox)
     EtsObject *boxedLong = EtsBoxPrimitive<EtsLong>::Create(coro_, 100L);
     ASSERT_NE(boxedLong, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(boxedLong);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedLong);
     EXPECT_FALSE(result) << "Boxed Long should not be a valid WeakMap key";
 }
 
@@ -128,7 +128,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsDoubleBox)
     EtsObject *boxedDouble = EtsBoxPrimitive<EtsDouble>::Create(coro_, 3.14);
     ASSERT_NE(boxedDouble, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(boxedDouble);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedDouble);
     EXPECT_FALSE(result) << "Boxed Double should not be a valid WeakMap key";
 }
 
@@ -138,7 +138,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsFloatBox)
     EtsObject *boxedFloat = EtsBoxPrimitive<EtsFloat>::Create(coro_, 2.5f);
     ASSERT_NE(boxedFloat, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(boxedFloat);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedFloat);
     EXPECT_FALSE(result) << "Boxed Float should not be a valid WeakMap key";
 }
 
@@ -148,7 +148,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsByteBox)
     EtsObject *boxedByte = EtsBoxPrimitive<EtsByte>::Create(coro_, static_cast<EtsByte>(10));
     ASSERT_NE(boxedByte, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(boxedByte);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedByte);
     EXPECT_FALSE(result) << "Boxed Byte should not be a valid WeakMap key";
 }
 
@@ -158,7 +158,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsShortBox)
     EtsObject *boxedShort = EtsBoxPrimitive<EtsShort>::Create(coro_, static_cast<EtsShort>(1000));
     ASSERT_NE(boxedShort, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(boxedShort);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedShort);
     EXPECT_FALSE(result) << "Boxed Short should not be a valid WeakMap key";
 }
 
@@ -168,7 +168,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsCharBox)
     EtsObject *boxedChar = EtsBoxPrimitive<EtsChar>::Create(coro_, static_cast<EtsChar>('A'));
     ASSERT_NE(boxedChar, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(boxedChar);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedChar);
     EXPECT_FALSE(result) << "Boxed Char should not be a valid WeakMap key";
 }
 
@@ -179,7 +179,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsString)
     EtsString *str = EtsString::CreateFromMUtf8(testStr);
     ASSERT_NE(str, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(str->AsObject());
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(str->AsObject());
     EXPECT_FALSE(result) << "String should not be a valid WeakMap key";
 }
 
@@ -196,7 +196,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsBigInt)
     EtsObject *bigInt = EtsObject::Create(coro_, bigIntClass);
     ASSERT_NE(bigInt, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(bigInt);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(bigInt);
     EXPECT_FALSE(result) << "BigInt should not be a valid WeakMap key";
 }
 
@@ -210,7 +210,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsNullValue)
     EtsObject *nullValue = EtsObject::Create(coro_, nullValueClass);
     ASSERT_NE(nullValue, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(nullValue);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(nullValue);
     EXPECT_FALSE(result) << "NullValue should not be a valid WeakMap key";
 }
 
@@ -221,7 +221,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyAcceptsArray)
     EtsArray *arr = EtsIntArray::Create(10);
     ASSERT_NE(arr, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(arr->AsObject());
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(arr->AsObject());
     EXPECT_TRUE(result) << "Array should be a valid WeakMap key";
 }
 
@@ -236,7 +236,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyAcceptsMultipleReferenceTypes)
     EtsObject *error = EtsObject::Create(coro_, errorClass);
     ASSERT_NE(error, nullptr);
 
-    EtsBoolean result = intrinsics::EtsEscompatWeakMapValidateKey(error);
+    EtsBoolean result = intrinsics::EtsWeakMapValidateKey(error);
     EXPECT_TRUE(result) << "Error object should be a valid WeakMap key";
 }
 

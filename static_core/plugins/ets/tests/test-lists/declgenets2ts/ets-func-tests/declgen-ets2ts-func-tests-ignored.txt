@@ -28,10 +28,8 @@ spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.D
 std/core/TypeCreatePrimitiveNameTest.ets
 escompat/ArrayProxyTest.ets
 std/core/JsonParseTest.ets
-escompat/ProcessTest.ets
+std/core/ProcessTest.ets
 escompat/ProxyTest.ets
-escompat/WeakMapGCTest.ets
-escompat/WeakSetGCTest.ets
 regression/15114.ets
 regression/Issue20610.ets
 regression/verify_generics.ets
@@ -162,6 +160,8 @@ std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_concurrent_se
 std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_concurrent_set_test.ets
 std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_fails.ets
 std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_not_concurrent_tests.ets
+std/containers/WeakMapGCTest.ets
+std/containers/WeakSetGCTest.ets
 std/core/ArrayTypeAllTests.ets
 std/core/ClassTypeAllTests.ets
 std/core/FunctionTypeAllTests.ets

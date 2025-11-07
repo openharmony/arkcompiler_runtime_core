@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.containers;
 
  /**
   * A WeakMap is a collection of key/value pairs whose keys must be objects,
