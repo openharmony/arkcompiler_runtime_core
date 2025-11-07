@@ -7439,8 +7439,10 @@ intrinsics:
     method_name: parse
     static: true
     signature:
-      ret: std.core.String
-      args: [ std.core.String ]
+      ret: void
+      args:
+        - std.core.String
+        - std.core.String
     impl: ark::ets::intrinsics::StdCoreRegExpParse
 
 ####################

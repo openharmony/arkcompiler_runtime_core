@@ -658,6 +658,9 @@ bool RegExpParser::ParseAssertion(bool isBackward, bool &isAtom, bool &parseCapt
             isAtom = true;
             Advance();
             ParseDisjunction(isBackward);
+            if (isError_) {
+                return false;
+            }
             break;
         default:
             Advance();
@@ -695,6 +698,9 @@ bool RegExpParser::ParseAssertionCapture(int *captureIndex, bool isBackward)
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             PrintF("capture start %d \n", *captureIndex);
             ParseDisjunction(isBackward);
+            if (isError_) {
+                return false;
+            }
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             PrintF("capture end %d \n", *captureIndex);
             if (isBackward) {

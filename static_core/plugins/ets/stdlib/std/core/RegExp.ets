@@ -659,7 +659,7 @@ export class RegExp extends Object {
     /**
      * Parse a regular expression
      */
-    public native static parse(pattern: String): String | undefined;
+    private native static parse(pattern: String, flags: String): void
 
     /**
      * Recompiles a regular expression with new source and flags after the RegExp object has already been created
@@ -1001,11 +1001,11 @@ export class RegExp extends Object {
      * @param flags description of flags to be used
      */
     private init(pattern: String, flags?: String) {
-        this.regexp_parser(pattern)
         this.pattern_ = pattern
         this.flags_ = flags === undefined ? "" : flags!
         this.source_ = RegExp.escapePattern(pattern)
         this.flags_ = Array.from(this.flags_.split("")).sort().join("")
+        RegExp.parse(pattern, this.flags_)
     }
 
     /**
@@ -1017,12 +1017,5 @@ export class RegExp extends Object {
      */
     private init(regexp: RegExp, flags?: String) {
         this.init(regexp.pattern_, flags === undefined ? regexp.flags : flags!)
-    }
-
-    private regexp_parser(pattern: String): void {
-        let err: String | undefined = RegExp.parse(pattern)
-        if (err != undefined) {
-            throw new SyntaxError(err as String)
-        }
     }
 }

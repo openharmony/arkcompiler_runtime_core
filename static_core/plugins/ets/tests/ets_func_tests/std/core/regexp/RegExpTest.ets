@@ -260,12 +260,12 @@ function GreekAlphabetTestFunction36(): void {
 }
 
 function GreekAlphabetTestFunction37(): void {
-    let reg = new RegExp("^[-+]?([0-9]+)?(\\٫[0-9]{1,})?$", "u");
+    let reg = new RegExp("^[-+]?([0-9]+)?(\\٫[0-9]{1,})?$");
     arktest.assertEQ(reg.test('0٫0000000000001'), true)
 }
 
 function GreekAlphabetTestFunction38(): void {
-    let reg = new RegExp("^(?:[-+])?(?:[0-9]+)?(?:\\٫[0-9]*)?(?:[eE][\\+\\-]?(?:[0-9]+))?$", "u");
+    let reg = new RegExp("^(?:[-+])?(?:[0-9]+)?(?:\\٫[0-9]*)?(?:[eE][\\+\\-]?(?:[0-9]+))?$");
     arktest.assertEQ(reg.test('123٫'), true)
     arktest.assertEQ(reg.test('123٫123'), true)
     arktest.assertEQ(reg.test('-123٫123'), true)
@@ -277,7 +277,7 @@ function GreekAlphabetTestFunction39(): void {
 }
 
 function GreekAlphabetTestFunction40(): void {
-    let reg = new RegExp("^(?!-? )(?=.*\\d)(\\¥)?-?(0|[1-9]\\d|[1-9]\\d{0,2}(\\,\\d{3})*)?(\\.(\\d{2}))?$", "iu");
+    let reg = new RegExp("^(?!-? )(?=.*\\d)(\\¥)?-?(0|[1-9]\\d|[1-9]\\d{0,2}(\\,\\d{3})*)?(\\.(\\d{2}))?$");
     arktest.assertEQ(reg.test('¥6,954,231'), true)
     arktest.assertEQ(reg.test('¥-6,954,231'), true)
 }
