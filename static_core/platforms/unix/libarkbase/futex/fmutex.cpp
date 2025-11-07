@@ -412,7 +412,7 @@ void Wait(struct CondVar *const cond, struct fmutex *const m)
     if (futex(GetCondAddr(cond), FUTEX_WAIT_PRIVATE, curCond, nullptr, nullptr, 0) != 0) {
         // NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
         if ((errno != EAGAIN) && (errno != EINTR)) {
-            LOG(FATAL, COMMON) << "Futex wait failed!";
+            LOG(FATAL, COMMON) << "Futex wait failed!errno=" + std::to_string(errno);
         }
     }
 #endif
@@ -474,7 +474,9 @@ bool TimedWait(struct CondVar *const cond, struct fmutex *const m, uint64_t ms, 
         if (errno == ETIMEDOUT) {
             timeout = true;
         } else if ((errno != EAGAIN) && (errno != EINTR)) {
-            LOG(FATAL, COMMON) << "Futex wait failed!";
+            LOG(FATAL, COMMON) << "Futex time wait failed!errno=" + std::to_string(errno) +
+                                      ";tv_sec=" + std::to_string(time.tv_sec) +
+                                      ";tv_nsec=" + std::to_string(time.tv_nsec);
         }
     }
 #endif
