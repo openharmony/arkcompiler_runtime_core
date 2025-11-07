@@ -535,9 +535,6 @@
 #23051 Reference comparison
 07.expressions/25.equality_expressions/reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
-#30216 Incorrect error for readonly array assignment
-07.expressions/29.assignment/01.simple_assignment_operator/readonly_array_negative.ets
-
 #30412 Incorrect evaluation order for compound assignment
 07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_0.ets
 07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_1.ets
