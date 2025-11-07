@@ -42,7 +42,7 @@
 //! INST_COUNT   "Deoptimize ", 1
 //! PASS_AFTER   "EscapeAnalysis"
 //! INST_COUNT   "DeoptimizeIf", 1
-//! INST_COUNT   "Deoptimize ", 1
+//! INST_COUNT   "Deoptimize ", 2
 
 function __noinline__next1(str: string): string {
   return str;

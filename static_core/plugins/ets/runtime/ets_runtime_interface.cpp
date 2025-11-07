@@ -372,6 +372,12 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferDataAdd
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("dataAddress"));
 }
 
+// NOTE(@volkovanton, #31053) Will be refactored as a follow-up.
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferManagedData(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("data"));
+}
+
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
 {
     for (auto ctor : PlatformTypes()->coreStringBuilder->GetConstructors()) {

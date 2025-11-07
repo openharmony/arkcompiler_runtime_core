@@ -60,9 +60,9 @@ export class ArrayBuffer
             }
         }
         this.isResizable = (maxByteLength != undefined)
-        this.data = ArrayBuffer.allocateNonMovable(this.isResizable ? maxByteLength! : length)
+        this.data = new byte[this.isResizable ? maxByteLength! : length]
         this._byteLength = length
-        this.dataAddress = ArrayBuffer.getAddress(this.data!)
+        this.dataAddress = 0 // not needed in managed code
     }
 
     /**
@@ -197,8 +197,12 @@ export class ArrayBuffer
         return this._byteLength
     }
 
+    /**
+     * Checks managed data availability first. Otherwise, it checks if there is native data.
+     * ArrayBuffer with managed data cannot be detached.
+     */
     get detached(): boolean {
-        return this.dataAddress == 0
+        return this.data != undefined ? false : this.dataAddress == 0
     }
 
     get resizable(): boolean {

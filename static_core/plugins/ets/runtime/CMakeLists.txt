@@ -110,6 +110,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_coroutine.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
+    ${ETS_EXT_SOURCES}/types/ets_arraybuffer.cpp
     ${ETS_EXT_SOURCES}/types/ets_escompat_array.cpp
     ${ETS_EXT_SOURCES}/types/ets_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_method.cpp

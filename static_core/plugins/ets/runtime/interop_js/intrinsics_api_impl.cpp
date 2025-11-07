@@ -1648,9 +1648,14 @@ EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
     NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, dynamicArrayBuffer, &data, &byteLength));
 
     [[maybe_unused]] EtsHandleScope s(coro);
-    void *etsData = nullptr;
-    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coro, byteLength, &etsData);
-    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, reinterpret_cast<uint8_t *>(etsData));
+    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coro, byteLength);
+    if (UNLIKELY(arrayBuffer == nullptr)) {
+        return nullptr;
+    }
+    auto *etsData = arrayBuffer->GetData<uint8_t *>();
+    if (LIKELY(byteLength > 0 && etsData != nullptr)) {
+        std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, etsData);
+    }
     return arrayBuffer;
 }
 

@@ -20,10 +20,6 @@ module Constants
   ARRAY_BUFFER_CLASS_SIZE = "cross_values::GetArrayBufferClassSize(GetArch())"
   ARRAY_BUFFER_BYTE_LENGTH_OFFSET =  "cross_values::GetArrayBufferByteLengthOffset(GetArch())"
   ARRAY_BUFFER_DATA_OFFSET = "cross_values::GetArrayBufferDataOffset(GetArch())"
-  ARRAY_BUFFER_NATIVE_DATA_OFFSET = "cross_values::GetArrayBufferNativeDataOffset(GetArch())"
-  ARRAY_BUFFER_MANAGED_DATA_OFFSET = "cross_values::GetArrayBufferManagedDataOffset(GetArch())"
-  ARRAY_BUFFER_IS_RESIZABLE_OFFSET = "cross_values::GetArrayBufferIsResizableOffset(GetArch())"
-  ARRAY_BUFFER_CLASS_SIZE_WITH_ALIGNMENT = "cross_values::GetArrayBufferClassSize(GetArch()) + TLAB_ALIGNMENT - 1"
 
   TYPED_UNSIGNED_ARRAY_BYTES_PER_ELEMENT_OFFSET = "cross_values::GetTypedUnsignedArrayBytesPerElementOffset(GetArch())"
   TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedUnsignedArrayByteOffsetOffset(GetArch())"

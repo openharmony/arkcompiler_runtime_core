@@ -39,13 +39,13 @@ namespace ark::ets::intrinsics {
 static EtsHandle<EtsEscompatArrayBuffer> CreateArrayBuffer(EtsCoroutine *coro, EtsInt byteLength,
                                                            const uint8_t *data = nullptr)
 {
-    void *buffer = nullptr;
-    EtsHandle<EtsEscompatArrayBuffer> newBuffer(coro, EtsEscompatArrayBuffer::Create(coro, byteLength, &buffer));
+    EtsHandle<EtsEscompatArrayBuffer> newBuffer(coro, EtsEscompatArrayBuffer::Create(coro, byteLength));
     if (UNLIKELY(newBuffer.GetPtr() == nullptr)) {
         return newBuffer;
     }
-    if (data != nullptr && byteLength > 0) {
-        std::copy_n(data, byteLength, reinterpret_cast<uint8_t *>(buffer));
+    auto *buffer = newBuffer->GetData<uint8_t *>();
+    if (LIKELY(data != nullptr && buffer != nullptr && byteLength > 0)) {
+        std::copy_n(data, byteLength, buffer);
     }
     return newBuffer;
 }

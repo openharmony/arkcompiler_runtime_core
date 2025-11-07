@@ -158,7 +158,7 @@ void InstBuilder::BuildTypedUnsignedArraySetIntrinsic(const BytecodeInstruction 
                                                       DataType::Type type, bool accRead)
 {
     ASSERT(type != DataType::INT64);
-    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead, true);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset<true>(bcInst, type, accRead, true);
     BuildTypedArraySet(bcInst, value, type, loadDataInst, dataOffsetInst);
 }
 
@@ -198,7 +198,7 @@ void InstBuilder::BuildBigInt64ArraySetIntrinsic(const BytecodeInstruction *bcIn
 void InstBuilder::BuildBigUint64ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
 {
     auto [loadDataInst, dataOffsetInst] =
-        BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead, true);
+        BuildTypedArrayLoadDataAndOffset<true>(bcInst, DataType::INT64, accRead, true);
     auto *value = GetArgDefinition(bcInst, 2, accRead);
     if (value->GetType() != DataType::INT64) {
         auto bcAddr = GetPc(bcInst->GetAddress());
@@ -234,7 +234,7 @@ void InstBuilder::BuildTypedUnsignedArrayGetIntrinsic(const BytecodeInstruction 
 {
     ASSERT(type != DataType::INT64);
     auto bcAddr = GetPc(bcInst->GetAddress());
-    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead, true);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset<true>(bcInst, type, accRead, true);
     auto *loadInst = BuildTypedArrayGet(bcInst, type, loadDataInst, dataOffsetInst);
     auto result = GetGraph()->CreateInstCast(DataType::FLOAT64, bcAddr, loadInst, loadInst->GetType());
     AddInstruction(result);
@@ -245,7 +245,7 @@ void InstBuilder::BuildTypedUnsignedArrayGetUnsafeIntrinsic(const BytecodeInstru
                                                             bool accRead)
 {
     ASSERT(type != DataType::INT64);
-    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead, false);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset<true>(bcInst, type, accRead, false);
     auto *loadInst = BuildTypedArrayGet(bcInst, type, loadDataInst, dataOffsetInst);
     UpdateDefinitionAcc(loadInst);
 }
@@ -254,7 +254,7 @@ void InstBuilder::BuildUint32ArrayGetUnsafeIntrinsic(const BytecodeInstruction *
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto [loadDataInst, dataOffsetInst] =
-        BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::UINT32, accRead, false);
+        BuildTypedArrayLoadDataAndOffset<true>(bcInst, DataType::UINT32, accRead, false);
     auto *loadInst = BuildTypedArrayGet(bcInst, DataType::UINT32, loadDataInst, dataOffsetInst);
     auto result = GetGraph()->CreateInstCast(DataType::INT64, bcAddr, loadInst, loadInst->GetType());
     AddInstruction(result);
@@ -283,31 +283,33 @@ void InstBuilder::BuildBigInt64ArrayGetIntrinsic(const BytecodeInstruction *bcIn
 void InstBuilder::BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead, bool needBoundCheck)
 {
     auto [loadDataInst, dataOffsetInst] =
-        BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead, needBoundCheck);
+        BuildTypedArrayLoadDataAndOffset<true>(bcInst, DataType::INT64, accRead, needBoundCheck);
     auto *loadInst = BuildTypedArrayGet(bcInst, DataType::INT64, loadDataInst, dataOffsetInst);
     UpdateDefinitionAcc(loadInst);
 }
 
 /*
-    1. typedArray
-    2. pos
-    3. NullCheck v1
-    5. LoadObject v3, TYPED_ARRAY_BUFFER_OFFSET
-    6. LoadObject v5, ARRAY_BUFFER_DATA_OFFSET
-    7. ZeroCheck D v6
-    4. Bitcast INT64->POINTER v7
-    9. LoadObject v3, TYPED_ARRAY_BUFFER_BYTE_OFFSET_OFFSET
-    11. LoadObject v3, TYPED_ARRAY_LENGTH_OFFSET
-    12. BoundsCheck v11, v2
-    14. Add v2, v10
-    Returns (v4, v14)
- */
+    1. typedArray       arg 0 -> (v4, v3, v2)
+    2. pos              arg 1 -> (v14, v6, v3)
+    3. SaveState        v0, v1 -> (v9, v6, v4)
+    4. NullCheck        v0, v3 -> (v10, v7, v5)
+    5. LoadObject       v4 -> (v6), TYPED_ARRAY_LENGTH_INT_OFFSET
+    6. BoundsCheck D    v5, v1, v3
+    7. LoadObject       v4 -> (v_8), TYPED_ARRAY_BUFFER_OFFSET
+    8. LoadObject       v7 -> (v9), ARRAY_BUFFER_DATA_OFFSET
+    9. NullCheck D      v_8, v3 -> (v16)
+    10. LoadObject      v4 -> (v12), TYPED_ARRAY_BUFFER_BYTE_OFFSET_OFFSET
+    11. Add             v11, v10 -> (v15), ARRAY_DATA_OFFSET
+    12. Shl             v0, v13 -> (v15)
+    13. Add             v14, v12 -> (v16)
+    Return              v9, v15
+*/
 // CC-OFFNXT(huge_depth[C++]) solid logic
+template <bool UNSIGNED>
 std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const BytecodeInstruction *bcInst,
                                                                          DataType::Type type, bool accRead,
                                                                          bool needBoundCheck)
 {
-    ASSERT(DataType::IsTypeSigned(type));
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto *obj = GetArgDefinition(bcInst, 0, accRead);
     auto *pos = GetArgDefinition(bcInst, 1, accRead);
@@ -321,38 +323,13 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
     auto calleeMethodId = runtime->ResolveMethodIndex(GetMethod(), bcInst->GetId(0).AsIndex());
     auto *calleeMethod = runtime->GetMethodById(GetMethod(), calleeMethodId);
 
+    // TypedArray helpers
     auto *typedArrayClass = runtime->GetClass(calleeMethod);
     auto *bufferField = runtime->GetEscompatTypedArrayBuffer(typedArrayClass);
-    auto *byteOffsetField = runtime->GetEscompatTypedArrayByteOffset(typedArrayClass);
-    auto *lengthIntField = runtime->GetEscompatTypedArrayLengthInt(typedArrayClass);
-
-    auto *arrayBufferClass = runtime->GetEscompatArrayBufferClass();
-    auto *dataAddressField = runtime->GetEscompatArrayBufferDataAddress(arrayBufferClass);
-
-    auto *loadBufferInst = graph->CreateInstLoadObject(DataType::REFERENCE, bcAddr, nullCheck,
-                                                       TypeIdMixin {runtime->GetFieldId(bufferField), calleeMethod},
-                                                       bufferField, runtime->IsFieldVolatile(bufferField));
-    AddInstruction(loadBufferInst);
-
-    Inst *loadDataInst = graph->CreateInstLoadObject(DataType::INT64, bcAddr, loadBufferInst,
-                                                     TypeIdMixin {runtime->GetFieldId(dataAddressField), calleeMethod},
-                                                     dataAddressField, runtime->IsFieldVolatile(dataAddressField));
-    AddInstruction(loadDataInst);
-
-    BuildTypedArrayDetachedDataCheck(&loadDataInst, bcAddr, saveState);
-    if (!Is64BitsArch(graph->GetArch())) {
-        loadDataInst = graph->CreateInstCast(DataType::INT32, bcAddr, loadDataInst, loadDataInst->GetType());
-        AddInstruction(loadDataInst);
-    }
-    loadDataInst = graph->CreateInstBitcast(DataType::POINTER, bcAddr, loadDataInst, loadDataInst->GetType());
-    AddInstruction(loadDataInst);
-
-    auto *loadDataOffsetInst = graph->CreateInstLoadObject(
-        DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(byteOffsetField), calleeMethod},
-        byteOffsetField, runtime->IsFieldVolatile(byteOffsetField));
-    AddInstruction(loadDataOffsetInst);
-
+    auto *byteOffsetField = UNSIGNED ? runtime->GetEscompatUnsignedTypedArrayByteOffsetInt(typedArrayClass)
+                                     : runtime->GetEscompatTypedArrayByteOffset(typedArrayClass);
     if (needBoundCheck) {
+        auto *lengthIntField = runtime->GetEscompatTypedArrayLengthInt(typedArrayClass);
         auto *loadLengthInst = graph->CreateInstLoadObject(
             DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(lengthIntField), calleeMethod},
             lengthIntField, runtime->IsFieldVolatile(lengthIntField));
@@ -360,6 +337,38 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
         BuildTypedArrayBoundsCheck(pos, loadLengthInst, bcAddr, saveState);
     }
 
+    // ArrayBuffer helpers
+    auto *arrayBufferClass = runtime->GetEscompatArrayBufferClass();
+    // .data field (FixedArray<byte>)
+    auto *dataField = runtime->GetEscompatArrayBufferManagedData(arrayBufferClass);
+    // offset to real data inside .data (FixedArray<byte>)
+    auto arrayDataOffset = runtime->GetArrayDataOffset(graph->GetArch());
+
+    auto *loadBufferInst = graph->CreateInstLoadObject(DataType::REFERENCE, bcAddr, nullCheck,
+                                                       TypeIdMixin {runtime->GetFieldId(bufferField), calleeMethod},
+                                                       bufferField, runtime->IsFieldVolatile(bufferField));
+    AddInstruction(loadBufferInst);
+
+    // Load ArrayBuffer.data
+    Inst *loadDataInst = graph->CreateInstLoadObject(DataType::REFERENCE, bcAddr, loadBufferInst,
+                                                     TypeIdMixin {runtime->GetFieldId(dataField), calleeMethod},
+                                                     dataField, runtime->IsFieldVolatile(dataField));
+    AddInstruction(loadDataInst);
+
+    BuildTypedArrayDetachedManagedDataCheck(&loadDataInst, bcAddr, saveState);
+
+    // Load position in data
+    auto *loadByteOffsetInst = graph->CreateInstLoadObject(
+        DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(byteOffsetField), calleeMethod},
+        byteOffsetField, runtime->IsFieldVolatile(byteOffsetField));
+    AddInstruction(loadByteOffsetInst);
+
+    // Add offset to real data in ArrayBuffer.data
+    auto *loadDataOffsetInst =
+        graph->CreateInstAdd(DataType::INT32, bcAddr, graph->FindOrCreateConstant(arrayDataOffset), loadByteOffsetInst);
+    AddInstruction(loadDataOffsetInst);
+
+    // Convert index in data to correct byte offset
     auto scale = DataType::ShiftByType(type, graph->GetArch());
     auto *scaledPos = graph->CreateInstShl(DataType::INT32, bcAddr, pos, graph->FindOrCreateConstant(scale));
     AddInstruction(scaledPos);
@@ -378,92 +387,21 @@ void InstBuilder::BuildTypedArrayDetachedDataCheck(Inst **dataInst, size_t bcAdd
     *dataInst = zeroCheck;
 }
 
+void InstBuilder::BuildTypedArrayDetachedManagedDataCheck(Inst **dataInst, size_t bcAddr, SaveStateInst *saveState)
+{
+    auto *graph = GetGraph();
+    auto *nullCheck = graph->CreateInstNullCheck(DataType::REFERENCE, bcAddr, *dataInst, saveState);
+    nullCheck->SetFlag(inst_flags::CAN_DEOPTIMIZE);
+    AddInstruction(nullCheck);
+    *dataInst = nullCheck;
+}
+
 void InstBuilder::BuildTypedArrayBoundsCheck(Inst *posInst, Inst *lengthInst, size_t bcAddr, SaveStateInst *saveState)
 {
     auto *graph = GetGraph();
     auto *boundsCheck = graph->CreateInstBoundsCheck(DataType::INT32, bcAddr, lengthInst, posInst, saveState);
     boundsCheck->SetFlag(inst_flags::CAN_DEOPTIMIZE);
     AddInstruction(boundsCheck);
-}
-
-/*
-    1. typedUArray
-    2. pos
-    3. NullCheck v1
-    5. LoadObject v3, TYPED_U_ARRAY_BUFFER_OFFSET
-    6. LoadObject v5, ARRAY_BUFFER_DATA_OFFSET
-    7. ZeroCheck D v6
-    4. Bitcast INT64->POINTER v7
-    9. LoadObject v3, TYPED_U_ARRAY_BUFFER_BYTE_OFFSET_OFFSET
-    11. LoadObject v3, TYPED_U_ARRAY_LENGTH_OFFSET
-    12. BoundsCheck v11, v2
-    14. Add v2, v9
-    Returns (v4, v14)
- */
-// CC-OFFNXT(huge_depth[C++]) solid logic
-std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset(const BytecodeInstruction *bcInst,
-                                                                                 DataType::Type type, bool accRead,
-                                                                                 bool needBoundCheck)
-{
-    auto bcAddr = GetPc(bcInst->GetAddress());
-    auto *obj = GetArgDefinition(bcInst, 0, accRead);
-    auto *pos = GetArgDefinition(bcInst, 1, accRead);
-    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
-    AddInstruction(saveState);
-    auto *graph = GetGraph();
-    auto *nullCheck = graph->CreateInstNullCheck(DataType::REFERENCE, bcAddr, obj, saveState);
-    AddInstruction(nullCheck);
-
-    auto *runtime = graph->GetRuntime();
-    auto calleeMethodId = runtime->ResolveMethodIndex(GetMethod(), bcInst->GetId(0).AsIndex());
-    auto *calleeMethod = runtime->GetMethodById(GetMethod(), calleeMethodId);
-
-    auto *typedArrayClass = runtime->GetClass(calleeMethod);
-    auto *bufferField = runtime->GetEscompatTypedArrayBuffer(typedArrayClass);
-    auto *byteOffsetIntField = runtime->GetEscompatUnsignedTypedArrayByteOffsetInt(typedArrayClass);
-    auto *lengthIntField = runtime->GetEscompatTypedArrayLengthInt(typedArrayClass);
-
-    auto *arrayBufferClass = runtime->GetEscompatArrayBufferClass();
-    auto *dataAddressField = runtime->GetEscompatArrayBufferDataAddress(arrayBufferClass);
-
-    auto *loadBufferInst = graph->CreateInstLoadObject(DataType::REFERENCE, bcAddr, nullCheck,
-                                                       TypeIdMixin {runtime->GetFieldId(bufferField), calleeMethod},
-                                                       bufferField, runtime->IsFieldVolatile(bufferField));
-    AddInstruction(loadBufferInst);
-
-    Inst *loadDataInst = graph->CreateInstLoadObject(DataType::INT64, bcAddr, loadBufferInst,
-                                                     TypeIdMixin {runtime->GetFieldId(dataAddressField), calleeMethod},
-                                                     dataAddressField, runtime->IsFieldVolatile(dataAddressField));
-    AddInstruction(loadDataInst);
-
-    BuildTypedArrayDetachedDataCheck(&loadDataInst, bcAddr, saveState);
-    if (!Is64BitsArch(graph->GetArch())) {
-        loadDataInst = graph->CreateInstCast(DataType::INT32, bcAddr, loadDataInst, loadDataInst->GetType());
-        AddInstruction(loadDataInst);
-    }
-    loadDataInst = graph->CreateInstBitcast(DataType::POINTER, bcAddr, loadDataInst, loadDataInst->GetType());
-    AddInstruction(loadDataInst);
-
-    auto *loadDataOffsetInst = graph->CreateInstLoadObject(
-        DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(byteOffsetIntField), calleeMethod},
-        byteOffsetIntField, runtime->IsFieldVolatile(byteOffsetIntField));
-    AddInstruction(loadDataOffsetInst);
-
-    if (needBoundCheck) {
-        auto *loadLengthInst = graph->CreateInstLoadObject(
-            DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(lengthIntField), calleeMethod},
-            lengthIntField, runtime->IsFieldVolatile(lengthIntField));
-        AddInstruction(loadLengthInst);
-        BuildTypedArrayBoundsCheck(pos, loadLengthInst, bcAddr, saveState);
-    }
-
-    auto scale = DataType::ShiftByType(type, graph->GetArch());
-    auto *scaledPos = graph->CreateInstShl(DataType::INT32, bcAddr, pos, graph->FindOrCreateConstant(scale));
-    AddInstruction(scaledPos);
-    auto *dataOffsetInst = graph->CreateInstAdd(DataType::INT32, bcAddr, scaledPos, loadDataOffsetInst);
-    AddInstruction(dataOffsetInst);
-
-    return std::make_tuple(loadDataInst, dataOffsetInst);
 }
 
 template <bool LOAD>
