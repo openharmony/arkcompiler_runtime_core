@@ -281,6 +281,14 @@ def create_file(path: Union[str, Path]):
         mode='w', encoding='utf-8')
 
 
+def check_file_exists(file_path: Union[str, Path]) -> None:
+    path = Path(file_path)
+    if not path.exists():
+        error_text = 'File not found: "' + str(path) + '"'
+        log.error(error_text)
+        sys.exit(1)
+
+
 def copy_file(src: Union[str, Path], dst: Union[str, Path]) -> None:
     s = Path(src)
     if not s.exists():
