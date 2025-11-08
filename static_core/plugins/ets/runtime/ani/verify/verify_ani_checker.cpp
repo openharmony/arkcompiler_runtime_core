@@ -40,17 +40,25 @@ public:
     template <typename Callback>
     void ForEachArgs(Callback callback) const
     {
-        static_assert(std::is_invocable_r_v<bool, Callback, ani_value, panda_file::Type>, "wrong callback signature");
+        static_assert(std::is_invocable_r_v<bool, Callback, ani_value, panda_file::Type, size_t>,
+                      "wrong callback signature");
 
         panda_file::ShortyIterator it(method_->GetShorty());
         panda_file::ShortyIterator end;
         ++it;  // skip the return value
 
         size_t i = 0;
+        size_t refArgNumber = 0;
+        if (!method_->IsStatic()) {
+            ++refArgNumber;
+        }
         for (; it != end; ++it) {
             panda_file::Type type = *it;
-            if (!callback(args_[i++], type)) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            if (!callback(args_[i++], type, refArgNumber)) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 return;
+            }
+            if (type.IsReference()) {
+                ++refArgNumber;
             }
         }
     }
@@ -239,6 +247,30 @@ static bool IsValidRawAniValue(EnvANIVerifier *envANIVerifier, ani_value v, pand
 
     LOG(FATAL, ANI) << "Unexpected argument type: " << static_cast<int>(typeId);
     return false;
+}
+
+static bool IsValidMethodArgRefType(ani_env *env, EtsMethod *method, VRef *ref, size_t refArgNumber)
+{
+    auto realRef = ref->GetRef();
+    if (ManagedCodeAccessor::IsUndefined(realRef)) {
+        return true;
+    }
+
+    ASSERT(env != nullptr);
+    ScopedManagedCodeFix s(env);
+
+    const char *methodArgDesc = method->GetRefArgType(refArgNumber);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto ctx = method->GetClass()->GetLoadContext();
+    Class *methodKlass = classLinker->FindLoadedClass(utf::CStringAsMutf8(methodArgDesc), ctx);
+
+    // NOTE(ypigunova): Add check for union types #31219
+    if (methodKlass == nullptr) {
+        return true;
+    }
+
+    Class *inputKlass = s.ToInternalType(realRef)->GetClass()->GetRuntimeClass();
+    return methodKlass->IsAssignableFrom(inputKlass);
 }
 
 class Verifier {
@@ -516,12 +548,19 @@ public:
         CallArgs callArgs(methodArgs->method, methodArgs->vargs);
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
         std::optional<PandaString> err;
-        callArgs.ForEachArgs([&](ani_value value, panda_file::Type type) -> bool {
+
+        callArgs.ForEachArgs([&](ani_value value, panda_file::Type type, size_t refIndex) -> bool {
             if (UNLIKELY(!IsValidRawAniValue(envANIVerifier, value, type, methodArgs->isVaArgs))) {
                 err = "wrong method arguments";
                 return false;
             }
-            // NOTE: Add checker of ref type
+            if (type.IsReference()) {
+                if (UNLIKELY(!IsValidMethodArgRefType(venv_->GetEnv(), methodArgs->method,
+                                                      reinterpret_cast<VRef *>(value.r), refIndex))) {
+                    err = "wrong method arguments";
+                    return false;
+                }
+            }
             return true;
         });
         return err;
@@ -895,7 +934,7 @@ static void DoANIArgsAbort(PandaEtsVM *etsVm, std::string_view functionName, con
     DoAbortANI(etsVm, functionName, ss.str());
 }
 
-static PandaVector<ExtArgInfo> MakeExtArgInfoList(EnvANIVerifier *envANIVerifier, ANIArg::AniMethodArgs *methodArgs)
+static PandaVector<ExtArgInfo> MakeExtArgInfoList(PandaEnv *pandaEnv, ANIArg::AniMethodArgs *methodArgs)
 {
     if (methodArgs->method == nullptr || methodArgs->vargs == nullptr) {
         return {};
@@ -915,9 +954,14 @@ static PandaVector<ExtArgInfo> MakeExtArgInfoList(EnvANIVerifier *envANIVerifier
     }
 
     CallArgs callArgs(methodArgs->method, methodArgs->vargs);
-    callArgs.ForEachArgs([&](ani_value value, panda_file::Type type) -> bool {
+    auto envANIVerifier = pandaEnv->GetEnvANIVerifier();
+    callArgs.ForEachArgs([&](ani_value value, panda_file::Type type, size_t refIndex) -> bool {
         PandaString name = getName(i++);
         bool isValid = IsValidRawAniValue(envANIVerifier, value, type, methodArgs->isVaArgs);
+        if (isValid && type.IsReference()) {
+            isValid =
+                IsValidMethodArgRefType(pandaEnv, methodArgs->method, reinterpret_cast<VRef *>(value.r), refIndex);
+        }
         extArgInfoList.emplace_back(ExtArgInfo {std::move(name), value.l, type, isValid});
         return true;
     });
@@ -950,7 +994,7 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
         if (action == ANIArg::Action::VERIFY_METHOD_V_ARGS || action == ANIArg::Action::VERIFY_METHOD_A_ARGS) {
             auto *methodArgs = lastArgInfo.arg.GetValueMethodArgs();
             PandaEnv *pandaEnv = PandaEnv::FromAniEnv(venv->GetEnv());
-            methodArgInfoList = MakeExtArgInfoList(pandaEnv->GetEnvANIVerifier(), methodArgs);
+            methodArgInfoList = MakeExtArgInfoList(pandaEnv, methodArgs);
         }
         ArgsInfo argsInfo {std::move(argInfoList), std::move(methodArgInfoList)};
         DoANIArgsAbort(PandaEtsVM::FromAniVM(vvm->GetVm()), functionName, argsInfo);

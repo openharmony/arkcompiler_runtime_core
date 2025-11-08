@@ -23,15 +23,25 @@ public:
     {
         VerifyAniTest::SetUp();
 
-        const ani_byte bVal = 0x3f;
-        const ani_short sVal = 0x1f4f;
-        const ani_int iVal = 0x323fff23;
-        const ani_long lVal = 0xff3229884222;
-        const ani_float fVal = 0.234;
-        const ani_double dVal = 1.423;
+        constexpr ani_byte bVal = 0x3f;
+        constexpr ani_short sVal = 0x1f4f;
+        constexpr ani_int iVal = 0x323fff23;
+        constexpr ani_long lVal = 0xff3229884222;
+        constexpr ani_float fVal = 0.234;
+        constexpr ani_double dVal = 1.423;
+        constexpr std::string_view longSignature = "zC{std.core.String}sC{std.core.String}lfdC{std.core.String}:";
 
         ASSERT_EQ(env_->FindClass("verify_object_new_test.CheckCtorTypes", &cls_), ANI_OK);
+        ASSERT_EQ(env_->FindClass("verify_object_new_test.A", &clsA_), ANI_OK);
+        ASSERT_EQ(env_->FindClass("verify_object_new_test.B", &clsB_), ANI_OK);
+        ASSERT_EQ(env_->FindClass("verify_object_new_test.C", &clsC_), ANI_OK);
+        ASSERT_EQ(env_->FindClass("verify_object_new_test.CheckUnionType", &checkUnion_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", "zcbsilfdC{std.core.String}:", &ctor_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", longSignature.data(), &ctorRefs_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(clsA_, "<ctor>", ":", &ctorA_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(clsB_, "<ctor>", ":", &ctorB_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(clsC_, "<ctor>", "C{verify_object_new_test.A}:", &ctorCA_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(clsC_, "<ctor>", "C{verify_object_new_test.B}:", &ctorCB_), ANI_OK);
         z_ = ANI_TRUE;
         c_ = 'c';
         b_ = bVal;
@@ -47,7 +57,16 @@ public:
 protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     ani_class cls_ {};
+    ani_class clsA_ {};
+    ani_class clsB_ {};
+    ani_class clsC_ {};
+    ani_class checkUnion_ {};
     ani_method ctor_ {};
+    ani_method ctorRefs_ {};
+    ani_method ctorA_ {};
+    ani_method ctorB_ {};
+    ani_method ctorCA_ {};
+    ani_method ctorCB_ {};
 
     ani_boolean z_ {};
     ani_char c_ {};
@@ -315,7 +334,7 @@ TEST_F(ObjectNewTest, wrong_arg_byte_0)
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
 }
 
-TEST_F(ObjectNewTest, DISABLED_wrong_arg_byte_1)
+TEST_F(ObjectNewTest, wrong_arg_byte_1)
 {
     const ani_int b = -129;
     ani_object obj {};
@@ -493,7 +512,7 @@ TEST_F(ObjectNewTest, wrong_arg_ref_fake)
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
 }
 
-TEST_F(ObjectNewTest, DISABLED_wrong_arg_ref_invalid_type)
+TEST_F(ObjectNewTest, wrong_arg_ref_invalid_type)
 {
     ani_object argObj {};
     ASSERT_EQ(env_->c_api->Object_New(env_, cls_, ctor_, &argObj, z_, c_, b_, s_, i_, l_, f_, d_, r_), ANI_OK);
@@ -516,6 +535,161 @@ TEST_F(ObjectNewTest, DISABLED_wrong_arg_ref_invalid_type)
         {"[6]", "ani_float"},
         {"[7]", "ani_double"},
         {"[8]", "ani_ref", "wrong value"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
+}
+
+TEST_F(ObjectNewTest, wrong_arg_ref_check_args1)
+{
+    ani_object objA;
+    ani_object objB;
+    ASSERT_EQ(env_->c_api->Object_New(env_, clsA_, ctorA_, &objA), ANI_OK);
+    ASSERT_EQ(env_->c_api->Object_New(env_, clsB_, ctorB_, &objB), ANI_OK);
+
+    ani_object argObj {};
+    ASSERT_EQ(env_->c_api->Object_New(env_, clsC_, ctorCA_, &argObj, objA), ANI_OK);
+    ASSERT_EQ(env_->c_api->Object_New(env_, clsC_, ctorCA_, &argObj, objB), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->Object_New(env_, clsC_, ctorCB_, &argObj, objB), ANI_OK);
+    ASSERT_EQ(env_->c_api->Object_New(env_, clsC_, ctorCB_, &argObj, objA), ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class"},
+        {"ctor", "ani_method"},
+        {"result", "ani_object *"},
+        {"...", "       ", "wrong method arguments"},
+        {"[0]", "ani_ref", "wrong value"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
+}
+
+TEST_F(ObjectNewTest, wrong_arg_ref_check_args2)
+{
+    ani_object argObj {};
+    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, ctorRefs_, &argObj, z_, r_, s_, r_, l_, f_, d_, r_), ANI_OK);
+
+    ani_object noObj {};
+    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, ctorRefs_, &argObj, z_, noObj, s_, r_, l_, f_, d_, r_), ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class"},
+        {"ctor", "ani_method"},
+        {"result", "ani_object *"},
+        {"...", "       ", "wrong method arguments"},
+        {"[0]", "ani_boolean"},
+        {"[1]", "ani_ref", "wrong value"},
+        {"[2]", "ani_short"},
+        {"[3]", "ani_ref"},
+        {"[4]", "ani_long"},
+        {"[5]", "ani_float"},
+        {"[6]", "ani_double"},
+        {"[7]", "ani_ref"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
+}
+
+TEST_F(ObjectNewTest, wrong_arg_ref_check_args3)
+{
+    ani_object argObj {};
+    ani_object noObj {};
+    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, ctorRefs_, &argObj, z_, noObj, s_, noObj, l_, f_, d_, noObj),
+              ANI_ERROR);
+
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class"},
+        {"ctor", "ani_method"},
+        {"result", "ani_object *"},
+        {"...", "       ", "wrong method arguments"},
+        {"[0]", "ani_boolean"},
+        {"[1]", "ani_ref", "wrong value"},
+        {"[2]", "ani_short"},
+        {"[3]", "ani_ref", "wrong value"},
+        {"[4]", "ani_long"},
+        {"[5]", "ani_float"},
+        {"[6]", "ani_double"},
+        {"[7]", "ani_ref", "wrong value"},
+    };
+    // clang-format on
+
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
+}
+
+TEST_F(ObjectNewTest, arg_undef)
+{
+    ani_object obj {};
+    ani_ref undef {};
+    ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
+    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, ctorRefs_, &obj, z_, r_, s_, r_, l_, f_, d_, undef), ANI_OK);
+}
+
+TEST_F(ObjectNewTest, arg_null)
+{
+    ani_object obj {};
+    ani_ref nullRef {};
+    ASSERT_EQ(env_->GetNull(&nullRef), ANI_OK);
+    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, ctorRefs_, &obj, z_, r_, s_, r_, l_, f_, d_, nullRef), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class"},
+        {"ctor", "ani_method"},
+        {"result", "ani_object *"},
+        {"...", "       ", "wrong method arguments"},
+        {"[0]", "ani_boolean"},
+        {"[1]", "ani_ref"},
+        {"[2]", "ani_short"},
+        {"[3]", "ani_ref"},
+        {"[4]", "ani_long"},
+        {"[5]", "ani_float"},
+        {"[6]", "ani_double"},
+        {"[7]", "ani_ref", "wrong value"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
+}
+
+// NOTE(ypigunova): Add check for union types #31219
+TEST_F(ObjectNewTest, DISABLED_arg_union1)
+{
+    constexpr std::string_view LONG_SIGNATURE =
+        "X{C{std.core.String}C{verify_object_new_test.A}C{verify_object_new_test.C}}:";
+    ani_method unionMethod {};
+    ani_object obj {};
+    ASSERT_EQ(env_->Class_FindMethod(checkUnion_, "<ctor>", LONG_SIGNATURE.data(), &unionMethod), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->Object_New(env_, checkUnion_, unionMethod, &obj, r_), ANI_OK);
+}
+
+// NOTE(ypigunova): Add check for union types #31219
+TEST_F(ObjectNewTest, DISABLED_arg_union2)
+{
+    constexpr std::string_view LONG_SIGNATURE =
+        "X{C{std.core.String}C{verify_object_new_test.A}C{verify_object_new_test.C}}:";
+    ani_method unionMethod {};
+    ani_object obj {};
+    ASSERT_EQ(env_->Class_FindMethod(checkUnion_, "<ctor>", LONG_SIGNATURE.data(), &unionMethod), ANI_OK);
+
+    ani_class boolClass {};
+    ani_method ctor {};
+    ASSERT_EQ(env_->FindClass("std.core.Boolean", &boolClass), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(boolClass, "<ctor>", "z:", &ctor), ANI_OK);
+    ani_object arg {};
+    ASSERT_EQ(env_->Object_New(boolClass, ctor, &arg, z_), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->Object_New(env_, checkUnion_, unionMethod, &obj, arg), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class"},
+        {"ctor", "ani_method"},
+        {"result", "ani_object *"},
+        {"...", "       ", "wrong method arguments"},
+        {"[0]", "ani_ref", "wrong value"},
     };
     // clang-format on
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
