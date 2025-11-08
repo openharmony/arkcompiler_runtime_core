@@ -830,10 +830,51 @@ export class DateTimeFormat {
             }
         }
 
+        private toDefaultDateTimeSkeleton(): string {
+            let needDateDefaults:boolean = true
+            const skeleton = new StringBuilder()
+            if (this.options.year !== undefined || this.options.month !== undefined || this.options.weekday !== undefined || this.options.day !== undefined) {
+                needDateDefaults = false
+            }
+            if (this.options.hour !== undefined || this.options.minute !== undefined || this.options.second !== undefined) {
+                needDateDefaults = false
+            }
+            if (this.options.dateStyle !== undefined || this.options.timeStyle !== undefined) {
+                needDateDefaults = false
+            }
+
+            const hcDefault = this.getLocaleHourCycle()
+            const hourCycle = this.options.hourCycle 
+            const hc = hourCycle == undefined ? hcDefault : hourCycle
+            if (needDateDefaults) {
+                skeleton.append("yMd")
+                switch (hc) {
+                    case "h11":
+                        skeleton.append("Kms")
+                        break
+                    case "h12":
+                        skeleton.append("hms")
+                        break
+                    case "h23":
+                    case undefined:
+                        skeleton.append("Hms")
+                        break
+                    case "h24":
+                        skeleton.append("kms")
+                        break
+                    default:
+                        break
+                }
+
+            }
+            return skeleton.toString()
+        }
+
         private getPattern(): string {
             const datePattern = this.getDatePattern()
             const timePattern = this.getTimePattern()
-            return datePattern + timePattern
+            const dtfSkeleton = this.toDefaultDateTimeSkeleton()
+            return datePattern + timePattern + dtfSkeleton
         }
 
         private getDatePattern(): string {
@@ -1011,13 +1052,13 @@ export class DateTimeFormat {
             if (optTimeZoneName) {
                 switch (optTimeZoneName) {
                     case "short":
-                        pattern.append("O");
+                        pattern.append("z");
                         break
                     case "long":
                         pattern.append("zzzz")
                         break
                     case "shortGeneric":
-                        pattern.append("VVVV")
+                        pattern.append("v")
                         break
                     case "shortOffset":
                         pattern.append("O")
