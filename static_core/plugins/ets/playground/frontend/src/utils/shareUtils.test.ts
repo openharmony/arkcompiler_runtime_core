@@ -27,10 +27,10 @@ describe('share utils', () => {
   beforeAll(() => {
     const global = globalThis as unknown as GlobalWithBase64;
     if (!global.btoa) {
-      global.btoa = (str: string) => Buffer.from(str, 'binary').toString('base64');
+      global.btoa = (str: string): string => Buffer.from(str, 'binary').toString('base64');
     }
     if (!global.atob) {
-      global.atob = (b64: string) => Buffer.from(b64, 'base64').toString('binary');
+      global.atob = (b64: string): string => Buffer.from(b64, 'base64').toString('binary');
     }
   });
 

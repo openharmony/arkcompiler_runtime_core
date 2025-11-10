@@ -19,7 +19,7 @@ import styles from './styles.module.scss';
 import {useTheme} from '../../components/theme/ThemeContext';
 import {useDispatch, useSelector} from 'react-redux';
 import {selectSyntax} from '../../store/selectors/syntax';
-import {setCodeAction} from '../../store/actions/code';
+import {setCodeAction, flushPendingCodeUpdate} from '../../store/actions/code';
 import {AppDispatch} from '../../store';
 import {selectCode} from '../../store/selectors/code';
 import debounce from 'lodash.debounce';
@@ -114,6 +114,9 @@ const ArkTSEditor: React.FC = () => {
     const hasCancel = (fn: unknown): fn is { cancel: () => void } =>
         !!fn && typeof (fn as { cancel?: unknown }).cancel === 'function';
 
+    const hasFlush = (fn: unknown): fn is { flush: () => void } =>
+        !!fn && typeof (fn as { flush?: unknown }).flush === 'function';
+
     const debouncedDispatchRef = useRef<ReturnType<typeof debounce>>(
         debounce((value: string) => {
           dispatch(setCodeAction(value));
@@ -121,7 +124,17 @@ const ArkTSEditor: React.FC = () => {
     );
 
     useEffect(() => {
+        const handleFlush = (): void => {
+            const d = debouncedDispatchRef.current;
+            if (hasFlush(d)) {
+                d.flush();
+            }
+        };
+
+        window.addEventListener('flushPendingCodeUpdate', handleFlush);
+
         return () => {
+            window.removeEventListener('flushPendingCodeUpdate', handleFlush);
             const d = debouncedDispatchRef.current;
             if (hasCancel(d)) {
                 d.cancel();

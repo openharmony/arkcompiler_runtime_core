@@ -104,7 +104,7 @@ const collectHighlights = (str?: string): HighlightItem[] => {
     const loc = r`\[(?<file>[^\[\]]+?):(?<line>\d+):(?<col>\d+)\]`;
     const shortid = r`(?:[A-Za-z]+\d+)`
 
-    const re_str = r`(?:${loc}\s*)(?<type>${diag_type})\s*(?<shortid>${shortid})\s*:\s*(?<msg>[\s\S]*?)`;
+    const re_str = r`(?:${loc}\s*)(?<type>${diag_type})\s*(?<shortid>${shortid})\s*:\s*(?<msg>.*?)(?<newline>\n|$)`;
     const re = new RegExp(re_str, "g");
 
     const out: HighlightItem[] = [];
@@ -128,12 +128,12 @@ const collectHighlights = (str?: string): HighlightItem[] => {
         if (start > last) {
             pushPlainSegments(str.slice(last, start));
         }
-        const { type, msg, file, line, col } = (m.groups ?? {}) as {
-            type?: string; msg?: string; file?: string; line?: string; col?: string;
+        const { type, msg, file, line, col, shortid, newline } = (m.groups ?? {}) as {
+            type?: string; msg?: string; file?: string; line?: string; col?: string; shortid?: string; newline?: string;
         };
 
         out.push({
-            message: `${type}: ${(msg ?? '').trim()} [${file ?? ''}:${line ?? ''}:${col ?? ''}]`,
+            message: `${type} ${shortid ?? ''}: ${(msg ?? '').trim()} [${file ?? ''}:${line ?? ''}:${col ?? ''}]${newline ?? ''}`,
             line: line ? Number(line) : undefined,
             column: col ? Number(col) : undefined,
             type,
