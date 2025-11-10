@@ -88,7 +88,7 @@ class VMBComparison(Jsonable):
             return 0
         log.warning('Some tests have perfomance degradation')
         for r in self._perf_regressions:
-            print(f'{r[0]:<{self._name_len}} {r[1]}')
+            print(f'{r[0]:<{self._name_len}} {r[1]}', file=sys.stderr)
         return 1
 
     def compare_one_result(self, test: str, t1: TestResult, t2: TestResult,
