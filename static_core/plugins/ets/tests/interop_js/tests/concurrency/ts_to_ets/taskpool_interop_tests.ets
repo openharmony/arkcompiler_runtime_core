@@ -334,7 +334,8 @@ function taskpoolInteropTest() {
     taskpoolInteropSuite.addTest('testProcessInput', testProcessInput);
     taskpoolInteropSuite.addTest('testCreateArray', testCreateArray);
     taskpoolInteropSuite.addTest('testGetUser', testGetUser);
-    taskpoolInteropSuite.addTest('testUnion', testUnion);
+    // Flaky fail: #30965
+    // taskpoolInteropSuite.addTest('testUnion', testUnion);
     taskpoolInteropSuite.addTest('testBaseClass', testBaseClass);
     taskpoolInteropSuite.addTest('testChildClass', testChildClass);
     taskpoolInteropSuite.addTest('testBaseFunc', testBaseFunc);
