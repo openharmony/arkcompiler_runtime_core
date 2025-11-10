@@ -29,8 +29,6 @@ class A implements I {
   a: {{c}}
 }
 
-class B {}
-
 let a: A = new A()
 arktest.assertNE(a.a, undefined)
 

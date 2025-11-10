@@ -18,6 +18,23 @@ desc: Declaring interface property
 tags: [compile-only]
 ---*/
 
-interface I {
+interface I1 {
     text: string;
+}
+
+interface I2 {
+    get text(): string;
+    set text(s: string);
+}
+
+interface I3 {
+    get text(): string;
+}
+
+interface I4 {
+    readonly text: string;
+}
+
+interface I5 {
+    text?: string;
 }

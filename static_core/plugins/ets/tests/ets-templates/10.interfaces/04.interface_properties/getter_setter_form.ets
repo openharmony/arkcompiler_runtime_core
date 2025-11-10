@@ -15,23 +15,22 @@ limitations under the License.
 
 /*---
 desc: Implementing getter from interface
-tags: [negative, compile-only]
 ---*/
 
 interface I {
-    get text()
+    get text(): string
     set text(s: string)
 }
 
 class B implements I {
-    private text : string = "";
+    _text: string = ""
 
     get text(): string {
-        return this.text;
+        return this._text;
     }
 
     set text(s: string) {
-        this.text = s;
+        this._text = s;
     }
 }
 
