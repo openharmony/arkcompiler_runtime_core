@@ -121,6 +121,7 @@ void GCTriggerHeap::FinishPostponeGCIfNeeded(GC *gc)
 {
     if (gc->IsPostponeEnabled() && ++gcPostponeCount_ == POSTPONE_GC_LIMIT) {
         gc->PostponeGCEnd();
+        gcPostponeCount_ = 0;
     }
 }
 
