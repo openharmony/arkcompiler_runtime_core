@@ -49,7 +49,10 @@ bool LLVMIrConstructor::EmitArrayCopyTo(Inst *inst)
 
 bool LLVMIrConstructor::EmitStdStringSubstring(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED, 3U);
+    auto entrypointId = GetGraph()->GetRuntime()->IsUseAllStrings()
+                            ? RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_ALL_STRINGS_COMPRESSED
+                            : RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED;
+    return EmitFastPath(inst, entrypointId, 3U);
 }
 
 bool LLVMIrConstructor::EmitStringBuilderAppendBool(Inst *inst)

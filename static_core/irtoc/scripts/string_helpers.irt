@@ -344,6 +344,38 @@ macro(:allocate_tree_string_tlab) do |tree_string_klass|
   _allocated_string := _start
 end
 
+macro(:allocate_sliced_string_tlab) do |sliced_string_klass|
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # Add sizeof(String) and do align
+  _size := Cast(Constants::SLICED_STRING_ALIGNED_OBJ_SIZE).word
+  _size := AndI(_size).Imm(Constants::ALIGNMENT_MASK).word
+  # Load pointer to the TLAB from TLS
+  _tlab := LoadI(%tr).Imm(Constants::TLAB_OFFSET).ptr
+  # Load pointer to the start address of free memory in the TLAB
+  _start := LoadI(_tlab).Imm(Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
+  # Load pointer to the end address of free memory in the TLAB
+  _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
+  # Check if there is enough space
+  If(Sub(_end, _start).word, _size).B.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+  Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
+  if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
+    call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+  end
+  # Store class of the object
+  store_class(_start, sliced_string_klass)
+  # Update the TLAB state
+  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).ptr
+  # Return a pointer to the newly allocated string
+  _allocated_string := _start
+end
+
 # Try to allocate String in TLAB.
 # The result is either a pointer to a new string or null if there is no enough space in TLAB.
 # this is a version that does not do allocation tracking due to the bug #24977
@@ -965,132 +997,6 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateCreateStringFromZeroBasedCharArrayTlab
-
-
-def GenerateSubstringFromStringTlab(string_compression_enabled)
-  suffix = (string_compression_enabled ? "Compressed" : "")
-  available_regs = $panda_mask
-  function("SubStringFromStringTlab#{suffix}".to_sym,
-           params: {str: 'ref', begin_index: 'i32', end_index: 'i32'},
-           regmap: $full_regmap,
-           regalloc_set: available_regs,
-           mode: [:FastPath]) {
-
-    if Options.arch == :arm32
-      Intrinsic(:UNREACHABLE).Terminator.void
-      ReturnVoid().void
-      next
-    end
-
-    check_not_tree_string_type(str) if defines.DEBUG
-    # it still can be slice
-    check_string_type(str)
-
-    # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
-    length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-    if string_compression_enabled
-      length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
-    else
-      length := length_packed
-    end
-
-    # If begin_index < 0, then it is assumed to be equal to zero
-    If(begin_index, Cast(0).i32).LT.Unlikely.b {
-      bx1 := Cast(0).i32
-    }
-    bx2 := Phi(begin_index, bx1).u32
-    # If end_index < 0, then it is assumed to be equal to zero
-    If(end_index, Cast(0).i32).LT.Unlikely.b {
-      ex1 := Cast(0).i32
-    }
-    ex2 := Phi(end_index, ex1).u32
-    # If begin_index > str.length(), then make it equal to str.length()
-    If(bx2, length).A.Unlikely.b {
-      bx3 := length
-    }
-    bx4 := Phi(bx2, bx3).u32
-    # If end_index > str.length(), then make it equal to str.length()
-    If(ex2, length).A.Unlikely.b {
-      ex3 := length
-    }
-    ex4 := Phi(ex2, ex3).u32
-    # If begin_index > end_index, then swap them.
-    If(bx4, ex4).GT.Unlikely.b {
-      bx5 := ex4
-      ex5 := bx4
-    }
-    bx6 := Phi(bx4, bx5).u32
-    ex6 := Phi(ex4, ex5).u32
-
-    If(bx6, 0).EQ.Likely.b {
-      If(ex6, length).EQ.Unlikely.b {
-        Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
-      }
-    }
-
-    if string_compression_enabled
-      not_compressed := AndI(length_packed).Imm(1).u32
-      offset := Shl(bx6, not_compressed).u32
-    else
-      offset := ShlI(bx6).Imm(1).u32
-    end
-
-    src_str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
-    src_str_data := Add(src_str_data, Cast(offset).u64).ptr
-
-    klass := load_class(str)
-    char_count := Sub(ex6, bx6).u32
-
-    # Allocate a new string
-    if string_compression_enabled
-      If(not_compressed, 1).EQ.Unlikely.b {
-        compressable := is_array_of_compressable_chars(src_str_data, Cast(char_count).u64)
-        If(compressable, 1).EQ.Likely.b {
-          data_size1 := Cast(char_count).word
-        } Else {
-          data_size2 := Cast(ShlI(char_count).Imm(1).u32).word
-        }
-        data_size := Phi(data_size1, data_size2).word
-        new_str := allocate_string_tlab(klass, data_size)
-        new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
-        If(compressable, 1).EQ.Likely.b {
-          compress_u16_to_u8_chars(src_str_data, new_str_data, Cast(char_count).u64)
-          StoreI(new_str, ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
-        } Else {
-          copy_u16_chars(src_str_data, new_str_data, Cast(char_count).u64)
-          StoreI(new_str, OrI(ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
-        }
-        # String is supposed to be a constant object, so all its data should be visible by all threads
-        Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
-        Return(new_str).ptr
-      } Else {
-        # Source string is already compressed
-        new_str := allocate_string_tlab(klass, Cast(char_count).word)
-        new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
-        copy_u8_chars(src_str_data, new_str_data, Cast(char_count).u64)
-        StoreI(new_str, ShlI(char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
-        # String is supposed to be a constant object, so all its data should be visible by all threads
-        Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
-        Return(new_str).ptr
-      }
-    else
-      data_size := Cast(ShlI(char_count).Imm(1).u32).word
-      new_str := allocate_string_tlab(klass, data_size)
-      new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
-      copy_u16_chars(src_str_data, new_str_data, Cast(char_count).u64)
-      StoreI(new_str, char_count).Imm(Constants::STRING_LENGTH_OFFSET).u32
-      # String is supposed to be a constant object, so all its data should be visible by all threads
-      Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
-      Return(new_str).ptr
-    end
-
-  Label(:SlowPathEntrypoint)
-    entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
-    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
-  }
-end  # def GenerateSubstringFromStringTlab
-
 
 def GenerateStringGetCharsTlab(string_compression_enabled)
   suffix = (string_compression_enabled ? "Compressed" : "")

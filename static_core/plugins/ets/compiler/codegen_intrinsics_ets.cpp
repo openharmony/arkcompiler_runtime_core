@@ -629,6 +629,25 @@ void Codegen::CreateStringCharAt(IntrinsicInst *inst, Reg dst, SRCREGS src)
     CallFastPath(inst, EntrypointId::STRING_CHAR_AT, dst, {}, src[0], src[1U]);
 }
 
+static RuntimeInterface::EntrypointId SubStringFromStringEntrypoint(RuntimeInterface *runtime)
+{
+    if (runtime->IsUseAllStrings()) {
+        return runtime->IsCompressedStringsEnabled()
+                   ? RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_ALL_STRINGS_COMPRESSED
+                   : RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_ALL_STRINGS;
+    }
+
+    return runtime->IsCompressedStringsEnabled()
+               ? RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED
+               : RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB;
+}
+
+void Codegen::CreateStringSubstringTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto entrypointId = SubStringFromStringEntrypoint(GetRuntime());
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
+}
+
 void Codegen::CreateInt8ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
