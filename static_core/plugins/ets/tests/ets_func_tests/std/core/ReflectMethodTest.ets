@@ -473,6 +473,14 @@ class DerivedInvokeTester extends BaseInvokeTester {
     }
 }
 
+class PrivateCtor {
+    private constructor() {}
+}
+
+class ProtectedCtor {
+    protected constructor() {}
+}
+
 function invokeByBaseTester(tester: BaseInvokeTester) {
     let testerType = Class.of(tester)
 
@@ -883,6 +891,16 @@ function testReturn() {
     arktest.assertEQ(constructorOfClass.getReturnType(), Class.PRIMITIVE_VOID)
 }
 
+function testNonPublicCtor(): void {
+    arktest.expectError(() => {
+        const instance = Class.from<PrivateCtor>().createInstance()
+    }, "No default public constructor in LReflectMethodTest/PrivateCtor;")
+
+    arktest.expectError(() => {
+        const instance = Class.from<ProtectedCtor>().createInstance()
+    }, "No default public constructor in LReflectMethodTest/ProtectedCtor;")
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Reflect Method tests')
     suite.addTest('Test Reflect Method base APIs', testReflectMethod)
@@ -893,5 +911,6 @@ function main() {
     suite.addTest('Test Reflect Constructor.equals()', testConstructorEquals)
     suite.addTest('Test Reflect overridden InstanceMethod.equals()', testOverriddenInstanceMethodEquals)
     suite.addTest('Test Reflect Method.invoke() and Constructor.createInstance()', testReflectMethodInvoke)
+    suite.addTest('Test Constructor.createInstance() for non-public constructor', testNonPublicCtor)
     return suite.run()
 }

@@ -88,6 +88,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_Field.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_internals.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Job.cpp

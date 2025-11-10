@@ -58,18 +58,17 @@ function getClassInstanceFieldsAll(cls: Class): Array<reflect.InstanceField> {
         cls = cls.getSuper()!
     }
 
-    const allFields = new Map<string, reflect.InstanceField>()
+    const allFields = new Array<reflect.InstanceField>()
     const baseClassesCount = baseClasses.length
     for (let i = baseClassesCount - 1; i >= 0; i--) {
         const currentCls = baseClasses[i]
         const clsFields = currentCls.getInstanceFields()
         for (const field of clsFields) {
-            const qfName = field.getOwner().getName() + "::" + field.getName()
-            allFields.set(qfName, field)
+            allFields.push(field)
         }
     }
 
-    return Array.from(allFields.values())
+    return allFields
 }
 
 class JSONAPI {
@@ -660,7 +659,7 @@ export class JSON {
         } else if (type.isUnion()) {
             // NOTE(lyupaanastasia) parse union #27136
             throw new Error("UnionType is not supported yet")
-        } else if (type === TypeColor.STRING_CLASS || TypeColor.isPrimitiveType(type) || type === TypeColor.NULL_CLASS) {
+        } else if (type === TypeColor.STRING_CLASS || Types.isPrimitiveType(type) || type === TypeColor.NULL_CLASS) {
             ok = true
         } else if (type.isSubtypeOf(TypeColor.OBJECT_CLASS)) {
             ok &= JSON.classHasDefaultCtor(type)
@@ -770,10 +769,6 @@ class JSONWriter {
     private readonly path = new Set<Object>()
     private buffer = new StringBuilder()
 
-    private static asFixedArray<E>(obj: object): FixedArray<E> {
-        return obj as FixedArray<E>
-    }
-
     constructor(replacer?: (key: String, value: Any) => Any, space?: String) {
         this.replacer = replacer
         this.fieldsFilter = []
@@ -839,7 +834,7 @@ class JSONWriter {
             if (objCls === JSONWriter.STD_CORE_INTEROP_JSVALUE_CLASS) {
                 this.buffer.append(JSON.stringify(obj as JSValue))
             } else if (objCls.isFixedArray()) {
-                this.writeArrayValue(JSONWriter.asFixedArray(obj))
+                this.writeArrayValue(Types.asFixedArray(obj))
             } else {
                 this.writeClassValue(obj, objCls)
             }
@@ -1529,14 +1524,6 @@ class TypeColor {
 
     readonly static STRING_CLASS = Class.of("")
 
-    private readonly static BOXED_DOUBLE = Class.from<Double>()
-    private readonly static BOXED_BOOLEAN = Class.from<Boolean>()
-    private readonly static BOXED_INT = Class.from<Int>()
-    private readonly static BOXED_LONG = Class.from<Long>()
-    private readonly static BOXED_BYTE = Class.from<Byte>()
-    private readonly static BOXED_SHORT = Class.from<Short>()
-    private readonly static BOXED_FLOAT = Class.from<Float>()
-
     readonly static OBJECT_CLASS = Class.from<Object>()
     readonly static NULL_CLASS = Class.of(null)
 
@@ -1547,43 +1534,6 @@ class TypeColor {
         this.color = color
     }
 
-    static isDoubleType(type: Class): boolean {
-        return type === TypeColor.BOXED_DOUBLE || type === Class.PRIMITIVE_DOUBLE
-    }
-
-    static isBooleanType(type: Class): boolean {
-        return type === TypeColor.BOXED_BOOLEAN || type === Class.PRIMITIVE_BOOLEAN
-    }
-
-    static isIntType(type: Class): boolean {
-        return type === TypeColor.BOXED_INT || type === Class.PRIMITIVE_INT
-    }
-
-    static isLongType(type: Class): boolean {
-        return type === TypeColor.BOXED_LONG || type === Class.PRIMITIVE_LONG
-    }
-
-    static isByteType(type: Class): boolean {
-        return type === TypeColor.BOXED_BYTE || type === Class.PRIMITIVE_BYTE
-    }
-
-    static isShortType(type: Class): boolean {
-        return type === TypeColor.BOXED_SHORT || type === Class.PRIMITIVE_SHORT
-    }
-
-    static isFloatType(type: Class): boolean {
-        return type === TypeColor.BOXED_FLOAT || type === Class.PRIMITIVE_FLOAT
-    }
-
-    static isPrimitiveType(type: Class): boolean {
-        return TypeColor.isDoubleType(type)
-            || TypeColor.isBooleanType(type)
-            || TypeColor.isIntType(type)
-            || TypeColor.isLongType(type)
-            || TypeColor.isByteType(type)
-            || TypeColor.isShortType(type)
-            || TypeColor.isFloatType(type)
-    }
 }
 
 class Position {
@@ -1838,6 +1788,8 @@ export class JSONParser {
     private static readonly ESCAPED_CHARS: FixedArray<char> = [c'\"', c'\\', c'\/', c'\b', c'\f', c'\n', c'\r', c'\t']
 }
 
+type Types = reflect.internals.Types
+
 class JSONValueParser {
     private reviver: ((key: string, value: Any) => Any) | undefined
     private bigIntMode: int
@@ -1852,17 +1804,17 @@ class JSONValueParser {
     private createNumber(value: JSONNumber, type: Class): Any {
         if (type === BigIntType && (this.bigIntMode === 2 || (!Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new BigInt(value.bigintValue)
-        } else if (TypeColor.isDoubleType(type) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+        } else if (Types.isDoubleType(type) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value)
-        } else if (TypeColor.isIntType(type) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+        } else if (Types.isIntType(type) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value).toInt()
-        } else if (TypeColor.isLongType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if (Types.isLongType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Long().createFromJSONValue(value)
-        } else if (TypeColor.isShortType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if (Types.isShortType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Short().createFromJSONValue(value)
-        } else if (TypeColor.isFloatType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if (Types.isFloatType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Float().createFromJSONValue(value)
-        } else if (TypeColor.isByteType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if (Types.isByteType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Byte().createFromJSONValue(value)
         } else {
             throw new Error(type.getName() + " is expected, but get " + Class.of(value.value).getName() + " with bigIntMode=" + this.bigIntMode)
@@ -1877,19 +1829,19 @@ class JSONValueParser {
             return this.parseArray(value as JSONArray, type)
         } else if (
                 value instanceof JSONNumber && (
-                    TypeColor.isDoubleType(type) ||
+                    Types.isDoubleType(type) ||
                     type === BigIntType ||
-                    TypeColor.isIntType(type) ||
-                    TypeColor.isLongType(type) ||
-                    TypeColor.isByteType(type) ||
-                    TypeColor.isShortType(type) ||
-                    TypeColor.isFloatType(type))) {
+                    Types.isIntType(type) ||
+                    Types.isLongType(type) ||
+                    Types.isByteType(type) ||
+                    Types.isShortType(type) ||
+                    Types.isFloatType(type))) {
             return this.createNumber(value as JSONNumber, type)
         } else if (value instanceof JSONString && type === TypeColor.STRING_CLASS) {
             return (value as JSONString).value
-        } else if (value instanceof JSONTrue && TypeColor.isBooleanType(type)) {
+        } else if (value instanceof JSONTrue && Types.isBooleanType(type)) {
             return new Boolean(true)
-        } else if (value instanceof JSONFalse && TypeColor.isBooleanType(type)) {
+        } else if (value instanceof JSONFalse && Types.isBooleanType(type)) {
             return new Boolean(false)
         } else if (value instanceof JSONNull && type === TypeColor.NULL_CLASS) {
             return null
@@ -1980,9 +1932,9 @@ class JSONValueParser {
     }
 
     private parseArray(jVal: JSONArray, aType: Class): Object | null {
-        let len = jVal.values.length
-        // NOTE(cheezzario) Class API lacks array creation facility
-        let arr = ArrayType.getInstance(aType).make(len.toInt()) as FixedArray<Any>
+        const len = jVal.values.length
+        const componentType = aType.getFixedArrayComponentType()!
+        const arr = reflect.internals.createFixedArray(componentType, len) as FixedArray<Any>
 
         let setArrayElementFn = (a: FixedArray<Any>, i: int, v: Any) => { a[i] = v }
 

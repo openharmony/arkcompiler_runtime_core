@@ -604,14 +604,6 @@ export abstract class Type extends Object {
     }
 }
 
-export final class Types {
-    private constructor() {}
-
-    public static identity_cast<T>(array: ArrayLike<T>): ArrayLike<T> {
-        return array
-    }
-}
-
 /**
  * Represents null type
  */

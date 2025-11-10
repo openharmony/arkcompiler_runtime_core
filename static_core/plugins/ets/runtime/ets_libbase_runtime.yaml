@@ -7032,6 +7032,20 @@ intrinsics:
         - std.core.Object
     impl: ark::ets::intrinsics::ReflectFieldGetValueInternal
 
+##############################
+# std.core.reflect.internals #
+##############################
+
+  - name: StdCoreReflectInternalsCreateFixedArray
+    space: ets
+    class_name: std.core.reflect.internals
+    method_name: createFixedArray
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Class, i32 ]
+    impl: ark::ets::intrinsics::StdCoreReflectInternalsCreateFixedArray
+
 ##################
 # std.core.Class #
 ##################

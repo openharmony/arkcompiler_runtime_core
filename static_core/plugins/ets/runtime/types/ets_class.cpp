@@ -879,8 +879,8 @@ EtsObject *EtsClass::CreateInstance()
     }
 
     EtsMethod *ctor = GetDirectMethod(panda_file_items::CTOR.data(), ":V");
-    if (UNLIKELY(ctor == nullptr)) {
-        throwCreateInstanceErr("No default constructor in");
+    if (UNLIKELY(ctor == nullptr) || !ctor->IsPublic()) {
+        throwCreateInstanceErr("No default public constructor in");
         return nullptr;
     }
 

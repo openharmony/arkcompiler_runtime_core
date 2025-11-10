@@ -176,6 +176,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_Method.cpp",
   "runtime/intrinsics/std_core_reflect_Method.cpp",
   "runtime/intrinsics/std_core_reflect_Field.cpp",
+  "runtime/intrinsics/std_core_reflect_internals.cpp",
   "runtime/intrinsics/std_core_Value.cpp",
   "runtime/intrinsics/std_core_gc.cpp",
   "runtime/intrinsics/std_core_finalization_registry.cpp",

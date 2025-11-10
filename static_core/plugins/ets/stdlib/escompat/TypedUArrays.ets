@@ -166,7 +166,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     public constructor(elements: Iterable<Number>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            const arr = reflect.internals.Types.identity_cast<Number>(items as ArrayLike<Number>)
             this.byteLengthInt = arr.length * Uint8ClampedArray.BYTES_PER_ELEMENT
             this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLengthInt)
@@ -1650,7 +1650,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(elements: Iterable<Number>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            const arr = reflect.internals.Types.identity_cast<Number>(items as ArrayLike<Number>)
             this.byteLengthInt = arr.length * Uint8Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLengthInt)
@@ -3139,7 +3139,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(elements: Iterable<Number>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            const arr = reflect.internals.Types.identity_cast<Number>(items as ArrayLike<Number>)
             this.byteLengthInt = arr.length * Uint16Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLengthInt)
@@ -4629,7 +4629,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(elements: Iterable<Number>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            const arr = reflect.internals.Types.identity_cast<Number>(items as ArrayLike<Number>)
             this.byteLengthInt = arr.length * Uint32Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLengthInt)
@@ -6152,7 +6152,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public constructor(elements: Iterable<BigInt>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<BigInt>(items as ArrayLike<BigInt>)
+            const arr = reflect.internals.Types.identity_cast<BigInt>(items as ArrayLike<BigInt>)
             this.byteLengthInt = arr.length * BigUint64Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLengthInt)
