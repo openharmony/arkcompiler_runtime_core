@@ -46,6 +46,7 @@ If the during execution job function throws error this error will be propagated 
 In general Job class have these public API:
 
 .. code-block:: typescript
+    :donotcompile:
 
     class Job<T> {
       constructor(v: T) {
@@ -80,6 +81,7 @@ Concurrency Launch
 For creation of the coroutine you should use standard library function ``launch`` with this signature(Note: final interface is still will be defined, current is just to demonstrate semantic):
 
 .. code-block:: typescript
+    :donotcompile:
 
     function launch<R, F extends CoroFun<never, R>>() {
       coroFun: F,
@@ -151,6 +153,7 @@ The following methods are used as follows:
         Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
 
 .. code-block:: typescript
+    :donotcompile:
 
         Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
 
@@ -159,6 +162,7 @@ The following methods are used as follows:
 .. code-block-meta:
 
 .. code-block:: typescript
+    :donotcompile:
 
         Promise<U>::catch<U = never>(onRejected?: (error: Any) => U|PromiseLike<U> throws): Promise<T|U>
 
@@ -171,6 +175,7 @@ The following methods are used as follows:
    call
 
 .. code-block:: typescript
+    :donotcompile:
 
         finally(onFinally?: () => void throws): Promise<T>
 
@@ -257,6 +262,7 @@ In Java language we have `synchronized` methods for guarantee that only one thre
 
 .. code-block:: ts
     :linenos:
+    :donotcompile:
 
     class AsyncLock {
       async(lambda:any) {
@@ -270,6 +276,7 @@ The semantic of such lock should be something like this:
 
 .. code-block:: c++
     :linenos:
+    :donotcompile:
 
     void Lock(ObjectHeader* obj) {
         while (1) {
@@ -296,6 +303,7 @@ Example with ``AsyncLock`` usage:
 
 .. code-block:: javascript
     :linenos:
+    :donotcompile:
 
     import {AsyncLock, SyncMode} from '@ohos.sync';
 

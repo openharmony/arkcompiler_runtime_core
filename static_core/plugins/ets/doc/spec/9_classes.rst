@@ -896,7 +896,7 @@ A class can contain declarations of the following members:
 -  Constructors,
 -  Method overloads (see :ref:`Explicit Class Method Overload`),
 -  Constructor overloads (see :ref:`Explicit Constructor Overload`), and
--  Single static block for initialization (see :ref:`Initialization Sequence`).
+-  Single static block for initialization (see :ref:`Static Initialization`).
 
 The syntax is presented below:
 
@@ -1482,7 +1482,7 @@ initializer (see below) if present. Otherwise, a field can be initialized as
 follows:
 
 - Static field, by a static initializer block (see
-  :ref:`Initialization Sequence`), or
+  :ref:`Static Initialization`), or
 - Instance field, by a class constructor (see
   :ref:`Constructor Declaration`).
 

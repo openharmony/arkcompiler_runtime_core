@@ -16,3 +16,4 @@ sphinx
 sphinx-markdown-builder==0.6.0
 sphinxcontrib.plantuml==0.31
 markdown
+plantuml

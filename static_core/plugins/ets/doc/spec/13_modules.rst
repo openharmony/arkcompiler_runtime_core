@@ -132,7 +132,7 @@ The syntax of *namespace declarations* is presented below:
 
 Namespaces like modules can have top-level statements which act as namespace
 initializers, and are called only if at least one of the exported namespace
-members is used in the program (see :ref:`Initialization Sequence` for detail).
+members is used in the program (see :ref:`Static Initialization` for detail).
 
 The usage of namespaces is represented in the example below:
 

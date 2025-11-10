@@ -2523,7 +2523,7 @@ expression* of a static field in a class is as follows:
    be changed later.
 
 -  ``value`` if the field is ``readonly``, except where *field access* occurs
-   in a initializer block (see :ref:`Initialization Sequence`).
+   in a initializer block (see :ref:`Static Initialization`).
 
 .. index::
    access

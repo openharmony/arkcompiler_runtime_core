@@ -148,7 +148,7 @@ Ensuring Module Initialization
 The |LANG| standard library (see :ref:`Standard Library`) provides a top-level
 function ``initModule()`` with one parameter of ``string`` type. A call to this
 function ensures that the module referred by the argument is available, and
-that its initialization (see :ref:`Initialization Sequence`) is performed. An
+that its initialization (see :ref:`Static Initialization`) is performed. An
 argument must be a string literal. Otherwise, a :index:`compile-time error`
 occurs.
 

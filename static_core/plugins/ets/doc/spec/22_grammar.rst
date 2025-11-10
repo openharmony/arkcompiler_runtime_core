@@ -403,8 +403,9 @@ Grammar Summary
         expression '||' expression
         ;
 
-    assignmentExpression:
-        lhsExpression assignmentOperator rhsExpression
+    assignmentExpression
+        : lhsExpression assignmentOperator rhsExpression
+        | destructuringAssignment
         ;
 
     assignmentOperator
@@ -983,7 +984,7 @@ Grammar Summary
 
     ambientAccessorDeclaration:
         ( 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' requiredParameter ')' 
+        | 'set' identifier '(' requiredParameter ')'
         )
         ;
 

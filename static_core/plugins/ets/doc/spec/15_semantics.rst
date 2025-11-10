@@ -3401,9 +3401,8 @@ for the entity name. The order of an *overload set* is determined as follows:
 #. If an overload set is a combination of implicitly and explicitly overloaded
    entities, then:
 
-   - An *implicit overload* name coinciding with an *explicit overload* name
-     must be included in the *explicit overload* list. Otherwise, a
-     :index:`compile-time` occurs.
+   - An *explicit overload* list must contain the name of an implicitly
+     overloaded entity. Otherwise, a :index:`compile-time error` occurs.
 
    - The order is based on the order of the *explicit overload* list as an
      *explicit overload* has a higher priority.
@@ -3450,7 +3449,7 @@ by *overload resolution*:
 
     function fooX(x?: number) {}
 
-    overload foo {fooN, foo, fooX}  // implicitly overloaded 'foo' must be in the set
+    overload foo {fooN, foo, fooX}
     // The overload set for 'foo' is {fooN, foo#1, foo#2, fooX}
 
     overload bar {fooX, foo}
@@ -3573,9 +3572,9 @@ Combining implicit and explicit overloads is represented in the example below:
 
     interface J2 extends I {
         foo(b: boolean) // #2
-        overload foo {fooOpt, foo}
-        /* The overload set is {fooOpt, foo#2, foo#1}
-           Formed as: {fooOpt, foo#2} append set(A)={fooOpt, foo#1}
+        overload foo {foo, fooOpt}
+        /* The overload set is {foo#2, fooOpt, foo#1}
+           Formed as: {foo#2, fooOpt} append set(A)={fooOpt, foo#1}
            Second occurrence of fooOpt is skipped.
         */
     }
@@ -3707,10 +3706,11 @@ the example below:
    :linenos:
 
     interface I{
-        foo(x: number) // #1
+        foo(x: number) {} // #1
     }
     class C implement I{
         foo(x: A)      // #2
+        // Note: foo in I has default body, no need to implement it in C
         // The overload set is {foo#2, foo#1}
     }
     class D extends C {
@@ -4095,19 +4095,19 @@ value is produced by a :ref:`Cast Expression`.
 
 |
 
-.. _Initialization Sequence:
+.. _Static Initialization:
 
-Initialization Sequence
-***********************
+Static Initialization
+*********************
 
 .. meta:
     frontend_status: Done
 
-*Initialization sequence* is a set of statements executed once for each class
-(see :ref:`Classes`), namespace (see :ref:`Namespace Declarations`), or
+*Static initialization* is a routine performed once for each class (see
+:ref:`Classes`), namespace (see :ref:`Namespace Declarations`), or
 module (see :ref:`Namespaces and Modules`).
 
-*Initialization sequence* presumes executing the following:
+*Static initialization* presumes executing the following:
 
 - *Initializers* of *variables* or *static fields*;
 
@@ -4116,6 +4116,7 @@ module (see :ref:`Namespaces and Modules`).
 - Code inside a *static block* for classes.
 
 .. index::
+   static initialization
    routine
    class
    namespace
@@ -4127,7 +4128,7 @@ module (see :ref:`Namespaces and Modules`).
    top-level statement
    static block
 
-*Initialization sequence* is performed before one of the following operations is
+*Static initialization* is performed before one of the following operations is
 executed for the first time:
 
 - Calling a class static method (see :ref:`Method Call Expression`),
@@ -4138,28 +4139,28 @@ executed for the first time:
 - Calling a function or accessing a variable of a namespace or a module.
 
 .. note::
-   None of the operations above invokes an *initialization sequence* recursively
-   if the *initialization sequence* of the same entity is not complete.
+   None of the operations above invokes an *static initialization* recursively
+   if the *static initialization* of the same entity is not complete.
 
-   The code of a top-level statement in a namespace is executed only if
-   namespace members are used in the program (see :ref:`Namespace Declarations`
-   for an an example).
+   For namespaces, the code in a static block is executed only when
+   namespace members are used in the program (an example is provided in
+   :ref:`Namespace Declarations`).
 
-An initialization is not complete if the execution of an *initialization
-sequence* is terminated due to an exception thrown. A repeated attempt to
-execute the *initialization sequence* can throw an exception again.
+An initialization is not complete if the execution of an *static
+initialization* is terminated due to an exception thrown. A repeated attempt to
+execute the *static initialization* can throw an exception again.
 
-If an *initialization sequence* invokes a concurrent execution (see
+If an *static initialization* invokes a concurrent execution (see
 :ref:`Coroutines (Experimental)`), then all *coroutines* that try to invoke it
 are synchronized. The synchronization is to ensure that the initialization
-is performed only once, and that the operations requiring the *initialization
-sequence* to be performed are executed after the initialization completes.
+is performed only once, and that the operations requiring the *static
+initialization* to be performed are executed after the initialization completes.
 
-If *initialization sequences* of two concurrently initialized classes are
+If *static initialization* routines of two concurrently initialized classes are
 circularly dependent, then a deadlock can occur.
 
 .. index::
-   initialization sequence
+   static initialization
    entity
    scope
    static field
@@ -4179,10 +4180,10 @@ circularly dependent, then a deadlock can occur.
 
 |
 
-.. _Initialization Sequence Safety:
+.. _Static Initialization Safety:
 
-Initialization Sequence Safety
-==============================
+Static Initialization Safety
+============================
 
 .. meta:
     frontend_status: Done
