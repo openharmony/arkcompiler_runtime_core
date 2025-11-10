@@ -41,9 +41,6 @@
 #26102 Readonly array assignment does not throw CTE
 03.types/16.literal_types/function_literal_type_7.ets
 
-#29681 union causes TypeError with literal type
-03.types/16.literal_types/infer_from_union2.ets
-
 #30677
 03.types/19.function_types/01.type_function/optional_type_params_0.ets
 03.types/19.function_types/01.type_function/optional_type_params_2.ets
