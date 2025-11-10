@@ -4208,9 +4208,9 @@ private:
     void LogInnerMessage(const CheckResult &elt)
     {
         if (elt.IsError()) {
-            LOG(ERROR, VERIFIER) << "Error: " << elt.msg << ". ";
+            LOG(ERROR, VERIFIER) << "Error: " << elt.msg;
         } else if (elt.IsWarning()) {
-            LOG(WARNING, VERIFIER) << "Warning: " << elt.msg << ". ";
+            LOG(WARNING, VERIFIER) << "Warning: " << elt.msg;
         }
     }
 

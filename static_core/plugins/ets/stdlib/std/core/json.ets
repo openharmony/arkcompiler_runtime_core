@@ -1116,6 +1116,7 @@ class JSONWriter {
         if (this.useFieldsFilter) {
             for (let fieldIdx = 0; fieldIdx < this.fieldsFilter.length; fieldIdx++) {
                 const fieldName = this.fieldsFilter[fieldIdx]
+                let writableFieldName = fieldName
                 const field = searchInstanceFieldInHierarchy(cls, fieldName)
                 if (field === undefined) {
                     continue
@@ -1130,18 +1131,19 @@ class JSONWriter {
                     if (searchInstanceFieldInHierarchy(cls, fieldRename) !== undefined) {
                         throw new Error("Cannot rename " + fieldRename + " in keys of " + cls.getName())
                     } else {
-                        field.name = fieldRename
+                        writableFieldName = fieldRename
                     }
-                    if (this.checkSameRename(field.getName(), writableFields)) {
-                        throw new Error("Cannot double rename " + field.getName() + " in keys of " + cls.getName())
+                    if (this.checkSameRename(writableFieldName, writableFields)) {
+                        throw new Error("Cannot double rename " + writableFieldName + " in keys of " + cls.getName())
                     }
                 }
 
-                const fieldNameValuePair: [string, Any] = [field.getName(), field.getValue(obj)]
+                const fieldNameValuePair: [string, Any] = [writableFieldName, field.getValue(obj)]
                 writableFields.push(fieldNameValuePair)
             }
         } else {
             for (const field of getClassInstanceFieldsAll(cls)) {
+                let writableFieldName = field.getName()
                 hasJsonIgnore = JSONAPI.getJSONStringifyIgnore(field);
                 if (hasJsonIgnore) {
                     continue
@@ -1152,14 +1154,14 @@ class JSONWriter {
                     if (searchInstanceFieldInHierarchy(field.getOwner(), fieldRename) !== undefined) {
                         throw new Error("Cannot rename " + fieldRename + " in keys of " + cls.getName())
                     } else {
-                        field.name = fieldRename
+                        writableFieldName = fieldRename
                     }
-                    if (this.checkSameRename(field.getName(), writableFields)) {
-                        throw new Error("Cannot double rename " + field.getName() + " in keys of " + cls.getName())
+                    if (this.checkSameRename(writableFieldName, writableFields)) {
+                        throw new Error("Cannot double rename " + writableFieldName + " in keys of " + cls.getName())
                     }
                 }
 
-                const fieldNameValuePair: [string, Any] = [field.getName(), field.getValue(obj)]
+                const fieldNameValuePair: [string, Any] = [writableFieldName, field.getValue(obj)]
                 if (fieldRename != undefined || index == -1) {
                     writableFields.push(fieldNameValuePair)
                 } else {
@@ -1580,8 +1582,6 @@ export class JSONParser {
     private escapeWhitespaces: boolean
     // TODO(ivan-tyulyandin): replace the hardcode with proper use of Array<T>/Map<T> in JSONValue inheritors
 
-    private static readonly SETTER_PREFIX = "<set>"
-
     constructor(json: String) {
         this.json = json
         this.escapeWhitespaces = true
@@ -1810,6 +1810,8 @@ class JSONValueParser {
     private reviver: ((key: string, value: Any) => Any) | undefined
     private bigIntMode: int
 
+    private static readonly SETTER_PREFIX = "<set>"
+
     constructor(reviver: ((key: string, value: Any) => Any) | undefined, bigIntMode: int) {
         this.reviver = reviver
         this.bigIntMode = bigIntMode
@@ -1914,8 +1916,8 @@ class JSONValueParser {
 
         for (const method of classType.getInstanceMethods()) {
             const methodName = method.getName()
-            if (methodName.startsWith(JSONParser.SETTER_PREFIX)) {
-                const propName = methodName.substring(JSONParser.SETTER_PREFIX.length)
+            if (methodName.startsWith(JSONValueParser.SETTER_PREFIX)) {
+                const propName = methodName.substring(JSONValueParser.SETTER_PREFIX.length)
                 const jsonFieldVal = jsonObjFields.get(propName)
                 if (jsonFieldVal !== undefined) {
                     const propType = method.getParameterType(0)!

@@ -136,6 +136,7 @@
   "plugins/ets/tests/ets_test_suite/functions/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_test_suite/object_literal/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_test_suite/unions/CMakeLists.txt": {"bc-40001": "*"},
+  "plugins/ets/tests/verifier-tests-ets/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_warnings_tests": "*",
   "plugins/ets/tests/integrational": "*",
   "plugins/ets/tests/interop_js/eacoro": "*",

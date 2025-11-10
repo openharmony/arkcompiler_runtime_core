@@ -23,7 +23,7 @@ enum JobStatus { RUNNING = 0, FINISHED = 1, FAILED = 2 }
  */
 export class Job<T> {
 
-    private constructor() {}
+    protected constructor() {}
 
 
     /**

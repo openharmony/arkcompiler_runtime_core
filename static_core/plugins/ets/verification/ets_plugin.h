@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,19 +27,11 @@ public:
     void DestroyManagedThread(ManagedThread *thr) const override;
     void TypeSystemSetup(TypeSystem *types) const override;
 
-    CheckResult const &CheckFieldAccessViolation([[maybe_unused]] Field const *field,
-                                                 [[maybe_unused]] Method const *from,
-                                                 [[maybe_unused]] TypeSystem *types) const override
-    {
-        return CheckResult::ok;
-    }
+    CheckResult const &CheckFieldAccessViolation(Field const *field, Method const *from,
+                                                 TypeSystem *types) const override;
 
-    CheckResult const &CheckMethodAccessViolation([[maybe_unused]] Method const *method,
-                                                  [[maybe_unused]] Method const *from,
-                                                  [[maybe_unused]] TypeSystem *types) const override
-    {
-        return CheckResult::ok;
-    }
+    CheckResult const &CheckMethodAccessViolation(Method const *method, Method const *from,
+                                                  TypeSystem *types) const override;
 
     CheckResult const &CheckClassAccessViolation([[maybe_unused]] Class const *method,
                                                  [[maybe_unused]] Method const *from,

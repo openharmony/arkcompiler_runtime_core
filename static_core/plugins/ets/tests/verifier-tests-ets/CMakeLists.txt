@@ -11,8 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-cases:
-  - { modifier: protected, constructor: '',                          tags: ''                       }
-  - { modifier: protected, constructor: 'constructor() {}',          tags: ''                       }
-  - { modifier: protected, constructor: 'constructor() { super() }', tags: ''                       }
+add_subdirectory(access_modifiers)
+
+add_custom_target(ets_verifier_tests)
+add_dependencies(ets_verifier_tests 
+    ets_verify_access_modifiers 
+    verifier
+)
