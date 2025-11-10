@@ -477,30 +477,7 @@ export namespace taskpool {
          * @see taskpool.SequenceRunner.execute
          * @see taskpool.AsyncRunner.execute
          */
-        getOnReceivePromise(p: Promise<Any>): Promise<Any> {
-            if (this.onReceiveCallback === undefined) {
-                return p;
-            }
-            return p.then<Any>((value: Any): Any => {
-                const argsArray: Array<FixedArray<Any>> = this.extractDataArgs();
-                argsArray.forEach((args: FixedArray<Any>) => {
-                    try {
-                        this.onReceiveCallback!.unsafeCall(...args);
-                    } catch(e) {}
-                });
-                return value;
-            });
-        }
-
-        /// @see taskpool.Task.getOnReceivePromise
-        extractDataArgs(): Array<FixedArray<Any>> {
-            ConcurrencyHelpers.mutexLock(this.dataMutex);
-            const argsArray: Array<FixedArray<Any>> = this.argsArray;
-            this.argsArray = new Array<FixedArray<Any>>();
-            ConcurrencyHelpers.mutexUnlock(this.dataMutex);
-            return argsArray;
-        }
-
+     
         /// trigger next runner task to execute
         tryTriggerRunner(): void {
             // handle sequenceRunner
@@ -563,7 +540,6 @@ export namespace taskpool {
 
         onReceiveCallback?: Function;
         dataMutex: Object = ConcurrencyHelpers.mutexCreate();
-        argsArray: Array<FixedArray<Any>> = new Array<FixedArray<Any>>();
 
         onEnqueueCallback?: CallbackFunction;
         onStartCallback?: CallbackFunction;
@@ -767,9 +743,7 @@ export namespace taskpool {
             if (InternalTask.of(task).onReceiveCallback === undefined) {
                 throw new Error(TASKPOOL_ERROR_CALLBACK_NOT_REGISTERED, "taskpool:: The callback is not registered on the host side");
             }
-            ConcurrencyHelpers.mutexLock(InternalTask.of(task).dataMutex);
-            InternalTask.of(task).argsArray.push(args);
-            ConcurrencyHelpers.mutexUnlock(InternalTask.of(task).dataMutex);
+            task.createPromise(InternalTask.of(task).onReceiveCallback!, ...args);
         }
 
         /**
@@ -819,6 +793,12 @@ export namespace taskpool {
             if (InternalTask.of(this).isSubmitted) {
                 throw new Error(TASKPOOL_ERROR_LISTENER_REGISTRATION, "taskpool:: The executed task does not support the registration of listeners.");
             }
+        }
+
+        private createPromise(callback : Function, ...args: FixedArray<Any> ) : Promise<void> {
+            return new Promise<void>((resolve) => {
+                    callback.unsafeCall(...args);
+          })
         }
 
         /**
@@ -990,10 +970,10 @@ export namespace taskpool {
                 const taskRunner = (value: Any): Any => {
                     return InternalTask.of(task).execute();
                 };
-                this.impl.seqPromise = InternalTask.of(task).getOnReceivePromise(this.impl.seqPromise.then<Any>(taskRunner, (error) => {
+                this.impl.seqPromise = this.impl.seqPromise.then<Any>(taskRunner, (error) => {
                     taskRunner(undefined);
                     return new Promise<never>((resolve, reject) => {});
-                } ));
+                } );
                 return this.impl.seqPromise;
             }
 
@@ -1008,7 +988,7 @@ export namespace taskpool {
                 InternalTask.of(task).enqueue(this.impl.priority);
             }
             notifyExecuteTask();
-            return InternalTask.of(task).getOnReceivePromise(promise);
+            return promise;
         }
 
         private static native generateSeqRunnerId(): int;
@@ -1194,7 +1174,7 @@ export namespace taskpool {
                 ConcurrencyHelpers.mutexUnlock(this.impl.implInnerMutex);
             }
 
-            return InternalTask.of(task).getOnReceivePromise(promise);
+            return promise;
         }
 
         private static native generateAsyncRunnerId(): int;
@@ -1312,7 +1292,7 @@ export namespace taskpool {
         InternalTask.of(task).enqueue(priority);
 
         if (isTaskPoolUseLaunch) {
-            return InternalTask.of(task).getOnReceivePromise(launchPromise(InternalTask.of(task).execute));
+            return launchPromise(InternalTask.of(task).execute);
         }
 
         const promise = new Promise<Any>((resolve, reject) => {
@@ -1320,7 +1300,7 @@ export namespace taskpool {
             InternalTask.of(task).reject = reject;
         });
         notifyExecuteTask();
-        return InternalTask.of(task).getOnReceivePromise(promise);
+        return promise;
     }
 
     /**
@@ -1344,14 +1324,14 @@ export namespace taskpool {
             InternalTask.of(task).isSubmitted = true;
             InternalTask.of(task).enqueue(priority);
             if (isTaskPoolUseLaunch) {
-                promises.push(InternalTask.of(task).getOnReceivePromise(launchPromise(InternalTask.of(task).execute)));
+                promises.push(launchPromise(InternalTask.of(task).execute));
             } else {
                 const promise = new Promise<Any>((resolve, reject) => {
                     InternalTask.of(task).resolve = resolve;
                     InternalTask.of(task).reject = reject;
                 });
                 notifyExecuteTask();
-                promises.push(InternalTask.of(task).getOnReceivePromise(promise));
+                promises.push(promise);
             }
         });
         return Promise.all<Any>(promises);
@@ -1397,7 +1377,7 @@ export namespace taskpool {
                         InternalTask.of(task).reject = reject;
                     })
                     notifyExecuteTask();
-                    InternalTask.of(task).getOnReceivePromise(p).then((res: Any) => {
+                    p.then((res: Any) => {
                         resolve(res);
                     }).catch((e) => {
                         reject(e);
@@ -2074,7 +2054,7 @@ export namespace taskpool {
                 reject(e as Error);
             }
         });
-        return InternalTask.of(task).getOnReceivePromise(promise);
+        return promise;
     }
 
     native function isUsingLaunch(): boolean;
