@@ -39,6 +39,39 @@ export @interface JSONStringifyIgnore {
 export @interface JSONParseIgnore {
 }
 
+function searchInstanceFieldInHierarchy(cls: Class, name: string): reflect.InstanceField | undefined {
+    let currClass: Class | undefined = cls
+    while(currClass != undefined) {
+        const candidate = currClass.getInstanceField(name)
+        if (candidate != undefined) {
+            return candidate
+        }
+        currClass = currClass.getSuper()
+    }
+    return undefined
+}
+
+function getClassInstanceFieldsAll(cls: Class): Array<reflect.InstanceField> {
+    const baseClasses = new Array<Class>()
+    while (cls.getSuper() !== undefined) {
+        baseClasses.push(cls)
+        cls = cls.getSuper()!
+    }
+
+    const allFields = new Map<string, reflect.InstanceField>()
+    const baseClassesCount = baseClasses.length
+    for (let i = baseClassesCount - 1; i >= 0; i--) {
+        const currentCls = baseClasses[i]
+        const clsFields = currentCls.getInstanceFields()
+        for (const field of clsFields) {
+            const qfName = field.getOwner().getName() + "::" + field.getName()
+            allFields.set(qfName, field)
+        }
+    }
+
+    return Array.from(allFields.values())
+}
+
 class JSONAPI {
     native static getJSONStringifyIgnore(field: reflect.InstanceField): boolean
 
@@ -627,7 +660,7 @@ export class JSON {
             ok = true
         } else if (type.isSubtypeOf(TypeColor.OBJECT_CLASS)) {
             ok &= JSON.classHasDefaultCtor(type)
-            for (const field of type.getInstanceFields()) {
+            for (const field of getClassInstanceFieldsAll(type)) {
                 if (JSONAPI.getJSONParseIgnore(field)) {
                     continue
                 }
@@ -1075,27 +1108,6 @@ class JSONWriter {
         return fields.findIndex((writableField) => writableField[0] == fieldName);
     }
 
-    private getClassInstanceFields(cls: Class): Array<reflect.InstanceField> {
-        const baseClasses = new Array<Class>()
-        while (cls.getSuper() !== undefined) {
-            baseClasses.push(cls)
-            cls = cls.getSuper()!
-        }
-
-        const allFields = new Map<string, reflect.InstanceField>()
-        const baseClassesCount = baseClasses.length
-        for (let i = baseClassesCount - 1; i >= 0; i--) {
-            const currentCls = baseClasses[i]
-            const clsFields = currentCls.getInstanceFields()
-            for (const field of clsFields) {
-                const qfName = field.getOwner().getName() + "::" + field.getName()
-                allFields.set(qfName, field)
-            }
-        }
-
-        return Array.from(allFields.values())
-    }
-
     private getWritableFields(cls: Class, obj: object): Array<[string, Any]> {
         const writableFields = new Array<[string, Any]>()
         let hasJsonIgnore: boolean = false
@@ -1104,7 +1116,7 @@ class JSONWriter {
         if (this.useFieldsFilter) {
             for (let fieldIdx = 0; fieldIdx < this.fieldsFilter.length; fieldIdx++) {
                 const fieldName = this.fieldsFilter[fieldIdx]
-                const field = cls.getInstanceFieldByName(fieldName)
+                const field = searchInstanceFieldInHierarchy(cls, fieldName)
                 if (field === undefined) {
                     continue
                 }
@@ -1115,7 +1127,7 @@ class JSONWriter {
                 }
                 fieldRename = JSONAPI.getJSONRename(field);
                 if (fieldRename != undefined) {
-                    if (cls.getInstanceFieldByName(fieldRename) !== undefined) {
+                    if (searchInstanceFieldInHierarchy(cls, fieldRename) !== undefined) {
                         throw new Error("Cannot rename " + fieldRename + " in keys of " + cls.getName())
                     } else {
                         field.name = fieldRename
@@ -1129,7 +1141,7 @@ class JSONWriter {
                 writableFields.push(fieldNameValuePair)
             }
         } else {
-            for (const field of this.getClassInstanceFields(cls)) {
+            for (const field of getClassInstanceFieldsAll(cls)) {
                 hasJsonIgnore = JSONAPI.getJSONStringifyIgnore(field);
                 if (hasJsonIgnore) {
                     continue
@@ -1137,7 +1149,7 @@ class JSONWriter {
                 const index: int = this.findKeyIndex(field.getName(), writableFields)
                 fieldRename = JSONAPI.getJSONRename(field);
                 if (fieldRename !== undefined) {
-                    if (field.getOwner().getInstanceFieldByName(fieldRename) !== undefined) {
+                    if (searchInstanceFieldInHierarchy(field.getOwner(), fieldRename) !== undefined) {
                         throw new Error("Cannot rename " + fieldRename + " in keys of " + cls.getName())
                     } else {
                         field.name = fieldRename
@@ -1856,7 +1868,7 @@ class JSONValueParser {
 
     private parseObject(jsonObj: JSONObject, classType: Class): Object {
         let setClassFieldFn = (obj: object, fieldName: string, fieldVal: Any) => {
-            const field = Class.of(obj).getInstanceFieldByName(fieldName)!
+            const field = searchInstanceFieldInHierarchy(Class.of(obj), fieldName)!
             field.setValue(obj, fieldVal)
         }
 
@@ -1864,7 +1876,7 @@ class JSONValueParser {
             setClassFieldFn = (obj: object, fieldName: string, fieldVal: Any): void => {
                 const revivedVal = this.reviver!(fieldName, fieldVal)
 
-                const field = Class.of(obj).getInstanceFieldByName(fieldName)!
+                const field = searchInstanceFieldInHierarchy(Class.of(obj), fieldName)!
                 field.setValue(obj, revivedVal)
             }
         }
@@ -1874,7 +1886,7 @@ class JSONValueParser {
         let hasJsonStringifyIgnore: boolean = false
         const jsonObjFields = jsonObj.getFields()
 
-        for (const classField of classType.getInstanceFields()) {
+        for (const classField of getClassInstanceFieldsAll(classType)) {
             hasJsonParseIgnore = JSONAPI.getJSONParseIgnore(classField);
             if (hasJsonParseIgnore) {
                 continue

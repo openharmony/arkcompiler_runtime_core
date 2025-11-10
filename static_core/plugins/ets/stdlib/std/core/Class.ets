@@ -198,7 +198,7 @@ export final class Class {
     public native isUnion(): boolean
 
     /**
-     * Gets public instance methods declared in the class
+     * Gets public instance methods (including default methods from implemented interfaces) declared in the class
      *
      * @returns Immutable array of instance {@link reflect.InstanceMethod} objects
      */
@@ -207,7 +207,8 @@ export final class Class {
     }
 
     /**
-     * Looks up a public instance method among the methods declared in the class
+     * Looks up a public instance method (including default methods from implemented interfaces)
+     * among the methods declared in the class
      *
      * @param name - The method name to search for
      *
@@ -263,18 +264,7 @@ export final class Class {
     }
 
     /**
-     * Looks up an public instance field by name
-     *
-     * @param name - The field name to search for
-     *
-     * @returns The {@link reflect.InstanceField} if found, `undefined` otherwise
-     */
-    public getInstanceFieldByName(name: string): reflect.InstanceField | undefined {
-        return this.getInstanceFieldByNameInternal(name, true)
-    }
-
-    /**
-     * Gets only public instance fields of a class
+     * Gets public instance fields declared in the class
      *
      * @returns Immutable array of instance {@link reflect.InstanceField} objects
      */
@@ -286,7 +276,18 @@ export final class Class {
     }
 
     /**
-     * Gets only public static fields of a class
+     * Looks up a public instance field by name among the fields declared in this class
+     *
+     * @param name - The field name to search for
+     *
+     * @returns The {@link reflect.InstanceField} if found, `undefined` otherwise
+     */
+    public getInstanceField(name: string): reflect.InstanceField | undefined {
+        return this.getInstanceFieldByNameInternal(name, true)
+    }
+
+    /**
+     * Gets public static fields declared in this class
      *
      * @returns Immutable array of static {@link reflect.StaticField} objects
      */
@@ -298,13 +299,13 @@ export final class Class {
     }
 
     /**
-     * Looks up a public static field by name
+     * Looks up a public static field by name among the fields declared in this class
      *
      * @param name - The field name to search for
      *
      * @returns The {@link reflect.StaticField} if found, `undefined` otherwise
      */
-    public getStaticFieldByName(name: string): reflect.StaticField | undefined {
+    public getStaticField(name: string): reflect.StaticField | undefined {
         return this.getStaticFieldByNameInternal(name, true)
     }
 

@@ -507,6 +507,30 @@ inline Field *Class::GetDeclaredFieldByName(const uint8_t *mutf8Name) const
     return FindDeclaredField([sd](const Field &field) { return field.GetName() == sd; });
 }
 
+inline Field *Class::GetDeclaredInstanceFieldByName(const uint8_t *mutf8Name) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindDeclaredField<FindFilter::INSTANCE>([sd](const Field &field) { return field.GetName() == sd; });
+}
+
+inline Field *Class::GetDeclaredInstanceFieldByName(const uint8_t *mutf8Name, uint32_t mutf16Length) const
+{
+    panda_file::File::StringData sd = {mutf16Length, mutf8Name};
+    return FindDeclaredField<FindFilter::INSTANCE>([sd](const Field &field) { return field.GetName() == sd; });
+}
+
+inline Field *Class::GetDeclaredStaticFieldByName(const uint8_t *mutf8Name) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindDeclaredField<FindFilter::STATIC>([sd](const Field &field) { return field.GetName() == sd; });
+}
+
+inline Field *Class::GetDeclaredStaticFieldByName(const uint8_t *mutf8Name, uint32_t mutf16Length) const
+{
+    panda_file::File::StringData sd = {mutf16Length, mutf8Name};
+    return FindDeclaredField<FindFilter::STATIC>([sd](const Field &field) { return field.GetName() == sd; });
+}
+
 inline Method *Class::GetVirtualClassMethod(panda_file::File::EntityId id) const
 {
     return FindClassMethod<FindFilter::INSTANCE, MethodIdComp>(id);

@@ -44,45 +44,36 @@ class Point3D extends Point {
 }
 
 function testField(): void {
-    let typePoint3D = Class.of(new Point3D())
-
-    arktest.assertEQ(typePoint3D.getInstanceFieldByName("xP"), undefined) // protected
-    let xf = typePoint3D.getInstanceFieldByName("x")!
-    let yf = typePoint3D.getInstanceFieldByName("y")!
-    arktest.assertEQ(typePoint3D.getInstanceFieldByName("stateP"), undefined) // private
-    let sf = typePoint3D.getInstanceFieldByName("state")!
-    let rf = typePoint3D.getInstanceFieldByName("r")!
-    let abilityf = typePoint3D.getInstanceFieldByName("ability")!
-
-    let isInherited = (f: reflect.InstanceField, type: Class): boolean => {
-        return f.getOwner().getName() != type.getName()
-    }
-    let isOverrided = (f: reflect.InstanceField, type: Class): boolean => {
-        if (f.getOwner().getName() != type.getName()) {
-            return false
-        }
-        let baseType = type.getSuper()!
-        return baseType.getInstanceFieldByName(f.getName()) != undefined
-    }
+    let typePoint = Class.from<Point>()
+    let xf = typePoint.getInstanceField("x")!
+    let yf = typePoint.getInstanceField("y")!
+    arktest.assertEQ(typePoint.getInstanceField("xP"), undefined) // protected
 
     arktest.assertEQ(xf.getName(), "x")
-    arktest.assertEQ(xf.getOwner(), Class.of(new Point()))
+    arktest.assertEQ(xf.getOwner(), typePoint)
     arktest.assertEQ(xf.getType(), Class.PRIMITIVE_DOUBLE)
     arktest.assertFalse(xf.isReadonly())
     arktest.assertTrue(xf.isPublic())
     arktest.assertFalse(xf.isProtected())
     arktest.assertFalse(xf.isPrivate())
-    arktest.assertTrue(isInherited(xf, typePoint3D))
-    arktest.assertFalse(isOverrided(xf, typePoint3D))
+
     arktest.assertEQ(yf.getName(), "y")
-    arktest.assertEQ(yf.getOwner(), typePoint3D)
+    arktest.assertEQ(yf.getOwner(), typePoint)
     arktest.assertEQ(yf.getType(), Class.PRIMITIVE_DOUBLE)
     arktest.assertFalse(yf.isReadonly())
     arktest.assertTrue(yf.isPublic())
     arktest.assertFalse(yf.isProtected())
     arktest.assertFalse(yf.isPrivate())
-    arktest.assertFalse(isInherited(yf, typePoint3D))
-    arktest.assertTrue(isOverrided(yf, typePoint3D))
+
+    let typePoint3D = Class.from<Point3D>()
+    let sf = typePoint3D.getInstanceField("state")!
+    let rf = typePoint3D.getInstanceField("r")!
+    let abilityf = typePoint3D.getInstanceField("ability")!
+    yf = typePoint3D.getInstanceField("y")!
+    arktest.assertEQ(typePoint3D.getInstanceField("stateP"), undefined) // private
+    arktest.assertEQ(typePoint3D.getInstanceField("xP"), undefined) // parent field
+    arktest.assertEQ(typePoint3D.getInstanceField("x"), undefined) // parent field
+
     arktest.assertEQ(sf.getName(), "state")
     arktest.assertEQ(sf.getOwner(), typePoint3D)
     arktest.assertEQ(sf.getType(), Class.PRIMITIVE_INT)
@@ -90,8 +81,7 @@ function testField(): void {
     arktest.assertTrue(sf.isPublic())
     arktest.assertFalse(sf.isProtected())
     arktest.assertFalse(sf.isPrivate())
-    arktest.assertFalse(isInherited(sf, typePoint3D))
-    arktest.assertFalse(isOverrided(sf, typePoint3D))
+
     arktest.assertEQ(rf.getName(), "r")
     arktest.assertEQ(rf.getOwner(), typePoint3D)
     arktest.assertEQ(rf.getType(), Class.PRIMITIVE_INT)
@@ -99,8 +89,7 @@ function testField(): void {
     arktest.assertTrue(rf.isPublic())
     arktest.assertFalse(rf.isProtected())
     arktest.assertFalse(rf.isPrivate())
-    arktest.assertFalse(isInherited(rf, typePoint3D))
-    arktest.assertFalse(isOverrided(rf, typePoint3D))
+
     arktest.assertEQ(abilityf.getName(), "ability")
     arktest.assertEQ(abilityf.getOwner(), typePoint3D)
 }
@@ -163,7 +152,7 @@ class Child extends Parent {
 function testInstanceGetSetPrimitive(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentIdFld = parentCls.getInstanceFieldByName('id')!
+    const parentIdFld = parentCls.getInstanceField('id')!
     const localStr = 'I\'m a string'
     const localNum = 3.14
 
@@ -175,7 +164,7 @@ function testInstanceGetSetPrimitive(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childIdFld = childCls.getInstanceFieldByName('id')!
+    const childIdFld = childCls.getInstanceField('id')!
 
     arktest.assertNE(localNum, childInst.id)
     arktest.assertNE(localNum, childIdFld.getValue(childInst))
@@ -187,8 +176,8 @@ function testInstanceGetSetPrimitive(): void {
 function testInstanceGetSetReference(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentStrFld = parentCls.getInstanceFieldByName('str')!
-    const parentIdFld = parentCls.getInstanceFieldByName('id')!
+    const parentStrFld = parentCls.getInstanceField('str')!
+    const parentIdFld = parentCls.getInstanceField('id')!
     const localStr = 'I\'m a string'
     const localNum = parentInst.id
 
@@ -205,7 +194,7 @@ function testInstanceGetSetReference(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childStrFld = childCls.getInstanceFieldByName('str')!
+    const childStrFld = childCls.getInstanceField('str')!
 
     arktest.assertNE(localStr, childInst.str)
     arktest.assertNE(localStr, childStrFld.getValue(childInst))
@@ -222,7 +211,7 @@ function testInstanceGetSetReference(): void {
 function testInstanceGetSetUnion(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentUnFld = parentCls.getInstanceFieldByName('un')!
+    const parentUnFld = parentCls.getInstanceField('un')!
     const localUA = new UClassA()
     const localUB = new UClassB()
     const localNum = 3.14
@@ -253,7 +242,7 @@ function testInstanceGetSetUnion(): void {
 function testInstanceGetSetTuple(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentTpleFld = parentCls.getInstanceFieldByName('tple')!
+    const parentTpleFld = parentCls.getInstanceField('tple')!
     const localTuple: [int, string] = [0, "local"]
 
     arktest.assertNE(localTuple, parentInst.tple)
@@ -269,23 +258,13 @@ function testInstanceGetSetTuple(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childTpleFld = childCls.getInstanceFieldByName('tple')!
-
-    arktest.assertNE(localTuple, childInst.tple)
-    arktest.assertNE(localTuple, childTpleFld.getValue(childInst))
-    childTpleFld.setValue(childInst, localTuple)
-    arktest.assertEQ(localTuple, childInst.tple)
-    arktest.assertEQ(localTuple, childTpleFld.getValue(childInst))
-
-    childTpleFld.setValue(childInst, undefTuple)
-    arktest.assertEQ(undefTuple, childInst.tple)
-    arktest.assertEQ(undefTuple, childTpleFld.getValue(childInst))
+    arktest.assertEQ(childCls.getInstanceField('tple'), undefined) // parent field
 }
 
 function testInstanceGetSetEnum(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentEnmFld = parentCls.getInstanceFieldByName('enm')!
+    const parentEnmFld = parentCls.getInstanceField('enm')!
     const localEnum = TestFieldEnum.TWO
 
     arktest.assertNE(localEnum, parentInst.enm)
@@ -298,9 +277,9 @@ function testInstanceGetSetEnum(): void {
 function testInstanceGetSetPrimitiveNegative(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentStrFld = parentCls.getInstanceFieldByName('str')!
-    const parentIdFld = parentCls.getInstanceFieldByName('id')!
-    const parentRdonlyPrimFld = parentCls.getInstanceFieldByName('rdonlyPrim')!
+    const parentStrFld = parentCls.getInstanceField('str')!
+    const parentIdFld = parentCls.getInstanceField('id')!
+    const parentRdonlyPrimFld = parentCls.getInstanceField('rdonlyPrim')!
     const localStr = 'I\'m a string'
     const localNumParent = parentInst.id
 
@@ -328,7 +307,7 @@ function testInstanceGetSetPrimitiveNegative(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childIdFld = childCls.getInstanceFieldByName('id')!
+    const childIdFld = childCls.getInstanceField('id')!
     const localNumChild = childInst.id
 
     arktest.expectError(() => {
@@ -349,8 +328,8 @@ function testInstanceGetSetPrimitiveNegative(): void {
 function testInstanceGetSetReferenceNegative(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentStrFld = parentCls.getInstanceFieldByName('str')!
-    const parentRdonlyStrFld = parentCls.getInstanceFieldByName('rdonlyStr')!
+    const parentStrFld = parentCls.getInstanceField('str')!
+    const parentRdonlyStrFld = parentCls.getInstanceField('rdonlyStr')!
     const localStrParent = parentInst.str
     const localNum = 3.14
 
@@ -370,7 +349,7 @@ function testInstanceGetSetReferenceNegative(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childStrFld = childCls.getInstanceFieldByName('str')!
+    const childStrFld = childCls.getInstanceField('str')!
     const localStrChild = childInst.str
 
     arktest.expectError(() => {
@@ -383,7 +362,7 @@ function testInstanceGetSetReferenceNegative(): void {
 function testInstanceGetSetUnionNegative(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentUnFld = parentCls.getInstanceFieldByName('un')!
+    const parentUnFld = parentCls.getInstanceField('un')!
     const localStr = 'I\'m a string'
 
     arktest.expectError(() => {
@@ -398,7 +377,7 @@ function testInstanceGetSetUnionNegative(): void {
 function testInstanceGetSetTupleNegative(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentTpleFld = parentCls.getInstanceFieldByName('tple')!
+    const parentTpleFld = parentCls.getInstanceField('tple')!
     const localTuple: [number, Object, string] = [3.14, new Object(), '']
     const originalTuple = parentInst.tple
 
@@ -412,7 +391,7 @@ function testInstanceGetSetTupleNegative(): void {
 function testInstanceGetSetEnumNegative(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentEnmFld = parentCls.getInstanceFieldByName('enm')!
+    const parentEnmFld = parentCls.getInstanceField('enm')!
     const localEnum = WrongEnum.ONE
     const originalEnum = parentInst.enm
 
@@ -425,7 +404,7 @@ function testInstanceGetSetEnumNegative(): void {
 
 function testStaticGetSetPrimitive(): void {
     const parentCls = Class.from<Parent>()
-    const parentIdFld = parentCls.getStaticFieldByName('ID')!
+    const parentIdFld = parentCls.getStaticField('ID')!
     const localNum = 3.14
 
     arktest.assertNE(localNum, Parent.ID)
@@ -435,7 +414,7 @@ function testStaticGetSetPrimitive(): void {
     arktest.assertEQ(localNum, parentIdFld.getValue())
 
     const childCls = Class.from<Child>()
-    const childIdFld = childCls.getStaticFieldByName('ID')!
+    const childIdFld = childCls.getStaticField('ID')!
 
     arktest.assertNE(localNum, Child.ID)
     arktest.assertNE(localNum, childIdFld.getValue())
@@ -446,7 +425,7 @@ function testStaticGetSetPrimitive(): void {
 
 function testStaticGetSetReference(): void {
     const parentCls = Class.from<Parent>()
-    const parentStrFld = parentCls.getStaticFieldByName('STR')!
+    const parentStrFld = parentCls.getStaticField('STR')!
     const localStr = 'I\'m a string'
 
     arktest.assertNE(localStr, Parent.STR)
@@ -458,7 +437,7 @@ function testStaticGetSetReference(): void {
 
 function testStaticGetSetUnion(): void {
     const parentCls = Class.from<Parent>()
-    const parentUnFld = parentCls.getStaticFieldByName('UN')!
+    const parentUnFld = parentCls.getStaticField('UN')!
     const localUA = new UClassA()
     const localUB = new UClassB()
     const localNum = 3.14
@@ -489,7 +468,7 @@ function testStaticGetSetUnion(): void {
 
 function testStaticGetSetTuple(): void {
     const parentCls = Class.from<Parent>()
-    const parentTpleFld = parentCls.getStaticFieldByName('TPLE')!
+    const parentTpleFld = parentCls.getStaticField('TPLE')!
     const localTuple: [int, string] = [0, "local"]
     const originalTuple = Parent.TPLE
 
@@ -504,7 +483,7 @@ function testStaticGetSetTuple(): void {
 
 function testStaticGetSetEnum(): void {
     const parentCls = Class.from<Parent>()
-    const parentEnmFld = parentCls.getStaticFieldByName('ENM')!
+    const parentEnmFld = parentCls.getStaticField('ENM')!
     const localEnum = TestFieldEnum.TWO
 
     arktest.assertNE(localEnum, Parent.ENM)
@@ -516,8 +495,8 @@ function testStaticGetSetEnum(): void {
 
 function testStaticGetSetPrimitiveNegative(): void {
     const parentCls = Class.from<Parent>()
-    const parentIdFld = parentCls.getStaticFieldByName('ID')!
-    const parentRdonlyPrimFld = parentCls.getStaticFieldByName('RDONLYPRIM')!
+    const parentIdFld = parentCls.getStaticField('ID')!
+    const parentRdonlyPrimFld = parentCls.getStaticField('RDONLYPRIM')!
     const localNum = 3.14
     const localStr = 'I\'m a string'
 
@@ -538,7 +517,7 @@ function testStaticGetSetPrimitiveNegative(): void {
 
 function testStaticGetSetReferenceNegative(): void {
     const parentCls = Class.from<Parent>()
-    const parentStrFld = parentCls.getStaticFieldByName('STR')!
+    const parentStrFld = parentCls.getStaticField('STR')!
     const localNum = 3.14
     const localStr = 'I\'m a string'
 
@@ -553,7 +532,7 @@ function testStaticGetSetReferenceNegative(): void {
 
 function testStaticGetSetUnionNegative(): void {
     const parentCls = Class.from<Parent>()
-    const parentUnFld = parentCls.getStaticFieldByName('UN')!
+    const parentUnFld = parentCls.getStaticField('UN')!
     const localStr = 'I\'m a string'
     Parent.UN = 42
 
@@ -568,7 +547,7 @@ function testStaticGetSetUnionNegative(): void {
 
 function testStaticGetSetTupleNegative(): void {
     const parentCls = Class.from<Parent>()
-    const parentTpleFld = parentCls.getStaticFieldByName('TPLE')!
+    const parentTpleFld = parentCls.getStaticField('TPLE')!
     const localTuple: [number, Object, string] = [3.14, new Object(), '']
     const originalTuple = Parent.TPLE
 
@@ -581,7 +560,7 @@ function testStaticGetSetTupleNegative(): void {
 
 function testStaticGetSetEnumNegative(): void {
     const parentCls = Class.from<Parent>()
-    const parentEnmFld = parentCls.getStaticFieldByName('ENM')!
+    const parentEnmFld = parentCls.getStaticField('ENM')!
     const localEnum = WrongEnum.TWO
     const originalEnum = Parent.ENM
 
@@ -606,8 +585,8 @@ function testInstanceField(): void {
 
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
-    const parentIdFld = parentCls.getInstanceFieldByName('id')!
-    const parentStrFld = parentCls.getInstanceFieldByName('str')!
+    const parentIdFld = parentCls.getInstanceField('id')!
+    const parentStrFld = parentCls.getInstanceField('str')!
 
     arktest.assertEQ(parentIdFld.getType(), Class.PRIMITIVE_NUMBER)
     arktest.assertEQ(parentIdFld.getOwner(), parentCls)
@@ -616,18 +595,18 @@ function testInstanceField(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childIdFld = childCls.getInstanceFieldByName('id')!
-    const childStrFld = childCls.getInstanceFieldByName('str')!
+    const childIdFld = childCls.getInstanceField('id')!
+    const childStrFld = childCls.getInstanceField('str')!
 
     arktest.assertEQ(childIdFld.getType(), Class.PRIMITIVE_NUMBER)
     arktest.assertEQ(childIdFld.getOwner(), childCls)
     arktest.assertEQ(childStrFld.getType(), Class.of(new String()))
     arktest.assertEQ(childStrFld.getOwner(), childCls)
 
-    arktest.assertEQ(parentCls.getInstanceFieldByName('prop'), undefined)
-    arktest.assertEQ(parentCls.getInstanceFieldByName('priv'), undefined)
-    arktest.assertEQ(parentCls.getInstanceFieldByName('prot'), undefined)
-    arktest.assertEQ(childCls.getInstanceFieldByName('prot'), undefined)
+    arktest.assertEQ(parentCls.getInstanceField('prop'), undefined)
+    arktest.assertEQ(parentCls.getInstanceField('priv'), undefined)
+    arktest.assertEQ(parentCls.getInstanceField('prot'), undefined)
+    arktest.assertEQ(childCls.getInstanceField('prot'), undefined)
 
     const parentFlds = parentCls.getInstanceFields()
     const parentFldNames = new Set<string>(Array.from<reflect.InstanceField, string>(parentFlds, (f) => f.getName()))
@@ -642,7 +621,7 @@ function testInstanceField(): void {
 
     const bools: FixedArray<boolean> = [true]
     const boolsCls = Class.of(bools)
-    arktest.assertEQ(boolsCls.getInstanceFieldByName('length'), undefined)
+    arktest.assertEQ(boolsCls.getInstanceField('length'), undefined)
 }
 
 function testStaticField(): void {
@@ -658,34 +637,29 @@ function testStaticField(): void {
     testStaticGetSetEnumNegative()
 
     const parentCls = Class.of(new Parent)
-    const parentIdFld = parentCls.getStaticFieldByName('ID')!
-    const parentStrFld = parentCls.getStaticFieldByName('STR')!
+    const parentIdFld = parentCls.getStaticField('ID')!
+    const parentStrFld = parentCls.getStaticField('STR')!
 
     arktest.assertEQ(parentIdFld.getType(), Class.PRIMITIVE_NUMBER)
     arktest.assertEQ(parentIdFld.getOwner(), parentCls)
     arktest.assertEQ(parentStrFld.getType(), Class.of(new String()))
     arktest.assertEQ(parentStrFld.getOwner(), parentCls)
-    arktest.assertEQ(parentCls.getStaticFieldByName('EOL'), undefined)
+    arktest.assertEQ(parentCls.getStaticField('EOL'), undefined)
 
     const childCls = Class.of(new Child)
-    const childIdFld = childCls.getStaticFieldByName('ID')!
+    const childIdFld = childCls.getStaticField('ID')!
 
     arktest.assertEQ(childIdFld.getType(), Class.PRIMITIVE_NUMBER)
     arktest.assertEQ(childIdFld.getOwner(), childCls)
-    arktest.assertNE(childCls.getStaticFieldByName('STR'), undefined)
+    arktest.assertEQ(childCls.getStaticField('STR'), undefined) // parent field
 
-    const parentFld = parentCls.getStaticFieldByName('STR')!
-    const childFld = childCls.getStaticFieldByName('STR')!
-    arktest.assertEQ(parentFld.getType(), childFld.getType())
-    arktest.assertEQ(childCls.getStaticFieldByName('EOL')!.getType(), Class.PRIMITIVE_CHAR)
-    arktest.assertTrue(parentFld.equals(childFld))
-    arktest.assertFalse(parentIdFld.equals(childIdFld))
+    arktest.assertEQ(childCls.getStaticField('EOL')!.getType(), Class.PRIMITIVE_CHAR)
 
-    arktest.assertEQ(parentCls.getStaticFieldByName('PROP'), undefined)
-    arktest.assertEQ(childCls.getStaticFieldByName('PROP'), undefined)
+    arktest.assertEQ(parentCls.getStaticField('PROP'), undefined)
+    arktest.assertEQ(childCls.getStaticField('PROP'), undefined)
 
-    arktest.assertEQ(parentCls.getStaticFieldByName('PRIV'), undefined)
-    arktest.assertEQ(childCls.getStaticFieldByName('PROT'), undefined)
+    arktest.assertEQ(parentCls.getStaticField('PRIV'), undefined)
+    arktest.assertEQ(childCls.getStaticField('PROT'), undefined)
 
     const parentFlds = parentCls.getStaticFields()
     const parentFldNames = new Set<string>(Array.from<reflect.StaticField, string>(parentFlds, (f) => f.getName()))
@@ -709,14 +683,13 @@ class IfaceImpl implements Iface {
 }
 
 function testInterfaceField(): void {
-    const ifaces: FixedArray<Iface> = []
-    const ifaceCls = Class.of(ifaces).getFixedArrayComponentType()!
+    const ifaceCls = Class.from<FixedArray<Iface>>().getFixedArrayComponentType()!
 
-    const idFld = ifaceCls.getInstanceFieldByName('id')
+    const idFld = ifaceCls.getInstanceField('id')
     arktest.assertEQ(idFld, undefined)
 
     const impl = new IfaceImpl()
-    const idFldImpl = Class.of(impl).getInstanceFieldByName('id')
+    const idFldImpl = Class.of(impl).getInstanceField('id')
     arktest.assertEQ(idFldImpl, undefined)
 
     arktest.assertEQ(ifaceCls.getInstanceFields().length, 0)
