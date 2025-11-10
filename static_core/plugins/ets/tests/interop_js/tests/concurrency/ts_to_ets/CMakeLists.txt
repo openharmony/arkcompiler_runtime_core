@@ -21,6 +21,7 @@ if (NOT PANDA_ETS_INTEROP_JS)
         ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/eworker_interop_tests.ets
                     ${CMAKE_CURRENT_SOURCE_DIR}/taskpool_interop_tests.ets
         TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../concurrency_helpers.ts
+        ETS_CONFIG ${ETS_CONFIG}
         PACKAGE_NAME
         concurrentcy_tests
     )

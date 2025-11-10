@@ -72,9 +72,7 @@ export namespace taskpool {
         constructor(supportInterop: boolean = false) {
             super("taskpool", supportInterop);
             this.start();
-            this.run<void>((): void => {
-                this.workerId = CoroutineExtras.getWorkerId();
-            }).Await();
+            this.workerId = this.getWorkerId()!;
         }
 
         performTask(): boolean {
@@ -163,7 +161,11 @@ export namespace taskpool {
                                                    min(workersLimit, targetNum) - idleWorkersNum))).toInt();
                         for (let i = 0; i < step; ++i) {
                             let w: TaskPoolWorker = new TaskPoolWorker(isTaskpoolSupportInterop);
-                            workers.add(w);
+                            if(this.isAlive()) {
+                                workers.add(w);
+                            } else {
+                                w.join();
+                            }
                         }
                     }
                 });
@@ -387,7 +389,7 @@ export namespace taskpool {
         }
 
         execute(): Any {
-            initWorkerPool();
+            initWorkerPoolSync();
             this.waitForDependencies();
             if (!taskStarted(this.task)) {
                 this.notifyDependencies();
@@ -979,7 +981,7 @@ export namespace taskpool {
         }
 
         execute(task: Task): Promise<Any> {
-            initWorkerPool();
+            initWorkerPoolSync();
             this.checkExecution(task);
             InternalTask.of(task).seqId = this.impl.id;
             InternalTask.of(task).runnerImpl = this.impl;
@@ -1153,7 +1155,7 @@ export namespace taskpool {
          * @returns 
          */
         execute(task: Task, priority?: Priority): Promise<Any> {
-            initWorkerPool();
+            initWorkerPoolSync();
             this.checkExecution(task);
             
             InternalTask.of(task).runnerAsyncImpl = this.impl;
@@ -1289,7 +1291,7 @@ export namespace taskpool {
      * @returns { Promise<Any> } Promise for result of executed task
      */
     export function execute(func: Function, ...args: FixedArray<Any>): Promise<Any> {
-        initWorkerPool();
+        initWorkerPoolSync();
         if (isTaskPoolUseLaunch) {
             return launchPromise(func, ...args);
         }
@@ -1305,7 +1307,7 @@ export namespace taskpool {
      * @returns { Promise<Any> } Promise for result of executed task
      */
     export function execute(task: Task, priority?: Priority): Promise<Any> {
-        initWorkerPool();
+        initWorkerPoolSync();
         InternalTask.of(task).checkExecution();
         taskSubmitted(task);
         InternalTask.of(task).isSubmitted = true;
@@ -1331,7 +1333,7 @@ export namespace taskpool {
      * @returns { Promise<Array<Any>> } Promise for array of results of executed tasks from the group
      */
     export function execute(group: TaskGroup, priority?: Priority): Promise<Array<Any>> {
-        initWorkerPool();
+        initWorkerPoolSync();
         const tasksCount = GroupState.of(group).tasks.length.toInt();
         if (tasksCount == 0) {
             return Promise.resolve<Array<Any>>(new Array<Any>());
@@ -1366,7 +1368,7 @@ export namespace taskpool {
      * @returns { Promise<Any> } Promise for result of executed task
      */
     export function executeDelayed(delayTime: int, task: Task, priority?: Priority): Promise<Any> {
-        initWorkerPool();
+        initWorkerPoolSync();
         InternalTask.of(task).checkExecutionForDelayedTask(delayTime);
         InternalTask.of(task).isSubmitted = true;
         ConcurrencyHelpers.lockGuard(mutex, () => {
@@ -1415,7 +1417,7 @@ export namespace taskpool {
      * @param { Priority } [priority] priority for task
      */
     export function executePeriodically(period: int, task: Task, priority?: Priority): void {
-        initWorkerPool();
+        initWorkerPoolSync();
         InternalTask.of(task).checkExecutionForPeriodTask(period);
         InternalTask.of(task).isSubmitted = true;
         InternalTask.of(task).isPeriodicTask = true;
@@ -1504,7 +1506,7 @@ export namespace taskpool {
      * @returns { TaskPoolInfo } taskpool internal information about tasks and threads
      */
     export function getTaskPoolInfo(): TaskPoolInfo {
-        initWorkerPool();
+        initWorkerPoolSync();
         const taskInfos: Array<TaskInfo> = new Array<TaskInfo>();
         const threadInfos: Array<ThreadInfo> = new Array<ThreadInfo>();
         ConcurrencyHelpers.mutexLock(mutex);
@@ -1848,7 +1850,7 @@ export namespace taskpool {
     }
 
     /**
-     * @brief Initialize taskpool worker pool.
+     * @brief Initialize taskpool worker pool in manager worker avoid blocking main thread for long time
      * @see taskpool.execute
      * @see taskpool.Task.constructor
      * @see taskpool.TaskGroup.constructor
@@ -1859,7 +1861,6 @@ export namespace taskpool {
         if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                 return;
         }
-
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                 return;
@@ -1872,12 +1873,43 @@ export namespace taskpool {
             }
 
             // Init taskpool worker pool.
+            managerWorker!.run<void>(() => {
+                for (let i = 0; i < initialWorkersNumber; ++i) {
+                    let w = new TaskPoolWorker(isTaskpoolSupportInterop);
+                    workers.add(w);
+                }
+                for(let i = 0; i < waitingTasksNum; i++) {
+                    triggerExecuteNextTask();
+                }
+                isWorkersInitialized.set(true);
+            });
+        })
+    }
+
+    /**
+     * @brief Initialize taskpool worker sequential mode for avoid missing task
+     */
+    function initWorkerPoolSync(): void {
+        if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
+                return;
+        }
+        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
+                return;
+            }
+
+            if (managerWorker === undefined) {
+                // Create managerWorker, and start to trigger shrink.
+                managerWorker = new TaskPoolWorker(isTaskpoolSupportInterop);
+                managerWorker.retriggerShrink();
+            }
+
             for (let i = 0; i < initialWorkersNumber; ++i) {
                 let w = new TaskPoolWorker(isTaskpoolSupportInterop);
                 workers.add(w);
             }
             isWorkersInitialized.set(true);
-        })
+        });
     }
 
     /**
@@ -1911,11 +1943,11 @@ export namespace taskpool {
     function triggerExecuteNextTask(): void {
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             let w = chooseWorkerForTask();
-            if (!w.performTask() && getTaskNum() > 0) {
+            if (w !== undefined && !w.performTask() && getTaskNum() > 0) {
                 // Current getTask may get an undefined task when higher priority task hit the continueCount
                 // So here we try to performTask again to avoid task cannot be executed
                 w.performTask();
-            } else if (isIdleWorker(w) && w.idleTime == 0) {
+            } else if (w !== undefined && isIdleWorker(w) && w.idleTime == 0) {
                 idleWorkers.add(w);
                 w.idleTime = Chrono.nanoNow();
             }
@@ -1953,7 +1985,10 @@ export namespace taskpool {
      * @brief Select an optimal worker for task execution based on current pending tasks count.
      * @see taskpool.notifyExecuteTask
      */
-    function chooseWorkerForTask(): TaskPoolWorker {
+    function chooseWorkerForTask(): TaskPoolWorker | undefined {
+        if(workers.size === 0) {
+            return undefined;
+        }
         let minTaskCount = Int.MAX_VALUE;
         let selectedWorker = Array.from(workers)[0];
         for (let w : TaskPoolWorker of workers) {
