@@ -236,6 +236,38 @@ TEST_F(RegAccAllocTest, SimplePhi)
     CheckInstructionsSrcRegIsAcc({6U, 7U, 11U});
 }
 
+// Case from GitCode issue 8073
+TEST_F(RegAccAllocTest, PhiWithTwoInputsAsConstInAcc)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        BASIC_BLOCK(2U, 3U)
+        {
+            CONSTANT(8U, 0U).s32();
+            CONSTANT(9U, 1U).s32();
+        }
+
+        BASIC_BLOCK(3U, 4U, 3U)
+        {
+            INST(5U, Opcode::Phi).s32().Inputs({{2U, 9U}, {3U, 8U}});
+            INST(6U, Opcode::IfImm).SrcType(compiler::DataType::INT32).CC(compiler::CC_EQ).Imm(0U).Inputs(5U);
+        }
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(7U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
+
+    ASSERT_EQ(INS(5U).GetDstReg(), compiler::GetInvalidReg());
+    ASSERT_EQ(INS(8U).GetDstReg(), compiler::GetInvalidReg());
+    ASSERT_EQ(INS(9U).GetDstReg(), compiler::GetInvalidReg());
+    ASSERT_EQ(INS(6U).GetSrcReg(0), compiler::GetInvalidReg());
+}
+
 /*
  * Test Cast instructions which follow each other.
  * Each instruction refers to the previos one.
