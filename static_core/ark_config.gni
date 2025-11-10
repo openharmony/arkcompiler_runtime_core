@@ -60,6 +60,10 @@ declare_args() {
 }
 
 declare_args() {
+  runtime_core_enable_ffrt = true
+}
+
+declare_args() {
   ark_enabled_plugins = default_ark_enabled_plugins
   extras = []
   if (!defined(is_ohos)) {
