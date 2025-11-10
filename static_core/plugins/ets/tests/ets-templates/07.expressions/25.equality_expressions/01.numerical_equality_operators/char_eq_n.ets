@@ -15,8 +15,10 @@
 
 {% for c in cases %}
 /*---
-desc: >-
-    Negative tests for char
+desc: |-
+    Negative tests for char.
+    if types A and B do not overlap (and therefore an expression always evaluated to false at compile time), then:
+    - if each of A and B is either a predefined type or a union of predefined types, a compile-time-error is issued.
 tags: [compile-only, negative]
 ---*/
 

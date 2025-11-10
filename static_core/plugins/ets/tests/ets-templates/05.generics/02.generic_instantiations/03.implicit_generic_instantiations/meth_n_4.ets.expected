@@ -10,4 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-TypeError: No matching call signature for foo("a", "b") [meth_n_4.ets:39:5]
+[meth_n_4.ets:40:5] Semantic error ESE0127: No matching call signature for f(X)

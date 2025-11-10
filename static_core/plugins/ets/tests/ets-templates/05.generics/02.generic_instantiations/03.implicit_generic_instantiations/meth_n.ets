@@ -31,7 +31,7 @@ class Cls {
 {{c.decl}}
 
 function main() {
-    let cls = new Cls
+    let cls = new Cls;
     {{c.use|indent}}
 }
 {% endfor %}

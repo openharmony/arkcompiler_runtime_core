@@ -25,53 +25,54 @@ desc: Specification examples for semantic checks that must be performed to argum
 // Note limited visibility because of #28527
 class A {
     constructor{{ c.decl_args }} {
-        {{ c.verify_args }}
+        {{ c.verify_args|indent(8) }}
     }
 }
-{% endif %}
+{%- endif %}
 
 class B {
     bar{{ c.decl_args }}: void {
-        {{ c.verify_args }}
+        {{ c.verify_args|indent(8) }}
     }
 }
 
 function foo{{ c.decl_args }}: void {
-    {{ c.verify_args }}
+    {{ c.verify_args|indent(4) }}
 }
 
 type my_lambda = {{ c.decl_args }} => void
 
 interface I {
     bar{{ c.decl_args }}: void {
-        {{ c.verify_args }}
+        {{ c.verify_args|indent(8) }}
     }
 }
 
 function main() {
 
-{% if "lambda" in ctx %}
-    let my_lambda_var: my_lambda = {{ c.decl_args }}: void => { {{ c.verify_args }} }
+{%- if "lambda" in ctx %}
+    let my_lambda_var: my_lambda = {{ c.decl_args }}: void => {
+        {{ c.verify_args|indent(8) }}
+    }
     my_lambda_var{{c.use_args}}
 {% endif %}
 
-{% if "function" in ctx %}
+{%- if "function" in ctx %}
     foo{{c.use_args}}
 {% endif %}
 
-{% if "constructor" in ctx %}
+{%- if "constructor" in ctx %}
     let a = new A{{c.use_args}}
 {% endif %}
 
-{% if "method" in ctx %}
+{%- if "method" in ctx %}
     new B().bar{{c.use_args}}
 {% endif %}
 
-{% if "interface" in ctx %}
+{%- if "interface" in ctx %}
     let i: I = {}
     i.bar{{c.use_args}}
 {% endif %}
-
 }
 
 {% endfor %}

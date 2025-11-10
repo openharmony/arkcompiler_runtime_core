@@ -51,17 +51,10 @@
 #24649
 04.names_declarations_and_scopes/03.scopes/type_param_class_neg_3.ets
 
-#24109
-04.names_declarations_and_scopes/04.accessible/type_name_const_enum.ets
-04.names_declarations_and_scopes/04.accessible/type_name_variable_enum.ets
-
 #26485
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_11.ets
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_12.ets
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_13.ets
-
-#563 arkts-2.0-specification
-04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/record_to_rest.ets
 
 #2236
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
@@ -350,19 +343,27 @@
 07.expressions/11.function_call_expression/fixed_array_predefined_neg_14.ets
 07.expressions/11.function_call_expression/fixed_array_predefined_neg_15.ets
 
-#19951
+#31353  Semantic error ESE0129: Call to `foo` is ambiguous
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_17.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_18.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_6.ets
+
+#31355 Semantic error ESE0131: Function foo with this assembly signature already declared.
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_20.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_21.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_4.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_22.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_6.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_8.ets
 
-#23062
+#31357 wrong function selected
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_10.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_11.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_14.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_16.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_2.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_21.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_5.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_22.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_24.ets
 
 #28679
 07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_0.ets
@@ -425,115 +426,14 @@
 #30891
 07.expressions/21.multiplicative_expressions/04.exponentiation/enum.ets
 
-#24367 no CTE on equality expressions with numeric types vs. enum int
-07.expressions/25.equality_expressions/eq_neg_100.ets
-07.expressions/25.equality_expressions/eq_neg_145.ets
-07.expressions/25.equality_expressions/eq_neg_147.ets
-07.expressions/25.equality_expressions/eq_neg_4.ets
-07.expressions/25.equality_expressions/eq_neg_51.ets
-07.expressions/25.equality_expressions/eq_neg_53.ets
-07.expressions/25.equality_expressions/eq_neg_6.ets
-07.expressions/25.equality_expressions/eq_neg_98.ets
-
-#24362 no CTE on equality expressions with value vs. reference type
-07.expressions/25.equality_expressions/eq_neg_10.ets
-07.expressions/25.equality_expressions/eq_neg_102.ets
-07.expressions/25.equality_expressions/eq_neg_103.ets
-07.expressions/25.equality_expressions/eq_neg_104.ets
-07.expressions/25.equality_expressions/eq_neg_105.ets
-07.expressions/25.equality_expressions/eq_neg_106.ets
-07.expressions/25.equality_expressions/eq_neg_107.ets
-07.expressions/25.equality_expressions/eq_neg_108.ets
-07.expressions/25.equality_expressions/eq_neg_109.ets
-07.expressions/25.equality_expressions/eq_neg_11.ets
-07.expressions/25.equality_expressions/eq_neg_110.ets
-07.expressions/25.equality_expressions/eq_neg_111.ets
-07.expressions/25.equality_expressions/eq_neg_115.ets
-07.expressions/25.equality_expressions/eq_neg_12.ets
-07.expressions/25.equality_expressions/eq_neg_122.ets
-07.expressions/25.equality_expressions/eq_neg_123.ets
-07.expressions/25.equality_expressions/eq_neg_124.ets
-07.expressions/25.equality_expressions/eq_neg_125.ets
-07.expressions/25.equality_expressions/eq_neg_126.ets
-07.expressions/25.equality_expressions/eq_neg_127.ets
-07.expressions/25.equality_expressions/eq_neg_128.ets
-07.expressions/25.equality_expressions/eq_neg_13.ets
-07.expressions/25.equality_expressions/eq_neg_137.ets
-07.expressions/25.equality_expressions/eq_neg_138.ets
-07.expressions/25.equality_expressions/eq_neg_139.ets
-07.expressions/25.equality_expressions/eq_neg_14.ets
-07.expressions/25.equality_expressions/eq_neg_140.ets
-07.expressions/25.equality_expressions/eq_neg_149.ets
-07.expressions/25.equality_expressions/eq_neg_15.ets
-07.expressions/25.equality_expressions/eq_neg_150.ets
-07.expressions/25.equality_expressions/eq_neg_151.ets
-07.expressions/25.equality_expressions/eq_neg_152.ets
-07.expressions/25.equality_expressions/eq_neg_153.ets
-07.expressions/25.equality_expressions/eq_neg_154.ets
-07.expressions/25.equality_expressions/eq_neg_155.ets
-07.expressions/25.equality_expressions/eq_neg_156.ets
-07.expressions/25.equality_expressions/eq_neg_157.ets
-07.expressions/25.equality_expressions/eq_neg_158.ets
-07.expressions/25.equality_expressions/eq_neg_16.ets
-07.expressions/25.equality_expressions/eq_neg_162.ets
-07.expressions/25.equality_expressions/eq_neg_169.ets
-07.expressions/25.equality_expressions/eq_neg_17.ets
-07.expressions/25.equality_expressions/eq_neg_170.ets
-07.expressions/25.equality_expressions/eq_neg_171.ets
-07.expressions/25.equality_expressions/eq_neg_172.ets
-07.expressions/25.equality_expressions/eq_neg_173.ets
-07.expressions/25.equality_expressions/eq_neg_174.ets
-07.expressions/25.equality_expressions/eq_neg_175.ets
-07.expressions/25.equality_expressions/eq_neg_184.ets
-07.expressions/25.equality_expressions/eq_neg_185.ets
-07.expressions/25.equality_expressions/eq_neg_186.ets
-07.expressions/25.equality_expressions/eq_neg_187.ets
-07.expressions/25.equality_expressions/eq_neg_21.ets
-07.expressions/25.equality_expressions/eq_neg_28.ets
-07.expressions/25.equality_expressions/eq_neg_29.ets
-07.expressions/25.equality_expressions/eq_neg_30.ets
-07.expressions/25.equality_expressions/eq_neg_31.ets
-07.expressions/25.equality_expressions/eq_neg_32.ets
-07.expressions/25.equality_expressions/eq_neg_33.ets
-07.expressions/25.equality_expressions/eq_neg_34.ets
-07.expressions/25.equality_expressions/eq_neg_43.ets
-07.expressions/25.equality_expressions/eq_neg_44.ets
-07.expressions/25.equality_expressions/eq_neg_45.ets
-07.expressions/25.equality_expressions/eq_neg_46.ets
-07.expressions/25.equality_expressions/eq_neg_55.ets
-07.expressions/25.equality_expressions/eq_neg_56.ets
-07.expressions/25.equality_expressions/eq_neg_57.ets
-07.expressions/25.equality_expressions/eq_neg_58.ets
-07.expressions/25.equality_expressions/eq_neg_59.ets
-07.expressions/25.equality_expressions/eq_neg_60.ets
-07.expressions/25.equality_expressions/eq_neg_61.ets
-07.expressions/25.equality_expressions/eq_neg_62.ets
-07.expressions/25.equality_expressions/eq_neg_63.ets
-07.expressions/25.equality_expressions/eq_neg_64.ets
-07.expressions/25.equality_expressions/eq_neg_68.ets
-07.expressions/25.equality_expressions/eq_neg_75.ets
-07.expressions/25.equality_expressions/eq_neg_76.ets
-07.expressions/25.equality_expressions/eq_neg_77.ets
-07.expressions/25.equality_expressions/eq_neg_78.ets
-07.expressions/25.equality_expressions/eq_neg_79.ets
-07.expressions/25.equality_expressions/eq_neg_8.ets
-07.expressions/25.equality_expressions/eq_neg_80.ets
-07.expressions/25.equality_expressions/eq_neg_81.ets
-07.expressions/25.equality_expressions/eq_neg_9.ets
-07.expressions/25.equality_expressions/eq_neg_90.ets
-07.expressions/25.equality_expressions/eq_neg_91.ets
-07.expressions/25.equality_expressions/eq_neg_92.ets
-07.expressions/25.equality_expressions/eq_neg_93.ets
-
-#26107 type compatability
-07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_2.ets
-07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_6.ets
-
 #30203 BigInt compare with floating-point number
 07.expressions/25.equality_expressions/01.numerical_equality_operators/different_types_equality_48.ets
 
-#23051 Reference comparison
-07.expressions/25.equality_expressions/reference_equality/type_conversion_of_one_operand_to_another_type.ets
+#31358 number and char equality ops should produce CTE
+07.expressions/25.equality_expressions/eq_neg_16.ets
+07.expressions/25.equality_expressions/eq_neg_17.ets
+07.expressions/25.equality_expressions/eq_neg_18.ets
+07.expressions/25.equality_expressions/eq_neg_19.ets
 
 #30412 Incorrect evaluation order for compound assignment
 07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_0.ets
@@ -1001,10 +901,6 @@
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_6.ets
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_7.ets
 
-#29939
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_global_0.ets
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_global_1.ets
-
 #29725
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_2.ets
@@ -1354,8 +1250,6 @@
 #30451
 15.semantic_rules/06.compatibility_call_args/spec_examples2_0.ets
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
-
-#612 spec issue
 15.semantic_rules/06.compatibility_call_args/spec_examples2_2.ets
 
 #30553 intersection in smart casts
@@ -2571,16 +2465,6 @@
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_0.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_1.ets
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
-
-# Negative tests passed successfully (narrowing conversion from int, function oveload and enum comparision...)
-07.expressions/25.equality_expressions/eq_neg_101.ets
-07.expressions/25.equality_expressions/eq_neg_146.ets
-07.expressions/25.equality_expressions/eq_neg_148.ets
-07.expressions/25.equality_expressions/eq_neg_5.ets
-07.expressions/25.equality_expressions/eq_neg_52.ets
-07.expressions/25.equality_expressions/eq_neg_54.ets
-07.expressions/25.equality_expressions/eq_neg_7.ets
-07.expressions/25.equality_expressions/eq_neg_99.ets
 
 #59 verifier in lambda
 07.expressions/06.spread_expression/spex_lmbd_37.ets

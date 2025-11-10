@@ -17,17 +17,8 @@ operators:
     - '!='
     - '!=='
 
-types:
-    - name: numeric
-      types: [ int, number ]
-    - name: string
-      types: [ string ]
-    - name: boolean
-      types: [ boolean ]
-    - name: enum
-      types: [ EN, ES ]
-    - name: array
-      types: [ 'C[]' ]
-    - name: reference
-      types: [ 'C',       'I',       '[number, boolean]', '() => void' ]
-            #  Class,     Interface, Tuple,               Function
+types: # Predefined value types
+    - types: [ int|short|byte, number, bigint ]
+    - types: [ string ]
+    - types: [ char ]
+    - types: [ boolean ]

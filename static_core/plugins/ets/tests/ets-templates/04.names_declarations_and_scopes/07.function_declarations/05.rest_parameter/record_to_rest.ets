@@ -15,6 +15,7 @@
 
 /*---
 desc: Rest function with record literals as param
+tags: [compile-only, negative]
 ---*/
 
 type TEntity = Record<number, string>
