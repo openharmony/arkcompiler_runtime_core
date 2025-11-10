@@ -29,7 +29,6 @@
 10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_17.ets
 13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_same_name.ets
 13.modules_and_namespaces/04.namespace_declarations/namespace_storage2.ets
-17.experimental_features/13.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_negative_22.ets
 18.annotations/01.declaring_annotations/declaration_coincide_name_n_0.ets
 #FailKind.DECLGEN_ETS2TS_TIMEOUT - 9 tests:
 03.types/19.function_types/incorrect_function_name_61.ets
