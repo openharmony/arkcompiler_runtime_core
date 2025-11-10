@@ -2606,9 +2606,6 @@
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
 
-#30650
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/issue30650_0.ets
-
 #30653
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_37.ets
 
