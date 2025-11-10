@@ -2388,14 +2388,6 @@
 17.experimental_features/14.trailing_lambdas/trlambda_met_13.ets
 17.experimental_features/14.trailing_lambdas/trlambda_met_14.ets
 
-#30251 Top-Level accessors
-17.experimental_features/15.accessor_declarations/accessor_0.ets
-17.experimental_features/15.accessor_declarations/accessor_1.ets
-17.experimental_features/15.accessor_declarations/accessor_2.ets
-17.experimental_features/15.accessor_declarations/accessor_3.ets
-17.experimental_features/15.accessor_declarations/accessor_4.ets
-17.experimental_features/15.accessor_declarations/accessor_5.ets
-
 #31097
 18.annotations/base_annotation_syntax_n_2.ets
 18.annotations/base_annotation_syntax_n_3.ets
