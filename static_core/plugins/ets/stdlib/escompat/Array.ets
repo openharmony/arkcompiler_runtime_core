@@ -1704,6 +1704,16 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
  */
 native function copyToFast(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
 
+function tryGetIteratorLength(obj: Object): int | undefined {
+    const objCls = Class.of(obj)
+    for (const method of objCls.getInstanceMethods()) {
+        if (method.getName() == "__Iterator_getLength" && method.getParametersNum() == 0) {
+            return method.invoke(obj, []) as int
+        }
+    }
+    return undefined
+}
+
 class ArrayValuesIterator_T<T> implements IterableIterator<T> {
     private parent: Array<T>
     private idx: int = 0

@@ -976,5 +976,16 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
  * ```
  */
 native function copyToFast(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
+
+function tryGetIteratorLength(obj: Object): int | undefined {
+    const objCls = Class.of(obj)
+    for (const method of objCls.getInstanceMethods()) {
+        if (method.getName() == "__Iterator_getLength" && method.getParametersNum() == 0) {
+            return method.invoke(obj, []) as int
+        }
+    }
+    return undefined
+}
+
 % template = ERB.new(File.read("Array_common_top_scope.erb"), trim_mode: '%', eoutvar: '_sub03')
 <%= template.result(ctx.instance_eval { binding }).rstrip %>
