@@ -16,7 +16,6 @@
 /*---
 desc: Ambient Namespace declarations
 name: namespace_declarations.d_3
-files: ['../namespace_declarations_n_3.ets']
 tags:
 - compile-only
 - not-a-test

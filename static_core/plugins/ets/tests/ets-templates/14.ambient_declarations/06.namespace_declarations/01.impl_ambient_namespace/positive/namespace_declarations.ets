@@ -16,7 +16,6 @@ limitations under the License.
 {% for decl in declarations %}
 /*---
 desc: Ambient Namespace declarations
-files: ['./namespace_decl_d/namespace_declarations_{{loop.index0}}.d.ets']
 tags: [compile-only, not-a-test]
 ---*/
 

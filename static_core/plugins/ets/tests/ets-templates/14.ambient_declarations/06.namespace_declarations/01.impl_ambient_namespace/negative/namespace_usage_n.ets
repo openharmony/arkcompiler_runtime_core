@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Namespaces usage
-files: ['./namespace_decl_d/namespace_declarations_n_{{loop.index0}}.d.ets']
+files: ['./namespace_declarations_n_{{loop.index0}}.ets']
 tags: ['negative']
 ---*/
 
