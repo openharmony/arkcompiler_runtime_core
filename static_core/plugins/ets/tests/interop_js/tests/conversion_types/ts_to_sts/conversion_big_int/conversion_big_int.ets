@@ -31,8 +31,8 @@ function checkTypeBigInt(): boolean {
 
 function checkConversionBigIntToInt(): boolean {
     try {
-        const Number = global.getProperty('Number');
-        const val = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const val = NumberData.invoke(tsBigInt);
         return val.typeOf() == 'number';
     } catch (e) {
         return false;
@@ -41,8 +41,8 @@ function checkConversionBigIntToInt(): boolean {
 
 function checkConversionBigIntToNumber(): boolean {
     try {
-        const Number = global.getProperty('Number');
-        const val = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const val = NumberData.invoke(tsBigInt);
         return val.typeOf() == 'number';
     } catch (e) {
         return false;
@@ -51,8 +51,8 @@ function checkConversionBigIntToNumber(): boolean {
 
 function checkConversionBigIntToFloat(): boolean {
     try {
-        const Number = global.getProperty('Number');
-        const val = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const val = NumberData.invoke(tsBigInt);
         return val.typeOf() == 'number';
     } catch (e) {
         return false;
@@ -61,8 +61,8 @@ function checkConversionBigIntToFloat(): boolean {
 
 function checkConversionBigIntToByte(): boolean {
     try {
-        const Number = global.getProperty('Number');
-        const val = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const val = NumberData.invoke(tsBigInt);
         return val.typeOf() == 'number';
     } catch (e) {
         return false;
@@ -71,8 +71,8 @@ function checkConversionBigIntToByte(): boolean {
 
 function checkConversionBigIntToShort(): boolean {
     try {
-        const Number = global.getProperty('Number');
-        const val = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const val = NumberData.invoke(tsBigInt);
         return val.typeOf() == 'number';
     } catch (e) {
         return false;
@@ -81,8 +81,8 @@ function checkConversionBigIntToShort(): boolean {
 
 function checkConversionBigIntToLong(): boolean {
     try {
-        const Number = global.getProperty('Number');
-        const val = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const val = NumberData.invoke(tsBigInt);
         return val.typeOf() == 'number';
     } catch (e) {
         return false;
@@ -91,8 +91,8 @@ function checkConversionBigIntToLong(): boolean {
 
 function checkConversionBigIntToDouble(): boolean {
     try {
-        const Number = global.getProperty('Number');
-        const val = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const val = NumberData.invoke(tsBigInt);
         return val.typeOf() == 'number';
     } catch (e) {
         return false;
@@ -101,8 +101,8 @@ function checkConversionBigIntToDouble(): boolean {
 
 function checkConversionBigIntToChar(): boolean {
     try {
-        const Number = global.getProperty('Number');
-        const val = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const val = NumberData.invoke(tsBigInt);
         return val.typeOf() == 'number';
     } catch (e) {
         return false;

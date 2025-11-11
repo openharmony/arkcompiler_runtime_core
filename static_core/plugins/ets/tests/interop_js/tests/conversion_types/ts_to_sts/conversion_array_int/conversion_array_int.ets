@@ -663,8 +663,8 @@ function checkConversionByteToArrayChar(): boolean {
 function checkConversionBigIntToArrayInt(): boolean {
     try {
         const val = ESValue.instantiateEmptyArray();
-        const Number = global.getProperty('Number');
-        const converted = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
         val.setProperty(0, converted);
 
         const firstElement = val.getProperty(0);
@@ -677,8 +677,8 @@ function checkConversionBigIntToArrayInt(): boolean {
 function checkConversionBigIntToArrayNumber(): boolean {
     try {
         const val = ESValue.instantiateEmptyArray();
-        const Number = global.getProperty('Number');
-        const converted = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
         val.setProperty(0, converted);
 
         const firstElement = val.getProperty(0);
@@ -691,8 +691,8 @@ function checkConversionBigIntToArrayNumber(): boolean {
 function checkConversionBigIntToArrayFloat(): boolean {
     try {
         const val = ESValue.instantiateEmptyArray();
-        const Number = global.getProperty('Number');
-        const converted = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
         val.setProperty(0, converted);
 
         const firstElement = val.getProperty(0);
@@ -705,8 +705,8 @@ function checkConversionBigIntToArrayFloat(): boolean {
 function checkConversionBigIntToArrayByte(): boolean {
     try {
         const val = ESValue.instantiateEmptyArray();
-        const Number = global.getProperty('Number');
-        const converted = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
         val.setProperty(0, converted);
 
         const firstElement = val.getProperty(0);
@@ -719,8 +719,8 @@ function checkConversionBigIntToArrayByte(): boolean {
 function checkConversionBigIntToArrayShort(): boolean {
     try {
         const val = ESValue.instantiateEmptyArray();
-        const Number = global.getProperty('Number');
-        const converted = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
         val.setProperty(0, converted);
 
         const firstElement = val.getProperty(0);
@@ -733,8 +733,8 @@ function checkConversionBigIntToArrayShort(): boolean {
 function checkConversionBigIntToArrayLong(): boolean {
     try {
         const val = ESValue.instantiateEmptyArray();
-        const Number = global.getProperty('Number');
-        const converted = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
         val.setProperty(0, converted);
 
         const firstElement = val.getProperty(0);
@@ -747,8 +747,8 @@ function checkConversionBigIntToArrayLong(): boolean {
 function checkConversionBigIntToArrayDouble(): boolean {
     try {
         const val = ESValue.instantiateEmptyArray();
-        const Number = global.getProperty('Number');
-        const converted = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
         val.setProperty(0, converted);
 
         const firstElement = val.getProperty(0);
@@ -761,8 +761,8 @@ function checkConversionBigIntToArrayDouble(): boolean {
 function checkConversionBigIntToArrayChar(): boolean {
     try {
         const val = ESValue.instantiateEmptyArray();
-        const Number = global.getProperty('Number');
-        const converted = Number.invoke(tsBigInt);
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
         val.setProperty(0, converted);
 
         const firstElement = val.getProperty(0);
