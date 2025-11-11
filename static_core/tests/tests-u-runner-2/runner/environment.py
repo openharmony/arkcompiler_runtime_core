@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 import os
 from pathlib import Path
 from typing import ClassVar, NamedTuple
@@ -53,7 +52,10 @@ class RunnerEnv:
         self.urunner_path: Path | None = urunner_path
 
     @staticmethod
-    def expand_mandatory_prop(prop_desc: MandatoryPropDescription) -> None:
+    def expand_mandatory_prop(prop_desc: MandatoryPropDescription, runner_help_mode: bool) -> None:
+        if runner_help_mode:
+            return
+
         var_value = os.getenv(prop_desc.name)
         if var_value is None:
             raise InvalidInitialization(
@@ -77,12 +79,12 @@ class RunnerEnv:
             result[prop_name] = MandatoryProp(value=os.getenv(prop_name), is_path=is_path, require_exist=require_exist)
         return result
 
-    def load_environment(self) -> None:
+    def load_environment(self, runner_help_mode: bool = False) -> None:
         self.load_home_env()
         self.load_local_env()
 
         for prop in self.mandatory_props:
-            self.expand_mandatory_prop(prop)
+            self.expand_mandatory_prop(prop, runner_help_mode)
 
         if self.urunner_path:
             os.environ[self.urunner_path_name] = self.urunner_path.as_posix()

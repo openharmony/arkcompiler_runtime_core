@@ -17,7 +17,7 @@
 
 import os
 from pathlib import Path
-from typing import cast
+from typing import ClassVar, cast
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -33,6 +33,8 @@ existing_path_02: str = str(Path(__file__).parent / "env-exist-02")
 
 
 class EnvironmentTest(TestCase):
+    runner_help_mode_off: ClassVar[bool] = False
+    runner_help_mode_on: ClassVar[bool] = True
 
     @staticmethod
     def clear_dir(dir_path: Path) -> None:
@@ -81,7 +83,18 @@ class EnvironmentTest(TestCase):
         self.assertRaises(
             InvalidInitialization,
             RunnerEnv.expand_mandatory_prop,
-            MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True))
+            MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True),
+            EnvironmentTest.runner_help_mode_off)
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_check_mandatory_prop_absent_help_mode(self) -> None:
+        # test
+        assert_not_raise(
+            test_case=self,
+            cls=InvalidInitialization,
+            function=RunnerEnv.expand_mandatory_prop,
+            params=[MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True),
+                    EnvironmentTest.runner_help_mode_on])
 
     @patch.dict(os.environ, {
         'ARKCOMPILER_RUNTIME_CORE_PATH': non_existing_path_01,
@@ -91,7 +104,8 @@ class EnvironmentTest(TestCase):
         self.assertRaises(
             InvalidInitialization,
             RunnerEnv.expand_mandatory_prop,
-            MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True))
+            MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True),
+            EnvironmentTest.runner_help_mode_off)
 
     @patch.dict(os.environ, {
         'WORK_DIR': non_existing_path_01,
@@ -102,7 +116,8 @@ class EnvironmentTest(TestCase):
             test_case=self,
             cls=InvalidInitialization,
             function=RunnerEnv.expand_mandatory_prop,
-            params=[MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False)])
+            params=[MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False),
+                    EnvironmentTest.runner_help_mode_off])
 
     @patch.dict(os.environ, {
         'ARKCOMPILER_RUNTIME_CORE_PATH': existing_path_01,
@@ -115,7 +130,8 @@ class EnvironmentTest(TestCase):
             test_case=self,
             cls=InvalidInitialization,
             function=RunnerEnv.expand_mandatory_prop,
-            params=[MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True)])
+            params=[MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True),
+                    EnvironmentTest.runner_help_mode_off])
         # clear up
         self.clear_dir(Path(existing_path_01))
 
@@ -130,7 +146,8 @@ class EnvironmentTest(TestCase):
             test_case=self,
             cls=InvalidInitialization,
             function=RunnerEnv.expand_mandatory_prop,
-            params=[MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False)])
+            params=[MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False),
+                    EnvironmentTest.runner_help_mode_off])
         # clear up
         self.clear_dir(Path(existing_path_02))
 
