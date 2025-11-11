@@ -23,7 +23,7 @@ export enum AsyncLockMode {
     EXCLUSIVE = 2,
 }
 
-export final class AsyncLock {
+export class AsyncLock {
 
     /**
      * Creates instance of AsyncLock class
@@ -32,8 +32,7 @@ export final class AsyncLock {
         this(AsyncLock.generateAnonymousLockName());
     }
 
-    //NOTE(ekaterinzaytseva): used as public in AsyncLockManager
-    internal constructor(name: string) {
+    protected constructor(name: string) {
         this.name = name;
         asyncLockManager.setElem(this);
     }
@@ -162,7 +161,7 @@ export final class AsyncLock {
             this.fireCondEvent();
             throw new Error('Aborted');
         }
-            this.unlock(asyncLockInfo); 
+            this.unlock(asyncLockInfo);
         });
     }
 
@@ -170,7 +169,7 @@ export final class AsyncLock {
         let isDone = false;
         let timeout = options.timeout;
         let isTimeoutExec: boolean = false;
-       
+
         if (timeout) {
            setTimeout(() => {
               this.queryAllDeadlocks();
@@ -192,7 +191,7 @@ export final class AsyncLock {
             if(options.isAvailable) {
                 throw new Error("AsyncLock is not available");
             }
-            
+
             ConcurrencyHelpers.mutexLock(this.mutex);
             if (this.holderCID == 0) {
                 this.holderCID = callerCID;
@@ -212,7 +211,7 @@ export final class AsyncLock {
                 ConcurrencyHelpers.condVarWait(this.condVar, this.mutex);
             }
             ConcurrencyHelpers.mutexUnlock(this.mutex);
-        } 
+        }
     }
 
     private fireCondEvent()
@@ -268,9 +267,9 @@ export final class AsyncLock {
         ConcurrencyHelpers.mutexUnlock(this.mutex);
         return state;
     }
-   
+
     private queryDeadlock(deadLockPrinter : DeadLockInfo) {
-        ConcurrencyHelpers.mutexLock(this.mutex);     
+        ConcurrencyHelpers.mutexLock(this.mutex);
         this.held.forEach((v : AsyncLockInfo) => {
             this.pending.forEach((p : AsyncLockInfo) => {
                 if (v.contextId != p.contextId) {
@@ -278,8 +277,8 @@ export final class AsyncLock {
                 }
             })
         });
-        ConcurrencyHelpers.mutexUnlock(this.mutex);   
-    }    
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
+    }
 
     private  queryAllDeadlocks() {
         let arr = asyncLockManager.queryAllLocks() ;
@@ -330,7 +329,7 @@ class DeadLockInfo {
     private helper(t : StoreType)
     {
         let sb  = new StringBuilder();
-     
+
         sb.append('\n');
         sb.append('!!! DEADLOCK WARNING !!!');
         sb.append(t[1]);
@@ -342,4 +341,10 @@ class DeadLockInfo {
     }
 
     private arr: Array<StoreType>  = new Array<StoreType>;
+}
+
+final class AsyncLockHelper extends AsyncLock {
+    constructor(name: String) {
+        super(name);
+    }
 }
