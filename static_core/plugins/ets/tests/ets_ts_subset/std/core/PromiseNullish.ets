@@ -17,53 +17,52 @@ function id<T>(v: T): T {
     return v;
 }
 
-Promise.resolve<string | undefined | null>(null)
-    .then<string | undefined | null>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
-Promise.resolve<string | undefined | null>(undefined)
-    .then<string | undefined | null>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
-Promise.all<string | undefined | null>([Promise.resolve<string | undefined | null>(undefined)])
-    .then<Array<string | undefined | null>>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
-Promise.all<string | undefined | null>([Promise.resolve<string | undefined | null>(null)])
-    .then<Array<string | undefined | null>>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
-Promise.allSettled<string | undefined | null>([Promise.resolve<string | undefined | null>(undefined)])
-    .then<PromiseSettledResult<string | undefined | null>[]>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
-Promise.allSettled<string | undefined | null>([Promise.resolve<string | undefined | null>(null)])
-    .then<PromiseSettledResult<string | undefined | null>[]>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
-Promise.race<string | undefined | null>([Promise.resolve<string | undefined | null>(undefined)])
-    .then<string | undefined | null>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
-Promise.race<string | undefined | null>([Promise.resolve<string | undefined | null>(null)])
-    .then<string | undefined | null>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
-Promise.any<string | undefined | null>([Promise.resolve<string | undefined | null>(undefined)])
-    .then<string | undefined | null>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
-Promise.any<string | undefined | null>([Promise.resolve<string | undefined | null>(null)])
-    .then<string | undefined | null>(id)
-    .catch((e: Error): void => {
-        console.log('Test failed: ' + e);
-    });
+type NullishStr = string | undefined | null;
+
+const idNullish      = id<NullishStr>;
+const idNullishArray = id<Array<NullishStr>>;
+const idSettledArray = id<PromiseSettledResult<NullishStr>[]>;
+
+const onReject = (e: Error): void => {
+    console.log('Test failed: ' + e);
+};
+
+Promise.resolve<NullishStr>(null)
+    .then<NullishStr>(idNullish)
+    .catch(onReject);
+
+Promise.resolve<NullishStr>(undefined)
+    .then<NullishStr>(idNullish)
+    .catch(onReject);
+
+Promise.all<NullishStr>([Promise.resolve<NullishStr>(undefined)])
+    .then<Array<NullishStr>>(idNullishArray)
+    .catch(onReject);
+
+Promise.all<NullishStr>([Promise.resolve<NullishStr>(null)])
+    .then<Array<NullishStr>>(idNullishArray)
+    .catch(onReject);
+
+Promise.allSettled<NullishStr>([Promise.resolve<NullishStr>(undefined)])
+    .then<PromiseSettledResult<NullishStr>[]>(idSettledArray)
+    .catch(onReject);
+
+Promise.allSettled<NullishStr>([Promise.resolve<NullishStr>(null)])
+    .then<PromiseSettledResult<NullishStr>[]>(idSettledArray)
+    .catch(onReject);
+
+Promise.race<NullishStr>([Promise.resolve<NullishStr>(undefined)])
+    .then<NullishStr>(idNullish)
+    .catch(onReject);
+
+Promise.race<NullishStr>([Promise.resolve<NullishStr>(null)])
+    .then<NullishStr>(idNullish)
+    .catch(onReject);
+
+Promise.any<NullishStr>([Promise.resolve<NullishStr>(undefined)])
+    .then<NullishStr>(idNullish)
+    .catch(onReject);
+
+Promise.any<NullishStr>([Promise.resolve<NullishStr>(null)])
+    .then<NullishStr>(idNullish)
+    .catch(onReject);
