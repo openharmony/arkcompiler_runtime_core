@@ -29,7 +29,7 @@ class Field {
     protected fieldPtr: long
     protected accessMod: byte
 
-    private native constructor()
+    protected native constructor()
 
     public isReadonly(): boolean {
         return (this.attributes & Attributes.READONLY) != 0

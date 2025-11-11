@@ -1790,23 +1790,23 @@ export class DateTimeFormat {
         public useGroupingStr: string;
         public isCompact: boolean;
 
-        private _compactDisplay?: "short" | "long";
-        private _currencySign?: "standard" | "accounting";
-        private _currency?: string;
-        private _currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name";
-        private _locale: Intl.BCP47LanguageTag;
-        private _maximumFractionDigits: number;
-        private _maximumSignificantDigits?: number;
-        private _minimumFractionDigits: number;
-        private _minimumIntegerDigits: number;
-        private _minimumSignificantDigits?: number;
-        private _notation?: "standard" | "scientific" | "engineering" | "compact";
-        private _numberingSystem: string;
-        private _signDisplay?: "auto" | "never" | "always" | "exceptZero";
-        private _style: "decimal" | "percent" | "currency" | "unit";
-        private _unit?: string;
-        private _unitDisplay?: "short" | "long" | "narrow";
-        private _useGrouping: boolean;
+        public _compactDisplay?: "short" | "long";
+        public _currencySign?: "standard" | "accounting";
+        public _currency?: string;
+        public _currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name";
+        public _locale: Intl.BCP47LanguageTag;
+        public _maximumFractionDigits: number;
+        public _maximumSignificantDigits?: number;
+        public _minimumFractionDigits: number;
+        public _minimumIntegerDigits: number;
+        public _minimumSignificantDigits?: number;
+        public _notation?: "standard" | "scientific" | "engineering" | "compact";
+        public _numberingSystem: string;
+        public _signDisplay?: "auto" | "never" | "always" | "exceptZero";
+        public _style: "decimal" | "percent" | "currency" | "unit";
+        public _unit?: string;
+        public _unitDisplay?: "short" | "long" | "narrow";
+        public _useGrouping: boolean;
 
         set compactDisplay(value: "short" | "long" | undefined) {
             this._compactDisplay = value;

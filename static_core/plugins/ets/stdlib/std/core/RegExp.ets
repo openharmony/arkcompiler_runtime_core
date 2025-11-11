@@ -64,43 +64,11 @@ export class RegExpResultArray extends Array<String | undefined> {
         return this
     }
 
-    private setNumberedField(index: int, value: String): void {
-        if (index > 9 || index <= 0) {
-            return
-        }
-        if (index == 1) RegExp.$1_ = value
-        else if (index == 2) RegExp.$2_ = value
-        else if (index == 3) RegExp.$3_ = value
-        else if (index == 4) RegExp.$4_ = value
-        else if (index == 5) RegExp.$5_ = value
-        else if (index == 6) RegExp.$6_ = value
-        else if (index == 7) RegExp.$7_ = value
-        else if (index == 8) RegExp.$8_ = value
-        else if (index == 9) RegExp.$9_ = value
-    }
-
-    public postExecProcessing(res: RegExpResultArray, input: String, index: int, hasIndices: boolean): void {
+    public postExecProcessing(res: RegExpResultArray, input: String, index: int, hasIndices: boolean, 
+                              indecesUpdater: (length: int, index: int, str: String) => void): void {
         // NOTE(ekaterinazaytseva): temp solution - will be fixed in #20259
-        if (this.wasProcessed) {
-            return
-        }
-        if (!res.isCorrect) {
-            return
-        }
-        RegExp.$1_ = ""
-        RegExp.$2_ = ""
-        RegExp.$3_ = ""
-        RegExp.$4_ = ""
-        RegExp.$5_ = ""
-        RegExp.$6_ = ""
-        RegExp.$7_ = ""
-        RegExp.$8_ = ""
-        RegExp.$9_ = ""
         this.updateGroups()
-        this.updateIndicesAndResult(hasIndices)
-        RegExp.input_ = input
-        RegExp.leftContext_ = input.substring(0, index)
-        RegExp.rightContext_ = input.substring(index + res.result[0]!.length)
+        this.updateIndicesAndResult(hasIndices, indecesUpdater)
         this.wasProcessed = true
     }
 
@@ -158,17 +126,13 @@ export class RegExpResultArray extends Array<String | undefined> {
         throw new Error("not overridden")
     }
 
-    private processStaticFields(index: int, str: String): void {
-        if (index == 0) {
-            RegExp.lastMatch_ = str
-        }
-        if (index == this.length - 1) {
-            RegExp.lastParen_ = str
-        }
-        this.setNumberedField(index, str)
+    // NOTE(mgroshev): remove it as part of #20259
+    public getWasProcessed(): boolean {
+        return this.wasProcessed
     }
 
-    private updateIndicesAndResult(hasIndices: boolean): void {
+    private updateIndicesAndResult(hasIndices: boolean, 
+                                   indecesUpdater: (length: int, index: int, str: String) => void): void {
         const data = this.resultRaw_.split(',')
         const n: int = (data.length / 2)
 
@@ -190,7 +154,7 @@ export class RegExpResultArray extends Array<String | undefined> {
                     this.indices_[pos] = [index, endIndex]
                     const str = this.input_.substring(index, endIndex)
                     this.$_set(pos, str)
-                    this.processStaticFields(pos, str)
+                    indecesUpdater(this.length, pos, str)
                 }
             }
         } else {
@@ -202,7 +166,7 @@ export class RegExpResultArray extends Array<String | undefined> {
                 if (index != -1 && endIndex != -1) {
                     const str = this.input_.substring(index, endIndex)
                     this.$_set(pos, str)
-                    this.processStaticFields(pos, str)
+                    indecesUpdater(this.length, pos, str)
                 }
             }
         }
@@ -686,7 +650,14 @@ export class RegExp extends Object {
             res.input = str
             RegExp.lastMatch_ = ""
             RegExp.lastParen_ = ""
-            res.postExecProcessing(res, str, res.index, this.hasIndices)
+            let indecesUpdater = (length: int, index: int, value: String) => {
+                RegExp.updateStaticFields(length, index, value)
+            }
+            if (!res.getWasProcessed() && res.isCorrect) {
+                RegExp.resetStaticFields();
+                res.postExecProcessing(res, str, res.index, this.hasIndices, indecesUpdater)
+                RegExp.postExecProcessing(res, str, res.index)
+            }
             return res
         } else {
             return null
@@ -711,7 +682,14 @@ export class RegExp extends Object {
         const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
             res.input = str
-            res.postExecProcessing(res, str, res.index!, this.hasIndices)
+            let indecesUpdater = (length: int, index: int, value: String) => {
+                RegExp.updateStaticFields(length, index, value)
+            }
+            if (!res.getWasProcessed() && res.isCorrect) {
+                RegExp.resetStaticFields();
+                res.postExecProcessing(res, str, res.index!, this.hasIndices, indecesUpdater)
+                RegExp.postExecProcessing(res, str, res.index!)
+            }
             return res
         } else {
             return null
@@ -983,6 +961,48 @@ export class RegExp extends Object {
 
     public static $_invoke(pattern: String, flags?: String) : RegExp {
         return new RegExp(pattern, flags)
+    }
+
+    private static resetStaticFields() {
+        RegExp.$1_ = ""
+        RegExp.$2_ = ""
+        RegExp.$3_ = ""
+        RegExp.$4_ = ""
+        RegExp.$5_ = ""
+        RegExp.$6_ = ""
+        RegExp.$7_ = ""
+        RegExp.$8_ = ""
+        RegExp.$9_ = ""
+    }
+
+    private static postExecProcessing(res: RegExpResultArray, input: String, index: int): void {
+        // NOTE(ekaterinazaytseva): temp solution - will be fixed in #20259
+        RegExp.input_ = input
+        RegExp.leftContext_ = input.substring(0, index)
+        RegExp.rightContext_ = input.substring(index + res.result[0]!.length)
+    }
+
+    // NOTE(@mgroshev): Need to redesign. This approach is used to avoid private field access violation
+    private static updateStaticFields(length: int, index: int, value: String): void {
+        if (index == 0) {
+            RegExp.lastMatch_ = value
+        }
+        if (index == length - 1) {
+            RegExp.lastParen_ = value
+        }
+        
+        if (index > 9 || index <= 0) {
+            return
+        }
+        if (index == 1) RegExp.$1_ = value
+        else if (index == 2) RegExp.$2_ = value
+        else if (index == 3) RegExp.$3_ = value
+        else if (index == 4) RegExp.$4_ = value
+        else if (index == 5) RegExp.$5_ = value
+        else if (index == 6) RegExp.$6_ = value
+        else if (index == 7) RegExp.$7_ = value
+        else if (index == 8) RegExp.$8_ = value
+        else if (index == 9) RegExp.$9_ = value
     }
 
     private static escapePattern(pattern: String): String {

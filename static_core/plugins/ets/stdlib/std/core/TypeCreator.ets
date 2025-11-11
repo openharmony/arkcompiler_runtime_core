@@ -105,6 +105,14 @@ export abstract class TypeCreator {
         }
         return TypeCreatorCtx.getTypeDescFromPointer(this.ctxItemPtr)
     }
+
+    public setTyp(typ_: Type) {
+        this.typ = typ_ 
+    }
+
+    public getTyp(): Type | undefined {
+        return this.typ
+    }
 }
 
 /**
@@ -127,8 +135,8 @@ export abstract class TypeOrCreator {
      * @returns created {@link TypeOrCreator_Creator} or TypeOrCreator_Type if it was already created
      */
     static from(typ: TypeCreator): TypeOrCreator {
-        if (typ.typ != undefined) {
-            return new TypeOrCreator_Type(typ.typ!)
+        if (typ.getTyp() != undefined) {
+            return new TypeOrCreator_Type(typ.getTyp()!)
         }
         return new TypeOrCreator_Creator(typ)
     }
@@ -263,7 +271,7 @@ export final class TypeCreatorCtx {
                 return
             }
             const typeCreator = (tc as TypeOrCreator_Creator).typ
-            if (typeCreator.typ != undefined) {
+            if (typeCreator.getTyp() != undefined) {
                 return
             }
             if (visited.has(typeCreator)) {
@@ -323,7 +331,11 @@ export final class TypeCreatorCtx {
         // assignes actual runtime types to all creators
         for (let i = 0; i < order.length; i++) {
             const tc = order.$_get(i)
-            tc.typ = Type.resolve(TypeCreatorCtx.getTypeDescFromPointer(tc.ctxItemPtr), targetLinker)
+            let resolved = Type.resolve(tc.getTypeDescriptor(), targetLinker) 
+            if (resolved == undefined) {
+                throw new TypeAPICreateError("Can not resolve Type")
+            }
+            tc.setTyp(resolved!)
         }
     }
 
@@ -427,7 +439,7 @@ export final class ClassTypeCreator extends TypeCreator {
      * @returns this
      */
     public addField(fld: FieldCreator): ClassTypeCreator {
-        fld.frozen.freeze()
+        fld.getFrozen().freeze()
         this.fields.push(fld)
         return this;
     }
@@ -464,7 +476,7 @@ export final class ClassTypeCreator extends TypeCreator {
         }
         for (let i = 0; i < this.fields.length; i++) {
             const f = this.fields.$_get(i);
-            ctx.checkError(TypeCreatorCtx.classAddField(classPtr, f.name, f.typ.getTypeDescriptor(), f.attrs.get(), f.accessMod.get()))
+            ctx.checkError(TypeCreatorCtx.classAddField(classPtr, f.name, f.typ.getTypeDescriptor(), f.attrs.get(), f.getAccessMod()))
         }
         for (let i = 0; i < this.methods.length; i++) {
             const m = this.methods.$_get(i)
@@ -744,6 +756,7 @@ export final class LambdaTypeCreator extends TypeCreator {
  */
 export interface Freezable {
     isFrozen(): boolean;
+    freeze(): void;
 }
 
 /**
@@ -772,6 +785,8 @@ final class FreezableCreator extends TypeCreator implements Freezable {
         return getNearestNonBootRuntimeLinker()!
     }
 
+    public override freeze(): void {}
+
     public override collectTypes(collector: CollectTypesCB): void {}
 
     public override declare(ctx: TypeCreatorCtx): void {}
@@ -789,7 +804,7 @@ export final class FreezableImpl implements Freezable {
         return this.frozen
     }
 
-    freeze(): void {
+    override freeze(): void {
         this.frozen = true
     }
 }
@@ -893,7 +908,7 @@ export final class FieldCreator {
         this.typ = typ
     }
 
-    private frozen: FreezableImpl = new FreezableImpl()
+    private frozen: Freezable = new FreezableImpl()
     public attrs: HasAttributes
     private accessMod: HasAccessMod
 
@@ -903,6 +918,10 @@ export final class FieldCreator {
      */
     public constructor(name: string, typ: Type) {
         this(name, TypeOrCreator.from(typ))
+    }
+
+    public getAccessMod(): Int {
+        return this.accessMod.get()
     }
 
     /**
@@ -921,6 +940,10 @@ export final class FieldCreator {
     public addAttributes(attrs: int): FieldCreator {
         this.attrs.add(attrs)
         return this;
+    }
+
+    public getFrozen(): Freezable {
+        return this.frozen
     }
 
     /**
@@ -1177,15 +1200,15 @@ export final class MethodCreator {
         if (!isAbstract) {
             const body = this.body!
             if (body instanceof CallableBodyMethod) {
-                const callableBody = (body as CallableBodyMethod).body
+                const callableBody = (body as CallableBodyMethod).getBody()
                 ctx.checkError(TypeCreatorCtx.methodAddBodyFromMethod(fptr, callableBody.getType()))
             } else if (body instanceof CallableBodyFunction) {
-                const bbody = (body as CallableBodyFunction).body
+                const bbody = (body as CallableBodyFunction).getBody()
                 const id = ctx.registerObject(bbody as Object);
                 const bbodyType = Type.of(bbody) as LambdaType
                 ctx.checkError(TypeCreatorCtx.methodAddBodyFromLambda(fptr, id, bbodyType))
             } else if (body instanceof CallableBodyErasedFunction) {
-                const bbody = (body as CallableBodyErasedFunction).body
+                const bbody = (body as CallableBodyErasedFunction).getBody()
                 const id = ctx.registerObject(bbody as Object);
                 ctx.checkError(TypeCreatorCtx.methodAddBodyFromErasedLambda(fptr, id))
             } else if (body instanceof CallableBodyDefault) {
@@ -1225,6 +1248,9 @@ export final class CallableBodyMethod extends CallableBody {
         super()
         this.body = m
     }
+    public getBody(): Method {
+        return this.body
+    }
 }
 
 /**
@@ -1245,6 +1271,9 @@ export final class CallableBodyFunction extends CallableBody {
         }
         this.body = m
     }
+    public getBody(): Object {
+        return this.body
+    }
 }
 
 /**
@@ -1255,5 +1284,9 @@ export final class CallableBodyErasedFunction extends CallableBody {
     public constructor(m: (recv: Any, args: FixedArray<Any>) => Any) {
         super()
         this.body = m
+    }
+
+    public getBody(): (recv: Any, args: FixedArray<Any>) => Any {
+        return this.body
     }
 }
