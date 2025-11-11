@@ -15,8 +15,8 @@
 
 /*---
 desc: Overriding abstract method.
-assert: A compile-time error occurs if an abstract method overrides a non-abstract instance method
-tags: [negative, compile-only]
+assert: An abstract method can also override non-abstract methods inherited from base classes or base inferfaces
+tags: [compile-only]
 ---*/
 
 class A {
