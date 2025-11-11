@@ -41,6 +41,9 @@ function(add_ets_coroutines_test)
     set(multiValues OPTIONS IMPL OPTION_SETS_THREADED OPTION_SETS_STACKFUL WORKERS MODE)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
 
+    # NOTE(26403) Profilesaver is turned off beause of integer overflow
+    list(APPEND ARG_OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false")
+
     if (ARG_SKIP_ARM32_COMPILER)
         set(SKIP_ARM32_COMPILER "SKIP_ARM32_COMPILER")
     endif()
@@ -217,10 +220,8 @@ if (NOT PANDA_TARGET_ARM32)
                             MODE "AOT"
     )
 
-    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE class_load_race.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
                             OPTION_SETS_STACKFUL "DEFAULT" "POOL"
@@ -228,20 +229,16 @@ if (NOT PANDA_TARGET_ARM32)
                             MODE "INT" "JIT"
     )
 
-    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_n_workers.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "AUTO"
                             MODE "INT" "JIT" "AOT"
     )
 
-    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_n_workers.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "POOL"
                             WORKERS "AUTO"
@@ -261,12 +258,11 @@ if (NOT PANDA_TARGET_ARM32)
         )
     endif()
 
-    # NOTE(26403) Profilesaver is turned off because of data race
     # NOTE(30627) Temporarily disabled due failures under TSan
     if (NOT PANDA_ENABLE_THREAD_SANITIZER)
         add_ets_coroutines_test(FILE launch_oom.ets
                                 SKIP_ARM32_COMPILER
-                                OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" "--coroutines-stack-mem-limit=268435456"
+                                OPTIONS "--gc-type=epsilon" "--coroutines-stack-mem-limit=268435456"
                                 IMPL "STACKFUL"
                                 OPTION_SETS_STACKFUL "POOL"
                                 WORKERS "ONE"
@@ -274,10 +270,9 @@ if (NOT PANDA_TARGET_ARM32)
         )
     endif()
 
-    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_oom.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" "--coroutines-stack-mem-limit=268435456"
+                            OPTIONS "--gc-type=epsilon" "--coroutines-stack-mem-limit=268435456"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "ONE"
