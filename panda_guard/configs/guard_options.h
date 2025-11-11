@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,7 @@ struct ObfuscationRules {
     std::string printNameCache;
     std::string applyNameCache;
     std::vector<std::string> reservedNames;
+    std::vector<std::string> recordNameWhiteList;
     ObfuscationOption propertyOption;
     ObfuscationOption toplevelOption;
     FileNameOption fileNameOption;
@@ -115,6 +116,8 @@ public:
     [[nodiscard]] bool IsKeepPath(const std::string &path) const;
 
     [[nodiscard]] bool IsReservedNames(const std::string &name) const;
+
+    [[nodiscard]] bool IsInRecordNameWhiteList(const std::string &name) const;
 
     [[nodiscard]] bool IsReservedProperties(const std::string &name) const;
 

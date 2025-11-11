@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,7 @@ HWTEST(GuardOptionsUnitTest, guard_options_test_001, TestSize.Level4)
     EXPECT_EQ(options.IsToplevelObfEnabled(), true);
     EXPECT_EQ(options.IsFileNameObfEnabled(), true);
     EXPECT_EQ(options.IsReservedNames("xxx"), true);
+    EXPECT_EQ(options.IsInRecordNameWhiteList("xxx"), true);
     EXPECT_EQ(options.IsReservedProperties("xxx"), true);
     EXPECT_EQ(options.IsReservedToplevelNames("xxx"), true);
     EXPECT_EQ(options.IsReservedFileNames("xxx"), true);

@@ -24,6 +24,9 @@
     "reservedNames": [
       "xxx"
     ],
+    "recordNameWhiteList": [
+      "xxx"
+    ],
     "propertyObfuscation": {
       "enable": true,
       "reservedProperties": [

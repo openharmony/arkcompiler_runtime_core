@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,8 @@ void panda::guard::FilePathItem::ExtractNames(std::set<std::string> &strings) co
 void panda::guard::FilePathItem::RefreshNeedUpdate()
 {
     this->needUpdate_ = GuardContext::GetInstance()->GetGuardOptions()->IsFileNameObfEnabled() &&
-                        this->refFilePath_.pathType_ != FilePathType::EXTERNAL_DEPENDENCE;
+        this->refFilePath_.pathType_ != FilePathType::EXTERNAL_DEPENDENCE &&
+        !GuardContext::GetInstance()->GetGuardOptions()->IsInRecordNameWhiteList(this->refFilePath_.rawName_);
     if (!this->needUpdate_) {
         auto parts = StringUtil::Split(this->refFilePath_.GetRawPath(), PATH_DELIMITER.data());
         for (const auto &part : parts) {
