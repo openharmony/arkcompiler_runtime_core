@@ -108,8 +108,8 @@ cases:
       decl: |-
           type LITERAL = "some str"
           function foo(i: LITERAL ) { }
-      use: |-
           let a: string = "some str"
+      use: |-
           foo(a)
 
     - doc: |-

@@ -400,6 +400,7 @@ cases:
     - decl: |-
           class A<T> {}
           class B<T> {}
+      tags: 'compile-only, negative'
       use: |-
           // use generics
           let f = <T, U> (...p: [A<T>, B<U>]): boolean => p[0] == p[1]

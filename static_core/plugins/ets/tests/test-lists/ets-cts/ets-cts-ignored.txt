@@ -35,9 +35,6 @@
 #30239 first match overload
 03.types/20.union_types/02.access_to_common_union_members/overload/overload_6.ets
 
-#26102 Readonly array assignment does not throw CTE
-03.types/16.literal_types/function_literal_type_7.ets
-
 #30677
 03.types/19.function_types/01.type_function/optional_type_params_0.ets
 03.types/19.function_types/01.type_function/optional_type_params_2.ets
@@ -270,9 +267,6 @@
 
 #20371 Unexpected Type Error on string array
 07.expressions/06.spread_expression/spex_lmbd_32.ets
-
-#25901
-07.expressions/06.spread_expression/spex_lmbd_47.ets
 
 #20376 No support for spread arguments in lambda
 07.expressions/06.spread_expression/spex_lmbd_2.ets
@@ -738,9 +732,6 @@
 #30286
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_neg_3.ets
 
-#26983
-09.classes/06.field_declarations/06.overriding_fields/sample.ets
-
 #29602
 09.classes/07.method_declarations/01.static_methods/static_method_with_body_type_parameter_0.ets
 09.classes/07.method_declarations/01.static_methods/static_method_with_body_type_parameter_1.ets
@@ -912,9 +903,6 @@
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_2.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_3.ets
-
-#30464
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default.ets
 
 #28972 CTE on string[] type parameter
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_3.ets
