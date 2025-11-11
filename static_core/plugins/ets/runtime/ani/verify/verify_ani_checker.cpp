@@ -989,14 +989,14 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
 
     if (!success) {
         const ArgInfo &lastArgInfo = argInfoList.back();
-        std::optional<PandaVector<ExtArgInfo>> methodArgInfoList {};
         auto action = lastArgInfo.arg.GetAction();
+        ArgsInfo argsInfo {};
         if (action == ANIArg::Action::VERIFY_METHOD_V_ARGS || action == ANIArg::Action::VERIFY_METHOD_A_ARGS) {
             auto *methodArgs = lastArgInfo.arg.GetValueMethodArgs();
             PandaEnv *pandaEnv = PandaEnv::FromAniEnv(venv->GetEnv());
-            methodArgInfoList = MakeExtArgInfoList(pandaEnv, methodArgs);
+            argsInfo.extArgInfoList = MakeExtArgInfoList(pandaEnv, methodArgs);
         }
-        ArgsInfo argsInfo {std::move(argInfoList), std::move(methodArgInfoList)};
+        argsInfo.argInfoList = std::move(argInfoList);
         DoANIArgsAbort(PandaEtsVM::FromAniVM(vvm->GetVm()), functionName, argsInfo);
     }
     return success;
