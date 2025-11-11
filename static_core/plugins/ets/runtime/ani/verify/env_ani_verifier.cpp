@@ -166,7 +166,7 @@ bool EnvANIVerifier::IsGlobalRef(VRef *vref)
     return verifier_->IsValidGlobalVerifiedRef(vref);
 }
 
-bool EnvANIVerifier::IsValidMethod(VMethod *vmethod)
+bool EnvANIVerifier::IsValidMethod(impl::VMethod *vmethod)
 {
     ASSERT(!frames_.empty());
     for (auto it = frames_.crbegin(); it != frames_.crend(); ++it) {

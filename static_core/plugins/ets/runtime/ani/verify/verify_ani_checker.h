@@ -39,11 +39,19 @@
     X(VERIFY_THIS_OBJECT,                   VerifyThisObject)                     \
     X(VERIFY_CTOR,                          VerifyCtor)                           \
     X(VERIFY_METHOD,                        VerifyMethod)                         \
+    X(VERIFY_STATIC_METHOD,                 VerifyStaticMethod)                   \
     X(VERIFY_METHOD_A_ARGS,                 VerifyMethodAArgs)                    \
     X(VERIFY_METHOD_V_ARGS,                 VerifyMethodVArgs)                    \
     X(VERIFY_VM_STORAGE,                    VerifyVmStorage)                      \
     X(VERIFY_ENV_STORAGE,                   VerifyEnvStorage)                     \
     X(VERIFY_BOOLEAN_STORAGE,               VerifyBooleanStorage)                 \
+    X(VERIFY_CHAR_STORAGE,                  VerifyCharStorage)                    \
+    X(VERIFY_BYTE_STORAGE,                  VerifyByteStorage)                    \
+    X(VERIFY_SHORT_STORAGE,                 VerifyShortStorage)                   \
+    X(VERIFY_INT_STORAGE,                   VerifyIntStorage)                     \
+    X(VERIFY_LONG_STORAGE,                  VerifyLongStorage)                    \
+    X(VERIFY_FLOAT_STORAGE,                 VerifyFloatStorage)                   \
+    X(VERIFY_DOUBLE_STORAGE,                VerifyDoubleStorage)                  \
     X(VERIFY_REF_STORAGE,                   VerifyRefStorage)                     \
     X(VERIFY_OBJECT_STORAGE,                VerifyObjectStorage)                  \
     X(VERIFY_STRING_STORAGE,                VerifyStringStorage)                  \
@@ -92,7 +100,7 @@
     X(ANI_BYTE_STORAGE,                 ByteStorage,               ani_byte *)               \
     X(ANI_SHORT_STORAGE,                ShortStorage,              ani_short *)              \
     X(ANI_INT_STORAGE,                  IntStorage,                ani_int *)                \
-    X(ANI_LONG_STORAGE,                 LontStorage,               ani_long *)               \
+    X(ANI_LONG_STORAGE,                 LongStorage,               ani_long *)               \
     X(ANI_FLOAT_STORAGE,                FloatStorage,              ani_float *)              \
     X(ANI_DOUBLE_STORAGE,               DoubleStorage,             ani_double *)             \
     X(ANI_REF_STORAGE,                  RefStorage,                VRef **)                  \
@@ -260,6 +268,11 @@ public:
         return ANIArg(ArgValueByMethod(vmethod), name, Action::VERIFY_METHOD, returnType);
     }
 
+    static ANIArg MakeForStaticMethod(VStaticMethod *vstaticmethod, std::string_view name, EtsType returnType)
+    {
+        return ANIArg(ArgValueByStaticMethod(vstaticmethod), name, Action::VERIFY_STATIC_METHOD, returnType);
+    }
+
     static ANIArg MakeForMethodArgs(AniMethodArgs *aniMethodArgs, std::string_view name)
     {
         return ANIArg(ArgValueByMethodArgs(aniMethodArgs), name, Action::VERIFY_METHOD_V_ARGS);
@@ -274,6 +287,48 @@ public:
     static ANIArg MakeForBooleanStorage(ani_boolean *valueStorage, std::string_view name)
     {
         return ANIArg(ArgValueByBooleanStorage(valueStorage), name, Action::VERIFY_BOOLEAN_STORAGE);
+    }
+
+    // NOLINTNEXTLINE(readability-non-const-parameter)
+    static ANIArg MakeForCharStorage(ani_char *valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByCharStorage(valueStorage), name, Action::VERIFY_CHAR_STORAGE);
+    }
+
+    // NOLINTNEXTLINE(readability-non-const-parameter)
+    static ANIArg MakeForByteStorage(ani_byte *valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByByteStorage(valueStorage), name, Action::VERIFY_BYTE_STORAGE);
+    }
+
+    // NOLINTNEXTLINE(readability-non-const-parameter)
+    static ANIArg MakeForShortStorage(ani_short *valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByShortStorage(valueStorage), name, Action::VERIFY_SHORT_STORAGE);
+    }
+
+    // NOLINTNEXTLINE(readability-non-const-parameter)
+    static ANIArg MakeForIntStorage(ani_int *valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByIntStorage(valueStorage), name, Action::VERIFY_INT_STORAGE);
+    }
+
+    // NOLINTNEXTLINE(readability-non-const-parameter)
+    static ANIArg MakeForLongStorage(ani_long *valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByLongStorage(valueStorage), name, Action::VERIFY_LONG_STORAGE);
+    }
+
+    // NOLINTNEXTLINE(readability-non-const-parameter)
+    static ANIArg MakeForFloatStorage(ani_float *valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByFloatStorage(valueStorage), name, Action::VERIFY_FLOAT_STORAGE);
+    }
+
+    // NOLINTNEXTLINE(readability-non-const-parameter)
+    static ANIArg MakeForDoubleStorage(ani_double *valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByDoubleStorage(valueStorage), name, Action::VERIFY_DOUBLE_STORAGE);
     }
 
     static ANIArg MakeForRefStorage(VRef **refStorage, std::string_view name)

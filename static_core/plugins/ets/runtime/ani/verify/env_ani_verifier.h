@@ -60,7 +60,7 @@ public:
 
     bool IsValidRefInCurrentFrame(VRef *vref);
     bool IsGlobalRef(VRef *vref);
-    bool IsValidMethod(VMethod *vmethod);
+    bool IsValidMethod(impl::VMethod *vmethod);
 
     bool IsValidInCurrentFrame(VRef *vref);
     bool CanBeDeletedFromCurrentScope(VRef *vref);

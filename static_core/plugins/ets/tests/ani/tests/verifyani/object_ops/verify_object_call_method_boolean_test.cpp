@@ -127,7 +127,7 @@ public:
         ani_boolean result;
         if constexpr (std::is_same_v<TestType, ObjectCallMethodBooleanATest>) {
             ani_value args[2U];
-            ASSERT_EQ(env->c_api->Object_CallMethod_Boolean(env, object, method, &result, args), ANI_OK);
+            ASSERT_EQ(env->c_api->Object_CallMethod_Boolean_A(env, object, method, &result, args), ANI_OK);
         } else {
             ASSERT_EQ(env->c_api->Object_CallMethod_Boolean(env, object, method, &result), ANI_OK);
         }
