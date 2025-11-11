@@ -88,6 +88,7 @@ private:
         ~ParseInfoClassCache();
         ani_object New() const;
         void InitFieldCache();
+        ani_class GetCachedClass_();
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define FIELD_SETTER(_cache, func, _item, type, _typeName) \

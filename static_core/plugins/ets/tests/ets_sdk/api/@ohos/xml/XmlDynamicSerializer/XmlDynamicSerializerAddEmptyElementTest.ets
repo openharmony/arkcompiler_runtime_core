@@ -25,6 +25,7 @@ function main(): int {
         testAddEmptyElementWithoutStartOrEnd);
     suite.addTest('Testing add multiple empty elements inside a start and end element.',
         testAddMultipleEmptyElementsInsideStartAndEnd);
+    suite.addTest('Testing Boundary Value', testBoundaryValue);
 
     return suite.run();
 }
@@ -90,4 +91,16 @@ function testAddMultipleEmptyElementsInsideStartAndEnd() {
         serializer.addEmptyElement('d');
         serializer.endElement();
     }, '<note>\r\n  <c/>\r\n  <d/>\r\n</note>');
+}
+
+function testBoundaryValue() {
+    let thatSer = new xml.XmlDynamicSerializer();
+    let arrayBuffer = thatSer.getOutput();
+    let view1 = "";
+    let result = "";
+    let view = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < view.length; ++i) {
+        view1 = view1 + String.fromCodePoint(view[i]);
+    }
+    arktest.assertEQ(view1, result);
 }
