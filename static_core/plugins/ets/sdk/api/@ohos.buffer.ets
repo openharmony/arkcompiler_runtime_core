@@ -402,7 +402,7 @@ export default namespace buffer {
      * Allocates a new Buffer for a fixed size bytes. If fill is undefined, the Buffer will be zero-filled.
      *
      * @param { int } size - The desired length of the new Buffer
-     * @param { string | Buffer | Uint8Array | int | double | long } [fill] - A value to pre-fill the new Buffer with
+     * @param { string | Buffer | int | double | long } [fill] - A value to pre-fill the new Buffer with
      * @param { BufferEncoding } [encoding] - If `fill` is a string, this is its encoding
      * @returns { Buffer } Return a new allocated Buffer
      * @throws { BusinessError } 401 - Parameter error. Possible causes:
@@ -411,7 +411,7 @@ export default namespace buffer {
      */
     export function alloc(
         size: int,
-        fill?: string | Buffer | Uint8Array | int | double | long,
+        fill?: string | Buffer | int | double | long,
         encoding?: BufferEncoding
     ): Buffer
     {
