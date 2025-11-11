@@ -23,7 +23,7 @@ export enum AsyncLockMode {
     EXCLUSIVE = 2,
 }
 
-export final class AsyncLock {
+export class AsyncLock {
 
     /**
      * Creates instance of AsyncLock class
@@ -32,8 +32,7 @@ export final class AsyncLock {
         this(AsyncLock.generateAnonymousLockName());
     }
 
-    //NOTE(ekaterinzaytseva): used as public in AsyncLockManager
-    internal constructor(name: string) {
+    protected constructor(name: string) {
         this.name = name;
         asyncLockManager.setElem(this);
     }
@@ -160,7 +159,7 @@ export final class AsyncLock {
             this.fireCondEvent();
             throw new Error('Aborted');
         }
-            this.unlock(asyncLockInfo); 
+            this.unlock(asyncLockInfo);
         });
     }
 
@@ -188,7 +187,7 @@ export final class AsyncLock {
             if(options.isAvailable) {
                 throw new Error("AsyncLock is not available");
             }
-            
+
             ConcurrencyHelpers.mutexLock(this.mutex);
             if (this.holderCID == 0) {
                 this.holderCID = callerCID;
@@ -210,7 +209,7 @@ export final class AsyncLock {
             if (isDone == false) {
                 ConcurrencyHelpers.eventWait(this.event)
             }
-        } 
+        }
     }
 
     private fireCondEvent()
@@ -278,4 +277,10 @@ export final class AsyncLock {
     private held: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
     private pending: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
     private event: Object = ConcurrencyHelpers.eventCreate();
+}
+
+final class AsyncLockHelper extends AsyncLock {
+    constructor(name: String) {
+        super(name);
+    }
 }

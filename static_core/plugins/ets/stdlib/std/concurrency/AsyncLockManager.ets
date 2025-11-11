@@ -21,7 +21,7 @@ package std.concurrency;
  */
 class AsyncLockManager {
 
-    internal constructor() {}
+    constructor() {}
 
     /**
     * Find or create an instance of AsyncLock using the specified name.
@@ -37,7 +37,7 @@ class AsyncLockManager {
             lock = lck!.deref();
         }
         if (lock == undefined) {
-            lock = new AsyncLock(name);
+            lock = (new AsyncLockHelper(name)) as AsyncLock;
         }
         ConcurrencyHelpers.mutexUnlock(this.mutex);
         return lock!;
@@ -83,7 +83,7 @@ class AsyncLockManager {
             let l = val.deref();
             if (l != undefined) {
                 result[idx++] = l.query();
-            } 
+            }
         });
         ConcurrencyHelpers.mutexUnlock(this.mutex);
         return result;
@@ -103,7 +103,7 @@ class AsyncLockManager {
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private finreg: FinalizationRegistry<String> = new FinalizationRegistry<String>((s: String) => {
             this.locks.delete(s)
-        }); 
+        });
 }
 
 const asyncLockManager: AsyncLockManager;
