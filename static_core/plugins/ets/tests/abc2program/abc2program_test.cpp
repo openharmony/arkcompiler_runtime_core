@@ -24,15 +24,15 @@
 
 namespace ark::abc2program {
 
-constexpr std::string_view FIELD_ABC_TEST_FILE_NAME = "ets/Field.abc";
-constexpr std::string_view FUNCTIONS_ABC_TEST_FILE_NAME = "ets/Functions.abc";
-constexpr std::string_view FUNCTIONS_CONCAT_ABC_TEST_FILE_NAME = "ets/Functions_concat.abc";
-constexpr std::string_view HELLO_WORLD_ABC_TEST_FILE_NAME = "ets/HelloWorld.abc";
-constexpr std::string_view INS_ABC_TEST_FILE_NAME = "ets/Ins.abc";
-constexpr std::string_view LITERAL_ARRAY_ABC_TEST_FILE_NAME = "ets/LiteralArray.abc";
-constexpr std::string_view METADATA_ABC_TEST_FILE_NAME = "ets/Metadata.abc";
-constexpr std::string_view RECORD_ABC_TEST_FILE_NAME = "ets/Record.abc";
-constexpr std::string_view TYPE_ABC_TEST_FILE_NAME = "ets/Type.abc";
+constexpr std::string_view FIELD_ABC_TEST_FILE_NAME = "Field.abc";
+constexpr std::string_view FUNCTIONS_ABC_TEST_FILE_NAME = "Functions.abc";
+constexpr std::string_view FUNCTIONS_CONCAT_ABC_TEST_FILE_NAME = "Functions_concat.abc";
+constexpr std::string_view HELLO_WORLD_ABC_TEST_FILE_NAME = "HelloWorld.abc";
+constexpr std::string_view INS_ABC_TEST_FILE_NAME = "Ins.abc";
+constexpr std::string_view LITERAL_ARRAY_ABC_TEST_FILE_NAME = "LiteralArray.abc";
+constexpr std::string_view METADATA_ABC_TEST_FILE_NAME = "Metadata.abc";
+constexpr std::string_view RECORD_ABC_TEST_FILE_NAME = "Record.abc";
+constexpr std::string_view TYPE_ABC_TEST_FILE_NAME = "Type.abc";
 constexpr size_t ANNOTATION_ID_SIZE = 1;
 constexpr size_t ANNOTATION_ID_PREFIX_SIZE = 3;
 
@@ -346,7 +346,7 @@ TEST_F(Abc2ProgramTypeTest, Type)
         "Type.Cls._ctor_ Type.Cls void",
         "Type.Cls.add_inner Type.Cls i32 i64 f32 f64 std.core.String",
         "Type.ETSGLOBAL._cctor_ void",
-        "Type.ETSGLOBAL.add_outer i32 i64 f32 f64 std.core.String",
+        "Type.ETSGLOBAL.addOuter i32 i64 f32 f64 std.core.String",
         "Type.ETSGLOBAL.main void",
         "std.core.Object._ctor_ std.core.Object void",
     };

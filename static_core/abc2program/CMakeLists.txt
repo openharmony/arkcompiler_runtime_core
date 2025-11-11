@@ -79,7 +79,3 @@ panda_target_include_directories(abc2program PUBLIC
 
 panda_add_sanitizers(TARGET abc2program SANITIZERS ${PANDA_SANITIZERS_LIST})
 panda_add_sanitizers(TARGET abc2prog SANITIZERS ${PANDA_SANITIZERS_LIST})
-
-if(PANDA_WITH_TESTS AND PANDA_WITH_ETS AND NOT CMAKE_CROSSCOMPILING)
-    add_subdirectory(tests)
-endif()

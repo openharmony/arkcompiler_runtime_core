@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,16 @@
  * limitations under the License.
  */
 
-export class Cls {
-    add_inner(a: int, b: long, c: float, d: double): string{
-        return "add";
-    }
+class HelloWorld {
+    private str = 'HelloWorld'
+    private line = 'NewLine\n'
+    foo(x:int):int {return x}
+    bar(x:Object):Object {return x}
 }
 
-function add_outer(a: int, b: long, c:float, d: double): string{
-    return "add";
+function main() {
+    let world = new HelloWorld();
+
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.log(world.foo(5));
 }
