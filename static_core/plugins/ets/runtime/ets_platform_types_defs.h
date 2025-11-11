@@ -130,7 +130,7 @@
     T("Lstd/core/JsonReplacer;", stdcoreJsonReplacer) /* naming! */                                                   \
     T("Lstd/core/jsonx/JsonElementSerializable;", coreJsonElementSerializable)                                        \
     /* RegExp */                                                                                                      \
-    T("Lstd/core/RegExpExecArray;", stdcoreRegExpExecArray) /* naming! */                                             \
+    T("Lstd/core/RegExpResultArray;", coreRegExpResultArray)                                                          \
     /* Do not add anything below this line. */
 
 // NOLINTEND(cppcoreguidelines-macro-usage)

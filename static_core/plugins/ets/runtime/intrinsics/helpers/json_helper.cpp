@@ -558,7 +558,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
     } else if (desc == panda_file_items::class_descriptors::JS_VALUE) {
         isSuccessful = false;
     } else {
-        if (value->IsInstanceOf(platformTypes->stdcoreRegExpExecArray)) {
+        if (value->IsInstanceOf(platformTypes->coreRegExpResultArray)) {
             coro->ManagedCodeEnd();
             {
                 ScopedManagedCodeThread v(coro);
