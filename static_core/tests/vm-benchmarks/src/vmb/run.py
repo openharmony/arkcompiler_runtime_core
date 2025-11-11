@@ -173,6 +173,8 @@ class VmbRunner:
         log.info("Starting RUN phase...")
         timer_suite = Timer()
         self.hooks.run_before_suite(self.platform)
+        # the point is to run platform init (if any) after hooks
+        self.platform.lazy_setup()
         # run suite in serial or batch mode
         # if platform expose 'run_batch' method run it in batch mode
         # otherwise - one by one
