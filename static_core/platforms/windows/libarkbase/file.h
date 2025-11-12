@@ -179,16 +179,7 @@ public:
 private:
     int fd_;
 
-    static bool HasStatMode(const std::string &path, uint16_t mode)
-    {
-        struct _stat s = {};
-
-        if (_stat(path.c_str(), &s) != 0) {
-            return false;
-        }
-
-        return static_cast<bool>(s.st_mode & mode);
-    }
+    static bool HasStatMode(const std::string &path, uint16_t mode);
 };
 
 }  // namespace ark::os::windows::file
