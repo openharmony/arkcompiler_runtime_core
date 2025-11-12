@@ -30,7 +30,7 @@ from runner.sts_utils.constants import (
     META_START_STRING,
 )
 from runner.sts_utils.exceptions import InvalidFileFormatException, InvalidMetaException, UnknownTemplateException
-from runner.utils import read_file
+from runner.utils import read_file, remove_template_copyright
 
 ROOT_PATH = Path(os.path.realpath(os.path.dirname(__file__)))
 BENCH_PATH = ROOT_PATH / "test_template.tpl"
@@ -89,6 +89,7 @@ class Template:
         yaml_content = yaml.dump(meta.config)
 
         bench_template = read_file(BENCH_PATH)
+        bench_template = remove_template_copyright(bench_template)
         bench_code = bench_template.format(
             copyright=self.__copyright.strip(),
             description=yaml_content.strip(),

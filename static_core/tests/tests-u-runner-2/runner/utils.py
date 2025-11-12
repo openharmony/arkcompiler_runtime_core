@@ -159,6 +159,11 @@ def read_file(file_path: Path | str) -> str:
     return text
 
 
+def remove_template_copyright(template_text: str) -> str:
+    lines = template_text.split('\n')
+    return '\n'.join([line for line in lines if not line.startswith('#')])
+
+
 def read_expected_file(path_to_file: Path) -> str:
     with open(path_to_file, encoding='utf-8') as f:
         return ''.join(line for line in f if not line.startswith('#')).strip()
