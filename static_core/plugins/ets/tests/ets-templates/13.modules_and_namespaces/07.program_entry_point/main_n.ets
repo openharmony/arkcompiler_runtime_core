@@ -15,11 +15,8 @@
 
 {%- for c in cases %}
 /*---
-desc: >-
-    Entry point function must either have no parameters, or have one parameter
-    of type string[] that provides access to the arguments of a program command line
-tags: [no-warmup, {{c.tags}}]
-test_cli: [{{c.cmd_line_args}}]
+desc: Program execution starts from the execution of a program entry point
+tags: [no-warmup, negative, {{c.tags}}]
 ---*/
 
 {{c.use}}

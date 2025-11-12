@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: Package initialization and function entry verification.
+desc: >-
+    Entry point function must either have no parameters, or have one parameter
+    of type string[] that provides access to the arguments of a program command line
+tags: [no-warmup]
+test_cli: [{{c.cmd_line_args}}]
 ---*/
 
-class P {
-  static isInit: number = 1;
-  static mainTest() {
-    arktest.assertTrue(P.isInit === 1);
-  }
-}
-
-function main(): void {
-  P.mainTest();
-}
+{{c.use}}
+{%- endfor %}

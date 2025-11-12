@@ -13,15 +13,11 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: The top-level exported function serves as the entry point.
+desc: Program execution starts from the execution of a program entry point
+tags: [no-warmup]
 ---*/
 
-export function entry(): number {
-    return 10;
-}
-
-function main(): void {
-    let a: number = entry();
-    arktest.assertEQ(a, 10);
-}
+{{c.use}}
+{%- endfor %}

@@ -15,7 +15,7 @@
 {%- for c in cases %}
 /*---
 desc: {{c.desc}}
-tags: [no-warmup]
+tags: [no-warmup, negative]
 entry_point: {{c.entry_point}}
 ---*/
 

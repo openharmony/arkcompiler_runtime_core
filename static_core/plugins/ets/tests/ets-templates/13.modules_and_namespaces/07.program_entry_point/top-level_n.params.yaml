@@ -10,4 +10,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-[TID 01f55f] E/runtime: Cannot find method 'entry_point_foo_12.ETSGLOBAL::foo'
+
+---
+cases:
+    # top-level statements only, negative
+    - use: |-
+          // top-level statements, negative
+          arktest.assertTrue(false)
+
+    # top-level statements and function main
+    - use: |-
+          // top-level statements and function main, negative
+          let res = 'X'
+
+          function main(): int {
+              return res == '' ? 0 : 1
+          }

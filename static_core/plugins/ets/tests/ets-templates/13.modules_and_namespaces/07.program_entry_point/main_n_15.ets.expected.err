@@ -10,4 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-[TID 0259a1] E/runtime: Method 'ULstd.core.Int;Lstd.core.String; entry_point_main_42.ETSGLOBAL::main()' has invalid signature
+[TID 02592c] E/runtime: Method 'f64 main_n_15.ETSGLOBAL::main()' has invalid signature

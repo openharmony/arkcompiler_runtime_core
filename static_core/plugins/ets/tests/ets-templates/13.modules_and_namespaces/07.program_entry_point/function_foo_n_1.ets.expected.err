@@ -10,4 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-[TID 02592c] E/runtime: Method 'f64 entry_point_main_37.ETSGLOBAL::main()' has invalid signature
+[TID 01f4ea] E/runtime: Cannot find method 'function_foo_n_1.ETSGLOBAL::foo'

@@ -10,21 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
----
-cases:
-    - desc: Default (implicit) entry point 'main'
-      entry_point: main
-      use: |-
-          export function main1(): void {
-              arktest.assertTrue(false)
-          }
-
-          export namespace NS {
-              export function main(): void {
-                  arktest.assertTrue(false)
-              }
-              export function main1(): void {
-                  arktest.assertTrue(false)
-              }
-          }
+[TID 023349] E/runtime: Cannot find method 'function_foo_n_5.ETSGLOBAL::foo'
