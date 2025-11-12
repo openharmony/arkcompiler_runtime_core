@@ -34,7 +34,7 @@ cases:
               fld: int
           }
 
-          function foo(this: B, p: int): this {
+          function bar(this: B, p: int) {
               this.fld += p
               return this
           }
@@ -46,7 +46,7 @@ cases:
           }
       use: |-
           let a: A = { fld: 1 }
-          arktest.assertEQ(a.foo().foo(10).foo(), a)
+          arktest.assertEQ(a.foo().bar(10).foo(), a)
           arktest.assertEQ(a.fld, 13)
 
     - decl: |-
@@ -91,7 +91,7 @@ cases:
 
     - decl: |-
           // return 'this' from function with receiver
-          function foo(this: A): this {
+          function foo(this: A) {
               if (this.fld == 0) {
                   return this
               }
@@ -207,7 +207,7 @@ cases:
 
     - decl: |-
           // return 'this' from superclass from function with receiver
-          function foo(this: Super): this {
+          function foo(this: Super) {
               if (this.fld == 0) {
                   return this
               }
@@ -308,7 +308,7 @@ cases:
               fld: int
           }
 
-          function foo(this: Super): this {
+          function foo(this: Super) {
               if (this.fld == 0) {
                   return this
               }
@@ -317,7 +317,7 @@ cases:
 
           class A extends Super {}
 
-          function bar(this: A): this {
+          function bar(this: A) {
               if (this.fld == 0) {
                   return this
               }
@@ -398,7 +398,7 @@ cases:
               }
           }
 
-          function foo(this: A): this {
+          function foo(this: A) {
               if (this.fld == 0) {
                   return this
               }
@@ -446,7 +446,7 @@ cases:
               }
           }
 
-          function foo(this: A, p: int): this {
+          function foo(this: A, p: int) {
               if (p == 0) {
                   throw new A('Error in A')
               }
@@ -503,7 +503,7 @@ cases:
               }
           }
 
-          function foo(this: A, p: int): this {
+          function foo(this: A, p: int) {
               if (p == 0) {
                   throw new A('Error in A')
               }
@@ -555,7 +555,7 @@ cases:
               }
           }
 
-          function foo(this: A): this {
+          function foo(this: A) {
               if (this.fld == 999) {
                   throw new Error
               }
