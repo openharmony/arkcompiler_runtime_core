@@ -538,6 +538,7 @@ endif()
 
 if(NOT CMAKE_CROSSCOMPILING)
     add_subdirectory(abc2program)
+    add_subdirectory(static_linker)
 endif()
 
 add_subdirectory(common)
