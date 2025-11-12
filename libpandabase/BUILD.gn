@@ -13,10 +13,27 @@
 
 import("//arkcompiler/runtime_core/ark_config.gni")
 
+config("libpandabase_public_config") {
+  include_dirs = [
+    "$ark_root/libpandabase/",
+    "$ark_root/libpandabase/include",
+    "$ark_root/libpandabase/include/libpandabase",
+    "$ark_root/platforms",
+    "$target_gen_dir/include",
+    "$target_gen_dir",
+    "$ark_root/static_core/plugins",
+    "$ark_root/static_core/runtime",
+  ]
+
+  include_dirs += platform_include_dirs
+}
+
 config("arkbase_public_config") {
   include_dirs = [
     "$ark_root",
     "$ark_root/libpandabase",
+    "$ark_root/libpandabase/include",
+    "$ark_root/libpandabase/include/libpandabase",
     "$ark_root/platforms",
     "$target_gen_dir/include",
     "$target_gen_dir",
@@ -35,8 +52,8 @@ config("arkbase_public_config") {
 if (!ark_standalone_build && !is_arkui_x) {
   ohos_shared_headers("arkbase_public_headers") {
     include_dirs = [
-      "$ark_root/libpandabase",
-      "$ark_root/libpandabase/mem",
+      "$ark_root/libpandabase/include",
+      "$ark_root/libpandabase/include/libpandabase",
       "$target_gen_dir/include",
       "$target_gen_dir",
     ]

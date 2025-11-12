@@ -124,7 +124,11 @@ config("ark_config") {
     "//arkcompiler/ets_frontend/*",
   ]
 
-  include_dirs = [ "$ark_root" ]
+  include_dirs = [ 
+    "$ark_root",
+    "$ark_root/libpandabase/include",
+    "$ark_root/libpandabase/include/libpandabase",
+  ]
   defines = [ "PANDA_TARGET_MOBILE_WITH_MANAGED_LIBS=1" ]
 
   if (is_linux) {

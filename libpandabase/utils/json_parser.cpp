@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "json_parser.h"
-#include "logger.h"
-#include "utils.h"
+#include "utils/json_parser.h"
+#include "utils/logger.h"
+#include "utils/utils.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_JSON(level) LOG(level, COMMON) << "JsonParser: " << std::string(log_recursion_level_, '\t')

@@ -16,7 +16,7 @@
 #ifndef PANDA_DEBUG_H
 #define PANDA_DEBUG_H
 
-#include "../../../libpandabase/utils/debug.h"
+#include "../../../libpandabase/include/libpandabase/utils/debug.h"
 
 namespace ark::debug {
 
