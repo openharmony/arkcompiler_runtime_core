@@ -89,23 +89,23 @@ const collectHighlights = (str?: string): HighlightItem[] => {
 
     // keep in sync with DiagnosticType in ets_frontend/ets2panda/util/diagnostic/diagnostic.h.erb
     const diag_types = [
-        "ArkTS config error",
-        "Error",
-        "Fatal",
-        "Semantic error",
-        "SUGGESTION",
-        "Syntax error",
-        "Warning",
+        'ArkTS config error',
+        'Error',
+        'Fatal',
+        'Semantic error',
+        'SUGGESTION',
+        'Syntax error',
+        'Warning',
     ];
 
     // emulate Python's rf strings to make regex more readable
     const r = String.raw;
-    const diag_type = r`(?:${diag_types.join("|")})`;
+    const diag_type = r`(?:${diag_types.join('|')})`;
     const loc = r`\[(?<file>[^\[\]]+?):(?<line>\d+):(?<col>\d+)\]`;
     const shortid = r`(?:[A-Za-z]+\d+)`
 
     const re_str = r`(?:${loc}\s*)(?<type>${diag_type})\s*(?<shortid>${shortid})\s*:\s*(?<msg>.*?)(?<newline>\n|$)`;
-    const re = new RegExp(re_str, "g");
+    const re = new RegExp(re_str, 'g');
 
     const out: HighlightItem[] = [];
 
