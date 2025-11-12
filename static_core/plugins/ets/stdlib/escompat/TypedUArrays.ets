@@ -1025,13 +1025,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         }
 
         let cmp = (l: int, r: int): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: int, r: int): number => {
-                const result = compareFn!(l.toDouble(), r.toDouble())
-                return result
-            }
+            return compareFn!(l, r)
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
@@ -2526,13 +2520,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: int, r: int): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: int, r: int): number => {
-                const result = compareFn!(l.toDouble(), r.toDouble())
-                return result
-            }
+            return compareFn!(l, r)
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
@@ -4011,13 +3999,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: int, r: int): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: int, r: int): number => {
-                const result = compareFn!(l.toDouble(), r.toDouble())
-                return result
-            }
+            return compareFn!(l, r)
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
@@ -5530,13 +5512,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let cmp = (l: long, r: long): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: long, r: long): number => {
-                const result = compareFn!(l.toDouble(), r.toDouble())
-                return result
-            }
+            return compareFn!(l, r)
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
@@ -7061,16 +7037,12 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         }
 
         let cmp = (l: long, r: long): number => {
-                return (l - r).toDouble()
-            }
-        if (compareFn != undefined) {
-            cmp = (l: long, r: long): number => {
-                const result = compareFn!(new BigInt(l), new BigInt(r))
-                if (result instanceof BigInt) {
-                    return (result as BigInt).getLong()
-                } else {
-                    return result.toDouble()
-                }
+            const result = compareFn!(BigInt.fromULong(l), BigInt.fromULong(r))
+            if (result instanceof BigInt) {
+                const val = result as BigInt
+                return val == 0n ? 0 : val > 0n ? 1 : -1
+            } else {
+                return result as number
             }
         }
         const MAX_SHORT_LENGTH = 24

@@ -1218,21 +1218,17 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         }
 
         let cmp = (l: {{element['primitiveType']}}, r: {{element['primitiveType']}}): number => {
-                return (l - r).toDouble()
+            {%- if element['name'] == 'BigUint64' %}
+            const result = compareFn!(BigInt.fromULong(l), BigInt.fromULong(r))
+            if (result instanceof BigInt) {
+                const val = result as BigInt
+                return val == 0n ? 0 : val > 0n ? 1 : -1
+            } else {
+                return result as number
             }
-        if (compareFn != undefined) {
-            cmp = (l: {{element['primitiveType']}}, r: {{element['primitiveType']}}): number => {
-                const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
-                {%- if element['name'] == 'BigUint64' %}
-                if (result instanceof BigInt) {
-                    return (result as BigInt).getLong()
-                } else {
-                    return result.toDouble()
-                }
-                {%- else %}
-                return result
-                {%- endif %}
-            }
+            {%- else %}
+            return compareFn!(l, r)
+            {%- endif %}
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
