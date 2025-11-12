@@ -127,9 +127,10 @@ static size_t ParseBody(char type, const std::string_view data, PandaStringStrea
             return std::string_view::npos;
         }
         std::replace(oldName.begin(), oldName.end(), '.', '/');
+        size_t lastPos = oldName.find_last_of('/') + 1;
         ss << 'L';
-        ss << oldName;
-        ss << (type == 'P' ? "$partial;" : ";");
+        ss << (type == 'P' ? oldName.substr(0, lastPos) + "%%partial-" + oldName.substr(lastPos) : oldName);
+        ss << ";";
         return pos + 1;
     }
     return std::string_view::npos;
