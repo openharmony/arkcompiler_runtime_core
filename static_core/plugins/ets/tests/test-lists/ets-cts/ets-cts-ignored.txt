@@ -1503,13 +1503,13 @@
 15.semantic_rules/10.overloading/overload_method_negative_11.ets
 
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
-15.semantic_rules/11.type_erasure/instanceof_0.ets
-15.semantic_rules/11.type_erasure/instanceof_1.ets
-15.semantic_rules/11.type_erasure/instanceof_28.ets
-15.semantic_rules/11.type_erasure/instanceof_5.ets
-15.semantic_rules/11.type_erasure/instanceof_6.ets
-15.semantic_rules/11.type_erasure/instanceof_7.ets
-15.semantic_rules/11.type_erasure/instanceof_9.ets
+15.semantic_rules/11.type_erasure/instanceof_negative_0.ets
+15.semantic_rules/11.type_erasure/instanceof_negative_1.ets
+15.semantic_rules/11.type_erasure/instanceof_negative_15.ets
+15.semantic_rules/11.type_erasure/instanceof_negative_3.ets
+15.semantic_rules/11.type_erasure/instanceof_negative_4.ets
+15.semantic_rules/11.type_erasure/instanceof_negative_5.ets
+15.semantic_rules/11.type_erasure/instanceof_negative_6.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_1.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_10.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_11.ets
