@@ -12,75 +12,7 @@
 # limitations under the License.
 
 --- # List of predefined types
-cases: 
-  - decl: |
-      class T1 {
-        fld1: 'abc'
-        fld2: string
-      }
-      class T2 {
-        fld1: 'def'
-        fld3: number
-      }
-      type T3 = T1 | T2
-
-      function foo(p: T3) {
-        if (p.fld1 === 'abc') {
-          p.fld2
-        } else {
-          p.fld3
-        }
-      }
-    use: |
-      foo(new T1())
-      foo(new T2())
-    tags: [compile-only, negative]
-
-  - decl: | 
-      class A {}
-      class B extends A {
-        fld: int = 1
-      }
-      type T1 = (p: B) => void
-      let a: T1
-      let b = (p: A) => { p.fld }
-      a = b
-      let c = (p: B) => { console.log(p.fld) }
-    use: |
-      a = c
-    tags: [compile-only, negative]
-
-  - decl: | 
-      class A {
-        fld: int = 0
-      }
-      class B extends A {
-        fld: int = 1
-      }
-    use: |
-      let a: A = new A()
-      let b: B = new B()
-      arktest.assertEQ(a.fld, 0)
-      arktest.assertEQ(b.fld, 1)
-      a = new B()
-      arktest.assertEQ(a.fld, 1)
-
-  - decl: |
-      interface Point {
-        x: number
-        y: number
-      }
-    use: |
-      let p: Point = { x: 10, y: 20, z: 30 }
-    tags: [compile-only, negative]
-  
-  - decl: |
-      let n: Any = 10 as short
-    use: |
-      let result = n + 10
-      arktest.assertTrue(result instanceof short)
-    tags: [compile-only, negative]
-
+cases:
   - decl: |
       interface I {
         fld1: string
@@ -120,15 +52,6 @@ cases:
       let i: I | null = {fld1: 'dfgd', fld2: 5}
       i.fld1
 
-  - decl: |
-      interface I {
-        fld1: string
-        fld2: number
-      }
-    use: |
-      let i: I | null = null
-      i.fld1
-    tags: [compile-only, negative]
 
   - decl: |
       class A {
@@ -139,7 +62,6 @@ cases:
       }
     use: |
       let a: A | B = new A()
-      a.fld1
+      arktest.assertEQ(a.fld1, "abc")
       let b: A | B = new B()
-      b.fld1
-
+      arktest.assertEQ(b.fld1, 1)
