@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+---*/
+
 // static call without any side effects
 export function add(x: int, y: int): int {
     return x + y;

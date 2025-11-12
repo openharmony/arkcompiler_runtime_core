@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-import { risky_array } from "./ext_funcs_4.ets";
+/*---
+  tags: [not-a-test]
+---*/
 
-export function middle(arr: int[]): int {
-    return risky_array(arr); // inline will be here
-}
-
-export function compute(x: int): int {
-    return x * x + 1;
-}
-
-// potential deoptimization
-export function compute2(x: int): int {
-    if (false) { // SaveState will be created
-        throw new Error("Unreachable!");
+export class C {
+    static array_test(a: int[]): int {
+        let res: int = a[0] + 300;
+        res += a[1];
+        res += a[2];
+        res += a[3];
+        res += a[4];
+        return res;    
     }
-    return x * x + 1;
 }

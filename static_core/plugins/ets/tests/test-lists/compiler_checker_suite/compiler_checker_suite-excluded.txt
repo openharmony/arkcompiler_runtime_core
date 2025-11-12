@@ -29,3 +29,13 @@ simple_run/ets_promise_launch.ets
 
 #Disabled - Replace typedarray length LoadObject with constant with external inlining support.issue 28689
 simple_run/typedarray_get_length_loadobject.ets
+
+#NOTE(pantos) Issue #17103 reassign readonly property
+simple_run/optimize_load_readonly_static.ets
+simple_run/optimize_load_readonly_instance.ets
+
+#Disabled as stdlib API was required to change.issue 25232
+simple_run/memory_coalescing3.ets
+
+#issue #25345
+simple_run/checks_elimination_no_hoist.ets

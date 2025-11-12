@@ -47,6 +47,7 @@ from runner.common_exceptions import (
 )
 from runner.enum_types.base_enum import BaseEnum, EnumT
 from runner.enum_types.configuration_kind import ArchitectureKind, OSKind
+from runner.enum_types.qemu import QemuKind
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
@@ -442,7 +443,9 @@ def prepend_list(pre_list: list, post_list: list) -> list:
     return result
 
 
-def detect_architecture() -> ArchitectureKind:
+def detect_architecture(qemu_kind: QemuKind) -> ArchitectureKind:
+    if qemu_kind != QemuKind.NONE:
+        return ArchitectureKind(qemu_kind.name)
     arch = platform.machine().lower()
     if arch == "aarch64":
         return ArchitectureKind.ARM64
