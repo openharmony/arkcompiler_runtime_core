@@ -1540,14 +1540,7 @@ bool G1GC<LanguageConfig>::SinglePassCompactionAvailable()
         }
     }
 
-    auto predictedSurvivedBytesRatio = analytics_.PredictSurvivedBytesRatio();
-    if (predictedSurvivedBytesRatio == 0) {
-        // threre are not statistics, starts with GC which is able to promote whole regions
-        return false;
-    }
-
-    // uses single pass collection for low survival ratio
-    return predictedSurvivedBytesRatio * PERCENT_100_D < g1PromotionRegionAliveRate_;
+    return true;
 }
 
 template <class LanguageConfig>
