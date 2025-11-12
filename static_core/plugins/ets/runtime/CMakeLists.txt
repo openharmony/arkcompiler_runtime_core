@@ -97,6 +97,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Job.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Timers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Launch.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_LegacyAtomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
     ${ETS_EXT_SOURCES}/intrinsics/unsafe_memory.cpp

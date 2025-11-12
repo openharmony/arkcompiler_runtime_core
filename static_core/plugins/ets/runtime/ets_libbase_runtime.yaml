@@ -8771,68 +8771,690 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
 
 ################################
-# std.containers.AtomicInt #
+# std.containers.AtomicReference #
 ################################
 
-  - name: AtomicIntSet
+  - name: AtomicsRefLoadObject
     space: ets
-    class_name: std.containers.AtomicInt
+    class_name: std.concurrency.AtomicReference
+    method_name: load
+    static: false
+    signature:
+      ret: std.core.Object
+      args: [ ]
+    impl: ark::ets::intrinsics::EtsAtomicReferenceLoadValue
+
+  - name: AtomicsRefStoreObject
+    space: ets
+    class_name: std.concurrency.AtomicReference
+    method_name: store
+    static: false
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsAtomicReferenceStoreValue
+ 
+  - name: AtomicsRefExchangeObject
+    space: ets
+    class_name: std.concurrency.AtomicReference
+    method_name: exchange
+    static: false
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsAtomicReferenceExchangeValue
+
+  - name: AtomicsRefCompareAndSwapObject
+    space: ets
+    class_name: std.concurrency.AtomicReference
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: std.core.Object 
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsAtomicReferenceCompareAndSwapValue
+
+  - name: AtomicsRefIsLockFreeCheck
+    space: ets
+    class_name: std.concurrency.AtomicReference
+    method_name: isLockFree
+    static: true 
+    signature:
+      ret: u1  
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicReferenceIsLockFreeCheck
+  
+################################
+# std.concurrency.AtomicInt #
+################################
+
+  - name: AtomicIntStore
+    space: ets
+    class_name: std.concurrency.AtomicInt
     method_name: store
     static: false
     signature:
       ret: void
       args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntSetValue
+    impl: ark::ets::intrinsics::EtsAtomicIntStoreValue
 
-  - name: AtomicIntGet
+  - name: AtomicIntLoad
     space: ets
-    class_name: std.containers.AtomicInt
-    method_name: load
+    class_name: std.concurrency.AtomicInt
+    method_name: load 
     static: false
     signature:
       ret: i32
       args: []
-    impl: ark::ets::intrinsics::EtsAtomicIntGetValue
+    impl: ark::ets::intrinsics::EtsAtomicIntLoadValue
 
   - name: AtomicIntExchange
     space: ets
-    class_name: std.containers.AtomicInt
+    class_name: std.concurrency.AtomicInt
     method_name: exchange
     static: false
     signature:
       ret: i32
       args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntGetAndSet
+    impl: ark::ets::intrinsics::EtsAtomicIntExchangeValue
 
   - name: AtomicIntCompareAndSwap
     space: ets
-    class_name: std.containers.AtomicInt
+    class_name: std.concurrency.AtomicInt
     method_name: compareAndSwap
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntCompareAndSet
+    impl: ark::ets::intrinsics::EtsAtomicIntCompareAndSwapValue
 
   - name: AtomicIntFetchAndAdd
     space: ets
-    class_name: std.containers.AtomicInt
+    class_name: std.concurrency.AtomicInt
     method_name: fetchAdd
     static: false
     signature:
       ret: i32
       args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndAdd
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchAddValue
 
   - name: AtomicIntFetchAndSub
     space: ets
-    class_name: std.containers.AtomicInt
+    class_name: std.concurrency.AtomicInt
     method_name: fetchSub
     static: false
     signature:
       ret: i32
       args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndSub
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchSubValue
+
+  - name: AtomicIntFetchAndAnd
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: fetchAnd
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndValue
+
+  - name: AtomicIntFetchAndOr
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: fetchOr
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchOrValue
+
+  - name: AtomicIntFetchAndXor
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: fetchXor
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchXorValue
+
+  - name: AtomicsIntIsLockFreeCheck
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: isLockFree
+    static: true 
+    signature:
+      ret: u1  
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicIntIsLockFreeCheck
+
+################################
+# std.concurrency.AtomicLong #
+################################
+
+  - name: AtomicLongStore
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: store
+    static: false
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::EtsAtomicLongStoreValue
+
+  - name: AtomicLongLoad
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: load 
+    static: false
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicLongLoadValue
+
+  - name: AtomicLongExchange
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: exchange
+    static: false
+    signature:
+      ret: i64
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::EtsAtomicLongExchangeValue
+
+  - name: AtomicLongCompareAndSwap
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: i64
+      args: [ i64, i64 ]
+    impl: ark::ets::intrinsics::EtsAtomicLongCompareAndSwapValue
+
+  - name: AtomicLongFetchAndAdd
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: fetchAdd
+    static: false
+    signature:
+      ret: i64
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::EtsAtomicLongFetchAddValue
+
+  - name: AtomicLongFetchAndSub
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: fetchSub
+    static: false
+    signature:
+      ret: i64
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::EtsAtomicLongFetchSubValue
+
+  - name: AtomicLongFetchAndAnd
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: fetchAnd
+    static: false
+    signature:
+      ret: i64
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::EtsAtomicLongFetchAndValue
+
+  - name: AtomicLongFetchAndOr
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: fetchOr
+    static: false
+    signature:
+      ret: i64
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::EtsAtomicLongFetchOrValue
+
+  - name: AtomicLongFetchAndXor
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: fetchXor
+    static: false
+    signature:
+      ret: i64
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::EtsAtomicLongFetchXorValue
+
+  - name: AtomicsLongIsLockFreeCheck
+    space: ets
+    class_name: std.concurrency.AtomicLong
+    method_name: isLockFree
+    static: true 
+    signature:
+      ret: u1  
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicLongIsLockFreeCheck
+
+################################
+# std.concurrency.AtomicShort #
+################################
+
+  - name: AtomicShortStore
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: store
+    static: false
+    signature:
+      ret: void
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::EtsAtomicShortStoreValue
+
+  - name: AtomicShortLoad
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: load 
+    static: false
+    signature:
+      ret: i16
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicShortLoadValue
+
+  - name: AtomicShortExchange
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: exchange
+    static: false
+    signature:
+      ret: i16
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::EtsAtomicShortExchangeValue
+
+  - name: AtomicShortCompareAndSwap
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: i16
+      args: [ i16, i16 ]
+    impl: ark::ets::intrinsics::EtsAtomicShortCompareAndSwapValue
+
+  - name: AtomicShortFetchAndAdd
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: fetchAdd
+    static: false
+    signature:
+      ret: i16
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::EtsAtomicShortFetchAddValue
+
+  - name: AtomicShortFetchAndSub
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: fetchSub
+    static: false
+    signature:
+      ret: i16
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::EtsAtomicShortFetchSubValue
+
+  - name: AtomicShortFetchAndAnd
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: fetchAnd
+    static: false
+    signature:
+      ret: i16
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::EtsAtomicShortFetchAndValue
+
+  - name: AtomicShortFetchAndOr
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: fetchOr
+    static: false
+    signature:
+      ret: i16
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::EtsAtomicShortFetchOrValue
+
+  - name: AtomicShortFetchAndXor
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: fetchXor
+    static: false
+    signature:
+      ret: i16
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::EtsAtomicShortFetchXorValue
+
+  - name: AtomicsShortIsLockFreeCheck
+    space: ets
+    class_name: std.concurrency.AtomicShort
+    method_name: isLockFree
+    static: true 
+    signature:
+      ret: u1  
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicShortIsLockFreeCheck
+
+################################
+# std.concurrency.AtomicByte #
+################################
+
+  - name: AtomicByteStore
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: store
+    static: false
+    signature:
+      ret: void
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::EtsAtomicByteStoreValue
+
+  - name: AtomicByteLoad
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: load 
+    static: false
+    signature:
+      ret: i8
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicByteLoadValue
+
+  - name: AtomicByteExchange
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: exchange
+    static: false
+    signature:
+      ret: i8
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::EtsAtomicByteExchangeValue
+
+  - name: AtomicByteCompareAndSwap
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: i8
+      args: [ i8, i8 ]
+    impl: ark::ets::intrinsics::EtsAtomicByteCompareAndSwapValue
+
+  - name: AtomicByteFetchAndAdd
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: fetchAdd
+    static: false
+    signature:
+      ret: i8
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::EtsAtomicByteFetchAddValue
+
+  - name: AtomicByteFetchAndSub
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: fetchSub
+    static: false
+    signature:
+      ret: i8
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::EtsAtomicByteFetchSubValue
+
+  - name: AtomicByteFetchAndAnd
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: fetchAnd
+    static: false
+    signature:
+      ret: i8
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::EtsAtomicByteFetchAndValue
+
+  - name: AtomicByteFetchAndOr
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: fetchOr
+    static: false
+    signature:
+      ret: i8
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::EtsAtomicByteFetchOrValue
+
+  - name: AtomicByteFetchAndXor
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: fetchXor
+    static: false
+    signature:
+      ret: i8
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::EtsAtomicByteFetchXorValue
+
+  - name: AtomicsByteIsLockFreeCheck
+    space: ets
+    class_name: std.concurrency.AtomicByte
+    method_name: isLockFree
+    static: true 
+    signature:
+      ret: u1  
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicByteIsLockFreeCheck
+
+################################
+# std.concurrency.AtomicFloat #
+################################
+
+  - name: AtomicFloatStore
+    space: ets
+    class_name: std.concurrency.AtomicFloat
+    method_name: store
+    static: false
+    signature:
+      ret: void
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::EtsAtomicFloatStoreValue
+
+  - name: AtomicFloatLoad
+    space: ets
+    class_name: std.concurrency.AtomicFloat
+    method_name: load 
+    static: false
+    signature:
+      ret: f32
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicFloatLoadValue
+
+  - name: AtomicFloatExchange
+    space: ets
+    class_name: std.concurrency.AtomicFloat
+    method_name: exchange
+    static: false
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::EtsAtomicFloatExchangeValue
+
+  - name: AtomicFloatCompareAndSwap
+    space: ets
+    class_name: std.concurrency.AtomicFloat
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: f32
+      args: [ f32, f32 ]
+    impl: ark::ets::intrinsics::EtsAtomicFloatCompareAndSwapValue
+
+  - name: AtomicsFloatIsLockFreeCheck
+    space: ets
+    class_name: std.concurrency.AtomicFloat
+    method_name: isLockFree
+    static: true 
+    signature:
+      ret: u1  
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicFloatIsLockFreeCheck
+
+################################
+# std.concurrency.AtomicDouble #
+################################
+
+  - name: AtomicDoubleStore
+    space: ets
+    class_name: std.concurrency.AtomicDouble
+    method_name: store
+    static: false
+    signature:
+      ret: void
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::EtsAtomicDoubleStoreValue
+
+  - name: AtomicDoubleLoad
+    space: ets
+    class_name: std.concurrency.AtomicDouble
+    method_name: load 
+    static: false
+    signature:
+      ret: f64
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicDoubleLoadValue
+
+  - name: AtomicDoubleExchange
+    space: ets
+    class_name: std.concurrency.AtomicDouble
+    method_name: exchange
+    static: false
+    signature:
+      ret: f64
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::EtsAtomicDoubleExchangeValue
+
+  - name: AtomicDoubleCompareAndSwap
+    space: ets
+    class_name: std.concurrency.AtomicDouble
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: f64
+      args: [ f64, f64 ]
+    impl: ark::ets::intrinsics::EtsAtomicDoubleCompareAndSwapValue
+
+  - name: AtomicsDoubleIsLockFreeCheck
+    space: ets
+    class_name: std.concurrency.AtomicDouble
+    method_name: isLockFree
+    static: true 
+    signature:
+      ret: u1  
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicDoubleIsLockFreeCheck
+
+################################
+# std.concurrency.AtomicBoolean #
+################################
+
+  - name: AtomicBooleanStore
+    space: ets
+    class_name: std.concurrency.AtomicBoolean
+    method_name: store
+    static: false
+    signature:
+      ret: void
+      args: [ u1 ]
+    impl: ark::ets::intrinsics::EtsAtomicBooleanStoreValue
+
+  - name: AtomicBooleanLoad
+    space: ets
+    class_name: std.concurrency.AtomicBoolean
+    method_name: load 
+    static: false
+    signature:
+      ret: u1
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicBooleanLoadValue
+
+  - name: AtomicBooleanExchange
+    space: ets
+    class_name: std.concurrency.AtomicBoolean
+    method_name: exchange
+    static: false
+    signature:
+      ret: u1
+      args: [ u1 ]
+    impl: ark::ets::intrinsics::EtsAtomicBooleanExchangeValue
+
+  - name: AtomicBooleanCompareAndSwap
+    space: ets
+    class_name: std.concurrency.AtomicBoolean
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: u1
+      args: [ u1, u1 ]
+    impl: ark::ets::intrinsics::EtsAtomicBooleanCompareAndSwapValue
+
+  - name: AtomicsBooleanIsLockFreeCheck
+    space: ets
+    class_name: std.concurrency.AtomicBoolean
+    method_name: isLockFree
+    static: true 
+    signature:
+      ret: u1  
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicBooleanIsLockFreeCheck
+
+################################
+# std.concurrency.AtomicChar #
+################################
+
+  - name: AtomicCharStore
+    space: ets
+    class_name: std.concurrency.AtomicChar
+    method_name: store
+    static: false
+    signature:
+      ret: void
+      args: [ u16 ]
+    impl: ark::ets::intrinsics::EtsAtomicCharStoreValue
+
+  - name: AtomicCharLoad
+    space: ets
+    class_name: std.concurrency.AtomicChar
+    method_name: load 
+    static: false
+    signature:
+      ret: u16
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicCharLoadValue
+
+  - name: AtomicCharExchange
+    space: ets
+    class_name: std.concurrency.AtomicChar
+    method_name: exchange
+    static: false
+    signature:
+      ret: u16
+      args: [ u16 ]
+    impl: ark::ets::intrinsics::EtsAtomicCharExchangeValue
+
+  - name: AtomicCharCompareAndSwap
+    space: ets
+    class_name: std.concurrency.AtomicChar
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: u16
+      args: [ u16, u16 ]
+    impl: ark::ets::intrinsics::EtsAtomicCharCompareAndSwapValue
+
+  - name: AtomicsCharIsLockFreeCheck
+    space: ets
+    class_name: std.concurrency.AtomicChar
+    method_name: isLockFree
+    static: true 
+    signature:
+      ret: u1  
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicCharIsLockFreeCheck
 
 ###############################
 # std.core.RuntimeDebug #
@@ -9060,71 +9682,6 @@ intrinsics:
         - i64
         - std.core.Object
     impl: ark::ets::intrinsics::DebuggerAPISetLocalObject
-
-
-################################
-# std.concurrency.AtomicInt #
-################################
-
-  - name: escompatAtomicIntSet
-    space: ets
-    class_name: std.concurrency.AtomicInt
-    method_name: store
-    static: false
-    signature:
-      ret: void
-      args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntSetValue
-
-  - name: escompatAtomicIntGet
-    space: ets
-    class_name: std.concurrency.AtomicInt
-    method_name: load
-    static: false
-    signature:
-      ret: i32
-      args: []
-    impl: ark::ets::intrinsics::EtsAtomicIntGetValue
-
-  - name: escompatAtomicIntExchange
-    space: ets
-    class_name: std.concurrency.AtomicInt
-    method_name: exchange
-    static: false
-    signature:
-      ret: i32
-      args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntGetAndSet
-
-  - name: escompatAtomicIntCompareAndSwap
-    space: ets
-    class_name: std.concurrency.AtomicInt
-    method_name: compareAndSwap
-    static: false
-    signature:
-      ret: i32
-      args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntCompareAndSet
-
-  - name: escompatAtomicIntFetchAndAdd
-    space: ets
-    class_name: std.concurrency.AtomicInt
-    method_name: fetchAdd
-    static: false
-    signature:
-      ret: i32
-      args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndAdd
-
-  - name: escompatAtomicIntFetchAndSub
-    space: ets
-    class_name: std.concurrency.AtomicInt
-    method_name: fetchSub
-    static: false
-    signature:
-      ret: i32
-      args: [ i32 ]
-    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndSub
 
 ##############################
 #      std.core.reflect      #

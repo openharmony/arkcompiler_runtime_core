@@ -14,4 +14,3 @@
 add_subdirectory(exclusive_worker)
 add_subdirectory(sync_primitives)
 add_subdirectory(array_buffer)
-add_subdirectory(atomic_int)
