@@ -19,58 +19,63 @@
 
 namespace ark::ets::ani {
 
-static size_t ParseArrayBody(const std::string_view data, PandaStringStream &ss);
+static size_t ParseArrayBody(const std::string_view data, PandaString &str);
 
 /*static*/
 std::optional<PandaString> Mangle::ConvertDescriptor(const std::string_view descriptor, bool allowArray)
 {
-    // NOTE(dslynko, #30175): Move security checks in a more optimized converter
-    if (descriptor.empty() || descriptor.back() == ';' || descriptor.find('/') != std::string::npos) {
+    if (descriptor.empty() || descriptor.back() == ';') {
         // The 'descriptor' has incorrect format, report error to user
         LOG(WARNING, ANI) << "Incorrect mangling: " << descriptor;
         return std::nullopt;
     }
 
-    PandaStringStream ss;
+    PandaString str;
     if (allowArray) {
         // NOLINTNEXTLINE(readability-magic-numbers)
         if (descriptor.size() >= 3U && descriptor[0] == 'A' && descriptor[1] == '{') {
-            auto bodySize = ParseArrayBody(descriptor.substr(1), ss);
+            auto bodySize = ParseArrayBody(descriptor.substr(1), str);
             if (bodySize == std::string_view::npos) {
                 // The 'descriptor' has wrong format, so can't be convert
                 LOG(WARNING, ANI) << "Incorrect mangling: " << descriptor;
                 return std::nullopt;
             }
-            return ss.str();
+            return str;
         }
     }
 
-    ss << 'L';
-    ss << descriptor;
-    ss << ';';
-    PandaString oldDescriptor = ss.str();
-    std::replace(oldDescriptor.begin(), oldDescriptor.end(), '.', '/');
+    str.reserve(descriptor.size() + 2U);
+    str.push_back('L');
+    for (size_t pos = 0; pos < descriptor.size(); ++pos) {
+        if (descriptor[pos] == '/') {
+            // The new format 'descriptor' can't contain '/'
+            LOG(WARNING, ANI) << "Incorrect mangling: " << descriptor;
+            return std::nullopt;
+        }
+        str.push_back(descriptor[pos] == '.' ? '/' : descriptor[pos]);
+    }
+    str.push_back(';');
 
-    return oldDescriptor;
+    return str;
 }
 
 static constexpr size_t MIN_BODY_SIZE = sizeof('{') + 1 + sizeof('}');
 
-static size_t ParseType(char type, const std::string_view data, PandaStringStream &ss);
+static size_t ParseType(char type, const std::string_view data, PandaString &str);
 
-static size_t ParseUnionBody(const std::string_view data, PandaStringStream &ss)
+static size_t ParseUnionBody(const std::string_view data, PandaString &str)
 {
     if (data.size() < MIN_BODY_SIZE || data[0] != '{') {
         return std::string_view::npos;
     }
-    PandaStringStream unionStream;
-    unionStream << "{U";
+    PandaString unionStr;
+    unionStr.append("{U");
 
     std::string_view previousConstituentTypes;
     size_t size = 1;
     while (size < data.size() && data[size] != '}') {
         std::string_view substr = data.substr(size);
-        size_t sz = ParseType(data[size], substr, unionStream);
+        size_t sz = ParseType(data[size], substr, unionStr);
         if (sz == std::string_view::npos) {
             // The 'descriptor' does not have a new format, so no conversion is required.
             return std::string_view::npos;
@@ -87,29 +92,29 @@ static size_t ParseUnionBody(const std::string_view data, PandaStringStream &ss)
         // Union descriptor must end with '}'.
         return std::string_view::npos;
     }
-    unionStream << '}';
+    unionStr.push_back('}');
 
-    ss << pandasm::Type::CanonicalizeDescriptor(unionStream.str());
+    str.append(pandasm::Type::CanonicalizeDescriptor(unionStr));
     return size + sizeof('}');
 }
 
-static size_t ParseArrayBody(const std::string_view data, PandaStringStream &ss)
+static size_t ParseArrayBody(const std::string_view data, PandaString &str)
 {
     if (data.size() < MIN_BODY_SIZE || data[0] != '{') {
         return std::string_view::npos;
     }
-    ss << '[';
+    str.push_back('[');
 
     char type = data[1];
     const std::string_view typeData = data.substr(1);
-    size_t size = ParseType(type, typeData, ss);
+    size_t size = ParseType(type, typeData, str);
     if (size == std::string_view::npos || size >= typeData.size() || typeData[size] != '}') {
         return std::string_view::npos;
     }
     return sizeof('{') + size + sizeof('}');
 }
 
-static size_t ParseBody(char type, const std::string_view data, PandaStringStream &ss)
+static size_t ParseBody(char type, const std::string_view data, PandaString &str)
 {
     ASSERT(type != 'A');
     ASSERT(type != 'X');
@@ -117,46 +122,48 @@ static size_t ParseBody(char type, const std::string_view data, PandaStringStrea
     if (data.size() < MIN_BODY_SIZE || data[0] != '{') {
         return std::string_view::npos;
     }
-    for (size_t pos = 1; pos < data.size(); ++pos) {
-        if (data[pos] != '}') {
-            continue;
+    auto end = data.find('}', 1);
+    if (end != std::string_view::npos) {
+        str.push_back('L');
+        for (size_t pos = 1; pos < end; ++pos) {
+            if (data[pos] == '/' || data[pos] == ':') {
+                // The new format 'descriptor' can't contain '/'
+                return std::string_view::npos;
+            }
+            str.push_back(data[pos] == '.' ? '/' : data[pos]);
         }
-        PandaString oldName(data.substr(1, pos - 1));
-        if (oldName.find('/') != std::string::npos || oldName.find(':') != std::string::npos) {
-            // The new format 'descriptor' can't contain '/'
-            return std::string_view::npos;
+        if (type == 'P') {
+            // e.g. "La/b/c/X;" -> "La/b/c/%%partial-X;"
+            size_t lastPos = str.find_last_of('/') + 1;
+            str.replace(lastPos, str.length(), "%%partial-" + str.substr(lastPos));
         }
-        std::replace(oldName.begin(), oldName.end(), '.', '/');
-        size_t lastPos = oldName.find_last_of('/') + 1;
-        ss << 'L';
-        ss << (type == 'P' ? oldName.substr(0, lastPos) + "%%partial-" + oldName.substr(lastPos) : oldName);
-        ss << ";";
-        return pos + 1;
+        str.push_back(';');
+        return end + 1;
     }
     return std::string_view::npos;
 }
 
-static size_t ParseType(char type, const std::string_view data, PandaStringStream &ss)
+static size_t ParseType(char type, const std::string_view data, PandaString &str)
 {
     size_t bodySize = std::string_view::npos;
     // clang-format off
     switch (type) {
-        case 'z': ss << 'Z'; return 1;
-        case 'c': ss << 'C'; return 1;
-        case 'b': ss << 'B'; return 1;
-        case 's': ss << 'S'; return 1;
-        case 'i': ss << 'I'; return 1;
-        case 'l': ss << 'J'; return 1;
-        case 'f': ss << 'F'; return 1;
-        case 'd': ss << 'D'; return 1;
-        case 'Y': ss << "Lstd/core/Object;"; return 1;
-        case 'N': ss << "Lstd/core/Object;"; return 1;
-        case 'U': ss << panda_file_items::class_descriptors::OBJECT; return 1;
-        case 'A': bodySize = ParseArrayBody(data.substr(1), ss); break;
-        case 'X': bodySize = ParseUnionBody(data.substr(1), ss); break;
+        case 'z': str.push_back('Z'); return 1;
+        case 'c': str.push_back('C'); return 1;
+        case 'b': str.push_back('B'); return 1;
+        case 's': str.push_back('S'); return 1;
+        case 'i': str.push_back('I'); return 1;
+        case 'l': str.push_back('J'); return 1;
+        case 'f': str.push_back('F'); return 1;
+        case 'd': str.push_back('D'); return 1;
+        case 'Y': str.append("Lstd/core/Object;"); return 1;
+        case 'N': str.append("Lstd/core/Object;"); return 1;
+        case 'U': str.append(panda_file_items::class_descriptors::OBJECT); return 1;
+        case 'A': bodySize = ParseArrayBody(data.substr(1), str); break;
+        case 'X': bodySize = ParseUnionBody(data.substr(1), str); break;
         case 'C':
         case 'E':
-        case 'P': bodySize = ParseBody(type, data.substr(1), ss); break;
+        case 'P': bodySize = ParseBody(type, data.substr(1), str); break;
         default:
             // The 'descriptor' does not have a new format, so no conversion is required.
             return std::string_view::npos;
@@ -172,18 +179,19 @@ static size_t ParseType(char type, const std::string_view data, PandaStringStrea
 /*static*/
 std::optional<PandaString> Mangle::ConvertSignature(const std::string_view descriptor)
 {
-    PandaStringStream ss;
+    PandaString str;
+    str.reserve(descriptor.size() * 2U);
     int nr = -1;
     int k = -1;
     for (size_t i = 0; i < descriptor.size(); ++i) {
         char type = descriptor[i];
         if (type == ':') {
-            ss << ':';
+            str.push_back(':');
             nr = 0;
             k = 1;
             continue;
         }
-        size_t sz = ParseType(type, descriptor.substr(i), ss);
+        size_t sz = ParseType(type, descriptor.substr(i), str);
         if (sz == std::string_view::npos) {
             // The 'descriptor' does not have a new format, so no conversion is required.
             LOG(WARNING, ANI) << "Incorrect mangling: " << descriptor;
@@ -198,9 +206,9 @@ std::optional<PandaString> Mangle::ConvertSignature(const std::string_view descr
         return std::nullopt;
     }
     if (nr == 0) {
-        ss << 'V';
+        str.push_back('V');
     }
-    return ss.str();
+    return str;
 }
 
 }  // namespace ark::ets::ani
