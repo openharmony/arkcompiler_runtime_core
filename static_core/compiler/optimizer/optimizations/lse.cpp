@@ -130,7 +130,9 @@ public:
                 const Lse::HeapValue heap = {inst, alive, false, false};
                 MarkForElimination(hvalue->origin, inst, &heap);
             } else {
-                shadowedStores_[hvalue->origin].push_back(inst);
+                auto it =
+                    shadowedStores_.try_emplace(hvalue->origin, aa_.GetGraph()->GetLocalAllocator()->Adapter()).first;
+                it->second.push_back(inst);
             }
         }
         COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(inst) << " updated heap with v" << alive->GetId();
@@ -663,7 +665,7 @@ private:
     Lse::HeapEqClasses &heaps_;
     /* Map of instructions to be deleted with values to replace them with */
     Lse::BasicBlockHeap eliminations_;
-    ArenaMap<Inst *, std::vector<Inst *>> shadowedStores_;
+    ArenaMap<Inst *, ArenaVector<Inst *>> shadowedStores_;
     SaveStateBridgesBuilder ssb_;
     InstVector disabledObjects_;
     uint32_t aliasCalls_ {0};
@@ -1244,8 +1246,7 @@ bool Lse::RunImpl()
     GetGraph()->RunPass<LoopAnalyzer>();
     GetGraph()->RunPass<AliasAnalysis>();
 
-    LseVisitor visitorInstance(GetGraph(), &heaps);
-    visitor_ = &visitorInstance;
+    visitor_ = GetGraph()->GetLocalAllocator()->New<LseVisitor>(GetGraph(), &heaps);
     auto markerHolder = MarkerHolder(GetGraph());
     auto phiFixupMrk = markerHolder.GetMarker();
 
