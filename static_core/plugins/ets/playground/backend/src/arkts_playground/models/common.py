@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,25 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from typing import Optional
 from pydantic import BaseModel, Field
 
 
 class ResponseLog(BaseModel):
-    output: Optional[str] = None
-    error: Optional[str] = None
-    exit_code: Optional[int] = None
+    output: str | None = None
+    error: str | None = None
+    exit_code: int | None = None
 
 
 class DisasmResponse(BaseModel):
-    output: Optional[str] = None
-    code: Optional[str] = None
-    error: Optional[str] = None
-    exit_code: Optional[int] = None
+    output: str | None = None
+    code: str | None = None
+    error: str | None = None
+    exit_code: int | None = None
 
 
 class VersionsResponse(BaseModel):
-    backend_version: Optional[str] = Field(alias="backendVersion")
-    arkts_version: Optional[str] = Field(alias="arktsVersion")
-    es2panda_version: Optional[str] = Field(alias="es2pandaVersion")
+    backend_version: str | None = Field(alias="backendVersion")
+    arkts_version: str | None = Field(alias="arktsVersion")
+    es2panda_version: str | None = Field(alias="es2pandaVersion")

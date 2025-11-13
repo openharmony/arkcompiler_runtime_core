@@ -16,24 +16,64 @@
 
 
 import asyncio
+from collections.abc import Sequence
 from pathlib import Path
 from functools import lru_cache
 from importlib.metadata import version, PackageNotFoundError
-from types import SimpleNamespace
-from typing import Tuple, Dict, Any
+from typing import NamedTuple, TypedDict, final
+from typing_extensions import Unpack
 
 import aiofiles
 
 from ..config import get_settings
 
 
-class Binary(SimpleNamespace):
+class Binary(NamedTuple):
     ark_bin: str
     es2panda: str
     disasm_bin: str
     verifier: str
 
 
+class SubprocessExecResult(TypedDict):
+    output: str
+    error: str
+    exit_code: int | None
+
+
+class AstViewExecResult(TypedDict):
+    output: str
+    error: str
+    exit_code: int | None
+    ast: str | None
+
+
+class DisasmResult(TypedDict):
+    output: str
+    error: str
+    code: str | None
+    exit_code: int | None
+
+
+class CompileResult(TypedDict):
+    compile: SubprocessExecResult
+    disassembly: DisasmResult | None
+    verifier: SubprocessExecResult | None
+
+
+class CompileRunResult(TypedDict):
+    compile: SubprocessExecResult
+    disassembly: DisasmResult | None
+    verifier: SubprocessExecResult | None
+    run: SubprocessExecResult | None
+
+
+class CompileRunParams(TypedDict, total=False):
+    runtime_verify: bool
+    verifier: bool
+
+
+@final
 class Runner:
     def __init__(self, build: str, timeout: int = 120, icu_data: str = ""):
         self._exec_timeout = timeout
@@ -55,8 +95,8 @@ class Runner:
         self._validate()
 
     @staticmethod
-    def parse_compile_options(options: dict) -> list:
-        res = []
+    def parse_compile_options(options: dict[str, str]) -> list[str]:
+        res: list[str] = []
         if op := options.get("--opt-level"):
             res.append(f"--opt-level={op}")
         return res
@@ -75,7 +115,7 @@ class Runner:
             await stsfile.write(code)
             return str(stsfile.name)
 
-    async def get_versions(self) -> Tuple[str, str, str]:
+    async def get_versions(self) -> tuple[str, str, str]:
         """Get arkts_playground package and ark versions
         :rtype: Tuple[str, str]
         """
@@ -89,16 +129,16 @@ class Runner:
 
     async def compile_arkts(self,
                             code: str,
-                            options: list,
+                            options: list[str],
                             disasm: bool = False,
-                            verifier: bool = False) -> Dict[str, Any]:
+                            verifier: bool = False) -> CompileResult:
         """Compile code and make disassemble if disasm argument is True
         :rtype: Dict[str, Any]
         """
         async with aiofiles.tempfile.TemporaryDirectory(prefix="arkts_playground") as tempdir:
             stsfile_name = await self._save_code(tempdir, code)
             compile_result = await self._compile(stsfile_name, options)
-            res = {"compile": compile_result, "disassembly": None, "verifier": None}
+            res: CompileResult = {"compile": compile_result, "disassembly": None, "verifier": None}
             if disasm and compile_result["exit_code"] == 0:
                 disassembly = await self.disassembly(f"{stsfile_name}.abc", f"{stsfile_name}.pa")
                 res["disassembly"] = disassembly
@@ -109,9 +149,9 @@ class Runner:
 
     async def compile_run_arkts(self,
                                 code: str,
-                                options: list,
+                                options: list[str],
                                 disasm: bool = False,
-                                **kwargs) -> Dict[str, Any]:
+                                **kwargs: Unpack[CompileRunParams]) -> CompileRunResult:
         """Compile, run code and make disassemble if disasm argument is True
         :rtype: Dict[str, Any]
         """
@@ -119,11 +159,11 @@ class Runner:
             stsfile_name = await self._save_code(tempdir, code)
             abcfile_name = f"{stsfile_name}.abc"
             compile_result = await self._compile(stsfile_name, options)
-            res = {"compile": compile_result, "run": None, "disassembly": None, "verifier": None}
+            res: CompileRunResult = {"compile": compile_result, "run": None, "disassembly": None, "verifier": None}
             if compile_result["exit_code"] != 0:
                 return res
-
-            run_result = await self._run(abcfile_name, runtime_verify=kwargs.get("runtime_verify", False))
+            runtime_verify: bool = kwargs.get("runtime_verify", False)
+            run_result = await self._run(abcfile_name, runtime_verify=runtime_verify)
             res["run"] = run_result
             if disasm:
                 disasm_res = await self.disassembly(f"{stsfile_name}.abc", f"{stsfile_name}.pa")
@@ -133,14 +173,14 @@ class Runner:
                 res["verifier"] = verifier_res
             return res
 
-    async def disassembly(self, input_file: str, output_file: str) -> Dict[str, Any]:
+    async def disassembly(self, input_file: str, output_file: str) -> DisasmResult:
         """Call ark_disasm and read disassembly from file
         :rtype: Dict[str, Any]
         """
         stdout, stderr, retcode = await self._execute_cmd(self.binary.disasm_bin, input_file, output_file)
         if retcode == -11:
             stderr += "disassembly: Segmentation fault"
-        result = {"output": stdout, "error": stderr, "code": None, "exit_code": 0}
+        result: DisasmResult = {"output": stdout, "error": stderr, "code": None, "exit_code": 0}
         if retcode != 0:
             result["exit_code"] = retcode
             return result
@@ -148,7 +188,7 @@ class Runner:
             result["code"] = await f.read()
         return result
 
-    async def dump_ast(self, code: str, options: list | None = None) -> Dict[str, Any]:
+    async def dump_ast(self, code: str, options: Sequence[str] | None = None) -> AstViewExecResult:
         """Parse ETS code and return AST dump strictly from stdout."""
         opts = list(options) if options else []
         async with aiofiles.tempfile.TemporaryDirectory(prefix="arkts_playground") as tempdir:
@@ -168,7 +208,7 @@ class Runner:
                 "exit_code": retcode
             }
 
-    async def _compile(self, filename: str, options: list) -> Dict[str, Any]:
+    async def _compile(self, filename: str, options: list[str]) -> SubprocessExecResult:
         """Compiles ets code stored in file
         :rtype: Dict[str, Any]
         """
@@ -178,7 +218,7 @@ class Runner:
             stderr += "compilation: Segmentation fault"
         return {"output": stdout, "error": stderr, "exit_code": retcode}
 
-    async def _verify(self, input_file: str) -> Dict[str, Any]:
+    async def _verify(self, input_file: str) -> SubprocessExecResult:
         """Runs verifier for input abc file
         :rtype: Dict[str, Any]
         """
@@ -192,7 +232,7 @@ class Runner:
             stderr += "compilation: Segmentation fault"
         return {"output": stdout, "error": stderr, "exit_code": retcode}
 
-    async def _execute_cmd(self, cmd, *args) -> Tuple[str, str, int | None]:
+    async def _execute_cmd(self, cmd: str, *args: str) -> tuple[str, str, int | None]:
         """Create and executes command
         :rtype: Tuple[str, str, int | None]
         """
@@ -235,7 +275,7 @@ class Runner:
         except PackageNotFoundError:
             self._version["playground"] = "not installed"
 
-    async def _run(self, abcfile_name: str, runtime_verify: bool = False) -> Dict[str, Any]:
+    async def _run(self, abcfile_name: str, runtime_verify: bool = False) -> SubprocessExecResult:
         """Runs abc file
         :rtype: Dict[str, Any]
         """
