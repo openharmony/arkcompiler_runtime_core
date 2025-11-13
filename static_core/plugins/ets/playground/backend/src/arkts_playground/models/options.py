@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,16 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Union
-
 from pydantic import BaseModel, Field
 
 
 class OptionModel(BaseModel):
     flag: str
-    values: List[Union[str, float, int, bool]]
-    default: Union[str, float, int, bool]
+    values: list[str | float | int | bool]
+    default: str | float | int | bool
 
 
 class OptionsResponseModel(BaseModel):
-    compile_options: List[OptionModel] = Field(alias="compileOptions")
+    compile_options: list[OptionModel] = Field(alias="compileOptions")
