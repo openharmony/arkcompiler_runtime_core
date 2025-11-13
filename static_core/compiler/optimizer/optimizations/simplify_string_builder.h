@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ namespace ark::compiler {
  * See compiler/docs/simplify_sb_doc.md for complete documentation
  */
 
+constexpr size_t ARGS_NUM_1 = 1;
 constexpr size_t ARGS_NUM_2 = 2;
 constexpr size_t ARGS_NUM_3 = 3;
 constexpr size_t ARGS_NUM_4 = 4;
@@ -78,6 +79,8 @@ private:
     };
 
     InstIter SkipToStringBuilderDefaultConstructor(InstIter begin, InstIter end);
+    InstIter SkipToStringBuilderDefaultOrStringArgConstructor(InstIter begin, InstIter end);
+    void InsertNewAppendIntrinsic(ConcatenationMatch &match);
     IntrinsicInst *CreateConcatIntrinsic(const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics,
                                          size_t appendCount, DataType::Type type, SaveStateInst *saveState);
     bool MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match);
@@ -208,7 +211,8 @@ private:
     };
 
     IntrinsicInst *CreateIntrinsicStringBuilderAppendString(Inst *instance, Inst *arg, SaveStateInst *saveState);
-    void NormalizeStringBuilderAppendInstructionUsers(Inst *instance, SaveStateInst *saveState);
+    CallInst *CreateStringBuilderAppendString(Inst *instance, Inst *arg, SaveStateInst *saveState);
+    Inst *NormalizeStringBuilderAppendInstructionUsers(Inst *instance, SaveStateInst *saveState);
     ArenaVector<Inst *> FindStringBuilderAppendInstructions(Inst *instance);
 
     void RemoveFromSaveStateInputs(Inst *inst, bool doMark = false);
@@ -254,9 +258,10 @@ private:
 
     bool HasInputFromPreHeader(PhiInst *phi) const;
     bool HasToStringCallInput(PhiInst *phi) const;
+    bool HasSbCtorStrInstructionUser(Inst *inst) const;
     bool HasAppendInstructionUser(Inst *inst) const;
-    bool HasPhiOrAppendOrLengthUsersOnly(Inst *inst, Marker visited) const;
-    bool HasAppendOrLengthUsersOnly(Inst *inst) const;
+    bool HasPhiOrAppendOrLengthUsersOnly(Inst *inst, Inst *ctorCall, Marker visited) const;
+    bool HasAppendOrLengthUsersOnly(Inst *inst, Inst *ctorCall) const;
     bool HasInputInst(Inst *inputInst, Inst *inst) const;
 
     bool IsInstanceHoistable(const ConcatenationLoopMatch &match) const;

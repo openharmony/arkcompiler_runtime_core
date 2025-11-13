@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,47 +21,47 @@
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat0"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",10
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",5
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat1"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",7
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",14
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",7
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",7
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",7
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat2"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",9
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",18
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",9
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",9
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",8
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",9
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat3"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",14
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",28
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",14
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",14
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",2
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",12
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",2
@@ -147,38 +147,39 @@
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::partially_supported_chain_concat14"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",3
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",3
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
 //! INST_COUNT    "Intrinsic.StdCoreStringConcat2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::supported_chain_concat15"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",3
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",3
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString3",1
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::partially_supported_chain_concat16"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",3
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",3
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
 //! INST_COUNT    "Intrinsic.StdCoreStringConcat2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
@@ -211,47 +212,47 @@
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat0"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",10
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",5
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat1"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",7
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",14
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",7
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",7
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",7
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat2"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",9
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",18
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",9
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",9
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",8
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",9
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat3"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",14
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",28
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",14
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",14
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",2
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",12
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",2
@@ -337,38 +338,39 @@
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::partially_supported_chain_concat14"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",3
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",3
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
 //! INST_COUNT    "Intrinsic.StdCoreStringConcat2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::supported_chain_concat15"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",3
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",3
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString3",1
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::partially_supported_chain_concat16"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",3
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",3
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",3
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
 //! INST_COUNT    "Intrinsic.StdCoreStringConcat2",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
@@ -781,35 +783,35 @@ function bugfix_chain_concat20(): void
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat0"
 //! PASS_AFTER    "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",5
-//! INST_COUNT    /StringBuilder::append/,10
+//! INST_COUNT    /StringBuilder::append/,5
 //! INST_COUNT    /StringBuilder::toString/,5
 //! IN_BLOCK      /prehead \(loop 2\)/
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::append/,1
 //! INST_COUNT    /StringBuilder::toString/,1
 //! PASS_AFTER    "BranchElimination"
 //! IN_BLOCK      /loop 2, depth 1/
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::append/,1
 //! INST_COUNT    /StringBuilder::toString/,1
 //! PASS_AFTER    "BranchElimination"
 //! IN_BLOCK      /prehead \(loop 1\)/
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::append/,1
 //! INST_COUNT    /StringBuilder::toString/,1
 //! PASS_AFTER    "BranchElimination"
 //! IN_BLOCK      /loop 1, depth 1/
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::append/,1
 //! INST_COUNT    /StringBuilder::toString/,1
 //!
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::append/,5
 //! INST_COUNT    /StringBuilder::toString/,1
 //! IN_BLOCK      /prehead \(loop 2\)/
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::append/,1
 //! INST_NOT      /StringBuilder::toString/
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! IN_BLOCK      /loop 2, depth 1/
@@ -830,32 +832,32 @@ function bugfix_chain_concat20(): void
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat1"
 //! PASS_AFTER    "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",7
-//! INST_COUNT    /StringBuilder::append/,14
+//! INST_COUNT    /StringBuilder::append/,7
 //! INST_COUNT    /StringBuilder::toString/,7
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    /StringBuilder::append/,8
+//! INST_COUNT    /StringBuilder::append/,7
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    /StringBuilder::toString/,1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat2"
 //! PASS_AFTER    "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",9
-//! INST_COUNT    /StringBuilder::append/,18
+//! INST_COUNT    /StringBuilder::append/,9
 //! INST_COUNT    /StringBuilder::toString/,9
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    /StringBuilder::append/,10
+//! INST_COUNT    /StringBuilder::append/,9
 //! INST_COUNT    /StringBuilder::toString/,1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat3"
 //! PASS_AFTER    "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",14
-//! INST_COUNT    /StringBuilder::append/,28
+//! INST_COUNT    /StringBuilder::append/,14
 //! INST_COUNT    /StringBuilder::toString/,14
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",2
-//! INST_COUNT    /StringBuilder::append/,16
+//! INST_COUNT    /StringBuilder::append/,14
 //! INST_COUNT    /StringBuilder::toString/,2
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::supported_chain_concat5"
@@ -923,31 +925,31 @@ function bugfix_chain_concat20(): void
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::partially_supported_chain_concat14"
 //! PASS_AFTER    "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",3
-//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::append/,3
 //! INST_COUNT    /StringBuilder::toString/,3
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",2
-//! INST_COUNT    /StringBuilder::append/,5
+//! INST_COUNT    /StringBuilder::append/,3
 //! INST_COUNT    /StringBuilder::toString/,2
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::supported_chain_concat15"
 //! PASS_AFTER    "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",3
-//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::append/,3
 //! INST_COUNT    /StringBuilder::toString/,3
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::append/,3
 //! INST_COUNT    /StringBuilder::toString/,1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::partially_supported_chain_concat16"
 //! PASS_AFTER    "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",3
-//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::append/,3
 //! INST_COUNT    /StringBuilder::toString/,3
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",2
-//! INST_COUNT    /StringBuilder::append/,5
+//! INST_COUNT    /StringBuilder::append/,3
 //! INST_COUNT    /StringBuilder::toString/,2
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_usage_chain_concat17"

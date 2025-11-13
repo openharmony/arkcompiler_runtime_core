@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,10 @@
 #include "optimizer/ir/inst.h"
 
 #include "optimizer/optimizations/cleanup.h"
+#include "optimizer/optimizations/string_builder_utils.h"
 
 namespace ark::compiler {
+using MethodPtr = RuntimeInterface::MethodPtr;
 
 SimplifyStringBuilder::SimplifyStringBuilder(Graph *graph)
     : Optimization(graph),
@@ -244,6 +246,13 @@ InstIter SimplifyStringBuilder::SkipToStringBuilderDefaultConstructor(InstIter b
                         [](auto inst) { return IsMethodStringBuilderDefaultConstructor(inst); });
 }
 
+InstIter SimplifyStringBuilder::SkipToStringBuilderDefaultOrStringArgConstructor(InstIter begin, InstIter end)
+{
+    return std::find_if(std::move(begin), std::move(end), [](auto inst) {
+        return IsMethodStringBuilderDefaultConstructor(inst) || IsMethodStringBuilderConstructorWithStringArg(inst);
+    });
+}
+
 IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
     const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics, size_t appendCount, DataType::Type type,
     SaveStateInst *saveState)
@@ -271,7 +280,7 @@ IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
     return concatIntrinsic;
 }
 
-bool CheckUnsupportedCases(Inst *instance)
+bool CheckUnsupportedCases(Inst *instance, Inst *ctorCall)
 {
     if (!CanRemoveFromSaveStates(instance)) {
         return false;  // Unsupported case: this instance may be needed for deoptimization
@@ -292,17 +301,20 @@ bool CheckUnsupportedCases(Inst *instance)
     if (appendCount != appendStringCount) {
         return false;  // Unsupported case: arguments must be strings
     }
-    if (appendCount <= 1 || appendCount > ARGS_NUM_4) {
-        return false;  // Unsupported case: too many strings concatenated
+    if (IsMethodStringBuilderDefaultConstructor(ctorCall)) {
+        return appendCount > 1 && appendCount <= ARGS_NUM_4;
+    } else if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
+        return appendCount > 0 && appendCount <= ARGS_NUM_3;
+    } else {
+        UNREACHABLE();
     }
-
-    return true;
+    return false;
 }
 
 bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match)
 {
     auto instance = match.instance;
-    if (!CheckUnsupportedCases(instance)) {
+    if (!CheckUnsupportedCases(instance, match.ctorCall)) {
         return false;
     }
 
@@ -340,6 +352,12 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
         }
     }
 
+    if (IsMethodStringBuilderConstructorWithStringArg(match.ctorCall)) {
+        if (!match.ctorCall->IsDominate(match.toStringCall)) {
+            return false;
+        }
+    }
+
     for (size_t index = 0; index < match.appendCount; ++index) {
         if (!match.appendIntrinsics[index]->IsDominate(match.toStringCall)) {
             return false;
@@ -363,29 +381,14 @@ void SimplifyStringBuilder::Check(const ConcatenationMatch &match)
 {
     // NOLINTBEGIN(readability-magic-numbers)
     [[maybe_unused]] auto &appendIntrinsics = match.appendIntrinsics;
-    ASSERT(match.appendCount > 1);
-    ASSERT(appendIntrinsics[0U] != nullptr);
-    ASSERT(appendIntrinsics[0U]->GetInputsCount() > 1);
-    ASSERT(appendIntrinsics[1U] != nullptr);
-    ASSERT(appendIntrinsics[1U]->GetInputsCount() > 1);
-
-    switch (match.appendCount) {
-        case ARGS_NUM_2:
-            break;
-        case ARGS_NUM_3: {
-            ASSERT(appendIntrinsics[2U] != nullptr);
-            ASSERT(appendIntrinsics[2U]->GetInputsCount() > 1);
-            break;
-        }
-        case ARGS_NUM_4: {
-            ASSERT(appendIntrinsics[2U] != nullptr);
-            ASSERT(appendIntrinsics[2U]->GetInputsCount() > 1);
-            ASSERT(appendIntrinsics[3U] != nullptr);
-            ASSERT(appendIntrinsics[3U]->GetInputsCount() > 1);
-            break;
-        }
-        default:
-            UNREACHABLE();
+    if (IsMethodStringBuilderDefaultConstructor(match.ctorCall)) {
+        ASSERT(match.appendCount >= ARGS_NUM_2 && match.appendCount <= ARGS_NUM_4);
+    } else if (IsMethodStringBuilderConstructorWithStringArg(match.ctorCall)) {
+        ASSERT(match.appendCount >= ARGS_NUM_1 && match.appendCount <= ARGS_NUM_3);
+    }
+    for (unsigned i = 0; i < match.appendCount; ++i) {
+        ASSERT(appendIntrinsics[i] != nullptr);
+        ASSERT(appendIntrinsics[i]->GetInputsCount() > 1);
     }
     // NOLINTEND(readability-magic-numbers)
 }
@@ -399,6 +402,20 @@ void SimplifyStringBuilder::InsertIntrinsicAndFixSaveStates(
         auto arg = appendIntrinsics[index]->GetDataFlowInput(1);
         FixBrokenSaveStates(arg, concatIntrinsic);
     }
+}
+
+void SimplifyStringBuilder::InsertNewAppendIntrinsic(ConcatenationMatch &match)
+{
+    auto newAppInst =
+        CreateIntrinsicStringBuilderAppendString(match.instance, match.ctorCall->GetInput(1).GetInst(),
+                                                 CopySaveState(GetGraph(), match.ctorCall->GetSaveState()));
+    InsertAfterWithSaveState(newAppInst, match.ctorCall);
+    ASSERT(match.appendCount < ARGS_NUM_4);
+    for (size_t index = match.appendCount; index > 0; --index) {
+        match.appendIntrinsics[index] = match.appendIntrinsics[index - 1];
+    }
+    match.appendIntrinsics[0] = newAppInst;
+    match.appendCount += 1;
 }
 
 void SimplifyStringBuilder::ReplaceWithConcatIntrinsic(const ConcatenationMatch &match)
@@ -438,7 +455,8 @@ void SimplifyStringBuilder::OptimizeStringConcatenation(BasicBlock *block)
         // Walk through a basic block, find every String concatenation pattern,
         // and check if we can optimize them
         InstIter inst = block->Insts().begin();
-        while ((inst = SkipToStringBuilderDefaultConstructor(inst, block->Insts().end())) != block->Insts().end()) {
+        while ((inst = SkipToStringBuilderDefaultOrStringArgConstructor(inst, block->Insts().end())) !=
+               block->Insts().end()) {
             ASSERT((*inst)->IsStaticCall());
             auto ctorCall = (*inst)->CastToCallStatic();
 
@@ -452,16 +470,21 @@ void SimplifyStringBuilder::OptimizeStringConcatenation(BasicBlock *block)
 
             ConcatenationMatch match {instance, ctorCall};
             // Check if current StringBuilder instance can be optimized
-            if (MatchConcatenation(inst, block->Insts().end(), match)) {
-                Check(match);
-                ReplaceWithConcatIntrinsic(match);
-                Cleanup(match);
-
-                instance->SetMarker(visited);
-
-                isAppliedLocal = true;
-                isApplied_ = true;
+            if (!MatchConcatenation(inst, block->Insts().end(), match)) {
+                continue;
             }
+            Check(match);
+
+            if (IsMethodStringBuilderConstructorWithStringArg(match.ctorCall)) {
+                InsertNewAppendIntrinsic(match);
+            }
+            ReplaceWithConcatIntrinsic(match);
+            Cleanup(match);
+
+            instance->SetMarker(visited);
+
+            isAppliedLocal = true;
+            isApplied_ = true;
         }
     } while (isAppliedLocal);
 }
@@ -477,8 +500,17 @@ void SimplifyStringBuilder::ConcatenationLoopMatch::TemporaryInstructions::Clear
 
 bool SimplifyStringBuilder::ConcatenationLoopMatch::TemporaryInstructions::IsEmpty() const
 {
-    return toStringCall == nullptr || intermediateValue == nullptr || instance == nullptr || ctorCall == nullptr ||
-           appendAccValue == nullptr;
+    if (ctorCall != nullptr) {
+        if (IsMethodStringBuilderDefaultConstructor(ctorCall)) {
+            return toStringCall == nullptr || intermediateValue == nullptr || instance == nullptr ||
+                   appendAccValue == nullptr;
+        } else if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
+            return toStringCall == nullptr || intermediateValue == nullptr || instance == nullptr;
+        } else {
+            UNREACHABLE();
+        }
+    }
+    return false;
 }
 
 void SimplifyStringBuilder::ConcatenationLoopMatch::Clear()
@@ -497,16 +529,24 @@ void SimplifyStringBuilder::ConcatenationLoopMatch::Clear()
     exit.toStringCall = nullptr;
 }
 
-bool SimplifyStringBuilder::HasAppendOrLengthUsersOnly(Inst *inst) const
+bool SimplifyStringBuilder::HasAppendOrLengthUsersOnly(Inst *inst, Inst *ctorCall) const
 {
     MarkerHolder visited {inst->GetBasicBlock()->GetGraph()};
-    bool found = HasUserPhiRecursively(inst, visited.GetMarker(), [inst](auto &user) {
+    bool found = HasUserPhiRecursively(inst, visited.GetMarker(), [inst, ctorCall](auto &user) {
         bool sameLoop = user.GetInst()->GetBasicBlock()->GetLoop() == inst->GetBasicBlock()->GetLoop();
         bool isSaveState = user.GetInst()->IsSaveState();
         bool isPhi = user.GetInst()->IsPhi();
-        bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
         bool isStringLength = IsStringLengthAccessorChain(user.GetInst());
-        return sameLoop && !isSaveState && !isPhi && !isAppendInstruction && !isStringLength;
+        if (IsMethodStringBuilderDefaultConstructor(ctorCall)) {
+            bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
+            return sameLoop && !isSaveState && !isPhi && !isAppendInstruction && !isStringLength;
+        } else if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
+            bool isSbCtorStrInstruction = IsMethodStringBuilderConstructorWithStringArg(user.GetInst());
+            return sameLoop && !isSaveState && !isPhi && !isSbCtorStrInstruction && !isStringLength;
+        } else {
+            UNREACHABLE();
+            return true;
+        }
     });
     ResetUserMarkersRecursively(inst, visited.GetMarker());
     return !found;
@@ -517,21 +557,31 @@ bool IsCheckCastWithoutUsers(Inst *inst)
     return inst->GetOpcode() == Opcode::CheckCast && !inst->HasUsers();
 }
 
-bool SimplifyStringBuilder::HasPhiOrAppendOrLengthUsersOnly(Inst *inst, Marker appendInstructionVisited) const
+bool SimplifyStringBuilder::HasPhiOrAppendOrLengthUsersOnly(Inst *inst, Inst *ctorCall,
+                                                            Marker appendInstructionVisited) const
 {
     MarkerHolder phiVisited {GetGraph()};
     // Release clang-tidy-14 claims match.exit.toStringCall as nullable ignorring IsInstanceHoistable checks
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
-    auto fnCheckUser = [loop = inst->GetBasicBlock()->GetLoop(), appendInstructionVisited](auto &user) {
+    auto fnCheckUser = [loop = inst->GetBasicBlock()->GetLoop(), ctorCall, appendInstructionVisited](auto &user) {
         bool sameLoop = user.GetInst()->GetBasicBlock()->GetLoop() == loop;
         bool isSaveState = user.GetInst()->IsSaveState();
         bool isCheckCast = IsCheckCastWithoutUsers(user.GetInst());
         bool isPhi = user.GetInst()->IsPhi();
         bool isVisited = user.GetInst()->IsMarked(appendInstructionVisited);
-        bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
         bool isStringLength = IsStringLengthAccessorChain(user.GetInst());
-        return sameLoop && !isSaveState && !isCheckCast && !isStringLength && !isPhi &&
-               !(isAppendInstruction && isVisited);
+        if (IsMethodStringBuilderDefaultConstructor(ctorCall)) {
+            bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
+            return sameLoop && !isSaveState && !isCheckCast && !isStringLength && !isPhi &&
+                   !(isAppendInstruction && isVisited);
+        } else if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
+            bool isSbCtorStrInstruction = IsMethodStringBuilderConstructorWithStringArg(user.GetInst());
+            return sameLoop && !isSaveState && !isCheckCast && !isStringLength && !isPhi &&
+                   !(isSbCtorStrInstruction && isVisited);
+        } else {
+            UNREACHABLE();
+            return true;
+        }
     };
     bool found = HasUserPhiRecursively(inst, phiVisited.GetMarker(), fnCheckUser);
     return !found;
@@ -569,14 +619,14 @@ bool SimplifyStringBuilder::ConcatenationLoopMatch::IsInstanceHoistable() const
 
 bool SimplifyStringBuilder::IsInstanceHoistable(const ConcatenationLoopMatch &match) const
 {
-    return match.IsInstanceHoistable() && HasAppendOrLengthUsersOnly(match.accValue);
+    return match.IsInstanceHoistable() && HasAppendOrLengthUsersOnly(match.accValue, match.preheader.ctorCall);
 }
 
 bool SimplifyStringBuilder::IsToStringHoistable(const ConcatenationLoopMatch &match,
                                                 Marker appendInstructionVisited) const
 {
     ASSERT(match.exit.toStringCall != nullptr);
-    return HasPhiOrAppendOrLengthUsersOnly(match.exit.toStringCall, appendInstructionVisited);
+    return HasPhiOrAppendOrLengthUsersOnly(match.exit.toStringCall, match.preheader.ctorCall, appendInstructionVisited);
 }
 
 SaveStateInst *FindPreHeaderSaveState(Loop *loop)
@@ -635,6 +685,21 @@ BasicBlock *GetLoopPostExit(Loop *loop)
     return nullptr;
 }
 
+CallInst *SimplifyStringBuilder::CreateStringBuilderAppendString(Inst *instance, Inst *arg, SaveStateInst *saveState)
+{
+    auto graph = GetGraph();
+    auto runtime = graph->GetRuntime();
+    auto methodPtr = runtime->GetMethodStringBuilderAppendString(runtime->GetStringBuilderClass());
+    ASSERT(methodPtr != nullptr);
+    auto methodId = runtime->GetMethodId(methodPtr);
+    auto newAppend =
+        graph->CreateInstCallStatic(runtime->GetMethodReturnType(methodPtr), instance->GetPc(), methodId, methodPtr);
+    ASSERT(newAppend != nullptr);
+    newAppend->SetInputs(graph->GetAllocator(),
+                         {{instance, instance->GetType()}, {arg, arg->GetType()}, {saveState, saveState->GetType()}});
+    return newAppend;
+}
+
 IntrinsicInst *CreateIntrinsic(Graph *graph, RuntimeInterface::IntrinsicId intrinsicId, DataType::Type type,
                                const std::initializer_list<std::pair<Inst *, DataType::Type>> &args)
 {
@@ -654,8 +719,9 @@ IntrinsicInst *SimplifyStringBuilder::CreateIntrinsicStringBuilderAppendString(I
                            {{instance, instance->GetType()}, {arg, arg->GetType()}, {saveState, saveState->GetType()}});
 }
 
-void SimplifyStringBuilder::NormalizeStringBuilderAppendInstructionUsers(Inst *instance, SaveStateInst *saveState)
+Inst *SimplifyStringBuilder::NormalizeStringBuilderAppendInstructionUsers(Inst *instance, SaveStateInst *saveState)
 {
+    Inst *newAppendInst = nullptr;
     [[maybe_unused]] Inst *ctorCall = nullptr;
 
     for (auto &user : instance->GetUsers()) {
@@ -665,7 +731,14 @@ void SimplifyStringBuilder::NormalizeStringBuilderAppendInstructionUsers(Inst *i
             ASSERT(ctorCall == nullptr);
             ctorCall = userInst;
             auto ctorArg = ctorCall->GetInput(1).GetInst();
-            CreateIntrinsicStringBuilderAppendString(instance, ctorArg, CopySaveState(GetGraph(), saveState));
+            if (!GetGraph()->IsBytecodeOptimizer()) {
+                newAppendInst =
+                    CreateIntrinsicStringBuilderAppendString(instance, ctorArg, CopySaveState(GetGraph(), saveState));
+            } else {
+                newAppendInst =
+                    CreateStringBuilderAppendString(instance, ctorArg, CopySaveState(GetGraph(), saveState));
+            }
+            InsertAfterWithSaveState(newAppendInst, ctorCall);
         } else if (IsMethodStringBuilderDefaultConstructor(userInst)) {
             ASSERT(ctorCall == nullptr);
             ctorCall = userInst;
@@ -676,6 +749,7 @@ void SimplifyStringBuilder::NormalizeStringBuilderAppendInstructionUsers(Inst *i
         }
     }
     ASSERT(ctorCall != nullptr);
+    return newAppendInst;
 }
 
 ArenaVector<Inst *> SimplifyStringBuilder::FindStringBuilderAppendInstructions(Inst *instance)
@@ -774,18 +848,22 @@ void SimplifyStringBuilder::ReconnectStringBuilderCascade(Inst *instance, Inst *
 
     instructionsStack_.push(inputInstance);
 
-    NormalizeStringBuilderAppendInstructionUsers(inputInstance, saveState);
+    auto newAppendInst = NormalizeStringBuilderAppendInstructionUsers(inputInstance, saveState);
     for (auto inputAppendInstruction : FindStringBuilderAppendInstructions(inputInstance)) {
         COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Retarget append instrisic (id=" << inputAppendInstruction->GetId()
                                          << ") to instance (id=" << instance->GetId() << ")";
 
-        inputAppendInstruction->SetInput(0, instance);
-        inputAppendInstruction->SetSaveState(saveState);
+        if (newAppendInst != nullptr && newAppendInst == inputAppendInstruction) {
+            inputAppendInstruction->SetInput(0, instance);
+        } else {
+            inputAppendInstruction->SetInput(0, instance);
+            inputAppendInstruction->SetSaveState(saveState);
 
-        if (inputAppendInstruction->GetBasicBlock() != nullptr) {
-            inputAppendInstruction->GetBasicBlock()->EraseInst(inputAppendInstruction, true);
+            if (inputAppendInstruction->GetBasicBlock() != nullptr) {
+                inputAppendInstruction->GetBasicBlock()->EraseInst(inputAppendInstruction, true);
+            }
+            appendInstruction->InsertAfter(inputAppendInstruction);
         }
-        appendInstruction->InsertAfter(inputAppendInstruction);
 
         for (auto &input : inputAppendInstruction->GetInputs()) {
             if (input.GetInst()->IsSaveState()) {
@@ -1051,7 +1129,10 @@ Inst *SimplifyStringBuilder::HoistInstructionToPreHeaderRecursively(BasicBlock *
         if (inputInst->GetBasicBlock() == preHeader) {
             continue;
         }
-
+        // Only instructions from first input are moved to preheader in this case
+        if (IsMethodStringBuilderConstructorWithStringArg(inst) && inputInst != inst->GetInput(0).GetInst()) {
+            continue;
+        }
         lastInst = HoistInstructionToPreHeaderRecursively(preHeader, lastInst, inputInst, saveState);
         if (lastInst->RequireState()) {
             saveState = lastInst->GetSaveState();
@@ -1074,9 +1155,10 @@ void SimplifyStringBuilder::HoistInstructionsToPreHeader(const ConcatenationLoop
                                            initSaveState);
 
     ASSERT(match.preheader.ctorCall->RequireState());
-    HoistInstructionToPreHeader(preHeader, match.preheader.ctorCall, match.preheader.appendAccValue,
-                                match.preheader.ctorCall->GetSaveState());
-
+    if (IsMethodStringBuilderDefaultConstructor(match.preheader.ctorCall)) {
+        HoistInstructionToPreHeader(preHeader, match.preheader.ctorCall, match.preheader.appendAccValue,
+                                    match.preheader.ctorCall->GetSaveState());
+    }
     for (auto &input : match.preheader.appendAccValue->GetInputs()) {
         auto inputInst = input.GetInst();
         if (inputInst->IsSaveState()) {
@@ -1207,7 +1289,9 @@ void SimplifyStringBuilder::Cleanup(const ConcatenationLoopMatch &match)
         temp.instance->ReplaceUsers(match.preheader.instance);
         temp.instance->ClearFlag(compiler::inst_flags::NO_DCE);
         temp.ctorCall->ClearFlag(compiler::inst_flags::NO_DCE);
-        temp.appendAccValue->ClearFlag(compiler::inst_flags::NO_DCE);
+        if (temp.appendAccValue) {
+            temp.appendAccValue->ClearFlag(compiler::inst_flags::NO_DCE);
+        }
     }
 }
 
@@ -1353,25 +1437,23 @@ void SimplifyStringBuilder::MatchStringBuilderUsage(Inst *instance, StringBuilde
 
     for (auto &user : instance->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
-        if (IsMethodStringBuilderConstructorWithStringArg(userInst)) {
-            usage.ctorCall = userInst;
-        } else if (IsMethodStringBuilderDefaultConstructor(userInst)) {
+        if (IsMethodStringBuilderConstructorWithStringArg(userInst) ||
+            IsMethodStringBuilderDefaultConstructor(userInst)) {
             usage.ctorCall = userInst;
         } else if (IsStringBuilderAppend(userInst)) {
             // StringBuilder append-call returns 'this' (instance)
             // Replace all users of append-call by instance for simplicity
             userInst->ReplaceUsers(instance);
-        }
-    }
-    ASSERT(usage.ctorCall != nullptr);
-
-    for (auto &user : instance->GetUsers()) {
-        auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
-        if (IsStringBuilderAppend(userInst)) {
             usage.appendInstructions.push_back(userInst);
         } else if (IsStringBuilderToString(userInst)) {
             usage.toStringCalls.push_back(userInst);
         }
+    }
+
+    ASSERT(usage.ctorCall != nullptr);
+
+    if (IsMethodStringBuilderConstructorWithStringArg(usage.ctorCall)) {
+        usage.appendInstructions.push_back(usage.ctorCall);
     }
 
     for (auto &toStringCall : usage.toStringCalls) {
@@ -1471,6 +1553,25 @@ bool SimplifyStringBuilder::HasInputInst(Inst *inputInst, Inst *inst) const
     return found;
 }
 
+bool SimplifyStringBuilder::HasSbCtorStrInstructionUser(Inst *inst) const
+{
+    Loop *instLoop = inst->GetBasicBlock()->GetLoop();
+    for (auto &user : inst->GetUsers()) {
+        auto ctorInst = SkipSingleUserCheckInstruction(user.GetInst());
+        if (!IsMethodStringBuilderConstructorWithStringArg(ctorInst)) {
+            continue;
+        }
+        if (ctorInst->GetDataFlowInput(1) != inst) {
+            continue;
+        }
+        if (ctorInst->GetBasicBlock()->GetLoop() != instLoop) {
+            continue;
+        }
+        return true;
+    }
+    return false;
+}
+
 bool SimplifyStringBuilder::HasAppendInstructionUser(Inst *inst) const
 {
     Loop *instLoop = inst->GetBasicBlock()->GetLoop();
@@ -1520,7 +1621,7 @@ bool SimplifyStringBuilder::IsPhiAccumulatedValue(PhiInst *phi) const
     //      ...
 
     return HasInputFromPreHeader(phi) && HasToStringCallInput(phi) && !UsedByPhiInstInSameBB(phi) &&
-           HasAppendInstructionUser(phi);
+           (HasAppendInstructionUser(phi) || HasSbCtorStrInstructionUser(phi));
 }
 
 ArenaVector<Inst *> SimplifyStringBuilder::GetPhiAccumulatedValues(Loop *loop)
@@ -1569,7 +1670,7 @@ void SimplifyStringBuilder::StringBuilderUsagesDFS(Inst *inst, Loop *loop, Marke
             StringBuilderUsagesDFS(userInst, loop, visited);
         }
 
-        if (!IsStringBuilderAppend(userInst)) {
+        if (!IsStringBuilderAppend(userInst) && !IsMethodStringBuilderConstructorWithStringArg(userInst)) {
             continue;
         }
 
@@ -1791,7 +1892,7 @@ Inst *SimplifyStringBuilder::MatchHoistableInstructions(const StringBuilderUsage
             continue;
         }
 
-        if (!IsStringBuilderAppend(userInst)) {
+        if (!IsStringBuilderAppend(userInst) && !IsMethodStringBuilderConstructorWithStringArg(userInst)) {
             continue;
         }
 
@@ -2135,6 +2236,13 @@ void SimplifyStringBuilder::CollectStringBuilderFirstCalls(BasicBlock *block)
                 firstCall = inst;
             }
         }
+        if (calls != stringBuilderFirstLastCalls_.end() && IsMethodStringBuilderConstructorWithStringArg(inst) &&
+            inst->GetDataFlowInput(0) == instance) {
+            auto &firstCall = calls->second.first;
+            if (firstCall == nullptr) {
+                firstCall = inst;
+            }
+        }
     }
 }
 
@@ -2202,8 +2310,7 @@ bool SimplifyStringBuilder::CanMergeStringBuilders(Inst *instance, const InstPai
 
     for (auto &user : instance->GetUsers()) {
         auto userInst = user.GetInst();
-        if (IsMethodStringBuilderConstructorWithCharArrayArg(userInst) ||
-            IsMethodStringBuilderConstructorWithStringArg(userInst)) {
+        if (IsMethodStringBuilderConstructorWithCharArrayArg(userInst)) {
             // Does not look like string concatenation pattern
             return false;
         }
@@ -2219,7 +2326,7 @@ bool SimplifyStringBuilder::CanMergeStringBuilders(Inst *instance, const InstPai
     // Check if 'inputInstance' toString call comes after any 'inputInstance' append call
     for (auto &user : inputInstance->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
-        if (!IsStringBuilderAppend(userInst)) {
+        if (!IsStringBuilderAppend(userInst) && !IsMethodStringBuilderConstructorWithStringArg(userInst)) {
             continue;
         }
 
@@ -2232,7 +2339,8 @@ bool SimplifyStringBuilder::CanMergeStringBuilders(Inst *instance, const InstPai
     if (CountUsers(inputInstanceLastToStringCall, [instanceFirstCall](auto &user) {
             auto userInst = user.GetInst();
             auto isAppend = IsStringBuilderAppend(userInst);
-            return isAppend && userInst != instanceFirstCall;
+            auto isCtorStr = IsMethodStringBuilderConstructorWithStringArg(userInst);
+            return (isAppend || isCtorStr) && userInst != instanceFirstCall;
         }) > 0) {
         return false;
     }
@@ -2376,7 +2484,8 @@ SimplifyStringBuilder::StringBuilderCallsMap &SimplifyStringBuilder::CollectStri
                 continue;  // Unsupported case: doesn't look like concatenation pattern
             }
 
-            if (!IsStringBuilderAppend(instanceFirstAppendCall)) {
+            if (!IsStringBuilderAppend(instanceFirstAppendCall) &&
+                !IsMethodStringBuilderConstructorWithStringArg(instanceFirstAppendCall)) {
                 continue;
             }
 

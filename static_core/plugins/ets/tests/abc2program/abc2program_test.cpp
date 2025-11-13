@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -259,7 +259,7 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
         "std.core.Lambda1._ctor_:std.core.Lambda1;void;",
         "std.core.Object._ctor_:std.core.Object;void;",
         "std.core.Runtime.failedTypeCastExclUndefinedStub:std.core.Object;std.core.Class;std.core.ClassCastError;",
-        "std.core.StringBuilder._ctor_:std.core.StringBuilder;void;",
+        "std.core.StringBuilder._ctor_:std.core.StringBuilder;std.core.String;void;",
         "std.core.StringBuilder.append:std.core.StringBuilder;f64;std.core.StringBuilder;",
         "std.core.StringBuilder.append:std.core.StringBuilder;std.core.String;std.core.StringBuilder;",
         "std.core.StringBuilder.toString:std.core.StringBuilder;std.core.String;",

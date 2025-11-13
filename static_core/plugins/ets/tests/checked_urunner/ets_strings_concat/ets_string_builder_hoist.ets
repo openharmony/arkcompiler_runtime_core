@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 //! INST        /Load.*std\.core\.StringBuilder/
 //! INST_NEXT   /NewObject/
 //! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
-//! INST_NEXT   /Intrinsic\.StdCoreSbAppendString/
+//! INST_NOT    /Intrinsic\.StdCoreSbAppendString/
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting optimization for string concatenation in loop
@@ -37,7 +37,7 @@
 //! INST        /LoadImmediate/
 //! INST_NEXT   /NewObject/
 //! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
-//! INST_NEXT   /Intrinsic\.StdCoreSbAppendString/
+//! INST_NOT    /Intrinsic\.StdCoreSbAppendString/
 
 function will_hoist1() {
     let ret: string = "test:"
@@ -111,7 +111,7 @@ function main() {
 //! INST        /Load.*std\.core\.StringBuilder/
 //! INST_NEXT   /NewObject/
 //! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
-//! INST_NEXT   /StringBuilder::append/
+//! INST_NOT   /StringBuilder::append/
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"

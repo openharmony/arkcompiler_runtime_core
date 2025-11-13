@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,9 +62,11 @@ bool IsUsedOutsideBasicBlock(Inst *inst, BasicBlock *bb);
 SaveStateInst *FindFirstSaveState(BasicBlock *block);
 
 template <bool ALLOW_INLINED = false>
-bool IsStringBuilderAppend(const Inst *inst)
+bool IsStringBuilderAppend(const Inst *inst, RuntimeInterface *runtime = nullptr)
 {
-    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    if (runtime == nullptr) {
+        runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    }
     if (inst->GetOpcode() == Opcode::CallStatic || inst->GetOpcode() == Opcode::CallVirtual) {
         auto callInst = static_cast<const CallInst *>(inst);
         return (ALLOW_INLINED || !callInst->IsInlined()) &&
