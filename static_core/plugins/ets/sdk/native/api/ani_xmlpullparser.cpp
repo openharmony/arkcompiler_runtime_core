@@ -77,9 +77,11 @@ XmlPullParser::ParseInfoClassCache::ParseInfoClassCache(ani_env *env) : env_(env
     InitFieldCache();
 }
 
-XmlPullParser::ParseInfoClassCache::~ParseInfoClassCache()
+XmlPullParser::ParseInfoClassCache::~ParseInfoClassCache() {}
+
+ani_class XmlPullParser::ParseInfoClassCache::GetCachedClass_()
 {
-    ANI_FATAL_IF_ERROR(env_->GlobalReference_Delete(static_cast<ani_ref>(cachedClass_)));
+    return cachedClass_;
 }
 
 ani_object XmlPullParser::ParseInfoClassCache::New() const
@@ -141,6 +143,7 @@ ani_boolean XmlPullParser::ReleaseNative([[maybe_unused]] ani_env *env, [[maybe_
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     CHECK_NON_NULL_PARSER_AND_RETURN(pointer, false);
     ANI_FATAL_IF_ERROR(env->GlobalReference_Delete(static_cast<ani_ref>(that->enumTypeClass_)));
+    ANI_FATAL_IF_ERROR(env->GlobalReference_Delete(static_cast<ani_ref>(that->infoClass_.GetCachedClass_())));
     delete that;
     return static_cast<ani_boolean>(true);
 }
