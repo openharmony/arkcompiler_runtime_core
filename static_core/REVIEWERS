@@ -102,11 +102,23 @@ static_core/plugins/ets/isa/                             @mbolshov @xucheng46 @g
 static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon @asidorov @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/runtime/                         @vpukhov
 static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/runtime/ets_class_linker_context.cpp                  @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_class_linker_context.h                    @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_class_linker_extension.cpp                @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_class_linker_extension.h                  @vpukhov @shilei123
 static_core/plugins/ets/runtime/ani                      @wanzixuan330 @v-cherkashin ^slynkodenis
 static_core/plugins/ets/runtime/ets_coroutine.h          ^tanglu100 @MofengMa ^weixin_41079876 ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/ets_entrypoints*         @Prof @mbolshov ^asidorov @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/runtime/ets_handle*              ^dmitriitr @udav
 static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof @xucheng46 ^gitee-dakeQI
+static_core/plugins/ets/runtime/ets_namespace_manager.cpp                     @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_namespace_manager.h                       @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_namespace_manager_impl.cpp                @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_namespace_manager_impl.h                  @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_native_library.cpp                        @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_native_library.h                          @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_native_library_provider.cpp               @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_native_library_provider.h                 @vpukhov @shilei123
 static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
 static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @yuan-yao14
@@ -125,6 +137,8 @@ static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @P
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/runtime/intrinsics/std_core_AbcFile.cpp               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @shilei123
+static_core/plugins/ets/runtime/intrinsics/std_core_AbcRuntimeLinker.cpp      ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_finalization_registry.cpp ^dmitriitr @udav
 static_core/plugins/ets/runtime/intrinsics/std_core_gc.cpp                    ^dmitriitr @udav
 static_core/plugins/ets/runtime/libani_helpers/                               @wanzixuan330 @v-cherkashin ^slynkodenis
@@ -137,9 +151,13 @@ static_core/plugins/ets/runtime/types/*atomic*                                ^d
 static_core/plugins/ets/runtime/types/*promise*                               ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/types/*reflect*                               @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/*typeapi*                               @magikarp777 ^anton-sysoev @Nojpg
+static_core/plugins/ets/runtime/types/ets_abc_runtime_linker.h                @nazarovkonstantin @slynkodenis @shilei123
 static_core/plugins/ets/runtime/types/ets_class*                              @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/ets_method*                             @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/ets_promise.h                           ^tanglu100 @MofengMa ^weixin_41079876 ^dmitriitr @konstanting
+static_core/plugins/ets/runtime/types/ets_runtime_linker.h                    @nazarovkonstantin @slynkodenis @shilei123
+static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting
+static_core/plugins/ets/stdlib/escompat/taskpool.ets                          ^dmitriitr @konstanting @zhuangkudecha ^tanglu10 ^yuesiyuan ^Wangyuzhong11
 static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof @asidorov
 static_core/plugins/ets/tests/benchmarks/interop_js                           @igelhaus @nazarovkonstantin @ignatenkooleg @Prof ^slynkodenis @benzunfu
@@ -161,16 +179,19 @@ static_core/plugins/ets/stdlib/std/concurrency/                               @k
 static_core/plugins/ets/stdlib/std/concurrency/Atomics.ets                    ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/stdlib/std/concurrency/taskpool.ets                   @ipetrov ^dmitriitr ^konstanting ^molotkovmikhail ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.ets               @konstanting ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/stdlib/std/core/AbcRuntimeLinker.ets                  ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^lijin1039 @shilei123
+static_core/plugins/ets/stdlib/std/core/BootRuntimeLinker.ets                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^lijin1039 @shilei123
 static_core/plugins/ets/stdlib/std/core/Coroutine.ets                         ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/stdlib/std/core/EAWorker.ets                          ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.ets              ^dmitriitr @udav ^shemetovphilip @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/GC.ets                                ^dmitriitr @udav
 static_core/plugins/ets/stdlib/std/core/Promise.ets                           ^dmitriitr @udav ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/stdlib/std/core/RuntimeLinker.ets                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^lijin1039 @shilei123
 static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @Prof @igelhaus @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/7.expressions/                    @dmitriitr @Prof @igelhaus @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/9.classes/                        @dmitriitr @Prof @igelhaus @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
-static_core/plugins/ets/tests/ets_func_tests/escompat/                        ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^jokerxd-liu
-static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^jokerxd-liu
+static_core/plugins/ets/tests/ets_func_tests/escompat/                        ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039
+static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039
 static_core/plugins/ets/tests/ets_test_suite/atomics/                         @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.ets    @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting ^tanglu100 @MofengMa ^weixin_41079876
