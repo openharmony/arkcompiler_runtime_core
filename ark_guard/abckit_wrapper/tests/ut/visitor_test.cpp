@@ -144,22 +144,22 @@ public:
         AddTargetObjectName("module_static.Ns1.Color2.$_get:module_static.Ns1.Color2;std.core.String;");
         AddTargetObjectName("module_static.Ns1.ClassB._cctor_:void;");
         AddTargetObjectName("module_static.Ns1.ClassB.sMethod2:i32;void;");
-        AddTargetObjectName("module_static.Ns1.ClassB.%%set-iField2:module_static.Ns1.ClassB;std.core.String;void;");
-        AddTargetObjectName("module_static.Ns1.ClassB.%%get-iField2:module_static.Ns1.ClassB;std.core.String;");
+        AddTargetObjectName("module_static.Ns1.ClassB.<set>iField2:module_static.Ns1.ClassB;std.core.String;void;");
+        AddTargetObjectName("module_static.Ns1.ClassB.<get>iField2:module_static.Ns1.ClassB;std.core.String;");
         AddTargetObjectName("module_static.Ns1.ClassB.iMethod2:module_static.Ns1.ClassB;void;");
         AddTargetObjectName("module_static.ClassA._ctor_:module_static.ClassA;void;");
         AddTargetObjectName("module_static.ClassA.sMethod1:i32;void;");
-        AddTargetObjectName("module_static.ClassA.%%set-iField1:module_static.ClassA;i32;void;");
-        AddTargetObjectName("module_static.ClassA.%%get-iField1:module_static.ClassA;i32;");
+        AddTargetObjectName("module_static.ClassA.<set>iField1:module_static.ClassA;i32;void;");
+        AddTargetObjectName("module_static.ClassA.<get>iField1:module_static.ClassA;i32;");
         AddTargetObjectName("module_static.Color1.values:module_static.Color1[];");
         AddTargetObjectName("module_static.Color1.fromValue:i32;module_static.Color1;");
         AddTargetObjectName("module_static.Ns1.Color2.fromValue:i32;module_static.Ns1.Color2;");
         AddTargetObjectName("module_static.Ns1.foo2:i32;i32;void;");
-        AddTargetObjectName("module_static.Ns1.Interface2.%%get-iField2:module_static.Ns1.Interface2;std.core.String;");
+        AddTargetObjectName("module_static.Ns1.Interface2.<get>iField2:module_static.Ns1.Interface2;std.core.String;");
         AddTargetObjectName("module_static.Interface1.iMethod1:module_static.Interface1;void;");
         AddTargetObjectName("module_static.Color1.getValueOf:std.core.String;module_static.Color1;");
         AddTargetObjectName(
-            "module_static.Ns1.Interface2.%%set-iField2:module_static.Ns1.Interface2;std.core.String;void;");
+            "module_static.Ns1.Interface2.<set>iField2:module_static.Ns1.Interface2;std.core.String;void;");
         AddTargetObjectName("module_static.foo1:i32;i32;void;");
         AddTargetObjectName("module_static.main:void;");
         AddTargetObjectName("module_static.Ns1.ClassB.method2:module_static.Ns1.ClassB;void;");
@@ -171,8 +171,8 @@ public:
         AddTargetObjectName("module_static.Color1.getOrdinal:module_static.Color1;i32;");
         AddTargetObjectName("module_static.Ns1.Color2.values:module_static.Ns1.Color2[];");
         AddTargetObjectName("module_static.Color1.toString:module_static.Color1;std.core.String;");
-        AddTargetObjectName("module_static.Interface1.%%get-iField1:module_static.Interface1;i32;");
-        AddTargetObjectName("module_static.Interface1.%%set-iField1:module_static.Interface1;i32;void;");
+        AddTargetObjectName("module_static.Interface1.<get>iField1:module_static.Interface1;i32;");
+        AddTargetObjectName("module_static.Interface1.<set>iField1:module_static.Interface1;i32;void;");
         AddTargetObjectName("module_static.Color1._cctor_:void;");
         AddTargetObjectName("module_static.Color1.getName:module_static.Color1;std.core.String;");
     }
@@ -215,8 +215,8 @@ public:
         AddTargetObjectName("module_static.Ns1.Color2._ordinal");
         AddTargetObjectName("module_static.Ns1.Color2._StringValuesArray");
         AddTargetObjectName("module_static.Ns1.ClassB.sField2");
-        AddTargetObjectName("module_static.Ns1.ClassB.%%property-iField2");
-        AddTargetObjectName("module_static.Interface1.%%property-iField1");
+        AddTargetObjectName("module_static.Ns1.ClassB.<property>iField2");
+        AddTargetObjectName("module_static.Interface1.<property>iField1");
         AddTargetObjectName("module_static.Color1._ordinal");
         AddTargetObjectName("module_static.Ns1.Color2._NamesArray");
         AddTargetObjectName("module_static.Ns1.ClassB.field2");
@@ -224,8 +224,8 @@ public:
         AddTargetObjectName("module_static.Color1._ItemsArray");
         AddTargetObjectName("module_static.m1");
         AddTargetObjectName("module_static.ClassA.field1");
-        AddTargetObjectName("module_static.ClassA.%%property-iField1");
-        AddTargetObjectName("module_static.Ns1.Interface2.%%property-iField2");
+        AddTargetObjectName("module_static.ClassA.<property>iField1");
+        AddTargetObjectName("module_static.Ns1.Interface2.<property>iField2");
         AddTargetObjectName("module_static.ClassA.sField1");
         AddTargetObjectName("module_static.Ns1.Color2._ValuesArray");
     }
@@ -522,13 +522,13 @@ public:
         AddTargetObjectName("module_static.ClassA.method1:module_static.ClassA;void;");
         AddTargetObjectName("module_static.ClassA._ctor_:module_static.ClassA;void;");
         AddTargetObjectName("module_static.ClassA._cctor_:void;");
-        AddTargetObjectName("module_static.ClassA.%%set-iField1:module_static.ClassA;i32;void;");
-        AddTargetObjectName("module_static.ClassA.%%get-iField1:module_static.ClassA;i32;");
+        AddTargetObjectName("module_static.ClassA.<set>iField1:module_static.ClassA;i32;void;");
+        AddTargetObjectName("module_static.ClassA.<get>iField1:module_static.ClassA;i32;");
         AddTargetObjectName("module_static.ClassA.iMethod1:module_static.ClassA;void;");
         // Fields
         AddTargetObjectName("module_static.ClassA.field1");
         AddTargetObjectName("module_static.ClassA.sField1");
-        AddTargetObjectName("module_static.ClassA.%%property-iField1");
+        AddTargetObjectName("module_static.ClassA.<property>iField1");
     }
 
     bool Visit(abckit_wrapper::Module *module) override
@@ -575,13 +575,13 @@ public:
         AddTargetObjectName("module_static.ClassA.method1:module_static.ClassA;void;");
         AddTargetObjectName("module_static.ClassA._ctor_:module_static.ClassA;void;");
         AddTargetObjectName("module_static.ClassA._cctor_:void;");
-        AddTargetObjectName("module_static.ClassA.%%set-iField1:module_static.ClassA;i32;void;");
-        AddTargetObjectName("module_static.ClassA.%%get-iField1:module_static.ClassA;i32;");
+        AddTargetObjectName("module_static.ClassA.<set>iField1:module_static.ClassA;i32;void;");
+        AddTargetObjectName("module_static.ClassA.<get>iField1:module_static.ClassA;i32;");
         AddTargetObjectName("module_static.ClassA.iMethod1:module_static.ClassA;void;");
         // Fields
         AddTargetObjectName("module_static.ClassA.field1");
         AddTargetObjectName("module_static.ClassA.sField1");
-        AddTargetObjectName("module_static.ClassA.%%property-iField1");
+        AddTargetObjectName("module_static.ClassA.<property>iField1");
     }
 
     bool Visit(abckit_wrapper::Module *module) override

@@ -2532,7 +2532,7 @@ public:
         Field const *rawField = GetCachedField();
         Type objType;
 
-        // currently all union type named access sites are encoded as “%%union_prop-” class fields
+        // currently all union type named access sites are encoded as “$NamedAccessMeta” class fields
         // at bytecode level, thus we do not have accurate union type info to verify each variables
         // so the current temporary solution would be to skip verification for union types.This
         // actually introduce insecure possibilities here. Accurate verification for union types

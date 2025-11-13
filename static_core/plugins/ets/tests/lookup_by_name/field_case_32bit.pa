@@ -22,7 +22,7 @@
     i32 baz
 }
 
-.function i32 A.%%get-bar(A a0) <access.function=public> {
+.function i32 A.<get>bar(A a0) <access.function=public> {
     ldai 15
     return
 }

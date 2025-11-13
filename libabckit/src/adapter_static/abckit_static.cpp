@@ -43,13 +43,13 @@ constexpr std::string_view ETS_ANNOTATION_MODULE = "ets.annotation.Module";
 constexpr std::string_view ETS_EXTENDS = "ets.extends";
 constexpr std::string_view ETS_IMPLEMENTS = "ets.implements";
 constexpr std::string_view ENUM_BASE = "std.core.BaseEnum";
-constexpr std::string_view INTERFACE_GET_FUNCTION_PATTERN = ".*%%get-(.*)";
-constexpr std::string_view INTERFACE_SET_FUNCTION_PATTERN = ".*%%set-(.*)";
+constexpr std::string_view INTERFACE_GET_FUNCTION_PATTERN = ".*<get>(.*)";
+constexpr std::string_view INTERFACE_SET_FUNCTION_PATTERN = ".*<set>(.*)";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
 constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 constexpr std::string_view OBJECT_CLASS = "std.core.Object";
 constexpr std::string_view OBJECT_LITERAL_NAME = "$ObjectLiteral";
-constexpr std::string_view INTERFACE_FIELD_PREFIX = "%%property-";
+constexpr std::string_view INTERFACE_FIELD_PREFIX = "<property>";
 constexpr std::string_view ASYNC_ORIGINAL_RETURN = "std.core.Promise;";
 const std::unordered_set<std::string> GLOBAL_CLASS_NAMES = {"ETSGLOBAL", "_GLOBAL"};
 

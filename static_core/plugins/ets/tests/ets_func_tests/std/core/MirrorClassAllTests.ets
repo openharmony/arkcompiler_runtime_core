@@ -108,7 +108,7 @@ function testMethodBasics(): void {
 	for (let i = 0; i < ct.getMethodsNum(); ++i) {
 		got.add(ct.getMethod(i).getName())
 	}
-	for (const name of ['sm','f','%%get-g','%%set-g','p']) {
+	for (const name of ['sm','f','<get>g','<set>g','p']) {
 		arktest.assertTrue(got.has(name), `should have method ${name}`)
 	}
 	const mSm = getMethodByName(ct, 'sm')
@@ -124,12 +124,12 @@ function testMethodBasics(): void {
 	arktest.assertTrue(mF.getType().getResultType().equals(StringType.REF))
 	arktest.assertEQ(AccessModifier.PUBLIC, mF.getAccessModifier())
 
-	const mGet = getMethodByName(ct, '%%get-g')
+	const mGet = getMethodByName(ct, '<get>g')
 	arktest.assertTrue(mGet.isGetter())
 	arktest.assertEQ(0 as long, mGet.getType().getParametersNum())
 	arktest.assertTrue(mGet.getType().getResultType().equals(IntType.VAL))
 
-	const mSet = getMethodByName(ct, '%%set-g')
+	const mSet = getMethodByName(ct, '<set>g')
 	arktest.assertTrue(mSet.isSetter())
 	arktest.assertEQ(1 as long, mSet.getType().getParametersNum())
 }

@@ -32,17 +32,14 @@ static constexpr const char *TYPE_API_UNDEFINED_TYPE_DESC = "__TYPE_API_UNDEFINE
 static constexpr const char *INVOKE_METHOD_NAME = "$_invoke";
 static constexpr const char *CONSTRUCTOR_NAME = "constructor";
 static constexpr char TYPE_DESC_DELIMITER = ';';
-//--------------
-static constexpr const char *PROPERTY = "%%property-";
-static constexpr const uint8_t PROPERTY_PREFIX_LENGTH = 11;
-//--------------
-static constexpr const char *GETTER_BEGIN = "%%get-";
-static constexpr const char *SETTER_BEGIN = "%%set-";
-static constexpr const uint8_t SETTER_GETTER_PREFIX_LENGTH = 6;
-//--------------
+static constexpr const char *GETTER_BEGIN = "<get>";
+static constexpr const char *SETTER_BEGIN = "<set>";
+static constexpr const char *PROPERTY = "<property>";
 static constexpr const char *ITERATOR_METHOD = "$_iterator";
 static constexpr const char *GET_INDEX_METHOD = "$_get";
 static constexpr const char *SET_INDEX_METHOD = "$_set";
+static constexpr const uint8_t SETTER_GETTER_PREFIX_LENGTH = 5;
+static constexpr const uint8_t PROPERTY_PREFIX_LENGTH = 10;
 
 static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
 static constexpr const char *STD_CORE_FUNCTION_UNSAFECALL_METHOD = "unsafeCall";

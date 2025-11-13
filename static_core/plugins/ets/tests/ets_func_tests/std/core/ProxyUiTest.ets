@@ -477,7 +477,7 @@ function createProxyTestBody(proxy: ProxyTest<Object>) {
     proxy.a17!.set(1.0, "one")
 }
 
-// Test ProxyTest %%get- and %%set-
+// Test ProxyTest <get> and <set>
 function createProxyTestOpt(){
     let ifaces: FixedArray<Class> =  [ (Type.from<ProxyTest<Object>>() as InterfaceType).getClass() ]
     let proxy1: ProxyTest<Object> = createProxy(ifaces, new ProxyTestHandler(new ProxyTestImpl<Object>())) as ProxyTest<Object>

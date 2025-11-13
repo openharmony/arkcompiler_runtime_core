@@ -366,7 +366,7 @@ TEST_F(LibAbcKitInspectApiFieldsTest, InterfaceFieldIsReadonlyStatic)
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/fields/fields_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectFieldNames = {"%%property-i1F2"};
+    std::set<std::string> expectFieldNames = {"<property>i1F2"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {

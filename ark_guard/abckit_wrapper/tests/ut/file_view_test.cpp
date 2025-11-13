@@ -150,13 +150,13 @@ HWTEST_F(TestFileView, fileView_class_001, TestSize.Level0)
 HWTEST_F(TestFileView, fileView_class_002, TestSize.Level0)
 {
     ValidateModuleObject<abckit_wrapper::Method>("ClassA.method1:module_static.ClassA;void;");
-    ValidateModuleObject<abckit_wrapper::Method>("ClassA.%%get-iField1:module_static.ClassA;i32;");
-    ValidateModuleObject<abckit_wrapper::Method>("ClassA.%%set-iField1:module_static.ClassA;i32;void;");
+    ValidateModuleObject<abckit_wrapper::Method>("ClassA.<get>iField1:module_static.ClassA;i32;");
+    ValidateModuleObject<abckit_wrapper::Method>("ClassA.<set>iField1:module_static.ClassA;i32;void;");
 
     ValidateModuleObject<abckit_wrapper::Method>("Ns1.ClassB.method2:module_static.Ns1.ClassB;void;");
-    ValidateModuleObject<abckit_wrapper::Method>("Ns1.ClassB.%%get-iField2:module_static.Ns1.ClassB;std.core.String;");
+    ValidateModuleObject<abckit_wrapper::Method>("Ns1.ClassB.<get>iField2:module_static.Ns1.ClassB;std.core.String;");
     ValidateModuleObject<abckit_wrapper::Method>(
-        "Ns1.ClassB.%%set-iField2:module_static.Ns1.ClassB;std.core.String;void;");
+        "Ns1.ClassB.<set>iField2:module_static.Ns1.ClassB;std.core.String;void;");
 }
 
 /**
@@ -169,11 +169,11 @@ HWTEST_F(TestFileView, fileView_class_003, TestSize.Level0)
 {
     ValidateModuleObject<abckit_wrapper::Field>("ClassA.sField1");
     ValidateModuleObject<abckit_wrapper::Field>("ClassA.field1");
-    ValidateModuleObject<abckit_wrapper::Field>("ClassA.%%property-iField1");
+    ValidateModuleObject<abckit_wrapper::Field>("ClassA.<property>iField1");
 
     ValidateModuleObject<abckit_wrapper::Field>("Ns1.ClassB.sField2");
     ValidateModuleObject<abckit_wrapper::Field>("Ns1.ClassB.field2");
-    ValidateModuleObject<abckit_wrapper::Field>("Ns1.ClassB.%%property-iField2");
+    ValidateModuleObject<abckit_wrapper::Field>("Ns1.ClassB.<property>iField2");
 }
 
 /**
@@ -186,16 +186,16 @@ HWTEST_F(TestFileView, fileView_class_004, TestSize.Level0)
 {
     AssertSignatureEqual<abckit_wrapper::Method>("ClassA.sMethod1:i32;void;", "sMethod1", "(i32)void");
     AssertSignatureEqual<abckit_wrapper::Method>("ClassA.method1:module_static.ClassA;void;", "method1", "()void");
-    AssertSignatureEqual<abckit_wrapper::Method>("ClassA.%%get-iField1:module_static.ClassA;i32;", "iField1", "");
-    AssertSignatureEqual<abckit_wrapper::Method>("ClassA.%%set-iField1:module_static.ClassA;i32;void;", "iField1", "");
+    AssertSignatureEqual<abckit_wrapper::Method>("ClassA.<get>iField1:module_static.ClassA;i32;", "iField1", "");
+    AssertSignatureEqual<abckit_wrapper::Method>("ClassA.<set>iField1:module_static.ClassA;i32;void;", "iField1", "");
 
     AssertSignatureEqual<abckit_wrapper::Method>("Ns1.ClassB.sMethod2:i32;void;", "sMethod2", "(i32)void");
     AssertSignatureEqual<abckit_wrapper::Method>("Ns1.ClassB.method2:module_static.Ns1.ClassB;void;", "method2",
                                                  "()void");
-    AssertSignatureEqual<abckit_wrapper::Method>("Ns1.ClassB.%%get-iField2:module_static.Ns1.ClassB;std.core.String;",
+    AssertSignatureEqual<abckit_wrapper::Method>("Ns1.ClassB.<get>iField2:module_static.Ns1.ClassB;std.core.String;",
                                                  "iField2", "");
     AssertSignatureEqual<abckit_wrapper::Method>(
-        "Ns1.ClassB.%%set-iField2:module_static.Ns1.ClassB;std.core.String;void;", "iField2", "");
+        "Ns1.ClassB.<set>iField2:module_static.Ns1.ClassB;std.core.String;void;", "iField2", "");
 }
 
 /**
@@ -208,11 +208,11 @@ HWTEST_F(TestFileView, fileView_class_005, TestSize.Level0)
 {
     AssertSignatureEqual<abckit_wrapper::Field>("ClassA.sField1", "sField1", "");
     AssertSignatureEqual<abckit_wrapper::Field>("ClassA.field1", "field1", "");
-    AssertSignatureEqual<abckit_wrapper::Field>("ClassA.%%property-iField1", "iField1", "");
+    AssertSignatureEqual<abckit_wrapper::Field>("ClassA.<property>iField1", "iField1", "");
 
     AssertSignatureEqual<abckit_wrapper::Field>("Ns1.ClassB.sField2", "sField2", "");
     AssertSignatureEqual<abckit_wrapper::Field>("Ns1.ClassB.field2", "field2", "");
-    AssertSignatureEqual<abckit_wrapper::Field>("Ns1.ClassB.%%property-iField2", "iField2", "");
+    AssertSignatureEqual<abckit_wrapper::Field>("Ns1.ClassB.<property>iField2", "iField2", "");
 }
 
 /**
@@ -247,8 +247,8 @@ HWTEST_F(TestFileView, fileView_interface_002, TestSize.Level0)
  */
 HWTEST_F(TestFileView, fileView_interface_003, TestSize.Level0)
 {
-    ValidateModuleObject<abckit_wrapper::Field>("Interface1.%%property-iField1");
-    ValidateModuleObject<abckit_wrapper::Field>("Ns1.Interface2.%%property-iField2");
+    ValidateModuleObject<abckit_wrapper::Field>("Interface1.<property>iField1");
+    ValidateModuleObject<abckit_wrapper::Field>("Ns1.Interface2.<property>iField2");
 }
 
 /**

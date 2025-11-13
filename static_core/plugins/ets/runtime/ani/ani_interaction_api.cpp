@@ -1686,7 +1686,7 @@ static ani_status DoGetField(ScopedManagedCodeFix &s, ani_class cls, const char 
             EtsField *foundField = klass->GetFieldIDByName(name, nullptr);
             if (UNLIKELY(foundField == nullptr)) {
                 // NOTE: Need to look for class property implemented from interface
-                auto interfaceFieldName = PandaString("%%property-") + name;
+                auto interfaceFieldName = PandaString("<property>") + name;
                 foundField = klass->GetFieldIDByName(interfaceFieldName.c_str(), nullptr);
             }
             return foundField;
@@ -1753,15 +1753,7 @@ NO_UB_SANITIZE static ani_status Class_FindMethod(ani_env *env, ani_class cls, c
     CHECK_PTR_ARG(result);
 
     EtsMethod *method = nullptr;
-    ani_status status;
-
-    // Note: remove this code as soon as new mangler rules have merged.
-    constexpr std::size_t oldGetPrefixLength = 5;
-    std::string methodName(name);
-    if (methodName.rfind("<get>", 0) == 0) {
-        methodName.replace(0, oldGetPrefixLength, "%%get-");
-    }
-    status = GetClassMethod<false>(env, cls, methodName.c_str(), signature, &method);
+    ani_status status = GetClassMethod<false>(env, cls, name, signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     *result = ToAniMethod(method);
     return ANI_OK;
@@ -2182,7 +2174,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(ani_env *env, an
 // NOLINTNEXTLINE(readability-identifier-naming)
 ani_status Class_FindSetter(ani_env *env, ani_class cls, const char *name, ani_method *result)
 {
-    PandaString setterName("%%set-");
+    PandaString setterName("<set>");
     setterName += name;
     return Class_FindMethod(env, cls, setterName.c_str(), nullptr, result);
 }
@@ -2190,7 +2182,7 @@ ani_status Class_FindSetter(ani_env *env, ani_class cls, const char *name, ani_m
 // NOLINTNEXTLINE(readability-identifier-naming)
 ani_status Class_FindGetter(ani_env *env, ani_class cls, const char *name, ani_method *result)
 {
-    PandaString getterName("%%get-");
+    PandaString getterName("<get>");
     getterName += name;
     return Class_FindMethod(env, cls, getterName.c_str(), nullptr, result);
 }

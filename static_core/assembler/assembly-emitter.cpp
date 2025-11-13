@@ -1454,8 +1454,8 @@ void AsmEmitter::AddFakeIndexDependenciesForUnusedItems(AsmEmitter::AsmEntityCol
 {
     static std::vector<std::pair<std::string, std::vector<std::string>>> UNUSED_ITEM_KEYS_TO_EMIT = {
         {
-            "std.core.String.%%get-length:i32;",
-            {"std.core.StringBuilder.%%get-stringLength:i32;"},
+            "std.core.String.<get>length:i32;",
+            {"std.core.StringBuilder.<get>stringLength:i32;"},
         },
     };
 

@@ -22,37 +22,37 @@
 
 .record std.core.Int <external>
 
-.record std.core.%%partial-Int <external>
+.record std.core.Int$partial <external>
 
 .record std.core.IntBox <external>
 
-.record std.core.%%partial-IntBox <external>
+.record std.core.IntBox$partial <external>
 
 .record std.core.IntType <external>
 
-.record std.core.%%partial-IntType <external>
+.record std.core.IntType$partial <external>
 
 .record std.core.IntValue <external>
 
-.record std.core.%%partial-IntValue <external>
+.record std.core.IntValue$partial <external>
 
 .record std.core.Double <external>
 
-.record std.core.%%partial-Double <external>
+.record std.core.Double$partial <external>
 
 .record std.core.DoubleBox <external>
 
-.record std.core.%%partial-DoubleBox <external>
+.record std.core.DoubleBox$partial <external>
 
 .record std.core.DoubleToStringCacheElement <external>
 
 .record std.core.DoubleType <external>
 
-.record std.core.%%partial-DoubleType <external>
+.record std.core.DoubleType$partial <external>
 
 .record std.core.DoubleValue <external>
 
-.record std.core.%%partial-DoubleValue <external>
+.record std.core.DoubleValue$partial <external>
 
 .record std.interop.js.JSValue <external>
 

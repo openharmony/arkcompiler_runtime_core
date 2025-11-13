@@ -146,7 +146,7 @@ extern "C" ani_status IsDetachedArrayBuffer(ani_env *env, ani_arraybuffer buffer
 
     ani_boolean isDetached = ANI_FALSE;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
-    auto status = env->Object_CallMethodByName_Boolean(buffer, "%%get-detached", ":z", &isDetached);
+    auto status = env->Object_CallMethodByName_Boolean(buffer, "<get>detached", ":z", &isDetached);
     if (status != ANI_OK) {
         return status;
     }

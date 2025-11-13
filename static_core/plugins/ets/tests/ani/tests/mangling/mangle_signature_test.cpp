@@ -238,10 +238,10 @@ TEST_F(MangleSignatureTest, FormatReferences_NewToOld)
     // Check 'Partial<T>'
     desc = Mangle::ConvertSignature("P{a.b.c.X}:");
     ASSERT_TRUE(desc.has_value());
-    EXPECT_STREQ(desc.value().c_str(), "La/b/c/%%partial-X;:V");
+    EXPECT_STREQ(desc.value().c_str(), "La/b/c/X$partial;:V");
     desc = Mangle::ConvertSignature(":P{a.b.c.X}");
     ASSERT_TRUE(desc.has_value());
-    EXPECT_STREQ(desc.value().c_str(), ":La/b/c/%%partial-X;");
+    EXPECT_STREQ(desc.value().c_str(), ":La/b/c/X$partial;");
 }
 
 // CC-OFFNXT(huge_method[C++], G.FUD.05) long test with solid logic
@@ -406,14 +406,14 @@ TEST_F(MangleSignatureTest, FormatReferencesFixedArray_NewToOld)
 
     desc = Mangle::ConvertSignature("A{C{std.core.String}}dA{A{E{a.b.Color}}}:A{P{a.b.X}}");
     ASSERT_TRUE(desc.has_value());
-    EXPECT_STREQ(desc.value().c_str(), "[Lstd/core/String;D[[La/b/Color;:[La/b/%%partial-X;");
+    EXPECT_STREQ(desc.value().c_str(), "[Lstd/core/String;D[[La/b/Color;:[La/b/X$partial;");
 }
 
 TEST_F(MangleSignatureTest, FormatReferencesFixedArray_OldToOld)
 {
     std::optional<PandaString> desc;
 
-    desc = Mangle::ConvertSignature("[Lstd/core/String;D[[La/b/Color;:[La/b/%%partial-X;");
+    desc = Mangle::ConvertSignature("[Lstd/core/String;D[[La/b/Color;:[La/b/X$partial;");
     ASSERT_FALSE(desc.has_value());
 }
 
@@ -434,7 +434,7 @@ TEST_F(MangleSignatureTest, FormatUnion_NewToRuntime)
     // type F = (u: number | string | FixedArray<char>) => (msig.E | msig.B) | Partial<msig.A>
     desc = Mangle::ConvertSignature(FOO_UNION_SIGNATURE);
     ASSERT_TRUE(desc.has_value());
-    EXPECT_STREQ(desc.value().c_str(), "{ULstd/core/Double;Lstd/core/String;[C}:{ULmsig/%%partial-A;Lmsig/B;Lmsig/E;}");
+    EXPECT_STREQ(desc.value().c_str(), "{ULstd/core/Double;Lstd/core/String;[C}:{ULmsig/A$partial;Lmsig/B;Lmsig/E;}");
 
     // type F = <T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V
     desc = Mangle::ConvertSignature(FOO1_UNION_SIGNATURE);
@@ -550,7 +550,7 @@ TEST_F(MangleSignatureTest, Module_FindFunction_OldFormat)
 
     // Check references
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", "DLmsig/A;Lmsig/B;:Lmsig/E;", &fn), ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "Lmsig/%%partial-A;Lescompat/Array;:V", &fn), ANI_INVALID_DESCRIPTOR);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "Lmsig/A$partial;Lescompat/Array;:V", &fn), ANI_INVALID_DESCRIPTOR);
 }
 
 TEST_F(MangleSignatureTest, Namespace_FindFunction)
@@ -630,7 +630,7 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction_OldFormat)
     // Check references
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "DLmsig/rls/A;Lmsig/rls/B;:Lmsig/rls/E;", &fn),
               ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "Lmsig/%%partial-A;Lescompat/Array;:V", &fn),
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "Lmsig/A$partial;Lescompat/Array;:V", &fn),
               ANI_INVALID_DESCRIPTOR);
 }
 
@@ -710,7 +710,7 @@ TEST_F(MangleSignatureTest, Class_FindMethod_OldFormat)
 
     // Check references
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "DLmsig/A;Lmsig/B;:Lmsig/E;", &method), ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "Lmsig/%%partial-A;Lescompat/Array;:V", &method),
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "Lmsig/A$partial;Lescompat/Array;:V", &method),
               ANI_INVALID_DESCRIPTOR);
 }
 
@@ -789,7 +789,7 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod_OldFormat)
 
     // Check references
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "DLmsig/A;Lmsig/B;:Lmsig/E;", &method), ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "Lmsig/%%partial-A;Lescompat/Array;:V", &method),
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "Lmsig/A$partial;Lescompat/Array;:V", &method),
               ANI_INVALID_DESCRIPTOR);
 }
 

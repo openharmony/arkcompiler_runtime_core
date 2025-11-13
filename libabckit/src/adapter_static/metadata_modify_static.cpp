@@ -224,9 +224,9 @@ static AbckitArktsFunction *CreateFunctionImpl(AbckitFile *file, AbckitCoreModul
     return owningModule->functions.back()->GetArkTSImpl();
 }
 
-static constexpr std::string_view GET_FUNCTION_PATTERN = "%%get-";
-static constexpr std::string_view SET_FUNCTION_PATTERN = "%%set-";
-static constexpr std::string_view PROPERTY_FUNCTION_PATTERN = "%%property-";
+static constexpr std::string_view GET_FUNCTION_PATTERN = "<get>";
+static constexpr std::string_view SET_FUNCTION_PATTERN = "<set>";
+static constexpr std::string_view PROPERTY_FUNCTION_PATTERN = "<property>";
 // ========================================
 // Create / Update
 // ========================================
@@ -1814,7 +1814,7 @@ template <typename TblType>
 static void RemoveFuncInTable(TblType &table, const std::string &interfaceName, const std::string &name)
 {
     std::string cleanFieldName = name;
-    const std::string propertyPrefix = "%%property-";
+    const std::string propertyPrefix = "<property>";
     if (cleanFieldName.find(propertyPrefix) == 0) {
         cleanFieldName = cleanFieldName.substr(propertyPrefix.length());
     }

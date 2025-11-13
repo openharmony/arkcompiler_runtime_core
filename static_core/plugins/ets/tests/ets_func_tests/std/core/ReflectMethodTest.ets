@@ -495,9 +495,9 @@ function invokeByBaseTester(tester: BaseInvokeTester) {
     arktest.assertEQ(testerType.getInstanceMethod("funcRestParamsObj")!.invoke(tester, [ReferenceValueHolder.objReference, ReferenceValueHolder.objArrReference]), testerType)
     arktest.assertEQ(testerType.getInstanceMethod("funcRestParamsObj")!.invoke(tester, [undefined, ReferenceValueHolder.objArrReference]), testerType)
 
-    arktest.assertEQ(testerType.getInstanceMethod("%%get-getter")!.invoke(tester), testerType)
-    arktest.assertEQ(testerType.getInstanceMethod("%%set-setter")!.invoke(tester, [ ReferenceValueHolder.objReference ]), undefined)
-    
+    arktest.assertEQ(testerType.getInstanceMethod("<get>getter")!.invoke(tester), testerType)
+    arktest.assertEQ(testerType.getInstanceMethod("<set>setter")!.invoke(tester, [ ReferenceValueHolder.objReference ]), undefined)
+
     arktest.expectError(() => {
         testerType.getInstanceMethod("funcEmpty")!.invoke(new Object())
     }, new TypeError("Object type is not compatible with method owner type"))
@@ -529,8 +529,8 @@ function invokeByBaseTester(tester: BaseInvokeTester) {
     arktest.assertEQ(testerType.getStaticMethod("funcRestParams")!.invoke([ ReferenceValueHolder.objArrReference ]), testerType)
     arktest.assertEQ(testerType.getStaticMethod("funcRestParamsObj")!.invoke([ReferenceValueHolder.objReference, ReferenceValueHolder.objArrReference]), testerType)
     arktest.assertEQ(testerType.getStaticMethod("funcRestParamsObj")!.invoke([undefined, ReferenceValueHolder.objArrReference]), testerType)
-    arktest.assertEQ(testerType.getStaticMethod("%%get-staticGetter")!.invoke(), testerType)
-    arktest.assertEQ(testerType.getStaticMethod("%%set-staticSetter")!.invoke([ ReferenceValueHolder.objReference ]), undefined)
+    arktest.assertEQ(testerType.getStaticMethod("<get>staticGetter")!.invoke(), testerType)
+    arktest.assertEQ(testerType.getStaticMethod("<set>staticSetter")!.invoke([ ReferenceValueHolder.objReference ]), undefined)
     arktest.assertEQ(testerType.getStaticMethod("funcTestStatic")!.invoke(), testerType)
 
     arktest.expectError(() => {
@@ -647,8 +647,8 @@ function testReflectMethod(): void {
     let serializeMethod = typePoint.getInstanceMethod("serialize")!
     let addMethod = typePoint.getInstanceMethod("add")!
     let unionMethod = typePoint.getInstanceMethod("testUnion")!
-    let getter = typeHWriter.getInstanceMethod("%%get-state")!
-    let setter = typeHWriter.getInstanceMethod("%%set-state")!
+    let getter = typeHWriter.getInstanceMethod("<get>state")!
+    let setter = typeHWriter.getInstanceMethod("<set>state")!
     let optionalParamsMethod = typePoint.getInstanceMethod("optionalParams")!
 
     arktest.assertEQ(serializeMethod.getReturnType(), Class.of(""))
@@ -672,8 +672,8 @@ function testMethodAttributes(): void {
     let typeHWriter = Class.of(new HTMLWriter(10))
     let typeWriter = typeHWriter.getSuper()!
 
-    let getterMethod = typeHWriter.getInstanceMethod("%%get-state")!
-    let setterMethod = typeHWriter.getInstanceMethod("%%set-state")!
+    let getterMethod = typeHWriter.getInstanceMethod("<get>state")!
+    let setterMethod = typeHWriter.getInstanceMethod("<set>state")!
     let abstractWriteMethod = typeWriter.getInstanceMethod("write")!
     let overrideWriteMethod = typeHWriter.getInstanceMethod("write")!
     let closeMethod = typeWriter.getInstanceMethod("close")!
@@ -694,7 +694,7 @@ function testMethodAttributes(): void {
         return baseType.getInstanceMethod(m.getName()) != undefined
     }
 
-    arktest.assertEQ(getterMethod.getName(), "%%get-state")
+    arktest.assertEQ(getterMethod.getName(), "<get>state")
     arktest.assertFalse(isInherited(getterMethod, typeHWriter))
     arktest.assertFalse(isOverrided(getterMethod, typeHWriter))
     arktest.assertFalse(getterMethod.isAbstract())
@@ -706,7 +706,7 @@ function testMethodAttributes(): void {
     arktest.assertTrue(getterMethod.isPublic())
     arktest.assertFalse(getterMethod.isProtected())
     arktest.assertFalse(getterMethod.isPrivate())
-    arktest.assertEQ(setterMethod.getName(), "%%set-state")
+    arktest.assertEQ(setterMethod.getName(), "<set>state")
     arktest.assertFalse(isInherited(setterMethod, typeHWriter))
     arktest.assertFalse(isOverrided(setterMethod, typeHWriter))
     arktest.assertFalse(setterMethod.isAbstract())
@@ -863,8 +863,8 @@ function testReturn() {
     let typeHWriter = Class.of(new HTMLWriter(10))
     let typeWriter = typeHWriter.getSuper()!
 
-    let getterMethod = typeHWriter.getInstanceMethod("%%get-state")!
-    let setterMethod = typeHWriter.getInstanceMethod("%%set-state")!
+    let getterMethod = typeHWriter.getInstanceMethod("<get>state")!
+    let setterMethod = typeHWriter.getInstanceMethod("<set>state")!
     let abstractWriteMethod = typeWriter.getInstanceMethod("write")!
     let overrideWriteMethod = typeHWriter.getInstanceMethod("write")!
     let closeMethod = typeWriter.getInstanceMethod("close")!

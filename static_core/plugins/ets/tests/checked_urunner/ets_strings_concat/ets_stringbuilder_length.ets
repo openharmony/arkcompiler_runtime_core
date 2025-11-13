@@ -191,14 +191,14 @@ function StringCalculation03() {
 //! INST_COUNT  /StringBuilder::<ctor>/,3
 //! INST_COUNT  /StringBuilder::append/,6
 //! INST_COUNT  /StringBuilder::toString/,3
-//! INST_COUNT  /std.core.String::%%get-length/,4
-//! INST_NOT    /std.core.StringBuilder::%%get-stringLength/
+//! INST_COUNT  /std.core.String::<get>length/,4
+//! INST_NOT    /std.core.StringBuilder::<get>stringLength/
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! INST_COUNT  /StringBuilder::<ctor>/,1
 //! INST_COUNT  /StringBuilder::append/,4
 //! INST_COUNT  /StringBuilder::toString/,1
-//! INST_COUNT  /std.core.String::%%get-length/,2
-//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,2
+//! INST_COUNT  /std.core.String::<get>length/,2
+//! INST_COUNT  /std.core.StringBuilder::<get>stringLength/,2
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    /loop 1, depth 1, bc: 0x000000a8/
 //! INST_NOT    /StringBuilder::<ctor>/
@@ -209,7 +209,7 @@ function StringCalculation03() {
 //! INST_NOT    /StringBuilder::<ctor>/
 //! INST_NOT    /StringBuilder::append/
 //! INST_COUNT  /StringBuilder::toString/,1
-//! INST_COUNT  /std.core.String::%%get-length/,2
+//! INST_COUNT  /std.core.String::<get>length/,2
 
 //! CHECKER       INTERP-IRTOC, StringBuilder length field access BCO optimized
 //! SKIP_IF       @architecture == "arm32"

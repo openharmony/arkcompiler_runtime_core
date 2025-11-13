@@ -496,16 +496,16 @@ HWTEST(NameMarkerTest, name_marker_interface_test_003, TestSize.Level1)
     AssertModuleNotKept(fileView, "interface_test_003");
 
     AssertKept(fileView, "interface_test_003.Interface1");
-    AssertKept(fileView, "interface_test_003.Interface1.%%get-iField1:interface_test_003.Interface1;i32;");
-    AssertKept(fileView, "interface_test_003.Interface1.%%set-iField1:interface_test_003.Interface1;i32;void;");
-    AssertKept(fileView, "interface_test_003.Interface1.%%get-iField2:interface_test_003.Interface1;i32;");
-    AssertKept(fileView, "interface_test_003.Interface1.%%set-iField2:interface_test_003.Interface1;i32;void;");
+    AssertKept(fileView, "interface_test_003.Interface1.<get>iField1:interface_test_003.Interface1;i32;");
+    AssertKept(fileView, "interface_test_003.Interface1.<set>iField1:interface_test_003.Interface1;i32;void;");
+    AssertKept(fileView, "interface_test_003.Interface1.<get>iField2:interface_test_003.Interface1;i32;");
+    AssertKept(fileView, "interface_test_003.Interface1.<set>iField2:interface_test_003.Interface1;i32;void;");
 
     AssertKept(fileView, "interface_test_003.Interface2");
-    AssertKept(fileView, "interface_test_003.Interface2.%%get-iField3:interface_test_003.Interface2;i32;");
-    AssertKept(fileView, "interface_test_003.Interface2.%%set-iField3:interface_test_003.Interface2;i32;void;");
-    AssertNotKept(fileView, "interface_test_003.Interface2.%%get-iField4:interface_test_003.Interface2;i32;");
-    AssertNotKept(fileView, "interface_test_003.Interface2.%%set-iField4:interface_test_003.Interface2;i32;void;");
+    AssertKept(fileView, "interface_test_003.Interface2.<get>iField3:interface_test_003.Interface2;i32;");
+    AssertKept(fileView, "interface_test_003.Interface2.<set>iField3:interface_test_003.Interface2;i32;void;");
+    AssertNotKept(fileView, "interface_test_003.Interface2.<get>iField4:interface_test_003.Interface2;i32;");
+    AssertNotKept(fileView, "interface_test_003.Interface2.<set>iField4:interface_test_003.Interface2;i32;void;");
 }
 
 /**
@@ -567,17 +567,17 @@ HWTEST(NameMarkerTest, name_marker_interface_test_006, TestSize.Level1)
     AssertModuleNotKept(fileView, "interface_test_006");
 
     AssertKept(fileView, "interface_test_006.Ns1.Interface1");
-    AssertKept(fileView, "interface_test_006.Ns1.Interface1.%%get-iField1:interface_test_006.Ns1.Interface1;i32;");
-    AssertKept(fileView, "interface_test_006.Ns1.Interface1.%%set-iField1:interface_test_006.Ns1.Interface1;i32;void;");
-    AssertKept(fileView, "interface_test_006.Ns1.Interface1.%%get-iField2:interface_test_006.Ns1.Interface1;i32;");
-    AssertKept(fileView, "interface_test_006.Ns1.Interface1.%%set-iField2:interface_test_006.Ns1.Interface1;i32;void;");
+    AssertKept(fileView, "interface_test_006.Ns1.Interface1.<get>iField1:interface_test_006.Ns1.Interface1;i32;");
+    AssertKept(fileView, "interface_test_006.Ns1.Interface1.<set>iField1:interface_test_006.Ns1.Interface1;i32;void;");
+    AssertKept(fileView, "interface_test_006.Ns1.Interface1.<get>iField2:interface_test_006.Ns1.Interface1;i32;");
+    AssertKept(fileView, "interface_test_006.Ns1.Interface1.<set>iField2:interface_test_006.Ns1.Interface1;i32;void;");
 
     AssertKept(fileView, "interface_test_006.Ns1.Interface2");
-    AssertKept(fileView, "interface_test_006.Ns1.Interface2.%%get-iField3:interface_test_006.Ns1.Interface2;i32;");
-    AssertKept(fileView, "interface_test_006.Ns1.Interface2.%%set-iField3:interface_test_006.Ns1.Interface2;i32;void;");
-    AssertNotKept(fileView, "interface_test_006.Ns1.Interface2.%%get-iField4:interface_test_006.Ns1.Interface2;i32;");
+    AssertKept(fileView, "interface_test_006.Ns1.Interface2.<get>iField3:interface_test_006.Ns1.Interface2;i32;");
+    AssertKept(fileView, "interface_test_006.Ns1.Interface2.<set>iField3:interface_test_006.Ns1.Interface2;i32;void;");
+    AssertNotKept(fileView, "interface_test_006.Ns1.Interface2.<get>iField4:interface_test_006.Ns1.Interface2;i32;");
     AssertNotKept(fileView,
-                  "interface_test_006.Ns1.Interface2.%%set-iField4:interface_test_006.Ns1.Interface2;i32;void;");
+                  "interface_test_006.Ns1.Interface2.<set>iField4:interface_test_006.Ns1.Interface2;i32;void;");
 }
 
 /**
@@ -596,12 +596,12 @@ HWTEST(NameMarkerTest, name_marker_interface_test_007, TestSize.Level1)
     AssertModuleNotKept(fileView, "interface_test_007");
 
     AssertKept(fileView, "interface_test_007.Interface1");
-    AssertKept(fileView, "interface_test_007.Interface1.%%get-iField1:interface_test_007.Interface1;i32;");
-    AssertKept(fileView, "interface_test_007.Interface1.%%set-iField1:interface_test_007.Interface1;i32;void;");
+    AssertKept(fileView, "interface_test_007.Interface1.<get>iField1:interface_test_007.Interface1;i32;");
+    AssertKept(fileView, "interface_test_007.Interface1.<set>iField1:interface_test_007.Interface1;i32;void;");
 
     AssertKept(fileView, "interface_test_007.Ns1.Interface2");
-    AssertKept(fileView, "interface_test_007.Ns1.Interface2.%%get-iField2:interface_test_007.Ns1.Interface2;i32;");
-    AssertKept(fileView, "interface_test_007.Ns1.Interface2.%%set-iField2:interface_test_007.Ns1.Interface2;i32;void;");
+    AssertKept(fileView, "interface_test_007.Ns1.Interface2.<get>iField2:interface_test_007.Ns1.Interface2;i32;");
+    AssertKept(fileView, "interface_test_007.Ns1.Interface2.<set>iField2:interface_test_007.Ns1.Interface2;i32;void;");
 }
 
 /**
@@ -762,10 +762,10 @@ HWTEST(NameMarkerTest, name_marker_namespace_test_004, TestSize.Level1)
 
     AssertKept(fileView, "namespace_test_004.Ns1.Interface2");
     AssertKept(fileView,
-               "namespace_test_004.Ns1.Interface2.%%get-iField2:namespace_test_004.Ns1.Interface2;std.core.String;");
+               "namespace_test_004.Ns1.Interface2.<get>iField2:namespace_test_004.Ns1.Interface2;std.core.String;");
     AssertKept(
         fileView,
-        "namespace_test_004.Ns1.Interface2.%%set-iField2:namespace_test_004.Ns1.Interface2;std.core.String;void;");
+        "namespace_test_004.Ns1.Interface2.<set>iField2:namespace_test_004.Ns1.Interface2;std.core.String;void;");
     AssertKept(fileView, "namespace_test_004.Ns1.Interface2.iMethod2:namespace_test_004.Ns1.Interface2;void;");
 
     AssertKept(fileView, "namespace_test_004.Ns1.MyAnno2");
@@ -774,8 +774,8 @@ HWTEST(NameMarkerTest, name_marker_namespace_test_004, TestSize.Level1)
     AssertKept(fileView, "namespace_test_004.Ns1.ClassB.sField2");
     AssertKept(fileView, "namespace_test_004.Ns1.ClassB.field2");
     AssertKept(fileView,
-               "namespace_test_004.Ns1.ClassB.%%set-iField2:namespace_test_004.Ns1.ClassB;std.core.String;void;");
-    AssertKept(fileView, "namespace_test_004.Ns1.ClassB.%%get-iField2:namespace_test_004.Ns1.ClassB;std.core.String;");
+               "namespace_test_004.Ns1.ClassB.<set>iField2:namespace_test_004.Ns1.ClassB;std.core.String;void;");
+    AssertKept(fileView, "namespace_test_004.Ns1.ClassB.<get>iField2:namespace_test_004.Ns1.ClassB;std.core.String;");
     AssertKept(fileView, "namespace_test_004.Ns1.ClassB.sMethod2:i32;void;");
     AssertKept(fileView, "namespace_test_004.Ns1.ClassB.method2:namespace_test_004.Ns1.ClassB;void;");
     AssertKept(fileView, "namespace_test_004.Ns1.ClassB.iMethod2:namespace_test_004.Ns1.ClassB;void;");
@@ -864,8 +864,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_003, TestSize.Level1)
     AssertKept(fileView, "module_test_003.m1");
 
     AssertKept(fileView, "module_test_003.Interface1");
-    AssertKept(fileView, "module_test_003.Interface1.%%get-iField1:module_test_003.Interface1;i32;");
-    AssertKept(fileView, "module_test_003.Interface1.%%set-iField1:module_test_003.Interface1;i32;void;");
+    AssertKept(fileView, "module_test_003.Interface1.<get>iField1:module_test_003.Interface1;i32;");
+    AssertKept(fileView, "module_test_003.Interface1.<set>iField1:module_test_003.Interface1;i32;void;");
     AssertKept(fileView, "module_test_003.Interface1.iMethod1:module_test_003.Interface1;void;");
 
     AssertKept(fileView, "module_test_003.MyAnno1");
@@ -873,8 +873,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_003, TestSize.Level1)
     AssertKept(fileView, "module_test_003.ClassA");
     AssertKept(fileView, "module_test_003.ClassA.sField1");
     AssertKept(fileView, "module_test_003.ClassA.field1");
-    AssertKept(fileView, "module_test_003.ClassA.%%set-iField1:module_test_003.ClassA;i32;void;");
-    AssertKept(fileView, "module_test_003.ClassA.%%get-iField1:module_test_003.ClassA;i32;");
+    AssertKept(fileView, "module_test_003.ClassA.<set>iField1:module_test_003.ClassA;i32;void;");
+    AssertKept(fileView, "module_test_003.ClassA.<get>iField1:module_test_003.ClassA;i32;");
     AssertKept(fileView, "module_test_003.ClassA.sMethod1:i32;void;");
     AssertKept(fileView, "module_test_003.ClassA.method1:module_test_003.ClassA;void;");
     AssertKept(fileView, "module_test_003.ClassA.iMethod1:module_test_003.ClassA;void;");
@@ -887,10 +887,9 @@ HWTEST(NameMarkerTest, name_marker_module_test_003, TestSize.Level1)
     AssertKept(fileView, "module_test_003.Ns1.foo2:i32;i32;void;");
     AssertKept(fileView, "module_test_003.Ns1.m2");
     AssertKept(fileView, "module_test_003.Ns1.Interface2");
+    AssertKept(fileView, "module_test_003.Ns1.Interface2.<get>iField2:module_test_003.Ns1.Interface2;std.core.String;");
     AssertKept(fileView,
-        "module_test_003.Ns1.Interface2.%%get-iField2:module_test_003.Ns1.Interface2;std.core.String;");
-    AssertKept(fileView,
-               "module_test_003.Ns1.Interface2.%%set-iField2:module_test_003.Ns1.Interface2;std.core.String;void;");
+               "module_test_003.Ns1.Interface2.<set>iField2:module_test_003.Ns1.Interface2;std.core.String;void;");
     AssertKept(fileView, "module_test_003.Ns1.Interface2.iMethod2:module_test_003.Ns1.Interface2;void;");
 
     AssertKept(fileView, "module_test_003.Ns1.MyAnno2");
@@ -898,8 +897,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_003, TestSize.Level1)
     AssertKept(fileView, "module_test_003.Ns1.ClassB");
     AssertKept(fileView, "module_test_003.Ns1.ClassB.sField2");
     AssertKept(fileView, "module_test_003.Ns1.ClassB.field2");
-    AssertKept(fileView, "module_test_003.Ns1.ClassB.%%set-iField2:module_test_003.Ns1.ClassB;std.core.String;void;");
-    AssertKept(fileView, "module_test_003.Ns1.ClassB.%%get-iField2:module_test_003.Ns1.ClassB;std.core.String;");
+    AssertKept(fileView, "module_test_003.Ns1.ClassB.<set>iField2:module_test_003.Ns1.ClassB;std.core.String;void;");
+    AssertKept(fileView, "module_test_003.Ns1.ClassB.<get>iField2:module_test_003.Ns1.ClassB;std.core.String;");
     AssertKept(fileView, "module_test_003.Ns1.ClassB.sMethod2:i32;void;");
     AssertKept(fileView, "module_test_003.Ns1.ClassB.method2:module_test_003.Ns1.ClassB;void;");
     AssertKept(fileView, "module_test_003.Ns1.ClassB.iMethod2:module_test_003.Ns1.ClassB;void;");
