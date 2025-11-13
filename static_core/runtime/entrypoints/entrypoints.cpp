@@ -1460,12 +1460,51 @@ extern "C" uint32_t CheckCastByIdEntrypoint(ObjectHeader *obj, Class *klass)
     return 0;
 }
 
+extern "C" uint32_t CheckCastNoSuperTraversalEntrypoint(ark::Class *objKlass, ark::Class *klass)
+{
+    CHECK_STACK_WALKER;
+    ASSERT(objKlass != nullptr && klass != nullptr);
+
+#ifndef NDEBUG
+    // If hierarchy accept is still true here, then the fast path missed it...
+    if ((!klass->IsInterface() && objKlass->IsSubClassOf(klass)) || (klass == objKlass)) {
+        ASSERT_PRINT(false, "This should be handled in the fast path!");
+        return 0;
+    }
+#endif
+
+    if (UNLIKELY(!klass->IsAssignableFromRefNoSuper(objKlass))) {
+        ark::ThrowClassCastException(klass, objKlass);
+        return 1;
+    }
+    return 0;
+}
+
 extern "C" uint32_t IsInstanceByIdEntrypoint(ObjectHeader *obj, Class *klass)
 {
     CHECK_STACK_WALKER;
     ASSERT(IsAddressInObjectsHeapOrNull(obj));
 
     return IsInstanceEntrypoint(obj, klass);
+}
+
+extern "C" uint32_t IsInstanceNoSuperTraversalEntrypoint(ark::Class *objKlass, ark::Class *klass)
+{
+    CHECK_STACK_WALKER;
+    ASSERT(objKlass != nullptr && klass != nullptr);
+
+#ifndef NDEBUG
+    // If hierarchy accept is still true here, then the fast path missed it...
+    if ((!klass->IsInterface() && objKlass->IsSubClassOf(klass)) || (klass == objKlass)) {
+        ASSERT_PRINT(false, "This should be handled in the fast path!");
+        return 0;
+    }
+#endif
+
+    if (UNLIKELY(klass->IsAssignableFromRefNoSuper(objKlass))) {
+        return 1;
+    }
+    return 0;
 }
 
 extern "C" coretypes::String *ResolveStringByIdEntrypoint(ManagedThread *thread, Frame *frame, FileEntityId id)

@@ -152,6 +152,7 @@ module Constants
     MARK_WORD_LWL_COUNTER_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE)"
     MARK_WORD_LWL_THREAD_ID_AND_COUNTER_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE | MarkWord::LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE)"
     MARK_WORD_STATUS_MASK_AND_LWL_THREAD_ID_MASK = "static_cast<uint64_t>(MarkWord::STATUS_MASK | MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE)"
+    CLASS_BASE_OFFSET = "cross_values::GetClassBaseOffset(GetArch())"
     CLASS_COMPONENT_OFFSET = "cross_values::GetClassComponentTypeOffset(GetArch())"
     CLASS_TYPE_OFFSET = "cross_values::GetClassTypeOffset(GetArch())"
     CLASS_ITABLE_ENTRIES_DATA_OFFSET = "CLASS_ITABLE_OFFSET + CLASS_ITABLE_ENTRIES_DATA_OFFSET"
@@ -355,6 +356,15 @@ macro(:load_class) do |obj|
   end
 end
 
+macro(:load_base_class) do |klass|
+  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+    base_klass = LoadI(klass).Imm(Constants::CLASS_BASE_OFFSET).Volatile.u64
+    Bitcast(And(base_klass, 0x0000ffffffffffff).u64).ref
+  else
+    LoadI(klass).Imm(Constants::CLASS_BASE_OFFSET).Volatile.ref
+  end
+end
+
 macro(:store_class) do |obj, klass|
   if defines.ARK_HYBRID && defines.PANDA_TARGET_64
     StoreI(obj, OrI(Bitcast(klass).u64).Imm("0x1000000000000000UL").u64).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile.u64
@@ -383,4 +393,12 @@ end
 
 macro(:get_entrypoint_offset) do |entrypoint_id|
   "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::#{entrypoint_id})"
+end
+
+macro(:reftoptr) do |ref_val|
+  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+    Bitcast(ref_val).ptr
+  else
+    Cast(ref_val).SrcType("DataType::REFERENCE").ptr
+  end
 end

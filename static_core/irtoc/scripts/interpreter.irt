@@ -763,7 +763,7 @@ end
 
 macro(:get_instructions) do |callee|
     pc_int1 := LoadI(callee).Imm(Constants::METHOD_INSTRUCTIONS_OFFSET).Volatile.ptr
-    If(pc_int1, 0).EQ.Unlikely {      
+    If(pc_int1, 0).EQ.Unlikely {
       pc_int2 := call_runtime("GetInstructionsByMethod", callee).ptr
     }
     Phi(pc_int1, pc_int2).ptr
@@ -802,7 +802,7 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
   } Else {
     pc_int := get_instructions(callee)
     num_vregs := u32toword(get_numvregs(callee))
-    num_vregs := AddI(num_vregs).Imm(1).word if is_initobj    
+    num_vregs := AddI(num_vregs).Imm(1).word if is_initobj
 
     if nargs
       num_args := nargs
@@ -845,7 +845,7 @@ macro(:free_frame) do |frame|
 
   frame_word := Bitcast(frame).SrcType("DataType::POINTER").word
   free_pointer_word := Bitcast(free_pointer).SrcType("DataType::POINTER").word
-  If(ShrI(frame_word).Imm(Constants::STACK_FRAME_ALLOCATOR_RELEASE_PAGES_SHIFT).word, 
+  If(ShrI(frame_word).Imm(Constants::STACK_FRAME_ALLOCATOR_RELEASE_PAGES_SHIFT).word,
     ShrI(free_pointer_word).Imm(Constants::STACK_FRAME_ALLOCATOR_RELEASE_PAGES_SHIFT).word).NE.Unlikely {
     call_runtime("FreeFrameInterp", frame, %tr).void
   } Else {
@@ -1715,24 +1715,76 @@ macro(:handle_ldstatic_obj_id16) do |id|
   set_acc_object(value).ref
 end
 
-macro(:handle_isinstance_id16) do |id|
-  type := type_ptr(id, true)
-  acc := Phi(acc, acc_restored).ref
-  If(type, 0).EQ.Unlikely {
-    move_to_exception
+macro(:handle_isinstance_checkcast_common) do |obj_ref, type_ptr|
+  If(obj_ref, 0).EQ.Unlikely {
+    Goto(:ReturnValue0)
   }
-  set_acc_primitive(call_runtime("IsInstanceByIdEntrypoint", acc.ref, type).u32)
+
+  obj_class := reftoptr(load_class(obj_ref).ref).ptr
+  If(obj_class, type_ptr).EQ.Likely {
+    Goto(:ReturnValue1)
+  }
+
+  Label(:CheckBaseClassLoop)
+    curr := Phi(obj_class, base_class).ptr
+
+    If(curr, nullptr).EQ.Unlikely {
+      Goto(:SlowPath)
+    }
+
+    If(curr, type_ptr).EQ.Likely {
+      Goto(:ReturnValue1)
+    }
+
+    base_class := reftoptr(load_base_class(curr).ref).ptr
+    Goto(:CheckBaseClassLoop)
+end
+
+macro(:handle_isinstance_id16) do |id|
+  type := type_ptr(id, true).ptr
+  acc := Phi(acc, acc_restored).ref
+
+  If(type, nullptr).EQ.Unlikely {
+     move_to_exception
+  }
+
+  handle_isinstance_checkcast_common(acc, type)
+
+  Label(:ReturnValue0)
+  res_0 := Cast(0).u32
+  Goto(:End)
+
+  Label(:ReturnValue1)
+  res_1 := Cast(1).u32
+  Goto(:End)
+
+  Label(:SlowPath)
+  res_slow := call_runtime("IsInstanceNoSuperTraversalEntrypoint", obj_class, type).u32
+  Goto(:End)
+
+  Label(:End)
+  res := Phi(res_0, res_1, res_slow).u32
+  set_acc_primitive(res)
 end
 
 macro(:handle_checkcast_id16) do |id|
-  type := type_ptr(id, true)
+  type := type_ptr(id, true).ptr
   acc := Phi(acc, acc_restored).ref
-  If(type, 0).EQ.Unlikely {
+
+  If(type, nullptr).EQ.Unlikely {
     move_to_exception
   }
-  If(call_runtime("CheckCastByIdEntrypoint", acc.ref, type).u32, 0).NE.Unlikely {
+
+  handle_isinstance_checkcast_common(acc.ref, type)
+
+  Label(:SlowPath)
+  If(call_runtime("CheckCastNoSuperTraversalEntrypoint", obj_class, type).u32, 0).NE.Unlikely {
     move_to_exception
   }
+
+  Label(:ReturnValue0)
+  Label(:ReturnValue1)
+  Label(:End)
 end
 
 macro(:handle_sta_obj_v8) do |vd|
