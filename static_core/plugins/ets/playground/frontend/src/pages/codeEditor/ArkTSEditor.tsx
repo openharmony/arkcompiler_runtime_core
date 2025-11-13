@@ -19,7 +19,7 @@ import styles from './styles.module.scss';
 import {useTheme} from '../../components/theme/ThemeContext';
 import {useDispatch, useSelector} from 'react-redux';
 import {selectSyntax} from '../../store/selectors/syntax';
-import {setCodeAction, flushPendingCodeUpdate} from '../../store/actions/code';
+import {setCodeAction} from '../../store/actions/code';
 import {AppDispatch} from '../../store';
 import {selectCode} from '../../store/selectors/code';
 import debounce from 'lodash.debounce';

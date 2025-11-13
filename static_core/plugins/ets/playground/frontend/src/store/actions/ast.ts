@@ -36,7 +36,7 @@ export const fetchAst = createAsyncThunk(
         const modeFromState: AstTrigger = (state.features?.astMode ?? 'auto') as AstTrigger;
         const trigger: AstTrigger = triggerArg ?? modeFromState;
     
-        thunkAPI.dispatch(setClearHighLightErrs([]));
+        thunkAPI.dispatch(setClearHighLightErrs());
         if (clearLogs) {
           thunkAPI.dispatch(clearOutLogs());
           thunkAPI.dispatch(clearErrLogs());
