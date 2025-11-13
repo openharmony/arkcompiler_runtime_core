@@ -221,6 +221,22 @@ function jsonParseWithBigInt(): int {
     return RESULT_SUCCESS
 }
 
+class ElementTest {
+    ele: string = "abc"
+}
+
+class TokenTest {
+    property : ElementTest = new ElementTest()
+}
+
+function jsonParseWithSpecialToken(): int {
+    const jsonStr = '\t\r \n{\t\r \n' +
+        '"property"\t\r \n:\t\r \n{\t\r"ele": \t "def"}\t\t \n}\t\t \n'
+    const obj = JSON.parse<TokenTest>(jsonStr, Type.from<TokenTest>()) as TokenTest
+    arktest.assertEQ(obj.property.ele, "def")
+    return RESULT_SUCCESS
+}
+
 function main(): int {
     let failures = RESULT_SUCCESS
 
@@ -234,6 +250,7 @@ function main(): int {
     failures += test(jsonParseWithBoolean, 'JSON.parse boolean in class')
     failures += test(jsonParseWithInterface, 'JSON.parse interface(ignore) in class')
     failures += test(jsonParseWithBigInt, 'JSON.parse BigInt')
+    failures += test(jsonParseWithSpecialToken, 'JSON.parse specialToken')
 
     if (failures == RESULT_SUCCESS) {
         consolePrint(Color.Green, "PASSED: ")

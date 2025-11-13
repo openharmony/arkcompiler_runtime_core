@@ -1604,7 +1604,8 @@ export class JSONParser {
                 ++this.curPos.row
                 this.curPos.col = 1
             }
-        } while (this.escapeWhitespaces && (this.curChar == c' ' || this.curChar == c'\t' || this.curChar == c'\n'))
+        } while (this.escapeWhitespaces && (this.curChar == c' ' || this.curChar == c'\t' ||
+            this.curChar == c'\n' || this.curChar == c'\r'))
         return true
     }
 
