@@ -133,16 +133,16 @@ let i3 = (Type.from<I3>() as InterfaceType).getClass()
 
 let i1foo = i1.getInstanceMethod('foo')
 let i1goo = i1.getInstanceMethod('goo')
-let i1fldSetter = i1.getInstanceMethod('%%set-fld')
-let i1fldGetter = i1.getInstanceMethod('%%get-fld')
+let i1fldSetter = i1.getInstanceMethod('<set>fld')
+let i1fldGetter = i1.getInstanceMethod('<get>fld')
 
 let i2foo = i2.getInstanceMethod('foo')
 let i2bar = i2.getInstanceMethod('bar')
 
 let i3foo = i3.getInstanceMethod('foo')
 let i3goo = i3.getInstanceMethod('goo')
-let i3fldSetter = i3.getInstanceMethod('%%set-fld')
-let i3fldGetter = i3.getInstanceMethod('%%get-fld')
+let i3fldSetter = i3.getInstanceMethod('<set>fld')
+let i3fldGetter = i3.getInstanceMethod('<get>fld')
 
 // get proxy
 let ifaces1: FixedArray<Class> =  [ (Type.from<I1>() as InterfaceType).getClass() ]

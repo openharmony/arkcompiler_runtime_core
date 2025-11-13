@@ -110,8 +110,8 @@ function testMethodType(): int {
     let serializeMethodType = findMethodByName(pt, "serialize")!.getType()
     let addMethodType = findMethodByName(pt, "add")!.getType()
     let cType = hwt.getConstructor(0).getType()
-    let getterType = findMethodByName(hwt, "%%get-state")!.getType()
-    let setterType = findMethodByName(hwt, "%%set-state")!.getType()
+    let getterType = findMethodByName(hwt, "<get>state")!.getType()
+    let setterType = findMethodByName(hwt, "<set>state")!.getType()
 
     return  test(serializeMethodType.getParametersNum() == 0,           "   0 Parameters") +
             test(serializeMethodType.getResultType() == StringType.REF, "   has String result type") +
@@ -139,8 +139,8 @@ function testMethod() {
     let wt = hwt.getBaseType()
 
     let cMethod = hwt.getConstructor(0)
-    let getterMethod = findMethodByName(hwt, "%%get-state")!
-    let setterMethod = findMethodByName(hwt, "%%set-state")!
+    let getterMethod = findMethodByName(hwt, "<get>state")!
+    let setterMethod = findMethodByName(hwt, "<set>state")!
     let createFileExtMethod = findMethodByName(hwt, "createFileExt")!
     let abstractWriteMethod = findMethodByName(wt, "write")!
     let overrideWriteMethod = findMethodByName(hwt, "write")!
@@ -172,7 +172,7 @@ function testMethod() {
             test(!cMethod.isAbstract(),                                         "   not abstract") +
             test(!cMethod.isGetter(),                                           "   not getter") +
             test(!cMethod.isSetter(),                                           "   not setter") +
-            test(getterMethod.getName() == "%%get-state",                        "MethodName: %%get-state") +
+            test(getterMethod.getName() == "<get>state",                        "MethodName: <get>state") +
             test(getterMethod.getAttributes() == Attributes.GETTER,             "   getter attrib") +
             test(getterMethod.getAccessModifier() == AccessModifier.PUBLIC,     "   public access modifier") +
             test(!isInherited(getterMethod, hwt),                               "   not inherited") +
@@ -184,7 +184,7 @@ function testMethod() {
             test(!getterMethod.isFinal(),                                       "   not final") +
             test(!getterMethod.isNative(),                                      "   not native") +
             test(!getterMethod.isAsync(),                                       "   not async") +
-            test(setterMethod.getName() == "%%set-state",                        "MethodName: %%set-state") +
+            test(setterMethod.getName() == "<set>state",                        "MethodName: <set>state") +
             test(setterMethod.getAttributes() == Attributes.SETTER,             "   setter attrib") +
             test(setterMethod.getAccessModifier() == AccessModifier.PRIVATE,    "   private access modifier") +
             test(!isInherited(setterMethod, hwt),                               "   not inherited") +

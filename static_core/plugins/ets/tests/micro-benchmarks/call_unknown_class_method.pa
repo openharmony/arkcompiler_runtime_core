@@ -23,16 +23,16 @@
 
 .function void run(A a0, B a1) <external>
 
-.function i32 A.%%get-baz(A a0) {
+.function i32 A.<get>baz(A a0) {
     ldai 2
     return
 }
 
-.function void A.%%set-baz(A a0, i32 a1) {
+.function void A.<set>baz(A a0, i32 a1) {
     return.void
 }
 
-.function void B.%%set-bar(B a0, i32 a1) {
+.function void B.<set>bar(B a0, i32 a1) {
     return.void
 }
 

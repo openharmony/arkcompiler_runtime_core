@@ -268,42 +268,41 @@ napi_value CallJSHandler::HandleSpecialMethod(Span<napi_value> jsargs)
     napi_value handlerResult {};
     napi_env env = ctx_->GetJSEnv();
     ScopedNativeCodeThread nativeScope(coro_);
-    std::string_view methodName(EtsMethod::FromRuntimeMethod(protoReader_.GetMethod())->GetName());
-
-    if (methodName.rfind(GETTER_BEGIN, 0) == 0) {
-        std::string content = std::string(methodName.substr(SETTER_GETTER_PREFIX_LENGTH));
-        NAPI_CHECK_FATAL(napi_get_named_property(env, jsThis_, content.c_str(), &handlerResult));
-    } else if (methodName.rfind(SETTER_BEGIN, 0) == 0) {
-        std::string content = std::string(methodName.substr(SETTER_GETTER_PREFIX_LENGTH));
-        NAPI_CHECK_FATAL(napi_create_string_utf8(env, content.c_str(), NAPI_AUTO_LENGTH, &handlerResult));
-        NAPI_CHECK_FATAL(napi_set_property(env, jsThis_, handlerResult, jsargs[0]));
-        napi_get_undefined(env, &handlerResult);
-    } else if (methodName == GET_INDEX_METHOD) {
-        int32_t idx;
-        NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
-        NAPI_CHECK_FATAL(napi_get_element(env, jsThis_, idx, &handlerResult));
-    } else if (methodName == SET_INDEX_METHOD) {
-        int32_t idx;
-        NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
-        NAPI_CHECK_FATAL(napi_set_element(env, jsThis_, idx, jsargs[1]));
-        napi_get_undefined(env, &handlerResult);
-    } else if (methodName == ITERATOR_METHOD) {
-        napi_value global;
-        NAPI_CHECK_FATAL(napi_get_global(env, &global));
-        napi_value symbol;
-        NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Symbol", &symbol));
-        napi_value symbolIterator;
-        NAPI_CHECK_FATAL(napi_get_named_property(env, symbol, "iterator", &symbolIterator));
-        napi_value iteratorMethod;
-        NAPI_CHECK_FATAL(napi_get_property(env, jsThis_, symbolIterator, &iteratorMethod));
-        if (GetValueType(env, iteratorMethod) == napi_undefined) {
-            NAPI_CHECK_FATAL(napi_get_undefined(env, &handlerResult));
-            return handlerResult;
+    const char *methodName = EtsMethod::FromRuntimeMethod(protoReader_.GetMethod())->GetName();
+    if (methodName != nullptr && std::strlen(methodName) >= SETTER_GETTER_PREFIX_LENGTH) {
+        std::string content = std::string(methodName).substr(SETTER_GETTER_PREFIX_LENGTH);
+        if (std::strncmp(methodName, GETTER_BEGIN, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            NAPI_CHECK_FATAL(napi_get_named_property(env, jsThis_, content.c_str(), &handlerResult));
+        } else if (std::strncmp(methodName, SETTER_BEGIN, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            NAPI_CHECK_FATAL(napi_create_string_utf8(env, content.c_str(), NAPI_AUTO_LENGTH, &handlerResult));
+            NAPI_CHECK_FATAL(napi_set_property(env, jsThis_, handlerResult, jsargs[0]));
+            napi_get_undefined(env, &handlerResult);
+        } else if (std::strncmp(methodName, GET_INDEX_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            int32_t idx;
+            NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
+            NAPI_CHECK_FATAL(napi_get_element(env, jsThis_, idx, &handlerResult));
+        } else if (std::strncmp(methodName, SET_INDEX_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            int32_t idx;
+            NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
+            NAPI_CHECK_FATAL(napi_set_element(env, jsThis_, idx, jsargs[1]));
+            napi_get_undefined(env, &handlerResult);
+        } else if (std::strncmp(methodName, ITERATOR_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
+            napi_value global;
+            NAPI_CHECK_FATAL(napi_get_global(env, &global));
+            napi_value symbol;
+            NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Symbol", &symbol));
+            napi_value symbolIterator;
+            NAPI_CHECK_FATAL(napi_get_named_property(env, symbol, "iterator", &symbolIterator));
+            napi_value iteratorMethod;
+            NAPI_CHECK_FATAL(napi_get_property(env, jsThis_, symbolIterator, &iteratorMethod));
+            if (GetValueType(env, iteratorMethod) == napi_undefined) {
+                NAPI_CHECK_FATAL(napi_get_undefined(env, &handlerResult));
+                return handlerResult;
+            }
+            size_t jsArgc = 0;
+            NAPI_CHECK_FATAL(napi_call_function(env, jsThis_, iteratorMethod, jsArgc, nullptr, &handlerResult));
         }
-        size_t jsArgc = 0;
-        NAPI_CHECK_FATAL(napi_call_function(env, jsThis_, iteratorMethod, jsArgc, nullptr, &handlerResult));
     }
-
     return handlerResult;
 }
 

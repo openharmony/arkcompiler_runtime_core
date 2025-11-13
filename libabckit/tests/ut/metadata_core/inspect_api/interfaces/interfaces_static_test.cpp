@@ -68,8 +68,8 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetAllMethodsStatic)
     }
 
     std::set<std::string> expectMethodNames = {
-        "%%get-fieldA:interfaces_static.InterfaceA;std.core.String;", "%%get-fieldB:interfaces_static.InterfaceA;f64;",
-        "%%set-fieldA:interfaces_static.InterfaceA;std.core.String;void;", "bar:interfaces_static.InterfaceA;void;"};
+        "<get>fieldA:interfaces_static.InterfaceA;std.core.String;", "<get>fieldB:interfaces_static.InterfaceA;f64;",
+        "<set>fieldA:interfaces_static.InterfaceA;std.core.String;void;", "bar:interfaces_static.InterfaceA;void;"};
     ASSERT_EQ(gotMethodNames, expectMethodNames);
 }
 
@@ -91,7 +91,7 @@ TEST_F(LibAbcKitInspectApiInterfacesTest, InterfaceGetFieldsStatic)
         }
     }
 
-    std::set<std::string> expectFieldNames = {"%%property-fieldA", "%%property-fieldB"};
+    std::set<std::string> expectFieldNames = {"<property>fieldA", "<property>fieldB"};
     ASSERT_EQ(gotFieldNames, expectFieldNames);
 }
 

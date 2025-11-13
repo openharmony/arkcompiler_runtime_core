@@ -181,7 +181,7 @@ public:
  */
 HWTEST_F(TestAnnotation, annotation_005, TestSize.Level0)
 {
-    const auto field1 = fileView.Get<abckit_wrapper::Field>("annotation_test.Interface1.%%property-iField1");
+    const auto field1 = fileView.Get<abckit_wrapper::Field>("annotation_test.Interface1.<property>iField1");
     ASSERT_TRUE(field1.has_value());
 
     visitor_ = std::make_unique<TestInterfaceFieldAnnotationVisitor>();

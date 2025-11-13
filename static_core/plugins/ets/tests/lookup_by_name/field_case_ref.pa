@@ -29,7 +29,7 @@
     std.core.String baz
 }
 
-.function std.core.String A.%%get-bar(A a0) <access.function=public> {
+.function std.core.String A.<get>bar(A a0) <access.function=public> {
     lda.str "64"
     return.obj
 }

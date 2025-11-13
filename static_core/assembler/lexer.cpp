@@ -255,6 +255,10 @@ bool Lexer::LexString()
 
 bool Lexer::IsAngleBracketInFunctionName(char c, Line *currLine)
 {
+    // <get> and <set> are used for mangling function name for setter and getter
+    // ensure "<" and ">" are only valid for function name:
+    // .function return_type <get>...(...)
+
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr size_t FUNCTION_KEY_WORD_OFFSET = 2;
     size_t currTokenSize = currLine->tokens.size();

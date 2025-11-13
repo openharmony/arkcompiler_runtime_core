@@ -78,7 +78,7 @@
     /* Containers */                                                                                                  \
     T("Lescompat/Array;", escompatArray)                                                                              \
     I("Lescompat/Array;", "pop", ":Lstd/core/Object;", escompatArrayPop)                                              \
-    I("Lescompat/Array;", "%%get-length", ":I", escompatArrayGetLength)                                               \
+    I("Lescompat/Array;", "<get>length", ":I", escompatArrayGetLength)                                                \
     I("Lescompat/Array;", "$_get", "I:Lstd/core/Object;", escompatArrayGet)                                           \
     I("Lescompat/Array;", "$_set", "ILstd/core/Object;:V", escompatArraySet)                                          \
     /* ArrayBuffer */                                                                                                 \

@@ -342,7 +342,7 @@ TEST_F(Abc2ProgramLiteralArrayTest, LiteralArray)
 TEST_F(Abc2ProgramTypeTest, Type)
 {
     const std::set<std::string> expectedType = {
-        "Type.%%partial-Cls._ctor_ Type.%%partial-Cls void",
+        "Type.Cls$partial._ctor_ Type.Cls$partial void",
         "Type.Cls._ctor_ Type.Cls void",
         "Type.Cls.add_inner Type.Cls i32 i64 f32 f64 std.core.String",
         "Type.ETSGLOBAL._cctor_ void",

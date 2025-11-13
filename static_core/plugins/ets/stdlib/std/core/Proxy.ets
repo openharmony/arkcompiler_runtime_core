@@ -29,10 +29,10 @@ export final class Proxy {
 
     private static readonly CTOR_METHOD_NAME = "constructor"
 
-    private static readonly GETTER_METHOD_PREFIX = "%%get-"
+    private static readonly GETTER_METHOD_PREFIX = "<get>"
     private static readonly GETTER_METHOD_PREFIX_LENGTH = Proxy.GETTER_METHOD_PREFIX.getLength()
 
-    private static readonly SETTER_METHOD_PREFIX = "%%set-"
+    private static readonly SETTER_METHOD_PREFIX = "<set>"
     private static readonly SETTER_METHOD_PREFIX_LENGTH = Proxy.SETTER_METHOD_PREFIX.getLength()
 
     static tryGetTarget(obj: Object): Any {
@@ -631,7 +631,7 @@ export interface ProxyHandler<T extends Object> {
 
 export abstract class DefaultProxyHandler<T extends Object> implements ProxyHandler<T> {
     override get(target: T, name: string): Any {
-        const GETTER_PREFIX = "%%get-";
+        const GETTER_PREFIX = "<get>";
         const targetType = Type.of(target) as ClassType
 
         try {
@@ -645,7 +645,7 @@ export abstract class DefaultProxyHandler<T extends Object> implements ProxyHand
     }
 
     override set(target: T, name: string, value: Any): boolean {
-        const SETTER_PREFIX = "%%set-";
+        const SETTER_PREFIX = "<set>";
         const targetType = Type.of(target) as ClassType
 
         try {

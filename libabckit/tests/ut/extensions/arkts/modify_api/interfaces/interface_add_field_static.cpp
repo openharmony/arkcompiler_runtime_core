@@ -119,7 +119,7 @@ TEST_F(LibAbcKitModifyApiIfaceTests, InterfaceAddFieldTest0)
             (*ctx).emplace_back(filedName);
             return true;
         });
-    std::vector<std::string> testFileds = {"%%property-newInterfaceField", "%%property-key"};
+    std::vector<std::string> testFileds = {"<property>newInterfaceField", "<property>key"};
     ASSERT_EQ(FieldNames, testFileds);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

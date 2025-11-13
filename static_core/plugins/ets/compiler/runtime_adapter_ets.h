@@ -80,7 +80,7 @@ public:
     bool IsMethodStringGetLength(MethodPtr method) const override
     {
         auto methodName = GetMethodFullName(method, false);
-        return (methodName == "std.core.String::%%get-length" || methodName == "std.core.String::getLength") &&
+        return (methodName == "std.core.String::<get>length" || methodName == "std.core.String::getLength") &&
                GetSignature(method) == "()I";
     }
 
@@ -267,7 +267,7 @@ public:
 
             for (auto methodId : methodIdx) {
                 if (GetMethodFullName(reinterpret_cast<MethodPtr>(methodId.GetOffset()), false) ==
-                    "std.core.StringBuilder::%%get-stringLength") {
+                    "std.core.StringBuilder::<get>stringLength") {
                     return reinterpret_cast<MethodPtr>(methodId.GetOffset());
                 }
             }

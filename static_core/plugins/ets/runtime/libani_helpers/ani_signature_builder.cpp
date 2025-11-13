@@ -364,47 +364,47 @@ std::string Builder::BuildConstructorName()
 
 std::string Builder::BuildSetterName(std::string_view name)
 {
-    return GetSetterNamePrefix() + std::string(name);
+    return "<set>" + std::string(name);
 }
 
 std::string Builder::BuildGetterName(std::string_view name)
 {
-    return GetGetterNamePrefix() + std::string(name);
+    return "<get>" + std::string(name);
 }
 
 std::string Builder::BuildPropertyName(std::string_view name)
 {
-    return GetPropertyNamePrefix() + std::string(name);
+    return "<property>" + std::string(name);
 }
 
 std::string Builder::Builder::BuildPartialName(std::string_view name)
 {
-    return GetPartialNamePrefix() + std::string(name);
+    return std::string(name) + "$partial";
 }
 
 std::string Builder::BuildAsyncName(std::string_view name)
 {
-    return GetAsyncNamePrefix() + std::string(name);
+    return "%%async-" + std::string(name);
 }
 
 std::string Builder::GetSetterNamePrefix()
 {
-    return "%%set-";
+    return "<set>";
 }
 
 std::string Builder::GetGetterNamePrefix()
 {
-    return "%%get-";
+    return "<get>";
 }
 
 std::string Builder::GetPropertyNamePrefix()
 {
-    return "%%property-";
+    return "<property>";
 }
 
 std::string Builder::GetPartialNamePrefix()
 {
-    return "%%partial-";
+    return "$partial";
 }
 
 std::string Builder::GetAsyncNamePrefix()

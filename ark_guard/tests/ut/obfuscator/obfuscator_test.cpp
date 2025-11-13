@@ -348,14 +348,14 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_012, TestSize.Level1)
     this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
 
     const auto classAField1 = this->fileView_.Get<abckit_wrapper::Method>(
-        "module_link_field_test.ClassA.%%set-field1:module_link_field_test.ClassA;i32;void;");
+        "module_link_field_test.ClassA.<set>field1:module_link_field_test.ClassA;i32;void;");
     ASSERT_TRUE(classAField1.has_value());
     const auto interface1Field1 = this->fileView_.Get<abckit_wrapper::Method>(
-        "module_link_field_test.Interface1.%%set-field1:module_link_field_test.Interface1;i32;void;");
+        "module_link_field_test.Interface1.<set>field1:module_link_field_test.Interface1;i32;void;");
     ASSERT_TRUE(interface1Field1.has_value());
 
     const auto interface2Field1 = this->fileView_.Get<abckit_wrapper::Method>(
-        "module_link_field_test.Interface2.%%set-field1:module_link_field_test.Interface2;i32;void;");
+        "module_link_field_test.Interface2.<set>field1:module_link_field_test.Interface2;i32;void;");
     ASSERT_TRUE(interface2Field1.has_value());
     const auto classCField1 = this->fileView_.Get<abckit_wrapper::Field>("module_link_field_test.ClassC.field1");
     ASSERT_TRUE(classCField1.has_value());
@@ -426,8 +426,8 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_014, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("export_file2.process_field:export_file2.A;void;", "process_field");
     AddElement<abckit_wrapper::Class>("export_file2.A", "A");
     AddElement<abckit_wrapper::Method>("export_file2.A.foo:export_file2.A;std.core.String;", "foo");
-    AddElement<abckit_wrapper::Class>("export_file2.%%partial-B", "%%partial-B");
-    AddElement<abckit_wrapper::Field>("export_file2.%%partial-B.a", "a");
+    AddElement<abckit_wrapper::Class>("export_file2.B$partial", "B$partial");
+    AddElement<abckit_wrapper::Field>("export_file2.B$partial.a", "a");
     AddElement<abckit_wrapper::Class>("export_file2.B", "B");
     AddElement<abckit_wrapper::Field>("export_file2.B.a", "a");
     AddElement<abckit_wrapper::Method>("export_file2.B.foo:export_file2.B;void;", "foo");
@@ -452,19 +452,19 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_014, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("export_file.Space1.variable", "variable");
     AddElement<abckit_wrapper::Field>("export_file.Space1.constant", "constant");
     AddElement<abckit_wrapper::Method>("export_file.Space1.foo:void;", "foo");
-    AddElement<abckit_wrapper::Class>("export_file.%%partial-ExportClass", "%%partial-ExportClass");
-    AddElement<abckit_wrapper::Field>("export_file.%%partial-ExportClass.memA", "memA");
-    AddElement<abckit_wrapper::Field>("export_file.%%partial-ExportClass.memC", "memC");
+    AddElement<abckit_wrapper::Class>("export_file.ExportClass$partial", "ExportClass$partial");
+    AddElement<abckit_wrapper::Field>("export_file.ExportClass$partial.memA", "memA");
+    AddElement<abckit_wrapper::Field>("export_file.ExportClass$partial.memC", "memC");
     AddElement<abckit_wrapper::Namespace>("export_file.Space2", "Space2");
     AddElement<abckit_wrapper::Field>("export_file.Space2.tag", "tag");
     AddElement<abckit_wrapper::Field>("export_file.Space2.variable", "variable");
     AddElement<abckit_wrapper::AnnotationInterface>("export_file.MyAnno", "MyAnno");
-    AddElement<abckit_wrapper::Class>("export_file.%%partial-SomeClass", "%%partial-SomeClass");
+    AddElement<abckit_wrapper::Class>("export_file.SomeClass$partial", "SomeClass$partial");
     AddElement<abckit_wrapper::Class>("export_file.SomeClass", "SomeClass");
     AddElement<abckit_wrapper::Method>("export_file.SomeClass.foo:export_file.SomeClass;void;", "foo");
     AddElement<abckit_wrapper::Class>("export_file.ExportClass", "ExportClass");
     AddElement<abckit_wrapper::Field>("export_file.ExportClass.memC", "memC");
-    AddElement<abckit_wrapper::Method>("export_file.ExportClass.%%get-memA:export_file.ExportClass;std.core.String;",
+    AddElement<abckit_wrapper::Method>("export_file.ExportClass.<get>memA:export_file.ExportClass;std.core.String;",
                                        "memA");
     AddElement<abckit_wrapper::Method>("export_file.ExportClass.memB:export_file.ExportClass;std.core.String;", "memB");
     AddElement<abckit_wrapper::Class>("export_file.ClassType1", "ClassType1");
@@ -585,11 +585,10 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_017, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("function_demo.fun3:i32;", "fun3");
     AddElement<abckit_wrapper::Method>("function_demo.fun2:i32;", "fun2");
     AddElement<abckit_wrapper::Class>("function_demo.Obj1", "Obj1");
-    AddElement<abckit_wrapper::Field>("function_demo.Obj1.%%property-suit", "suit");
-    AddElement<abckit_wrapper::Field>("function_demo.Obj1.%%property-card", "card");
-    AddElement<abckit_wrapper::Method>("function_demo.Obj1.%%set-card:function_demo.Obj1;f64;void;", "card");
-    AddElement<abckit_wrapper::Method>("function_demo.Obj1.%%set-suit:function_demo.Obj1;std.core.String;void;",
-        "suit");
+    AddElement<abckit_wrapper::Field>("function_demo.Obj1.<property>suit", "suit");
+    AddElement<abckit_wrapper::Field>("function_demo.Obj1.<property>card", "card");
+    AddElement<abckit_wrapper::Method>("function_demo.Obj1.<set>card:function_demo.Obj1;f64;void;", "card");
+    AddElement<abckit_wrapper::Method>("function_demo.Obj1.<set>suit:function_demo.Obj1;std.core.String;void;", "suit");
     AddElement<abckit_wrapper::Class>("function_demo.ClassA", "ClassA");
     AddElement<abckit_wrapper::Method>(
         "function_demo.ClassA.method1:function_demo.ClassA;i32;std.core.String;escompat.Array;std.core.String;",
@@ -625,7 +624,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_018, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("class_demo1.ClassA2.sFieldA0", "sFieldA0");
     AddElement<abckit_wrapper::Field>("class_demo1.ClassA2.fieldA1", "fieldA1");
     AddElement<abckit_wrapper::Method>("class_demo1.ClassA2.methodA1:class_demo1.ClassA2;f64;", "methodA1");
-    AddElement<abckit_wrapper::Method>("class_demo1.ClassA2.%%get-value1:class_demo1.ClassA2;f64;", "value1");
+    AddElement<abckit_wrapper::Method>("class_demo1.ClassA2.<get>value1:class_demo1.ClassA2;f64;", "value1");
 
     AddElement<abckit_wrapper::Field>("class_demo1.a", "a");
 
@@ -669,11 +668,11 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_019, TestSize.Level1)
                                        "methodNative");
 
     AddElement<abckit_wrapper::Class>("class_demo2.Interface1", "Interface1");
-    AddElement<abckit_wrapper::Field>("class_demo2.Interface1.%%property-field_inf", "field_inf");
-    AddElement<abckit_wrapper::Method>("class_demo2.Interface1.%%get-field_inf:class_demo2.Interface1;std.core.String;",
+    AddElement<abckit_wrapper::Field>("class_demo2.Interface1.<property>field_inf", "field_inf");
+    AddElement<abckit_wrapper::Method>("class_demo2.Interface1.<get>field_inf:class_demo2.Interface1;std.core.String;",
                                        "field_inf");
     AddElement<abckit_wrapper::Method>(
-        "class_demo2.Interface1.%%set-field_inf:class_demo2.Interface1;std.core.String;void;", "field_inf");
+        "class_demo2.Interface1.<set>field_inf:class_demo2.Interface1;std.core.String;void;", "field_inf");
     AddElement<abckit_wrapper::Method>("class_demo2.Interface1.print:class_demo2.Interface1;void;", "print");
 
     AddElement<abckit_wrapper::Class>("class_demo2.Interface2", "Interface2");
@@ -681,10 +680,10 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_019, TestSize.Level1)
                                        "getDescription");
 
     AddElement<abckit_wrapper::Class>("class_demo2.Interface3", "Interface3");
-    AddElement<abckit_wrapper::Field>("class_demo2.Interface3.%%property-field_inf2", "field_inf2");
-    AddElement<abckit_wrapper::Method>("class_demo2.Interface3.%%get-field_inf2:class_demo2.Interface3;f64;",
+    AddElement<abckit_wrapper::Field>("class_demo2.Interface3.<property>field_inf2", "field_inf2");
+    AddElement<abckit_wrapper::Method>("class_demo2.Interface3.<get>field_inf2:class_demo2.Interface3;f64;",
                                        "field_inf2");
-    AddElement<abckit_wrapper::Method>("class_demo2.Interface3.%%set-field_inf2:class_demo2.Interface3;f64;void;",
+    AddElement<abckit_wrapper::Method>("class_demo2.Interface3.<set>field_inf2:class_demo2.Interface3;f64;void;",
                                        "field_inf2");
 
     AddElement<abckit_wrapper::Class>("class_demo2.ClassA", "ClassA");
@@ -693,10 +692,10 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_019, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("class_demo2.ClassA.field2", "field2");
     AddElement<abckit_wrapper::Field>("class_demo2.ClassA.field3", "field3");
     AddElement<abckit_wrapper::Field>("class_demo2.ClassA.field4", "field4");
-    AddElement<abckit_wrapper::Field>("class_demo2.ClassA.%%property-field_inf", "field_inf");
-    AddElement<abckit_wrapper::Method>("class_demo2.ClassA.%%get-field_inf:class_demo2.ClassA;std.core.String;",
+    AddElement<abckit_wrapper::Field>("class_demo2.ClassA.<property>field_inf", "field_inf");
+    AddElement<abckit_wrapper::Method>("class_demo2.ClassA.<get>field_inf:class_demo2.ClassA;std.core.String;",
                                        "field_inf");
-    AddElement<abckit_wrapper::Method>("class_demo2.ClassA.%%set-field_inf:class_demo2.ClassA;std.core.String;void;",
+    AddElement<abckit_wrapper::Method>("class_demo2.ClassA.<set>field_inf:class_demo2.ClassA;std.core.String;void;",
                                        "field_inf");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassA.method0:std.core.String;", "method0");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassA.method1:class_demo2.ClassA;std.core.String;", "method1");
@@ -712,10 +711,9 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_019, TestSize.Level1)
                                        "getDescription");
 
     AddElement<abckit_wrapper::Class>("class_demo2.ClassC", "ClassC");
-    AddElement<abckit_wrapper::Field>("class_demo2.ClassC.%%property-field_inf2", "field_inf2");
-    AddElement<abckit_wrapper::Method>("class_demo2.ClassC.%%get-field_inf2:class_demo2.ClassC;f64;", "field_inf2");
-    AddElement<abckit_wrapper::Method>("class_demo2.ClassC.%%set-field_inf2:class_demo2.ClassC;f64;void;",
-        "field_inf2");
+    AddElement<abckit_wrapper::Field>("class_demo2.ClassC.<property>field_inf2", "field_inf2");
+    AddElement<abckit_wrapper::Method>("class_demo2.ClassC.<get>field_inf2:class_demo2.ClassC;f64;", "field_inf2");
+    AddElement<abckit_wrapper::Method>("class_demo2.ClassC.<set>field_inf2:class_demo2.ClassC;f64;void;", "field_inf2");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassC.method2:class_demo2.ClassC;std.core.String;", "method2");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassC.getDescription:class_demo2.ClassC;std.core.String;",
                                        "getDescription");
@@ -745,18 +743,18 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_020, TestSize.Level1)
     AddModuleElement("class_get_set", "class_get_set");
 
     AddElement<abckit_wrapper::Class>("class_get_set.Style1", "Style1");
-    AddElement<abckit_wrapper::Field>("class_get_set.Style1.%%property-color", "color");
+    AddElement<abckit_wrapper::Field>("class_get_set.Style1.<property>color", "color");
     AddElement<abckit_wrapper::Class>("class_get_set.StyleClass1", "StyleClass1");
-    AddElement<abckit_wrapper::Field>("class_get_set.StyleClass1.%%property-color", "color");
+    AddElement<abckit_wrapper::Field>("class_get_set.StyleClass1.<property>color", "color");
     AddElement<abckit_wrapper::Class>("class_get_set.StyleClass2", "StyleClass2");
     AddElement<abckit_wrapper::Field>("class_get_set.StyleClass2.color_", "color_");
     AddElement<abckit_wrapper::Class>("class_get_set.StyleClass3", "StyleClass3");
     AddElement<abckit_wrapper::Field>("class_get_set.StyleClass3.colorClass3", "colorClass3");
     AddElement<abckit_wrapper::Class>("class_get_set.Style2", "Style2");
-    AddElement<abckit_wrapper::Field>("class_get_set.Style2.%%property-color", "color");
-    AddElement<abckit_wrapper::Field>("class_get_set.Style2.%%property-readable", "readable");
+    AddElement<abckit_wrapper::Field>("class_get_set.Style2.<property>color", "color");
+    AddElement<abckit_wrapper::Field>("class_get_set.Style2.<property>readable", "readable");
     AddElement<abckit_wrapper::Class>("class_get_set.Style2Class", "Style2Class");
-    AddElement<abckit_wrapper::Field>("class_get_set.Style2Class.%%property-readable", "readable");
+    AddElement<abckit_wrapper::Field>("class_get_set.Style2Class.<property>readable", "readable");
 
     this->VerifyObfuscated();
 }
@@ -943,41 +941,40 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_025, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("generics_demo2.constY", "constY");
     AddElement<abckit_wrapper::Field>("generics_demo2.recordX", "recordX");
     AddElement<abckit_wrapper::Field>("generics_demo2.myIssue", "myIssue");
-    AddElement<abckit_wrapper::Method>("generics_demo2.process:generics_demo2.%%partial-Issue;void;", "process");
+    AddElement<abckit_wrapper::Method>("generics_demo2.process:generics_demo2.Issue$partial;void;", "process");
     AddElement<abckit_wrapper::Class>("generics_demo2.Issue", "Issue");
-    AddElement<abckit_wrapper::Field>("generics_demo2.Issue.%%property-title", "title");
-    AddElement<abckit_wrapper::Field>("generics_demo2.Issue.%%property-description", "description");
-    AddElement<abckit_wrapper::Method>("generics_demo2.Issue.%%get-description:generics_demo2.Issue;std.core.String;",
+    AddElement<abckit_wrapper::Field>("generics_demo2.Issue.<property>title", "title");
+    AddElement<abckit_wrapper::Field>("generics_demo2.Issue.<property>description", "description");
+    AddElement<abckit_wrapper::Method>("generics_demo2.Issue.<get>description:generics_demo2.Issue;std.core.String;",
                                        "description");
-    AddElement<abckit_wrapper::Method>("generics_demo2.Issue.%%get-title:generics_demo2.Issue;std.core.String;",
+    AddElement<abckit_wrapper::Method>("generics_demo2.Issue.<get>title:generics_demo2.Issue;std.core.String;",
                                        "title");
     AddElement<abckit_wrapper::Method>(
-        "generics_demo2.Issue.%%set-description:generics_demo2.Issue;std.core.String;void;", "description");
-    AddElement<abckit_wrapper::Method>("generics_demo2.Issue.%%set-title:generics_demo2.Issue;std.core.String;void;",
+        "generics_demo2.Issue.<set>description:generics_demo2.Issue;std.core.String;void;", "description");
+    AddElement<abckit_wrapper::Method>("generics_demo2.Issue.<set>title:generics_demo2.Issue;std.core.String;void;",
                                        "title");
     AddElement<abckit_wrapper::Class>("generics_demo2.A", "A");
     AddElement<abckit_wrapper::Field>("generics_demo2.A.f1", "f1");
     AddElement<abckit_wrapper::Field>("generics_demo2.A.f2", "f2");
     AddElement<abckit_wrapper::Field>("generics_demo2.A.f3", "f3");
     AddElement<abckit_wrapper::Class>("generics_demo2.Issue2", "Issue2");
-    AddElement<abckit_wrapper::Field>("generics_demo2.Issue2.%%property-title", "title");
-    AddElement<abckit_wrapper::Method>("generics_demo2.Issue2.%%get-title:generics_demo2.Issue2;std.core.String;",
+    AddElement<abckit_wrapper::Field>("generics_demo2.Issue2.<property>title", "title");
+    AddElement<abckit_wrapper::Method>("generics_demo2.Issue2.<get>title:generics_demo2.Issue2;std.core.String;",
                                        "title");
-    AddElement<abckit_wrapper::Method>("generics_demo2.Issue2.%%set-title:generics_demo2.Issue2;std.core.String;void;",
+    AddElement<abckit_wrapper::Method>("generics_demo2.Issue2.<set>title:generics_demo2.Issue2;std.core.String;void;",
                                        "title");
-    AddElement<abckit_wrapper::Class>("generics_demo2.%%partial-Issue", "%%partial-Issue");
-    addelement<abckit_wrapper::field>("generics_demo2.%%partial-issue.%%property-title", "title");
-    addelement<abckit_wrapper::field>("generics_demo2.%%partial-issue.%%property-description", "description");
+    AddElement<abckit_wrapper::Class>("generics_demo2.Issue$partial", "Issue$partial");
+    AddElement<abckit_wrapper::Field>("generics_demo2.Issue$partial.<property>title", "title");
+    AddElement<abckit_wrapper::Field>("generics_demo2.Issue$partial.<property>description", "description");
     AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%get-description:generics_demo2.%%partial-Issue;std.core.String;",
+        "generics_demo2.Issue$partial.<get>description:generics_demo2.Issue$partial;std.core.String;", "description");
+    AddElement<abckit_wrapper::Method>(
+        "generics_demo2.Issue$partial.<get>title:generics_demo2.Issue$partial;std.core.String;", "title");
+    AddElement<abckit_wrapper::Method>(
+        "generics_demo2.Issue$partial.<set>description:generics_demo2.Issue$partial;std.core.String;void;",
         "description");
     AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%get-title:generics_demo2.%%partial-Issue;std.core.String;", "title");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%set-description:generics_demo2.%%partial-Issue;std.core.String;void;",
-        "description");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%set-title:generics_demo2.%%partial-Issue;std.core.String;void;", "title");
+        "generics_demo2.Issue$partial.<set>title:generics_demo2.Issue$partial;std.core.String;void;", "title");
 
     this->VerifyObfuscated();
 }
@@ -1064,20 +1061,20 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_027, TestSize.Level1)
     this->InitRunAbcConfig("class_demo3", "main");
 
     AddElement<abckit_wrapper::Class>("class_demo3.ExportClass", "ExportClass");
-    AddElement<abckit_wrapper::Method>("class_demo3.ExportClass.%%get-memA:class_demo3.ExportClass;std.core.String;",
+    AddElement<abckit_wrapper::Method>("class_demo3.ExportClass.<get>memA:class_demo3.ExportClass;std.core.String;",
                                        "memA");
 
     AddElement<abckit_wrapper::Method>("class_demo3.ExportClass.memB:class_demo3.ExportClass;std.core.String;", "memB");
     AddElement<abckit_wrapper::Field>("class_demo3.ExportClass.memC", "memC");
     AddElement<abckit_wrapper::Field>("class_demo3.inst", "inst");
     AddElement<abckit_wrapper::Class>("class_demo3.Base", "Base");
-    AddElement<abckit_wrapper::Method>("class_demo3.Base.%%get-field:class_demo3.Base;class_demo3.Base;", "field");
-    AddElement<abckit_wrapper::Method>("class_demo3.Base.%%set-field:class_demo3.Base;class_demo3.Derived;void;",
+    AddElement<abckit_wrapper::Method>("class_demo3.Base.<get>field:class_demo3.Base;class_demo3.Base;", "field");
+    AddElement<abckit_wrapper::Method>("class_demo3.Base.<set>field:class_demo3.Base;class_demo3.Derived;void;",
                                        "field");
     AddElement<abckit_wrapper::Class>("class_demo3.Derived", "Derived");
-    AddElement<abckit_wrapper::Method>("class_demo3.Derived.%%get-field:class_demo3.Derived;class_demo3.Derived;",
+    AddElement<abckit_wrapper::Method>("class_demo3.Derived.<get>field:class_demo3.Derived;class_demo3.Derived;",
                                        "field");
-    AddElement<abckit_wrapper::Method>("class_demo3.Derived.%%set-field:class_demo3.Derived;class_demo3.Base;void;",
+    AddElement<abckit_wrapper::Method>("class_demo3.Derived.<set>field:class_demo3.Derived;class_demo3.Base;void;",
                                        "field");
     AddElement<abckit_wrapper::Method>("class_demo3.foo:class_demo3.Base;void;", "foo");
     AddElement<abckit_wrapper::Class>("class_demo3.Point", "Point");
@@ -1146,11 +1143,11 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_029, TestSize.Level1)
     AddElement<abckit_wrapper::Class>("lambda_demo.C1", "C1");
     AddElement<abckit_wrapper::Field>("lambda_demo.C1.field1", "field1");
     AddElement<abckit_wrapper::Class>("lambda_demo.GenericIdentityFn", "GenericIdentityFn");
-    AddElement<abckit_wrapper::Field>("lambda_demo.GenericIdentityFn.%%property-foo", "foo");
+    AddElement<abckit_wrapper::Field>("lambda_demo.GenericIdentityFn.<property>foo", "foo");
     AddElement<abckit_wrapper::Method>(
-        "lambda_demo.GenericIdentityFn.%%get-foo:lambda_demo.GenericIdentityFn;std.core.Function1;", "foo");
+        "lambda_demo.GenericIdentityFn.<get>foo:lambda_demo.GenericIdentityFn;std.core.Function1;", "foo");
     AddElement<abckit_wrapper::Method>(
-        "lambda_demo.GenericIdentityFn.%%set-foo:lambda_demo.GenericIdentityFn;std.core.Function1;void;", "foo");
+        "lambda_demo.GenericIdentityFn.<set>foo:lambda_demo.GenericIdentityFn;std.core.Function1;void;", "foo");
 
     this->VerifyObfuscated();
 }
@@ -1178,14 +1175,14 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_031, TestSize.Level1)
     this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
 
     const auto classAField1 = this->fileView_.Get<abckit_wrapper::Method>(
-        "ns_link_field_test.Ns1.ClassA.%%set-field1:ns_link_field_test.Ns1.ClassA;i32;void;");
+        "ns_link_field_test.Ns1.ClassA.<set>field1:ns_link_field_test.Ns1.ClassA;i32;void;");
     ASSERT_TRUE(classAField1.has_value());
     const auto interface1Field1 = this->fileView_.Get<abckit_wrapper::Method>(
-        "ns_link_field_test.Ns1.Interface1.%%set-field1:ns_link_field_test.Ns1.Interface1;i32;void;");
+        "ns_link_field_test.Ns1.Interface1.<set>field1:ns_link_field_test.Ns1.Interface1;i32;void;");
     ASSERT_TRUE(interface1Field1.has_value());
 
     const auto interface2Field1 = this->fileView_.Get<abckit_wrapper::Method>(
-        "ns_link_field_test.Ns1.Interface2.%%set-field1:ns_link_field_test.Ns1.Interface2;i32;void;");
+        "ns_link_field_test.Ns1.Interface2.<set>field1:ns_link_field_test.Ns1.Interface2;i32;void;");
     ASSERT_TRUE(interface2Field1.has_value());
     const auto classCField1 = this->fileView_.Get<abckit_wrapper::Field>("ns_link_field_test.Ns1.ClassC.field1");
     ASSERT_TRUE(classCField1.has_value());

@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-[TID 001efb] E/verifier: Cannot link class: Cannot find method '%%set-a (Lstd/core/String;)V' in class 'namespace_declarations_n_5.namespace_declarations_n_5$Ambient$A$ObjectLiteral'
-[TID 001efb] E/verifier: Cannot link class: Cannot find method '%%get-a ()Lstd/core/String;' in class 'namespace_declarations_n_5.Ambient.A'
+[TID 001efb] E/verifier: Cannot link class: Cannot find method '<set>a (Lstd/core/String;)V' in class 'namespace_declarations_n_5.namespace_declarations_n_5$Ambient$A$ObjectLiteral'
+[TID 001efb] E/verifier: Cannot link class: Cannot find method '<get>a ()Lstd/core/String;' in class 'namespace_declarations_n_5.Ambient.A'
 [TID 001efb] E/runtime: Cannot initialize class 'namespace_usage_n_5.ETSGLOBAL'
 Unhandled exception: std.core.LinkerVerificationError
 LinkerVerificationError: Lnamespace_usage_n_5/ETSGLOBAL;

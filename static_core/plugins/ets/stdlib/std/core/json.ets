@@ -1810,7 +1810,7 @@ class JSONValueParser {
     private reviver: ((key: string, value: Any) => Any) | undefined
     private bigIntMode: int
 
-    private static readonly SETTER_PREFIX = "%%set-"
+    private static readonly SETTER_PREFIX = "<set>"
 
     constructor(reviver: ((key: string, value: Any) => Any) | undefined, bigIntMode: int) {
         this.reviver = reviver

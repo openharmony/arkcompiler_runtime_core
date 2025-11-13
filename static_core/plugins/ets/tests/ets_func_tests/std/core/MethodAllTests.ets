@@ -86,8 +86,8 @@ function testAbstractFlag(): void {
 
 function testGetterSetter(): void {
 	const ct = Type.of(new PropClass()) as ClassType
-	let gm = findMethod(ct, '%%get-x')!
-	let sm = findMethod(ct, '%%set-x')!
+	let gm = findMethod(ct, '<get>x')!
+	let sm = findMethod(ct, '<set>x')!
 	arktest.assertTrue(gm.isGetter())
 	arktest.assertFalse(gm.isSetter())
 	arktest.assertEQ(AccessModifier.PUBLIC, gm.getAccessModifier())

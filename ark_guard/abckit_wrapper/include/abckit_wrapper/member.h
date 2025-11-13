@@ -31,7 +31,7 @@ public:
     /**
      * @brief Get member descriptor
      * 1. normal method: (param1Type, param2Type, ..., paramNType):returnType
-     * 2. setter&getter method: %%set-field(fieldType) -> field; %%get-()fieldType -> field
+     * 2. setter&getter method: <set>field(fieldType) -> field; <get>()fieldType -> field
      * 3. field: ""
      * @return member descriptor
      */
@@ -40,8 +40,8 @@ public:
     /**
      * @brief Get member raw name
      * 1. normal method: methodName
-     * 2. setter&getter method: %%set-field(fieldType) -> field; %%get-()fieldType -> field
-     * 3. field: fieldName (ignore %%property-)
+     * 2. setter&getter method: <set>field(fieldType) -> field; <get>()fieldType -> field
+     * 3. field: fieldName (ignore <property>)
      * @return member raw name
      */
     [[nodiscard]] std::string GetRawName();

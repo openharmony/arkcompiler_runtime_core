@@ -28,12 +28,12 @@
     i32 foo
 }
 
-.function i64 A.%%get-baz(A a0) <access.function=public> {
+.function i64 A.<get>baz(A a0) <access.function=public> {
     ldai.64 42
     return.64
 }
 
-.function void C.%%set-bar(C a0, i32 a1) <access.function=public> {
+.function void C.<set>bar(C a0, i32 a1) <access.function=public> {
     mov.obj v0, a0
     lda a1
     stobj v0, C.foo

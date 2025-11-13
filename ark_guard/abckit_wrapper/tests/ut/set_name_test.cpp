@@ -253,11 +253,11 @@ HWTEST_F(TestSetName, interface_set_name_001, TestSize.Level0)
  */
 HWTEST_F(TestSetName, interface_field_set_name_001, TestSize.Level0)
 {
-    const auto field = fileView.Get<abckit_wrapper::Field>("set_name_test.Interface4.%%property-field1");
+    const auto field = fileView.Get<abckit_wrapper::Field>("set_name_test.Interface4.<property>field1");
     ASSERT_TRUE(field.has_value());
 
     ASSERT_TRUE(field.value()->SetName("a"));
-    ASSERT_EQ(field.value()->GetName(), "%%property-a");
+    ASSERT_EQ(field.value()->GetName(), "<property>a");
 }
 
 /**

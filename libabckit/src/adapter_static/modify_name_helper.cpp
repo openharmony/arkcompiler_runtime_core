@@ -29,11 +29,11 @@ constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 constexpr std::string_view GLOBAL_CLASS = "ETSGLOBAL";
 constexpr std::string_view NAME_DELIMITER = ".";
 constexpr std::string_view FUNCTION_DELIMITER = ":";
-constexpr std::string_view INTERFACE_FIELD_PREFIX = "%%property-";
+constexpr std::string_view INTERFACE_FIELD_PREFIX = "<property>";
 constexpr std::string_view ASYNC_PATTERN = "(%%async-)(.+):(.+)";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
-constexpr std::string_view GETTER_PREFIX = "%%get-";
-constexpr std::string_view SETTER_PREFIX = "%%set-";
+constexpr std::string_view GETTER_PREFIX = "<get>";
+constexpr std::string_view SETTER_PREFIX = "<set>";
 
 std::string AddGetSetPrefix(const std::string &input, const std::string &name)
 {
@@ -48,12 +48,12 @@ std::string AddGetSetPrefix(const std::string &input, const std::string &name)
 
 std::string GetSetPattern(const std::string &name)
 {
-    return "%%([gs]et)-(" + name + "):(.+)";
+    return "<([gs]et)>(" + name + "):(.+)";
 }
 
 std::string GetSetReplace(const std::string &name)
 {
-    return "%%$1-" + name + ":$3";
+    return "<$1>" + name + ":$3";
 }
 
 std::string AsyncReplace(const std::string &name)
@@ -386,7 +386,7 @@ bool libabckit::ModifyNameHelper::FieldRefreshName(
                 return true;
             }
             std::string processNewName;
-            // if oldName is %%property-xxx and newName does not contain '%%property-' prefix, add '%%property-' to the
+            // if oldName is <property>xxx and newName does not contain '<property>' prefix, add '<property>' to the
             // beginning of newName
             if (oldName.find(INTERFACE_FIELD_PREFIX) == 0 && newName.find(INTERFACE_FIELD_PREFIX) != 0) {
                 processNewName.append(INTERFACE_FIELD_PREFIX).append(newName);

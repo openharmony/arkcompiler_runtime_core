@@ -123,56 +123,56 @@ HWTEST(MemberLinkerTest, member_linker_test_002, TestSize.Level1)
 
     // validate last member
     const auto field1SetterOfClassA = fileView.Get<abckit_wrapper::Method>(
-        "module_member_linker_field_test.ClassA.%%set-field1:module_member_linker_field_test.ClassA;i32;void;");
+        "module_member_linker_field_test.ClassA.<set>field1:module_member_linker_field_test.ClassA;i32;void;");
     ASSERT_TRUE(field1SetterOfClassA.has_value());
 
     // ClassA get field1
     ValidateLastMember<abckit_wrapper::Method>(
-        fileView, "module_member_linker_field_test.ClassA.%%get-field1:module_member_linker_field_test.ClassA;i32;",
+        fileView, "module_member_linker_field_test.ClassA.<get>field1:module_member_linker_field_test.ClassA;i32;",
         field1SetterOfClassA.value());
     // ClassA field1
-    ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.ClassA.%%property-field1",
+    ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.ClassA.<property>field1",
                                               field1SetterOfClassA.value());
     // Interface1 get field1
     ValidateLastMember<abckit_wrapper::Method>(
         fileView,
-        "module_member_linker_field_test.Interface1.%%get-field1:module_member_linker_field_test.Interface1;i32;",
+        "module_member_linker_field_test.Interface1.<get>field1:module_member_linker_field_test.Interface1;i32;",
         field1SetterOfClassA.value());
     // Interface1 set field1
     ValidateLastMember<abckit_wrapper::Method>(
         fileView,
-        "module_member_linker_field_test.Interface1.%%set-field1:module_member_linker_field_test.Interface1;i32;void;",
+        "module_member_linker_field_test.Interface1.<set>field1:module_member_linker_field_test.Interface1;i32;void;",
         field1SetterOfClassA.value());
     // Interface1 field1
-    ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.Interface1.%%property-field1",
+    ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.Interface1.<property>field1",
                                               field1SetterOfClassA.value());
 
     const auto field1OfClassC = fileView.Get<abckit_wrapper::Field>("module_member_linker_field_test.ClassC.field1");
     ASSERT_TRUE(field1OfClassC.has_value());
 
     // ClassB field1
-    ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.ClassB.%%property-field1",
+    ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.ClassB.<property>field1",
                                               field1OfClassC.value());
     // ClassB set field1
-    ValidateLastMember<abckit_wrapper::Method>(fileView,
-        "module_member_linker_field_test.ClassB.%%set-field1:module_member_linker_field_test.ClassB;i32;void;",
+    ValidateLastMember<abckit_wrapper::Method>(
+        fileView, "module_member_linker_field_test.ClassB.<set>field1:module_member_linker_field_test.ClassB;i32;void;",
         field1OfClassC.value());
     // ClassB get field1
     ValidateLastMember<abckit_wrapper::Method>(
-        fileView, "module_member_linker_field_test.ClassB.%%get-field1:module_member_linker_field_test.ClassB;i32;",
+        fileView, "module_member_linker_field_test.ClassB.<get>field1:module_member_linker_field_test.ClassB;i32;",
         field1OfClassC.value());
     // Interface2 field1
-    ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.Interface2.%%property-field1",
+    ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.Interface2.<property>field1",
                                               field1OfClassC.value());
     // Interface2 set field1
     ValidateLastMember<abckit_wrapper::Method>(
         fileView,
-        "module_member_linker_field_test.Interface2.%%set-field1:module_member_linker_field_test.Interface2;i32;void;",
+        "module_member_linker_field_test.Interface2.<set>field1:module_member_linker_field_test.Interface2;i32;void;",
         field1OfClassC.value());
     // Interface2 get field1
     ValidateLastMember<abckit_wrapper::Method>(
         fileView,
-        "module_member_linker_field_test.Interface2.%%get-field1:module_member_linker_field_test.Interface2;i32;",
+        "module_member_linker_field_test.Interface2.<get>field1:module_member_linker_field_test.Interface2;i32;",
         field1OfClassC.value());
 }
 
@@ -239,55 +239,55 @@ HWTEST(MemberLinkerTest, member_linker_test_004, TestSize.Level1)
 
     // validate last member
     const auto field1SetterOfClassA = fileView.Get<abckit_wrapper::Method>(
-        "ns_member_linker_field_test.Ns1.ClassA.%%set-field1:ns_member_linker_field_test.Ns1.ClassA;i32;void;");
+        "ns_member_linker_field_test.Ns1.ClassA.<set>field1:ns_member_linker_field_test.Ns1.ClassA;i32;void;");
     ASSERT_TRUE(field1SetterOfClassA.has_value());
 
     // ClassA get field1
     ValidateLastMember<abckit_wrapper::Method>(
-        fileView, "ns_member_linker_field_test.Ns1.ClassA.%%get-field1:ns_member_linker_field_test.Ns1.ClassA;i32;",
+        fileView, "ns_member_linker_field_test.Ns1.ClassA.<get>field1:ns_member_linker_field_test.Ns1.ClassA;i32;",
         field1SetterOfClassA.value());
     // ClassA field1
-    ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.ClassA.%%property-field1",
+    ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.ClassA.<property>field1",
                                               field1SetterOfClassA.value());
     // Interface1 get field1
     ValidateLastMember<abckit_wrapper::Method>(
         fileView,
-        "ns_member_linker_field_test.Ns1.Interface1.%%get-field1:ns_member_linker_field_test.Ns1.Interface1;i32;",
+        "ns_member_linker_field_test.Ns1.Interface1.<get>field1:ns_member_linker_field_test.Ns1.Interface1;i32;",
         field1SetterOfClassA.value());
     // Interface1 set field1
     ValidateLastMember<abckit_wrapper::Method>(
         fileView,
-        "ns_member_linker_field_test.Ns1.Interface1.%%set-field1:ns_member_linker_field_test.Ns1.Interface1;i32;void;",
+        "ns_member_linker_field_test.Ns1.Interface1.<set>field1:ns_member_linker_field_test.Ns1.Interface1;i32;void;",
         field1SetterOfClassA.value());
     // Interface1 field1
-    ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.Interface1.%%property-field1",
+    ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.Interface1.<property>field1",
                                               field1SetterOfClassA.value());
 
     const auto field1OfClassC = fileView.Get<abckit_wrapper::Field>("ns_member_linker_field_test.Ns1.ClassC.field1");
     ASSERT_TRUE(field1OfClassC.has_value());
 
     // ClassB field1
-    ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.ClassB.%%property-field1",
+    ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.ClassB.<property>field1",
                                               field1OfClassC.value());
     // ClassB set field1
-    ValidateLastMember<abckit_wrapper::Method>(fileView,
-        "ns_member_linker_field_test.Ns1.ClassB.%%set-field1:ns_member_linker_field_test.Ns1.ClassB;i32;void;",
+    ValidateLastMember<abckit_wrapper::Method>(
+        fileView, "ns_member_linker_field_test.Ns1.ClassB.<set>field1:ns_member_linker_field_test.Ns1.ClassB;i32;void;",
         field1OfClassC.value());
     // ClassB get field1
     ValidateLastMember<abckit_wrapper::Method>(
-        fileView, "ns_member_linker_field_test.Ns1.ClassB.%%get-field1:ns_member_linker_field_test.Ns1.ClassB;i32;",
+        fileView, "ns_member_linker_field_test.Ns1.ClassB.<get>field1:ns_member_linker_field_test.Ns1.ClassB;i32;",
         field1OfClassC.value());
     // Interface2 field1
-    ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.Interface2.%%property-field1",
+    ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.Interface2.<property>field1",
                                               field1OfClassC.value());
     // Interface2 set field1
     ValidateLastMember<abckit_wrapper::Method>(
         fileView,
-        "ns_member_linker_field_test.Ns1.Interface2.%%set-field1:ns_member_linker_field_test.Ns1.Interface2;i32;void;",
+        "ns_member_linker_field_test.Ns1.Interface2.<set>field1:ns_member_linker_field_test.Ns1.Interface2;i32;void;",
         field1OfClassC.value());
     // Interface2 get field1
     ValidateLastMember<abckit_wrapper::Method>(
         fileView,
-        "ns_member_linker_field_test.Ns1.Interface2.%%get-field1:ns_member_linker_field_test.Ns1.Interface2;i32;",
+        "ns_member_linker_field_test.Ns1.Interface2.<get>field1:ns_member_linker_field_test.Ns1.Interface2;i32;",
         field1OfClassC.value());
 }

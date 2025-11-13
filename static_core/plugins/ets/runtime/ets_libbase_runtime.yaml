@@ -770,7 +770,7 @@ intrinsics:
   - name: StdCoreStringLength
     space: ets
     class_name: std.core.String
-    method_name: \u0025\u0025get-length
+    method_name: <get>length
     static: false
     signature:
       ret: i32

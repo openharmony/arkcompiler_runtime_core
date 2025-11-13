@@ -31,7 +31,7 @@
     std.core.LinkerUnresolvedFieldError foo
 }
 
-.function std.core.LinkerUnresolvedFieldError A.%%get-baz(A a0) <access.function=public> {
+.function std.core.LinkerUnresolvedFieldError A.<get>baz(A a0) <access.function=public> {
     newobj v0, std.core.LinkerUnresolvedFieldError
     lda.str "42"
     stobj.obj v0, std.core.LinkerUnresolvedFieldError.message
@@ -39,7 +39,7 @@
     return.obj
 }
 
-.function void C.%%set-bar(C a0, std.core.Exception a1) <access.function=public> {
+.function void C.<set>bar(C a0, std.core.Exception a1) <access.function=public> {
     ldobj.v.obj v0, a0, C.foo
     ldobj.obj a1, std.core.Exception.message
     stobj.obj v0, std.core.LinkerUnresolvedFieldError.message

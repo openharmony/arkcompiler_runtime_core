@@ -129,8 +129,7 @@ TEST_F(ArrayManagedTest, GetLengthWithError)
     ASSERT_EQ(env_->GetUnhandledError(&pendingError), ANI_OK);
     ASSERT_EQ(env_->ResetError(), ANI_OK);
     ani_ref message {};
-    ASSERT_EQ(env_->Object_CallMethodByName_Ref(pendingError, "%%get-message", ":C{std.core.String}", &message),
-              ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(pendingError, "<get>message", ":C{std.core.String}", &message), ANI_OK);
     std::string messageStr;
     GetStdString(static_cast<ani_string>(message), messageStr);
     ASSERT_STREQ(messageStr.c_str(), "length was called");

@@ -30,7 +30,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetFieldsStatic)
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static.abc");
 
     std::set<std::string> gotFieldNames;
-    std::set<std::string> expectFieldNames = {"f1", "f2", "%%property-i1F1"};
+    std::set<std::string> expectFieldNames = {"f1", "f2", "<property>i1F1"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
