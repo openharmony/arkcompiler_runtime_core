@@ -13,23 +13,25 @@
  * limitations under the License.
  */
 
-export let magicBoolean: boolean = false;
-export let magicByte: byte = 24;
-export let magicChar: char = c'h';
-export let magicShort: short = 124;
-export let magicInt: int = 15;
-export let magicLong: long = 102400;
-export let magicFloat: float = 3.14f
-export let magicDouble: double = 3.1415926
-export let magicString1: string = 'Hello World';
-export let magicString2: string = 'Hello World!!!';
+export namespace Unwrap {
+    export let magicBoolean: boolean = false;
+    export let magicByte: byte = 24;
+    export let magicChar: char = c'h';
+    export let magicShort: short = 124;
+    export let magicInt: int = 15;
+    export let magicLong: long = 102400;
+    export let magicFloat: float = 3.14f
+    export let magicDouble: double = 3.1415926
+    export let magicString1: string = 'Hello World';
+    export let magicString2: string = 'Hello World!!!';
 
-/*
- * toBigIntTest
- */
-export let defaultNumber: int = 42;
-export let bigIntFromString: bigint = BigInt('999999999999999999');
-export let bigIntFromLiteral: bigint = 123456789012345678901234567890n;
-export let stringVariable: string = 'Hello, World!';
-export let zeroBigInt: bigint = 0n;
-export let negativeBigInt: bigint = -1234567890123456789n;
+    /*
+    * toBigIntTest
+    */
+    export let defaultNumber: int = 42;
+    export let bigIntFromString: bigint = BigInt('999999999999999999');
+    export let bigIntFromLiteral: bigint = 123456789012345678901234567890n;
+    export let stringVariable: string = 'Hello, World!';
+    export let zeroBigInt: bigint = 0n;
+    export let negativeBigInt: bigint = -1234567890123456789n;
+}

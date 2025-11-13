@@ -16,52 +16,40 @@
 const etsVm = globalThis.gtest.etsVm;
 
 let STValue = etsVm.STValue;
-let module = STValue.findModule('stvalue_wrap');
 const epsilon = 1e-5;
 let stvalueWrap;
-enum SType {
-    BOOLEAN,
-    CHAR,
-    BYTE,
-    SHORT,
-    INT,
-    LONG,
-    FLOAT,
-    DOUBLE,
-    REFERENCE,
-    VOID
-};
+let SType = etsVm.SType;
 
 function testWrapByte(): void {
     stvalueWrap = STValue.wrapByte(1);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == 1); // ASCII code for '1'
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === 1); // ASCII code for '1'
 }
 
 function testWrapChar(): void {
     stvalueWrap = STValue.wrapChar('1');
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == 49); // ASCII code for '1'
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === 49); // ASCII code for '1'
 }
 
 function testWrapShort(): void {
     stvalueWrap = STValue.wrapShort(32767);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == 32767);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === 32767);
 
     stvalueWrap = STValue.wrapShort(-32768);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == -32768);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === -32768);
 }
 
 function testWrapInt(): void {
     let test_value: number = 44;
     let stvalueWrap = STValue.wrapInt(test_value);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == test_value);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === test_value);
 
     const MAX_INT = 2147483647;
     stvalueWrap = STValue.wrapInt(MAX_INT);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == MAX_INT);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === MAX_INT);
 
     const MIN_INT = -2147483648;
     stvalueWrap = STValue.wrapInt(MIN_INT);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == MIN_INT);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === MIN_INT);
 
     const OVER_MAX_INT = 2147483648;
     let overMaxIntErrorHappen: boolean = false;
@@ -85,15 +73,15 @@ function testWrapInt(): void {
 function testWrapLongWithNumberInput(): void {
     let test_value: number = 44;
     let stvalueWrap = STValue.wrapLong(test_value);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == test_value);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === test_value);
 
     const MAX_SAFE_LONG = Number.MAX_SAFE_INTEGER;
     stvalueWrap = STValue.wrapLong(MAX_SAFE_LONG);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == MAX_SAFE_LONG);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === MAX_SAFE_LONG);
 
     const MIN_SAFE_LONG = Number.MIN_SAFE_INTEGER;
     stvalueWrap = STValue.wrapLong(MIN_SAFE_LONG);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == MIN_SAFE_LONG);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === MIN_SAFE_LONG);
 
     /*
     const OVER_MAX_LONG = MAX_SAFE_LONG + 1;
@@ -119,7 +107,7 @@ function testWrapLongWithNumberInput(): void {
 function testWrapLongWithBigIntInput(): void {
     let test_value = 44n;
     let stvalueWrap = STValue.wrapLong(test_value);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == Number(test_value));
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === Number(test_value));
 
     const longKlass = STValue.findClass("std.core.Long");
 
@@ -129,13 +117,13 @@ function testWrapLongWithBigIntInput(): void {
     let res = value.objectInvokeMethod('toString', ':C{std.core.String}', [value]);
     print("res.unwrapToString() = " + res.unwrapToString());
     print("MAX_LONG.toString() = " + MAX_LONG.toString());
-    ASSERT_TRUE(res.unwrapToString() == MAX_LONG.toString());
+    ASSERT_TRUE(res.unwrapToString() === MAX_LONG.toString());
 
     const MIN_LONG = -(1n << 63n);
     stvalueWrap = STValue.wrapLong(MIN_LONG);
-    value =longKlass.classInstantiate('l:', [stvalueWrap]);
+    value = longKlass.classInstantiate('l:', [stvalueWrap]);
     res = value.objectInvokeMethod('toString', ':C{std.core.String}', [value]);
-    ASSERT_TRUE(res.unwrapToString() == MIN_LONG.toString());
+    ASSERT_TRUE(res.unwrapToString() === MIN_LONG.toString());
 
     const OVER_MAX_LONG = MAX_LONG + 1n;
     let overMaxLongErrorHappen: boolean = false;
@@ -172,11 +160,11 @@ function testWrapFloat(): void {
 
     const P_INF = Number.POSITIVE_INFINITY;
     stvalueWrap = STValue.wrapFloat(P_INF);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == P_INF);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === P_INF);
 
     const N_INF = Number.NEGATIVE_INFINITY;
     stvalueWrap = STValue.wrapFloat(N_INF);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == N_INF);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === N_INF);
 }
 
 function testWrapNumber(): void {
@@ -189,26 +177,26 @@ function testWrapNumber(): void {
 
     const P_INF = Number.POSITIVE_INFINITY;
     stvalueWrap = STValue.wrapNumber(P_INF);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == P_INF);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === P_INF);
 
     const N_INF = Number.NEGATIVE_INFINITY;
     stvalueWrap = STValue.wrapNumber(N_INF);
-    ASSERT_TRUE(stvalueWrap.unwrapToNumber() == N_INF);
+    ASSERT_TRUE(stvalueWrap.unwrapToNumber() === N_INF);
 }
 
 function testWrapString(): void {
     stvalueWrap = STValue.wrapString('magicString1');
-    ASSERT_TRUE(stvalueWrap.unwrapToString() == 'magicString1');
+    ASSERT_TRUE(stvalueWrap.unwrapToString() === 'magicString1');
 }
 
 function testWrapBoolean(): void {
     stvalueWrap = STValue.wrapBoolean(true);
-    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() == true);
+    ASSERT_TRUE(stvalueWrap.unwrapToBoolean() === true);
 }
 
 function testWrapBigInt(): void {
     stvalueWrap = STValue.wrapBigInt(1234567890123456789n);
-    ASSERT_TRUE(stvalueWrap.unwrapToBigInt() == 1234567890123456789n);
+    ASSERT_TRUE(stvalueWrap.unwrapToBigInt() === 1234567890123456789n);
 }
 
 function testGetNull(): void {

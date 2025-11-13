@@ -204,7 +204,7 @@ napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info in
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &arrLength));
 
     STValueData *typeData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[1]));
-    if (typeData == nullptr || !typeData->IsAniRef()) {
+    if (typeData == nullptr || !typeData->IsAniRef() || typeData->IsAniNullOrUndefined(env)) {
         ThrowJSNonObjectError(env, "elementType");
         return nullptr;
     }

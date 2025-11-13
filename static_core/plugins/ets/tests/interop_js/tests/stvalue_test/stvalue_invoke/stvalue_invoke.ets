@@ -75,9 +75,7 @@ export class SubStudent extends Student {
     }
 }
 
-export let getNumberFn = () => { return 123; }
 
-export let getSumFn = (n1: number, n2: number) => { return n1 + n2; }
 
 // boolean type
 export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {
@@ -188,6 +186,10 @@ export function VoidEmptyInvoke() {
 }
 
 export namespace Invoke {
+
+    export let getNumberFn = () => { return 123; }
+
+    export let getSumFn = (n1: number, n2: number) => { return n1 + n2; }
 
     // boolean type
     export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean {

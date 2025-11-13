@@ -26,7 +26,6 @@
 
 namespace ark::ets::interop::js {
 
-napi_value STValueModuleInvokeFunctionImpl(napi_env env, napi_callback_info info);
 napi_value STValueNamespaceInvokeFunctionImpl(napi_env env, napi_callback_info info);
 napi_value STValueFunctionalObjectInvokeImpl(napi_env env, napi_callback_info info);
 napi_value STValueObjectInvokeMethodImpl(napi_env env, napi_callback_info info);
@@ -70,9 +69,7 @@ napi_value STValueObjectInstanceOfImpl(napi_env env, napi_callback_info info);
 napi_value ClassGetSuperClassImpl(napi_env env, napi_callback_info info);
 napi_value FixedArrayGetLengthImpl(napi_env env, napi_callback_info info);
 napi_value EnumGetIndexByNameImpl(napi_env env, napi_callback_info info);
-napi_value EnumGetNameByIndexImpl(napi_env env, napi_callback_info info);
 napi_value EnumGetValueByNameImpl(napi_env env, napi_callback_info info);
-napi_value EnumGetValueByIndexImpl(napi_env env, napi_callback_info info);
 napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info);
 napi_value ClassSetStaticFieldImpl(napi_env env, napi_callback_info info);
 napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info);
@@ -80,11 +77,8 @@ napi_value ObjectSetPropertyImpl(napi_env env, napi_callback_info info);
 napi_value STValueObjectGetTypeImpl(napi_env env, napi_callback_info info);
 napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info);
 napi_value FixedArraySetImpl(napi_env env, napi_callback_info info);
-napi_value STValueModuleGetVariableImpl(napi_env env, napi_callback_info info);
-napi_value STValueModuleSetVariableImpl(napi_env env, napi_callback_info info);
 napi_value STValueNamespaceGetVariableImpl(napi_env env, napi_callback_info info);
 napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info);
-napi_value STValueFindModuleImpl(napi_env env, napi_callback_info info);
 napi_value STValueFindClassImpl(napi_env env, napi_callback_info info);
 napi_value STValueFindNamespaceImpl(napi_env env, napi_callback_info info);
 napi_value STValueFindEnumImpl(napi_env env, napi_callback_info info);
