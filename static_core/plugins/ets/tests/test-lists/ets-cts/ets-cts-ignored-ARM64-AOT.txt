@@ -1,2 +1,0 @@
-#29205 Instanceof result on INT is different from AOT and JIT-with-repeats
-15.semantic_rules/11.type_erasure/instanceof_negative_15.ets
