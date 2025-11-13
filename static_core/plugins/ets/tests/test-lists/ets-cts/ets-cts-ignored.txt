@@ -2157,6 +2157,9 @@
 #30813 No CTE for lambda body without return statement
 07.expressions/32.lambda_expression/02.lambda_body/negative_2.ets
 
+#30786
+07.expressions/32.lambda_expression/04.runtime_evaluation_of_lambda_expressions/lambda_instance_type_15.ets
+
 #25111
 17.experimental_features/02.fixed_array_types/far3_0.ets
 17.experimental_features/02.fixed_array_types/far3_1.ets
