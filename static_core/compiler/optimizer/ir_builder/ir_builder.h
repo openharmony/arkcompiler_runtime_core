@@ -133,12 +133,6 @@ private:
 
     bool CheckMethodLimitations(const BytecodeInstructions &instructions, size_t vregsCount);
     void BuildBasicBlocks(const BytecodeInstructions &instructions);
-    bool CreateSaveStateForLoopBlocks(BasicBlock *bb);
-    bool BuildBasicBlock(BasicBlock *bb, const uint8_t *instructionsBuf);
-    template <bool NEED_SS_DEOPT>
-    bool AddInstructionToBB(BasicBlock *bb, BytecodeInstruction &inst, size_t pc, bool *ssDeoptWasBuilded);
-    template <bool NEED_SS_DEOPT>
-    bool BuildInstructionsForBB(BasicBlock *bb, const uint8_t *instructionsBuf);
     void SplitConstant(ConstantInst *constInst);
     void ConnectBasicBlocks(const BytecodeInstructions &instructions);
     void CreateTryCatchBoundariesBlocks();
@@ -154,26 +148,25 @@ private:
     void EnumerateTryBlocksCoveredPc(uint32_t pc, const Callback &callback);
     void SetMemoryBarrierFlag();
     void ConnectTryCodeBlock(const TryCodeBlock &tryBlock, const ArenaMap<uint32_t, BasicBlock *> &catchBlocks);
-    void ProcessThrowableInstructions(Inst *throwableInst);
     void RestoreTryEnd(const TryCodeBlock &tryBlock);
     uint32_t FindCatchBlockInPandaFile(Class *cls, uint32_t pc) const;
     void ConnectThrowBlock(BasicBlock *throwBlock, const TryCodeBlock &tryBlock);
     void ConnectThrowBlocks();
-    bool BuildIrImpl(size_t vregsCount);
+
+    bool CreateSaveStateForLoopBlocks(InstBuilder &instBuilder, BasicBlock *bb);
+    bool BuildBasicBlock(InstBuilder &instBuilder, BasicBlock *bb, const uint8_t *instructionsBuf);
+    template <bool NEED_SS_DEOPT>
+    bool AddInstructionToBB(InstBuilder &instBuilder, BasicBlock *bb, BytecodeInstruction &inst, size_t pc,
+                            bool *ssDeoptWasBuilded);
+    template <bool NEED_SS_DEOPT>
+    bool BuildInstructionsForBB(InstBuilder &instBuilder, BasicBlock *bb, const uint8_t *instructionsBuf);
+    void ProcessThrowableInstructions(InstBuilder &instBuilder, Inst *throwableInst);
+    bool BuildIrImpl(InstBuilder &instBuilder, size_t vregsCount);
     bool BuildIr(size_t vregsCount);
+
     RuntimeInterface::ClassPtr FindExceptionClass(BasicBlock *throwBlock, int32_t *throwPc);
     bool FindAppropriateCatchBlock(const TryCodeBlock &tryBlock, BasicBlock *throwBlock, uint32_t catchPc);
     BasicBlock *FindCatchBegin(BasicBlock *bb);
-
-    void SetInstBuilder(InstBuilder *instBuilder)
-    {
-        instBuilder_ = instBuilder;
-        instBuilder_->Prepare(isInlinedGraph_);
-    }
-    InstBuilder *GetInstBuilder() const
-    {
-        return instBuilder_;
-    }
 
 private:
     ArenaVector<BasicBlock *> blocks_;
@@ -186,7 +179,6 @@ private:
     bool isInlinedGraph_ {false};
     CallInst *callerInst_ {nullptr};
     uint32_t inliningDepth_ {0};
-    InstBuilder *instBuilder_ {nullptr};
 };
 
 class IrBuilderInliningAnalysis : public Analysis {

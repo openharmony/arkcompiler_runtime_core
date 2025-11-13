@@ -42,7 +42,7 @@ public:
 
     NO_COPY_SEMANTIC(InstBuilder);
     NO_MOVE_SEMANTIC(InstBuilder);
-    ~InstBuilder()
+    virtual ~InstBuilder()
     {
         GetGraph()->EraseMarker(noTypeMarker_);
         GetGraph()->EraseMarker(visitedBlockMarker_);
