@@ -1,5 +1,5 @@
-# NOTE #28944
+#28944
 simple_run/llvm_infer_flags.ets
 
-# NOTE #24986
+#24986
 simple_run/optimize_load_object_boxed.ets

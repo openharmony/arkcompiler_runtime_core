@@ -23,10 +23,10 @@ ets-common-tests/atomics/base_operation_sub.ets
 #31104
 ets-common-tests/atomics/base_operation_or.ets
 
-#30136
+#31166
 ets-common-tests/atomics/base_operation_xor.ets
 
-#30897
+#31210
 ets-common-tests/atomics/base_operation_load.ets
 ets-common-tests/atomics/base_operation_compare_exchange.ets
 ets-common-tests/taskpool/long_task.ets
