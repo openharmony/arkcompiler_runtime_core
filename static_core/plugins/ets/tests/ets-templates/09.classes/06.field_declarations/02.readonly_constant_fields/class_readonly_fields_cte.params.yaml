@@ -608,3 +608,45 @@ cases:
         class A {
           readonly field: C
         }
+
+  - desc: |-
+      >-
+        Checking on field has an initializer and is
+        assigned in the constructor with optional parameter.
+    decl_variants:
+      - |-
+        class A {
+          readonly field: int = 3
+          constructor (v: int = 5) {
+            if (v == 5) {
+              this.field = v  // CTE: Changing the value of a readonly field after initialization is not allowed
+            }
+          }
+        }
+
+  - desc: |-
+      >-
+        Checking on field has an initializer and is
+        assigned in the constructor without parameters.
+    decl_variants:
+      - |-
+        class A {
+          readonly field: int = 3
+          constructor () {
+            this.field = 5  // CTE: Changing the value of a readonly field after initialization is not allowed
+          }
+        }
+
+  - desc: |-
+      >-
+        Checking on field has an initializer and is
+        assigned in the constructor.
+    decl_variants:
+      - |-
+        class C {readonly data: int = 0}
+        class A {
+          readonly field: C = {data: 0}
+          constructor () {
+            this.field = {data: 5}  // CTE: Changing the value of a readonly field after initialization is not allowed
+          }
+        }
