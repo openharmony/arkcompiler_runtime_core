@@ -43,7 +43,7 @@ class Tool(ToolBase):
         name = bu.src('.abc').with_suffix('').name
         bu_path = bu.path if self.target == Target.HOST \
             else bu.device_path
-        aot = f'--aot-file={name} ' if OptFlags.AOT in self.flags else ''
+        aot = f'--aot-file={name} ' if OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags else ''
         res = self.x_run(
             f'{self.ark_js_vm} --entry-point={name} '
             f'--open-ark-tools=true '
