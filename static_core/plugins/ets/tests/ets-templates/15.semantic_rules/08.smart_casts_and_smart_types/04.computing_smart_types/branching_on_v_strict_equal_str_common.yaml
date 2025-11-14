@@ -1,0 +1,261 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # Note: each 'check_variant_decl_data'
+  # define different types A and related to them check values for check
+  # branching on "v === str" (string literal) where A is type of v variable
+  # ("v === StrLit1" and "v === StrLit2")
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v === str"
+      // ("v === StrLit1" and "v === StrLit2")
+      type A = "123" | "1234" | byte
+      // StrLit1: "123"
+      // StrLit2: "1234"
+
+      // type A - StrLit1 is computed smart type on the negative branch
+      // after branching on "v === StrLit1"
+      type A_diff_StrLit1 = "1234" | byte
+
+      // type A - StrLit1 - StrLit2 is computed smart type on the negative branch
+      // after branching on "v === StrLit1" and "v === StrLit2"
+      // (branch where: v !== StrLit1 && v !== StrLit2)
+      type A_diff_StrLit1_StrLit2 = byte
+
+      // VarType is type of v variable after branching on "v === str":
+      // on positive branch where: "v === StrLit1",
+      // on positive branch where: "v === StrLit2",
+      // on negative branch where: "v !== StrLit1 && v !== StrLit2"
+      // for example: branching in "if/else if/else"
+      enum VarType {StrLit1, StrLit2, A_diff_StrLit1_StrLit2}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        ["123", VarType.StrLit1],
+        ["1234", VarType.StrLit2],
+        [15 as byte, VarType.A_diff_StrLit1_StrLit2] ]
+      const check_values_number: int = 3
+    StrLit1: "\"123\""
+    StrLit2: "\"1234\""
+    check_value_by_expression_on_the_positive_branch_StrLit1:
+      "arktest.assertEQ(v.length, 3)"
+    check_value_by_expression_on_the_positive_branch_StrLit2:
+      "arktest.assertEQ(v.length, 4)"
+    check_value_by_expression_on_the_negative_branch_StrLit1_StrLit2:
+      "arktest.assertEQ(v.toInt(), 15)"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v === str"
+      // ("v === StrLit1" and "v === StrLit2")
+      type A = long | int | byte | "123" | "1234" | "12345" | short |
+        double | float | boolean | bigint | char | null | undefined
+      // StrLit1: "123"
+      // StrLit2: "1234"
+
+      // type A - StrLit1 is computed smart type on the negative branch
+      // after branching on "v === StrLit1"
+      type A_diff_StrLit1 = long | int | byte | "1234" | "12345" | short |
+        double | float | boolean | bigint | char | null | undefined
+
+      // type A - StrLit1 - StrLit2 is computed smart type on the negative branch
+      // after branching on "v === StrLit1" and "v === StrLit2"
+      // (branch where: v !== StrLit1 && v !== StrLit2)
+      type A_diff_StrLit1_StrLit2 = long | int | byte | "12345" | short |
+        double | float | boolean | bigint | char | null | undefined
+
+      // VarType is type of v variable after branching on "v === str":
+      // on positive branch where: "v === StrLit1",
+      // on positive branch where: "v === StrLit2",
+      // on negative branch where: "v !== StrLit1 && v !== StrLit2"
+      // for example: branching in "if/else if/else"
+      enum VarType {StrLit1, StrLit2, A_diff_StrLit1_StrLit2}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        ["123", VarType.StrLit1],
+        ["1234", VarType.StrLit2],
+        ["12345", VarType.A_diff_StrLit1_StrLit2],
+        [0x7FFF_FFFF_1, VarType.A_diff_StrLit1_StrLit2],
+        [123, VarType.A_diff_StrLit1_StrLit2],
+        [15 as byte, VarType.A_diff_StrLit1_StrLit2],
+        [517 as short, VarType.A_diff_StrLit1_StrLit2],
+        [4.59, VarType.A_diff_StrLit1_StrLit2],
+        [17.8f, VarType.A_diff_StrLit1_StrLit2],
+        [true, VarType.A_diff_StrLit1_StrLit2],
+        [567n, VarType.A_diff_StrLit1_StrLit2],
+        [c'a', VarType.A_diff_StrLit1_StrLit2],
+        [null, VarType.A_diff_StrLit1_StrLit2],
+        [undefined, VarType.A_diff_StrLit1_StrLit2] ]
+      const check_values_number: int = 14
+    StrLit1: "\"123\""
+    StrLit2: "\"1234\""
+    check_value_by_expression_on_the_positive_branch_StrLit1:
+      "arktest.assertEQ(v.length, 3)"
+    check_value_by_expression_on_the_positive_branch_StrLit2:
+      "arktest.assertEQ(v.length, 4)"
+    check_value_by_expression_on_the_negative_branch_StrLit1_StrLit2:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v === str"
+      // ("v === StrLit1" and "v === StrLit2")
+      type A = string
+      // StrLit1: "123"
+      // StrLit2: "1234"
+
+      // type A - StrLit1 is computed smart type on the negative branch
+      // after branching on "v === StrLit1"
+      type A_diff_StrLit1 = string // nearest supertype for A - StrLit1
+
+      // type A - StrLit1 - StrLit2 is computed smart type on the negative branch
+      // after branching on "v === StrLit1" and "v === StrLit2"
+      // (branch where: v !== StrLit1 && v !== StrLit2)
+      type A_diff_StrLit1_StrLit2 = string // nearest supertype for A - StrLit1 - StrLit2
+
+      // VarType is type of v variable after branching on "v === str":
+      // on positive branch where: "v === StrLit1",
+      // on positive branch where: "v === StrLit2",
+      // on negative branch where: "v !== StrLit1 && v !== StrLit2"
+      // for example: branching in "if/else if/else"
+      enum VarType {StrLit1, StrLit2, A_diff_StrLit1_StrLit2}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        ["123", VarType.StrLit1],
+        ["1234", VarType.StrLit2],
+        ["12345", VarType.A_diff_StrLit1_StrLit2] ]
+      const check_values_number: int = 3
+    StrLit1: "\"123\""
+    StrLit2: "\"1234\""
+    check_value_by_expression_on_the_positive_branch_StrLit1:
+      "arktest.assertEQ(v.length, 3)"
+    check_value_by_expression_on_the_positive_branch_StrLit2:
+      "arktest.assertEQ(v.length, 4)"
+    check_value_by_expression_on_the_negative_branch_StrLit1_StrLit2:
+      "arktest.assertEQ(v.length, 5)"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v === str"
+      // ("v === StrLit1" and "v === StrLit2")
+      type A = Object
+      // StrLit1: "123"
+      // StrLit2: "1234"
+
+      // type A - StrLit1 is computed smart type on the negative branch
+      // after branching on "v === StrLit1"
+      type A_diff_StrLit1 = Object // nearest supertype for A - StrLit1
+
+      // type A - StrLit1 - StrLit2 is computed smart type on the negative branch
+      // after branching on "v === StrLit1" and "v === StrLit2"
+      // (branch where: v !== StrLit1 && v !== StrLit2)
+      type A_diff_StrLit1_StrLit2 = Object // nearest supertype for A - StrLit1 - StrLit2
+
+      // VarType is type of v variable after branching on "v === str":
+      // on positive branch where: "v === StrLit1",
+      // on positive branch where: "v === StrLit2",
+      // on negative branch where: "v !== StrLit1 && v !== StrLit2"
+      // for example: branching in "if/else if/else"
+      enum VarType {StrLit1, StrLit2, A_diff_StrLit1_StrLit2}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        ["123", VarType.StrLit1],
+        ["1234", VarType.StrLit2],
+        ["12345", VarType.A_diff_StrLit1_StrLit2],
+        [0x7FFF_FFFF_1, VarType.A_diff_StrLit1_StrLit2],
+        [123, VarType.A_diff_StrLit1_StrLit2],
+        [15 as byte, VarType.A_diff_StrLit1_StrLit2],
+        [517 as short, VarType.A_diff_StrLit1_StrLit2],
+        [4.59, VarType.A_diff_StrLit1_StrLit2],
+        [17.8f, VarType.A_diff_StrLit1_StrLit2],
+        [true, VarType.A_diff_StrLit1_StrLit2],
+        [567n, VarType.A_diff_StrLit1_StrLit2],
+        [c'a', VarType.A_diff_StrLit1_StrLit2] ]
+      const check_values_number: int = 12
+    StrLit1: "\"123\""
+    StrLit2: "\"1234\""
+    check_value_by_expression_on_the_positive_branch_StrLit1:
+      "arktest.assertEQ(v.length, 3)"
+    check_value_by_expression_on_the_positive_branch_StrLit2:
+      "arktest.assertEQ(v.length, 4)"
+    check_value_by_expression_on_the_negative_branch_StrLit1_StrLit2:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v === str"
+      // ("v === StrLit1" and "v === StrLit2")
+      type A = Any
+      // StrLit1: "123"
+      // StrLit2: "1234"
+
+      // type A - StrLit1 is computed smart type on the negative branch
+      // after branching on "v === StrLit1"
+      type A_diff_StrLit1 = Any // nearest supertype for A - StrLit1
+
+      // type A - StrLit1 - StrLit2 is computed smart type on the negative branch
+      // after branching on "v === StrLit1" and "v === StrLit2"
+      // (branch where: v !== StrLit1 && v !== StrLit2)
+      type A_diff_StrLit1_StrLit2 = Any // nearest supertype for A - StrLit1 - StrLit2
+
+      // VarType is type of v variable after branching on "v === str":
+      // on positive branch where: "v === StrLit1",
+      // on positive branch where: "v === StrLit2",
+      // on negative branch where: "v !== StrLit1 && v !== StrLit2"
+      // for example: branching in "if/else if/else"
+      enum VarType {StrLit1, StrLit2, A_diff_StrLit1_StrLit2}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        ["123", VarType.StrLit1],
+        ["1234", VarType.StrLit2],
+        ["12345", VarType.A_diff_StrLit1_StrLit2],
+        [0x7FFF_FFFF_1, VarType.A_diff_StrLit1_StrLit2],
+        [123, VarType.A_diff_StrLit1_StrLit2],
+        [15 as byte, VarType.A_diff_StrLit1_StrLit2],
+        [517 as short, VarType.A_diff_StrLit1_StrLit2],
+        [4.59, VarType.A_diff_StrLit1_StrLit2],
+        [17.8f, VarType.A_diff_StrLit1_StrLit2],
+        [true, VarType.A_diff_StrLit1_StrLit2],
+        [567n, VarType.A_diff_StrLit1_StrLit2],
+        [c'a', VarType.A_diff_StrLit1_StrLit2],
+        [null, VarType.A_diff_StrLit1_StrLit2],
+        [undefined, VarType.A_diff_StrLit1_StrLit2] ]
+      const check_values_number: int = 14
+    StrLit1: "\"123\""
+    StrLit2: "\"1234\""
+    check_value_by_expression_on_the_positive_branch_StrLit1:
+      "arktest.assertEQ(v.length, 3)"
+    check_value_by_expression_on_the_positive_branch_StrLit2:
+      "arktest.assertEQ(v.length, 4)"
+    check_value_by_expression_on_the_negative_branch_StrLit1_StrLit2:
+      "arktest.assertEQ(v, check_values[v_id][0])"

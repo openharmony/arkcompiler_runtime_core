@@ -1,0 +1,188 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # Note: each 'check_variant_decl_data'
+  # define different types A and related to them check values for check
+  # branching on "v == undefined" where A is type of v variable
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v == undefined"
+      type A = string | null
+
+      // type EqualUndefined is null | undefined
+
+      // type A & EqualUndefined is computed smart type on the positive branch
+      // after branching on "v == undefined"
+      type A_inter_EqualUndefined = null
+
+      // type A - EqualUndefined is computed smart type on the negative branch
+      // after branching on "v == undefined"
+      type A_diff_EqualUndefined = string
+
+      // VarType is type of v variable after branching on
+      // "v == undefined": on positive branch, on negative branch
+      enum VarType {A_inter_EqualUndefined, A_diff_EqualUndefined}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [null, VarType.A_inter_EqualUndefined],
+        ["abc", VarType.A_diff_EqualUndefined] ]
+      const check_values_number: int = 2
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v.length, 3)"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v == undefined"
+      type A = string | undefined
+
+      // type EqualUndefined is null | undefined
+
+      // type A & EqualUndefined is computed smart type on the positive branch
+      // after branching on "v == undefined"
+      type A_inter_EqualUndefined = undefined
+
+      // type A - EqualUndefined is computed smart type on the negative branch
+      // after branching on "v == undefined"
+      type A_diff_EqualUndefined = string
+
+      // VarType is type of v variable after branching on
+      // "v == undefined": on positive branch, on negative branch
+      enum VarType {A_inter_EqualUndefined, A_diff_EqualUndefined}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [undefined, VarType.A_inter_EqualUndefined],
+        ["abc", VarType.A_diff_EqualUndefined] ]
+      const check_values_number: int = 2
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v.length, 3)"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v == undefined"
+      type A = long | int | byte | short | double | float | null |
+        boolean | bigint | char | string | undefined
+
+      // type EqualUndefined is null | undefined
+
+      // type A & EqualUndefined is computed smart type on the positive branch
+      // after branching on "v == undefined"
+      type A_inter_EqualUndefined = null | undefined
+
+      // type A - EqualUndefined is computed smart type on the negative branch
+      // after branching on "v == undefined"
+      type A_diff_EqualUndefined = long | int | byte | short | double | float |
+        boolean | bigint | char | string
+
+      // VarType is type of v variable after branching on
+      // "v == undefined": on positive branch, on negative branch
+      enum VarType {A_inter_EqualUndefined, A_diff_EqualUndefined}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [null, VarType.A_inter_EqualUndefined],
+        [undefined, VarType.A_inter_EqualUndefined],
+        [0x7FFF_FFFF_1, VarType.A_diff_EqualUndefined],
+        [123, VarType.A_diff_EqualUndefined],
+        [15 as byte, VarType.A_diff_EqualUndefined],
+        [517 as short, VarType.A_diff_EqualUndefined],
+        [4.59, VarType.A_diff_EqualUndefined],
+        [17.8f, VarType.A_diff_EqualUndefined],
+        [true, VarType.A_diff_EqualUndefined],
+        [567n, VarType.A_diff_EqualUndefined],
+        [c'a', VarType.A_diff_EqualUndefined],
+        ["abc",VarType.A_diff_EqualUndefined] ]
+      const check_values_number: int = 12
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v == undefined"
+      type A = Object | null | undefined
+
+      // type EqualUndefined is null | undefined
+
+      // type A & EqualUndefined is computed smart type on the positive branch
+      // after branching on "v == undefined"
+      type A_inter_EqualUndefined = null | undefined
+
+      // type A - EqualUndefined is computed smart type on the negative branch
+      // after branching on "v == undefined"
+      type A_diff_EqualUndefined = Object
+
+      // VarType is type of v variable after branching on
+      // "v == undefined": on positive branch, on negative branch
+      enum VarType {A_inter_EqualUndefined, A_diff_EqualUndefined}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [undefined, VarType.A_inter_EqualUndefined],
+        [null, VarType.A_inter_EqualUndefined],
+        ["abc", VarType.A_diff_EqualUndefined],
+        [123, VarType.A_diff_EqualUndefined],
+        [567n, VarType.A_diff_EqualUndefined],
+        [17.8f, VarType.A_diff_EqualUndefined],
+        [c'a', VarType.A_diff_EqualUndefined] ]
+      const check_values_number: int = 7
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v == undefined"
+      type A = Any
+
+      // type EqualUndefined is null | undefined
+
+      // type A & EqualUndefined is computed smart type on the positive branch
+      // after branching on "v == undefined"
+      type A_inter_EqualUndefined = null | undefined
+
+      // type A - EqualUndefined is computed smart type on the negative branch
+      // after branching on "v == undefined"
+      type A_diff_EqualUndefined = Any // nearest supertype for A - EqualUndefined
+
+      // VarType is type of v variable after branching on
+      // "v == undefined": on positive branch, on negative branch
+      enum VarType {A_inter_EqualUndefined, A_diff_EqualUndefined}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [undefined, VarType.A_inter_EqualUndefined],
+        [null, VarType.A_inter_EqualUndefined],
+        ["abc", VarType.A_diff_EqualUndefined],
+        [123, VarType.A_diff_EqualUndefined],
+        [567n, VarType.A_diff_EqualUndefined],
+        [17.8f, VarType.A_diff_EqualUndefined],
+        [c'a', VarType.A_diff_EqualUndefined] ]
+      const check_values_number: int = 7
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
