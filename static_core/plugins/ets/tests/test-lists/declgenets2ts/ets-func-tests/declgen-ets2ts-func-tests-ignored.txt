@@ -162,7 +162,6 @@ std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_concurrent_se
 std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_concurrent_set_test.ets
 std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_fails.ets
 std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_not_concurrent_tests.ets
-#28370
 std/core/ArrayTypeAllTests.ets
 std/core/ClassTypeAllTests.ets
 std/core/FunctionTypeAllTests.ets
@@ -179,7 +178,6 @@ std/core/VoidTypeAllTests.ets
 std/core/IntlListFormatTest.ets
 std/core/IntlNumberFormatToParts.ets
 std/core/IntlPluralRulesTest.ets
-#28370
 std/core/FieldAllTests.ets
 std/core/MethodAllTests.ets
 std/core/MirrorClassAllTests.ets

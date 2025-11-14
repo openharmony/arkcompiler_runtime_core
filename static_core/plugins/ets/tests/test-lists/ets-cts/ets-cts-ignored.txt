@@ -16,7 +16,7 @@
 02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
 02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
 
-#28320 CTE in the spec example 3.11
+#615 3.11 Type void inconsistency
 03.types/11.type_void/generic_void_2.ets
 
 #28399 Possible to create a void array
@@ -44,6 +44,16 @@
 
 #24649
 04.names_declarations_and_scopes/03.scopes/type_param_class_neg_3.ets
+
+#27159
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
+
+#30653
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_37.ets
+
+#30697
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_39.ets
 
 #26485
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_11.ets
@@ -470,6 +480,22 @@
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_13.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_14.ets
 
+#30582
+07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_1.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_2.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_3.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_4.ets
+07.expressions/32.lambda_expression/01.lambda_signature/positive_5.ets
+
+#30813 No CTE for lambda body without return statement
+07.expressions/32.lambda_expression/02.lambda_body/negative_2.ets
+
+#30786
+07.expressions/32.lambda_expression/04.runtime_evaluation_of_lambda_expressions/lambda_instance_type_15.ets
+
+#29160
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
 
 #29971
 08.statements/04.local_declarations/post_declaration_func_n_1.ets
@@ -601,7 +627,7 @@
 09.classes/06.field_declarations/04.field_initialization/non_static_field_initialization_reference.ets
 09.classes/06.field_declarations/04.field_initialization/non_static_field_self_initialization_reference.ets
 
-#29684
+#31341
 09.classes/06.field_declarations/04.field_initialization/class_fields_cte_49.ets
 09.classes/06.field_declarations/04.field_initialization/class_fields_cte_50.ets
 09.classes/06.field_declarations/04.field_initialization/class_fields_cte_51.ets
@@ -752,6 +778,14 @@
 09.classes/07.method_declarations/01.static_methods/use_instance_method_4.ets
 09.classes/07.method_declarations/01.static_methods/use_instance_method_7.ets
 09.classes/07.method_declarations/01.static_methods/use_instance_method_9.ets
+
+#27886 Issues with default values
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_3.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_4.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_5.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_8.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_11.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_12.ets
 
 #23238 Method returning 'this' returns wrong instance
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_8.ets
@@ -1759,9 +1793,13 @@
 17.experimental_features/03.resizable_array_creation_expressions/expr_n_16.ets
 17.experimental_features/03.resizable_array_creation_expressions/expr_n_17.ets
 
-#28965
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_decl_108.ets
-17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_decl_109.ets
+#25111
+17.experimental_features/02.fixed_array_types/far3_0.ets
+17.experimental_features/02.fixed_array_types/far3_1.ets
+17.experimental_features/02.fixed_array_types/far3_2.ets
+17.experimental_features/02.fixed_array_types/far3_3.ets
+17.experimental_features/02.fixed_array_types/far3_4.ets
+17.experimental_features/02.fixed_array_types/far3_7.ets
 
 #29160
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_export_decl_4.ets
@@ -1841,6 +1879,9 @@
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_1.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_9.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_11.ets
+17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_decl_108.ets
+17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_integer_types_common_decl_109.ets
+
 
 #29683
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_long_decl_4.ets
@@ -1869,8 +1910,6 @@
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_explicit_type_constant_to_string_25.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_explicit_type_constant_to_string_26.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_explicit_type_constant_to_string_27.ets
-
-#29160
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_getname_24.ets
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_getname_25.ets
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_getname_26.ets
@@ -2140,49 +2179,6 @@
 07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
 
-#29160
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
-
 #59 verifier in lambda
 07.expressions/06.spread_expression/spex_lmbd_37.ets
 07.expressions/06.spread_expression/spex_lmbd_39.ets
-
-#30582
-07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_1.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_2.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_3.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_4.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_5.ets
-
-#30813 No CTE for lambda body without return statement
-07.expressions/32.lambda_expression/02.lambda_body/negative_2.ets
-
-#30786
-07.expressions/32.lambda_expression/04.runtime_evaluation_of_lambda_expressions/lambda_instance_type_15.ets
-
-#25111
-17.experimental_features/02.fixed_array_types/far3_0.ets
-17.experimental_features/02.fixed_array_types/far3_1.ets
-17.experimental_features/02.fixed_array_types/far3_2.ets
-17.experimental_features/02.fixed_array_types/far3_3.ets
-17.experimental_features/02.fixed_array_types/far3_4.ets
-17.experimental_features/02.fixed_array_types/far3_7.ets
-
-#27159
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
-
-#30653
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_37.ets
-
-#30697
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_39.ets
-
-#27886 Issues with default values
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_3.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_4.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_5.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_8.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_11.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_12.ets
