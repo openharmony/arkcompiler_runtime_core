@@ -22,6 +22,24 @@
 #28399 Possible to create a void array
 03.types/11.type_void/generic_void_n_3.ets
 
+#31484
+03.types/11.type_void/void_subtyping_basic_0.ets
+03.types/11.type_void/void_arrow_functions_0.ets
+03.types/11.type_void/void_arrow_functions_1.ets
+03.types/11.type_void/void_arrow_functions_2.ets
+03.types/11.type_void/void_complex_scenarios_1.ets
+
+#31486
+03.types/11.type_void/void_generics_neg_3.ets
+
+#31488
+03.types/11.type_void/void_override_neg_0.ets
+03.types/11.type_void/void_override_neg_1.ets
+03.types/11.type_void/void_edge_cases_2.ets
+
+#31489
+03.types/11.type_void/void_edge_cases_1.ets
+
 #30705 Can't use unsafeCall for Function object with union of FixedArrays param
 03.types/19.function_types/01.type_function/positive_args_15.ets
 03.types/19.function_types/01.type_function/positive_args_16.ets
