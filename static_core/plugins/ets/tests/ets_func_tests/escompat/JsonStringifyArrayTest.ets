@@ -135,6 +135,52 @@ function jsonStringifyArrayReplacer4() {
     arktest.assertEQ(ret, expect);
 }
 
+function jsonStringifyRegExptest1() {
+    const str = "For more information, see Chapter 3.4.5.1";
+    const re = new RegExp('see (chapter \\d+(\\.\\d)*)', 'i');
+    const found = str.match(re);
+    let str1 = JSON.stringify(found);
+    let expect = '["see Chapter 3.4.5.1","Chapter 3.4.5.1",".1"]'
+    arktest.assertEQ(str1, expect);
+}
+
+function jsonStringifyRegExptest2() {
+    const str = "ABCDEFGHIJKLMNOPQRSTUVWHIZabcdefghijklmnopqrstuvwxyz";
+    const re = new RegExp('[A-E]', 'gi');
+    const found = str.match(re);
+    let str1 = JSON.stringify(found);
+    let expect = '["A","B","C","D","E","a","b","c","d","e"]'
+    arktest.assertEQ(str1, expect);
+}
+
+function jsonStringifyRegExptest3() {
+    const str = "The quick brown fox jumps over the lazy dog. It barked.";
+    const re = new RegExp('(?<animal>fox|cat) jumps over');
+    const found = str.match(re);
+    let str1 = JSON.stringify(found);
+    let expect = '["fox jumps over","fox"]'
+    arktest.assertEQ(str1, expect);
+}
+
+function jsonStringifyRegExptest4() {
+    const str = encodeURI('\r'); 
+    const re = new RegExp(str, 'g');
+    let search = re.exec(str);
+    let expected = '["%0D"]'; 
+    let ret = JSON.stringify(search);
+    arktest.assertEQ(ret, expected);
+}
+
+function jsonStringifyRegExptest5() {
+    const str = encodeURI('\b\t\n');
+    const re = new RegExp(str, 'g');
+    let match = re.exec(str);
+    let ret = JSON.stringify(match);
+    let expected = '["%08%09%0A"]';
+    arktest.assertEQ(ret, expected);
+}
+
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('Json stringify for Array tests');
     suite.addTest('for boolean', jsonStringifyArrayBoolean);
@@ -150,5 +196,10 @@ function main(): int {
     suite.addTest('for replacer 2', jsonStringifyArrayReplacer2);
     suite.addTest('for replacer 3', jsonStringifyArrayReplacer3);
     suite.addTest('for replacer 4', jsonStringifyArrayReplacer4);
+    suite.addTest('for RegExp 1', jsonStringifyRegExptest1);
+    suite.addTest('for RegExp 2', jsonStringifyRegExptest2);
+    suite.addTest('for RegExp 3', jsonStringifyRegExptest3);
+    suite.addTest('for RegExp 2', jsonStringifyRegExptest4);
+    suite.addTest('for RegExp 3', jsonStringifyRegExptest5);
     return suite.run();
 }
