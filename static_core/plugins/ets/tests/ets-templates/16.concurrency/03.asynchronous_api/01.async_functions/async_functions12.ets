@@ -26,10 +26,10 @@ async function startTest() {
     try {
         await rejectImmediately();
     } catch (error) {
-        arktest.assertEQ(error, "Rejected immediately");
+        arktest.assertEQ(error.message, "Rejected immediately");
     }
 }
 
 function main(): void {
-    startTest();
+  waitForCompletion(startTest);
 }

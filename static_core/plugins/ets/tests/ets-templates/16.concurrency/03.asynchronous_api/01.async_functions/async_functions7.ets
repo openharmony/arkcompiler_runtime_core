@@ -25,11 +25,10 @@ async function startTest() {
     try {
         await testAsyncError();
     } catch (error) {
-        let err: string = error.message as string;
-        arktest.assertEQ(err === "Failed", true);
+        arktest.assertEQ(error.message, "Something went wrong!");
     }
 }
 
 function main(): void {
-    startTest();
+    waitForCompletion(startTest);
 }

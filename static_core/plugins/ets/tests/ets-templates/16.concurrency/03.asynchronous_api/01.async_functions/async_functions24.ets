@@ -25,9 +25,11 @@ async function functionReturnArray(): Promise<Array<number>> {
 async function startTest() {
   const result = await functionReturnArray();
   const resTemp = new Array<number>(1, 2, 3);
-  arktest.assertEQ(result === resTemp, true);
+  arktest.assertEQ(result[0], resTemp[0]);
+  arktest.assertEQ(result[1], resTemp[1]);
+  arktest.assertEQ(result[2], resTemp[2]);
 }
 
 function main(): void {
-  startTest();
+  waitForCompletion(startTest);
 }

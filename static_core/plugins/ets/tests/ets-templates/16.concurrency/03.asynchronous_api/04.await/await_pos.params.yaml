@@ -16,7 +16,7 @@ cases:
     - decl: |-
           // Promise in function argument, no error
           function foo(r: Promise<int>): int {
-              return await r
+              return waitForCompletion(async () => await r)
           }
           async function bar(p: int): Promise<int> {
               return p + 1
@@ -27,7 +27,7 @@ cases:
     - decl: |-
           // Error in launch function propagates outside
           function foo(r: Promise<int>): int {
-              return await r
+              return waitForCompletion(async () => await r)
           }
           async function bar(p: int): Promise<int> {
               if (p == 1) {
@@ -54,7 +54,7 @@ cases:
               if (p == 1) {
                   throw new Error('ABC')
               }
-              return await r
+              return waitForCompletion(async () => await r)
           }
           async function bar(p: int): Promise<int> {
               return p + 1
@@ -66,8 +66,7 @@ cases:
           } catch (e) {
             if (e instanceof Error) {
               arktest.assertTrue(e.message == 'ABC')  // expected
-            }
-            else {
+            } else {
               arktest.assertTrue(false)
             }
           }
@@ -83,7 +82,7 @@ cases:
 
           function bar(p: Promise<string>): string {
               try {
-                  return await p
+                  return waitForCompletion(async () => await p)
               } catch (e) {
                   if (e instanceof Error) {
                     return e.message
@@ -107,7 +106,6 @@ cases:
               fld: Promise<string>
               constructor() {
                   this.fld = foo('')
-                  await this.fld
               }
               constructor(p: Promise<string>) {
                   this.fld = p
@@ -121,23 +119,23 @@ cases:
       use: |-
           // array element
           let arr: Promise<string>[] = [foo('A')]
-          arktest.assertTrue((await arr[0]) == 'AA')
+          arktest.assertEQ(waitForCompletion(async () => await arr[0]), 'AA')
 
           // tuple element
           let tup: [boolean, Promise<string>] = [false, foo('A')]
-          arktest.assertTrue((await tup[1]) == 'AA')
+          arktest.assertEQ(waitForCompletion(async () => await tup[1]), 'AA')
 
           // union type
           let ut: boolean|number|Promise<string> = foo('A')
-          arktest.assertTrue((await (ut as Promise<string>)) == 'AA')
+          arktest.assertEQ(waitForCompletion(async () => await (ut as Promise<string>)), 'AA')
 
           // nullish type
           let nt: Promise<string>|null|undefined = p1()
-          arktest.assertTrue((await nt!) == 'AA')
+          arktest.assertEQ(waitForCompletion(async () => await nt!), 'AA')
 
           nt = p2()
           try {
-              await nt!
+              waitForCompletion(async () => await nt!)
               arktest.assertTrue(false)
           } catch (e) {
               // OK
@@ -145,18 +143,18 @@ cases:
 
           // function call
           let f: (p: Promise<string>) => Promise<string> = (p: Promise<string>): Promise<string> => p
-          arktest.assertTrue((await f(foo('A'))) == 'AA')
+          arktest.assertEQ(waitForCompletion(async () => await f(foo('A'))), 'AA')
 
           // instance field
           let a: A = { fld: foo('A') }
-          arktest.assertTrue((await a.fld) == 'AA')
+          arktest.assertEQ(waitForCompletion(async () => await a.fld), 'AA')
 
           // method call
           let b: A = new A(foo('A'))
-          arktest.assertTrue((await b.meth()) == 'AA')
+          arktest.assertEQ(waitForCompletion(async () => await b.meth()), 'AA')
 
           // conditional expression
           let expr1 = foo('A')
           let expr2 = foo('B')
-          arktest.assertTrue(await (a instanceof A ? expr1 : expr2) == 'AA')
-          arktest.assertTrue(await (!(a instanceof A) ? expr1 : expr2) == 'BB')
+          arktest.assertEQ(waitForCompletion(async () => await (a instanceof A ? expr1 : expr2)), 'AA')
+          arktest.assertEQ(waitForCompletion(async () => await (!(a instanceof A) ? expr1 : expr2)), 'BB')

@@ -16,11 +16,16 @@
 {% for c in cases %}
 /*---
 desc: Async functions are implicit coroutines that can be called as regular functions.
+tags: [no-warmup]
 ---*/
 
 {{c.decl}}
 
-function main() {
+async function startTest() {
     {{c.use|indent}}
+}
+
+function main() {
+    waitForCompletion(startTest)
 }
 {% endfor %}
