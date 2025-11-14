@@ -43,11 +43,12 @@
     } while (false)
 
 // CC-OFFNXT(G.PRE.02) should be with define
-#define ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult) \
-    do {                                                            \
-        if (LIKELY((status) == ANI_OK)) {                           \
-            *(vresult) = (venv)->AddLocalVerifiedRef(result);       \
-        }                                                           \
+#define ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult)                 \
+    do {                                                                            \
+        if (LIKELY((status) == ANI_OK)) {                                           \
+            using ResType = std::remove_reference_t<decltype(*(vresult))>;          \
+            *(vresult) = static_cast<ResType>((venv)->AddLocalVerifiedRef(result)); \
+        }                                                                           \
     } while (false)
 
 // CC-OFFNXT(G.PRE.02) should be with define
@@ -4122,7 +4123,7 @@ NO_UB_SANITIZE static ani_status GlobalReference_Create(VEnv *venv, VRef *vref, 
     ani_ref result {};
     auto status = GetInteractionAPI(venv)->GlobalReference_Create(venv->GetEnv(), vref->GetRef(), &result);
     if (LIKELY(status == ANI_OK)) {
-        *vresult = venv->AddGloablVerifiedRef(result);
+        *vresult = venv->AddGlobalVerifiedRef(result);
     }
     return status;
 }

@@ -28,6 +28,18 @@ public:
         substrOffset_ = 0;
         substrSize_ = 2U;
         bufSize_ = 5U;
+        ASSERT_EQ(env_->GetUndefined(&undef_), ANI_OK);
+        ASSERT_EQ(env_->GetNull(&null_), ANI_OK);
+
+        ani_class cls {};
+        ani_method ctor {};
+        ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Object_New(cls, ctor, &obj_), ANI_OK);
+
+        ASSERT_EQ(env_->FindClass("escompat.Error", &cls_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", ":", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Object_New(cls_, ctor, &err_), ANI_OK);
     }
 
 protected:
@@ -37,6 +49,11 @@ protected:
     char buf_[5];
     ani_size bufSize_;
     ani_size res_;
+    ani_object obj_ {};
+    ani_ref undef_ {};
+    ani_object err_ {};
+    ani_ref null_ {};
+    ani_class cls_ {};
 };
 
 TEST_F(StringGetUtf8SubstrTest, wrong_env)
@@ -74,15 +91,13 @@ TEST_F(StringGetUtf8SubstrTest, wrong_input_string)
 
 TEST_F(StringGetUtf8SubstrTest, null_input_string)
 {
-    ani_string str;
-    ASSERT_EQ(env_->GetNull(reinterpret_cast<ani_ref *>(&str)), ANI_OK);
-
-    ASSERT_EQ(env_->c_api->String_GetUTF8SubString(env_, str, substrOffset_, substrSize_, buf_, bufSize_, &res_),
+    ASSERT_EQ(env_->c_api->String_GetUTF8SubString(env_, static_cast<ani_string>(null_), substrOffset_, substrSize_,
+                                                   buf_, bufSize_, &res_),
               ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_ref"},
+        {"string", "ani_string", "wrong reference type: null"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"utf8Buffer", "char *"},
@@ -95,15 +110,70 @@ TEST_F(StringGetUtf8SubstrTest, null_input_string)
 
 TEST_F(StringGetUtf8SubstrTest, undef_input_string)
 {
-    ani_string str;
-    ASSERT_EQ(env_->GetUndefined(reinterpret_cast<ani_ref *>(&str)), ANI_OK);
-
-    ASSERT_EQ(env_->c_api->String_GetUTF8SubString(env_, str, substrOffset_, substrSize_, buf_, bufSize_, &res_),
+    ASSERT_EQ(env_->c_api->String_GetUTF8SubString(env_, static_cast<ani_string>(undef_), substrOffset_, substrSize_,
+                                                   buf_, bufSize_, &res_),
               ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"string", "ani_string", "wrong reference type: ani_ref"},
+        {"string", "ani_string", "wrong reference type: undefined"},
+        {"substrOffset", "ani_size"},
+        {"substrSize", "ani_size"},
+        {"utf8Buffer", "char *"},
+        {"result", "ani_size *"},
+    };
+    // clang-format on
+
+    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8SubString", testLines);
+}
+
+TEST_F(StringGetUtf8SubstrTest, err_input_string)
+{
+    ASSERT_EQ(env_->c_api->String_GetUTF8SubString(env_, static_cast<ani_string>(err_), substrOffset_, substrSize_,
+                                                   buf_, bufSize_, &res_),
+              ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"string", "ani_string", "wrong reference type: ani_error"},
+        {"substrOffset", "ani_size"},
+        {"substrSize", "ani_size"},
+        {"utf8Buffer", "char *"},
+        {"result", "ani_size *"},
+    };
+    // clang-format on
+
+    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8SubString", testLines);
+}
+
+TEST_F(StringGetUtf8SubstrTest, obj_input_string)
+{
+    ASSERT_EQ(env_->c_api->String_GetUTF8SubString(env_, static_cast<ani_string>(obj_), substrOffset_, substrSize_,
+                                                   buf_, bufSize_, &res_),
+              ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"string", "ani_string", "wrong reference type: ani_object"},
+        {"substrOffset", "ani_size"},
+        {"substrSize", "ani_size"},
+        {"utf8Buffer", "char *"},
+        {"result", "ani_size *"},
+    };
+    // clang-format on
+
+    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8SubString", testLines);
+}
+
+TEST_F(StringGetUtf8SubstrTest, cls_input_string)
+{
+    ASSERT_EQ(env_->c_api->String_GetUTF8SubString(env_, reinterpret_cast<ani_string>(cls_), substrOffset_, substrSize_,
+                                                   buf_, bufSize_, &res_),
+              ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"string", "ani_string", "wrong reference type: ani_class"},
         {"substrOffset", "ani_size"},
         {"substrSize", "ani_size"},
         {"utf8Buffer", "char *"},

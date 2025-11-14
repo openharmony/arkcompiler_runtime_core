@@ -58,9 +58,9 @@ void VEnv::DeleteLocalVerifiedRef(VRef *vref)
     GetEnvANIVerifier()->DeleteLocalVerifiedRef(vref);
 }
 
-VRef *VEnv::AddGloablVerifiedRef(ani_ref gref)
+VRef *VEnv::AddGlobalVerifiedRef(ani_ref gref)
 {
-    return GetEnvANIVerifier()->AddGloablVerifiedRef(gref);
+    return GetEnvANIVerifier()->AddGlobalVerifiedRef(gref);
 }
 
 void VEnv::DeleteDeleteGlobalRef(VRef *vgref)

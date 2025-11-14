@@ -50,8 +50,11 @@ namespace ark::ets::ani::verify::testing {
             if (!error.has_value()) {                                                                        \
                 ASSERT_THAT(lineList[i].c_str(), ::testing::HasSubstr(" | VALID")) << abortMsg;              \
             } else {                                                                                         \
-                ASSERT_THAT(lineList[i].c_str(), ::testing::HasSubstr(" | INVALID: ")) << abortMsg;          \
-                ASSERT_THAT(lineList[i].c_str(), ::testing::HasSubstr(error->c_str())) << abortMsg;          \
+                std::string invalidStr = " | INVALID: ";                                                     \
+                ASSERT_THAT(lineList[i].c_str(), ::testing::HasSubstr(invalidStr.c_str())) << abortMsg;      \
+                auto errStartPos = lineList[i].find(invalidStr.c_str());                                     \
+                auto errStr = lineList[i].substr(errStartPos + invalidStr.size());                           \
+                ASSERT_STREQ(error->c_str(), errStr.c_str()) << abortMsg;                                    \
             }                                                                                                \
             ++i;                                                                                             \
         }                                                                                                    \

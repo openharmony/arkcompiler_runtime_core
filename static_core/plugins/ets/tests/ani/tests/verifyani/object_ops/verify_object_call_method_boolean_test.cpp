@@ -210,7 +210,7 @@ TEST_F(ObjectCallMethodBooleanTest, cls_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "wrong reference type: null"},
         {"method", "ani_method", "wrong object"},
         {"result", "ani_boolean *"},
         {"...", "       "},
@@ -806,7 +806,7 @@ TEST_F(ObjectCallMethodBooleanATest, cls_1)
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"object", "ani_object", "wrong reference"},
+        {"object", "ani_object", "wrong reference type: null"},
         {"method", "ani_method", "wrong object"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},

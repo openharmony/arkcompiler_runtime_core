@@ -41,7 +41,7 @@ TEST_F(StringNewUtf16Test, wrong_input_string)
     ASSERT_EQ(env_->c_api->String_NewUTF16(env_, nullptr, size_, &res_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"utf16String", "const uint16_t *", " wrong pointer to use as argument in 'const uint16_t *'"},
+        {"utf16String", "const uint16_t *", "wrong pointer to use as argument in 'const uint16_t *'"},
         {"utf16Size", "ani_size"},
         {"result", "ani_string *"},
     };

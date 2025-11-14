@@ -25,6 +25,50 @@
 
 namespace ark::ets::ani::verify {
 
+class ANIRefTypeChecker {
+public:
+    static bool IsClass(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (ManagedCodeAccessor::IsUndefined(ref)) {
+            return false;
+        }
+        auto klass = s.ToInternalType(ref)->GetClass();
+        return klass->IsClassClass();
+    }
+
+    static bool IsError(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (ManagedCodeAccessor::IsUndefined(ref)) {
+            return false;
+        }
+        EtsClass *klass = s.ToInternalType(ref)->GetClass();
+        EtsClass *errorKlass = PlatformTypes()->escompatError;
+
+        return errorKlass->IsAssignableFrom(klass);
+    }
+
+    static bool IsString(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (ManagedCodeAccessor::IsUndefined(ref)) {
+            return false;
+        }
+        EtsClass *klass = s.ToInternalType(ref)->GetClass();
+        EtsClass *stringKlass = PlatformTypes()->coreString;
+
+        return stringKlass->IsAssignableFrom(klass);
+    }
+    static bool IsObject(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (s.IsNullishValue(ref)) {
+            return false;
+        }
+        EtsClass *klass = s.ToInternalType(ref)->GetClass();
+        EtsClass *objectKlass = PlatformTypes()->coreObject;
+
+        return objectKlass->IsAssignableFrom(klass);
+    }
+};
+
 class CallArgs {
 public:
     explicit CallArgs(const EtsMethod *etsMethod, const ani_value *args)
@@ -68,34 +112,58 @@ private:
     const ani_value *args_ {};
 };
 
-std::string_view ANIRefTypeToString(ANIRefType refType)
+// Сheckers must be consistent with the type hierarchy
+// ani_ref
+//    |
+//    +-- (ani_undefined)
+//    +-- (ani_null)
+//    +-- ani_object
+//          |
+//          +-- ani_fn_object
+//          +-- ani_enum_item
+//          +-- ani_error
+//          +-- ani_arraybuffer
+//          +-- ani_string
+//          +-- ani_tuple_value
+//          +-- ani_array
+//          +-- ani_fixedarray
+//          |    |
+//          |    +-- ani_fixedarray_boolean
+//          |    +-- ani_fixedarray_char
+//          |    +-- ani_fixedarray_byte
+//          |    +-- ani_fixedarray_short
+//          |    +-- ani_fixedarray_int
+//          |    +-- ani_fixedarray_long
+//          |    +-- ani_fixedarray_float
+//          |    +-- ani_fixedarray_double
+//          |    +-- ani_fixedarray_ref
+//          +-- ani_type
+//              |
+//              +-- ani_class
+//              +-- ani_enum
+//              +-- ani_namespace
+//              +-- (ani_module)
+std::string_view ANIRefTypeToString(ScopedManagedCodeFix &s, ani_ref ref)
 {
-    // clang-format off
-    switch (refType) {
-        case ANIRefType::REFERENCE:             return "ani_ref";
-        case ANIRefType::MODULE:                return "ani_module";
-        case ANIRefType::NAMESPACE:             return "ani_namespace";
-        case ANIRefType::OBJECT:                return "ani_object";
-        case ANIRefType::FN_OBJECT:             return "ani_fn_object";
-        case ANIRefType::ENUM_ITEM:             return "ani_enum_item";
-        case ANIRefType::ERROR:                 return "ani_error";
-        case ANIRefType::ARRAYBUFFER:           return "ani_arraybuffer";
-        case ANIRefType::STRING:                return "ani_string";
-        case ANIRefType::ARRAY:                 return "ani_array";
-        case ANIRefType::TYPE:                  return "ani_type";
-        case ANIRefType::CLASS:                 return "ani_class";
-        case ANIRefType::ENUM:                  return "ani_enum";
-        case ANIRefType::FIXED_ARRAY_BOOLEAN:   return "ani_fixedarray_boolean";
-        case ANIRefType::FIXED_ARRAY_CHAR:      return "ani_fixedarray_char";
-        case ANIRefType::FIXED_ARRAY_BYTE:      return "ani_fixedarray_byte";
-        case ANIRefType::FIXED_ARRAY_SHORT:     return "ani_fixedarray_short";
-        case ANIRefType::FIXED_ARRAY_INT:       return "ani_fixedarray_int";
-        case ANIRefType::FIXED_ARRAY_LONG:      return "ani_fixedarray_long";
-        case ANIRefType::FIXED_ARRAY_FLOAT:     return "ani_fixedarray_float";
-        case ANIRefType::FIXED_ARRAY_DOUBLE:    return "ani_fixedarray_double";
+    if (ManagedCodeAccessor::IsUndefined(ref)) {
+        return "undefined";
     }
-    // clang-format on
-    UNREACHABLE();
+    if (s.IsNull(ref)) {
+        return "null";
+    }
+    if (ANIRefTypeChecker::IsObject(s, ref)) {
+        if (ANIRefTypeChecker::IsError(s, ref)) {
+            return "ani_error";
+        }
+        if (ANIRefTypeChecker::IsString(s, ref)) {
+            return "ani_string";
+        }
+        if (ANIRefTypeChecker::IsClass(s, ref)) {
+            return "ani_class";
+        }
+        return "ani_object";
+    }
+    return "ani_ref";
 }
 
 std::string_view ANIFuncTypeToString(impl::VMethod::ANIMethodType funcType)
@@ -397,14 +465,14 @@ public:
         if (err) {
             return err;
         }
-        ANIRefType refType = vclass->GetRefType();
-        if (refType != ANIRefType::CLASS) {
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsClass(s, vclass->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(refType);
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vclass->GetRef());
             return ss.str();
         }
 
-        ScopedManagedCodeFix s(venv_->GetEnv());
         class_ = s.ToInternalType(vclass->GetRef());
         return {};
     }
@@ -415,10 +483,11 @@ public:
         if (err) {
             return err;
         }
-        ANIRefType refType = vstr->GetRefType();
-        if (refType != ANIRefType::STRING) {
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsString(s, vstr->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(refType);
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vstr->GetRef());
             return ss.str();
         }
         return {};
@@ -430,10 +499,11 @@ public:
         if (errMessage) {
             return errMessage;
         }
-        ANIRefType refType = verr->GetRefType();
-        if (refType != ANIRefType::ERROR) {
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsError(s, verr->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(refType);
+            ss << "wrong reference type: " << ANIRefTypeToString(s, verr->GetRef());
             return ss.str();
         }
         return {};
@@ -457,14 +527,14 @@ public:
         if (err) {
             return err;
         }
-        ANIRefType refType = vobject->GetRefType();
-        if (refType != ANIRefType::OBJECT) {
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsObject(s, vobject->GetRef())) {
             PandaStringStream ss;
-            ss << "wrong reference type: " << ANIRefTypeToString(refType);
+            ss << "wrong reference type: " << ANIRefTypeToString(s, vobject->GetRef());
             return ss.str();
         }
 
-        ScopedManagedCodeFix s(venv_->GetEnv());
         EtsObject *etsObject = s.ToInternalType(vobject->GetRef());
         class_ = etsObject->GetClass();
         return {};
