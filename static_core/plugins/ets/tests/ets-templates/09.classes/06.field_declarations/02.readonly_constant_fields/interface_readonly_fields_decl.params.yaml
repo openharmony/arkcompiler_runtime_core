@@ -15,6 +15,47 @@ cases:
   - desc: |-
       Checking the implementation of interface readonly field.
     check_variants:
+      - {check_type: "long",
+        base_value: "0"}
+      - {check_type: "int",
+        base_value: "0"}
+      - {check_type: "byte",
+        base_value: "0"}
+      - {check_type: "short",
+        base_value: "0"}
+      - {check_type: "double",
+        base_value: "0"}
+      - {check_type: "number",
+        base_value: "0"}
+      - {check_type: "float",
+        base_value: "0.0f"}
+      - {check_type: "char",
+        base_value: "c'\\u0000'"}
+      - {check_type: "boolean",
+        base_value: "false"}
+      - {check_type: "Object | undefined",
+        base_value: "undefined"}
+      - {check_type: "Object | undefined | null",
+        base_value: "undefined"}
+      - {check_type: "Any",
+        base_value: "undefined"}
+    decl_variants:
+      - |-
+        interface I {
+          readonly field: [check_type]
+        }
+        class A implements I {
+          readonly field: [check_type]
+        }
+    sub_cases_logic:
+      - |-
+        let a: A = new A()
+        arktest.assertTrue(a.field instanceof [check_type])
+        arktest.assertEQ(a.field, [base_value])
+
+  - desc: |-
+      Checking the implementation of interface readonly field.
+    check_variants:
       - {type: "long", check_type: "long", check_value: "5"}
       - {type: "int", check_type: "int", check_value: "5"}
       - {type: "byte", check_type: "byte", check_value: "5"}
