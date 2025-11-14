@@ -148,6 +148,10 @@ declarations:
     }
   - >
     declare class MyIndexable {
+      [index: string]: MyIndexable
+    }
+  - >
+    declare class MyIndexable {
       readonly [index: number]: MyIndexable
     }
   - >

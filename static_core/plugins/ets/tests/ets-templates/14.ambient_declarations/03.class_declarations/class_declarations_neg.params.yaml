@@ -30,10 +30,6 @@ declarations:
   - >
     declare class A<T1, T2>
   - >
-    declare class MyIndexable {
-      [index: string]: MyIndexable
-    }
-  - >
     declare class WithPrivateField {
       private x: int
     }
