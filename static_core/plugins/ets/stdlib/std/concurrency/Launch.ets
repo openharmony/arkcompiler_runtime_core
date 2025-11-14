@@ -144,23 +144,10 @@ export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
 }
 
 function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<Any>, launchParams?: LaunchParams): Job<R> {
-  const paddedArgs = padArrayToMaxArgs(args);
   if (launchParams) {
     return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag, launchParams.workerGroupId);
   }
   return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, false, WorkerGroup.ANY_ID);
-}
-
-function padArrayToMaxArgs<T>(arr: FixedArray<T>): FixedArray<(T | undefined)> {
-  const MAX_ARGS = 16;
-  const res: FixedArray<(T | undefined)> = new (T | undefined)[MAX_ARGS];
-  for (let i = 0; i < arr.length && i < MAX_ARGS; ++i) {
-    res[i] = arr[i];
-  }
-  for (let i = arr.length; i < MAX_ARGS; ++i) {
-    res[i] = undefined;
-  }
-  return res;
 }
 
 native function launchInternalJobNative<F, R>(coroFun: F, args: FixedArray<Any>, abortFlag: boolean, gid: WorkerGroupId): Job<R>;

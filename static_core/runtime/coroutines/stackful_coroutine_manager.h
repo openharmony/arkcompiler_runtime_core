@@ -57,7 +57,7 @@ public:
                                    bool abortFlag) override;
     LaunchResult LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
                               const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                              bool abortFlag) override;
+                              bool launchImmediately, bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;

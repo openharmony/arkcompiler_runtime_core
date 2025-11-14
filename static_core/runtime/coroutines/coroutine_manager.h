@@ -194,7 +194,7 @@ public:
      */
     virtual LaunchResult LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
                                       const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                                      bool abortFlag) = 0;
+                                      bool launchImmediately, bool abortFlag) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**
