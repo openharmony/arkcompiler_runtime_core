@@ -79,7 +79,7 @@ public:
 private:
     void PostImpl([[maybe_unused]] WrappedCallback &&callback) override {};
 
-    void PostImpl() override;
+    void PostImpl([[maybe_unused]] int64_t delayMs) override;
 
     static void CallbackExecutor(uv_async_t *async);
 

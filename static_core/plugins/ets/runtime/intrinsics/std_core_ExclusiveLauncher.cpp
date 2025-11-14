@@ -92,7 +92,7 @@ Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limit
     return exclusiveCoro;
 }
 
-static constexpr uint64_t ASYNC_WORK_WAITING_TIME = 10;
+static constexpr uint64_t ASYNC_WORK_WAITING_TIME = 100 * 1000U;
 
 void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, mem::Reference *taskRef)
 {

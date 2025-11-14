@@ -45,6 +45,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_stubs.cpp
     ${ETS_EXT_SOURCES}/ets_vm.cpp
     ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
+    ${ETS_EXT_SOURCES}/integrate/ark_vm_api.cpp
     ${ETS_EXT_SOURCES}/integrate/ets_ani_expo.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Array.cpp
@@ -106,6 +107,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/helpers/json_helper.cpp
     ${ETS_EXT_SOURCES}/finalreg/finalization_registry_manager.cpp
     ${ETS_EXT_SOURCES}/unhandled_manager/unhandled_object_manager.cpp
+    ${ETS_EXT_SOURCES}/main_worker_external_scheduler.cpp
     ${ETS_EXT_SOURCES}/mem/ets_gc_stat.cpp
     ${ETS_EXT_SOURCES}/mem/ets_reference_processor.cpp
     ${ETS_EXT_SOURCES}/ani/ani_helpers.cpp

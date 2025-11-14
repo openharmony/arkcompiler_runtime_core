@@ -22,12 +22,12 @@
 
 namespace ark {
 
-void CoroutineWorker::TriggerSchedulerExternally(Coroutine *requester)
+void CoroutineWorker::TriggerSchedulerExternally(Coroutine *requester, int64_t delayMs)
 {
-    if (requester->GetType() == Coroutine::Type::MUTATOR && IsExternalSchedulingEnabled()) {
+    if (requester->GetType() == Coroutine::Type::MUTATOR) {
         os::memory::LockHolder l(posterLock_);
         if (extSchedulingPoster_ != nullptr) {
-            extSchedulingPoster_->Post();
+            extSchedulingPoster_->Post(delayMs);
         }
     }
 }

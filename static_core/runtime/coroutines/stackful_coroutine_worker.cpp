@@ -675,7 +675,7 @@ void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStat
 
 void StackfulCoroutineWorker::ProcessTimerEvents()
 {
-    PandaVector<TimerEvent *> timerEvents;
+    PandaVector<TimerEvent *> expiredTimers;
     {
         os::memory::LockHolder lh(waitersLock_);
         auto curTime = coroManager_->GetCurrentTime();
@@ -683,16 +683,16 @@ void StackfulCoroutineWorker::ProcessTimerEvents()
             if (evt->GetType() == CoroutineEvent::Type::TIMER) {
                 auto *timerEvent = static_cast<TimerEvent *>(evt);
                 timerEvent->SetCurrentTime(curTime);
-                timerEvents.push_back(timerEvent);
+                if (timerEvent->IsExpired()) {
+                    expiredTimers.push_back(timerEvent);
+                }
             }
         }
     }
-    std::sort(timerEvents.begin(), timerEvents.end(),
+    std::sort(expiredTimers.begin(), expiredTimers.end(),
               [](const TimerEvent *evt1, const TimerEvent *evt2) { return evt1->GetId() < evt2->GetId(); });
-    for (auto *evt : timerEvents) {
-        if (evt->IsExpired()) {
-            evt->Happen();
-        }
+    for (auto *evt : expiredTimers) {
+        evt->Happen();
     }
 }
 
@@ -713,7 +713,8 @@ std::pair<bool, uint64_t> StackfulCoroutineWorker::CalculateShortestTimerDelay()
             minTimerDelay = std::min(delay, minTimerDelay);
         }
     }
-    return {hasTimerEvents, minTimerDelay};
+    auto msDelay = minTimerDelay / 1000U;
+    return {hasTimerEvents, msDelay};
 }
 
 }  // namespace ark
