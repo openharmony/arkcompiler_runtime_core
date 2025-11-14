@@ -1,0 +1,134 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # Note: each 'check_variant_decl_data'
+  # define different types A and related to them check values for check
+  # branching on "v === null" where A is type of v variable
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v === null"
+      type A = string | null
+
+      // type A - null is computed smart type on the negative branch
+      // after branching on "v === null"
+      type A_diff_Null = string
+
+      // VarType is type of v variable after branching on
+      // "v === null": on positive branch, on negative branch
+      enum VarType {Null, A_diff_Null}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [null, VarType.Null],
+        ["abc", VarType.A_diff_Null] ]
+      const check_values_number: int = 2
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v.length, 3)"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v === null"
+      type A = long | int | byte | short | double | float | null |
+        boolean | bigint | char | string | undefined
+
+      // type A - null is computed smart type on the negative branch
+      // after branching on "v === null"
+      type A_diff_Null = long | int | byte | short | double | float |
+        boolean | bigint | char | string | undefined
+
+      // VarType is type of v variable after branching on
+      // "v === null": on positive branch, on negative branch
+      enum VarType {Null, A_diff_Null}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [null, VarType.Null],
+        [undefined, VarType.A_diff_Null],
+        [0x7FFF_FFFF_1, VarType.A_diff_Null],
+        [123, VarType.A_diff_Null],
+        [15 as byte, VarType.A_diff_Null],
+        [517 as short, VarType.A_diff_Null],
+        [4.59, VarType.A_diff_Null],
+        [17.8f, VarType.A_diff_Null],
+        [true, VarType.A_diff_Null],
+        [567n, VarType.A_diff_Null],
+        [c'a', VarType.A_diff_Null],
+        ["abc",VarType.A_diff_Null] ]
+      const check_values_number: int = 12
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v === null"
+      type A = Object | null | undefined
+
+      // type A - null is computed smart type on the negative branch
+      // after branching on "v === null"
+      type A_diff_Null = Object | undefined
+
+      // VarType is type of v variable after branching on
+      // "v === null": on positive branch, on negative branch
+      enum VarType {Null, A_diff_Null}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [null, VarType.Null],
+        ["abc", VarType.A_diff_Null],
+        [123, VarType.A_diff_Null],
+        [567n, VarType.A_diff_Null],
+        [17.8f, VarType.A_diff_Null],
+        [c'a', VarType.A_diff_Null],
+        [undefined, VarType.A_diff_Null] ]
+      const check_values_number: int = 7
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "v === null"
+      type A = Any
+
+      // type A - null is computed smart type on the negative branch
+      // after branching on "v === null"
+      type A_diff_Null = Any // nearest supertype for A - null
+
+      // VarType is type of v variable after branching on
+      // "v === null": on positive branch, on negative branch
+      enum VarType {Null, A_diff_Null}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [null, VarType.Null],
+        ["abc", VarType.A_diff_Null],
+        [123, VarType.A_diff_Null],
+        [567n, VarType.A_diff_Null],
+        [17.8f, VarType.A_diff_Null],
+        [c'a', VarType.A_diff_Null],
+        [undefined, VarType.A_diff_Null] ]
+      const check_values_number: int = 7
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
