@@ -444,11 +444,51 @@
 07.expressions/14.new_expressions/constructor_param_gen_optional_lambda_neg.ets
 07.expressions/14.new_expressions/constructor_param_optional_lambda_neg.ets
 
+#31779 Params contravariance not checked for function type
+07.expressions/15.instanceof_expression/instanceof_func_2.ets
+07.expressions/15.instanceof_expression/instanceof_func_3.ets
+07.expressions/15.instanceof_expression/instanceof_func_10.ets
+07.expressions/15.instanceof_expression/instanceof_func_11.ets
+07.expressions/15.instanceof_expression/instanceof_func_17.ets
+07.expressions/15.instanceof_expression/instanceof_func_28.ets
+07.expressions/15.instanceof_expression/instanceof_func_31.ets
+07.expressions/15.instanceof_expression/instanceof_func_32.ets
+07.expressions/15.instanceof_expression/instanceof_func_33.ets
+07.expressions/15.instanceof_expression/instanceof_func_35.ets
+07.expressions/15.instanceof_expression/instanceof_func_36.ets
+
+#730 (spec)
+07.expressions/15.instanceof_expression/instanceof_func_9.ets
+
+#31822 Optional parameters count are not considered for function type subtyping
+07.expressions/15.instanceof_expression/instanceof_func_15.ets
+07.expressions/15.instanceof_expression/instanceof_func_16.ets
+
+#31808 Optional params in supertype should be optonal, if they are optional in subtype
+07.expressions/15.instanceof_expression/instanceof_func_18.ets
+07.expressions/15.instanceof_expression/instanceof_func_19.ets
+
+#31788 Default value for optional params
+07.expressions/15.instanceof_expression/instanceof_func_20.ets
+07.expressions/15.instanceof_expression/instanceof_func_21.ets
+07.expressions/15.instanceof_expression/instanceof_func_22.ets
+07.expressions/15.instanceof_expression/instanceof_func_23.ets
+
+#31831 Rest parameter checked with last, not with the same place
+07.expressions/15.instanceof_expression/instanceof_func_27.ets
+
+#31769 Tuples and derived types can't be used as instanceof rhs
+07.expressions/15.instanceof_expression/instanceof_func_37.ets
+07.expressions/15.instanceof_expression/instanceof_func_38.ets
+07.expressions/15.instanceof_expression/instanceof_func_39.ets
+07.expressions/15.instanceof_expression/instanceof_func_40.ets
+07.expressions/15.instanceof_expression/instanceof_func_41.ets
+
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
-07.expressions/15.instanceof_expression/instanceof-cte_1.ets
-07.expressions/15.instanceof_expression/instanceof-cte_2.ets
-07.expressions/15.instanceof_expression/instanceof-cte_3.ets
-07.expressions/15.instanceof_expression/instanceof-cte_4.ets
+07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_1.ets
+07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_2.ets
+07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_3.ets
+07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_4.ets
 
 #29203 Warning: Type parameter is erased from type 'Array' when used in instanceof expression
 07.expressions/15.instanceof_expression/instanceof_neg_27.ets
