@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-{% for t in named_types_generics %}
+{% for type in ["class", "interface"] %}
 
 /*---
-desc: Generic named type {{named}}
-params: {{t.type}}, {{t.value}}
-tags: [compile-only]
+desc: Generic named type
 ---*/
 
-{{t.type}}
+{{type}} A<G> {}
 
-let x: {{t.value}};
-
+function main() {
+    let x: A<String> = {};
+    arktest.assertTrue(x instanceof A)
+}
 
 {% endfor %}

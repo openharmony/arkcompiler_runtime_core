@@ -17,4 +17,12 @@
 desc: Generic named type
 ---*/
 
-let m: Map<Number, String>
+function main() {
+    let m: Map<Number, String> = new Map<Number, String>();
+    m.set(1, "one");
+    m.set(2, "two");
+
+    arktest.assertTrue(m.get(1) === "one");
+    arktest.assertTrue(m.get(2) === "two");
+    arktest.assertTrue(m.size === 2);
+}
