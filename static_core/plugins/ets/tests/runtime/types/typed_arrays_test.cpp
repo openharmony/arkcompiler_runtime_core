@@ -20,7 +20,7 @@
 #include "types/ets_class.h"
 #include "types/ets_arraybuffer.h"
 #include "types/ets_typed_arrays.h"
-#include "tests/runtime/types/ets_test_mirror_classes.h"
+#include "plugins/ets/tests/runtime/types/ets_test_mirror_classes.h"
 #include "cross_values.h"
 #include "intrinsics.h"
 
