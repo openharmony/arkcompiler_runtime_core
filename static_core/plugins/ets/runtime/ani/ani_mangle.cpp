@@ -143,7 +143,8 @@ static size_t ParseType(char type, const std::string_view data, PandaStringStrea
         case 'l': ss << 'J'; return 1;
         case 'f': ss << 'F'; return 1;
         case 'd': ss << 'D'; return 1;
-        case 'N': ss << panda_file_items::class_descriptors::NULL_VALUE; return 1;
+        case 'Y': ss << "Lstd/core/Object;"; return 1;
+        case 'N': ss << "Lstd/core/Object;"; return 1;
         case 'U': ss << panda_file_items::class_descriptors::OBJECT; return 1;
         case 'A': bodySize = ParseArrayBody(data.substr(1), ss); break;
         case 'X': bodySize = ParseUnionBody(data.substr(1), ss); break;
