@@ -114,6 +114,24 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Creates a new instance of Array.
      *
+     * @param arrayLen amount of elements.
+     *
+     * @param initializer custom initialization for each elements.
+     *
+     * @returns A new Array instance with the specified length
+     *
+     */
+    public constructor(arrayLen: int, initializer: (index: int) => T) {
+        this.buffer = new Any[arrayLen]
+        this.actualLength = arrayLen
+        for (let k: int = 0; k < arrayLen; k++) {
+            this.$_set_unsafe(k, initializer(k))
+        }
+    }
+
+    /**
+     * Creates a new instance of Array.
+     *
      * @param arrayLength amount of elements.
      *
      * @param initialValue initial value of elements.
