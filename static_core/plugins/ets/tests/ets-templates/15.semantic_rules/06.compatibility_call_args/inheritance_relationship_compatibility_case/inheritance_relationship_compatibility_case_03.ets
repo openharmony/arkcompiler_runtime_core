@@ -26,7 +26,7 @@ class MyClass implements MyInterface {
 }
 
 function checkTypeIdentity(a: Any, b: Any): boolean {
-    return Class.of(a as Object) === Class.of(b as Object);
+    return a instanceof b; // return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {

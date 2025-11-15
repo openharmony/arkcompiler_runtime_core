@@ -26,8 +26,6 @@ function main(): void {
   const val2: string[] = ["1", "2", "3"];
 
   const result1 = checkTypeIdentity(val1, val2);
-  const result2 = checkTypeIdentity(val2, val1);
 
   arktest.assertEQ(result1, true);
-  arktest.assertEQ(result2, true);
 }

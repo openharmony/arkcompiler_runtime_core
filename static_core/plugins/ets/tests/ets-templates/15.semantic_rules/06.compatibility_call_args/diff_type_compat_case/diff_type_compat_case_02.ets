@@ -17,14 +17,6 @@
 desc: Ensuring type identity in type guards.
 ---*/
 
-interface I {
-  i: boolean;
-}
-
-class A {
-  i: number;
-}
-
 function checkTypeIdentity(a: Any, b: Any): boolean {
     return Class.of(a as Object) === Class.of(b as Object);
 }
