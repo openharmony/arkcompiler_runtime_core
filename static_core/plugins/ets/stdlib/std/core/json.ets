@@ -271,9 +271,13 @@ export class JSON {
         if (obj === undefined) {
             return "undefined"
         }
-        const json = JSON.stringifyFast(obj)
-        if (json !== undefined) {
-            return json
+        // `stringifyFast` does not implement special processing of object literals,
+        // hence need to implement that case in managed
+        if (!(obj instanceof Object) || !Reflect.isLiteralInitializedInterface(obj)) {
+            const json = JSON.stringifyFast(obj)
+            if (json !== undefined) {
+                return json
+            }
         }
         return new JSONWriter().write(obj)
     }
@@ -751,6 +755,7 @@ export class JSON {
 
 class JSONWriter {
     private static readonly STD_CORE_INTEROP_JSVALUE_CLASS = Class.from<JSValue>()
+    private static readonly GETTER_METHOD_PREFIX = "%%get-"
 
     private readonly replacer: ((key: String, value: Any) => Any) | undefined
     private readonly fieldsFilter: FixedArray<string>
@@ -1026,13 +1031,21 @@ class JSONWriter {
             this.indentLevel += 1
         }
 
-        const writableFields = this.getWritableFields(objCls, obj)
-
         let fieldDumped = false
+        const writableFields = this.getWritableFields(objCls, obj)
         if (writableFields.length > 0) {
             this.path.add(obj)
-            fieldDumped = this.writeClassFields(writableFields)
+            fieldDumped = this.writeClassFields(writableFields, fieldDumped)
             this.path.delete(obj)
+        }
+
+        if (Reflect.isLiteralInitializedInterface(obj)) {
+            const gettersValues = JSONWriter.getGettersKeyValuePairs(objCls, obj)
+            if (gettersValues.length > 0) {
+                this.path.add(obj)
+                fieldDumped |= this.writeClassFields(gettersValues, fieldDumped)
+                this.path.delete(obj)
+            }
         }
 
         if (this.useIndent) {
@@ -1082,11 +1095,10 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private writeClassFields(writableFields: Array<[string, Any]>): boolean {
+    private writeClassFields(writableFields: Array<[string, Any]>, fieldDumped: boolean): boolean {
         const FIELD_NAME = 0
         const FIELD_VALUE = 1
 
-        let fieldDumped = false
         for (let fieldIdx = 0; fieldIdx < writableFields.length; fieldIdx++) {
             const fieldTypeValuePair = writableFields[fieldIdx]
 
@@ -1171,6 +1183,25 @@ class JSONWriter {
         }
 
         return writableFields
+    }
+
+    /**
+    * @brief Returns values of public getters of a class.
+    * Searches only within direct methods of the class. Does not apply fields filter.
+    */
+    private static getGettersKeyValuePairs(cls: Class, obj: Object) {
+        const namesAndValues = new Array<[string, Any]>()
+        const prefixLength = JSONWriter.GETTER_METHOD_PREFIX.getLength()
+        const clsMethods = cls.getInstanceMethods()
+        for (const method of clsMethods) {
+            let name = method.getName()
+            if (name.startsWith(JSONWriter.GETTER_METHOD_PREFIX, 0)) {
+                name = name.substring(prefixLength)
+                const value = method.invoke(obj)
+                namesAndValues.push([name, value])
+            }
+        }
+        return namesAndValues
     }
 
     private writeArrayValue<E>(array: FixedArray<E>): void {
