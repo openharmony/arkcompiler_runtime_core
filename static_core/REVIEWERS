@@ -100,19 +100,31 @@ static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon @asidoro
 static_core/plugins/ets/runtime/                         @vpukhov
 static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting ^ychen3
 static_core/plugins/ets/runtime/ani                      @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
-static_core/plugins/ets/runtime/ets_coroutine.h          ^tanglu10 @zhuangkudecha ^yuesiyuan ^Wangyuzhong11 ^dmitriitr @konstanting
-static_core/plugins/ets/runtime/ets_entrypoints*         @Prof @mbolshov ^asidorov
-static_core/plugins/ets/runtime/ets_handle*              ^dmitriitr @udav
-static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof
-static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof
-static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
-static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @yuan-yao14
-static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^jokerxd-liu ^lijin1039
-static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
-static_core/plugins/ets/verification/                    @igelhaus @oatuwwutao ^seeuiceland
-static_core/runtime/include/mem/                         ^dmitriitr @udav
-static_core/runtime/include/tooling/                     @slynkodenis
-static_core/runtime/tests/tooling/                       @slynkodenis
+static_core/plugins/ets/runtime/ets_class_linker_context.cpp                  @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_class_linker_context.h                    @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_class_linker_extension.cpp                @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_class_linker_extension.h                  @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_coroutine.h                               ^tanglu10 @zhuangkudecha ^yuesiyuan ^Wangyuzhong11 ^dmitriitr @konstanting
+static_core/plugins/ets/runtime/ets_entrypoints*                              @Prof @mbolshov ^asidorov
+static_core/plugins/ets/runtime/ets_handle*                                   ^dmitriitr @udav
+static_core/plugins/ets/runtime/ets_libbase_runtime.yaml                      @Prof
+static_core/plugins/ets/runtime/ets_namespace_manager.cpp                     @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_namespace_manager.h                       @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_namespace_manager_impl.cpp                @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_namespace_manager_impl.h                  @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_native_library.cpp                        @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_native_library.h                          @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_native_library_provider.cpp               @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_native_library_provider.h                 @vpukhov @shilei123
+static_core/plugins/ets/runtime/ets_runtime_interface*                        @Prof
+static_core/plugins/ets/runtime/job_queue.h                                   @dmitriitr
+static_core/plugins/ets/sdk/                                                  ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @yuan-yao14
+static_core/plugins/ets/stdlib/                                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^jokerxd-liu ^lijin1039
+static_core/plugins/ets/tests/ani                                             @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
+static_core/plugins/ets/verification/                                         @igelhaus @oatuwwutao ^seeuiceland
+static_core/runtime/include/mem/                                              ^dmitriitr @udav
+static_core/runtime/include/tooling/                                          @slynkodenis
+static_core/runtime/tests/tooling/                                            @slynkodenis
 static_core/plugins/ets/runtime/ani/ani_helpers*                              @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw ^asidorov
 static_core/plugins/ets/runtime/finalreg/*                                    ^dmitriitr @udav @ipetrov ^shemetovphilip
 static_core/plugins/ets/runtime/interop_js/                                   @nazarovkonstantin @vpukhov @zmzhao1995 @gitee-dakeQI
@@ -122,6 +134,8 @@ static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @P
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/intrinsics/escompat_taskpool.cpp              ^dmitriitr ^konstanting @ipetrov
 static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
+static_core/plugins/ets/runtime/intrinsics/std_core_AbcFile.cpp               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @shilei123
+static_core/plugins/ets/runtime/intrinsics/std_core_AbcRuntimeLinker.cpp      ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_Method.cpp                @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/intrinsics/std_core_Type*                     @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/intrinsics/std_core_Value.cpp                 @magikarp777 ^anton-sysoev @Nojpg
@@ -135,9 +149,11 @@ static_core/plugins/ets/runtime/types/*atomic*                                ^d
 static_core/plugins/ets/runtime/types/*promise*                               ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/*reflect*                               @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/*typeapi*                               @magikarp777 ^anton-sysoev @Nojpg
+static_core/plugins/ets/runtime/types/ets_abc_runtime_linker.h                @nazarovkonstantin @slynkodenis @shilei123
 static_core/plugins/ets/runtime/types/ets_class*                              @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/ets_method*                             @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/ets_promise.h                           ^tanglu10 @zhuangkudecha ^yuesiyuan ^Wangyuzhong11 ^dmitriitr @konstanting
+static_core/plugins/ets/runtime/types/ets_runtime_linker.h                    @nazarovkonstantin @slynkodenis @shilei123
 static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting
 static_core/plugins/ets/stdlib/escompat/taskpool.ets                          ^dmitriitr @konstanting @zhuangkudecha ^tanglu10 ^yuesiyuan ^Wangyuzhong11
 static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
@@ -159,6 +175,8 @@ static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^d
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong ^ychen3 @zhuangkudecha ^tanglu10 ^yuesiyuan ^Wangyuzhong11
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.ets               @konstanting ^tanglu10 @zhuangkudecha ^yuesiyuan ^Wangyuzhong11
+static_core/plugins/ets/stdlib/std/core/AbcRuntimeLinker.ets                  ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^jokerxd-liu ^lijin1039 @shilei123
+static_core/plugins/ets/stdlib/std/core/BootRuntimeLinker.ets                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^jokerxd-liu ^lijin1039 @shilei123
 static_core/plugins/ets/stdlib/std/core/Coroutine.ets                         ^dmitriitr @konstanting ^ychen3
 static_core/plugins/ets/stdlib/std/core/EAWorker.ets                          ^dmitriitr @konstanting ^ychen3 @zhuangkudecha ^tanglu10 ^yuesiyuan ^Wangyuzhong11
 static_core/plugins/ets/stdlib/std/core/EnumConstant.ets                      @magikarp777 ^anton-sysoev @Nojpg @liyiming13 ^lijin1039
@@ -168,6 +186,7 @@ static_core/plugins/ets/stdlib/std/core/GC.ets                                ^d
 static_core/plugins/ets/stdlib/std/core/Method.ets                            @magikarp777 ^anton-sysoev @Nojpg @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/Object.ets                            @magikarp777 ^anton-sysoev @Nojpg @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/Promise.ets                           ^dmitriitr @udav  ^tanglu10 @zhuangkudecha ^yuesiyuan ^Wangyuzhong11
+static_core/plugins/ets/stdlib/std/core/RuntimeLinker.ets                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^jokerxd-liu ^lijin1039 @shilei123
 static_core/plugins/ets/stdlib/std/core/Type*                                 @magikarp777 ^anton-sysoev @Nojpg @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/UnionCase.ets                         @magikarp777 ^anton-sysoev @Nojpg @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/Value.ets                             @magikarp777 ^anton-sysoev @Nojpg @liyiming13 ^lijin1039
