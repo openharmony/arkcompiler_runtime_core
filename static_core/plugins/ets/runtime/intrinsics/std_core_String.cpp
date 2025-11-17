@@ -193,6 +193,9 @@ EtsBoolean StdCoreStringIsEmpty(EtsString *s)
 
 uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
 {
+    if (owner == nullptr) {
+        return UINT8_C(s == nullptr);
+    }
     if ((owner->AsObject()) == s) {
         return UINT8_C(1);
     }
