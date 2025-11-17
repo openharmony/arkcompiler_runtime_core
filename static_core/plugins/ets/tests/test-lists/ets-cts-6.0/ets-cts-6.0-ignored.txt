@@ -389,6 +389,7 @@
 #31475 False positive passed tests on runner-2
 09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
 09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
+09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri30.ets
 
 #30295
 09.classes/02.class_extension_clause/extension_clause_negative_5.ets
