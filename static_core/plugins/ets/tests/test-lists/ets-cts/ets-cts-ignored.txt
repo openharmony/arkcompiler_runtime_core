@@ -933,11 +933,6 @@
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_6.ets
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_7.ets
 
-#29725
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default.ets
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_2.ets
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_3.ets
-
 #28972 CTE on string[] type parameter
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_3.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_4.ets

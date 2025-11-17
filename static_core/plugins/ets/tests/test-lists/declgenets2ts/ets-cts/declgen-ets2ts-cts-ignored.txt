@@ -222,6 +222,7 @@
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all_a_plus_c.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all_with_rename_0.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all_with_rename_1.ets
+13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_5.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_5.ets
 15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_infer_37.ets
 15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_neg_3.ets

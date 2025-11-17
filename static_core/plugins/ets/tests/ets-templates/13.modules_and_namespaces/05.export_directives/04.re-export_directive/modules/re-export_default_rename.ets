@@ -19,4 +19,9 @@ files:
 - ./default_module.ets
 ---*/
 
+class V {
+  f: int = 7
+}
+
 export {default as B} from "./default_module"
+export default V

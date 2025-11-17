@@ -14,15 +14,15 @@
  */
 
 /*---
-desc: reexported and rename default entity. Import entity as non-default
+desc: reexported default entity after rename becomes usual entity. Module may contain own default entity.
 files:
 - ./modules/re-export_default_rename.ets
 - ./modules/default_module.ets
 ---*/
 
-import {B} from "./modules/re-export_default_rename"
+import ClassV from "./modules/re-export_default_rename"
 
 function main() {
-  let i = new B()
-  arktest.assertEQ(i.f, 3)
+  let i = new ClassV()
+  arktest.assertEQ(i.f, 7)
 }

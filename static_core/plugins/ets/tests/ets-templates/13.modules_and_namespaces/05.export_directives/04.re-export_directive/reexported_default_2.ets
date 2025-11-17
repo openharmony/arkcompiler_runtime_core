@@ -14,15 +14,15 @@
  */
 
 /*---
-desc: re-export default declaration from the other module under 'name'
+desc: reexported default entity without rename is still default. Import option #2 with figure brackets
 files:
-- ./modules/re-export_default_rename.ets
+- ./modules/re-export_default.ets
 - ./modules/default_module.ets
 ---*/
 
-import {C} from "./modules/re-export_default_rename"
+import {default as A} from "./modules/re-export_default"
 
 function main() {
-  let i = new C()
+  let i = new A()
   arktest.assertEQ(i.f, 3)
 }
