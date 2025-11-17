@@ -229,6 +229,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_CLASS:                        return "ani_class";
         case ValueType::ANI_METHOD:                       return "ani_method";
         case ValueType::ANI_STATIC_METHOD:                return "ani_static_method";
+        case ValueType::ANI_FUNCTION:                     return "ani_function";
         case ValueType::ANI_OBJECT:                       return "ani_object";
         case ValueType::ANI_STRING:                       return "ani_string";
         case ValueType::ANI_VALUE_ARGS:                   return "const ani_value *";
@@ -576,9 +577,6 @@ public:
             return err;
         }
 
-        if (class_ == nullptr) {
-            return "wrong class";
-        }
         if (vctor->GetEtsMethod()->GetClass() != class_) {
             return "wrong class for ctor";
         }
@@ -595,10 +593,7 @@ public:
             return err;
         }
 
-        if (class_ == nullptr) {
-            return "wrong object";
-        }
-        if (!vmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
+        if (class_ == nullptr || !vmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
             return "wrong object for method";
         }
         return {};
@@ -615,12 +610,22 @@ public:
             return err;
         }
 
-        if (class_ == nullptr) {
-            return "wrong class";
-        }
-        if (!vstaticmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
+        if (class_ == nullptr || !vstaticmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {
             return "wrong class for method";
         }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyFunction(VFunction *vfunction, EtsType returnType)
+    {
+        if (!GetEnvANIVerifier()->IsValidMethod(vfunction)) {
+            return "wrong function";
+        }
+        std::optional<PandaString> err = DoVerifyMethod(vfunction, impl::VMethod::ANIMethodType::FUNCTION, returnType);
+        if (err) {
+            return err;
+        }
+
         return {};
     }
 
@@ -793,6 +798,12 @@ static std::optional<PandaString> VerifyStaticMethod(Verifier &v, const ANIArg &
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_STATIC_METHOD);
     return v.VerifyStaticMethod(arg.GetValueStaticMethod(), arg.GetReturnType());
+}
+
+static std::optional<PandaString> VerifyFunction(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FUNCTION);
+    return v.VerifyFunction(arg.GetValueFunction(), arg.GetReturnType());
 }
 
 static std::optional<PandaString> VerifyMethodAArgs(Verifier &v, const ANIArg &arg)

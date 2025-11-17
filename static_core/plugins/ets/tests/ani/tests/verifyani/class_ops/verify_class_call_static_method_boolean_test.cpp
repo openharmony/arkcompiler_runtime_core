@@ -166,7 +166,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, wrong_cls_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
-        {"static_method", "ani_static_method", "wrong class"},
+        {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -201,7 +201,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, cls_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference type: null"},
-        {"static_method", "ani_static_method", "wrong class"},
+        {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -592,7 +592,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, class_from_local_scope)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
-        {"static_method", "ani_static_method", "wrong class"},
+        {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -616,7 +616,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, cross_thread_method_call_from_native_me
     std::array methods = {
         ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
         ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ClassCallStaticMethodBooleanTest>)}};
-    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, cls, methods.data(), methods.size()), ANI_OK);
+    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
 
     std::thread([&]() {
         ani_env *env {};
@@ -643,8 +643,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, cross_thread_method_call_from_native_me
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "baz", ":"), ANI_OK);
 }
 
-// Issue 30353
-TEST_F(ClassCallStaticMethodBooleanTest, DISABLED_class_from_escape_local_scope)
+TEST_F(ClassCallStaticMethodBooleanTest, class_from_escape_local_scope)
 {
     const int nr3 = 3;
     ani_class cls {};
@@ -663,8 +662,7 @@ TEST_F(ClassCallStaticMethodBooleanTest, DISABLED_class_from_escape_local_scope)
         ANI_OK);
 }
 
-// Issue 30353
-TEST_F(ClassCallStaticMethodBooleanTest, DISABLED_call_method_on_global_ref)
+TEST_F(ClassCallStaticMethodBooleanTest, call_method_on_global_ref)
 {
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
@@ -841,7 +839,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, wrong_cls_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
-        {"static_method", "ani_static_method", "wrong class"},
+        {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -874,7 +872,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, cls_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference type: null"},
-        {"static_method", "ani_static_method", "wrong class"},
+        {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -1143,7 +1141,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, class_from_local_scope)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"class", "ani_class", "wrong reference"},
-        {"static_method", "ani_static_method", "wrong class"},
+        {"static_method", "ani_static_method", "wrong class for method"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -1194,8 +1192,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, cross_thread_method_call_from_native_m
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "baz", ":"), ANI_OK);
 }
 
-// Issue 30353
-TEST_F(ClassCallStaticMethodBooleanATest, DISABLED_class_from_escape_local_scope)
+TEST_F(ClassCallStaticMethodBooleanATest, class_from_escape_local_scope)
 {
     ani_class cls {};
     const int nr3 = 3;
@@ -1212,8 +1209,7 @@ TEST_F(ClassCallStaticMethodBooleanATest, DISABLED_class_from_escape_local_scope
     ASSERT_EQ(env_->c_api->Class_CallStaticMethod_Boolean_A(env_, cls, method, &result, args_.data()), ANI_OK);
 }
 
-// Issue 30353
-TEST_F(ClassCallStaticMethodBooleanATest, DISABLED_call_method_on_global_ref)
+TEST_F(ClassCallStaticMethodBooleanATest, call_method_on_global_ref)
 {
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);

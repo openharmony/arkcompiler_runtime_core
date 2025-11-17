@@ -102,7 +102,7 @@ inline ani_static_method ToAniStaticMethod(EtsMethod *method)
     return reinterpret_cast<ani_static_method>(method);
 }
 
-inline EtsMethod *ToInternalFunction(ani_function fn)
+inline EtsMethod *ToInternalMethod(ani_function fn)
 {
     auto *m = reinterpret_cast<EtsMethod *>(fn);
     ASSERT(m != nullptr);

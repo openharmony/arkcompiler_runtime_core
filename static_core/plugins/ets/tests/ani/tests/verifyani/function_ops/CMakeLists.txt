@@ -11,15 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include(cmake/ani_verify_tests.cmake)
-
-add_subdirectory(array_ops)
-add_subdirectory(class_ops)
-add_subdirectory(error_ops)
-add_subdirectory(function_ops)
-add_subdirectory(local_scope_ops)
-add_subdirectory(object_ops)
-add_subdirectory(ref_ops)
-add_subdirectory(scope_ops)
-add_subdirectory(string_ops)
-add_subdirectory(vm_ops)
+ani_verify_add_gtest(ani_verify_test_function_call_boolean
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_function_call_boolean_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_function_call_boolean_test.ets
+)

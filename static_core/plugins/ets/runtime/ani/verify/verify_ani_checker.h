@@ -40,6 +40,7 @@
     X(VERIFY_CTOR,                          VerifyCtor)                           \
     X(VERIFY_METHOD,                        VerifyMethod)                         \
     X(VERIFY_STATIC_METHOD,                 VerifyStaticMethod)                   \
+    X(VERIFY_FUNCTION,                      VerifyFunction)                       \
     X(VERIFY_METHOD_A_ARGS,                 VerifyMethodAArgs)                    \
     X(VERIFY_METHOD_V_ARGS,                 VerifyMethodVArgs)                    \
     X(VERIFY_VM_STORAGE,                    VerifyVmStorage)                      \
@@ -90,6 +91,7 @@
     X(ANI_OBJECT,                       Object,                    VObject *)                \
     X(ANI_METHOD,                       Method,                    VMethod *)                \
     X(ANI_STATIC_METHOD,                StaticMethod,              VStaticMethod *)          \
+    X(ANI_FUNCTION,                     Function,                  VFunction *)              \
     X(ANI_STRING,                       String,                    VString *)                \
     X(ANI_ERROR,                        Error,                     VError *)                 \
     X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
@@ -140,6 +142,7 @@ class VObject;
 class VClass;
 class VMethod;
 class VStaticMethod;
+class VFunction;
 class VString;
 class VError;
 class VFixedArrayBoolean;
@@ -271,6 +274,11 @@ public:
     static ANIArg MakeForStaticMethod(VStaticMethod *vstaticmethod, std::string_view name, EtsType returnType)
     {
         return ANIArg(ArgValueByStaticMethod(vstaticmethod), name, Action::VERIFY_STATIC_METHOD, returnType);
+    }
+
+    static ANIArg MakeForFunction(VFunction *vfunction, std::string_view name, EtsType returnType)
+    {
+        return ANIArg(ArgValueByFunction(vfunction), name, Action::VERIFY_FUNCTION, returnType);
     }
 
     static ANIArg MakeForMethodArgs(AniMethodArgs *aniMethodArgs, std::string_view name)

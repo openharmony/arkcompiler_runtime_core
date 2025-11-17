@@ -113,7 +113,7 @@ TEST_F(ObjectNewTest, wrong_cls_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"cls", "ani_class", "wrong reference"},
-        {"ctor", "ani_method", "wrong class"},
+        {"ctor", "ani_method", "wrong class for ctor"},
         {"result", "ani_object *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -141,7 +141,7 @@ TEST_F(ObjectNewTest, wrong_cls_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"cls", "ani_class", "wrong reference type: null"},
-        {"ctor", "ani_method", "wrong class"},
+        {"ctor", "ani_method", "wrong class for ctor"},
         {"result", "ani_object *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -665,7 +665,7 @@ TEST_F(ObjectNewTest, cls_undefined)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"cls", "ani_class", "wrong reference type: undefined"},
-        {"ctor", "ani_method", "wrong class"},
+        {"ctor", "ani_method", "wrong class for ctor"},
         {"result", "ani_object *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},

@@ -179,7 +179,7 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_object_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
-        {"method", "ani_method", "wrong object"},
+        {"method", "ani_method", "wrong object for method"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -196,7 +196,7 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_object_0)
     ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, cls_1)
+TEST_F(ObjectCallMethodBooleanTest, wrong_object_1)
 {
     GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
     ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
@@ -211,7 +211,7 @@ TEST_F(ObjectCallMethodBooleanTest, cls_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference type: null"},
-        {"method", "ani_method", "wrong object"},
+        {"method", "ani_method", "wrong object for method"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -573,7 +573,7 @@ TEST_F(ObjectCallMethodBooleanTest, object_from_local_scope)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
-        {"method", "ani_method", "wrong object"},
+        {"method", "ani_method", "wrong object for method"},
         {"result", "ani_boolean *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
@@ -596,7 +596,7 @@ TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call_from_native_method)
     std::array methods = {
         ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
         ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethodBooleanTest>)}};
-    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, class_, methods.data(), methods.size()), ANI_OK);
+    ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     std::thread([&]() {
         ani_env *env {};
@@ -616,14 +616,14 @@ TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call_from_native_method)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 
-// Issue 30353
-TEST_F(ObjectCallMethodBooleanTest, DISABLED_object_from_escape_local_scope)
+TEST_F(ObjectCallMethodBooleanTest, object_from_escape_local_scope)
 {
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateEscapeLocalScope(nr3), ANI_OK);
     ani_object object {};
     GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Child", &object);
     ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
 
     ani_boolean result;
     ASSERT_EQ(
@@ -631,8 +631,7 @@ TEST_F(ObjectCallMethodBooleanTest, DISABLED_object_from_escape_local_scope)
         ANI_OK);
 }
 
-// Issue 30353
-TEST_F(ObjectCallMethodBooleanTest, DISABLED_call_method_on_global_ref)
+TEST_F(ObjectCallMethodBooleanTest, call_method_on_global_ref)
 {
     GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
     ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
@@ -777,7 +776,7 @@ TEST_F(ObjectCallMethodBooleanATest, wrong_object_0)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
-        {"method", "ani_method", "wrong object"},
+        {"method", "ani_method", "wrong object for method"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -807,7 +806,7 @@ TEST_F(ObjectCallMethodBooleanATest, cls_1)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference type: null"},
-        {"method", "ani_method", "wrong object"},
+        {"method", "ani_method", "wrong object for method"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -1055,7 +1054,7 @@ TEST_F(ObjectCallMethodBooleanATest, object_from_local_scope)
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
-        {"method", "ani_method", "wrong object"},
+        {"method", "ani_method", "wrong object for method"},
         {"result", "ani_boolean *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
@@ -1098,21 +1097,20 @@ TEST_F(ObjectCallMethodBooleanATest, cross_thread_method_call_from_native_method
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 
-// Issue 30353
-TEST_F(ObjectCallMethodBooleanATest, DISABLED_object_from_escape_local_scope)
+TEST_F(ObjectCallMethodBooleanATest, object_from_escape_local_scope)
 {
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateEscapeLocalScope(nr3), ANI_OK);
     ani_object object {};
     GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Child", &object);
     ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
 
     ani_boolean result;
     ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_OK);
 }
 
-// Issue 30353
-TEST_F(ObjectCallMethodBooleanATest, DISABLED_call_method_on_global_ref)
+TEST_F(ObjectCallMethodBooleanATest, call_method_on_global_ref)
 {
     GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
     ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);

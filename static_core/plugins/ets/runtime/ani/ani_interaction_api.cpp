@@ -94,7 +94,7 @@ static void CheckMethodReturnType(ani_method method, EtsType type)
 
 static void CheckFunctionReturnType(ani_function fn, EtsType type)
 {
-    EtsMethod *m = ToInternalFunction(fn);
+    EtsMethod *m = ToInternalMethod(fn);
     if (UNLIKELY(m->GetReturnValueType() != type)) {
         LOG(FATAL, ANI) << "Return type mismatch";
     }
@@ -254,7 +254,7 @@ static ani_status DoGeneralMethodCall(ScopedManagedCodeFix &s, ani_object obj, M
         ani_status status = InitializeClass(s, m->GetClass());
         ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     } else if constexpr (std::is_same_v<MethodType, ani_function>) {
-        m = ToInternalFunction(method);
+        m = ToInternalMethod(method);
 
         ani_status status = InitializeClass(s, m->GetClass());
         ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);

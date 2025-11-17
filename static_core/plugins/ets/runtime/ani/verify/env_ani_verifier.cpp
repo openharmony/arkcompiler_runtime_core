@@ -130,11 +130,15 @@ VRef *EnvANIVerifier::AddLocalVerifiedRef(ani_ref ref)
 
 VMethod *EnvANIVerifier::GetVerifiedMethod(ani_method method)
 {
-    return reinterpret_cast<VMethod *>(verifier_->AddMethod(ToInternalMethod(method)));
+    return static_cast<VMethod *>(verifier_->AddMethod(ToInternalMethod(method)));
 }
 VStaticMethod *EnvANIVerifier::GetVerifiedStaticMethod(ani_static_method staticMethod)
 {
-    return reinterpret_cast<VStaticMethod *>(verifier_->AddMethod(ToInternalMethod(staticMethod)));
+    return static_cast<VStaticMethod *>(verifier_->AddMethod(ToInternalMethod(staticMethod)));
+}
+VFunction *EnvANIVerifier::GetVerifiedFunction(ani_function function)
+{
+    return static_cast<VFunction *>(verifier_->AddMethod(ToInternalMethod(function)));
 }
 
 void EnvANIVerifier::DeleteLocalVerifiedRef(VRef *vref)
@@ -168,13 +172,7 @@ bool EnvANIVerifier::IsGlobalRef(VRef *vref)
 
 bool EnvANIVerifier::IsValidMethod(impl::VMethod *vmethod)
 {
-    ASSERT(!frames_.empty());
-    for (auto it = frames_.crbegin(); it != frames_.crend(); ++it) {
-        if (verifier_->IsValidVerifiedMethod(vmethod)) {
-            return true;
-        }
-    }
-    return false;
+    return verifier_->IsValidVerifiedMethod(vmethod);
 }
 
 bool EnvANIVerifier::CanBeDeletedFromCurrentScope(VRef *vref)

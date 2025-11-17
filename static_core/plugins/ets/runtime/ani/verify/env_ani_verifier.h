@@ -53,6 +53,7 @@ public:
 
     VMethod *GetVerifiedMethod(ani_method method);
     VStaticMethod *GetVerifiedStaticMethod(ani_static_method staticMethod);
+    VFunction *GetVerifiedFunction(ani_function function);
 
     VRef *AddGlobalVerifiedRef(ani_ref gref);
     void DeleteDeleteGlobalRef(VRef *vgref);
