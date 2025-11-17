@@ -34,7 +34,6 @@ export class ProcessErrorHandler {
     }
 
     /**
-     * Does not return.
      * Calls a custom handler on uncaught error and then exits
      *
      * @param error Uncaught error
@@ -52,10 +51,10 @@ export class ProcessErrorHandler {
             this.callback(error);
         } catch (e) {
             console.error('Error while invoking callback:', e);
-        } finally {
             let procManager = new StdProcess.ProcessManager();
             procManager.exit(1);
         }
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
     /**

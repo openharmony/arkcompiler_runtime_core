@@ -46,11 +46,12 @@ function SimpleTest(): void {
 }
 
 function SetTimeoutTest(): void {
+    let jb = new CompletableJob<void>();
     StdProcess.on('uncaughtError', (err: Object): void => {
-        let procManager = new StdProcess.ProcessManager();
-        procManager.exit(2);
+        jb.finish();
     });
     setTimeout(Failing);
+    jb.Await();
 }
 
 function NoDeadlockTest(): void {

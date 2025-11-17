@@ -153,7 +153,7 @@ public:
     void OnContextSwitchedTo() override;
 
     /// @brief print stack and exit the program
-    [[noreturn]] void HandleUncaughtException() override;
+    void HandleUncaughtException() override;
 
     /// The method returns true if there are interop JS code frames in the coroutine call stack
     bool IsContextSwitchRisky() const override;

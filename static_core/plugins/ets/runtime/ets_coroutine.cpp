@@ -296,11 +296,10 @@ void EtsCoroutine::OnContextSwitchedTo()
     }
 }
 
-[[noreturn]] void EtsCoroutine::HandleUncaughtException()
+void EtsCoroutine::HandleUncaughtException()
 {
     ASSERT(HasPendingException());
     GetPandaVM()->HandleUncaughtException();
-    UNREACHABLE();
 }
 
 void EtsCoroutine::ListUnhandledEventsOnProgramExit()
@@ -327,7 +326,6 @@ void EtsCoroutine::ProcessUnhandledFailedJobs()
             }
             if (HasPendingException()) {
                 HandleUncaughtException();
-                UNREACHABLE();
             }
         }
     }
@@ -352,7 +350,6 @@ void EtsCoroutine::ProcessUnhandledRejectedPromises(bool listAllObjects)
             }
             if (HasPendingException()) {
                 HandleUncaughtException();
-                UNREACHABLE();
             }
         }
     }
