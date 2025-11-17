@@ -224,6 +224,7 @@
   "tests/tests-u-runner-2/runner/test/metadata_test/__init__.py": "*",
   "tests/tests-u-runner-2/runner/test/func_test/__init__.py": "*",
   "tests/tests-u-runner-2/runner/test/runner_test/data/__init__.py": "*",
+  "tests/tests-u-runner-2/runner/extensions/generators/ets_cts/test_template.tpl": "*",
   "tests/verifier-tests": "*",
   "tests/vm-benchmarks": "*",
   "tools/ark_js_napi_cli": "*",
