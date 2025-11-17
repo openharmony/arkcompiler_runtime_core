@@ -1287,7 +1287,9 @@ void StackfulCoroutineManager::CalculateUserCoroutinesLimits(size_t &userCorouti
     constexpr size_t SYSTEM_COROS_PER_WORKER = 2;
     size_t estimatedSystemCoroCount = SYSTEM_COROS_PER_WORKER * (commonWorkersCount_ + exclusiveWorkersLimit_);
 
-    size_t userCoroutineMaxLimit = coroutineCountLimit_ - estimatedSystemCoroCount;
+    ASSERT(coroutineCountLimit_ > estimatedSystemCoroCount);
+    constexpr size_t USER_COROUTINE_LIMIT = 7000;
+    size_t userCoroutineMaxLimit = std::min(USER_COROUTINE_LIMIT, coroutineCountLimit_ - estimatedSystemCoroCount);
 
     if (limit == 0) {  // Auto set
         LOG(DEBUG, COROUTINES)

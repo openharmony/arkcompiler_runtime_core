@@ -251,7 +251,7 @@ if (NOT PANDA_TARGET_ARM32)
 
     # limit with 10'000 coroutine can be faced only on 64bit arch
     if (NOT PANDA_ENABLE_THREAD_SANITIZER AND NOT PANDA_ENABLE_ADDRESS_SANITIZER)
-        add_ets_coroutines_test(FILE launch_10000.ets
+        add_ets_coroutines_test(FILE launch_7000.ets
                                 SKIP_ARM32_COMPILER
                                 LIST_UNHANDLED
                                 IMPL "STACKFUL"

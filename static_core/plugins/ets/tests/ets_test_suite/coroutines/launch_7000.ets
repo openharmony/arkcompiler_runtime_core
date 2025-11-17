@@ -15,8 +15,8 @@
 
 import { launch } from "std/concurrency"
 
-function create_10000_coro_test() {
-    const coro_to_create = 10000;
+function create_7000_coro_test() {
+    const coro_to_create = 7000;
     let arr = new Int32Array(new ArrayBuffer(16384))
 
     let wait_func = (arr: Int32Array) => {Atomics.wait(arr, 0, 0);}
@@ -33,6 +33,6 @@ function create_10000_coro_test() {
 
 function main() {
     let testsuite = new arktest.ArkTestsuite("EAWorker");
-    testsuite.addTest("create_10000_coro_test", create_10000_coro_test)
+    testsuite.addTest("create_7000_coro_test", create_7000_coro_test)
     return testsuite.run();
 }
