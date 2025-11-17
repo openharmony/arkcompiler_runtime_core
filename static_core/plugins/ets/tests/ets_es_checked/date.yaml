@@ -113,10 +113,19 @@ sub:
     - expr: new Date(pars).setHours(10)
       params:
         - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
+    - expr: new Date(pars).setHours(25)
+      params:
+        - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
     - expr: new Date(pars).setMinutes(11)
       params:
         - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
+    - expr: new Date(pars).setMinutes(61)
+      params:
+        - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
     - expr: new Date(pars).setSeconds(27)
+      params:
+        - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
+    - expr: new Date(pars).setSeconds(61)
       params:
         - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
     - expr: new Date(pars).setMilliseconds(37)
@@ -137,10 +146,19 @@ sub:
     - expr: new Date(pars).setUTCHours(10, 20, 18)
       params:
         - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
+    - expr: new Date(pars).setUTCHours(25, 61, 61)
+      params:
+        - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
     - expr: new Date(pars).setUTCMinutes(11)
       params:
         - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
+    - expr: new Date(pars).setUTCMinutes(61)
+      params:
+        - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
     - expr: new Date(pars).setUTCSeconds(27)
+      params:
+        - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
+    - expr: new Date(pars).setUTCSeconds(61)
       params:
         - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565
     - expr: new Date(pars).setUTCMilliseconds(37)

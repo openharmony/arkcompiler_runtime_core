@@ -1048,9 +1048,6 @@ export class Date {
      * @param value new hours
      */
     public setHours(value: int): long {
-        if (value < 0 || value > 23) {
-            throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..23");
-        }
         let hours = ecmaHourFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= msPerHour * hours;
         this.ms += msPerHour * value;
@@ -1099,9 +1096,6 @@ export class Date {
      * @param value new hours
      */
     public setUTCHours(value: int): long {
-        if (value < 0 || value > 23) {
-            throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..23");
-        }
         let hours = ecmaHourFromTime(this.ms);
         this.ms -= msPerHour * hours;
         this.ms += msPerHour * value;
@@ -1317,9 +1311,6 @@ export class Date {
      * @param value new seconds
      */
     public setUTCSeconds(value: int): long {
-        if (value < 0 || value >= 60) {
-            throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..60");
-        }
         let sec = ecmaSecFromTime(this.ms);
         this.ms -= sec * msPerSecond;
         this.ms += value * msPerSecond;
@@ -1361,9 +1352,6 @@ export class Date {
      * @param value new minutes
      */
     public setUTCMinutes(value: int): long {
-        if (value < 0 || value >= 60) {
-            throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..60");
-        }
         let min = ecmaMinFromTime(this.ms);
         this.ms -= min * msPerMinute;
         this.ms += value * msPerMinute;
@@ -1408,9 +1396,6 @@ export class Date {
      * @param value new minutes
      */
     public setMinutes(value: int): long {
-        if (value < 0 || value >= 60) {
-            throw new AssertionError("Invalid value " + value + " for \"value\", has to be in range 0..60");
-        }
         let min = ecmaMinFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
         this.ms -= min * msPerMinute;
         this.ms += value * msPerMinute;
