@@ -84,7 +84,6 @@ public:
     static std::vector<MirrorFieldInfo> GetFinalizableWeakRefMembers()
     {
         return std::vector<MirrorFieldInfo> {
-            MIRROR_FIELD_INFO(EtsFinalizableWeakRef, referent_, "referent"),
             MIRROR_FIELD_INFO(EtsFinalizableWeakRef, prev_, "prevRef"),
             MIRROR_FIELD_INFO(EtsFinalizableWeakRef, next_, "nextRef"),
             MIRROR_FIELD_INFO(EtsFinalizableWeakRef, finalizerPtr_, "finalizerPtr"),
@@ -115,7 +114,11 @@ protected:
 
 TEST_F(EtsFinalizableWeakRefTest, FinalizableWeakRefMemoryLayout)
 {
+    // Check the parent is WeakRef because it affects memory layout of fields
+    EtsClass *weakRefClass = vm_->GetClassLinker()->GetClass("Lstd/core/WeakRef;");
+    ASSERT_NE(nullptr, weakRefClass);
     EtsClass *finalizableWeakRefClass = PlatformTypes(vm_)->coreFinalizableWeakRef;
+    ASSERT_EQ(weakRefClass, finalizableWeakRefClass->GetBase());
     CompareMemberOffsets(finalizableWeakRefClass, GetFinalizableWeakRefMembers());
 }
 

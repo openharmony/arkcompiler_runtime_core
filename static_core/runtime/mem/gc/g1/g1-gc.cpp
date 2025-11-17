@@ -1604,6 +1604,7 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
             return;
         }
         auto field = *reinterpret_cast<ObjectPointerType *>(ToUintPtr(object) + offset);
+        ASSERT(field != 0);
         if (!this->InGCSweepRange(reinterpret_cast<ObjectHeader *>(static_cast<uintptr_t>(field)))) {
             return;
         }
@@ -2541,7 +2542,12 @@ void G1GC<LanguageConfig>::VisitRemSets(const Visitor &visitor)
         for (auto &entry : *entryVector) {
             ObjectHeader *object = entry.GetObject();
             uint32_t offset = entry.GetReferenceOffset();
-            visitor(object, ObjectAccessor::GetObject(object, offset), offset);
+            ObjectHeader *field = ObjectAccessor::GetObject(object, offset);
+            if (field != nullptr) {
+                // The field may gets nullptr during reference processing.
+                // RefProc may remove an object from a list and set links to null.
+                visitor(object, field, offset);
+            }
         }
     }
 }

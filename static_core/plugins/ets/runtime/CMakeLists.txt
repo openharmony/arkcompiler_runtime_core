@@ -131,6 +131,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_job.cpp
     ${ETS_EXT_SOURCES}/types/ets_map.cpp
+    ${ETS_EXT_SOURCES}/types/ets_finreg_node.cpp
+    ${ETS_EXT_SOURCES}/types/ets_finalization_registry.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_utils.cpp
     ${ETS_EXT_SOURCES}/ets_object_state_info.cpp

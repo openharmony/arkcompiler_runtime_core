@@ -187,9 +187,19 @@ public:
         return FromCoreType(ObjectHeader::Clone(GetCoreType()));
     }
 
+    static constexpr ObjectHeader *ToCoreType(EtsObject *obj)
+    {
+        return static_cast<ObjectHeader *>(obj);
+    }
+
+    static constexpr const ObjectHeader *ToCoreType(const EtsObject *obj)
+    {
+        return static_cast<const ObjectHeader *>(obj);
+    }
+
     ObjectHeader *GetCoreType() const
     {
-        return static_cast<ObjectHeader *>(const_cast<EtsObject *>(this));
+        return ToCoreType(const_cast<EtsObject *>(this));
     }
 
     static constexpr EtsObject *FromCoreType(ObjectHeader *objectHeader)

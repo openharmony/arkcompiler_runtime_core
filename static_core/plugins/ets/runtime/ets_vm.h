@@ -67,7 +67,6 @@
 #include "plugins/ets/runtime/mem/root_provider.h"
 #include "plugins/ets/runtime/ets_object_state_table.h"
 #include "plugins/ets/runtime/ets_stdlib_cache.h"
-#include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 #include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
 
 namespace ark::ets {
@@ -76,6 +75,7 @@ class FloatToStringCache;
 class LongToStringCache;
 class EtsAbcRuntimeLinker;
 class EtsFinalizableWeakRef;
+class FinalizationRegistryManager;
 
 using WalkEventLoopCallback = std::function<void(void *, void *)>;
 
@@ -109,6 +109,7 @@ public:
     void StopGC() override;
     void VisitVmRoots(const GCRootVisitor &visitor) override;
     void UpdateVmRefs(const GCRootUpdater &gcRootUpdater) override;
+    void SweepVmRefs(const GCObjectVisitor &gcObjectVisitor) override;
     void UninitializeThreads() override;
 
     void HandleReferences(const GCTask &task, const mem::GC::ReferenceClearPredicateT &pred) override;
