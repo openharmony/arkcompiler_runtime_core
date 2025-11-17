@@ -478,27 +478,25 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
 bool EtsHasPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name)
 {
     PandaVector<uint8_t> tree8Buf;
+    auto nameView = name->ConvertToStringView(&tree8Buf);
+    PandaString str(nameView);
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
-            return xRefObjectOperator.HasProperty(coro, utf::Mutf8AsCString(name->IsTreeString()
-                                                                                ? name->GetTreeStringDataMUtf8(tree8Buf)
-                                                                                : name->GetDataMUtf8()));
+            return xRefObjectOperator.HasProperty(coro, str.c_str());
         })
     } else {
-        auto namePtr =
-            utf::Mutf8AsCString(name->IsTreeString() ? name->GetTreeStringDataMUtf8(tree8Buf) : name->GetDataMUtf8());
-        auto fieldIndex = thisObj->GetClass()->GetFieldIndexByName(namePtr);
+        auto fieldIndex = thisObj->GetClass()->GetFieldIndexByName(str.c_str());
         if (fieldIndex != static_cast<uint32_t>(-1)) {
             return true;
         }
-        auto method = thisObj->GetClass()->GetInstanceMethod(namePtr, nullptr);
+        auto method = thisObj->GetClass()->GetInstanceMethod(str.c_str(), nullptr);
         if (method != nullptr) {
             return true;
         }
-        return FindGetterMethod(thisObj->GetClass(), namePtr) != nullptr;
+        return FindGetterMethod(thisObj->GetClass(), str.c_str()) != nullptr;
     }
 }
 
@@ -529,29 +527,25 @@ bool EtsHasPropertyByIdx([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj
 bool EtsHasOwnPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name)
 {
     PandaVector<uint8_t> tree8Buf;
+    auto fieldName = name->ConvertToStringView(&tree8Buf);
+    PandaString str(fieldName);
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
-            return xRefObjectOperator.HasProperty(coro,
-                                                  utf::Mutf8AsCString(name->IsTreeString()
-                                                                          ? name->GetTreeStringDataMUtf8(tree8Buf)
-                                                                          : name->GetDataMUtf8()),
-                                                  true);
+            return xRefObjectOperator.HasProperty(coro, str.c_str(), true);
         });
     } else {
-        auto fieldName =
-            utf::Mutf8AsCString(name->IsTreeString() ? name->GetTreeStringDataMUtf8(tree8Buf) : name->GetDataMUtf8());
-        EtsField *etsFiled = thisObj->GetClass()->GetDeclaredFieldIDByName(fieldName);
+        EtsField *etsFiled = thisObj->GetClass()->GetDeclaredFieldIDByName(str.c_str());
         if (etsFiled != nullptr) {
             return true;
         }
-        auto etsMethod = thisObj->GetClass()->GetDirectMethod(fieldName);
+        auto etsMethod = thisObj->GetClass()->GetDirectMethod(str.c_str());
         if (etsMethod != nullptr) {
             return true;
         }
-        return FindGetterMethod(thisObj->GetClass(), fieldName) != nullptr;
+        return FindGetterMethod(thisObj->GetClass(), str.c_str()) != nullptr;
     }
 }
 
@@ -577,14 +571,8 @@ bool HandleStaticHasProperty(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *
         }
         PandaVector<uint8_t> tree8Buf;
         EtsString *propertyStr = EtsString::FromEtsObject(property);
-        auto fieldName = utf::Mutf8AsCString(propertyStr->IsTreeString() ? propertyStr->GetTreeStringDataMUtf8(tree8Buf)
-                                                                         : propertyStr->GetDataMUtf8());
         EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
-        auto fieldNameStr = EtsString::CreateFromUtf8(fieldName, std::strlen(fieldName));
-        if (fieldNameStr == nullptr) {
-            return false;
-        }
-        return EtsHasPropertyByName(coro, thisObjHandle.GetPtr(), fieldNameStr);
+        return EtsHasPropertyByName(coro, thisObjHandle.GetPtr(), propertyStr);
     }
     auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), property);
     if (unboxedValue.has_value()) {
@@ -627,7 +615,7 @@ EtsObject *EtsLdbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File:
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
-            return xRefObjectOperator.GetProperty(coro, utf::Mutf8AsCString(name.data));
+            return xRefObjectOperator.GetProperty(coro, fieldName);
         });
     } else {
         auto fieldIndex = thisObj->GetClass()->GetFieldIndexByName(fieldName);
@@ -655,8 +643,7 @@ EtsObject *EtsLdbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File:
     }
 }
 
-bool EtsStbyname([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj,
-                 [[maybe_unused]] panda_file::File::StringData name, [[maybe_unused]] EtsObject *value)
+bool EtsStbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::StringData name, EtsObject *value)
 {
     auto fieldName = utf::Mutf8AsCString(name.data);
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
@@ -742,9 +729,9 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
             if (valObj->IsStringClass()) {
                 PandaVector<uint8_t> tree8Buf;
                 EtsString *valObjStr = EtsString::FromEtsObject(valObj);
-                return xRefObjectThis.GetProperty(
-                    coro, utf::Mutf8AsCString(valObjStr->IsTreeString() ? valObjStr->GetTreeStringDataMUtf8(tree8Buf)
-                                                                        : valObjStr->GetDataMUtf8()));
+                auto nameView = valObjStr->ConvertToStringView(&tree8Buf);
+                PandaString str(nameView);
+                return xRefObjectThis.GetProperty(coro, str);
             } else {
                 EtsHandle<EtsObject> valObjHandle(coro, valObj);
                 return xRefObjectThis.GetProperty(coro, valObjHandle);
@@ -756,9 +743,9 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
         if (valObj->IsStringClass()) {
             PandaVector<uint8_t> tree8Buf;
             EtsString *valObjStr = EtsString::FromEtsObject(valObj);
-            auto strObj =
-                valObjStr->IsTreeString() ? valObjStr->GetTreeStringDataMUtf8(tree8Buf) : valObjStr->GetDataMUtf8();
-            panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(strObj)), strObj};
+            auto nameView = valObjStr->ConvertToStringView(&tree8Buf);
+            PandaString str(nameView);
+            panda_file::File::StringData propName = {valObjStr->GetUtf16Length(), utf::CStringAsMutf8(str.c_str())};
             return EtsLdbyname(coro, thisObj, propName);
         }
         auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), valObj);
@@ -813,8 +800,9 @@ bool EtsStbyval(EtsCoroutine *coro, EtsObject *obj, EtsObject *key, EtsObject *v
     if (key->IsStringClass()) {
         PandaVector<uint8_t> tree8Buf;
         EtsString *keyStr = EtsString::FromEtsObject(key);
-        auto strObj = keyStr->IsTreeString() ? keyStr->GetTreeStringDataMUtf8(tree8Buf) : keyStr->GetDataMUtf8();
-        panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(strObj)), strObj};
+        auto nameView = keyStr->ConvertToStringView(&tree8Buf);
+        PandaString str(nameView);
+        panda_file::File::StringData propName = {keyStr->GetUtf16Length(), utf::CStringAsMutf8(str.c_str())};
         return EtsStbyname(coro, obj, propName, value);
     }
     auto unboxedValue = GetBoxedNumericValue<int64_t>(PlatformTypes(coro), key);

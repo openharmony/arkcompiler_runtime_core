@@ -252,7 +252,8 @@ EtsReflectField *StdCoreClassGetInstanceFieldByNameInternal(EtsClass *cls, EtsSt
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    Field *field = cls->GetRuntimeClass()->GetDeclaredInstanceFieldByName(name->GetDataMUtf8(), name->GetUtf16Length());
+    PandaVector<uint8_t> tree8Buf;
+    Field *field = cls->GetRuntimeClass()->GetDeclaredInstanceFieldByName(name->ConvertToStringView(&tree8Buf));
     if (field == nullptr || (FromEtsBoolean(publicOnly) && !field->IsPublic())) {
         return nullptr;
     }
@@ -268,7 +269,8 @@ EtsReflectField *StdCoreClassGetStaticFieldByNameInternal(EtsClass *cls, EtsStri
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    Field *field = cls->GetRuntimeClass()->GetDeclaredStaticFieldByName(name->GetDataMUtf8(), name->GetUtf16Length());
+    PandaVector<uint8_t> tree8Buf;
+    Field *field = cls->GetRuntimeClass()->GetDeclaredStaticFieldByName(name->ConvertToStringView(&tree8Buf));
     if (field == nullptr || (FromEtsBoolean(publicOnly) && !field->IsPublic())) {
         return nullptr;
     }
