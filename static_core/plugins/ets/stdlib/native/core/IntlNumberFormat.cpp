@@ -262,6 +262,27 @@ ani_string IcuFormatDouble(ani_env *env, ani_object self, ani_double value)
     return nullptr;
 }
 
+ani_string IcuFormatLong(ani_env *env, ani_object self, ani_long value)
+{
+    ParsedOptions options;
+    ParseOptions(env, self, options);
+
+    ani_status err;
+    LocNumFmt formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
+    if (err != ANI_OK) {
+        return nullptr;
+    }
+    UErrorCode status = U_ZERO_ERROR;
+    auto fmtNumber = formatter.formatInt(value, status);
+    if (UNLIKELY(U_FAILURE(status))) {
+        std::string message = "Icu formatter format failed " + std::string(u_errorName(status));
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+        return nullptr;
+    }
+    icu::UnicodeString ustr = fmtNumber.toString(status);
+    return UnicodeToAniStr(env, ustr);
+}
+
 ani_string IcuFormatDecStr(ani_env *env, ani_object self, ani_string value)
 {
     ParsedOptions options;
@@ -697,6 +718,7 @@ ani_status RegisterIntlNumberFormatNativeMethods(ani_env *env)
 
     const auto methods = std::array {
         ani_native_function {"formatDouble", "d:C{std.core.String}", reinterpret_cast<void *>(IcuFormatDouble)},
+        ani_native_function {"formatLong", "l:C{std.core.String}", reinterpret_cast<void *>(IcuFormatLong)},
         ani_native_function {"formatDecStr", "C{std.core.String}:C{std.core.String}",
                              reinterpret_cast<void *>(IcuFormatDecStr)},
         ani_native_function {"formatRangeDoubleDouble", "dd:C{std.core.String}",
