@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "runtime/include/coretypes/string_flatten.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/mem/vm_handle.h"
+#include "libarkbase/mem/mem.h"
 
 namespace ark::intrinsics {
 
@@ -60,6 +61,9 @@ LoadType BuildSearchPattern(CharType character) = delete;
 
 template <typename T>
 size_t ClzInSwappedBytes(T val) = delete;
+
+template <typename T>
+T SwapBytes(T val) = delete;
 
 #if defined(PANDA_TARGET_64) && defined(__SIZEOF_INT128__)
 __extension__ using PandaWideUintT = unsigned __int128;
@@ -112,6 +116,47 @@ int32_t StringIndexOfSwar(CharType *data, int32_t offset, int32_t length, CharTy
     return -1;
 }
 
+template <typename CharType, typename LoadType>
+int32_t StringLastIndexOfSwar(CharType *data, int32_t offset, [[maybe_unused]] int32_t length, CharType character)
+{
+    static_assert(std::is_same_v<uint8_t, CharType> || std::is_same_v<uint16_t, CharType>,
+                  "Only uint8_t and uint16_t CharTypes are supported");
+    auto ptr = data + offset + 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto alignedDown = ark::AlignDown(reinterpret_cast<uintptr_t>(ptr), sizeof(LoadType));
+    auto stop = reinterpret_cast<CharType *>(std::max(alignedDown, reinterpret_cast<uintptr_t>(data)));
+    while (ptr > stop) {
+        if (*(--ptr) == character) {
+            return ptr - data;
+        }
+    }
+    auto alignedUp = reinterpret_cast<CharType *>(ark::AlignUp(reinterpret_cast<uintptr_t>(data), sizeof(LoadType)));
+    ASSERT(alignedUp >= data);
+    LoadType searchPattern = BuildSearchPattern<CharType, LoadType>(character);
+    while (ptr - IndexOfConstants<CharType, LoadType>::VECTOR_SIZE >= alignedUp) {
+        ptr -= IndexOfConstants<CharType, LoadType>::VECTOR_SIZE;
+        LoadType value = *reinterpret_cast<LoadType *>(ptr);
+        LoadType xoredValue = SwapBytes(searchPattern ^ value);
+        LoadType eq = (xoredValue - IndexOfConstants<CharType, LoadType>::XOR_SUB_MASK) &
+                      ~(xoredValue | IndexOfConstants<CharType, LoadType>::NXOR_OR_MASK);
+        if (eq != 0) {
+            size_t idx = IndexOfConstants<CharType, LoadType>::VECTOR_SIZE - 1;
+            idx = idx - Ctz(eq) / IndexOfConstants<CharType, LoadType>::BITS_PER_CHAR;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            ASSERT(idx < (IndexOfConstants<CharType, LoadType>::VECTOR_SIZE) && ptr[idx] == character);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            return ptr + idx - data;
+        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    }
+    while (ptr >= data) {
+        if (*ptr == character) {
+            return ptr - data;
+        }
+        --ptr;
+    }
+    return -1;
+}
+
 template <>
 inline uint64_t BuildSearchPattern<uint8_t, uint64_t>(uint8_t character)
 {
@@ -134,6 +179,11 @@ inline size_t ClzInSwappedBytes<uint64_t>(uint64_t val)
     return Clz(__builtin_bswap64(val));
 }
 
+template <>
+inline uint64_t SwapBytes<uint64_t>(uint64_t val)
+{
+    return __builtin_bswap64(val);
+}
 #if defined(PANDA_TARGET_64) && defined(__SIZEOF_INT128__)
 template <>
 struct IndexOfConstants<uint16_t, PandaWideUintT> {
@@ -165,6 +215,18 @@ inline size_t ClzInSwappedBytes<PandaWideUintT>(PandaWideUintT val)
     }
     return Clz(lo);
 }
+
+template <>
+inline PandaWideUintT SwapBytes<PandaWideUintT>(PandaWideUintT val)
+{
+    static_assert(sizeof(PandaWideUintT) == 16);
+    uint64_t hi = static_cast<uint64_t>(val >> BITS_PER_UINT64);
+    uint64_t lo = static_cast<uint64_t>(val);
+    auto high = static_cast<PandaWideUintT>(__builtin_bswap64(lo)) << BITS_PER_UINT64;
+    auto low = static_cast<PandaWideUintT>(__builtin_bswap64(hi));
+    PandaWideUintT swapped = high | low;
+    return swapped;
+}
 #endif
 
 inline ALWAYS_INLINE int32_t Utf8StringIndexOfChar(uint8_t *data, size_t offset, size_t length, uint8_t character)
@@ -187,6 +249,26 @@ inline ALWAYS_INLINE int32_t Utf16StringIndexOfChar(uint16_t *data, size_t offse
     return StringIndexOfSwar<uint16_t, uint64_t>(data, offset, length, character);
 }
 
+inline ALWAYS_INLINE int32_t Utf8StringLastIndexOfChar(uint8_t *data, size_t offset, size_t length, uint8_t ch)
+{
+    if ((length - offset) >= IndexOfConstants<uint8_t, uint64_t>::VECTOR_SIZE * 2) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto pos = reinterpret_cast<uint8_t *>(memrchr(data, ch, length - offset));
+        return pos == nullptr ? -1 : pos - data;
+    }
+    return StringLastIndexOfSwar<uint8_t, uint64_t>(data, offset, length, ch);
+}
+
+inline ALWAYS_INLINE int32_t Utf16StringLastIndexOfChar(uint16_t *data, size_t offset, size_t length, uint16_t ch)
+{
+    if constexpr (sizeof(PandaWideUintT) >= sizeof(uint64_t)) {
+        if ((length - offset) >= IndexOfConstants<uint16_t, PandaWideUintT>::VECTOR_SIZE * 2) {
+            return StringIndexOfSwar<uint16_t, PandaWideUintT>(data, offset, length, ch);
+        }
+    }
+    return StringLastIndexOfSwar<uint16_t, uint64_t>(data, offset, length, ch);
+}
+
 }  // namespace impl
 
 // CC-OFFNXT(G.FUD.06) perf critical
@@ -197,25 +279,22 @@ inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset)
     ASSERT(string->IsLineString());
     ark::coretypes::LineString *lineString = ark::coretypes::String::Cast(string);
 
-    bool isUtf8 = lineString->IsMUtf8();
     auto length = lineString->GetLength();
     if (offset < 0) {
         offset = 0;
-    }
-
-    if (static_cast<uint32_t>(offset) >= length) {
+    } else if (static_cast<uint32_t>(offset) >= length) {
         return -1;
     }
 
-    if (isUtf8) {
-        if (character > std::numeric_limits<uint8_t>::max()) {
-            return -1;
-        }
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return impl::Utf8StringIndexOfChar(lineString->GetDataMUtf8(), offset, length, character);
+    if (lineString->IsUtf16()) {
+        return impl::Utf16StringIndexOfChar(lineString->GetDataUtf16(), offset, length, character);
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    return impl::Utf16StringIndexOfChar(lineString->GetDataUtf16(), offset, length, character);
+    if (character > std::numeric_limits<uint8_t>::max()) {
+        return -1;
+    }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    return impl::Utf8StringIndexOfChar(lineString->GetDataMUtf8(), offset, length, character);
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
@@ -223,30 +302,33 @@ inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset, c
 {
     auto string = reinterpret_cast<ark::coretypes::String *>(str);
     ASSERT(string != nullptr);
-    bool isUtf8 = string->IsMUtf8();
     auto length = string->GetLength();
-    if (offset < 0) {
-        offset = 0;
+    // Empty string implies no match
+    if (length == 0) {
+        return -1;
     }
-
-    if (static_cast<uint32_t>(offset) >= length) {
+    if (offset < 0) {
+        // All values with negative 'offset' are equivalent
+        offset = 0;
+    } else if (static_cast<uint32_t>(offset) >= length) {
+        // No match if 'offset' is out of length
         return -1;
     }
     auto thread = ark::ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::String> stringHandle(thread, string);
     ark::coretypes::FlatStringInfo flatStr = ark::coretypes::FlatStringInfo::FlattenAllString(stringHandle, ctx);
-
-    if (isUtf8) {
-        if (character > std::numeric_limits<uint8_t>::max()) {
-            return -1;
-        }
+    if (flatStr.IsUtf16()) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return impl::Utf8StringIndexOfChar(flatStr.GetDataUtf8Writable(), offset, length, character);
+        return impl::Utf16StringIndexOfChar(flatStr.GetDataUtf16Writable(), offset, length, character);
+    }
+    if (character > std::numeric_limits<uint8_t>::max()) {
+        return -1;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    return impl::Utf16StringIndexOfChar(flatStr.GetDataUtf16Writable(), offset, length, character);
+    return impl::Utf8StringIndexOfChar(flatStr.GetDataUtf8Writable(), offset, length, character);
 }
+
 }  // namespace ark::intrinsics
 
 #endif

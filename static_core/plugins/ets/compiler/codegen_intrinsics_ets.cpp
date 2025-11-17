@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -570,6 +570,44 @@ void Codegen::CreateStringIndexOfAfter(IntrinsicInst *inst, Reg dst, SRCREGS src
     enc->EncodeSelect({tmp, startIndex, zreg, startIndex, Imm(0), Condition::GE});
     enc->EncodeAdd(dst, dst, tmp);
     enc->BindLabel(charNotFoundLabel);
+}
+
+void Codegen::CreateStringLastIndexOf(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    constexpr uint32_t LENGTH_START_BIT = common::BaseString::LengthBits::START_BIT;
+    constexpr uint32_t LENGTH_BITS_NUM = common::BaseString::STRING_LENGTH_BITS_NUM;
+    constexpr auto LENGTH_ZERO = (((uint32_t)0xFFFFFFFF) << LENGTH_BITS_NUM) >> LENGTH_BITS_NUM;
+    auto *enc = GetEncoder();
+    auto str = src[FIRST_OPERAND];
+    auto ch = src[SECOND_OPERAND];
+    auto startIndex = src[THIRD_OPERAND];
+    auto notFoundLabel = enc->CreateLabel();
+    auto callLabel = enc->CreateLabel();
+    auto retLabel = enc->CreateLabel();
+    // Negative startIndex implies no match, i.e. return -1
+    enc->EncodeJump(notFoundLabel, startIndex, Imm(0), Condition::LT);
+    // Empty string implies no match, i.e. return -1
+    ScopedTmpRegLazy tmpLazyReg(enc);
+    auto tmp = INVALID_REGISTER;
+    if (dst.GetId() != str.GetId() && dst.GetId() != ch.GetId() && dst.GetId() != startIndex.GetId()) {
+        tmp = dst.As(INT32_TYPE);
+    } else {
+        tmpLazyReg.Acquire();
+        tmp = tmpLazyReg.GetReg().As(INT32_TYPE);
+    }
+    enc->EncodeLdr(tmp, false, MemRef(str, ark::coretypes::STRING_LENGTH_OFFSET));
+    enc->EncodeJump(notFoundLabel, tmp, Imm(LENGTH_ZERO), Condition::LS);
+    // Make startIndex = str.length - 1 if startIndex >= str.length
+    enc->EncodeShr(tmp, tmp, Imm(LENGTH_START_BIT));             // unpack length
+    enc->EncodeJump(callLabel, startIndex, tmp, Condition::LO);  // unsigned less
+    enc->EncodeSub(startIndex, tmp, Imm(1));
+    enc->BindLabel(callLabel);
+    CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_LAST_INDEX_OF, dst, {}, str, ch, startIndex);
+    enc->EncodeJump(retLabel);
+    enc->BindLabel(notFoundLabel);
+    enc->EncodeMov(dst, Imm(-1));
+    enc->BindLabel(retLabel);
 }
 
 void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src)

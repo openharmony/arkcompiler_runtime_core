@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -422,6 +422,40 @@ EtsInt StdCoreStringIndexOfAfter(EtsString *s, uint16_t ch, EtsInt fromIndex)
 EtsInt StdCoreStringIndexOf(EtsString *s, uint16_t ch)
 {
     return StdCoreStringIndexOfAfter(s, ch, 0);
+}
+
+EtsInt StdCoreStringLastIndexOf(EtsString *s, uint16_t ch, EtsInt fromIndex)
+{
+    // Negative 'fromIndex' implies no match
+    if (fromIndex < 0) {
+        return -1;
+    }
+    auto string = reinterpret_cast<ark::coretypes::String *>(s);
+    ASSERT(string != nullptr);
+    auto length = string->GetLength();
+    // Empty string implies no match
+    if (length == 0) {
+        return -1;
+    }
+    // All values of 'fromIndex' >= 'length' are equivalent
+    if (static_cast<uint32_t>(fromIndex) >= length) {
+        fromIndex = length - 1;
+    }
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    auto thread = ark::ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<coretypes::String> stringHandle(thread, string);
+    ark::coretypes::FlatStringInfo flatStr = ark::coretypes::FlatStringInfo::FlattenAllString(stringHandle, ctx);
+    namespace impl = ark::intrinsics::impl;
+    if (flatStr.IsUtf16()) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return impl::Utf16StringLastIndexOfChar(flatStr.GetDataUtf16Writable(), fromIndex, length, ch);
+    }
+    if (ch > std::numeric_limits<uint8_t>::max()) {
+        return -1;
+    }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    return impl::Utf8StringLastIndexOfChar(flatStr.GetDataUtf8Writable(), fromIndex, length, ch);
 }
 
 EtsInt StdCoreStringIndexOfString(EtsString *thisStr, EtsString *patternStr, EtsInt fromIndex)

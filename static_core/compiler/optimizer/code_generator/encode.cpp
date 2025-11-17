@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -644,6 +644,18 @@ void Encoder::EncodeMemCharU8X16UsingSimd([[maybe_unused]] Reg dst, [[maybe_unus
 
 void Encoder::EncodeMemCharU16X8UsingSimd([[maybe_unused]] Reg dst, [[maybe_unused]] Reg ch,
                                           [[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeMemLastCharU16X8UsingSimd([[maybe_unused]] Reg dst, [[maybe_unused]] Reg ch,
+                                              [[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeMemLastCharU8X16UsingSimd([[maybe_unused]] Reg dst, [[maybe_unused]] Reg ch,
+                                              [[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg tmp)
 {
     SetFalseResult();
 }

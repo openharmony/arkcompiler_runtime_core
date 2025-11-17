@@ -1171,6 +1171,21 @@ intrinsics:
       args: [std.core.String, i32]
     impl: ark::ets::intrinsics::StdCoreStringIndexOfString
 
+  - name: StdCoreStringLastIndexOf
+    space: ets
+    class_name: std.core.String
+    method_name: lastIndexOf
+    static: false
+    signature:
+      ret: i32
+      args: [u16, i32]
+    impl: ark::ets::intrinsics::StdCoreStringLastIndexOf
+    irtoc_impl: StringLastIndexOfNativePlus
+    codegen_arch: [arm64]
+    codegen_func: CreateStringLastIndexOf
+    llvm_codegen_func: EmitStringLastIndexOf
+    require_flat_check: true
+
   - name: StdCoreStringLastIndexOfString
     space: ets
     class_name: std.core.String

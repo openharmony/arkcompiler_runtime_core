@@ -1,5 +1,5 @@
 # plugin ets_string
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,6 +27,7 @@ module Constants
   MAX_U8_VALUE = "255"
   U8_SIZE = "1"
   U16_SIZE = "2"
+  ADDR_16_BYTE_ALIGNED_MASK = "0x0FULL"
   WRONG_CHAR_FLAG_MASK = "0x10000UL"
   ASCII_CHAR_CACHE_SIZE = "cross_values::GetPlatformTypesAsciiCharCacheSize(GetArch())"
   STRING_PACKED_LENGTH_ZERO = "(((uint32_t)0xFFFFFFFF) << common::BaseString::STRING_LENGTH_BITS_NUM) >> common::BaseString::STRING_LENGTH_BITS_NUM"
@@ -1967,6 +1968,313 @@ end
 
 GenerateStringIndexOfAfter(:FastPath)
 GenerateStringIndexOfAfter(:NativePlus)
+
+
+function(:StringLastIndexOfCompressedPlain,
+          params: {str_data: 'ptr', start_index: 'u32', ch: 'u8'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPathPlus]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+  # String contains 8-bit chars
+  # It's assumed that 0 <= start_index < string.length
+Label(:Loop)
+  i := Phi(start_index, i2).u32
+  If(Load(str_data, i).u8, ch).EQ.Unlikely.b {
+    Return(Cast(i).i32).i32
+  }
+  If(i, 0).EQ.Unlikely.b {
+    Return(-1).i32
+  }
+  i2 := SubI(i).Imm(Constants::U8_SIZE).u32
+  Goto(:Loop)
+}
+
+
+function(:StringLastIndexOfCompressedSimd,
+          params: {str_data: 'ptr', start_index: 'u32', ch: 'u8'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPathPlus]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+  # String contains 8-bit chars
+  # Check alignment (it's assumed that 0 <= start_index < string.length)
+  str_end := Add(str_data, AddI(start_index).Imm(1).u32).ptr
+  If(AndI(Bitcast(str_end).word).Imm(Constants::ADDR_16_BYTE_ALIGNED_MASK).word, 0).EQ.Unlikely.b {
+    Goto(:Simd)
+  }
+  # Check by u8 char until address is 16-byte aligned (i.e. SIMD ready)
+  ch_ptr1 := Add(str_data, start_index).ptr
+Label(:LoopByChar1)
+  ch_ptr := Phi(ch_ptr1, ch_ptr2).ptr
+  If(LoadI(ch_ptr).Imm(0).u8, ch).EQ.Unlikely.b {
+    Return(Cast(Sub(ch_ptr, str_data).word).i32).i32
+  }
+  If(AndI(Bitcast(ch_ptr).word).Imm(Constants::ADDR_16_BYTE_ALIGNED_MASK).u32, 0).EQ.Unlikely.b {
+    Goto(:Simd)
+  }
+  ch_ptr2 := SubI(ch_ptr).Imm(Constants::U8_SIZE).ptr
+  Goto(:LoopByChar1)
+  # Check by 16-byte blocks using SIMD intrinsic
+Label(:Simd)
+  blk_end := Phi(str_end, ch_ptr).ptr
+  blk_start1 := SubI(blk_end).Imm(Constants::MEM_BLOCK_16_BYTES).ptr
+Label(:LoopSimd)
+  blk_start := Phi(blk_start1, blk_start2).ptr
+  p := Intrinsic(:MEM_LAST_CHAR_U8_X16_USING_SIMD, ch, blk_start).ptr
+  If(p, 0).NE.Likely.b {
+    Return(Cast(Sub(p, str_data).word).i32).i32
+  }
+  If(Sub(blk_start, str_data).u32, Constants::MEM_BLOCK_16_BYTES).GE.Likely.b {
+    blk_start2 := SubI(blk_start).Imm(Constants::MEM_BLOCK_16_BYTES).ptr
+    Goto(:LoopSimd)
+  }
+  If(blk_start, str_data).EQ.Unlikely.b {
+    Return(-1).i32
+  }
+  ch_ptr3 := SubI(blk_start).Imm(Constants::U8_SIZE).ptr
+Label(:LoopByChar2)
+  ch_ptr4 := Phi(ch_ptr3, ch_ptr5).ptr
+  If(LoadI(ch_ptr4).Imm(0).u8, ch).EQ.Unlikely.b {
+    Return(Cast(Sub(ch_ptr4, str_data).word).i32).i32
+  }
+  If(ch_ptr4, str_data).GT.Likely.b {
+    ch_ptr5 := SubI(ch_ptr4).Imm(Constants::U8_SIZE).ptr
+    Goto(:LoopByChar2)
+  }
+  Return(-1).i32
+}
+
+
+function(:StringLastIndexOfUncompressedPlain,
+          params: {str_data: 'ptr', start_index: 'u32', ch: 'u16'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPathPlus]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # String contains 16-bit chars
+  # It's assumed that 0 <= start_index < string.length
+  i1 := ShlI(start_index).Imm(1).u32
+Label(:Loop)
+  i := Phi(i1, i2).u32
+  If(Load(str_data, i).u16, ch).EQ.Unlikely.b {
+    Return(Cast(ShrI(i).Imm(1).u32).i32).i32
+  }
+  If(i, 0).EQ.Unlikely.b {
+    Return(-1).i32
+  }
+  i2 := SubI(i).Imm(Constants::U16_SIZE).u32
+  Goto(:Loop)
+}
+
+
+function(:StringLastIndexOfUncompressedSimd,
+          params: {str_data: 'ptr', start_index: 'u32', ch: 'u16'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPathPlus]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # String contains 16-bit chars
+  # Check alignment (it's assumed that 0 <= start_index < string.length)
+  str_end := Add(str_data, ShlI(AddI(start_index).Imm(1).u32).Imm(1).u32).ptr
+  If(AndI(Bitcast(str_end).word).Imm(Constants::ADDR_16_BYTE_ALIGNED_MASK).word, 0).EQ.Unlikely.b {
+    Goto(:Simd)
+  }
+  # Check each u16 char until address is 16-byte aligned (i.e. SIMD ready)
+  ch_ptr1 := Add(str_data, ShlI(start_index).Imm(1).u32).ptr
+Label(:LoopByChar1)
+  ch_ptr := Phi(ch_ptr1, ch_ptr2).ptr
+  If(LoadI(ch_ptr).Imm(0).u16, ch).EQ.Unlikely.b {
+    Return(Cast(ShrI(Sub(ch_ptr, str_data).word).Imm(1).u32).i32).i32
+  }
+  If(AndI(Bitcast(ch_ptr).word).Imm(Constants::ADDR_16_BYTE_ALIGNED_MASK).u32, 0).EQ.Unlikely.b {
+    Goto(:Simd)
+  }
+  ch_ptr2 := SubI(ch_ptr).Imm(Constants::U16_SIZE).ptr
+  Goto(:LoopByChar1)
+  # Check by 16-byte blocks using SIMD intrinsic
+Label(:Simd)
+  blk_end := Phi(str_end, ch_ptr).ptr
+  blk_start1 := SubI(blk_end).Imm(Constants::MEM_BLOCK_16_BYTES).ptr
+Label(:LoopSimd)
+  blk_start := Phi(blk_start1, blk_start2).ptr
+  p := Intrinsic(:MEM_LAST_CHAR_U16_X8_USING_SIMD, ch, blk_start).ptr
+  If(p, 0).NE.Likely.b {
+    Return(Cast(ShrI(Sub(p, str_data).word).Imm(1).word).i32).i32
+  }
+  If(Sub(blk_start, str_data).u32, Constants::MEM_BLOCK_16_BYTES).GE.Likely.b {
+    blk_start2 := SubI(blk_start).Imm(Constants::MEM_BLOCK_16_BYTES).ptr
+    Goto(:LoopSimd)
+  }
+  If(blk_start, str_data).EQ.Unlikely.b {
+    Return(-1).i32
+  }
+  ch_ptr3 := SubI(blk_start).Imm(Constants::U16_SIZE).ptr
+Label(:LoopByChar2)
+  ch_ptr4 := Phi(ch_ptr3, ch_ptr5).ptr
+  If(LoadI(ch_ptr4).Imm(0).u16, ch).EQ.Unlikely.b {
+    Return(Cast(ShrI(Sub(ch_ptr4, str_data).word).Imm(1).word).i32).i32
+  }
+  If(ch_ptr4, str_data).GT.Likely.b {
+    ch_ptr5 := SubI(ch_ptr4).Imm(Constants::U16_SIZE).ptr
+    Goto(:LoopByChar2)
+  }
+  Return(-1).i32
+}
+
+
+def GenerateStringLastIndexOf(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringLastIndexOf#{suffix}".to_sym,
+            params: {str_orig: 'ref', ch: 'u16', start_index: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  if cgmode == :NativePlus
+    # Negative startIndex implies no match, i.e. return -1
+    IfImm(Compare(start_index, 0).LT.b).Imm(0).NE.Unlikely.b {
+      Return(-1).i32
+    }
+  end  # NativePlus
+
+  str_len_packed := LoadI(str_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+  # String's emptiness and validity of start index are checked in Codegen::CreateStringLastIndexOf.
+  # So we have to explicitly check them here iff 'NativePlus' mode is in effect.
+  if cgmode == :NativePlus
+    # Check if str_orig is empty (return '-1' if so).
+    # Currently, there are two special bits in a packed length:
+    #   - lowest bit in length: 1:compressed/0:uncompressed.
+    #   - second lowest bit in length: 1:string is in string table/0:not in string table.
+    # Thus a string is considered to be empty if packed_length <= 3
+    StaticAssertEQ(Constants::STRING_PACKED_LENGTH_ZERO, 3)
+    # Empty string implies no match, i.e. return -1
+    IfImm(Compare(str_len_packed, Constants::STRING_PACKED_LENGTH_ZERO).LE.b).Imm(0).NE.Unlikely.b {
+      Return(-1).i32
+    }
+    # Make startIndex = str.length - 1 if startIndex >= str.length
+    str_len := ShrI(str_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    index0 := Cast(start_index).u32
+    If(index0, str_len).AE.Unlikely.b {
+      index1 := SubI(str_len).Imm(1).u32
+    }
+    # str_len is 30-bit in size and index <= str_len - 1, so u32->i32 is safe here.
+    start_index := Cast(Phi(index0, index1).u32).i32
+  end  # NativePlus
+
+  dispatch_on_string_type(str_orig, AsGlobalLabel(:LineString),
+                                    AsGlobalLabel(:SlicedString),
+                                    AsGlobalLabel(:TreeString))
+LabelGlobal(:TreeString)
+  tree_data := get_tree_data_ptr(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
+  Goto(:Flat)
+LabelGlobal(:SlicedString)
+  sliced_data := get_sliced_data_ptr(str_orig, str_len_packed)
+  Goto(:Flat)
+LabelGlobal(:LineString)
+  line_data := Add(Cast(str_orig).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+
+Label(:Flat)
+  str_data := Phi(tree_data, sliced_data, line_data).ptr
+
+  uncompressed := Compare(AndI(str_len_packed).Imm(1).i32, 1).EQ.b
+  IfImm(uncompressed).Imm(0).NE.Unlikely.b {
+    # char is u16 and start_index is zero-based
+    If(start_index, 7).LT.Unlikely.b {
+      LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+      LiveOut(start_index).DstReg(regmap[:arg1]).u32
+      LiveOut(ch).DstReg(regmap[:arg2]).u16
+      name = "StringLastIndexOfUncompressedPlain#{suffix}"
+      if cgmode == :NativePlus
+        Return(Call(0, str_data, start_index, ch).Method(name).i32).i32
+      else
+        entrypoint = get_entrypoint_offset("STRING_LAST_INDEX_OF_UNCOMPRESSED_PLAIN#{upsuffix}")
+        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+      end
+    }
+    LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+    LiveOut(start_index).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u16
+    name = "StringLastIndexOfUncompressedSimd#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, start_index, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_LAST_INDEX_OF_UNCOMPRESSED_SIMD#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
+  }  # u16 string
+
+  IfImm(Compare(ch, Constants::MAX_U8_VALUE).A.b).Imm(0).NE.Unlikely.b {
+    Return(-1).i32
+  }
+
+  # char is u8 and start_index is zero-based
+  If(start_index, 15).LT.Unlikely.b {
+    LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+    LiveOut(start_index).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u8
+    name = "StringLastIndexOfCompressedPlain#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, start_index, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_LAST_INDEX_OF_COMPRESSED_PLAIN#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
+  }
+  LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+  LiveOut(start_index).DstReg(regmap[:arg1]).u32
+  LiveOut(ch).DstReg(regmap[:arg2]).u8
+  name = "StringLastIndexOfCompressedSimd#{suffix}"
+  if cgmode == :NativePlus
+    Return(Call(0, str_data, start_index, ch).Method(name).i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_LAST_INDEX_OF_COMPRESSED_SIMD#{upsuffix}")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+  end
+LabelGlobal(:SlowPathEntrypoint)
+  if cgmode == :NativePlus
+      Return(Call(str_orig, ch, start_index).Method("StdCoreStringLastIndexOf").i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_LAST_INDEX_OF_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, ch, start_index).AddImm(entrypoint).MethodAsImm("StringLastIndexOfOddSavedBridge").Terminator.i32
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
+}
+end  # GenerateStringLastIndexOf
+
+GenerateStringLastIndexOf(:FastPath)
+GenerateStringLastIndexOf(:NativePlus)
+
 
 def GenerateStringRepeatTlab(cgmode)
   function("StringRepeatTlab#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,

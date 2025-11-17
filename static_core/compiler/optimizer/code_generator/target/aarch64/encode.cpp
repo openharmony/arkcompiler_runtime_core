@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1217,6 +1217,107 @@ void Aarch64Encoder::EncodeMemCharU16X8UsingSimd(Reg dst, Reg ch, Reg srcAddr, R
     GetMasm()->Bind(labelFound);
     GetMasm()->Lsr(xReg0, xReg0, 4U);  // number of 16-bit chars
     GetMasm()->Lsl(xReg0, xReg0, 1U);  // number of bytes
+    GetMasm()->Add(xReg0, xReg0, VixlReg(srcAddr));
+    GetMasm()->Bind(labelReturn);
+}
+
+void Aarch64Encoder::EncodeMemLastCharU16X8UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp)
+{
+    ScopedTmpReg vTmp0(this, FLOAT64_TYPE);
+    ScopedTmpReg vTmp1(this, FLOAT64_TYPE);
+    auto vReg0 = vixl::aarch64::VRegister(vTmp0.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8H);
+    auto vReg1 = vixl::aarch64::VRegister(tmp.GetId(), vixl::aarch64::VectorFormat::kFormat8H);
+    auto xReg0 = vixl::aarch64::Register(dst.GetId(), vixl::aarch64::kXRegSize);
+    auto labelReturn = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelFound = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCheckV0D0 = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+
+    // We use 'Ld1' to load the string into a vector register containing eight 16-bit elements (kFormat8H).
+    //
+    // 'Ld1' transfer vector elements as follows:
+    //   - the order of the elements in the register is the same regardless of the endianness
+    //   - the order of bytes in the elements depends on the endianness
+    //
+    // Suppose that we are looking for '零' in the following u16 string: '一零二三四五六七'
+    // 'Ld1' loads eight u16 chars with the lowest indexed element fetched from the lowest address.
+    // The order of bytes in the elements does not matter in this particular case.
+    //
+    // 1. Load eight 16-bit chars into vReg0:
+    //       7    6    5    4    3    2    1    0
+    //     | 七 | 六 | 五 | 四 | 三 | 二 | 零 | 一 |
+    //
+    // 2. Fill vReg1 with eight '零':
+    //     | 零 | 零 | 零 | 零 | 零 | 零 | 零 | 零 |
+    //
+    // 3. Compare vReg0 with vReg1 using 'Cmeq':
+    //     |0000|0000|0000|0000|0000|0000|FFFF|0000|
+    //
+    // 4. Compute an offset (in u16 chars) to the char of interest (if any).
+    //    It would be better to use 'Ctz' instruction but it is supported iff FEAT_CSSC is in effect.
+    //    As FEAT_CSSC is optional from Armv8.7 and mandatory from Armv8.9.
+    //    So now we make use of 'Clz' and compute the offset as follows: (7 - (Clz(vReg0) / 16)).
+    //    For this particular example it is as follows: (7 - 96/16) = 1
+    //
+    // 5. Compute an address of the char if it is found
+    //
+    GetMasm()->Ld1(vReg0, vixl::aarch64::MemOperand(VixlReg(srcAddr)));
+    GetMasm()->Dup(vReg1, VixlReg(ch));
+    GetMasm()->Cmeq(vReg0, vReg0, vReg1);
+    // Give up if char is not there
+    GetMasm()->Addp(vReg1.V2D(), vReg0.V2D(), vReg0.V2D());
+    GetMasm()->Mov(xReg0, vReg1.D(), 0);
+    GetMasm()->Cbz(xReg0, labelReturn);
+    // Compute a pointer to the char
+    // Check D1 first as we are looking for the last occurrence of 'ch'
+    GetMasm()->Mov(xReg0, vReg0.D(), 1U);
+    GetMasm()->Cbz(xReg0, labelCheckV0D0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->B(labelFound);
+    GetMasm()->Bind(labelCheckV0D0);
+    GetMasm()->Mov(xReg0, vReg0.D(), 0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(BITS_PER_UINT64));
+    GetMasm()->Bind(labelFound);
+    GetMasm()->Lsr(xReg0, xReg0, 4U);  // number of 16-bit chars
+    GetMasm()->Neg(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(7U));
+    GetMasm()->Lsl(xReg0, xReg0, 1U);  // number of bytes
+    GetMasm()->Add(xReg0, xReg0, VixlReg(srcAddr));
+    GetMasm()->Bind(labelReturn);
+}
+
+void Aarch64Encoder::EncodeMemLastCharU8X16UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp)
+{
+    ScopedTmpReg vTmp0(this, FLOAT64_TYPE);
+    ScopedTmpReg vTmp1(this, FLOAT64_TYPE);
+    auto vReg0 = vixl::aarch64::VRegister(vTmp0.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    auto vReg1 = vixl::aarch64::VRegister(tmp.GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    auto xReg0 = vixl::aarch64::Register(dst.GetId(), vixl::aarch64::kXRegSize);
+    auto labelReturn = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelFound = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCheckV0D0 = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+
+    GetMasm()->Ld1(vReg0, vixl::aarch64::MemOperand(VixlReg(srcAddr)));
+    GetMasm()->Dup(vReg1, VixlReg(ch));
+    GetMasm()->Cmeq(vReg0, vReg0, vReg1);
+    // Give up if char is not there
+    GetMasm()->Addp(vReg1.V2D(), vReg0.V2D(), vReg0.V2D());
+    GetMasm()->Mov(xReg0, vReg1.D(), 0);
+    GetMasm()->Cbz(xReg0, labelReturn);
+    // Compute a pointer to the char
+    // Check D1 first as we are looking for the last occurrence of 'ch'
+    GetMasm()->Mov(xReg0, vReg0.D(), 1U);
+    GetMasm()->Cbz(xReg0, labelCheckV0D0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->B(labelFound);
+    GetMasm()->Bind(labelCheckV0D0);
+    GetMasm()->Mov(xReg0, vReg0.D(), 0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(BITS_PER_UINT64));
+    GetMasm()->Bind(labelFound);
+    GetMasm()->Lsr(xReg0, xReg0, 3U);  // number of 8-bit chars
+    GetMasm()->Neg(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(15U));
     GetMasm()->Add(xReg0, xReg0, VixlReg(srcAddr));
     GetMasm()->Bind(labelReturn);
 }
