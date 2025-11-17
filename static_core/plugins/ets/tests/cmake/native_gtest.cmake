@@ -61,6 +61,11 @@ function (ets_native_test_helper TARGET)
         set(MANAGED_GTEST_ABC_PATH "${ARG_ETS_GTEST_ABC_PATH}=${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip")
     endif()
 
+    set(TEST_GROUP "")
+    if (DEFINED ARG_TEST_GROUP)
+        set(TEST_GROUP "TEST_GROUP;${ARG_TEST_GROUP}")
+    endif()
+
     # Add launcher <${TARGET}_gtests> target
     set(NATIVE_TESTS_DIR "${PANDA_BINARY_ROOT}/tests/native")
     panda_ets_add_gtest(
@@ -78,6 +83,7 @@ function (ets_native_test_helper TARGET)
         DEPS_TARGETS etsstdlib ${TARGET_GTEST_PACKAGE}
         TEST_RUN_DIR ${NATIVE_TESTS_DIR}
         OUTPUT_DIRECTORY ${NATIVE_TESTS_DIR}
+        ${TEST_GROUP}
     )
 
     if (DEFINED ARG_TEST_GROUP AND NOT ${ARG_TEST_GROUP} STREQUAL "")

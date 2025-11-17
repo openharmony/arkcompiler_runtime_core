@@ -110,25 +110,28 @@ panda_target_link_libraries(${PROJECT_NAME}
 
 panda_add_sanitizers(TARGET ${PROJECT_NAME} SANITIZERS ${PANDA_SANITIZERS_LIST})
 
-panda_add_gtest(
-    NAME arkinspector_tests
-    NO_CORES
-    SOURCES
-        tests/base64.cpp
-        tests/debug_info_cache.cpp
-        tests/inspector_server.cpp
-        tests/json_object_matcher.cpp
-        tests/object_repository.cpp
-        tests/session_manager.cpp
-        tests/source_manager.cpp
-        tests/thread_state.cpp
-    INCLUDE_DIRS
-        ${PANDA_ROOT}/runtime/tooling/inspector 
-    LIBRARIES
-        arkassembler
-        ${PROJECT_NAME}
-        arkruntime
-        gmock
-    SANITIZERS
-        ${PANDA_SANITIZERS_LIST}
-)
+# NOTE(@srokashevich, #29188): enable with asan after fix
+if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
+    panda_add_gtest(
+        NAME arkinspector_tests
+        NO_CORES
+        SOURCES
+            tests/base64.cpp
+            tests/debug_info_cache.cpp
+            tests/inspector_server.cpp
+            tests/json_object_matcher.cpp
+            tests/object_repository.cpp
+            tests/session_manager.cpp
+            tests/source_manager.cpp
+            tests/thread_state.cpp
+        INCLUDE_DIRS
+            ${PANDA_ROOT}/runtime/tooling/inspector
+        LIBRARIES
+            arkassembler
+            ${PROJECT_NAME}
+            arkruntime
+            gmock
+        SANITIZERS
+            ${PANDA_SANITIZERS_LIST}
+    )
+endif()

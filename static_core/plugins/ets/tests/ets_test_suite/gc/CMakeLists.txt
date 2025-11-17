@@ -99,8 +99,11 @@ add_ets_gc_test(FILE pin_object.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type
 # NOTE(26403) Profilesaver is turned off because of data race
 add_ets_gc_test(FILE get_object_address_test.ets OPTIONS "--gc-trigger-type=debug-never" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" MODE "INT")
 add_ets_gc_test(FILE space_type_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
-# NOTE(26403) Profilesaver is turned off because of data race
-add_ets_gc_test(FILE weak_ref_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--max-free=1" "--gc-trigger-type=debug-never" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" MODE "INT")
+# NOTE(@srokashevich, #29644): enable with tsan after fix
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
+    # NOTE(26403) Profilesaver is turned off because of data race
+    add_ets_gc_test(FILE weak_ref_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--max-free=1" "--gc-trigger-type=debug-never" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" MODE "INT")
+endif()
 add_ets_gc_test(FILE concurrent_start_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE register_native_allocation_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE finalization_registry_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
@@ -109,18 +112,27 @@ add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 10m FILE test_finreg_in_differe
 add_ets_gc_test(FILE finalization_registry_coro_test.ets OPTIONS  "--coroutine-workers-count=10" "--gc-type=g1-gc" "--run-gc-in-place"  "--gc-trigger-type=debug-never" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" MODE "INT")
 
 add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 10m FILE finalization_registry_deadlock_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
+# NOTE(@srokashevich, #29644): enable with tsan after fix
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
 add_ets_gc_test(FILE scheduled_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" "--gc-use-nth-alloc-trigger=true" MODE "INT")
+endif()
 add_ets_gc_test(FILE scheduled_gc_trigger_exception.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 
+# NOTE(@srokashevich, #30217): enable with tsan after fix
+if(NOT PANDA_ENABLE_THREAD_SANITIZER)
 # NOTE(26403) Profilesaver is turned off because of data race
 add_ets_gc_test(FILE postpone_gc_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false" MODE "INT")
+endif()
 
 add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "INT")
 add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "JIT")
 if (NOT CMAKE_CROSSCOMPILING)
     add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "AOT")
 endif()
-add_ets_gc_test(FILE heap_info_test.ets OPTIONS MODE "INT")
+# NOTE(@srokashevich, #29137): enable with tsan after fix
+if (NOT PANDA_ENABLE_THREAD_SANITIZER)
+    add_ets_gc_test(FILE heap_info_test.ets OPTIONS MODE "INT")
+endif()
 add_ets_gc_test(FILE free_heap_size_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--gc-workers-count=1" MODE "INT")
 add_ets_gc_test(FILE alloc_pinned.ets OPTIONS "--gc-type=g1-gc" "--heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post" MODE "INT")
 # Running tests via API calls

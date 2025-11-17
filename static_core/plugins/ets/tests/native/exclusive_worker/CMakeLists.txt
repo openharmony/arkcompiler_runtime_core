@@ -11,7 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (NOT PANDA_TARGET_ARM32)
+# NOTE(@srokashevich, #29164): enable with tsan after fix
+if (NOT PANDA_TARGET_ARM32 AND NOT PANDA_ENABLE_THREAD_SANITIZER)
     ani_add_gtest(ets_native_exclusive_worker_tests
         ETS_NAMED_MODE
         CPP_SOURCES
