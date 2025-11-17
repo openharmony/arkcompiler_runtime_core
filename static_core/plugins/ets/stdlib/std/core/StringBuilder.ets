@@ -36,7 +36,7 @@ export final class StringBuilder {
      *
      * @param fromChars array that will be used to initialize the builder
      */
-    constructor(fromChars: char[]) {
+    constructor(fromChars: FixedArray<char>) {
         let s: String = new String(fromChars);
         this.buf[this.index++] = s;
         this.length = s.getLength();
@@ -50,7 +50,7 @@ export final class StringBuilder {
      *
      * @param fromChars array that will be used to initialize the builder
      */
-    constructor(fromChars: FixedArray<char>) {
+    constructor(fromChars: char[]) {
         let s: String = new String(fromChars);
         this.buf[this.index++] = s;
         this.length = s.getLength();
@@ -97,18 +97,6 @@ export final class StringBuilder {
 
 
     /**
-     * Appends an object representation as string to the builder's internal buffer
-     *
-     * @param o object that will be converted to a string
-     *
-     * @returns builder with updated internal buffer
-     */
-    public append(o: Object): StringBuilder {
-        this.append(o.toString());
-        return this;
-    }
-
-    /**
      * Appends a string to the builder's internal buffer
      *
      * @param s string to be appended
@@ -116,7 +104,6 @@ export final class StringBuilder {
      * @returns builder with updated internal buffer
      */
     public native append(s: String): StringBuilder;
-
     private native append(s0: String, s1: String): StringBuilder;
     private native append(s0: String, s1: String, s2: String): StringBuilder;
     private native append(s0: String, s1: String, s2: String, s3: String): StringBuilder;
@@ -140,15 +127,6 @@ export final class StringBuilder {
     public native append(i: byte): StringBuilder;
 
     /**
-     * Appends a short as string to the builder's internal buffer
-     *
-     * @param i value to be appended
-     *
-     * @returns builder with updated internal buffer
-     */
-    public native append(i: short): StringBuilder;
-
-    /**
      * Appends a char to the builder's internal buffer
      *
      * @param i value to be appended
@@ -156,6 +134,15 @@ export final class StringBuilder {
      * @returns builder with updated internal buffer
      */
     public native append(i: char): StringBuilder;
+
+    /**
+     * Appends a short as string to the builder's internal buffer
+     *
+     * @param i value to be appended
+     *
+     * @returns builder with updated internal buffer
+     */
+    public native append(i: short): StringBuilder;
 
     /**
      * Appends an int as string to the builder's internal buffer
@@ -194,6 +181,18 @@ export final class StringBuilder {
     public native append(i: double): StringBuilder;
 
     /**
+     * Appends an object representation as string to the builder's internal buffer
+     *
+     * @param o object that will be converted to a stringitg
+     *
+     * @returns builder with updated internal buffer
+     */
+    public append(o: Object): StringBuilder {
+        this.append(o.toString());
+        return this;
+    }
+
+    /**
      * Returns the string that was formed as a result of all append operations
      *
      * @see append
@@ -227,7 +226,7 @@ export final class StringBuilder {
      *
      * @returns result of the conversion
      */
-    public static native toString(i: short): String;
+    public static native toString(i: char): String;
 
     /**
      * Converts the primitive to a string
@@ -236,7 +235,7 @@ export final class StringBuilder {
      *
      * @returns result of the conversion
      */
-    public static native toString(i: char): String;
+    public static native toString(i: short): String;
 
     /**
      * Converts the primitive to a string

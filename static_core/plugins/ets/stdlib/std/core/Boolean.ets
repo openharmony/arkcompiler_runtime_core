@@ -40,6 +40,15 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     }
 
     /**
+     * Constructs a new Boolean with provided char value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: char) {
+        this.value = value != c'\u0000';
+    }
+
+    /**
      * Constructs a new Boolean with provided short value
      *
      * @param value value to construct class instance with
@@ -76,15 +85,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     }
 
     /**
-     * Constructs a new Boolean with provided char value
-     *
-     * @param value value to construct class instance with
-     */
-    public constructor(value: char) {
-        this.value = value != c'\u0000';
-    }
-
-    /**
      * Constructs a new Boolean with provided float value
      *
      * @param value value to construct class instance with
@@ -101,7 +101,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     public constructor(value: number) {
         this.value = (value != 0 && !isNaN(value));
     }
-
 
     /**
      * Constructs a new Boolean with provided string value

@@ -26,7 +26,7 @@ let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}};
 
 function main(): void {
 {%- for v in c['values'] %}
-    let d{{loop.index}}: A{{loop.index}} = { fld: s{{loop.index}} }
+    let d{{loop.index}}: A{{loop.index}} = { fld: {% if c.type_trans is defined %}{{c.type_trans|safe}}(s{{loop.index}}){% else %}s{{loop.index}}{% endif %} }
     arktest.assertEQ(d{{loop.index}}.fld, {{v.val}})
 {%- endfor %}
 }

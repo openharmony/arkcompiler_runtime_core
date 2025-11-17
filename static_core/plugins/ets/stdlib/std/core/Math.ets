@@ -524,20 +524,6 @@ export class Math {
      *
      * @returns Largest value of `u` and `v`
      */
-    public static max(...values: double[]): double {
-        if (values.length == 0) {
-            return -Infinity;
-        }
-        let max = values[0];
-        for (let i = 1; i < values.length; i++) {
-            if (isNaN(values[i])) return NaN;
-            if (values[i] > max) {
-                max = values[i];
-            }
-        }
-        return max;
-    }
-
     public static max(): double {
         return -Infinity;
     }
@@ -556,6 +542,20 @@ export class Math {
         return val2;
     }
 
+    public static max(...values: double[]): double {
+        if (values.length == 0) {
+            return -Infinity;
+        }
+        let max = values[0];
+        for (let i = 1; i < values.length; i++) {
+            if (isNaN(values[i])) return NaN;
+            if (values[i] > max) {
+                max = values[i];
+            }
+        }
+        return max;
+    }
+
     /**
      * Smallest value of `u` and `v`
      *
@@ -564,20 +564,6 @@ export class Math {
      *
      * @returns Smallest value of `u` and `v`
      */
-    public static min(...values: double[]): double {
-        if (values.length == 0) {
-            return Infinity;
-        }
-        let min = values[0];
-        for (let i = 1; i < values.length; i++) {
-            if (isNaN(values[i])) return NaN;
-            if (values[i] < min) {
-                min = values[i];
-            }
-        }
-        return min;
-    }
-
     public static min(): double {
         return Infinity;
     }
@@ -594,6 +580,20 @@ export class Math {
             return val1
         }
         return val2;
+    }
+
+    public static min(...values: double[]): double {
+        if (values.length == 0) {
+            return Infinity;
+        }
+        let min = values[0];
+        for (let i = 1; i < values.length; i++) {
+            if (isNaN(values[i])) return NaN;
+            if (values[i] < min) {
+                min = values[i];
+            }
+        }
+        return min;
     }
 
     /**

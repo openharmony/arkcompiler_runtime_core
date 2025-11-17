@@ -295,8 +295,8 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: char): Type {
-        return CharType.VAL
+    public static of(v: byte): Type {
+        return ByteType.VAL
     }
 
     /**
@@ -306,8 +306,8 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: byte): Type {
-        return ByteType.VAL
+    public static of(v: char): Type {
+        return CharType.VAL
     }
 
     /**
@@ -367,15 +367,6 @@ export abstract class Type extends Object {
 
     // -----
 
-    public static of(o: Any): Type {
-        const td = TypeAPI.getTypeDescriptor(o)
-        const contextClass = o == undefined ? Class.ofCaller() : Class.of(o as object)
-        const contextLinker = contextClass == undefined ? getBootRuntimeLinker() : contextClass.getLinker()
-        return Type.resolve(td, contextLinker)!
-    }
-
-    // -----
-
     /**
      * Returns Type of value
      *
@@ -386,8 +377,6 @@ export abstract class Type extends Object {
     public static of(v: string): Type {
         return StringType.REF
     }
-
-    // -----
 
     /**
      * Returns Type of value
@@ -407,8 +396,8 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: FixedArray<char>): Type {
-        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.CHAR)
+    public static of(v: FixedArray<byte>): Type {
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BYTE)
     }
 
     /**
@@ -418,8 +407,8 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: FixedArray<byte>): Type {
-        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BYTE)
+    public static of(v: FixedArray<char>): Type {
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.CHAR)
     }
 
     /**
@@ -489,6 +478,17 @@ export abstract class Type extends Object {
     public static of(v: FixedArray<Object>): Type {
         return ArrayType.getInstance(Class.of(v))
     }
+
+    // -----
+
+    public static of(o: Any): Type {
+        const td = TypeAPI.getTypeDescriptor(o)
+        const contextClass = o == undefined ? Class.ofCaller() : Class.of(o as object)
+        const contextLinker = contextClass == undefined ? getBootRuntimeLinker() : contextClass.getLinker()
+        return Type.resolve(td, contextLinker)!
+    }
+
+    // -----
 
     public abstract isPrimitive(): boolean // Or Composite
 

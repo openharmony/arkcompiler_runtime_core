@@ -81,24 +81,9 @@ export final class SetIterator<T> implements IterableIterator<T> {
 export class Set<K> implements ReadonlySet<K> {
     private readonly elements: Map<K, K>
 
-    /**
-     * Constructs a Set from collection
-     * @param elements initial collection
-     */
-    constructor(elements?: Iterable<K> | FixedArray<K> | null) {
-        if (elements == null) {
-            this.elements = new Map<K, K>();
-        } else if (elements instanceof Iterable) {
-            const it = (elements as Iterable<K>).$_iterator()
-            const entriesIter = new MappingIterator<K, [K, K]>(it, (element: K): [K, K] => [element, element])
-            this.elements = new Map<K, K>(entriesIter)
-        } else {
-            const entries = new ([K, K] | null | undefined)[elements.length]
-            for (let i = 0; i < elements.length; ++i) {
-                entries[i] = [elements[i], elements[i]] as [K, K]
-            }
-            this.elements = new Map<K, K>(entries)
-        }
+    // NOTE: This API may be removed someday due #28030 internal issue
+    constructor(bucketsCount: int) {
+        this.elements = new Map<K, K>(bucketsCount);
     }
 
     /**
@@ -119,9 +104,24 @@ export class Set<K> implements ReadonlySet<K> {
         }
     }
 
-    // NOTE: This API may be removed someday due #28030 internal issue
-    constructor(bucketsCount: int) {
-        this.elements = new Map<K, K>(bucketsCount);
+    /**
+     * Constructs a Set from collection
+     * @param elements initial collection
+     */
+    constructor(elements?: Iterable<K> | FixedArray<K> | null) {
+        if (elements == null) {
+            this.elements = new Map<K, K>();
+        } else if (elements instanceof Iterable) {
+            const it = (elements as Iterable<K>).$_iterator()
+            const entriesIter = new MappingIterator<K, [K, K]>(it, (element: K): [K, K] => [element, element])
+            this.elements = new Map<K, K>(entriesIter)
+        } else {
+            const entries = new ([K, K] | null | undefined)[(elements as FixedArray<K>).length]
+            for (let i = 0; i < elements.length; ++i) {
+                entries[i] = [elements[i], elements[i]] as [K, K]
+            }
+            this.elements = new Map<K, K>(entries)
+        }
     }
 
     private toStringVals(): String {

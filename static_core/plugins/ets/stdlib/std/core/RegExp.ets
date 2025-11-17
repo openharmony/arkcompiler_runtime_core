@@ -951,16 +951,16 @@ export class RegExp extends Object {
         return index + s.codePointCount(index, index + 1);
     }
 
+    public static $_invoke(pattern: String, flags?: String) : RegExp {
+        return new RegExp(pattern, flags)
+    }
+    
     public static $_invoke(pattern: RegExp | String, flags?: String) : RegExp {
         return new RegExp(pattern, flags)
     }
 
     public static $_invoke(pattern: RegExp | String) : RegExp {
         return new RegExp(pattern)
-    }
-
-    public static $_invoke(pattern: String, flags?: String) : RegExp {
-        return new RegExp(pattern, flags)
     }
 
     private static resetStaticFields() {

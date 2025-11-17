@@ -125,6 +125,87 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     {%- endif %}
 
     /**
+     * Creates an {{element['name']}}Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: int) {
+        this(length.toDouble())
+    }
+
+    /**
+     * Creates an {{element['name']}}Array with respect to length.
+     *
+     * @param length data initializer
+     */
+    public constructor(length: number) {
+        if (length < 0 || length > (Int.MAX_VALUE / {{element['name']}}Array.BYTES_PER_ELEMENT)) {
+            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+        }
+        this.lengthInt = length.toInt()
+        this.byteLengthInt = this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT
+        this.byteOffsetInt = 0
+        this.buffer = new ArrayBuffer(this.byteLengthInt)
+    }
+
+    /**
+     * Creates an {{element['name']}}Array from FixedArray<int>
+     */
+    public constructor(numbers: FixedArray<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            {%- if element.get('name') == 'BigUint64' %}
+            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( valueOrBigIntGetULong % 'numbers[i]' ) }})
+            {%- elif element.get('name') != 'Uint8Clamped' %}
+            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( valueOrBigIntGetULong % 'numbers[i]' ) }})
+            {%- else %}
+            this.setUnsafeClamp(i, numbers[i].to{{element['primitiveType'].capitalize()}}())
+            {%- endif %}
+        }
+    }
+
+    /**
+     * Creates an {{element['name']}}Array from FixedArray<number>
+     */
+    public constructor(numbers: FixedArray<number>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            {%- if element.get('name') == 'BigUint64' %}
+            this.setUnsafe(i, new BigInt(numbers[i]).getULong())
+            {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+            this.setUnsafe(i, {{element.get('name')}}Array.doubleToInt(numbers[i]))
+            {%- else %}
+            this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(numbers[i]))
+            {%- endif %}
+        }
+    }
+
+    {%- if element['name'] == 'BigUint64' %}
+
+    /**
+     * Creates an {{element['name']}}Array from FixedArray<bigint>
+     */
+    public constructor(numbers: FixedArray<bigint>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, {{fromElementCompat % 'numbers[i]'}})
+        }
+    }
+    {%- endif %}
+
+    /**
+     * Creates a copy of {{element['name']}}Array.
+     *
+     * @param other data initializer
+     */
+    public constructor(other: {{element['name']}}Array) {
+        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
+        this.byteLengthInt = other.byteLength
+        this.lengthInt = other.length
+        this.byteOffsetInt = 0
+    }
+
+    /**
      * Creates an {{element['name']}}Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<{{element['subsetTypeValues']}}>) {
@@ -156,6 +237,30 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     {%- if element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
     private static native doubleToInt(d: double): {{element['primitiveType'].capitalize()}};
     {%- endif %}
+
+    /**
+     * Creates an {{element['name']}}Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type {{element['primitiveType']}} in newly created {{element['name']}}Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an {{element['name']}}Array with respect to buf and byteOffset.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     */
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
+    }
 
     /**
      * Creates an {{element['name']}}Array with respect to data, byteOffset and length.
@@ -216,30 +321,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     /**
-     * Creates an {{element['name']}}Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type {{element['primitiveType']}} in newly created {{element['name']}}Array
-     */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
-        this(buf, new Number(byteOffset), new Number(length))
-    }
-
-    /**
-     * Creates an {{element['name']}}Array with respect to buf and byteOffset.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     */
-    public constructor(buf: ArrayBuffer, byteOffset: int) {
-        this(buf, new Number(byteOffset), undefined)
-    }
-
-    /**
      * Creates an {{element['name']}}Array with respect to buf.
      *
      * @param buf data initializer
@@ -274,87 +355,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new Error("unexpected type of buf")
         }
     }
-
-    /**
-     * Creates an {{element['name']}}Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: int) {
-        this(length.toDouble())
-    }
-
-    /**
-     * Creates an {{element['name']}}Array with respect to length.
-     *
-     * @param length data initializer
-     */
-    public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / {{element['name']}}Array.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
-        }
-        this.lengthInt = length.toInt()
-        this.byteLengthInt = this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT
-        this.byteOffsetInt = 0
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
-    }
-
-    /**
-     * Creates a copy of {{element['name']}}Array.
-     *
-     * @param other data initializer
-     */
-    public constructor(other: {{element['name']}}Array) {
-        this.buffer = other.buffer.slice(other.byteOffset, other.byteOffset + other.byteLength) as ArrayBuffer
-        this.byteLengthInt = other.byteLength
-        this.lengthInt = other.length
-        this.byteOffsetInt = 0
-    }
-
-    /**
-     * Creates an {{element['name']}}Array from FixedArray<number>
-     */
-    public constructor(numbers: FixedArray<number>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            {%- if element.get('name') == 'BigUint64' %}
-            this.setUnsafe(i, new BigInt(numbers[i]).getULong())
-            {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
-            this.setUnsafe(i, {{element.get('name')}}Array.doubleToInt(numbers[i]))
-            {%- else %}
-            this.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(numbers[i]))
-            {%- endif %}
-        }
-    }
-
-    /**
-     * Creates an {{element['name']}}Array from FixedArray<int>
-     */
-    public constructor(numbers: FixedArray<int>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            {%- if element.get('name') == 'BigUint64' %}
-            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( valueOrBigIntGetULong % 'numbers[i]' ) }})
-            {%- elif element.get('name') != 'Uint8Clamped' %}
-            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( valueOrBigIntGetULong % 'numbers[i]' ) }})
-            {%- else %}
-            this.setUnsafeClamp(i, numbers[i].to{{element['primitiveType'].capitalize()}}())
-            {%- endif %}
-        }
-    }
-
-    {%- if element['name'] == 'BigUint64' %}
-
-    /**
-     * Creates an {{element['name']}}Array from FixedArray<bigint>
-     */
-    public constructor(numbers: FixedArray<bigint>) {
-        this(numbers.length)
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, {{fromElementCompat % 'numbers[i]'}})
-        }
-    }
-    {%- endif %}
 
     /**
      * Iteratorable interface implementation
@@ -404,6 +404,26 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     {%- else %}
     public native $_get(i: int): {{element['subsetType']}}
     {%- endif %}
+    {%- if element['primitiveType'] != 'int' %}
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public native $_set(index: int, val: int): void
+    {%- endif %}
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public native $_set(index: int, val: {{element['primitiveType']}}): void
 
     /**
      * Assigns val as element on index.
@@ -421,26 +441,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         this.$_set(index, Uint8ClampedArray.toUint8Clamped(val))
         {%- endif %}
     }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public native $_set(index: int, val: {{element['primitiveType']}}): void
-    {%- if element['primitiveType'] != 'int' %}
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public native $_set(index: int, val: int): void
-    {%- endif %}
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -498,6 +498,23 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns modified {{element['name']}}Array
      */
+    public fill(value: {{element['primitiveType']}}, start?: int, end?: int): {{element['name']}}Array {
+        {%- if element.get('clamped', False) %}
+        value = {{element['name']}}Array.clamp(value)
+        {%- endif %}
+        const k = normalizeIndex(start ?? 0, this.lengthInt)
+        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
+        this.fillInternal(value, k, finalPos)
+        return this
+    }
+
+    /**
+     * Fills the {{element['name']}}Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified {{element['name']}}Array
+     */
     public fill(value: {{element['subsetType']}}, start?: int, end?: int): {{element['name']}}Array {
         {%- if element.get('name') == 'BigUint64' %}
         this.fill(value.getULong(), start, end)
@@ -509,24 +526,18 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         return this
     }
 
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['primitiveType']}}, start?: int, end?: int): {{element['name']}}Array {
-        {%- if element.get('clamped', False) %}
-        value = {{element['name']}}Array.clamp(value)
-        {%- endif %}
-        const k = normalizeIndex(start ?? 0, this.lengthInt)
-        const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
-        this.fillInternal(value, k, finalPos)
-        return this
-    }
-
     private final native fillInternal(value: {{element['primitiveType']}}, start: int, end: int): void
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: int, val: {{element['primitiveType']}}): void {
+        this.$_set(insertPos, val)
+    }
 
     /**
      * Assigns val as element on index.
@@ -540,14 +551,21 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     /**
-     * Assigns val as element on index.
+     * Copies all elements of arr to the current {{element['name']}}Array starting from insertPos.
      *
-     * @param val value to set
+     * @param arr array to copy data from
      *
-     * @param index index to change
+     * @param insertPos start index where data from arr will be inserted
+     *
+     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(insertPos: int, val: {{element['primitiveType']}}): void {
-        this.$_set(insertPos, val)
+    public set(arr: FixedArray<{{element['primitiveType']}}>, insertPos: int): void {
+        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
+            throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
+        }
+        for (let i = 0; i < arr.length; i++) {
+            this.setUnsafeClamp(insertPos + i, arr[i])
+        }
     }
 
     /**
@@ -575,21 +593,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     /**
-     * Copies all elements of arr to the current {{element['name']}}Array starting from insertPos.
+     * Copies all elements of arr to the current {{element['name']}}Array.
      *
      * @param arr array to copy data from
-     *
-     * @param insertPos start index where data from arr will be inserted
-     *
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: FixedArray<{{element['primitiveType']}}>, insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
-            throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
-        }
-        for (let i = 0; i < arr.length; i++) {
-            this.setUnsafeClamp(insertPos + i, arr[i])
-        }
+    public set(arr: FixedArray<{{element['primitiveType']}}>): void {
+        this.set(arr, 0)
     }
 
     /**
@@ -601,14 +610,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         this.set(arr, 0)
     }
 
-    /**
-     * Copies all elements of arr to the current {{element['name']}}Array.
-     *
-     * @param arr array to copy data from
-     */
-    public set(arr: FixedArray<{{element['primitiveType']}}>): void {
-        this.set(arr, 0)
-    }
+    private native final set(array: Array<{{updatedSubsetType}}>): void;
 
     public native set(array: {{element['name']}}Array): void
 
@@ -640,9 +642,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             {%- endif %}
         }
     }
-    {%- set uniquePrimitiveTypes = ['number', 'int',  element['primitiveTypeWide']] if element['primitiveTypeWide'] != 'int' else ['number', 'int'] %}
-    {%- set uniquePrimitiveTypes = uniquePrimitiveTypes if element['name'] != 'BigUint64' else uniquePrimitiveTypes + ['bigint'] %}
-    {%- for argType in uniquePrimitiveTypes %}
+    {%- set types_to_generate = ['number', 'int'] %}
+    {%- if element['primitiveTypeWide'] != 'int' %}{%- do types_to_generate.append(element['primitiveTypeWide']) %}{%- endif %}
+    {%- if element['name'] == 'BigUint64' %}{%- do types_to_generate.append('bigint') %}{%- endif %}
+    {%- set sorted_order = ['short', 'int', 'long', 'bigint', 'number'] %}
+    {%- for argType in sorted_order %}
+        {%- if argType in types_to_generate %}
 
     /**
      * Returns a new array from a set of elements.
@@ -672,6 +677,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         {%- endif %}
         return res
     }
+        {%- endif %}
     {%- endfor %}
 
     private final native ofInt(items: FixedArray<int>): void
@@ -793,8 +799,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         {%- endif %}
         return result
     }
-
-    private native final set(array: Array<{{updatedSubsetType}}>): void;
 
     /**
      * Creates an array from an object of escompat.Array<{{updatedSubsetType}}>.
@@ -921,19 +925,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns true if searchElement is in {{element['name']}}Array, false otherwise
      */
-    public includes(searchElement: {{element['subsetType']}}, fromIndex?: int): boolean {
-        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
-    }
-
-    /**
-     * Determines whether {{element['name']}}Array includes a certain element, returning true or false as appropriate
-     *
-     * @param searchElement The element to search for
-     *
-     * @param fromIndex The position in this array at which to begin searching for searchElement
-     *
-     * @returns true if searchElement is in {{element['name']}}Array, false otherwise
-     */
     public includes(searchElement: {{element['primitiveType']}}, fromIndex: int): boolean {
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
@@ -949,6 +940,47 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      */
     public includes(searchElement: {{element['primitiveType']}}): boolean {
         return this.indexOf(searchElement.toInt(), 0) != -1
+    }
+
+    /**
+     * Determines whether {{element['name']}}Array includes a certain element, returning true or false as appropriate
+     *
+     * @param searchElement The element to search for
+     *
+     * @param fromIndex The position in this array at which to begin searching for searchElement
+     *
+     * @returns true if searchElement is in {{element['name']}}Array, false otherwise
+     */
+    public includes(searchElement: {{element['subsetType']}}, fromIndex?: int): boolean {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
+    }
+
+    /**
+     * Returns the index of the first occurrence of a value in {{element['name']}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    public indexOf(searchElement: int): int {
+        return this.indexOf(searchElement, 0)
+    }
+
+    /**
+     * Returns the index of the first occurrence of a value in {{element['name']}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    public indexOf(searchElement: int, fromIndex: int): int {
+        return this.indexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -974,32 +1006,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     /**
-     * Returns the index of the first occurrence of a value in {{element['name']}}Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(searchElement: int, fromIndex: int): int {
-        return this.indexOfImpl(searchElement.toLong(), fromIndex)
-    }
-
-    /**
-     * Returns the index of the first occurrence of a value in {{N}}Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    private final native indexOfImpl(searchElement: number, fromIndex: int): int
-
-    /**
      * Returns the index of the first occurrence of a value in {{N}}Array.
      *
      * @param searchElement The value to locate in the array.
@@ -1012,7 +1018,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in {{element['name']}}Array.
+     * Returns the index of the first occurrence of a value in {{N}}Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -1021,9 +1027,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(searchElement: int): int {
-        return this.indexOf(searchElement, 0)
-    }
+    private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
     /**
      * Converts all elements of an array to strings and joins them using the specified separator.
@@ -1068,8 +1072,36 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
+    public lastIndexOf(searchElement: int): int {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in {{element['name']}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
     public lastIndexOf(searchElement: {{element['subsetType']}}): int {
         return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in {{element['name']}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    public lastIndexOf(searchElement: int, fromIndex: int): int {
+        return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
     }
 
     /**
@@ -1095,32 +1127,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     /**
-     * Returns the index of the last occurrence of a value in {{element['name']}}Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
-     *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     */
-    public lastIndexOf(searchElement: int, fromIndex: int): int {
-        return this.lastIndexOfImpl(searchElement.toLong(), fromIndex)
-    }
-
-    /**
-     * Returns the index of the first occurrence of a value in {{N}}Array.
-     *
-     * @param searchElement The value to locate in the array.
-     *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     *  search starts at index 0.
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
-
-    /**
      * Returns the index of the first occurrence of a value in {{N}}Array.
      *
      * @param searchElement The value to locate in the array.
@@ -1133,18 +1139,16 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the last occurrence of a value in {{element['name']}}Array.
+     * Returns the index of the first occurrence of a value in {{N}}Array.
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
-     * search starts at index 0. If fromIndex is omitted, the search begins at index length-1
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
-     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     * @returns index of element if it presents, -1 otherwise
      */
-    public lastIndexOf(searchElement: int): int {
-        return this.lastIndexOf(searchElement, this.lengthInt - 1)
-    }
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): int
 
    /**
     * Creates a new {{element['name']}}Array using initializer
@@ -1371,8 +1375,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns an {{element['name']}}Array with replaced value on index
      */
-    public with(index: int, value: {{element['subsetType']}}): {{element['name']}}Array {
-        return this.withImpl(index, {{fromElementCompat % 'value'}})
+    public with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
+        return this.withImpl(index, value)
     }
 
     /**
@@ -1384,8 +1388,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns an {{element['name']}}Array with replaced value on index
      */
-    public with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
-        return this.withImpl(index, value)
+    public with(index: int, value: {{element['subsetType']}}): {{element['name']}}Array {
+        return this.withImpl(index, {{fromElementCompat % 'value'}})
     }
 
     /// === with element lambda functions ===

@@ -22,7 +22,7 @@ params: Conversion from '{{case.src_type}}' to '{{case.dst_type}}'
 function main(): void {
   let orig: {{case.src_type}} = {{case.src_val|safe}};
   let src: {{case.src_type}} = orig;
-  let dst: {{case.dst_type}} = src;   // testing this assignment
+  let dst: {{case.dst_type}} = {% if case.src_to_dst is defined %}{{case.src_to_dst|safe}}{% else %}src{% endif %};  // testing this assignment
   arktest.assertEQ(dst, {{case.dst_val}})
 }
 {% endfor %}

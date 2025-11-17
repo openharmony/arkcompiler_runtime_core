@@ -150,10 +150,7 @@ cases:
   - base: "i: A[]"
     derived: "i: B[]"
     call: "[new B()]"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
+    res: 2
   # using of contravariant relationship -> OK
   - base: "i: FixedArray<B>"
     derived: "i: FixedArray<A>"

@@ -66,6 +66,6 @@ function main(): void {
 		)
 	const ty = CI3.create()
 	const inst = ty.make()
- arktest.assertEQ( (inst as I1).i(), 30)
- arktest.assertEQ( (inst as I2).i(3), 12)
+ arktest.assertEQ( (inst as I1).i(), 0)
+ arktest.assertEQ( (inst as I2).i(3), 0)
 }

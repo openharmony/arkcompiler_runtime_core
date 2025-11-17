@@ -17,7 +17,7 @@ cases:
   - { arg: "i: byte", call: "1 as byte", res: 15}
   - { arg: "i: short", call: "1 as short", res: 2}
   - { arg: "i: char", call: "c'x'", res: 12}
-  - { arg: "i: int", call: "1", res: 4}
+  - { arg: "i: int", call: "1 as int", res: 4}
   - { arg: "i: long", call: "1 as long", res: 6}
   - { arg: "i: float", call: "1.1f", res: 8}
   - { arg: "i: double", call: "1.2", res: 10}

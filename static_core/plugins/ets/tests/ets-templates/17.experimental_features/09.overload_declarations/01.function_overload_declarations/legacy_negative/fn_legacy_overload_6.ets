@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: ArkTS supports the following two overloading mechanisms overload signatures and overload declarations. Legacy overload must be removed.
-tags: [compile-only, negative]
+tags: [{{c.tags}}]
 ---*/
 
 {{c.defs}}

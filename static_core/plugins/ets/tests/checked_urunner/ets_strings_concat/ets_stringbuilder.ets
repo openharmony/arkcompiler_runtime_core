@@ -148,7 +148,7 @@
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendInt/
+//! INST_NEXT     /Intrinsic.StdCoreSbAppendByte/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
@@ -296,7 +296,7 @@
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendInt/
+//! INST_NEXT     /Intrinsic.StdCoreSbAppendByte/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!

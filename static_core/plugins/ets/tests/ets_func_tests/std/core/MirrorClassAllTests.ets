@@ -93,7 +93,7 @@ function testFieldIsInherited(): void {
 function testParameterGetType(): void {
 	const ft = Type.of(paramDummy) as FunctionType
 	const p0 = ft.getParameter(0)
-	arktest.assertTrue(p0.getType().equals(Type.of(0)))
+	arktest.assertTrue(p0.getType().equals(Type.of(0 as int)))
 	const p1 = ft.getParameter(1)
 	arktest.assertTrue(p1.getType().equals(Type.of(new String(''))))
 }

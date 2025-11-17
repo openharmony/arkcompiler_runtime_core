@@ -23,10 +23,6 @@ params: {{c.type}}
 
 enum IntEnum {One = 1, Two = 0xFFFFFFFF, Three}
 
-function foo(a: Object): int {
-  return 1;
-}
-
 function foo(a: byte): int {
   return 2;
 }
@@ -53,6 +49,10 @@ function foo(a: float): int {
 
 function foo(a: double): int {
   return 8;
+}
+
+function foo(a: Object): int {
+  return 1;
 }
 
 function main(): void {

@@ -35,8 +35,8 @@ class A {
 function main(): void {
   {% for t in c['values'] %}
   let v{{loop.index}}: {{t.type}} = {{t.val|safe}};
-  let obj{{loop.index}}: A = new A(v{{loop.index}});
-  obj{{loop.index}}.foo(v{{loop.index}});
+  let obj{{loop.index}}: A = new A({% if t.obj_param_trans is defined %}{{t.obj_param_trans|safe}}(v{{loop.index}}){% else %}v{{loop.index}}{% endif %});
+  obj{{loop.index}}.foo({% if t.obj_param_trans is defined %}{{t.obj_param_trans|safe}}(v{{loop.index}}){% else %}v{{loop.index}}{% endif %});
   arktest.assertEQ(obj{{loop.index}}.fld1, {{t.val2|safe}})
   arktest.assertEQ(obj{{loop.index}}.fld2, {{t.val2|safe}})
   {% endfor %}

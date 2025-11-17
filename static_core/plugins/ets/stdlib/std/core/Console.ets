@@ -151,9 +151,6 @@ export final class Console {
      * @public
      * @deprecated Will be removed in future. Please use log instead
      */
-    public print(i: String): void {
-        this.addToBuffer(i, LogLevel.PRINTLN)
-    };
     public print(i: boolean): void {
         this.addToBuffer(new Boolean(i).toString(), LogLevel.PRINTLN)
     };
@@ -174,13 +171,16 @@ export final class Console {
     };
     public print(i: float): void {
         this.addToBuffer(new Float(i).toString(), LogLevel.PRINTLN)
-    }
+    };
     public print(i: double): void {
         this.addToBuffer(new Double(i).toString(), LogLevel.PRINTLN)
-    }
+    };
+    public print(i: String): void {
+        this.addToBuffer(i, LogLevel.PRINTLN)
+    };
     public print(o: Any): void {
         this.print(Console.AnyToPrint(o))
-    }
+    };
 
     /**
      * @section Println definitions
@@ -203,14 +203,6 @@ export final class Console {
      * @public
      * @deprecated Will be removed in future. Please use log instead
      */
-    public println(i: Any): void {
-        this.print(i)
-        this.println()
-    }
-    public println(i: String): void {
-        this.print(i)
-        this.println()
-    }
     public println(i: boolean): void {
         this.print(i)
         this.println()
@@ -243,6 +235,14 @@ export final class Console {
         this.print(i)
         this.println()
     }
+    public println(i: String): void {
+        this.print(i)
+        this.println()
+    }
+    public println(i: Any): void {
+        this.print(i)
+        this.println()
+    }
 
     /**
      * @section Console logging API
@@ -256,9 +256,6 @@ export final class Console {
      */
     // NOTE(ivan-tyulyandin): overload are added for performance reasons
     // To optimize `debug`, `warn`, `info` and `error` the same technique can be applied
-    public log(i: String): void {
-        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
-    }
     public log(i: boolean): void {
         this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
@@ -281,6 +278,9 @@ export final class Console {
         this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(i: double): void {
+        this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
+    }
+    public log(i: String): void {
         this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(): void {

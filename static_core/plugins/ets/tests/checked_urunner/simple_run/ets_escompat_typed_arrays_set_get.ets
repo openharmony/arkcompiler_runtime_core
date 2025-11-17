@@ -57,7 +57,7 @@ function test_int8array_set_byte_ir(): void {
 //! METHOD        "ets_escompat_typed_arrays_set_get.ETSGLOBAL::test_int8array_set_int_cpp"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.Int8ArraySetInt "
-//! INST_NOT      "Intrinsic.Int8ArraySetByte "
+//! INST          "Intrinsic.Int8ArraySetByte "
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST          "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
