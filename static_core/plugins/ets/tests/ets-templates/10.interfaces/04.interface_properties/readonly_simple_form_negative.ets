@@ -14,8 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Readonly simple form fo interface property
-tags: [negative, compile-only]
+desc: Readonly simple form for interface property
 ---*/
 
 interface I {
@@ -23,14 +22,22 @@ interface I {
 }
 
 class B implements I {
-  public constructor() {
-    text = "text";
-  }
+    private _text: string
 
+    public constructor() {
+      this._text = "text";
+    }
+    get text(): string {
+       return this._text;
+    }
+    set text(s: string) {
+       this._text = s
+    }
 }
 
 function main(): void {
   let instance: I = new B();
 
-  arktest.assertEQ(instance.text, "text")
+  instance.text = "text2";
+  arktest.assertEQ(instance.text, "text2")
 }
