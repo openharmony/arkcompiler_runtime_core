@@ -1869,6 +1869,66 @@
     - ark::coretypes::String*
     - ark::coretypes::String*
 
+- name: SubStringFromStringTlab
+  entrypoint: SubStringFromStringTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringTlabCompressed
+  entrypoint: SubStringFromStringTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringTlabAllStrings
+  entrypoint: SubStringFromStringTlabAllStrings
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringTlabAllStringsCompressed
+  entrypoint: SubStringFromStringTlabAllStringsCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringSlowPath
+  entrypoint: SubStringFromStringEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringOddSaved
+  entrypoint: SubStringFromStringEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
 - name: EscompatArrayIsPlatformArrayFast
   entrypoint: EscompatArrayIsPlatformArrayFast
   bridge: none

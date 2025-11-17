@@ -2759,14 +2759,6 @@ void Codegen::CreateStringFromStringTlab(IntrinsicInst *inst, Reg dst, SRCREGS s
     CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), srcStr);
 }
 
-void Codegen::CreateStringSubstringTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
-{
-    auto entrypointId = GetRuntime()->IsCompressedStringsEnabled()
-                            ? EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED
-                            : EntrypointId::SUB_STRING_FROM_STRING_TLAB;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
-}
-
 void Codegen::CreateStringGetCharsTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     auto entrypointId = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_GET_CHARS_TLAB_COMPRESSED

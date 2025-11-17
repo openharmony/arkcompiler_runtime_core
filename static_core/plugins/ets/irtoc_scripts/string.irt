@@ -31,14 +31,13 @@ module Constants
   ASCII_CHAR_CACHE_SIZE = "cross_values::GetPlatformTypesAsciiCharCacheSize(GetArch())"
 end
 
-# It is assumed that _begin_index and _end_index are safe and does not check/normalize them.
-# The range is [_begin_index, _end_index).
+# It is assumed that _begin_index is safe and does not check/normalize them.
+# The range is [_begin_index, _begin_index + _char_count).
 # Note, a caller of this macro must provide a corresponding 'SlowPathEntrypoint'
 # for the case when 'allocate_string_tlab' fails (see StringTrim as an example)
 # Now TLAB implementation initializes memory with zero, so the hashcode field
 # is not initialized with zero explicitly.
-macro(:fast_substring) do |_str, _str_len, _begin_index, _end_index, _not_compressed|
-  _char_count := Sub(_end_index, _begin_index).u32
+macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _not_compressed|
   If(_char_count, Cast(_str_len).u32).EQ.Unlikely.b {
     # Return the string itself
     _same_str := Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr
@@ -291,7 +290,8 @@ Label(:Loop2)
   index2 := Phi(j, j1).i32
 Label(:TrimLeft)
   index := Phi(index1, index2).i32
-  trimmed := fast_substring(str, length, index, length, not_compressed)
+  char_count := Sub(length, index).u32
+  trimmed := fast_substring(str, length, index, char_count, not_compressed)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
@@ -394,7 +394,7 @@ Label(:Loop2)
 Label(:TrimRight)
   index := Phi(index1, index2).i32
   index := AddI(index).Imm(1).i32
-  trimmed := fast_substring(str, length, 0, index, not_compressed)
+  trimmed := fast_substring(str, length, 0, Cast(index).u32, not_compressed)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
@@ -516,7 +516,8 @@ Label(:Loop4)  # while (left < right && utf::IsWhiteSpaceChar(str->At(left)))
 Label(:Trim)
   l := Phi(left, left1, left, left11).i32
   r := Phi(right1, right3, right11, right33).i32
-  trimmed := fast_substring(str, length, l, r, not_compressed)
+  char_count := Sub(r, l).u32
+  trimmed := fast_substring(str, length, l, char_count, not_compressed)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
@@ -2290,3 +2291,127 @@ Label(:SlowPathEntrypoint)
   Intrinsic(:SLOW_PATH_ENTRY, strOrig, indexOrig).AddImm(entrypoint).MethodAsImm("StringCharAtUsualBridge").Terminator.u16
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
+
+def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enabled)
+  suffix = (all_strings_enabled ? "AllStrings" : "")
+  suffix += (string_compression_enabled ? "Compressed" : "")
+  available_regs = $panda_mask
+  function("SubStringFromStringTlab#{suffix}".to_sym,
+           params: {str: 'ref', begin_index: 'i32', end_index: 'i32'},
+           regmap: $full_regmap,
+           regalloc_set: available_regs,
+           mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      ReturnVoid().void
+      next
+    end
+
+    check_not_tree_string_type(str) if defines.DEBUG
+
+    # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
+    length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    if string_compression_enabled
+      length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    else
+      length := length_packed
+    end
+
+    # If begin_index < 0, then it is assumed to be equal to zero
+    If(begin_index, Cast(0).i32).LT.Unlikely.b {
+      bx1 := Cast(0).i32
+    }
+    bx2 := Phi(begin_index, bx1).u32
+    # If end_index < 0, then it is assumed to be equal to zero
+    If(end_index, Cast(0).i32).LT.Unlikely.b {
+      ex1 := Cast(0).i32
+    }
+    ex2 := Phi(end_index, ex1).u32
+    # If begin_index > str.length(), then make it equal to str.length()
+    If(bx2, length).A.Unlikely.b {
+      bx3 := length
+    }
+    bx4 := Phi(bx2, bx3).u32
+    # If end_index > str.length(), then make it equal to str.length()
+    If(ex2, length).A.Unlikely.b {
+      ex3 := length
+    }
+    ex4 := Phi(ex2, ex3).u32
+    # If begin_index > end_index, then swap them.
+    If(bx4, ex4).GT.Unlikely.b {
+      bx5 := ex4
+      ex5 := bx4
+    }
+    bx6 := Phi(bx4, bx5).u32
+    ex6 := Phi(ex4, ex5).u32
+
+    charCount := Sub(ex6, bx6).u32
+
+    If(charCount, length).EQ.Unlikely.b {
+      Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+    }
+
+    if string_compression_enabled
+      not_compressed := AndI(length_packed).Imm(1).u32
+      offset := Shl(bx6, not_compressed).u32
+    else
+      not_compressed := Cast(1).u32
+      offset := ShlI(bx6).Imm(1).u32
+    end
+
+    if all_strings_enabled
+      baseClass := load_class(str)
+      stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+
+      If(stringType, Constants::STRING_TYPE_SLICE).EQ {
+        strParent := LoadI(str).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+        strStartIndexAndBits := LoadI(str).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+        strStartIndex := ShrI(strStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
+        addedStartIndex := Add(bx6, strStartIndex).u32
+      } Else {
+        str0 := str
+        startIndex := bx6
+      }
+
+      fromStr := Phi(strParent, str0).ref
+      resultStartIndex := Phi(addedStartIndex, startIndex).u32
+
+      If(charCount, Constants::SLICED_STRING_MIN_LENGTH).GE.b {
+        Goto(:CreateSlicedString)
+      }
+
+      # create line substring from line string
+      result := fast_substring(fromStr, length, resultStartIndex, charCount, not_compressed)
+      Return(result).ptr
+
+    Label(:CreateSlicedString)
+      ptypes := getPlatformTypes()
+      klass := getSlicedStringClass(ptypes)
+      result := allocate_sliced_string_tlab(klass)
+
+      slicedStringLength := Or(ShlI(charCount).Imm(Constants::STRING_LENGTH_SHIFT).u32, not_compressed).u32
+      StoreI(result, slicedStringLength).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      StoreI(result, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+      StoreI(result, fromStr).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+      # hasBackingStoreBit become zero after shift left
+      startIndexAndBits := ShlI(resultStartIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
+      StoreI(result, startIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+
+      Return(result).ptr
+    else
+      result := fast_substring(str, length, bx6, charCount, not_compressed)
+      Return(result).ptr
+    end
+  Label(:SlowPathEntrypoint)
+    entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  }
+end  # def GenerateSubstringFromStringTlab
+
+GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=true)
+GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=false)
+GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=true)
+GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=false)

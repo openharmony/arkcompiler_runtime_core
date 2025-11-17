@@ -224,6 +224,8 @@ module Constants
     SLICED_STRING_PARENT_OFFSET = "cross_values::GetSlicedStringParentOffset(GetArch())"
     SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET = "cross_values::GetSlicedStringStartindexAndFlagsOffset(GetArch())"
     SLICED_STRING_STARTINDEX_SHIFT = "cross_values::GetSlicedStringStartindexShift(GetArch())"
+    SLICED_STRING_MIN_LENGTH = "common::SlicedString::MIN_SLICED_STRING_LENGTH"
+    SLICED_STRING_ALIGNED_OBJ_SIZE = "common::SlicedString::SIZE + TLAB_ALIGNMENT - 1"
     TREE_STRING_CLASS_OFFSET = "cross_values::GetPlatformTypesCoreTreeStringClassOffset(graph->GetArch())"
     TREE_STRING_LEFT_OFFSET = "common::TreeString::LEFT_OFFSET"
     TREE_STRING_RIGHT_OFFSET = "common::TreeString::RIGHT_OFFSET"
