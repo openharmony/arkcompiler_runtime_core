@@ -792,8 +792,8 @@ async function dependencyExecutedTaskTest() {
     arktest.expectError(() => { task1.removeDependency(task2) }, new Error('taskpool:: task has no dependency'));
     let res1 = await taskpool.execute(task2);
     arktest.assertEQ(res1, 30);
-    arktest.expectError(() => { task1.addDependency(task2) }, new Error('taskpool:: seqRunnerTask or executedTask cannot be relied on'));
-    arktest.expectError(() => { task2.addDependency(task1) }, new Error('taskpool:: seqRunnerTask or executedTask cannot addDependency'));
+    arktest.expectError(() => { task1.addDependency(task2) }, new Error('taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot be relied on'));
+    arktest.expectError(() => { task2.addDependency(task1) }, new Error('taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot addDependency'));
     let task3 = new taskpool.Task(returnAbc);
     let task4 = new taskpool.Task(max, 30, 10);
     let expectedAgainExecuteError = new Error('taskpool:: executedTask with dependency cannot execute again');
@@ -1270,6 +1270,15 @@ function testTaskpoolReturnObjWithGC() {
     arktest.assertEQ(RuntimeDebug.countInstancesOfClass(type), 0);
 }
 
+function executeAfterExecutePeriodically() {
+    let task = new taskpool.Task(sum, 1, 2);
+    taskpool.executePeriodically(100, task);
+    arktest.expectError(() => {
+        taskpool.execute(task);
+    }, new Error("taskpool:: the periodicTask cannot execute again"));
+    taskpool.cancel(task);
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1315,6 +1324,7 @@ function main(): int {
     commonTaskSuiteDisabled.addAsyncTest('taskpoolShrinkTest', taskpoolShrinkTest);
     commonTaskSuite.addAsyncTest('TestExecuteUndefined', testExecuteUndefined);
     commonTaskSuite.addTest('testTaskpoolReturnObjWithGC', testTaskpoolReturnObjWithGC);
+    commonTaskSuite.addTest('executeAfterExecutePeriodically', executeAfterExecutePeriodically);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
