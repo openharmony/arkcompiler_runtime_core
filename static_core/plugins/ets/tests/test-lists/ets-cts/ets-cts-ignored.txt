@@ -117,17 +117,6 @@
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_46.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_47.ets
 
-#24446
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_0.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_1.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_2.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_3.ets
-
-#24445
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_4.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_5.ets
-05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_6.ets
-
 #20213 Generic instantiation depends on arguments order
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_8.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_8.ets

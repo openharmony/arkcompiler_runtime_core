@@ -13,6 +13,7 @@
 
 generic_in_out:
   - desc: Verify the covariance of the 'out' keyword.
+    tags: "negative, compile-only"
     dec1: |-
       interface A<out T> {
         value: T;
@@ -23,6 +24,7 @@ generic_in_out:
       arktest.assertEQ(b.value, 42);
 
   - desc: Verify the covariance of the 'out' keyword, and act on the function.
+    tags: "negative, compile-only"
     dec1: |-
       interface A<out T> {
         value: T;
@@ -36,6 +38,7 @@ generic_in_out:
       arktest.assertEQ(objectA.value, 42);
 
   - desc: To verify the covariance of an array.
+    tags: "negative, compile-only"
     dec1: |-
       interface ArrayWrapper<out T> {
         values: T[];
@@ -49,6 +52,7 @@ generic_in_out:
       arktest.assertEQ(JSON.stringify(anyWrapper.values), JSON.stringify([1, 2, 3]));
 
   - desc: Verify the application of the covariance of the 'out' keyword to the function return value.
+    tags: "negative, compile-only"
     dec1: |-
       interface FunctionWrapper<out T> {
         func: () => T;
@@ -62,6 +66,7 @@ generic_in_out:
       arktest.assertEQ(anyFunctionWrapper.func(), 42);
 
   - desc: Verify the combined use of the keywords in and out.
+    tags: "negative, compile-only"
     dec1: |-
       interface FunctionWrapper<in T, out U> {
         func: (value: T) => U;
@@ -75,6 +80,7 @@ generic_in_out:
       arktest.assertEQ(anyFunctionWrapper.func(42), 84);
 
   - desc: Verify the application of the covariance of the out keyword in readonlyArray.
+    tags: "negative, compile-only"
     dec1: |-
       interface ReadonlyArrayWrapper<out T> {
         values: T[];
@@ -140,6 +146,7 @@ generic_in_out:
       arktest.assertEQ(numberConsumer.consume(42), 42);
 
   - desc: Verify the application of the contravariance of the in keyword in callback functions.
+    tags: "negative, compile-only"
     dec1: |-
       interface CallbackWrapper<in T> {
         callback: (value: T) => void;
@@ -157,6 +164,7 @@ generic_in_out:
       arktest.assertEQ(a, 43);
 
   - desc: Shows the inverse behavior of generics on input parameters.
+    tags: "negative, compile-only"
     dec1: |-
       interface Consumer<in T> {
         consume(item: T): T;
@@ -180,6 +188,7 @@ generic_in_out:
       arktest.assertEQ(result instanceof Dog, true);
 
   - desc: Verify the combination of covariance and inversion.
+    tags: "negative, compile-only"
     dec1: |-
       let a: number = 10;
       interface A<out T> {
@@ -206,6 +215,7 @@ generic_in_out:
       arktest.assertEQ(a, 11);
 
   - desc: Verify the application of contravariance of the in keyword 'in' function parameters.
+    tags: "negative, compile-only"
     dec1: |-
       interface FunctionWrapper<in T> {
         func: (value: T) => void;
@@ -224,6 +234,7 @@ generic_in_out:
       arktest.assertEQ(a, 11);
 
   - desc: Verify the covariance of the 'out' keyword.
+    tags: "negative, compile-only"
     dec1: |-
       interface A<out T> {
         value: T;

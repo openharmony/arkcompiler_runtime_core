@@ -15,10 +15,10 @@
 
 package std.core;
 
-export interface ConcatArray<T> extends ArrayLike<T> {
+export interface ConcatArray<out T> extends ArrayLike<T> {
     at(index: int): T | undefined;
 
     join(separator?: String): string;
 
-    slice(start?: int, end?: int): Array<T>;
+    slice(start?: int, end?: int): Array<@types.SkipVarianceCheckDontUseItWillBeRemoved T>;
 }

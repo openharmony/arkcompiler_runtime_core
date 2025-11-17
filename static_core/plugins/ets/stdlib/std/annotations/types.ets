@@ -13,16 +13,12 @@
  * limitations under the License.
  */
 
-{% for case in generic_in_out %}
+package std.annotations;
 
-/*---
-desc: {{case.desc}}
-tags: [{{case.tags}}]
----*/
-
-{{case.dec1|indent}}
-
-function main() {
-  {{case.check|indent}}
+export namespace types {
+    // Temporary annotation to allow some necessary but invalid stdlib code to be compiled.
+    // Has effect only inside stdlib. Will be removed.
+    // DON'T USE IT!
+    @Retention("SOURCE")
+    export @interface SkipVarianceCheckDontUseItWillBeRemoved {};
 }
-{% endfor %}

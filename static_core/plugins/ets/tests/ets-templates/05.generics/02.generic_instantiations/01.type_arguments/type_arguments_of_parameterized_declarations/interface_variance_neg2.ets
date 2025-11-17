@@ -23,7 +23,7 @@ desc: |-
     in T
     It restricts available methods so it is only allowed to access methods that do not use T or do use ones with T in in-positions only.
 params: interface arguments, use-site variance
-tags:
+tags: [compile-only, negative]
 ---*/
 
 class X {}
@@ -60,6 +60,6 @@ class A<T> implements I<T> {
 function main() {
 
     {{c.use|indent}}
-    
+
 }
 {% endfor %}
