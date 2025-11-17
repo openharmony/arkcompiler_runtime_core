@@ -32,7 +32,7 @@ class Platform(PlatformBase):
         super().__init__(args)
         self.es2abc = self.tools_get('es2abc')
         self.ark_js_vm = self.tools_get('ark_js_vm')
-        if OptFlags.AOT in self.flags:
+        if OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags:
             self.aot_compiler = self.tools_get('ark_aot_compiler')
         self.lang = list(self.langs)[0]
 
@@ -46,7 +46,7 @@ class Platform(PlatformBase):
 
     @property
     def required_tools(self) -> List[str]:
-        if OptFlags.AOT in self.flags:
+        if OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags:
             return ['es2abc', 'ark_js_vm', 'ark_aot_compiler']
         return ['es2abc', 'ark_js_vm']
 
@@ -59,7 +59,7 @@ class Platform(PlatformBase):
         if self.dry_run_stop(bu):
             return
         self.push_unit(bu, '.abc')  # for device; on host does nothing
-        if OptFlags.AOT in self.flags:
+        if OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags:
             self.ark_js_vm.profile(bu)
             self.aot_compiler(bu)
             self.ark_js_vm.profile(bu, with_aot=True)
