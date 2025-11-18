@@ -285,7 +285,7 @@ class ShellDevice(ShellBase):
         self._sh = ShellHost()
         self._devsh = dev_sh
         self.tmp_dir = tmp_dir
-        self.stderr_out = os.path.join(tmp_dir, 'vmb-stderr.out')
+        self.stderr_out = tmp_dir + '/vmb-stderr.out'
 
     def run(self, cmd: str,
             measure_time: bool = False,
@@ -295,7 +295,7 @@ class ShellDevice(ShellBase):
         if measure_time:
             cmd = f"\\time -v {self.taskset} env {cmd}"
             redir = f' 2>{self.stderr_out}'
-        cwd = f'cd {cwd}; ' if cwd else ''
+        cwd = f'cd {Path(cwd).as_posix()}; ' if cwd else ''
         # Single/Double quote problem for cross-platform shell:
         # 1) there is no proper way to have '>' inside single quotes on Windows
         # 2) on the other hand "echo $?" will be prematurely expanded on Unix host
@@ -308,13 +308,13 @@ class ShellDevice(ShellBase):
         if measure_time:
             stderr_host = mktemp(prefix='vmb-')
             self.pull(self.stderr_out, stderr_host)
-            self._sh.run(f"{self._devsh} shell 'rm -f {self.stderr_out}'")
+            self._sh.run(f'{self._devsh} shell {q}rm -f {self.stderr_out}{q}')
             if not Path(stderr_host).exists():
                 res.err = 'Pull from device failed'
                 return res
             with open(stderr_host, 'r', encoding="utf-8") as f:
                 res.err = f.read()
-            self._sh.run(f'rm -f {stderr_host}')
+            os.remove(stderr_host)
             res.set_time()
         else:
             res.err = ''
@@ -416,13 +416,15 @@ class ShellHdc(ShellDevice):
     def push(self,
              src: Union[str, Path],
              dst: Union[str, Path]) -> ShellResult:
-        return self._sh.run(f'{self._devsh} file send {src} {dst}',
+        posix_dst = Path(dst).as_posix()
+        return self._sh.run(f'{self._devsh} file send {src} "{posix_dst}"',
                             measure_time=False)
 
     def pull(self,
              src: Union[str, Path],
              dst: Union[str, Path]) -> ShellResult:
-        return self._sh.run(f'{self._devsh} file recv {src} {dst}',
+        posix_src = Path(src).as_posix()
+        return self._sh.run(f'{self._devsh} file recv {posix_src} {dst}',
                             measure_time=False)
 
     def install(self, package: Union[str, Path], name: str = '') -> ShellResult:

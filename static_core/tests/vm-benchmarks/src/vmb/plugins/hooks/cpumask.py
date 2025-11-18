@@ -87,8 +87,7 @@ class Hook(HookBase):
             f = f'{self.cpu_root}/cpu{cpu}/{prop}'
             platform.x_sh.run(f'echo {val} > {f}')
 
-        r = platform.x_sh.run(
-            f'ls -1 -d {os.path.join(self.cpu_root, "cpu[0-9]*")}')
+        r = platform.x_sh.run(f'ls -1 -d {self.cpu_root}/cpu[0-9]*')
         if not r.out:
             raise RuntimeError('Get cpus failed!')
         all_cores = sorted([

@@ -190,7 +190,7 @@ class PlatformBase(CrossShell, ABC):
         if Target.HOST == self.target:
             return
         bu.device_path = self.dev_dir.joinpath(bu.path.name)
-        self.x_sh.run(f'mkdir -p {bu.device_path}')
+        self.x_sh.run(f'mkdir -p {bu.device_path.as_posix()}')
         for f in bu.path.glob('*'):
             # skip if suffix filter provided
             if ext and f.suffix not in ext:
@@ -199,7 +199,7 @@ class PlatformBase(CrossShell, ABC):
             self.x_sh.push(p, bu.device_path.joinpath(f.name))
         resources = bu.path.joinpath('resources')
         if resources.exists():
-            device_resources = bu.device_path.joinpath('resources')
+            device_resources = bu.device_path.joinpath('resources').as_posix()
             self.x_sh.run(f'mkdir -p {device_resources}')
             for f in resources.glob('*'):
                 p = f.resolve()
@@ -214,7 +214,7 @@ class PlatformBase(CrossShell, ABC):
         if bu.device_path is None:
             return  # Bench Unit wasn't pused to device
         log.trace('Cleaning: %s', bu.device_path)
-        self.x_sh.run(f'rm -rf {bu.device_path}')
+        self.x_sh.run(f'rm -rf {bu.device_path.as_posix()}')
 
     def set_affinity(self, arg: str) -> None:
         self.x_sh.set_affinity(arg)
