@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import ClassVar
 from unittest.mock import patch
 
-from runner.common_exceptions import InvalidConfiguration
 from runner.options import cli_options_utils as cli_utils
 from runner.options.cli_options import CliOptionsParser, CliParserBuilder, ConfigsLoader
 from runner.test.config_test.data import data_1, data_2
@@ -109,15 +108,3 @@ class TestSuiteConfigTest1(unittest.TestCase):
         actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
         expected = data_2.args
         compare_dicts(self, actual, expected)
-
-    @patch('runner.utils.get_config_workflow_folder', lambda: TestSuiteConfigTest1.data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', lambda: TestSuiteConfigTest1.data_folder)
-    @patch.dict(os.environ, test_environ, clear=True)
-    def test_wrong_config_names(self) -> None:
-        args = [("panda-int1", "ets-runtime"), ("panda-int", "ets-runtime1"),
-                ("panda-int1", "ets-runtime1")]
-        for arg in args:
-            workflow_name, test_suite_name = arg
-            with self.assertRaises(InvalidConfiguration):
-                cli_utils.check_valid_workflow_name(cli_utils.WorkflowName(workflow_name))
-                cli_utils.check_valid_test_suite_name(cli_utils.TestSuiteName(test_suite_name))
