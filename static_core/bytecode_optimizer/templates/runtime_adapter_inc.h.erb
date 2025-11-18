@@ -22,7 +22,7 @@ namespace ark::bytecodeopt {
 
 inline bool NeedToRunSimplifyStringBuilder(ark::SourceLanguage lang)
 {
-    switch(lang) {
+    switch(lang) { // NOLINT(hicpp-multiway-paths-covered)
 % Common::each_plugin_suboption("bytecodeopt", "need_to_run_simplify_string_builder_inl") do |need_to_run_simplify_string_builder_inl, plugin_lang|
     <%= Common::include_plugin_files "bytecodeopt", "need_to_run_simplify_string_builder_inl" %>
 % end
@@ -32,6 +32,7 @@ inline bool NeedToRunSimplifyStringBuilder(ark::SourceLanguage lang)
     return false;
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 inline ark::BytecodeOptimizerRuntimeAdapter *CreateBytecodeOptimizerRuntimeAdapter(const ark::panda_file::File &panda_file, ark::ArenaAllocator &allocator, [[maybe_unused]] ark::SourceLanguage lang)
 {
     switch(lang) {
@@ -45,4 +46,4 @@ inline ark::BytecodeOptimizerRuntimeAdapter *CreateBytecodeOptimizerRuntimeAdapt
     return allocator.New<ark::BytecodeOptimizerRuntimeAdapter>(panda_file);
 }
 
-} // ark::bytecodeopt
+} // namespace ark::bytecodeopt

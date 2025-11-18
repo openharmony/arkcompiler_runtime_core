@@ -491,9 +491,9 @@ if __name__ == "__main__":
         arguments.panda_dir, arguments.build_dir, arguments.filename_filter)
 
     if not files_list:
-        sys.exit("Can't be prepaired source list."
-                 "Please check availble in build `dir compile_commands.json`"
-                 "and correcting of parameter `--filename-filter` if you use it.")
+        sys.exit("Can't prepare source list."
+                 "Please check if 'compile_commands.json` file exists in the build dir "
+                 "and check `--filename-filter` parameter correctness if you use it.")
 
     if not arguments.check_libabckit:
         check_headers_in_es2panda_sources(arguments.panda_dir)

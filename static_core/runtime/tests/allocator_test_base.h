@@ -32,7 +32,6 @@
 #include "runtime/mem/mem_stats_additional_info.h"
 #include "runtime/mem/mem_stats_default.h"
 #include "runtime/include/object_header.h"
-#include "libarkbase/utils/utils.h"
 
 namespace ark::mem {
 

@@ -47,7 +47,6 @@
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/tests/test_utils.h"
 #include "libarkbase/test_utilities.h"
-#include "libarkbase/utils/utils.h"
 #include "runtime/tests/interpreter_test_utils.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -163,5 +162,7 @@ DEATH_TEST_F(InterpreterFrameWithSTWTest, TestCreateFrame)
 
     ark::FreeFrameInterp(f2, ManagedThread::GetCurrent());
 }
+
+// NOLINTEND(readability-magic-numbers)
 
 }  // namespace ark::interpreter::test

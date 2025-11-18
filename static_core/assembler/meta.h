@@ -242,14 +242,14 @@ public:
         annotations_.insert(annotations_.end(), annotations.begin(), annotations.end());
     }
 
-    void DeleteAnnotationByName(const std::string_view &annotation_name)
+    void DeleteAnnotationByName(const std::string_view &annotationName)
     {
-        auto annotation_iter =
+        auto annotationIter =
             std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
+                return annotation.GetName() == annotationName;
             });
-        if (annotation_iter != annotations_.end()) {
-            (void)annotations_.erase(annotation_iter);
+        if (annotationIter != annotations_.end()) {
+            (void)annotations_.erase(annotationIter);
         }
     }
 

@@ -17,13 +17,14 @@
 
 namespace ark::ets::ani::verify::testing {
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class StringGetUtf16SubstrTest : public VerifyAniTest {
 public:
     void SetUp() override
     {
         VerifyAniTest::SetUp();
 
-        uint16_t input[3];
+        uint16_t input[3];  // NOLINT(modernize-avoid-c-arrays)
         auto status = env_->String_NewUTF16(input, 3U, &string_);
         ASSERT_EQ(status, ANI_OK);
         substrOffset_ = 0;
@@ -36,25 +37,27 @@ public:
         ani_method ctor {};
         ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env_->Object_New(cls, ctor, &obj_), ANI_OK);
 
         ASSERT_EQ(env_->FindClass("escompat.Error", &cls_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", ":", &ctor), ANI_OK);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env_->Object_New(cls_, ctor, &err_), ANI_OK);
     }
 
 protected:
-    ani_string string_;
-    ani_size substrOffset_;
-    ani_size substrSize_;
-    uint16_t buf_[5];
-    ani_size bufSize_;
-    ani_size res_;
-    ani_object obj_ {};
-    ani_ref undef_ {};
-    ani_object err_ {};
-    ani_ref null_ {};
-    ani_class cls_ {};
+    ani_string string_;      // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_size substrOffset_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_size substrSize_;    // NOLINT(misc-non-private-member-variables-in-classes)
+    uint16_t buf_[5];        // NOLINT(misc-non-private-member-variables-in-classes,modernize-avoid-c-arrays)
+    ani_size bufSize_;       // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_size res_;           // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_object obj_ {};      // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_ref undef_ {};       // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_object err_ {};      // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_ref null_ {};        // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_class cls_ {};       // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 TEST_F(StringGetUtf16SubstrTest, wrong_env)

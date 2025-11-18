@@ -67,7 +67,7 @@ constexpr std::string_view ToString(Enum e) {
 }  // namespace <%= op.camel_name.snakecase %>
 
 % end
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming,readability-magic-numbers)
 class PANDA_PUBLIC_API Options {
 public:
     class Error {
@@ -231,7 +231,7 @@ private:
 % end
 % end
 };
-// NOLINTEND(readability-identifier-naming)
+// NOLINTEND(readability-identifier-naming,readability-magic-numbers)
 }  // namespace <%= Common::module.namespace %>
 
 #endif  // PANDA_<%= Common::module.name.upcase %>_OPTIONS_GEN_H

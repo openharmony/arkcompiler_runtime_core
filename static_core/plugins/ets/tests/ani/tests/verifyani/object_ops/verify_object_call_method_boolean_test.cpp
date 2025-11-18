@@ -91,9 +91,9 @@ protected:
 
 class A {
 public:
-    static ani_method g_method;
+    static ani_method g_method;  // NOLINT(readability-identifier-naming)
 
-    static void NativeFoo(ani_env *env, ani_object)
+    static void NativeFoo(ani_env *env, ani_object /*unused*/)
     {
         ani_class cls {};
         ASSERT_EQ(env->FindClass("verify_object_call_method_boolean_test.Parent", &cls), ANI_OK);
@@ -102,7 +102,7 @@ public:
     }
 
     template <typename TestType>
-    static void NativeBaz(ani_env *env, ani_object)
+    static void NativeBaz(ani_env *env, ani_object /*unused*/)
     {
         ani_class cls {};
         ani_object obj {};
@@ -111,7 +111,7 @@ public:
 
         ani_boolean result;
         if constexpr (std::is_same_v<TestType, ObjectCallMethodBooleanATest>) {
-            ani_value args[2U];
+            ani_value args[2U];  // NOLINT(modernize-avoid-c-arrays)
             ASSERT_EQ(env->c_api->Object_CallMethod_Boolean_A(env, obj, g_method, &result, args), ANI_OK);
         } else {
             ASSERT_EQ(env->c_api->Object_CallMethod_Boolean(env, obj, g_method, &result), ANI_OK);
@@ -119,14 +119,14 @@ public:
     }
 
     template <typename TestType>
-    static void NativeBar(ani_env *env, ani_object, ani_ref o, ani_long m)
+    static void NativeBar(ani_env *env, ani_object /*unused*/, ani_ref o, ani_long m)
     {
-        ani_object object = static_cast<ani_object>(o);
-        ani_method method = reinterpret_cast<ani_method>(m);
+        auto object = static_cast<ani_object>(o);
+        auto method = reinterpret_cast<ani_method>(m);
 
         ani_boolean result;
         if constexpr (std::is_same_v<TestType, ObjectCallMethodBooleanATest>) {
-            ani_value args[2U];
+            ani_value args[2U];  // NOLINT(modernize-avoid-c-arrays)
             ASSERT_EQ(env->c_api->Object_CallMethod_Boolean_A(env, object, method, &result, args), ANI_OK);
         } else {
             ASSERT_EQ(env->c_api->Object_CallMethod_Boolean(env, object, method, &result), ANI_OK);
@@ -607,12 +607,14 @@ TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call_from_native_method)
         GetClassAndObject(env, &cls, "verify_object_call_method_boolean_test.Parent", &object);
 
         // In the native "foo" method, the "voidParamMethod" method is found
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env->Object_CallMethodByName_Void(object, "foo", ":"), ANI_OK);
 
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
     }).join();
 
     // In the native "baz" method, the "voidParamMethod" method is called
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 
@@ -697,8 +699,10 @@ TEST_F(ObjectCallMethodBooleanTest, method_call_from_native_method_1)
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     // In the native "foo" method, the "voidParamMethod" method is found
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "foo", ":"), ANI_OK);
     // In the native "baz" method, the "voidParamMethod" method is called
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 
@@ -1089,12 +1093,14 @@ TEST_F(ObjectCallMethodBooleanATest, cross_thread_method_call_from_native_method
         GetClassAndObject(env, &cls, "verify_object_call_method_boolean_test.Parent", &object);
 
         // In the native "foo" method, the "voidParamMethod" method is found
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env->Object_CallMethodByName_Void(object, "foo", ":"), ANI_OK);
 
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
     }).join();
 
     // In the native "baz" method, the "voidParamMethod" method is called
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 
@@ -1173,8 +1179,10 @@ TEST_F(ObjectCallMethodBooleanATest, method_call_from_native_method_1)
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     // In the native "foo" method, the "voidParamMethod" method is found
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "foo", ":"), ANI_OK);
     // In the native "baz" method, the "voidParamMethod" method is called
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 

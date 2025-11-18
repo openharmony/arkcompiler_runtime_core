@@ -33,7 +33,7 @@ class ClassLinker;
 class ClassLinkerErrorHandler;
 
 /// @brief Wrapper around a recursive mutex and a condition variable
-class ClassMutexHandler {
+class ClassMutexHandler {  // NOLINT(cppcoreguidelines-special-member-functions)
 public:
     ClassMutexHandler() = default;
 

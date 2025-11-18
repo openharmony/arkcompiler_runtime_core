@@ -154,3 +154,5 @@ CheckOptions:
     value: camelBack
   - key: readability-identifier-naming.VirtualMethodCase
     value: CamelCase
+  - key: readability-else-after-return.WarnOnConditionVariables
+    value: 'false'

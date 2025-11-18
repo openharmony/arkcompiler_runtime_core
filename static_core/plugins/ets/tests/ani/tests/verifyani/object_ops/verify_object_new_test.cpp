@@ -23,13 +23,13 @@ public:
     {
         VerifyAniTest::SetUp();
 
-        constexpr ani_byte bVal = 0x3f;
-        constexpr ani_short sVal = 0x1f4f;
-        constexpr ani_int iVal = 0x323fff23;
-        constexpr ani_long lVal = 0xff3229884222;
-        constexpr ani_float fVal = 0.234;
-        constexpr ani_double dVal = 1.423;
-        constexpr std::string_view longSignature = "zC{std.core.String}sC{std.core.String}lfdC{std.core.String}:";
+        constexpr ani_byte B_VAL = 0x3f;
+        constexpr ani_short S_VAL = 0x1f4f;
+        constexpr ani_int I_VAL = 0x323fff23;
+        constexpr ani_long L_VAL = 0xff3229884222;
+        constexpr ani_float F_VAL = 0.234;
+        constexpr ani_double D_VAL = 1.423;
+        constexpr std::string_view LONG_SIGNATURE = "zC{std.core.String}sC{std.core.String}lfdC{std.core.String}:";
 
         ASSERT_EQ(env_->FindClass("verify_object_new_test.CheckCtorTypes", &cls_), ANI_OK);
         ASSERT_EQ(env_->FindClass("verify_object_new_test.A", &clsA_), ANI_OK);
@@ -37,19 +37,19 @@ public:
         ASSERT_EQ(env_->FindClass("verify_object_new_test.C", &clsC_), ANI_OK);
         ASSERT_EQ(env_->FindClass("verify_object_new_test.CheckUnionType", &checkUnion_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", "zcbsilfdC{std.core.String}:", &ctor_), ANI_OK);
-        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", longSignature.data(), &ctorRefs_), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", LONG_SIGNATURE.data(), &ctorRefs_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(clsA_, "<ctor>", ":", &ctorA_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(clsB_, "<ctor>", ":", &ctorB_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(clsC_, "<ctor>", "C{verify_object_new_test.A}:", &ctorCA_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(clsC_, "<ctor>", "C{verify_object_new_test.B}:", &ctorCB_), ANI_OK);
         z_ = ANI_TRUE;
         c_ = 'c';
-        b_ = bVal;
-        s_ = sVal;
-        i_ = iVal;
-        l_ = lVal;
-        f_ = fVal;
-        d_ = dVal;
+        b_ = B_VAL;
+        s_ = S_VAL;
+        i_ = I_VAL;
+        l_ = L_VAL;
+        f_ = F_VAL;
+        d_ = D_VAL;
         std::string_view str("tra-ta-ta");
         ASSERT_EQ(env_->String_NewUTF8(str.data(), str.size(), &r_), ANI_OK);
     }
@@ -708,6 +708,7 @@ TEST_F(ObjectNewTest, DISABLED_arg_union2)
     ASSERT_EQ(env_->FindClass("std.core.Boolean", &boolClass), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(boolClass, "<ctor>", "z:", &ctor), ANI_OK);
     ani_object arg {};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Object_New(boolClass, ctor, &arg, z_), ANI_OK);
 
     ASSERT_EQ(env_->c_api->Object_New(env_, checkUnion_, unionMethod, &obj, arg), ANI_ERROR);

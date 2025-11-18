@@ -475,7 +475,7 @@ protected:
     static IntrinsicId GetIntrinsicId(std::string_view className, std::string_view methodName,
                                       panda_file::MethodDataAccessor mda);
 
-    const panda_file::File &pandaFile_;
+    const panda_file::File &pandaFile_;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 }  // namespace ark
 

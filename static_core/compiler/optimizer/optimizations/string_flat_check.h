@@ -32,6 +32,7 @@ class Graph;
  * Note: StringFlatCheck instruction and its users should not be separated by OSR entry since it is possible that
  * StringFlatCheck was not executed in compiled code.
  */
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API StringFlatCheck : public Optimization, GraphVisitor {
 public:
     static constexpr const char *NAME = "StringFlatCheck";

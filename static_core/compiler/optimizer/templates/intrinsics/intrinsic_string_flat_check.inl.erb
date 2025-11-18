@@ -19,11 +19,11 @@ inline uint32_t GetStringFlatCheckArgMask([[maybe_unused]] RuntimeInterface::Int
     switch (id) {
 % Compiler::intrinsics.select { |intrinsic| ((intrinsic.has_impl? and not intrinsic.impl_signature.strings.empty?) or (intrinsic.respond_to?(:this_string) and intrinsic.this_string)) and intrinsic.respond_to?(:require_flat_check) and intrinsic.require_flat_check }.each do |intrinsic|
     case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>: {
-        const uint32_t MASK = <%= intrinsic.impl_signature.strings.map { |i| 1 << i }.reduce(0) {|acc, n| acc | n} %>;
+        const uint32_t MASK = <%= intrinsic.impl_signature.strings.map { |i| 1 << i }.reduce(0) {|acc, n| acc | n} %>; // NOLINT(readability-identifier-naming)
 % if intrinsic.respond_to?(:static) and not intrinsic.static
         static_assert(sizeof(uint32_t) * 8 > <%= intrinsic.impl_signature.strings.max || 0 %> + 1);
 % if intrinsic.respond_to?(:this_string) and intrinsic.this_string
-        return (MASK << 1) | 1;
+        return (MASK << 1) | 1; // NOLINT(hicpp-signed-bitwise)
 % else
         return MASK << 1;
 % end
@@ -37,4 +37,4 @@ inline uint32_t GetStringFlatCheckArgMask([[maybe_unused]] RuntimeInterface::Int
         return 0;
     }
 }
-}
+} // namespace ark::compiler
