@@ -2233,6 +2233,17 @@ export class DateTimeFormat {
         /**
         * Formats a number according to the locale and formatting options of this Intl.NumberFormat object.
         *
+        * @param value A long to format.
+        *
+        * @returns string representing the given number formatted according to the locale and formatting options of this Intl.NumberFormat object.
+        */
+        public format(value: long): string {
+            return this.formatLong(value);
+        }
+
+        /**
+        * Formats a number according to the locale and formatting options of this Intl.NumberFormat object.
+        *
         * @param value A number to format.
         *
         * @returns string representing the given number formatted according to the locale and formatting options of this Intl.NumberFormat object.
@@ -2244,13 +2255,15 @@ export class DateTimeFormat {
         /**
         * Formats a number according to the locale and formatting options of this Intl.NumberFormat object.
         *
-        * @param value A number or BigInt to format
+        * @param value A number or BigInt or long to format
         *
         * @returns A string representing the given number formatted according to the locale and formatting options of this Intl.NumberFormat object.
         */
-        public format(value: number | bigint): string {
+        public format(value: number | bigint | long): string {
             if (value instanceof BigInt) {
                 return this.formatDecStr(value.toString());
+            } else if (value instanceof Long) {
+                return this.formatLong(value);
             }
             return this.formatDouble(value);
         }
@@ -2379,6 +2392,7 @@ export class DateTimeFormat {
         private native static isUnitCorrect(unit: string): boolean;
         private native static getNumberingSystem(locale: string): string;
         private native formatDouble(value: double): string;
+        private native formatLong(value: long): string;
         private native formatDecStr(value: string): string;
         private native formatRangeDoubleDouble(start: number, end: number): string;
         private native formatRangeDoubleDecStr(start: number, end: string): string;
