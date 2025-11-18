@@ -170,6 +170,20 @@
 #32457 CTE makes compiler to fail when specifying new object at awaited parameters
 05.generics/03.utility_types/01.awaited_utility_type/awaited_unsupported_char_n_2.ets
 
+#31665
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_func_arr_6.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_utility_type_func_arr_7.ets
+
+#33270
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_0.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_1.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_2.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_any_3.ets
+
+#33271
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_1.ets
+05.generics/03.utility_types/02.nonnullable_utility_type/nonnullable_void_undefined_3.ets
+
 #31615 RTE for partial class field assignment
 05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
 

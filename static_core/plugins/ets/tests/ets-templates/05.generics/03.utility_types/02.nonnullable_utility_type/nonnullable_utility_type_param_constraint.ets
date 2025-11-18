@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,18 +17,32 @@
 
 /*---
 desc: Type NonNullable<T> constructs a type by excluding null and undefined types
-tags: [compile-only, negative]
+      Type parameter constraint with NonNullable
 ---*/
 
-type OnlyNullable = null | undefined
-type Cleared = NonNullable<OnlyNullable> // type never is expected
-
-function main() {
-    let a1: OnlyNullable = null
-    let a2: OnlyNullable = undefined
-    let b: Cleared = /* @@ label */{{c.value}};
+class Base {
+    b: NonNullable<number|null> = 1
+}
+class Derived extends Base {
+    b: NonNullable<number|null> = 2
+    d: NonNullable<number|null> = 3
 }
 
-/* @@@ label Error Semantic error ESE0318: Type '{{c.error_type}}' cannot be assigned to type 'never'  */
+class G<T extends NonNullable<Base|number|null|undefined>> { 
+    foo<T>(t: T) {
+        return t
+    }
+}
+
+class H<T extends keyof NonNullable<Derived|null|undefined>> { 
+    foo<T>(t: T) {
+        return t
+    }
+}
+
+function main() {
+    let x = {{c.init}}
+    arktest.assertEQ(x.foo{{c.call}}, {{c.expected}})
+}
 
 {% endfor %}

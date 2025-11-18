@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,32 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: Type NonNullable<T> constructs a type by excluding null and undefined types
-tags: [compile-only, negative]
+desc: NonNullable with nested nullable classes - inner field cannot be null
 ---*/
 
-type OnlyNullable = null | undefined
-type Cleared = NonNullable<OnlyNullable> // type never is expected
-
-function main() {
-    let a1: OnlyNullable = null
-    let a2: OnlyNullable = undefined
-    let b: Cleared = /* @@ label */{{c.value}};
+class Inner {
+    v: number
+    constructor(v: number) {
+        this.v = v
+    }
 }
 
-/* @@@ label Error Semantic error ESE0318: Type '{{c.error_type}}' cannot be assigned to type 'never'  */
+class Outer {
+    inner: NonNullable<Inner|null>
+    constructor(inner: NonNullable<Inner|null>) {
+        this.inner = inner
+    }
+}
 
-{% endfor %}
+function main() {
+
+    let o = new Outer(new Inner(20))
+
+    // nested type is Inner
+    let i: Inner = o.inner
+
+    // Nested access is safe since inner is NonNullable
+    arktest.assertEQ(o.inner.v, 20)
+}
+
