@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,27 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{% for case in cases %}
 
 /*---
-desc: Type NonNullable<T> constructs a type by excluding null and undefined types
+desc: Type NonNullable<T> constructs a type by excluding null and undefined types -
+      NonNullable<Any> = Any - null - undefined
 tags: [compile-only, negative]
+expected_out: "TODO: throw CTE for null or undefined to NonNullable<Any> assignment"
 ---*/
 
-type OnlyNullable = null | undefined
-type Cleared = NonNullable<OnlyNullable> // type never is expected
+type NNANY = NonNullable<Any>
+type NNNNANY = NonNullable<NNANY>
 
 function main() {
-    let a1: OnlyNullable = null
-    let a2: OnlyNullable = undefined
-    let b: Cleared = /* @@ label */{{c.value}};
+
+    let u: undefined = undefined
+    let n: null = null
+
+    let ynn: NNANY = new Object
+    let ynnnn: NNNNANY = new Object
+
+    // should fail since NonNullable<Any> = Any - null - undefined
+    {{ case }}
 }
-
-/* @@@ label Error Semantic error ESE0318: Type '{{c.error_type}}' cannot be assigned to type 'never'  */
-
 {% endfor %}

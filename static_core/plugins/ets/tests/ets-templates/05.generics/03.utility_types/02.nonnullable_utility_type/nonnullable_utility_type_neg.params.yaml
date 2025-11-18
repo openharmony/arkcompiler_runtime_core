@@ -1,0 +1,198 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # Simple direct null/undefined assignment
+  - decl: |-
+      type A = NonNullable<string|null>
+    use: |-
+      let x: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'String'
+  - decl: |-
+      type A = NonNullable<string|undefined>
+    use: |-
+      let x: A = undefined
+    expect: |-
+      Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'String'
+  # NonNullable applied to only null / only undefined (not in union with other types)
+  - decl: |-
+      type A = NonNullable<null>
+    use: |-
+      let x: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'never'
+  - decl: |-
+      type A = NonNullable<undefined>
+    use: |-
+      let x: A = undefined
+    expect: |-
+      Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'never'
+  - decl: |-
+      type A = NonNullable<null|undefined>
+    use: |-
+      let x: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'never'
+  # Awaited
+  - decl: |-
+      type A = NonNullable<Awaited<Promise<string|null|undefined>>>
+    use: |-
+      const a: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'String'
+  - decl: |-
+      type A = NonNullable<NonNullable<Awaited<Promise<Promise<number|null|undefined>>>>>
+    use: |-
+      const a: A = undefined
+    expect: |-
+      Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'Double'
+  - decl: |-
+      type A = NonNullable<Awaited<boolean|null|Promise<number|null|undefined>>>
+    use: |-
+      const a: A = undefined
+    expect: |-
+      Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'Boolean|Double'
+  # Partial
+  - decl: |-
+      interface Issue {
+          title: string
+          description: string
+      }
+      type A = NonNullable<Partial<Issue>|null>
+    use: |-
+      let a1: A = {title: "title"}
+      let a2: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'Partial<Issue>'
+  - decl: |-
+      interface Issue {
+          title: string
+          description: string
+      }
+      type A = Partial<NonNullable<Issue|null>>
+    use: |-
+      let a1: A = {title: "title"}
+      let a2: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'Partial<Issue>'
+  # Required
+  - decl: |-
+      interface Issue {
+          title?: string
+          description?: string
+      }
+      type A = NonNullable<Required<Issue>|null>
+    use: |-
+      let a1: A = {title: "title", description: "description"}
+      let a2: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'Required<Issue>'
+  - decl: |-
+      interface Issue {
+          title?: string
+          description?: string
+      }
+      type A = Required<NonNullable<Issue|null>>
+    use: |-
+      let a1: A = {title: "title", description: "description"}
+      let a2: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'Required<Issue>'
+  # Readonly
+  - decl: |-
+      interface Issue {
+          title: string
+      }
+      type A = NonNullable<Readonly<Issue>|null>
+    use: |-
+      let a1: A = {title: "title"}
+      let a2: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'Readonly<Issue>'
+  - decl: |-
+      interface Issue {
+          title?: string
+          description?: string
+      }
+      type A = Readonly<NonNullable<Issue|null>>
+    use: |-
+      let a1: A = {title: "title"}
+      let a2: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'Readonly<Issue>'
+  # Record
+  - decl: |-
+      type A = NonNullable<Record<number, Object>|null>
+    use: |-
+      let x: A = {
+          1: "",
+          2: new Object
+      }
+      let a: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'Record<Double,Object>'
+  - decl: |-
+      type A = Record<NonNullable<number|null>, NonNullable<Object|null>>
+    use: |-
+      let x: A = {
+          1: "",
+          2: new Object
+      }
+      let x2: A = {
+          1: "",
+          2: null
+      }
+    expect: |-
+      Semantic error ESE0046: Type 'null' is not compatible with type 'Object' at index 2
+  # record with enums as keys
+  - decl: |-
+      enum Strings { A = "A", B = "B"}
+      type A = NonNullable<NonNullable<Record<NonNullable<Strings|null>, number>|null>|null>
+    use: |-
+      let x: A = {
+          Strings.A : "",
+          Strings.B : new Object
+      }
+      let x2: A = {
+          Strings.A: "",
+          Strings.B: null
+      }
+    expect: |-
+      Semantic error ESE0144: Enum name 'Strings' used in the wrong context
+  # ReturnType
+  - decl: |-
+      type A = ReturnType<() => NonNullable<string|null>>
+    use: |-
+      const a: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'String'
+  - decl: |-
+      type A = ReturnType<NonNullable<(() => string)|null>>
+    use: |-
+      const a: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'String'
+  - decl: |-
+      type A = NonNullable<ReturnType<() => string>|null>
+    use: |-
+      const a: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'String'
+  - decl: |-
+      type A = ReturnType<NonNullable<never|null>>
+    use: |-
+      const a: A = null
+    expect: |-
+      Semantic error ESE0318: Type 'null' cannot be assigned to type 'never'

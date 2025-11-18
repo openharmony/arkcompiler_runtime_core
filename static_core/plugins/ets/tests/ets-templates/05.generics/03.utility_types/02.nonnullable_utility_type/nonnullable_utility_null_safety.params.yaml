@@ -1,0 +1,67 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # Optional with NonNullable
+  - decl: |-
+      class A {
+          f!: NonNullable<string|null|undefined>
+          t?: NonNullable<number|null|undefined>
+          foo(f?: NonNullable<string|null|undefined>, t?: NonNullable<number|null|undefined>): void {
+              if (f) {
+                  this.f = f
+              }
+              if (t) {
+                  this.t = t
+              }
+          }
+      }
+    use: |-
+      let a: A = new A
+      a.foo("f")
+      arktest.assertEQ(a.f, "f")
+      arktest.assertEQ(a.t, undefined)
+      // optional parameter still contains undefined
+      a.foo("f", 2)
+      arktest.assertEQ(a.t, 2)
+
+  # Partial with NonNullable - positive counterpart to neg tests
+  - decl: |-
+      interface Issue {
+          title: string
+          description: string
+      }
+      type A = Partial<NonNullable<Issue|null>>
+    use: |-
+      let a1: A = {}
+      let a2: A = {title: "title"}
+      let a3: A = {title: "title", description: "description"}
+      arktest.assertEQ(a1.title, undefined)
+      arktest.assertEQ(a2.title, "title")
+      arktest.assertEQ(a3.description, "description")
+
+  # Nullish Coalescing with NonNullable
+  - decl: |-
+      interface I {
+          a?: number
+          b?: NonNullable<B|null|undefined>
+      }
+
+      class B {
+          b?: number
+      }
+    use: |-
+      const i: I = { a: 1}
+      // optional parameter still contains undefined
+      arktest.assertEQ(i.b, undefined)
