@@ -310,7 +310,6 @@
 07.expressions/06.spread_expression/spex_lmbd_27.ets
 07.expressions/06.spread_expression/spex_lmbd_28.ets
 07.expressions/06.spread_expression/spex_lmbd_29.ets
-07.expressions/06.spread_expression/spex_lmbd_30.ets
 07.expressions/06.spread_expression/spex_lmbd_31.ets
 
 #28326

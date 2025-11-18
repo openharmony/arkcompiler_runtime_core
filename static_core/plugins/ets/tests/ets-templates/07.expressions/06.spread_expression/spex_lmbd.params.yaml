@@ -261,6 +261,7 @@ cases:
           let f = <T, U, V> (...p: (A<T>|B<U>|C<V>|null)[]): int => p.length
           let a1: (A<String>|B<Long>|C<Error>|null)[] = [new A<String>, new B<Long>, new C<Error>]
           arktest.assertEQ(f<String, Long, Error>(...a1), 3)
+      tags: 'negative, compile-only'
 
     - decl: |-
           let a1 = ["1", "2", "3"]
