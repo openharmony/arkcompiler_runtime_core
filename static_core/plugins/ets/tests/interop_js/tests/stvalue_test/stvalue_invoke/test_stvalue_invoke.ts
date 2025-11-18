@@ -614,10 +614,10 @@ function funJsFullGC(): void {
 
 let module = STValue.findNamespace('stvalue_invoke.ETSGLOBAL');
 function createWeakRefForSTValue(): void {
-    const dateCls = STValue.findClass('escompat.Date');
+    const dateCls = STValue.findClass('std.core.Date');
     const dateObj = dateCls.classInstantiate(':', []);
     const staticWeakRef = module.namespaceInvokeFunction('createWeakRef',
-        'C{escompat.Date}:C{std.core.WeakRef}', [dateObj]);
+        'C{std.core.Date}:C{std.core.WeakRef}', [dateObj]);
     return [new WeakRef(dateObj), staticWeakRef];
 }
 
