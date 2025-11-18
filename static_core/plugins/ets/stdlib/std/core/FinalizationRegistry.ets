@@ -166,6 +166,7 @@ export final class FinalizationRegistry<T> {
                 nextNode = currNode!.next;
                 if (currNode!.token!.deref() != undefined) {
                     const bucketIdx = this.getBucketIndex(Runtime.getHashCode(currNode!.token!.deref()!));
+                    currNode!.bucketIdx == bucketIdx;
                     if (this.buckets[bucketIdx] == undefined) {
                         this.buckets[bucketIdx] = currNode;
                         currNode!.prev = undefined;
