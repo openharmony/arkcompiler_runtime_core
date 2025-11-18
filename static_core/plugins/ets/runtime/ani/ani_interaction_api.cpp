@@ -336,7 +336,6 @@ static ani_status ClassGetStaticField(ani_env *env, ani_class cls, ani_static_fi
 
     ScopedManagedCodeFix s(env);
     EtsClass *etsClass = etsField->GetDeclaringClass();
-    ;
     ani_status status = InitializeClass(s, etsClass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 

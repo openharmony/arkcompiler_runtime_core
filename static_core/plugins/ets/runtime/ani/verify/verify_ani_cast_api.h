@@ -118,13 +118,18 @@ struct TypeMapping<VMethod *> {
 };
 
 template <>
-struct TypeMapping<VStaticMethod **> {
-    using Type = ani_static_method *;
+struct TypeMapping<VStaticMethod *> {
+    using Type = ani_static_method;
 };
 
 template <>
 struct TypeMapping<VMethod **> {
     using Type = ani_method *;
+};
+
+template <>
+struct TypeMapping<VStaticMethod **> {
+    using Type = ani_static_method *;
 };
 
 template <>
