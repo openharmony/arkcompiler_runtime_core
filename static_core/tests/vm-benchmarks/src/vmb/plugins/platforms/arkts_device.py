@@ -37,24 +37,7 @@ class Platform(PlatformBase):
         self.paoc = self.tools_get('paoc')
         self.ark = self.tools_get('ark')
         self.nark = self.tools_get('nark')
-        # always aot etsstdlib
-        if OptFlags.AOT_SKIP_LIBS in self.flags:
-            log.info('Skipping aot compilation of libs')
-        else:
-            an = Path(self.ark.etsstdlib).with_suffix('.an')
-            aot_lib_opts = ' '.join(args.aot_lib_compiler_options)
-            log.info('AOT-Compiling %s. This may take a long time...',
-                     self.ark.etsstdlib)
-            res = self.paoc.run_paoc(self.ark.etsstdlib, an,
-                                     opts=aot_lib_opts, timeout=1800)
-            if not self.ext_info.get('etsstdlib', {}):
-                self.ext_info['etsstdlib'] = {}
-            self.ext_info['etsstdlib']['etsstdlib.an'] = \
-                AOTStatsLib(time=res.tm,
-                            size=self.x_sh.get_filesize(an),
-                            aot_stats=self.paoc.get_aot_stats(
-                                an, self.paoc.libs))
-        self.push_libs()
+        self.aot_lib_opts = ' '.join(args.aot_lib_compiler_options)
 
     @property
     def name(self) -> str:
@@ -100,3 +83,21 @@ class Platform(PlatformBase):
         if OptFlags.AOT in self.flags:
             self.paoc(bu)
         self.ark(bu)
+
+    def lazy_setup(self):
+        if OptFlags.AOT_SKIP_LIBS in self.flags:
+            log.info('Skipping aot compilation of libs')
+        else:
+            an = Path(self.ark.etsstdlib).with_suffix('.an')
+            log.info('AOT-Compiling %s. This may take a long time...',
+                     self.ark.etsstdlib)
+            res = self.paoc.run_paoc(self.ark.etsstdlib, an,
+                                     opts=self.aot_lib_opts, timeout=1800)
+            if not self.ext_info.get('etsstdlib', {}):
+                self.ext_info['etsstdlib'] = {}
+            self.ext_info['etsstdlib']['etsstdlib.an'] = \
+                AOTStatsLib(time=res.tm,
+                            size=self.x_sh.get_filesize(an),
+                            aot_stats=self.paoc.get_aot_stats(
+                                an, self.paoc.libs))
+        self.push_libs()

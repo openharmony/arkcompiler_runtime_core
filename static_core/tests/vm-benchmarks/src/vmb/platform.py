@@ -177,6 +177,9 @@ class PlatformBase(CrossShell, ABC):
     def run_unit(self, bu: BenchUnit) -> None:
         pass
 
+    def lazy_setup(self) -> None:
+        """Override and put some actions after hooks but before suite."""
+
     def cleanup(self, bu: BenchUnit) -> None:
         """Do default cleanup."""
         for binary in bu.binaries:
