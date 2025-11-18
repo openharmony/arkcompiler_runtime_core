@@ -458,6 +458,10 @@ export class Object {
             let arr = this as Array<Any>
             let len = arr.length
             return (0 <= idx && idx < len)
+        } else if (cls.isSubtypeOf(Class.from<ArrayLike<Any>>())) {
+            let arrLike = this as ArrayLike<Any>
+            let len = arrLike.length
+            return (0 <= idx && idx < len)
         }
         return false
     }
