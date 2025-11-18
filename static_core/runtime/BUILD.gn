@@ -449,13 +449,18 @@ if (ark_static_standalone_build) {
 }
 
 _libarkruntime_calculated_external_deps = [
-  "napi:ace_napi",
-  "node:node_header_notice",
   icui18n_dep,
   icuuc_dep,
   sdk_libc_secshared_dep,
   zlib_dep,
 ]
+
+if (ark_ets_interop_js) {
+  _libarkruntime_calculated_external_deps += [
+    "napi:ace_napi",
+    "node:node_header_notice",
+  ]
+}
 
 _libarkruntime_calculated_defines = []
 _libarkruntime_calculated_include_dirs = []

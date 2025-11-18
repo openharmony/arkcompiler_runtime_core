@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,8 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (!defined(ark_standalone_build)) {
+  ark_standalone_build = false
+}
+
 # Arguments for hybrid build of JS and STS VMs
 # Use this unified place to avoid duplication of arguments declaration
 declare_args() {
-  ark_ets_hybrid = true
+  # NOTE(ipetrov): Need to enable for mac previewer
+  # See ark_js_hybrid in ets_runtime/js_runtime_config.gni
+  ark_ets_hybrid = !ark_standalone_build && !is_mac
 }
