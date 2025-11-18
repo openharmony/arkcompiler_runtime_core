@@ -606,11 +606,40 @@ function testNamespaceInvokeFunction(): void {
     testNspVoidInvokeFunction();
 }
 
+function funJsFullGC(): void {
+    globalThis.ArkTools.GC.clearWeakRefForTest();
+    let gcId = globalThis.ArkTools.GC.startGC('full');
+    globalThis.ArkTools.GC.waitForFinishGC(gcId);
+}
+
+let module = STValue.findNamespace('stvalue_invoke.ETSGLOBAL');
+function createWeakRefForSTValue(): void {
+    const dateCls = STValue.findClass('escompat.Date');
+    const dateObj = dateCls.classInstantiate(':', []);
+    const staticWeakRef = module.namespaceInvokeFunction('createWeakRef',
+        'C{escompat.Date}:C{std.core.WeakRef}', [dateObj]);
+    return [new WeakRef(dateObj), staticWeakRef];
+}
+
+function testSTValueDestruct(): void {
+    let [dyWeakRef, staWeakRef] = createWeakRefForSTValue();
+    ASSERT_TRUE(dyWeakRef.deref() !== undefined);
+    let staWeakObj = staWeakRef.objectInvokeMethod('deref', ':C{std.core.Object}', []);
+    ASSERT_TRUE(!staWeakObj.isUndefined());
+
+    etsVm.getFunction('Lstvalue_invoke/ETSGLOBAL;', 'runFullGC')();
+    funJsFullGC();
+    
+    // NOTE(www) #31863, after this, it's also need to verify that the object held by staWeakObj is undefined.
+    ASSERT_TRUE(dyWeakRef.deref() === undefined);
+}
+
 function main(): void {
     testFunctionalObjectInvoke();
     testObjectInvokeMethod();
     testClassInvokeStaticMethod();
     testNamespaceInvokeFunction();
+    testSTValueDestruct();
 }
 
 main();

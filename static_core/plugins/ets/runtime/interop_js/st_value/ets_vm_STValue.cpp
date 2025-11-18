@@ -47,19 +47,6 @@ napi_status __attribute__((weak)) napi_define_properties(napi_env env, napi_valu
 // NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
 
 namespace ark::ets::interop::js {
-ani_env *GetAniEnv()
-{
-    ani_vm *vm {};
-    ani_env *aniEnv {};
-    ani_size size = 0;
-    ani_size bufferSize = 1;
-    AniExpectOK(ANI_GetCreatedVMs(&vm, bufferSize, &size));
-    ASSERT(size == bufferSize);
-    AniExpectOK(vm->GetEnv(ANI_VERSION_1, &aniEnv));
-
-    return aniEnv;
-}
-
 void AniExpectOK(ani_status status)
 {
     if (status != ANI_OK) {
@@ -195,7 +182,18 @@ STValueData::STValueData([[maybe_unused]] napi_env env, ani_double doubleData)
     dataRef = doubleData;
 }
 
-STValueData::~STValueData() {}
+STValueData::~STValueData()
+{
+    if (IsAniRef()) {
+        auto dataReference = this->GetAniRef();
+        auto *aniEnv = GetAniEnv<false>();
+        if (aniEnv == nullptr) {
+            return;
+        }
+        [[maybe_unused]] ani_status status = aniEnv->GlobalReference_Delete(dataReference);
+        ASSERT(status == ANI_OK);
+    }
+}
 
 bool STValueData::IsAniNullOrUndefined(napi_env env) const
 {
@@ -375,8 +373,13 @@ napi_value CreateSTypeObject(napi_env env)
 
 napi_value GetSTValueClass(napi_env env)
 {
-    // otherwise, define the class and cache it
     napi_value STValueCtor {};
+    thread_local napi_ref stvalueCtorRef {};
+    if (stvalueCtorRef != nullptr) {
+        NAPI_CHECK_FATAL(napi_get_reference_value(env, stvalueCtorRef, &STValueCtor));
+        return STValueCtor;
+    }
+
     const std::array instanceProperties = {
         napi_property_descriptor {"unwrapToNumber", 0, STValueUnwrapToNumberImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"unwrapToString", 0, STValueUnwrapToStringImpl, 0, 0, 0, napi_default, 0},
@@ -448,8 +451,7 @@ napi_value GetSTValueClass(napi_env env)
     };
     NAPI_CHECK_FATAL(napi_define_properties(env, STValueCtor, staticProperties.size(), staticProperties.data()));
 
-    napi_ref STValueCtorRef {};
-    NAPI_CHECK_FATAL(napi_create_reference(env, STValueCtor, 1, &STValueCtorRef));
+    NAPI_CHECK_FATAL(napi_create_reference(env, STValueCtor, 1, &stvalueCtorRef));
 
     return STValueCtor;
 }
