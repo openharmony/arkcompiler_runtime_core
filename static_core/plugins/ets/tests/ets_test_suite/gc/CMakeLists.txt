@@ -34,7 +34,7 @@ function(add_ets_gc_test)
     string(TOLOWER "${ARG_MODE}" run_mode)
     set(target ets_test_suite_gc_${TEST_NAME}-ets-${run_mode})
 
-    # NOTE(26403) Profilesaver is turned off beause of data race
+    # NOTE(26403) Profilesaver is turned off beause of integer overflow
     list(APPEND ARG_OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false")
 
     if ("${ARG_MODE}" STREQUAL "INT")
