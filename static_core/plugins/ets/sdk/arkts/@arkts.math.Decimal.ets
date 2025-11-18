@@ -2627,9 +2627,9 @@ export class Decimal {
             e = str.length;
         }
 
-        for (i = 0; str.charCodeAt(i) === 48; i++);
+        for (i = 0; i < str.length && str.charCodeAt(i) === 48; i++);
 
-        for (len = str.length; str.charCodeAt(len - 1) === 48; --len);
+        for (len = str.length; len > 0 && str.charCodeAt(len - 1) === 48; --len);
         str = str.slice(i, len);
         if (str) {
             len -= i;

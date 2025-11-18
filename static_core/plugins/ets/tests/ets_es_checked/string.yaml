@@ -49,9 +49,6 @@ sub:
       - method: big
       - method: blink
       - method: bold
-      - method: charCodeAt
-        params:
-          - paramOf(*inds)
       - method: codePointAt
         params:
           - paramOf(*int_inds)
