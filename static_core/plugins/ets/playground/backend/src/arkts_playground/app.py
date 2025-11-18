@@ -13,7 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional, Tuple
+
+from collections.abc import Sequence
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,7 +29,7 @@ async def validate_config():
     get_runner()
 
 
-def create_app(args: Optional[Tuple] = None) -> FastAPI:
+def create_app(args: Sequence[str] | None = None) -> FastAPI:
     app = FastAPI(on_startup=[validate_config])
     settings = get_settings(args)
     if settings.server.cors:
