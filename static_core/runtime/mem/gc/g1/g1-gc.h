@@ -76,6 +76,7 @@ class G1GC : public GenerationalGC<LanguageConfig> {
     template <bool VECTOR>
     using MovedObjectsContainer = std::conditional_t<VECTOR, PandaVector<PandaVector<ObjectHeader *> *>,
                                                      PandaVector<PandaDeque<ObjectHeader *> *>>;
+    using GarbageRegions = typename ObjectAllocatorG1<LanguageConfig::MT_MODE>::GarbageRegions;
 
 public:
     explicit G1GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
@@ -186,10 +187,10 @@ private:
     void CollectNonRegularObjects();
 
     template <bool ATOMIC, bool CONCURRENTLY>
-    void CollectEmptyRegions(GCTask &task, PandaVector<Region *> *emptyTenuredRegions);
+    void CollectEmptyRegions(GCTask &task, PandaVector<Region *> &&emptyTenuredRegions);
 
     template <bool ATOMIC, bool CONCURRENTLY>
-    void ClearEmptyTenuredMovableRegions(PandaVector<Region *> *emptyTenuredRegions);
+    void ClearEmptyTenuredMovableRegions(PandaVector<Region *> &&emptyTenuredRegions);
 
     bool NeedToPromote(const Region *region) const;
 
@@ -386,7 +387,7 @@ private:
 
     void VerifyHeapBeforeConcurrent();
 
-    void ConcurrentSweep(ark::GCTask &task);
+    void ConcurrentSweep(ark::GCTask &task, PandaVector<Region *> &&emptyTenuredRegions);
 
     /// Return collectible regions
     CollectionSet GetCollectibleRegions(ark::GCTask const &task, bool isMixed);
@@ -397,7 +398,7 @@ private:
     uint64_t AddMoreOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet, uint64_t gcPauseTimeBudget);
     void ReleasePagesInFreePools();
 
-    CollectionSet GetFullCollectionSet();
+    CollectionSet GetFullCollectionSet(PandaVector<std::pair<uint32_t, Region *>> &&garbageRegions);
 
     void UpdateCollectionSet(const CollectionSet &collectibleRegions);
 
