@@ -26,7 +26,7 @@ tags: [compile-only, negative]
 {{c.decl}}
 
 function main() {
-    arktest.assertTrue( true )
+     arktest.assertTrue( false, 'unreachable code, CTE expected' )
 }
 
 {%- endfor %}

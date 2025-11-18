@@ -14,8 +14,16 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Simple function declaration
-tags: [compile-only]
+desc: Same function signature
+tags: [negative, compile-only]
 ---*/
 
-function f(): void {}
+function f(a: int): int {
+    return 0;
+}
+
+function f(a: int): string {
+    return 0;
+}
+
+function main(): void {}
