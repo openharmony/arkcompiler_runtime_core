@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "adapter_dynamic/convert.h"
 #include "libpandabase/macros.h"
-#include "source_lang_enum.h"
+#include "include/source_lang_enum.h"
 #include "libabckit/c/metadata_core.h"
 
 namespace libabckit::cpp_test {
