@@ -144,22 +144,21 @@ export final class Class {
 
     private static native ofObject(obj: Object): Class
 
-    private static native ofNull(): Class
-
     public static ofAny(obj: Any): Class | undefined {
-        if (obj instanceof ESValue || obj === undefined) {
-            return undefined
-        } else if (obj instanceof Object) {
+        if (obj instanceof Object) {
             return Class.of(obj as Object)
         }
-        return Class.ofNull()
+        if (obj === null) {
+            return Class.from<null>()
+        }
+        return undefined
     }
 
     public static of(obj: Object | null): Class {
         if (obj instanceof Object) {
             return Class.ofObject(obj)
         }
-        return Class.ofNull()
+        return Class.from<null>()
     }
 
     public static from<T>(): Class {

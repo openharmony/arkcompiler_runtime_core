@@ -17,9 +17,9 @@ let module = ESValue.load('test_object')
 let str_val = module.getProperty('str_val');
  
 function ClassOfModule(): boolean {
-    return Class.ofAny(module) === undefined
+    return Class.ofAny(module) == Class.from<ESValue>()
 }
 
 function ClassOfString(): boolean {
-    return Class.ofAny(str_val) === undefined
+    return Class.ofAny(str_val) == Class.from<ESValue>()
 }
