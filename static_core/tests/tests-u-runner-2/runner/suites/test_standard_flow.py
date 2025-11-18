@@ -171,6 +171,16 @@ class TestStandardFlow(Test):
     def invalid_tags(self) -> list:
         return self.metadata.tags.invalid_tags
 
+    @property
+    def has_expected(self) -> bool:
+        """ True if test.expected file exists or expected_out is in metadata """
+        return super().has_expected or self.metadata.expected_out is not None
+
+    @property
+    def has_expected_err(self) -> bool:
+        """ True if test.expected.err file exists or expected_error is in metadata """
+        return super().has_expected_err or self.metadata.expected_error is not None
+
     @staticmethod
     def compare_line_sets(expected: str, actual: str, expected_path: Path) -> bool:
         expected_lines = set(filter(None, expected.splitlines()))
@@ -351,7 +361,7 @@ class TestStandardFlow(Test):
         """Compares test output with expected"""
 
         try:
-            self._read_expected_file()
+            self._get_expected_data()
             passed = self._determine_test_status(output, error_output)
 
         # NOTE(pronai): this might silence errors it shouldn't, add logging
@@ -387,11 +397,12 @@ class TestStandardFlow(Test):
             return validator(self, step.step_kind.value, output, error, return_code)
         return ValidationResult(True, ValidatorFailKind.NONE, "")
 
-    def _read_expected_file(self) -> None:
+    def _get_expected_data(self) -> None:
         if self.has_expected:
-            self.expected = utils.read_expected_file(self.path_to_expected)
+            self.expected = self.metadata.expected_out or utils.read_expected_file(self.path_to_expected)
+
         if self.has_expected_err:
-            self.expected_err = utils.read_expected_file(self.path_to_expected_err)
+            self.expected_err = self.metadata.expected_error or utils.read_expected_file(self.path_to_expected_err)
 
     def _refactor_expected_str_for_jit(self) -> None:
         if self.expected:

@@ -80,6 +80,8 @@ class TestMetadata:
     ark_options: List[str] = field(default_factory=list)
     timeout: Optional[int] = None
     spec: Optional[str] = None
+    expected_out: Optional[str] = None
+    expected_error: Optional[str] = None
 
     def __post_init__(self) -> None:
         if self.spec is None:
