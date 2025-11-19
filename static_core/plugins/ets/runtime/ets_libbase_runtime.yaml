@@ -810,10 +810,10 @@ intrinsics:
       ret: u1
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreStringEquals
-    irtoc_impl: StringEqualsCompressedNativePlus
-    codegen_func: CreateStringEquals
+    irtoc_impl: EtsStringEqualsNativePlus
+    codegen_func: CreateEtsStringEquals
     codegen_arch: [arm64, amd64]
-    llvm_codegen_func: EmitStringEquals
+    llvm_codegen_func: EmitEtsStringEquals
     peephole_func: PeepholeStringEquals
     need_param_locations: true
     require_flat_check: true

@@ -2671,9 +2671,7 @@ void Codegen::CreateFloatIsInf([[maybe_unused]] IntrinsicInst *inst, Reg dst, SR
 
 void Codegen::CreateStringEquals([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    auto entrypointId = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_EQUALS_COMPRESSED
-                                                                   : EntrypointId::STRING_EQUALS;
-    CallFastPath(inst, entrypointId, dst, {}, src[0], src[1U]);
+    CallFastPath(inst, EntrypointId::STRING_EQUALS, dst, {}, src[0], src[1U]);
 }
 
 void Codegen::CreateMathCeil([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)

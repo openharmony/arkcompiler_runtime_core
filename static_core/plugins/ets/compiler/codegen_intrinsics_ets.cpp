@@ -828,4 +828,10 @@ void Codegen::CreateArrayFastCopyToRef(IntrinsicInst *inst, [[maybe_unused]] Reg
     enc_->BindLabel(labelEnd);
 }
 
+void Codegen::CreateEtsStringEquals(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    CallFastPath(inst, EntrypointId::ETS_STRING_EQUALS, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+}
+
 }  // namespace ark::compiler

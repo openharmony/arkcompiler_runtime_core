@@ -852,26 +852,8 @@ entrypoints:
     - ark::coretypes::String*
     - ark::coretypes::String*
 
-- name: StringEqualsCompressed
-  entrypoint: StringEqualsCompressed
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
 - name: StringEqualsUnroll
   entrypoint: StringEqualsUnroll
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringEqualsUnrollCompressed
-  entrypoint: StringEqualsUnrollCompressed
   bridge: none
   properties: [irtoc]
   signature:
@@ -1301,7 +1283,7 @@ entrypoints:
     - ark::coretypes::String*  # second string
 
 - name: StringEqualsUsual
-  entrypoint: CoreStringEquals
+  entrypoint: CoreStringEqualsEntrypoint
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -1310,7 +1292,7 @@ entrypoints:
     - ark::coretypes::String*
 
 - name: StringEqualsSlowPath
-  entrypoint: CoreStringEquals
+  entrypoint: CoreStringEqualsEntrypoint
   bridge: slow_path
   properties: [intrinsic]
   signature:

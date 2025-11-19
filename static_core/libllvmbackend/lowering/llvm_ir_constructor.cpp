@@ -703,7 +703,7 @@ bool LLVMIrConstructor::EmitFastPath(Inst *inst, RuntimeInterface::EntrypointId 
 
 bool LLVMIrConstructor::EmitStringEquals(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_EQUALS_COMPRESSED, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_EQUALS, 2U);
 }
 
 bool LLVMIrConstructor::EmitStringBuilderBool(Inst *inst)

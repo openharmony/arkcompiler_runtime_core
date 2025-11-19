@@ -43,7 +43,16 @@
 //!
 //! RUN          entry: "ets_string_equals.ETSGLOBAL::main"
 
-// Prevents comparison elimination by frontend type inferrence
+//! CHECKER      JIT check that the Intrinsic.StdCoreStringEquals is NOT safe and may NOT be eliminated by GVN
+//! RUN          force_jit: true, options: "--compiler-regex='.*(eliminate)'", entry: "ets_string_equals.ETSGLOBAL::main"
+//! METHOD       "ets_string_equals.ETSGLOBAL::eliminate"
+//! PASS_BEFORE_NTH  "GVN", 1
+//! INST_COUNT       /Intrinsic.StdCoreStringEquals/, 2
+//! PASS_AFTER_NTH   "GVN", 1
+//! PASS_AFTER_NEXT  "Cleanup"
+//! INST_COUNT       /Intrinsic.StdCoreStringEquals/, 2
+
+// Prevents comparison elimination by frontend type inference
 function getnull(): String | null {
     return null;
 }
@@ -64,8 +73,16 @@ function not_equals_str_null(str: String | null) {
     return str != getnull();
 }
 
+function eliminate(str1: String, str2: String): boolean {
+    let count: int = 0;
+    count += (str1.equals(str2) ? 1 : 0);
+    count += (str1.equals(str2) ? 1 : 0);
+    return count == 2;
+}
+
 function main() {
     let str = "abc";
+    let str2 = "abc";
 
     arktest.assertTrue(equals_str_str(str, str));
     arktest.assertTrue(!equals_str_str(null, str));
@@ -81,4 +98,6 @@ function main() {
     arktest.assertTrue(!not_equals_null_str(null));
     arktest.assertTrue(equals_str_null(null));
     arktest.assertTrue(!not_equals_str_null(null));
+
+    arktest.assertTrue(eliminate(str, str2));
 }

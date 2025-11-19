@@ -199,7 +199,7 @@ uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
     if (s == nullptr || !(s->GetClass()->IsStringClass())) {
         return UINT8_C(0);
     }
-    return static_cast<uint8_t>(owner->StringsAreEqual(s));
+    return ToEtsBoolean(owner->Compare(EtsString::FromEtsObject(s)) == 0);
 }
 
 EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)

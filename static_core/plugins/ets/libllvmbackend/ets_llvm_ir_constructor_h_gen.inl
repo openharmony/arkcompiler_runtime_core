@@ -159,3 +159,9 @@ bool EmitSameValueZero(Inst *inst)
 bool EmitStringConcat2(Inst *inst);
 bool EmitStringConcat3(Inst *inst);
 bool EmitStringConcat4(Inst *inst);
+
+bool EmitEtsStringEquals(Inst *inst)
+{
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::ETS_STRING_EQUALS, 2U);
+}
