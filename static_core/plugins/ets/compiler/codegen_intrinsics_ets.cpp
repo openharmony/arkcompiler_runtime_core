@@ -200,7 +200,7 @@ void Codegen::CreateStringBuilderAppendNumber(IntrinsicInst *inst, Reg dst, SRCR
 void Codegen::CreateStringBuilderAppendChar(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(IsCompressedStringsEnabled());
-    auto entrypoint = EntrypointId::STRING_BUILDER_APPEND_CHAR_COMPRESSED;
+    auto entrypoint = EntrypointId::STRING_BUILDER_APPEND_CHAR;
     SbAppendArgs args(dst, src[FIRST_OPERAND], src[SECOND_OPERAND]);
     GenerateSbAppendCall(this, inst, args, entrypoint);
 }

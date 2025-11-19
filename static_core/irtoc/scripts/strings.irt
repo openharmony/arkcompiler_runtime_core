@@ -103,7 +103,7 @@ def GenerateCreateStringFromStringTlab(string_compression_enabled)
     hashcode := LoadI(str).Imm(Constants::STRING_HASHCODE_OFFSET).u32
     data_size := unpack_length(Cast(length).u64, string_compression_enabled, Constants::STRING_LENGTH_SHIFT)
 
-    new_str := allocate_string_tlab(klass, Cast(data_size).word)
+    new_str := allocate_string_tlab(klass, Cast(data_size).word, :FastPath)
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
     StoreI(new_str, hashcode).Imm(Constants::STRING_HASHCODE_OFFSET).u32
 
@@ -176,7 +176,7 @@ def GenerateCreateStringFromCharArrayTlab(string_compression_enabled)
     else
       data_size := Cast(ShlI(char_count).Imm(1).u32).word
     end
-    new_str := allocate_string_tlab(string_klass, data_size)
+    new_str := allocate_string_tlab(string_klass, data_size, :FastPath)
     str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
 
     # Copy data from char_array to the new string
@@ -236,7 +236,7 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
     else
       data_size := Cast(ShlI(char_count).Imm(1).u32).word
     end
-    new_str := allocate_string_tlab(string_klass, data_size)
+    new_str := allocate_string_tlab(string_klass, data_size, :FastPath)
     str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
 
     # Copy data from char_array to the new string
@@ -264,15 +264,14 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
   }
 end  # def GenerateCreateStringFromZeroBasedCharArrayTlab
 
-
-def GenerateStringGetCharsTlab(string_compression_enabled)
-  suffix = (string_compression_enabled ? "Compressed" : "")
+def GenerateStringGetCharsTlab(string_compression_enabled, cgmode)
+  suffix = (string_compression_enabled ? 'Compressed' : '') + (cgmode == :NativePlus ? 'NativePlus' : '')
   available_regs = $panda_mask
   function("StringGetCharsTlab#{suffix}".to_sym,
-           params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
+           params: {str_orig: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
            regmap: $full_regmap,
            regalloc_set: available_regs,
-           mode: [:FastPath]) {
+           mode: [cgmode]) {
 
     if Options.arch == :arm32
       Intrinsic(:UNREACHABLE).Terminator.void
@@ -280,9 +279,14 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
       next
     end
 
-    check_not_tree_string_type(str) if defines.DEBUG
-    # it still can be slice
-    check_string_type(str)
+    if cgmode == :NativePlus
+      str := try_use_cached_flat_str_reject_sliced(str_orig)
+    else
+      check_not_tree_string_type(str_orig) if defines.DEBUG
+      # it still can be slice
+      check_string_type(str_orig)
+      str := str_orig
+    end
 
     If(begin_index, end_index).GT.Unlikely.b {
       Goto(:SlowPathEntrypoint)  # Out of range
@@ -312,7 +316,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
 
     # Allocate a new array of u16 chars
     char_count := Sub(Cast(end_index).u32, Cast(begin_index).u32).u64
-    new_arr := allocate_array_of_chars_tlab(array_klass, Cast(char_count).word)
+    new_arr := allocate_array_of_chars_tlab(array_klass, Cast(char_count).word, cgmode)
     new_arr_data := Add(new_arr, Cast(Constants::ARRAY_DATA_OFFSET).u64).ptr
     If(not_compressed, Cast(0).u32).EQ.Likely.b {
       expand_u8_to_u16_chars(src_str_data, new_arr_data, char_count)
@@ -325,12 +329,15 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
     Return(new_arr).ptr
 
   Label(:SlowPathEntrypoint)
-    entrypoint = get_entrypoint_offset("STRING_GET_CHARS_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetChars4ArgBridge").Terminator.ptr
+  if cgmode == :NativePlus
+    Return(Call(str_orig, begin_index, end_index).Method('StringGetCharsEntrypoint').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset('STRING_GET_CHARS_SLOW_PATH')
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, begin_index, end_index).AddImm(entrypoint).MethodAsImm('StringGetChars4ArgBridge').Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
   }
 end  # def GenerateStringGetCharsTlab
-
 
 def GenerateStringHashCode(string_compression_enabled, cgmode)
   suffix = (string_compression_enabled ? "Compressed" : "")
@@ -381,7 +388,6 @@ end
   }
 end  # def GenerateStringHashCode
 
-
 def GenerateStringCompareTo(cgmode)
   suffix = (cgmode == :NativePlus ? 'NativePlus': '')
   function("StringCompareTo#{suffix}",
@@ -421,7 +427,6 @@ Label(:SlowPathEntrypoint)
     end
   }
 end  # def GenerateStringCompareTo
-
 
 function(:StringFlatCheck,
           params: {str: 'ref'},
@@ -477,8 +482,9 @@ GenerateCreateStringFromCharArrayTlab(string_compression_enabled=true)
 GenerateCreateStringFromCharArrayTlab(string_compression_enabled=false)
 GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled=true)
 GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled=false)
-GenerateStringGetCharsTlab(string_compression_enabled=true)
-GenerateStringGetCharsTlab(string_compression_enabled=false)
+GenerateStringGetCharsTlab(string_compression_enabled=true, :FastPath)
+GenerateStringGetCharsTlab(string_compression_enabled=false, :FastPath)
+GenerateStringGetCharsTlab(string_compression_enabled=true, :NativePlus)
 GenerateStringHashCode(string_compression_enabled=true, :FastPath)
 GenerateStringHashCode(string_compression_enabled=true, :NativePlus)
 GenerateStringHashCode(string_compression_enabled=false, :FastPath)

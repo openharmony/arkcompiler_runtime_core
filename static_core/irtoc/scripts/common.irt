@@ -207,6 +207,10 @@ module Constants
     COMPILER_INT32 = "compiler::DataType::INT32"
     COMPILER_PTR = "compiler::DataType::POINTER"
 
+    BYTE_ARRAY_CLASS_OFFSET = "cross_values::GetManagedThreadArrayU8ClassPtrOffset(graph->GetArch())"
+    CHAR_ARRAY_CLASS_OFFSET = "cross_values::GetManagedThreadArrayU16ClassPtrOffset(graph->GetArch())"
+    CORE_STRING_CLASS_OFFSET = "cross_values::GetManagedThreadStringClassPtrOffset(graph->GetArch())"
+
     STRING_CLASS_SIZE = "sizeof(coretypes::String)"
     STRING_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::String) + TLAB_ALIGNMENT - 1"
     STRING_MUTF8_1B_MAX = "0x7f"
