@@ -14,4 +14,4 @@
 include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
 set_c_compiler(gcc-11)
 set_cxx_compiler(g++-11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-array-bounds -Wno-maybe-uninitialized")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-array-bounds -Wno-maybe-uninitialized -Wno-attributes")

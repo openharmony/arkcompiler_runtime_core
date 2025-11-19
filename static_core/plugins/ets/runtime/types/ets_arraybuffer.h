@@ -54,7 +54,10 @@ public:
      * @param length of created array.
      * NOTE: Non-movable creation ensures that native code can obtain raw pointer to buffer.
      */
-    ALWAYS_INLINE static EtsByteArray *AllocateNonMovableArray(EtsInt length);
+    ALWAYS_INLINE static EtsByteArray *AllocateNonMovableArray(EtsInt length)
+    {
+        return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    }
 
     /**
      * Creates a managed byte array.
@@ -84,17 +87,25 @@ public:
 
     EtsInt GetByteLength() const;
 
+    /// NOTE: behavior of this method must repeat implementation of `detached` property in ArkTS `ArrayBuffer`
+    ALWAYS_INLINE bool WasDetached() const
+    {
+        return GetManagedDataImpl() != nullptr ? false : GetNativeDataImpl() == nullptr;
+    }
+
     /// @brief Returns managed or native data. Data can be movable in memory or empty.
-    ALWAYS_INLINE void *GetData() const;
+    ALWAYS_INLINE void *GetData() const
+    {
+        ASSERT(!WasDetached());
+        auto managedData = GetManagedDataImpl();
+        return managedData != nullptr ? managedData->GetData<void>() : GetNativeDataImpl();
+    }
 
     template <typename T>
     ALWAYS_INLINE T GetData() const
     {
         return reinterpret_cast<T>(GetData());
     }
-
-    /// NOTE: behavior of this method must repeat implementation of `detached` property in ArkTS `ArrayBuffer`
-    ALWAYS_INLINE bool WasDetached() const;
 
     bool IsExternal() const
     {
@@ -159,9 +170,15 @@ public:
     T GetAndBitwiseXor(uint32_t index, uint32_t offset, T element);
 
 private:
-    ALWAYS_INLINE ObjectPointer<EtsByteArray> GetManagedDataImpl() const;
-    ALWAYS_INLINE void *GetNativeDataImpl() const;
+    ALWAYS_INLINE ObjectPointer<EtsByteArray> GetManagedDataImpl() const
+    {
+        return ObjectAccessor::GetPrimitive<ObjectPointer<EtsByteArray>>(this, GetManagedDataOffset());
+    }
 
+    ALWAYS_INLINE void *GetNativeDataImpl() const
+    {
+        return ObjectAccessor::GetPrimitive<void *>(this, GetNativeDataOffset());
+    }
     /**
      * @brief Checks position is inside array, throws ets exception if not.
      * NOTE: behavior of this method must repeat initialization from managed `doBoundaryCheck`.

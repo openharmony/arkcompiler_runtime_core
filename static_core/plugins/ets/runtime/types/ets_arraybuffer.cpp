@@ -24,12 +24,6 @@
 namespace ark::ets {
 
 /*static*/
-ALWAYS_INLINE EtsByteArray *EtsEscompatArrayBuffer::AllocateNonMovableArray(EtsInt length)
-{
-    return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-}
-
-/*static*/
 ALWAYS_INLINE EtsByteArray *EtsEscompatArrayBuffer::AllocateArray(EtsInt length)
 {
     return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_OBJECT);
@@ -145,18 +139,6 @@ EtsInt EtsEscompatArrayBuffer::GetByteLength() const
     return ObjectAccessor::GetPrimitive<EtsInt>(this, GetByteLengthOffset());
 }
 
-ALWAYS_INLINE void *EtsEscompatArrayBuffer::GetData() const
-{
-    ASSERT(!WasDetached());
-    auto managedData = GetManagedDataImpl();
-    return managedData != nullptr ? managedData->GetData<void>() : GetNativeDataImpl();
-}
-
-ALWAYS_INLINE bool EtsEscompatArrayBuffer::WasDetached() const
-{
-    return GetManagedDataImpl() != nullptr ? false : GetNativeDataImpl() == nullptr;
-}
-
 EtsByte EtsEscompatArrayBuffer::At(EtsInt pos) const
 {
     if (!DoBoundaryCheck(pos)) {
@@ -203,16 +185,6 @@ void EtsEscompatArrayBuffer::SetValues(EtsEscompatArrayBuffer *other, EtsInt beg
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     [[maybe_unused]] errno_t res = memcpy_s(dstData, thisByteLength, srcData, thisByteLength);
     ASSERT(res == 0);
-}
-
-ALWAYS_INLINE ObjectPointer<EtsByteArray> EtsEscompatArrayBuffer::GetManagedDataImpl() const
-{
-    return ObjectAccessor::GetPrimitive<ObjectPointer<EtsByteArray>>(this, GetManagedDataOffset());
-}
-
-ALWAYS_INLINE void *EtsEscompatArrayBuffer::GetNativeDataImpl() const
-{
-    return ObjectAccessor::GetPrimitive<void *>(this, GetNativeDataOffset());
 }
 
 bool EtsEscompatArrayBuffer::DoBoundaryCheck(EtsInt pos) const
