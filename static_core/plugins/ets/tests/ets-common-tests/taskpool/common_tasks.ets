@@ -1279,6 +1279,26 @@ function executeAfterExecutePeriodically() {
     taskpool.cancel(task);
 }
 
+function periodicTaskAddDepedency() {
+    let task1 = new taskpool.Task(sum, 1, 2);
+    let task2 = new taskpool.Task(sum, 3, 4);
+    taskpool.executePeriodically(100, task1);
+    arktest.expectError(() => {
+        task1.addDependency(task2);
+    }, new Error("taskpool:: the periodic task cannot have a dependency"));
+    taskpool.cancel(task1);
+}
+
+function periodicTaskAddedAsDepedency() {
+    let task1 = new taskpool.Task(sum, 1, 2);
+    let task2 = new taskpool.Task(sum, 3, 4);
+    taskpool.executePeriodically(100, task1);
+    arktest.expectError(() => {
+        task2.addDependency(task1);
+    }, new Error("taskpool:: the periodic task cannot have a dependency"));
+    taskpool.cancel(task1);
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1325,6 +1345,8 @@ function main(): int {
     commonTaskSuite.addAsyncTest('TestExecuteUndefined', testExecuteUndefined);
     commonTaskSuite.addTest('testTaskpoolReturnObjWithGC', testTaskpoolReturnObjWithGC);
     commonTaskSuite.addTest('executeAfterExecutePeriodically', executeAfterExecutePeriodically);
+    commonTaskSuite.addTest('periodicTaskAddDepedency', periodicTaskAddDepedency);
+    commonTaskSuite.addTest('periodicTaskAddedAsDepedency', periodicTaskAddedAsDepedency);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;

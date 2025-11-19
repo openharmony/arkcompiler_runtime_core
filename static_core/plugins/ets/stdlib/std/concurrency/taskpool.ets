@@ -67,6 +67,7 @@ export namespace taskpool {
     const TASKPOOL_ERROR_ASYNC_RUNNER_CANCELED: int = 10200110;
     const TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTED: int = 10200111;
     const TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_DELAYED: int = 10200112;
+    const TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY: int = 10200113;
 
     class TaskPoolWorker extends EAWorker {
         constructor(supportInterop: boolean = false) {
@@ -680,6 +681,9 @@ export namespace taskpool {
             if (tasks.length == 0) {
                 throw new Error(TASKPOOL_ERROR_NO_PARAMS, "taskpool:: addDependency has no params.");
             }
+            if (InternalTask.of(this).isPeriodicTask) {
+                throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY, "taskpool:: the periodic task cannot have a dependency");
+            }
             if (InternalTask.of(this).isSubmitted || InternalTask.of(this).seqId != 0 || InternalTask.of(this).asyncId != 0) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_ADD_DEPENDENCY, "taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot addDependency");
             }
@@ -687,6 +691,9 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_DEPENDENCY, "taskpool:: groupTask cannot addDependency");
             }
             for (const task: Task of tasks) {
+                if (InternalTask.of(task).isPeriodicTask) {
+                    throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY, "taskpool:: the periodic task cannot have a dependency");
+                }
                 if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId != 0 || InternalTask.of(this).asyncId != 0) {
                     throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_OR_ASYNC_RUNNER_TASK_RELIED_ON, "taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot be relied on");
                 }
