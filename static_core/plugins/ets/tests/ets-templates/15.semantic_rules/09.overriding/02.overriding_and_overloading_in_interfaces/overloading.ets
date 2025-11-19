@@ -14,13 +14,10 @@
  */
 
 {%- for c in cases %}
+
 /*---
 desc: >-
-    A method is defined in a subinterface with the same name as the method
-    in the superinterface.
-    If signatures are override-compatible, then overriding is used.
-    Otherwise, a compile-time error occurs.
-tags: [{{c.tags}}]
+    Overloading is the language feature that allows to use the same name to call several methods with different signatures.
 ---*/
 
 class A {}
