@@ -19,6 +19,9 @@ set(QEMU_ARM32 false)
 
 if(PANDA_TARGET_ARM32 AND PANDA_QEMU_BUILD)
     set(QEMU_ARM32 true)
+    set(MODES "INT" "AOT" "LLVMAOT")
+else()
+    set(MODES "INT" "JIT" "AOT" "LLVMAOT" "JITOSR")
 endif()
 
 set(J2_files
@@ -93,7 +96,7 @@ function(add_tests pref suff)
     add_ets_test(ani_tests_bridges_${pref}
         FILE ${test_name}.ets
         TEST_NAME ${suff}
-        MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
+        MODE ${MODES}
         ENTRYPOINT "EtsAniTests"
         OPTIONS ${RT_OPTION}
         TEST_PATH ${CMAKE_CURRENT_BINARY_DIR}/tests/${test_name}/${test_name}.ets
