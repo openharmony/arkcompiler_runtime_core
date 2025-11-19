@@ -426,7 +426,7 @@ export namespace taskpool {
                     }
                 };
                 if (result instanceof Promise) {
-                    result.then(() => {
+                    return result.finally(() => {
                         taskFinishedhandle();
                     });
                 } else {
@@ -1629,7 +1629,7 @@ export namespace taskpool {
     /**
      * @brief Notify the taskpool that the task is started on a coroutine
      * @param task starting task
-     * @returns true if task is not cancled by cancel method, false - otherwise
+     * @returns true if task is not canceled by cancel method, false - otherwise
      *
      * @see taskpool.Task.execute
      * @see taskpool.cancel
@@ -1696,7 +1696,7 @@ export namespace taskpool {
      * @brief Notify the taskpool that the task is finished on a coroutine
      * @param taskId identifier of the finished task
      * @param groupId group identifier of the passed task (0 means task is not group task)
-     * @returns true if task is not cancled by cancel method, false - otherwise
+     * @returns true if task is not canceled by cancel method, false - otherwise
      *
      * @see taskpool.Task.execute
      * @see taskpool.cancel
