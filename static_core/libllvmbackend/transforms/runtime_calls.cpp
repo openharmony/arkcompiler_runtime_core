@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,11 +53,15 @@ llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Val
                                            llvm::ArrayRef<llvm::OperandBundleDef> bundle)
 {
     ASSERT(arkInterface->DeoptsEnabled() || bundle.empty());
-    auto tlsOffset = arkInterface->GetEntrypointTlsOffset(eid);
+    auto entrypointsTablePtrOffset = arkInterface->GetEntrypointsTablePointerTlsOffset();
+    auto entrypointOffset = arkInterface->GetEntrypointOffset(eid);
     auto [functionProto, functionName] = arkInterface->GetEntrypointCallee(eid);
 
     auto threadRegPtr = builder->CreateIntToPtr(threadRegValue, builder->getPtrTy());
-    auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), threadRegPtr, tlsOffset);
+    auto entrypointsTablePtrAddr =
+        builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), threadRegPtr, entrypointsTablePtrOffset);
+    auto entrypointsTableAddr = builder->CreateLoad(builder->getPtrTy(), entrypointsTablePtrAddr);
+    auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), entrypointsTableAddr, entrypointOffset);
     auto callee = builder->CreateLoad(builder->getPtrTy(), addr, functionName + "_addr");
 
     auto calleeFuncTy = llvm::cast<llvm::FunctionType>(functionProto);

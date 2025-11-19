@@ -342,7 +342,7 @@ protected:
     bool isCompiledFrame_ {false};
     ThreadId internalId_ {0};
 
-    EntrypointsTable entrypoints_ {};
+    EntrypointsTable *entrypointsTable_ {nullptr};
     void *object_ {nullptr};
     Frame *frame_ {nullptr};
     ObjectHeader *exception_ {nullptr};

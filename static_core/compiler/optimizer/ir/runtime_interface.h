@@ -1579,9 +1579,14 @@ public:
         UNREACHABLE();
     }
 
-    uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const
+    uintptr_t GetEntrypointsTablePointerTlsOffset(Arch arch) const
     {
-        return cross_values::GetManagedThreadEntrypointOffset(arch, ark::EntrypointId(id));
+        return cross_values::GetManagedThreadEntrypointsTableOffset(arch);
+    }
+
+    uintptr_t GetEntrypointOffset(Arch arch, EntrypointId id) const
+    {
+        return cross_values::GetEntrypointOffset(arch, ark::EntrypointId(id));
     }
 
     virtual EntrypointId GetGlobalVarEntrypointId()

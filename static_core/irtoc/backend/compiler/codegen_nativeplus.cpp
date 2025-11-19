@@ -32,7 +32,7 @@ void CodegenNativePlus::EmitTailCallIntrinsic([[maybe_unused]] IntrinsicInst *in
     ScopedTmpReg tmp(GetEncoder());
     auto offset = inst->GetImms()[0];
     GetCallingConvention()->GenerateEpilogueHead(*GetFrameInfo(), []() {});
-    GetEncoder()->EncodeLdr(tmp, false, MemRef(ThreadReg(), offset));
+    GetEntrypoint(tmp, offset);
     GetEncoder()->EncodeJump(tmp);
 }
 }  // namespace ark::compiler

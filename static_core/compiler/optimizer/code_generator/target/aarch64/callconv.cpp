@@ -15,6 +15,8 @@
 /*
 Low-level calling convention
 */
+#include "optimizer/code_generator/codegen_load_entrypoint.h"
+#include "scoped_tmp_reg.h"
 #include "target/aarch64/target.h"
 
 namespace ark::compiler::aarch64 {
@@ -189,9 +191,11 @@ void Aarch64CallingConvention::EncodeDynCallMode([[maybe_unused]] const FrameInf
     encoder->EncodeJump(expandDone, NUM_ACTUAL_REG, Imm(numExpected), Condition::GE);
     encoder->EncodeMov(NUM_EXPECTED_REG, Imm(numExpected));
 
-    MemRef expandEntrypoint(Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType()),
-                            GetDynInfo().GetExpandEntrypointTlsOffset());
-    GetEncoder()->MakeCall(expandEntrypoint);
+    ScopedTmpReg tmpReg(encoder, true);
+    MemRef epTable = MemRef(Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType()),
+                            GetDynInfo().GetExpandEntrypointsTableTlsOffset());
+    LoadEntrypoint(tmpReg, encoder, epTable, GetDynInfo().GetExpandEntrypointOffset());
+    encoder->MakeCall(tmpReg);
     encoder->BindLabel(expandDone);
 }
 

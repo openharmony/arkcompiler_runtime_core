@@ -359,6 +359,9 @@ public:
     PANDA_PUBLIC_API Reg ConvertInstTmpReg(const Inst *inst, DataType::Type type) const;
     Reg ConvertInstTmpReg(const Inst *inst) const;
 
+    void GetEntrypoint(Reg entry, intptr_t epOffset) const;
+    void GetEntrypoint(Reg entry, EntrypointId id) const;
+
     bool OffsetFitReferenceTypeSize(uint64_t offset) const;
 
 protected:

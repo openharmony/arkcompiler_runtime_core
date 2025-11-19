@@ -200,9 +200,8 @@ void SlowPathShared::GenerateImpl(Codegen *codegen)
     ASSERT(graph->IsAotMode());
     auto aotData = graph->GetAotData();
     aotData->SetSharedSlowPathOffset(GetEntrypoint(), codegen->GetEncoder()->GetCursorOffset());
-    MemRef entry(codegen->ThreadReg(), graph->GetRuntime()->GetEntrypointTlsOffset(graph->GetArch(), GetEntrypoint()));
     ScopedTmpReg tmp1Reg(codegen->GetEncoder());
-    codegen->GetEncoder()->EncodeLdr(tmp1Reg, false, entry);
+    codegen->GetEntrypoint(tmp1Reg, GetEntrypoint());
     codegen->GetEncoder()->EncodeJump(tmp1Reg);
 }
 

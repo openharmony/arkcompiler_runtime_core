@@ -300,9 +300,9 @@ public:
         return ThreadProxy::GetFlagOffset();
     }
 
-    static constexpr uint32_t GetEntrypointsOffset()
+    static constexpr uint32_t GetEntrypointsTableOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, entrypoints_);
+        return MEMBER_OFFSET(ManagedThread, entrypointsTable_);
     }
     static constexpr uint32_t GetObjectOffset()
     {
