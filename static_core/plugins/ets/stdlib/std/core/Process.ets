@@ -77,6 +77,8 @@ export namespace StdProcess {
             throw new Error('unknown error type');
         }
         console.error(out);
+        let procManager = new StdProcess.ProcessManager();
+        procManager.exit(1);
     };
 
     /**

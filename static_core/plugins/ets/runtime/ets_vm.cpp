@@ -619,7 +619,7 @@ bool PandaEtsVM::LoadNativeLibrary(ani_env *env, const PandaString &name, bool s
     return true;
 }
 
-[[noreturn]] void PandaEtsVM::HandleUncaughtException()
+void PandaEtsVM::HandleUncaughtException()
 {
     auto coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
@@ -628,7 +628,7 @@ bool PandaEtsVM::LoadNativeLibrary(ani_env *env, const PandaString &name, bool s
 
     EtsHandle<EtsObject> exception(coro, EtsObject::FromCoreType(coro->GetException()));
 
-    GetUnhandledObjectManager()->InvokeErrorHandlerAndExit(coro, exception);
+    GetUnhandledObjectManager()->InvokeErrorHandler(coro, exception);
 }
 
 void HandleEmptyArguments(const PandaVector<Value> &arguments, const GCRootVisitor &visitor,

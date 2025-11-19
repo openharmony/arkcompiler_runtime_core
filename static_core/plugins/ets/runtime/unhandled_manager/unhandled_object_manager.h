@@ -73,7 +73,7 @@ public:
     void VisitObjects(const GCRootVisitor &visitor);
 
     /// @brief Applies handler to the exception and exits the program
-    [[noreturn]] void InvokeErrorHandlerAndExit(EtsCoroutine *coro, EtsHandle<EtsObject> exception);
+    void InvokeErrorHandler(EtsCoroutine *coro, EtsHandle<EtsObject> exception);
 
 private:
     PandaUnorderedSet<EtsObject *> failedJobs_ GUARDED_BY(mutex_);

@@ -424,7 +424,7 @@ public:
     ClassLinkerContext *CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles);
 
     /// @brief print stack and exit the program
-    [[noreturn]] void HandleUncaughtException() override;
+    void HandleUncaughtException() override;
 
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;

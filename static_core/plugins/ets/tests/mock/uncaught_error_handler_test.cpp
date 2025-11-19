@@ -65,10 +65,10 @@ TEST_F(UncaughtErrorHandlerDeathTest, SimpleDeath)
     EXPECT_EXIT(RunTest("Simple"), testing::ExitedWithCode(2U), ".*");
 }
 
-/// Death test. Throws an exception from SetTimeout callback.
-TEST_F(UncaughtErrorHandlerDeathTest, SetTimeoutDeath)
+/// Throws an exception from SetTimeout callback.
+TEST_F(UncaughtErrorHandlerTest, SetTimeout)
 {
-    EXPECT_EXIT(RunTest("SetTimeout"), testing::ExitedWithCode(2U), ".*");
+    RunTest("SetTimeout");
 }
 
 /// Death test. Checks if `on('unhandledPromiseRejection)` and `on('uncaughtError')` don't collide.
