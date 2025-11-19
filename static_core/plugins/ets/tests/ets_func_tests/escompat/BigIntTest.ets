@@ -89,7 +89,7 @@ function testBigIntConstructor1() {
 
     const errorcheck = (e: Error) => { 
         return (e instanceof RangeError) &&
-            e.message === 'the number 72623859.79038285 cannot be converted to a BigInt because it is not an integer'
+            e.message === 'the Double value 72623859.79038285 cannot be converted to a BigInt because it is not an integer'
         }
     arktest.expectThrow((): void => { n = BigInt(72623859.790382848) }, errorcheck)
 }
@@ -114,10 +114,76 @@ function testBigIntConstructor4() {
     arktest.assertEQ(n.toString(), "0")
 }
 
-function main(): int {
-	const suite = new arktest.ArkTestsuite("test bigint toString by undefined")
+function testBigIntFromDoubleInt(): void {
+    let x = 1.0;
+    let b = new BigInt(x);
+    arktest.assertEQ(b, new BigInt(1));
+}
 
-	suite.addTest("convert 10 to toString(undefined)", testBigIntToString1)
+function testBigIntFromDoubleFraction(): void {
+    let x = 1.2;
+    arktest.expectThrow(
+        (): void => { new BigInt(x); },
+        (e: Error) => e instanceof RangeError
+    );
+}
+
+function testBigIntFromDoublePosInf(): void {
+    let x = Double.POSITIVE_INFINITY;
+    arktest.expectThrow(
+        (): void => { new BigInt(x); },
+        (e: Error) => e instanceof RangeError
+    );
+}
+
+function testBigIntFromDoubleNegInf(): void {
+    let x = Double.NEGATIVE_INFINITY;
+    arktest.expectThrow(
+        (): void => { new BigInt(x); },
+        (e: Error) => e instanceof RangeError
+    );
+}
+
+function testBigIntFromDoubleNaN(): void {
+    let x = Double.NaN;
+    arktest.expectThrow(
+        (): void => { new BigInt(x); },
+        (e: Error) => e instanceof RangeError
+    );
+}
+
+function testBigIntFromDoubleLarge(): void {
+    let x = 1024.0;
+    let b = new BigInt(x);
+    arktest.assertEQ(b, new BigInt(1024));
+}
+
+function testBigIntFromDoubleNegativeExp(): void {
+    let x = -4e10;
+    let b = new BigInt(x);
+    arktest.assertEQ(b, new BigInt(-4_00000_00000));
+}
+
+function testBigIntFromDoubleFloat32Underflow(): void {
+    let MIN_VAL = -3.4028235e38;
+    let arr1 = new Float32Array([MIN_VAL]);
+    let bval = BigInt(arr1[0]);
+    let arr = new BigInt64Array([bval]);
+    arktest.assertTrue(arr[0] == 0);
+    arktest.assertEQ(arr[0], BigInt(0));
+}
+
+function testBigIntNumberMax(): void {
+  let bi1 = 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368n;
+  arktest.assertTrue(bi1 == Number.MAX_VALUE);
+  arktest.assertFalse(bi1 >  Number.MAX_VALUE);
+}
+
+
+function main(): int {
+    const suite = new arktest.ArkTestsuite("test bigint toString by undefined")
+    
+    suite.addTest("convert 10 to toString(undefined)", testBigIntToString1)
     suite.addTest("convert -10 to toString(undefined)", testBigIntToString2)
     suite.addTest("convert 0b10 to toString(undefined)", testBigIntToString3)
     suite.addTest("convert 0x10 to toString(undefined)", testBigIntToString4)
@@ -132,6 +198,15 @@ function main(): int {
     suite.addTest("test ordinary numbers", testBigIntConstructor2)
     suite.addTest("test strings", testBigIntConstructor3)
     suite.addTest("test 0.0", testBigIntConstructor4)
-
-	return suite.run()
+    suite.addTest("bigint from double: integer", testBigIntFromDoubleInt);
+    suite.addTest("bigint from double: fractional -> throw", testBigIntFromDoubleFraction);
+    suite.addTest("bigint from double: +inf -> throw", testBigIntFromDoublePosInf);
+    suite.addTest("bigint from double: -inf -> throw", testBigIntFromDoubleNegInf);
+    suite.addTest("bigint from double: NaN -> throw", testBigIntFromDoubleNaN);
+    suite.addTest("bigint from double: 1024", testBigIntFromDoubleLarge);
+    suite.addTest("bigint from double: -4e10", testBigIntFromDoubleNegativeExp);
+    suite.addTest("bigint from double: float32 underflow", testBigIntFromDoubleFloat32Underflow);
+    suite.addTest("bigint from number max value", testBigIntNumberMax);
+    
+    return suite.run()
 }
