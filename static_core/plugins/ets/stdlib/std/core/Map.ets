@@ -207,7 +207,9 @@ function setNestedData(this: DataArrType, nestedData: DataArrType) {
     nestedBuckets.setItersCounter(buckets.getItersCounter())
 }
 
-export final class MapIterator<K, V, R> implements IterableIterator<R> {
+export interface MapIterator<R> extends IterableIterator<R> {}
+
+final class MapIteratorImpl<K, V, R> implements MapIterator<R> {
     private data: DataArrType
     private buckets: BucketsArrType
     private curAt: At
@@ -265,7 +267,7 @@ export final class MapIterator<K, V, R> implements IterableIterator<R> {
     }
 }
 
-export final class EmptyMapIterator<R> implements IterableIterator<R> {
+final class EmptyMapIteratorImpl<R> implements MapIterator<R> {
     override next(): IteratorResult<R> {
         return new IteratorResult<R>()
     }
@@ -742,9 +744,9 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     private mappedIterator<R>(fn: (k: K, v: V) => R): IterableIterator<R> {
         if (this.sizeVal > 0) {
-            return new MapIterator<K, V, R>(this.data, fn)
+            return new MapIteratorImpl<K, V, R>(this.data, fn)
         } else {
-            return new EmptyMapIterator<R>()
+            return new EmptyMapIteratorImpl<R>()
         }
     }
 

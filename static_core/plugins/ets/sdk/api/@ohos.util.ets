@@ -1511,7 +1511,7 @@ export namespace util {
          * @returns { boolean } Returns true if the value is an iterator returned for a built-in Map instance.
          */
         isMapIterator(value: Object): boolean {
-            return value instanceof MapIterator || value instanceof EmptyMapIterator;
+            return value instanceof MapIterator;
         }
 
         /**

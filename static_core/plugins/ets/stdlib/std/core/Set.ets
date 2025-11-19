@@ -59,7 +59,9 @@ export interface ReadonlySet<T> extends Iterable<T> {
     entries(): IterableIterator<[T, T]>;
 }
 
-export final class SetIterator<T> implements IterableIterator<T> {
+export interface SetIterator<T> extends IterableIterator<T> {}
+
+final class SetIteratorImpl<T> implements SetIterator<T> {
     private it: IterableIterator<T>
     constructor(it: IterableIterator<T>) {
         super()
@@ -197,7 +199,7 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns an iterable of the values in the set
      */
     override keys(): IterableIterator<K> {
-        return new SetIterator<K>(this.elements.keys())
+        return new SetIteratorImpl<K>(this.elements.keys())
     }
 
     /**
@@ -206,18 +208,18 @@ export class Set<K> implements ReadonlySet<K> {
      * @returns an iterable of the values in the set
      */
     override values(): IterableIterator<K> {
-        return new SetIterator<K>(this.elements.values())
+        return new SetIteratorImpl<K>(this.elements.values())
     }
 
     override $_iterator(): IterableIterator<K> {
-        return new SetIterator<K>(this.values())
+        return new SetIteratorImpl<K>(this.values())
     }
 
     /**
      * @returns an iterable of [v,v] pairs for every value `v` in the set.
      */
     override entries(): IterableIterator<[K, K]> {
-        return new SetIterator<[K, K]>(this.elements.entries())
+        return new SetIteratorImpl<[K, K]>(this.elements.entries())
     }
 
     /**
