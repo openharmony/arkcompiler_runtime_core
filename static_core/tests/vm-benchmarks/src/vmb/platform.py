@@ -206,7 +206,7 @@ class PlatformBase(CrossShell, ABC):
             self.x_sh.run(f'mkdir -p {device_resources}')
             for f in resources.glob('*'):
                 p = f.resolve()
-                self.x_sh.push(p, device_resources.joinpath(f.name))
+                self.x_sh.push(p, bu.device_path.joinpath('resources').joinpath(f.name).as_posix())
 
     def push_libs(self) -> None:
         if Target.HOST == self.target:
