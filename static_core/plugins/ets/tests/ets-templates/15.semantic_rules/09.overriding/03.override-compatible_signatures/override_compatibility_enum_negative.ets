@@ -25,7 +25,7 @@ desc: >-
 
     Every type is override-compatible with itself (see Invariance).
 
-
+tags: [negative, compile-only]
 params: {{c.params}}
 ---*/
 

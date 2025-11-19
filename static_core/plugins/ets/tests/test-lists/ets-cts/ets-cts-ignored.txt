@@ -1439,7 +1439,7 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_2.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_4.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_class_4.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_enum_1.ets
+
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_fixed_array_2.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_11.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_13.ets
@@ -1450,8 +1450,7 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_5.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_intf_3.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_primitive_2.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_tuple_2.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_tuple_4.ets
+
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_1.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_13.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_17.ets
