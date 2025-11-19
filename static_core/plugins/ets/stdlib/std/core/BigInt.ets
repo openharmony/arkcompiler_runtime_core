@@ -115,13 +115,12 @@ export final class BigInt {
         // should we cast it to long at then use internal helper?
         // i.e. like this: this.bytes = BigInt.fromLongHelper(d as long, 64)
         if (!d.isInteger()) {
-            throw new RangeError(`the number ${d} cannot be converted to a BigInt because it is not an integer`)
+            throw new RangeError(`the Double value ${d} cannot be converted to a BigInt because it is not an integer`)
         }
-        if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
-            let trimmed = d.toString().trim()
-            let a = BigInt.parseFromString(trimmed)
-            this.bytes = a[0] as FixedArray<int>
-            this.sign = a[1] as int
+        if (!d.isSafeInteger()) {
+            let a = BigInt.fromDoubleInteger(d);
+            this.bytes = a.bytes;
+            this.sign = a.sign;
             return
         }
         this.sign = d < 0 ? -1 : (d == 0 ? 0 : 1)
@@ -1316,6 +1315,56 @@ export final class BigInt {
             return new BigInt(value as Boolean)
         }
         return new BigInt(0)
+    }
+
+    private static fromDoubleInteger(d: double): BigInt {
+        if (!Number.isFinite(d)) {
+            throw new RangeError(`the Double value ${d} cannot be converted to a BigInt because it is not finite`);
+        }
+
+        if (d == 0) {
+            return new BigInt(0);
+        }
+
+        const buffer = new ArrayBuffer(8);
+        const view = new DataView(buffer);
+
+        // big-endian
+        view.setFloat64(0, d, false);
+
+        const hi = view.getUint32(0);
+        const lo = view.getUint32(4);
+
+        // IEEE-754
+        const signBit = hi >>> 31;
+        const exponentBits = (hi >>> 20) & 0x7FF;
+        const significandHi = hi & 0xFFFFF;
+        const significandLo = lo;
+
+        // Mantissa as integer val can hold upto 52 bit
+        let mantissaNum = significandHi * Math.pow(2, 32) + significandLo;
+
+        let exponent: int;
+        if (exponentBits === 0) {
+            // exponent = 1 - bias - 52
+            exponent = (1 - 1023 - 52) as int;
+        } else {
+            // (1.xxx... * 2^(exponentBits - bias))
+            mantissaNum += Math.pow(2, 52);  // hidden bit
+            exponent = (exponentBits - 1023 - 52) as int;
+        }
+
+        // mantissaNum is integer <= 2^53-1
+        let result = new BigInt(mantissaNum as double);
+        if (exponent > 0) {
+            result = result.operatorLeftShift(new BigInt(exponent));
+        } else if (exponent < 0) {
+            result = result.operatorRightShift(new BigInt(-exponent));
+        }
+        if (signBit) {
+            result = result.negate();
+        }
+        return result;
     }
 
 }
