@@ -86,6 +86,14 @@ panda_add_gtest_with_ani(map_iter_overflow_test
     TEST_GROUP ets_tests_runtime_gtests
 )
 
+panda_add_gtest_with_ani(is_assignable_from_union_test
+    CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/is_assignable_from_union_test.cpp
+    ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/is_assignable_from_union_test.ets
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    LIBRARIES arkbase arkfile arkruntime
+    TEST_GROUP ets_tests_runtime_gtests
+)
+
 add_dependencies(ets_tests_runtime_gtests
     ets_vm_test_gtests
     static_object_accessor_test_gtests
