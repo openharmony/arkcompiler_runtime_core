@@ -19,7 +19,7 @@ desc: >-
     If the last argument of the function call has the spread operator '...',
     then objectReference that follows the argument must refer to an array
     whose type is compatible (see Compatible Types) with the type specified
-    in the last parameter of the function declaration.
+    in the last parameter of the function declaration. {{c.desc}}
 tags: [compile-only, negative]
 ---*/
 
