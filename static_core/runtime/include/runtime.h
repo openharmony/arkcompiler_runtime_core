@@ -178,7 +178,11 @@ public:
     static bool GetLiteralTagAndValue(const panda_file::File &pf, uint32_t id, panda_file::LiteralTag *tag,
                                       panda_file::LiteralDataAccessor::LiteralValue *value);
 
+    static void SetRuntimeOptions(RuntimeOptions &options);
+
     static void SetDebuggerOptions(RuntimeOptions &options);
+
+    static void SetUseLargerYoungSpaceOptions(RuntimeOptions &options);
 
     uintptr_t GetPointerToConstArrayData(const panda_file::File &pf, uint32_t id) const;
 
