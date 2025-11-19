@@ -37,7 +37,7 @@ class Point {
 }
 
 class Trash {
-    point: Nullish<Point>
+    point: Point | null | undefined
 
     constructor() {
         this.point = undefined
@@ -100,8 +100,8 @@ function jsonParseUsingRevivierWhichReturnsUndefined(): int {
 const STRING_ARRAY_TYPE = Type.of([] as FixedArray<string>)
 
 function jsonParseArrayUsingReviverWhichReturnsUndefined(): int {
-    const parsedArray = JSON.parse<FixedArray<Nullish<string>>>(`["one","two"]`, newUndefiningReviver("0"), STRING_ARRAY_TYPE)
-    arktest.assertEQ([null, "two"] as FixedArray<Nullish<string>>, parsedArray)
+    const parsedArray = JSON.parse<FixedArray<string | null | undefined>>(`["one","two"]`, newUndefiningReviver("0"), STRING_ARRAY_TYPE)
+    arktest.assertEQ([null, "two"] as FixedArray<string | null | undefined>, parsedArray)
 
     return RESULT_SUCCESS
 }
@@ -137,14 +137,14 @@ function jsonParseUsingReplacingReviver(): int {
 }
 
 function jsonParseArrayWithReplacingReviver(): int {
-    const romans: FixedArray<Nullish<string>> = ["I", "II"]
+    const romans: FixedArray<string | null | undefined> = ["I", "II"]
 
     const replacements = new Map<string, Any>()
 
-    const replacedRomans: FixedArray<Nullish<string>> = ["I"]
+    const replacedRomans: FixedArray<string | null | undefined> = ["I"]
     replacements.set("", replacedRomans)
 
-    const parsedRomans = JSON.parse<FixedArray<Nullish<string>>>(JSON.stringify(romans), newReplacingReviver(replacements), STRING_ARRAY_TYPE)
+    const parsedRomans = JSON.parse<FixedArray<string | null | undefined>>(JSON.stringify(romans), newReplacingReviver(replacements), STRING_ARRAY_TYPE)
     arktest.assertEQ(parsedRomans, replacedRomans)
 
     return RESULT_SUCCESS
