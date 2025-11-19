@@ -23,6 +23,7 @@
 
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
+#include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 namespace ark::ets::ani::testing {
