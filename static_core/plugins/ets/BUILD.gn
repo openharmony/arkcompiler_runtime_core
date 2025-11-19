@@ -387,6 +387,8 @@ if (with_stdlib) {
         "tests/interop_js/taskpool:taskpool_tests",
         "tests/interop_js/serialize:serialize_tests",
         "tests/interop_js/xgc:xgc_tests",
+        # Check for offsets between managed and mirror classes
+        "tests/runtime/types:ets_internal_objects_tests_gtests",
       ]
     }
   }
