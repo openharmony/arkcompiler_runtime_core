@@ -63,6 +63,8 @@ class Tool(ToolBase):
                     '--log-file={gclog} '
         if OptFlags.JIT_STATS in self.flags:
             opts += '--compiler-dump-jit-stats-csv={abc}.dump.csv '
+        if OptFlags.SAFEPOINT_CHECKER in self.flags:
+            opts += '--safepoint-checkers-report-filepath={abc}.spcr.json '
         self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.ark} ' \
                    f'--boot-panda-files={self.etsstdlib} ' \
                    f'--load-runtimes=ets {opts} {{aot_opts}} {self.custom} ' \

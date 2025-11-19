@@ -202,6 +202,7 @@ class TestResult(Jsonable):
     execution_forks: List[RunResult] = field(default_factory=list)
     mem_bytes: int = -1
     gc_stats: Optional[GCStats] = None
+    safepoint_checker: Optional[Dict[str, int]] = None
     int_mem_alloc: Optional[Dict[str, int]] = None
     aot_stats: Optional[AOTStats] = None
     jit_stats: Optional[List[JITStat]] = None

@@ -149,6 +149,8 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         metavar='FILE_NAME', help='Create test list for failures')
     parser.add_argument('--custom-script', default='', type=str,
                         metavar='FILE_NAME', help='Run shell script after each test')
+    parser.add_argument('--safepoint-checker', action='store_true',
+                        help='Report the data on the intrinsic timings')
     parser.add_argument('--skip-cleanup', action='store_true',
                         help='Do not remove compiled files after test')
     parser.add_argument('--skip-compilation', action='store_true',
@@ -365,6 +367,8 @@ class Args(argparse.Namespace):
             flags |= OptFlags.AOT_STATS
         if self.get('jit_stats', False):
             flags |= OptFlags.JIT_STATS
+        if self.get('safepoint_checker', False):
+            flags |= OptFlags.SAFEPOINT_CHECKER
         # backward compatibility
         if 'false' == self.get('compiler_inlining', ''):
             flags |= OptFlags.DISABLE_INLINING
