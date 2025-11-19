@@ -1606,9 +1606,6 @@
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_7.ets
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_5.ets
 
-#30504
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/negative_cases/async_lambda_returns_not_promise_4.ets
-
 #30546
 16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/negative_cases/async_lambda_returns_not_promise_1.ets
 16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/negative_cases/async_lambda_returns_not_promise_3.ets
