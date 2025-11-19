@@ -17,7 +17,7 @@
 import pytest
 
 from src.arkts_playground.models.options import OptionsResponseModel
-from tests.fixtures.overrides import override_get_options
+from tests.fixtures.overrides import FakeRunner, override_get_options
 
 
 def test_formatting_api(playground_client, monkeypatch):
@@ -120,9 +120,7 @@ def test_get_version_api(playground_client):
     ("manual", True,  200),
 ])
 def test_ast_api_respects_mode(playground_client, monkeypatch, ast_mode, manual_flag, expected_status):
-    from tests.fixtures.overrides import FakeRunner
-
-    async def fake_dump_ast(self, code, options=None, **_):
+    async def fake_dump_ast(_self, code, _options=None, **_):
         return {
             "ast": "ast code",
             "output": f"testing output: {code}",

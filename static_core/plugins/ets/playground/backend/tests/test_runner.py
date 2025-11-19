@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import os
 import pytest
 from src.arkts_playground.deps.runner import Runner
 from tests.fixtures.mock_subprocess import FakeCommand, MockAsyncSubprocess
@@ -459,8 +459,16 @@ async def test_compile_utf8_decode_with_replace(monkeypatch, ark_build):
     assert "\ufffd" in res["compile"]["error"]
 
 
+@pytest.fixture(name="out_pa_file")
+def out_file_with_cleanup():
+    out_file = "out.pa"
+    yield out_file
+    if os.path.exists(out_file):
+        os.remove(out_file)
+
+
 @pytest.mark.asyncio
-async def test_disassembly_opens_file_with_errors_replace(monkeypatch, ark_build):
+async def test_disassembly_opens_file_with_errors_replace(monkeypatch, ark_build, out_pa_file):
     """
     Ensure disassembly opens the .pa file with encoding='utf-8' and errors='replace'.
     """
@@ -497,7 +505,7 @@ async def test_disassembly_opens_file_with_errors_replace(monkeypatch, ark_build
     monkeypatch.setattr("src.arkts_playground.deps.runner.aiofiles.open", open_spy)
 
     r = Runner(ark_build[0])
-    res = await r.disassembly("in.abc", "out.pa")
+    res = await r.disassembly("in.abc", out_pa_file)
 
     assert res["exit_code"] == 0
     assert res["code"] == "X"

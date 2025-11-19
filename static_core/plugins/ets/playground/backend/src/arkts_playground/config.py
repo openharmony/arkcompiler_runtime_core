@@ -15,8 +15,9 @@
 # limitations under the License.
 
 from argparse import ArgumentParser
+from collections.abc import Sequence
 from functools import lru_cache
-from typing import List, Optional, Tuple, Dict, Union, Literal
+import typing as t
 
 import yaml
 from pydantic import BaseModel, Field
@@ -26,18 +27,18 @@ from .models.options import OptionModel
 
 
 class SyntaxModel(BaseModel):
-    keywords: List[str]
-    type_keywords: List[str] = Field(alias="typeKeywords")
-    builtins: List[str]
-    tokenizer: Dict[str, List[Tuple[str, Union[str, dict]]]]
+    keywords: list[str]
+    type_keywords: list[str] = Field(alias="typeKeywords")
+    builtins: list[str]
+    tokenizer: dict[str, list[tuple[str, str | dict[str, t.Any]]]]
 
 
 class Server(BaseModel):
-    uvicorn_config: dict
+    uvicorn_config: dict[str, str | int]
     cors: bool = False
-    cors_allow_origins: List[str] = []
-    cors_allow_methods: List[str] = []
-    cors_allow_headers: List[str] = []
+    cors_allow_origins: list[str] = []
+    cors_allow_methods: list[str] = []
+    cors_allow_headers: list[str] = []
     cors_allow_credentials: bool = False
 
 
@@ -49,37 +50,37 @@ class Binary(BaseModel):
 
 
 class Features(BaseModel):
-    ast_mode: Literal["auto", "manual"] = "auto"
+    ast_mode: t.Literal["auto", "manual"] = "auto"
 
 
 class PlaygroundSettings(BaseSettings):
     server: Server
     binary: Binary
-    options: List[OptionModel]
+    options: list[OptionModel]
     syntax: SyntaxModel
-    features: Features = Field(default_factory=Features)
+    features: t.Annotated[Features, Field(default_factory=Features)]
 
 
 @lru_cache
-def get_settings(args: Optional[Tuple] = None) -> PlaygroundSettings:
+def get_settings(args: Sequence[str] | None = None) -> PlaygroundSettings:
     parser = ArgumentParser()
-    parser.add_argument("--config", "-c", type=str)
-    args = parser.parse_args(args)
-    with open(args.config, "r", encoding="utf-8") as f:
+    _ = parser.add_argument("--config", "-c", type=str)
+    parsed_args = parser.parse_args(args)
+    with open(t.cast(str, parsed_args.config), "r", encoding="utf-8") as f:
         conf = yaml.safe_load(f)
     return PlaygroundSettings(**conf)
 
 
 @lru_cache
-def get_options(args: Optional[Tuple] = None) -> List[OptionModel]:
+def get_options(args: Sequence[str] | None = None) -> list[OptionModel]:
     return get_settings(args).options
 
 
 @lru_cache
-def get_syntax(args: Optional[Tuple] = None) -> SyntaxModel:
+def get_syntax(args: Sequence[str] | None = None) -> SyntaxModel:
     return get_settings(args).syntax
 
 
 @lru_cache
-def get_features(args: Optional[Tuple] = None) -> Features:
+def get_features(args: Sequence[str] | None = None) -> Features:
     return get_settings(args).features

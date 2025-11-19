@@ -14,15 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 from pydantic import BaseModel, Field
 from .common import ResponseLog
 
 
 class AstRequestModel(BaseModel):
     code: str
-    options: dict = Field(default_factory=dict)
+    options: dict[str, str | int] = Field(default_factory=dict)
 
 
 class AstResponse(ResponseLog):
-    ast: Optional[str] = None
+    ast: str | None = None

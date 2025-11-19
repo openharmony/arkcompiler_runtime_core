@@ -14,28 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from typing import Any, Dict, Optional
+from typing import Any
 from pydantic import BaseModel, Field
 from .common import ResponseLog, DisasmResponse
 
 
 class CompileRequestModel(BaseModel):
     code: str
-    options: Dict[str, Any] = Field(default_factory=dict)
+    options: dict[str, Any] = Field(default_factory=dict)
     disassemble: bool = False
     verifier: bool = False
     runtime_verify: bool = False
 
 
 class RunResponse(BaseModel):
-    run: Optional[ResponseLog] = None
+    run: ResponseLog | None = None
     compile: ResponseLog
-    disassembly: Optional[DisasmResponse] = None
-    verifier: Optional[ResponseLog] = None
+    disassembly: DisasmResponse | None = None
+    verifier: ResponseLog | None = None
 
 
 class CompileResponse(BaseModel):
     compile: ResponseLog
-    disassembly: Optional[DisasmResponse] = None
-    verifier: Optional[ResponseLog] = None
+    disassembly: DisasmResponse | None = None
+    verifier: ResponseLog | None = None
