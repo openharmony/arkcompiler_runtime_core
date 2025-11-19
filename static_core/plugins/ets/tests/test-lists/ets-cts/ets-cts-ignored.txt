@@ -942,24 +942,24 @@
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_3.ets
 
 #28972 CTE on string[] type parameter
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_3.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_4.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_7.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_9.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_10.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_11.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_12.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_0.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_1.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_6.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_7.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_8.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_main_args_9.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_1.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_2.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_3.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_5.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_7.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_6.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_8.ets
+13.modules_and_namespaces/07.program_entry_point/main_w_args_2.ets
+13.modules_and_namespaces/07.program_entry_point/main_w_args_3.ets
+13.modules_and_namespaces/07.program_entry_point/main_w_args_4.ets
+13.modules_and_namespaces/07.program_entry_point/main_w_args_5.ets
+13.modules_and_namespaces/07.program_entry_point/main_w_args_n_0.ets
+13.modules_and_namespaces/07.program_entry_point/main_w_args_n_1.ets
 
 #29063 runtime complains on invalid signature
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_0.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_1.ets
-13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_2.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_0.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_n_0.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_n_2.ets
 
 #29153
 14.ambient_declarations/04.class_declarations/02.ambient_call_signature/call_sig_declarations_neg_2.ets

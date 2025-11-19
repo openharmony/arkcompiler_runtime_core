@@ -10,4 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-[TID 023349] E/runtime: Cannot find method 'entry_point_foo_14.ETSGLOBAL::foo'
+[TID 0259a1] E/runtime: Method 'ULstd.core.Int;Lstd.core.String; main_n_20.ETSGLOBAL::main()' has invalid signature

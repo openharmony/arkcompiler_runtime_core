@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
 /*---
-desc: The unhandled error led to the exit.
-tags: [negative]
+desc: Any exported top-level function can be used as an entry point
+tags: [no-warmup]
+entry_point: {{c.entry_point}}
 ---*/
 
-function main(): void {
-    throw new Error();
-}
+{{c.use}}
+{%- endfor %}

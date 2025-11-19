@@ -10,4 +10,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-[TID 025bea] E/runtime: Cannot find method 'multiple_entrypoints_5.ETSGLOBAL::NS.main'
+Unhandled exception: std.core.AssertionError
+AssertionError: expected equality failed: '42' === '0'
+	at std.core.AssertionError.<ctor> (Errors.ets:23:0)
+	at std.core.AssertionError.<ctor> (Errors.ets:22:0)
+	at std.testing.arktest.failingAssertion (arktest.ets:39:0)
+	at std.testing.arktest.assertCommon (arktest.ets:28:0)
+	at std.testing.arktest.assertEQ (arktest.ets:70:0)
+	at function_foo_n_8.NS.foo (function_foo_n_8.ets:43:0)

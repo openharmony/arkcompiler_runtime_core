@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 {%- for c in cases %}
 /*---
-desc: {{c.desc}}
+desc: >-
+    Entry point function must either have no parameters, or have one parameter
+    of type string[] that provides access to the arguments of a program command line
 tags: [no-warmup]
 entry_point: {{c.entry_point}}
+test_cli: [{{c.cmd_line_args}}]
 ---*/
 
 {{c.use}}

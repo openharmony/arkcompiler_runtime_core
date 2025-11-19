@@ -15,7 +15,6 @@
 cases:
     # void return type
     - cmd_line_args: X, Y
-      tags: negative
       use: |-
           function main(args: string[]) {
               arktest.assertEQ(args[0], 'X')
@@ -25,7 +24,6 @@ cases:
 
     # int return type
     - cmd_line_args: X, Y
-      tags: negative
       use: |-
           export function main(args: string[]): int {
               arktest.assertEQ(args[0], 'X')
@@ -35,7 +33,7 @@ cases:
 
     # with overload declarations, void
     - cmd_line_args: X, Y
-      tags: 'compile-only, negative'
+      tags: 'compile-only'
       use: |-
           export overload main { main1, main }
 
@@ -50,7 +48,7 @@ cases:
 
     # with overload declarations, int
     - cmd_line_args: X, Y
-      tags: 'compile-only, negative'
+      tags: 'compile-only'
       use: |-
           export overload main { main1, main }
 
@@ -62,63 +60,4 @@ cases:
 
           function main1(args: string[]): int {
               return 1
-          }
-
-    # entry point function cannot have overloading, void return type
-    - cmd_line_args: X, Y
-      use: |-
-          export overload main { main1, main2, main }
-
-          export function main1(args: string[]) {
-              arktest.assertTrue(false)
-          }
-
-          export function main2(args: string[]) {
-              arktest.assertTrue(false)
-          }
-
-    # entry point function cannot have overloading, int return type
-    - cmd_line_args: X, Y
-      use: |-
-          export overload main { main1, main, main2 }
-
-          export function main1(args: string[]): int {
-              return 1
-          }
-
-          export function main2(args: string[]): int {
-              return 1
-          }
-
-    # quoted command-line arguments
-    - cmd_line_args: >-
-          "a, b c", "D E, F"
-      use: |-
-          function main(args: string[]) {
-              arktest.assertEQ(args[0], 'a, b c')
-              arktest.assertEQ(args[1], 'D E, F')
-          }
-
-    - cmd_line_args: >-
-          "a, `b c", "D E, `F"
-      use: |-
-          function main(args: string[]) {
-              arktest.assertEQ(args[0], 'a, `b c')
-              arktest.assertEQ(args[1], 'D E, `F')
-          }
-
-    - cmd_line_args: >-
-          "a, \"b\" c", "D 'E', F"
-      use: |-
-          function main(args: string[]) {
-              arktest.assertEQ(args[0], 'a, "b" c')
-              arktest.assertEQ(args[1], 'D \'E\', F')
-          }
-
-    - cmd_line_args: >-
-          'a, "b-''c''-d", e', 'D, ''E-"F"-G'', H'
-      use: |-
-          function main(args: string[]) {
-              arktest.assertEQ(args[0], 'a, "b-\'c\'-d", e')
-              arktest.assertEQ(args[1], 'D, \'E-"F"-G\', H')
           }

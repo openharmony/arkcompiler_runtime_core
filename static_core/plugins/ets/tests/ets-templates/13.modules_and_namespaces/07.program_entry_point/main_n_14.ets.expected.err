@@ -10,4 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-[TID 0258b7] E/runtime: Method 'entry_point_main_36.Color entry_point_main_36.ETSGLOBAL::main()' has invalid signature
+[TID 0258b7] E/runtime: Method 'main_n_14.Color main_n_14.ETSGLOBAL::main()' has invalid signature
