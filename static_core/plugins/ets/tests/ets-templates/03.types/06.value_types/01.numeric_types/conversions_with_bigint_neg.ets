@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,31 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
+{% for type in types %}
+{% for op in ops %}
+
 /*---
 desc: >-
-    Literal types are aligned with some ArkTS literals (see Literals). Their names
-    are same as the names of their values, i.e., literals. Only three literal types
-    are supported - string, null and undefined.
-    {{c.doc}}
-tags: [negative, compile-only]
+    A smaller type's value can be assigned to a larger type's variable.
+    No implicit conversions from numeric types to bigint occurs in any assignment context.
+tags: [compile-only, negative]
 ---*/
 
-type number_tuple = [int, double]
-
-type tuple = ["a", int]
-
-type faa = FixedArray<"a">
-type tuple1 = [faa, int]
-const faa_value: faa = ["a"]
-
-type arr_a = "a"[]
-type tuple2 = [arr_a, int]
-const arr_a_value: arr_a = ["a"]
-
-
 function main(): void {
-    {{c.use|indent}}
+    let x: {{type}} = 1
+    let y: bigint = 1n
+    arktest.assertTrue((x {{op}} y) instanceof BigInt)
 }
 
+{% endfor %}
 {% endfor %}

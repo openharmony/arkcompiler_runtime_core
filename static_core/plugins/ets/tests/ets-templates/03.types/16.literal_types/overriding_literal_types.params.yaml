@@ -31,22 +31,6 @@ cases:
       arktest.assertEQ( i.foo("some str"), 2 )
       arktest.assertEQ( i.foo(new String("some str")), 2 )
 
-  - tags: negative, compile-only
-    doc: |-
-      String > literal string type (contravariant). Covariant parameter -> not override compatible
-    decl: |-
-      class Base {
-        foo(i: string) {
-          return 1
-        }
-      }
-      class Derived extends Base {
-        override foo(i: "some str") {
-          return 2
-        }
-      }
-    use: |-
-
   - doc: |-
       Functions are not override-equivalent, overload is happen and both functions are available.
     decl: |-

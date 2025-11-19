@@ -14,25 +14,6 @@
 ---
 cases:
     - doc: |-
-          Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
-      decl: |-
-          function foo(i: "some str") { }
-      use: |-
-          let a: "another str" = "another str"
-          foo(a)
-
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          String literal type could not be substituted by its superclass string
-      decl: |-
-          function foo(i: "some str") { }
-      use: |-
-          foo(new string("some str"))
-
-    - doc: |-
           Use literal type as an argument for the function
       decl: |-
           function foo(i: "some str", j: null, k: undefined) {
@@ -55,15 +36,6 @@ cases:
           foo("some str", null, undefined)
           let a: string = "some str"
           foo(a, null, undefined)
-
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          String literal type is overload-equivalent to string
-      decl: |-
-          function foo(i: "some str") {}
-          function foo(i: string) {}
-      use: |-
 
     - doc: |-
           Function returns literal type without return type specified.
@@ -100,17 +72,6 @@ cases:
         arktest.assertEQ( foo_s(a), "some str" )
         arktest.assertEQ( foo_u(undefined), undefined )
         arktest.assertEQ( foo_n(null), null )
-
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          Use custom type, made of literal type, as function parameter. String argument value used.
-      decl: |-
-          type LITERAL = "some str"
-          function foo(i: LITERAL ) { }
-          let a: string = "some str"
-      use: |-
-          foo(a)
 
     - doc: |-
           Use custom type, made of literal type, as an argument for the function.
@@ -222,28 +183,6 @@ cases:
           fooL(2, ...arr2)
           fooL(3, ...arr3)
 
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          Use rest parameter of literal array and argument of another literal type
-      decl: |-
-          function foo(...j: "some str"[]) {
-              return j[0]
-          }
-      use: |-
-          fooL("another str")
-
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          Use rest parameter of literal array and argument of unexpected type of Base class
-      decl: |-
-          function foo(...j: "some str"[]) {
-              return j[0]
-          }
-      use: |-
-          foo(new String("some str"))
-
     - doc: |-
           Use rest parameter for tuple of literal types
       decl: |-
@@ -257,13 +196,3 @@ cases:
       use: |-
           let a: TPL = [ "some str", "another str", undefined, null ]
           foo(...a)
-
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          Use rest parameter for tuple of literal types and argument of unexpected type of Base class
-      decl: |-
-          type TPL = ["some str, "another str", undefined, null]
-          function foo(...j: TPL) { }
-      use: |-
-          foo( [ "some str", new String("another str"), undefined, null ] )

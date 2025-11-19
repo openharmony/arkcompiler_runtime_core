@@ -629,7 +629,7 @@
 03.types/16.literal_types/as_const_0.ets
 03.types/16.literal_types/as_const_1.ets
 03.types/16.literal_types/as_const_2.ets
-03.types/16.literal_types/overriding_literal_types_2.ets
+03.types/16.literal_types/overriding_literal_types_1.ets
 03.types/16.literal_types/unsupported_literal_types_0.ets
 03.types/16.literal_types/unsupported_literal_types_1.ets
 03.types/16.literal_types/unsupported_literal_types_11.ets
