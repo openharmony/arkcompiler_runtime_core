@@ -355,7 +355,7 @@ function taskpoolInteropTest() {
     taskpoolInteropSuite.addTest('testTaskpoolSerializeClassInstantiate', testTaskpoolSerializeClassInstantiate);
     taskpoolInteropSuite.addTest('testTaskpoolSerializeUndefined', testTaskpoolSerializeUndefined);
     taskpoolInteropSuite.addTest('testTaskpoolSerializeNull', testTaskpoolSerializeNull);
-    taskpoolInteropSuite.run();
+    const res = taskpoolInteropSuite.run();
     CoroutineExtras.stopTaskpool();
-    return true;
+    return res == 0;
 }

@@ -478,8 +478,7 @@ function eworkerInteropTest() {
     eworkerInteropSuite.addTest('testEAWorkerMessageCancellation', testEAWorkerMessageCancellation);
     eworkerInteropSuite.addTest('testRemoveMessageHandlerTest', removeMessageHandlerTest);
     eworkerInteropSuite.addTest('testEAWorkerCommmunicateWithMessage', testEAWorkerCommmunicateWithMessage);
-    eworkerInteropSuite.run();
+    const res = eworkerInteropSuite.run();
     eaw.join();
-    return true;
+    return res == 0;
 }
-
