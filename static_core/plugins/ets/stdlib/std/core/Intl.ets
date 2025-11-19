@@ -341,47 +341,47 @@ export namespace Intl {
     }
 
     class DateTimeFormatOptionsImpl implements DateTimeFormatOptions {
-        set calendar(val?: string) {this.calendar_ = val}
+        set calendar(val: string | undefined) {this.calendar_ = val}
         get calendar(): string | undefined { return this.calendar_ }
-        set localeMatcher(val?: "lookup" | "best fit") { this.localeMatcher_ = val}
+        set localeMatcher(val: "lookup" | "best fit" | undefined) { this.localeMatcher_ = val}
         get localeMatcher(): "lookup" | "best fit" | undefined { return this.localeMatcher_}
-        set dateStyle(val?: DateStyle) { this.dateStyle_ = val }
+        set dateStyle(val: DateStyle | undefined) { this.dateStyle_ = val }
         get dateStyle(): DateStyle | undefined { return this.dateStyle_}
-        set day(val?: "numeric" | "2-digit") { this.day_ = val }
+        set day(val: "numeric" | "2-digit" | undefined) { this.day_ = val }
         get day(): "numeric" | "2-digit" | undefined { return this.day_ }
-        set dayPeriod(val?: "narrow" | "short" | "long") { this.dayPeriod_ = val}
+        set dayPeriod(val: "narrow" | "short" | "long" | undefined) { this.dayPeriod_ = val}
         get dayPeriod() : "narrow" | "short" | "long" | undefined { return this.dayPeriod_}
-        set era(val?: "long" | "short" | "narrow") { this.era_ = val}
+        set era(val: "long" | "short" | "narrow" | undefined) { this.era_ = val}
         get era(): "long" | "short" | "narrow" | undefined { return this.era_}
-        set formatMatcher(val ?: "basic" | "best fit") { this.formatMatcher_ = val}
+        set formatMatcher(val : "basic" | "best fit" | undefined) { this.formatMatcher_ = val}
         get formatMatcher(): "basic" | "best fit" | undefined { return this.formatMatcher_}
         // NOTE(cheezzario) 'number' literal types are not supported #23963
         // fractionalSecondDigits?: 1 | 2 | 3
-        set fractionalSecondDigits(val?: number) {this.fractionalSecondDigits_ = val}
+        set fractionalSecondDigits(val: number | undefined) {this.fractionalSecondDigits_ = val}
         get fractionalSecondDigits(): number | undefined { return this.fractionalSecondDigits_}
-        set hour12(val?: boolean) {this.hour12_ = val}
+        set hour12(val: boolean | undefined) {this.hour12_ = val}
         get hour12(): boolean | undefined { return this.hour12_} 
-        set hour(val?: "numeric" | "2-digit") { this.hour_ = val}
+        set hour(val: "numeric" | "2-digit" | undefined) { this.hour_ = val}
         get hour(): "numeric" | "2-digit" | undefined { return this.hour_}
-        set hourCycle(val?: "h11" | "h12" | "h23" | "h24") { this.hourCycle_ = val}
+        set hourCycle(val: "h11" | "h12" | "h23" | "h24" | undefined) { this.hourCycle_ = val}
         get hourCycle(): "h11" | "h12" | "h23" | "h24" | undefined { return this.hourCycle_}
-        set minute(val?: "numeric" | "2-digit") { this.minute_ = val}
+        set minute(val: "numeric" | "2-digit" | undefined) { this.minute_ = val}
         get minute(): "numeric" | "2-digit" | undefined { return this.minute_}
-        set month(val?: "numeric" | "2-digit" | "long" | "short" | "narrow") { this.month_ = val}
+        set month(val: "numeric" | "2-digit" | "long" | "short" | "narrow" | undefined) { this.month_ = val}
         get month(): "numeric" | "2-digit" | "long" | "short" | "narrow" | undefined { return this.month_}
-        set numberingSystem(val?: string) { this.numberingSystem_ = val}
+        set numberingSystem(val: string | undefined) { this.numberingSystem_ = val}
         get numberingSystem(): string | undefined { return this.numberingSystem_}
-        set second(val?: "numeric" | "2-digit") { this.second_ = val}
+        set second(val: "numeric" | "2-digit" | undefined) { this.second_ = val}
         get second(): "numeric" | "2-digit" | undefined { return this.second_}
-        set timeStyle(val?: TimeStyle) { this.timeStyle_ = val}
+        set timeStyle(val: TimeStyle | undefined) { this.timeStyle_ = val}
         get timeStyle(): TimeStyle | undefined {return this.timeStyle_}
-        set timeZone(val?: string) { this.timeZone_ = val}
+        set timeZone(val: string | undefined) { this.timeZone_ = val}
         get timeZone(): string | undefined { return this.timeZone_}
-        set timeZoneName(val?: TimeZoneName) { this.timeZoneName_ = val}
+        set timeZoneName(val: TimeZoneName | undefined) { this.timeZoneName_ = val}
         get timeZoneName(): TimeZoneName | undefined { return this.timeZoneName_}
-        set weekday(val?: "long" | "short" | "narrow") { this.weekday_ = val}
+        set weekday(val: "long" | "short" | "narrow" | undefined) { this.weekday_ = val}
         get weekday(): "long" | "short" | "narrow" | undefined { return this.weekday_}
-        set year(val?: "numeric" | "2-digit") { this.year_ = val}
+        set year(val: "numeric" | "2-digit" | undefined) { this.year_ = val}
         get year(): "numeric" | "2-digit" | undefined { return this.year_}
 
         private calendar_?: string
@@ -522,63 +522,63 @@ export namespace Intl {
         get dateStyle(): DateStyle | undefined {
             return this._dateStyle
         }
-        set dateStyle(dateStyle?: DateStyle) {
+        set dateStyle(dateStyle: DateStyle | undefined) {
             this._dateStyle = dateStyle
         }
 
         get day(): string | undefined {
             return this._day
         }
-        set day(day?: string) {
+        set day(day: string | undefined) {
             this._day = day
         }
 
         get dayPeriod(): DayPeriod | undefined {
             return this._dayPeriod
         }
-        set dayPeriod(dayPeriod?: DayPeriod) {
+        set dayPeriod(dayPeriod: DayPeriod | undefined) {
             this._dayPeriod = dayPeriod
         }
 
         get era(): string | undefined {
             return this._era
         }
-        set era(era?: string) {
+        set era(era: string | undefined) {
             this._era = era
         }
 
         get formatMatcher(): FormatMatcher | undefined {
             return this._formatMatcher
         }
-        set formatMatcher(formatMatcher?: FormatMatcher) {
+        set formatMatcher(formatMatcher: FormatMatcher | undefined) {
             this._formatMatcher = formatMatcher
         }
 
         get fractionalSecondDigits(): number | undefined {
             return this._fractionalSecondDigits
         }
-        set fractionalSecondDigits(fractionalSecondDigits?: number) {   
+        set fractionalSecondDigits(fractionalSecondDigits: number | undefined) {
             this._fractionalSecondDigits = fractionalSecondDigits
         }
 
         get hour12(): boolean | undefined {
             return this._hour12
         }
-        set hour12(hour12?: boolean) {
+        set hour12(hour12: boolean | undefined) {
             this._hour12 = hour12
         }
 
         get hour(): string | undefined {
             return this._hour
         }
-        set hour(hour?: string) {   
+        set hour(hour: string | undefined) {
             this._hour = hour
         }
 
         get hourCycle(): HourCycle | undefined {
             return this._hourCycle
         }
-        set hourCycle(hourCycle?: HourCycle) {
+        set hourCycle(hourCycle: HourCycle | undefined) {
             this._hourCycle = hourCycle
         }
 
@@ -592,14 +592,14 @@ export namespace Intl {
         get minute(): string | undefined {
             return this._minute
         }
-        set minute(minute?: string) {   
+        set minute(minute: string | undefined) {
             this._minute = minute
         }
 
         get month(): string | undefined {
             return this._month
         }
-        set month(month?: string) {   
+        set month(month: string | undefined) {
             this._month = month
         }
 
@@ -613,14 +613,14 @@ export namespace Intl {
         get second(): string | undefined {
             return this._second
         }
-        set second(second?: string) {   
+        set second(second: string | undefined) {
             this._second = second
         }
 
         get timeStyle(): TimeStyle | undefined {
             return this._timeStyle
         }
-        set timeStyle(timeStyle?: TimeStyle) {   
+        set timeStyle(timeStyle: TimeStyle | undefined) {
             this._timeStyle = timeStyle
         }
 
@@ -634,21 +634,21 @@ export namespace Intl {
         get timeZoneName(): string | undefined {
             return this._timeZoneName
         }
-        set timeZoneName(timeZoneName?: string) {   
+        set timeZoneName(timeZoneName: string | undefined) {
             this._timeZoneName = timeZoneName
         }
 
         get weekday(): string | undefined {
             return this._weekday
         }
-        set weekday(weekday?: string) {   
+        set weekday(weekday: string | undefined) {
             this._weekday = weekday
         }
 
         get year(): string | undefined {
             return this._year
         }
-        set year(year?: string) {   
+        set year(year: string | undefined) {
             this._year = year
         }
     }
