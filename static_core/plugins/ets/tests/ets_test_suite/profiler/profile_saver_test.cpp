@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #include <gtest/gtest.h>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <utility>
 
@@ -24,6 +26,7 @@
 #include "include/runtime.h"
 #include "include/runtime_options.h"
 #include "libarkbase/test_utilities.h"
+#include "libarkbase/os/exec.h"
 #include "jit/libprofile/aot_profiling_data.h"
 #include "jit/profiling_loader.h"
 #include "jit/profiling_saver.h"
@@ -90,9 +93,6 @@ public:
         ProfilingLoader loader;
         const std::string &pgoFilePath = options_.GetProfileOutput();
         auto profileCtxOrError = loader.LoadProfile(PandaString(pgoFilePath));
-        if (!profileCtxOrError) {
-            std::cerr << profileCtxOrError.Error();
-        }
         auto classCtxStr = Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->GetBootClassContext() + ":" +
                            Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->GetAppClassContext();
         ASSERT_TRUE(profileCtxOrError.HasValue());
@@ -113,6 +113,62 @@ public:
         ASSERT_TRUE(success) << "Cannot destroy Runtime";
     }
 
+    void RunAptoolAndCheck()
+    {
+        auto apPath = options_.GetProfileOutput();
+        auto aptoolPath = GetArkAptoolBinary();
+        auto tempRoot = std::filesystem::temp_directory_path() / "aptool_integration";
+        std::error_code ec;
+        std::filesystem::create_directories(tempRoot, ec);
+        auto yamlPath = tempRoot / "profile_saver_dump.yaml";
+
+        auto sourceAbc = std::filesystem::absolute("profile_saver_test.abc");
+        ASSERT_TRUE(std::filesystem::exists(sourceAbc))
+            << "profile_saver_test.abc must exist for aptool integration test";
+        auto abcDir = sourceAbc.parent_path();
+
+        auto execResult = os::exec::Exec(aptoolPath.c_str(), "dump", "--ap-path", apPath.c_str(), "--output",
+                                         yamlPath.string().c_str(), "--abc-path", sourceAbc.string().c_str(),
+                                         "--abc-dir", abcDir.string().c_str());
+        ASSERT_TRUE(execResult) << "ark_aptool dump failed: " << execResult.Error().ToString();
+        EXPECT_EQ(execResult.Value(), 0U);
+
+        std::ifstream yaml(yamlPath);
+        ASSERT_TRUE(yaml.is_open());
+        std::string content((std::istreambuf_iterator<char>(yaml)), std::istreambuf_iterator<char>());
+        EXPECT_NE(content.find("ClassCtxStr:"), std::string::npos);
+        EXPECT_NE(content.find("class_descriptor"), std::string::npos);
+        EXPECT_NE(content.find("method_signature"), std::string::npos);
+        EXPECT_NE(content.find("inline_caches"), std::string::npos);
+        EXPECT_NE(content.find("branches"), std::string::npos);
+        EXPECT_NE(content.find("throws"), std::string::npos);
+        EXPECT_NE(content.find("bytecode:"), std::string::npos);
+
+        auto filteredYamlPath = tempRoot / "profile_saver_filtered.yaml";
+        auto filteredResult =
+            os::exec::Exec(aptoolPath.c_str(), "dump", "--ap-path", apPath.c_str(), "--output",
+                           filteredYamlPath.string().c_str(), "--abc-path", sourceAbc.string().c_str(), "--abc-dir",
+                           abcDir.string().c_str(), "--keep-method-name", "foo");
+        ASSERT_TRUE(filteredResult) << "ark_aptool dump filtered run failed: " << filteredResult.Error().ToString();
+        EXPECT_EQ(filteredResult.Value(), 0U);
+
+        std::ifstream filteredYaml(filteredYamlPath);
+        ASSERT_TRUE(filteredYaml.is_open());
+        std::string filteredContent((std::istreambuf_iterator<char>(filteredYaml)), std::istreambuf_iterator<char>());
+        EXPECT_NE(filteredContent.find("method_signature: \"foo"), std::string::npos);
+        EXPECT_EQ(filteredContent.find("method_signature: \"main"), std::string::npos);
+
+        std::filesystem::remove_all(tempRoot, ec);
+    }
+
+    static std::string GetArkAptoolBinary()
+    {
+        auto execPath = std::filesystem::canonical("/proc/self/exe");
+        auto outDir = execPath.parent_path().parent_path();
+        auto binPath = outDir / "bin" / "ark_aptool";
+        return binPath.string();
+    }
+
 private:
     RuntimeOptions options_;
 };
@@ -129,6 +185,7 @@ TEST_F(ProfileSaverTest, ProfileSaverWorkerTest)
     ASSERT_TRUE(saverWorker->TryAddTask());
     saverWorker->WaitForFinishSaverTask();
     CheckLoadProfile();
+    RunAptoolAndCheck();
     DestroyRuntime();
 }
 

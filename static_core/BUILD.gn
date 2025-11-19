@@ -45,6 +45,7 @@ group("ark_packages") {
         "$ark_root/compiler/tools/paoc:ark_aot",
       ]
     }
+    deps += [ "$ark_root/compiler/tools/aptool:ark_aptool" ]
   }
 }
 
@@ -67,6 +68,8 @@ group("ark_host_linux_tools_packages") {
   if (enable_codegen && host_os != "mac") {
     deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder(${host_toolchain})" ]
   }
+
+  deps += [ "$ark_root/compiler/tools/aptool:ark_aptool(${host_toolchain})" ]
 
   # TODO: don't exclude these targets from OHOS build
   if (ark_static_standalone_build) {
