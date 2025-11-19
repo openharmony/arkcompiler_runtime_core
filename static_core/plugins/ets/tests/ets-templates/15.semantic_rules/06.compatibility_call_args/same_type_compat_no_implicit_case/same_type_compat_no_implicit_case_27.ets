@@ -15,10 +15,9 @@
 
 /*---
 desc: T1 is compatible with T2 if implicitly convertible. Class does not implement interface.
-tags: [compile-only, negative]
 ---*/
 
-type my_type = { [key: string]: number }
+type my_type = Record<string, number>
 
 function checkTypeIdentity(a: Any, b: Any): boolean {
     return Class.of(a as Object) === Class.of(b as Object);

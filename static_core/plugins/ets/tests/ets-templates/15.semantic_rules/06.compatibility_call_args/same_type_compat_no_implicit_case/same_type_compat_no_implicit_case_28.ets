@@ -15,18 +15,17 @@
 
 /*---
 desc: T1 is compatible with T2 if implicitly convertible. Class does not implement interface.
-tags: [compile-only, negative]
 ---*/
 
-type my_type = { readonly name: string, readonly age: number }
+type my_type = Record<string, number>
 
 function checkTypeIdentity(a: Any, b: Any): boolean {
     return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
-  const val1: my_type = { name: "Alice", age: 25 };
-  const val2: my_type = { name: "Bob", age: 30 };
+  const val1: Readonly<my_type> = { "Alice": 25 };
+  const val2: Readonly<my_type> = { "Bob": 30 };
   const diffTypeVal: Any = "This can be any type";
 
   const result1 = checkTypeIdentity(val1, val2);

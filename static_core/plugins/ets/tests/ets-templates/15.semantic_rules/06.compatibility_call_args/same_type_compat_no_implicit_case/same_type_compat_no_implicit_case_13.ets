@@ -15,7 +15,6 @@
 
 /*---
 desc: T1 is compatible with T2 if implicitly convertible. Class does not implement interface.
-tags: [compile-only, negative]
 ---*/
 
 function checkTypeIdentity(a: Any, b: Any): boolean {
@@ -23,8 +22,8 @@ function checkTypeIdentity(a: Any, b: Any): boolean {
 }
 
 function main(): void {
-  const val1: RegExp = /test/;
-  const val2: RegExp = /example/;
+  const val1 = /test/;
+  const val2 = /example/;
   const diffTypeVal: Any = "This can be any type";
 
   const result1 = checkTypeIdentity(val1, val2);

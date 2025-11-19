@@ -15,24 +15,28 @@
 
 /*---
 desc: The notion of the least upper bound (LUB) is used where a single type must be found that is a common supertype for a set of reference types.
-tags: [compile-only, negative]
 ---*/
 
 class Base {
-    methodOne(p: Base): { key: string } {
-        return { key: "value" };
+    methodOne(p: Base): string {
+        return "value";
     }
 }
 class Derived extends Base {
-    override methodOne(p: Base): { key: string } {
-        return { key: "derivedValue" };
+    override methodOne(p: Base): "derivedValue" {
+        return "derivedValue";
     }
 }
-function main() {
+
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
+}
+
+function main(): void {
     let a = new Base();
     let b = new Derived();
     let resultA = a.methodOne(a);
     let resultB = b.methodOne(a);
-    arktest.assertEQ(resultA, resultB);
+    const result1 = checkTypeIdentity(resultA, resultB);
+    arktest.assertEQ(result1, true);
 }
-main();
