@@ -1838,8 +1838,9 @@
 #31150 cannot create array of enums
 17.experimental_features/03.resizable_array_creation_expressions/expr_8.ets
 
-#31152 int enum cannot be used in dimension expression
-17.experimental_features/03.resizable_array_creation_expressions/expr_9.ets
+#31705
+17.experimental_features/03.resizable_array_creation_expressions/expr_n_20.ets
+17.experimental_features/03.resizable_array_creation_expressions/expr_n_21.ets
 
 #29160
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_export_decl_4.ets
