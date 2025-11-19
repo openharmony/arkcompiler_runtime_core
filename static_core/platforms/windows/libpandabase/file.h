@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -179,16 +179,7 @@ public:
 private:
     int fd_;
 
-    static bool HasStatMode(const std::string &path, uint16_t mode)
-    {
-        struct _stat s = {};
-
-        if (_stat(path.c_str(), &s) != 0) {
-            return false;
-        }
-
-        return static_cast<bool>(s.st_mode & mode);
-    }
+    static bool HasStatMode(const std::string &path, uint16_t mode);
 };
 
 }  // namespace ark::os::windows::file
