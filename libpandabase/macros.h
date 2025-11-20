@@ -341,8 +341,9 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 #define NO_ADDRESS_SANITIZE
 #endif  // USE_ADDRESS_SANITIZER
 
-// To avoid ASAN warnings on exit we should use quick_exit
-#ifdef USE_ADDRESS_SANITIZER
+// std::exit performs static object destrution which is not suitable for us, but in ohos we still need it for now
+// eventually we will come up with better solution
+#ifndef PANDA_BUILD_IN_OHOS_TREE
 // CC-OFFNXT(G.PRE.02) code readability
 #define PROCESS_EXIT(code) std::quick_exit(code)
 #else
