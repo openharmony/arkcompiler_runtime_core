@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -59,12 +59,10 @@ class ArkPauseParser(EventParser):
                 raw_message=line,
                 gc_name=m.group('gc_name'),
                 timestamp=datetime_to_nanos(m.group('timestamp')),
-                freed_object_count=int(m.group('obj_count')),
                 freed_object_mem=mem_to_bytes(
                     int(m.group('obj_mem_freed')),
                     m.group('obj_mem_units')
                 ),
-                freed_large_object_count=int(m.group('large_obj_count')),
                 freed_large_object_mem=mem_to_bytes(
                     int(m.group('large_obj_mem_freed')),
                     m.group('large_obj_mem_units')
