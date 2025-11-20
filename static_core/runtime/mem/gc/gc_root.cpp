@@ -164,7 +164,11 @@ void RootManager<LanguageConfig>::VisitLocalRoots(const GCRootVisitor &gcRootVis
     auto threadVisitor = [this, &gcRootVisitor](ManagedThread *thread) {
         VisitRootsForThread(thread, gcRootVisitor);
         for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
-            ASSERT(!stack.GetMethod()->IsCriticalNative());
+            auto currentMethod = stack.GetMethod();
+            if (currentMethod->IsCriticalNative()) {
+                LOG(FATAL, GC) << "GC cannot be triggered in CriticalNative method. Method name: "
+                               << currentMethod->GetFullName(true);
+            }
             LOG(DEBUG, GC) << " VisitRoots frame " << std::hex << stack.GetFp();
             stack.IterateObjects([this, &gcRootVisitor](auto &vreg) {
                 this->VisitRegisterRoot(vreg, gcRootVisitor);
