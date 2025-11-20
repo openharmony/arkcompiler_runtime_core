@@ -17,12 +17,14 @@ import unittest
 from pathlib import Path
 
 from runner.enum_types.params import TestReport
+from runner.suites.test_metadata import TestMetadata
 from runner.suites.test_standard_flow import TestStandardFlow
 
 
 def get_test_instance(report_stdout: str, report_stderr: str,
                       expected_file: str, expected_err_file: str, fail_kind: str | None = None) -> TestStandardFlow:
     test_instance = TestStandardFlow.__new__(TestStandardFlow)
+    test_instance.metadata = TestMetadata()
     test_instance.expected = ""
     test_instance.expected_err = ""
     test_instance.passed = True

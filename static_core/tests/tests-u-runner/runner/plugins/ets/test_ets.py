@@ -83,13 +83,13 @@ class TestETS(TestFileBased):
 
     @property
     def has_expected(self) -> bool:
-        """ True if test.expected file exists """
-        return path.isfile(self.test_expected)
+        """ True if test.expected file exists or expected_out is in metadata """
+        return self.metadata.expected_out is not None or path.isfile(self.test_expected)
 
     @property
     def has_expected_err(self) -> bool:
-        """ True if test.expected.err file exists """
-        return path.isfile(self.test_expected_err)
+        """ True if test.expected.err file exists or expected_error is in metadata """
+        return self.metadata.expected_error is not None or path.isfile(self.test_expected_err)
 
     @property
     def ark_extra_options(self) -> List[str]:
@@ -331,9 +331,10 @@ class TestETS(TestFileBased):
 
     def _read_expected_file(self) -> None:
         if self.has_expected:
-            self.expected = self._read_file(self.test_expected)
+            self.expected = self.metadata.expected_out or self._read_file(self.test_expected)
+
         if self.has_expected_err:
-            self.expected_err = self._read_file(self.test_expected_err)
+            self.expected_err = self.metadata.expected_error or self._read_file(self.test_expected_err)
 
     def _refactor_expected_str_for_jit(self) -> None:
         def _remove_after_main(s: str) -> str:

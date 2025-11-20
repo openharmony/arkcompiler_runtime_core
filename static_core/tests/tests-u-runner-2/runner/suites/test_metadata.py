@@ -100,6 +100,8 @@ class TestMetadata:     # type: ignore[explicit-any]
     es2panda_options: list[str] = field(default_factory=list)
     spec: str | None = None
     arktsconfig: Path | None = None
+    expected_out: str | None = None
+    expected_error: str | None = None
     # Test262 specific metadata keys
     description: str | None = None
     defines: str | None = None
