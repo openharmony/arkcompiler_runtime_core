@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: {{c.description}}
-tags: [compile-only]
+tags: [compile-only, negative]
 {% if c.expected_out -%}
 expected_out: {{c.expected_out |tojson}}
 {% endif %}
