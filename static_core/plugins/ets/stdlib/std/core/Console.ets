@@ -141,7 +141,7 @@ export final class Console {
     }
 
     private static AnyToPrint(o: Any): String {
-        return reflect.Value.of(o).toPrint(MAX_CONSOLE_PRINT_DEPTH)
+        return DataFrame.toPrint(o, MAX_CONSOLE_PRINT_DEPTH)
     }
 
     /**
@@ -634,54 +634,51 @@ export final class Console {
     }
 
     private static parseObject(...data: Any[]): void {
-        const dat = data[0];
-        const objType = Type.of(dat);
-        const objValue = reflect.Value.of(dat);
-        if (objType instanceof ClassType) {
+        const obj = data[0];
+        if (obj instanceof object) {
             let hasPrimitive = false;
-            let columnMap = new ColumnMap();
-            const arrayValue = objValue as ClassValue;
-            const keyLength = objType.getFieldsNum().toInt();
+            const columnMap = new ColumnMap();
+            const fieldVals = DataFrame.getAllInstanceFieldValues(obj)
+            const keyLength = fieldVals.length
             let keyArray = new Array<string>();
             let valuesKeyArray:Array<string> = new Array<string>(keyLength).fill("");
             for (let i = 0; i < keyLength; i++) {
-                let fieldName = objType.getField(i).getName() as string;
+                const fieldVal: [string, Any, Class] = fieldVals[i]
+
+                const fieldName = fieldVal[0]
                 keyArray.push(fieldName);
-                let value = arrayValue.getField(i);
-                let valueType = objType.getField(i).getType();
-                if (valueType.isPrimitive()) {
-                    valuesKeyArray[i] = value.toString();
+
+                let value = fieldVal[1]
+                const fieldType = fieldVal[2]
+                if (value === undefined || DataFrame.isElementaryType(fieldType)) {
+                    valuesKeyArray[i] = DataFrame.primitiveToString(value)
                     hasPrimitive = true;
                 } else {
-                    let value = arrayValue.getField(i).getData();
-                    Console.parseObjectInner(value, valueType, keyLength, columnMap, i);
+                    Console.parseObjectInner(value, keyLength, columnMap, i);
                 }
             }
             let outputKeysArray = Console.getKeyArray(columnMap);
             let outputValuesArray = Console.getValueArray(columnMap, keyLength, keyArray)
             if (hasPrimitive) {
-                Console.setPrimitive(columnMap, keyLength, valuesKeyArray, outputKeysArray,   outputValuesArray);
+                Console.setPrimitive(columnMap, keyLength, valuesKeyArray, outputKeysArray, outputValuesArray);
             }
             let tableResult = Console.graphTable(outputKeysArray, outputValuesArray, keyLength);
             Console.printTable(tableResult);
         } else {
-            DataFrame.fromObjects(dat);
+            DataFrame.fromObjects(obj);
         }
     }
 
-    private static parseObjectInner(value: Any, valueType:Type, keyLength: number, columnMap: ColumnMap, index: int): void {
+    private static parseObjectInner(value: Any, keyLength: int, columnMap: ColumnMap, index: int): void {
         let initialMap = new Map<string, boolean>();
         let keys:Array<string> = new Array<string>();
         let innerLength: number = 0;
         let innerValue: Array<string> = new Array<string>();
-        if (valueType.toString() == "std.core.Array") {
-            let innerValueStr = (reflect.Value.of(value)).toPrint(10);
+        if (value instanceof Array) {
+            const innerValueStr = DataFrame.toPrint(value, MAX_CONSOLE_PRINT_DEPTH)
             Console.parseString(innerValueStr, keys, innerValue);
             innerLength = innerValue.length;
-        } else if (valueType instanceof ClassType) {
-            Console.parseClassType(value, keys, innerValue);
-            innerLength = innerValue.length;
-        } else if (valueType instanceof InterfaceType) {
+        } else {
             Console.parseClassType(value, keys, innerValue);
             innerLength = innerValue.length;
         }
@@ -718,32 +715,22 @@ export final class Console {
         }
     }
 
-    private static parseClassType(value:Any, keys: Array<string>, innerValue: Array<string>): void {
-        const objType = Type.of(value);
-        const objValue = reflect.Value.of(value);
-        if (objType instanceof ClassType) {
-            const arrayValue = objValue as ClassValue;
-            const keyLength = objType.getFieldsNum();
-            for (let i = 0; i < keyLength; i++) {
-                let fieldName = objType.getField(i).getName() as string;
-                keys.push(fieldName);
-                let values = Console.getValues(arrayValue, i)
-                innerValue.push(values);
+    private static parseClassType(value: Any, keys: Array<string>, innerValue: Array<string>): void {
+        if (DataFrame.isElementaryValue(value)) {
+            return
+        }
+        const fieldVals = DataFrame.getAllInstanceFieldValues(value as object)
+        for (const fieldVal: [string, Any, Class] of fieldVals) {
+            const fieldName = fieldVal[0]
+            keys.push(fieldName)
+
+            const value = fieldVal[1]
+            if (DataFrame.isElementaryValue(value)) {
+                innerValue.push(DataFrame.primitiveToString(value))
+            } else {
+                innerValue.push(DataFrame.toPrint(value, MAX_CONSOLE_PRINT_DEPTH))
             }
         }
-    }
-
-    private static getValues(arrayValue: ClassValue, i: int): string {
-        let str = "";
-        let type = Type.of(arrayValue) as ClassType;
-        let value = arrayValue.getField(i);
-        let valueType = type.getField(i).getType();
-        if (valueType.isPrimitive()) {
-            str = value.toString();
-        } else {
-            str = value.toPrint(10);
-        }
-        return str;
     }
 
     private static getKeyArray(columnMap: ColumnMap): Array<string> {
@@ -787,9 +774,8 @@ export final class Console {
         return outputValuesArray;
     }
 
-    private static setPrimitive(columnMap: ColumnMap, length: number, valuesKeyArray: Array<string>, outputKeysArray: Array<string>, outputValuesArray: Array<string>): void {
-        let mapLen = columnMap.columnValue.size;
-        let mapKeys: Array<string> = new Array<string>();
+    private static setPrimitive(columnMap: ColumnMap, length: int, valuesKeyArray: Array<string>, outputKeysArray: Array<string>, outputValuesArray: Array<string>): void {
+        const mapKeys = new Array<string>();
         for (const key of columnMap.columnValue.keys()) {
             mapKeys.push(key);
         }
@@ -950,6 +936,8 @@ class DataFrame {
     /** Header text for the index column */
     private static readonly headerIndexRow: string = '│ (index) │'
 
+    private static readonly GETTER_METHOD_PREFIX = "%%get-"
+
     /** Width of the index column based on header */
     private readonly _indexColumnWidth: int = Double.toInt(DataFrame.headerIndexRow.length);
 
@@ -1100,6 +1088,18 @@ class DataFrame {
         }
     }
 
+    public static isElementaryValue(val: Any): boolean {
+        if (val === undefined || val === null) {
+            return true
+        }
+        const valType = Class.of(val as object)
+        return Types.isPrimitiveType(valType) || Types.isCharType(valType)
+    }
+
+    public static isElementaryType(type: Class): boolean {
+        return Types.isPrimitiveType(type) || Types.isCharType(type) || type === Class.of(null)
+    }
+
     /**
     * Converts an object into a map of string key-value pairs for table representation.
     * Handles various types including primitives, collections, arrays, classes, and functions.
@@ -1109,9 +1109,6 @@ class DataFrame {
     */
     private static getObjectInfoForTable(obj: Any): Map<string, string> {
         const mapping = new Map<string, string>();
-        const objType = Type.of(obj);
-        const objValue = reflect.Value.of(obj);
-
         // Handle primitive types
         if (obj === null) {
             mapping.set("Values", "null");
@@ -1119,16 +1116,16 @@ class DataFrame {
             mapping.set("Values", "undefined");
         } else if (obj instanceof String) {
             mapping.set("Values", `'${obj}'`);
-        } else if (objType.isPrimitive()) {
-            mapping.set("Values", `${obj}`);
         }
-
         // Handle complex types
         else if (obj instanceof Map) {
             const entries = obj.entries();
             for (let entry of entries) {
                 mapping.set(`${entry[0]}`, `${entry[1]}`);
             }
+        } else if (obj instanceof Function) {
+            const fnName = obj.name
+            mapping.set("Values", (fnName == "") ? "[Function (anonymous)]" : `[Function: ${fnName}]`)
         } else if (obj instanceof Set) {
             const values = obj.values();
             let i = 0;
@@ -1136,40 +1133,214 @@ class DataFrame {
                 mapping.set(`{i}?`, `${value}`);
                 i++;
             }
-        } else if (objType instanceof ArrayType) {
-            const arrayValue = objValue as ArrayValue;
-            for (let i = 0; i < arrayValue.getLength(); i++) {
-                mapping.set(`${i}`, arrayValue.getElement(i).toPrint(10));
-            }
-        } else if (objType instanceof ClassType) {
-            const arrayValue = objValue as ClassValue;
-            for (let i = 0; i < arrayValue.getFieldsNum(); i++) {
-                try {
-                    let fieldName = objType.getField(i).getName() as string;
-                    // NOTE (templin.konstantin): replace internal-representation
-                    //  fields like gensym%% with more human-readable field name
-                    //  used in interfaces
-                    if (fieldName.startsWith("gensym%%")) {
-                        fieldName = `Field${i}`;
-                    }
-                    if (obj instanceof Tuple){
-                        fieldName = `${i}`;
-                    }
-                    mapping.set(
-                        fieldName,
-                        arrayValue.getField(i).toPrint(10)
-                    );
-                } catch (e) {
-                    continue;
-                }
-            }
-        } else if (objType instanceof FunctionType) {
-            mapping.set("Values", `${objType}`);
         } else {
-            mapping.set("Values", JSON.stringify(obj))
+            if (DataFrame.isElementaryValue(obj)) {
+                mapping.set("Values", `${obj}`);
+            } else if (obj instanceof object) {
+                const objType = Class.of(obj as object)
+                if (objType.isFixedArray()) {
+                    DataFrame.addArrayInfoToTableMapping(obj, mapping)
+                } else {
+                    const fieldVals = DataFrame.getAllInstanceFieldValues(obj)
+                    for (let i = 0; i < fieldVals.length; i++) {
+                        const fieldVal: [string, Any, Class] = fieldVals[i]
+                        const fieldName = (obj instanceof Tuple) ? `${i}` : fieldVal[0]
+                        mapping.set(fieldName, DataFrame.toPrint(fieldVal[1], MAX_CONSOLE_PRINT_DEPTH));
+                    }
+                }
+            } else {
+                mapping.set("Values", JSON.stringify(obj))
+            }
         }
 
         return mapping;
+    }
+
+    private static addArrayInfoToTableMapping(arrObj: object, mapping: Map<string, string>): void {
+        if (arrObj instanceof FixedArray<boolean>) {
+            forEach(arrObj, (v: boolean, i: int) => {
+                mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
+            })
+        } else if (arrObj instanceof FixedArray<byte>) {
+            forEach(arrObj, (v: byte, i: int) => {
+                mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
+            })
+        } else if (arrObj instanceof FixedArray<char>) {
+            forEach(arrObj, (v: char, i: int) => {
+                mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
+            })
+        } else if (arrObj instanceof FixedArray<short>) {
+            forEach(arrObj, (v: short, i: int) => {
+                mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
+            })
+        } else if (arrObj instanceof FixedArray<int>) {
+            forEach(arrObj, (v: int, i: int) => {
+                mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
+            })
+        } else if (arrObj instanceof FixedArray<long>) {
+            forEach(arrObj, (v: long, i: int) => {
+                mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
+            })
+        } else if (arrObj instanceof FixedArray<float>) {
+            forEach(arrObj, (v: float, i: int) => {
+                mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
+            })
+        } else if (arrObj instanceof FixedArray<double>) {
+            forEach(arrObj, (v: double, i: int) => {
+                mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
+            })
+        } else {
+            const arr = arrObj as FixedArray<object>
+            for (let i = 0; i < arr.length; i++) {
+                mapping.set(`${i}`, DataFrame.toPrint(arr[i], MAX_CONSOLE_PRINT_DEPTH));
+            }
+        }
+    }
+
+    public static getAllInstanceFieldValues(obj: object): Array<[string, Any, Class]> {
+        const fieldVals = new Array<[string, Any, Class]>()
+
+        if (!Reflect.isLiteralInitializedInterface(obj)) {
+            let curType = Class.of(obj)
+            const typeHierarchy = new Array<Class>()
+            while (curType.getSuper() !== undefined) {
+                typeHierarchy.push(curType)
+                curType = curType.getSuper()!
+            }
+
+            for (let i = typeHierarchy.length - 1; i >= 0; i--) {
+                const curType = typeHierarchy[i]
+                const fields = curType.getInstanceFields()
+                for (const field of fields) {
+                    const fieldVal: [string, Any, Class] = [field.getName(), field.getValue(obj), field.getType()]
+                    fieldVals.push(fieldVal)
+                }
+            }
+        } else {
+            const prefixLength = DataFrame.GETTER_METHOD_PREFIX.getLength()
+            const objType = Class.of(obj)
+            const objTypeMethods = objType.getInstanceMethods()
+            for (const method of objTypeMethods) {
+                let methodName = method.getName()
+                if (methodName.startsWith(DataFrame.GETTER_METHOD_PREFIX, 0)) {
+                    const value = method.invoke(obj)
+                    fieldVals.push([methodName.substring(prefixLength), value, method.getReturnType()])
+                }
+            }
+        }
+
+        return fieldVals
+    }
+
+    public static toPrint(val: Any, depth: int): string {
+        if (val === undefined) {
+            return "undefined"
+        } else if (val === null) {
+            return "null"
+        } else if (val instanceof Date) {
+            return new StringBuilder("Date: ").append("\"").append(val.toISOString()).append("\"").toString()
+        } else if (val instanceof ArrayBuffer) {
+            if (depth == 0) {
+                return "std.core.ArrayBuffer {...}"
+            }
+
+            const res = new StringBuilder("std.core.ArrayBuffer {")
+            const byteLength = val.byteLength
+            res.append("data: [")
+            if (byteLength > 0) {
+                for (let i = 0; i < byteLength - 1; i++) {
+                    res.append(val.at(i)).append(", ")
+                }
+                res.append(val.at(byteLength - 1))
+            }
+            res.append("], byteLength: ").append(byteLength).append("}")
+            return res.toString()
+        } else if (val instanceof Function) {
+            const fnName = val.name
+            return (fnName == "") ? "[Function (anonymous)]" : `[Function: ${fnName}]`
+        }
+
+        const objVal = val as object
+        const valType = Class.of(objVal)
+        if (valType.isFixedArray()) {
+            return DataFrame.fixedArrayToPrint(objVal, depth - 1)
+        }
+
+        if (depth == 0) {
+            return valType.getName() + " {...}"
+        }
+
+        const valStr = objVal.toString()
+        const objStr = new Object().toString()
+        // val overrides toString() - so using it
+        if (valStr != objStr) {
+            return valStr
+        }
+
+        const fieldVals = DataFrame.getAllInstanceFieldValues(objVal)
+        if (fieldVals.length == 0) {
+            return valType.getName() + " {}"
+        }
+
+        const res = new StringBuilder(valType.getName())
+        res.append(" {")
+
+        const lastFieldIdx = fieldVals.length - 1
+        for (let fieldIdx = 0; fieldIdx < lastFieldIdx; fieldIdx++) {
+            const fieldVal: [string, Any, Class] = fieldVals[fieldIdx]
+            res.append(fieldVal[0]).append(": ").append(DataFrame.toPrint(fieldVal[1], depth - 1))
+            res.append(", ")
+        }
+
+        const lastFieldVal = fieldVals[lastFieldIdx]
+        res.append(lastFieldVal[0]).append(": ").append(DataFrame.toPrint(lastFieldVal[1], depth - 1))
+        res.append("}")
+        return res.toString()
+    }
+
+    private static fixedArrayToPrint(arrObj: object, depth: int): string {
+        if (depth == 0) {
+            return "[...]"
+        }
+
+        if (arrObj instanceof FixedArray<Any>) {
+            const arrLen = arrObj.length
+            if (arrLen == 0) {
+                return "[]"
+            }
+
+            const res = new StringBuilder("[")
+            for (let i = 0; i < arrLen - 1; i++) {
+                const elem = arrObj[i]
+                res.append(DataFrame.toPrint(elem, depth - 1)).append(", ")
+            }
+            res.append(DataFrame.toPrint(arrObj[arrLen - 1], depth - 1)).append("]")
+            return res.toString()
+        }
+
+        const res = new StringBuilder("[")
+        if (arrObj instanceof FixedArray<boolean>) {
+            res.append(join(arrObj, ", "))
+        } else if (arrObj instanceof FixedArray<byte>) {
+            res.append(join(arrObj, ", "))
+        } else if (arrObj instanceof FixedArray<char>) {
+            res.append(join(arrObj, ", "))
+        } else if (arrObj instanceof FixedArray<short>) {
+            res.append(join(arrObj, ", "))
+        } else if (arrObj instanceof FixedArray<int>) {
+            res.append(join(arrObj, ", "))
+        } else if (arrObj instanceof FixedArray<long>) {
+            res.append(join(arrObj, ", "))
+        } else if (arrObj instanceof FixedArray<float>) {
+            res.append(join(arrObj, ", "))
+        } else if (arrObj instanceof FixedArray<double>) {
+            res.append(join(arrObj, ", "))
+        } else {
+            const arrType = Class.of(arrObj)
+            throw new AssertionError(`unexpected FixedArray type: ${arrType.getName()}`)
+        }
+        res.append("]")
+        return res.toString()
     }
 
     /**
@@ -1178,9 +1349,6 @@ class DataFrame {
      * @static
      */
     public static fromObjects(...data: Any[]): void {
-        let dat = data[0];
-        const objType = Type.of(dat);
-        const objValue = reflect.Value.of(dat);
         const columns = new Set<string>();
         const preparedInfo = new Array<Map<string, string>>(data.length);
         for (let i = 0; i < data.length; ++i){
@@ -1194,6 +1362,22 @@ class DataFrame {
         for (let i = 0; i < data.length; ++i) {
             df.insertRow(preparedInfo[i]);
         }
-        df!.display();
+        df.display();
+    }
+
+    public static primitiveToString(val: Any): string {
+        if (!DataFrame.isElementaryValue(val)) {
+            throw new IllegalArgumentError("illegal argument")
+        }
+
+        if (val === undefined) {
+            return "undefined"
+        } else if (val === null) {
+            return "null"
+        } else if (val instanceof object) {
+            return val.toString()
+        } else {
+            throw new IllegalArgumentError("unsupported type: " + Class.ofAny(val)?.getName())
+        }
     }
 }

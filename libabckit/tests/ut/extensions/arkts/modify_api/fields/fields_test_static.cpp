@@ -564,7 +564,7 @@ static void TransformMethodClassFieldGetModify(AbckitFile *file, AbckitCoreFunct
     std::string paramName("%%property-i2F1");
     std::string fieldFullName = moduleName + "." + className + "." + paramName;
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
-    auto *newLdOwn = g_statG->iCreateLoadObject(graph, param, newKeyString, ABCKIT_TYPE_ID_F64);
+    auto *newLdOwn = g_statG->iCreateLoadObject(graph, param, newKeyString, ABCKIT_TYPE_ID_REFERENCE);
     helpers::ReplaceInst(callOp, newLdOwn);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
