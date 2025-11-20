@@ -150,7 +150,7 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
         return CallETSStatic(coro, ctx, method, *jsArgs);
     }
 
-    if (UNLIKELY(IsNullOrUndefined(env, jsThis))) {
+    if (UNLIKELY(IsNullOrUndefined<true>(env, jsThis))) {
         ctx->ThrowJSTypeError(env, "ets this in instance method cannot be null or undefined");
         return nullptr;
     }

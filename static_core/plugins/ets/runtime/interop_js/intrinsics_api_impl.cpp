@@ -76,11 +76,11 @@ using common::TaggedType;
     }
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
     napi_value result;
     napi_status status;
     {
         ScopedNativeCodeThread etsNativeScope(coro);
-        NapiScope jsHandleScope(env);
         status = napi_load_module_with_module_request(env, moduleName.c_str(), &result);
         if (status != napi_ok) {
             INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception";
@@ -88,7 +88,7 @@ using common::TaggedType;
             return nullptr;
         }
     }
-    if (IsUndefined(env, result) || !result) {
+    if (IsUndefined<true>(env, result) || !result) {
         PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to Undefined result";
         INTEROP_LOG(ERROR) << exp;
         InteropCtx::ThrowETSError(coro, exp.c_str());
@@ -338,7 +338,12 @@ JSValue *JSRuntimeGetGlobal()
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
-    return JSValue::CreateRefValue(coro, ctx, GetGlobal(env), napi_object);
+    napi_value global;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        global = GetGlobal(env);
+    }
+    return JSValue::CreateRefValue(coro, ctx, global, napi_object);
 }
 
 JSValue *JSRuntimeCreateObject()
@@ -354,7 +359,10 @@ JSValue *JSRuntimeCreateObject()
     NapiScope jsHandleScope(env);
 
     napi_value obj;
-    NAPI_CHECK_FATAL(napi_create_object(env, &obj));
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        NAPI_CHECK_FATAL(napi_create_object(env, &obj));
+    }
     return JSValue::CreateRefValue(coro, ctx, obj, napi_object);
 }
 
@@ -371,7 +379,10 @@ EtsObject *JSRuntimeCreateArray()
     NapiScope jsHandleScope(env);
 
     napi_value array;
-    NAPI_CHECK_FATAL(napi_create_array(env, &array));
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        NAPI_CHECK_FATAL(napi_create_array(env, &array));
+    }
     return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, array).value();
 }
 
@@ -390,7 +401,13 @@ uint8_t JSRuntimeInstanceOfDynamic(EtsObject *object, EtsObject *ctor)
     auto objConv = JSRefConvertResolve(ctx, object->GetClass()->GetRuntimeClass());
     auto ctorConv = JSRefConvertResolve(ctx, ctor->GetClass()->GetRuntimeClass());
     bool res;
-    napi_status rc = napi_instanceof(env, objConv->Wrap(ctx, object), ctorConv->Wrap(ctx, ctor), &res);
+    auto targetObj = objConv->Wrap(ctx, object);
+    auto ctorObj = ctorConv->Wrap(ctx, ctor);
+    napi_status rc;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        rc = napi_instanceof(env, targetObj, ctorObj, &res);
+    }
     if (UNLIKELY(NapiThrownGeneric(rc))) {
         ctx->ForwardJSException(coro);
         return 0;
@@ -876,13 +893,13 @@ EtsString *JSRuntimeTypeOf(JSValue *object)
             NapiScope jsHandleScope(env);
             napi_value jsValue = JSConvertJSValue::Wrap(env, object);
             // (note: need to use JS_TYPE, #ICIFWJ)
-            if (IsConstructor(env, jsValue, "Number")) {
+            if (IsConstructor<true>(env, jsValue, "Number")) {
                 return EtsString::CreateFromMUtf8("number");
             }
-            if (IsConstructor(env, jsValue, "Boolean")) {
+            if (IsConstructor<true>(env, jsValue, "Boolean")) {
                 return EtsString::CreateFromMUtf8("boolean");
             }
-            if (IsConstructor(env, jsValue, "String")) {
+            if (IsConstructor<true>(env, jsValue, "String")) {
                 return EtsString::CreateFromMUtf8("string");
             }
             return EtsString::CreateFromMUtf8("object");
@@ -1486,7 +1503,7 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
     if (UNLIKELY(IsNull(env, jsVal))) {
         return ctx->GetNullValue();
     }
-    if (UNLIKELY(IsUndefined(env, jsVal))) {
+    if (UNLIKELY(IsUndefined<true>(env, jsVal))) {
         return nullptr;
     }
 
@@ -1546,7 +1563,7 @@ EtsString *JSONStringify(JSValue *jsvalue)
         ctx->ForwardJSException(coro);
         return nullptr;
     }
-    if (IsUndefined(env, result)) {
+    if (IsUndefined<true>(env, result)) {
         return EtsString::CreateFromMUtf8("undefined");
     }
     auto res = JSConvertString::Unwrap(ctx, env, result);
@@ -1638,9 +1655,11 @@ EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
     }
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<JSValue> objHandle(coro, object->GetEo());
     NapiScope jsHandleScope(env);
 
-    napi_value dynamicArrayBuffer = object->GetEo()->GetNapiValue(ctx->GetJSEnv());
+    napi_value dynamicArrayBuffer = JSValue::GetNapiValue(coro, ctx, objHandle);
 
     bool isArrayBuffer = false;
     NAPI_CHECK_FATAL(napi_is_arraybuffer(env, dynamicArrayBuffer, &isArrayBuffer));
@@ -1653,7 +1672,6 @@ EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
     // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
     NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, dynamicArrayBuffer, &data, &byteLength));
 
-    [[maybe_unused]] EtsHandleScope s(coro);
     auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coro, byteLength);
     if (UNLIKELY(arrayBuffer == nullptr)) {
         return nullptr;
@@ -1777,10 +1795,13 @@ EtsBoolean IsJSInteropRef(EtsObject *value)
 
 EtsLong SerializeHandle(JSValue *value)
 {
-    auto ctx = InteropCtx::Current();
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
     auto env = ctx->GetJSEnv();
 
-    napi_value nv = value->GetRefValue(env);
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<JSValue> valueHandle(coro, value);
+    napi_value nv = JSValue::GetRefValue(env, valueHandle);
 
     napi_value undefined = nullptr;
     napi_get_undefined(env, &undefined);
@@ -1820,7 +1841,8 @@ EtsObject *JSRuntimeInvokeDynamicFunction(EtsObject *functionObject, EtsObjectAr
         argsVec.emplace_back(VMHandle<ObjectHeader>(coro, argHeader));
     }
 
-    auto xRefObjectOperator = XRefObjectOperator::FromEtsObject(functionObject);
+    EtsHandle<EtsObject> functionHandle(coro, functionObject);
+    auto xRefObjectOperator = XRefObjectOperator::FromEtsObject(functionHandle);
     return xRefObjectOperator.Invoke(coro, Span<VMHandle<ObjectHeader>>(argsVec.data(), argsVec.size()));
 }
 

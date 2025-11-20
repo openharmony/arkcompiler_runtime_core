@@ -29,22 +29,12 @@ namespace ark::ets::interop::js {
 
 using JSConvertEtsObject = interop::js::JSConvertEtsObject;
 
-XRefObjectOperator::XRefObjectOperator(EtsObject *etsObject) : etsObject_(etsObject) {}
+XRefObjectOperator::XRefObjectOperator(EtsHandle<EtsObject> &etsObject) : etsObject_(etsObject) {}
 
-XRefObjectOperator XRefObjectOperator::FromEtsObject(EtsObject *etsObject)
+XRefObjectOperator XRefObjectOperator::FromEtsObject(EtsHandle<EtsObject> &etsObject)
 {
-    ASSERT(etsObject == nullptr || etsObject->GetClass()->GetRuntimeClass()->IsXRefClass());
+    ASSERT(etsObject.GetPtr() == nullptr || etsObject->GetClass()->GetRuntimeClass()->IsXRefClass());
     return XRefObjectOperator(etsObject);
-}
-
-EtsObject *XRefObjectOperator::AsObject()
-{
-    return reinterpret_cast<EtsObject *>(this);
-}
-
-const EtsObject *XRefObjectOperator::AsObject() const
-{
-    return reinterpret_cast<const EtsObject *>(this);
 }
 
 EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const std::string &name) const
@@ -52,19 +42,22 @@ EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const std::string
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
     napi_value jsThis = this->GetNapiValue(coro);
-
-    auto resultTaggedType =
-        common::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsThis), name.c_str());
+    TaggedType *resultTaggedType = nullptr;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        resultTaggedType =
+            common::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsThis), name.c_str());
+    }
     if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);
         return {};
     }
-
     return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, ArkNapiHelper::ToNapiValue(resultTaggedType)).value();
 }
 
-EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, EtsObject *keyObject) const
+EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject) const
 {
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
@@ -107,7 +100,8 @@ EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const uint32_t in
     return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsVal).value();
 }
 
-bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, const std::string &name, EtsObject *valueObject) const
+bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, const std::string &name,
+                                     EtsHandle<EtsObject> &valueObject) const
 {
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
@@ -115,6 +109,7 @@ bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, const std::string &name
     NapiScope jsHandleScope(env);
 
     napi_value jsThis = this->GetNapiValue(coro);
+    ASSERT_MANAGED_CODE();
     napi_value jsValue = XRefObjectOperator::ConvertStaticObjectToDynamic(coro, valueObject);
     napi_status jsStatus;
     {
@@ -129,7 +124,8 @@ bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, const std::string &name
     return true;
 }
 
-bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, EtsObject *keyObject, EtsObject *valueObject) const
+bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject,
+                                     EtsHandle<EtsObject> &valueObject) const
 {
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
@@ -152,7 +148,7 @@ bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, EtsObject *keyObject, E
     return true;
 }
 
-bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, uint32_t index, EtsObject *valueObject) const
+bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, uint32_t index, EtsHandle<EtsObject> &valueObject) const
 {
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
@@ -274,7 +270,7 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsCoroutine *coro, const std::strin
     return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
-EtsObject *XRefObjectOperator::InvokeMethod(EtsCoroutine *coro, EtsObject *methodObject,
+EtsObject *XRefObjectOperator::InvokeMethod(EtsCoroutine *coro, EtsHandle<EtsObject> &methodObject,
                                             Span<VMHandle<ObjectHeader>> args) const
 {
     auto ctx = InteropCtx::Current(coro);
@@ -340,7 +336,7 @@ bool XRefObjectOperator::HasProperty(EtsCoroutine *coro, const std::string &name
     return res;
 }
 
-bool XRefObjectOperator::HasProperty(EtsCoroutine *coro, EtsObject *keyObject, bool isOwnProperty) const
+bool XRefObjectOperator::HasProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject, bool isOwnProperty) const
 {
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
@@ -416,39 +412,30 @@ EtsObject *XRefObjectOperator::Instantiate(EtsCoroutine *coro, Span<VMHandle<Obj
     return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
-napi_valuetype XRefObjectOperator::GetValueType(EtsCoroutine *coro) const
+napi_valuetype XRefObjectOperator::GetValueType(EtsCoroutine *coro, EtsObject *obj)
 {
-    // Background: GC-safe is required here!
-    // StrictEquals bytecode is not allowed to raise gc.
-    // So we cannot use some napi api here, because some napi api may raise a gc.
-
     // 1. If it is nullptr, then we return napi_undefined
-    if (this->etsObject_ == nullptr) {
+    if (obj == nullptr) {
         return napi_undefined;
     }
 
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
     // 2. If it is a JSValue, then we use the JSValue's GetNapiValue method
     // Note(MockMockBlack, #ICQS8L): this is a workaround and will be removed
-    if (this->etsObject_->GetClass() == PlatformTypes(coro)->interopJSValue) {
-        return JSValue::FromEtsObject(this->etsObject_)->GetType();
+    if (obj->GetClass() == PlatformTypes(coro)->interopJSValue) {
+        return JSValue::FromEtsObject(obj)->GetType();
     }
 
     // 3. Otherwise, we assume that it is a XRefObject
     // In this case, this object is either a function or an object.
-    if (this->etsObject_->GetClass()->IsFunction()) {
+    if (obj->GetClass()->IsFunction()) {
         return napi_function;
     }
     return napi_object;
 }
 
-std::string XRefObjectOperator::TypeOf(EtsCoroutine *coro) const
+std::string XRefObjectOperator::TypeOf(EtsCoroutine *coro, EtsObject *obj)
 {
-    napi_valuetype valueType = this->GetValueType(coro);
+    napi_valuetype valueType = GetValueType(coro, obj);
     switch (valueType) {
         // NOTE(MockMockBlack): moved this code from JSValue::TypeOf
         case napi_string:
@@ -468,26 +455,17 @@ std::string XRefObjectOperator::TypeOf(EtsCoroutine *coro) const
     }
 }
 
-bool XRefObjectOperator::IsTrue(EtsCoroutine *coro) const
+bool XRefObjectOperator::IsTrue(EtsCoroutine *coro, EtsObject *obj)
 {
-    // Background: GC-safe is required here!
-    // StrictEquals bytecode is not allowed to raise gc.
-    // So we cannot use some napi api here, because some napi api may raise a gc.
-
     // 1. If it is nullptr, then we return false
-    if (this->etsObject_ == nullptr) {
+    if (obj == nullptr) {
         return false;
     }
 
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
     // 2. If it is a JSValue, then we use the JSValue's IsTrue method
     // Note(MockMockBlack, #ICQS8L): this is a workaround and will be removed
-    if (this->etsObject_->GetClass() == PlatformTypes(coro)->interopJSValue) {
-        return JSValue::FromEtsObject(this->etsObject_)->IsTrue();
+    if (obj->GetClass() == PlatformTypes(coro)->interopJSValue) {
+        return JSValue::FromEtsObject(obj)->IsTrue();
     }
 
     // 3. Otherwise, we assume that it is a XRefObject
@@ -505,22 +483,24 @@ napi_value XRefObjectOperator::GetNapiValue(EtsCoroutine *coro) const
 
     // 1. If it is undefiend(nullptr in native),
     // then return an undefined value
-    if (this->etsObject_ == nullptr) {
+    if (this->etsObject_.GetPtr() == nullptr) {
         return GetUndefined(env);
     }
 
     // 2. If it is already in shared_reference_table,
     // get it from there
+    ASSERT_MANAGED_CODE();
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-    if (UNLIKELY(storage->HasReference(this->etsObject_, env))) {
-        auto jsObject = storage->GetJsObject(this->etsObject_, env);
+    if (UNLIKELY(storage->HasReference(this->etsObject_.GetPtr(), env))) {
+        auto jsObject = storage->GetJsObject(this->etsObject_.GetPtr(), env);
         return jsObject;
     }
 
     // 3. otherwise, we assume that it is a jsvalue object,
     // so we will treat it as a JSValue
-    auto jsValueObject = JSValue::FromEtsObject(this->etsObject_);
-    auto jsObject = jsValueObject->GetNapiValue(env);
+    auto jsValueObject = JSValue::FromEtsObject(this->etsObject_.GetPtr());
+    EtsHandle<JSValue> jsValueHandle(coro, jsValueObject);
+    auto jsObject = JSValue::GetNapiValue(coro, ctx, jsValueHandle);
     // NOTE(MockMockBlack): will be removed after this is stable
     if (UNLIKELY(jsObject == nullptr)) {
         InteropCtx::Fatal("Failed to get NAPI value for XRefObject");
@@ -529,43 +509,39 @@ napi_value XRefObjectOperator::GetNapiValue(EtsCoroutine *coro) const
     return jsObject;
 }
 
-bool XRefObjectOperator::StrictEquals(EtsCoroutine *coro, const XRefObjectOperator &lhs, const XRefObjectOperator &rhs)
+bool XRefObjectOperator::StrictEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
 {
-    // Background: GC-safe is required here!
-    // StrictEquals bytecode is not allowed to raise gc.
-    // So we cannot use some napi api here, because some napi api may raise a gc.
-
-    // 1. lhs or rhs is both nullptr,
+    // 1. obj1 or obj2 is both nullptr,
     // so we can just return false
-    if (lhs.etsObject_ == nullptr && rhs.etsObject_ == nullptr) {
+    if (obj1 == nullptr && obj2 == nullptr) {
         return true;
     }
 
     // 2. if one and only one of them is nullptr,
     // then we can just return false
-    if (lhs.etsObject_ == nullptr || rhs.etsObject_ == nullptr) {
+    if (obj1 == nullptr || obj2 == nullptr) {
         return false;
     }
 
     // 3. If both of them are JSValue,
     // then we can use JSValue's StrictEquals method
     // Note(MockMockBlack, #ICQS8L): this is a workaround and will be removed
-    if (lhs.etsObject_->GetClass() == PlatformTypes(coro)->interopJSValue &&
-        rhs.etsObject_->GetClass() == PlatformTypes(coro)->interopJSValue) {
-        return JSValue::FromEtsObject(lhs.etsObject_)->StrictEquals(JSValue::FromEtsObject(rhs.etsObject_));
+    if (obj1->GetClass() == PlatformTypes(coro)->interopJSValue &&
+        obj2->GetClass() == PlatformTypes(coro)->interopJSValue) {
+        return JSValue::StrictEquals(JSValue::FromEtsObject(obj1), JSValue::FromEtsObject(obj2));
     }
 
     // 4. Otherwise, we just compare their pointers
-    return lhs.etsObject_ == rhs.etsObject_;
+    return obj1 == obj2;
 }
 
-napi_value XRefObjectOperator::ConvertStaticObjectToDynamic(EtsCoroutine *coro, EtsObject *object)
+napi_value XRefObjectOperator::ConvertStaticObjectToDynamic(EtsCoroutine *coro, EtsHandle<EtsObject> &object)
 {
     auto ctx = interop::js::InteropCtx::Current(coro);
 
     // static undefined is nullptr in runtime
     // handle undefined case
-    if (UNLIKELY(object == nullptr)) {
+    if (UNLIKELY(object.GetPtr() == nullptr)) {
         return interop::js::GetUndefined(ctx->GetJSEnv());
     }
 
@@ -575,6 +551,10 @@ napi_value XRefObjectOperator::ConvertStaticObjectToDynamic(EtsCoroutine *coro, 
         return xRefObjectOperator.GetNapiValue(coro);
     }
 
-    return JSRefConvertResolve(ctx, object->GetClass()->GetRuntimeClass())->Wrap(ctx, object);
+    auto converter = JSRefConvertResolve(ctx, object->GetClass()->GetRuntimeClass());
+    if (converter == nullptr) {
+        return interop::js::GetUndefined(ctx->GetJSEnv());
+    }
+    return converter->Wrap(ctx, object.GetPtr());
 }
 }  // namespace ark::ets::interop::js

@@ -236,7 +236,7 @@ public:
             if (UNLIKELY(NapiThrownGeneric(rc))) {
                 return nullptr;
             }
-            if (LIKELY(!IsNullOrUndefined(env, jsElem))) {
+            if (LIKELY(!IsNullOrUndefined<true>(env, jsElem))) {
                 auto *etsElem = UnwrapNonUndefined(ctx, jsElem);
                 if (UNLIKELY(etsElem == nullptr)) {
                     return nullptr;

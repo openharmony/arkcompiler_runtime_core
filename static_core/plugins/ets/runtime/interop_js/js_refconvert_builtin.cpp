@@ -32,6 +32,8 @@ napi_status __attribute__((weak)) napi_is_set(napi_env env, napi_value value, bo
 
 namespace ark::ets::interop::js {
 
+enum class MObjectObjectType { ARRAY, MAP, SET, PROMISE, ERROR, DATE, NUMBER, BOOLEAN, STRING, JSVALUE };
+
 // JSRefConvert adapter for builtin reference types
 template <typename Conv>
 class JSRefConvertBuiltin : public JSRefConvert {
@@ -110,7 +112,7 @@ private:
         napi_env env = ctxx->GetJSEnv();
         napi_value val;
         NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), name, &val));
-        INTEROP_FATAL_IF(IsNull(env, val));
+        INTEROP_FATAL_IF(GetValueTypeNoScope(env, val) == napi_null);
         napi_ref ref;
         NAPI_CHECK_FATAL(napi_create_reference(env, val, 1, &ref));
         return ref;
@@ -357,44 +359,82 @@ private:
         return wError_->CreateJSBuiltinProxy(ctxx, jsValue);
     }
 
-    EtsObject *MObjectObject(InteropCtx *ctxx, napi_value jsValue)
+    MObjectObjectType GetObjectObjectType(InteropCtx *ctxx, napi_value jsValue)
     {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         napi_env env = ctxx->GetJSEnv();
         bool isInstanceof;
         NAPI_CHECK_FATAL(napi_is_array(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return MArray(ctxx, jsValue);
+            return MObjectObjectType::ARRAY;
         }
         NAPI_CHECK_FATAL(napi_is_map(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return MMap(ctxx, jsValue);
+            return MObjectObjectType::MAP;
         }
         NAPI_CHECK_FATAL(napi_is_set(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return MSet(ctxx, jsValue);
+            return MObjectObjectType::SET;
         }
         NAPI_CHECK_FATAL(napi_is_promise(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return BuiltinConvert<JSConvertPromise>(ctxx, env, jsValue);
+            return MObjectObjectType::PROMISE;
         }
         NAPI_CHECK_FATAL(napi_is_error(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return MError(ctxx, jsValue);
+            return MObjectObjectType::ERROR;
         }
         NAPI_CHECK_FATAL(napi_is_date(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return MDate(ctxx, jsValue);
+            return MObjectObjectType::DATE;
         }
         if (IsConstructor(env, jsValue, CONSTRUCTOR_NAME_NUMBER)) {
-            return BuiltinConvert<JSConvertStdlibDouble>(ctxx, env, jsValue);
+            return MObjectObjectType::NUMBER;
         }
         if (IsConstructor(env, jsValue, CONSTRUCTOR_NAME_BOOLEAN)) {
-            return BuiltinConvert<JSConvertStdlibBoolean>(ctxx, env, jsValue);
+            return MObjectObjectType::BOOLEAN;
         }
         if (IsConstructor(env, jsValue, CONSTRUCTOR_NAME_STRING)) {
-            return BuiltinConvert<JSConvertString>(ctxx, env, jsValue);
+            return MObjectObjectType::STRING;
         }
-        return BuiltinConvert<JSConvertJSValue>(ctxx, env, jsValue);
+        return MObjectObjectType::JSVALUE;
+    }
+
+    EtsObject *MObjectObject(InteropCtx *ctxx, napi_value jsValue)
+    {
+        napi_env env = ctxx->GetJSEnv();
+        auto objectType = GetObjectObjectType(ctxx, jsValue);
+        switch (objectType) {
+            case MObjectObjectType::ARRAY: {
+                return MArray(ctxx, jsValue);
+            }
+            case MObjectObjectType::MAP: {
+                return MMap(ctxx, jsValue);
+            }
+            case MObjectObjectType::SET: {
+                return MSet(ctxx, jsValue);
+            }
+            case MObjectObjectType::PROMISE: {
+                return BuiltinConvert<JSConvertPromise>(ctxx, env, jsValue);
+            }
+            case MObjectObjectType::ERROR: {
+                return MError(ctxx, jsValue);
+            }
+            case MObjectObjectType::DATE: {
+                return MDate(ctxx, jsValue);
+            }
+            case MObjectObjectType::NUMBER: {
+                return BuiltinConvert<JSConvertStdlibDouble>(ctxx, env, jsValue);
+            }
+            case MObjectObjectType::BOOLEAN: {
+                return BuiltinConvert<JSConvertStdlibBoolean>(ctxx, env, jsValue);
+            }
+            case MObjectObjectType::STRING: {
+                return BuiltinConvert<JSConvertString>(ctxx, env, jsValue);
+            }
+            default:
+                return BuiltinConvert<JSConvertJSValue>(ctxx, env, jsValue);
+        }
     }
 
     EtsObject *MObject(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
@@ -402,7 +442,7 @@ private:
         napi_env env = ctxx->GetJSEnv();
         (void)verified;  // ignored for Object
 
-        napi_valuetype jsType = GetValueType(env, jsValue);
+        napi_valuetype jsType = GetValueType<true>(env, jsValue);
         switch (jsType) {
             case napi_boolean:
                 return BuiltinConvert<JSConvertStdlibBoolean>(ctxx, env, jsValue);
