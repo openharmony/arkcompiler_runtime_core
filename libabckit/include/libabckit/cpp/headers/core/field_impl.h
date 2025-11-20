@@ -166,6 +166,14 @@ inline bool ClassField::IsStatic() const
     return res;
 }
 
+inline bool ClassField::IsFinal() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->classFieldIsFinal(GetView());
+    CheckError(conf);
+    return res;
+}
+
 inline std::vector<core::Annotation> ClassField::GetAnnotations() const
 {
     std::vector<core::Annotation> annotations;

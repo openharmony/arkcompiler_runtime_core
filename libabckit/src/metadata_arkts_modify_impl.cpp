@@ -1447,8 +1447,12 @@ extern "C" bool FunctionSetName(AbckitArktsFunction *function, const char *name)
     LIBABCKIT_BAD_ARGUMENT(name, false);
 
     LIBABCKIT_INTERNAL_ERROR(function->core, false);
+    if (IsDynamic(function->core->owningModule->target)) {
+        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+        return false;
+    }
 
-    return FunctionSetNameStatic(function, name);
+    return FunctionSetNameStatic(function->core, name);
 }
 
 extern "C" bool FunctionAddParameter(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)

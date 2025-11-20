@@ -34,7 +34,14 @@ public:
      * @param subStr sub string
      * @return true: match, false: not match
      */
-    static bool IsEndWith(const std::string &str, const std::string &subStr);
+    static bool IsEndWith(const std::string &str, const std::string_view &subStr);
+
+    /**
+     * @brief Remove square brackets suffix from string
+     * @param str string
+     * @return std::string without square brackets suffix
+     */
+    static std::string RemoveBracketsSuffix(const std::string &str);
 
     /**
      * @brief Traverse types and assemble their names
@@ -49,6 +56,18 @@ public:
      * @return std::string transformed function name
      */
     static std::string GetFuncNameWithSquareBrackets(const char *name);
+
+    /**
+     * @brief Replaces all occurrences of a substring within a string.
+     * @param str The original string to be processed.
+     * @param from The substring to be replaced.
+     * @param to The substring to replace all occurrences of 'from'.
+     * @return A new string with all occurrences of 'from' replaced by 'to'.
+     *
+     * @note If 'from' is an empty string, the original string is returned unchanged.
+     * @warning If 'to' contains 'from', this may lead to infinite loops. Use with caution.
+     */
+    static std::string ReplaceAll(const std::string &str, const std::string &from, const std::string &to);
 };
 }  // namespace libabckit
 

@@ -12,37 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@interface AI1 {
-  a1F1: string
+
+#ifndef CPP_ABCKIT_STATIC_ISA_IMPL_H
+#define CPP_ABCKIT_STATIC_ISA_IMPL_H
+
+#include "static_isa.h"
+
+// NOLINTBEGIN(performance-unnecessary-value-param)
+namespace abckit {
+
+inline AbckitIsaApiStaticOpcode StaticIsa::GetOpCode(Instruction inst) &&
+{
+    const ApiConfig *conf = graph_.GetApiConfig();
+    AbckitIsaApiStaticOpcode opc = conf->cStatapi_->iGetOpcode(inst.GetView());
+    CheckError(conf);
+    return opc;
 }
 
-@interface AI3 {
-  a3F1: string
-}
+}  // namespace abckit
 
-const f1: string = 'Hello';
+// NOLINTEND(performance-unnecessary-value-param)
 
-class C1 {
-  @AI1({a1F1: 'C1F1'})
-  public c1F1: string = 'public';
-  protected c1F2: string = 'protected';
-  private c1F3: string = 'private';
-  public static c1F4: string = 'static';
-  internal c1F5: int = 1;
-  public readonly c1F6: int = 2;
-  public final c1F7: int = 1;
-}
-
-interface I1 {
-  @AI3({a3F1: 'interface annotation'})
-  i1F1: number;
-  readonly i1F2: string;
-}
-
-enum E1 {
-  ONE = 0
-}
-
-namespace NS1 {
-  const nS1F1: string[] = ['namespace'];
-}
+#endif  // CPP_ABCKIT_STATIC_ISA_IMPL_H

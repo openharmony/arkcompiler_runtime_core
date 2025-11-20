@@ -686,6 +686,13 @@ bool ClassFieldIsStatic(AbckitCoreClassField *field)
     return DEFAULT_BOOL;
 }
 
+bool ClassFieldIsFinal(AbckitCoreClassField *field)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_CORE_CLASS_FIELD);
+    return DEFAULT_BOOL;
+}
+
 bool ClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
@@ -1493,6 +1500,7 @@ static AbckitInspectApi g_inspectApiImpl = {
     ClassFieldIsPrivate,
     ClassFieldIsInternal,
     ClassFieldIsStatic,
+    ClassFieldIsFinal,
     ClassFieldEnumerateAnnotations,
 
     // ========================================

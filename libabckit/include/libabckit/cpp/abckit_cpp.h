@@ -97,6 +97,7 @@
 #include "headers/js/module_impl.h"
 
 #include "headers/dynamic_isa_impl.h"
+#include "headers/static_isa_impl.h"
 #include "headers/basic_block_impl.h"
 #include "headers/file_impl.h"
 #include "headers/graph_impl.h"

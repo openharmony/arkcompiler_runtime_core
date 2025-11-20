@@ -27,7 +27,7 @@ namespace abckit::arkts {
 class ModuleField final : public core::ModuleField {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
-    /// @brief abckit::DefaultHash<Class>
+    /// @brief abckit::DefaultHash<ModuleField>
     friend class abckit::DefaultHash<ModuleField>;
     /// @brief to access private TargetCast
     friend class abckit::traits::TargetCheckCast<ModuleField>;
@@ -132,7 +132,7 @@ private:
 class NamespaceField final : public core::NamespaceField {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
-    /// @brief abckit::DefaultHash<Class>
+    /// @brief abckit::DefaultHash<NamespaceField>
     friend class abckit::DefaultHash<NamespaceField>;
     /// @brief to access private TargetCast
     friend class abckit::traits::TargetCheckCast<NamespaceField>;
@@ -201,7 +201,7 @@ private:
 class ClassField final : public core::ClassField {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
-    /// @brief abckit::DefaultHash<Class>
+    /// @brief abckit::DefaultHash<ClassField>
     friend class abckit::DefaultHash<ClassField>;
     /// @brief to access private constructor
     friend class Class;
@@ -308,7 +308,7 @@ private:
 class InterfaceField final : public core::InterfaceField {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
-    /// @brief abckit::DefaultHash<Class>
+    /// @brief abckit::DefaultHash<InterfaceField>
     friend class abckit::DefaultHash<InterfaceField>;
     /// @brief to access private TargetCast
     friend class abckit::traits::TargetCheckCast<InterfaceField>;
@@ -407,7 +407,7 @@ private:
 class EnumField final : public core::EnumField {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
-    /// @brief abckit::DefaultHash<Class>
+    /// @brief abckit::DefaultHash<EnumField>
     friend class abckit::DefaultHash<EnumField>;
     /// @brief to access private TargetCast
     friend class abckit::traits::TargetCheckCast<EnumField>;

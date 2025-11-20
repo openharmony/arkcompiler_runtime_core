@@ -221,6 +221,12 @@ bool ClassFieldIsStaticStatic(AbckitCoreClassField *field)
     return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_STATIC) != 0x0;
 }
 
+bool ClassFieldIsFinalStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+    return (field->GetArkTSImpl()->GetStaticImpl()->metadata->GetAccessFlags() & ACC_FINAL) != 0x0;
+}
+
 bool InterfaceFieldIsReadonlyStatic(AbckitCoreInterfaceField *field)
 {
     LIBABCKIT_LOG_FUNC;
