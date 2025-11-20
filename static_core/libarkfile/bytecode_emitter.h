@@ -96,9 +96,9 @@ public:
 #include <libarkfile/include/bytecode_emitter_def_gen.h>
 
 private:
-    ErrorCode ReserveSpaceForOffsets();
-    ErrorCode DoReserveSpaceForOffset(const BytecodeInstruction &insn, uint32_t insnPc, BitImmSize expectedImmSize,
-                                      size_t *extraBytesPtr, uint32_t *targetPtr);
+    ErrorCode ReserveSpaceForOffsets(const bool isFirstCheck);
+    ErrorCode UpdateSpaceForOffset(const BytecodeInstruction &insn, uint32_t insnPc, BitImmSize expectedImmSize,
+                                   size_t *extraBytesPtr, uint32_t *targetPtr);
     ErrorCode UpdateBranches();
     void UpdateLabelTargets(uint32_t pc, size_t bias);
     int32_t EstimateMaxDistance(uint32_t insnPc, uint32_t targetPc, uint32_t bias) const;
@@ -106,6 +106,7 @@ private:
 
     static size_t GetSizeByOpcode(BytecodeInstruction::Opcode opcode);
     static BytecodeInstruction::Opcode RevertConditionCode(BytecodeInstruction::Opcode opcode);
+    static BytecodeInstruction::Opcode GetLowestSizeOp(BytecodeInstruction::Opcode opcode);
     static void UpdateBranchOffs(uint8_t *insn, int32_t offs);
     static BitImmSize GetBitImmSizeByOpcode(BytecodeInstruction::Opcode opcode);
     static BytecodeInstruction::Opcode GetLongestJump(BytecodeInstruction::Opcode opcode);

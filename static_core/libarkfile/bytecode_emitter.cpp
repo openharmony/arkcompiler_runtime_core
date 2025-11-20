@@ -132,7 +132,11 @@ BytecodeEmitter::ErrorCode BytecodeEmitter::Build(std::vector<uint8_t> *output)
     if (res != ErrorCode::SUCCESS) {
         return res;
     }
-    res = ReserveSpaceForOffsets();
+    res = ReserveSpaceForOffsets(true);
+    if (res != ErrorCode::SUCCESS) {
+        return res;
+    }
+    res = ReserveSpaceForOffsets(false);
     if (res != ErrorCode::SUCCESS) {
         return res;
     }
@@ -153,7 +157,7 @@ BytecodeEmitter::ErrorCode BytecodeEmitter::Build(std::vector<uint8_t> *output)
  * jmp far
  * next:     # This label is inserted just after previous instruction.
  */
-BytecodeEmitter::ErrorCode BytecodeEmitter::ReserveSpaceForOffsets()
+BytecodeEmitter::ErrorCode BytecodeEmitter::ReserveSpaceForOffsets(const bool isFirstCheck)
 {
     uint32_t bias = 0;
     std::map<uint32_t, Label> newBranches;
@@ -165,13 +169,17 @@ BytecodeEmitter::ErrorCode BytecodeEmitter::ReserveSpaceForOffsets()
         BytecodeInstruction insn(&bytecode_[insnPc]);
         auto opcode = insn.GetOpcode();
         const auto encodedImmSize = GetBitImmSizeByOpcode(opcode);
-        const auto realImmSize = GetBitLengthSigned(EstimateMaxDistance(insnPc, label.GetPc(), bias));
-
+        BitImmSize realImmSize;
+        if (isFirstCheck) {
+            realImmSize = GetBitLengthSigned(EstimateMaxDistance(insnPc, label.GetPc(), bias));
+        } else {
+            realImmSize = GetBitLengthSigned(label.GetPc() - insnPc);
+        }
         auto newTarget = insnPc;
         size_t extraBytes = 0;
 
         if (realImmSize > encodedImmSize) {
-            auto res = DoReserveSpaceForOffset(insn, insnPc, realImmSize, &extraBytes, &newTarget);
+            auto res = UpdateSpaceForOffset(insn, insnPc, realImmSize, &extraBytes, &newTarget);
             if (res != ErrorCode::SUCCESS) {
                 return res;
             }
@@ -188,31 +196,32 @@ BytecodeEmitter::ErrorCode BytecodeEmitter::ReserveSpaceForOffsets()
     return ErrorCode::SUCCESS;
 }
 
-BytecodeEmitter::ErrorCode BytecodeEmitter::DoReserveSpaceForOffset(const BytecodeInstruction &insn, uint32_t insnPc,
-                                                                    BitImmSize expectedImmSize, size_t *extraBytesPtr,
-                                                                    uint32_t *targetPtr)
+BytecodeEmitter::ErrorCode BytecodeEmitter::UpdateSpaceForOffset(const BytecodeInstruction &insn, uint32_t insnPc,
+                                                                 BitImmSize expectedImmSize, size_t *extraBytesPtr,
+                                                                 uint32_t *targetPtr)
 {
     auto opcode = insn.GetOpcode();
     const auto insnSize = GetSizeByOpcode(opcode);
-
-    auto updOp = GetSuitableJump(opcode, expectedImmSize);
+    auto lowestOp = GetLowestSizeOp(opcode);
+    auto sizeDifference = insnSize - GetSizeByOpcode(lowestOp);
+    auto updOp = GetSuitableJump(lowestOp, expectedImmSize);
     using DifferenceTypeT = decltype(bytecode_)::iterator::difference_type;
     if (updOp != Opcode::LAST) {
         *extraBytesPtr = GetSizeByOpcode(updOp) - insnSize;
         bytecode_.insert(bytecode_.begin() + static_cast<DifferenceTypeT>(insnPc + insnSize), *extraBytesPtr, 0);
     } else {
-        *extraBytesPtr = GetSizeByOpcode(Opcode::JMP_IMM32);
+        *extraBytesPtr = GetSizeByOpcode(Opcode::JMP_IMM32) - sizeDifference;
         bytecode_.insert(bytecode_.begin() + static_cast<DifferenceTypeT>(insnPc + insnSize), *extraBytesPtr, 0);
-
-        updOp = RevertConditionCode(opcode);
+        updOp = RevertConditionCode(lowestOp);
         if (updOp == Opcode::LAST) {
             UNREACHABLE();  // no revcc and no far opcode
             return ErrorCode::INTERNAL_ERROR;
         }
         ASSERT(insnPc < bytecode_.size());
         ASSERT(insnPc + insnSize <= bytecode_.size());
-        UpdateBranchOffs(&bytecode_[insnPc], static_cast<int32_t>(insnSize + GetSizeByOpcode(Opcode::JMP_IMM32)));
-        *targetPtr = insnPc + insnSize;
+        UpdateBranchOffs(&bytecode_[insnPc],
+                         static_cast<int32_t>(insnSize + GetSizeByOpcode(Opcode::JMP_IMM32) - sizeDifference));
+        *targetPtr = insnPc + insnSize - sizeDifference;
         Emit<Format::IMM32>(bytecode_.begin() + *targetPtr, Opcode::JMP_IMM32, 0);
     }
     if (BytecodeInstruction(reinterpret_cast<uint8_t *>(&updOp)).IsPrefixed()) {
