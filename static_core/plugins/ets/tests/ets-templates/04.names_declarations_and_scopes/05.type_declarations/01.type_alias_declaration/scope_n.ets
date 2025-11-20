@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-{% for c in cases %}
+{%- for c in cases %}
 /*---
 desc: >-
-    Any assignment of readonly parameters and variables must follow the limitations stated in Contexts and Conversions.
-tags: [compile-only]
+    Scopes of type aliases are module level scopes.
+    Names of all type aliases must be unique across all types in the current context.
+files: {{c.files}}
+tags: [compile-only, negative]
 ---*/
-{{c.decl}}
-{{c.use}}
 
-{% endfor %}
+{{c.decl}}
+
+function main(): void {
+    {{c.use|indent}}
+    arktest.assertFalse(!ok)
+}
+{%- endfor %}
