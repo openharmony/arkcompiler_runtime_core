@@ -15,7 +15,7 @@
 
 /*---
 desc: Test passing an instance of class A to a function expecting Readonly<A>
-tags: [compile-only, positive]
+tags: [compile-only]
 ---*/
 
 function foo(): string {

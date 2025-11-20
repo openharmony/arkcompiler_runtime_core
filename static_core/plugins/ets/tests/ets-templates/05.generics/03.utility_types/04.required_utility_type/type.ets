@@ -19,7 +19,6 @@ limitations under the License.
 
 /*---
 desc: Using custom type of Required<T>
-tags: [{% if c.result == -1 %}compile-only, negative{% endif %}]
 ---*/
 
 {{t}} A {

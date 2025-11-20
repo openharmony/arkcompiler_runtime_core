@@ -20,7 +20,6 @@ desc: >-
     If no constraint is declared, then the type parameter is not compatible with Object
     If type parameter T has type constraint S, then the
     actual type of the generic instantiation must be assignable to S (see Assignability).
-tags: [{{case.tags}}]
 ---*/
 
 class Base {}

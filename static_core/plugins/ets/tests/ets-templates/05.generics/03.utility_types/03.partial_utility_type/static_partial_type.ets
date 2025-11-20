@@ -19,7 +19,6 @@ limitations under the License.
 desc: |-
     Type Partial<T> with static fields.
     {{c.doc}}
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

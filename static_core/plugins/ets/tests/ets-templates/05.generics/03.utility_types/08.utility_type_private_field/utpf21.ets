@@ -15,7 +15,7 @@
 
 /*---
 desc: Pass object literal without private field to Readonly type with different public field types
-tags: [compile-only, positive]
+tags: [compile-only]
 ---*/
 
 class A {

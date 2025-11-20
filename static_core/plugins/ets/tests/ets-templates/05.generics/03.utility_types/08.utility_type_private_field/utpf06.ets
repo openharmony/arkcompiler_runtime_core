@@ -15,7 +15,7 @@
 
 /*---
 desc: Test assigning a Readonly<A> object to another Readonly<A> variable
-tags: [compile-only, positive]
+tags: [compile-only]
 ---*/
 
 function foo(): string {

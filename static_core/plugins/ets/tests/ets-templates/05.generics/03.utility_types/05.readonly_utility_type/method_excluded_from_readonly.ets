@@ -18,7 +18,6 @@ limitations under the License.
 /*---
 desc: >-
     No method (not even any getter or setter) of T is part of the Readonly<T> type.
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

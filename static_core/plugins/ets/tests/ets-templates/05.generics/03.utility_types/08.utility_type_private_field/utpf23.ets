@@ -15,7 +15,7 @@
 
 /*---
 desc: Pass partial object literal without private field to Partial<Readonly> type with different public field types
-tags: [compile-only, positive]
+tags: [compile-only]
 ---*/
 
 class A {

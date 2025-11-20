@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,23 +13,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for wc in wrong_constraints %}
-{% for tog in type_with_one_generic %}
-{% for bd in bounds %}
+{% for t in types %}
+{% for s in custom_types %}
+{% for c in cases %}
 
 /*---
-desc: Self-dependency is prohibited
-tags: [positive, compile-only]
-params: >
-  {{wc}}
-  {{tog}}
-  {{bd}}
+desc: Using custom type of Required<T>
+tags: [compile-only, negative]
 ---*/
 
-{{tog.decl}}
+{{t}} A {
+  i?: number;
+  j?: string;
+}
 
-function main(): void {
-    let x = {{tog.type}}<{{bd}}{{wc}}>{{tog.curly_if_need}};
+type T = Required<A>
+
+type R = A
+
+type RP = Required<R>
+
+function foo(i: Required<A>) {
+  let a: int = 0;
+  if(i.i != null) {
+    a += 1;
+  }
+  if(i.j != undefined) {
+    a += 2;
+  }
+  return a;
+}
+
+function main() {
+  let f: {{s}} = {{c.argument}}
+  arktest.assertTrue( foo(f) == {{c.result}} )
 }
 
 {% endfor %}

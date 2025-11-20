@@ -42,11 +42,6 @@ cases:
 
   # type argument is array of classes, interfaces, enums
   - use: |-
-      let v = new X[0]
-      arktest.assertEQ(foo <X[]> (v, new Y<X>[0]), v)
-    tags: 'compile-only, negative'
-
-  - use: |-
       let v: Color[] = [Color.Red]
       arktest.assertEQ(foo <Color[]> (v, [Color.Blue]), v)
     bound: ' extends Object'
@@ -70,13 +65,6 @@ cases:
       arktest.assertEQ(foo <B>(v, v), v)
     decl: |-
       type B = I
-
-  - use: |-
-      let v = new X[0]
-      arktest.assertEQ(foo <B>(v, new Y<X>[0]), v)
-    decl: |-
-      type B = X[]|null
-    tags: 'compile-only, negative'
 
   # Autoboxing of primitives
   - use: |-

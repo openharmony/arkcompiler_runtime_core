@@ -15,7 +15,7 @@
 
 /*---
 desc: Pass class instance to Readonly type
-tags: [compile-only, positive]
+tags: [compile-only]
 ---*/
 
 class A {
