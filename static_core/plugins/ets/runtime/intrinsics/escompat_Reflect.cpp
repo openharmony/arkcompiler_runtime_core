@@ -12,40 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "libarkfile/annotation_data_accessor.h"
-#include "libarkfile/class_data_accessor.h"
-#include "ets_panda_file_items.h"
-#include "ets_vm.h"
-#include "libarkfile/file.h"
-#include "include/managed_thread.h"
-#include "include/object_header.h"
-#include "plugins/ets/runtime/types/ets_field.h"
-#include "types/ets_object.h"
-#include "types/ets_primitives.h"
+
+#include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
 
 namespace ark::ets::intrinsics {
 
 extern "C" EtsBoolean IsLiteralInitializedInterfaceImpl(EtsObject *target)
 {
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(ManagedThread::GetCurrent());
-
-    auto *etsClass = target->GetClass();
-    auto *runtimeClass = etsClass->GetRuntimeClass();
-    if (runtimeClass->GetPandaFile() == nullptr) {
-        return ToEtsBoolean(false);
-    }
-
-    const panda_file::File &pf = *runtimeClass->GetPandaFile();
-    panda_file::ClassDataAccessor cda(pf, runtimeClass->GetFileId());
-    bool retBoolVal = false;
-
-    cda.EnumerateAnnotation(panda_file_items::class_descriptors::INTERFACE_OBJ_LITERAL.data(),
-                            [&retBoolVal](panda_file::AnnotationDataAccessor &) {
-                                retBoolVal = true;
-                                return true;
-                            });
-
-    return ToEtsBoolean(retBoolVal);
+    return helpers::IsLiteralInitializedInterface(target);
 }
 
 }  // namespace ark::ets::intrinsics
