@@ -561,7 +561,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     ASSERT(!coro->HasPendingException());
 
     auto env = ctx->GetJSEnv();
-    if (IsUndefined(env, val)) {
+    if (IsUndefined<true>(env, val)) {
         auto etsObj = JSValue::CreateUndefined(coro, ctx)->AsObject();
         EtsObject *esObj = ctx->CreateETSCoreESError(coro, etsObj);
         coro->SetException(esObj->GetCoreType());

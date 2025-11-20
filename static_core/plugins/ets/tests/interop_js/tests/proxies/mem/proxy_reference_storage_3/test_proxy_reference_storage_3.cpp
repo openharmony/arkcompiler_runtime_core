@@ -118,15 +118,23 @@ public:
 
     SharedReference *CreateReference(EtsObject *etsObject, napi_value &jsObj)
     {
+        auto coro = EtsCoroutine::GetCurrent();
+        [[maybe_unused]] EtsHandleScope s(coro);
+        EtsHandle<EtsObject> objHandle(coro, etsObject);
+
         NAPI_CHECK_FATAL(napi_create_object(InteropCtx::Current()->GetJSEnv(), &jsObj));
-        SharedReference *ref = storage_->CreateJSObjectRef(InteropCtx::Current(), etsObject, jsObj);
+        SharedReference *ref = storage_->CreateJSObjectRef(InteropCtx::Current(), objHandle, jsObj);
         return ref;
     }
 
     SharedReference *CreateReferenceEts(EtsObject *etsObject, napi_value &jsObj)
     {
+        auto coro = EtsCoroutine::GetCurrent();
+        [[maybe_unused]] EtsHandleScope s(coro);
+        EtsHandle<EtsObject> objHandle(coro, etsObject);
+
         NAPI_CHECK_FATAL(napi_create_object(InteropCtx::Current()->GetJSEnv(), &jsObj));
-        SharedReference *ref = storage_->CreateETSObjectRef(InteropCtx::Current(), etsObject, jsObj);
+        SharedReference *ref = storage_->CreateETSObjectRef(InteropCtx::Current(), objHandle, jsObj);
         return ref;
     }
 

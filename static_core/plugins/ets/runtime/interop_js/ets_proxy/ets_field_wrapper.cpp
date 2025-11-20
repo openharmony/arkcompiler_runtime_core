@@ -42,7 +42,7 @@ static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsCorou
         return etsClass->AsObject();
     }
 
-    if (UNLIKELY(IsNullOrUndefined(env, jsThis))) {
+    if (UNLIKELY(IsNullOrUndefined<true>(env, jsThis))) {
         ctx->ThrowJSTypeError(env, "ets this in set accessor cannot be null or undefined");
         return nullptr;
     }
@@ -146,9 +146,9 @@ struct EtsFieldAccessorREFERENCE {
                        napi_value jsValue)
     {
         EtsObject *etsValue;
-        if (IsUndefined(env, jsValue)) {
+        if (IsUndefined<true>(env, jsValue)) {
             etsValue = nullptr;
-        } else if (IsNull(env, jsValue)) {
+        } else if (IsNull<true>(env, jsValue)) {
             etsValue = ctx->GetNullValue();
         } else {
             JSRefConvert *refconv = etsFieldWrapper->GetRefConvert<true>(ctx);

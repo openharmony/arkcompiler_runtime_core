@@ -141,12 +141,15 @@ class NapiScope {
 public:
     explicit NapiScope(napi_env env) : env_(env)
     {
+        ASSERT_MANAGED_CODE();
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_open_handle_scope(env_, &scope_);
         ASSERT(status == napi_ok);
     }
 
     ~NapiScope()
     {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_close_handle_scope(env_, scope_);
         ASSERT(status == napi_ok);
     }
@@ -163,18 +166,22 @@ class NapiEscapableScope {
 public:
     explicit NapiEscapableScope(napi_env env) : env_(env)
     {
+        ASSERT_MANAGED_CODE();
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_open_escapable_handle_scope(env_, &scope_);
         ASSERT(status == napi_ok);
     }
 
     void Escape(napi_value &val)
     {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_escape_handle(env_, scope_, val, &val);
         ASSERT(status == napi_ok);
     }
 
     ~NapiEscapableScope()
     {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_close_escapable_handle_scope(env_, scope_);
         ASSERT(status == napi_ok);
     }
@@ -187,7 +194,21 @@ private:
     napi_escapable_handle_scope scope_ {};
 };
 
+template <bool IS_ADD_NATIVE_SCOPE = false>
 inline napi_valuetype GetValueType(napi_env env, napi_value val)
+{
+    napi_valuetype vtype;
+    if constexpr (IS_ADD_NATIVE_SCOPE) {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        NAPI_CHECK_FATAL(napi_typeof(env, val, &vtype));
+    } else {
+        ASSERT_NATIVE_CODE();
+        NAPI_CHECK_FATAL(napi_typeof(env, val, &vtype));
+    }
+    return vtype;
+}
+
+inline napi_valuetype GetValueTypeNoScope(napi_env env, napi_value val)
 {
     napi_valuetype vtype;
     NAPI_CHECK_FATAL(napi_typeof(env, val, &vtype));
@@ -236,19 +257,22 @@ inline napi_value GetBooleanValue(napi_env env, bool val)
     return jsValueBoolean;
 }
 
+template <bool IS_ADD_NATIVE_SCOPE = false>
 inline bool IsNull(napi_env env, napi_value val)
 {
-    return GetValueType(env, val) == napi_null;
+    return GetValueType<IS_ADD_NATIVE_SCOPE>(env, val) == napi_null;
 }
 
+template <bool IS_ADD_NATIVE_SCOPE = false>
 inline bool IsUndefined(napi_env env, napi_value val)
 {
-    return GetValueType(env, val) == napi_undefined;
+    return GetValueType<IS_ADD_NATIVE_SCOPE>(env, val) == napi_undefined;
 }
 
+template <bool IS_ADD_NATIVE_SCOPE = false>
 inline bool IsNullOrUndefined(napi_env env, napi_value val)
 {
-    napi_valuetype vtype = GetValueType(env, val);
+    napi_valuetype vtype = GetValueType<IS_ADD_NATIVE_SCOPE>(env, val);
     return vtype == napi_undefined || vtype == napi_null;
 }
 

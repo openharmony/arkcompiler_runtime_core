@@ -56,13 +56,15 @@ public:
         return SharedReferencePool::MaxSize();
     }
 
-    PANDA_PUBLIC_API SharedReference *CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
+    PANDA_PUBLIC_API SharedReference *CreateETSObjectRef(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,
+                                                         napi_value jsObject,
                                                          const PreInitJSObjectCallback &preInitCallback = nullptr);
-    SharedReference *CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
 
-    SharedReference *CreateJSObjectRefwithWrap(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+    SharedReference *CreateJSObjectRef(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject, napi_value jsObject);
 
-    SharedReference *CreateHybridObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+    SharedReference *CreateJSObjectRefwithWrap(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject, napi_value jsObject);
+
+    SharedReference *CreateHybridObjectRef(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject, napi_value jsObject);
 
     PANDA_PUBLIC_API SharedReference *GetReference(napi_env env, napi_value jsObject) const;
     PANDA_PUBLIC_API SharedReference *GetReference(EtsObject *etsObject) const;
@@ -117,7 +119,7 @@ private:
     NO_MOVE_SEMANTIC(SharedReferenceStorage);
 
     template <SharedReference::InitFn REF_INIT>
-    SharedReference *CreateRefCommon(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
+    SharedReference *CreateRefCommon(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject, napi_value jsObject,
                                      const PreInitJSObjectCallback &callback = nullptr);
 
     PANDA_PUBLIC_API static SharedReferenceStorage *GetCurrent()
@@ -127,7 +129,7 @@ private:
     }
 
     template <SharedReference::InitFn REF_INIT>
-    PANDA_PUBLIC_API inline SharedReference *CreateReference(InteropCtx *ctx, EtsHandle<EtsObject> etsObject,
+    PANDA_PUBLIC_API inline SharedReference *CreateReference(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,
                                                              napi_ref jsRef) REQUIRES(storageLock_);
     PANDA_PUBLIC_API SharedReference *GetReference(void *data) const;
     PANDA_PUBLIC_API void RemoveReference(SharedReference *sharedRef);

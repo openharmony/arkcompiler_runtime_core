@@ -42,9 +42,13 @@ public:
 
     SharedReference *CreateReference(EtsObject *etsObject)
     {
+        auto coro = EtsCoroutine::GetCurrent();
+        [[maybe_unused]] EtsHandleScope s(coro);
+        EtsHandle<EtsObject> objHandle(coro, etsObject);
         napi_value jsObj;
+
         NAPI_CHECK_FATAL(napi_create_object(InteropCtx::Current()->GetJSEnv(), &jsObj));
-        SharedReference *ref = storage_->CreateETSObjectRef(InteropCtx::Current(), etsObject, jsObj);
+        SharedReference *ref = storage_->CreateETSObjectRef(InteropCtx::Current(), objHandle, jsObj);
 
         // Emulate wrappper usage
         ((uintptr_t *)ref)[0] = 0xcc00ff23deadbeef;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)

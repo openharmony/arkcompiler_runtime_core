@@ -251,7 +251,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall
     }
 
     napi_env env = ctx_->GetJSEnv();
-    if (UNLIKELY(GetValueType(env, jsFn_) != napi_function)) {
+    if (UNLIKELY(GetValueType<true>(env, jsFn_) != napi_function)) {
         ctx_->ThrowJSTypeError(env, "call target is not a function");
         return std::nullopt;
     }
@@ -504,7 +504,7 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
             auto refconv = JSRefConvertResolve(ctx, etsThis->ClassAddr<Class>());
             ASSERT(refconv != nullptr);
             napi_value jsThis = refconv->Wrap(ctx, EtsObject::FromCoreType(etsThis));
-            ASSERT(GetValueType(env, jsThis) == napi_object);
+            ASSERT(GetValueType<true>(env, jsThis) == napi_object);
             auto *refconvProxy = static_cast<ets_proxy::JSRefConvertJSProxy *>(refconv);
             ASSERT(refconvProxy != nullptr);
             std::string methodNameStr = refconvProxy->GetJSMethodName(st->GetMethod());

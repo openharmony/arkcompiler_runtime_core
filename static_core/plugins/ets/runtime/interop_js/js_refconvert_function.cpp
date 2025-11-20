@@ -87,6 +87,7 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     auto coro = EtsCoroutine::GetCurrent();
     ASSERT(ctx == InteropCtx::Current(coro));
     auto env = ctx->GetJSEnv();
+    [[maybe_unused]] EtsHandleScope s(coro);
 
     ASSERT(obj->GetClass() == klass_);
 
@@ -105,7 +106,9 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
                                                       EtsLambdaProxyInvoke, uninitializedRef, &jsFn));
                 return jsFn;
             };
-            ets_proxy::SharedReference *sharedRef = storage->CreateETSObjectRef(ctx, obj, jsFn, preInitCallback);
+
+            EtsHandle<EtsObject> objHandle(coro, obj);
+            ets_proxy::SharedReference *sharedRef = storage->CreateETSObjectRef(ctx, objHandle, jsFn, preInitCallback);
             if (UNLIKELY(sharedRef == nullptr)) {
                 ASSERT(InteropCtx::SanityJSExceptionPending());
                 return nullptr;
@@ -116,7 +119,9 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     if (UNLIKELY(jsValue == nullptr)) {
         return nullptr;
     }
-    return jsValue->GetRefValue(env);
+
+    EtsHandle<JSValue> jsValueHandle(coro, jsValue);
+    return JSValue::GetNapiValue(coro, ctx, jsValueHandle);
 }
 
 EtsObject *JSRefConvertFunction::UnwrapImpl(InteropCtx *ctx, napi_value jsFun)
@@ -137,15 +142,14 @@ EtsObject *JSRefConvertFunction::UnwrapImpl(InteropCtx *ctx, napi_value jsFun)
     // storage->CreateJSObjectRefwithWrap will trigger XGC if needed
     // after that, the ptr `ret` will be valid
     // so a handle is created to keep the object valid
-    VMHandle<ObjectHeader> retHandle(coro, ret);
-    auto functionDynamicObject = EtsObject::FromCoreType(ret);
+    EtsHandle<EtsObject> functionDynamicObject(coro, EtsObject::FromCoreType(ret));
 
     // Put it into SharedReferenceStorage
     storage->CreateJSObjectRefwithWrap(ctx, functionDynamicObject, jsFun);
 
     // ptr `ret` is valid now,
     // so we must get the object from the handle
-    return EtsObject::FromCoreType(retHandle.GetPtr());
+    return functionDynamicObject.GetPtr();
 }
 
 }  // namespace ark::ets::interop::js

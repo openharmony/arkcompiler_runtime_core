@@ -50,9 +50,9 @@ static EtsObject *UnwrapJsValue(napi_env env, napi_value jsValue)
     auto ctx = InteropCtx::Current(coro);
 
     EtsObject *etsObject;
-    if (IsUndefined(env, jsValue)) {
+    if (IsUndefined<true>(env, jsValue)) {
         etsObject = nullptr;
-    } else if (IsNull(env, jsValue)) {
+    } else if (IsNull<true>(env, jsValue)) {
         etsObject = ctx->GetNullValue();
     } else {
         auto refconv = JSRefConvertResolve(ctx, ctx->GetObjectClass());
@@ -199,7 +199,10 @@ napi_value JSRefConvertTuple<IS_TUPLEN>::WrapImpl(InteropCtx *ctx, EtsObject *et
         napi_value jsProxyCtor = ctx->GetCommonJSObjectCache()->GetProxy();
         NAPI_CHECK_FATAL(napi_new_instance(env, jsProxyCtor, args.size(), args.data(), &proxyObject));
 
-        storage->CreateETSObjectRef(ctx, etsObject, proxyObject);
+        auto coro = EtsCoroutine::GetCurrent();
+        [[maybe_unused]] EtsHandleScope s(coro);
+        EtsHandle<EtsObject> objHandle(coro, etsObject);
+        storage->CreateETSObjectRef(ctx, objHandle, proxyObject);
 
         return proxyObject;
     } else {
