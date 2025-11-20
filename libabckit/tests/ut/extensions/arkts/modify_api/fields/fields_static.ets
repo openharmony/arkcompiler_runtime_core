@@ -44,10 +44,37 @@ interface I2 {
 
 class C4 implements I1 {
     public i1F1: string = 'ABC';
+
+    toString(): string {
+        const res = new StringBuilder()
+        const thisCls = Class.of(this)
+        res.append(thisCls.getName()).append(" {")
+        const getterPrefix = "%%get-"
+        // using interface getter to find underlying field name
+        const ifaceMethods = Array.from(thisCls.getInterfaces()[0].getInstanceMethods())
+        const ifaceGetter = ifaceMethods.find((m) => m.getName().startsWith(getterPrefix))!
+        const fieldName = ifaceGetter.getName().substring(getterPrefix.length)
+        // using class getter to find underlying field value
+        const thisMethods = Array.from(thisCls.getInstanceMethods())
+        const fieldGetter = thisMethods.find((m) => m.getName().startsWith(getterPrefix))!
+        const fieldVal = fieldGetter.invoke(this)
+        res.append(`${fieldName}: ${fieldVal}}`)
+        return res.toString()
+    }
 }
 
 class C5 implements I2 {
     public i2F1: number = 3;
+
+    toString(): string {
+        const res = new StringBuilder()
+        const thisCls = Class.of(this)
+        res.append(thisCls.getName()).append(" {")
+        const fieldGetter = thisCls.getInstanceMethod("%%get-i2F1")!
+        const fieldVal = fieldGetter.invoke(this)
+        res.append(`i2F1: ${fieldVal}}`)
+        return res.toString()
+    }
 }
 
 enum E1 {
@@ -60,12 +87,12 @@ function enumFieldSetName() {
 }
 
 function interfaceFieldSetType() {
-    let inst: C5 = new C5();
+    const inst = new C5()
     console.log(inst)
 }
 
 function interfaceFieldSetName() {
-    let inst: C4 = new C4();
+    const inst = new C4()
     console.log(inst)
 }
 
