@@ -399,8 +399,8 @@ def GenerateStringCompareTo(cgmode)
     end
 
     if cgmode == :NativePlus
-        str1 := try_use_cached_flat_str(str1_orig)
-        str2 := try_use_cached_flat_str(str2_orig)
+        str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
+        str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
     else
         check_not_tree_string_type(str1_orig) if defines.DEBUG
         check_not_tree_string_type(str2_orig) if defines.DEBUG

@@ -60,33 +60,46 @@ macro(:check_not_tree_string_type) do |str|
   }
 end
 
-macro(:try_use_cached_flat_str) do |str|
+macro(:try_get_flattened_tree_str) do |str|
+  stringCache := LoadI(%tr).Imm(Constants::THREAD_FLATTENED_STRING_CACHE_OFFSET).ref
+  If(stringCache, 0).EQ {
+    Goto(:SlowPathEntrypoint)
+  }
+
+  # cannot cast directly from ref to uint
+  strPtr := Cast(str).ptr
+  strUint := Bitcast(strPtr).word
+  strShifted := ShrI(strUint).Imm(FlattenedStringCacheConstants::ADDRESS_SHIFT).word
+  strMasked := AndI(strShifted).Imm(FlattenedStringCacheConstants::ADDRESS_MASK).word
+  strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
+  key := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+  If(key, str).NE {
+    Goto(:SlowPathEntrypoint)
+  }
+  strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
+  strCached := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+end  # try_get_flattened_tree_str
+
+macro(:try_use_cached_flat_str_reject_sliced) do |str|
   baseClass := load_class(str)
   stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
   If(stringType, Constants::STRING_TYPE_SLICE).EQ {
     Goto(:SlowPathEntrypoint)
   }
   If(stringType, Constants::STRING_TYPE_TREE).EQ {
-    stringCache := LoadI(%tr).Imm(Constants::THREAD_FLATTENED_STRING_CACHE_OFFSET).ref
-    If(stringCache, 0).EQ {
-      Goto(:SlowPathEntrypoint)
-    }
-
-    # cannot cast directly from ref to uint
-    strPtr := Cast(str).ptr
-    strUint := Bitcast(strPtr).word
-    strShifted := ShrI(strUint).Imm(FlattenedStringCacheConstants::ADDRESS_SHIFT).word
-    strMasked := AndI(strShifted).Imm(FlattenedStringCacheConstants::ADDRESS_MASK).word
-    strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
-    key := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
-    If(key, str).NE {
-      Goto(:SlowPathEntrypoint)
-    }
-    strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
-    strCached := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
+    strCached := try_get_flattened_tree_str(str)
   }
   result := Phi(str, strCached).ref
-end  # try_use_cached_flat_str
+end  # try_use_cached_flat_str_reject_sliced
+
+macro(:try_use_cached_flat_str_accept_sliced) do |str|
+  baseClass := load_class(str)
+  stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+  If(stringType, Constants::STRING_TYPE_TREE).EQ {
+    strCached := try_get_flattened_tree_str(str)
+  }
+  result := Phi(str, strCached).ref
+end  # try_use_cached_flat_str_accept_sliced
 
 # Try to allocate String in TLAB.
 # The result is either a pointer to a new string or null if there is no enough space in TLAB.
@@ -779,14 +792,14 @@ def GenerateStringEquals(lang, dynamic, cgmode = :FastPath)
             Return(1).b
         }
         if cgmode == :NativePlus
-            str1 := try_use_cached_flat_str(str1_orig)
+            str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
         else
             check_not_tree_string_type(str1_orig) if defines.DEBUG
             # it still can be slice
             check_string_type(str1_orig)
             str1 := str1_orig
         end
-        str2 := try_use_cached_flat_str(str2_orig)
+        str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
         if dynamic
             length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
             length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32

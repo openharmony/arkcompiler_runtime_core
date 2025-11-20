@@ -627,7 +627,7 @@ end
 
 
 function(:StringStartsWithBase,
-          params: {str: 'ref', pfx: 'ref', from_index: 'i32'},
+          params: {str: 'ref', pfx: 'ref', from_index: 'i32', pfx_i1: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
           mode: [:FastPathPlus]) {
@@ -646,7 +646,6 @@ function(:StringStartsWithBase,
   pfx_not_compressed := AndI(pfx_len_packed).Imm(1).i32
   pfx_data := Add(Cast(pfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
 
-  pfx_i1 := 0
 Label(:Loop)
   str_i := Phi(from_index, str_i1).i32
   pfx_i := Phi(pfx_i1, pfx_i2).i32
@@ -669,7 +668,7 @@ def GenerateStringStartsWith(cgmode)
   suffix = (cgmode == :NativePlus ? 'NativePlus': '')
   upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
   function("StringStartsWith#{suffix}".to_sym,
-           params: {str_orig: 'ref', pfx_orig: 'ref', from_index: 'i32'},
+           params: {str_orig: 'ref', pfx_orig: 'ref', from_index: 'i32', arg4: 'i32'},
            regmap: $full_regmap,
            regalloc_set: $panda_mask,
            mode: [cgmode]) {
@@ -681,19 +680,42 @@ def GenerateStringStartsWith(cgmode)
   end
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str(str_orig)
-    pfx := try_use_cached_flat_str(pfx_orig)
+    str_orig0 := try_use_cached_flat_str_accept_sliced(str_orig)
+    pfx_orig0 := try_use_cached_flat_str_accept_sliced(pfx_orig)
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     check_not_tree_string_type(pfx_orig) if defines.DEBUG
-    # it still can be slice
-    check_string_type(str_orig)
-    check_string_type(pfx_orig)
-    str := str_orig
-    pfx := pfx_orig
+    str_orig0 := str_orig
+    pfx_orig0 := pfx_orig
   end
 
-  pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  strBaseClass := load_class(str_orig0)
+  strType := LoadI(strBaseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+
+  zeroIndex := Cast(0).u32
+
+  If(strType, Constants::STRING_TYPE_SLICE).EQ {
+    strParent := LoadI(str_orig0).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+    strStartIndexAndBits := LoadI(str_orig0).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+    strStartIndex := ShrI(strStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
+  }
+
+  str := Phi(str_orig0, strParent).ref
+  resultStrStartIndex := Phi(zeroIndex, strStartIndex).u32
+
+  pfxBaseClass := load_class(pfx_orig0)
+  pfxType := LoadI(pfxBaseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+
+  If(pfxType, Constants::STRING_TYPE_SLICE).EQ {
+    pfxParent := LoadI(pfx_orig0).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+    pfxStartIndexAndBits := LoadI(pfx_orig0).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+    pfxStartIndex := ShrI(pfxStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
+  }
+
+  pfx := Phi(pfx_orig0, pfxParent).ref
+  resultPfxStartIndex := Phi(zeroIndex, pfxStartIndex).u32
+
+  pfx_len_packed := LoadI(pfx_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if prefix is empty
   # The least significant bit indicates COMPRESSED/UNCOMPRESSED,
   # thus if (packed length <= 1) then the actual length is equal to 0.
@@ -701,7 +723,7 @@ def GenerateStringStartsWith(cgmode)
     Return(1).b
   }
 
-  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  str_len_packed := LoadI(str_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'false' if 'str' is empty as 'prefix' is not empty.
   If(str_len_packed, 1).LE.Unlikely.b {
     Return(0).b
@@ -722,25 +744,25 @@ def GenerateStringStartsWith(cgmode)
     Return(0).b
   }
 
+  from_index3 := Add(from_index2, resultStrStartIndex).i32
+
   if cgmode == :NativePlus
     LiveOut(str).DstReg(regmap[:arg1]).ref
     LiveOut(pfx).DstReg(regmap[:arg2]).ref
-    LiveOut(from_index2).DstReg(regmap[:arg3]).i32
+    LiveOut(from_index3).DstReg(regmap[:arg3]).i32
+    LiveOut(resultPfxStartIndex).DstReg(regmap[:arg4]).i32
   else
     LiveOut(str).DstReg(regmap[:arg0]).ref
     LiveOut(pfx).DstReg(regmap[:arg1]).ref
-    LiveOut(from_index2).DstReg(regmap[:arg2]).i32
+    LiveOut(from_index3).DstReg(regmap[:arg2]).i32
+    LiveOut(resultPfxStartIndex).DstReg(regmap[:arg3]).i32
   end
   entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_BASE#{upsuffix}")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase#{suffix}").Terminator.b
 
-Label(:SlowPathEntrypoint)
   if cgmode == :NativePlus
+  Label(:SlowPathEntrypoint)
     Return(Call(str_orig, pfx_orig, from_index).Method("StdCoreStringStartsWith").b).b
-  else
-    entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str_orig, pfx_orig, from_index).AddImm(entrypoint).MethodAsImm("StringStartsWithOddSavedBridge").Terminator.b
-    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   end
 }
 end
@@ -806,8 +828,8 @@ def GenerateStringEndsWith(cgmode)
   end
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str(str_orig)
-    sfx := try_use_cached_flat_str(sfx_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
+    sfx := try_use_cached_flat_str_reject_sliced(sfx_orig)
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     check_not_tree_string_type(sfx_orig) if defines.DEBUG
@@ -1507,7 +1529,7 @@ def GenerateStringIndexOf(cgmode)
   end
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str(str_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     # it still can be slice
@@ -1666,7 +1688,7 @@ def GenerateStringIndexOfAfter(cgmode)
   end
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str(str_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     # it still can be slice
@@ -1924,8 +1946,8 @@ function(:StringConcat2Tlab,
       next
     end
 
-    str1 := try_use_cached_flat_str(str1_orig)
-    str2 := try_use_cached_flat_str(str2_orig)
+    str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
+    str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -1999,9 +2021,9 @@ function(:StringConcat3Tlab,
       next
     end
 
-    str1 := try_use_cached_flat_str(str1_orig)
-    str2 := try_use_cached_flat_str(str2_orig)
-    str3 := try_use_cached_flat_str(str3_orig)
+    str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
+    str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
+    str3 := try_use_cached_flat_str_reject_sliced(str3_orig)
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -2091,10 +2113,10 @@ function(:StringConcat4Tlab,
       next
     end
 
-    str1 := try_use_cached_flat_str(str1_orig)
-    str2 := try_use_cached_flat_str(str2_orig)
-    str3 := try_use_cached_flat_str(str3_orig)
-    str4 := try_use_cached_flat_str(str4_orig)
+    str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
+    str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
+    str3 := try_use_cached_flat_str_reject_sliced(str3_orig)
+    str4 := try_use_cached_flat_str_reject_sliced(str4_orig)
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -2273,13 +2295,10 @@ function(:StringCharAt,
     startIndexAndFlags := LoadI(strOrig).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).i32
     startIndex := ShrI(startIndexAndFlags).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).i32
     slicedIndex := Add(startIndex, indexOrig).i32
-  } Else {
-    str0 := strOrig
-    index0 := indexOrig
   }
 
-  str := Phi(parentStr, str0).ref
-  index := Phi(slicedIndex, index0).i32
+  str := Phi(strOrig, parentStr).ref
+  index := Phi(indexOrig, slicedIndex).i32
 
   lengthPacked := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   length := ShrI(lengthPacked).Imm(Constants::STRING_LENGTH_SHIFT).i32
