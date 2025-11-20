@@ -180,6 +180,69 @@ function jsonStringifyRegExptest5() {
     arktest.assertEQ(ret, expected);
 }
 
+class ObjWithBoolArray {
+    arr: FixedArray<boolean> = [true]
+}
+
+function jsonStringifyObjWithBoolArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithBoolArray()), '{"arr":[true]}')
+}
+
+class ObjWithByteArray {
+    arr: FixedArray<byte> = [1]
+}
+
+function jsonStringifyObjWithByteArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithByteArray()), '{"arr":[1]}')
+}
+
+class ObjWithCharArray {
+    arr: FixedArray<char> = [c'a']
+}
+
+function jsonStringifyObjWithCharArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithCharArray()), '{"arr":["a"]}')
+}
+
+class ObjWithShortArray {
+    arr: FixedArray<short> = [ 1 ]
+}
+
+function jsonStringifyObjWithShortArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithShortArray()), '{"arr":[1]}')
+}
+
+class ObjWithIntArray {
+    arr: FixedArray<int> = [ 1 ]
+}
+
+function jsonStringifyObjWithIntArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithIntArray()), '{"arr":[1]}')
+}
+
+class ObjWithLongArray {
+    arr: FixedArray<long> = [ 1 ]
+}
+
+function jsonStringifyObjWithLongArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithLongArray()), '{"arr":[1]}')
+}
+
+class ObjWithFloatArray {
+    arr: FixedArray<float> = [ 1.0 ]
+}
+
+function jsonStringifyObjWithFloatArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithFloatArray()), '{"arr":[1]}')
+}
+
+class ObjWithDoubleArray {
+    arr: FixedArray<double> = [ 1.0 ]
+}
+
+function jsonStringifyObjWithDoubleArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithDoubleArray()), '{"arr":[1]}')
+}
 
 function main(): int {
     const suite = new arktest.ArkTestsuite('Json stringify for Array tests');
@@ -201,5 +264,13 @@ function main(): int {
     suite.addTest('for RegExp 3', jsonStringifyRegExptest3);
     suite.addTest('for RegExp 2', jsonStringifyRegExptest4);
     suite.addTest('for RegExp 3', jsonStringifyRegExptest5);
+    suite.addTest('for object with FixedArray<boolean> field', jsonStringifyObjWithBoolArray)
+    suite.addTest('for object with FixedArray<byte> field', jsonStringifyObjWithByteArray)
+    suite.addTest('for object with FixedArray<char> field', jsonStringifyObjWithCharArray)
+    suite.addTest('for object with FixedArray<short> field', jsonStringifyObjWithShortArray)
+    suite.addTest('for object with FixedArray<int> field', jsonStringifyObjWithIntArray)
+    suite.addTest('for object with FixedArray<long> field', jsonStringifyObjWithLongArray)
+    suite.addTest('for object with FixedArray<float> field', jsonStringifyObjWithFloatArray)
+    suite.addTest('for object with FixedArray<double> field', jsonStringifyObjWithDoubleArray)
     return suite.run();
 }
