@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -685,10 +685,11 @@ void panda::guard::Node::ExtractNames()
 void panda::guard::Node::RefreshNeedUpdate()
 {
     const auto &options = GuardContext::GetInstance()->GetGuardOptions();
-    if (options->IsUseNormalizedOhmUrl()) {
-        this->fileNameNeedUpdate_ = options->IsFileNameObfEnabled() && !options->IsReservedRemoteHarPkgNames(pkgName_);
-    } else {
-        this->fileNameNeedUpdate_ = options->IsFileNameObfEnabled() && !IsRemoteHar(this->name_);
+    this->fileNameNeedUpdate_ = options->IsFileNameObfEnabled() && !options->IsInRecordNameWhiteList(this->name_);
+    if (this->fileNameNeedUpdate_) {
+        this->fileNameNeedUpdate_ = options->IsUseNormalizedOhmUrl() ?
+            !options->IsReservedRemoteHarPkgNames(pkgName_) :
+            !IsRemoteHar(this->name_);
     }
 
     if (options->IsKeepPath(this->name_)) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@ constexpr std::string_view COMPACT = "compact";
 constexpr std::string_view PRINT_NAME_CACHE = "printNameCache";
 constexpr std::string_view APPLY_NAME_CACHE = "applyNameCache";
 constexpr std::string_view RESERVED_NAMES = "reservedNames";
+constexpr std::string_view RECORD_NAME_WHITE_LIST = "recordNameWhiteList";
 constexpr std::string_view ENABLE = "enable";
 constexpr std::string_view PROPERTY_OBFUSCATION = "propertyObfuscation";
 constexpr std::string_view RESERVED_PROPERTIES = "reservedProperties";
@@ -155,6 +156,7 @@ void ParseObfuscationConfigFile(const std::string &content, panda::guard::Obfusc
     obfRule->printNameCache = panda::guard::JsonUtil::GetStringValue(rulesObj, PRINT_NAME_CACHE);
     obfRule->applyNameCache = panda::guard::JsonUtil::GetStringValue(rulesObj, APPLY_NAME_CACHE);
     obfRule->reservedNames = panda::guard::JsonUtil::GetArrayStringValue(rulesObj, RESERVED_NAMES);
+    obfRule->recordNameWhiteList = panda::guard::JsonUtil::GetArrayStringValue(rulesObj, RECORD_NAME_WHITE_LIST);
     ParsePropertyOption(rulesObj, obfRule->propertyOption);
     ParseToplevelOption(rulesObj, obfRule->toplevelOption);
     ParseFileNameOption(rulesObj, obfRule->fileNameOption);
@@ -381,6 +383,12 @@ bool panda::guard::GuardOptions::IsReservedNames(const std::string &name) const
 {
     std::vector<std::string> universalReservedNames;  // names not have universal
     return NeedToBeReserved(obfConfig_.obfuscationRules.reservedNames, universalReservedNames, name);
+}
+
+bool panda::guard::GuardOptions::IsInRecordNameWhiteList(const std::string &name) const
+{
+    std::vector<std::string> universalWhiteList;  // not have universal white list
+    return NeedToBeReserved(obfConfig_.obfuscationRules.recordNameWhiteList, universalWhiteList, name);
 }
 
 bool panda::guard::GuardOptions::IsReservedProperties(const std::string &name) const

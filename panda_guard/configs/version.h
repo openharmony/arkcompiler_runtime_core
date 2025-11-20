@@ -21,7 +21,7 @@
 namespace panda::guard {
 
 constexpr std::string_view ARK_GUARD_DYNAMIC_VERSION = "ArkGuardDynamicVersion";
-constexpr std::string_view OBFUSCATION_TOOL_VERSION = "1.0.0.300";
+constexpr std::string_view OBFUSCATION_TOOL_VERSION = "1.0.0.310";
 
 }  // namespace panda::guard
 
