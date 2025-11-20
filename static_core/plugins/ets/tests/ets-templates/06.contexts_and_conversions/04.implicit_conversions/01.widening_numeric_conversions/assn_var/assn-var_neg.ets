@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 /*---
 desc: Assignment context, variable, widening primitive conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
+tags: [compile-only, negative]
 ---*/
 {{c.defs}}
 let d: {{c.to_type}}

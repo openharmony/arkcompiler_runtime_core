@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +15,21 @@
 {%- for c in cases %}
 
 /*---
-desc: Assignment context, variable, widening primitive conversion, implicit
+desc: Declaration context, static field declaration, widening primitive conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
+tags: [compile-only, negative]
 ---*/
 {{c.defs}}
-let d: {{c.to_type}}
+{%- for v in c['values'] %}
+class A{{loop.index}} {
+    private static s: {{c.from_type}} = {{v.expr|safe}}
+    public static d: {{c.to_type}} = A{{loop.index}}.s
+}
+{%- endfor %}
 
 function main(): void {
 {%- for v in c['values'] %}
-    let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
-    d = s{{loop.index}}  // this var assignment is tested
-    arktest.assertEQ(d, {{v.val}})
+    arktest.assertEQ(A{{loop.index}}.d, {{v.val}})
 {%- endfor %}
 }
 {%- endfor %}

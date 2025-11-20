@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +15,20 @@
 {%- for c in cases %}
 
 /*---
-desc: Assignment context, variable, widening primitive conversion, implicit
+desc: Composite context, interface field, widening primitive conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
+tags: [compile-only, negative]
 ---*/
 {{c.defs}}
-let d: {{c.to_type}}
+{%- for v in c['values'] %}
+interface J{{loop.index}} { fld: {{c.to_type}} }
+let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}};
+{%- endfor %}
 
 function main(): void {
 {%- for v in c['values'] %}
-    let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
-    d = s{{loop.index}}  // this var assignment is tested
-    arktest.assertEQ(d, {{v.val}})
+    let d{{loop.index}}: J{{loop.index}} = { fld: s{{loop.index}} }
+    arktest.assertEQ(d{{loop.index}}.fld, {{v.val}})
 {%- endfor %}
 }
 {%- endfor %}

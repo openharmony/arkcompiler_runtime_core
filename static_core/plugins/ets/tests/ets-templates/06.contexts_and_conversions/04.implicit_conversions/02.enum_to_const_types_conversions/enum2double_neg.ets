@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,20 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 {%- for c in cases %}
-
 /*---
-desc: Assignment context, variable, widening primitive conversion, implicit
-params: from {{c.from_type}} to {{c.to_type}}
+desc: >-
+    A value of an enumeration type is converted to type double
+    if enumeration constants of this type are of type double.
+tags: [negative, compile-only]
 ---*/
-{{c.defs}}
-let d: {{c.to_type}}
+enum Color: double { Red = 0.0, Green = 100.0, Blue = 101.0 }
 
-function main(): void {
-{%- for v in c['values'] %}
-    let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
-    d = s{{loop.index}}  // this var assignment is tested
-    arktest.assertEQ(d, {{v.val}})
-{%- endfor %}
+{{c.decl}}
+
+function main() {
+    {{c.use|indent}}
 }
 {%- endfor %}

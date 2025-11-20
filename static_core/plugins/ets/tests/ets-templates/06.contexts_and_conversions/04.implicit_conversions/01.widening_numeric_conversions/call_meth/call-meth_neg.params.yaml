@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,9 @@
 
 ---
 cases:
-  - { ptype: [double], type: Double, val: "42 as byte" }
-  - { ptype: [double], type: Double, val: "(127).toShort()" }
-  - { ptype: [double], type: Double, val: "-0x5A5A5A5A" }
-  - { ptype: [double], type: Double, val: "3.14" }
+    - from_type: byte
+      to_type: char
+      values:
+          - { expr: 0b0 as byte, val: "c'\\u0000'" }
+          - { expr: Byte.MIN_VALUE, val: "c'\\uFF80'" }
+          - { expr: Byte.MAX_VALUE, val: "c'\\u007F'" }
