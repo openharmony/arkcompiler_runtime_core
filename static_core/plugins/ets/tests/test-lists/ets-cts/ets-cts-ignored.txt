@@ -339,28 +339,6 @@
 07.expressions/11.function_call_expression/fixed_array_predefined_neg_14.ets
 07.expressions/11.function_call_expression/fixed_array_predefined_neg_15.ets
 
-#31353  Semantic error ESE0129: Call to `foo` is ambiguous
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_17.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_18.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_6.ets
-
-#31355 Semantic error ESE0131: Function foo with this assembly signature already declared.
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_20.ets
-07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_4.ets
-07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.ets
-
-#31357 wrong function selected
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_10.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_11.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_14.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_16.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_2.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_21.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_5.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_22.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_24.ets
-
 #28679
 07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_0.ets
 07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_1.ets
