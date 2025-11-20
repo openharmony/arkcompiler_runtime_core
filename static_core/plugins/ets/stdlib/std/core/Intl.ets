@@ -741,6 +741,8 @@ export class DateTimeFormat {
                 resolvedOptions.hourCycle = hourCycleOpt ? hourCycleOpt : this.getLocaleHourCycle()
             }
 
+            resolvedOptions.locale = this.locale
+
             resolvedOptions.hour12 = resolvedOptions.hourCycle == "h11" || resolvedOptions.hourCycle == "h12"
 
             resolvedOptions.dateStyle = this.options.dateStyle
@@ -2489,6 +2491,9 @@ export class DateTimeFormat {
                 pluralCategories: categories,
                 type: type,
             } as ResolvedPluralRulesOptions
+            if (this.options.maximumFractionDigits < this.options.minimumFractionDigits) {
+                this.options.maximumFractionDigits = this.options.minimumFractionDigits
+            }
         }
 
         private resolveLocale(localeMatcher: "lookup" | "best fit", locales?: string | FixedArray<string>): string {

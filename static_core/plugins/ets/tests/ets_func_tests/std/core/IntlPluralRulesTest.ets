@@ -86,6 +86,18 @@ function testResolvedOptions() {
         const result = rules.resolvedOptions()
         arktest.assertEQ(result.minimumSignificantDigits, 3)
     }
+    {
+        const rules = new Intl.PluraRules('zh',{ minimumSignificantDigits: 4});
+        const value = rules.select(0);
+        arktest.assertEQ(result.maximumFractionDigits, 4);
+        arktest.assertEQ(value, 'other');
+    }
+    {
+        const rules = new Intl.PluraRules('zh',{ minimumSignificantDigits: 10});
+        const value = rules.select(0);
+        arktest.assertEQ(result.maximumFractionDigits, 10);
+        arktest.assertEQ(value, 'other');
+    }
 }
 
 function runTestWithOptions(locale: string, value: number, options: Intl.PluralRulesOptions, expected: string) {
