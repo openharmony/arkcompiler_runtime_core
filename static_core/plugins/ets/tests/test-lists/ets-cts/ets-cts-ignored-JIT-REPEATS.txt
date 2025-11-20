@@ -1,5 +1,0 @@
-#26038
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
-
-16.concurrency/03.asynchronous_api/03.async_methods/async_method29.ets
-16.concurrency/03.asynchronous_api/03.async_methods/async_method30.ets
