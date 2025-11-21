@@ -42,3 +42,4 @@ cases:
    decl: |-
     import {foo as A} from "./modules/mod2.d"
     import {boo as A} from "./modules/mod3.d"
+    A()

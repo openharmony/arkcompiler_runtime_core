@@ -2150,3 +2150,9 @@
 07.expressions/28.conditional-or_expression/conditional_or_bool_3.ets
 09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
 09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
+
+#31384
+14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
+
+#31411
+13.modules_and_namespaces/01.import_directives/03.selective_binding/import_conflict_neg.ets
