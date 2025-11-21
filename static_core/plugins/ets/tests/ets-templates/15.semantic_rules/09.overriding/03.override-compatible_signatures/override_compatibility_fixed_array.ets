@@ -24,7 +24,7 @@ desc: >-
     - FixedArray type
 
     Every type is override-compatible with itself (see Invariance).
-tags: [{{c.tags}}]
+tags: []
 params: {{c.params}}
 ---*/
 

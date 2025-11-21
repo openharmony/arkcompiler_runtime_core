@@ -18,7 +18,7 @@
 /*---
 desc: >-
       Verify static initializer works correctly according to the access modifier configured
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 {{c.decl}}

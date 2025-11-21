@@ -20,7 +20,7 @@ desc: >-
     An instance method is defined in a subclass with the same name as the instance method in a superclass.
     If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used.
     Otherwise, a compile-time error occurs.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 let res: number = 0;

@@ -15,7 +15,7 @@
 {%- for c in cases %}
 /*---
 desc: A compile-time error occurs if type T is not preserved by Type Erasure
-tags: [{{c.tags}}]
+tags: []
 ---*/
 {{c.decl}}
 

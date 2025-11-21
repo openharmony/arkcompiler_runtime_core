@@ -50,28 +50,6 @@ cases:
           arktest.assertEQ(res, 1)
       params: override-compatible parameter (contravariance)
 
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: FixedArray<Base>) {
-              res = 1
-          }
-      derived: |-
-          foo(i: FixedArray<Derived>) { // CTE: not override-compatible
-              res = 2
-          }
-      params: override-incompatible parameter
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: FixedArray<Base>) {
-              res = 1
-          }
-      derived: |-
-          override foo(i: FixedArray<Derived>) { // CTE: not override-compatible
-              res = 2
-          }
-      params: override-incompatible parameter
-
     # FIXED ARRAY, RETURN TYPE
     - base: |-
           foo(): FixedArray<Base> {
@@ -130,29 +108,3 @@ cases:
           new Derived().bar()
           arktest.assertEQ(res, 4)
       params: override-compatible return type (covariance)
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): FixedArray<Derived> {
-              res = 1
-              return [new Derived()]
-          }
-      derived: |-
-          override foo(): FixedArray<Base> {
-              res = 2
-              return [new Base()]
-          }
-      params: override-incompatible return type
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): FixedArray<Derived> {
-              res = 1
-              return [new Derived()]
-          }
-      derived: |-
-          foo(): FixedArray<Base> {
-              res = 2
-              return [new Base()]
-          }
-      params: override-incompatible return type

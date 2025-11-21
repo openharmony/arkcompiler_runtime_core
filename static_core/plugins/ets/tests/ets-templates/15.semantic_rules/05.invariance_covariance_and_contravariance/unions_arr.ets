@@ -18,7 +18,7 @@
 desc: >-
     Variance is how subtyping between types relates to subtyping between derived types.
     Unions are invariant on nested Array types.
-tags: [{{c.tags}}]
+tags: [compile-only, negative]
 ---*/
 
 class A {}

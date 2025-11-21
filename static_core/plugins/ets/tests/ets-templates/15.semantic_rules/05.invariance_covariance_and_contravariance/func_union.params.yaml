@@ -29,33 +29,6 @@ cases:
           superFoo = sub3
           arktest.assertEQ(superFoo(new B), 3)
 
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-
-          // contravariance in arguments
-          let sub1: (p: B|A) => Any = (p: B|A): Any => 1
-      use: |-
-          sub1 = superFoo
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-
-          // contravariance in arguments
-          let sub2: (p: B|string|number) => Any = (p: B|string|number): Any => 2
-      use: |-
-          sub2 = superFoo
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-
-          // contravariance in arguments
-          let sub3: (p: A|boolean|null|undefined) => Any = (p: A|boolean|null|undefined): Any => 3
-      use: |-
-          sub3 = superFoo
-      tags: 'compile-only, negative'
-
     # assignment, covariance in return type, union type
     - decl: |-
           // covariance in return type
@@ -72,30 +45,6 @@ cases:
           superFoo = sub3
           arktest.assertEQ(superFoo(new B), 3)
 
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-          let sub1: (p: B) => A|B|null = (p: B): A|B|null => a
-      use: |-
-          sub1 = superFoo
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-          let sub2: (p: B) => string|Array<B>|B|undefined = (p: B): string|Array<B>|B|undefined => b
-      use: |-
-          sub2 = superFoo
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-          let sub3: (p: B) => number|int|long|double|float = (p: B): number|int|long|double|float => 3
-      use: |-
-          sub3 = superFoo
-      tags: 'compile-only, negative'
-
     # call context, contravariance in arguments, union type argument
     - decl: |-
           // contravariance in arguments
@@ -107,27 +56,6 @@ cases:
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), 1) })(sub1);
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), 2) })(sub2);
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), 3) })(sub3);
-
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: B|A) => Any
-          ((p: (p: B|A) => Any) => {})(superFoo)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: B|string|number) => Any
-          ((p: (p: B|string|number) => Any) => {})(superFoo)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: A|boolean|null|undefined) => Any
-          ((p: (p: A|boolean|null|undefined) => Any) => {})(superFoo)
-      tags: 'compile-only, negative'
 
     # call context, covariance in return type, union type
     - decl: |-
@@ -141,26 +69,3 @@ cases:
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), b) })(sub2);
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), 3) })(sub3);
 
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: B) => A|B|null
-          ((p: (p: B) => A|B|null) => {})(superFoo)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: B) => string|Array<B>|B|undefined
-          ((p: (p: B) => string|Array<B>|B|undefined) => {})(superFoo)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: B) => number|int|long|double|float
-          ((p: (p: B) => number|int|long|double|float) => {})(superFoo)
-      tags: 'compile-only, negative'

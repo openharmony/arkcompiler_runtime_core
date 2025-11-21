@@ -19,14 +19,12 @@ cases:
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           sup = sub
-      tags: 'compile-only, negative'
 
     - decl: |-
           let sup: Array<A|string|null>|null|string|undefined = supArr
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           sub = sup
-      tags: 'compile-only, negative'
 
     # class literal
     - decl: |-
@@ -36,7 +34,6 @@ cases:
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           let x: X = { f: sub }
-      tags: 'compile-only, negative'
 
     - decl: |-
           class X {
@@ -44,8 +41,7 @@ cases:
           }
           let sup: Array<A|string|null>|null|string|undefined = supArr
       use: |-
-          let x: X = { f: sup }
-      tags: 'compile-only, negative'
+          let x: X = { f: sup }'
 
     # interface literal
     - decl: |-
@@ -55,7 +51,6 @@ cases:
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           let i: I = { f: sub }
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {
@@ -64,33 +59,28 @@ cases:
           let sup: Array<A|string|null>|null|string|undefined = supArr
       use: |-
           let i: I = { f: sup }
-      tags: 'compile-only, negative'
 
     # array literal
     - decl: |-
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           let arr: Array<Array<A|string|null>|null|string|undefined> = [sub]
-      tags: 'compile-only, negative'
 
     - decl: |-
           let sup: Array<A|string|null>|null|string|undefined = supArr
       use: |-
           let arr: Array<Array<B|string|null>|null|string|undefined> = [sup]
-      tags: 'compile-only, negative'
 
     # tuple literal
     - decl: |-
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
-          let tup: [Array<A|string|null>|null|string|undefined, Array<A|string|null>|null|string|undefined] = [sub, sub]
-      tags: 'compile-only, negative'
+          let tup: [Array<A|string|null>|null|string|undefined, Array<A|string|null>|null|string|undefined] = [sub, sub]'
 
     - decl: |-
           let sup: Array<A|string|null>|null|string|undefined = supArr
       use: |-
           let tup: [Array<B|string|null>|null|string|undefined, Array<B|string|null>|null|string|undefined] = [sup, sup]
-      tags: 'compile-only, negative'
 
     # call context
     - decl: |-
@@ -98,11 +88,9 @@ cases:
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           ((p: Array<A|string|null>|null|string|undefined) => {})(sub)
-      tags: 'compile-only, negative'
 
     - decl: |-
           let sup: Array<A|string|null>|null|string|undefined = supArr
           let sub: Array<B|string|null>|null|string|undefined = subArr
       use: |-
           ((p: Array<B|string|null>|null|string|undefined) => {})(sup)
-      tags: 'compile-only, negative'

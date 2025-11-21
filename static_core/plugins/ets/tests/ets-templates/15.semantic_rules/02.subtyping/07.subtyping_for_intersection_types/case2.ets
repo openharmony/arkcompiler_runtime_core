@@ -18,7 +18,7 @@
 /*---
 desc: >-
     Type T is a subtype of intersection type (I1 & ... & In) if T is a subtype of each Ii.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 class A {}

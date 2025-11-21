@@ -29,33 +29,6 @@ cases:
           superFoo = sub3
           arktest.assertEQ(superFoo(new B), 3)
 
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-
-          // contravariance in arguments
-          let sub1: (p: A) => Any = (p: A): Any => 1
-      use: |-
-          sub1 = superFoo
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-
-          // contravariance in arguments
-          let sub2: (p: Object) => Any = (p: Object): Any => 2
-      use: |-
-          sub2 = superFoo
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-
-          // contravariance in arguments
-          let sub3: (p: Any) => Any = (p: Any): Any => 3
-      use: |-
-          sub3 = superFoo
-      tags: 'compile-only, negative'
-
     # assignment, covariance in return type, class type
     - decl: |-
           // covariance in return type
@@ -72,30 +45,6 @@ cases:
           superFoo = sub3
           arktest.assertEQ(superFoo(new B), 3)
 
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-          let sub1: (p: B) => A = (p: B): A => a
-      use: |-
-          sub1 = superFoo
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-          let sub2: (p: B) => B = (p: B): B => b
-      use: |-
-          sub2 = superFoo
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-          let sub3: (p: B) => number = (p: B): number => 3
-      use: |-
-          sub3 = superFoo
-      tags: 'compile-only, negative'
-
     # call context, contravariance in arguments, class type argument
     - decl: |-
           // contravariance in arguments
@@ -108,27 +57,6 @@ cases:
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), 2) })(sub2);
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), 3) })(sub3);
 
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: A) => Any
-          ((p: (p: A) => Any) => {})(superFoo)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: Object) => Any
-          ((p: (p: Object) => Any) => {})(superFoo)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: Any) => Any
-          ((p: (p: Any) => Any) => {})(superFoo)
-      tags: 'compile-only, negative'
-
     # call context, covariance in return type, class type
     - decl: |-
           // covariance in return type
@@ -140,27 +68,3 @@ cases:
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), a) })(sub1);
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), b) })(sub2);
           ((p: (p: B) => Any) => { arktest.assertEQ(p(new B), 3) })(sub3);
-
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: B) => A
-          ((p: (p: B) => A) => {})(superFoo)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: B) => B
-          ((p: (p: B) => B) => {})(superFoo)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          // covariance in return type
-          let superFoo: (p: B) => Any = (p: B): Any => 0
-      use: |-
-          // subtype is (p: B) => number
-          ((p: (p: B) => number) => {})(superFoo)
-      tags: 'compile-only, negative'

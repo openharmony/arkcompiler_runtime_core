@@ -21,7 +21,7 @@ desc: >-
     subclass hides the previous static method. Otherwise, a compile-time error occurs.
 
     {{c.doc|indent}}
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 let res: number = 0;

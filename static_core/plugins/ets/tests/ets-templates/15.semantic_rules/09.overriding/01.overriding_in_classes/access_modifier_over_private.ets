@@ -25,7 +25,7 @@ desc: >-
     A compile-time error occurs if an attempt is made to do the following:
         • Override a private method of a superclass;
 
-tags: [{{c.tags}}]
+tags: [compile-only, negative]
 ---*/
 
 let res: number = 0;

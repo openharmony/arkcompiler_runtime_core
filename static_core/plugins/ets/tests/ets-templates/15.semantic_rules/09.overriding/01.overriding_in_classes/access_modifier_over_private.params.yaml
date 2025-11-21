@@ -14,8 +14,7 @@
 ---
 cases:
   # Override private
-  - tags: negative, compile-only
-    decl: |-
+  - decl: |-
       class Derived extends Base {
         override private_foo/* @@ label */() { res = 11; }
       }
@@ -23,8 +22,7 @@ cases:
     expected_error: |-
       /* @@@ label Error TypeError: Method private_foo(): void in Derived not overriding any method */
 
-  - tags: negative, compile-only
-    decl: |-
+  - decl: |-
       class Derived extends Base implements Interface {
         public override private_foo/* @@ label */() { res = 11; }
       }
@@ -32,8 +30,7 @@ cases:
     expected_error: |-
       /* @@@ label Error TypeError: Method private_foo(): void in Derived not overriding any method */
 
-  - tags: negative, compile-only
-    decl: |-
+  - decl: |-
       class Derived extends Base implements Interface {
         protected override private_foo/* @@ label */() { res = 11; }
       }
@@ -41,8 +38,8 @@ cases:
     expected_error: |-
       /* @@@ label Error TypeError: Method private_foo(): void in Derived not overriding any method */
 
-  - tags: negative, compile-only
-    decl: |-
+
+  - decl: |-
       class Derived extends Base implements Interface {
         private override private_foo/* @@ label */() { res = 11; }
       }
@@ -50,8 +47,7 @@ cases:
     expected_error: |-
       /* @@@ label Error TypeError: Method private_foo(): void in Derived not overriding any method */
 
-  - tags: negative, compile-only
-    decl: |-
+  - decl: |-
       class Derived extends Base implements Interface {
         private override private_interface_foo/* @@ label */() { res = 11; }
       }
@@ -61,8 +57,7 @@ cases:
 
   # use method with the same name as private method of the Base class
 
-  - tags: negative, compile-only
-    decl: |-
+  - decl: |-
       class Derived extends Base implements Interface {
         public_foo() { this.private_foo(); }
         private private_foo/* @@ label */() { res = 11; }
@@ -73,8 +68,7 @@ cases:
     expected_error: |-
       /* @@@ label Error TypeError: Method private_foo(): void in Derived not overriding any method */
 
-  - tags: negative, compile-only
-    decl: |-
+  - decl: |-
       class Derived extends Base {
         public private_foo/* @@ label */() { res = 11; }
       }

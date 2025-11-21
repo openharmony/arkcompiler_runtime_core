@@ -14,10 +14,6 @@
 ---
 cases:
     - decl: '{x: 42}'
-      tags: [compile-only, negative]
     - decl: '[]'
-      tags: [compile-only, negative]
     - decl: '[[1], []]'
-      tags: [compile-only, negative]
     - decl: '[[], []]'
-      tags: [compile-only, negative]

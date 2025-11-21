@@ -19,7 +19,7 @@ desc: >-
     There are tricky cases related to overloading when a smart type may
     lead to the call of the function or method which suits the smart type
     of an argument rather than the static one.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 interface I {

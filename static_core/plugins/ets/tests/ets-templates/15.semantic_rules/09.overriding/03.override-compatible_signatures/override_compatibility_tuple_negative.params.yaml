@@ -15,8 +15,7 @@
 cases:
     # TUPLE, PARAMETER
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(i: TPL_OB) {
               res = 1
           }
@@ -26,8 +25,7 @@ cases:
           }
       params: overload-incompatible parameter
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(i: TPL_DO) {
               res = 1
           }
@@ -37,8 +35,7 @@ cases:
           }
       params: overload-incompatible parameter
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(i: TPL_OOO) {
               res = 1
           }
@@ -48,8 +45,7 @@ cases:
           }
       params: overload-compatible parameter
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(i: TPL_OO) {
               res = 1
           }
@@ -59,8 +55,7 @@ cases:
           }
       params: overload-incompatible parameter
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(i: TPL_BD) {
               res = 1
           }
@@ -70,8 +65,7 @@ cases:
           }
       params: overload-incompatible parameter
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(i: TPL_BB) {
               res = 1
           }
@@ -81,8 +75,7 @@ cases:
           }
       params: override-incompatible parameter
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(i: TPL_DD) {
               res = 1
           }
@@ -94,8 +87,7 @@ cases:
 
     # TUPLE, RETURN TYPE
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(): TPL_BD {
               res = 1
               return bd
@@ -107,8 +99,7 @@ cases:
           }
       params: override-incompatible return type
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(): TPL_BD {
               res = 1
               return bd
@@ -120,8 +111,7 @@ cases:
           }
       params: override-incompatible return type
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(): TPL_OB {
               res = 1
               return ob
@@ -133,8 +123,7 @@ cases:
           }
       params: override-incompatible return type
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(): TPL_OB {
               res = 1
               return ob
@@ -146,8 +135,7 @@ cases:
           }
       params: override-incompatible return type
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(): TPL_BB {
               res = 1
               return bb
@@ -159,8 +147,7 @@ cases:
           }
       params: override-incompatible return type
 
-    - tags: 'negative, compile-only'
-      base: |-
+    - base: |-
           foo(): TPL_BB {
               res = 1
               return bb
