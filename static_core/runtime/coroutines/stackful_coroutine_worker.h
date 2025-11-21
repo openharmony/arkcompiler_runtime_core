@@ -207,7 +207,11 @@ private:
     void PushToRunnableQueue(Coroutine *co, CoroutinePriority priority) REQUIRES(runnablesLock_);
     Coroutine *PopFromRunnableQueue();
     bool RunnableCoroutinesExist() const;
-    void WaitForRunnables(bool needTimedWait, uint64_t waitingTime) REQUIRES(runnablesLock_);
+    /**
+     * @brief Method waits for @param waitingTime ms, if waitingTimeMs == WAITING_TIME_UNLIMITED, will wait until signal
+     * of runnablesCv_ condvar
+     */
+    void WaitForRunnables(uint64_t waitingTimeMs) REQUIRES(runnablesLock_);
     /**
      * @brief Register a new active (= runnable or running) coroutine on this worker.
      * @param newCoro the incoming coroutine to register
@@ -269,6 +273,11 @@ private:
 
     void ProcessTimerEvents();
 
+    /**
+     * @brief Method checks if we need to wait timer and if it is, returns time to wait.
+     * @returns false and 0 if no need to wait. Otherwise, @returns true and time to wait
+     * (if time is WAITING_TIME_UNLIMITED constant, no timed waiting, only waiting for signal)
+     */
     std::pair<bool, uint64_t> CalculateShortestTimerDelay();
 
 private:  // data members
@@ -314,6 +323,8 @@ private:  // data members
 
     // the maximum continuous execution time of a coroutine
     static constexpr uint32_t MAX_EXECUTION_DURATION_MS = 6000;
+
+    static constexpr uint64_t WAITING_TIME_UNLIMITED = std::numeric_limits<uint64_t>::max();
 };
 
 }  // namespace ark
