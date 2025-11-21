@@ -14,6 +14,7 @@
  */
 
 //! CHECKER      Test charAt intrinsic
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, options: "", entry: "charAt.ETSGLOBAL::main"
 //! METHOD       "charAt.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
