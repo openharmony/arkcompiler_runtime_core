@@ -80,7 +80,7 @@ class StdlibTemplatesGenerator(IGenerator):
                 raise common_exceptions.UnknownException("Internal error: there should be tests")
             for key, test in tests.items():
                 output_filepath = outpath / f"{name_without_ext}_{key}{OUT_EXTENSION}"
-                write_2_file(file_path=output_filepath, content=test)
+                write_2_file(file_path=output_filepath, content=test, disallow_overwrite=True)
                 generated_test_list.append(str(output_filepath))
         return generated_test_list
 
