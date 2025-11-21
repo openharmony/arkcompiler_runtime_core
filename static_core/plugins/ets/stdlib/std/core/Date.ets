@@ -431,7 +431,15 @@ export class Date {
         second: "numeric"
     }
 
-    private static isoDateRegExp: RegExp = new RegExp("^(-?(?:[0-9]{1,}))-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(?:T([01][0-9]|2[0-3])(?::[0-5][0-9])?(?::[0-5][0-9](?:\\.[0-9]+)?)?)?(Z|(?:[+-])(?:[01][0-9]|2[0-3]):[0-5][0-9])?$");
+    private static isoDateRegExp: RegExp = new RegExp(
+        "^((?:[0-9]{4}|(?!-000000)(?:-|\\+)[0-9]{6}))" +  // capture group 1：4 digits only, or 6 digits with `-` or `+`;
+        "(?:-(0[1-9]|1[0-2])" +          // month, 01-12
+        "(?:-(0[1-9]|[12][0-9]|3[01]))?)?" + // date, 01-31
+        "(?:T([01][0-9]|2[0-3])" +       // hours, 00-23
+        "(?::[0-5][0-9])?" +             // minute, 00-59
+        "(?::[0-5][0-9](?:\\.[0-9]+)?)?)?" + // seconds, 00-59 and milliseconds (options)
+        "(Z|(?:[+-])(?:[01][0-9]|2[0-3]):?[0-5][0-9])?$" // timezone (Z or ±HH:mm/±HHmm)
+    );
 
     private static readonly DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
         year: "numeric",
@@ -511,7 +519,10 @@ export class Date {
         if (tzOffset !== undefined) {
             return date.valueOf() + tzOffset
         }
-        return date.valueOf() + Date.getLocalTimezoneOffset(date.getTime()) * msPerMinute
+        if (dateStr.includes('T')) {
+            return date.valueOf() + Date.getLocalTimezoneOffset(date.getTime()) * msPerMinute;
+        }
+        return date.valueOf()
     }
 
     /**
@@ -809,7 +820,7 @@ export class Date {
     public getUTCDate(): int {
         let localTime = this.ms;
         let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
-        let inLeapYear = ecmaInLeapYear(this.getFullYear());
+        let inLeapYear = ecmaInLeapYear(this.getUTCFullYear());
         let firstDay: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
         return day - firstDay + 1;
     }
@@ -1437,11 +1448,19 @@ export class Date {
      * @param month new month
      */
     public setMonth(month: int): long {
+        let yearsNow: int = this.getFullYear();
+        let yearsOffSet: int = Math.floor(month / 12.0).toInt();
+        let yearsNew = yearsNow + yearsOffSet;
+        let adjustMonth = ((month % 12) + 12) % 12;
+        if (yearsNew !== yearsNow) {
+            this.setFullYear(yearsNew);
+        }
         let inLeapYear = ecmaInLeapYear(this.getFullYear());
-        let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms - this.TZOffset * 60 * msPerSecond));
-        let daysNew: int = getFirstDayInMonth(inLeapYear, month);
-        this.ms -= daysNow * msPerDay;
-        this.ms += daysNew * msPerDay;
+        let daysNow: int = getFirstDayInMonth(inLeapYear, this.getMonth());
+        let daysNew: int = getFirstDayInMonth(ecmaInLeapYear(this.getFullYear()), adjustMonth);
+        let dayOfMonth = this.getDate();
+        this.ms -= (daysNow + dayOfMonth - 1) * msPerDay;
+        this.ms += (daysNew + dayOfMonth - 1) * msPerDay;
         return this.ms;
     }
 
@@ -1462,11 +1481,20 @@ export class Date {
      * @param month new month
      */
     public setUTCMonth(month: int): long {
-        let inLeapYear = ecmaInLeapYear(this.getFullYear());
-        let daysNow: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(this.ms));
-        let daysNew: int = getFirstDayInMonth(inLeapYear, month);
-        this.ms -= daysNow * msPerDay;
-        this.ms += daysNew * msPerDay;
+        let yearsNow: int = this.getUTCFullYear();
+        let yearsOffSet: int = Math.floor(month / 12.0).toInt();
+        let yearsNew: int = yearsNow + yearsOffSet;
+        let adjustedMonth: int = ((month % 12) + 12) % 12;
+        if (yearsNew !== yearsNow) {
+            this.setUTCFullYear(yearsNew);
+        }
+        let inLeapYear = ecmaInLeapYear(this.getUTCFullYear());
+        let daysNow: int = getFirstDayInMonth(inLeapYear, this.getUTCMonth());
+        let daysNew: int = getFirstDayInMonth(ecmaInLeapYear(this.getUTCFullYear()), adjustedMonth);
+
+        let dayOfMonth = this.getUTCDate();
+        this.ms -= (daysNow + dayOfMonth - 1) * msPerDay;
+        this.ms += (daysNew + dayOfMonth - 1) * msPerDay;
         return this.ms;
     }
 
@@ -1873,7 +1901,7 @@ export class Date {
 class ISODateParseResult {
     year: int = 0
     month: int = 0
-    day: int = 0
+    day: int = 1
     hour: int = 0
     minute: int = 0
     second: int = 0
@@ -1934,7 +1962,22 @@ class ISODateParser {
             // expanded year -YYYYYY
             result.year = -this.parseInt(EXPANDED_YEAR_COMPONENT_LENGTH)
         } else {
-            result.year = this.parseInt(YEAR_COMPONENT_LENGTH)
+            const remainingLength = this.endPos - this.currentPos
+            if (remainingLength >= 10 &&
+                this.currentPos + 5 <= this.endPos &&
+                this.dateStr.charAt(this.currentPos + 4) !== c'-' &&
+                this.dateStr.charAt(this.currentPos + 5) === c'-') {
+                const yearStr = this.dateStr.substring(this.currentPos, this.currentPos + 5)
+                for (const literalChar of yearStr.getChars()) {
+                    if (!Char.isDecDigit(literalChar)) {
+                        throw new ISODateParseError()
+                    }
+                }
+                result.year = Double.parseInt(yearStr).toInt()
+                this.currentPos += 5
+            } else {
+                result.year = this.parseInt(YEAR_COMPONENT_LENGTH)
+            }
         }
 
         if (!this.match(DATE_COMPONENTS_SEPARATOR)) {
@@ -1983,13 +2026,13 @@ class ISODateParser {
 
     private parseTimeZoneOffset(): long {
         const tzOffsetHour = this.parseInt(HOUR_COMPONENT_LENGTH)
-        if (!this.match(TIME_COMPONENTS_SEPARATOR)) {
-            throw new ISODateParseError()
-        }
-
-        const tzOffsetMinute = this.parseInt(MINUTE_COMPONENT_LENGTH)
-
-        return tzOffsetHour * msPerHour + tzOffsetMinute * msPerMinute
+        if (this.match(TIME_COMPONENTS_SEPARATOR)) {
+            const tzOffsetMinute = this.parseInt(MINUTE_COMPONENT_LENGTH)
+            return tzOffsetHour * msPerHour + tzOffsetMinute * msPerMinute
+        } else {
+            const tzOffsetMinute = this.parseInt(MINUTE_COMPONENT_LENGTH)
+            return tzOffsetHour * msPerHour + tzOffsetMinute * msPerMinute
+         }
     }
 
     private parseInt(length: int): int {
