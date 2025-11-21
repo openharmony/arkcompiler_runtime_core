@@ -124,8 +124,92 @@ function testBigIntPow() {
     arktest.assertTrue(result == tmp);
 }
 
+function testBigIntStringBin() {
+    arktest.assertEQ(new BigInt("0b1111"), 15n);
+    arktest.assertEQ(new BigInt("0b10"), 2n);
+    arktest.assertEQ(new BigInt("0b0"), 0n);
+    arktest.assertEQ(new BigInt("0b1"), 1n);
+
+    let binaryString = "0b1";
+    for (let i = 0; i < 128; i++) {
+        binaryString += "0";
+    }
+    arktest.assertEQ(new BigInt(binaryString), 340282366920938463463374607431768211456n);
+
+    arktest.assertEQ(new BigInt("0B1111"), 15n);
+    arktest.assertEQ(new BigInt("0B10"), 2n);
+    arktest.assertEQ(new BigInt("0B0"), 0n);
+    arktest.assertEQ(new BigInt("0B1"), 1n);
+
+    binaryString = "0B1";
+    for (let i = 0; i < 128; i++) {
+        binaryString += "0";
+    }
+    arktest.assertEQ(new BigInt(binaryString), 340282366920938463463374607431768211456n);
+}
+
+function testBigIntStringOct() {
+    arktest.assertEQ(new BigInt("0o7"), 7n);
+    arktest.assertEQ(new BigInt("0o10"), 8n);
+    arktest.assertEQ(new BigInt("0o20"), 16n);
+    arktest.assertEQ(new BigInt("0O7"), 7n);
+    arktest.assertEQ(new BigInt("0O10"), 8n);
+    arktest.assertEQ(new BigInt("0O20"), 16n);
+}
+
+function testBigIntStringDec() {
+    arktest.assertEQ(new BigInt("10"), 10n);
+    arktest.assertEQ(new BigInt("18446744073709551616"), 18446744073709551616n);
+    arktest.assertEQ(new BigInt("7"), 7n);
+    arktest.assertEQ(new BigInt("88"), 88n);
+    arktest.assertEQ(new BigInt("900"), 900n);
+    arktest.assertEQ(new BigInt("-10"), -10n);
+    arktest.assertEQ(new BigInt("-18446744073709551616"), -18446744073709551616n);
+    arktest.assertEQ(new BigInt("-7"), -7n);
+    arktest.assertEQ(new BigInt("-88"), -88n);
+    arktest.assertEQ(new BigInt("-900"), -900n);
+    arktest.assertEQ(new BigInt("100.0"), 100n);
+    arktest.assertEQ(new BigInt("100.000"), 100n);
+}
+
+function testBigIntStringHex() {
+    arktest.assertEQ(new BigInt("0xa"), 10n);
+    arktest.assertEQ(new BigInt("0xff"), 255n);
+    arktest.assertEQ(new BigInt("0xfabc"), 64188n);
+    arktest.assertEQ(new BigInt("0xfffffffffffffffffff"), 75557863725914323419135n);
+    arktest.assertEQ(new BigInt("0Xa"), 10n);
+    arktest.assertEQ(new BigInt("0Xff"), 255n);
+    arktest.assertEQ(new BigInt("0Xfabc"), 64188n);
+    arktest.assertEQ(new BigInt("0Xfffffffffffffffffff"), 75557863725914323419135n);
+}
+
+function testBigIntStringError() {
+    const invalidBigIntStrings = [
+        "10x", "10b", "0b", "-0x1", "-0XFFab", 
+        "000 12", "0o", "0x", "00o", "00b", "00x", "10n"
+    ];
+    
+    for (const str of invalidBigIntStrings) {
+        arktest.expectError(() => { BigInt(str) }, "BigInt.parseFromString(): provided string is invalid")
+    }
+
+    const invalidBigIntStrings2 = [
+        "10.5", "11.11", "22.22", "33.33"
+    ];
+    for (let str of invalidBigIntStrings2) {
+        let errMess = "Can't convert number " + str + " to BigInt because it's not an integer"
+        arktest.expectError(() => { BigInt(str) }, errMess)
+    }
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite("BigInt.powTest");
     suite.addTest("Test BigInt pow", testBigIntPow);
+    suite.addTest("Test BigInt String Bin", testBigIntStringBin);
+    suite.addTest("Test BigInt String Oct", testBigIntStringOct);
+    suite.addTest("Test BigInt String Dec", testBigIntStringDec);
+    suite.addTest("Test BigInt String Hex", testBigIntStringHex);
+    suite.addTest("Test BigInt String Error", testBigIntStringError);
+
     return suite.run();
 }

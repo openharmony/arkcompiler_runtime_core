@@ -977,23 +977,119 @@ export final class BigInt {
         return digits
     }
 
+    private static processRadixPrefix(s: string): [string, int] {
+        if (s.length >= 2 && s.charAt(0) == c'0') {
+            const secondChar = s.charAt(1).toLowerCase()
+            switch (secondChar) {
+                case c'b': 
+                    return [s.substring(2), 2]
+                case c'o': 
+                    return [s.substring(2), 8]
+                case c'x': 
+                    return [s.substring(2), 16]
+            }
+        }
+        return [s, 10]
+    }
+
+    private static multiplyDecimalArrayWithDigit(a: Array<int>, digit: int): Array<int> {
+        const lenA: int = a.length
+        const result: Array<int> = Array.create<int>(lenA + 1, 0)
+        let carry: int = 0 
+        
+        for (let i = lenA - 1; i >= 0; i--) {
+            const product: int = a[i] * digit + carry
+            result[i + 1] = product % 10
+            carry = product / 10
+        }
+        
+        if (carry > 0) {
+            result[0] = carry
+            return result
+        } 
+        return result.slice(1)
+        
+    }
+
+    private static addDecimalArrayWithDigit(a: Array<int>, digit: int): Array<int> {
+        if (digit === 0) return a.slice()        
+        const result: Array<int> = a.slice()
+        let carry = digit
+        let i: int = result.length - 1
+        
+        while (i >= 0 && carry > 0) {
+            const sum: int = result[i] + carry
+            result[i] = sum % 10
+            carry = sum / 10
+            i--
+        }
+        if (carry > 0) {
+            result.unshift(carry)
+        }
+        return result
+    }
+
+    private static convertToDecimalArray(s: string, radix: int): Array<int> {
+        if (s.isEmpty()) {
+            return [0]
+        }
+        
+        let result: Array<int> = [0]      
+        for (let i = 0; i < s.length; i++) {
+            let currentChar: char = s.charAt(i)           
+            if (currentChar == c'_') {
+                continue  
+            }
+            
+            let digitValue: int
+            let charCode = currentChar.toInt()
+            
+            if (radix == 16) {
+                if (charCode >= c'0'.toInt() && charCode <= c'9'.toInt()) {
+                    digitValue = charCode - c'0'.toInt()
+                } else if (charCode >= c'a'.toInt() && charCode <= c'f'.toInt()) {
+                    digitValue = charCode - c'a'.toInt() + 10
+                } else {
+                    digitValue = charCode - c'A'.toInt() + 10
+                }
+            } else if (radix == 8) {
+                digitValue = charCode - c'0'.toInt()
+            } else if (radix == 2) {
+                digitValue = charCode - c'0'.toInt()
+            } else {
+                throw new IllegalArgumentError()
+            }
+            
+            result = BigInt.multiplyDecimalArrayWithDigit(result, radix)
+            result = BigInt.addDecimalArrayWithDigit(result, digitValue)
+        }
+        
+        return result
+    }
+
     private static parseFromString(s: string): [FixedArray<int>, int] {
         if (s.isEmpty()) {
             // Return 0 when provided string is empty
             s = "0"
         }
 
-        if (!BigInt.validate(s)) {
+        const processedStringRadix = BigInt.processRadixPrefix(s)
+        s = processedStringRadix[0]
+        let radix = processedStringRadix[1]
+
+        if (s.isEmpty() || !BigInt.validate(s,radix)) {
             throw new Error("BigInt.parseFromString(): provided string is invalid")
         }
 
         let firstChar = s.charAt(0)
         let negative: boolean = (firstChar == c'-')
-        let start = 0
         if (firstChar == c'-' || firstChar == c'+') {
-            start = 1
+            s = s.substring(1)
         }
 
+        if(radix != 10) {
+            s = BigInt.convertToDecimalArray(s,radix).join('')
+        }
         let len: int = s.length.toInt()
         let shift: int = 0
         let expPosition: int = s.indexOf(c'e')
@@ -1001,9 +1097,8 @@ export final class BigInt {
             shift = BigInt.parseInt(s, expPosition + 1, len)
             len = expPosition
         }
-
         let digits = new Array<Int>(0)
-        for (let i = start; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             if (s.charAt(i) == c'_') {
                 continue
             }
@@ -1083,18 +1178,18 @@ export final class BigInt {
         return bytes
     }
 
-    private static validate(s: string): boolean {
+    private static validate(s: string, radix: int = 10): boolean {
         let expPosition = -1
         let isDouble = false
         for (let i = 0; i < s.length; i++) {
             let c = s.charAt(i)
-            if (Char.isDecDigit(c)) {
+            if (BigInt.isValidDigitForRadix(c, radix)) {
             } else if ((c == c'_') && (i > 0) && (i < s.length - 1)) {
                 // Underscore, allowed only between digits
             } else if ((i == 0 || i == expPosition) && (c == c'-' || c == c'+')) {
                 // Minus or plus sign, allowed at the beginning of the string
                 // or at the beggining of the scientific notation
-            } else if (c == c'.' && !isDouble && expPosition < 0) {
+            } else if (c == c'.' && !isDouble && expPosition < 0 && radix == 10) {
                 // Fraction is not allowed in exponential part
                 isDouble = true
             } else if ((c == c'e') && expPosition < 0) {
@@ -1106,6 +1201,26 @@ export final class BigInt {
         }
 
         return true
+    }
+
+    private static isValidDigitForRadix(judgeChar: char, radix: int): boolean {
+        switch (radix) {
+            case 2: 
+                return judgeChar == c'0' || judgeChar == c'1'
+                
+            case 8: 
+                return judgeChar >= c'0' && judgeChar <= c'7'
+                
+            case 10: 
+                return judgeChar >= c'0' && judgeChar <= c'9'
+                
+            case 16: 
+                return (judgeChar >= c'0' && judgeChar <= c'9') || 
+                       (judgeChar >= c'A' && judgeChar <= c'F') ||
+                       (judgeChar >= c'a' && judgeChar <= c'f')
+            default:
+                return false
+        }
     }
 
     private static multiplyDigits(lhs: FixedArray<int>, rhs: FixedArray<int>): FixedArray<int> {
