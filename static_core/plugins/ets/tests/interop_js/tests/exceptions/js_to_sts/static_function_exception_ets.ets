@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 let module1 = ESValue.load('static_function_exception')
 let staticFunctionWithCustomException = module1.getProperty('staticFunctionWithCustomException');
 let staticFunctionWithBuiltinException = module1.getProperty('staticFunctionWithBuiltinException');
@@ -25,7 +25,7 @@ let createCustomErrorA = module2.getProperty('createCustomErrorA');
 
 //1 Static function throws user-defined exception E
 
-//Test 1.1 catch and check  
+//Test 1.1 catch and check
 function CheckCustomException(): boolean {
     try {
         staticFunctionWithCustomException.invoke()
@@ -59,7 +59,7 @@ function CheckMessageCustomException(): boolean {
 
 // 2 Static function throws builtin exception
 
-//Test 2.1 catch and check  
+//Test 2.1 catch and check
 function CheckBuiltinExceptionInStatic(): boolean {
     try {
         staticFunctionWithBuiltinException.invoke()
@@ -122,4 +122,3 @@ function throwTSCustomExceptionWithImportType(): boolean {
         return true;
     }
 }
-

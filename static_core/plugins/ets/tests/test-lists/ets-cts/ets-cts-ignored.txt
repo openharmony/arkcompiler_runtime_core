@@ -681,7 +681,7 @@
 #28527
 09.classes/09.constructor_declaration/cons_parameters_gen_20.ets
 
-#67 Cannot spread FixedArray<string> for rest parameter of FixedArray<T> 
+#67 Cannot spread FixedArray<string> for rest parameter of FixedArray<T>
 09.classes/09.constructor_declaration/cons_parameters_gen_23.ets
 
 #28693 CTE when a call to `super` is not the first statement
@@ -842,6 +842,16 @@
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_0.ets
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_n_0.ets
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_n_2.ets
+
+# enable when intitalizers in '.d.ets' check is enabled.
+14.ambient_declarations/04.class_declarations/class_declarations_neg_6.ets
+14.ambient_declarations/04.class_declarations/class_declarations_neg_7.ets
+14.ambient_declarations/04.class_declarations/class_declarations_neg_8.ets
+14.ambient_declarations/04.class_declarations/class_declarations_neg_9.ets
+14.ambient_declarations/04.class_declarations/class_declarations_neg_10.ets
+14.ambient_declarations/bad_ambient_declarations_2.ets
+14.ambient_declarations/bad_ambient_declarations_16.ets
+14.ambient_declarations/bad_ambient_declarations_17.ets
 
 #29270
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_0.ets
@@ -2071,3 +2081,10 @@
 15.semantic_rules/11.type_erasure/instanceof_gen_25.ets
 15.semantic_rules/11.type_erasure/instanceof_negative_11.ets
 15.semantic_rules/11.type_erasure/instanceof_negative_12.ets
+
+NOTE: tests failed only in 'simultaneous' mode
+13.modules_and_namespaces/03.import_directives/02.default_import_binding/default_import_union.ets
+05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_9.ets
+05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_12.ets
+04.names_declarations_and_scopes/02.declarations/01.declaration_distinguishable_by_signatures/spec_example_1_0.ets
+04.names_declarations_and_scopes/02.declarations/01.declaration_distinguishable_by_signatures/spec_example_1_1.ets

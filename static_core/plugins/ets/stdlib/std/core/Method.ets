@@ -21,7 +21,7 @@ native function TypeAPIMethodInvokeConstructor(methodType: MethodType, args: Fix
 /**
  * Represents method of class or interface
  */
-export final class Method extends Object {
+export class Method extends Object {
     private methodType: MethodType | undefined // not undefined if already created
     private ownerType: Type | undefined // not undefined if already created
     private name: string = ""

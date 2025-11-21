@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,10 @@
 
  /*---
  desc: Issue 22981. SIGSEGV on use qualified type name
- tags: []
-
+ tags: [compile-only]
  ---*/
 
-package packm
-
+import {myns} from "./other.ets"
 
 function main() {
     const mr: myns.IResult = myns.publishResult()

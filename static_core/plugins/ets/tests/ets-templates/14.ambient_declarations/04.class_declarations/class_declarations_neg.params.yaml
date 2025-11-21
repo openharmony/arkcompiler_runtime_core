@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -53,21 +53,21 @@ declarations:
           a: number = 1;
       }
     stdout: |-
-      "Syntax error ESY0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
   #7
   - decl: |-
       declare final class B {
           b: number = 1;
       }
     stdout: |-
-      "Syntax error ESY0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
   #8
   - decl: |-
       declare abstract class C {
           c: number = 1;
       }
     stdout: |-
-      "Syntax error ESY0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
   #9
   - decl: |-
       class A {}
@@ -76,7 +76,7 @@ declarations:
           b: number = 1;
       }
     stdout: |-
-      "Syntax error ESY0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
   #10
   - decl: |-
       interface A {}
@@ -85,7 +85,7 @@ declarations:
           b: number = 1;
       }
     stdout: |-
-      "Syntax error ESY0125: Initializers are not allowed in ambient contexts."
+      "Semantic error ESE0125: Initializers are not allowed in ambient contexts."
   #11
   - decl: |-
       declare class A<T1, T2>

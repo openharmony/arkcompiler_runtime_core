@@ -16,7 +16,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_gtest(ets_interop_js_indexed_type
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indexed_type.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indexed_type.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indexed_type_ets.ets
     TS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/indexed_type.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/proxy.ts

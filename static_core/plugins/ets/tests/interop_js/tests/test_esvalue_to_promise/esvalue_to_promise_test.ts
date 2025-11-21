@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 let etsVm = globalThis.gtest.etsVm;
-let checkToPromise = etsVm.getFunction('Lesvalue_to_promise_test/ETSGLOBAL;', 'checkToPromise');
-let checkToNumber = etsVm.getFunction('Lesvalue_to_promise_test/ETSGLOBAL;', 'checkToNumber');
-let checkToString = etsVm.getFunction('Lesvalue_to_promise_test/ETSGLOBAL;', 'checkToString');
-let checkToBoolean = etsVm.getFunction('Lesvalue_to_promise_test/ETSGLOBAL;', 'checkToBoolean');
-let checkToBigInt = etsVm.getFunction('Lesvalue_to_promise_test/ETSGLOBAL;', 'checkToBigInt');
+let checkToPromise = etsVm.getFunction('Lesvalue_to_promise_test_ets/ETSGLOBAL;', 'checkToPromise');
+let checkToNumber = etsVm.getFunction('Lesvalue_to_promise_test_ets/ETSGLOBAL;', 'checkToNumber');
+let checkToString = etsVm.getFunction('Lesvalue_to_promise_test_ets/ETSGLOBAL;', 'checkToString');
+let checkToBoolean = etsVm.getFunction('Lesvalue_to_promise_test_ets/ETSGLOBAL;', 'checkToBoolean');
+let checkToBigInt = etsVm.getFunction('Lesvalue_to_promise_test_ets/ETSGLOBAL;', 'checkToBigInt');
 
 export function sleep(ms: number): Promise<void> {
     return new Promise<void>((resolve) => {

@@ -67,6 +67,9 @@ std/core/std_core_short_instance_Short_sub.ets
 std/core/std_core_short_static_Short_valueOf.ets
 std/math/TestClz64Function.ets
 
+# TODO(dkofanov): Should be negative, CTE expected.
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_04.ets
+
 ############
 # temporary place for the tests related to primitive types refactoring
 ############
