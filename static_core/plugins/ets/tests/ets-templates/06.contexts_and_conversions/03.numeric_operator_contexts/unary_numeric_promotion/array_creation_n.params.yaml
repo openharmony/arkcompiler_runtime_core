@@ -17,3 +17,7 @@ cases:
   - { type: Long, val: new Long(1 as long), len: 1 }
   - { type: char, val: "c'A'", len: 65 }
   - { type: Char, val: new Char(c' '), len: 32 }
+  - { type: float, val: 10.0f, len: 10 }
+  - { type: double, val: 20.0, len: 20 }
+  - { type: Float, val: new Float(1.0f), len: 1 }
+  - { type: Double, val: new Double(2.0), len: 2 }
