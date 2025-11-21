@@ -18,6 +18,9 @@ function main(): int {
     dtfTestsuite.addTest("dateTimeFormatTest1", dateTimeFormatTest1)
     dtfTestsuite.addTest("dateTimeFormatTest2", dateTimeFormatTest2)
     dtfTestsuite.addTest("dateTimeFormatTest3", dateTimeFormatTest3)
+    dtfTestsuite.addTest("dateTimeFormatTest4", dateTimeFormatTest4)
+    dtfTestsuite.addTest("dateTimeFormatTest5", dateTimeFormatTest5)
+    dtfTestsuite.addTest("dateTimeFormatTest6", dateTimeFormatTest6)
 
     dtfTestsuite.addTest("dateToLocaleString1", dateToLocaleString1)
     dtfTestsuite.addTest("dateToLocaleString2", dateToLocaleString2)
@@ -62,6 +65,39 @@ function dateTimeFormatTest3() {
     arktest.assertEQ('UTC', intlObj.resolvedOptions().timeZone)
     arktest.assertEQ('short', intlObj.resolvedOptions().timeZoneName)
 
+}
+
+function dateTimeFormatTest4() {
+    let options: Intl.DateTimeFormatOptions = {
+            year: "numeric", month: "long", day: "numeric",
+            hour: "2-digit", minute: "2-digit", timeZoneName: "short", timeZone: "UTC", hour12: true
+    };
+    let intlObj = new Intl.DateTimeFormat("en-us", options);
+    let rops = intlObj.resolvedOptions();
+    arktest.assertEQ(rops.locale, 'en-US');
+    arktest.assertEQ(rops.calendar, 'gregory');
+}
+
+function dateTimeFormatTest5() {
+    let options: Intl.DateTimeFormatOptions = {
+            year: "numeric", month: "long", day: "numeric",
+            hour: "2-digit", minute: "2-digit", timeZoneName: "short", timeZone: "UTC", hour12: true
+    };
+    let intlObj = new Intl.DateTimeFormat("zh-CN", options);
+    let rops = intlObj.resolvedOptions();
+    arktest.assertEQ(rops.locale, 'zh-CN');
+    arktest.assertEQ(rops.calendar, 'gregory');
+}
+
+function dateTimeFormatTest6() {
+    let options: Intl.DateTimeFormatOptions = {
+            year: "numeric", month: "long", day: "numeric",
+            hour: "2-digit", minute: "2-digit", timeZoneName: "short", timeZone: "UTC", hour12: true
+    };
+    let intlObj = new Intl.DateTimeFormat("am-ET-u-ca-ethioaa", options);
+    let rops = intlObj.resolvedOptions();
+    arktest.assertEQ(rops.locale, 'am-ET-u-ca-ethioaa');
+    arktest.assertEQ(rops.calendar, 'ethioaa');
 }
 
 function dateToLocaleString1() {
