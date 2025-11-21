@@ -31,6 +31,8 @@ class MetadataTest(unittest.TestCase):
         self.assertEqual(str(metadata.tags), '[]')
         self.assertIsNone(metadata.desc)
         self.assertIsNone(metadata.files)
+        self.assertIsNone(metadata.expected_out)
+        self.assertIsNone(metadata.expected_error)
 
     def test_metadata_main_items(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
@@ -149,3 +151,99 @@ class MetadataTest(unittest.TestCase):
         self.assertIsInstance(metadata, TestMetadata)
         self.assertIsNotNone(metadata)
         self.assertEqual(len(metadata.tags.invalid_tags), 0)
+
+    def test_expected_out_string(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': 'output line 1\noutput line 2',
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_out, 'output line 1\noutput line 2')
+        self.assertIsInstance(metadata.expected_out, str)
+
+    def test_expected_out_list(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': ['output line 1', 'output line 2', 'output line 3'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_out, 'output line 1\noutput line 2\noutput line 3')
+        self.assertIsInstance(metadata.expected_out, str)
+
+    def test_expected_out_empty_string(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': '',
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_out, '')
+        self.assertIsInstance(metadata.expected_out, str)    
+
+    def test_expected_error_string(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_error': 'error line 1\nerror line 2',
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_error, 'error line 1\nerror line 2')
+        self.assertIsInstance(metadata.expected_error, str)
+
+    def test_expected_error_list(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_error': ['error line 1', 'error line 2', 'error line 3'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_error, 'error line 1\nerror line 2\nerror line 3')
+        self.assertIsInstance(metadata.expected_error, str)
+
+    def test_expected_error_empty_string(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_error': '',
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_error, '')
+        self.assertIsInstance(metadata.expected_error, str)
+
+    def test_expected_out_and_error_both_strings(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': 'output text',
+            'expected_error': 'error text',
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_out, 'output text')
+        self.assertEqual(metadata.expected_error, 'error text')
+        self.assertIsInstance(metadata.expected_out, str)
+        self.assertIsInstance(metadata.expected_error, str)
+
+    def test_expected_out_and_error_both_lists(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': ['out1', 'out2'],
+            'expected_error': ['err1', 'err2', 'err3'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_out, 'out1\nout2')
+        self.assertEqual(metadata.expected_error, 'err1\nerr2\nerr3')
+        self.assertIsInstance(metadata.expected_out, str)
+        self.assertIsInstance(metadata.expected_error, str)
+
+    def test_expected_out_list_single_element(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_out': ['single line'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_out, 'single line')
+        self.assertIsInstance(metadata.expected_out, str)
+
+    def test_expected_error_list_single_element(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'expected_error': ['single error'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(metadata.expected_error, 'single error')
+        self.assertIsInstance(metadata.expected_error, str)
