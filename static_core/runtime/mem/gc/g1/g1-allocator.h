@@ -40,6 +40,8 @@ class ObjectAllocatorG1 final : public ObjectAllocatorGenBase {
     static_assert(REGION_SIZE == mem::G1_REGION_SIZE);
 
 public:
+    using GarbageRegions = ObjectAllocator::GarbageRegions;
+
     NO_MOVE_SEMANTIC(ObjectAllocatorG1);
     NO_COPY_SEMANTIC(ObjectAllocatorG1);
 
@@ -114,9 +116,11 @@ public:
     const std::vector<MemRange> &GetYoungSpaceMemRanges() final;
 
     template <bool INCLUDE_CURRENT_REGION>
-    PandaVector<std::pair<uint32_t, Region *>> GetTopGarbageRegions(double garbageThreshold = 0.0)
+    void GetTopGarbageRegions(double garbageThreshold, GarbageRegions &garbageRegions,
+                              PandaVector<Region *> &emptyRegions)
     {
-        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>(garbageThreshold);
+        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>(garbageThreshold, garbageRegions,
+                                                                                       emptyRegions);
     }
 
     std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() final;
