@@ -69,7 +69,7 @@ function JobHandler(reason: Error, obj: Object): void {
 }
 
 function testUnhandledRejection(): void {
-    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         arktest.assertEQ(reason.message, 'Failing');
         JobHandler(reason, obj);
@@ -93,7 +93,7 @@ function testUnhandledRejection(): void {
 }
 
 function main(): int {
-    StdProcess.off('unhandledJobRejection');
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection');
     testSuite.addTest('testUnhandledRejection', testUnhandledRejection);
     let res = testSuite.run();

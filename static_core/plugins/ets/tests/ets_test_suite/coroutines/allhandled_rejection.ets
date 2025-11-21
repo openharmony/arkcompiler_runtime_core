@@ -28,7 +28,7 @@ function SingleRejectedJob(): null {
 }
 
 function testAllhandledRejection(): void {
-    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
     });
 
@@ -36,11 +36,11 @@ function testAllhandledRejection(): void {
         arktest.assertTrue(obj instanceof Promise, 'The object should be of type Promise');
     });
 
-    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         arktest.assertEQ(reason.message, 'This is a single rejected job');
 
-        StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+        StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
             arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         });
     });
@@ -80,7 +80,7 @@ function testAllhandledRejection(): void {
 }
 
 function main(): int {
-    StdProcess.off('unhandledJobRejection')
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection')
     let testSuite = new arktest.ArkTestsuite('coroutines.allhandled_rejection');
     testSuite.addTest('testAllhandledRejection', testAllhandledRejection);
     let res = testSuite.run();

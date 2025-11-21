@@ -414,8 +414,8 @@ export namespace StdProcess {
     * @param { EventListener } listener callback for event handling
     *
     */
-    export function on(type: string, listener: EventListener): void {
-        if (type == "unhandledJobRejection") {
+    export function on(type: "unhandledPromiseRejection" | "uncaughtError", listener: EventListener): void {
+        if (type == string("unhandledJobRejection")) {
             listener = listener as RejectedObjectListener;
             setFailedJobHandler(listener);
             return;
@@ -441,8 +441,8 @@ export namespace StdProcess {
     * @returns { boolean } indicating if the event has been removed successfully
     *
     */
-    export function off(type: string, listener?: RejectedObjectListener): boolean {
-        if (type == "unhandledJobRejection") {
+    export function off(type: "unhandledPromiseRejection" | "uncaughtError", listener?: RejectedObjectListener): boolean {
+        if (type == string("unhandledJobRejection")) {
             if (listener) {
                 failedJobHandler.unregister(listener);
             } else {
