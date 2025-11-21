@@ -15,170 +15,120 @@
 cases:
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
            let a: tuple2 | number_tuple = [arr_a_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
            const a: tuple2 | number_tuple = [arr_a_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
            let a: tuple1 | number_tuple = [faa_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
            const a: tuple1 | number_tuple = [faa_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
            let a: tuple | number_tuple = ["a", 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
            const a: tuple | number_tuple = ["a", 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
            let a: tuple2 | int[] = [arr_a_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
           const a: tuple2 | int[] = [arr_a_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-  
           let a: tuple1 | int[] = [faa_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
           const a: tuple1 | int[] = [faa_value, 1] 
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
           let a: tuple | int[] = ["a", 1] 
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
           const a: tuple | int[] = ["a", 1] 
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-           
           let a: tuple2 | FixedArray<int> = [arr_a_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
           const a: tuple2 | FixedArray<int> = [arr_a_value, 1] 
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |- 
           let a: tuple1 | FixedArray<int> = [faa_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
           const a: tuple1 | FixedArray<int> = [faa_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |- 
           let a: tuple | FixedArray<int> = ["a", 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
           const a: tuple | FixedArray<int> = ["a", 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |- 
           let a: tuple2 | Array<int> = [arr_a_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
           const a: tuple2 | Array<int> = [arr_a_value, 1] 
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |- 
           let a: tuple1 | Array<int> = [faa_value, 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |-
           const a: tuple1 | Array<int> = [faa_value, 1]  
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |- 
           let a: tuple | Array<int> = ["a", 1]
 
     - doc: |-
           Use unexpected literal type as an argument for the function
-      tags: |-
-          negative, compile-only
       use: |- 
           const a: tuple | Array<int> = ["a", 1]
-
-          

@@ -76,41 +76,6 @@ cases:
           arktest.assertEQ( b.j, undefined )
           arktest.assertEQ( b.k, null )
 
-    - tags: |-
-        negative, compile-only
-      doc: |-
-        Initialize class field of literal type using its supertype string
-      decl: |-
-        class A {
-            i: "some str" = new string("some str")
-        }
-      use: |-
-
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          Contravariance at constructor argument is not allowed
-      decl: |-
-          class A {
-              i: "some str"
-              constructor(i: "some str") {
-                  this.i = i
-              }
-          }
-      use: |-
-          new A(new string("some str"))
-
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          Edit class field of literal type using different literal
-      decl: |-
-          class A {
-              i: "some str" = "some str"
-          }
-      use: |-
-          new A().i = "another str"
-
     - doc: |-
         Call class method of literal type using supertype as an argument (incorrect)
       decl: |-
@@ -123,17 +88,6 @@ cases:
         let a = new A()
         arktest.assertEQ( a.foo(new string("some str")), "some str" )
         arktest.assertEQ( a.foo("some str"), "some str" )
-
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          Literal string and usual string are overload equivalent, which leads to CTE
-      decl: |-
-          class A {
-              foo(i: "some str") { return 1 }
-              foo(i: string) { return 2 }
-          }
-      use: |-
 
     - doc: |-
           Class method return type is compatible to its supertype
@@ -151,17 +105,6 @@ cases:
           let d: string = a.bar()
           arktest.assertEQ( d, "2" )
 
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          Class method return type is not compatible to its subtype
-      decl: |-
-          class A {
-              bar(): "2" { return "str" }
-          }
-      use: |-
-          let a: "2" = new A().bar()
-
     - doc: |-
           Readonly string literal could be used
       decl: |-
@@ -170,14 +113,3 @@ cases:
           }
       use: |-
           arktest.assertEQ( new A().i, "some str")
-
-    - tags: |-
-          negative, compile-only
-      doc: |-
-          Readonly string literal cannot be changed
-      decl: |-
-          class A {
-              readonly i: "some str" = "some str"
-          }
-      use: |-
-          new A().i = "some str"

@@ -15,25 +15,18 @@ limitations under the License.
 
 {% for type in types %}
 {% for op in ops %}
-{% for t in tags %}
 
 /*---
 desc: >-
     A smaller type's value can be assigned to a larger type's variable.
-    No implicit conversionsfrom numeric types to bigint occurs in any assignment context.
-tags: {{t}}
+    No implicit conversions from numeric types to bigint occurs in any assignment context.
 ---*/
 
 function main(): void {
     let x: {{type}} = 1
     let y: bigint = 1n
-    {% if 'negative' in t %}
-    arktest.assertTrue((x {{op}} y) instanceof BigInt)
-    {% else %}
     arktest.assertTrue((BigInt(x) {{op}} y) instanceof BigInt)
-    {% endif %}
 }
 
-{% endfor %}
 {% endfor %}
 {% endfor %}

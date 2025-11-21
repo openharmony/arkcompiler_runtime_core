@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,28 +16,17 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: >-
-    Literal types are aligned with some ArkTS literals (see Literals). Their names
-    are same as the names of their values, i.e., literals. Only three literal types
-    are supported - string, null and undefined.
+    Literal types are aligned with some ArkTS literals (see Literals).
+    Their names are same as the names of their values, i.e., literals.
+    Only three literal types are supported - string, null and undefined.
     {{c.doc}}
 tags: [negative, compile-only]
 ---*/
 
-type number_tuple = [int, double]
-
-type tuple = ["a", int]
-
-type faa = FixedArray<"a">
-type tuple1 = [faa, int]
-const faa_value: faa = ["a"]
-
-type arr_a = "a"[]
-type tuple2 = [arr_a, int]
-const arr_a_value: arr_a = ["a"]
-
+{{c.decl|indent}}
 
 function main(): void {
-    {{c.use|indent}}
+    {{c.use}}
 }
 
 {% endfor %}

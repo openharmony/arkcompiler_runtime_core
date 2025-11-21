@@ -17,7 +17,6 @@
 /*---
 desc: >-
     Types number, byte, short, int, long, float, double, char, and boolean are primitive types.
-tags: [{{p.tags}}]
 ---*/
 
 function main() {

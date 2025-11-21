@@ -11,21 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-types:
-  - byte
-  - short
-  - int
-  - long
-  - float
-  - double
-
-ops:
-  - '+'
-  - '-'
-  - '*'
-  - '/'
-  - '%'
-  - '**'
-  - '&'
-  - '|'
-  - '^'
+---
+cases:
+  - doc: |-
+      String > literal string type (contravariant). Covariant parameter -> not override compatible
+    decl: |-
+      class Base {
+        foo(i: string) {
+          return 1
+        }
+      }
+      class Derived extends Base {
+        override foo(i: "some str") {
+          return 2
+        }
+      }
