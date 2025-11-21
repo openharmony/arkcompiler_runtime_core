@@ -14,15 +14,13 @@
  */
 
 /*---
-desc: reexported and rename default entity. Import entity as non-default
+desc: reexported default entity without rename is still default. Only single default entity per module is allowed.
 files:
-- ./modules/re-export_default_rename.ets
 - ./modules/default_module.ets
+tags: [compile-only, negative]
 ---*/
 
-import {B} from "./modules/re-export_default_rename"
+class V {}
 
-function main() {
-  let i = new B()
-  arktest.assertEQ(i.f, 3)
-}
+export {default} from "./default_module"
+export default V

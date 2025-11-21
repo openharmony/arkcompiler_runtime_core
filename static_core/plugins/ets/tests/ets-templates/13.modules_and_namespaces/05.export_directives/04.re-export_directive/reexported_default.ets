@@ -14,13 +14,13 @@
  */
 
 /*---
-desc: re-export default declaration from the other module
+desc: reexported default entity without rename is still default
 files:
 - ./modules/re-export_default.ets
 - ./modules/default_module.ets
 ---*/
 
-import {A} from "./modules/re-export_default"
+import A from "./modules/re-export_default"
 
 function main() {
   let i = new A()
