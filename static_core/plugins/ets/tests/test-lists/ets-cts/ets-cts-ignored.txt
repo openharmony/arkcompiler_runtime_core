@@ -151,6 +151,9 @@
 05.generics/03.utility_types/incorrect_utility_type_usage_1_3.ets
 05.generics/03.utility_types/incorrect_utility_type_usage_1_6.ets
 
+#31615 RTE for partial class field assignment
+05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
+
 #24168
 05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_0.ets
 05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_1.ets
@@ -167,6 +170,9 @@
 
 #28679
 05.generics/03.utility_types/06.record_utility_type/enum_record_0.ets
+
+#31619 TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Any, Any]'
+05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
 
 #29887
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
@@ -311,6 +317,10 @@
 07.expressions/06.spread_expression/spex_lmbd_28.ets
 07.expressions/06.spread_expression/spex_lmbd_29.ets
 07.expressions/06.spread_expression/spex_lmbd_31.ets
+
+#31617 Catch NPE (tests should be updated)
+07.expressions/06.spread_expression/spex_lmbd_37.ets
+07.expressions/06.spread_expression/spex_lmbd_39.ets
 
 #28326
 07.expressions/09.field_access_expressions/field_access_to_override.ets
@@ -469,8 +479,25 @@
 #30786
 07.expressions/32.lambda_expression/04.runtime_evaluation_of_lambda_expressions/lambda_instance_type_15.ets
 
+#31616 Use only available types for Annotation Fields (tests should be updated)
+07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
+07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
+
 #29160
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
+
+# 31662 Float to float comparison
+07.expressions/33.constant_expression/check_enum/constant_calculation_21.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_23.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_24.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_4.ets
 
 #29971
 08.statements/04.local_declarations/post_declaration_func_n_1.ets
@@ -2114,42 +2141,7 @@
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_80.ets
 18.annotations/05.standard_annotations/02.target_annotation/ClassAnnoTest.ets
 
-############
-# temporary place for the tests related to primitive types refactoring
-############
-
-# 2.
-# TypeError: Type '[String, Double]' is not compatible with the enclosing method's
-# return type '[Object|null|undefined, Object|null|undefined]' [x.ets:1:21]
-05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
-
-# 46
-# Since floating point numbers no longer generate an error and floating point calculations are unstable
-# on certain platforms at the moment, these tests remain here.
-07.expressions/33.constant_expression/check_enum/constant_calculation_21.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_23.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_24.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_4.ets
-
-# Runtime Fail Ignore list (looks like should work)
-05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
-
-# Invalid annotation field type. Only numeric, boolean, string, enum, or arrays of these types are permitted for annotation fields.
-07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
-07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
-
-#59 verifier in lambda
-07.expressions/06.spread_expression/spex_lmbd_37.ets
-07.expressions/06.spread_expression/spex_lmbd_39.ets
-
-#31475
+#31475 False positive passed tests on runner-2
 07.expressions/19.nullish-coalescing_expression/lazy_operator_2.ets
 07.expressions/19.nullish-coalescing_expression/lazy_operator_1.ets
 07.expressions/27.conditional-and_expression/conditional_and_boolean_3.ets
