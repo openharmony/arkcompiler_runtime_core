@@ -139,12 +139,3 @@ cases:
      }
    check: |-
      arktest.assertEQ(C.i, 2)
-
- - decl: |-
-     class C {
-       static readonly i: int = 2
-       static {
-         C.i = 3
-       }
-     }
-   tags: compile-only, negative

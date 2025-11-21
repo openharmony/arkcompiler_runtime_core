@@ -30,7 +30,7 @@ desc: >-
     - Number of type parameters of either method is the same, i.e., k = l.
     - Constraints of W1 , . . . Wl are to be contravariant (see Contravariance)
     to the appropriate constraints of V1 , . . . Vk .
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 let res: number = 0;

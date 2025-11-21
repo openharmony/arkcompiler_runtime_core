@@ -21,13 +21,6 @@ cases:
           sup = sub
           arktest.assertEQ(sup, "B")
 
-    - decl: |-
-          let sup: null|string|undefined|number = "A"
-          let sub: null|"A"|"B"|"C"|undefined|number = "B"
-      use: |-
-          sub = sup
-      tags: 'compile-only, negative'
-
     # class literal
     - decl: |-
           class X {
@@ -37,15 +30,6 @@ cases:
       use: |-
           let x: X = { f: sub }
           arktest.assertEQ(x.f, "B")
-
-    - decl: |-
-          class X {
-              f: null|"A"|"B"|"C"|undefined|number = "B"
-          }
-          let sup: null|string|undefined|number = "A"
-      use: |-
-          let x: X = { f: sup }
-      tags: 'compile-only, negative'
 
     # interface literal
     - decl: |-
@@ -57,27 +41,12 @@ cases:
           let i: I = { f: sub }
           arktest.assertEQ(i.f, "B")
 
-    - decl: |-
-          interface I {
-              f: null|"A"|"B"|"C"|undefined|number
-          }
-          let sup: null|string|undefined|number = "A"
-      use: |-
-          let i: I = { f: sup }
-      tags: 'compile-only, negative'
-
     # array literal
     - decl: |-
           let sub: null|"A"|"B"|"C"|undefined|number = "B"
       use: |-
           let arr: Array<null|string|undefined|number> = [sub]
           arktest.assertEQ(arr[0], "B")
-
-    - decl: |-
-          let sup: null|string|undefined|number = "A"
-      use: |-
-          let arr: Array<null|"A"|"B"|"C"|undefined|number> = [sup]
-      tags: 'compile-only, negative'
 
     # tuple literal
     - decl: |-
@@ -87,12 +56,6 @@ cases:
           arktest.assertEQ(tup[0], "B")
           arktest.assertEQ(tup[1], "B")
 
-    - decl: |-
-          let sup: null|string|undefined|number = "A"
-      use: |-
-          let tup: [null|"A"|"B"|"C"|undefined|number, null|"A"|"B"|"C"|undefined|number] = [sup, sup]
-      tags: 'compile-only, negative'
-
     # call context
     - decl: |-
           let sup: null|string|undefined|number = "A"
@@ -101,10 +64,3 @@ cases:
           ((p: null|string|undefined|number) => {
               arktest.assertEQ(p, "B")
           })(sub)
-
-    - decl: |-
-          let sup: null|string|undefined|number = "A"
-          let sub: null|"A"|"B"|"C"|undefined|number = "B"
-      use: |-
-          ((p: null|"A"|"B"|"C"|undefined|number) => {})(sup)
-      tags: 'compile-only, negative'

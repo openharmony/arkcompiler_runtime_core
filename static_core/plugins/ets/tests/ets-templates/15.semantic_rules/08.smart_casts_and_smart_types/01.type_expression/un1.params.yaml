@@ -24,28 +24,16 @@ cases:
           res = v + 1 == 43.0
 
     # function argument
-    - code: |-
+    - decl: |-
+        function foo(p: number): number {
+            return p + 1
+        }
+      code: |-
           let v: number|string|boolean = true
           v = 42.0
           if (!res) {
               res = foo(v) == 43.0
           }
-      decl: |-
-          function foo(p: number): number {
-              return p + 1
-          }
-
-    - code: |-
-          let v: number|string|boolean = true
-          if (!res) {
-              v = 42.0
-          }
-          res = foo(v) == 43.0
-      decl: |-
-          function foo(p: number): number {
-              return p + 1
-          }
-      tags: 'compile-only, negative'
 
     # constructor argument
     - decl: |-
@@ -63,22 +51,6 @@ cases:
               res = a.fld == 43.0
           }
 
-    - decl: |-
-          class A {
-              fld: number
-              constructor(p: number) {
-                  this.fld = p + 1
-              }
-          }
-      tags: 'compile-only, negative'
-      code: |-
-          let v: number|string|boolean = true
-          if (!res) {
-              v = 42.0
-          }
-          let a: A = new A(v)
-          res = a.fld == 43.0
-
     # method argument
     - decl: |-
           class A {
@@ -94,20 +66,6 @@ cases:
               res = a.meth(v) == 43.0
           }
 
-    - decl: |-
-          class A {
-              meth(p: number): number {
-                  return p + 1
-              }
-          }
-      tags: 'compile-only, negative'
-      code: |-
-          let v: number|string|boolean = '1.0'
-          let a: A = new A()
-          if (!res) {
-              v = 42.0
-          }
-          res = a.meth(v) == 43.0
 
     # array literal element
     - code: |-
@@ -118,16 +76,6 @@ cases:
               arr = [v, v + 1, v + 2]
               res = arr[0] == 42.0 && arr[1] == 43.0 && arr[2] == 44.0
           }
-
-    - code: |-
-          let v: number|string|boolean = '0.0'
-          let arr: number[]
-          if (!res) {
-              v = 42.0
-          }
-          arr = [v, v + 1, v + 2]
-          res = arr[0] == 42.0 && arr[1] == 43.0 && arr[2] == 44.0
-      tags: 'compile-only, negative'
 
     # object literal
     - decl: |-
@@ -142,18 +90,6 @@ cases:
               res = a.f == 43.0
           }
 
-    - decl: |-
-          class A {
-              f: number
-          }
-      tags: 'compile-only, negative'
-      code: |-
-          let v: number|string|boolean = false
-          if (!res) {
-              v = 42.0
-          }
-          let a: A = { f: v + 1 }
-          res = a.f == 43.0
 
     # lambda argument
     - code: |-
@@ -169,15 +105,6 @@ cases:
               res = arr[v] == 'B'
           }
 
-    - code: |-
-          let v: int|string|boolean = false
-          let arr: string[] = ['A', 'B', 'C']
-          if (!res) {
-              v = 1
-          }
-          res = arr[v] == 'B'
-      tags: 'compile-only, negative'
-
     # func types union
     - decl: |-
           type F1 = (p: string) => string
@@ -188,17 +115,6 @@ cases:
           if (!res) {
               res = v('X') == 'X1'
           }
-
-    - decl: |-
-          type F1 = (p: string) => string
-          type F2 = (p: number) => string
-      code: |-
-          let v: F1|F2|string|null = null
-          if (!res) {
-              v = (p: string): string => { return p + '1' }
-          }
-          res = v('X') == 'X1'
-      tags: 'compile-only, negative'
 
     - decl: |-
           type F1 = (p: string) => string

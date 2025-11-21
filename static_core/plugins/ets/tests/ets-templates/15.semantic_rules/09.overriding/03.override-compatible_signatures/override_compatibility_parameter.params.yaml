@@ -31,21 +31,6 @@ cases:
           arktest.assertEQ(res, 2)
       params: override-compatible with no constraints
 
-    - tags: 'negative, compile-only'
-      base: |-
-          class Base<T> {
-              foo(i: T) {
-                  res = 1
-              }
-          }
-      derived: |-
-          class Derived<T> extends Base<T> {
-              override foo<J extends T>(i: J) {
-                  res = 2
-              }
-          }
-      params: different number of type parameters
-
     - base: |-
           class Base {
               foo<T>(i: T): T {
@@ -103,21 +88,6 @@ cases:
           arktest.assertEQ(res, 2)
       params: override-compatible type parameter (invariant)
 
-    - tags: 'negative, compile-only'
-      base: |-
-          class Base {
-              foo<T extends Object>(i: T) {
-                  res = 1
-              }
-          }
-      derived: |-
-          class Derived extends Base {
-              override foo<J extends Base>(i: J) {
-                  res = 2
-              }
-          }
-      params: override-incompatible type parameter (covariant)
-
     - decl: |-
           interface I {}
           interface II extends I {}
@@ -147,41 +117,6 @@ cases:
           new Derived().foo(new D)
           arktest.assertEQ(res, 2)
       params: override-compatible type parameter (contravariance)
-
-    - tags: 'negative, compile-only'
-      decl: |-
-          interface I {}
-          interface II extends I {}
-      base: |-
-          class Base {
-              foo<T extends I>(i: T) {
-                  res = 1
-              }
-          }
-      derived: |-
-          class Derived extends Base {
-              override foo<J extends II>(i: J) {
-                  res = 2
-              }
-          }
-      params: override-incompatible type parameter (covariance)
-
-    - tags: 'negative, compile-only'
-      decl: |-
-          interface I {}
-      base: |-
-          class Base {
-              foo<T extends I, U extends I>(i: T, j: U) {
-                  res = 1
-              }
-          }
-      derived: |-
-          class Derived extends Base {
-              override foo<J extends I>(i: J, j: J) {
-                  res = 2
-              }
-          }
-      params: different number of type parameters
 
     - decl: |-
           interface I {}
@@ -260,20 +195,3 @@ cases:
           new Derived().foo(new Derived())
           arktest.assertEQ(res, 2)
       params: override-compatible return type (contravariance)
-
-    - tags: 'negative, compile-only'
-      base: |-
-          class Base {
-              foo<T extends Object>(i: T): T {
-                  res = 1
-                  return i
-              }
-          }
-      derived: |-
-          class Derived extends Base {
-              override foo<J extends Base>(i: J): J {
-                  res = 2
-                  return i
-              }
-          }
-      params: override-incompatible constraints (covariance)

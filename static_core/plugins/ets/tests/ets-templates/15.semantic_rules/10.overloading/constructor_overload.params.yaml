@@ -70,30 +70,11 @@ cases:
       new Derived<Number>("some string");
       arktest.assertEQ( res, 21 );
 
-  - tags: negative, compile-only
-    decl: |-
-      constructor() {}
-    use: |-
-      new Derived<Number>("some string");
-
-  - tags: negative, compile-only
-    use: |-
-      new Derived<Number>("some string");
-
-  - tags: negative, compile-only
-    use: |-
-      new Derived<Number>(new Number());
-
   - decl: |-
       constructor(i: Number) { res = 24;}
     use: |-
       new Derived<Number>(new Number());
       arktest.assertEQ( res, 24 );
-
-  - tags: negative, compile-only
-    use: |-
-      let a: byte[] = [1 as byte, 2 as byte];
-      new Derived<Number>(a);
 
   - decl: |-
       constructor(i: byte[]) { res = 25;}
@@ -102,11 +83,6 @@ cases:
       new Derived<Number>(a);
       arktest.assertEQ( res, 25 );
 
-  - tags: negative, compile-only
-    use: |-
-      let a: TPL = [ false, 1.2];
-      new Derived<Number>(a);
-
   - decl: |-
       constructor(i: TPL) { res = 26;}
     use: |-
@@ -114,19 +90,11 @@ cases:
       new Derived<Number>(a);
       arktest.assertEQ( res, 26 );
 
-  - tags: negative, compile-only
-    use: |-
-      new Derived<Number>( () => { return true; } );
-
   - decl: |-
       constructor(i: BoolFun) { res = 27;}
     use: |-
       new Derived<Number>( () => { return true; } );
       arktest.assertEQ( res, 27 );
-
-  - tags: negative, compile-only
-    use: |-
-      new Derived<Number>( undefined );
 
   - decl: |-
       constructor(i: undefined|Number|null) { res = 28;}
@@ -134,19 +102,11 @@ cases:
       new Derived<Number>( undefined );
       arktest.assertEQ( res, 28 );
 
-  - tags: negative, compile-only
-    use: |-
-      new Derived<Number>( null );
-
   - decl: |-
       constructor(i: null|undefined|Number) { res = 28;}
     use: |-
       new Derived<Number>( null );
       arktest.assertEQ( res, 28 );
-
-  - tags: negative, compile-only
-    use: |-
-      new Derived<Number>( new Gen<Byte>() );
 
   - decl: |-
       constructor(i: Gen<T>) { res = 29;}

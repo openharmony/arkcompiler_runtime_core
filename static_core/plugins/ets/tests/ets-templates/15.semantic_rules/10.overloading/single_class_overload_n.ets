@@ -19,7 +19,7 @@
 desc: >-
     Two instance methods, two static methods with the same name or, two constructors are defined in the same class
     member. If signatures are overload-equivalent, then a compile-time error occurs. Otherwise, overloading is used.
-tags: [{{c.tags}}]
+tags: [negative, compile-only]
 ---*/
 
 let res: number = 0;

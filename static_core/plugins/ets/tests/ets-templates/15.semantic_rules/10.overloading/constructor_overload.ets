@@ -19,7 +19,7 @@
 desc: >-
      Constructor is defined in a subclass.
      All base class constructors are available for call in all derived class constructors.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 let res: number = 0;

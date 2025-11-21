@@ -19,7 +19,7 @@ desc: >-
     Otherwise, a compile-time error occurs.
     Specifically, a compile-time error occurs
     if an object literal is used as a standalone expression.
-tags: {{c.tags}}
+tags: [compile-only, negative]
 ---*/
 
 function main() {

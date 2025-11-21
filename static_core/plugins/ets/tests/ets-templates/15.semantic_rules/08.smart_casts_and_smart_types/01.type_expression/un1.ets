@@ -20,7 +20,7 @@ desc: >-
     is a union type and in the particular context of the program the compiler
     can narrow (smart cast) the static type to a more precise type (smart type)
     and allow operations which are specific to such narrowed type.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 {{c.decl}}

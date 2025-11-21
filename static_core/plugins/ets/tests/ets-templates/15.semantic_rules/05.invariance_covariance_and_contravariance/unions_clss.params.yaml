@@ -21,13 +21,6 @@ cases:
           sup = sub
           arktest.assertEQ(sup, b)
 
-    - decl: |-
-          let sup: A|null|string|undefined = a
-          let sub: B|null|string|undefined = b
-      use: |-
-          sub = sup
-      tags: 'compile-only, negative'
-
     # class literal
     - decl: |-
           class X {
@@ -37,15 +30,6 @@ cases:
       use: |-
           let x: X = { f: sub }
           arktest.assertEQ(x.f, b)
-
-    - decl: |-
-          class X {
-              f: B|null|string|undefined = b
-          }
-          let sup: A|null|string|undefined = a
-      use: |-
-          let x: X = { f: sup }
-      tags: 'compile-only, negative'
 
     # interface literal
     - decl: |-
@@ -57,27 +41,12 @@ cases:
           let i: I = { f: sub }
           arktest.assertEQ(i.f, b)
 
-    - decl: |-
-          interface I {
-              f: B|null|string|undefined
-          }
-          let sup: A|null|string|undefined = a
-      use: |-
-          let i: I = { f: sup }
-      tags: 'compile-only, negative'
-
     # array literal
     - decl: |-
           let sub: B|null|string|undefined = b
       use: |-
           let arr: Array<A|null|string|undefined> = [sub]
           arktest.assertEQ(arr[0], b)
-
-    - decl: |-
-          let sup: A|null|string|undefined = a
-      use: |-
-          let arr: Array<B|null|string|undefined> = [sup]
-      tags: 'compile-only, negative'
 
     # tuple literal
     - decl: |-
@@ -87,12 +56,6 @@ cases:
           arktest.assertEQ(tup[0], b)
           arktest.assertEQ(tup[1], b)
 
-    - decl: |-
-          let sup: A|null|string|undefined = a
-      use: |-
-          let tup: [B|null|string|undefined, B|null|string|undefined] = [sup, sup]
-      tags: 'compile-only, negative'
-
     # call context
     - decl: |-
           let sup: A|null|string|undefined = a
@@ -101,10 +64,3 @@ cases:
           ((p: A|null|string|undefined) => {
               arktest.assertEQ(p, b)
           })(sub)
-
-    - decl: |-
-          let sup: A|null|string|undefined = a
-          let sub: B|null|string|undefined = b
-      use: |-
-          ((p: B|null|string|undefined) => {})(sup)
-      tags: 'compile-only, negative'

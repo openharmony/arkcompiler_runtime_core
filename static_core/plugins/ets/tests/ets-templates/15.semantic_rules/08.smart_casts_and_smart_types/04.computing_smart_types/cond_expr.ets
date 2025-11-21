@@ -18,7 +18,7 @@
 desc: >-
     Other examples are explicit calls to instanceof or checks against
     null as part of conditional expression
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 interface I {

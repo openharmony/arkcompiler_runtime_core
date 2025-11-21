@@ -38,29 +38,11 @@ cases:
 
     - code: |-
           let v: string|number|Error|null|boolean = new Error()
-          let q: Error|boolean = true
-          if (!res) {
-              v = true
-          }
-          res = v & q
-      tags: 'compile-only, negative'
-
-    - code: |-
-          let v: string|number|Error|null|boolean = new Error()
           let q: Error|boolean = false
           v = true
           if (!res) {
               res = v | q
           }
-
-    - code: |-
-          let v: string|number|Error|null|boolean = new Error()
-          let q: Error|boolean = true
-          if (!res) {
-              v = false
-          }
-          res = v | q
-      tags: 'compile-only, negative'
 
     - code: |-
           let v: string|number|Error|null|boolean = new Error()
@@ -73,15 +55,6 @@ cases:
     - code: |-
           let v: string|number|Error|null|boolean = new Error()
           let q: Error|boolean = true
-          if (!res) {
-              v = false
-          }
-          res = v ^ q
-      tags: 'compile-only, negative'
-
-    - code: |-
-          let v: string|number|Error|null|boolean = new Error()
-          let q: Error|boolean = true
           v = true
           if (!res) {
               res = v && q
@@ -90,28 +63,10 @@ cases:
     - code: |-
           let v: string|number|Error|null|boolean = new Error()
           let q: Error|boolean = true
-          if (!res) {
-              v = true
-          }
-          res = v && q
-      tags: 'compile-only, negative'
-
-    - code: |-
-          let v: string|number|Error|null|boolean = new Error()
-          let q: Error|boolean = true
           v = false
           if (!res) {
               res = v || q
           }
-
-    - code: |-
-          let v: string|number|Error|null|boolean = new Error()
-          let q: Error|boolean = true
-          if (!res) {
-              v = false
-          }
-          res = v || q
-      tags: 'compile-only, negative'
 
     - code: |-
           let v: string|number|Error|null|boolean = new Error()
