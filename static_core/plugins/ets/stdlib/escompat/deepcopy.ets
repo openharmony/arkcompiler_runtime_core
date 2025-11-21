@@ -26,7 +26,7 @@ export interface Cloneable {
 // class provided that the clone method needs to be overridden and if the clone method
 // is not overridden in the parent and child classes an error will be thrown at runtime
 
-export function deepcopy<T>(src: Nullish<T>, depth: int = -1): Nullish<T> {
+export function deepcopy<T>(src: T | null | undefined, depth: int = -1): T | null | undefined {
 	const maxDepth = (depth == -1) ? Int.MAX_VALUE : depth
 	return new DeepCloner(maxDepth).clone<T>(src)
 }
@@ -44,7 +44,7 @@ class DeepCloner {
 		this.maxDepth = maxDepth
 	}
 
-	clone<T>(src: Nullish<T>): Nullish<T> {
+	clone<T>(src: T | null | undefined): T | null | undefined {
 		if (src === null) {
 			return null
 		} else if (src === undefined) {

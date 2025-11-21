@@ -136,7 +136,7 @@ function testBuiltinArrayClone(): void {
 }
 
 function testArrayClone(): void {
-	const objs = new Array<Nullish<Obj>>()
+	const objs = new Array<Obj | null | undefined>()
 	objs.push(new Obj())
 	objs.push(null)
 	objs.push(undefined)
@@ -178,7 +178,7 @@ function testSetClone(): void {
 }
 
 function testMapClone(): void {
-	const map = new Map<string, Nullish<number>>()
+	const map = new Map<string, number | null | undefined>()
 
 	const key = "1.0"
 	map.set(key, 1.0)

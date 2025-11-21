@@ -691,7 +691,7 @@ export class JSON {
         return JSON.checkType(type, new Array<TypeColor>())
     }
 
-    public static parse<T>(text: String, type: Type): Nullish<T> {
+    public static parse<T>(text: String, type: Type): T | null | undefined {
         const cls = type.getClass()
         if (cls !== undefined) {
             return JSON.parse<T>(text, undefined, cls)
@@ -699,7 +699,7 @@ export class JSON {
         throw new Error(`Unable to resolve type ${type} runtime class`)
     }
 
-    public static parse<T>(text: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Type, options?: jsonx.ParseOptions): Nullish<T> {
+    public static parse<T>(text: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Type, options?: jsonx.ParseOptions): T | null | undefined {
         const cls = type.getClass()
         if (cls !== undefined) {
             return JSON.parse<T>(text, reviver, cls, options)
@@ -707,11 +707,11 @@ export class JSON {
         throw new Error(`Unable to resolve type ${type} runtime class`)
     }
 
-    public static parse<T>(json: string, type: Class): Nullish<T> {
+    public static parse<T>(json: string, type: Class): T | null | undefined {
         return JSON.parse<T>(json, undefined, type)
     }
 
-    public static parse<T>(json: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Class, options?: jsonx.ParseOptions): Nullish<T> {
+    public static parse<T>(json: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Class, options?: jsonx.ParseOptions): T | null | undefined {
         if (!JSON.checkType(type, new Array<TypeColor>())) {
             throw new Error("Incorrect type: " + type.getName())
         }

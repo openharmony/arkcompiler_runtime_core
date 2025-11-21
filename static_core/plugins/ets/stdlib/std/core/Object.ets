@@ -15,23 +15,6 @@
 
 package std.core;
 
-/**
- * @deprecated
- */
-export type NullableType = Object | null
-
-/**
- * @deprecated
- */
-export type Nullish<T> = T | null | undefined
-
-/**
- * @deprecated
- *
- * Use Any instead. NullishType is a legacy name
- */
-export type NullishType = Any
-
 export type PropertyKey = string
 
 export const ARRAY_LENGTH_MEMBER_NAME      = "length"
