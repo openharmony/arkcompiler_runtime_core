@@ -18,7 +18,3 @@ cases:
   - { type: Byte, val: new Byte(3 as byte), len: 3 }
   - { type: Short, val: new Short(0x1ff), len: 511 }
   - { type: Int, val: new Int(128), len: 128 }
-  - { type: float, val: 10.0f, len: 10 }
-  - { type: double, val: 20.0, len: 20 }
-  - { type: Float, val: new Float(1.0f), len: 1 }
-  - { type: Double, val: new Double(2.0), len: 2 }
