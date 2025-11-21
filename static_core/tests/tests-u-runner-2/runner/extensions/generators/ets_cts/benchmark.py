@@ -53,7 +53,7 @@ class Benchmark:
             full_name = f"{self.__full_name}_{i}" if len(rendered_tests) > 1 else self.__full_name
             test_content = template.generate_test(test, full_name)
             file_path = self.__output / f"{name}{self.__out_extension}"
-            write_2_file(file_path=file_path, content=test_content)
+            write_2_file(file_path=file_path, content=test_content, disallow_overwrite=True)
             tests.append(str(file_path))
 
         _LOGGER.all(f"Finish generating test template for: {self.__name}")

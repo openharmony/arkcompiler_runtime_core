@@ -266,8 +266,8 @@ class TestStandardFlow(Test):
         if not self._continue_after_process_dependent_files():
             return self
 
-        self._log_invalid_tags()
-        compile_only_test = self.is_compile_only or self.metadata.tags.not_a_test or self.parent_test_id != ""
+        self._log_invalid_tags_if_any()
+        compile_only_test = self._is_compile_only_test()
         allowed_steps = [StepKind.COMPILER]  # steps to run for compile only or not-a-test tests
         steps = [step for step in self.test_env.config.workflow.steps
                  if step.executable_path is not None and
@@ -362,6 +362,37 @@ class TestStandardFlow(Test):
         if differences:
             self.expected_err_log += "\n".join(differences)
 
+    def _continue_after_process_dependent_files(self) -> bool:
+        """
+        Processes dependent files
+        Returns True if to continue test run
+        False - break test run
+        """
+        for test in self.dependent_tests:
+            dependent_result = test.do_run()
+            self.reproduce += dependent_result.reproduce
+            simple_failed = not dependent_result.passed
+            negative_compile = dependent_result.passed and dependent_result.is_negative_compile
+            dep_package = dependent_result.metadata.get_package_name()
+            package_neg_compile = self.dependent_packages.get(dep_package, False)
+            if simple_failed or negative_compile or package_neg_compile:
+                self.passed = dependent_result.passed if not package_neg_compile else True
+                self.report = dependent_result.report
+                self.fail_kind = dependent_result.fail_kind
+                self.last_failure_check_passed = dependent_result.last_failure_check_passed
+                return False
+        return True
+
+    def _log_invalid_tags_if_any(self) -> None:
+        if len(self.invalid_tags) > 0:
+            Log.default(
+                _LOGGER,
+                f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
+                f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
+
+    def _is_compile_only_test(self) -> bool:
+        return self.is_compile_only or self.metadata.tags.not_a_test or self.parent_test_id != ""
+
     def _step_validator(self, step: Step, output: str, error: str, return_code: int) -> ValidationResult:
         validator_name = step.name if step.name in self.validator.validators else step.step_kind.value
         validator = self.validator.get_validator(validator_name)
@@ -425,27 +456,6 @@ class TestStandardFlow(Test):
                 _LOGGER,
                 f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
                 f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
-
-    def _continue_after_process_dependent_files(self) -> bool:
-        """
-        Processes dependent files
-        Returns True if to continue test run
-        False - break test run
-        """
-        for test in self.dependent_tests:
-            dependent_result = test.do_run()
-            self.reproduce += dependent_result.reproduce
-            simple_failed = not dependent_result.passed
-            negative_compile = dependent_result.passed and dependent_result.is_negative_compile
-            dep_package = dependent_result.metadata.get_package_name()
-            package_neg_compile = self.dependent_packages.get(dep_package, False)
-            if simple_failed or negative_compile or package_neg_compile:
-                self.passed = dependent_result.passed if not package_neg_compile else True
-                self.report = dependent_result.report
-                self.fail_kind = dependent_result.fail_kind
-                self.last_failure_check_passed = dependent_result.last_failure_check_passed
-                return False
-        return True
 
     def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
