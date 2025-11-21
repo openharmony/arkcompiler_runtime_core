@@ -204,7 +204,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public constructor(elements: Iterable<{{subsetTypeValues}}>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<{{subsetTypeValues}}>(items as ArrayLike<{{subsetTypeValues}}>)
+            const arr = reflect.internals.Types.identity_cast<{{subsetTypeValues}}>(items as ArrayLike<{{subsetTypeValues}}>)
             this.byteLength = arr.length * {{N}}Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLength)

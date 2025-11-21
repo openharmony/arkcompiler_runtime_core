@@ -211,7 +211,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     public constructor(elements: Iterable<{{element['subsetTypeValues']}}>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<{{element['subsetTypeValues']}}>(items as ArrayLike<{{element['subsetTypeValues']}}>)
+            const arr = reflect.internals.Types.identity_cast<{{element['subsetTypeValues']}}>(items as ArrayLike<{{element['subsetTypeValues']}}>)
             this.byteLengthInt = arr.length * {{element['name']}}Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLengthInt)

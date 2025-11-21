@@ -193,8 +193,8 @@ bool ResolveAndSetPrimitive(EtsCoroutine *coro, const PrimitiveFieldInfo &info)
             break;
         case EtsType::FLOAT:
             if (argType == EtsClass::BoxedType::FLOAT) {
-                ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsFloat>(),
-                                         info.field);
+                return ReflectFieldSetPrimitive(coro, info.thisObj, GetUnboxedValue(coro, info.arg).GetAs<EtsFloat>(),
+                                                info.field);
             }
             break;
         case EtsType::INT:

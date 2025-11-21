@@ -31,11 +31,16 @@ export function deepcopy<T>(src: T | null | undefined, depth: int = -1): T | nul
 	return new DeepCloner(maxDepth).clone<T>(src)
 }
 
+type Types = reflect.internals.Types
+
+type EntryType = [reflect.InstanceField, Any]
+type NullishEntryType = EntryType | null | undefined
+
 class DeepCloner {
 	private maxDepth: int
 	private currentDepth: int = 0
 
-	private static readonly OBJ_ENTRY_NAME: int = 0
+	private static readonly OBJ_ENTRY_FIELD: int = 0
 	private static readonly OBJ_ENTRY_VALUE: int = 1
 
 	private copies = new Map<Object, Object>()
@@ -50,6 +55,8 @@ class DeepCloner {
 		} else if (src === undefined) {
 			return undefined
 		} else if (src instanceof String) {
+			// strings are immutable, cloning reference is enough here
+			// because source string instance can't be changed through the cloned reference
 			return src as T
 		} else if (src instanceof Boolean) {
 			return Boolean.valueOf(src) as T
@@ -69,57 +76,96 @@ class DeepCloner {
 			return Double.valueOf(src) as T
 		} else if (src instanceof BaseEnum) {
 			return src as T
+		} else if (src instanceof Date) {
+			return new Date(src) as T
 		} else {
 			const existingCopy = this.copies.get(src as Object)
 			if (existingCopy !== undefined) {
 				return existingCopy as T
 			}
 
-			const srcType = Type.of(src)
-			if (srcType instanceof ClassType) {
-				if (src instanceof Array) {
-					return this.cloneArray(src) as T
-				} else if (src instanceof Set) {
-					return this.cloneSet(src) as T
-				} else if (src instanceof Map) {
-					return this.cloneMap(src) as T
+			if (src instanceof Array) {
+				return this.cloneDynamicArray(src) as T
+			} else if (src instanceof Set) {
+				return this.cloneSet(src) as T
+			} else if (src instanceof Map) {
+				return this.cloneMap(src) as T
+			} else if (src instanceof Function) {
+				return src as T
+			} else if (src instanceof Object) {
+				const srcType = Class.of(src)
+				if (srcType.isFixedArray()) {
+					if (src instanceof FixedArray<boolean>) {
+						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
+					} else if (src instanceof FixedArray<byte>) {
+						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
+					} else if (src instanceof FixedArray<char>) {
+						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
+					} else if (src instanceof FixedArray<short>) {
+						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
+					} else if (src instanceof FixedArray<int>) {
+						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
+					} else if (src instanceof FixedArray<long>) {
+						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
+					} else if (src instanceof FixedArray<float>) {
+						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
+					} else if (src instanceof FixedArray<double>) {
+						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
+					} else {
+						const componentType = srcType.getFixedArrayComponentType()!
+						return this.cloneFixedArray(Types.asFixedArray(src), componentType) as T
+					}
 				} else {
-					return this.cloneObject(src as Object, srcType) as T
+					return this.cloneObject(src, srcType) as T
 				}
-			} else if (srcType instanceof ArrayType) {
-				return this.cloneBuiltinArray(src as Object, srcType as ArrayType) as T
-			} else if (srcType instanceof LambdaType) {
-				return src
 			} else {
-				throw new Error("unsupported source object type: " + srcType)
+				throw new Error("unsupported source object type: " + Class.ofAny(src)?.getName())
 			}
 		}
 	}
 
-	private hasEmptyConstructor(type: ClassType): boolean {
-		const ctorsNum = type.getConstructorsNum()
-		for (let ctorIdx = 0; ctorIdx < ctorsNum; ctorIdx++) {
-			const ctor = type.getConstructor(ctorIdx)
-			if (ctor.getType().getParametersNum() == 0 && ctor.getAccessModifier() == AccessModifier.PUBLIC) {
+	private getEmptyConstructor(type: Class): reflect.Constructor | undefined {
+		for (const ctor of type.getConstructors()) {
+			if (ctor.getParametersNum() == 0) {
+				return ctor
+			}
+		}
+		return undefined
+	}
+
+	private hasOverrideClone(type: Class): boolean {
+		for (const method of type.getInstanceMethods()) {
+			if (method.getName() == "clone") {
 				return true
 			}
 		}
 		return false
 	}
 
-	private hasOverrideClone(type: ClassType): boolean {
-		const methodNum = type.getMethodsNum()
-		for (let methodIdx = 0; methodIdx < methodNum; methodIdx++) {
-			const method = type.getMethod(methodIdx)
-			const methodName = method.getName()
-			if (methodName.equals("clone") && (method.getOwnerType().equals(type))) {
-				return true
-			}
-		}
-		return false
+	private getObjectEntries(obj: Object): NullishEntryType[] {
+		const entries = new Array<NullishEntryType>()
+
+		let cls = Class.of(obj)
+	    const classHierarchy = new Array<Class>()
+	    while (cls.getSuper() !== undefined) {
+	        classHierarchy.push(cls)
+	        cls = cls.getSuper()!
+	    }
+
+	    const classHierarchyLength = classHierarchy.length
+	    for (let i = classHierarchyLength - 1; i >= 0; i--) {
+	        const currentCls = classHierarchy[i]
+	        const clsFields = currentCls.getInstanceFields()
+	        for (const field of clsFields) {
+	            const entry: NullishEntryType = [field, field.getValue(obj)]
+	            entries.push(entry)
+	        }
+	    }
+
+		return entries
 	}
 
-	private cloneObject(obj: Object, objType: ClassType): Object {
+	private cloneObject(obj: Object, objType: Class): Object {
 		this.currentDepth++
 		if (this.currentDepth > this.maxDepth) {
 			return obj
@@ -133,23 +179,24 @@ class DeepCloner {
 			throw new Error(`class ${objType.getName()} doesn't override clone`)
 		}
 
-		if (!this.hasEmptyConstructor(objType)) {
+		const emptyCtor = this.getEmptyConstructor(objType)
+		if (emptyCtor === undefined) {
 			throw new Error(`class ${objType.getName()} doesn't have default constructor`)
 		}
 
-		const objCopy = objType.make()
+		// this won't work for strings due to string special constructor mechanics
+		// but string instance cloning is not handled here
+		const objCopy = emptyCtor.createInstance() as object
 		this.copies.set(obj, objCopy)
 
-		const objCopyValue = reflect.Value.of(objCopy) as ClassValue
-
-		const objEntries = Object.entries(obj)
+		const objEntries = this.getObjectEntries(obj)
 		for (const objEntry of objEntries) {
-			const fieldName = objEntry![DeepCloner.OBJ_ENTRY_NAME]
-			const field = objType.getFieldByName(fieldName as String)
+			const field = objEntry![DeepCloner.OBJ_ENTRY_FIELD]
+			const fieldValCopy = this.clone<Object>(objEntry![DeepCloner.OBJ_ENTRY_VALUE] as (Object | undefined))
+			const fieldValCopyType = Class.ofAny(fieldValCopy)
 
-			const objFieldValueCopy = this.clone<Object>(objEntry![DeepCloner.OBJ_ENTRY_VALUE] as (Object | undefined))
-			if (field.getType().assignableFrom(Type.of(objFieldValueCopy))) {
-				objCopyValue.setFieldByName(fieldName as string, reflect.Value.of(objFieldValueCopy) as reflect.Value)
+			if (fieldValCopyType !== undefined && reflect.internals.Types.isAssignableFrom(field.getType(), fieldValCopyType)) {
+				field.setValue(objCopy, fieldValCopy)
 			}
 		}
 
@@ -158,24 +205,20 @@ class DeepCloner {
 		return objCopy
 	}
 
-	private cloneBuiltinArray(array: Object, arrayType: ArrayType): Object {
+	private cloneFixedArray<E>(array: FixedArray<E>, componentType: Class): FixedArray<E> {
 		this.currentDepth++
 		if (this.currentDepth > this.maxDepth) {
 			return array
 		}
 
-		const arrayValue = reflect.Value.of(array) as ArrayValue
-		const arrayLength: int = arrayValue.getLength().toInt()
+		const arrayLength = array.length
 
-		const arrayCopy = arrayType.make(arrayLength)
+		const arrayCopy = reflect.internals.createFixedArray(componentType, arrayLength) as FixedArray<E>
 		this.copies.set(array, arrayCopy)
 
-		const arrayCopyValue = reflect.Value.of(arrayCopy) as ArrayValue
 		for (let i = 0; i < arrayLength; i++) {
-			const arrayElementValue = arrayValue.getElement(i)
-
-			const arrayElementCopy = this.clone<Object>(arrayElementValue.getData() as (Object | undefined))
-			arrayCopyValue.setElement(i, reflect.Value.of(arrayElementCopy as (Object | undefined)))
+			const arrayElementCopy = this.clone<E>(array[i]) as E
+			arrayCopy[i] = arrayElementCopy
 		}
 
 		this.currentDepth--
@@ -183,7 +226,7 @@ class DeepCloner {
 		return arrayCopy
 	}
 
-	private cloneArray<E>(array: Array<E>): Array<E> {
+	private cloneDynamicArray<E>(array: Array<E>): Array<E> {
 		this.currentDepth++
 		if (this.currentDepth > this.maxDepth) {
 			return array
