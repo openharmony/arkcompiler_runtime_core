@@ -80,7 +80,7 @@
 #include "base_runtime.h"
 #endif
 #ifdef OHOS_PANDA_DEBUG_MODE_ENABLE
-#include "base/startup/init/interfaces/innerkits/include/syspara/parameters.h"
+#include "syspara/parameters.h"
 #endif
 
 namespace ark {
