@@ -1,3 +1,4 @@
-# multi static block #26663
-07.expressions/03.named_reference/qualified_name_2.ets
-07.expressions/03.named_reference/qualified_name_3.ets
+#31588
+13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default.ets
+13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_2.ets
+13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_3.ets
