@@ -183,7 +183,7 @@ targets:
   - target: |-
       let x: @MyAnnotation () => void = () => {}
     decl: |-
-      LAMBDA
+      TYPE
 
 #  - target: |-
 #      // Structs are only used to define UI components, it should be translated at 'plugin after parser' phase.
