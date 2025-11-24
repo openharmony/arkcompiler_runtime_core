@@ -572,9 +572,14 @@ public:
         if (!GetEnvANIVerifier()->IsValidMethod(vctor)) {
             return "wrong ctor";
         }
+
         std::optional<PandaString> err = DoVerifyMethod(vctor, impl::VMethod::ANIMethodType::METHOD, returnType);
         if (err) {
             return err;
+        }
+
+        if (!vctor->GetEtsMethod()->IsConstructor()) {
+            return "method is not ctor";
         }
 
         if (vctor->GetEtsMethod()->GetClass() != class_) {
@@ -588,9 +593,14 @@ public:
         if (!GetEnvANIVerifier()->IsValidMethod(vmethod)) {
             return "wrong method";
         }
+
         std::optional<PandaString> err = DoVerifyMethod(vmethod, impl::VMethod::ANIMethodType::METHOD, returnType);
         if (err) {
             return err;
+        }
+
+        if (vmethod->GetEtsMethod()->IsConstructor()) {
+            return "method is ctor";
         }
 
         if (class_ == nullptr || !vmethod->GetEtsMethod()->GetClass()->IsAssignableFrom(class_)) {

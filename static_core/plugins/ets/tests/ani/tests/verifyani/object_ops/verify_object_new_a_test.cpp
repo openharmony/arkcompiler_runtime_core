@@ -175,6 +175,45 @@ TEST_F(ObjectNewATest, wrong_ctor_1)
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New_A", testLines);
 }
 
+TEST_F(ObjectNewATest, wrong_ctor_2)
+{
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(cls_, "voidMethod", ":", &method), ANI_OK);
+
+    ani_object obj {};
+    ASSERT_EQ(env_->c_api->Object_New_A(env_, cls_, method, &obj, args_.data()), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class"},
+        {"ctor", "ani_method", "method is not ctor"},
+        {"result", "ani_object *"},
+        {"args", "ani_value *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New_A", testLines);
+}
+
+TEST_F(ObjectNewATest, wrong_ctor_3)
+{
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls_, "staticMethod", ":", &method), ANI_OK);
+
+    ani_object obj {};
+    ASSERT_EQ(env_->c_api->Object_New_A(env_, cls_, reinterpret_cast<ani_method>(method), &obj, args_.data()),
+              ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class"},
+        {"ctor", "ani_method", "wrong type: ani_static_method, expected: ani_method"},
+        {"result", "ani_object *"},
+        {"args", "ani_value *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New_A", testLines);
+}
+
 TEST_F(ObjectNewATest, wrong_result)
 {
     ASSERT_EQ(env_->c_api->Object_New_A(env_, cls_, ctor_, nullptr, args_.data()), ANI_ERROR);
