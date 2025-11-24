@@ -88,6 +88,18 @@ def test_optflags():
         test.assertTrue(OptFlags.GC_STATS not in flags)
 
 
+@pytest.mark.parametrize('arg_flag, expected', [
+    ('--safepoint-checker', True),
+    ('', False)
+])
+def test_safepoint_optflag(arg_flag, expected):
+    with cmdline(f'all --lang=blah --platform=xxx {arg_flag}'):
+        args = Args()
+        flags = args.get_opts_flags()
+        test = TestCase()
+        test.assertTrue((OptFlags.SAFEPOINT_CHECKER in flags) == expected)
+
+
 def test_custom_opts():
     test = TestCase()
     with (cmdline('all --lang=blah --platform=xxx '

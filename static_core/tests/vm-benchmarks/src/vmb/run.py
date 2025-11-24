@@ -46,6 +46,8 @@ class VmbRunner:
             args.hooks.add('cpumask')
         if args.get('custom_script', False):
             args.hooks.add('run_custom_script')
+        if args.get('safepoint_checker', False):
+            args.hooks.add('safepoint_checker')
         try:
             self.hooks = HookRegistry().register_all_by_name(args.hooks, args)
         except (RuntimeError, ValueError) as e:

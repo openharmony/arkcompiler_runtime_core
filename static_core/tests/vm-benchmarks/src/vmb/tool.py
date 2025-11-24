@@ -73,6 +73,7 @@ class OptFlags(Flag):
     INT_LLVM = auto()
     LLVMAOT = auto()
     AOTPGO = auto()
+    SAFEPOINT_CHECKER = auto()
 
 
 class ToolBase(CrossShell, ABC):
