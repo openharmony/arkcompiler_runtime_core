@@ -12,15 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { func1 } from './package_a/module1.ets';
+import { func2 } from './package_a/module2.ets';
+
 
 function func() {
-  console.println("func enter");
+  console.println('func enter');
   return;
 }
 
 function riskyOperation(): number {
     // Simulate operations that may fail
-    throw new Error("Stochastic Operation Failure");
+    throw new Error('Stochastic Operation Failure');
 }
 
 function main() {
@@ -29,21 +32,23 @@ function main() {
   let b: number = 5;
   let flag: number = 1;
   let value: number = 7;
+  func1();
+  func2();
 
   // 1. SwitchStatement - Note: switch only supports int-like, string, or enum types
   switch (choice) {
     case 1:
-      console.info("Case 1");
+      console.info('Case 1');
       break;
     case 2:
-      console.info("Case 2");
+      console.info('Case 2');
       func();
       break;
     case 3:
-      console.info("Case 3");
+      console.info('Case 3');
       break;
     default:
-      console.info("Default case");
+      console.info('Default case');
       break;
   }
 
@@ -81,31 +86,31 @@ function main() {
 
   // Example 1: &&
   if (a > 0 && b < 10 && a < 20) {
-    console.info("Both conditions in if are true.");
+    console.info('Both conditions in if are true.');
   } else {
-    console.info("At least one condition in if is false.");
+    console.info('At least one condition in if is false.');
   }
 
   // Example 2: ||
   if (flag === 1 || value > 100) {
-    console.info("At least one condition in second if is true.");
+    console.info('At least one condition in second if is true.');
   } else {
-    console.info("Both conditions in second if are false.");
+    console.info('Both conditions in second if are false.');
   }
 
   // Example 3: Nested if
   if (value > 5) {
     if (value < 8) {
-      console.info("Value is 6 or 7.");
+      console.info('Value is 6 or 7.');
     } else {
-      console.info("Value is 8 or more.");
+      console.info('Value is 8 or more.');
     }
   } else {
-    console.info("Value is 5 or less.");
+    console.info('Value is 5 or less.');
   }
 
   try {
-    console.info("Inner try block started");
+    console.info('Inner try block started');
 
     // Inner operation that may throw exception
     let result = riskyOperation();
@@ -113,10 +118,10 @@ function main() {
   } catch (innerError) {
     if (innerError instanceof Error) {
       // Inner catch: handles inner exception
-      console.error("Inner exception caught:", innerError.message);
+      console.error('Inner exception caught:', innerError.message);
     }
   } finally {
-    console.info("Finally block: always executed.");
+    console.info('Finally block: always executed.');
   }
 
   if (true) {

@@ -44,6 +44,11 @@ Command 2: Generate AST files for device side
 python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --mode=hap
 ```
 
+Command 3: Generate AST files for host side with multiple files linked
+
+```
+python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --ark-link=../../../out/bin/ark_link --mode=host-multi --abc-link-name=linked.abc --ets-arkts-path=../../../plugins/ets/sdk/arkts/ --std-path=../../../plugins/ets/stdlib/std/ --escompat-path=../../../plugins/ets/stdlib/escompat/ --ets-api-path=../../../plugins/ets/sdk/api/
+```
 ### 2. Generate PA Files
 
 Command: Decompile ABC files to generate PA files
@@ -71,7 +76,7 @@ or
 python coverage.py gen_report --src=./src --mode=host -d
 ```
 
-Note: For the device side, replace `--mode=host` with `--mode=hap`. To generate an incremental coverage HTML file, a diff.txt file must be created and placed in the same directory as coverage.py.
+Note: For the device side, replace `--mode=host` with `--mode=hap`. When host source files involve multiple files, replace `--mode=host`  with `--mode=host-multi`. To generate an incremental coverage HTML file, a diff.txt file must be created and placed in the same directory as coverage.py.
 
 Command to generate diff.txt:
 

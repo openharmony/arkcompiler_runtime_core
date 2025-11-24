@@ -38,6 +38,12 @@ host侧生成ast文件:
 python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --mode=host
 ```
 
+host侧多文件链接生成ast文件:
+
+```
+python3 coverage.py gen_ast --src=./src --output=./ --es2panda=../../../out/bin/es2panda --ark-link=../../../out/bin/ark_link --mode=host-multi --abc-link-name=linked.abc --ets-arkts-path=../../../plugins/ets/sdk/arkts/ --std-path=../../../plugins/ets/stdlib/std/ --escompat-path=../../../plugins/ets/stdlib/escompat/ --ets-api-path=../../../plugins/ets/sdk/api/
+```
+
 真机侧生成ast文件:
 
 ```
@@ -71,7 +77,7 @@ python coverage.py gen_report --src=./src --mode=host --diff
 python coverage.py gen_report --src=./src --mode=host -d
 ```
 
-注：真机侧使用需要将`--mode=host`替换为`--mode=hap`；生成增量覆盖率html文件需要生成diff.txt文件并放到coverage.py的同级目录。
+注：真机侧使用需要将`--mode=host`替换为`--mode=hap`；host源文件涉及多个文件时需要将`--mode=host`替换为`--mode=host-multi`；生成增量覆盖率html文件需要生成diff.txt文件并放到coverage.py的同级目录。
 
 生成diff.txt指令：
 ```
