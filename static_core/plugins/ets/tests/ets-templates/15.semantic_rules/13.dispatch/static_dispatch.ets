@@ -21,6 +21,7 @@ desc: >-
     of class or interface can become different from the type explicitly specified
     or inferred at the point of declaration.
     In this situation method calls are dispatched during program execution based on their actual type
+    {{c.desc or ""}}
 ---*/
 
 {{c.decl}}

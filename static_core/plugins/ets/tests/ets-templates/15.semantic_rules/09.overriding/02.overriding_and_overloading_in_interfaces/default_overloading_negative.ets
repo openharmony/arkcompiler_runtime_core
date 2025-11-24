@@ -17,16 +17,13 @@ limitations under the License.
 
 /*---
 desc: >-
-    As a result of assignment to a variable or call, the actual runtime type of a parameter
-    of class or interface can become different from the type explicitly specified
-    or inferred at the point of declaration.
-    In this situation method calls are dispatched during program execution based on their actual type
+    Default interface method overloading
+    {{c.desc or ""}}
+tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}
 
-function main() {
-  {{c.use}}
-}
+{{c.use}}
 
 {% endfor %}
