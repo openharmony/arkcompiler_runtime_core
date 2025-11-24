@@ -1,4 +1,4 @@
-#28320 CTE in the spec example 3.11
+#615 3.11 Type void inconsistency
 03.types/11.type_void/generic_void_2.ets
 
 #28399 Possible to create a void array
@@ -9,9 +9,6 @@
 03.types/20.union_types/united_switch_ext_5.ets
 03.types/20.union_types/united_switch_ext_7.ets
 03.types/20.union_types/united_switch_ext_8.ets
-
-#29681 union causes TypeError with literal type
-03.types/16.literal_types/infer_from_union2.ets
 
 #30677
 03.types/19.function_types/01.type_function/optional_type_params_0.ets
@@ -582,34 +579,6 @@
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_270.ets
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_271.ets
 
-#29306
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_272.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_273.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_274.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_275.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_276.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_277.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_278.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_279.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_280.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_281.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_282.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_283.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_284.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_285.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_286.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_287.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_288.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_289.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_290.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_291.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_292.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_293.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_294.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_295.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_296.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_297.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_298.ets
 
 #29302
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_247.ets
@@ -746,22 +715,6 @@
 
 #28527
 09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_gen_35.ets
-
-#28693
-09.classes/09.constructor_declaration/02.constructor_body/spec_example1.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary01.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary02.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary03.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary04.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary01.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary03.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary05.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary07.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init20.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init21.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init22.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init23.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init24.ets
 
 #30467 Field initialization expression performed multiple times
 09.classes/09.constructor_declaration/02.constructor_body/check_fld_init00.ets
