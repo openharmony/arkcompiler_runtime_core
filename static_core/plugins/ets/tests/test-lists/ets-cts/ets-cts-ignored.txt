@@ -525,8 +525,8 @@
 08.statements/14.throw_statements/throw_7.ets
 
 #22428
-08.statements/15.try_statements/01.catch_clause/catch_6.ets
-08.statements/15.try_statements/01.catch_clause/catch_9.ets
+08.statements/15.try_statements/01.catch_clause/catch_n_0.ets
+08.statements/15.try_statements/01.catch_clause/catch_n_3.ets
 
 #30295
 09.classes/02.class_extension_clause/extension_clause_negative_5.ets

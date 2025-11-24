@@ -127,54 +127,6 @@ cases:
           }
           arktest.assertTrue(false, 'Error err expected')
 
-    # catch block with explicit type
-    - tags: compile-only, negative
-      defs: |-
-          class MyError extends Error {}
-      use: |-
-          try {
-              if ((() => true)()) throw new MyError()
-          } catch (e: MyError) { // CTE: explicit type is not permitted
-              return
-          }
-
-    # catch block without the identifier
-    - tags: compile-only, negative
-      defs: |-
-          class MyError extends Error {}
-      use: |-
-          try {
-              if ((() => true)()) throw new MyError()
-          } catch { // CTE: identifier is missed
-              return
-          }
-
-    # multiple catch blocks
-    - tags: compile-only, negative
-      defs: |-
-          class MyError extends Error {}
-      use: |-
-          try {
-              if ((() => true)()) throw new MyError()
-          } catch (e) {
-              return
-          } catch (f) { // CTE: multiple catch blocks
-              return
-          }
-
-    # multiple catch blocks with explicit type
-    - tags: compile-only, negative
-      defs: |-
-          class MyError extends Error {}
-      use: |-
-          try {
-              if ((() => true)()) throw new MyError()
-          } catch (e: MyError) { // CTE: type is not permitted
-              return
-          } catch (f) { // CTE: multiple catch blocks
-              return
-          }
-
     # exported from namespace error
     - defs: |-
           namespace NS {
