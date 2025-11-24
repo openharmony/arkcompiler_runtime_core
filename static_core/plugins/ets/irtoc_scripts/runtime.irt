@@ -222,7 +222,7 @@ def GenerateGetHashCodeByValue(cgmode)
 
     klass := load_class(obj)
     If(isString(klass), 0).NE {
-      str := try_use_cached_flat_str(obj)
+      str := try_use_cached_flat_str_reject_sliced(obj)
       hash := fetchHashCodeString(str)
       If(hash, 0).EQ.Unlikely {
         Goto(:SlowPathEntrypointString)
@@ -244,7 +244,7 @@ def GenerateGetHashCodeByValue(cgmode)
 
     Return(Cast(Cast(fetchHashCodeObject(obj)).i32).i64).i64
 
-Label(:SlowPathEntrypoint)  # jump here from try_use_cached_flat_str macro
+Label(:SlowPathEntrypoint)  # jump here from try_use_cached_flat_str_reject_sliced macro
 Label(:SlowPathEntrypointString)
   if mode == :NativePlus
     Return(Call(obj).Method('GetHashCodeStringSlowPath').i64).i64
@@ -377,7 +377,7 @@ def GenerateSameValueZero(cgmode)
         Goto(:SlowPathEntrypoint)
       }
       ep_offset = get_entrypoint_offset("ETS_STRING_EQUALS")
-      flatStr := try_use_cached_flat_str(o1)
+      flatStr := try_use_cached_flat_str_reject_sliced(o1)
       # StringEqualsCompressed requires flat string as arg0
       LiveOut(flatStr).DstReg(regmap[:arg0]).ref
       LiveOut(o2).DstReg(regmap[:arg1]).ref
