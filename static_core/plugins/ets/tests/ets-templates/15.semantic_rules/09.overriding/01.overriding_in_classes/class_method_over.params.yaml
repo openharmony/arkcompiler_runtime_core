@@ -143,11 +143,10 @@ cases:
           Derived.foo(new A());
           arktest.assertEQ(res, 22);
 
-    - doc: CTE due to the different number of type parameters
+    - doc: Different number of type parameters
       decl: |-
           class A {}
           class B extends A {}
-          interface I {}
           class Base<T,S> {
               foo(i: T, j: S) {
                 res = 11;
@@ -162,15 +161,24 @@ cases:
                 res = 21;
               }
 
-              static /* @@ label */foo<X>(i: X) {
+              static foo<X>(i: X) {
                 res = 22;
               }
           }
       use: |-
-          new Derived<A, B>()
-      tags: "compile-only, negative"
-      expected_error: |-
-          /* @@@ label Error TypeError: Cannot override */
+          let a = new A();
+          new Derived<A, B>().foo(new A(), new B());
+          arktest.assertEQ(res, 11);
+          new Derived<A, B>().foo(new A());
+          arktest.assertEQ(res, 21);
+          new Derived<A, B>().foo(a);
+          arktest.assertEQ(res, 21);
+          Derived.foo<A>(a);
+          arktest.assertEQ(res, 22);
+          Derived.foo<A, B>(new A(), new B());
+          arktest.assertEQ(res, 12);
+          Derived.foo<A>(new A());
+          arktest.assertEQ(res, 22);
 
     - doc: |-
           CTE due to different return types.
@@ -290,8 +298,7 @@ cases:
 
     # Tuple
     - doc: |-
-          CTE due to different order in tuples
-      tags: compile-only, negative
+          Different order in tuples
       decl: |-
           type TPL_BF = [boolean, float];
           type TPL_FB = [float, boolean];
@@ -302,20 +309,19 @@ cases:
           }
           
           class Derived extends Base {
-              /* @@ label1 */foo(i: TPL_FB) { res = 21; }
-              static /* @@ label2 */foo(i: TPL_FB) { res = 22; }
+              foo(i: TPL_FB) { res = 21; }
+              static foo(i: TPL_FB) { res = 22; }
           }
       use: |-
-          new Derived();
-      expected_error: |-
-          /* @@@ label1 Error TypeError: Cannot override */
-          /* @@@ label2 Error TypeError: Cannot override */
+          new Derived().foo([1.0f, true]);
+          arktest.assertEQ(res, 21);
+          Derived.foo([1.0f, true]);
+          arktest.assertEQ(res, 22);
 
     - doc: |-
           CTE due to covariant relationship presence
-          pair C -> E is covariant (CTE)
-          pair E -> C is contravariant (OK)
-      tags: compile-only, negative
+          pair C -> E is covariant
+          pair E -> C is contravariant
       decl: |-
           class C {}
           class D extends C {}
@@ -330,18 +336,17 @@ cases:
           }
 
           class Derived extends Base {
-              /* @@ label1 */foo(i: TPL_EC) { res = 21; }
-              static /* @@ label2 */foo(i: TPL_EC) { res = 22; }
+              foo(i: TPL_EC) { res = 21; }
+              static foo(i: TPL_EC) { res = 22; }
           }
       use: |-
-          new Derived();
-      expected_error: |-
-          /* @@@ label1 Error TypeError: Cannot override */
-          /* @@@ label2 Error TypeError: Cannot override */
+          new Derived().foo([new E, new C]);
+          arktest.assertEQ(res, 21);
+          Derived.foo([new E, new C]);
+          arktest.assertEQ(res, 22);
 
     - doc: |-
           CTE due to different length of tuples
-      tags: compile-only, negative
       decl: |-
           class C {}
           class D extends C {}
@@ -355,18 +360,16 @@ cases:
           }
 
           class Derived extends Base {
-              /* @@ label1 */foo(i: TPL_CDE) { res = 21; }
+              foo(i: TPL_CDE) { res = 21; }
           }
       use: |-
           let a = new Derived();
           let tpl_cd: TPL_CD = [new C(), new D()];
           let tpl_cde: TPL_CDE = [new C(), new D(), new E()];
           a.foo(tpl_cd);
-          arktest.assertEQ(res, 21);
+          arktest.assertEQ(res, 11);
           a.foo(tpl_cde);
           arktest.assertEQ(res, 21);
-      expected_error: |-
-          /* @@@ label1 Error TypeError: Cannot override */
 
     - doc: |-
           Overriding instance method having arguments of tuple with contravariant reference types.
@@ -390,8 +393,7 @@ cases:
       use: |-
           let a = new Derived();
           let tpl1: TPL_CD = [new C(), new D()];
-          let tpl2: TPL_DE = [new D(), new E()];
           a.foo(tpl1);
           arktest.assertEQ(res, 21);
-          a.foo(tpl2);
+          Derived.foo(tpl1);
           arktest.assertEQ(res, 22);
