@@ -35,8 +35,7 @@ export namespace concurrency {
      * Provides functionality for posting tasks, sending messages, and managing callbacks
      */
     export class MessageHandler {
-        //NOTE(ekaterinzaytseva): unable to replace internal - uses as public in InteropWorker
-        internal handler: Handler;
+        private handler: Handler;
         private worker: EAWorker;
         // TODO: using managed mutex instead of concurrent hash map
         private messages: containers.ConcurrentHashMap<Message, MessageStatus>;
