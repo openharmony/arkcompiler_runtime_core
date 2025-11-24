@@ -23,66 +23,43 @@ cases:
               res = 2
           }
       call: |-
+          res = 0
           new Base().foo(SHIPYARD.Flippers)
           arktest.assertEQ(res, 1)
           new Derived().foo(SHIPYARD.Flippers)
           arktest.assertEQ(res, 2)
       params: override-compatible, same parameter type
 
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: SHIPYARD) {
-              res = 1
-          }
-      derived: |-
-          foo(i: HARBOUR) {  // overriding assumed
-              res = 2
-          }
-      params: parameter is override-incompatible
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: SHIPYARD) {
-              res = 1
-          }
-      derived: |-
-          override foo(i: HARBOUR) {
-              res = 2
-          }
-      params: parameter is override-incompatible
-
-    # ENUM, RETURN TYPE
     - base: |-
-          foo(): SHIPYARD {
-              return SHIPYARD.Flippers
+          foo(i: SHIPYARD) {
+              res = 1
           }
       derived: |-
-          foo(): SHIPYARD {
-              return SHIPYARD.SwimRing
+          foo(i: HARBOUR) {
+              res = 2
           }
       call: |-
-          arktest.assertEQ(new Base().foo(), SHIPYARD.Flippers)
-          arktest.assertEQ(new Derived().foo(), SHIPYARD.SwimRing)
+        res = 0
+        new Base().foo(SHIPYARD.Flippers)
+        arktest.assertEQ(1, res)
+        res = 0
+        new Derived().foo(SHIPYARD.Flippers)
+        arktest.assertEQ(1, res)
+        res = 0
+        new Derived().foo(HARBOUR.Flippers)
+        arktest.assertEQ(2, res)
+      params: parameter is unrelated
+
+  # ENUM, RETURN TYPE
+    - base: |-
+        foo(): SHIPYARD {
+            return SHIPYARD.Flippers
+        }
+      derived: |-
+        foo(): SHIPYARD {
+            return SHIPYARD.SwimRing
+        }
+      call: |-
+        arktest.assertEQ(new Base().foo(), SHIPYARD.Flippers)
+        arktest.assertEQ(new Derived().foo(), SHIPYARD.SwimRing)
       params: override-compatible with same type
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): SHIPYARD {
-              return SHIPYARD.Flippers
-          }
-      derived: |-
-          foo(): HARBOUR {
-              return HARBOUR.Boat
-          }
-      params: override-incompatible return type
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): SHIPYARD {
-              return SHIPYARD.Flippers
-          }
-      derived: |-
-          override foo(): HARBOUR {
-              return HARBOUR.Boat
-          }
-      params: override-incompatible return type
