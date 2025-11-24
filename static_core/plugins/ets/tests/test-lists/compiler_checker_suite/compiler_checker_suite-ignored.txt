@@ -1,5 +1,8 @@
 #28944
 simple_run/llvm_infer_flags.ets
 
+#31608
+simple_run/codegen_new_obj_call.ets
+
 #24986
 simple_run/optimize_load_object_boxed.ets

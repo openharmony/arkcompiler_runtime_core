@@ -1,0 +1,3 @@
+
+#31700
+15.semantic_rules/04.assignability/never_assignability3_0.ets

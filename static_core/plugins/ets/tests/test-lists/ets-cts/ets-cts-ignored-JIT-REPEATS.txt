@@ -1,0 +1,2 @@
+#31741
+10.interfaces/06.interface_inheritance/Interface_inheritance_class_implementation/child_interface_constants_inheritance_verification/child_interface_constants_inheritance_verification_14.ets
