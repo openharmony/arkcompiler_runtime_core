@@ -256,4 +256,24 @@ BytecodeEmitter::BitImmSize BytecodeEmitter::GetBitImmSizeByOpcode(<%= OPCODE_TY
     UNREACHABLE();
     return <%= OPCODE_TYPE %>::LAST;  // Any return value will do, we are broken here anyway.
 }
+
+/* static */
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+<%= OPCODE_TYPE %> BytecodeEmitter::GetLowestSizeOp(<%= OPCODE_TYPE %> opcode) {
+    switch (opcode) {
+% Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
+%   insn = group[0]
+%   if insn.jump?
+%     group.each do |i|
+    case <%= OPCODE_TYPE %>::<%= i.opcode.upcase %>:
+%     end
+        return <%= OPCODE_TYPE %>::<%= group[0].opcode.upcase %>;
+%   end
+% end
+    default:
+        UNREACHABLE();
+        return <%= OPCODE_TYPE %>::LAST;  // Any return value will do, we are broken here anyway.
+    }
+}
+
 // NOLINTEND(readability-identifier-naming)
