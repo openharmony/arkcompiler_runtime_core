@@ -467,19 +467,18 @@ static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char
     if (signature == nullptr && !CheckUniqueMethod<IS_STATIC_METHOD>(klass, name)) {
         return ANI_AMBIGUOUS;
     }
-    std::optional<PandaString> oldSignature;
+    std::optional<EtsMethodSignature> methodSignature;
     if (signature != nullptr) {
-        oldSignature = Mangle::ConvertSignature(signature);
-        ANI_CHECK_RETURN_IF_EQ(oldSignature.has_value(), false, ANI_INVALID_DESCRIPTOR);
-        signature = oldSignature.value().c_str();
+        Mangle::ConvertSignatureToProto(methodSignature, signature);
+        ANI_CHECK_RETURN_IF_EQ(methodSignature.has_value(), false, ANI_INVALID_DESCRIPTOR);
     }
 
     // CC-OFFNXT(G.FMT.14-CPP) project code style
-    auto *method = [klass, name, signature]() -> EtsMethod * {
+    auto *method = [klass, name, &methodSignature]() -> EtsMethod * {
         if constexpr (IS_STATIC_METHOD) {
-            return klass->GetStaticMethod(name, signature);
+            return klass->GetStaticMethod(name, methodSignature);
         } else {
-            return klass->GetInstanceMethod(name, signature);
+            return klass->GetInstanceMethod(name, methodSignature);
         }
     }();
 
@@ -489,9 +488,9 @@ static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char
     }
     PandaVector<EtsMethod *> methodVec;
     if constexpr (IS_STATIC_METHOD) {
-        methodVec = klass->GetStaticMethodOverload(name, signature);
+        methodVec = klass->GetStaticMethodOverload(name, methodSignature);
     } else {
-        methodVec = klass->GetInstanceMethodOverload(name, signature);
+        methodVec = klass->GetInstanceMethodOverload(name, methodSignature);
     }
     if (methodVec.empty()) {
         return ANI_NOT_FOUND;
@@ -1234,20 +1233,19 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
     for (const auto &fn : Span(functions, nrFunctions)) {
         const char *name = fn.name;
         const char *signature = fn.signature;
-        std::optional<PandaString> oldSignature;
+        std::optional<EtsMethodSignature> methodSignature;
         if (signature != nullptr) {
-            oldSignature = Mangle::ConvertSignature(signature);
-            ANI_CHECK_RETURN_IF_EQ(oldSignature.has_value(), false, ANI_INVALID_DESCRIPTOR);
-            signature = oldSignature.value().c_str();
+            Mangle::ConvertSignatureToProto(methodSignature, signature);
+            ANI_CHECK_RETURN_IF_EQ(methodSignature.has_value(), false, ANI_INVALID_DESCRIPTOR);
         }
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        EtsMethod *method = etsNs->GetFunction(name, signature);
+        EtsMethod *method = etsNs->GetFunction(name, methodSignature);
         if (method != nullptr) {
             etsMethods.push_back(method);
             continue;
         }
-        PandaVector<EtsMethod *> methodVec = etsNs->GetFunctionOverload(name, signature);
+        PandaVector<EtsMethod *> methodVec = etsNs->GetFunctionOverload(name, methodSignature);
         if (methodVec.size() == 1U) {
             etsMethods.push_back(methodVec[0]);
             continue;
@@ -1431,9 +1429,10 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(ani_env *env, ani_fix
     return SetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
 }
 
-static ani_status GetDirectMethodOverload(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
+static ani_status GetDirectMethodOverload(EtsClass *klass, const char *name,
+                                          std::optional<EtsMethodSignature> &methodSignature, EtsMethod **result)
 {
-    PandaVector<EtsMethod *> methodVec = klass->GetDirectMethodOverload(name, signature);
+    PandaVector<EtsMethod *> methodVec = klass->GetDirectMethodOverload(name, methodSignature);
     if (!methodVec.empty()) {
         ANI_CHECK_RETURN_IF_GT(methodVec.size(), 1U, ANI_AMBIGUOUS);
         ASSERT(methodVec.size() == 1U);
@@ -1442,14 +1441,15 @@ static ani_status GetDirectMethodOverload(EtsClass *klass, const char *name, con
     return ANI_OK;
 }
 
-static void CheckWrongBindingMethodType(EtsClass *klass, bool isStatic, const char *name, const char *signature)
+static void CheckWrongBindingMethodType(EtsClass *klass, bool isStatic, const char *name,
+                                        std::optional<EtsMethodSignature> &methodSignature)
 {
     EtsMethod *method = nullptr;
-    if (signature == nullptr) {
+    if (!methodSignature.has_value()) {
         bool isUnique = false;
         method = klass->GetDirectMethod(!isStatic, name, &isUnique);
     } else {
-        method = klass->GetDirectMethod(!isStatic, name, signature);
+        method = klass->GetDirectMethod(!isStatic, name, methodSignature.value());
     }
     if (method != nullptr) {
         if (!isStatic && method->IsStatic()) {
@@ -1480,29 +1480,28 @@ static ani_status BindNativeMethods(ani_env *env, ani_class cls, const ani_nativ
     for (const ani_native_function &m : Span(methods, nrMethods)) {
         const char *name = m.name;
         const char *signature = m.signature;
-        std::optional<PandaString> oldSignature;
+        std::optional<EtsMethodSignature> methodSignature;
         if (signature != nullptr) {
-            oldSignature = Mangle::ConvertSignature(signature);
-            ANI_CHECK_RETURN_IF_EQ(oldSignature.has_value(), false, ANI_INVALID_DESCRIPTOR);
-            signature = oldSignature.value().c_str();
+            Mangle::ConvertSignatureToProto(methodSignature, signature);
+            ANI_CHECK_RETURN_IF_EQ(methodSignature.has_value(), false, ANI_INVALID_DESCRIPTOR);
         }
 
         EtsMethod *method = nullptr;
-        if (signature == nullptr) {
+        if (!methodSignature.has_value()) {
             bool isUnique = false;
             method = klass->GetDirectMethod(isStatic, name, &isUnique);
             ANI_CHECK_RETURN_IF_EQ(isUnique, false, ANI_AMBIGUOUS);
         } else {
-            method = klass->GetDirectMethod(isStatic, name, signature);
+            method = klass->GetDirectMethod(isStatic, name, methodSignature.value());
         }
 
         if (method == nullptr && !isStatic) {
-            ani_status status = GetDirectMethodOverload(klass, name, signature, &method);
+            ani_status status = GetDirectMethodOverload(klass, name, methodSignature, &method);
             ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
         }
 
         if (method == nullptr) {
-            CheckWrongBindingMethodType(klass, isStatic, name, signature);
+            CheckWrongBindingMethodType(klass, isStatic, name, methodSignature);
         }
 
         ANI_CHECK_RETURN_IF_EQ(method, nullptr, ANI_NOT_FOUND);

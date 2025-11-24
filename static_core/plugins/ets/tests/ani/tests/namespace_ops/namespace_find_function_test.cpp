@@ -113,7 +113,7 @@ TEST_F(NamespaceFindFunctionTest, find_function05)
 
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "", &fn), ANI_INVALID_DESCRIPTOR);
 
-    ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "d:ii", &fn), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "d:ii", &fn), ANI_INVALID_DESCRIPTOR);
 
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "b", "d:ii", nullptr), ANI_INVALID_ARGS);
 }

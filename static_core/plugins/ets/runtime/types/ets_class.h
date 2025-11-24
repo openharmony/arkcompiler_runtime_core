@@ -138,6 +138,8 @@ public:
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature);
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(bool isStatic, const char *name, const char *signature) const;
+    PANDA_PUBLIC_API EtsMethod *GetDirectMethod(bool isStatic, const char *name,
+                                                const EtsMethodSignature &methodSignature) const;
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(bool isStatic, const char *name, bool *outIsUnique) const;
 
     PANDA_PUBLIC_API EtsMethod *GetStaticMethod(const char *name, const char *signature) const
@@ -148,6 +150,15 @@ public:
         return GetMethodInternal<FindFilter::STATIC>(name, signature);
     }
 
+    PANDA_PUBLIC_API EtsMethod *GetStaticMethod(const char *name,
+                                                std::optional<EtsMethodSignature> &methodSignature) const
+    {
+        if (!methodSignature.has_value()) {
+            return GetMethodInternal<FindFilter::STATIC>(name);
+        }
+        return GetMethodInternal<FindFilter::STATIC>(name, methodSignature.value());
+    }
+
     PANDA_PUBLIC_API EtsMethod *GetInstanceMethod(const char *name, const char *signature) const
     {
         if (signature == nullptr) {
@@ -156,9 +167,24 @@ public:
         return GetMethodInternal<FindFilter::INSTANCE>(name, signature);
     }
 
+    PANDA_PUBLIC_API EtsMethod *GetInstanceMethod(const char *name,
+                                                  std::optional<EtsMethodSignature> &methodSignature) const
+    {
+        if (!methodSignature.has_value()) {
+            return GetMethodInternal<FindFilter::INSTANCE>(name);
+        }
+        return GetMethodInternal<FindFilter::INSTANCE>(name, methodSignature.value());
+    }
+
     PANDA_PUBLIC_API PandaVector<EtsMethod *> GetStaticMethodOverload(const char *name, const char *signature)
     {
         return GetMethodOverloadInternal<FindFilter::STATIC, false>(name, signature);
+    }
+
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetStaticMethodOverload(
+        const char *name, std::optional<EtsMethodSignature> &methodSignature)
+    {
+        return GetMethodOverloadInternal<FindFilter::STATIC, false>(name, methodSignature);
     }
 
     PANDA_PUBLIC_API PandaVector<EtsMethod *> GetInstanceMethodOverload(const char *name, const char *signature)
@@ -166,9 +192,21 @@ public:
         return GetMethodOverloadInternal<FindFilter::INSTANCE, false>(name, signature);
     }
 
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetInstanceMethodOverload(
+        const char *name, std::optional<EtsMethodSignature> &methodSignature)
+    {
+        return GetMethodOverloadInternal<FindFilter::INSTANCE, false>(name, methodSignature);
+    }
+
     PANDA_PUBLIC_API PandaVector<EtsMethod *> GetDirectMethodOverload(const char *name, const char *signature)
     {
         return GetMethodOverloadInternal<FindFilter::ALL, true>(name, signature);
+    }
+
+    PANDA_PUBLIC_API PandaVector<EtsMethod *> GetDirectMethodOverload(
+        const char *name, std::optional<EtsMethodSignature> &methodSignature)
+    {
+        return GetMethodOverloadInternal<FindFilter::ALL, true>(name, methodSignature);
     }
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const PandaString &name, const PandaString &signature)
@@ -711,6 +749,12 @@ private:
             return nullptr;
         }
 
+        return this->GetMethodInternal<FILTER>(name, methodSignature);
+    }
+
+    template <FindFilter FILTER>
+    EtsMethod *GetMethodInternal(const char *name, const EtsMethodSignature &methodSignature) const
+    {
         const auto *coreName = utf::CStringAsMutf8(name);
 
         Method *coreMethod = nullptr;
@@ -739,14 +783,22 @@ private:
     template <FindFilter FILTER, bool IS_DIRECT>
     PandaVector<EtsMethod *> GetMethodOverloadInternal(const char *name, const char *signature)
     {
-        PandaVector<EtsMethod *> etsMethods;
-        auto overloadName = PandaString(name);
         std::optional<EtsMethodSignature> methodSignature;
-        auto staticOverloadKey = OverloadKey(overloadName, true);
-        auto instanceOverloadKey = OverloadKey(overloadName, false);
         if (signature) {
             methodSignature.emplace(signature);
         }
+        return GetMethodOverloadInternal<FILTER, IS_DIRECT>(name, methodSignature);
+    }
+
+    template <FindFilter FILTER, bool IS_DIRECT>
+    PandaVector<EtsMethod *> GetMethodOverloadInternal(const char *name,
+                                                       std::optional<EtsMethodSignature> &methodSignature)
+    {
+        PandaVector<EtsMethod *> etsMethods;
+        auto overloadName = PandaString(name);
+        auto staticOverloadKey = OverloadKey(overloadName, true);
+        auto instanceOverloadKey = OverloadKey(overloadName, false);
+
         for (auto curClass = this; curClass != nullptr; curClass = curClass->GetBase()) {
             if constexpr (FILTER == FindFilter::ALL || FILTER == FindFilter::STATIC) {
                 if (curClass->FindMethodFromOverloadMap(staticOverloadKey, etsMethods, methodSignature)) {

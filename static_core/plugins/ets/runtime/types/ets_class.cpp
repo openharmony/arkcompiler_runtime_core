@@ -372,6 +372,16 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name, const Method::Proto &prot
 
 EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, const char *signature) const
 {
+    EtsMethodSignature methodSignature(signature);
+    if (!methodSignature.IsValid()) {
+        LOG(ERROR, ANI) << "Wrong method signature: " << signature;
+        return nullptr;
+    }
+    return GetDirectMethod(isStatic, name, methodSignature);
+}
+
+EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, const EtsMethodSignature &methodSignature) const
+{
     const Class *rtClass = GetRuntimeClass();
     Span<Method> methods = isStatic ? rtClass->GetStaticMethods() : rtClass->GetVirtualMethods();
 
@@ -380,12 +390,7 @@ EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, const char
     panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     auto it = std::lower_bound(methods.begin(), methods.end(), key, comp);
 
-    EtsMethodSignature methodSignature(signature);
-    if (!methodSignature.IsValid()) {
-        LOG(ERROR, ANI) << "Wrong method signature: " << signature;
-        return nullptr;
-    }
-    Method::Proto &proto = methodSignature.GetProto();
+    const Method::Proto &proto = methodSignature.GetProto();
     while (it != methods.end()) {
         auto &m = *it;
         if (!comp.equal(m, key)) {

@@ -45,9 +45,19 @@ public:
         return GetStaticMethod(name, signature);
     }
 
+    EtsMethod *GetFunction(const char *name, std::optional<EtsMethodSignature> &methodSignature)
+    {
+        return GetStaticMethod(name, methodSignature);
+    }
+
     PandaVector<EtsMethod *> GetFunctionOverload(const char *name, const char *signature)
     {
         return GetStaticMethodOverload(name, signature);
+    }
+
+    PandaVector<EtsMethod *> GetFunctionOverload(const char *name, std::optional<EtsMethodSignature> &methodSignature)
+    {
+        return GetStaticMethodOverload(name, methodSignature);
     }
 };
 
