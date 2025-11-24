@@ -3,9 +3,9 @@
 02.lexical_elements/10.comments/combined1.ets
 02.lexical_elements/10.comments/combined2.ets
 02.lexical_elements/10.comments/combined3.ets
-02.lexical_elements/10.comments/combined4.ets
+02.lexical_elements/10.comments/combined4_n.ets
 02.lexical_elements/10.comments/combined5.ets
-02.lexical_elements/10.comments/combined6.ets
+02.lexical_elements/10.comments/combined6_n.ets
 02.lexical_elements/10.comments/multi_line_comment1_n.ets
 02.lexical_elements/10.comments/multi_line_comment2_n.ets
 02.lexical_elements/10.comments/multi_line_comment3_n.ets
