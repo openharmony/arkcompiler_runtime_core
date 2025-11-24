@@ -63,7 +63,9 @@ export class Autofixer {
         this[FaultID.DuplicatedEnum].bind(this),
         this[FaultID.EnumWithMixedType].bind(this),
         this[FaultID.LimitExtends].bind(this),
-        this[FaultID.AddDeclareToTopLevelInterfaces].bind(this)
+        this[FaultID.AddDeclareToTopLevelInterfaces].bind(this),
+        this[FaultID.AddDeclareToTopLevelVariable].bind(this),
+        this[FaultID.AddDeclareToTopLevelFunction].bind(this)
       ]
     ],
     [ts.SyntaxKind.LiteralType, [this[FaultID.NumbericLiteral].bind(this)]],
@@ -134,7 +136,7 @@ export class Autofixer {
       ts.SyntaxKind.ClassDeclaration,
       [
         this[FaultID.MergeOverloadedMethods].bind(this),
-        this[FaultID.NoPrivateMember].bind(this), 
+        this[FaultID.NoPrivateMember].bind(this),
         this[FaultID.AddDeclareToClass].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
         this[FaultID.RemoveLimitDecorator].bind(this),
@@ -1016,6 +1018,83 @@ export class Autofixer {
     } else {
       return node;
     }
+  }
+
+  /**
+   * Rule: `arkts-add-declare-to-exported-variables`
+   */
+  private [FaultID.AddDeclareToTopLevelVariable](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isSourceFile(node)) {
+      return node;
+    }
+
+    const statements = node.statements.map(stmt => {
+      if (ts.isVariableStatement(stmt) && stmt.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)) {
+        if (stmt.modifiers.some(m => m.kind === ts.SyntaxKind.DeclareKeyword)) {
+          return stmt;
+        }
+
+        const newModifiers: ts.Modifier[] = [];
+        for (const modifier of stmt.modifiers) {
+          newModifiers.push(modifier);
+          if (modifier.kind === ts.SyntaxKind.ExportKeyword) {
+            newModifiers.push(this.context.factory.createToken(ts.SyntaxKind.DeclareKeyword) as ts.Modifier);
+          }
+        }
+
+        return this.context.factory.updateVariableStatement(
+          stmt,
+          newModifiers,
+          stmt.declarationList
+        );
+      }
+      return stmt;
+    });
+
+    return this.context.factory.updateSourceFile(node, statements);
+  }
+
+  /**
+   * Rule: `arkts-add-declare-to-exported-functions`
+   */
+  private [FaultID.AddDeclareToTopLevelFunction](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isSourceFile(node)) {
+      return node;
+    }
+
+    const statements = node.statements.map(stmt => {
+      if (ts.isFunctionDeclaration(stmt) && stmt.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)) {
+        if (stmt.modifiers.some(m => m.kind === ts.SyntaxKind.DeclareKeyword)) {
+          return stmt;
+        }
+
+        if (stmt.modifiers.some(m => m.kind === ts.SyntaxKind.DefaultKeyword)) {
+          return stmt;
+        }
+
+        const newModifiers: ts.Modifier[] = [];
+        for (const modifier of stmt.modifiers) {
+          newModifiers.push(modifier);
+          if (modifier.kind === ts.SyntaxKind.ExportKeyword) {
+            newModifiers.push(this.context.factory.createToken(ts.SyntaxKind.DeclareKeyword) as ts.Modifier);
+          }
+        }
+
+        return this.context.factory.updateFunctionDeclaration(
+          stmt,
+          newModifiers,
+          stmt.asteriskToken,
+          stmt.name,
+          stmt.typeParameters,
+          stmt.parameters,
+          stmt.type,
+          stmt.body
+        );
+      }
+      return stmt;
+    });
+
+    return this.context.factory.updateSourceFile(node, statements);
   }
 
   /**
