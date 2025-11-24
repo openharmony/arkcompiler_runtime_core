@@ -601,7 +601,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @param set A set object to convert to an array.
      *
-     * @returns new Array
+     * @returns new Uint8ClampedArray
      */
     public static fromSetint(set: Set<int>): Uint8ClampedArray {
         const length = set.size;
@@ -977,7 +977,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     public native reverse(): Uint8ClampedArray
 
     /**
-     * Creates a slice of current Uint8ClampedArray using range [begin, end)
+     * Creates a slice of current Uint8ClampedArray using range [begin, end]
      *
      * @param begin start index to be taken into slice
      *
@@ -988,24 +988,32 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: int, end?: int): Uint8ClampedArray {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
+    }
+
+    private sliceFromTo(begin: int, end: int): Uint8ClampedArray {
+        const relStart = normalizeIndex(begin, this.lengthInt)
+        const relEnd = normalizeIndex(end, this.lengthInt)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        return new Uint8ClampedArray(buf)
     }
 
     /**
-     * Creates a slice of current Uint8ClampedArray using range [begin, this.lengthInt).
+     * Creates a slice of current Uint8ClampedArray using range [begin, this.lengthInt].
      *
      * @param begin start index to be taken into slice
      *
-     * @returns a new Uint8ClampedArray with elements of current Uint8ClampedArray[begin, this.lengthInt)
+     * @returns a new Uint8ClampedArray with elements of current Uint8ClampedArray[begin, this.lengthInt]
      */
     public slice(begin: int): Uint8ClampedArray {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceFromTo(begin, this.lengthInt)
     }
+
 
     /**
      * Sorts in-place by numeric value in ascending order.
      *
-     * @returns sorted Array
+     * @returns sorted Uint8ClampedArray
      */
     public native sort(): this;
 
@@ -1117,7 +1125,11 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @returns a reversed copy
      */
     public toReversed(): Uint8ClampedArray {
-        return this.toReversedImpl()
+        let newArray = new Uint8ClampedArray(this.lengthInt)
+        if (this.lengthInt > 0) {
+            Uint8ClampedArray.reverseCopyBuffer(newArray.buffer, this.buffer, this.byteOffset, this.lengthInt);
+        }
+        return newArray
     }
 
     /**
@@ -1157,7 +1169,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @returns an Uint8ClampedArray with replaced value on index
      */
     public with(index: int, value: int): Uint8ClampedArray {
-        return this.withImpl(index, value)
+        let res = new Uint8ClampedArray(this)
+        res.setUnsafeClamp(index, value)
+        return res
     }
 
     /**
@@ -1170,7 +1184,9 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @returns an Uint8ClampedArray with replaced value on index
      */
     public with(index: int, value: number): Uint8ClampedArray {
-        return this.withImpl(index, value.toInt())
+        let res = new Uint8ClampedArray(this)
+        res.setUnsafeClamp(index, value.toInt())
+        return res
     }
 
     /// === with element lambda functions ===
@@ -1463,21 +1479,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     /** String \"Uint8ClampedArray\" */
     public readonly name = "Uint8ClampedArray"
 
-    private final sliceImpl(begin: int, end: int): Uint8ClampedArray {
-        return new Uint8ClampedArray(this.allocSlicedBuffer(begin, end))
-    }
-
-    private final toReversedImpl(): Uint8ClampedArray {
-        return new Uint8ClampedArray(this.allocReversedBuffer())
-    }
-
-    private final withImpl(index: int, value: int): Uint8ClampedArray {
-        return new Uint8ClampedArray(this.allocBufferWith(index, value))
-    }
-
-    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
-    private final native allocReversedBuffer(): ArrayBuffer
-    private final native allocBufferWith(index: int, value: int): ArrayBuffer
+    private static native reverseCopyBuffer(dstBuf: ArrayBuffer, srcBuf: ArrayBuffer, startPos: int, length: int): void
 
     private static clamp(val: int): int {
         if (val > 255) {
@@ -2084,7 +2086,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param set A set object to convert to an array.
      *
-     * @returns new Array
+     * @returns new Uint8Array
      */
     public static fromSetint(set: Set<int>): Uint8Array {
         const length = set.size;
@@ -2472,7 +2474,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public native reverse(): Uint8Array
 
     /**
-     * Creates a slice of current Uint8Array using range [begin, end)
+     * Creates a slice of current Uint8Array using range [begin, end]
      *
      * @param begin start index to be taken into slice
      *
@@ -2483,24 +2485,32 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: int, end?: int): Uint8Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
+    }
+
+    private sliceFromTo(begin: int, end: int): Uint8Array {
+        const relStart = normalizeIndex(begin, this.lengthInt)
+        const relEnd = normalizeIndex(end, this.lengthInt)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        return new Uint8Array(buf)
     }
 
     /**
-     * Creates a slice of current Uint8Array using range [begin, this.lengthInt).
+     * Creates a slice of current Uint8Array using range [begin, this.lengthInt].
      *
      * @param begin start index to be taken into slice
      *
-     * @returns a new Uint8Array with elements of current Uint8Array[begin, this.lengthInt)
+     * @returns a new Uint8Array with elements of current Uint8Array[begin, this.lengthInt]
      */
     public slice(begin: int): Uint8Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceFromTo(begin, this.lengthInt)
     }
+
 
     /**
      * Sorts in-place by numeric value in ascending order.
      *
-     * @returns sorted Array
+     * @returns sorted Uint8Array
      */
     public native sort(): this;
 
@@ -2612,7 +2622,11 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a reversed copy
      */
     public toReversed(): Uint8Array {
-        return this.toReversedImpl()
+        let newArray = new Uint8Array(this.lengthInt)
+        if (this.lengthInt > 0) {
+            Uint8Array.reverseCopyBuffer(newArray.buffer, this.buffer, this.byteOffset, this.lengthInt);
+        }
+        return newArray
     }
 
     /**
@@ -2652,7 +2666,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Uint8Array with replaced value on index
      */
     public with(index: int, value: int): Uint8Array {
-        return this.withImpl(index, value)
+        let res = new Uint8Array(this)
+        res.setUnsafeClamp(index, value)
+        return res
     }
 
     /**
@@ -2665,7 +2681,9 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Uint8Array with replaced value on index
      */
     public with(index: int, value: number): Uint8Array {
-        return this.withImpl(index, value.toInt())
+        let res = new Uint8Array(this)
+        res.setUnsafeClamp(index, value.toInt())
+        return res
     }
 
     /// === with element lambda functions ===
@@ -2958,21 +2976,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     /** String \"Uint8Array\" */
     public readonly name = "Uint8Array"
 
-    private final sliceImpl(begin: int, end: int): Uint8Array {
-        return new Uint8Array(this.allocSlicedBuffer(begin, end))
-    }
-
-    private final toReversedImpl(): Uint8Array {
-        return new Uint8Array(this.allocReversedBuffer())
-    }
-
-    private final withImpl(index: int, value: int): Uint8Array {
-        return new Uint8Array(this.allocBufferWith(index, value))
-    }
-
-    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
-    private final native allocReversedBuffer(): ArrayBuffer
-    private final native allocBufferWith(index: int, value: int): ArrayBuffer
+    private static native reverseCopyBuffer(dstBuf: ArrayBuffer, srcBuf: ArrayBuffer, startPos: int, length: int): void
 
     private static clamp(val: int): int {
         return val
@@ -3563,7 +3567,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param set A set object to convert to an array.
      *
-     * @returns new Array
+     * @returns new Uint16Array
      */
     public static fromSetint(set: Set<int>): Uint16Array {
         const length = set.size;
@@ -3951,7 +3955,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public native reverse(): Uint16Array
 
     /**
-     * Creates a slice of current Uint16Array using range [begin, end)
+     * Creates a slice of current Uint16Array using range [begin, end]
      *
      * @param begin start index to be taken into slice
      *
@@ -3962,24 +3966,32 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: int, end?: int): Uint16Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
+    }
+
+    private sliceFromTo(begin: int, end: int): Uint16Array {
+        const relStart = normalizeIndex(begin, this.lengthInt)
+        const relEnd = normalizeIndex(end, this.lengthInt)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        return new Uint16Array(buf)
     }
 
     /**
-     * Creates a slice of current Uint16Array using range [begin, this.lengthInt).
+     * Creates a slice of current Uint16Array using range [begin, this.lengthInt].
      *
      * @param begin start index to be taken into slice
      *
-     * @returns a new Uint16Array with elements of current Uint16Array[begin, this.lengthInt)
+     * @returns a new Uint16Array with elements of current Uint16Array[begin, this.lengthInt]
      */
     public slice(begin: int): Uint16Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceFromTo(begin, this.lengthInt)
     }
+
 
     /**
      * Sorts in-place by numeric value in ascending order.
      *
-     * @returns sorted Array
+     * @returns sorted Uint16Array
      */
     public native sort(): this;
 
@@ -4091,7 +4103,11 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a reversed copy
      */
     public toReversed(): Uint16Array {
-        return this.toReversedImpl()
+        let newArray = new Uint16Array(this.lengthInt)
+        if (this.lengthInt > 0) {
+            Uint16Array.reverseCopyBuffer(newArray.buffer, this.buffer, this.byteOffset, this.lengthInt);
+        }
+        return newArray
     }
 
     /**
@@ -4131,7 +4147,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Uint16Array with replaced value on index
      */
     public with(index: int, value: int): Uint16Array {
-        return this.withImpl(index, value)
+        let res = new Uint16Array(this)
+        res.setUnsafeClamp(index, value)
+        return res
     }
 
     /**
@@ -4144,7 +4162,9 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Uint16Array with replaced value on index
      */
     public with(index: int, value: number): Uint16Array {
-        return this.withImpl(index, value.toInt())
+        let res = new Uint16Array(this)
+        res.setUnsafeClamp(index, value.toInt())
+        return res
     }
 
     /// === with element lambda functions ===
@@ -4437,21 +4457,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     /** String \"Uint16Array\" */
     public readonly name = "Uint16Array"
 
-    private final sliceImpl(begin: int, end: int): Uint16Array {
-        return new Uint16Array(this.allocSlicedBuffer(begin, end))
-    }
-
-    private final toReversedImpl(): Uint16Array {
-        return new Uint16Array(this.allocReversedBuffer())
-    }
-
-    private final withImpl(index: int, value: int): Uint16Array {
-        return new Uint16Array(this.allocBufferWith(index, value))
-    }
-
-    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
-    private final native allocReversedBuffer(): ArrayBuffer
-    private final native allocBufferWith(index: int, value: int): ArrayBuffer
+    private static native reverseCopyBuffer(dstBuf: ArrayBuffer, srcBuf: ArrayBuffer, startPos: int, length: int): void
 
     private static clamp(val: int): int {
         return val
@@ -5076,7 +5082,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param set A set object to convert to an array.
      *
-     * @returns new Array
+     * @returns new Uint32Array
      */
     public static fromSetint(set: Set<int>): Uint32Array {
         const length = set.size;
@@ -5464,7 +5470,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public native reverse(): Uint32Array
 
     /**
-     * Creates a slice of current Uint32Array using range [begin, end)
+     * Creates a slice of current Uint32Array using range [begin, end]
      *
      * @param begin start index to be taken into slice
      *
@@ -5475,24 +5481,32 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: int, end?: int): Uint32Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
+    }
+
+    private sliceFromTo(begin: int, end: int): Uint32Array {
+        const relStart = normalizeIndex(begin, this.lengthInt)
+        const relEnd = normalizeIndex(end, this.lengthInt)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        return new Uint32Array(buf)
     }
 
     /**
-     * Creates a slice of current Uint32Array using range [begin, this.lengthInt).
+     * Creates a slice of current Uint32Array using range [begin, this.lengthInt].
      *
      * @param begin start index to be taken into slice
      *
-     * @returns a new Uint32Array with elements of current Uint32Array[begin, this.lengthInt)
+     * @returns a new Uint32Array with elements of current Uint32Array[begin, this.lengthInt]
      */
     public slice(begin: int): Uint32Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceFromTo(begin, this.lengthInt)
     }
+
 
     /**
      * Sorts in-place by numeric value in ascending order.
      *
-     * @returns sorted Array
+     * @returns sorted Uint32Array
      */
     public native sort(): this;
 
@@ -5604,7 +5618,11 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns a reversed copy
      */
     public toReversed(): Uint32Array {
-        return this.toReversedImpl()
+        let newArray = new Uint32Array(this.lengthInt)
+        if (this.lengthInt > 0) {
+            Uint32Array.reverseCopyBuffer(newArray.buffer, this.buffer, this.byteOffset, this.lengthInt);
+        }
+        return newArray
     }
 
     /**
@@ -5644,7 +5662,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Uint32Array with replaced value on index
      */
     public with(index: int, value: long): Uint32Array {
-        return this.withImpl(index, value)
+        let res = new Uint32Array(this)
+        res.setUnsafeClamp(index, value)
+        return res
     }
 
     /**
@@ -5657,7 +5677,9 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns an Uint32Array with replaced value on index
      */
     public with(index: int, value: number): Uint32Array {
-        return this.withImpl(index, value.toLong())
+        let res = new Uint32Array(this)
+        res.setUnsafeClamp(index, value.toLong())
+        return res
     }
 
     /// === with element lambda functions ===
@@ -5950,21 +5972,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     /** String \"Uint32Array\" */
     public readonly name = "Uint32Array"
 
-    private final sliceImpl(begin: int, end: int): Uint32Array {
-        return new Uint32Array(this.allocSlicedBuffer(begin, end))
-    }
-
-    private final toReversedImpl(): Uint32Array {
-        return new Uint32Array(this.allocReversedBuffer())
-    }
-
-    private final withImpl(index: int, value: long): Uint32Array {
-        return new Uint32Array(this.allocBufferWith(index, value))
-    }
-
-    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
-    private final native allocReversedBuffer(): ArrayBuffer
-    private final native allocBufferWith(index: int, value: long): ArrayBuffer
+    private static native reverseCopyBuffer(dstBuf: ArrayBuffer, srcBuf: ArrayBuffer, startPos: int, length: int): void
 
     private static clamp(val: long): long {
         return val
@@ -6613,7 +6621,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @param set A set object to convert to an array.
      *
-     * @returns new Array
+     * @returns new BigUint64Array
      */
     public static fromSetBigInt(set: Set<BigInt>): BigUint64Array {
         const length = set.size;
@@ -6989,7 +6997,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public native reverse(): BigUint64Array
 
     /**
-     * Creates a slice of current BigUint64Array using range [begin, end)
+     * Creates a slice of current BigUint64Array using range [begin, end]
      *
      * @param begin start index to be taken into slice
      *
@@ -7000,24 +7008,32 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: int, end?: int): BigUint64Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
+    }
+
+    private sliceFromTo(begin: int, end: int): BigUint64Array {
+        const relStart = normalizeIndex(begin, this.lengthInt)
+        const relEnd = normalizeIndex(end, this.lengthInt)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        return new BigUint64Array(buf)
     }
 
     /**
-     * Creates a slice of current BigUint64Array using range [begin, this.lengthInt).
+     * Creates a slice of current BigUint64Array using range [begin, this.lengthInt].
      *
      * @param begin start index to be taken into slice
      *
-     * @returns a new BigUint64Array with elements of current BigUint64Array[begin, this.lengthInt)
+     * @returns a new BigUint64Array with elements of current BigUint64Array[begin, this.lengthInt]
      */
     public slice(begin: int): BigUint64Array {
-        return this.slice(begin, this.lengthInt)
+        return this.sliceFromTo(begin, this.lengthInt)
     }
+
 
     /**
      * Sorts in-place by numeric value in ascending order.
      *
-     * @returns sorted Array
+     * @returns sorted BigUint64Array
      */
     public native sort(): this;
 
@@ -7135,7 +7151,11 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns a reversed copy
      */
     public toReversed(): BigUint64Array {
-        return this.toReversedImpl()
+        let newArray = new BigUint64Array(this.lengthInt)
+        if (this.lengthInt > 0) {
+            BigUint64Array.reverseCopyBuffer(newArray.buffer, this.buffer, this.byteOffset, this.lengthInt);
+        }
+        return newArray
     }
 
     /**
@@ -7175,7 +7195,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns an BigUint64Array with replaced value on index
      */
     public with(index: int, value: long): BigUint64Array {
-        return this.withImpl(index, value)
+        let res = new BigUint64Array(this)
+        res.setUnsafeClamp(index, value)
+        return res
     }
 
     /**
@@ -7188,7 +7210,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns an BigUint64Array with replaced value on index
      */
     public with(index: int, value: BigInt): BigUint64Array {
-        return this.withImpl(index, value.getULong())
+        let res = new BigUint64Array(this)
+        res.setUnsafeClamp(index, value.getULong())
+        return res
     }
 
     /// === with element lambda functions ===
@@ -7481,21 +7505,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     /** String \"BigUint64Array\" */
     public readonly name = "BigUint64Array"
 
-    private final sliceImpl(begin: int, end: int): BigUint64Array {
-        return new BigUint64Array(this.allocSlicedBuffer(begin, end))
-    }
-
-    private final toReversedImpl(): BigUint64Array {
-        return new BigUint64Array(this.allocReversedBuffer())
-    }
-
-    private final withImpl(index: int, value: long): BigUint64Array {
-        return new BigUint64Array(this.allocBufferWith(index, value))
-    }
-
-    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
-    private final native allocReversedBuffer(): ArrayBuffer
-    private final native allocBufferWith(index: int, value: long): ArrayBuffer
+    private static native reverseCopyBuffer(dstBuf: ArrayBuffer, srcBuf: ArrayBuffer, startPos: int, length: int): void
 
     private static clamp(val: long): long {
         return val

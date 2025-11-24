@@ -397,7 +397,10 @@ export class ArrayBuffer
     // Fields' order is important due to alignment
     private data: FixedArray<byte> | undefined
     private weakRef: Object | undefined
-    // Pointer to underlying array, which is either non-movable array or native
+    /**
+     * Pointer to underlying array, which is either non-movable array or native.
+     * Not needed in managed code.
+     */
     private dataAddress: long
     // Length in bytes
     private _byteLength: int

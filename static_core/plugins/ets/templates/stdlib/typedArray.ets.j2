@@ -1240,7 +1240,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns a new {{N}}Array with elements of current {{N}}Array[begin, this.length)
      */
     public slice(begin: int): {{N}}Array {
-        return this.sliceImpl(begin, this.lengthInt)
+        return this.sliceFromTo(begin, this.lengthInt)
     }
 
     /**
@@ -1255,8 +1255,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: int, end?: int): {{N}}Array {
-        return this.sliceImpl(asIntOrDefault(begin, (0).toInt()), asIntOrDefault(end, this.lengthInt))
+        return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
     }
+
+    private sliceFromTo(begin: int, end: int): {{N}}Array {
+        const relStart: int = normalizeIndex(begin, this.lengthInt)
+        const relEnd: int = normalizeIndex(end, this.lengthInt)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        return new {{N}}Array(buf)
+    }
+
 
     /**
      * Creates a {{N}}Array with the same underlying ArrayBuffer
@@ -1309,7 +1317,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns a reversed copy
      */
     public toReversed(): {{N}}Array {
-        return this.toReversedImpl()
+        let newArray = new {{N}}Array(this.lengthInt);
+        if (this.lengthInt > 0) {
+            {{N}}Array.reverseCopyBuffer(newArray.buffer, this.buffer, this.byteOffset, this.lengthInt);
+        }
+        return newArray
     }
 
     /**
@@ -1360,7 +1372,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns an {{N}}Array with replaced value on index
      */
     public with(index: int, value: {{T}}): {{N}}Array {
-        return this.withImpl(index, value)
+        let res = new {{N}}Array(this)
+        res.set(index, value)
+        return res
     }
 
     {%- endif %}
@@ -1375,7 +1389,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns an {{N}}Array with replaced value on index
      */
     public with(index: int, value: {{elementCompat}}): {{N}}Array {
-        return this.withImpl(index, value{{fromElementCompat}})
+        let res = new {{N}}Array(this)
+        {%- if N != 'Float64' %}
+        res.set(index, value{{fromElementCompat}})
+        {%- else %}
+        res.set(index, value)
+        {%- endif %}
+        return res
     }
 
     /// === with element lambda functions ===
@@ -1779,21 +1799,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return this
     }
 
-    private final sliceImpl(begin: int, end: int): {{N}}Array {
-        return new {{N}}Array(this.allocSlicedBuffer(begin, end))
-    }
-
-    private final toReversedImpl(): {{N}}Array {
-        return new {{N}}Array(this.allocReversedBuffer())
-    }
-
-    private final withImpl(index: int, value: {{T}}): {{N}}Array {
-        return new {{N}}Array(this.allocBufferWith(index, value))
-    }
-
-    private final native allocSlicedBuffer(beg: int, end: int): ArrayBuffer
-    private final native allocReversedBuffer(): ArrayBuffer
-    private final native allocBufferWith(index: int, value: {{T}}): ArrayBuffer
+    private static native reverseCopyBuffer(dstBuf: ArrayBuffer, srcBuf: ArrayBuffer, startPos: int, length: int): void
 
     private final native getUnsafe(index: int): {{T}}
 
