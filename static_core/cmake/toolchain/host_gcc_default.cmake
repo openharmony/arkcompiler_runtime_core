@@ -14,3 +14,4 @@
 include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
 set_c_compiler(gcc)
 set_cxx_compiler(g++)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
