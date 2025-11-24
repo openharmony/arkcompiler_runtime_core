@@ -11,9 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Unhandled exception: throw_neg2.Ex
+Unhandled exception: throw_from_top_level_statement_n1.TLSErr
 Error
-	at escompat.Error.<ctor> (Error.ets:56:0)
-	at throw_neg2.Ex.<ctor> (throw_neg2.ets:25:0)
-	at throw_neg2.ETSGLOBAL.getEx (throw_neg2.ets:28:0)
-	at throw_neg2.ETSGLOBAL.main (throw_neg2.ets:34:0)
+        at escompat.Error.<ctor> (Error.ets:56:0)
+        at throw_from_top_level_statement_n1.TLSErr.<ctor> (throw_from_top_level_statement_n1.ets:23:0)
+        at throw_from_top_level_statement_n1.ETSGLOBAL.lambda_invoke-0 (throw_from_top_level_statement_n1.ets:28:0)
+        at throw_from_top_level_statement_n1.%lambda-lambda_invoke-0.invoke0 (throw_from_top_level_statement_n1.ets:1:0)
+        at throw_from_top_level_statement_n1.ETSGLOBAL.<cctor> (throw_from_top_level_statement_n1.ets:28:0)
