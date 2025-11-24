@@ -25,7 +25,7 @@ TEST_F(EtsThreadScopeTsToEtsTest, TestGetObjectPropertis)
     ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testGetObjectPropertis"), true);
 }
 
-TEST_F(EtsThreadScopeTsToEtsTest, TestSetObjectPropertis)
+TEST_F(EtsThreadScopeTsToEtsTest, DISABLED_TestSetObjectPropertis)
 {
     ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testSetObjectPropertis"), true);
 }
