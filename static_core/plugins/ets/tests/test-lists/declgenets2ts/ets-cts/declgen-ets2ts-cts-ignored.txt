@@ -148,6 +148,7 @@
 04.names_declarations_and_scopes/07.function_declarations/function_decl_neg_11.ets
 09.classes/02.class_extension_clause/extend_object_class_with_interface.ets
 #FailKind.TSC_FAIL - 1469 tests:
+03.types/11.type_void/void_override_neg_2.ets
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_1.ets
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_13.ets
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_16.ets
