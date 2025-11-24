@@ -54,12 +54,12 @@ function catchFailing(): string {
 }
 
 function testAllUnhandledJobRejection(): void {
-    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         arktest.assertEQ(reason.message, 'get unhandled job rejection');
     });
 
-    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         arktest.assertEQ(reason.message, 'get unhandled job rejection');
     });
@@ -73,9 +73,9 @@ function testAllUnhandledJobRejection(): void {
         arktest.assertEQ(reason.message, 'get unhandled job rejection');
     };
 
-    StdProcess.on('unhandledJobRejection', observer1);
-    StdProcess.on('unhandledJobRejection', observer2);
-    StdProcess.off('unhandledJobRejection', observer1);
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', observer1);
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', observer2);
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection', observer1);
 
     let g = launch<String, () => string>(Failing);
 
@@ -98,7 +98,7 @@ function testAllUnhandledJobRejection(): void {
 }
 
 function main(): int {
-    StdProcess.off('unhandledJobRejection');
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection_event');
     testSuite.addTest('testUnhandledRejectionObserverRegistration', testUnhandledRejectionObserverRegistration);
     testSuite.addTest('testAllUnhandledJobRejection', testAllUnhandledJobRejection);

@@ -15,7 +15,7 @@
 
 function testDumpUnhandledJobs(): void {
     let event = new CompletableJob<void>();
-    StdProcess.on('unhandledJobRejection', (reason: Error, obj: Object): void => {
+    StdProcess.on('unhandledJobRejection' as 'unhandledPromiseRejection', (reason: Error, obj: Object): void => {
         arktest.assertTrue(obj instanceof Job, 'The object should be of type Job');
         event.finish();
     });
@@ -26,7 +26,7 @@ function testDumpUnhandledJobs(): void {
 }
 
 function main(): int {
-    StdProcess.off('unhandledJobRejection');
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection');
     testSuite.addTest('testDumpUnhandledJobs', testDumpUnhandledJobs);
     let res = testSuite.run();
