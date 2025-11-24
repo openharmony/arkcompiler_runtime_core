@@ -2158,6 +2158,7 @@
 18.annotations/01.declaring_annotations/declaration_inheritance_n_0.ets
 18.annotations/01.declaring_annotations/declaration_inheritance_n_1.ets
 18.annotations/01.declaring_annotations/declaration_type_definition.ets
+18.annotations/02.using_annotations/top_level_accessor_annotations.ets
 18.annotations/03.exporting_and_importing_annotations/to_export_n.ets
 18.annotations/04.ambient_annotations/annotation_ambient_decl/import_annotated_decl_class_0.ets
 18.annotations/04.ambient_annotations/annotation_ambient_decl/import_annotated_decl_class_1.ets
