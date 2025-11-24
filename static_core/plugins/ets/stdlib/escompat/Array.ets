@@ -853,7 +853,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a flattened Array with respect to depth
      */
-    public flat<U>(depth: int): Array<U> {
+    public flat<U = T>(depth: int): Array<U> {
         let ret = new Array<U>()
         this.flatImpl<U>(depth, ret)
         return ret
@@ -930,7 +930,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a flattened Array
      */
-    public flat<U>(): Array<U> {
+    public flat<U = T>(): Array<U> {
         return this.flat<U>(1)
     }
 
