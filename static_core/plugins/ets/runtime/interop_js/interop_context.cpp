@@ -503,7 +503,7 @@ bool InteropCtx::PushOntoFinalizationRegistry(EtsCoroutine *coro, EtsObject *obj
 
 EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsObject)
 {
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    ASSERT_MANAGED_CODE();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
     VMHandle<ObjectHeader> etsObjectHandle(coro, etsObject->GetCoreType());
 
@@ -532,7 +532,8 @@ EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsOb
 void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
 {
     auto ctx = Current(coro);
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+
+    ASSERT_MANAGED_CODE();
     if (coro->IsUsePreAllocObj()) {
         coro->SetUsePreAllocObj(false);
         coro->SetException(coro->GetVM()->GetOOMErrorObject());
@@ -541,7 +542,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     ASSERT(!coro->HasPendingException());
 
     auto env = ctx->GetJSEnv();
-    if (IsUndefined(env, val)) {
+    if (IsUndefined<true>(env, val)) {
         auto etsObj = JSValue::CreateUndefined(coro, ctx)->AsObject();
         EtsObject *esObj = ctx->CreateETSCoreESError(coro, etsObj);
         coro->SetException(esObj->GetCoreType());
@@ -580,7 +581,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
 
 void InteropCtx::ThrowETSError(EtsCoroutine *coro, const char *msg)
 {
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    ASSERT_MANAGED_CODE();
     ASSERT(!coro->HasPendingException());
     ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, msg);
 }
@@ -664,7 +665,7 @@ void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
     auto env = GetJSEnv();
     ASSERT(coro != nullptr);
     ASSERT(coro->HasPendingException());
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    ASSERT_MANAGED_CODE();
     LocalObjectHandle<ObjectHeader> exc(coro, coro->GetException());
     coro->ClearException();
 

@@ -56,7 +56,7 @@ inline void JSConvertTypeCheckFailed(const std::string &s)
     JSConvertTypeCheckFailed(s.c_str());
 }
 
-static bool IsConstructor(napi_env &env, napi_value &jsValue, const char *constructorName)
+static bool DoIsConstructor(napi_env &env, napi_value &jsValue, const char *constructorName)
 {
     napi_value constructor;
     bool isInstanceof;
@@ -65,7 +65,19 @@ static bool IsConstructor(napi_env &env, napi_value &jsValue, const char *constr
     return isInstanceof;
 }
 
-static bool GetValueByValueOf(napi_env env, napi_value &jsValue, const char *constructorName, napi_value *result)
+template <bool IS_ADD_NATIVE_SCOPE = false>
+static bool IsConstructor(napi_env &env, napi_value &jsValue, const char *constructorName)
+{
+    if constexpr (IS_ADD_NATIVE_SCOPE) {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        return DoIsConstructor(env, jsValue, constructorName);
+    } else {
+        ASSERT_NATIVE_CODE();
+        return DoIsConstructor(env, jsValue, constructorName);
+    }
+}
+
+static bool DoGetValueByValueOf(napi_env env, napi_value &jsValue, const char *constructorName, napi_value *result)
 {
     if (!IsConstructor(env, jsValue, constructorName)) {
         return false;
@@ -74,6 +86,18 @@ static bool GetValueByValueOf(napi_env env, napi_value &jsValue, const char *con
     NAPI_CHECK_FATAL(napi_get_named_property(env, jsValue, "valueOf", &method));
     NAPI_CHECK_FATAL(napi_call_function(env, jsValue, method, 0, nullptr, result));
     return true;
+}
+
+template <bool IS_ADD_NATIVE_SCOPE = false>
+static bool GetValueByValueOf(napi_env env, napi_value &jsValue, const char *constructorName, napi_value *result)
+{
+    if constexpr (IS_ADD_NATIVE_SCOPE) {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        return DoGetValueByValueOf(env, jsValue, constructorName, result);
+    } else {
+        ASSERT_NATIVE_CODE();
+        return DoGetValueByValueOf(env, jsValue, constructorName, result);
+    }
 }
 
 // Base mixin class of JSConvert interface
@@ -106,7 +130,7 @@ struct JSConvertBase {
     static std::optional<cpptype> Unwrap(InteropCtx *ctx, napi_env env, napi_value jsVal)
     {
         if constexpr (IS_REFTYPE) {
-            ASSERT(!IsUndefined(env, jsVal));
+            ASSERT(!IsUndefined<true>(env, jsVal));
         }
         auto res = Impl::UnwrapImpl(ctx, env, jsVal);
         ASSERT(res.has_value() || InteropCtx::SanityJSExceptionPending() || InteropCtx::SanityETSExceptionPending());
@@ -129,7 +153,7 @@ struct JSConvertBase {
     {
         if constexpr (IS_REFTYPE) {
             // NOTE(kprokopenko) can't assign null to EtsString *, hence fallback into UnwrapImpl
-            if (UNLIKELY(IsUndefined(env, jsVal))) {
+            if (UNLIKELY(IsUndefined<true>(env, jsVal))) {
                 if constexpr (IS_JSVALUE) {
                     return JSValue::CreateUndefined(EtsCoroutine::GetCurrent(), ctx);
                 }

@@ -161,10 +161,12 @@ typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int64_t index)
     }
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<JSValue> etsJsValueHandle(coro, etsJsValue);
     NapiScope jsHandleScope(env);
 
     napi_value result;
-    napi_value jsVal = etsJsValue->GetNapiValue(env);
+    napi_value jsVal = JSValue::GetNapiValue(coro, ctx, etsJsValueHandle);
     napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(coro);

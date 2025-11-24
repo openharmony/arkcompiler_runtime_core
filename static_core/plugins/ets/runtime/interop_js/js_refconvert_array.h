@@ -68,7 +68,7 @@ public:
         NapiEscapableScope jsHandleScope(env);
         napi_value jsArr;
         {
-            ScopedNativeCodeThreadIfNeeded nativeScope(coro);
+            ScopedNativeCodeThread nativeScope(coro);
             NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
         }
 
@@ -80,7 +80,7 @@ public:
             }
             {
                 // NOTE(audovichenko): try to do not change thread state in each iteration.
-                ScopedNativeCodeThreadIfNeeded s(coro);
+                ScopedNativeCodeThread s(coro);
                 napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
                 if (UNLIKELY(NapiThrownGeneric(rc))) {
                     return nullptr;
@@ -159,7 +159,7 @@ public:
         NapiEscapableScope jsHandleScope(env);
         napi_value jsArr;
         {
-            ScopedNativeCodeThreadIfNeeded nativeScope(coro);
+            ScopedNativeCodeThread nativeScope(coro);
             NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
         }
 
@@ -182,7 +182,7 @@ public:
                 jsElem = GetUndefined(env);
             }
             {
-                ScopedNativeCodeThreadIfNeeded s(coro);
+                ScopedNativeCodeThread s(coro);
                 napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
                 if (UNLIKELY(NapiThrownGeneric(rc))) {
                     return nullptr;
@@ -236,7 +236,7 @@ public:
             if (UNLIKELY(NapiThrownGeneric(rc))) {
                 return nullptr;
             }
-            if (LIKELY(!IsNullOrUndefined(env, jsElem))) {
+            if (LIKELY(!IsNullOrUndefined<true>(env, jsElem))) {
                 auto *etsElem = UnwrapNonUndefined(ctx, jsElem);
                 if (UNLIKELY(etsElem == nullptr)) {
                     return nullptr;

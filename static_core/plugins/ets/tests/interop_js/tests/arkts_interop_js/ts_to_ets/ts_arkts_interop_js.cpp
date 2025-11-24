@@ -65,7 +65,6 @@ static ani_ref CreateJsObject(ani_env *env)
         if (!arkts_napi_scope_open(env, &napiEnv)) {
             return undefinedRef;
         }
-        NapiScope jsScope(napiEnv);
 
         napi_value jsObj {};
         if (napi_create_object(napiEnv, &jsObj) != napi_ok) {
@@ -222,7 +221,6 @@ TEST_F(ArktsNapiScopeTest, CheckScopeCloseNApi)
     {
         napi_env jsEnv {};
         ASSERT_TRUE(arkts_napi_scope_open(aniEnv, &jsEnv));
-        NapiScope s(jsEnv);
 
         std::array<napi_value, 2U> jsValues {};
         ASSERT_EQ(napi_create_object(jsEnv, &jsValues[0]), napi_ok);

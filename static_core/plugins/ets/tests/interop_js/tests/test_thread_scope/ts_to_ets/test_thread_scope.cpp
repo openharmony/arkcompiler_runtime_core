@@ -25,9 +25,29 @@ TEST_F(EtsThreadScopeTsToEtsTest, TestGetObjectPropertis)
     ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testGetObjectPropertis"), true);
 }
 
+TEST_F(EtsThreadScopeTsToEtsTest, DISABLED_TestSetObjectPropertis)
+{
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testSetObjectPropertis"), true);
+}
+
 TEST_F(EtsThreadScopeTsToEtsTest, TestGetStringPropertis)
 {
     ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testGetStringPropertis"), true);
+}
+
+TEST_F(EtsThreadScopeTsToEtsTest, TestSetStringPropertis)
+{
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testSetStringPropertis"), true);
+}
+
+TEST_F(EtsThreadScopeTsToEtsTest, TestSetNumberPropertis)
+{
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testGetNumberPropertis"), true);
+}
+
+TEST_F(EtsThreadScopeTsToEtsTest, TestGetNumberPropertis)
+{
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testSetNumberPropertis"), true);
 }
 
 TEST_F(EtsThreadScopeTsToEtsTest, DISABLED_TestCallFooFunc)

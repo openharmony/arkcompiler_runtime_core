@@ -16,7 +16,6 @@
 #include "include/class.h"
 #include "include/mem/panda_containers.h"
 #include "include/method.h"
-#include "interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/js_proxy/js_proxy.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
@@ -167,7 +166,6 @@ JSProxy *JSProxy::CreateBuiltinProxy(EtsClass *etsClass, Span<Method *> targetMe
 JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     auto ctx = InteropCtx::Current(coro);
 
     Class *interfaceCls = functionInterface->GetRuntimeClass();
@@ -206,7 +204,6 @@ JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
 JSProxy *JSProxy::CreateProxy(const uint8_t *descriptor, Class *baseClass, Span<Method *> targetMethods,
                               const PandaVector<Class *> &interfaces, void *callBridge)
 {
-    ScopedManagedCodeThreadIfNeeded managedScope(EtsCoroutine::GetCurrent());
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     ClassLinkerContext *context = baseClass->GetLoadContext();
     auto proxyMethods = BuildProxyMethods(baseClass, targetMethods, callBridge);

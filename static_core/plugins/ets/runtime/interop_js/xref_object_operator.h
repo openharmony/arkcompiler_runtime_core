@@ -26,56 +26,53 @@ namespace ark::ets::interop::js {
 
 class XRefObjectOperator {
 public:
-    static XRefObjectOperator FromEtsObject(EtsObject *etsObject);
-
-    EtsObject *AsObject();
-
-    const EtsObject *AsObject() const;
+    static XRefObjectOperator FromEtsObject(EtsHandle<EtsObject> &etsObject);
 
     EtsObject *GetProperty(EtsCoroutine *coro, const std::string &name) const;
 
-    EtsObject *GetProperty(EtsCoroutine *coro, EtsObject *keyObject) const;
+    EtsObject *GetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject) const;
 
     EtsObject *GetProperty(EtsCoroutine *coro, const uint32_t index) const;
 
-    bool SetProperty(EtsCoroutine *coro, const std::string &name, EtsObject *valueObject) const;
+    bool SetProperty(EtsCoroutine *coro, const std::string &name, EtsHandle<EtsObject> &valueObject) const;
 
-    bool SetProperty(EtsCoroutine *coro, EtsObject *keyObject, EtsObject *valueObject) const;
+    bool SetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject, EtsHandle<EtsObject> &valueObject) const;
 
-    bool SetProperty(EtsCoroutine *coro, const uint32_t index, EtsObject *valueObject) const;
+    bool SetProperty(EtsCoroutine *coro, const uint32_t index, EtsHandle<EtsObject> &valueObject) const;
 
     bool IsInstanceOf(EtsCoroutine *coro, const XRefObjectOperator &rhsObject) const;
 
     EtsObject *Invoke(EtsCoroutine *coro, Span<VMHandle<ObjectHeader>> args) const;
 
-    EtsObject *InvokeMethod(EtsCoroutine *coro, EtsObject *methodObject, Span<VMHandle<ObjectHeader>> args) const;
+    EtsObject *InvokeMethod(EtsCoroutine *coro, EtsHandle<EtsObject> &methodObject,
+                            Span<VMHandle<ObjectHeader>> args) const;
 
     EtsObject *InvokeMethod(EtsCoroutine *coro, const std::string &name, Span<VMHandle<ObjectHeader>> args) const;
 
     bool HasProperty(EtsCoroutine *coro, const std::string &name, bool isOwnProperty = false) const;
 
-    bool HasProperty(EtsCoroutine *coro, EtsObject *keyObject, bool isOwnProperty = false) const;
+    bool HasProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject, bool isOwnProperty = false) const;
 
     bool HasProperty(EtsCoroutine *coro, const uint32_t index) const;
 
     EtsObject *Instantiate(EtsCoroutine *coro, Span<VMHandle<ObjectHeader>> args) const;
 
-    std::string TypeOf(EtsCoroutine *coro) const;
+    static std::string TypeOf(EtsCoroutine *coro, EtsObject *obj);
 
-    bool IsTrue(EtsCoroutine *coro) const;
+    static bool IsTrue(EtsCoroutine *coro, EtsObject *obj);
 
     napi_value GetNapiValue(EtsCoroutine *coro) const;
 
-    static bool StrictEquals(EtsCoroutine *coro, const XRefObjectOperator &lhs, const XRefObjectOperator &rhs);
+    static bool StrictEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2);
 
 private:
-    static napi_value ConvertStaticObjectToDynamic(EtsCoroutine *coro, EtsObject *object);
+    static napi_value ConvertStaticObjectToDynamic(EtsCoroutine *coro, EtsHandle<EtsObject> &object);
 
-    napi_valuetype GetValueType(EtsCoroutine *coro) const;
+    static napi_valuetype GetValueType(EtsCoroutine *coro, EtsObject *obj);
 
-    explicit XRefObjectOperator(EtsObject *etsObject);
+    explicit XRefObjectOperator(EtsHandle<EtsObject> &etsObject);
 
-    EtsObject *etsObject_;
+    EtsHandle<EtsObject> &etsObject_;
 };
 
 }  // namespace ark::ets::interop::js

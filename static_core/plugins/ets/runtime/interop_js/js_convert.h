@@ -16,7 +16,6 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 
-#include "interop_js/interop_common.h"
 #include "js_convert_base.h"
 #include "js_convert_stdlib.h"
 #include "napi_impl/ark_napi_helper.h"
@@ -32,6 +31,7 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
     static std::enable_if_t<std::is_integral_v<P>, napi_value> WrapImpl(napi_env env, Cpptype etsVal)
     {
         napi_value jsVal;
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         if constexpr (sizeof(Cpptype) >= sizeof(int32_t)) {
             NAPI_CHECK_FATAL(napi_create_int64(env, etsVal, &jsVal));
         } else if constexpr (std::is_signed_v<Cpptype>) {
@@ -46,6 +46,7 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
     static std::enable_if_t<std::is_integral_v<P>, std::optional<Cpptype>> UnwrapImpl([[maybe_unused]] InteropCtx *ctx,
                                                                                       napi_env env, napi_value jsVal)
     {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         napi_valuetype valueType = GetValueType(env, jsVal);
         napi_value result = jsVal;
         if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
@@ -77,6 +78,7 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
     static std::enable_if_t<std::is_floating_point_v<P>, napi_value> WrapImpl(napi_env env, Cpptype etsVal)
     {
         napi_value jsVal;
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         NAPI_CHECK_FATAL(napi_create_double(env, etsVal, &jsVal));
         return jsVal;
     }
@@ -85,6 +87,7 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
     static std::enable_if_t<std::is_floating_point_v<P>, std::optional<Cpptype>> UnwrapImpl(
         [[maybe_unused]] InteropCtx *ctx, napi_env env, napi_value jsVal)
     {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         napi_valuetype valueType = GetValueType(env, jsVal);
         napi_value result = jsVal;
         if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
@@ -120,7 +123,7 @@ JSCONVERT_WRAP(U1)
 }
 JSCONVERT_UNWRAP(U1)
 {
-    if (IsUndefined(env, jsVal)) {
+    if (IsUndefined<true>(env, jsVal)) {
         TypeCheckFailed();
         return {};
     }
@@ -138,12 +141,13 @@ JSCONVERT_DEFINE_TYPE(U16, char16_t);
 JSCONVERT_WRAP(U16)
 {
     napi_value jsVal;
+    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
     NAPI_CHECK_FATAL(napi_create_string_utf16(env, &etsVal, 1, &jsVal));
     return jsVal;
 }
 JSCONVERT_UNWRAP(U16)
 {
-    if (IsUndefined(env, jsVal)) {
+    if (IsUndefined<true>(env, jsVal)) {
         TypeCheckFailed();
         return {};
     }
@@ -166,29 +170,36 @@ JSCONVERT_WRAP(String)
     if (UNLIKELY(etsVal->IsUtf16())) {
         auto str = reinterpret_cast<char16_t *>(etsVal->IsTreeString() ? etsVal->GetTreeStringDataUtf16(tree16Buf)
                                                                        : etsVal->GetDataUtf16());
-        NAPI_CHECK_FATAL(napi_create_string_utf16(env, str, etsVal->GetUtf16Length(), &jsVal));
+        auto length = etsVal->GetUtf16Length();
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        NAPI_CHECK_FATAL(napi_create_string_utf16(env, str, length, &jsVal));
     } else {
         auto str = utf::Mutf8AsCString(etsVal->IsTreeString() ? etsVal->GetTreeStringDataMUtf8(tree8Buf)
                                                               : etsVal->GetDataMUtf8());
         // -1 for NULL terminated Mutf8 string!!!
-        NAPI_CHECK_FATAL(napi_create_string_utf8(env, str, etsVal->GetMUtf8Length() - 1, &jsVal));
+        auto length = etsVal->GetMUtf8Length();
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        NAPI_CHECK_FATAL(napi_create_string_utf8(env, str, length - 1, &jsVal));
     }
     return jsVal;
 }
 JSCONVERT_UNWRAP(String)
 {
-    napi_value result = jsVal;
-    napi_valuetype valueType = GetValueType(env, jsVal);
-    if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_STRING, &result)) {
-        TypeCheckFailed();
-        return {};
+    std::string value;
+    {
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        napi_value result = jsVal;
+        napi_valuetype valueType = GetValueType(env, jsVal);
+        if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_STRING, &result)) {
+            TypeCheckFailed();
+            return {};
+        }
+        if (UNLIKELY(GetValueType(env, result) != napi_string)) {
+            TypeCheckFailed();
+            return {};
+        }
+        value = GetString(env, result);
     }
-    if (UNLIKELY(GetValueType(env, result) != napi_string)) {
-        TypeCheckFailed();
-        return {};
-    }
-    std::string value = GetString(env, result);
-    ScopedManagedCodeThreadIfNeeded managedScope(EtsCoroutine::GetCurrent());
     return EtsString::CreateFromUtf8(value.data(), value.length());
 }
 
@@ -213,18 +224,17 @@ JSCONVERT_WRAP(BigInt)
 
     napi_value jsVal;
     int sign = etsVal->GetSign() < 0 ? 1 : 0;
+    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
     NAPI_CHECK_FATAL(napi_create_bigint_words(env, sign, jsArray.size(), jsArray.data(), &jsVal));
 
     return jsVal;
 }
 JSCONVERT_UNWRAP(BigInt)
 {
-    if (UNLIKELY(GetValueType(env, jsVal) != napi_bigint)) {
+    if (UNLIKELY(GetValueType<true>(env, jsVal) != napi_bigint)) {
         TypeCheckFailed();
         return {};
     }
-    auto coro = EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
 
     auto [words, signBit] = GetBigInt(env, jsVal);
     std::vector<EtsInt> array = ConvertBigIntArrayFromJsToEts(words);
@@ -235,6 +245,7 @@ JSCONVERT_UNWRAP(BigInt)
         etsIntArray->Set(i, array[i]);
     }
 
+    auto coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle etsIntArrayHandle(coro, etsIntArray);
 
@@ -249,7 +260,16 @@ JSCONVERT_UNWRAP(BigInt)
 JSCONVERT_DEFINE_TYPE(JSValue, JSValue *);
 JSCONVERT_WRAP(JSValue)
 {
-    return etsVal->GetNapiValue(env);
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
+
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<JSValue> etsValHandle(coro, etsVal);
+    return JSValue::GetNapiValue(coro, ctx, etsValHandle);
 }
 JSCONVERT_UNWRAP(JSValue)
 {
@@ -288,7 +308,8 @@ JSCONVERT_WRAP(ESError)
         ThrowNoInteropContextException();
         return {};
     }
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+
+    ASSERT_MANAGED_CODE();
     auto klass = etsVal->GetClass();
     INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
 
@@ -316,9 +337,11 @@ JSCONVERT_UNWRAP(ESError)
     auto coro = EtsCoroutine::GetCurrent();
     EtsObject *etsObject = nullptr;
     bool isError = false;
-    NAPI_CHECK_FATAL(napi_is_error(env, jsVal, &isError));
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        NAPI_CHECK_FATAL(napi_is_error(env, jsVal, &isError));
+    }
     if (isError) {
-        ScopedManagedCodeThreadIfNeeded managedScope(coro);
         auto jsValueObj = JSValue::Create(coro, ctx, jsVal);
         etsObject = jsValueObj->AsObject();
     } else {
@@ -337,25 +360,6 @@ JSCONVERT_UNWRAP(ESError)
 
 JSCONVERT_DEFINE_TYPE(Promise, EtsPromise *);
 
-static void ResolveDeferred(napi_env env, EtsCoroutine *coro, InteropCtx *ctx, EtsHandle<EtsPromise> &hpromise,
-                            napi_deferred deferred)
-{
-    EtsHandle<EtsObject> value(coro, hpromise->GetValue(coro));
-    ScopedNativeCodeThreadIfNeeded nativeScope(coro);
-    napi_value completionValue;
-    if (value.GetPtr() == nullptr) {
-        completionValue = GetUndefined(env);
-    } else {
-        auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
-        completionValue = refconv->Wrap(ctx, value.GetPtr());
-    }
-    if (hpromise->IsResolved()) {
-        NAPI_CHECK_FATAL(napi_resolve_deferred(env, deferred, completionValue));
-    } else {
-        NAPI_CHECK_FATAL(napi_reject_deferred(env, deferred, completionValue));
-    }
-}
-
 JSCONVERT_WRAP(Promise)
 {
     auto *coro = EtsCoroutine::GetCurrent();
@@ -364,7 +368,6 @@ JSCONVERT_WRAP(Promise)
         ThrowNoInteropContextException();
         return {};
     }
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     // SharedReferenceStorage uses object's MarkWord to store interop hash.
     // Also runtime may lock a Promise object (this operation also requires MarkWord modification).
@@ -387,20 +390,33 @@ JSCONVERT_WRAP(Promise)
     hpromise->Lock();
     // NOTE(alimovilya, #23064) This if should be removed. Only else branch should remain.
     if (!hpromise->IsPending() && !hpromise->IsLinked()) {  // it will never get PENDING again
-        ResolveDeferred(env, coro, ctx, hpromise, deferred);
+        EtsHandle<EtsObject> value(coro, hpromise->GetValue(coro));
+        napi_value completionValue;
+        if (value.GetPtr() == nullptr) {
+            completionValue = GetUndefined(env);
+        } else {
+            auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
+            completionValue = refconv->Wrap(ctx, value.GetPtr());
+        }
+        ScopedNativeCodeThread nativeScope(coro);
+        if (hpromise->IsResolved()) {
+            NAPI_CHECK_FATAL(napi_resolve_deferred(env, deferred, completionValue));
+        } else {
+            NAPI_CHECK_FATAL(napi_reject_deferred(env, deferred, completionValue));
+        }
     } else {
         // connect->Invoke calls EtsPromiseSubmitCallback that acquires the mutex and checks the state again
         hpromise->Unlock();
         ASSERT_MANAGED_CODE();
-        Method *connect = ctx->GetPromiseInteropConnectMethod();
         std::array<Value, 2U> args = {Value(hpromise.GetPtr()), Value(reinterpret_cast<int64_t>(deferred))};
-        connect->Invoke(coro, args.data());
+        ctx->GetPromiseInteropConnectMethod()->Invoke(coro, args.data());
         hpromise->Lock();
     }
     EtsPromiseRef *ref = EtsPromiseRef::Create(coro);
     ref->SetTarget(coro, hpromise->AsObject());
     hpromise->SetInteropObject(coro, ref);
-    [[maybe_unused]] auto *sharedRef = storage->CreateETSObjectRef(ctx, ref, jsPromise);
+    EtsHandle<EtsObject> refHandle(coro, ref->AsObject());
+    [[maybe_unused]] auto *sharedRef = storage->CreateETSObjectRef(ctx, refHandle, jsPromise);
     ASSERT(sharedRef != nullptr);
     hpromise->Unlock();
     return jsPromise;
@@ -422,7 +438,6 @@ JSCONVERT_UNWRAP(Promise)
         return EtsPromise::FromEtsObject(ref->GetTarget(coro));
     }
 
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     [[maybe_unused]] EtsHandleScope s(coro);
     auto *promise = EtsPromise::Create(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
@@ -430,7 +445,8 @@ JSCONVERT_UNWRAP(Promise)
     EtsHandle<EtsPromiseRef> href(coro, EtsPromiseRef::Create(coro));
     href->SetTarget(coro, hpromise->AsObject());
     hpromise->SetInteropObject(coro, href.GetPtr());
-    storage->CreateJSObjectRef(ctx, href.GetPtr(), jsVal);
+    EtsHandle<EtsObject> etsObject(coro, href->AsObject());
+    storage->CreateJSObjectRef(ctx, etsObject, jsVal);
     hpromise->SetLinkedPromise(coro, href->AsObject());
     EtsPromise::CreateLink(hpromise->GetLinkedPromise(coro), hpromise.GetPtr());
     return hpromise.GetPtr();
@@ -444,7 +460,7 @@ JSCONVERT_WRAP(EtsNull)
 
 JSCONVERT_UNWRAP(EtsNull)
 {
-    if (UNLIKELY(!IsNull(env, jsVal))) {
+    if (UNLIKELY(!IsNull<true>(env, jsVal))) {
         TypeCheckFailed();
         return {};
     }
@@ -461,8 +477,15 @@ ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(Interop
 {
     auto env = ctx->GetJSEnv();
     auto coro = EtsCoroutine::GetCurrent();
-    napi_value jsVal = jsvalue->GetNapiValue(env);
-    auto result = common::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsVal), name);
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<JSValue> jsvalueHandle(coro, jsvalue);
+    NapiScope jsHandleScope(env);
+    auto jsVal = JSValue::GetNapiValue(coro, ctx, jsvalueHandle);
+    TaggedType *result = nullptr;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        result = common::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsVal), name);
+    }
     if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);
         return {};
@@ -475,12 +498,15 @@ ALWAYS_INLINE inline void JSValueSetByName(InteropCtx *ctx, JSValue *jsvalue, co
                                            typename T::cpptype etsPropVal)
 {
     auto env = ctx->GetJSEnv();
-    napi_value jsVal = jsvalue->GetNapiValue(env);
+    auto coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<JSValue> jsvalueHandle(coro, jsvalue);
+    NapiScope jsHandleScope(env);
     napi_value jsPropVal = T::WrapWithNullCheck(env, etsPropVal);
     if (UNLIKELY(jsPropVal == nullptr)) {
         return;
     }
-    auto coro = EtsCoroutine::GetCurrent();
+    auto jsVal = JSValue::GetNapiValue(coro, ctx, jsvalueHandle);
     napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(coro);

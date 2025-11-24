@@ -23,8 +23,6 @@ namespace ark::ets::interop::js {
 JSRefConvertFunction::JSRefConvertFunction(Class *klass)
     : JSRefConvert(this), klass_ {EtsClass::FromRuntimeClass(klass)}
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     // Mark interop function dynamic class as XRef class
     auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
 
@@ -33,6 +31,7 @@ JSRefConvertFunction::JSRefConvertFunction(Class *klass)
         classLinker->GetClass(panda_file_items::class_descriptors::INTEROP_DYNAMIC_FUNCTION.data());
     if (UNLIKELY(interopDynamicFunction == nullptr)) {
         // just throw exception
+        auto coro = EtsCoroutine::GetCurrent();
         InteropCtx::ThrowETSError(
             coro, "Interop: Interop function dynamic class Lstd/interop/js/DynamicFunction; is not found.");
         return;
@@ -72,7 +71,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     auto *sharedRef = AtomicLoad(static_cast<ets_proxy::SharedReference **>(data), std::memory_order_acquire);
     ASSERT(sharedRef != nullptr);
 
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    ScopedManagedCodeThread managedScope(coro);
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
     EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
@@ -88,6 +87,7 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     auto coro = EtsCoroutine::GetCurrent();
     ASSERT(ctx == InteropCtx::Current(coro));
     auto env = ctx->GetJSEnv();
+    [[maybe_unused]] EtsHandleScope s(coro);
 
     ASSERT(obj->GetClass() == klass_);
 
@@ -106,7 +106,9 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
                                                       EtsLambdaProxyInvoke, uninitializedRef, &jsFn));
                 return jsFn;
             };
-            ets_proxy::SharedReference *sharedRef = storage->CreateETSObjectRef(ctx, obj, jsFn, preInitCallback);
+
+            EtsHandle<EtsObject> objHandle(coro, obj);
+            ets_proxy::SharedReference *sharedRef = storage->CreateETSObjectRef(ctx, objHandle, jsFn, preInitCallback);
             if (UNLIKELY(sharedRef == nullptr)) {
                 ASSERT(InteropCtx::SanityJSExceptionPending());
                 return nullptr;
@@ -117,7 +119,9 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     if (UNLIKELY(jsValue == nullptr)) {
         return nullptr;
     }
-    return jsValue->GetRefValue(env);
+
+    EtsHandle<JSValue> jsValueHandle(coro, jsValue);
+    return JSValue::GetNapiValue(coro, ctx, jsValueHandle);
 }
 
 EtsObject *JSRefConvertFunction::UnwrapImpl(InteropCtx *ctx, napi_value jsFun)
@@ -132,22 +136,20 @@ EtsObject *JSRefConvertFunction::UnwrapImpl(InteropCtx *ctx, napi_value jsFun)
     }
 
     auto *coro = EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
     HandleScope<ObjectHeader *> scope(coro);
 
     auto ret = interopCreateDynamicFunctionMethod_->GetPandaMethod()->Invoke(coro, {}).GetAs<ObjectHeader *>();
     // storage->CreateJSObjectRefwithWrap will trigger XGC if needed
     // after that, the ptr `ret` will be valid
     // so a handle is created to keep the object valid
-    VMHandle<ObjectHeader> retHandle(coro, ret);
-    auto functionDynamicObject = EtsObject::FromCoreType(ret);
+    EtsHandle<EtsObject> functionDynamicObject(coro, EtsObject::FromCoreType(ret));
 
     // Put it into SharedReferenceStorage
     storage->CreateJSObjectRefwithWrap(ctx, functionDynamicObject, jsFun);
 
     // ptr `ret` is valid now,
     // so we must get the object from the handle
-    return EtsObject::FromCoreType(retHandle.GetPtr());
+    return functionDynamicObject.GetPtr();
 }
 
 }  // namespace ark::ets::interop::js

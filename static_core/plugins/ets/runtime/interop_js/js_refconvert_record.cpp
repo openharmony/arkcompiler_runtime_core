@@ -43,7 +43,10 @@ napi_value JSRefConvertRecord::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     napi_value proxyObj;
     NAPI_CHECK_FATAL(napi_new_instance(env, proxy, args.size(), args.data(), &proxyObj));
 
-    storage->CreateETSObjectRef(ctx, obj, proxyObj);
+    auto coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<EtsObject> objHandle(coro, obj);
+    storage->CreateETSObjectRef(ctx, objHandle, proxyObj);
 
     return proxyObj;
 }

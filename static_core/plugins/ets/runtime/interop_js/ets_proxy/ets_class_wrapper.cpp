@@ -96,7 +96,7 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
     EtsHandle<EtsObject> handle(coro, etsObject);
     ctx->SetPendingNewInstance(handle);
     {
-        ScopedNativeCodeThreadIfNeeded nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(coro);
         NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
     }
 
@@ -114,8 +114,9 @@ EtsObject *EtsClassWrapper::Unwrap(InteropCtx *ctx, napi_value jsValue)
     CheckClassInitialized(etsClass_->GetRuntimeClass());
 
     napi_env env = ctx->GetJSEnv();
-
-    ASSERT(!IsUndefined(env, jsValue));
+    if (IsUndefined<true>(env, jsValue)) {
+        InteropCtx::ThrowJSTypeError(env, "Value is undefined");
+    }
 
     // Check if object has SharedReference
     SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
@@ -132,7 +133,9 @@ EtsObject *EtsClassWrapper::Unwrap(InteropCtx *ctx, napi_value jsValue)
     if (LIKELY(HasBuiltin())) {
         ASSERT(jsBuiltinMatcher_ != nullptr);
         auto res = jsBuiltinMatcher_(ctx, jsValue, false);
-        ASSERT(res != nullptr || ctx->SanityJSExceptionPending() || ctx->SanityETSExceptionPending());
+        if (res == nullptr && !ctx->SanityJSExceptionPending() && !ctx->SanityETSExceptionPending()) {
+            InteropCtx::ThrowJSTypeError(env, std::string("Value is not assignable to ") + etsClass_->GetDescriptor());
+        }
         return res;
     }
 
@@ -147,7 +150,7 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
 
     napi_env env = ctx->GetJSEnv();
 
-    ASSERT(!IsNullOrUndefined(env, jsValue));
+    ASSERT(!IsNullOrUndefined<true>(env, jsValue));
 
     // Check if object has SharedReference
     SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
@@ -173,14 +176,16 @@ EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsV
     auto *storage = ctx->GetSharedRefStorage();
     ASSERT(storage->GetReference(ctx->GetJSEnv(), jsValue) == nullptr);
 
-    ScopedManagedCodeThreadIfNeeded managedScope(EtsCoroutine::GetCurrent());
     EtsObject *etsObject = EtsObject::Create(jsproxyWrapper_->GetProxyClass());
     if (UNLIKELY(etsObject == nullptr)) {
         ctx->ForwardEtsException(EtsCoroutine::GetCurrent());
         return nullptr;
     }
 
-    SharedReference *sharedRef = storage->CreateJSObjectRefwithWrap(ctx, etsObject, jsValue);
+    auto coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<EtsObject> objHandle(coro, etsObject);
+    SharedReference *sharedRef = storage->CreateJSObjectRefwithWrap(ctx, objHandle, jsValue);
     if (UNLIKELY(sharedRef == nullptr)) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
         return nullptr;
@@ -285,7 +290,7 @@ public:
 
         napi_value result;
         NAPI_CHECK_FATAL(napi_get_ets_implements(env, jsValue, &result));
-        if (GetValueType(env, result) != napi_string) {
+        if (GetValueType<true>(env, result) != napi_string) {
             ctx->ThrowJSTypeError(ctx->GetJSEnv(), std::string("object is not a type of Interface: ") +
                                                        utf::Mutf8AsCString(klass_->GetDescriptor()));
             return nullptr;
@@ -297,14 +302,13 @@ public:
             proxy = js_proxy::JSProxy::CreateInterfaceProxy(interfaces, interfaceName);
             ctx->SetInterfaceProxyInstance(interfaceName, proxy);
         }
-        ScopedManagedCodeThreadIfNeeded managedScope(coro);
-        LocalObjectHandle<EtsObject> etsObject(coro, EtsObject::Create(proxy->GetProxyClass()));
+        EtsHandle<EtsObject> etsObject(coro, EtsObject::Create(proxy->GetProxyClass()));
         if (UNLIKELY(etsObject.GetPtr() == nullptr)) {
             ctx->ThrowJSTypeError(ctx->GetJSEnv(),
                                   "Interface Proxy EtsObject create failed, interfaceList: " + interfaceName);
             return nullptr;
         }
-        sharedRef = ctx->GetSharedRefStorage()->CreateHybridObjectRef(ctx, etsObject.GetPtr(), jsValue);
+        sharedRef = ctx->GetSharedRefStorage()->CreateHybridObjectRef(ctx, etsObject, jsValue);
         if (UNLIKELY(sharedRef == nullptr)) {
             ASSERT(InteropCtx::SanityJSExceptionPending());
             return nullptr;
@@ -1025,9 +1029,11 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
             jsObject = jsThis;
         }
 
+        [[maybe_unused]] EtsHandleScope s(coro);
+        EtsHandle<EtsObject> objHandle(coro, etsObject);
         // Create shared reference for existing ets object
         SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-        if (UNLIKELY(!storage->CreateETSObjectRef(ctx, etsObject, jsObject))) {
+        if (UNLIKELY(!storage->CreateETSObjectRef(ctx, objHandle, jsObject))) {
             ASSERT(InteropCtx::SanityJSExceptionPending());
             return nullptr;
         }
@@ -1086,7 +1092,8 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
         instanceClass = jsproxyWrapper_->GetProxyClass();
     }
 
-    LocalObjectHandle<EtsObject> etsObject(coro, EtsObject::Create(instanceClass));
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<EtsObject> etsObject(coro, EtsObject::Create(instanceClass));
     if (UNLIKELY(etsObject.GetPtr() == nullptr)) {
         return false;
     }
@@ -1094,13 +1101,13 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     // NOTE(MockMockBlack, #IC59ZS): put proxy to SharedReferenceStorage more prettily
     SharedReference *sharedRef;
     if (LIKELY(notExtensible)) {
-        sharedRef = ctx->GetSharedRefStorage()->CreateETSObjectRef(ctx, etsObject.GetPtr(), jsThis);
+        sharedRef = ctx->GetSharedRefStorage()->CreateETSObjectRef(ctx, etsObject, jsThis);
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
         // In case of OHOS sealed object can't be wrapped, therefore seal it after wrapping
         NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
 #endif  // PANDA_TARGET_OHOS
     } else {
-        sharedRef = ctx->GetSharedRefStorage()->CreateHybridObjectRef(ctx, etsObject.GetPtr(), jsThis);
+        sharedRef = ctx->GetSharedRefStorage()->CreateHybridObjectRef(ctx, etsObject, jsThis);
     }
     if (UNLIKELY(sharedRef == nullptr)) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
