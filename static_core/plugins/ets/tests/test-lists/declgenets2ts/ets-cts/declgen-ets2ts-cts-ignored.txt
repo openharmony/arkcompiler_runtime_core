@@ -1200,6 +1200,10 @@
 07.expressions/01.evaluation_of_expressions/01.type_of_expression/standalone_expression_n_0.ets
 07.expressions/01.evaluation_of_expressions/01.type_of_expression/standalone_expression_n_2.ets
 07.expressions/01.evaluation_of_expressions/01.type_of_expression/standalone_expression_n_3.ets
+06.contexts_and_conversions/01.assignment-like_contexts/alias2_call_neg_0.ets
+06.contexts_and_conversions/01.assignment-like_contexts/alias2_call_neg_1.ets
+06.contexts_and_conversions/01.assignment-like_contexts/alias2_call_neg_2.ets
+06.contexts_and_conversions/01.assignment-like_contexts/alias2_call_neg_3.ets
 06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_11.ets
 06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_13.ets
 06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_2.ets
@@ -2750,7 +2754,7 @@
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_11.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_17.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_18.ets
-06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field_6.ets
+06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field_neg.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_11.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_12.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_5.ets
@@ -2779,14 +2783,14 @@
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_6.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_14.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_16.ets
-06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field_6.ets
+06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field_neg.ets
 07.expressions/25.equality_expressions/type_neg_45.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/02.constant_declarations/bad_const_decl_qmark2_13.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_10.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_14.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_9.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_7.ets
-06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/enum2double_2.ets
+06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/enum2double_neg_0.ets
 07.expressions/25.equality_expressions/type_neg_0.ets
 07.expressions/25.equality_expressions/type_neg_22.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_15.ets

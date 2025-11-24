@@ -55,14 +55,6 @@ cases:
           - { expr: Byte.MIN_VALUE, val: -128.0 }
           - { expr: Byte.MAX_VALUE, val: 127.0 }
 
-    - from_type: byte
-      to_type: char
-      values:
-          - { expr: 0b0 as byte, val: "c'\\u0000'" }
-          - { expr: Byte.MIN_VALUE, val: "c'\\uFF80'" }
-          - { expr: Byte.MAX_VALUE, val: "c'\\u007F'" }
-      tags: 'compile-only, negative'
-
     - from_type: short
       to_type: int
       values:

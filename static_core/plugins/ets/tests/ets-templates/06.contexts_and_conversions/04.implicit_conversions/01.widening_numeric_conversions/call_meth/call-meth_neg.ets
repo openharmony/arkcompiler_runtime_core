@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +15,20 @@
 {%- for c in cases %}
 
 /*---
-desc: Assignment context, variable, widening primitive conversion, implicit
+desc: Call context, method, widening primitive conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
+tags: [compile-only, negative]
 ---*/
 {{c.defs}}
-let d: {{c.to_type}}
+class A {
+    meth(p: {{c.to_type}}): {{c.to_type}} { return p }
+}
 
 function main(): void {
+    let a: A = new A()
 {%- for v in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
-    d = s{{loop.index}}  // this var assignment is tested
-    arktest.assertEQ(d, {{v.val}})
+    arktest.assertEQ(a.meth(s{{loop.index}}), {{v.val}})
 {%- endfor %}
 }
 {%- endfor %}

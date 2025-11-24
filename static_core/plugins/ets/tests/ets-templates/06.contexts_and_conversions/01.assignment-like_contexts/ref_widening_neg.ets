@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,20 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for c in cases %}
 
+{% for t in cases %}
 /*---
-desc: Assignment context, variable, widening primitive conversion, implicit
-params: from {{c.from_type}} to {{c.to_type}}
+desc: >-
+    A widening reference conversion exists from any reference type S to any reference
+    type T, provided S is a subtype of T.
+tags: [compile-only, negative]
 ---*/
-{{c.defs}}
-let d: {{c.to_type}}
 
-function main(): void {
-{%- for v in c['values'] %}
-    let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
-    d = s{{loop.index}}  // this var assignment is tested
-    arktest.assertEQ(d, {{v.val}})
-{%- endfor %}
+{{t.defs}}
+
+function main() {
+  let src: {{t.stype}} = {{t.src|safe}};
+  let dst: {{t.dtype}} = src as {{t.dtype}};
+  arktest.assertEQ(src, dst) // reference equality
 }
-{%- endfor %}
+{% endfor %}

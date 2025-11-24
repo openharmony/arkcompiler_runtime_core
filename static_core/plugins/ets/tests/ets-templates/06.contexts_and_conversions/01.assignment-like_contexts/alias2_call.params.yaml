@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,27 +33,6 @@ cases:
   - type: double
     ref_type: Byte
     values: [new Byte(-128 as byte), new Byte(0 as byte), new Byte(127 as byte)]
-
-
-  - type: int
-    ref_type: Char
-    values: ["new Char(c'\\u0000')", "new Char(c'X')", "new Char(c'\\uffff')"]
-    tags: 'compile-only, negative'
-
-  - type: long
-    ref_type: Char
-    values: ["new Char(c'\\u0000')", "new Char(c'X')", "new Char(c'\\uffff')"]
-    tags: 'compile-only, negative'
-
-  - type: float
-    ref_type: Char
-    values: ["new Char(c'\\u0000')", "new Char(c'X')", "new Char(c'\\uffff')"]
-    tags: 'compile-only, negative'
-
-  - type: double
-    ref_type: Char
-    values: ["new Char(c'\\u0000')", "new Char(c'X')", "new Char(c'\\uffff')"]
-    tags: 'compile-only, negative'
 
 
   - type: int

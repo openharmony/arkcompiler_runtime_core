@@ -15,7 +15,6 @@
 cases:
   - { stype: 'Object[]', src: 'new Object[1]', dtype: Object }
   - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: Object }
-  - { stype: 'Object[][]', src: 'new Object[1][1]', dtype: 'Object[]', tags: 'compile-only, negative' }
 
   - { stype: '() => void', src: '() => { return; }', dtype: Object }
   - { stype: '(() => void)[]', src: '[]', dtype: Object }
@@ -35,14 +34,6 @@ cases:
   - { stype: 'Long[]', src: 'new Long[1]', dtype: Object }
   - { stype: 'Float[]', src: 'new Float[1]', dtype: Object }
   - { stype: 'Double[]', src: 'new Double[1]', dtype: Object }
-
-  - { stype: 'Byte[]', src: 'new Byte[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
-  - { stype: 'Short[]', src: 'new Short[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
-  - { stype: 'Char[]', src: 'new Char[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
-  - { stype: 'Int[]', src: 'new Int[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
-  - { stype: 'Long[]', src: 'new Long[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
-  - { stype: 'Float[]', src: 'new Float[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
-  - { stype: 'Double[]', src: 'new Double[1]', dtype: 'Object[]', tags: 'compile-only, negative' }
 
   - { stype: 'Byte', src: 'new Byte()', dtype: Integral }
   - { stype: 'Short', src: 'new Short()', dtype: Integral }
@@ -70,13 +61,6 @@ cases:
     stype: 'Color[]'
     src: '[Color.Red, Color.Blue]'
     dtype: Object
-
-  - defs: |-
-      enum Color {Red, Green, Blue}
-    stype: 'Color[]'
-    src: '[Color.Red, Color.Blue]'
-    dtype: 'Object[]'
-    tags: 'compile-only, negative'
 
   - defs: |-
       interface I {}

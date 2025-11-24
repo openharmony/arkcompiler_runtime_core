@@ -18,7 +18,6 @@
 desc: >-
     A value of an enumeration type is converted to type double
     if enumeration constants of this type are of type double.
-tags: [{{c.tags}}]
 ---*/
 enum Color: double { Red = 0.0, Green = 100.0, Blue = 101.0 }
 
