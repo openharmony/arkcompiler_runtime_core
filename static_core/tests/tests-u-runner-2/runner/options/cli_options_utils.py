@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, NewType, cast
 
 from runner import utils
-from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.base_enum import BaseEnum
 
 if TYPE_CHECKING:
@@ -42,22 +41,6 @@ class CliOptionsConsts(BaseEnum):
 def get_config_list(cfg_path: Path) -> list[str]:
     files: Generator[Path, None, None] = cfg_path.rglob("*.yaml")
     return sorted(f.relative_to(cfg_path).as_posix().replace(".yaml", "") for f in files)
-
-
-def check_valid_workflow_name(workflow_name: WorkflowName) -> None:
-    valid_workflow_names = get_config_list(utils.get_config_workflow_folder())
-    if workflow_name not in valid_workflow_names:
-        raise InvalidConfiguration(f"Invalid workflow name - {workflow_name}."
-                                   "\nShould be one of the following\n"
-                                   f"{valid_workflow_names}")
-
-
-def check_valid_test_suite_name(test_suite_name: TestSuiteName) -> None:
-    valid_test_suite_names = get_config_list(utils.get_config_test_suite_folder())
-    if test_suite_name not in valid_test_suite_names:
-        raise InvalidConfiguration(f"Invalid test suite name - {test_suite_name}."
-                                   f"\nShould be one of the following: \n"
-                                   f"{valid_test_suite_names}")
 
 
 def restore_default_list(full_options: dict[str, ConfigPropertyType],

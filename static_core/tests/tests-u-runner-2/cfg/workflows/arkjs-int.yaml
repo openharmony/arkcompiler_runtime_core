@@ -20,8 +20,8 @@ parameters:
     arkjs-build: ${parameters.arkjs-repo}/out/${parameters.os-cpu}.${parameters.mode}
     opt-level: 2
     output-file: "${parameters.work-dir}/intermediate/${test-id}.ts.abc"
-    enable-es2abc: True
-    enable-ark-js-vm: True
+    enable-es2abc: true
+    enable-ark-js-vm: true
     ark-gc-thread-num: "7"
 steps:
     copy:
@@ -41,7 +41,7 @@ steps:
         timeout: 30
         step-type: compiler
         enabled: ${parameters.enable-es2abc}
-        can-be-instrumented: True
+        can-be-instrumented: true
     ark_js_vm:
         executable-path: ${parameters.arkjs-build}/arkcompiler/ets_runtime/ark_js_vm
         timeout: 180
@@ -54,4 +54,4 @@ steps:
                 - "${parameters.arkjs-build}/thirdparty/icu:"
                 - "${parameters.arkjs-build}/thirdparty/zlib:"
                 - "${parameters.arkjs-build}/arkcompiler/ets_runtime"
-        can-be-instrumented: True
+        can-be-instrumented: true

@@ -17,17 +17,17 @@ workflow-name: hybrid-es2panda-verifier
 parameters:
     arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
     build: ${PANDA_BUILD}
-    enable-es2panda: True
-    enable-verifier: True
-    es2panda-args: []
-    es2panda-full-args:
+    enable-es2panda: true
+    enable-verifier: true
+    es2panda-args: []  # for specifying in CLI
+    es2panda-test-suite-args: []  # for specifying in test-suite config
+    es2panda-workflow-args:
         - "--arktsconfig=${parameters.arktsconfig}"
         - "--gen-stdlib=false"
         - "--ets-module"
         - "--extension=${parameters.extension}"
         - "--opt-level=${parameters.opt-level}"
         - "--output=${parameters.output-file}"
-        - "${parameters.es2panda-args}"
     es2panda-timeout: 30
     extension: sts
     load-runtimes: ets
@@ -45,7 +45,9 @@ steps:
         enabled: ${parameters.enable-es2panda}
         step-type: compiler
         args:
-            - "${parameters.es2panda-full-args}"
+            - "${parameters.es2panda-workflow-args}"
+            - "${parameters.es2panda-args}"
+            - "${parameters.es2panda-test-suite-args}"
             - "${parameters.work-dir}/gen/${test-id}"
         env:
             LD_LIBRARY_PATH:

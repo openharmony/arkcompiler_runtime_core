@@ -31,7 +31,7 @@ from runner.enum_types.params import TestEnv
 from runner.logger import Log
 from runner.options.options import IOptions
 from runner.options.options_collections import CollectionsOptions
-from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, TestPreparationStep
+from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, JitStep, TestPreparationStep
 from runner.suites.step_utils import StepUtils
 from runner.suites.test_lists import TestLists
 from runner.suites.test_standard_flow import TestStandardFlow
@@ -52,16 +52,19 @@ class TestSuite:
 
         self.config = test_env.config
 
+        self.jit_repeats: int = int(repeats) \
+            if (repeats := self.config.workflow.get_parameter("num-repeats")) is not None else 0
         self._preparation_steps: list[TestPreparationStep] = self.set_preparation_steps()
         self.__collections_parameters = self.__get_collections_parameters()
 
         self._explicit_file: Path | None = None
         self._explicit_list: Path | None = None
-        self._test_lists = TestLists(self._list_root, self.__test_env)
+        self._test_lists = TestLists(self._list_root, self.__test_env, self.jit_repeats)
         self._test_lists.collect_excluded_test_lists(test_name=self.__suite_name)
         self._test_lists.collect_ignored_test_lists(test_name=self.__suite_name)
         self.excluded = 0
         self.ignored_tests: list[Path] = []
+        self.ignored_tests_with_failures: dict[Path, str] = {}
         self.excluded_tests: list[Path] = []
 
     @property
@@ -132,6 +135,18 @@ class TestSuite:
         excluded = [excl for excl in collection.exclude if tested_path.as_posix().endswith(excl)]
         return len(excluded) > 0
 
+    @staticmethod
+    def _comment_has_failure(comment: str | None) -> bool:
+        return bool(TestSuite._get_failure_text(comment))
+
+    @staticmethod
+    def _get_failure_text(comment: str | None) -> str:
+        pattern = r'^#\d+\s+.*?@@Failure:\s*(.+?)@@.*$'
+        if comment is not None:
+            match = re.match(pattern, comment)
+            return match.group(1) if match else ""
+        return ""
+
     @cached_property
     def name(self) -> str:
         return self.__suite_name
@@ -156,6 +171,8 @@ class TestSuite:
         self.__search_both_excluded_and_ignored_tests()
         executed_set = self.__get_by_groups(executed_set)
         tests = self.__create_tests(executed_set)
+        Log.default(_LOGGER, f"Loaded {len(tests)} valid tests from the folder '{self.test_root}'. "
+                             f"Excluded {self.excluded} tests are not loaded.")
         return tests
 
     def set_preparation_steps(self) -> list[TestPreparationStep]:
@@ -183,6 +200,8 @@ class TestSuite:
             with_js = self.config.test_suite.with_js(collection)
             if (extension == "js" and with_js) or extension != "js":
                 steps.extend(self.__add_copy_steps(collection, copy_source_path, extension))
+            if self.jit_repeats > 0:
+                steps.extend(self.__add_jit_steps(collection, copy_source_path, extension))
         return steps
 
     def __add_copy_steps(self, collection: CollectionsOptions, copy_source_path: Path, extension: str) \
@@ -199,13 +218,39 @@ class TestSuite:
                     collection=collection,
                     extension=extension
                 ))
-        else:
+        elif copy_source_path != self.test_root / collection.name:
             steps.append(CopyStep(
                 test_source_path=copy_source_path,
                 test_gen_path=self.test_root / collection.name,
                 config=self.config,
                 collection=collection,
                 extension=extension
+            ))
+        return steps
+
+    def __add_jit_steps(self, collection: CollectionsOptions, copy_source_path: Path, extension: str) \
+            -> list[TestPreparationStep]:
+        steps: list[TestPreparationStep] = []
+        if collection.exclude:
+            for file_path in copy_source_path.iterdir():
+                if self.__is_path_excluded(collection, file_path):
+                    continue
+                steps.append(JitStep(
+                    test_source_path=file_path,
+                    test_gen_path=self.test_root / collection.name / file_path.name,
+                    config=self.config,
+                    collection=collection,
+                    extension=extension,
+                    num_repeats=self.jit_repeats
+                ))
+        else:
+            steps.append(JitStep(
+                test_source_path=copy_source_path,
+                test_gen_path=self.test_root / collection.name,
+                config=self.config,
+                collection=collection,
+                extension=extension,
+                num_repeats=self.jit_repeats
             ))
         return steps
 
@@ -270,6 +315,8 @@ class TestSuite:
             if not self.config.test_suite.test_lists.skip_test_lists:
                 self.excluded_tests = self.__load_excluded_tests()
                 self.ignored_tests = self.__load_ignored_tests()
+                self.ignored_tests_with_failures = self._get_tests_from_ignore_with_failures(
+                    self._test_lists.ignored_lists)
             test_files.extend(self.__load_test_files(raw_test_files))
         return test_files
 
@@ -299,6 +346,9 @@ class TestSuite:
             params=IOptions(params),
             test_id=test_id)
         test.ignored = is_ignored
+        if is_ignored and test.path in self.ignored_tests_with_failures:
+            test.last_failure = self.ignored_tests_with_failures[test.path]
+
         return test
 
     def __get_coll_name(self, test_id: str) -> str | None:
@@ -315,9 +365,9 @@ class TestSuite:
         all_tests = {self.__create_test(test, test in self.ignored_tests) for test in raw_test_files}
         not_tests = {t for t in all_tests if not t.is_valid_test}
         valid_tests = all_tests - not_tests
-        if self.config.test_suite.skip_compile_only:
-            compile_only_tests = {t for t in all_tests if t.is_compile_only}
-            valid_tests = valid_tests - compile_only_tests
+        if self.config.test_suite.skip_compile_only_neg:
+            compile_only_tests_neg = {t for t in all_tests if t.is_negative_compile}
+            valid_tests = valid_tests - compile_only_tests_neg
         _LOGGER.all(f"Loaded {len(valid_tests)} tests")
 
         return list(valid_tests)
@@ -331,7 +381,10 @@ class TestSuite:
         excluded: list[Path] = list(self.excluded_tests)[:]
         if self.config.test_suite.groups.chapters:
             test_files = self.__filter_by_chapters(self.test_root, test_files)
-        pattern = re.compile(self.config.test_suite.filter.replace(".", r"\.").replace("*", ".*"))
+        mask = self.config.test_suite.filter.replace(".", r"\.").replace("*", ".*")
+        coll_names = "|".join(self.__collections_parameters.keys())
+        mask = f"({coll_names})?/{mask}" if coll_names else mask
+        pattern = re.compile(f"{self.test_root / mask}")
         return [test for test in test_files if test not in excluded and pattern.search(str(test))]
 
     def __filter_by_chapters(self, base_folder: Path, files: list[Path]) -> list[Path]:
@@ -394,9 +447,9 @@ class TestSuite:
         """
         Read excluded_lists and load list of excluded tests
         """
-        excluded_tests = self.__load_tests_from_lists(self._test_lists.excluded_lists)
-        self.excluded = len(excluded_tests)
+        excluded_tests = self.__get_by_groups(self.__load_tests_from_lists(self._test_lists.excluded_lists))
         self.__search_duplicates(excluded_tests, "excluded")
+        self.excluded = len(set(excluded_tests))
         return excluded_tests
 
     def __load_ignored_tests(self) -> list[Path]:
@@ -422,3 +475,42 @@ class TestSuite:
         for collection in self.__test_env.config.test_suite.collections:
             result[collection.name] = collection.parameters
         return result
+
+    def _get_tests_from_ignore_with_failures(self, lists: list[Path]) -> dict[Path, str]:
+        tests: dict[Path, str] = {}
+        for list_path in lists:
+            tests_from_list = self._get_tests_with_comment(list_path)
+            tests = {**tests, **tests_from_list}
+
+        tests = {key: val for key, val in tests.items() if TestSuite._comment_has_failure(val)}
+        tests = {key: TestSuite._get_failure_text(val) for key, val in tests.items()}
+        return tests
+
+    def _get_tests_with_comment(self, list_path: Path) -> dict[Path, str]:
+        tests: dict[Path, str] = {}
+        comment_lines: list[str] = []
+        prev_line_was_comment = False
+
+        with open(list_path, encoding="utf-8") as f:
+            for line in f:
+                line = line.rstrip('\n').strip()
+                if not line:
+                    continue
+
+                if line.startswith("#"):
+                    if not prev_line_was_comment:
+                        comment_lines = []
+                    comment_lines.append(line)
+                    prev_line_was_comment = True
+                    continue
+
+                prev_line_was_comment = False
+
+                if not line.endswith(".ets"):
+                    continue
+
+                test_path = self.test_root / line
+                if test_path.exists():
+                    tests[test_path] = "\n".join(comment_lines)
+
+        return tests

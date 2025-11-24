@@ -20,6 +20,6 @@ generator-class: runner.extensions.generators.ets_arkjs_xgc.ets_arkjs_xgc_genera
 
 parameters:
     work-dir: ${WORK_DIR}/${suite-name}
-    enable-verifier: False
+    enable-verifier: false
     build: ${PANDA_BUILD}
     extension: ts

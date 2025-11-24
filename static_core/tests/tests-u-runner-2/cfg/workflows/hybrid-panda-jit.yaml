@@ -23,8 +23,8 @@ parameters:
     opt-level: 2
     es2panda-timeout: 30
     verifier-timeout: 30
-    enable-es2panda: True
-    enable-verifier: True
+    enable-es2panda: true
+    enable-verifier: true
     extension: ${parameters.extension}
     # ark
     ark-timeout: 180
@@ -32,31 +32,32 @@ parameters:
     full-gc-bombing-frequency: 0
     heap-verifier: fail_on_verification
     compiler-enable-jit: "true"
-    ark-args: []
-    ark-full-args:
+    ark-args: [ ]
+    ark-workflow-args:
         - ${parameters.ark-args}
         - "--compiler-check-final=true"
         - "--compiler-ignore-failures=false"
         - "--no-async-jit=false"
 steps:
-    imports:
-        hybrid-es2panda-verifier:
-            opt-level: ${parameters.opt-level}
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            extension: ${parameters.extension}
-            load-runtimes: ${parameters.load-runtimes}
-            enable-es2panda: ${parameters.enable-es2panda}
-            enable-verifier: ${parameters.enable-verifier}
-            es2panda-timeout: ${parameters.es2panda-timeout}
-            verifier-timeout: ${parameters.verifier-timeout}
-        hybrid-ark:
-            ark-timeout: ${parameters.ark-timeout}
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            heap-verifier: ${parameters.heap-verifier}
-            gc-type: ${parameters.gc-type}
-            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
-            load-runtimes: ${parameters.load-runtimes}
-            ark-args: ${parameters.ark-full-args}
-            compiler-enable-jit: ${parameters.compiler-enable-jit}
+    hybrid-es2panda-verifier:
+        from: hybrid-es2panda-verifier
+        opt-level: ${parameters.opt-level}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        extension: ${parameters.extension}
+        load-runtimes: ${parameters.load-runtimes}
+        enable-es2panda: ${parameters.enable-es2panda}
+        enable-verifier: ${parameters.enable-verifier}
+        es2panda-timeout: ${parameters.es2panda-timeout}
+        verifier-timeout: ${parameters.verifier-timeout}
+    hybrid-ark:
+        from: hybrid-ark
+        ark-timeout: ${parameters.ark-timeout}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        heap-verifier: ${parameters.heap-verifier}
+        gc-type: ${parameters.gc-type}
+        full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+        load-runtimes: ${parameters.load-runtimes}
+        ark-args: ${parameters.ark-workflow-args}
+        compiler-enable-jit: ${parameters.compiler-enable-jit}

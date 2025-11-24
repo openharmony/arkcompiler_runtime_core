@@ -32,7 +32,7 @@ steps:
             - "--output=${steps.preparation.extra.output-file}"
             - "${general.work-dir}/gen/${test-id}"
         timeout: 30
-        can-be-instrumented: True
+        can-be-instrumented: true
     ark:
         order: 30
         executable-path: ${general.build}/arkcompiler/ets_runtime/ark_js_vm
@@ -45,4 +45,4 @@ steps:
                 - "${general.build}/thirdparty/icu:"
                 - "${general.build}/thirdparty/zlib:"
                 - "${general.build}/arkcompiler/ets_runtime"
-        can-be-instrumented: True
+        can-be-instrumented: true

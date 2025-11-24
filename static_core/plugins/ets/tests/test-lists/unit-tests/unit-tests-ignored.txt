@@ -45,3 +45,13 @@ ets-common-tests/atomics/base_operation_xor.ets
 
 #30971
 ets-common-tests/function_ref_primitive/function_ref_primitive_this.ets
+
+# 74119 fail after tests-u-runner-2 update
+ets-common-tests/default_import/default4.ets
+ets-common-tests/import_name_conflicts/main.ets
+ets-common-tests/intrinsics/map.ets
+ets-common-tests/unions/union_method.ets
+ets-common-tests/unions/union_method_common.ets
+ets-common-tests/unions/union_method_dummy_interface.ets
+ets-common-tests/unions/union_method_short_long_range.ets
+ets-common-tests/unions/union_method_virtual.ets

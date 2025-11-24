@@ -48,6 +48,7 @@ class Tags:
             Tags.EtsTag.NOT_A_TEST: Tags.__contains(Tags.EtsTag.NOT_A_TEST.value, tags),
             Tags.EtsTag.NO_WARMUP: Tags.__contains(Tags.EtsTag.NO_WARMUP.value, tags),
         }
+        self.invalid_tags = Tags.get_invalid_tags(tags)
 
     def __repr__(self) -> str:
         values = [tag.name for (tag, value) in self.__values.items() if value]
@@ -70,6 +71,15 @@ class Tags:
         return self.__values.get(Tags.EtsTag.NO_WARMUP, False)
 
     @staticmethod
+    def get_invalid_tags(tags: str | list[str] | None) -> list[str]:
+        if isinstance(tags, str):
+            tags = [tag.strip() for tag in tags.split(",")]
+
+        if tags:
+            return [tag for tag in tags if tag not in Tags.EtsTag.values()]
+        return []
+
+    @staticmethod
     def __contains(tag: str, tags: list[str] | None) -> bool:
         return tag in tags if tags is not None else False
 
@@ -82,12 +92,16 @@ class TestMetadata:     # type: ignore[explicit-any]
     assertion: str | None = None
     params: Any | None = None   # type: ignore[explicit-any]
     name: str | None = None
+    entry_point: str | None = None
+    test_cli: list[str] | None = None
     package: str | None = None
     ark_options: list[str] = field(default_factory=list)
     timeout: int | None = None
     es2panda_options: list[str] = field(default_factory=list)
     spec: str | None = None
     arktsconfig: Path | None = None
+    expected_out: str | None = None
+    expected_error: str | None = None
     # Test262 specific metadata keys
     description: str | None = None
     defines: str | None = None
@@ -99,6 +113,8 @@ class TestMetadata:     # type: ignore[explicit-any]
     author: str | None = None
     info: str | None = None
     locale: str | None = None
+    # ark_tests/parser
+    issues: str | None = None
 
     @classmethod
     def get_metadata(cls, path: Path) -> 'TestMetadata':
@@ -119,6 +135,8 @@ class TestMetadata:     # type: ignore[explicit-any]
     def create_filled_metadata(cls, metadata: dict[str, Any],       # type: ignore[explicit-any]
                                path: Path) -> 'TestMetadata':
         metadata['tags'] = Tags(metadata.get('tags'))
+        metadata['entry_point'] = metadata.get('entry_point')
+        metadata['test_cli'] = metadata.get('test_cli')
         if 'assert' in metadata:
             metadata['assertion'] = metadata.get('assert')
             del metadata['assert']

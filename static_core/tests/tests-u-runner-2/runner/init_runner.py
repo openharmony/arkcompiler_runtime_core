@@ -48,6 +48,7 @@ class InitRunner:
     # Number of repeats to type a value for one variable
     attempts: ClassVar[int] = 3
     init_option: ClassVar[str] = "init"
+    help_options: ClassVar[set[str]] = {"--help", "-h"}
     urunner_env_name_default: ClassVar[str] = ".urunner.env"
 
     def __init__(self, urunner_env: str = urunner_env_name_default):
@@ -110,6 +111,10 @@ class InitRunner:
     @classmethod
     def should_runner_initialize(cls, argv: list[str]) -> bool:
         return cls.init_option in argv
+
+    @classmethod
+    def request_runner_help(cls, argv: set[str]) -> bool:
+        return bool(cls.help_options & argv)
 
     def search_global_env(self, urunner_env: str) -> Path:
         current = Path.cwd()

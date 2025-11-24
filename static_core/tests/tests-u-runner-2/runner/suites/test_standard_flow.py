@@ -24,6 +24,7 @@ from pathlib import Path
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.params import BinaryParams, TestEnv, TestReport
+from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
@@ -42,14 +43,21 @@ IS_PANDA = "is-panda"
 
 class TestStandardFlow(Test):
     __DEFAULT_ENTRY_POINT = "ETSGLOBAL::main"
+    CTE_RETURN_CODE = 1
 
     def __init__(self, test_env: TestEnv, test_path: Path, *,
                  params: IOptions, test_id: str, is_dependent: bool = False,
                  parent_test_id: str = "") -> None:
         Test.__init__(self, test_env, test_path, params, test_id)
 
-        self.main_entry_point: str = self.__DEFAULT_ENTRY_POINT
-        self.metadata: TestMetadata = TestMetadata.get_metadata(test_path)
+        self.metadata: TestMetadata = TestMetadata.get_metadata(test_path) \
+            if test_env.config.test_suite.use_metadata \
+            else TestMetadata.create_empty_metadata(test_path)
+        self.test_cli: list[str] = self.metadata.test_cli or []
+        self.main_entry_point: str = (
+            f"ETSGLOBAL::{self.metadata.entry_point}"
+            if self.metadata.entry_point else self.__DEFAULT_ENTRY_POINT
+        )
         if self.metadata.package is not None:
             self.main_entry_point = f"{self.metadata.package}.{self.main_entry_point}"
         else:
@@ -74,12 +82,13 @@ class TestStandardFlow(Test):
         self.test_abc.parent.mkdir(parents=True, exist_ok=True)
 
         self.validator: IValidator = self.__init_validator()
-        self.__dependent_tests: list[TestStandardFlow] = []
+        self.expected_err_log = ""
+        self._dependent_tests: list[TestStandardFlow] = []
         self.__is_dependent = is_dependent
         self.__boot_panda_files: str = ""
 
     @property
-    def all_dependent_tests(self) -> list['TestStandardFlow']:
+    def direct_dependent_tests(self) -> list['TestStandardFlow']:
         if not self.metadata.files:
             return []
         id_pos: int = str(self.path).find(self.test_id)
@@ -90,14 +99,14 @@ class TestStandardFlow(Test):
         for file in self.metadata.files:
             new_test_file_path: Path = self.path.parent.joinpath(file).resolve()
             new_test_id: Path = new_test_file_path.relative_to(test_root)
+            if new_test_id in dependent_tests:
+                continue
             test = self.__class__(self.test_env, new_test_file_path,
                                   params=self.test_extra_params,
                                   test_id=str(new_test_id),
                                   is_dependent=True,
                                   parent_test_id=self.test_id)
             dependent_tests.append(test)
-            if (sub_tests := test.all_dependent_tests) is not None:
-                dependent_tests.extend(sub_tests)
 
         return dependent_tests
 
@@ -127,12 +136,12 @@ class TestStandardFlow(Test):
         if not self.metadata.files:
             return []
 
-        if self.__dependent_tests:
-            return self.__dependent_tests
+        if self._dependent_tests:
+            return self._dependent_tests
 
-        self.__dependent_tests.extend(self.all_dependent_tests)
+        self._dependent_tests.extend(self.direct_dependent_tests)
         current_test_id: Path = Path(self.test_id)
-        for test in self.__dependent_tests:
+        for test in self._dependent_tests:
             prefix = Path(self.parent_test_id).stem if self.parent_test_id else current_test_id.stem
 
             test_abc_name = f'{prefix}_{Path(test.test_abc).name}'
@@ -148,18 +157,57 @@ class TestStandardFlow(Test):
             if test.dependent_packages:
                 for dep_key, dep_item in test.dependent_packages.items():
                     self.dependent_packages[dep_key] = self.dependent_packages.get(dep_key, False) or dep_item
+        return self._dependent_tests
 
-        return self.__dependent_tests
+    @property
+    def dependent_abc_files(self) -> list[str]:
+        abc_files_lists = [[*df.dependent_abc_files, df.test_abc.as_posix()] for df in self.dependent_tests]
+        result = []
+        for abc_files_list in abc_files_lists:
+            result += abc_files_list
+        return list(result)
+
+    @property
+    def invalid_tags(self) -> list:
+        return self.metadata.tags.invalid_tags
+
+    @property
+    def has_expected(self) -> bool:
+        """ True if test.expected file exists or expected_out is in metadata """
+        return super().has_expected or self.metadata.expected_out is not None
+
+    @property
+    def has_expected_err(self) -> bool:
+        """ True if test.expected.err file exists or expected_error is in metadata """
+        return super().has_expected_err or self.metadata.expected_error is not None
 
     @staticmethod
-    def _get_return_code_from_device(output: str, actual_return_code: int) -> int:
-        if output.find('TypeError:') > -1 or output.find('FatalOutOfMemoryError:') > -1:
-            return actual_return_code if actual_return_code else -1
-        match = re.search(r'Exit code:\s*(-?\d+)', output)
-        if match:
-            return_code_from_device = int(match.group(1))
-            return return_code_from_device
-        return actual_return_code
+    def compare_line_sets(expected: str, actual: str, expected_path: Path) -> bool:
+        expected_lines = set(filter(None, expected.splitlines()))
+        actual_lines = set(filter(None, actual.splitlines()))
+
+        if not actual_lines and not expected_lines:
+            return True
+
+        if not expected_lines:
+            _LOGGER.all(f"{expected_path} is empty after normalization")
+            return False
+        if not actual_lines:
+            _LOGGER.all(f"{expected_path} is not empty, but actual output is")
+            return False
+
+        is_subset = expected_lines.issubset(actual_lines)
+        return is_subset
+
+    @staticmethod
+    def normalize_output_lines(output: str, expected: str) -> tuple[str, str]:
+        norm_output = ''.join(TestStandardFlow.normalize_line(line) + '\n' for line in output.splitlines())
+        norm_output_err = ''.join(TestStandardFlow.normalize_line(line) + '\n' for line in expected.splitlines())
+        return norm_output, norm_output_err
+
+    @staticmethod
+    def normalize_line(line: str) -> str:
+        return TestStandardFlow._remove_file_info_from_error(TestStandardFlow._normalize_error_report(line))
 
     @staticmethod
     def __add_options(options: list[str]) -> list[str]:
@@ -176,6 +224,50 @@ class TestStandardFlow(Test):
                 f"Validator class '{clazz}' not found. "
                 f"Check value of 'validator' parameter")
         return class_obj
+
+    @staticmethod
+    def _normalize_error_report(report: str) -> str:
+        pattern = r"\[TID [0-9a-fA-F]{6,}\]\s*"
+        result = re.sub(pattern, "", report).strip()
+        return TestStandardFlow._remove_tabs_and_spaces_from_begin(result)
+
+    @staticmethod
+    def _remove_tabs_and_spaces_from_begin(report: str) -> str:
+        pattern = r"^\s+"
+        return re.sub(pattern, "", report, flags=re.MULTILINE)
+
+    @staticmethod
+    def _remove_file_info_from_error(error_message: str) -> str:
+        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:\d+:\d+\s*[\]\)]\s*|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]\s*'
+        return re.sub(pattern, '', error_message)
+
+    @staticmethod
+    def _get_return_code_from_device(output: str, actual_return_code: int) -> int:
+        if output.find('TypeError:') > -1 or output.find('FatalOutOfMemoryError:') > -1:
+            return actual_return_code if actual_return_code else -1
+        match = re.search(r'Exit code:\s*(-?\d+)', output)
+        if match:
+            return_code_from_device = int(match.group(1))
+            return return_code_from_device
+        return actual_return_code
+
+    @staticmethod
+    def _remove_main_decl(lines: str) -> str:
+        expected = lines.split("\n")
+        index_to_delete = len(expected)
+        for i, item in enumerate(expected):
+            if '.main' in item or ':main' in item:
+                index_to_delete = i
+                break
+
+        return '\n'.join(expected[:index_to_delete])
+
+    def log_invalid_tags(self) -> None:
+        if len(self.invalid_tags) > 0:
+            Log.default(
+                _LOGGER,
+                f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
+                f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
 
     def continue_after_process_dependent_files(self) -> bool:
         """
@@ -194,6 +286,7 @@ class TestStandardFlow(Test):
                 self.passed = dependent_result.passed if not package_neg_compile else True
                 self.report = dependent_result.report
                 self.fail_kind = dependent_result.fail_kind
+                self.last_failure_check_passed = dependent_result.last_failure_check_passed
                 return False
         return True
 
@@ -201,18 +294,25 @@ class TestStandardFlow(Test):
         if not self.continue_after_process_dependent_files():
             return self
 
-        for step in self.test_env.config.workflow.steps:
-            if step.executable_path is not None:
-                self.passed, self.report, self.fail_kind = self.__do_run_one_step(step)
-                is_break = ((not self.passed) or
-                            (step.step_kind == StepKind.COMPILER and
-                             (self.is_compile_only or self.metadata.tags.not_a_test)))
-                if is_break:
-                    return self
-        return self
+        self.log_invalid_tags()
+        compile_only_test = self.is_compile_only or self.metadata.tags.not_a_test or self.parent_test_id != ""
+        allowed_steps = [StepKind.COMPILER]  # steps to run for compile only or not-a-test tests
+        steps = [step for step in self.test_env.config.workflow.steps
+                 if step.executable_path is not None and
+                 ((compile_only_test and step.step_kind in allowed_steps) or not compile_only_test)]
+        for step in steps:
+            self.passed, self.report, self.fail_kind = self.__do_run_one_step(step)
+            if step.step_kind in allowed_steps:
+                allowed_steps.remove(step.step_kind)
+            if not self.passed or (compile_only_test and not allowed_steps):
+                return self
 
-    def dependent_abc_files(self) -> list[str]:
-        return [df.test_abc.as_posix() for df in self.dependent_tests]
+        if not steps:
+            # no step runs, so nothing bad occurs, and we consider the test is passed
+            self.passed = True
+            self.fail_kind = 'PASSED'
+
+        return self
 
     def prepare_compiler_step(self, step: Step) -> Step:
         new_step = copy.copy(step)
@@ -238,7 +338,7 @@ class TestStandardFlow(Test):
         new_step = copy.copy(step)
         new_step.args = step.args[:]
         if self.dependent_tests:
-            for abc_file in list(self.dependent_abc_files()):
+            for abc_file in list(self.dependent_abc_files):
                 new_step.args.extend([f'--paoc-panda-files={abc_file}'])
         new_step.args.extend([f'--paoc-panda-files={self.test_abc}'])
         return new_step
@@ -248,28 +348,116 @@ class TestStandardFlow(Test):
             return step
         new_step = copy.copy(step)
         new_step.args = step.args[:]
-        if self.dependent_tests:
-            new_step.args = self.__add_boot_panda_files(new_step.args)
-            return new_step
+        new_step.args.insert(-2, "--verification-mode=ahead-of-time")
 
         new_step.args.insert(-2, self.__add_panda_files())
+        if self.metadata.test_cli:
+            new_step.args.append("--")
+            new_step.args.extend(self.metadata.test_cli)
+
         return new_step
+
+    def compare_output_with_expected(self, output: str, error_output: str) -> bool:
+        """Compares test output with expected"""
+
+        try:
+            self._get_expected_data()
+            passed = self._determine_test_status(output, error_output)
+
+        # NOTE(pronai): this might silence errors it shouldn't, add logging
+        except OSError:
+            passed = False
+
+        return passed
+
+    def log_comparison_difference(self, output: str | None, error_output: str | None) -> None:
+        def find_difference(expected: str, actual: str) -> set[str]:
+            expected_lines = set(filter(None, expected.splitlines()))
+            actual_lines = set(filter(None, actual.splitlines()))
+            return expected_lines.difference(actual_lines)
+
+        differences = []
+        if output and self.expected:
+            dif_exp_output = find_difference(self.expected, output)
+            if dif_exp_output:
+                differences.append(f"StdOut doesn't contain expected lines: \n{dif_exp_output}\n")
+
+        if error_output and self.expected_err:
+            diff_exp_error = find_difference(self.expected_err, error_output)
+            if diff_exp_error:
+                differences.append(f"StdErr doesn't contain expected lines: \n{diff_exp_error}\n")
+
+        if differences:
+            self.expected_err_log += "\n".join(differences)
+
+    def _step_validator(self, step: Step, output: str, error: str, return_code: int) -> ValidationResult:
+        validator_name = step.name if step.name in self.validator.validators else step.step_kind.value
+        validator = self.validator.get_validator(validator_name)
+        if validator is not None:
+            return validator(self, step.step_kind.value, output, error, return_code)
+        return ValidationResult(True, ValidatorFailKind.NONE, "")
+
+    def _get_expected_data(self) -> None:
+        if self.has_expected:
+            self.expected = self.metadata.expected_out or utils.read_expected_file(self.path_to_expected)
+
+        if self.has_expected_err:
+            self.expected_err = self.metadata.expected_error or utils.read_expected_file(self.path_to_expected_err)
+
+    def _refactor_expected_str_for_jit(self) -> None:
+        if self.expected:
+            self.expected = TestStandardFlow._remove_main_decl(self.expected)
+
+        if self.expected_err:
+            self.expected_err = TestStandardFlow._remove_main_decl(self.expected_err)
+
+    def _determine_test_status(self, output: str | None, error: str | None) -> bool:
+
+        passed = self._check_expected_err(error)
+
+        if self.expected and not self.expected_err and output:
+            # Compare with output from std.OUT
+            output_normalized_info, expected_normalized_info = TestStandardFlow.normalize_output_lines(output,
+                                                                                                       self.expected)
+            passed = TestStandardFlow.compare_line_sets(expected_normalized_info, output_normalized_info,
+                                       self.path_to_expected) and not error
+        elif not self.expected and self.expected_err and error:
+            # Compare with output from std.ERR
+            report_error, expected_error = TestStandardFlow.normalize_output_lines(error, self.expected_err)
+            passed = TestStandardFlow.compare_line_sets(expected_error, report_error, self.path_to_expected_err)
+        elif self.expected and self.expected_err and output and error:
+            # Compare .expected with std.Output and .expected.err with std.Error
+            output_normalized_info, expected_normalized_info = TestStandardFlow.normalize_output_lines(output,
+                                                                                                       self.expected)
+            passed_output = TestStandardFlow.compare_line_sets(expected_normalized_info, output_normalized_info,
+                                                               self.path_to_expected)
+
+            report_error, expected_error = TestStandardFlow.normalize_output_lines(error, self.expected_err)
+            passed_error = TestStandardFlow.compare_line_sets(expected_error, report_error, self.path_to_expected_err)
+            passed = passed_output and passed_error
+
+        return bool(passed)
+
+    def _check_expected_err(self, error: str | None) -> bool:
+        # to cover case: there is no expected_err file, but stderr is not empty
+        # or there is expected err file, but it's empty
+        passed = True
+        if (not self.has_expected_err and error) or (not self.expected_err and error):
+            passed = False
+
+        return passed
 
     def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
             passed, report, fail_kind = True, None, None
         elif step.step_kind == StepKind.COMPILER:
             passed, report, fail_kind = self.__run_step(self.prepare_compiler_step(step))
-            if self.is_negative_compile:
-                passed = not passed
         elif step.step_kind == StepKind.VERIFIER:
             passed, report, fail_kind = self.__run_step(self.prepare_verifier_step(step))
         elif step.step_kind == StepKind.AOT:
             passed, report, fail_kind = self.__run_step(self.prepare_aot_step(step))
         elif step.step_kind == StepKind.RUNTIME:
             passed, report, fail_kind = self.__run_step(self.prepare_runtime_step(step))
-            if self.is_negative_runtime:
-                passed = not passed
         else:
             passed, report, fail_kind = self.__run_step(step)
         return passed, report, fail_kind
@@ -314,6 +502,7 @@ class TestStandardFlow(Test):
             flags=self.__expand_last_call_macros(step),
             env=cmd_env,
             timeout=step.timeout,
+            use_qemu=not step.skip_qemu
         )
 
         test_runner = OneTestRunner(self.test_env)
@@ -324,11 +513,12 @@ class TestStandardFlow(Test):
             return_code_interpreter=lambda out, err, return_code: self._get_return_code_from_device(out, return_code)
         )
         self.reproduce += test_runner.reproduce
+        self.reproduce += self.expected_err_log
         return passed, report, fail_kind
 
-    def __expand_last_call_macros(self, step: Step) -> list[str]:
+    def __expand_last_call_in_args(self, args: list[str]) -> list[str]:
         flags: list[str] = []
-        for arg in self.__fix_entry_point(step.args):
+        for arg in self.__fix_entry_point(args):
             flag = utils.replace_macro(str(arg), "test-id", self.test_id)
             if utils.has_macro(flag):
                 flag_expanded: str | list[str] = ""
@@ -342,6 +532,12 @@ class TestStandardFlow(Test):
                     flags.extend(flag_expanded.split())
             else:
                 flags.extend(flag.split())
+        return flags
+
+    def __expand_last_call_macros(self, step: Step) -> list[str]:
+        flags = step.args[:]
+        while utils.list_has_macros(flags):
+            flags = self.__expand_last_call_in_args(flags)
         if step.step_kind == StepKind.COMPILER and self.metadata.es2panda_options:
             if 'dynamic-ast' in self.metadata.es2panda_options:
                 index = flags.index("--dump-ast")
@@ -367,7 +563,7 @@ class TestStandardFlow(Test):
             if name in arg:
                 if not self.__boot_panda_files:
                     _, value = arg.split('=')
-                    boot_panda_files = [value, *self.dependent_abc_files(), self.test_abc.as_posix()]
+                    boot_panda_files = [value, *self.dependent_abc_files, self.test_abc.as_posix()]
                     self.__boot_panda_files = f'{name}={":".join(boot_panda_files)}'
                 dep_files_args.append(self.__boot_panda_files)
             else:
@@ -376,15 +572,7 @@ class TestStandardFlow(Test):
 
     def __add_panda_files(self) -> str:
         opt_name = '--panda-files'
-        if self.dependent_abc_files():
-            return f'{opt_name}={":".join(self.dependent_abc_files())}'
+        if self.dependent_abc_files:
+            return f'{opt_name}={":".join(self.dependent_abc_files)}'
 
         return f'{opt_name}={self.test_abc!s}'
-
-    def _step_validator(self, step: Step, output: str, error: str, return_code: int) -> bool:
-        validator = (self.validator.get_validator(step.name)
-                     if step.name in self.validator.validators
-                     else self.validator.get_validator(step.step_kind.value))
-        if validator is not None:
-            return validator(self, step.name, output, error, return_code)
-        return True

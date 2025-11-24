@@ -11,38 +11,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runner-api-level: 0.0.0.1
 type: workflow
-workflow-name: runtime
+workflow-name: ark-aot
 parameters:
-    ark-timeout: 180
+    aot-timeout: 30
     build: ${PANDA_BUILD}
     work-dir: ${parameters.work-dir}
-    heap-verifier: fail_on_verification
+    heap-verifier: fail_on_verification:pre:into:before_g1_concurrent:post
     gc-type: g1-gc
     full-gc-bombing-frequency: 0
     load-runtimes: ${parameters.load-runtimes}
-    ark-args: []  # for specifying in CLI
-    ark-extra-args: []  # for specifying in configs
+    aot-args: []
     stdlib: "${parameters.build}/plugins/ets/etsstdlib.abc"
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
-    compiler-enable-jit: "false"
-    # adds --boot-panda-files option to ark with all dependent and the current abc files
-    # adds --panda-files option to ark with all dependent and the current abc files
-    is-panda: True
+    paoc-output-file: "${parameters.work-dir}/intermediate/${test-id}.an"
+    # adds --paoc-panda-files option to ark_aot with all dependent and the current abc files
+    is-panda: true
+    boot-panda-files: ""
 steps:
-    ark:
-        executable-path: ${parameters.build}/bin/ark
-        timeout: ${parameters.ark-timeout}
-        step-type: runtime
+    ark-aot:
+        executable-path: ${parameters.build}/bin/ark_aot
+        timeout: ${parameters.aot-timeout}
+        step-type: aot
         args:
             - "--gc-type=${parameters.gc-type}"
             - "--heap-verifier=${parameters.heap-verifier}"
-            - "--full-gc-bombing-frequency=${parameters.full-gc-bombing-frequency}"
-            - "--boot-panda-files=${parameters.stdlib}"
             - "--load-runtimes=${parameters.load-runtimes}"
-            - "--compiler-enable-jit=${parameters.compiler-enable-jit}"
-            - "${parameters.ark-args}"
-            - "${parameters.ark-extra-args}"
-            - "${parameters.output-file}"
-            - "ETSGLOBAL::main"
+            - "--full-gc-bombing-frequency=${parameters.full-gc-bombing-frequency}"
+            - "--compiler-check-final=true"
+            - "--compiler-ignore-failures=false"
+            - "${parameters.aot-args}"
+            - "--boot-panda-files=${parameters.stdlib}${parameters.boot-panda-files}"
+            - "--paoc-output=${parameters.paoc-output-file}"

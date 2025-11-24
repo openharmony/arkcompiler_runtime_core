@@ -56,6 +56,7 @@ def parse_yaml(path: str) -> Any:       # type: ignore[explicit-any]
     text = read_file(path)
     try:
         params = yaml.safe_load(text)
+    # NOTE(pronai): can we make it more precise?
     except Exception as common_exp:
         raise InvalidFileFormatException(
             message=f"Could not load YAML: {common_exp!s}",

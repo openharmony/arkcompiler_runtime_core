@@ -16,12 +16,10 @@
 #
 
 import re
-from glob import glob
-from os import path
+from fnmatch import fnmatch
 from pathlib import Path
 from typing import cast
 
-from runner import utils
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.configuration_kind import (
     BuildTypeKind,
@@ -37,7 +35,7 @@ _LOGGER = Log.get_logger(__file__)
 
 
 class TestLists:
-    def __init__(self, list_root: Path, test_env: TestEnv):
+    def __init__(self, list_root: Path, test_env: TestEnv, jit_repeats: int | None):
         self.list_root = list_root
         self.config = test_env.config
         self.explicit_list: Path | None = (
@@ -48,13 +46,36 @@ class TestLists:
         self.explicit_test: Path | None = None
         self.excluded_lists: list[Path] = []
         self.ignored_lists: list[Path] = []
+        self.is_jit_with_repeats = jit_repeats is not None and jit_repeats > 0
 
+        _LOGGER.default(f"Initialize TestLists: gn_build = {self.config.general.gn_build}")
         self.cache: list[str] = self.__gn_cache() if self.config.general.gn_build else self.cmake_cache()
         self.sanitizer = self.search_sanitizer()
-        self.architecture = detect_architecture()
+        _LOGGER.default(f"Initialize TestLists: sanitizer = {self.sanitizer}")
+        self.architecture = detect_architecture(self.config.general.qemu)
+        _LOGGER.default(f"Initialize TestLists: architecture = {self.architecture}")
         self.operating_system = detect_operating_system()
+        _LOGGER.default(f"Initialize TestLists: operating_system = {self.operating_system}")
         self.build_type = self.search_build_type()
+        _LOGGER.default(f"Initialize TestLists: build_type = {self.build_type}")
         self.conf_kind = self.detect_conf()
+        _LOGGER.default(f"Initialize TestLists: conf_kind = {self.conf_kind}")
+
+    @staticmethod
+    def matched_test_lists(test_lists: list[Path], extra_lists: list[Path]) -> list[Path]:
+        found_test_lists = set()
+        if not extra_lists:
+            return []
+        patterns = [pattern.as_posix() for pattern in extra_lists]
+        for test_list in test_lists:
+            test_list_name = test_list.name
+
+            for pattern in patterns:
+                if fnmatch(test_list_name, pattern) or fnmatch(test_list.as_posix(), pattern):
+                    found_test_lists.add(test_list)
+                    break
+
+        return list(found_test_lists)
 
     @staticmethod
     def __search_option_in_list(option: str, arg_list: list[str] | None) -> list[str]:
@@ -74,17 +95,27 @@ class TestLists:
 
     def collect_ignored_test_lists(self, extra_list: list[str] | None = None,
                                    test_name: str | None = None) -> None:
-        if self.config.test_suite.test_lists.exclude_ignored_tests:
+        exclude_test_lists = self.config.test_suite.test_lists.exclude_ignored_test_lists
+        exclude_all_ignored_lists = self.config.test_suite.test_lists.exclude_ignored_tests
+
+        if exclude_all_ignored_lists:
             self.excluded_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
+        elif exclude_test_lists:
+
+            self.excluded_lists.extend(self.collect_test_lists("ignored", list(exclude_test_lists),
+                                                               test_name, filter_list=True))
+            self.ignored_lists.extend(self.collect_test_lists("ignored", list(exclude_test_lists),
+                                                              test_name, filter_list=False))
         else:
             self.ignored_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
 
     def collect_test_lists(
             self,
             kind: str, extra_lists: list[str] | None = None,
-            test_name: str | None = None
+            test_name: str | None = None, filter_list: bool | None = None
     ) -> list[Path]:
-        test_lists = extra_lists[:] if extra_lists else []
+
+        test_lists: list[Path] = []
         test_name = test_name if test_name else self.config.test_suite.suite_name
 
         short_template_name = f"{test_name}*-{kind}*.txt"
@@ -97,35 +128,45 @@ class TestLists:
                              f"(-{interpreter})?"
         if self.sanitizer != SanitizerKind.NONE:
             full_template_name += f"(-{self.sanitizer.value})?"
-        opt_level = self.opt_level()
-        if opt_level is not None:
-            full_template_name += f"(-OL{opt_level})?"
+        if self.opt_level() is not None:
+            full_template_name += f"(-OL{self.opt_level()})?"
         if self.debug_info():
             full_template_name += "(-DI)?"
         if self.is_full_ast_verifier():
             full_template_name += "(-FULLASTV)?"
-        if self.conf_kind == ConfigurationKind.JIT and self.is_jit_with_repeats():
+        if self.is_simultaneous():
+            full_template_name += "(-SIMULTANEOUS)?"
+        if self.conf_kind == ConfigurationKind.JIT and self.is_jit_with_repeats:
             full_template_name += "(-(repeats|REPEATS))?"
         gc_type = cast(str, self.config.workflow.get_parameter('gc-type', 'g1-gc')).upper()
         full_template_name += f"(-({gc_type}))?"
         full_template_name += f"(-{self.build_type.value})?"
         full_template_name += ".txt"
+        _LOGGER.default(f"Test lists searching: template = {full_template_name}")
         full_pattern = re.compile(full_template_name)
 
-        def is_matched(file: str) -> bool:
-            file = file.split(path.sep)[-1]
-            match = full_pattern.match(file)
+        def is_matched(file: Path) -> bool:
+            file_name = file.name
+            match = full_pattern.match(file_name)
             return match is not None
 
-        glob_expression = path.join(self.list_root, f"**/{short_template_name}")
+        glob_expression = f"**/{short_template_name}"
         test_lists.extend(filter(
             is_matched,
-            glob(glob_expression, recursive=True)
+            self.list_root.glob(glob_expression)
         ))
 
         _LOGGER.all(f"Loading {kind} test lists: {test_lists}")
 
-        return [Path(test_list) for test_list in test_lists]
+        if filter_list is not None and extra_lists:
+            found_test_lists = TestLists.matched_test_lists(test_lists,
+                                                            [Path(extra_list) for extra_list in extra_lists])
+            if filter_list:
+                return found_test_lists
+
+            return list(set(test_lists) - set(found_test_lists))
+
+        return test_lists
 
     def search_build_type(self) -> BuildTypeKind:
         search_option = "x64" if self.config.general.gn_build else "CMAKE_BUILD_TYPE"
@@ -157,10 +198,6 @@ class TestLists:
         jit = str(self.config.workflow.get_parameter("compiler-enable-jit"))
         return jit.lower() == "true"
 
-    def is_jit_with_repeats(self) -> bool:
-        jit_with_repeats = cast(str | None, self.config.workflow.get_parameter("with-repeats"))
-        return utils.to_bool(jit_with_repeats) if jit_with_repeats is not None else False
-
     def get_interpreter(self) -> str:
         result: list[str] | str | None = self.config.workflow.get_parameter("ark-args")
         ark_args: list[str] = [] if result is None else result if isinstance(result, list) else [result]
@@ -187,12 +224,24 @@ class TestLists:
         return int(level) if level is not None else None
 
     def debug_info(self) -> bool:
-        args = self.config.workflow.get_parameter("es2panda-extra-args")
-        return len(self.__search_option_in_list("--es2panda-debug-info", args)) > 0
+        debug_info_opt = "--debug-info"
+        args = self.get_es2panda_args()
+        if isinstance(args, str):
+            return args == debug_info_opt
+        return len(self.__search_option_in_list(debug_info_opt, args)) > 0
 
     def is_full_ast_verifier(self) -> bool:
-        args = self.config.workflow.get_parameter("es2panda-extra-args")
-        return len(self.__search_option_in_list("--verifier-all-checks", args)) > 0
+        option = "--verifier-all-checks"
+        args = self.get_es2panda_args()
+        if isinstance(args, str):
+            return args == option
+        return len(self.__search_option_in_list(option, args)) > 0
+
+    def is_simultaneous(self) -> bool:
+        return "--simultaneous=true" in self.get_es2panda_args()
+
+    def get_es2panda_args(self) -> list[str] | str:
+        return args if (args := self.config.workflow.get_parameter("es2panda-args")) else []
 
     def cmake_cache(self) -> list[str]:
         cmake_cache_txt = "CMakeCache.txt"

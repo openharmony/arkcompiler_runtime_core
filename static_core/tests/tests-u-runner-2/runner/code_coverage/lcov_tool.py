@@ -22,6 +22,11 @@ from pathlib import Path
 from runner.code_coverage.cmd_executor import CmdExecutor
 from runner.code_coverage.coverage_dir import CoverageDir
 
+IGNORE_COMPONENTS = ['npx']
+LCOV_IGNORE_ERROR = ['empty', 'utility', 'range', 'inconsistent',
+                     'source', 'format', 'category', 'mismatch',
+                     'unused', 'path', 'missing']
+
 
 class LcovTool:
     def __init__(
@@ -42,7 +47,7 @@ class LcovTool:
         self.lcov_binary = self.cmd_executor.get_binary("lcov")
         self.genhtml_binary = self.cmd_executor.get_binary("genhtml")
 
-        self.lcov_ignore_errors_option = "empty,utility,range,inconsistent,source,format,category"
+        self.ignore_errors = ','.join(LCOV_IGNORE_ERROR)
 
         self.components: dict[str, Path] = {}
 
@@ -56,6 +61,8 @@ class LcovTool:
         Args:
             exclude_regex (list[str] | None): Optional regex pattern to exclude certain files/dirs.
         """
+        for key in IGNORE_COMPONENTS:
+            self.components.pop(key, None)
         for key in self.components:
             self.generate_dot_info_file(exclude_regex, key)
 
@@ -100,7 +107,7 @@ class LcovTool:
             "--directory", str(directory_option),
             "--output-file", str(dot_info_file),
             "--branch-coverage",
-            "--ignore-errors", self.lcov_ignore_errors_option
+            "--ignore-errors", self.ignore_errors
         ]
         if exclude_regex is not None:
             for pattern in exclude_regex:
@@ -145,7 +152,7 @@ class LcovTool:
             str(self.genhtml_binary),
             f"--output-directory={_output_directory}",
             str(_dot_info_file),
-            "--ignore-errors", self.lcov_ignore_errors_option,
+            "--ignore-errors", self.ignore_errors,
             "--filter", "missing"
         ]
         self.cmd_executor.run_command(genhtml_command)

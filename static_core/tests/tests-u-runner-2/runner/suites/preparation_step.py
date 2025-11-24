@@ -15,13 +15,12 @@
 # limitations under the License.
 
 import multiprocessing
-import os
 import re
 import shutil
 import subprocess
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
-from glob import glob
 from pathlib import Path
 
 from runner.common_exceptions import InvalidConfiguration, TestGenerationException, TimeoutException, UnknownException
@@ -38,8 +37,8 @@ _LOGGER = Log.get_logger(__file__)
 class TestPreparationStep(ABC):
     def __init__(self, test_source_path: Path, *, test_gen_path: Path, config: Config, collection: CollectionsOptions,
                  extension: str = "ets") -> None:
-        self.__test_source_path = test_source_path
-        self.__test_gen_path = test_gen_path
+        self.__test_source_path = test_source_path.resolve()
+        self.__test_gen_path = test_gen_path.resolve()
         self.config = config
         self.extension = extension
         self.collection = collection
@@ -53,7 +52,7 @@ class TestPreparationStep(ABC):
         return self.__test_gen_path
 
     @abstractmethod
-    def transform(self, force_generated: bool) -> list[Path]:
+    def transform(self, force_generated: bool) -> Generator[Path, None, None]:
         pass
 
 
@@ -79,22 +78,18 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
                 f"Check value of 'generator-class' option")
         return class_obj
 
-    def transform(self, force_generated: bool) -> list[Path]:
+    def transform(self, force_generated: bool) -> Generator[Path, None, None]:
         # call of the custom generator
         if self.test_gen_path.exists() and force_generated:
             shutil.rmtree(self.test_gen_path)
-        os.makedirs(self.test_gen_path, exist_ok=True)
-        result: list[str] = []
+        self.test_gen_path.mkdir(exist_ok=True, parents=True)
         try:
             if self.collection.generator_class is not None:
                 self.__generate_by_class(self.collection.generator_class)
             elif self.collection.generator_script is not None:
                 self.__generate_by_script(self.collection.generator_script)
         finally:
-            glob_expression = os.path.join(self.test_gen_path, f"**/*.{self.extension}")
-            result.extend(glob(glob_expression, recursive=True))
-
-        return [Path(res) for res in result]
+            yield from self.test_gen_path.rglob(f"**/*.{self.extension}")
 
     def __generate_by_class(self, clazz: str) -> None:
         generator_class: type[IGenerator] = self.__get_generator_class(clazz)
@@ -135,14 +130,13 @@ class CopyStep(TestPreparationStep):
         return (f"Test preparation step: copying *.{self.extension} files "
                 f"from {self.test_source_path} to {self.test_gen_path}")
 
-    def transform(self, force_generated: bool) -> list[Path]:
+    def transform(self, force_generated: bool) -> Generator[Path, None, None]:
         try:
             if self.test_source_path != self.test_gen_path:
                 copy(self.test_source_path, self.test_gen_path, remove_if_exist=False)
-            glob_expression = os.path.join(self.test_gen_path, f"**/*.{self.extension}")
-            return [Path(test) for test in glob(glob_expression, recursive=True)]
+            yield from self.test_gen_path.rglob(f"**/*.{self.extension}")
         except FileNotFoundError:
-            return []
+            yield from []
 
 
 class JitStep(TestPreparationStep):
@@ -170,18 +164,16 @@ class JitStep(TestPreparationStep):
     def __str__(self) -> str:
         return "Test preparation step for any ets test suite: transforming for JIT testing"
 
-    def transform(self, force_generated: bool) -> list[Path]:
-        glob_expression = os.path.join(self.test_gen_path, f"**/*.{self.extension}")
-        tests = list(glob(glob_expression, recursive=True))
+    def transform(self, force_generated: bool) -> Generator[Path, None, None]:
+        tests = self.test_gen_path.rglob(f"**/*.{self.extension}")
         with multiprocessing.Pool(processes=self.config.general.processes) as pool:
             run_tests = pool.imap_unordered(self.jit_transform_one_test, tests, chunksize=self.config.general.chunksize)
             pool.close()
             pool.join()
 
-        return list(run_tests)
+        yield from run_tests
 
-    def jit_transform_one_test(self, test_path_str: str) -> Path:
-        test_path = Path(test_path_str)
+    def jit_transform_one_test(self, test_path: Path) -> Path:
         metadata = TestMetadata.get_metadata(test_path)
         is_convert = not metadata.tags.not_a_test and \
                      not metadata.tags.compile_only and \

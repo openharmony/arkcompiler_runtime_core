@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
-from jinja2 import Environment, TemplateSyntaxError, select_autoescape
+from jinja2 import Environment, FileSystemLoader, TemplateSyntaxError, select_autoescape
 
 from runner.sts_utils.constants import (
     META_COPYRIGHT,
@@ -30,7 +30,7 @@ from runner.sts_utils.constants import (
     META_START_STRING,
 )
 from runner.sts_utils.exceptions import InvalidFileFormatException, InvalidMetaException, UnknownTemplateException
-from runner.utils import read_file
+from runner.utils import read_file, remove_template_copyright
 
 ROOT_PATH = Path(os.path.realpath(os.path.dirname(__file__)))
 BENCH_PATH = ROOT_PATH / "test_template.tpl"
@@ -44,11 +44,14 @@ class Meta:
 
 
 class Template:
-    def __init__(self, test_path: Path, params: dict[str, list]) -> None:
+    def __init__(self, test_path: Path, params: dict[str, list], ets_templates_path: Path) -> None:
         self.test_path = str(test_path)
         self.text = read_file(test_path)
         self.__params = params
-        self.__jinja_env = Environment(autoescape=select_autoescape())
+        self.__jinja_env = Environment(
+            loader=FileSystemLoader([test_path.parent.as_posix(), ets_templates_path.as_posix()]),
+            autoescape=select_autoescape()
+        )
 
         if self.is_copyright:
             self.__copyright = read_file(COPYRIGHT_PATH)
@@ -66,15 +69,6 @@ class Template:
         for old, new in codes:
             text = text.replace(old, new)
         return text
-
-    @staticmethod
-    def __get_in_out_content(text: str, meta_start: str, meta_end: str) -> tuple[str, str]:
-        start, end = text.find(meta_start), text.find(meta_end)
-        if start > end or start == -1 or end == -1:
-            raise InvalidMetaException("Invalid meta or meta does not exist")
-        inside_content = text[start + len(meta_start):end]
-        outside_content = text[:start] + text[end + len(meta_end):]
-        return inside_content, outside_content
 
     def render_template(self) -> list[str]:
         try:
@@ -95,6 +89,7 @@ class Template:
         yaml_content = yaml.dump(meta.config)
 
         bench_template = read_file(BENCH_PATH)
+        bench_template = remove_template_copyright(bench_template)
         bench_code = bench_template.format(
             copyright=self.__copyright.strip(),
             description=yaml_content.strip(),
@@ -113,3 +108,11 @@ class Template:
             raise InvalidFileFormatException(message=f"Could not load YAML in test params: {exc!s}",
                                              filepath=self.test_path) from exc
         return result
+
+    def __get_in_out_content(self, text: str, meta_start: str, meta_end: str) -> tuple[str, str]:
+        start, end = text.find(meta_start), text.find(meta_end)
+        if start > end or start == -1 or end == -1:
+            raise InvalidMetaException(f"{Path(self.test_path).name}: Invalid meta or meta does not exist")
+        inside_content = text[start + len(meta_start):end]
+        outside_content = text[:start] + text[end + len(meta_end):]
+        return inside_content, outside_content

@@ -18,18 +18,19 @@ list-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/parser
 test-root: ${parameters.parser-root}
 
 parameters:
+  validator: runner.extensions.validators.parser.parser_validator.ParserValidator
   parser-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test
   work-dir: ${WORK_DIR}/${suite-name}
-  enable-verifier: False
+  enable-verifier: false
   build: ${PANDA_BUILD}
-  with-js: False
+  with-js: false
 
 collections:
   #  js tests
   ark_tests:
     parameters:
       extension: js
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -37,7 +38,7 @@ collections:
   parser/js:
     parameters:
       extension: js
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -45,16 +46,15 @@ collections:
   compiler/js:
     parameters:
       extension: js
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
   #  ts tests
   parser/ts:
     parameters:
       extension: ts
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
@@ -62,38 +62,29 @@ collections:
   compiler/ts:
     parameters:
       extension: ts
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
   # as/ts tests
   parser/as:
     parameters:
       extension: ts
-      es2panda-full-args:
+      es2panda-workflow-args:
         - "--dump-ast"
         - "--extension=${parameters.extension}"
         - "--thread=0"
         - "--parse-only"
-  # sts tests
+  # ets tests
   compiler/ets:
     parameters:
-      arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
       extension: ets
-      es2panda-full-args:
+      es2panda-test-suite-args:
         - "--dump-ast"
-        - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
-        - "--arktsconfig=${parameters.arktsconfig}"
   parser/ets:
     parameters:
-      arktsconfig: "${parameters.build}/tools/es2panda/generated/arktsconfig.json"
       extension: ets
-      es2panda-full-args:
+      es2panda-test-suite-args:
         - "--dump-ast"
-        - "--extension=${parameters.extension}"
         - "--thread=0"
-        - "--output=/dev/null"
-        - "--arktsconfig=${parameters.arktsconfig}"

@@ -19,6 +19,7 @@ import json
 from json import JSONDecodeError, JSONDecoder
 
 from runner import common_exceptions, utils
+from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.validators.astchecker.util_astchecker import UtilASTChecker
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
@@ -67,7 +68,7 @@ class AstCheckerValidator(BaseValidator):
 
     @staticmethod
     def es2panda_result_validator(test: object, step_name: str, actual_output: str, _2: str,
-                                  return_code: int) -> bool:
+                                  return_code: int) -> ValidationResult:
         error = ""
         dump: dict[str, str | list | dict] = {}
         if not isinstance(test, TestStandardFlow):
@@ -94,4 +95,4 @@ class AstCheckerValidator(BaseValidator):
         passed = ((test_cases.has_error_tests or test_cases.has_warning_tests)
                   and test.fail_kind == fail_kind_other) ^ passed
 
-        return passed
+        return ValidationResult(passed, ValidatorFailKind.NONE, fail_kind_other)

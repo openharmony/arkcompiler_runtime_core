@@ -26,6 +26,8 @@ from runner.options.config import Config
 
 _LOGGER = Log.get_logger(__file__)
 
+EXPECTED_FILE_EXTENSION = ".expected"
+
 
 class EtsTemplatesGenerator(IGenerator):
     def __init__(self, source: Path, target: Path, config: Config) -> None:
@@ -43,7 +45,7 @@ class EtsTemplatesGenerator(IGenerator):
     def __generate_test(self, path: Path) -> None:
         test_full_name = os.path.relpath(path, self._source)
         output = self._target / test_full_name
-        bench = Benchmark(path, output, test_full_name, self.extension, self.extension)
+        bench = Benchmark(path, output, test_full_name, self._source, self.extension)
         self.generated_tests.extend(bench.generate())
 
     def __dfs(self, path: Path, seen: set) -> None:
@@ -56,3 +58,10 @@ class EtsTemplatesGenerator(IGenerator):
                 self.__dfs(i, seen)
         elif path.suffix == self.extension:
             self.__generate_test(path)
+        elif EXPECTED_FILE_EXTENSION in path.suffixes:
+            self._copy_expected_file(path)
+
+    def _copy_expected_file(self, path: Path) -> None:
+        test_full_name = path.relative_to(self._source)
+        output = self._target / test_full_name
+        shutil.copy(path, output.parent)
