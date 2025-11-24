@@ -63,7 +63,10 @@ private:
     static bool InterfaceRefreshMethods(AbckitCoreInterface *iface);
     static bool InterfaceRefreshObjectLiteral(AbckitCoreInterface *iface);
 
+    static bool RefreshPartial(const std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *> &object);
+
     static bool ObjectLiteralRefreshName(AbckitCoreClass *objectLiteral, const std::string &newName = "");
+    static bool PartialRefreshName(AbckitCoreClass *partial, const std::string &newName = "");
 
     static bool GetSetMethodRefreshName(const std::variant<AbckitCoreClass *, AbckitCoreInterface *> &object,
                                         const std::string &oldName, const std::string &newName);

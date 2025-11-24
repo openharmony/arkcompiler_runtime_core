@@ -7,7 +7,8 @@
       "keeps": [
         "-keep @MyAnno1 class class_test_003.ClassA {\n    *;\n    }",
         "-keep class class_test_003.ClassB {\n    public field1:int;\n    }",
-        "-keep class class_test_003.ClassC {\n    @MyAnno1 public field1:int;\n    }"
+        "-keep class class_test_003.ClassC {\n    @MyAnno1 public field1:int;\n    }",
+        "-keep class class_test_003.ClassD {\n    public final field1:int;\n    }"
       ]
     }
   }

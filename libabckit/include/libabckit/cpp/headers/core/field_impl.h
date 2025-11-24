@@ -166,6 +166,14 @@ inline bool ClassField::IsStatic() const
     return res;
 }
 
+inline bool ClassField::IsFinal() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    bool res = conf->cIapi_->classFieldIsFinal(GetView());
+    CheckError(conf);
+    return res;
+}
+
 inline std::vector<core::Annotation> ClassField::GetAnnotations() const
 {
     std::vector<core::Annotation> annotations;
@@ -260,6 +268,14 @@ inline Type EnumField::GetType() const
     AbckitType *type = conf->cIapi_->enumFieldGetType(GetView());
     CheckError(conf);
     return Type(type, conf, GetResource());
+}
+
+inline Value EnumField::GetValue() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitValue *value = conf->cIapi_->enumFieldGetValue(GetView());
+    CheckError(conf);
+    return Value(value, conf, GetResource());
 }
 
 }  // namespace abckit::core

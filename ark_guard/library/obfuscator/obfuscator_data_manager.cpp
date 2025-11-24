@@ -59,6 +59,7 @@ void ark::guard::ObfuscatorDataManager::SetNameAndObfuscatedName(const std::stri
 
 void ark::guard::ObfuscatorDataManager::SetKeptWithMemberLink(abckit_wrapper::Member *member)
 {
+    ARK_GUARD_ASSERT(member == nullptr, ErrorCode::GENERIC_ERROR, "SetKeptWithMemberLink input nullptr");
     auto lastMember = MemberLinker::LastMember(member);
     if (lastMember != member) {
         ObfuscatorDataManager memberManager(member);
@@ -72,4 +73,15 @@ void ark::guard::ObfuscatorDataManager::SetKeptWithMemberLink(abckit_wrapper::Me
     ARK_GUARD_ASSERT(lastData == nullptr, ErrorCode::GENERIC_ERROR,
                      "Get obfuscate data failed, name:" + lastMember->GetFullyQualifiedName());
     lastData->SetKept();
+}
+
+bool ark::guard::ObfuscatorDataManager::IsKeptWithMemberLink(abckit_wrapper::Member *member)
+{
+    ARK_GUARD_ASSERT(member == nullptr, ErrorCode::GENERIC_ERROR, "IsKeptWithMemberLink input nullptr");
+    auto lastMember = MemberLinker::LastMember(member);
+    ObfuscatorDataManager lastMemberManager(lastMember);
+    auto lastData = lastMemberManager.GetData();
+    ARK_GUARD_ASSERT(lastData == nullptr, ErrorCode::GENERIC_ERROR,
+                     "Get obfuscate data failed, name:" + lastMember->GetFullyQualifiedName());
+    return lastData->IsKept();
 }

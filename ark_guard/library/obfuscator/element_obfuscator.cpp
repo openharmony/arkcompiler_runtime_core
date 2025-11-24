@@ -73,6 +73,9 @@ bool ark::guard::ElementObfuscator::VisitField(abckit_wrapper::Field *field)
 
 bool ark::guard::ElementObfuscator::VisitClass(abckit_wrapper::Class *clazz)
 {
+    if (clazz->IsExternal()) {
+        return true;
+    }
     return VisitObject(clazz, false, ObjectType::CLASS);
 }
 

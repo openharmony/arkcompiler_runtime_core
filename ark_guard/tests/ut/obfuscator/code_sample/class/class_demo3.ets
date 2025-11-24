@@ -87,3 +87,4 @@ pt1.x = 0;
 pt2.y = 1;
 console.log('BWPoint', pt1.color + pt2.color);
 
+export abstract class AbstractClass {};

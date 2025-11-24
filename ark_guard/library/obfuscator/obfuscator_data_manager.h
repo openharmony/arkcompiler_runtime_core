@@ -119,24 +119,6 @@ public:
     }
 
     /**
-     * @brief set indent
-     * @param indent indent
-     */
-    void SetIndent(const std::string &indent)
-    {
-        this->indent_ = indent;
-    }
-
-    /**
-     * @brief get indent
-     * @return std::string indent
-     */
-    [[nodiscard]] std::string GetIndent() const
-    {
-        return this->indent_;
-    }
-
-    /**
      * @brief set kept path
      * @param path kept path
      */
@@ -166,10 +148,6 @@ private:
     // Store the obfuscated name of the object,
     // This field is used for the obfuscation phase and the obfuscated name_cache dump
     std::string obfName_;
-
-    // When an object is a member, store the next member object associated with that object
-    // This field is used in the obfuscation phase
-    std::string indent_;
 
     // When an object is a module, store its kept path part; end with a '.'
     // This field is used in the obfuscation/nameMapping phase
@@ -219,6 +197,12 @@ public:
      * @param member the member to be set kept
      */
     static void SetKeptWithMemberLink(abckit_wrapper::Member *member);
+
+    /**
+     * @brief Is this Member's linked Member kept
+     * @param member the member to query
+     */
+    static bool IsKeptWithMemberLink(abckit_wrapper::Member *member);
 
 private:
     abckit_wrapper::Object *object_ = nullptr;

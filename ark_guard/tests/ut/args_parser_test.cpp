@@ -30,9 +30,7 @@ std::string GetArkGuardHelpInfo()
         "Supported options:\n"
         "--debug: enable debug messages (will be printed to standard output if no --debug-file was specified)\n"
         "--debug-file: (--debug-file FILENAME) set debug file name. default is std::cout\n"
-        "--help: Print this message and exit\n"
-        "Tail arguments:\n"
-        "config-file-path: configuration file path\n\n");
+        "--help: Print this message and exit\n\n");
 
     return helpInfo;
 }

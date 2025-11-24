@@ -1335,6 +1335,14 @@ struct CAPI_EXPORT AbckitInspectApi {
     bool (*classFieldIsStatic)(AbckitCoreClassField *field);
 
     /**
+     * @brief Returns whether class field `field` is final.
+     * @return `true` if field `field` is final.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*classFieldIsFinal)(AbckitCoreClassField *field);
+
+    /**
      * @brief Enumerates annotations of class field `field`, invoking callback `cb` for each annotation.
      * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] field - Field to be inspected.

@@ -126,6 +126,8 @@ bool ProgramUpdateFunctionTableKey(ark::pandasm::Program *prog, const std::strin
 std::vector<std::string> GetUpdatedValues(const std::vector<std::string> &values, const std::string &oldName,
                                           const std::string &newName)
 {
+    LIBABCKIT_LOG_FUNC;
+
     std::vector<std::string> updatedValues;
     for (auto &value : values) {
         if (value == oldName) {
@@ -157,15 +159,15 @@ void UpdateRecordAttributes(const std::vector<ark::pandasm::Record *> &recordUse
 bool ObjectRefreshName(std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreEnum *, AbckitCoreInterface *,
                                     AbckitCoreAnnotationInterface *>
                            object,
-                       const std::string &newName, bool isObjectLiteral = false)
+                       const std::string &newName, bool isObjectLiteral = false, bool isPartial = false)
 {
     LIBABCKIT_LOG_FUNC;
     const auto funcName = libabckit::StringUtil::GetFuncNameWithSquareBrackets(__func__);
     return std::visit(
-        [newName, isObjectLiteral, funcName](auto &coreObject) {
+        [newName, isObjectLiteral, isPartial, funcName](auto &coreObject) {
             auto record = libabckit::GetStaticImplRecord(coreObject);
             const auto oldFullName = record->name;
-            const auto newFullName = libabckit::NameUtil::GetFullName(coreObject, newName, isObjectLiteral);
+            const auto newFullName = libabckit::NameUtil::GetFullName(coreObject, newName, isObjectLiteral, isPartial);
             if (oldFullName == newFullName) {
                 return true;
             }
@@ -301,6 +303,9 @@ bool libabckit::ModifyNameHelper::ClassRefreshName(AbckitCoreClass *klass, const
 
     ClassRefreshMethods(klass);
     ClassRefreshObjectLiteral(klass);
+    if (klass->partial) {
+        RefreshPartial(klass);
+    }
 
     return true;
 }
@@ -323,6 +328,9 @@ bool libabckit::ModifyNameHelper::EnumRefreshName(AbckitCoreEnum *enm, const std
     ClassRefreshName(enm->arrayEnum.get(), arrayEnumName);
     EnumRefreshMethods(enm);
     EnumRefreshFieldsType(enm);
+    if (enm->partial) {
+        RefreshPartial(enm);
+    }
 
     return true;
 }
@@ -354,6 +362,9 @@ bool libabckit::ModifyNameHelper::InterfaceRefreshName(AbckitCoreInterface *ifac
 
     InterfaceRefreshObjectLiteral(iface);
     InterfaceRefreshMethods(iface);
+    if (iface->partial) {
+        RefreshPartial(iface);
+    }
 
     return true;
 }
@@ -677,6 +688,20 @@ bool libabckit::ModifyNameHelper::InterfaceRefreshObjectLiteral(AbckitCoreInterf
     return true;
 }
 
+bool libabckit::ModifyNameHelper::RefreshPartial(
+    const std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *> &object)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    std::visit(
+        [](auto &&base) {
+            auto baseName = GetStaticImplRecord(base)->name;
+            PartialRefreshName(base->partial.get(), baseName);
+        },
+        object);
+    return true;
+}
+
 bool libabckit::ModifyNameHelper::ObjectLiteralRefreshName(AbckitCoreClass *objectLiteral, const std::string &newName)
 {
     LIBABCKIT_LOG_FUNC;
@@ -690,6 +715,23 @@ bool libabckit::ModifyNameHelper::ObjectLiteralRefreshName(AbckitCoreClass *obje
     }
 
     ClassRefreshMethods(objectLiteral);
+    return true;
+}
+
+bool libabckit::ModifyNameHelper::PartialRefreshName(AbckitCoreClass *partial, const std::string &newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ObjectRefreshName(partial, newName, false, true)) {
+        return false;
+    }
+
+    if (!ObjectRefreshTypeUsersName(partial, GetStaticImplRecord(partial)->name)) {
+        return false;
+    }
+
+    ClassRefreshMethods(partial);
+    ClassRefreshObjectLiteral(partial);
     return true;
 }
 

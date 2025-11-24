@@ -31,7 +31,7 @@ public:
         const std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreClassField *, AbckitCoreEnum *,
                            AbckitCoreInterface *, AbckitCoreAnnotationInterface *, AbckitCoreFunction *,
                            AbckitCoreAnnotation *> &object,
-        const std::string &newName = "", bool isObjectLiteral = false);
+        const std::string &newName = "", bool isObjectLiteral = false, bool isPartial = false);
 
     static std::string GetFieldFullName(const ark::pandasm::Record *owner, const ark::pandasm::Field *field);
 
@@ -58,6 +58,8 @@ private:
     static std::string AnnotationGetFullName(AbckitCoreAnnotation *anno);
 
     static std::string ObjectLiteralGetFullName(const AbckitCoreClass *objectLiteral, const std::string &newName = "");
+
+    static std::string PartialGetFullName(const std::string &newName = "");
 };
 }  // namespace libabckit
 

@@ -272,6 +272,13 @@ TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, classFieldIsStatic)
     helpers_nullptr::TestNullptr(g_inspectApiImp->classFieldIsStatic);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::classFieldIsFinal,
+// abc-kind=NoABC, category=negative-nullptr, extension=c
+TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, classFieldIsFinal)
+{
+    helpers_nullptr::TestNullptr(g_inspectApiImp->classFieldIsFinal);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::classGetFile,
 // abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTestsInspectApiImpl0, classGetFile)

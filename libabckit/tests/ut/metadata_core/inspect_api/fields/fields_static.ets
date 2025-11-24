@@ -30,6 +30,7 @@ class C1 {
   public static c1F4: string = 'static';
   internal c1F5: int = 1;
   public readonly c1F6: int = 2;
+  public final c1F7: int = 1;
 }
 
 interface I1 {
@@ -39,7 +40,7 @@ interface I1 {
 }
 
 enum E1 {
-  ONE
+  ONE = 0
 }
 
 namespace NS1 {
