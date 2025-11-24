@@ -16,21 +16,21 @@
 class TestClass {}
 enum ColorSet { Red, Green, Blue }
 class MyClass {
-  public score: string = "good";
+  public score: string = 'good';
   protected testObj: TestClass = new TestClass();
   private levelArray: string[] = ['A', 'B', 'C'];
-  static myEnum: ColorSet = ColorSet.Red;
+  public static myEnum: ColorSet = ColorSet.Red;
   private static myMap: Map<string, number> = new Map<string, number>();
-  mySet: Set<number> = new Set<number>();
+  public mySet: Set<number> = new Set<number>();
 }
 
 class ParentTest {
-  id: string = "001";
+  public id: string = '001';
 }
 
 class PersonTest extends ParentTest {
-  name: string = "Alice";
-  age: number = 30;
+  public name: string = 'Alice';
+  public age: number = 30;
 
   showName() {
     console.log(this.name);
