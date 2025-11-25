@@ -224,7 +224,7 @@ intrinsics:
       args: [ ref ]
     impl: ark::ets::intrinsics::CompilerEtsNullcheck
     set_flags: [ no_nullptr ]
-    clear_flags: [ ]
+    clear_flags: [ heap_inv ]
     peephole_func: PeepholeNullcheck
 
   - name: CompilerEtsStringFromCharCodeSingle
