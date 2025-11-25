@@ -15,6 +15,9 @@
 
 package std.debug.concurrency;
 
+/**
+ * @internal
+ */
 export final class CoroutineExtras {
     public static POLICY_ANY = 0;
     public static POLICY_NON_MAIN = 1;
