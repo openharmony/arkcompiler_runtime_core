@@ -37,6 +37,35 @@ function testRegExpParserCase1() {
     const regex5 = new RegExp('[\x00-\x1F]', 'g');
     const result5 = str5.match(regex5);
     arktest.assertEQ(result5![0], ['\u0007'][0]);
+
+    const str6 = 'A1! α2? Б3.';
+    const regex6 = new RegExp('[\\p{L}\\d]+', 'gu');
+    const result6 = str6.match(regex6);
+    arktest.assertEQ(result6![0], ['A1', 'α2', 'Б3'][0]);
+    arktest.assertEQ(result6![1], ['A1', 'α2', 'Б3'][1]);
+    arktest.assertEQ(result6![2], ['A1', 'α2', 'Б3'][2]);
+
+    const str7 = 'A1 α2 Б3';
+    const regex7 = new RegExp('[\\p{L}\\d]+', 'gu');
+    const result7 = str7.match(regex7);
+    arktest.assertEQ(result7![0], ['A1', 'α2', 'Б3'][0]);
+    arktest.assertEQ(result7![1], ['A1', 'α2', 'Б3'][1]);
+    arktest.assertEQ(result7![2], ['A1', 'α2', 'Б3'][2]);
+
+    const str8 = 'A1 α2 Б3 Δ4';
+    const regex8 = new RegExp('[\\p{L}\\d]+', 'gu');
+    const result8 = str8.match(regex8);
+    arktest.assertEQ(result8![0], ['A1', 'α2', 'Б3', 'Δ4'][0]);
+    arktest.assertEQ(result8![1], ['A1', 'α2', 'Б3', 'Δ4'][1]);
+    arktest.assertEQ(result8![2], ['A1', 'α2', 'Б3', 'Δ4'][2]);
+    arktest.assertEQ(result8![3], ['A1', 'α2', 'Б3', 'Δ4'][3]);
+
+    const str9 = '𠀋 𠀌 𠀍';
+    const regex9 = new RegExp('[\\u{20000}-\\u{2A6DF}]+', 'gu');
+    const result9 = str9.match(regex9);
+    arktest.assertEQ(result9![0], ['𠀋', '𠀌', '𠀍'][0]);
+    arktest.assertEQ(result9![1], ['𠀋', '𠀌', '𠀍'][1]);
+    arktest.assertEQ(result9![2], ['𠀋', '𠀌', '𠀍'][2]);
 }
 
 function testRegExpParserCase2() {
