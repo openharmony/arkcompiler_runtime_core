@@ -3539,9 +3539,8 @@ public:
               bool INITOBJ, bool CALL>
     ALWAYS_INLINE inline void CallInterpreterStackless(Method *method)
     {
-        uint32_t numVregs;
-        auto *instructions =
-            panda_file::CodeDataAccessor::GetInstructions(*method->GetPandaFile(), method->GetCodeId(), &numVregs);
+        uint32_t numVregs = method->GetNumVregs();
+        auto *instructions = method->GetInstructions();
 
         Frame *frame = nullptr;
         if (!CreateAndSetFrame<FrameHelper, FORMAT, IS_DYNAMIC_T, IS_RANGE, ACCEPT_ACC, INITOBJ, CALL, true>(

@@ -370,7 +370,7 @@ PandaUniquePtr<Frame, FrameDeleter> Method::InitFrame(ManagedThread *thread, uin
                                                       Frame *currentFrame)
 {
     ASSERT(codeId_.IsValid());
-    auto numVregs = panda_file::CodeDataAccessor::GetNumVregs(*(pandaFile_), codeId_);
+    auto numVregs = GetNumVregs();
     return InitFrameWithNumVRegs<InvokeHelper, ValueT, false>(thread, numVregs, numActualArgs, args, currentFrame);
 }
 
