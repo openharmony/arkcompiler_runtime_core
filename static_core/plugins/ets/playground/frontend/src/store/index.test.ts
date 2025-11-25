@@ -18,7 +18,7 @@ import { setTheme } from './slices/appState';
 import { setOptionsLoading, setOptionsResponse } from './slices/options';
 import { setSyntaxLoading, setSyntaxResponse } from './slices/syntax';
 import { setCode, setRunLoading, setCompileLoading } from './slices/code';
-import { setCompileOutLogs, setRunErrLogs } from './slices/logs';
+import { setOutLogs, setErrLogs } from './slices/logs';
 
 describe('Redux Store Configuration', () => {
     it('should initialize with the correct default state', () => {
@@ -28,7 +28,7 @@ describe('Redux Store Configuration', () => {
         expect(state.options.isLoading).toBe(false);
         expect(state.syntax.isLoading).toBe(false);
         expect(state.code.isCompileLoading).toBe(false);
-        expect(state.logs.compileOut).toEqual([]);
+        expect(state.logs.out).toEqual([]);
     });
 
     it('should handle appState actions', () => {
@@ -66,12 +66,12 @@ describe('Redux Store Configuration', () => {
     });
 
     it('should handle logs actions', () => {
-        const mockCompileLogs = [{ message: [{message: 'Compile success'}], isRead: false }];
-        store.dispatch(setCompileOutLogs(mockCompileLogs));
-        expect(store.getState().logs.compileOut).toEqual(mockCompileLogs);
+        const mockOutLogs = [{ message: [{message: 'Compile success'}], isRead: false }];
+        store.dispatch(setOutLogs(mockOutLogs));
+        expect(store.getState().logs.out).toEqual(mockOutLogs);
 
-        const mockRunErrLogs = [{ message: [{message: 'Run error'}], isRead: false }];
-        store.dispatch(setRunErrLogs(mockRunErrLogs));
-        expect(store.getState().logs.runErr).toEqual(mockRunErrLogs);
+        const mockErrLogs = [{ message: [{message: 'Run error'}], isRead: false }];
+        store.dispatch(setErrLogs(mockErrLogs));
+        expect(store.getState().logs.err).toEqual(mockErrLogs);
     });
 });

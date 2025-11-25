@@ -17,14 +17,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {ILog} from '../../models/logs';
 
 interface IState {
-    compileOut: ILog[]
-    compileErr: ILog[]
-    runOut: ILog[]
-    runErr: ILog[]
-    disasmOut: ILog[]
-    disasmErr: ILog[]
-    verifierOut: ILog[]
-    verifierErr: ILog[]
     out: ILog[]
     err: ILog[]
     highlightErrors: HighlightError[];
@@ -40,14 +32,6 @@ export interface HighlightError {
 }
 
 const initialState: IState = {
-    compileOut: [],
-    compileErr: [],
-    runOut: [],
-    runErr: [],
-    disasmOut: [],
-    disasmErr: [],
-    verifierOut: [],
-    verifierErr: [],
     out: [],
     err: [],
     highlightErrors: [],
@@ -58,30 +42,6 @@ const logsSlice = createSlice({
     name: 'logsState',
     initialState,
     reducers: {
-        setCompileOutLogs(state, action: PayloadAction<ILog[]>) {
-            state.compileOut = action.payload;
-        },
-        setCompileErrLogs(state, action: PayloadAction<ILog[]>) {
-            state.compileErr = action.payload;
-        },
-        setRunOutLogs(state, action: PayloadAction<ILog[]>) {
-            state.runOut = action.payload;
-        },
-        setRunErrLogs(state, action: PayloadAction<ILog[]>) {
-            state.runErr = action.payload;
-        },
-        setVerifierOutLogs(state, action: PayloadAction<ILog[]>) {
-            state.runOut = action.payload;
-        },
-        setVerifierErrLogs(state, action: PayloadAction<ILog[]>) {
-            state.runErr = action.payload;
-        },
-        setDisasmOutLogs(state, action: PayloadAction<ILog[]>) {
-            state.disasmOut = action.payload;
-        },
-        setDisasmErrLogs(state, action: PayloadAction<ILog[]>) {
-            state.disasmErr = action.payload;
-        },
         setOutLogs(state, action: PayloadAction<ILog[]>) {
             state.out = action.payload;
         },
@@ -91,7 +51,7 @@ const logsSlice = createSlice({
         setHighlightErrors: (state, action) => {
             state.highlightErrors = state.highlightErrors.concat(action.payload);
         },
-        setClearHighLightErrs: (state, action) => {
+        setClearHighLightErrs: (state) => {
             state.highlightErrors = [];
         },
         setJumpTo(state, action: PayloadAction<JumpTo | null>) {
@@ -101,14 +61,6 @@ const logsSlice = createSlice({
 });
 
 export const {
-    setCompileOutLogs,
-    setCompileErrLogs,
-    setRunOutLogs,
-    setRunErrLogs,
-    setDisasmOutLogs,
-    setDisasmErrLogs,
-    setVerifierOutLogs,
-    setVerifierErrLogs,
     setOutLogs,
     setErrLogs,
     setHighlightErrors,

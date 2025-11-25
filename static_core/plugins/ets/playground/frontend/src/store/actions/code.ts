@@ -34,7 +34,7 @@ export const fetchCompileCode = createAsyncThunk(
         const codeState = state.code || '';
         const appState = state?.appState || false;
         const optionsState = state.options || {};
-        thunkAPI.dispatch(setClearHighLightErrs([]));
+        thunkAPI.dispatch(setClearHighLightErrs());
         if (appState.clearLogsEachRun) {
             thunkAPI.dispatch(clearOutLogs());
             thunkAPI.dispatch(clearErrLogs());
@@ -65,7 +65,7 @@ export const fetchRunCode = createAsyncThunk(
         const codeState = state.code || '';
         const appState = state?.appState || false;
         const optionsState = state?.options || {};
-        thunkAPI.dispatch(setClearHighLightErrs([]));
+        thunkAPI.dispatch(setClearHighLightErrs());
         if (appState.clearLogsEachRun) {
             thunkAPI.dispatch(clearOutLogs());
             thunkAPI.dispatch(clearErrLogs());

@@ -15,15 +15,9 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
-    setCompileErrLogs,
-    setCompileOutLogs, setDisasmErrLogs, setDisasmOutLogs,
     setErrLogs,
     setHighlightErrors,
-    setOutLogs,
-    setRunErrLogs,
-    setRunOutLogs,
-    setVerifierErrLogs,
-    setVerifierOutLogs
+    setOutLogs
 } from '../store/slices/logs';
 import { RootState } from '../store';
 import { IAstReq } from './ast';
@@ -42,9 +36,10 @@ export enum ELogType {
 }
 
 export interface ILog {
-    message: { message: string, line?: number, column?: number }[];
+    message: { message: string, line?: number, column?: number, source?: 'output' | 'error' }[];
     isRead?: boolean;
     from?: ELogType;
+    exit_code?: number;
 }
 
 export interface ICompileData {
@@ -80,9 +75,9 @@ export interface IApiResponse {
     };
 }
 
-type HighlightItem = { message: string; line?: number; column?: number; type?: string };
+type HighlightItem = { message: string; line?: number; column?: number; type?: string; source?: 'output' | 'error' };
 
-const collectHighlights = (str?: string): HighlightItem[] => {
+const collectHighlights = (str?: string, source?: 'output' | 'error'): HighlightItem[] => {
     if (!str) {
         return [];
     }
@@ -115,7 +110,7 @@ const collectHighlights = (str?: string): HighlightItem[] => {
             if (p === '') {
                 continue;
             }
-            out.push({ message: p });
+            out.push({ message: p, source });
         }
     };
 
@@ -137,6 +132,7 @@ const collectHighlights = (str?: string): HighlightItem[] => {
             line: line ? Number(line) : undefined,
             column: col ? Number(col) : undefined,
             type,
+            source,
         });
         last = end;
     }
@@ -150,14 +146,11 @@ const collectHighlights = (str?: string): HighlightItem[] => {
 export const handleResponseLogs = createAsyncThunk(
     'logs/compileLogs',
     async (response: IApiResponse, thunkAPI) => {
-
         const handleLog = (
             data: ICompileData | IRunData | IDisassemblyData | IAstReq | undefined,
             logTypeOut: ELogType,
             logTypeErr: ELogType,
-            successMessage: string,
-            setOutAction: (logs: ILog[]) => { payload: ILog[]; type: string },
-            setErrAction: (logs: ILog[]) => { payload: ILog[]; type: string }
+            successMessage: string
         ): void => {
             const state: RootState = thunkAPI.getState() as RootState;
             const logsState = state.logs;
@@ -165,98 +158,48 @@ export const handleResponseLogs = createAsyncThunk(
             if (!data) {
                 return;
             }
-            if (data.output && data.error) {
-                thunkAPI.dispatch(setOutAction(
-                    logsState.out.concat([{
-                        message: collectHighlights(data.output),
-                        isRead: false,
-                        from: logTypeOut
-                    }])
-                ));
+
+            if (data.output) {
+                const outputMessages = collectHighlights(data.output, 'output');
+                if (outputMessages.length > 0) {
+                    thunkAPI.dispatch(setOutLogs(
+                        logsState.out.concat({
+                            message: outputMessages,
+                            isRead: false,
+                            from: logTypeOut,
+                            exit_code: data.exit_code
+                        })
+                    ));
+                }
+            }
+
+            if (data.error) {
+                const errorMessages = collectHighlights(data.error, 'error');
+                if (errorMessages.length > 0) {
+                    thunkAPI.dispatch(setErrLogs(
+                        logsState.err.concat({
+                            message: errorMessages,
+                            isRead: false,
+                            from: logTypeErr,
+                            exit_code: data.exit_code
+                        })
+                    ));
+                }
+            }
+
+            if (data.exit_code === 0 && !data.error && !data.output && successMessage) {
                 thunkAPI.dispatch(setOutLogs(
                     logsState.out.concat({
-                        message: collectHighlights(data.output),
+                        message: [{ message: successMessage, source: 'output' }],
                         isRead: false,
-                        from: logTypeOut
-                    })
-                ));
-                thunkAPI.dispatch(setErrAction(
-                    logsState.err.concat([{
-                        message: collectHighlights(data.error),
-                        isRead: false,
-                        from: logTypeErr
-                    }])
-                ));
-                thunkAPI.dispatch(setErrLogs(
-                    logsState.err.concat({
-                        message: collectHighlights(data.error),
-                        isRead: false,
-                        from: logTypeErr
-                    })
-                ));
-            } else if (data.error) {
-                thunkAPI.dispatch(setErrAction(
-                    logsState.err.concat([{
-                        message: collectHighlights(data.error),
-                        isRead: false,
-                        from: logTypeErr
-                    }])
-                ));
-                thunkAPI.dispatch(setErrLogs(
-                    logsState.err.concat({
-                        message: collectHighlights(data.error),
-                        isRead: false,
-                        from: logTypeErr
-                    })
-                ));
-            } else if ((data.exit_code === 0 || data.exit_code === 254) && data.output && !data.error) {
-                thunkAPI.dispatch(setOutAction(
-                    logsState.out.concat({
-                        message: collectHighlights(data.output),
-                        isRead: false,
-                        from: logTypeOut
-                    })
-                ));
-                thunkAPI.dispatch(setOutLogs(
-                    logsState.out.concat({
-                        message: collectHighlights(data.output),
-                        isRead: false,
-                        from: logTypeOut
-                    })
-                ));
-            } else if (data.exit_code === 0 && !data.error && !data.output) {
-                thunkAPI.dispatch(setOutAction(
-                    logsState.out.concat({
-                        message: [{ message: successMessage }],
-                        isRead: false,
-                        from: logTypeOut
-                    })
-                ));
-                thunkAPI.dispatch(setOutLogs(
-                    logsState.out.concat({
-                        message: [{ message: successMessage }],
-                        isRead: false,
-                        from: logTypeOut
-                    })
-                ));
-            } else if (data.exit_code && data.exit_code !== 0 && data.exit_code !== 254) {
-                thunkAPI.dispatch(setErrAction(
-                    logsState.err.concat({
-                        message: collectHighlights(data.output) || `Exit code: ${data.exit_code}`,
-                        isRead: false,
-                        from: logTypeErr
-                    })
-                ));
-                thunkAPI.dispatch(setErrLogs(
-                    logsState.err.concat({
-                        message: collectHighlights(data.output) || `Exit code: ${data.exit_code}`,
-                        isRead: false,
-                        from: logTypeErr
+                        from: logTypeOut,
+                        exit_code: data.exit_code
                     })
                 ));
             }
-            const outHighlight = collectHighlights(data.output)
-            const errHighlight = collectHighlights(data.error)
+
+            const outHighlight = collectHighlights(data.output, 'output').filter(h => h.line !== undefined);
+            const errHighlight = collectHighlights(data.error, 'error').filter(h => h.line !== undefined);
             thunkAPI.dispatch(setHighlightErrors([...outHighlight, ...errHighlight]));
         };
 
@@ -264,27 +207,21 @@ export const handleResponseLogs = createAsyncThunk(
             response.data.compile,
             ELogType.COMPILE_OUT,
             ELogType.COMPILE_ERR,
-            'Compile successful!',
-            setCompileOutLogs,
-            setCompileErrLogs
+            'Compile successful!'
         );
 
         handleLog(
             response.data.run,
             ELogType.RUN_OUT,
             ELogType.RUN_ERR,
-            'Run successful!',
-            setRunOutLogs,
-            setRunErrLogs
+            'Run successful!'
         );
 
         handleLog(
             response.data.disassembly,
             ELogType.DISASM_OUT,
             ELogType.DISASM_ERR,
-            'Disassembly successful!',
-            setDisasmOutLogs,
-            setDisasmErrLogs
+            'Disassembly successful!'
         );
 
         if (response.data.verifier?.error || response.data.verifier?.output) {
@@ -292,9 +229,7 @@ export const handleResponseLogs = createAsyncThunk(
                 response.data.verifier,
                 ELogType.VERIFIER_OUT,
                 ELogType.VERIFIER_ERR,
-                '',
-                setVerifierOutLogs,
-                setVerifierErrLogs
+                ''
             );
         }
     }
@@ -311,9 +246,10 @@ export const handleASTLogs = createAsyncThunk(
             if (data.error) {
                 thunkAPI.dispatch(setErrLogs(
                     logsState.err.concat({
-                        message: collectHighlights(data.error),
+                        message: collectHighlights(data.error, 'error'),
                         isRead: false,
-                        from: ELogType.AST_ERR
+                        from: ELogType.AST_ERR,
+                        exit_code: data.exit_code
                     })
                 ));
             }

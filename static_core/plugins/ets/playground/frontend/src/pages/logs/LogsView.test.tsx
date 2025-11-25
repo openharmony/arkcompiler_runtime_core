@@ -26,8 +26,8 @@ const mockClearFilters = jest.fn();
 const mockStore = configureMockStore<AppDispatch>();
 
 const mockLogs: ILog[] = [
-    { message: [{message: 'This is a log message'}], from: ELogType.RUN_OUT },
-    { message: [{message: 'This is an error message'}], from: ELogType.RUN_ERR },
+    { message: [{message: 'This is a log message', source: 'output' as const}], from: ELogType.RUN_OUT, exit_code: 0, isRead: false },
+    { message: [{message: 'This is an error message', source: 'error' as const}], from: ELogType.RUN_ERR, exit_code: 1, isRead: false },
 ];
 
 describe('LogsView component', () => {
@@ -37,6 +37,12 @@ describe('LogsView component', () => {
         store = mockStore({
             // @ts-ignore
             appState: { theme: 'light', primaryColor: '#e32b49', disasm: false, clearLogsEachRun: true },
+            logs: {
+                out: [],
+                err: [],
+                highlightErrors: [],
+                jumpTo: null
+            }
         });
         store.dispatch = jest.fn();
     });
@@ -55,8 +61,8 @@ describe('LogsView component', () => {
     it('renders log messages', () => {
         renderWithProviders(<LogsView logArr={mockLogs} clearFilters={mockClearFilters} logType='out' />);
 
-        expect(screen.getByText('[LOG]:')).toBeInTheDocument();
-        expect(screen.getByText('[ERR]:')).toBeInTheDocument();
+        expect(screen.getByText('[out]')).toBeInTheDocument();
+        expect(screen.getByText('[err]')).toBeInTheDocument();
         expect(screen.getByText(mockLogs[0].message[0].message)).toBeInTheDocument();
         expect(screen.getByText(mockLogs[1].message[0].message)).toBeInTheDocument();
     });
