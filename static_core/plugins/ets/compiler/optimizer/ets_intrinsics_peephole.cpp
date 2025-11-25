@@ -103,7 +103,7 @@ bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
     return ReplaceTypeofWithIsInstance(intrinsic);
 }
 
-Inst *GetStringFromLength(Inst *inst)
+static Inst *GetStringFromLength(Inst *inst)
 {
     Inst *lenArray = inst;
     if (inst->GetBasicBlock()->GetGraph()->GetRuntime()->IsCompressedStringsEnabled()) {
@@ -307,6 +307,47 @@ static bool ReplaceIfNonValueTyped(IntrinsicInst *intrinsic, compiler::Graph *gr
     return false;
 }
 
+static bool ReplaceWithStdCoreStringEquals(IntrinsicInst *intrinsic, Graph *graph)
+{
+    // Replaces
+    //   .ref inp1 [string only]
+    //   .ref inp2 [string only]
+    //   .    ss
+    //   .b Intrinsic.CompilerEtsEquals inp1, inp2, ss -> ......
+    // with
+    //   .b Intrinsic.StdCoreStringEquals inp1, inp2, ss -> .....
+    //
+    // The optimization cannot be applied by BCO because the Intrinsic.StdCoreStringEquals intrinsic is unknown.
+    ASSERT(!graph->IsBytecodeOptimizer() && "The peephole cannot be applied by BCO");
+    auto *input0 = intrinsic->GetInput(0).GetInst();
+    auto *input1 = intrinsic->GetInput(1).GetInst();
+    auto *runtime = graph->GetRuntime();
+
+    auto input0TypeInfo = input0->GetObjectTypeInfo();
+    if (!input0TypeInfo.IsValid() || !input0TypeInfo.GetClass() || !runtime->IsStringClass(input0TypeInfo.GetClass())) {
+        return false;
+    }
+    auto input1TypeInfo = input1->GetObjectTypeInfo();
+    if (!input1TypeInfo.IsValid() || !input1TypeInfo.GetClass() || !runtime->IsStringClass(input1TypeInfo.GetClass())) {
+        return false;
+    }
+
+    ASSERT(intrinsic->RequireState() && "CompilerEtsEquals must have the require_state flag");
+    auto compareStrings = graph->CreateInstIntrinsic(DataType::BOOL, intrinsic->GetPc(),
+                                                     RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_EQUALS);
+    compareStrings->AllocateInputTypes(graph->GetAllocator(), intrinsic->GetInputsCount());
+    for (size_t idx = 0; idx < intrinsic->GetInputsCount(); idx++) {
+        compareStrings->AppendInput(intrinsic->GetInput(idx));
+        compareStrings->AddInputType(intrinsic->GetInputType(idx));
+    }
+
+    intrinsic->ReplaceUsers(compareStrings);
+    intrinsic->RemoveInputs();
+    intrinsic->GetBasicBlock()->ReplaceInst(intrinsic, compareStrings);
+
+    return true;
+}
+
 bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     auto input0 = intrinsic->GetInput(0).GetInst();
@@ -324,8 +365,7 @@ bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *
         ReplaceWithCompareNullish(intrinsic, nonNullishInput);
         return true;
     }
-
-    return ReplaceIfNonValueTyped(intrinsic, graph);
+    return ReplaceWithStdCoreStringEquals(intrinsic, graph) || ReplaceIfNonValueTyped(intrinsic, graph);
 }
 
 bool Peepholes::PeepholeStrictEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
@@ -347,7 +387,7 @@ bool Peepholes::PeepholeStrictEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
         return true;
     }
 
-    return ReplaceIfNonValueTyped(intrinsic, graph);
+    return ReplaceWithStdCoreStringEquals(intrinsic, graph) || ReplaceIfNonValueTyped(intrinsic, graph);
 }
 
 bool Peepholes::PeepholeTypeof([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
@@ -355,7 +395,7 @@ bool Peepholes::PeepholeTypeof([[maybe_unused]] GraphVisitor *v, IntrinsicInst *
     return ReplaceTypeofWithIsInstance(intrinsic);
 }
 
-bool HandleIstrueNullAndUnique(Inst *input, IntrinsicInst *intrinsic, Graph *graph)
+static bool HandleIstrueNullAndUnique(Inst *input, IntrinsicInst *intrinsic, Graph *graph)
 {
     if (!input->IsNullPtr() && !input->IsLoadUniqueObject()) {
         return false;
@@ -364,8 +404,8 @@ bool HandleIstrueNullAndUnique(Inst *input, IntrinsicInst *intrinsic, Graph *gra
     return true;
 }
 
-bool HandleIstrueFunctionReference(RuntimeInterface::ClassPtr klass, IntrinsicInst *intrinsic, Graph *graph,
-                                   RuntimeInterface *runtime)
+static bool HandleIstrueFunctionReference(RuntimeInterface::ClassPtr klass, IntrinsicInst *intrinsic, Graph *graph,
+                                          RuntimeInterface *runtime)
 {
     if (!runtime->IsFunctionReference(klass)) {
         return false;
@@ -374,8 +414,8 @@ bool HandleIstrueFunctionReference(RuntimeInterface::ClassPtr klass, IntrinsicIn
     return true;
 }
 
-bool HandleIstrueNonValueTypedClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic,
-                                    Graph *graph, RuntimeInterface *runtime)
+static bool HandleIstrueNonValueTypedClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic,
+                                           Graph *graph, RuntimeInterface *runtime)
 {
     if (runtime->IsClassValueTyped(klass) || input->GetOpcode() != Opcode::NewObject) {
         return false;
@@ -385,8 +425,8 @@ bool HandleIstrueNonValueTypedClass(RuntimeInterface::ClassPtr klass, Inst *inpu
     return true;
 }
 
-bool HandleIstrueBigInt(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
-                        RuntimeInterface *runtime)
+static bool HandleIstrueBigInt(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
+                               RuntimeInterface *runtime)
 {
     if (!runtime->IsBigIntClass(klass)) {
         return false;
@@ -407,7 +447,7 @@ bool HandleIstrueBigInt(RuntimeInterface::ClassPtr klass, Inst *input, Intrinsic
     return true;
 }
 
-bool FindNullCheckAndSaveStateInUsers(Inst *input, Inst *&nullCheck, Inst *&saveState)
+static bool FindNullCheckAndSaveStateInUsers(Inst *input, Inst *&nullCheck, Inst *&saveState)
 {
     nullCheck = nullptr;
     saveState = nullptr;
@@ -423,8 +463,8 @@ bool FindNullCheckAndSaveStateInUsers(Inst *input, Inst *&nullCheck, Inst *&save
     return nullCheck != nullptr && saveState != nullptr;
 }
 
-Inst *CreateValueOfCall(IntrinsicInst *intrinsic, Inst *input, Graph *graph, RuntimeInterface *runtime,
-                        RuntimeInterface::MethodPtr valueOf)
+static Inst *CreateValueOfCall(IntrinsicInst *intrinsic, Inst *input, Graph *graph, RuntimeInterface *runtime,
+                               RuntimeInterface::MethodPtr valueOf)
 {
     Inst *nullCheckInst = nullptr;
     Inst *saveStateInst = nullptr;
@@ -441,8 +481,8 @@ Inst *CreateValueOfCall(IntrinsicInst *intrinsic, Inst *input, Graph *graph, Run
     return callStaticInst;
 }
 
-void PrepareZeroConstAndInputInst(Graph *graph, IntrinsicInst *intrinsic, DataType::Type &type, Inst *&inputInst,
-                                  ConstantInst *&zeroConst)
+static void PrepareZeroConstAndInputInst(Graph *graph, IntrinsicInst *intrinsic, DataType::Type &type, Inst *&inputInst,
+                                         ConstantInst *&zeroConst)
 {
     zeroConst = nullptr;
     if (type == DataType::INT32) {
@@ -458,8 +498,8 @@ void PrepareZeroConstAndInputInst(Graph *graph, IntrinsicInst *intrinsic, DataTy
     }
 }
 
-bool HandleIstrueEnumClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
-                           RuntimeInterface *runtime)
+static bool HandleIstrueEnumClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
+                                  RuntimeInterface *runtime)
 {
     if (!runtime->IsEnumClass(klass) || input->GetOpcode() != Opcode::LoadStatic) {
         return false;
@@ -488,8 +528,8 @@ bool HandleIstrueEnumClass(RuntimeInterface::ClassPtr klass, Inst *input, Intrin
     return true;
 }
 
-bool HandleIstrueStringClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
-                             RuntimeInterface *runtime)
+static bool HandleIstrueStringClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic,
+                                    Graph *graph, RuntimeInterface *runtime)
 {
     if (!runtime->IsStringClass(klass) || input->GetOpcode() != Opcode::LoadString) {
         return false;
@@ -504,7 +544,7 @@ bool HandleIstrueStringClass(RuntimeInterface::ClassPtr klass, Inst *input, Intr
     return true;
 }
 
-Inst *CreateLoadFieldInst(Inst *input, Graph *graph, RuntimeInterface *runtime, DataType::Type valueType)
+static Inst *CreateLoadFieldInst(Inst *input, Graph *graph, RuntimeInterface *runtime, DataType::Type valueType)
 {
     auto fieldPtr = runtime->GetFieldPtrByName(input->GetObjectTypeInfo().GetClass(), "value");
     if (fieldPtr == nullptr) {
@@ -542,7 +582,8 @@ Inst *CreateIstrueFloatCheck(Graph *graph, BasicBlock *trueBlock, Inst *loadObje
     return graph->CreateInstAnd(DataType::BOOL, pc, checkIsNotNanInst, checkZeroInst);
 }
 
-Inst *HandleIstrueNonFloatBoxed(IntrinsicInst *intrinsic, Graph *graph, Inst *loadField, DataType::Type valueType)
+static Inst *HandleIstrueNonFloatBoxed(IntrinsicInst *intrinsic, Graph *graph, Inst *loadField,
+                                       DataType::Type valueType)
 {
     ConstantInst *zeroConst = nullptr;
     switch (valueType) {
@@ -581,8 +622,8 @@ Inst *HandleIstrueNonFloatBoxed(IntrinsicInst *intrinsic, Graph *graph, Inst *lo
                                     ConditionCode::CC_NE);
 }
 
-bool HandleIstrueBoxedClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic, Graph *graph,
-                            RuntimeInterface *runtime)
+static bool HandleIstrueBoxedClass(RuntimeInterface::ClassPtr klass, Inst *input, IntrinsicInst *intrinsic,
+                                   Graph *graph, RuntimeInterface *runtime)
 {
     if (!runtime->IsBoxedClass(klass)) {
         return false;

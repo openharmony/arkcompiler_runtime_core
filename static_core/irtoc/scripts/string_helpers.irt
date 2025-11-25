@@ -783,14 +783,17 @@ def GenerateStringEquals(lang, dynamic, cgmode = :FastPath)
             Intrinsic(:UNREACHABLE).void.Terminator
             next
         end
+        If(str1_orig, str2_orig).EQ.Unlikely.b {
+            Return(1).b
+        }
         unless dynamic
+            If(str1_orig, 0).EQ.Unlikely.b {
+                Goto(:NotEqual)
+            }
             If(str2_orig, 0).EQ.Unlikely.b {
                 Goto(:NotEqual)
             }
         end
-        If(str1_orig, str2_orig).EQ.Unlikely.b {
-            Return(1).b
-        }
         if cgmode == :NativePlus
             str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
         else

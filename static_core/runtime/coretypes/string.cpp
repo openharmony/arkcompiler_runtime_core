@@ -650,8 +650,6 @@ int32_t String::Compare(VMHandle<String> &left, VMHandle<String> &right, const L
         return 0;
     }
 
-    // when left or right is tree string , use native memory , no need to handle
-    // when function exit , native memory will be deleted in ~FlatStringInfo()
     FlatStringInfo lflat = FlatStringInfo::FlattenAllString(left, ctx, false);
     FlatStringInfo rflat = FlatStringInfo::FlattenAllString(right, ctx, false);
 
