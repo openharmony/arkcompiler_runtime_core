@@ -348,13 +348,14 @@ class ShellDevice(ShellBase):
         self._sh.run_async(f"{self._devsh} shell '{cmd}'")
 
     def get_filesize(self, filepath: Union[str, Path]) -> int:
+        filepath = Path(filepath).as_posix()
         res = self.run(f"stat -c '%s' {filepath}")
         size = 0
         if res.ret == 0 and res.out:
             try:
                 size = int(res.out.split("\n")[0])
             except Exception:  # pylint: disable=broad-exception-caught
-                log.warning('Error getting size of "%s"', str(filepath))
+                log.warning('Error getting size of "%s"', filepath)
         return size
 
     def push(self,
@@ -397,7 +398,8 @@ class ShellAdb(ShellDevice):
     def push(self,
              src: Union[str, Path],
              dst: Union[str, Path]) -> ShellResult:
-        return self._sh.run(f'{self._devsh} push {src} {dst}',
+        posix_dst = Path(dst).as_posix()
+        return self._sh.run(f'{self._devsh} push {src} {posix_dst}',
                             measure_time=False)
 
     def pull(self,

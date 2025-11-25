@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,10 +33,10 @@ class Tool(ToolBase):
             binpath = ToolBase.get_cmd_path(self.binname, 'V_8')
             self.d_8 = f'{binpath} {opts}'
         elif self.target == Target.DEVICE:
-            self.d_8 = f'{self.dev_dir}/v_8/{self.binname} {opts}'
+            self.d_8 = f'{self.dev_dir.as_posix()}/v_8/{self.binname} {opts}'
         elif self.target == Target.OHOS:
             self.d_8 = 'LD_LIBRARY_PATH=/data/local/and' \
-                      f'roid {self.dev_dir}/v_8/{self.binname} {opts}'
+                      f'roid {self.dev_dir.as_posix()}/v_8/{self.binname} {opts}'
         else:
             raise NotImplementedError(f'Not supported "{self.target}"!')
 

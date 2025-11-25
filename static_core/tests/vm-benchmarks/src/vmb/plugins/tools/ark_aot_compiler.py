@@ -37,8 +37,8 @@ class Tool(ToolBase):
                 f'{out}/../thirdparty/icu',
                 f'{out}/../thirdparty/zlib')])
         elif Target.OHOS == self.target:
-            self.aot_compiler = str(self.dev_dir.joinpath('ark_aot_compiler'))
-            self.lib_path = str(self.dev_dir)
+            self.aot_compiler = f'{self.dev_dir.as_posix()}/ark_aot_compiler'
+            self.lib_path = f'{self.dev_dir.as_posix()}'
         else:
             raise RuntimeError(f'Wrong target: {self.target} for ark_aot_compiler!')
 
