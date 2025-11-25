@@ -752,6 +752,172 @@ export class JSON {
     }
 }
 
+interface ArrayHandle {
+    readonly length: int
+    readonly array: object
+    get(i: int): Any
+}
+
+class BoolArrayHandle implements ArrayHandle {
+    private arr: FixedArray<boolean>
+
+    constructor(arr: FixedArray<boolean>) {
+        this.arr = arr
+    }
+
+    get length(): int {
+        return this.arr.length
+    }
+
+    get array(): object {
+        return this.arr
+    }
+
+    get(i: int): Any {
+        return this.arr[i]
+    }
+}
+
+class ByteArrayHandle implements ArrayHandle {
+    private arr: FixedArray<byte>
+
+    constructor(arr: FixedArray<byte>) {
+        this.arr = arr
+    }
+
+    get length(): int {
+        return this.arr.length
+    }
+
+    get array(): object {
+        return this.arr
+    }
+
+    get(i: int): Any {
+        return this.arr[i]
+    }
+}
+
+class CharArrayHandle implements ArrayHandle {
+    private arr: FixedArray<char>
+
+    constructor(arr: FixedArray<char>) {
+        this.arr = arr
+    }
+
+    get length(): int {
+        return this.arr.length
+    }
+
+    get array(): object {
+        return this.arr
+    }
+
+    get(i: int): Any {
+        return this.arr[i]
+    }
+}
+
+class ShortArrayHandle implements ArrayHandle {
+    private arr: FixedArray<short>
+
+    constructor(arr: FixedArray<short>) {
+        this.arr = arr
+    }
+
+    get length(): int {
+        return this.arr.length
+    }
+
+    get array(): object {
+        return this.arr
+    }
+
+    get(i: int): Any {
+        return this.arr[i]
+    }
+}
+
+class IntArrayHandle implements ArrayHandle {
+    private arr: FixedArray<int>
+
+    constructor(arr: FixedArray<int>) {
+        this.arr = arr
+    }
+
+    get length(): int {
+        return this.arr.length
+    }
+
+    get array(): object {
+        return this.arr
+    }
+
+    get(i: int): Any {
+        return this.arr[i]
+    }
+}
+
+class LongArrayHandle implements ArrayHandle {
+    private arr: FixedArray<long>
+
+    constructor(arr: FixedArray<long>) {
+        this.arr = arr
+    }
+
+    get length(): int {
+        return this.arr.length
+    }
+
+    get array(): object {
+        return this.arr
+    }
+
+    get(i: int): Any {
+        return this.arr[i]
+    }
+}
+
+class FloatArrayHandle implements ArrayHandle {
+    private arr: FixedArray<float>
+
+    constructor(arr: FixedArray<float>) {
+        this.arr = arr
+    }
+
+    get length(): int {
+        return this.arr.length
+    }
+
+    get array(): object {
+        return this.arr
+    }
+
+    get(i: int): Any {
+        return this.arr[i]
+    }
+}
+
+class DoubleArrayHandle implements ArrayHandle {
+    private arr: FixedArray<double>
+
+    constructor(arr: FixedArray<double>) {
+        this.arr = arr
+    }
+
+    get length(): int {
+        return this.arr.length
+    }
+
+    get array(): object {
+        return this.arr
+    }
+
+    get(i: int): Any {
+        return this.arr[i]
+    }
+}
+
 class JSONWriter {
     private static readonly STD_CORE_INTEROP_JSVALUE_CLASS = Class.from<JSValue>()
     private static readonly GETTER_METHOD_PREFIX = "%%get-"
@@ -834,7 +1000,25 @@ class JSONWriter {
             if (objCls === JSONWriter.STD_CORE_INTEROP_JSVALUE_CLASS) {
                 this.buffer.append(JSON.stringify(obj as JSValue))
             } else if (objCls.isFixedArray()) {
-                this.writeArrayValue(Types.asFixedArray(obj))
+                if (obj instanceof FixedArray<boolean>) {
+                    this.writeArrayHandleValue(new BoolArrayHandle(obj))
+                } else if (obj instanceof FixedArray<byte>) {
+                    this.writeArrayHandleValue(new ByteArrayHandle(obj))
+                } else if (obj instanceof FixedArray<char>) {
+                    this.writeArrayHandleValue(new CharArrayHandle(obj))
+                } else if (obj instanceof FixedArray<short>) {
+                    this.writeArrayHandleValue(new ShortArrayHandle(obj))
+                } else if (obj instanceof FixedArray<int>) {
+                    this.writeArrayHandleValue(new IntArrayHandle(obj))
+                } else if (obj instanceof FixedArray<long>) {
+                    this.writeArrayHandleValue(new LongArrayHandle(obj))
+                } else if (obj instanceof FixedArray<float>) {
+                    this.writeArrayHandleValue(new FloatArrayHandle(obj))
+                } else if (obj instanceof FixedArray<double>) {
+                    this.writeArrayHandleValue(new DoubleArrayHandle(obj))
+                } else {
+                    this.writeArrayValue(Types.asFixedArray(obj))
+                }
             } else {
                 this.writeClassValue(obj, objCls)
             }
@@ -1225,6 +1409,44 @@ class JSONWriter {
             this.writeArrayElementValue(array[lastElementIndex], lastElementIndex)
 
             this.path.delete(array)
+        }
+
+        if (this.useIndent) {
+            this.indentLevel -= 1
+            this.buffer.append("\n")
+        }
+
+        this.writePadding()
+
+        this.buffer.append("]")
+    }
+
+    private writeArrayHandleValue(handle: ArrayHandle): void {
+        this.buffer.append("[")
+
+        if (this.useIndent) {
+            this.buffer.append("\n")
+            this.indentLevel += 1
+        }
+
+        const arrayLength = handle.length
+        if (arrayLength > 0) {
+            this.path.add(handle.array)
+
+            const lastElementIndex = arrayLength - 1
+
+            for (let idx = 0; idx < lastElementIndex; idx++) {
+                this.writeArrayElementValue(handle.get(idx), idx)
+                this.buffer.append(",")
+
+                if (this.useIndent) {
+                    this.buffer.append("\n")
+                }
+            }
+
+            this.writeArrayElementValue(handle.get(lastElementIndex), lastElementIndex)
+
+            this.path.delete(handle.array)
         }
 
         if (this.useIndent) {
