@@ -1344,14 +1344,29 @@ export namespace taskpool {
     }
 
     /**
-     * Delayed execution of a concurrent task
+     * Delayed execution of a concurrent task with default priority
      *
      * @param { int } delayTime timeout in ms to execute task after
      * @param { Task } task The task to execute
-     * @param { Priority } [priority] priority for task
      * @returns { Promise<Any> } Promise for result of executed task
      */
-    export function executeDelayed(delayTime: int, task: Task, priority?: Priority): Promise<Any> {
+    export function executeDelayed(delayTime: int, task: Task): Promise<Any> {
+        return executeDelayedImpl(delayTime, task);
+    }
+
+    /**
+     * Delayed execution of a concurrent task with specified priority
+     *
+     * @param { int } delayTime timeout in ms to execute task after
+     * @param { Task } task The task to execute
+     * @param { Priority } priority specified priority for task
+     * @returns { Promise<Any> } Promise for result of executed task
+     */
+    export function executeDelayed(delayTime: int, task: Task, priority: Priority): Promise<Any> {
+        return executeDelayedImpl(delayTime, task, priority);
+    }
+    
+    function executeDelayedImpl(delayTime: int, task: Task, priority?: Priority): Promise<Any> {
         initWorkerPoolSync();
         InternalTask.of(task).checkExecutionForDelayedTask(delayTime);
         InternalTask.of(task).isSubmitted = true;
