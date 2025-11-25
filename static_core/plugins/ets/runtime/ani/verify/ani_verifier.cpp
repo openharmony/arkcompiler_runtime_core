@@ -58,27 +58,55 @@ impl::VMethod *ANIVerifier::AddMethod(EtsMethod *method)
     auto vmethodHolder = MakePandaUnique<impl::VMethod>(method);
     impl::VMethod *vmethod = vmethodHolder.get();
     {
-        os::memory::WriteLockHolder lock(GetGlobalData().methodsSetLock);
+        os::memory::WriteLockHolder lock(GetGlobalData().methodsMapLock);
 
-        GetGlobalData().methodsSet[vmethod] = std::move(vmethodHolder);
+        GetGlobalData().methodsMap[vmethod] = std::move(vmethodHolder);
     }
     return vmethod;
 }
 
 void ANIVerifier::DeleteMethod(impl::VMethod *vmethod)
 {
-    os::memory::WriteLockHolder lock(GetGlobalData().methodsSetLock);
+    os::memory::WriteLockHolder lock(GetGlobalData().methodsMapLock);
 
-    auto it = GetGlobalData().methodsSet.find(vmethod);
-    ASSERT(it != GetGlobalData().methodsSet.cend());
-    GetGlobalData().methodsSet.erase(it);
+    auto it = GetGlobalData().methodsMap.find(vmethod);
+    ASSERT(it != GetGlobalData().methodsMap.cend());
+    GetGlobalData().methodsMap.erase(it);
 }
 
 bool ANIVerifier::IsValidVerifiedMethod(impl::VMethod *vmethod)
 {
-    os::memory::ReadLockHolder lock(GetGlobalData().methodsSetLock);
+    os::memory::ReadLockHolder lock(GetGlobalData().methodsMapLock);
 
-    return GetGlobalData().methodsSet.find(vmethod) != GetGlobalData().methodsSet.cend();
+    return GetGlobalData().methodsMap.find(vmethod) != GetGlobalData().methodsMap.cend();
+}
+
+impl::VField *ANIVerifier::AddField(EtsField *field)
+{
+    auto vfieldHolder = MakePandaUnique<impl::VField>(field);
+    impl::VField *vfield = vfieldHolder.get();
+    {
+        os::memory::WriteLockHolder lock(GetGlobalData().fieldsMapLock);
+
+        GetGlobalData().fieldsMap[vfield] = std::move(vfieldHolder);
+    }
+    return vfield;
+}
+
+void ANIVerifier::DeleteField(impl::VField *vfield)
+{
+    os::memory::WriteLockHolder lock(GetGlobalData().fieldsMapLock);
+
+    auto it = GetGlobalData().fieldsMap.find(vfield);
+    ASSERT(it != GetGlobalData().fieldsMap.cend());
+    GetGlobalData().fieldsMap.erase(it);
+}
+
+bool ANIVerifier::IsValidVerifiedField(impl::VField *vfield)
+{
+    os::memory::ReadLockHolder lock(GetGlobalData().fieldsMapLock);
+
+    return GetGlobalData().fieldsMap.find(vfield) != GetGlobalData().fieldsMap.cend();
 }
 
 VResolver *ANIVerifier::AddGlobalVerifiedResolver(ani_resolver resolver)

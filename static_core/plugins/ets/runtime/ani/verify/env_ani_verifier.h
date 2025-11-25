@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
+#include "plugins/ets/runtime/ani/verify/types/vfield.h"
 #include "plugins/ets/runtime/ani/verify/types/vresolver.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -56,18 +57,22 @@ public:
     VStaticMethod *GetVerifiedStaticMethod(ani_static_method staticMethod);
     VFunction *GetVerifiedFunction(ani_function function);
 
+    VField *GetVerifiedField(ani_field field);
+    VStaticField *GetVerifiedStaticField(ani_static_field staticField);
+
     VRef *AddGlobalVerifiedRef(ani_ref gref);
     void DeleteGlobalVerifiedRef(VRef *vgref);
-    bool IsValidGlobalVerifiedRef(VRef *vgref);
+    bool IsValidGlobalVerifiedRef(VRef *vgref) const;
 
-    bool IsValidRefInCurrentFrame(VRef *vref);
-    bool IsGlobalRef(VRef *vref);
-    bool IsValidMethod(impl::VMethod *vmethod);
+    bool IsValidRefInCurrentFrame(VRef *vref) const;
+    bool IsGlobalRef(VRef *vref) const;
+    bool IsValidMethod(impl::VMethod *vmethod) const;
+    bool IsValidField(impl::VField *vfield) const;
 
     bool IsValidInCurrentFrame(VRef *vref);
     bool CanBeDeletedFromCurrentScope(VRef *vref);
 
-    bool IsValidGlobalVerifiedResolver(VResolver *vresolver);
+    bool IsValidGlobalVerifiedResolver(VResolver *vresolver) const;
     VResolver *AddGlobalVerifiedResolver(ani_resolver resolver);
     void DeleteGlobalVerifiedResolver(VResolver *vresolver);
 
@@ -76,7 +81,7 @@ public:
         return interactionAPI_;
     }
 
-    bool IsValidStackRef(VRef *vref);
+    bool IsValidStackRef(VRef *vref) const;
 
 private:
     enum class SubFrameType {

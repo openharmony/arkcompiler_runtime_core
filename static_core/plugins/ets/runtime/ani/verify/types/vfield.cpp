@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "vmethod.h"
+#include "vfield.h"
 
 #include "plugins/ets/runtime/ani/ani_converters.h"
 
@@ -21,32 +21,27 @@ namespace ark::ets::ani::verify {
 
 namespace impl {
 
-VMethod::ANIMethodType VMethod::GetType() const
+VField::ANIFieldType VField::GetType() const
 {
-    if (IsFunction(method_)) {
-        return ANIMethodType::FUNCTION;
+    if (IsVariable(field_)) {
+        return ANIFieldType::VARIABLE;
     }
-    if (IsStaticMethod(method_)) {
-        return ANIMethodType::STATIC_METHOD;
+    if (IsStaticField(field_)) {
+        return ANIFieldType::STATIC_FIELD;
     }
-    return ANIMethodType::METHOD;
+    return ANIFieldType::FIELD;
 }
 
 }  // namespace impl
 
-ani_method VMethod::GetMethod() const
+ani_field VField::GetField() const
 {
-    return ToAniMethod(impl::VMethod::GetEtsMethod());
+    return ToAniField(impl::VField::GetEtsField());
 }
 
-ani_static_method VStaticMethod::GetMethod() const
+ani_static_field VStaticField::GetField() const
 {
-    return ToAniStaticMethod(impl::VMethod::GetEtsMethod());
-}
-
-ani_function VFunction::GetMethod() const
-{
-    return ToAniFunction(impl::VMethod::GetEtsMethod());
+    return ToAniStaticField(impl::VField::GetEtsField());
 }
 
 }  // namespace ark::ets::ani::verify

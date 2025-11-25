@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,12 +37,12 @@ public:
     explicit VMethod(EtsMethod *method) : method_(method) {}
     ~VMethod() = default;
 
-    EtsMethod *GetEtsMethod()
+    EtsMethod *GetEtsMethod() const
     {
         return method_;
     }
 
-    ANIMethodType GetType();
+    ANIMethodType GetType() const;
 
     DEFAULT_COPY_SEMANTIC(VMethod);
     DEFAULT_MOVE_SEMANTIC(VMethod);
@@ -55,19 +55,19 @@ private:
 
 class VMethod : public impl::VMethod {
 public:
-    ani_method GetMethod();
+    ani_method GetMethod() const;
 };
 
 class VStaticMethod : public impl::VMethod {
 public:
-    ani_static_method GetMethod();
+    ani_static_method GetMethod() const;
 };
 
 class VFunction : public impl::VMethod {
 public:
-    ani_function GetMethod();
+    ani_function GetMethod() const;
 };
 
 }  // namespace ark::ets::ani::verify
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_TYPES_VREF_H
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_TYPES_VMETHOD_H

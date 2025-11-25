@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,9 +57,20 @@ public:
     {
         return GetEnvANIVerifier()->GetVerifiedStaticMethod(staticMethod);
     }
+
     VFunction *GetVerifiedFunction(ani_function function)
     {
         return GetEnvANIVerifier()->GetVerifiedFunction(function);
+    }
+
+    VField *GetVerifiedField(ani_field field)
+    {
+        return GetEnvANIVerifier()->GetVerifiedField(field);
+    }
+
+    VStaticField *GetVerifiedStaticField(ani_static_field staticField)
+    {
+        return GetEnvANIVerifier()->GetVerifiedStaticField(staticField);
     }
 
     // Global refs

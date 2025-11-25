@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 namespace ark::ets::ani::verify {
@@ -178,6 +179,18 @@ std::string_view ANIFuncTypeToString(impl::VMethod::ANIMethodType funcType)
     UNREACHABLE();
 }
 
+std::string_view ANIFieldTypeToString(impl::VField::ANIFieldType fieldType)
+{
+    // clang-format off
+    switch (fieldType) {
+        case impl::VField::ANIFieldType::FIELD:        return "ani_field";
+        case impl::VField::ANIFieldType::STATIC_FIELD: return "ani_static_field";
+        case impl::VField::ANIFieldType::VARIABLE:     return "ani_variable";
+    }
+    // clang-format on
+    UNREACHABLE();
+}
+
 template <class T>
 void FormatPointer(PandaStringStream &ss, T *ptr)
 {
@@ -230,6 +243,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_METHOD:                       return "ani_method";
         case ValueType::ANI_STATIC_METHOD:                return "ani_static_method";
         case ValueType::ANI_FUNCTION:                     return "ani_function";
+        case ValueType::ANI_FIELD:                        return "ani_field";
         case ValueType::ANI_OBJECT:                       return "ani_object";
         case ValueType::ANI_STRING:                       return "ani_string";
         case ValueType::ANI_VALUE_ARGS:                   return "const ani_value *";
@@ -251,6 +265,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_OBJECT_STORAGE:               return "ani_object *";
         case ValueType::ANI_STRING_STORAGE:               return "ani_string *";
         case ValueType::ANI_SIZE_STORAGE:                 return "ani_size *";
+        case ValueType::ANI_BOOLEAN:                      return "ani_boolean";
         case ValueType::UINT32:                           return "uint32_t";
         case ValueType::ANI_ERROR:                        return "ani_error";
         case ValueType::ANI_ERROR_STORAGE:                return "ani_error *";
@@ -424,6 +439,14 @@ public:
             PandaStringStream ss;
             ss << "wrong pointer for storing '" << typeName << "'";
             return ss.str();
+        }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyBoolean(ani_boolean value)
+    {
+        if (value != ANI_TRUE && value != ANI_FALSE) {
+            return "wrong value for ani_boolean";
         }
         return {};
     }
@@ -641,6 +664,38 @@ public:
         return {};
     }
 
+    std::optional<PandaString> DoVerifyField(impl::VField *vfield, impl::VField::ANIFieldType type, EtsType returnType)
+    {
+        impl::VField::ANIFieldType fieldType = vfield->GetType();
+        if (fieldType != type) {
+            PandaStringStream ss;
+            ss << "wrong type: " << ANIFieldTypeToString(fieldType) << ", expected: " << ANIFieldTypeToString(type);
+            return ss.str();
+        }
+
+        EtsType fieldReturnType = vfield->GetEtsField()->GetEtsType();
+        if (fieldReturnType != returnType) {
+            return "wrong return type";
+        }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyField(VField *vfield, EtsType returnType)
+    {
+        if (!GetEnvANIVerifier()->IsValidField(vfield)) {
+            return "wrong field";
+        }
+        std::optional<PandaString> err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, returnType);
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr || !vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
+            return "wrong object for field";
+        }
+        return {};
+    }
+
     std::optional<PandaString> VerifyMethodAArgs(ANIArg::AniMethodArgs *methodArgs)
     {
         ASSERT(methodArgs != nullptr);
@@ -827,6 +882,12 @@ static std::optional<PandaString> VerifyFunction(Verifier &v, const ANIArg &arg)
     return v.VerifyFunction(arg.GetValueFunction(), arg.GetReturnType());
 }
 
+static std::optional<PandaString> VerifyField(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIELD);
+    return v.VerifyField(arg.GetValueField(), arg.GetReturnType());
+}
+
 static std::optional<PandaString> VerifyMethodAArgs(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD_A_ARGS);
@@ -921,6 +982,12 @@ static std::optional<PandaString> VerifySize([[maybe_unused]] Verifier &v, [[may
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_SIZE);
     return {};
+}
+
+static std::optional<PandaString> VerifyBoolean(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_BOOLEAN);
+    return v.VerifyBoolean(arg.GetValueBoolean());
 }
 
 static std::optional<PandaString> VerifyObjectStorage(Verifier &v, const ANIArg &arg)

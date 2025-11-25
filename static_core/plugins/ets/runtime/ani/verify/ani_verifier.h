@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
+#include "plugins/ets/runtime/ani/verify/types/vfield.h"
 #include "plugins/ets/runtime/ani/verify/types/vresolver.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -36,8 +37,11 @@ public:
         PandaMap<VRef *, PandaUniquePtr<InternalRef>> grefsMap GUARDED_BY(grefsMapMutex);
         os::memory::Mutex grefsMapMutex;
 
-        PandaMap<impl::VMethod *, PandaUniquePtr<impl::VMethod>> methodsSet GUARDED_BY(methodsSetLock);
-        os::memory::RWLock methodsSetLock;
+        PandaMap<impl::VMethod *, PandaUniquePtr<impl::VMethod>> methodsMap GUARDED_BY(methodsMapLock);
+        os::memory::RWLock methodsMapLock;
+
+        PandaMap<impl::VField *, PandaUniquePtr<impl::VField>> fieldsMap GUARDED_BY(fieldsMapLock);
+        os::memory::RWLock fieldsMapLock;
 
         PandaMap<VResolver *, PandaUniquePtr<VResolver>> resolversMap GUARDED_BY(resolverMapMutex);
         os::memory::Mutex resolverMapMutex;
@@ -57,6 +61,10 @@ public:
     impl::VMethod *AddMethod(EtsMethod *method);
     void DeleteMethod(impl::VMethod *vmethod);
     bool IsValidVerifiedMethod(impl::VMethod *vmethod);
+
+    impl::VField *AddField(EtsField *field);
+    void DeleteField(impl::VField *vfield);
+    bool IsValidVerifiedField(impl::VField *vfield);
 
     bool IsValidStackRef(VRef *vref);
 
