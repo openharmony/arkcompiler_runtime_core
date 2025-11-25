@@ -209,9 +209,6 @@
 #30469
 07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets
 
-#28179
-07.expressions/03.named_reference/01.function_reference/function_reference_neg.ets
-
 #30896
 07.expressions/03.named_reference/02.method_reference/method_ref_neg_2.ets
 
