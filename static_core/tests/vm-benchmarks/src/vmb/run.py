@@ -49,6 +49,10 @@ class VmbRunner:
         if args.get('safepoint_checker', False):
             args.hooks.add('safepoint_checker')
         try:
+            if 'socperf_clean' in args.hooks:
+                # this one should run before all
+                args.hooks.remove('socperf_clean')
+                self.hooks = HookRegistry().register_all_by_name({'socperf_clean'}, args)
             self.hooks = HookRegistry().register_all_by_name(args.hooks, args)
         except (RuntimeError, ValueError) as e:
             log.fatal(e)
