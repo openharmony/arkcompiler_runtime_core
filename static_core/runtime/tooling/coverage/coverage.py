@@ -327,7 +327,7 @@ class CoverageInfo:
 
             if runtime_config.report_type == 'diff':
                 if self.source_file_path not in runtime_config.change_info:
-                    return True
+                    return False
                 lcov_content = self._filter_lcov_content(lcov_content)
                 if lcov_content is None:
                     print("Failed to generate LCOV content")
@@ -980,15 +980,13 @@ class HapCoverageInfo(CoverageInfo):
         super().__init__()
         self.source_file_path_trans = None
         self._function_pattern = None
-        pa_file_path = os.path.join(runtime_config.workdir, Config.PA_DIR)
-        self._pa_file_content = FileUtils.read_file(find_first_pa_file(pa_file_path))
+        self._get_pa_file_content()
 
     def reset_stats(self):
         super().reset_stats()
         self.source_file_path_trans = None
         self._function_pattern = None
-        pa_file_path = os.path.join(runtime_config.workdir, Config.PA_DIR)
-        self._pa_file_content = FileUtils.read_file(find_first_pa_file(pa_file_path))
+        self._get_pa_file_content()
 
     def process_data(self, src_file_path: str, pa_file_path: str,
                      ast_file_path: str, runtime_info: List[Dict]):
@@ -1005,6 +1003,15 @@ class HapCoverageInfo(CoverageInfo):
                 self._process_pa_file() and
                 self._process_runtime_info(runtime_info)
         )
+
+    def _get_pa_file_content(self):
+        pa_file_path = os.path.join(runtime_config.workdir, Config.PA_DIR)
+        pa_file = find_first_pa_file(pa_file_path)
+        if pa_file is not None:
+            self._pa_file_content = FileUtils.read_file(pa_file)
+        else:
+            self._pa_file_content = None
+            print(f"get nothing from pa file: {pa_file}")
 
     def _is_valid_path_prefix(self, prefix: str, full_path: str) -> bool:
         """Check if the full path starts with the given prefix"""
@@ -1291,7 +1298,15 @@ def export_lcov(args):
             except Exception as e:
                 print(f"Error processing file {row['src']}: {e}")
 
-        print(f"Successfully processed {success_count}/{len(file_mappings)} files")
+        if runtime_config.report_type == 'all':
+            print(f"Successfully processed {success_count}/{len(file_mappings)} files")
+        else:
+            if runtime_config.change_info is None:
+                print("change_info is none!")
+                return
+            num_files = len(runtime_config.change_info)
+            print(f"Successfully processed {success_count}/{num_files} files")
+
 
     except Exception as e:
         print(f"Program execution error: {e}")
