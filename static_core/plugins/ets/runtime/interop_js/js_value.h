@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
+#include "plugins/ets/runtime/interop_js/napi_impl/ark_napi_helper.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/include/coretypes/class.h"
 #include "utils/small_vector.h"
@@ -120,12 +121,15 @@ public:
         if (UNLIKELY(jsvalue == nullptr)) {
             return nullptr;
         }
-        jsvalue->SetRefValue(ctx, value, type);
-        return jsvalue;
+
+        [[maybe_unused]] EtsHandleScope s(coro);
+        EtsHandle<JSValue> jsValueHandle(coro, jsvalue);
+        SetRefValue(ctx, value, type, jsValueHandle);
+        return jsValueHandle.GetPtr();
     }
 
     // prefer JSConvertJSValue::WrapWithNullCheck
-    napi_value GetNapiValue(napi_env env);
+    static napi_value GetNapiValue(EtsCoroutine *coro, InteropCtx *ctx, EtsHandle<JSValue> &handle);
 
     bool GetBoolean() const
     {
@@ -151,10 +155,11 @@ public:
         return JSValueStringStorage::CachedEntry(GetData<std::string const *>());
     }
 
-    napi_value GetRefValue(napi_env env)
+    static napi_value GetRefValue(napi_env env, EtsHandle<JSValue> jsObject)
     {
         napi_value value;
-        auto napiRef = GetNapiRef(env);
+        auto napiRef = jsObject->GetNapiRef(env);
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         NAPI_ASSERT_OK(napi_get_reference_value(env, napiRef, &value));
         return value;
     }
@@ -166,32 +171,26 @@ public:
         return MEMBER_OFFSET(JSValue, type_);
     }
 
-    bool StrictEquals(JSValue *that)
+    static bool StrictEquals(JSValue *left, JSValue *right)
     {
-        if (this->GetType() != that->GetType()) {
+        if (left->GetType() != right->GetType()) {
             return false;
         }
-        switch (this->GetType()) {
+        switch (left->GetType()) {
             case napi_string:
-                return this->GetString().Data() == that->GetString().Data();
+                return left->GetString().Data() == right->GetString().Data();
             case napi_undefined:
             case napi_null:
                 return true;
             case napi_boolean:
-                return this->GetBoolean() == that->GetBoolean();
+                return left->GetBoolean() == right->GetBoolean();
             case napi_number:
-                return this->GetNumber() == that->GetNumber();
+                return left->GetNumber() == right->GetNumber();
             case napi_bigint:
-                return this->GetBigInt() == that->GetBigInt();
+                return left->GetBigInt() == right->GetBigInt();
             default: {
-                ASSERT(IsRefType(GetType()));
-#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-                auto env = InteropCtx::Current()->GetJSEnv();
-                return *((uintptr_t *)(this->GetRefValue(env))) == *((uintptr_t *)(that->GetRefValue(env)));
-#else
-                INTEROP_LOG(ERROR) << "unable to perform gc-safe strict equal without hybrid VM";
-                return false;
-#endif
+                ASSERT(IsRefType(left->GetType()));
+                return RefValueEquals(left, right);
             }
         }
     }
@@ -236,11 +235,8 @@ public:
     JSValue() = delete;
 
 private:
-    static JSValue *CreateStringJSValue(InteropCtx *ctx, napi_env env, napi_value nvalue, JSValue *jsvalue);
-    static JSValue *CreateBigIntJSValue(napi_env env, napi_value nvalue, JSValue *jsvalue);
-    static JSValue *CreateRefJSValue(InteropCtx *ctx, napi_value nvalue, JSValue *jsvalue, napi_valuetype jsType);
     static JSValue *CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue, napi_valuetype jsType,
-                                 JSValue *jsvalue);
+                                 EtsHandle<JSValue> &jsvalue);
 
     static constexpr bool IsRefType(napi_valuetype type)
     {
@@ -277,7 +273,6 @@ private:
     {
         JSValue *jsValue;
         {
-            ScopedManagedCodeThreadIfNeeded managedScope(coro);
             auto obj = ObjectHeader::Create(coro, ctx->GetJSValueClass());
             if (UNLIKELY(!obj)) {
                 return nullptr;
@@ -288,6 +283,14 @@ private:
         ASSERT(jsValue->GetType() == napi_undefined);
         return jsValue;
     }
+
+    static napi_value GetBooleanValue(EtsCoroutine *coro, napi_env env, EtsHandle<JSValue> jsObject);
+
+    static napi_value GetNumberValue(EtsCoroutine *coro, napi_env env, EtsHandle<JSValue> jsObject);
+
+    static napi_value GetStringValue(EtsCoroutine *coro, napi_env env, EtsHandle<JSValue> jsObject);
+
+    static napi_value GetBigIntValue(EtsCoroutine *coro, napi_env env, EtsHandle<JSValue> jsObject);
 
     // Returns moved jsValue
     [[nodiscard]] static JSValue *AttachFinalizer(EtsCoroutine *coro, JSValue *jsValue);
@@ -306,6 +309,26 @@ private:
         }
 
         return sharedRef->GetJsRef();
+    }
+
+    static bool RefValueEquals([[maybe_unused]] JSValue *left, [[maybe_unused]] JSValue *right)
+    {
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+        auto coro = EtsCoroutine::GetCurrent();
+        auto env = InteropCtx::Current()->GetJSEnv();
+        auto leftRef = left->GetNapiRef(env);
+        auto rightRef = right->GetNapiRef(env);
+        napi_value leftValue;
+        napi_value rightvalue;
+
+        ScopedNativeCodeThread nativeScope(coro);
+        NAPI_ASSERT_OK(napi_get_reference_value(env, leftRef, &leftValue));
+        NAPI_ASSERT_OK(napi_get_reference_value(env, rightRef, &rightvalue));
+        return ArkNapiHelper::GetTaggedType(leftValue) == ArkNapiHelper::GetTaggedType(rightvalue);
+#else
+        INTEROP_LOG(ERROR) << "unable to perform gc-safe strict equal without hybrid VM";
+        return false;
+#endif
     }
 
     void SetUndefined()
@@ -343,12 +366,13 @@ private:
         // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     }
 
-    void SetRefValue(InteropCtx *ctx, napi_value jsValue, napi_valuetype type)
+    static void SetRefValue(InteropCtx *ctx, napi_value jsValue, napi_valuetype type, EtsHandle<JSValue> &jsValueObject)
     {
-        ASSERT(GetValueType(ctx->GetJSEnv(), jsValue) == type);
+        ASSERT(GetValueType<true>(ctx->GetJSEnv(), jsValue) == type);
         ASSERT(IsRefType(type));
-        SetType(type);
-        SetData(ctx->GetSharedRefStorage()->CreateJSObjectRef(ctx, this, jsValue));
+        jsValueObject->SetType(type);
+        EtsHandle<EtsObject> objHandle(EtsCoroutine::GetCurrent(), jsValueObject->AsObject());
+        jsValueObject->SetData(ctx->GetSharedRefStorage()->CreateJSObjectRef(ctx, objHandle, jsValue));
     }
 
     FIELD_UNUSED uint32_t type_;

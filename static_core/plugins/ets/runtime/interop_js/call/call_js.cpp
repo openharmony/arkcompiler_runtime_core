@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "interop_js/interop_common.h"
 #include "macros.h"
 #include "runtime/mem/local_object_handle.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
@@ -211,7 +210,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall
     }
 
     napi_env env = ctx_->GetJSEnv();
-    if (UNLIKELY(GetValueType(env, jsFn_) != napi_function)) {
+    if (UNLIKELY(GetValueType<true>(env, jsFn_) != napi_function)) {
         ctx_->ThrowJSTypeError(env, "call target is not a function");
         return std::nullopt;
     }
@@ -273,7 +272,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::CallConverted(Span
     napi_value jsRetval;
     napi_status jsStatus;
     {
-        ScopedNativeCodeThreadIfNeeded nativeScope(coro_);
+        ScopedNativeCodeThread nativeScope(coro_);
         if constexpr (IS_NEWCALL) {
             jsStatus = napi_new_instance(env, jsFn_, jsargs.size(), jsargs.data(), &jsRetval);
         } else {
@@ -463,7 +462,7 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
             auto refconv = JSRefConvertResolve(ctx, etsThis->ClassAddr<Class>());
             ASSERT(refconv != nullptr);
             napi_value jsThis = refconv->Wrap(ctx, EtsObject::FromCoreType(etsThis));
-            ASSERT(GetValueType(env, jsThis) == napi_object);
+            ASSERT(GetValueType<true>(env, jsThis) == napi_object);
             auto *refconvProxy = static_cast<ets_proxy::JSRefConvertJSProxy *>(refconv);
             ASSERT(refconvProxy != nullptr);
             std::string methodNameStr = refconvProxy->GetJSMethodName(st->GetMethod());

@@ -129,7 +129,7 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, jsArgs->data(), &jsThis, &data));
 
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    ScopedManagedCodeThread managedScope(coro);
     auto [etsMethod, errorMessage, etsClassWrapper] = findMethodFunc(data, argc);
 
     ASSERT(nullptr != etsMethod || nullptr != errorMessage || etsClassWrapper != nullptr);
@@ -150,7 +150,7 @@ napi_value EtsMethodWrapper::DoEtsMethodCall(napi_env env, napi_callback_info ci
         return CallETSStatic(coro, ctx, method, *jsArgs);
     }
 
-    if (UNLIKELY(IsNullOrUndefined(env, jsThis))) {
+    if (UNLIKELY(IsNullOrUndefined<true>(env, jsThis))) {
         ctx->ThrowJSTypeError(env, "ets this in instance method cannot be null or undefined");
         return nullptr;
     }

@@ -39,6 +39,33 @@ public:
     }
 };
 
+// NOTE(ipetrov, 20146): It's tempoary solution for SharedReferencesStorage. All napi calls should in native scope
+class ScopedNativeCodeThreadIfNeeded {
+public:
+    explicit ScopedNativeCodeThreadIfNeeded(ManagedThread *thread) : thread_(thread)
+    {
+        ASSERT(thread_ != nullptr);
+        if (thread_->IsInNativeCode()) {
+            needToEndNativeCode_ = false;
+        } else {
+            thread_->NativeCodeBegin();
+        }
+    }
+    NO_COPY_SEMANTIC(ScopedNativeCodeThreadIfNeeded);
+    NO_MOVE_SEMANTIC(ScopedNativeCodeThreadIfNeeded);
+
+    ~ScopedNativeCodeThreadIfNeeded()
+    {
+        if (needToEndNativeCode_) {
+            thread_->NativeCodeEnd();
+        }
+    }
+
+private:
+    ManagedThread *thread_ {nullptr};
+    bool needToEndNativeCode_ {true};
+};
+
 SharedReferenceStorage *SharedReferenceStorage::sharedStorage_ = nullptr;
 
 /* static */
@@ -98,7 +125,7 @@ SharedReference *ExtractMaybeReference(napi_env env, napi_value jsObject)
 
 SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value jsObject) const
 {
-    ScopedNativeCodeThreadIfNeeded nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
     void *data = ExtractMaybeReference(env, jsObject);
     if (UNLIKELY(data == nullptr)) {
         return nullptr;
@@ -241,7 +268,7 @@ static SharedReference **CreateXRef(InteropCtx *ctx, napi_value jsObject, napi_r
 }
 
 template <SharedReference::InitFn REF_INIT>
-SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsHandle<EtsObject> etsObject,
+SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,
                                                          napi_ref jsRef)
 {
     SharedReference *sharedRef = AllocItem();
@@ -276,12 +303,9 @@ SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsHan
 }
 
 template <SharedReference::InitFn REF_INIT>
-SharedReference *SharedReferenceStorage::CreateRefCommon(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
-                                                         const PreInitJSObjectCallback &callback)
+SharedReference *SharedReferenceStorage::CreateRefCommon(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,
+                                                         napi_value jsObject, const PreInitJSObjectCallback &callback)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope hScope(coro);
-    EtsHandle<EtsObject> hobject(coro, etsObject);
     TriggerXGCIfNeeded(ctx);
     napi_ref jsRef;
     // Create XRef before SharedReferenceStorage lock to avoid deadlock situation with JS mutator lock in napi calls
@@ -290,46 +314,54 @@ SharedReference *SharedReferenceStorage::CreateRefCommon(InteropCtx *ctx, EtsObj
         return nullptr;
     }
     os::memory::WriteLockHolder lock(storageLock_);
-    auto *sharedRef = CreateReference<REF_INIT>(ctx, hobject, jsRef);
+    auto *sharedRef = CreateReference<REF_INIT>(ctx, etsObject, jsRef);
+    if (sharedRef == nullptr) {
+        napi_delete_reference(ctx->GetJSEnv(), jsRef);
+        return nullptr;
+    }
     // Atomic with release order reason: XGC thread should see all writes (initialization of SharedReference) before
     // check initialization status
     AtomicStore(refRef, sharedRef, std::memory_order_release);
     return sharedRef;
 }
 
-SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
+SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,
+                                                            napi_value jsObject,
                                                             const PreInitJSObjectCallback &callback)
 {
     return CreateRefCommon<&SharedReference::InitETSObject>(ctx, etsObject, jsObject, callback);
 }
 
-SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject)
+SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,
+                                                           napi_value jsObject)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope hScope(coro);
-    EtsHandle<EtsObject> hobject(coro, etsObject);
-    TriggerXGCIfNeeded(ctx);
     napi_ref jsRef;
+    auto coro = EtsCoroutine::GetCurrent();
+    auto env = ctx->GetJSEnv();
     {
-        ScopedNativeCodeThreadIfNeeded nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(coro);
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
-        NAPI_CHECK_FATAL(napi_create_xref(ctx->GetJSEnv(), jsObject, 1, &jsRef));
+        auto status = napi_create_xref(env, jsObject, 1, &jsRef);
 #else
-        NAPI_CHECK_FATAL(napi_create_reference(ctx->GetJSEnv(), jsObject, 1, &jsRef));
+        auto status = napi_create_reference(env, jsObject, 1, &jsRef);
 #endif
+        if (status != napi_ok) {
+            ctx->ForwardJSException(coro);
+            return nullptr;
+        }
     }
     os::memory::WriteLockHolder lock(storageLock_);
-    auto *sharedRef = CreateReference<&SharedReference::InitJSObject>(ctx, hobject, jsRef);
+    auto *sharedRef = CreateReference<&SharedReference::InitJSObject>(ctx, etsObject, jsRef);
     return sharedRef;
 }
 
-SharedReference *SharedReferenceStorage::CreateJSObjectRefwithWrap(InteropCtx *ctx, EtsObject *etsObject,
+SharedReference *SharedReferenceStorage::CreateJSObjectRefwithWrap(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,
                                                                    napi_value jsObject)
 {
     return CreateRefCommon<&SharedReference::InitJSObject>(ctx, etsObject, jsObject);
 }
 
-SharedReference *SharedReferenceStorage::CreateHybridObjectRef(InteropCtx *ctx, EtsObject *etsObject,
+SharedReference *SharedReferenceStorage::CreateHybridObjectRef(InteropCtx *ctx, EtsHandle<EtsObject> &etsObject,
                                                                napi_value jsObject)
 {
     return CreateRefCommon<&SharedReference::InitHybridObject>(ctx, etsObject, jsObject);

@@ -13,16 +13,20 @@
 * limitations under the License.
 */
 
-export let testStr: string = 'test';
+export let testObject: Object = {};
+export let testStr = 'test';
+export let testNumber = 11.22;
 
 export class Foo {
     constructor() {
-        this.objectProperty = {};
+        this.objectProperty = testObject;
         this.stringProperty = testStr;
+        this.numberProperty = testNumber;
     }
 
-    objectProperty: Object;
-    stringProperty: string;
+    public objectProperty: Object;
+    public stringProperty: string;
+    public numberProperty: number;
 }
 
 export let fooInstance: Foo = new Foo();

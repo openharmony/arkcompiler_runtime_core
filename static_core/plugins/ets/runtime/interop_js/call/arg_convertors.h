@@ -46,11 +46,11 @@ template <typename FStore>
     auto env = ctx->GetJSEnv();
 
     // start fastpath
-    if (IsUndefined(env, jsVal)) {
+    if (IsUndefined<true>(env, jsVal)) {
         storeRes(nullptr);
         return true;
     }
-    if (IsNull(env, jsVal)) {
+    if (IsNull<true>(env, jsVal)) {
         if (LIKELY(klass->IsAssignableFrom(ctx->GetNullValueClass()))) {
             storeRes(ctx->GetNullValue()->GetCoreType());
             return true;

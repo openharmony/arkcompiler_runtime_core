@@ -42,7 +42,7 @@ static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsCorou
         return etsClass->AsObject();
     }
 
-    if (UNLIKELY(IsNullOrUndefined(env, jsThis))) {
+    if (UNLIKELY(IsNullOrUndefined<true>(env, jsThis))) {
         ctx->ThrowJSTypeError(env, "ets this in set accessor cannot be null or undefined");
         return nullptr;
     }
@@ -73,7 +73,7 @@ static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    ScopedManagedCodeThread managedScope(coro);
 
     EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
@@ -108,7 +108,7 @@ static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThreadIfNeeded managedScope(coro);
+    ScopedManagedCodeThread managedScope(coro);
 
     EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
@@ -146,9 +146,9 @@ struct EtsFieldAccessorREFERENCE {
                        napi_value jsValue)
     {
         EtsObject *etsValue;
-        if (IsUndefined(env, jsValue)) {
+        if (IsUndefined<true>(env, jsValue)) {
             etsValue = nullptr;
-        } else if (IsNull(env, jsValue)) {
+        } else if (IsNull<true>(env, jsValue)) {
             etsValue = ctx->GetNullValue();
         } else {
             JSRefConvert *refconv = etsFieldWrapper->GetRefConvert<true>(ctx);

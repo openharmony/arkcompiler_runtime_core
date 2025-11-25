@@ -17,10 +17,15 @@ export declare class Foo {
     constructor();
     objectProperty: Object;
     stringProperty: string;
+    numberProperty: number;
 }
+
+export declare let testObject: Object;
 
 export declare let testStr: string;
 
+export declare let testNumber: number;
+
 export declare let fooInstance: Foo;
 
-export declare let fooFunc: (f: Foo)=>void;
+export declare let fooFunc: (f: Foo)=>Foo;
