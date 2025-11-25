@@ -18,6 +18,7 @@
 /*---
 desc: Test {{c.realType}} value '{{c.value}}' assignment (abnormal) for union type ({{c.type}}) as function parameter.
 tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 
 {{c.class}}

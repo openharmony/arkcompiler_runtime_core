@@ -24,12 +24,6 @@ cases:
       - '"i"'
 
   - def: |-
-      i: byte = 0
-    check:
-      - '"j"'
-    tags: compile-only,negative
-
-  - def: |-
       i = 0
       j = true
       k = "some str"
@@ -104,32 +98,6 @@ cases:
     check: 
       - '"foo"'
 
-  # Not included
-  - def: |-
-      constructor() {}
-      constructor(i: int) {}
-    check: 
-      - never
-    tags: compile-only,negative
-
-  - def: |-
-      constructor() {}
-    check:
-      - '"constructor"'
-    tags: compile-only,negative
-
-  - def: |-
-      static {}
-    check: 
-      - never
-    tags: compile-only,negative
-
-  - def: |-
-      static {}
-    check:
-      - '"static"'
-    tags: compile-only,negative
-
   # Access modifiers
   - def: |-
       public var1 = 1
@@ -144,58 +112,6 @@ cases:
       - '"foo"'
       - '"var1"'
       - '"bar"'
-
-  - def: |-
-      public var1 = 1
-      protected var2 = false
-      private var3 = "str"
-      private bar(i: int) {}
-      public bar() {}
-      foo() {}
-      protected jay() {}
-      private raf() {}
-    check:
-      - '"var2"'
-    tags: negative, compile-only
-
-  - def: |-
-      public var1 = 1
-      protected var2 = false
-      private var3 = "str"
-      private bar(i: int) {}
-      public bar() {}
-      foo() {}
-      protected jay() {}
-      private raf() {}
-    check:
-      - '"var3"'
-    tags: negative, compile-only
-
-  - def: |-
-      public var1 = 1
-      protected var2 = false
-      private var3 = "str"
-      private bar(i: int) {}
-      public bar() {}
-      foo() {}
-      protected jay() {}
-      private raf() {}
-    check:
-      - '"jay"'
-    tags: negative, compile-only
-
-  - def: |-
-      public var1 = 1
-      protected var2 = false
-      private var3 = "str"
-      private bar(i: int) {}
-      public bar() {}
-      foo() {}
-      protected jay() {}
-      private raf() {}
-    check:
-      - '"raf"'
-    tags: negative, compile-only
 
   # Different types check
   - def: |-

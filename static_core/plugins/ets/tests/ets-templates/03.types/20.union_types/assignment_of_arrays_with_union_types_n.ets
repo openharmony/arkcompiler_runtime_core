@@ -18,13 +18,15 @@
 /*---
 desc: {{c.desc}}
 tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 
 {{c.class}}
 {{c.function}}
 
+type MyArray = {{c.type}};
+
 function main(): void {
-  type MyArray = {{c.type}};
   let arr: MyArray[] = [{{c.value}}];
 }
 {%- endfor %}

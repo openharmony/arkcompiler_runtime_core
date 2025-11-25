@@ -16,42 +16,60 @@ cases:
       let a: number = 1.2
     check: |-
       type t = keyof a
+    stdout: |-
+      "Syntax error ESY0040: Illegal start of Type Alias expression." 
 
   - decl: |-
       function foo() {}
     check: |-
       type t = keyof foo
+    stdout: |-
+      "Syntax error ESY0040: Illegal start of Type Alias expression." 
 
   - decl: |-
       function foo() { return new Object() }
     check: |-
       type t = keyof foo()
+    stdout: |-
+      "Syntax error ESY0040: Illegal start of Type Alias expression." 
 
   - check: |-
       type t = keyof 1
+    stdout: |-
+      "Syntax error ESY0040: Illegal start of Type Alias expression." 
 
   - decl: |-
       type t = number[]
     check: |-
       type t = keyof t
+    stdout: |-
+      "Syntax error ESY0040: Illegal start of Type Alias expression." 
 
   - decl: |-
       type func = (x: int): int
     check: |-
       type t = keyof func
+    stdout: |-
+      "Syntax error ESY0040: Illegal start of Type Alias expression." 
 
   - check: |-
       type t = keyof { foo: 1, bar: "str" }
+    stdout: |-
+      "Syntax error ESY0040: Illegal start of Type Alias expression." 
 
   - decl: |-
       class A {}
       interface I {}
     check: |-
       type t = keyof ( A | I )
+    stdout: |-
+      "Syntax error ESY0040: Illegal start of Type Alias expression." 
 
   - decl: |-
       class A {}
       interface I {}
     check: |-
       type t = keyof ( A | I )
+    stdout: |-
+      "Syntax error ESY0040: Illegal start of Type Alias expression." 
 

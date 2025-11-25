@@ -63,11 +63,6 @@ cases:
     check:
       - '"foo"'
 
-    # Not included
-  - check:
-    - never
-    tags: compile-only,negative
-
     # Different types check
   - def: |-
       i: string|number|undefined|null

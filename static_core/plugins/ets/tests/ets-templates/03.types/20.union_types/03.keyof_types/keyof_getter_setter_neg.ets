@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
+{% for case in cases %}
+
 /*---
-desc: Accessing common members with inheritance.
+expected_out: {{case.stdout}}
+desc: >-
+    The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
+    The resultant new type is a union of names (as string literal types) of all accessible members of the class or interface type.
+tags: [compile-only,negative]
 ---*/
 
-enum NumberEnum { One, Two };
-enum StringEnum { One = "One", Two = "Two" };
+{{case.decl|indent}}
 
-type Union1 = number | NumberEnum;
-type Union2 = string | StringEnum;
-
-function main(): void {
-  let numUnion: Union1 = NumberEnum.One;
-  let strUnion: Union2 = StringEnum.Two;
-  arktest.assertTrue(numUnion == 0);
+function main() {
+   {{case.check|indent}}
 }
+
+{% endfor %}

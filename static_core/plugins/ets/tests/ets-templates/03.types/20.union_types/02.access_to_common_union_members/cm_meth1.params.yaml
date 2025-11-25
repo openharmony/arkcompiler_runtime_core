@@ -254,53 +254,6 @@ cases:
           arktest.assertEQ(u2.meth(...arr), Color.Blue)
 
     - decl: |-
-          // classes, methods of different types
-          class A {
-              meth(p: number): number {
-                  return p + 42.0
-              }
-          }
-          class B {}
-          let u1: A|B = new A
-      tags: compile-only, negative
-      use: |-
-          arktest.assertEQ(u1.meth(0) * 2, 84.0)   // CTE: class B has no method
-
-    - decl: |-
-          // classes, methods of different types
-          class A {
-              meth(p: number): number {
-                  return p + 42.0
-              }
-          }
-          class B {
-              meth(p: number): string {
-                  return 'abc' + p
-              }
-          }
-          let u1: A|B = new A
-      tags: compile-only, negative
-      use: |-
-          arktest.assertEQ(u1.meth(0) * 2, 84.0)  // CTE: different signatures
-
-    - decl: |-
-          // classes, methods of different types
-          class A {
-              meth(p: Object): number {
-                  return 1
-              }
-          }
-          class B {
-              meth(p: Error): number {
-                  return 2
-              }
-          }
-          let u1: A|B = new A
-      tags: compile-only, negative
-      use: |-
-          arktest.assertEQ(u1.meth(), 1)  // CTE: different signatures
-
-    - decl: |-
           // interface one - classes, methods of any type
           interface I { meth(): Object|null|undefined }
           class A implements I {

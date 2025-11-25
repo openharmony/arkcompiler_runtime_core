@@ -25,17 +25,6 @@ cases:
       arktest.assertEQ(typeof a, "string")
 
   - decl: |-
-      class A {
-        private _foo: int
-        get foo(): int { return this._foo } 
-        set foo(i: int) { this._foo = i } 
-      }
-    check: |-
-      type t = keyof A
-      let a: t = "_foo"
-    tags: compile-only,negative
-
-  - decl: |-
       type t = keyof A
 
       abstract class A {

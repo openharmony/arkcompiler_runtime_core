@@ -12,26 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ {% for c in cases %}
 
 /*---
-desc: Accessing common members with inheritance.
+desc: The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
+files:
+- ./module.ets
+tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 
-class Base {
-    tmp = 1;
-    foo() {}
-}
-
-class Derived1 extends Base {
-    tmp1 = "aa";
-}
-
-class Derived2 extends Base {
-    tmp1 = 3.14;
-}
+{{c.import|indent}}
 
 function main(): void {
-    let account: Derived1 | Derived2 | Base = new Base();
-    let num = account.tmp;
-    arktest.assertTrue(num === 1);
+  {{c.call|indent}}
 }
+
+{% endfor %}

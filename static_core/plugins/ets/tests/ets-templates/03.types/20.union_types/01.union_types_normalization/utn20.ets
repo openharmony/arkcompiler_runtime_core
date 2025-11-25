@@ -14,25 +14,17 @@
  */
 
 /*---
-desc: Accessing common fields.
+desc: Test union type normalization. If positioned among union types, type never is removed.
 ---*/
 
-class A {
-    tmp = 1;
-    tmp1 = "aa";
-    foo() {}
-    goo(tmp: number) {}
-}
+type A = never | string | char | TestClass;
 
-class B {
-    tmp = 2;
-    tmp1 = 3.14;
-    foo() {}
-    goo() {}
+class TestClass {
+    test: null
 }
 
 function main(): void {
-    let account: A | B = new B();
-    let num = account.tmp;
-    arktest.assertTrue(num === 2);
+    let neverVar: A
+    neverVar = "test"
+    arktest.assertEQ(typeof neverVar, "string")
 }
