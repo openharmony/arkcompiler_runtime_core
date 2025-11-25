@@ -14,35 +14,35 @@
  */
 
 // Before AOP:
-class c2{
-    a:string;
+class C2{
+    public a:string;
     constructor(str:string){
         this.a = str;
     }
 }
 
-class c1{
-    field1:int =1;
-    field2: number = 2.4;
-    field3: boolean =true;
-    field4:c2 = new c2("c2 created by c1");
+class C1{
+    public field1:int =1;
+    public field2: number = 2.4;
+    public field3: boolean =true;
+    public field4:C2 = new C2('c2 created by c1');
 }
 
 function loadfield1() : int{
-    let klass = new c1();
+    let klass = new C1();
    return 0;
 }
 function loadfield2() : number{
-    let klass = new c1();
+    let klass = new C1();
    return 0.0;
 }
 function loadfield3() : boolean{
-    let klass = new c1();
+    let klass = new C1();
    return false;
 }
-function loadfield4(): c2 {
-    let klass = new c1();
-    return new c2("test");
+function loadfield4(): C2 {
+    let klass = new C1();
+    return new C2('test');
 }
 
 function main() {

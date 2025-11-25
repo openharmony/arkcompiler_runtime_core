@@ -42,7 +42,7 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_I32)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test.abc",
                                             "load_object_test", "main");
-    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.c2 \\{a: test\\}\\n"));
+    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.C2 \\{a: test\\}\\n"));
 
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test.abc",
@@ -53,7 +53,7 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_I32)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(ctxFinder.module, nullptr);
 
-            helpers::ClassByNameContext classFinder = {nullptr, "c1"};
+            helpers::ClassByNameContext classFinder = {nullptr, "C1"};
             g_implI->moduleEnumerateClasses(ctxFinder.module, &classFinder, helpers::ClassByNameFinder);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(classFinder.klass, nullptr);
@@ -86,7 +86,7 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_I32)
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test_modified.abc",
                                        "load_object_test", "main");
-    EXPECT_TRUE(helpers::Match(output, "1\\n0\\nfalse\\nload_object_test\\.c2 \\{a: test\\}\\n"));
+    EXPECT_TRUE(helpers::Match(output, "1\\n0\\nfalse\\nload_object_test\\.C2 \\{a: test\\}\\n"));
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadObject, abc-kind=ArkTS2, category=positive, extension=c
@@ -94,7 +94,7 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_F64)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test.abc",
                                             "load_object_test", "main");
-    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.c2 \\{a: test\\}\\n"));
+    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.C2 \\{a: test\\}\\n"));
 
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test.abc",
@@ -105,7 +105,7 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_F64)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(ctxFinder.module, nullptr);
 
-            helpers::ClassByNameContext classFinder = {nullptr, "c1"};
+            helpers::ClassByNameContext classFinder = {nullptr, "C1"};
             g_implI->moduleEnumerateClasses(ctxFinder.module, &classFinder, helpers::ClassByNameFinder);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(classFinder.klass, nullptr);
@@ -138,14 +138,14 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_F64)
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test_modified.abc",
                                        "load_object_test", "main");
-    EXPECT_TRUE(helpers::Match(output, "0\\n2.4\\nfalse\\nload_object_test\\.c2 \\{a: test\\}\\n"));
+    EXPECT_TRUE(helpers::Match(output, "0\\n2.4\\nfalse\\nload_object_test\\.C2 \\{a: test\\}\\n"));
 }
 
 TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_Boolean)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test.abc",
                                             "load_object_test", "main");
-    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.c2 \\{a: test\\}\\n"));
+    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.C2 \\{a: test\\}\\n"));
 
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test.abc",
@@ -156,7 +156,7 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_Boolean)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(ctxFinder.module, nullptr);
 
-            helpers::ClassByNameContext classFinder = {nullptr, "c1"};
+            helpers::ClassByNameContext classFinder = {nullptr, "C1"};
             g_implI->moduleEnumerateClasses(ctxFinder.module, &classFinder, helpers::ClassByNameFinder);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(classFinder.klass, nullptr);
@@ -189,14 +189,14 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_Boolean)
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test_modified.abc",
                                        "load_object_test", "main");
-    EXPECT_TRUE(helpers::Match(output, "0\\n0\\ntrue\\nload_object_test\\.c2 \\{a: test\\}\\n"));
+    EXPECT_TRUE(helpers::Match(output, "0\\n0\\ntrue\\nload_object_test\\.C2 \\{a: test\\}\\n"));
 }
 
 TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_Reference)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test.abc",
                                             "load_object_test", "main");
-    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.c2 \\{a: test\\}\\n"));
+    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.C2 \\{a: test\\}\\n"));
 
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test.abc",
@@ -207,7 +207,7 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_Reference)
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(ctxFinder.module, nullptr);
 
-            helpers::ClassByNameContext classFinder = {nullptr, "c1"};
+            helpers::ClassByNameContext classFinder = {nullptr, "C1"};
             g_implI->moduleEnumerateClasses(ctxFinder.module, &classFinder, helpers::ClassByNameFinder);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(classFinder.klass, nullptr);
@@ -242,7 +242,7 @@ TEST_F(LibAbcKitLoadObjectStaticTest, LibAbcKitTestLoadObject_Reference)
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_object/load_object_test_modified.abc",
                                        "load_object_test", "main");
-    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.c2 \\{a: c2 created by c1\\}\\n"));
+    EXPECT_TRUE(helpers::Match(output, "0\\n0\\nfalse\\nload_object_test\\.C2 \\{a: c2 created by c1\\}\\n"));
 }
 
 }  // namespace libabckit::test
