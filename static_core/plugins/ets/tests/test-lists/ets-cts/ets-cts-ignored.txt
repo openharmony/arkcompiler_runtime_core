@@ -844,15 +844,6 @@
 09.classes/09.constructor_declaration/02.constructor_body/check_fld_init23.ets
 09.classes/09.constructor_declaration/02.constructor_body/check_fld_init24.ets
 
-#30467 Field initialization expression performed multiple times
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init00.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init02.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init11.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init15.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init01a.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init13a.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init13b.ets
-
 #28235 Constructor Names not yet work
 09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_same_class1.ets
 09.classes/09.constructor_declaration/02.constructor_body/secondary02.ets
