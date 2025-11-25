@@ -139,11 +139,11 @@ LineString *LineString::CreateFromUtf8(const uint8_t *utf8Data, uint32_t utf8Len
                                        PandaVM *vm, bool movable, bool pinned)
 {
     coretypes::LineString *s = nullptr;
-    auto utf16Length = utf::Utf8ToUtf16Size(utf8Data, utf8Length);
     if (CanBeCompressedMUtf8(utf8Data, utf8Length)) {
         // ascii string have equal representation in utf8 and mutf8 formats
-        s = coretypes::LineString::CreateFromMUtf8(utf8Data, utf8Length, utf16Length, true, ctx, vm, movable, pinned);
+        s = coretypes::LineString::CreateFromMUtf8(utf8Data, utf8Length, utf8Length, true, ctx, vm, movable, pinned);
     } else {
+        auto utf16Length = utf::Utf8ToUtf16Size(utf8Data, utf8Length);
         PandaVector<uint16_t> tmpBuffer(utf16Length);
         [[maybe_unused]] auto len =
             utf::ConvertRegionUtf8ToUtf16(utf8Data, tmpBuffer.data(), utf8Length, utf16Length, 0);
