@@ -16,6 +16,7 @@
 #define RUNTIME_INCLUDE_TAIHE_VECTOR_HPP_
 // NOLINTBEGIN
 
+#include <taihe/vector.abi.h>
 #include <taihe/common.hpp>
 
 #include <algorithm>
@@ -70,10 +71,10 @@ public:
         if (required_cap > m_handle->cap) {
             this->reserve(std::max(required_cap, m_handle->cap * VEC_GROWTH_FACTOR));
         }
-        T *location = &m_handle->buffer[m_handle->len];
-        new (location) T {std::forward<Args>(args)...};
+        T &item = m_handle->buffer[m_handle->len];
+        new (&item) T {std::forward<Args>(args)...};
         ++m_handle->len;
-        return *location;
+        return item;
     }
 
     T &push_back(T &&value) const
@@ -158,7 +159,7 @@ struct vector : vector_view<T> {
 
     explicit vector(std::size_t cap = VEC_DEFAULT_CAPACITY) : vector(new data_t)
     {
-        tref_set(&m_handle->count, 1);
+        tref_init(&m_handle->count, 1);
         m_handle->cap = cap;
         m_handle->buffer = reinterpret_cast<T *>(malloc(sizeof(T) * cap));
         m_handle->len = 0;
@@ -204,12 +205,12 @@ private:
 
 template <typename T>
 struct as_abi<vector<T>> {
-    using type = void *;
+    using type = TVector;
 };
 
 template <typename T>
 struct as_abi<vector_view<T>> {
-    using type = void *;
+    using type = TVector;
 };
 
 template <typename T>

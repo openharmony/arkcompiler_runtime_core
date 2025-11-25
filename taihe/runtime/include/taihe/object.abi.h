@@ -40,8 +40,6 @@ typedef bool same_func_t(struct DataBlockHead *, struct DataBlockHead *);
 // Represents metadata information for a type, including version, length, and
 // function pointers.
 // # Members
-// - `version`: A 64-bit unsigned integer representing the version of the type
-// information.
 // - `free_fptr`: Pointer to function that frees the data block.
 // - `hash_fptr`: Pointer to function that computes the hash of a data block.
 // - `same_fptr`: Pointer to function that compares equality of two data blocks.
@@ -49,7 +47,6 @@ typedef bool same_func_t(struct DataBlockHead *, struct DataBlockHead *);
 // - `idmap`: An array of IdMapItem structures representing the ID to vtable
 //   mapping.
 struct TypeInfo {
-    uint64_t version;
     free_func_t *free_fptr;
     hash_func_t *hash_fptr;
     same_func_t *same_fptr;

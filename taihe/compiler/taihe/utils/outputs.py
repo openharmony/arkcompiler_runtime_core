@@ -384,139 +384,124 @@ class CMakeOutputManager(OutputManager):
         self.runtime_cxx_src_files = [
             p for p in runtime_src_dir.rglob("*.cpp") if p.is_file()
         ]
+        self.target = CMakeWriter(self, "TaiheGenerated.cmake", FileKind.OTHER)
+        self.generated_path = "${CMAKE_CURRENT_LIST_DIR}"
 
     @override
     def post_generate(self):
-        with CMakeWriter(
-            self,
-            "TaiheGenerated.cmake",
-            FileKind.OTHER,
-        ) as cmake_target:
-            self.emit_runtime_files_list(cmake_target)
-            self.emit_generated_dir("${CMAKE_CURRENT_LIST_DIR}", cmake_target)
-            self.emit_generated_includes(cmake_target)
-            self.emit_generated_sources(cmake_target)
-            self.emit_set_cpp_standard(cmake_target)
+        with self.target:
+            self.emit_runtime_files_list()
+            self.emit_generated_dir()
+            self.emit_generated_includes()
+            self.emit_generated_sources()
+            self.emit_set_cpp_standard()
 
-    def emit_runtime_files_list(
-        self,
-        cmake_target: CMakeWriter,
-    ):
-        with cmake_target.indented(
+    def emit_runtime_files_list(self):
+        with self.target.indented(
             f"if(NOT DEFINED TAIHE_RUNTIME_INCLUDE_INNER)",
             f"endif()",
         ):
-            with cmake_target.indented(
+            with self.target.indented(
                 f"set(TAIHE_RUNTIME_INCLUDE_INNER",
                 f")",
             ):
-                cmake_target.writelns(
+                self.target.writelns(
                     f"{self.runtime_include_dir.as_posix()}",
                 )
-        with cmake_target.indented(
+        with self.target.indented(
             f"if(NOT DEFINED TAIHE_RUNTIME_C_SRC_INNER)",
             f"endif()",
         ):
-            with cmake_target.indented(
+            with self.target.indented(
                 f"set(TAIHE_RUNTIME_C_SRC_INNER",
                 f")",
             ):
                 for runtime_src_file in self.runtime_c_src_files:
-                    cmake_target.writelns(
+                    self.target.writelns(
                         f"{runtime_src_file.as_posix()}",
                     )
-        with cmake_target.indented(
+        with self.target.indented(
             f"if(NOT DEFINED TAIHE_RUNTIME_CXX_SRC_INNER)",
             f"endif()",
         ):
-            with cmake_target.indented(
+            with self.target.indented(
                 f"set(TAIHE_RUNTIME_CXX_SRC_INNER",
                 f")",
             ):
                 for runtime_src_file in self.runtime_cxx_src_files:
-                    cmake_target.writelns(
+                    self.target.writelns(
                         f"{runtime_src_file.as_posix()}",
                     )
-        with cmake_target.indented(
+        with self.target.indented(
             f"set(TAIHE_RUNTIME_INCLUDE",
             f")",
         ):
-            cmake_target.writelns(
+            self.target.writelns(
                 f"${{TAIHE_RUNTIME_INCLUDE_INNER}}",
             )
-        with cmake_target.indented(
+        with self.target.indented(
             f"set(TAIHE_RUNTIME_SRC",
             f")",
         ):
-            cmake_target.writelns(
+            self.target.writelns(
                 f"${{TAIHE_RUNTIME_C_SRC_INNER}}",
                 f"${{TAIHE_RUNTIME_CXX_SRC_INNER}}",
             )
 
-    def emit_generated_dir(
-        self,
-        generated_path: str,
-        cmake_target: CMakeWriter,
-    ):
-        with cmake_target.indented(
+    def emit_generated_dir(self):
+        with self.target.indented(
             f"if(NOT DEFINED TAIHE_GEN_DIR)",
             f"endif()",
         ):
-            with cmake_target.indented(
+            with self.target.indented(
                 f"set(TAIHE_GEN_DIR",
                 f")",
             ):
-                cmake_target.writelns(
-                    f"{generated_path}",
+                self.target.writelns(
+                    f"{self.generated_path}",
                 )
 
-    def emit_generated_includes(self, cmake_target: CMakeWriter):
-        with cmake_target.indented(
+    def emit_generated_includes(self):
+        with self.target.indented(
             f"set(TAIHE_GEN_INCLUDE",
             f")",
         ):
-            cmake_target.writelns(
+            self.target.writelns(
                 f"${{TAIHE_GEN_DIR}}/include",
             )
 
-    def emit_generated_sources(
-        self,
-        cmake_target: CMakeWriter,
-    ):
-        with cmake_target.indented(
+    def emit_generated_sources(self):
+        with self.target.indented(
             f"set(TAIHE_GEN_C_SRC",
             f")",
         ):
             for file in self.get_files_by_kind(FileKind.C_SOURCE):
-                cmake_target.writelns(
+                self.target.writelns(
                     f"${{TAIHE_GEN_DIR}}/{file.relative_path}",
                 )
-        with cmake_target.indented(
+        with self.target.indented(
             f"set(TAIHE_GEN_CXX_SRC",
             f")",
         ):
             for file in self.get_files_by_kind(FileKind.CPP_SOURCE):
-                cmake_target.writelns(
+                self.target.writelns(
                     f"${{TAIHE_GEN_DIR}}/{file.relative_path}",
                 )
-        with cmake_target.indented(
+        with self.target.indented(
             f"set(TAIHE_GEN_SRC",
             f")",
         ):
-            cmake_target.writelns(
+            self.target.writelns(
                 f"${{TAIHE_GEN_C_SRC}}",
                 f"${{TAIHE_GEN_CXX_SRC}}",
             )
 
-    def emit_set_cpp_standard(
-        self,
-        cmake_target: CMakeWriter,
-    ):
-        with cmake_target.indented(
+    def emit_set_cpp_standard(self):
+        with self.target.indented(
             f"set_source_files_properties(",
             f")",
         ):
-            cmake_target.writelns(
+            self.target.writelns(
                 f"${{TAIHE_GEN_CXX_SRC}}",
                 f"${{TAIHE_RUNTIME_CXX_SRC_INNER}}",
                 # setting

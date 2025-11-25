@@ -26,7 +26,7 @@ type checking through a plugin architecture.
 The system follows a hierarchical design:
 
 ```
-AnyAttribute = UncheckedAttribute | AbstractCheckedAttribute
+AnyAttribute
 ├── UncheckedAttribute: Raw attributes without validation
 └── AbstractCheckedAttribute: Base class for validated attributes
     └── AutoCheckedAttribute: Automatic checking via configuration
@@ -251,10 +251,10 @@ class AttributeGroupTag:
     pass
 
 
-T = TypeVar("T", bound=Decl)
+_D = TypeVar("_D", bound=Decl)
 
 
-class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
+class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[_D]):
     """Base class providing automatic name inference and target checking.
 
     This class implements common patterns for attribute registration and
@@ -264,7 +264,7 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
     NAME: ClassVar[str]
     """Explicit attribute name."""
 
-    TARGETS: ClassVar[tuple[type[T], ...]]  # type: ignore
+    TARGETS: ClassVar[tuple[type[_D], ...]]  # type: ignore
     """Declaration types this attribute can be attached to.
 
     The system uses isinstance() checking, so inheritance hierarchies are properly
@@ -385,7 +385,7 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
 
         self.check_typed_context(parent, dm)
 
-    def check_typed_context(self, parent: T, dm: DiagnosticsManager) -> None:
+    def check_typed_context(self, parent: _D, dm: DiagnosticsManager) -> None:
         """Checks if this attribute can be attached to the given declaration.
 
         Notice that parent type is already checked outside.
@@ -423,11 +423,11 @@ class AutoCheckedAttribute(AbstractCheckedAttribute, Generic[T]):
                 yield Argument(key=field.name, value=value, loc=None)
 
 
-class TypedAttribute(AutoCheckedAttribute[T]):
+class TypedAttribute(AutoCheckedAttribute[_D]):
     """Type-checked attribute that can be attached at most once per declaration."""
 
     @classmethod
-    def get(cls, decl: T) -> Self | None:
+    def get(cls, decl: _D) -> Self | None:
         """Retrieves the single instance of this attribute from a declaration.
 
         Args:
@@ -441,7 +441,7 @@ class TypedAttribute(AutoCheckedAttribute[T]):
         return None
 
     @override
-    def check_typed_context(self, parent: T, dm: DiagnosticsManager) -> None:
+    def check_typed_context(self, parent: _D, dm: DiagnosticsManager) -> None:
         prev = self.get(parent)
         if prev is not None and prev is not self:
             dm.emit(AttrConflictError(prev, self))
@@ -449,11 +449,11 @@ class TypedAttribute(AutoCheckedAttribute[T]):
         super().check_typed_context(parent, dm)
 
 
-class RepeatableAttribute(AutoCheckedAttribute[T]):
+class RepeatableAttribute(AutoCheckedAttribute[_D]):
     """Type-checked attribute that can be attached multiple times per declaration."""
 
     @classmethod
-    def get(cls, decl: T) -> list[Self]:
+    def get_all(cls, decl: _D) -> list[Self]:
         """Retrieves all instances of this attribute from a declaration.
 
         Args:

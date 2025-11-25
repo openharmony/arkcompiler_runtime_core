@@ -18,16 +18,21 @@ import re
 from taihe.codegen.abi.analyses import (
     GlobFuncAbiInfo,
     IfaceAbiInfo,
+    IfaceMethodAbiInfo,
     PackageAbiInfo,
     TypeAbiInfo,
 )
 from taihe.codegen.abi.writer import CHeaderWriter, CSourceWriter
 from taihe.codegen.cpp.analyses import (
     GlobFuncCppImplInfo,
+    IfaceCppImplInfo,
+    IfaceCppInfo,
+    IfaceMethodCppImplInfo,
     IfaceMethodCppInfo,
     PackageCppImplInfo,
-    PackageCppInfo,
     TypeCppInfo,
+    from_abi,
+    into_abi,
 )
 from taihe.semantics.declarations import (
     GlobFuncDecl,
@@ -36,9 +41,7 @@ from taihe.semantics.declarations import (
     PackageDecl,
     PackageGroup,
 )
-from taihe.semantics.types import (
-    IfaceType,
-)
+from taihe.semantics.types import IfaceType, NonVoidType
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.outputs import FileKind, OutputManager
 
@@ -50,57 +53,123 @@ class CppImplHeadersGenerator:
 
     def generate(self, pg: PackageGroup):
         for pkg in pg.packages:
-            self.gen_package_file(pkg)
+            CppImplPackageGenerator(self.om, self.am, pkg).gen_package_file()
+            for iface in pkg.interfaces:
+                CppImplIfaceGenerator(self.om, self.am, iface).gen_iface_file()
 
-    def gen_package_file(self, pkg: PackageDecl):
-        pkg_abi_info = PackageAbiInfo.get(self.am, pkg)
+
+class CppImplPackageGenerator:
+    def __init__(self, om: OutputManager, am: AnalysisManager, pkg: PackageDecl):
+        self.om = om
+        self.am = am
+        self.pkg = pkg
         pkg_cpp_impl_info = PackageCppImplInfo.get(self.am, pkg)
-        with CHeaderWriter(
+        self.target = CHeaderWriter(
             self.om,
             f"include/{pkg_cpp_impl_info.header}",
             FileKind.CPP_HEADER,
-        ) as pkg_cpp_impl_target:
-            pkg_cpp_impl_target.add_include("taihe/common.hpp")
-            pkg_cpp_impl_target.add_include(pkg_abi_info.header)
-            for func in pkg.functions:
-                for param in func.params:
-                    type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-                    pkg_cpp_impl_target.add_include(*type_cpp_info.impl_headers)
-                if return_ty_ref := func.return_ty_ref:
-                    type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-                    pkg_cpp_impl_target.add_include(*type_cpp_info.impl_headers)
-                self.gen_func(func, pkg_cpp_impl_target)
+        )
 
-    def gen_func(
-        self,
-        func: GlobFuncDecl,
-        pkg_cpp_impl_target: CHeaderWriter,
-    ):
+    def gen_package_file(self):
+        pkg_abi_info = PackageAbiInfo.get(self.am, self.pkg)
+        with self.target:
+            self.target.add_include("taihe/common.hpp")
+            self.target.add_include(pkg_abi_info.header)
+            for func in self.pkg.functions:
+                for param in func.params:
+                    param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+                    self.target.add_include(*param_ty_cpp_info.impl_headers)
+                if isinstance(return_ty := func.return_ty, NonVoidType):
+                    return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+                    self.target.add_include(*return_ty_cpp_info.impl_headers)
+                self.gen_func(func)
+
+    def gen_func(self, func: GlobFuncDecl):
         func_abi_info = GlobFuncAbiInfo.get(self.am, func)
         func_cpp_impl_info = GlobFuncCppImplInfo.get(self.am, func)
         func_impl = "CPP_FUNC_IMPL"
-        args_from_abi = []
-        abi_params = []
+        params_abi = []
+        args_cpp = []
         for param in func.params:
-            type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-            type_abi_info = TypeAbiInfo.get(self.am, param.ty_ref.resolved_ty)
-            args_from_abi.append(type_cpp_info.pass_from_abi(param.name))
-            abi_params.append(f"{type_abi_info.as_param} {param.name}")
-        args_from_abi_str = ", ".join(args_from_abi)
-        abi_params_str = ", ".join(abi_params)
-        cpp_result = f"{func_impl}({args_from_abi_str})"
-        if return_ty_ref := func.return_ty_ref:
-            type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            type_abi_info = TypeAbiInfo.get(self.am, return_ty_ref.resolved_ty)
-            abi_return_ty_name = type_abi_info.as_owner
-            abi_result = type_cpp_info.return_into_abi(cpp_result)
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            param_ty_abi_info = TypeAbiInfo.get(self.am, param.ty)
+            params_abi.append(f"{param_ty_abi_info.as_param} {param.name}")
+            args_cpp.append(from_abi(param_ty_cpp_info.as_param, param.name))
+        params_abi_str = ", ".join(params_abi)
+        args_cpp_str = ", ".join(args_cpp)
+        result_cpp = f"{func_impl}({args_cpp_str})"
+        if isinstance(return_ty := func.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_abi_info = TypeAbiInfo.get(self.am, return_ty)
+            return_ty_abi_name = return_ty_abi_info.as_owner
+            result_abi = into_abi(return_ty_cpp_info.as_owner, result_cpp)
         else:
-            abi_return_ty_name = "void"
-            abi_result = cpp_result
-        pkg_cpp_impl_target.writelns(
+            return_ty_abi_name = "void"
+            result_abi = result_cpp
+        self.target.writelns(
             f"#define {func_cpp_impl_info.macro}({func_impl}) \\",
-            f"    {abi_return_ty_name} {func_abi_info.mangled_name}({abi_params_str}) {{ \\",
-            f"        return {abi_result}; \\",
+            f"    {return_ty_abi_name} {func_abi_info.impl_name}({params_abi_str}) {{ \\",
+            f"        return {result_abi}; \\",
+            f"    }}",
+        )
+
+
+class CppImplIfaceGenerator:
+    def __init__(self, om: OutputManager, am: AnalysisManager, iface: IfaceDecl):
+        self.om = om
+        self.am = am
+        self.iface = iface
+        iface_cpp_impl_info = IfaceCppImplInfo.get(self.am, iface)
+        self.target = CHeaderWriter(
+            self.om,
+            f"include/{iface_cpp_impl_info.header}",
+            FileKind.CPP_HEADER,
+        )
+
+    def gen_iface_file(self):
+        iface_cpp_info = IfaceCppInfo.get(self.am, self.iface)
+        with self.target:
+            self.target.add_include("taihe/common.hpp")
+            self.target.add_include(iface_cpp_info.impl_header)
+            for method in self.iface.methods:
+                for param in method.params:
+                    param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+                    self.target.add_include(*param_ty_cpp_info.impl_headers)
+                if isinstance(return_ty := method.return_ty, NonVoidType):
+                    return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+                    self.target.add_include(*return_ty_cpp_info.impl_headers)
+                self.gen_method(method)
+
+    def gen_method(self, method: IfaceMethodDecl):
+        method_abi_info = IfaceMethodAbiInfo.get(self.am, method)
+        method_cpp_impl_info = IfaceMethodCppImplInfo.get(self.am, method)
+        method_impl = "CPP_METHOD_IMPL"
+        params_abi = []
+        args_cpp = []
+        iface_cpp_info = IfaceCppInfo.get(self.am, self.iface)
+        iface_abi_info = IfaceAbiInfo.get(self.am, self.iface)
+        params_abi.append(f"{iface_abi_info.as_param} tobj")
+        args_cpp.append(from_abi(iface_cpp_info.as_param, "tobj"))
+        for param in method.params:
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            param_ty_abi_info = TypeAbiInfo.get(self.am, param.ty)
+            params_abi.append(f"{param_ty_abi_info.as_param} {param.name}")
+            args_cpp.append(from_abi(param_ty_cpp_info.as_param, param.name))
+        params_abi_str = ", ".join(params_abi)
+        args_cpp_str = ", ".join(args_cpp)
+        result_cpp = f"{method_impl}({args_cpp_str})"
+        if isinstance(return_ty := method.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_abi_info = TypeAbiInfo.get(self.am, return_ty)
+            return_ty_abi_name = return_ty_abi_info.as_owner
+            result_abi = into_abi(return_ty_cpp_info.as_owner, result_cpp)
+        else:
+            return_ty_abi_name = "void"
+            result_abi = result_cpp
+        self.target.writelns(
+            f"#define {method_cpp_impl_info.macro}({method_impl}) \\",
+            f"    {return_ty_abi_name} {method_abi_info.impl_name}({params_abi_str}) {{ \\",
+            f"        return {result_abi}; \\",
             f"    }}",
         )
 
@@ -110,6 +179,30 @@ class CppImplSourcesGenerator:
         self.om = om
         self.am = am
         self.using_namespaces: list[str] = []
+
+    def generate(self, pg: PackageGroup):
+        for pkg in pg.packages:
+            CppTemplatePackageGenerator(self.om, self.am, pkg).gen_package_file()
+            for iface in pkg.interfaces:
+                CppTemplateIfaceGenerator(self.om, self.am, iface).gen_iface_file()
+        for pkg in pg.packages:
+            for iface in pkg.interfaces:
+                CppClassHeaderGenerator(self.om, self.am, iface).gen_class_header()
+                CppClassSourceGenerator(self.om, self.am, iface).gen_class_source()
+
+
+class CppTemplateBaseWriterGenerator:
+    def __init__(
+        self,
+        om: OutputManager,
+        am: AnalysisManager,
+        target: CSourceWriter,
+        using_namespaces: list[str],
+    ):
+        self.om = om
+        self.am = am
+        self.target = target
+        self.using_namespaces = using_namespaces
 
     @property
     def make_holder(self):
@@ -135,166 +228,268 @@ class CppImplSourcesGenerator:
 
         return re.sub(pattern, replace_ns, cpp_type)
 
-    def generate(self, pg: PackageGroup):
-        for pkg in pg.packages:
-            self.gen_package_file(pkg)
+    def gen_using_namespaces(self):
+        for namespace in self.using_namespaces:
+            self.target.writelns(
+                f"using namespace {namespace};",
+            )
 
-    def gen_package_file(self, pkg: PackageDecl):
-        pkg_cpp_info = PackageCppInfo.get(self.am, pkg)
-        pkg_cpp_impl_info = PackageCppImplInfo.get(self.am, pkg)
-        with CSourceWriter(
-            self.om,
+
+class CppTemplatePackageGenerator(CppTemplateBaseWriterGenerator):
+    def __init__(self, om: OutputManager, am: AnalysisManager, pkg: PackageDecl):
+        self.pkg = pkg
+        pkg_cpp_impl_info = PackageCppImplInfo.get(am, pkg)
+        target = CSourceWriter(
+            om,
             f"temp/{pkg_cpp_impl_info.source}",
             FileKind.TEMPLATE,
-        ) as pkg_cpp_impl_target:
-            pkg_cpp_impl_target.add_include(pkg_cpp_info.header)
-            pkg_cpp_impl_target.add_include(pkg_cpp_impl_info.header)
-            pkg_cpp_impl_target.add_include("taihe/runtime.hpp")
-            pkg_cpp_impl_target.add_include("stdexcept")
-            pkg_cpp_impl_target.newline()
-            self.using_namespaces = []
-            pkg_cpp_impl_target.newline()
-            self.gen_anonymous_namespace_block(pkg, pkg_cpp_impl_target)
-            pkg_cpp_impl_target.newline()
-            pkg_cpp_impl_target.writelns(
+        )
+        super().__init__(om, am, target, [])
+
+    def gen_package_file(self):
+        pkg_cpp_impl_info = PackageCppImplInfo.get(self.am, self.pkg)
+        with self.target:
+            self.target.add_include(pkg_cpp_impl_info.header)
+            self.target.add_include("stdexcept")
+            self.target.newline()
+            with self.target.indented(
+                f"namespace {{",
+                f"}}  // namespace",
+                indent="",
+            ):
+                self.gen_using_namespaces()
+                for func in self.pkg.functions:
+                    self.target.newline()
+                    self.gen_func_impl(func)
+            self.target.newline()
+            self.target.writelns(
                 "// Since these macros are auto-generate, lint will cause false positive.",
                 "// NOLINTBEGIN",
             )
-            for func in pkg.functions:
-                self.gen_func_macro(func, pkg_cpp_impl_target)
-            pkg_cpp_impl_target.writelns(
+            for func in self.pkg.functions:
+                self.gen_func_macro(func)
+            self.target.writelns(
                 "// NOLINTEND",
             )
-            self.using_namespaces = []
 
-    def gen_using_namespace(
-        self,
-        pkg_cpp_impl_target: CSourceWriter,
-        namespace: str,
-    ):
-        pkg_cpp_impl_target.writelns(
-            f"using namespace {namespace};",
-        )
-        self.using_namespaces.append(namespace)
-
-    def gen_anonymous_namespace_block(
-        self,
-        pkg: PackageDecl,
-        pkg_cpp_impl_target: CSourceWriter,
-    ):
-        with pkg_cpp_impl_target.indented(
-            f"namespace {{",
-            f"}}  // namespace",
-            indent="",
+    def gen_func_impl(self, func: GlobFuncDecl):
+        func_cpp_impl_info = GlobFuncCppImplInfo.get(self.am, func)
+        params_cpp = []
+        for param in func.params:
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            params_cpp.append(f"{self.mask(param_ty_cpp_info.as_param)} {param.name}")
+        params_cpp_str = ", ".join(params_cpp)
+        if isinstance(return_ty := func.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_cpp_name = self.mask(return_ty_cpp_info.as_owner)
+        else:
+            return_ty_cpp_name = "void"
+        with self.target.indented(
+            f"{return_ty_cpp_name} {func_cpp_impl_info.function}({params_cpp_str}) {{",
+            f"}}",
         ):
-            pkg_cpp_impl_target.writelns(
-                f"// To be implemented.",
-            )
-            for iface in pkg.interfaces:
-                pkg_cpp_impl_target.newline()
-                self.gen_iface(iface, pkg_cpp_impl_target)
-            for func in pkg.functions:
-                pkg_cpp_impl_target.newline()
-                self.gen_func_impl(func, pkg_cpp_impl_target)
+            if isinstance(return_ty := func.return_ty, IfaceType):
+                ret_cpp_impl_info = IfaceCppImplInfo.get(self.am, return_ty.decl)
+                self.target.add_include(ret_cpp_impl_info.template_header)
+                self.target.writelns(
+                    f"// The parameters in the make_holder function should be of the same type",
+                    f"// as the parameters in the constructor of the actual implementation class.",
+                    f"return {self.make_holder}<{ret_cpp_impl_info.template_class}, {return_ty_cpp_name}>();",
+                )
+            else:
+                self.target.writelns(
+                    f'TH_THROW({self.runtime_error}, "not implemented");',
+                )
 
-    def gen_iface(
-        self,
-        iface: IfaceDecl,
-        pkg_cpp_impl_target: CSourceWriter,
-    ):
-        iface_abi_info = IfaceAbiInfo.get(self.am, iface)
-        impl_name = f"{iface.name}Impl"
-        with pkg_cpp_impl_target.indented(
-            f"class {impl_name} {{",
+    def gen_func_macro(self, func: GlobFuncDecl):
+        func_cpp_impl_info = GlobFuncCppImplInfo.get(self.am, func)
+        self.target.writelns(
+            f"{func_cpp_impl_info.macro}({func_cpp_impl_info.function});",
+        )
+
+
+class CppTemplateIfaceGenerator(CppTemplateBaseWriterGenerator):
+    def __init__(self, om: OutputManager, am: AnalysisManager, iface: IfaceDecl):
+        self.iface = iface
+        iface_cpp_impl_info = IfaceCppImplInfo.get(am, iface)
+        target = CSourceWriter(
+            om,
+            f"temp/{iface_cpp_impl_info.source}",
+            FileKind.TEMPLATE,
+        )
+        super().__init__(om, am, target, [])
+
+    def gen_iface_file(self):
+        iface_cpp_impl_info = IfaceCppImplInfo.get(self.am, self.iface)
+        with self.target:
+            self.target.add_include(iface_cpp_impl_info.header)
+            self.target.add_include("stdexcept")
+            self.target.newline()
+            with self.target.indented(
+                f"namespace {{",
+                f"}}  // namespace",
+                indent="",
+            ):
+                self.gen_using_namespaces()
+                for method in self.iface.methods:
+                    self.target.newline()
+                    self.gen_method_impl(method)
+            self.target.newline()
+            self.target.writelns(
+                "// Since these macros are auto-generate, lint will cause false positive.",
+                "// NOLINTBEGIN",
+            )
+            for method in self.iface.methods:
+                self.gen_method_macro(method)
+            self.target.writelns(
+                "// NOLINTEND",
+            )
+
+    def gen_method_impl(self, method: IfaceMethodDecl):
+        method_cpp_impl_info = IfaceMethodCppImplInfo.get(self.am, method)
+        params_cpp = []
+        iface_cpp_info = IfaceCppInfo.get(self.am, self.iface)
+        params_cpp.append(f"{self.mask(iface_cpp_info.as_param)} tobj")
+        for param in method.params:
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            params_cpp.append(f"{self.mask(param_ty_cpp_info.as_param)} {param.name}")
+        params_cpp_str = ", ".join(params_cpp)
+        if isinstance(return_ty := method.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_cpp_name = self.mask(return_ty_cpp_info.as_owner)
+        else:
+            return_ty_cpp_name = "void"
+        with self.target.indented(
+            f"{return_ty_cpp_name} {method_cpp_impl_info.function}({params_cpp_str}) {{",
+            f"}}",
+        ):
+            if isinstance(return_ty := method.return_ty, IfaceType):
+                ret_cpp_impl_info = IfaceCppImplInfo.get(self.am, return_ty.decl)
+                self.target.add_include(ret_cpp_impl_info.template_header)
+                self.target.writelns(
+                    f"// The parameters in the make_holder function should be of the same type",
+                    f"// as the parameters in the constructor of the actual implementation class.",
+                    f"return {self.make_holder}<{ret_cpp_impl_info.template_class}, {return_ty_cpp_name}>();",
+                )
+            else:
+                self.target.writelns(
+                    f'TH_THROW({self.runtime_error}, "not implemented");',
+                )
+
+    def gen_method_macro(self, method: IfaceMethodDecl):
+        method_cpp_impl_info = IfaceMethodCppImplInfo.get(self.am, method)
+        self.target.writelns(
+            f"{method_cpp_impl_info.macro}({method_cpp_impl_info.function});",
+        )
+
+
+class CppClassHeaderGenerator:
+    def __init__(self, om: OutputManager, am: AnalysisManager, iface: IfaceDecl):
+        self.om = om
+        self.am = am
+        self.iface = iface
+        iface_cpp_impl_info = IfaceCppImplInfo.get(self.am, iface)
+        self.target = CHeaderWriter(
+            self.om,
+            f"temp/{iface_cpp_impl_info.template_header}",
+            FileKind.TEMPLATE,
+        )
+
+    def gen_class_header(self):
+        iface_abi_info = IfaceAbiInfo.get(self.am, self.iface)
+        with self.target:
+            for ancestor in iface_abi_info.ancestor_dict:
+                for method in ancestor.methods:
+                    for param in method.params:
+                        param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+                        self.target.add_include(*param_ty_cpp_info.impl_headers)
+                    if isinstance(return_ty := method.return_ty, NonVoidType):
+                        return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+                        self.target.add_include(*return_ty_cpp_info.impl_headers)
+            self.target.newline()
+            self.gen_iface_template_class()
+
+    def gen_iface_template_class(self):
+        iface_abi_info = IfaceAbiInfo.get(self.am, self.iface)
+        iface_cpp_impl_info = IfaceCppImplInfo.get(self.am, self.iface)
+        with self.target.indented(
+            f"class {iface_cpp_impl_info.template_class} {{",
             f"}};",
         ):
-            pkg_cpp_impl_target.writelns(
+            self.target.writelns(
                 f"public:",
+                f"// You can add member variables and constructor here.",
             )
-            with pkg_cpp_impl_target.indented(
-                f"{impl_name}() {{",
-                f"}}",
-            ):
-                pkg_cpp_impl_target.writelns(
-                    f"// Don't forget to implement the constructor.",
-                )
             for ancestor in iface_abi_info.ancestor_dict:
-                for func in ancestor.methods:
-                    pkg_cpp_impl_target.newline()
-                    self.gen_method_impl(func, pkg_cpp_impl_target)
+                for method in ancestor.methods:
+                    self.gen_iface_method_decl(method)
 
-    def gen_method_impl(
-        self,
-        func: IfaceMethodDecl,
-        pkg_cpp_impl_target: CSourceWriter,
-    ):
-        method_cpp_info = IfaceMethodCppInfo.get(self.am, func)
-        func_cpp_impl_name = method_cpp_info.impl_name
-        cpp_params = []
-        for param in func.params:
-            type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-            cpp_params.append(f"{self.mask(type_cpp_info.as_param)} {param.name}")
-        cpp_params_str = ", ".join(cpp_params)
-        if return_ty_ref := func.return_ty_ref:
-            type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            cpp_return_ty_name = self.mask(type_cpp_info.as_owner)
+    def gen_iface_method_decl(self, method: IfaceMethodDecl):
+        method_cpp_info = IfaceMethodCppInfo.get(self.am, method)
+        params_cpp = []
+        for param in method.params:
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            params_cpp.append(f"{param_ty_cpp_info.as_param} {param.name}")
+        params_cpp_str = ", ".join(params_cpp)
+        if isinstance(return_ty := method.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_cpp_name = return_ty_cpp_info.as_owner
         else:
-            cpp_return_ty_name = "void"
-        with pkg_cpp_impl_target.indented(
-            f"{cpp_return_ty_name} {func_cpp_impl_name}({cpp_params_str}) {{",
-            f"}}",
-        ):
-            if return_ty_ref and isinstance(return_ty_ref.resolved_ty, IfaceType):
-                impl_name = f"{return_ty_ref.resolved_ty.ty_decl.name}Impl"
-                pkg_cpp_impl_target.writelns(
-                    f"// The parameters in the make_holder function should be of the same type",
-                    f"// as the parameters in the constructor of the actual implementation class.",
-                    f"return {self.make_holder}<{impl_name}, {cpp_return_ty_name}>();",
-                )
-            else:
-                pkg_cpp_impl_target.writelns(
-                    f'TH_THROW({self.runtime_error}, "{func_cpp_impl_name} not implemented");',
-                )
-
-    def gen_func_impl(
-        self,
-        func: GlobFuncDecl,
-        pkg_cpp_impl_target: CSourceWriter,
-    ):
-        func_cpp_impl_name = func.name
-        cpp_params = []
-        for param in func.params:
-            type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-            cpp_params.append(f"{self.mask(type_cpp_info.as_param)} {param.name}")
-        cpp_params_str = ", ".join(cpp_params)
-        if return_ty_ref := func.return_ty_ref:
-            type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            cpp_return_ty_name = self.mask(type_cpp_info.as_owner)
-        else:
-            cpp_return_ty_name = "void"
-        with pkg_cpp_impl_target.indented(
-            f"{cpp_return_ty_name} {func_cpp_impl_name}({cpp_params_str}) {{",
-            f"}}",
-        ):
-            if return_ty_ref and isinstance(return_ty_ref.resolved_ty, IfaceType):
-                impl_name = f"{return_ty_ref.resolved_ty.ty_decl.name}Impl"
-                pkg_cpp_impl_target.writelns(
-                    f"// The parameters in the make_holder function should be of the same type",
-                    f"// as the parameters in the constructor of the actual implementation class.",
-                    f"return {self.make_holder}<{impl_name}, {cpp_return_ty_name}>();",
-                )
-            else:
-                pkg_cpp_impl_target.writelns(
-                    f'TH_THROW({self.runtime_error}, "{func_cpp_impl_name} not implemented");',
-                )
-
-    def gen_func_macro(
-        self,
-        func: GlobFuncDecl,
-        pkg_cpp_impl_target: CSourceWriter,
-    ):
-        func_cpp_impl_info = GlobFuncCppImplInfo.get(self.am, func)
-        func_cpp_impl_name = f"{func.name}"
-        pkg_cpp_impl_target.writelns(
-            f"{func_cpp_impl_info.macro}({func_cpp_impl_name});",
+            return_ty_cpp_name = "void"
+        self.target.writelns(
+            f"{return_ty_cpp_name} {method_cpp_info.call_name}({params_cpp_str});",
         )
+
+
+class CppClassSourceGenerator(CppTemplateBaseWriterGenerator):
+    def __init__(self, om: OutputManager, am: AnalysisManager, iface: IfaceDecl):
+        self.iface = iface
+        iface_cpp_impl_info = IfaceCppImplInfo.get(am, iface)
+        target = CSourceWriter(
+            om,
+            f"temp/{iface_cpp_impl_info.template_source}",
+            FileKind.TEMPLATE,
+        )
+        super().__init__(om, am, target, [])
+
+    def gen_class_source(self):
+        iface_abi_info = IfaceAbiInfo.get(self.am, self.iface)
+        iface_cpp_impl_info = IfaceCppImplInfo.get(self.am, self.iface)
+        with self.target:
+            self.target.add_include(iface_cpp_impl_info.template_header)
+            self.target.newline()
+            self.gen_using_namespaces()
+            for ancestor in iface_abi_info.ancestor_dict:
+                for method in ancestor.methods:
+                    self.target.newline()
+                    self.gen_iface_method_impl(method)
+
+    def gen_iface_method_impl(self, method: IfaceMethodDecl):
+        iface_cpp_impl_info = IfaceCppImplInfo.get(self.am, self.iface)
+        method_cpp_info = IfaceMethodCppInfo.get(self.am, method)
+        params_cpp = []
+        for param in method.params:
+            param_ty_cpp_info = TypeCppInfo.get(self.am, param.ty)
+            params_cpp.append(f"{self.mask(param_ty_cpp_info.as_param)} {param.name}")
+        params_cpp_str = ", ".join(params_cpp)
+        if isinstance(return_ty := method.return_ty, NonVoidType):
+            return_ty_cpp_info = TypeCppInfo.get(self.am, return_ty)
+            return_ty_cpp_name = self.mask(return_ty_cpp_info.as_owner)
+        else:
+            return_ty_cpp_name = "void"
+        with self.target.indented(
+            f"{return_ty_cpp_name} {iface_cpp_impl_info.template_class}::{method_cpp_info.impl_name}({params_cpp_str}) {{",
+            f"}}",
+        ):
+            if isinstance(return_ty := method.return_ty, IfaceType):
+                ret_cpp_impl_info = IfaceCppImplInfo.get(self.am, return_ty.decl)
+                self.target.add_include(ret_cpp_impl_info.template_header)
+                self.target.writelns(
+                    f"// The parameters in the make_holder function should be of the same type",
+                    f"// as the parameters in the constructor of the actual implementation class.",
+                    f"return {self.make_holder}<{ret_cpp_impl_info.template_class}, {return_ty_cpp_name}>();",
+                )
+            else:
+                self.target.writelns(
+                    f'TH_THROW({self.runtime_error}, "not implemented");',
+                )

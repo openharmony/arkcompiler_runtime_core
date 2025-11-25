@@ -32,19 +32,15 @@ from typing_extensions import override
 from taihe.utils.logging import AnsiStyle, should_use_color
 from taihe.utils.sources import SourceLocation
 
-T = TypeVar("T")
+_T = TypeVar("_T")
 
 
 def _passthrough(x: str) -> str:
     return x
 
 
-def _discard(x: str) -> str:
-    del x
+def _discard(_: str) -> str:
     return ""
-
-
-FilterT = Callable[[str], str]
 
 
 ###################
@@ -90,7 +86,7 @@ class DiagBase(ABC):
         """
         return ()
 
-    def format_message(self, f: FilterT) -> str:
+    def format_message(self, f: Callable[[str], str]) -> str:
         """Formats the diagnostic message, optionally applying ANSI styling.
 
         Args:
@@ -156,7 +152,7 @@ class DiagnosticsManager(ABC):
         return self.has_reached_severity(Severity.ERROR)
 
     @property
-    def has_fatal_error(self):
+    def has_fatal(self):
         return self.has_reached_severity(Severity.FATAL)
 
     def reset_severity(self):
@@ -194,7 +190,7 @@ class DiagnosticsManager(ABC):
         except DiagError as e:
             self.emit(e)
 
-    def for_each(self, xs: Iterable[T], cb: Callable[[T], bool | None]) -> bool:
+    def for_each(self, xs: Iterable[_T], cb: Callable[[_T], bool | None]) -> bool:
         """Calls `cb` for each element. Records and recovers from `DiagError`s.
 
         Returns `True` if no errors are encountered.
@@ -235,6 +231,11 @@ class ConsoleDiagnosticsManager(DiagnosticsManager):
     def _flush(self):
         self._out.flush()
 
+    def _render(self, d: DiagBase):
+        self._write(f"{d.format_message(self._color_filter_fn)}\n")
+        if d.loc:
+            self._render_source_location(d.loc)
+
     def _render_source_location(self, loc: SourceLocation):
         MAX_LINE_NO_SPACE = 5
         if not loc.span:
@@ -265,8 +266,3 @@ class ConsoleDiagnosticsManager(DiagnosticsManager):
                 f"{line:{MAX_LINE_NO_SPACE}} | {line_content}\n"
                 f"{'':{MAX_LINE_NO_SPACE}} | {f(AnsiStyle.GREEN + AnsiStyle.BRIGHT)}{markers}{f(AnsiStyle.RESET_ALL)}\n"
             )
-
-    def _render(self, d: DiagBase):
-        self._write(f"{d.format_message(self._color_filter_fn)}\n")
-        if d.loc:
-            self._render_source_location(d.loc)
