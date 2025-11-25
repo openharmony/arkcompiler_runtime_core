@@ -423,9 +423,18 @@ export namespace taskpool {
                             totalExecCount++;
                         });
                     }
-                    if (!notCanceled) {
-                        this.throwCancelTaskError();
+
+                    try {
+                        if (!notCanceled) {
+                            this.throwCancelTaskError();
+                        }
+                    } catch (e) {
+                        try {
+                            this.onFailCallback?.(e as Error);
+                        } catch (callbackError) {}
+                        throw e;
                     }
+
                 };
                 if (result instanceof Promise) {
                     return result.finally(() => {
