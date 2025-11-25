@@ -191,6 +191,46 @@ TEST_F(ObjectNewTest, wrong_ctor_fake)
     ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
 }
 
+TEST_F(ObjectNewTest, wrong_ctor_is_method)
+{
+    ani_method method {};
+    ASSERT_EQ(env_->Class_FindMethod(cls_, "voidMethod", ":", &method), ANI_OK);
+
+    ani_object obj {};
+    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, method, &obj, z_, c_, b_, s_, i_, l_, f_, d_, r_), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class"},
+        {"ctor", "ani_method", "method is not ctor"},
+        {"result", "ani_object *"},
+        {"...", "       "},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
+}
+
+TEST_F(ObjectNewTest, wrong_ctor_3)
+{
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls_, "staticMethod", ":", &method), ANI_OK);
+
+    ani_object obj {};
+    ASSERT_EQ(env_->c_api->Object_New(env_, cls_, reinterpret_cast<ani_method>(method), &obj, z_, c_, b_, s_, i_, l_,
+                                      f_, d_, r_),
+              ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"cls", "ani_class"},
+        {"ctor", "ani_method", "wrong type: ani_static_method, expected: ani_method"},
+        {"result", "ani_object *"},
+        {"...", "       "},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_New", testLines);
+}
+
 // NOTE: Enable when #25617 will be resolved
 TEST_F(ObjectNewTest, DISABLED_wrong_ctor_invalidated)
 {

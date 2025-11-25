@@ -47,6 +47,14 @@ class CheckCtorTypes {
     private f: float
     private d: double
     private r: string
+
+    public voidMethod(): void {
+        return;
+    }
+
+    public static staticMethod(): void {
+        return;
+    }
 }
 
 class A {
