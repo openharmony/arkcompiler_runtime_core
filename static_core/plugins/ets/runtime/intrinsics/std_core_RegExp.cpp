@@ -36,8 +36,10 @@ static void CheckAndSetFlag(char flagChar, uint32_t flagMask, int &nativeFlags)
 extern "C" void StdCoreRegExpParse(EtsString *pattern, EtsString *flags)
 {
     RegExpParser parse = RegExpParser();
-    auto patternstr = ark::PandaStringToStd(pattern->GetUtf8());
     auto flags_str = ark::PandaStringToStd(flags->GetUtf8());
+    auto patternStr = pattern->GetUtf8();
+    size_t patternLen = patternStr.length();
+    const char *patternData = patternStr.data();
 
     // Parse string flag into integer bit mask
     int nativeFlags = 0;
@@ -73,8 +75,7 @@ extern "C" void StdCoreRegExpParse(EtsString *pattern, EtsString *flags)
         }
     }
 
-    parse.Init(const_cast<char *>(reinterpret_cast<const char *>(patternstr.c_str())), patternstr.length(),
-               nativeFlags);
+    parse.Init(const_cast<char *>(patternData), patternLen, nativeFlags);
     parse.Parse();
     if (parse.IsError()) {
         auto errormsg = ark::PandaStringToStd(parse.GetErrorMsg());

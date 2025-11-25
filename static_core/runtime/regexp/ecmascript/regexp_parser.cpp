@@ -1155,8 +1155,22 @@ int RegExpParser::ParseAtomEscape(bool isBackward)
         // P{UnicodePropertyValueExpression}
         // p{UnicodePropertyValueExpression}
         case 'P':
-        case 'p':
-        // [+N]kGroupName[?U]
+        case 'p': {
+            RangeSet atom;
+            if (ParseUnicodePropertyValueCharacters(&atom, c0_ == 'P') == -1) {
+                // If there is an internal parsing error, interrupt
+                break;
+            }
+            // Generate corresponding Range OpCode based on the filled atom
+            if (atom.HighestValue() <= UINT16_MAX) {
+                RangeOpCode rangeOp;
+                rangeOp.InsertOpCode(&buffer_, atom);
+            } else {
+                Range32OpCode rangeOp;
+                rangeOp.InsertOpCode(&buffer_, atom);
+            }
+            break;
+        }
         case 'k': {
             int postion = ParseGroupName();
             if (postion < 0) {
@@ -1512,7 +1526,7 @@ int RegExpParser::ParseClassEscape(RangeSet *atom)
         // p{UnicodePropertyValueExpression}
         case 'P':
         case 'p':
-            ParseUnicodePropertyValueCharacters(result);
+            ParseUnicodePropertyValueCharacters(atom, c0_ == 'P');
             break;
         default:
             result = ParseCharacterEscape();
@@ -1526,33 +1540,66 @@ int RegExpParser::ParseClassEscape(RangeSet *atom)
     return result;
 }
 
-void RegExpParser::ParseUnicodePropertyValueCharacters(int &result)
+int RegExpParser::ParseUnicodePropertyValueCharacters(RangeSet *atom, bool invert)
 {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    PrintF("Warning: \\p is not supported in ECMA 2015!");
-    Advance();
-    if (c0_ == '{') {
-        Advance();
-        if (c0_ == '}') {
-            return;  // p{}, invalid
-        }
-        bool isValue = false;
-        ParseUnicodePropertyValueCharactersImpl(&isValue);
-        if (!isValue && c0_ == '=') {
-            // UnicodePropertyName = UnicodePropertyValue
-            Advance();
-            if (c0_ == '}') {
-                return;  // p{xxx=}, invalid
-            }
-            ParseUnicodePropertyValueCharactersImpl(&isValue);
-        }
-        if (c0_ != '}') {
-            return;  // p{xxx, invalid
-        }
-        // should do atom->Invert() here after ECMA 9.0
-        Advance();
-        result = CLASS_RANGE_BASE;
+    if (!IsUtf16()) {
+        ParseError("Unicode property escapes require the 'u' flag");
+        return -1;
     }
+
+    Advance();
+    if (c0_ != '{') {
+        ParseError("Invalid Unicode property escape");
+        return -1;
+    }
+    Advance();
+    if (c0_ == '}') {
+        ParseError("Empty Unicode property escape");
+        return -1;
+    }
+    // 1. Parsing attribute names/values between { and }
+    uint8_t *start = pc_ - 1;
+    while (c0_ != '}' && c0_ != KEY_EOF) {
+        Advance();
+    }
+    if (c0_ == KEY_EOF) {
+        ParseError("Unterminated Unicode property escape");
+        return -1;
+    }
+    uint8_t *propEnd = pc_ - 1;
+    PandaString property(reinterpret_cast<const char *>(start), propEnd - start);
+
+    // 2. Creating a UnicodeSet from attribute strings using ICU,
+    // ICU's pattern is typically `[:<property>:]` or `[<key>=<value>]`
+    PandaString icuPattern;
+    if (property.find('=') != PandaString::npos) {
+        icuPattern = "[\\p{" + property + "}]";
+    } else {
+        icuPattern = "[:" + property + ":]";
+    }
+    UErrorCode status = U_ZERO_ERROR;
+    icu::UnicodeSet icuSet(icu::UnicodeString::fromUTF8(icuPattern.c_str()), status);
+
+    if (U_FAILURE(status)) {
+        ParseError("Invalid or unsupported Unicode property");
+        return -1;
+    }
+    // 3. If it is \P, then invert the set
+    if (invert) {
+        icuSet.complement();
+    }
+
+    // 4. Convert icu:: UnicodeSet to RangeSet
+    int32_t rangeCount = icuSet.getRangeCount();
+    for (int32_t i = 0; i < rangeCount; i++) {
+        UChar32 startRange = icuSet.getRangeStart(i);
+        UChar32 endRange = icuSet.getRangeEnd(i);
+        atom->Insert(startRange, endRange);
+    }
+
+    Advance();  // Consume '}'
+    // Return CLASS_SHANGEBASE to inform the caller that atom has been filled and is a complex character set
+    return CLASS_RANGE_BASE;
 }
 
 void RegExpParser::ParseUnicodePropertyValueCharactersImpl(bool *isValue)
