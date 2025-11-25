@@ -26,7 +26,7 @@ from runner.common_exceptions import InvalidConfiguration
 from runner.extensions.generators.ets_cts.ets_templates_generator import EtsTemplatesGenerator
 from runner.options.config import Config
 from runner.test import test_utils
-from runner.test.generators_test.ets_data_tests import data_test_suite0
+from runner.test.generators_test.ets_data import data_test_suite0
 
 
 class EtsGeneratorTest(TestCase):
@@ -51,7 +51,6 @@ class EtsGeneratorTest(TestCase):
     }, clear=True)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     def test_disable_overwrite(self) -> None:
-
         test_source_path: Path = Path(__file__).with_name("ets_data_tests")
         test_gen_path: Path = Path(__file__).with_name("gen")
         shutil.rmtree(test_gen_path, ignore_errors=True)
@@ -60,5 +59,52 @@ class EtsGeneratorTest(TestCase):
         ets_test_generator = EtsTemplatesGenerator(test_source_path, test_gen_path, self.config)
         self.assertRaises(InvalidConfiguration, ets_test_generator.generate)
 
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    def test_generate(self) -> None:
+        test_source_path: Path = Path(__file__).with_name("ets_data")
+        test_gen_path: Path = Path(__file__).with_name("gen")
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+        self.load_config()
+
+        generated_tests = self.generate_tests(test_source_path, test_gen_path)
+        self.assertTrue(test_gen_path.exists())
+
+        expected_test_names = ['types_declaration_0',
+                               'types_declaration_1',
+                               'types_declaration_2',
+                               'simple_test']
+        self.assertEqual(sorted(expected_test_names), sorted(generated_tests))
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    def test_generate_with_custom_suffixes(self) -> None:
+        test_source_path: Path = Path(__file__).with_name("ets_data_suffixes")
+        test_gen_path: Path = Path(__file__).with_name("gen")
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+        self.load_config()
+
+        generated_tests = self.generate_tests(test_source_path, test_gen_path)
+        self.assertTrue(test_gen_path.exists())
+
+        expected_test_names = ['different_file_name_a',
+                               'different_file_name_b',
+                               'different_file_name_c']
+        self.assertEqual(expected_test_names, generated_tests)
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
