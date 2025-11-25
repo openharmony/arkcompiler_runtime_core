@@ -57,6 +57,10 @@ public:
     {
         return GetEnvANIVerifier()->GetVerifiedStaticMethod(staticMethod);
     }
+    VFunction *GetVerifiedFunction(ani_function function)
+    {
+        return GetEnvANIVerifier()->GetVerifiedFunction(function);
+    }
 
     // Global refs
     VRef *AddGlobalVerifiedRef(ani_ref gref);

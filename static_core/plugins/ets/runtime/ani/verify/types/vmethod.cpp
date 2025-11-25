@@ -44,4 +44,9 @@ ani_static_method VStaticMethod::GetMethod()
     return ToAniStaticMethod(impl::VMethod::GetEtsMethod());
 }
 
+ani_function VFunction::GetMethod()
+{
+    return ToAniFunction(impl::VMethod::GetEtsMethod());
+}
+
 }  // namespace ark::ets::ani::verify

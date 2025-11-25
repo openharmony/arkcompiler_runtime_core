@@ -63,6 +63,11 @@ public:
     ani_static_method GetMethod();
 };
 
+class VFunction : public impl::VMethod {
+public:
+    ani_function GetMethod();
+};
+
 }  // namespace ark::ets::ani::verify
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_TYPES_VREF_H
