@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.containers;
 
 /**
  * A WeakSet is a collection of garbage-collectable values.  A value

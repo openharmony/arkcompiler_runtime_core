@@ -1684,18 +1684,18 @@ intrinsics:
 
 
 ####################
-# escompat.WeakMap #
+# std.containers.WeakMap #
 ####################
-  - name: EscompatWeakMapValidateKey
+  - name: WeakMapValidateKey
     space: ets
-    class_name: escompat.WeakMap
+    class_name: std.containers.WeakMap
     method_name: validateKey
     static: true
     signature:
       ret: u1
-      args: 
+      args:
         - std.core.Object
-    impl: ark::ets::intrinsics::EtsEscompatWeakMapValidateKey
+    impl: ark::ets::intrinsics::EtsWeakMapValidateKey
 
 
 ########################
@@ -9012,70 +9012,6 @@ intrinsics:
         - i64
         - std.core.Object
     impl: ark::ets::intrinsics::DebuggerAPISetLocalObject
-
-###############################
-# escompat.ConcurrencyHelpers #
-###############################
-
-  - name: escompatConcurrencyHelpersMutexCreate
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: mutexCreate
-    static: true
-    signature:
-      ret: std.core.Object
-      args: []
-    impl: ark::ets::intrinsics::EtsMutexCreate
-
-  - name: escompatConcurrencyHelpersMutexLock
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: mutexLock
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsMutexLock
-
-  - name: escompatConcurrencyHelpersMutexUnlock
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: mutexUnlock
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsMutexUnlock
-
-  - name: escompatConcurrencyHelpersEventCreate
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: eventCreate
-    static: true
-    signature:
-      ret: std.core.Object
-      args: []
-    impl: ark::ets::intrinsics::EtsEventCreate
-
-  - name: escompatConcurrencyHelpersEventWait
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: eventWait
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEventWait
-
-  - name: escompatConcurrencyHelpersEventFire
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: eventFire
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEventFire
 
 ##############################
 #      std.core.Reflect      #

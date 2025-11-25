@@ -26,7 +26,7 @@ namespace ark::ets::intrinsics {
  * @param key The object to validate as a WeakMap key (must not be nullptr)
  * @return true if key is a valid reference type, false otherwise
  */
-extern "C" EtsBoolean EtsEscompatWeakMapValidateKey(EtsObject *key)
+extern "C" EtsBoolean EtsWeakMapValidateKey(EtsObject *key)
 {
     ASSERT(key != nullptr);
     auto *klass = key->GetClass();
