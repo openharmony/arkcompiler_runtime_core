@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -308,9 +308,6 @@ void G1GCFullGCTest::PrepareTest()
 bool G1GCFullGCTest::IsInYoung(uintptr_t addr)
 {
     switch (gcType) {
-        case GCType::GEN_GC: {
-            return objectAllocator->IsObjectInYoungSpace(reinterpret_cast<ObjectHeader *>(addr));
-        }
         case GCType::G1_GC: {
             auto memPool = PoolManager::GetMmapMemPool();
             if (memPool->GetSpaceTypeForAddr(reinterpret_cast<ObjectHeader *>(addr)) != SpaceType::SPACE_TYPE_OBJECT) {

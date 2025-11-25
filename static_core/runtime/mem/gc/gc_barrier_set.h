@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -156,55 +156,6 @@ public:
                      [[maybe_unused]] size_t count) override
     {
     }
-};
-
-class GCGenBarrierSet : public GCBarrierSet {
-public:
-    GCGenBarrierSet(mem::InternalAllocatorPtr allocator,
-                    /* POST ARGS: */
-                    CardTable *cardTable, uint8_t cardBits, uint8_t dirtyCardValue)
-        : GCBarrierSet(allocator, BarrierType::PRE_RB_NONE, BarrierType::PRE_WRB_NONE,
-                       BarrierType::POST_INTERGENERATIONAL_BARRIER),
-          minAddr_(ToVoidPtr(cardTable->GetMinAddress())),
-          cardTableAddr_(reinterpret_cast<uint8_t *>(*cardTable->begin())),
-          cardBits_(cardBits),
-          dirtyCardValue_(dirtyCardValue),
-          cardTable_(cardTable)
-    {
-        // POST
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "MIN_ADDR",
-                          BarrierOperand(BarrierOperandType::ADDRESS, BarrierOperandValue(minAddr_)));
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "CARD_TABLE_ADDR",
-                          BarrierOperand(BarrierOperandType::UINT8_ADDRESS, BarrierOperandValue(cardTableAddr_)));
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "CARD_BITS",
-                          BarrierOperand(BarrierOperandType::UINT8_LITERAL, BarrierOperandValue(cardBits)));
-        AddBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, "DIRTY_VAL",
-                          BarrierOperand(BarrierOperandType::UINT8_LITERAL, BarrierOperandValue(dirtyCardValue)));
-    }
-
-    void PreBarrier(void *preValAddr) override;
-
-    void PostBarrier(const void *objAddr, size_t offset, void *storedValAddr) override;
-
-    void PostBarrier(const void *objAddr, size_t offset, size_t count) override;
-
-    ~GCGenBarrierSet() override = default;
-
-    NO_COPY_SEMANTIC(GCGenBarrierSet);
-    NO_MOVE_SEMANTIC(GCGenBarrierSet);
-
-private:
-    // Store operands explicitly for interpreter perf
-    // POST BARRIER
-    /// Minimal address used by VM. Used as a base for card index calculation
-    void *minAddr_ {nullptr};
-    /// Address of card table
-    uint8_t *cardTableAddr_ {nullptr};
-    /// How many bits encoded by card (i.e. size covered by card = 2^card_bits_)
-    uint8_t cardBits_ {0};
-    /// Value of dirty card
-    uint8_t dirtyCardValue_ {0};
-    FIELD_UNUSED CardTable *cardTable_ {nullptr};
 };
 
 class GCG1BarrierSet : public GCBarrierSet {

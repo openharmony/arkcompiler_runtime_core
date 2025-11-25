@@ -719,35 +719,6 @@ entrypoints:
   signature:
     - void
 
-- name: PostInterGenerationalBarrier0
-  entrypoint: PostInterGenerationalBarrier0
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - void
-    - ark::ObjectHeader*
-
-- name: PostInterGenerationalBarrier1
-  entrypoint: PostInterGenerationalBarrier1
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - void
-    - ark::ObjectHeader*
-    - size_t
-    - ark::ObjectHeader*
-
-- name: PostInterGenerationalBarrier2
-  entrypoint: PostInterGenerationalBarrier2
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - void
-    - ark::ObjectHeader*
-    - size_t
-    - ark::ObjectHeader*
-    - ark::ObjectHeader*
-
 - name: PostInterRegionBarrierMarkSingleFast
   entrypoint: PostInterRegionBarrierMarkSingleFast
   bridge: none

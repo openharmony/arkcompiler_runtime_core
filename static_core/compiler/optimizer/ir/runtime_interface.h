@@ -921,7 +921,6 @@ public:
     {
         auto type = GetPostType();
         return type == ::ark::mem::BarrierType::POST_CMC_WRITE_BARRIER ||
-               type == ::ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
                type == ::ark::mem::BarrierType::POST_INTERREGION_BARRIER;
     }
 

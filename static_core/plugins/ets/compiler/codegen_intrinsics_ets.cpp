@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,8 +130,6 @@ static RuntimeInterface::EntrypointId GetArrayFastReverseEntrypointId(mem::Barri
 {
     using EntrypointId = RuntimeInterface::EntrypointId;
     switch (barrierType) {
-        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:  // Gen GC
-            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_ASYNC_MANUAL;
         case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
             return EntrypointId::ESCOMPAT_ARRAY_REVERSE_HYBRID;
         case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC
@@ -333,16 +331,6 @@ RuntimeInterface::EntrypointId GetStringBuilderAppendStringsEntrypointId(uint32_
 {
     using EntrypointId = RuntimeInterface::EntrypointId;
     switch (barrierType) {
-        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER: {  // Gen GC
-            std::array<EntrypointId, 5U> entrypoints {
-                EntrypointId::INVALID,  // numArgs = 0
-                EntrypointId::INVALID,  // numArgs = 1
-                EntrypointId::STRING_BUILDER_APPEND_STRING2_ASYNC_MANUAL,
-                EntrypointId::STRING_BUILDER_APPEND_STRING3_ASYNC_MANUAL,
-                EntrypointId::STRING_BUILDER_APPEND_STRING4_ASYNC_MANUAL,
-            };
-            return entrypoints[numArgs];
-        }
         case mem::BarrierType::POST_INTERREGION_BARRIER: {  // G1 GC
             std::array<EntrypointId, 5U> entrypoints {
                 EntrypointId::INVALID,  // numArgs = 0
@@ -787,8 +775,6 @@ static RuntimeInterface::EntrypointId GetArrayFastCopyToRefEntrypointId(mem::Bar
 {
     using EntrypointId = RuntimeInterface::EntrypointId;
     switch (barrierType) {
-        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:  // Gen GC
-            return EntrypointId::ARRAY_FAST_COPY_TO_REF_ASYNC_MANUAL;
         case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
             return EntrypointId::ARRAY_FAST_COPY_TO_REF_HYBRID;
         case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC

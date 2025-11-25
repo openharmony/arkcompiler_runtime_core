@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -534,9 +534,6 @@ typename GenerationalGC<LanguageConfig>::MemStats *MemStatsGenGCTest::GetGenMemS
 bool MemStatsGenGCTest::IsInYoung(uintptr_t addr)
 {
     switch (gcType) {
-        case GCType::GEN_GC: {
-            return objectAllocator->IsObjectInYoungSpace(reinterpret_cast<ObjectHeader *>(addr));
-        }
         case GCType::G1_GC: {
             auto memPool = PoolManager::GetMmapMemPool();
             if (memPool->GetSpaceTypeForAddr(reinterpret_cast<ObjectHeader *>(addr)) != SpaceType::SPACE_TYPE_OBJECT) {
@@ -570,12 +567,6 @@ typename MemStatsGenGCTest::MemOpReport MemStatsGenGCTest::MakeAllocations()
                            reinterpret_cast<ObjectAllocatorGenBase *>(objectAllocator)->GetHeapSpace())
                            ->GetCurrentYoungSize();
     switch (gcType) {
-        case GCType::GEN_GC: {
-            if (!InitGenGc<SPACE>(gcData)) {
-                return report;
-            }
-            break;
-        }
         case GCType::G1_GC: {
             if (!InitG1Gc<SPACE>(gcData)) {
                 return report;
@@ -946,10 +937,6 @@ TEST_F(MemStatsGenGCTest, TenuredStatsMixGenGcTest)
         if (!IsGenerationalGCType(static_cast<GCType>(gctypeIdx))) {
             continue;
         }
-        if (static_cast<GCType>(gctypeIdx) == GCType::GEN_GC) {
-            // Doesn't have mixed GC collection
-            continue;
-        }
         std::string gctype = static_cast<std::string>(GCStringFromType(static_cast<GCType>(gctypeIdx)));
         for (MemStatsGenGCTest::Config cfg; !cfg.End(); ++cfg) {
             SetupRuntime(gctype, cfg);
@@ -959,9 +946,6 @@ TEST_F(MemStatsGenGCTest, TenuredStatsMixGenGcTest)
                 PrepareTest<ark::PandaAssemblyLanguageConfig>();
                 GCTaskCause mixedCause;
                 switch (gcType) {
-                    case GCType::GEN_GC: {
-                        UNREACHABLE();  // Doesn't have mixed GC collection
-                    }
                     case GCType::G1_GC: {
                         mixedCause = MIXED_G1_GC_CAUSE;
                         break;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,6 @@ enum class GCType {
     EPSILON_GC,
     EPSILON_G1_GC,
     STW_GC,
-    GEN_GC,
     G1_GC,
     CMC_GC,
     GCTYPE_LAST = CMC_GC,
@@ -43,7 +42,6 @@ constexpr bool IsGenerationalGCType(const GCType gcType)
     bool ret = false;
     ASSERT(gcType != GCType::INVALID_GC);
     switch (gcType) {
-        case GCType::GEN_GC:
         case GCType::G1_GC:
         case GCType::EPSILON_G1_GC:
             ret = true;
@@ -66,8 +64,8 @@ constexpr size_t ToIndex(GCType type)
 }
 
 constexpr size_t GC_TYPE_SIZE = ToIndex(GCType::GCTYPE_LAST) + 1;
-constexpr std::array<char const *, GC_TYPE_SIZE> GC_NAMES = {
-    "Invalid GC", "Epsilon GC", "Epsilon-G1 GC", "Stop-The-World GC", "Generation GC", "G1 GC", "CMC GC"};
+constexpr std::array<char const *, GC_TYPE_SIZE> GC_NAMES = {"Invalid GC",        "Epsilon GC", "Epsilon-G1 GC",
+                                                             "Stop-The-World GC", "G1 GC",      "CMC GC"};
 
 constexpr bool StringsEqual(char const *a, char const *b)
 {
@@ -78,7 +76,6 @@ static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::INVALID_GC)], "Invalid GC"))
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::EPSILON_GC)], "Epsilon GC"));
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::EPSILON_G1_GC)], "Epsilon-G1 GC"));
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::STW_GC)], "Stop-The-World GC"));
-static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::GEN_GC)], "Generation GC"));
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::G1_GC)], "G1 GC"));
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::CMC_GC)], "CMC GC"));
 
@@ -92,9 +89,6 @@ constexpr GCType GCTypeFromString(std::string_view gcTypeStr)
     }
     if (gcTypeStr == "stw") {
         return GCType::STW_GC;
-    }
-    if (gcTypeStr == "gen-gc") {
-        return GCType::GEN_GC;
     }
     if (gcTypeStr == "g1-gc") {
         return GCType::G1_GC;
@@ -115,9 +109,6 @@ constexpr std::string_view GCStringFromType(GCType gcType)
     }
     if (gcType == GCType::STW_GC) {
         return "stw";
-    }
-    if (gcType == GCType::GEN_GC) {
-        return "gen-gc";
     }
     if (gcType == GCType::G1_GC) {
         return "g1-gc";

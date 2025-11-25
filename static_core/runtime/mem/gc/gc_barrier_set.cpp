@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,16 +64,6 @@ static void PreSATBBarrier(ObjectHeader *preVal)
     }
 }
 
-void PostIntergenerationalBarrier(const void *minAddr, uint8_t *cardTableAddr, uint8_t cardBits, uint8_t dirtyCardValue,
-                                  const void *objFieldAddr)
-{
-    size_t cardIndex = (ToUintPtr(objFieldAddr) - ToUintPtr(minAddr)) >> cardBits;
-    auto *cardAddr = static_cast<std::atomic_uint8_t *>(ToVoidPtr(ToUintPtr(cardTableAddr) + cardIndex));
-    // Atomic with relaxed order reason: data race with card_addr with no synchronization or ordering constraints
-    // imposed on other reads or writes
-    cardAddr->store(dirtyCardValue, std::memory_order_relaxed);
-}
-
 BarrierOperand GCBarrierSet::GetBarrierOperand(BarrierPosition barrierPosition, std::string_view name)
 {
     if (barrierPosition == BarrierPosition::BARRIER_POSITION_PRE) {
@@ -91,25 +81,6 @@ BarrierOperand GCBarrierSet::GetBarrierOperand(BarrierPosition barrierPosition, 
 BarrierOperand GCBarrierSet::GetPostBarrierOperand(std::string_view name)
 {
     return GetBarrierOperand(BarrierPosition::BARRIER_POSITION_POST, name);
-}
-
-void GCGenBarrierSet::PreBarrier([[maybe_unused]] void *preValAddr) {}
-
-void GCGenBarrierSet::PostBarrier(const void *objAddr, [[maybe_unused]] size_t offset,
-                                  [[maybe_unused]] void *storedValAddr)
-{
-    LOG(DEBUG, GC) << "GC PostBarrier: write to " << std::hex << objAddr << " value " << storedValAddr;
-    PostIntergenerationalBarrier(minAddr_, cardTableAddr_, cardBits_, dirtyCardValue_, objAddr);
-    ASSERT(CheckPostBarrier(cardTable_, objAddr));
-}
-
-void GCGenBarrierSet::PostBarrier(const void *objAddr, [[maybe_unused]] size_t offset, [[maybe_unused]] size_t count)
-{
-    // NOTE: We can improve an implementation here
-    // because now we consider every field as an object reference field.
-    // Maybe, it will be better to check it, but there can be possible performance degradation.
-    PostIntergenerationalBarrier(minAddr_, cardTableAddr_, cardBits_, dirtyCardValue_, objAddr);
-    ASSERT(CheckPostBarrier(cardTable_, objAddr));
 }
 
 bool GCG1BarrierSet::IsPreBarrierEnabled()

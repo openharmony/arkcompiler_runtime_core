@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -269,7 +269,6 @@ options:
     - epsilon
     - epsilon-g1
     - stw
-    - gen-gc
     - g1-gc
     - cmc-gc
   description: Type of used GC
@@ -331,12 +330,12 @@ options:
 - name: init-young-space-size
   type: uint64_t
   default: 4194304
-  description: Initial young space size gen-gc
+  description: Initial young space size
 
 - name: young-space-size
   type: uint64_t
   default: 4194304
-  description: Young space size of gen-gc
+  description: Young space size
 
 - name: young-shared-space-size
   type: uint64_t
@@ -557,7 +556,7 @@ options:
 - name: use-tlab-for-allocations
   type: bool
   default: true
-  description: Enable/disable TLAB using for object allocations. Now, it is ignored for all GCs except GenGC. Temporary option for quick switch between modes.
+  description: Enable/disable TLAB using for object allocations. Now, it is ignored for all GCs. Temporary option for quick switch between modes.
 
 - name: init-heap-size-limit
   type: uint64_t

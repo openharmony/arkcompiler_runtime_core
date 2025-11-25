@@ -90,9 +90,6 @@ def GenerateArrayFastReverse(sync_type)
   Label(:LoopDone)
     if sync_type == :Async
       post_inter_region_barrier(data, len_bytes)
-    elsif sync_type == :AsyncManual
-      obj_ptr := Cast(buf).ptr
-      post_inter_generational_barrier(obj_ptr)
     end
   Label(:Done)
     ReturnVoid().void
@@ -101,5 +98,4 @@ end
 
 GenerateArrayFastReverse(:Sync)
 GenerateArrayFastReverse(:Async)
-GenerateArrayFastReverse(:AsyncManual)
 GenerateArrayFastReverse(:Hybrid)
