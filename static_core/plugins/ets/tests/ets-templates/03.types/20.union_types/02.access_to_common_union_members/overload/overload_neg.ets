@@ -13,24 +13,16 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
+
 /*---
-desc: Accessing common members in interfaces.
+expected_error: {{c.stderr}}
+desc: Access to common union members.
+tags: [compile-only, negative]
 ---*/
+{{c.decl}}
 
-class A {
-    tmp = 1;
+function main() {
+    {{c.use|indent}}
 }
-
-class B {
-    tmp = 2;
-}
-
-class C {
-    tmp = 3;
-}
-
-function main(): void {
-    let account: A | B = new A();
-    let result = account.tmp;
-    arktest.assertTrue(result === 1);
-}
+{%- endfor %}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% for case in cases %}
 
 /*---
-desc: Access to common union members.
-tags: [{{c.tags}}]
+desc: The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
+tags: [compile-only, negative]
+expected_out: {{case.stdout}}
 ---*/
-{{c.decl}}
+
+{{case.decl}}
 
 function main() {
-    {{c.use|indent}}
+  {{case.check|indent}}
 }
-{%- endfor %}
+{% endfor %}

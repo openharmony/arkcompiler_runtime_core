@@ -14,32 +14,25 @@
  */
 
 /*---
-desc: Compile-time error for differing field types.
+desc: Accessing common fields.
 ---*/
 
 class A {
-    public _x = 1;
-    get x() {
-        return this._x;
-    }
-
-    constructor() {
-        arktest.assertTrue(this._x === 1);
-    }
+    tmp = 1;
+    tmp1 = "aa";
+    foo() {}
+    goo(tmp: number) {}
 }
 
 class B {
-    private _x = 2;
-    get x() {
-        return this._x;
-    }
-    constructor() {
-        arktest.assertTrue(this._x === 2);
-    }
+    tmp = 2;
+    tmp1 = 3.14;
+    foo() {}
+    goo() {}
 }
 
 function main(): void {
-    let new_B = new A();
-    let num = new_B._x;
-    arktest.assertEQ(num, 1);
+    let account: A | B = new B();
+    let num = account.tmp;
+    arktest.assertEQ(num, 2);
 }

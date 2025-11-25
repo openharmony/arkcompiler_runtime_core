@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,16 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
+
 /*---
-desc: Compile_time error for differing field types in inheritance.
+expected_out: {{c.stdout}}
+desc: Access to common union members.
+tags: [compile-only, negative]
 ---*/
+{{c.decl}}
 
-class Base {
-    tmp = 1;
+function main() {
+    {{c.use|indent}}
 }
-
-class Derived1 extends Base {
-    tmp1 = "aa";
-}
-
-class Derived2 extends Base {
-    tmp1 = 3.14;
-}
-
-function main(): void {
-    let account: Derived1 | Derived2 = new Derived1();
-    let num = account.tmp;
-    arktest.assertTrue(num === 1);
-}
+{%- endfor %}

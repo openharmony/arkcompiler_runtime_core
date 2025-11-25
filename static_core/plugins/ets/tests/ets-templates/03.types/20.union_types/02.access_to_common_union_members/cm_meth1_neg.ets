@@ -13,19 +13,16 @@
  * limitations under the License.
  */
 
+ {%- for c in cases %}
+
 /*---
-desc: The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
+expected_out: {{c.stdout}}
+desc: Access to common union members.
 tags: [compile-only, negative]
 ---*/
-
-class A {
-  i: byte = 0
-}
+{{c.decl}}
 
 function main() {
-  type t = keyof A
-  let union1: "i" = "i"
-  let union2: t = union1
-  union1 = union2
-  arktest.assertEQ(typeof union2, string)
+    {{c.use|indent}}
 }
+{%- endfor %}

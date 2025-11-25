@@ -13,26 +13,16 @@
  * limitations under the License.
  */
 
+ {%- for c in cases %}
+
 /*---
-desc: Accessing common methods.
+expected_out: {{c.stdout}}
+desc: Access to common union members.
+tags: [compile-only, negative]
 ---*/
+{{c.decl}}
 
-class A {
-    private tmp = 1;
-    get num() {
-        return this.tmp;
-    }
+function main() {
+    {{c.use|indent}}
 }
-
-class B {
-    private tmp = 2;
-    get num() {
-        return this.tmp;
-    }
-}
-
-function main(): void {
-    let account: A | B = new A();
-    let num = account.num;
-    arktest.assertTrue(num === 1);
-}
+{%- endfor %}

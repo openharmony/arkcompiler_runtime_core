@@ -14,29 +14,25 @@
  */
 
 /*---
-desc: Compile_time error for differing method signatures.
+desc: Accessing common methods.
 ---*/
 
 class A {
-    tmp = 1;
-    tmp1 = "aa";
-    foo() {}
-    goo(tmp: number):number {
-        return tmp;
+    private tmp = 1;
+    get num() {
+        return this.tmp;
     }
 }
 
 class B {
-    tmp = 2;
-    tmp1 = 3.14;
-    foo() {}
-    goo(tmp: number):number {
-        return tmp;
+    private tmp = 2;
+    get num() {
+        return this.tmp;
     }
 }
 
 function main(): void {
     let account: A | B = new A();
-    let result = account.goo(1);
-    arktest.assertTrue(result === 1);
+    let num = account.num;
+    arktest.assertEQ(num, 1);
 }

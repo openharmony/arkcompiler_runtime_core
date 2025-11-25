@@ -12,28 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+{% for type in types %}
+{% for case in cases %}
 
 /*---
-desc: Accessing common members with inheritance.
+desc: The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
+tags: [compile-only, negative]
+expected_out: {{case.stdout}}
 ---*/
 
-class A {
-  tmp = 1;
-  tmp1 = "aa";
-  foo() {}
-  goo(tmp: number) {}
+//extracted negative cases from keyof_class.ets positive cases template
+
+{{case.decl}}
+
+{{type}} A {
+    {{case.def|indent}}
 }
 
-class B {
-  tmp = 2;
-  tmp1 = 3.14;
-  foo() {}
-  goo() {}
+type t = keyof A
+
+function main() {
+    let union: t = {{case.check[0]}}
 }
 
-function main(): void {
-  let account: A | B = new A();
-  arktest.assertTrue(account.tmp === 1);
-  console.log(account.tmp);
-  account.foo();
-}
+{% endfor %}
+{% endfor %}

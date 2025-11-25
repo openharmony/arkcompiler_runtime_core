@@ -12,34 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ {% for case in cases %}
 
 /*---
-desc: Compile_time error for missing member.
+desc: >-
+    The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
+    The resultant new type is a union of names (as string literal types) of all accessible members of the class or interface type.
+tags: [compile-only, negative]
+expected_out: {{case.stdout}}
 ---*/
 
-class A {
-    private _x = 1;
-    get x() {
-        return this._x;
-    }
+{{case.decl}}
+
+interface I {
+  {{case.def}}
 }
 
-class B {
-    private _x = 2;
-    get x() {
-        return this._x;
-    }
+type t = keyof I
+
+function main() {
+    let union: t = {{case.check[0]}}  
 }
 
-class C {
-    private _x = 3;
-    get x() {
-        return this._x;
-    }
-}
-
-function main(): void {
-    let account: A | B | C = new A();
-    let result = account.x;
-    arktest.assertTrue(result === 1);
-}
+{% endfor %}

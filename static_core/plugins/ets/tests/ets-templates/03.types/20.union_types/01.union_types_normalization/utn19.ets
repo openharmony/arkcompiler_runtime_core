@@ -14,19 +14,27 @@
  */
 
 /*---
-desc: Accessing common members with inheritance.
+desc: Test union type normalization. If at least one type in a union is Any, then all other types are removed.
 ---*/
 
-class A {
-    tmp = 1;
-}
+type A = Any | string;
 
-class B {
-    tmp = 2;
+class TestClass {
+    test: null
 }
 
 function main(): void {
-    let account: A | B = new B();
-    let num = account.tmp;
-    arktest.assertTrue(num === 2);
+    let anyVar: A
+    anyVar = 1
+    arktest.assertEQ(typeof anyVar, "int")
+    anyVar = "test" 
+    arktest.assertEQ(typeof anyVar, "string")
+    anyVar = undefined
+    arktest.assertEQ(typeof anyVar, "undefined")
+    anyVar = () => {}
+    arktest.assertEQ(typeof anyVar, "function")
+    anyVar = new TestClass()
+    arktest.assertEQ(typeof anyVar, "object")
+    anyVar = c'◯'
+    arktest.assertEQ(typeof anyVar, "char")
 }

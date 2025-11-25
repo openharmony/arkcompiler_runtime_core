@@ -1,6 +1,7 @@
 #FailKind.SEGFAULT_FAIL - 31 tests:
 03.types/12.type_undefined/undefined_incorrect_usage_1.ets
 03.types/20.union_types/united_switch_ext_1.ets
+03.types/20.union_types/03.keyof_types/keyof_unsupported_neg_5.ets
 04.names_declarations_and_scopes/03.scopes/unique_decl_name_0.ets
 04.names_declarations_and_scopes/03.scopes/unique_decl_name_1.ets
 04.names_declarations_and_scopes/04.accessible/type_name_const_enum.ets

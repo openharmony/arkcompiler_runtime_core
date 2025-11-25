@@ -29,26 +29,9 @@ cases:
           }
           let u: A|B = new A
       use: |-
-          let x = u.n  // ok, common field
-          u.foo()  // ok, common method
-
-    - decl: |-
-          class A {
-              n = 1
-              s = "aa"
-              foo() {}
-              goo(n: number) {}
-          }
-          class B {
-              n = 2
-              s = 3.14
-              foo() {}
-              goo() {}
-          }
-          let u: A|B = new A
-      tags: compile-only, negative
-      use: |-
           console.log(u.s)  // compile-time error, field types are not equal
+      stdout: |-
+          "Semantic error ESE0244: Member type must be the same for all union objects."  
 
     - decl: |-
           class A {
@@ -64,6 +47,7 @@ cases:
               goo() {}
           }
           let u: A|B = new A
-      tags: compile-only, negative
       use: |-
           u.goo()  // compile-time error, signatures are not equal
+      stdout: |-
+          "Semantic error ESE0244: Member type must be the same for all union objects."  

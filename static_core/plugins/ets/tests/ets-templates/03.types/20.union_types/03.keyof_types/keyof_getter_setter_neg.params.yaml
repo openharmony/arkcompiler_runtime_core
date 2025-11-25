@@ -11,12 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
 cases:
-    - desc: Literal type does not match, compilation error.
-      use: |-
-          type HTTPMethod = "GET" | "POST" | "PUT";
-          let tmp1: HTTPMethod = "GET";
-          if (tmp1 == "PU") {
-            console.log("compile-time error");
-          }
+  - decl: |-
+      class A {
+        private _foo: int
+        get foo(): int { return this._foo } 
+        set foo(i: int) { this._foo = i } 
+      }
+
+      type t = keyof A
+    check: |-
+      let a: t = "_foo"
+    stdout: |-
+      "Semantic error ESE0318: Type '\"_foo\"' cannot be assigned to type '\"foo\"'"  
+
+  

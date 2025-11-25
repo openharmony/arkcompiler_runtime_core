@@ -19,7 +19,6 @@
 desc: The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
 files:
 - ./module.ets
-tags: [{{c.tags}}]
 ---*/
 
 {{c.import|indent}}

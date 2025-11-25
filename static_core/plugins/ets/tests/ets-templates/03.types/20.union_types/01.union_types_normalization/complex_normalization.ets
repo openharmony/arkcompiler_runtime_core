@@ -14,25 +14,21 @@
  */
 
 /*---
-desc: Accessing common members with inheritance.
+desc: Test union type normalization. Complex inner types and linearization
 ---*/
 
-class A {
-  tmp = 1;
-  tmp1 = "aa";
-  foo() {}
-  goo( tmp : number ) { }
-}
+type level1 = Short | string | readonly int[] | Any;
+type level2 = Byte | String | level1 | Any
+type level3 = never | TestClass | keyof TestClass | level2
+type level4 = level3 | [string, Long] | bigint | Error
 
-class B {
-  tmp = 2;
-  tmp1 = 3.14;
-  foo() { }
-  goo() { }
+class TestClass {
+    test: null
 }
 
 function main(): void {
-  let account: A | B = new A();
-  arktest.assertTrue(account.tmp === 1);
-  account.foo();
+    //any type through normalization
+    let anyVar: level4
+    anyVar = c'◯'
+    arktest.assertEQ(typeof anyVar, "char")
 }
