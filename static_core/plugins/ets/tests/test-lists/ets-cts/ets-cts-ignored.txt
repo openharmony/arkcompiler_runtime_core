@@ -200,6 +200,9 @@
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_82.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_83.ets
 
+#31755
+06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/explicit_type_conversion_6.ets
+
 #30469
 07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets
 
