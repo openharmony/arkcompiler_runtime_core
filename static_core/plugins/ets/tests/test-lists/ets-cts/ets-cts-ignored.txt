@@ -591,9 +591,6 @@
 08.statements/04.local_declarations/post_declaration_func_n_1.ets
 08.statements/04.local_declarations/post_declaration_n_1.ets
 
-#30145
-08.statements/14.throw_statements/throw_7.ets
-
 #22428
 08.statements/15.try_statements/01.catch_clause/catch_6.ets
 08.statements/15.try_statements/01.catch_clause/catch_9.ets
@@ -2167,6 +2164,7 @@
 18.annotations/base_annotation_syntax_n_3.ets
 18.annotations/base_annotation_syntax_n_5.ets
 18.annotations/base_annotation_syntax_n_6.ets
+
 
 #30410
 18.annotations/03.exporting_and_importing_annotations/import_as_type.ets

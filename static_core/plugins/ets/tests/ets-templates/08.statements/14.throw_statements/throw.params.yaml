@@ -130,9 +130,12 @@ cases:
       arktest.assertTrue(false, "No expected error")
 
   - defs: |-
+      let rc: int = 0      
+      let scc: int = 0
       class StaticThrow extends Error {}
       class ThrowFromClassInit {
         static {
+          scc++
           throw new StaticThrow
         }
       }
@@ -142,16 +145,21 @@ cases:
       try {
         new ThrowFromClassInit
       } catch(e) {
-        arktest.assertTrue( e instanceof StaticThrow )
+        if(rc == 0) {
+          arktest.assertTrue( e instanceof StaticThrow )
+        } else {
+          arktest.assertTrue( e instanceof LinkerUnresolvedClassError )
+        }
         cc++
       }
+      rc++
       try {
         new ThrowFromClassInit
       } catch(e) {
-
-        arktest.assertTrue( e instanceof StaticThrow )
+        arktest.assertTrue( e instanceof LinkerUnresolvedClassError )
         cc++
       }
+      arktest.assertEQ(1, scc)
       arktest.assertEQ(2, cc)
 
   - defs: |-
