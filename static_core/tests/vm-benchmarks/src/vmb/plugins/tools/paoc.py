@@ -41,9 +41,9 @@ class Tool(ToolBase):
             self.etsstdlib = self.ensure_file(
                 panda_root, 'plugins', 'ets', 'etsstdlib.abc')
         elif self.target in (Target.DEVICE, Target.OHOS):
-            self.paoc = f'{self.dev_dir}/{self.bin_name}'
-            self.ark_lib = f'{self.dev_dir}/lib'
-            self.etsstdlib = f'{self.dev_dir}/etsstdlib.abc'
+            self.paoc = f'{self.dev_dir.as_posix()}/{self.bin_name}'
+            self.ark_lib = f'{self.dev_dir.as_posix()}/lib'
+            self.etsstdlib = f'{self.dev_dir.as_posix()}/etsstdlib.abc'
         else:
             raise NotImplementedError(f'Wrong target: {self.target}!')
         if OptFlags.AOT_STATS in self.flags:
@@ -70,7 +70,7 @@ class Tool(ToolBase):
     def panda_files(files: Iterable[Path]) -> str:
         if not files:
             return ''
-        return '--panda-files=' + ':'.join([str(f.with_suffix('.abc'))
+        return '--panda-files=' + ':'.join([f.with_suffix('.abc').as_posix()
                                             for f in files])
 
     def do_exec(self, bu: BenchUnit, profdata: bool = False) -> None:
@@ -89,12 +89,12 @@ class Tool(ToolBase):
                 bu.status = BUStatus.COMPILATION_FAILED
                 raise VmbToolExecError(f'{self.name} failed', res)
         if profdata:
-            opts += f' --paoc-use-profile:path={abc}.profdata,force '
+            opts += f' --paoc-use-profile:path={abc.as_posix()}.profdata,force '
         res = self.run_paoc(abc, an, opts=opts)
         if 0 != res.ret:
             bu.status = BUStatus.COMPILATION_FAILED
             raise VmbToolExecError(f'{self.name} failed', res)
-        an_size = self.x_sh.get_filesize(an)
+        an_size = self.x_sh.get_filesize(an.as_posix())
         bu.result.build.append(
             BuildResult(self.bin_name, an_size, res.tm, res.rss))
         bu.result.aot_stats = self.get_aot_stats(an, bu.path)
@@ -108,6 +108,8 @@ class Tool(ToolBase):
                  an: Union[str, Path],
                  opts: str = '',
                  timeout: Optional[float] = None) -> ShellResult:
+        abc = Path(abc).as_posix()
+        an = Path(an).as_posix()
         return self.x_run(self.cmd.format(abc=abc, an=an, opts=opts),
                           timeout=timeout)
 
