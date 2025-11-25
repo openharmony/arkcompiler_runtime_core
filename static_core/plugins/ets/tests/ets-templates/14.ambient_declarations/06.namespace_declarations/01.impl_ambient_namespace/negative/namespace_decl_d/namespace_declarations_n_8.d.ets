@@ -16,7 +16,6 @@
 /*---
 desc: Ambient Namespace declarations
 name: namespace_declarations.d_8
-files: ['../namespace_declarations_n_8.ets']
 tags:
 - compile-only
 - not-a-test
