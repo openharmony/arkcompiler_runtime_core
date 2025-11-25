@@ -38,6 +38,8 @@ log = logging.getLogger('vmb')
 class PlatformBase(CrossShell, ABC):
     """Platform Base."""
 
+    DEFAULT_TIMEOUT = 900
+
     def __init__(self, args: Args) -> None:
         self.__sh = ShellHost(args.timeout)
         self.__andb = None
