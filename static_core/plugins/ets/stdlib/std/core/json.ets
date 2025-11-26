@@ -270,13 +270,9 @@ export class JSON {
         if (obj === undefined) {
             return "undefined"
         }
-        // `stringifyFast` does not implement special processing of object literals,
-        // hence need to implement that case in managed
-        if (!(obj instanceof Object) || !Reflect.isLiteralInitializedInterface(obj)) {
-            const json = JSON.stringifyFast(obj)
-            if (json !== undefined) {
-                return json
-            }
+        const json = JSON.stringifyFast(obj)
+        if (json !== undefined) {
+            return json
         }
         return new JSONWriter().write(obj)
     }

@@ -32,6 +32,7 @@
 #include "plugins/ets/runtime/types/ets_typeapi.h"
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
 #include "runtime/handle_scope-inl.h"
 #include "libarkbase/utils/utf.h"
 
@@ -235,29 +236,11 @@ static ObjectHeader *CreateEtsReflectMethodArray(EtsCoroutine *coro, const Panda
 
 ObjectHeader *StdCoreClassGetInstanceMethodsInternal(EtsClass *cls, EtsBoolean publicOnly)
 {
-    ASSERT(cls != nullptr);
-
     auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-
-    bool collectPublic = FromEtsBoolean(publicOnly);
     PandaVector<EtsMethod *> instanceMethods;
-
-    auto *rtCls = cls->GetRuntimeClass();
-    Span<Method> vMethods(rtCls->GetVirtualMethods());
-    Span<Method> cMethods(rtCls->GetCopiedMethods());
-
-    for (auto &method : vMethods) {
-        if (!method.IsConstructor() && (!collectPublic || method.IsPublic())) {
-            instanceMethods.push_back(EtsMethod::FromRuntimeMethod(&method));
-        }
+    for (auto iter = helpers::InstanceMethodsIterator(cls, FromEtsBoolean(publicOnly)); !iter.IsEmpty(); iter.Next()) {
+        instanceMethods.emplace_back(iter.Value());
     }
-    for (auto &cmethod : cMethods) {
-        if (!collectPublic || cmethod.IsPublic()) {
-            instanceMethods.push_back(EtsMethod::FromRuntimeMethod(&cmethod));
-        }
-    }
-
     return CreateEtsReflectMethodArray(coro, instanceMethods);
 }
 

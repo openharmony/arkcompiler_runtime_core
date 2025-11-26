@@ -16,15 +16,15 @@
 #ifndef PANDA_PLUGINS_ETS_REFLECTION_HELPERS_
 #define PANDA_PLUGINS_ETS_REFLECTION_HELPERS_
 
-#include "ets_coroutine.h"
-#include "plugins/ets/runtime/ets_utils.h"
-#include "ets_class_linker_extension.h"
 #include "libarkbase/utils/utils.h"
-#include "intrinsics.h"
-#include "types/ets_field.h"
-#include "types/ets_object.h"
-#include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/types/ets_field.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets::intrinsics::helpers {
 
@@ -98,6 +98,70 @@ Value ReflectFieldGetPrimitive(EtsObject *thisObj, EtsField *field)
 
 bool ResolveAndSetPrimitive(EtsCoroutine *coro, const PrimitiveFieldInfo &info);
 Value GetPrimitiveValue(EtsCoroutine *coro, EtsObject *thisObj, EtsType fieldType, EtsField *field);
+
+EtsBoolean IsLiteralInitializedInterface(EtsObject *target);
+
+class InstanceMethodsIterator final {
+public:
+    explicit InstanceMethodsIterator(EtsClass *cls, bool publicOnly) : publicOnly_(publicOnly)
+    {
+        auto *rtClass = cls->GetRuntimeClass();
+        vMethods_ = rtClass->GetVirtualMethods();
+        cMethods_ = rtClass->GetCopiedMethods();
+        iter_ = vMethods_.begin();
+        isCMethod_ = false;
+        Advance();
+    }
+
+    bool IsEmpty() const
+    {
+        return isCMethod_ && iter_ == cMethods_.end();
+    }
+
+    EtsMethod *Value()
+    {
+        ASSERT(!IsEmpty());
+        return EtsMethod::FromRuntimeMethod(iter_);
+    }
+
+    void Next()
+    {
+        ASSERT(!IsEmpty());
+        ++iter_;
+        Advance();
+    }
+
+private:
+    void Advance()
+    {
+        if (!isCMethod_) {
+            while (iter_ != vMethods_.end() && ShouldSkip()) {
+                ++iter_;
+            }
+            if (iter_ == vMethods_.end()) {
+                iter_ = cMethods_.begin();
+                isCMethod_ = true;
+            }
+        }
+        if (isCMethod_) {
+            while (iter_ != cMethods_.end() && ShouldSkip()) {
+                ++iter_;
+            }
+        }
+    }
+
+    bool ShouldSkip() const
+    {
+        return iter_->IsConstructor() || (publicOnly_ && !iter_->IsPublic());
+    }
+
+private:
+    Span<Method> vMethods_ {};
+    Span<Method> cMethods_ {};
+    Span<Method>::Iterator iter_ {};
+    bool isCMethod_ {};
+    bool publicOnly_ {};
+};
 
 }  // namespace ark::ets::intrinsics::helpers
 

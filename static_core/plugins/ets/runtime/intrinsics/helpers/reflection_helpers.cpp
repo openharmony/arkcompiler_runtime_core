@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "reflection_helpers.h"
-#include "types/ets_primitives.h"
-#include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
+
+#include "plugins/ets/runtime/types/ets_primitives.h"
 
 namespace ark::ets::intrinsics::helpers {
 
@@ -250,6 +250,28 @@ Value GetPrimitiveValue(EtsCoroutine *coro, EtsObject *thisObj, EtsType fieldTyp
     }
     ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "Failed to resolve primitive field type");
     return Value(0);
+}
+
+EtsBoolean IsLiteralInitializedInterface(EtsObject *target)
+{
+    ASSERT(target != nullptr);
+    auto *etsClass = target->GetClass();
+    auto *runtimeClass = etsClass->GetRuntimeClass();
+    if (runtimeClass->GetPandaFile() == nullptr) {
+        return ToEtsBoolean(false);
+    }
+
+    const panda_file::File &pf = *runtimeClass->GetPandaFile();
+    panda_file::ClassDataAccessor cda(pf, runtimeClass->GetFileId());
+    bool retBoolVal = false;
+
+    cda.EnumerateAnnotation(panda_file_items::class_descriptors::INTERFACE_OBJ_LITERAL.data(),
+                            [&retBoolVal](panda_file::AnnotationDataAccessor &) {
+                                retBoolVal = true;
+                                return true;
+                            });
+
+    return ToEtsBoolean(retBoolVal);
 }
 
 }  // namespace ark::ets::intrinsics::helpers
