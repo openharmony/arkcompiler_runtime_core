@@ -587,6 +587,16 @@
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_4.ets
 
+#31475 False positive passed tests on runner-2
+07.expressions/19.nullish-coalescing_expression/lazy_operator_2.ets
+07.expressions/19.nullish-coalescing_expression/lazy_operator_1.ets
+07.expressions/27.conditional-and_expression/conditional_and_boolean_3.ets
+07.expressions/27.conditional-and_expression/conditional_and_bool_3.ets
+07.expressions/28.conditional-or_expression/conditional_or_boolean_3.ets
+07.expressions/28.conditional-or_expression/conditional_or_bool_3.ets
+09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
+09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
+
 #29971
 08.statements/04.local_declarations/post_declaration_func_n_1.ets
 08.statements/04.local_declarations/post_declaration_n_1.ets
@@ -1002,6 +1012,9 @@
 #26714
 13.modules_and_namespaces/01.import_directives/test.ets
 
+#31411
+13.modules_and_namespaces/01.import_directives/03.selective_binding/import_conflict_neg.ets
+
 #29656
 13.modules_and_namespaces/01.import_directives/04.import_type_directive/export_type_with_bind.ets
 
@@ -1042,6 +1055,9 @@
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_4.ets
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_5.ets
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_6.ets
+
+#31384
+14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
 
 #28326
 15.semantic_rules/02.subtyping/02.subtyping_for_generic_classes_and_interfaces/generic_cast_to_generic_superclass.ets
@@ -1849,14 +1865,6 @@
 17.experimental_features/03.resizable_array_creation_expressions/expr_n_16.ets
 17.experimental_features/03.resizable_array_creation_expressions/expr_n_17.ets
 
-#25111
-17.experimental_features/02.fixed_array_types/far3_0.ets
-17.experimental_features/02.fixed_array_types/far3_1.ets
-17.experimental_features/02.fixed_array_types/far3_2.ets
-17.experimental_features/02.fixed_array_types/far3_3.ets
-17.experimental_features/02.fixed_array_types/far3_4.ets
-17.experimental_features/02.fixed_array_types/far3_7.ets
-
 #29160
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_export_decl_4.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_export_decl_5.ets
@@ -2191,18 +2199,3 @@
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_80.ets
 18.annotations/05.standard_annotations/02.target_annotation/ClassAnnoTest.ets
 
-#31475 False positive passed tests on runner-2
-07.expressions/19.nullish-coalescing_expression/lazy_operator_2.ets
-07.expressions/19.nullish-coalescing_expression/lazy_operator_1.ets
-07.expressions/27.conditional-and_expression/conditional_and_boolean_3.ets
-07.expressions/27.conditional-and_expression/conditional_and_bool_3.ets
-07.expressions/28.conditional-or_expression/conditional_or_boolean_3.ets
-07.expressions/28.conditional-or_expression/conditional_or_bool_3.ets
-09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
-09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
-
-#31384
-14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
-
-#31411
-13.modules_and_namespaces/01.import_directives/03.selective_binding/import_conflict_neg.ets
