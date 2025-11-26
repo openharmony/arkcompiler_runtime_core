@@ -1368,7 +1368,7 @@ intrinsics:
   - name: StdCoreStringStartsWith
     space: ets
     class_name: std.core.String
-    method_name: startsWith
+    method_name: startsWithImpl
     static: false
     signature:
       ret: u1
@@ -1383,7 +1383,7 @@ intrinsics:
   - name: StdCoreStringEndsWith
     space: ets
     class_name: std.core.String
-    method_name: endsWith
+    method_name: endsWithImpl
     static: false
     signature:
       ret: u1

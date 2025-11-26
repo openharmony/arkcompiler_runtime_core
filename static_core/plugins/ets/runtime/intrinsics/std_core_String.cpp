@@ -333,6 +333,12 @@ EtsInt StdCoreStringIndexOfAfter(EtsString *s, uint16_t ch, EtsInt fromIndex)
     return ark::intrinsics::StringIndexOfU16(s, ch, fromIndex, ctx);
 }
 
+extern "C" EtsInt StdCoreStringIndexOfAfterSubtracted(EtsString *s, uint16_t ch, EtsInt fromIndex)
+{
+    auto res = StdCoreStringIndexOfAfter(s, ch, fromIndex);
+    return res < 0 ? res : res - fromIndex;
+}
+
 EtsInt StdCoreStringIndexOf(EtsString *s, uint16_t ch)
 {
     return StdCoreStringIndexOfAfter(s, ch, 0);

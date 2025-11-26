@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,18 +19,8 @@ function escapeTest() {
     arktest.assertEQ(escapeSeqActual, escapeSeqGolden, 'escapeSeqActual must be equal to escapeSeqGolden');
 }
 
-function overflowSingleCasesTest() {
-    // on arm32 this case should be disabled due to
-    // https://gitee.com/openharmony/arkcompiler_runtime_core/issues/IBSVYX
-    arktest.assertEQ(string.fromCharCode(NaN), '\u{0}', 'CharCode[0] of a string built from NaN must be 0');
-    arktest.assertEQ(string.fromCharCode(NaN).length, 1);
-    arktest.assertEQ(string.fromCharCode(Infinity), '\u{0}', 'CharCode[0] of a string built from Infinity must be 0');
-    arktest.assertEQ(string.fromCharCode(Infinity).length, 1);
-}
-
 function main(): int {
     let fromCharCodeEscapeTestsuite = new arktest.ArkTestsuite('intrinsics.string_from_char_code_escape');
     fromCharCodeEscapeTestsuite.addTest('escapeTest', escapeTest);
-    fromCharCodeEscapeTestsuite.addTest('OverflowSingleCases', overflowSingleCasesTest);
     return fromCharCodeEscapeTestsuite.run();
 }

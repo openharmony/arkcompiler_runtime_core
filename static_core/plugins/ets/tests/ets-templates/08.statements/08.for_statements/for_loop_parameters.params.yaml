@@ -116,7 +116,7 @@ cases:
   - doc: For loop with complicated forUpdate option configured.
     decl: |-
       let c:string = '';
-      for(let a = 0, b: string='string' ; a<10 ; a++, b += String.fromCharCode( (a+40).toDouble()) ) {
+      for(let a = 0, b: string = 'string'; a < 10; a++, b += String.fromCharCode(a + 40) ) {
         c = b;
       }
       arktest.assertEQ( c, "string)*+,-./01" );

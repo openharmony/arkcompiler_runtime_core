@@ -2006,7 +2006,7 @@
     - uint16_t            # char to look up
 
 - name: StringIndexOfAfterSlowPath
-  entrypoint: StdCoreStringIndexOfAfter
+  entrypoint: StdCoreStringIndexOfAfterSubtracted
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2016,7 +2016,7 @@
     - int32_t             # unused (always zero)
 
 - name: StringIndexOfAfterOddSaved
-  entrypoint: StdCoreStringIndexOfAfter
+  entrypoint: StdCoreStringIndexOfAfterSubtracted
   bridge: odd_saved
   properties: [intrinsic]
   signature:

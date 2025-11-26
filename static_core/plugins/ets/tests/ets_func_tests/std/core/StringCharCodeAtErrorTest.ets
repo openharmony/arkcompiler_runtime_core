@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,8 @@
  */
 
 const strings = ["123", " \tabc\n\v ", "\"'abc'\"", "Русские Буквы", "函数式编程"]
-const validIndices = [0.0, 1.0, NaN]
-const invalidIndices = [-1.0, -100.0, 200.0, Infinity, -Infinity]
+const validIndices: int[] = [0, 1]
+const invalidIndices: int[] = [-1, -100, 200]
 
 function getError(index: int): RangeError {
     return new RangeError(`Invalid index: ${index}`)
@@ -29,21 +29,17 @@ function emptyStr(): void {
     const str = ""
     for (const index of validIndices) {
         arktest.expectError(() => { str.charCodeAt(index) }, getError(index))
-        arktest.expectError(() => { str.charCodeAt(index.toInt()) }, getError(index))
     }
     for (const index of invalidIndices) {
         arktest.expectError(() => { str.charCodeAt(index) }, getError(index))
-        arktest.expectError(() => { str.charCodeAt(index.toInt()) }, getError(index))
     }
 }
 
 function singleChar(): void {
     const str = "𠮷"
-    arktest.expectNoThrow(() => { str.charCodeAt(0.0) })
     arktest.expectNoThrow(() => { str.charCodeAt(0) })
     for (const index of invalidIndices) {
         arktest.expectError(() => { str.charCodeAt(index) }, getError(index))
-        arktest.expectError(() => { str.charCodeAt(index.toInt()) }, getError(index))
     }
 }
 
@@ -51,11 +47,9 @@ function multipleChars(): void {
     for (const str of strings) {
         for (const index of validIndices) {
             arktest.expectNoThrow(() => { str.charCodeAt(index) })
-            arktest.expectNoThrow(() => { str.charCodeAt(index.toInt()) })
         }
         for (const index of invalidIndices) {
             arktest.expectError(() => { str.charCodeAt(index) }, getError(index))
-            arktest.expectError(() => { str.charCodeAt(index.toInt()) }, getError(index))
         }
     }
 }

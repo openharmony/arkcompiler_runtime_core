@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -190,7 +190,7 @@ class MyWritable2 extends stream.Writable {
 }
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties010
 function testWritableWriteLargeData() {
-    const largeData = 'ab'.repeat(Math.floor(16384 / 2));
+    const largeData = 'ab'.repeat(Math.floor(16384 / 2).toInt());
     let writableStream = new MyWritable2();
     let writeResult = writableStream.write(largeData);
     arktest.assertFalse(writeResult);
@@ -198,7 +198,7 @@ function testWritableWriteLargeData() {
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties011
 async function testWritableDrainAfterLargeData() {
-    const largeData = 'ab'.repeat(Math.floor(16384 / 2));
+    const largeData = 'ab'.repeat(Math.floor(16384 / 2).toInt());
     let writableStream = new CustomWritable();
     writableStream.write(largeData);
     await new Promise<void>((resolve) => {
@@ -213,7 +213,7 @@ async function testWritableDrainAfterLargeData() {
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties012
 async function testWritableDrainEvent() {
-    const largeData = 'ab'.repeat(Math.floor(16384 / 2));
+    const largeData = 'ab'.repeat(Math.floor(16384 / 2).toInt());
     let writableStream = new CustomWritable();
     writableStream.write(largeData);
     await writableStream.waitForDrain();
@@ -223,7 +223,7 @@ async function testWritableDrainEvent() {
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties013
 function testWritableStateAfterEnd() {
-    const largeData = 'ab'.repeat(Math.floor(16384 / 2));
+    const largeData = 'ab'.repeat(Math.floor(16384 / 2).toInt());
     let writableStream = new CustomWritable();
     writableStream.write(largeData);
     arktest.assertEQ(writableStream.writable, true);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ export class StringUtil {
     randomString(size: int): string {
         let s = '';
         for (let i = 0; i < size; i++) {
-            s += String.fromCharCode((this.x * Math.random()) + this.y);
+            s += String.fromCharCode((this.x * Math.random()).toInt() + this.y);
         }
         return s;
     }

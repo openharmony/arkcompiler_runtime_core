@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,13 +73,8 @@ function testEndsWith() {
     arktest.assertFalse(HELLO.endsWith('Hello', 2));
     arktest.assertFalse(HELLO.endsWith('Hello', 3));
     arktest.assertFalse(HELLO.endsWith('Hello', 4));
-    arktest.assertFalse(HELLO.endsWith('Hello', 4.0));
-    arktest.assertFalse(HELLO.endsWith('Hello', 4.5));
     arktest.assertTrue(HELLO.endsWith('Hello', 5));
-    arktest.assertTrue(HELLO.endsWith('Hello', 5.0));
-    arktest.assertTrue(HELLO.endsWith('Hello', 5.5));
     arktest.assertTrue(HELLO.endsWith('Hello', 100));
-    arktest.assertTrue(HELLO.endsWith('Hello', 100.5));
 
     arktest.assertTrue(NATURE.endsWith(''));
     arktest.assertTrue(NATURE.endsWith('', -1));
@@ -95,10 +90,7 @@ function testEndsWith() {
     arktest.assertFalse(NATURE.endsWith('然界', 1));
     arktest.assertFalse(NATURE.endsWith('然界', 2));
     arktest.assertTrue(NATURE.endsWith('然界', 3));
-    arktest.assertTrue(NATURE.endsWith('然界', 3.0));
-    arktest.assertTrue(NATURE.endsWith('然界', 3.5));
     arktest.assertTrue(NATURE.endsWith('然界', 100));
-    arktest.assertTrue(NATURE.endsWith('然界', 100.5));
 
     arktest.assertTrue(NATURE.endsWith('自然界'));
     arktest.assertFalse(NATURE.endsWith('自然界', -1));

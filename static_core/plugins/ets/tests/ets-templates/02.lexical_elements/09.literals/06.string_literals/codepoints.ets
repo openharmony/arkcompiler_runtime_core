@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -24,11 +24,11 @@ function main() {
     let len: int = 0
     for (let i = 12; i < 0x10FFFF; i += 30009) {
         if (Char.codeUnitsToEncode(i) == 1) {
-            res += String.fromCharCode(Int.toDouble(i))
+            res += String.fromCharCode(i)
             len++
         } else {
-            res += String.fromCharCode(Char.toDouble(Char.getHighSurrogate(i)))
-            res += String.fromCharCode(Char.toDouble(Char.getLowSurrogate(i)))
+            res += String.fromCharCode(Char.getHighSurrogate(i).toInt())
+            res += String.fromCharCode(Char.getLowSurrogate(i).toInt())
             len += 2
         }
     }
