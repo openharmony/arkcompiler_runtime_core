@@ -29,13 +29,16 @@ function main(): int {
     suite.addTest("Test constructor with string (local TZ)", testStringConstructorLocalTZ)
     suite.addTest("Test constructor with string (invalid arguments)", testStringConstructorInvalidArgs)
     suite.addTest("Test constructor with string (expanded year)", testStringConstructorExpandedYear)
+    suite.addTest("Test constructor with string and offset", testStringConstructorWithOffset)
+    suite.addTest("Test constructor with RFC1123 string", testStringConstructorRFC1123)
+    suite.addTest("Test Date.parse matches constructor", testDateParseConsistency)
 
     return suite.run()
 }
 
-function test(result: int, message: String ): int {
-    if(result == 0) {
-      return 0;
+function test(result: int, message: String): int {
+    if (result == 0) {
+        return 0;
     }
     console.println("FAILED: " + message);
     return 1;
@@ -44,21 +47,21 @@ function test(result: int, message: String ): int {
 const msPerMinute: int = 60000;
 const intYears: int[] = [-300, -72, 1, 0, 99, 100, 1900, 1969, 1970, 1971, 1980, 2000, 2020, 2023, 2024, 2030, 2038, 2039];
 const intMonths: int[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5];
-const intHours: int[] =  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 17, 18, 19, 20, 21];
+const intHours: int[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 17, 18, 19, 20, 21];
 const intMinutes: int[] = [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 0, 4, 8];
 const valueIntYears: int[] = [-300, -72, 1901, 1900, 1999, 100, 1900, 1969, 1970, 1971, 1980, 2000, 2020, 2023, 2024, 2030, 2038, 2039];
 
 const dateString: string[] = ["2019-11-14T00:55:31.820Z", "2024-02-29T00:55:31.950Z", "2000-01-01T00:00:00.001Z"]
 
 function testIntMsConstructor(): void {
-    for(let i: int = 0; i < intYears.length; i++) {
+    for (let i: int = 0; i < intYears.length; i++) {
         let cd = new Date(intYears[i]);
         arktest.assertEQ(cd.valueOf(), intYears[i])
     }
 }
 
 function testIntYearMonthConstructor(): void {
-    for(let i: int = 0; i < intYears.length; i++) {
+    for (let i: int = 0; i < intYears.length; i++) {
         let cd = new Date(intYears[i], intMonths[i]);
         let utc = Date.UTC(intYears[i], intMonths[i]);
 
@@ -68,7 +71,7 @@ function testIntYearMonthConstructor(): void {
 }
 
 function testIntYearMonthDayConstructor(): void {
-    for(let i: int = 0; i < intYears.length; i++) {
+    for (let i: int = 0; i < intYears.length; i++) {
         let day: int = intMonths[i] + 1;
         let cd = new Date(intYears[i], intMonths[i], day);
         let utc = Date.UTC(intYears[i], intMonths[i], day);
@@ -79,7 +82,7 @@ function testIntYearMonthDayConstructor(): void {
 }
 
 function testIntYearMonthDayHoursConstructor(): void {
-    for(let i: int = 0; i < intYears.length; i++) {
+    for (let i: int = 0; i < intYears.length; i++) {
         let day: int = intMonths[i] + 1;
         let cd = new Date(intYears[i], intMonths[i], day, intHours[i]);
         let utc = Date.UTC(intYears[i], intMonths[i], day, intHours[i]);
@@ -90,7 +93,7 @@ function testIntYearMonthDayHoursConstructor(): void {
 }
 
 function testIntYearMonthDayHoursMinutesConstructor(): void {
-    for(let i: int = 0; i < intYears.length; i++) {
+    for (let i: int = 0; i < intYears.length; i++) {
         let day: int = intMonths[i] + 1;
         let cd = new Date(intYears[i], intMonths[i], day, intHours[i], intMinutes[i]);
         let utc = Date.UTC(intYears[i], intMonths[i], day, intHours[i], intMinutes[i]);
@@ -101,7 +104,7 @@ function testIntYearMonthDayHoursMinutesConstructor(): void {
 }
 
 function testIntYearMonthDayHoursMinutesSecondsConstructor(): void {
-    for(let i: int = 0; i < intYears.length; i++) {
+    for (let i: int = 0; i < intYears.length; i++) {
         let day: int = intMonths[i] + 1;
         let cd = new Date(intYears[i], intMonths[i], day, intHours[i], intMinutes[i], intMinutes[i]);
         let utc = Date.UTC(intYears[i], intMonths[i], day, intHours[i], intMinutes[i], intMinutes[i]);
@@ -112,11 +115,18 @@ function testIntYearMonthDayHoursMinutesSecondsConstructor(): void {
 }
 
 function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
-    for(let i: int = 0; i < intYears.length; i++) {
+    for (let i: int = 0; i < intYears.length; i++) {
         let day: int = intMonths[i] + 1;
         let millis: int = intMinutes[i] * 10;
 
-        let cd = new Date(intYears[i], intMonths[i], day, intHours[i], intMinutes[i], intMinutes[i], millis);
+        let cd = new Date(
+            intYears[i],
+            intMonths[i],
+            day,
+            intHours[i],
+            intMinutes[i],
+            intMinutes[i],
+            millis);
         let utc = Date.UTC(intYears[i], intMonths[i], day, intHours[i], intMinutes[i], intMinutes[i], millis);
 
         arktest.assertEQ(utc, cd.valueOf() - cd.getTimezoneOffset() * msPerMinute)
@@ -125,16 +135,22 @@ function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
 }
 
 function testStringConstructor(): void {
-    for(let i: int = 0; i < dateString.length; i++) {
+    for (let i: int = 0; i < dateString.length; i++) {
         let cd: Date = new Date(dateString[i]);
         arktest.assertEQ(dateString[i], cd.toISOString())
     }
 }
 
 function testDateConstructor(): void {
-    for(let i: int = 0; i < intYears.length; i++) {
+    for (let i: int = 0; i < intYears.length; i++) {
         let day: int = intMonths[i] + 1;
-        let tmp = new Date(intYears[i], intMonths[i], day, intHours[i], intMinutes[i], intMinutes[i]);
+        let tmp = new Date(
+            intYears[i],
+            intMonths[i],
+            day,
+            intHours[i],
+            intMinutes[i],
+            intMinutes[i]);
         let cd = new Date(tmp);
 
         arktest.assertEQ(tmp.valueOf(), cd.valueOf())
@@ -155,7 +171,7 @@ function testStringConstructorInvalidArgs(): void {
     arktest.expectError(() => {
         const startingSpaceDate = new Date(" 2024-02-19T08:00:00")
     }, "Invalid time value: ' 2024-02-19T08:00:00'")
-    
+
     arktest.expectError(() => {
         const trailingSpaceDate = new Date("2024-02-19T08:00:00 ")
     }, "Invalid time value: '2024-02-19T08:00:00 '")
@@ -196,7 +212,33 @@ function testStringConstructorExpandedYear(): void {
     arktest.assertEQ(date.toUTCString(), "Thu, 01 Jul -0001 00:00:00 GMT")
 }
 
-//*************************************************************************************************************************************************************
+function testStringConstructorWithOffset(): void {
+    const plusOffset = new Date("2024-02-19T08:00:00+05:30")
+    arktest.assertEQ(plusOffset.getTime(), Date.UTC(2024, 1, 19, 2, 30, 0, 0))
+
+    const minusOffset = new Date("2024-02-19T08:00:00-04:00")
+    arktest.assertEQ(minusOffset.getTime(), Date.UTC(2024, 1, 19, 12, 0, 0, 0))
+}
+
+function testStringConstructorRFC1123(): void {
+    const rfcDate = new Date("Tue, 19 Feb 2024 08:00:00 GMT")
+    arktest.assertEQ(rfcDate.toISOString(), "2024-02-19T08:00:00.000Z")
+}
+
+function testDateParseConsistency(): void {
+    const samples: string[] = [
+        "2019-11-14T00:55:31.820Z",
+        "2024-02-29T00:55:31.950Z",
+        "Tue, 19 Feb 2024 08:00:00 GMT",
+        "2024-02-19T08:00:00-04:00"
+    ]
+    for (let i: int = 0; i < samples.length; i++) {
+        const parsed = Date.parse(samples[i])
+        const constructed = new Date(samples[i]).getTime()
+        arktest.assertEQ(parsed, constructed, "Date.parse result mismatch")
+    }
+}
+
 
 function checkDateWithIntYMD(date: Date, year: int, month: int, day: int): void {
     checkDateWithIntYMDH(date, year, month, day, 0);
