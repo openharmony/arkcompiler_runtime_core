@@ -50,7 +50,7 @@ static constexpr std::string_view FINREG_NODE                          = "Lstd/c
 static constexpr std::string_view TYPE                                 = "Lstd/core/Type;";
 static constexpr std::string_view FIELD                                = "Lstd/core/Field;";
 static constexpr std::string_view METHOD                               = "Lstd/core/Method;";
-static constexpr std::string_view PARAMETER                            = "Lstd/core/Parameter;";
+static constexpr std::string_view PARAMETER                            = "Lstd/core/TypeAPIParameter;";
 static constexpr std::string_view STRING_BUILDER                       = "Lstd/core/StringBuilder;";
 
 // TypeAPI classes

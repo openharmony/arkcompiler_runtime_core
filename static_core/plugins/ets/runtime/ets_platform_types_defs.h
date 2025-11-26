@@ -109,7 +109,7 @@
     /* TypeAPI */                                                                                                     \
     T("Lstd/core/Field;", coreField)                                                                                  \
     T("Lstd/core/Method;", coreMethod)                                                                                \
-    T("Lstd/core/Parameter;", coreParameter)                                                                          \
+    T("Lstd/core/TypeAPIParameter;", coreTypeAPIParameter)                                                            \
     T("Lstd/core/ClassType;", coreClassType)                                                                          \
     T("Lstd/core/reflect/InstanceField;", reflectInstanceField)   /* naming! */                                       \
     T("Lstd/core/reflect/InstanceMethod;", reflectInstanceMethod) /* naming! */                                       \

@@ -67,7 +67,7 @@ coretypes:
 - managed_class: std.core.reflect.Constructor
   mirror_class: ark::ets::EtsReflectMethod
 
-- managed_class: std.core.Parameter
+- managed_class: std.core.TypeAPIParameter
   mirror_class: ark::ets::EtsTypeAPIParameter
 
 - managed_class: std.debug.concurrency.AtomicFlag
@@ -7591,7 +7591,7 @@ intrinsics:
     method_name: getParameter
     static: false
     signature:
-      ret: std.core.Parameter
+      ret: std.core.TypeAPIParameter
       args: [ i64, std.core.Type ]
     impl: ark::ets::intrinsics::TypeAPIGetParameter
 
