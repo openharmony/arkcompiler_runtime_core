@@ -54,8 +54,12 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
         // Filter by type (out/err)
         filtered = filtered.filter(log => {
             const isErr = log.from?.includes('Err');
-            if (!showOut && !isErr) return false;
-            if (!showErr && isErr) return false;
+            if (!showOut && !isErr) {
+                return false;
+            }
+            if (!showErr && isErr) {
+                return false;
+            }
             return true;
         });
 
