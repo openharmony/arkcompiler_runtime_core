@@ -2340,7 +2340,7 @@ try {
 
 `static wrapFloat(value: number): STValue`
 
-An STValue object used to wrap numbers as single-precision floating-point numbers (32-bit floating-point numbers). For the conversion from double-precision floating-point value to single-precision floating-point float, the actual effect is the same as `static_cast<float>(value)` in C++. Accepts a numeric argument and returns the wrapped STValue object.
+An STValue object used to wrap numbers as single-precision floating-point numbers (32-bit floating-point numbers). For the conversion from double-precision floating-point value to single-precision floating-point float, the actual effect is the same as `static_cast<float>(value)` in C++. Accepts a numeric argument and returns the wrapped STValue object. If a numeric parameter exceeds the representable range of a single-precision floating-point number, it will be converted to positive infinity (+Infinity) or negative infinity (-Infinity).
 
 **Parameters:** 
 
@@ -2362,7 +2362,7 @@ let floatValue = STValue.wrapFloat(3.14);
 let isFloat = floatValue.isFloat(); // true
 ```
 **Error:**
-When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the single-precision floating-point range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the single-precision floating-point range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the single-precision floating-point range, an error `Wrong parameter value exceeds the valid range` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when other errors are encountered, other types of errors are reported.
 
 Example:
 ```typescript
@@ -2381,7 +2381,7 @@ try {
 
 `static wrapNumber(value: number): STValue`
 
-An STValue object used to wrap numbers into double-precision floating-point types (64-bit floating-point numbers), accepts a number parameter, and returns the wrapped STValue object.
+An STValue object used to wrap numbers into double-precision floating-point types (64-bit floating-point numbers), accepts a number parameter, and returns the wrapped STValue object. If a numeric parameter exceeds the representable range of a double-precision floating-point number, it will be converted to positive infinity (+Infinity) or negative infinity (-Infinity).
 
 **Parameters:** 
 
@@ -2404,7 +2404,7 @@ let isDouble = doubleValue.isNumber(); // true
 ```
 
 **Error:**
-When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the double-precision floating-point range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the double-precision floating-point range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the double-precision floating-point range, an error `Wrong parameter value exceeds the valid range` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when other errors are encountered, other types of errors are reported.
 
 Example:
 ```typescript
