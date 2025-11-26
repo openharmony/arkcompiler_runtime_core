@@ -450,6 +450,13 @@ class TestStandardFlow(Test):
 
         return passed
 
+    def _log_invalid_tags(self) -> None:
+        if len(self.invalid_tags) > 0:
+            Log.default(
+                _LOGGER,
+                f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
+                f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
+
     def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
             passed, report, fail_kind = True, None, None
@@ -517,6 +524,8 @@ class TestStandardFlow(Test):
         )
         self.reproduce += test_runner.reproduce
         self.reproduce += self.expected_err_log
+        result = "PASSED" if passed else f"FAILED with {fail_kind}"
+        self.reproduce += f"Step '{step.name}' result: {result}\n"
         return passed, report, fail_kind
 
     def __expand_last_call_in_args(self, args: list[str]) -> list[str]:
