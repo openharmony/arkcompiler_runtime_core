@@ -34,7 +34,7 @@ cases:
     assert_result: '"computeField getValue "'
     assert_s: '"abc"'
 
-  - desc: 'Negative case for field assignment. E evaluation completes abruptely'
+  - desc: 'Negative case for field assignment. E evaluation completes abruptly'
     compute_field: 'return ""'
     field: 'public fld: string'
     class_constructor: 'throw new Error("Any error to break assignment")'
@@ -46,7 +46,7 @@ cases:
     assert_result: '"getObj classConstructor "'
     assert_s: '""'
 
-  - desc: 'Negative case for field assignment. F evaluation completes abruptely'
+  - desc: 'Negative case for field assignment. F evaluation completes abruptly'
     compute_field: |-
       throw new Error("Any error to break assignment")
       return ""
@@ -60,7 +60,7 @@ cases:
     assert_result: '"getObj computeField "'
     assert_s: '""'
 
-  - desc: 'Negative case for static field assignment. F evaluation completes abruptely'
+  - desc: 'Negative case for static field assignment. F evaluation completes abruptly'
     compute_field: |-
       throw new Error("Any error to break assignment")
       return ""
@@ -74,7 +74,7 @@ cases:
     assert_result: '"getValue computeField "'
     assert_s: '""'
 
-  - desc: 'Negative case for field assignment. Rhs evaluation completes abruptely'
+  - desc: 'Negative case for field assignment. Rhs evaluation completes abruptly'
     compute_field: 'return ""'
     field: 'public fld: string = computeField()'
     class_constructor: ''
@@ -88,7 +88,7 @@ cases:
     assert_result: '"getObj computeField classConstructor getValue "'
     assert_s: '""'
 
-  - desc: 'Negative case for static field assignment. Rhs evaluation completes abruptely'
+  - desc: 'Negative case for static field assignment. Rhs evaluation completes abruptly'
     compute_field: 'return ""'
     field: 'public static fld: string = computeField()'
     class_constructor: ''

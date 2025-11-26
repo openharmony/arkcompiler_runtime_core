@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: A spread expression can be used only within the array literal or argument passing.
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

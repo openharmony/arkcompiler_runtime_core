@@ -15,7 +15,6 @@
 
 {%- for c in cases %}
 /*---
-tags: {{c.tags}}
 desc: The numeric types conversion (see Primitive Types Conversions) is performed on the operands of a value equality operator.
 ---*/
 

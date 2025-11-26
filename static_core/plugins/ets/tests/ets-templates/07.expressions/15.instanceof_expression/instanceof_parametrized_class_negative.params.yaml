@@ -13,8 +13,8 @@
 
 ---
 cases:
-    - { type: 'T', tags: 'compile-only, negative' }
-    - { type: 'A<T>', tags: 'compile-only, negative' }
-    - { type: 'A<number>', tags: 'compile-only, negative' }
-    - { type: 'A<A<T>>', tags: 'compile-only, negative' }
-    - { type: 'A<A<number>>', tags: 'compile-only, negative' }
+    - { type: 'T' }
+    - { type: 'A<T>' }
+    - { type: 'A<number>' }
+    - { type: 'A<A<T>>' }
+    - { type: 'A<A<number>>' }

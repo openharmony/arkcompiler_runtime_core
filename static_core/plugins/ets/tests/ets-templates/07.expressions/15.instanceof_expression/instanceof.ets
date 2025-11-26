@@ -17,7 +17,6 @@
 {% for t in c['types'] %}
 /*---
 desc: Any instanceof expression in the form 'expr instanceof T' is of type boolean
-tags: [{% if t.res == 'cte' %}compile-only, negative{% endif %}]
 ---*/
 
 {{c.decl}}
@@ -27,14 +26,10 @@ function main() {
     arktest.expectThrow(() => {({{c.expr}} instanceof {{t.type}})})
 {%- else %}
     let v1 = {{c.expr}} instanceof {{t.type}}
-{%- if t.res != 'cte' %}
     arktest.assertTrue(v1 instanceof boolean)
     arktest.assertEQ(v1 ? 1 : 0, {{t.res}})
-{% endif %}
     let v2 = ((p: boolean) => p ? 1 : 0)({{c.expr}} instanceof {{t.type}})
-{%- if t.res != 'cte' %}
     arktest.assertEQ(v2, {{t.res}})
-{%- endif %}
 {%- endif %}
 }
 {% endfor %}

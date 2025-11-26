@@ -20,7 +20,6 @@ desc:
     Per 15.7.1 Type Inference for Numeric Literals, "The default type of a numeric literal is...
       int or long for an integer literal... The default type is used in Numeric Operator Contexts
       as the type of a literal is not inferred..."
-tags: [compile-only {{c.negative}}]
 ---*/
 
 @interface MyAnno {

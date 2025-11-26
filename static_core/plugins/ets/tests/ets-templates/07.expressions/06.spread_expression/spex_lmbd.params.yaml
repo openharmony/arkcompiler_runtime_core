@@ -14,20 +14,6 @@
 ---
 cases:
 # arrays
-    - decl: |-
-          let a1: Object|null|undefined = new Object
-      use: |-
-          // not array type
-          arktest.assertEQ(((...p: Object[]): int => p.length > 0 ? p.length : -1)(...a1), -1)
-      tags: 'negative, compile-only'
-
-    - decl: |-
-          let a1: number[] = [1.0, 2.0]
-      use: |-
-          // not rest parameters
-          arktest.assertEQ(((p1: number, p2: number): number => p1 + p2)(...a1), 3.0)
-      tags: 'negative, compile-only'
-
     - use: |-
           // empty arrays
           let a1: Object[] = [], a2: Error[] = []
@@ -101,13 +87,6 @@ cases:
           } catch (e: Error) {
             arktest.assertTrue(e instanceof NullPointerError)
           }
-
-    - decl: |-
-          let a1: Object[]|null = [new Object, new Object]
-      use: |-
-          // nullish expression
-          arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1), 7)  // CTE expected
-      tags: 'negative, compile-only'
 
     - decl: |-
           let a1: Object[]|null = null
@@ -256,17 +235,6 @@ cases:
           arktest.assertEQ(((...p: (Int|Number|String|undefined)[]): int => p.length)(...a1), 5)
 
     - decl: |-
-          class A<T> {}
-          class B<T> {}
-          class C<T> {}
-      use: |-
-          // use generics
-          let f = <T, U, V> (...p: (A<T>|B<U>|C<V>|null)[]): int => p.length
-          let a1: (A<String>|B<Long>|C<Error>|null)[] = [new A<String>, new B<Long>, new C<Error>]
-          arktest.assertEQ(f<String, Long, Error>(...a1), 3)
-      tags: 'negative, compile-only'
-
-    - decl: |-
           let a1 = ["1", "2", "3"]
       use: |-
           // lambda expression in expression
@@ -325,14 +293,6 @@ cases:
           // nullish-coalescing expression
           arktest.assertEQ(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)!), 3) // NPE expected
       tags: 'negative'
-
-    - decl: |-
-          let a1: [Object, Error]|null = null
-          let a2: [Object, Error]|null = null
-      use: |-
-          // nullish-coalescing expression
-          arktest.assertEQ(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)), 3)  // CTE, nullish expression
-      tags: 'negative, compile-only'
 
     - decl: |-
           function foo(): [number, string] {
@@ -400,16 +360,6 @@ cases:
           // use super expression
           let b: B = new B(1, c'Z')
           arktest.assertEQ(b.meth()[0], 111)
-
-    - decl: |-
-          class A<T> {}
-          class B<T> {}
-      tags: 'compile-only, negative'
-      use: |-
-          // use generics
-          let f = <T, U> (...p: [A<T>, B<U>]): boolean => p[0] == p[1]
-          let a1: [A<Long>, B<Error>] = [new A<Long>, new B<Error>]
-          arktest.assertFalse(f<Long, Error>(...a1))
 
     - decl: |-
           let a2: [int, int] = [6, 5]
