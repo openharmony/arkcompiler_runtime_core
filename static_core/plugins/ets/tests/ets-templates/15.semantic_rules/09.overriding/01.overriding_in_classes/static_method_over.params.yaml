@@ -26,63 +26,50 @@ cases:
   - { base: "i: Number", derived: "i: Double", call: "new Double()", res: 2 }
   - { base: "i: Double", derived: "i: Number", call: "new Number()", res: 2 }
   - { base: "i: Double", derived: "i: Number", call: "new Double()", res: 2 }
-  # CTE due to args covariance
+
   - base: "i: A"
     derived: "i: B"
-    tags: "compile-only, negative"
     call: "new A()"
-    res: 0
-    expected_error: |-
-      /* @@@ label2 Error TypeError: No matching call signature */
+    res: 1
+
   - base: "i: A"
     derived: "i: B"
     call: "new B()"
-    tags: "compile-only, negative"
-    res: 0
-    expected_error: |-
-      /* @@@ label2 Error TypeError: No matching call signature */
+    res: 2
+
   # correct override due to args contravariance
   - { base: "i: B", derived: "i: A", call: "new A()", res: 2 }
   - { base: "i: B", derived: "i: A", call: "new B()", res: 2 }
 
 # Function
-  # paramval is the same, retval is contravariant -> expected CTE
+  # paramval is the same, retval is contravariant
   - base: "i: FUN_AB"
     derived: "i: FUN_AA"
     call: "faa"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
+    res: 2
+
   # paramval is the same, retval is covariant -> OK
   - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "fac", res: 2 }
   # paramval is the same, retval is the same -> OK
   - { base: "i: FUN_AB", derived: "i: FUN_AB", call: "fab", res: 2 }
 
-  # paramval is covariant, retval is the same -> CTE
+  # paramval is covariant, retval is the same
   - base: "i: FUN_AB"
     derived: "i: FUN_BB"
     call: "fbb"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
-  # paramval is covariant, retval is covariant -> CTE
+    res: 2
+
+  # paramval is covariant, retval is covariant
   - base: "i: FUN_AB"
     derived: "i: FUN_BC"
     call: "fbc"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
-  # paramval is covariant, retval is contravariant -> CTE
+    res: 2
+
+  # paramval is covariant, retval is contravariant
   - base: "i: FUN_AB"
     derived: "i: FUN_BA"
     call: "fbc"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
+    res: 2
 
   # paramval is contravariant, retval is the same -> OK
   - base: "i: FUN_BB"
@@ -93,15 +80,13 @@ cases:
   - base: "i: FUN_BB"
     derived: "i: FUN_AC"
     call: "fbc"
-    res: 2
-  # paramval is contravariant, retval is contravariant -> CTE
+    res: 1
+  
+  # paramval is contravariant, retval is contravariant
   - base: "i: FUN_BB"
     derived: "i: FUN_AA"
     call: "faa"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
+    res: 2
 
 # Array
   # override (alias)
@@ -110,52 +95,44 @@ cases:
   - { base: "i: string[]", derived: "i: String[]", call: "new string[2]", res: 2 }
   - { base: "i: string[]", derived: "i: String[]", call: "new String[1]", res: 2 }
 
-  # not-related types -> CTE
+  # not-related types
   - base: "i: FixedArray<int>"
     derived: "i: FixedArray<float>"
     call: "new int[2]"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
+    res: 2
+
   - base: "i: int[]"
     derived: "i: float[]"
     call: "new float[1]"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
+    res: 2
+
   - base: "i: int[]"
     derived: "i: double[]"
     call: "new double[2]"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
+    res: 2
+
   - base: "i: FixedArray<String>"
     derived: "i: FixedArray<Number>"
     call: "new String[1]"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
-  # using of covariant relationship -> CTE
+    res: 2
+
+  # using of covariant relationship
   - base: "i: FixedArray<A>"
     derived: "i: FixedArray<B>"
     call: "[new A()]"
-    res: 0
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label1 Error TypeError: Cannot override */
+    res: 2
+
   - base: "i: A[]"
     derived: "i: B[]"
     call: "[new B()]"
     res: 2
+
   # using of contravariant relationship -> OK
   - base: "i: FixedArray<B>"
     derived: "i: FixedArray<A>"
     call: "[new A()]"
     res: 2
+    
   - base: "i: B[]"
     derived: "i: A[]"
     call: "[new A()]"

@@ -1480,23 +1480,8 @@
 #31018 override protected method in superclass by protected one with the same public in superinterface
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_5.ets
 
-#26554 overloads for static methods span the inheritance
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_4.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_9.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_10.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_11.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_12.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_8.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_9.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_12.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_15.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_16.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_17.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_19.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_20.ets
+#31232 Method in child class doesn't override method in generic parent
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_25.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_26.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_27.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_28.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_29.ets
 
@@ -1543,14 +1528,17 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_3.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_5.ets
 
-#28343
+#28343 CTE in case of imported function is used in declaration overload
+15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_0.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_1.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_2.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_3.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_4.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_5.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_8.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_9.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_10.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_11.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_12.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_13.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_14.ets
-
 
 #30721 No CTE when using overloads with import_all_from_reexport_0
 15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_1.ets
