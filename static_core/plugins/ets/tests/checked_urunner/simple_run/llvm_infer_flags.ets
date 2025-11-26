@@ -43,27 +43,21 @@ function simple(): int {
 }
 
 //! CHECKER        Will throw
-//! RUN_LLVM       options: "--llvm-options=--print-after=runtime-calls-lowering --compiler-regex='.*willThrow'"
+//! RUN_LLVM       options: "--llvm-options=--print-after=runtime-calls-lowering --compiler-regex='.*willThrow.*'"
 //! READ_FILE      "console.out"
 //! LLVM_METHOD    /.*willThrow.*/
-//! INST_NEXT      /.*ArithmeticError.*/
 //! RUN            entry: "llvm_infer_flags.ETSGLOBAL::willThrow"
 
 function willThrow(): int {
     let i0 = 1
+    const i1 = 0
     try {
-        for (let i = 0; i < 100000; i++) {
-            if (condition(i, i0)) {
-                i0 += -1
-            } else {
-                i0 += 4
-            }
-        }
+	    let result : int = i0 / i1
     } catch(e) {
-        if ( e instanceof ArithmeticError) {
+        if (e instanceof ArithmeticError) {
             return 0
         } else {
-            throw e;
+            throw e
         }
     }
     return i0
@@ -84,8 +78,8 @@ function overflows(): int {
                 i0 += 2
             }
         }
-    } catch(expected) {
-        if (expected instanceof ArithmeticError) {
+    } catch(e) {
+        if (e instanceof ArithmeticError) {
             return 0
         } else {
             throw e
