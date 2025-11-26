@@ -35,7 +35,6 @@ bool EtsRegExp::Compile(const std::vector<uint8_t> &pattern, const bool isUtf16,
     }
     if (flagCaseInsentitive_) {
         flags |= PCRE2_CASELESS;
-        flags |= PCRE2_UCP;
     }
     if (flagSticky_) {
         flags |= PCRE2_ANCHORED;
