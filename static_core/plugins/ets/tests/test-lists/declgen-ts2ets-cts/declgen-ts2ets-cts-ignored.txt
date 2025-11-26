@@ -193,5 +193,3 @@
 05.generics/03.utility_types/incorrect_utility_type_usage_0.ts
 05.generics/03.utility_types/incorrect_utility_type_usage_1.ts
 05.generics/03.utility_types/incorrect_utility_type_usage_2.ts
-
-
