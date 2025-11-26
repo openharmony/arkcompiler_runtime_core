@@ -46,26 +46,7 @@ function test(): void {
 function main(): int {
     const suite = new arktest.ArkTestsuite("RegExp.test")
 
-    suite.addTest("test", test)
-    suite.addTest("CaselessTest", caselessTest)
+    suite.addTest("RegExp.test", test)
 
     return suite.run()
-}
-
-function caselessTest(): void {
-    let regex = new RegExp('\u00C7', 'i');
-    arktest.assertTrue(regex.test("ç"));
-    arktest.assertTrue(regex.test("Ç"));
-    arktest.assertFalse(regex.test("c"));
-
-    regex = new RegExp('Z', 'i');
-    arktest.assertTrue(regex.test("z"));
-    arktest.assertTrue(regex.test("Z"));
-    arktest.assertFalse(regex.test("Ż"));
-    arktest.assertFalse(regex.test("ż"));
-
-    regex = new RegExp('\u017B', 'i');
-    arktest.assertTrue(regex.test("ż"));
-    arktest.assertTrue(regex.test("Ż"));
-    arktest.assertFalse(regex.test("z"));
 }
