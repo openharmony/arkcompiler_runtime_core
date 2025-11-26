@@ -195,6 +195,4 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/quick_native.ets
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/unsafe_memory.ets NATIVE BOOT_SELF SUPPORT_RELEASE)
 
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
-#NOTE #28944
-#panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / llvm_infer_flags.ets)
 endif()
