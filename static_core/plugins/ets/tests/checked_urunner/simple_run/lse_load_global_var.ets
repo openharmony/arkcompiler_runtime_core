@@ -32,9 +32,9 @@
 let globalVar = '=';
 
 function main(): int {
-    let s = "aa";
+    let s = 'aa';
     // Here we expect single LoadStatic instruction, the LSE pass should have removed the second one.
     s = s + (globalVar + globalVar);
-    arktest.assertEQ(s, "aa==");
+    arktest.assertEQ(s, 'aa==');
     return 0;
 }
