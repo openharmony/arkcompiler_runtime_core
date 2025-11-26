@@ -17,7 +17,6 @@
 
 /*---
 desc: {{case.desc}}
-tags: [{{case.tags}}]
 ---*/
 
 {{case.dec1|indent}}

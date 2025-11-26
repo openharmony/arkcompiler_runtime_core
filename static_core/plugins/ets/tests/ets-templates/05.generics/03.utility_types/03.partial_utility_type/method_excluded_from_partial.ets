@@ -20,7 +20,6 @@ desc: >-
     If class T has a user-defined getter, setter, or both, then none of those is called
     when object literal is used with Partial<T> variables.
     Object literal has its own built-in getters and setters to modify its variables
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

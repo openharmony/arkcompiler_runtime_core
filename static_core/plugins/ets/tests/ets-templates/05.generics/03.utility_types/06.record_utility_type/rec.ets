@@ -17,7 +17,6 @@
 /*---
 desc: >-
     Type Record<K, V> constructs a container that maps keys (of type K) to values (of type V).
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

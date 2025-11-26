@@ -17,7 +17,6 @@ limitations under the License.
 /*---
 desc: Type arguments
 params: function
-tags: [{{c.tags}}]
 ---*/
 
 interface I {}

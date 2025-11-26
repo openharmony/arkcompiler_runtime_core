@@ -22,7 +22,6 @@ desc: >-
     Lack of constraint effectively means extends Object|null|undefined.
     If the constraint S is a non-nullish type (see Nullish Types), then T is also non-nullish.
     {{case.doc}}
-tags: [{{case.tags}}]
 ---*/
 
 {{case.code}}

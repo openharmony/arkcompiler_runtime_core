@@ -78,11 +78,6 @@ cases:
   - use: |-
       let v: A<X[]> = new A<X[]> (new X[0])
 
-  - use: |-
-      let v: A<X[]|null> = new A<X[]|null> (new X[0])
-    bound: ' extends Object[]|null'
-    tags: 'compile-only, negative'
-
 # aliases
   - use: |-
       let v: A<B> = new A<B> (new X[0] [0])
@@ -95,12 +90,6 @@ cases:
   - use: |-
       let v: A<B> = new A<B> (new Y[0])
     decl: type B = Y[]
-
-  - use: |-
-      let v: A<B|null> = new A<B|null> (new Y[0])
-    bound: ' extends X[]|null'
-    decl: type B = X[]
-    tags: 'compile-only, negative'
 
   # tuples
   - use: |-

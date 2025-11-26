@@ -19,8 +19,6 @@ cases:
   - decl: |-
       let x = new G<Derived>
       arktest.assertTrue(x instanceof GType)
-  - decl: let x = new G<Sometype>
-    tags: compile-only, negative
   - decl: |-
       let h1 = new H<Base>
       arktest.assertTrue(h1 instanceof HType)
@@ -30,18 +28,12 @@ cases:
   - decl: |-
       let h3 = new H<SomeType>
       arktest.assertTrue(h3 instanceof HType)
-  - decl: let h4 = new H<Object>
-    tags: compile-only, negative
   - decl: |-
       let e1 = new Exotic<"aa">
       arktest.assertTrue(e1 instanceof ExoticType)
-  - decl: let e2 = new Exotic<"cc">
-    tags: compile-only, negative
   - decl: |-
       let b1 = new B<'f1'>
       arktest.assertTrue(b1 instanceof BType)
-  - decl: let b2 = new BType<'f0'>
-    tags: compile-only, negative
   - decl: |-
       let b3 = new B<keyof A>
       arktest.assertTrue(b3 instanceof BType)

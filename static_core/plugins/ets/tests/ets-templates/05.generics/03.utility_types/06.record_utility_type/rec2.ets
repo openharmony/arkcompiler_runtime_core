@@ -18,7 +18,6 @@
 desc: >-
     Type K is restricted to numeric types, type string, string literal types, enum types, and union
     types constructed from these types.
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

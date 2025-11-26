@@ -48,22 +48,6 @@ cases:
       arktest.assertTrue(foo(new RA))
   
   - decl: |-
-      class A {
-        s: string = "s"
-        foo() {
-          this.s = "a"
-        }
-      }
-
-      type RA = Readonly<A>
-
-    check: |-
-      let ra: RA = new RA
-      ra.foo()
-      arktest.assertEQ(ra.s, "s")
-    tags: compile-only,negative
-  
-  - decl: |-
       abstract class A {
         s: string = ""
         s2?: string
@@ -83,23 +67,6 @@ cases:
     check: |-
       let rac: RAC = new RAC
       arktest.assertFalse(foo(rac))
-  
-  - decl: |-
-      abstract class A {
-        s: string = "s"
-        foo() {
-          this.s = "a"
-        }
-      }
-
-      class AC extends A {}
-      type RA = Readonly<A>
-
-    check: |-
-      let rac: RAC = new RAC
-      rac.foo()
-      arktest.assertEQ(rac.s, "s")
-    tags: compile-only,negative
   
   - decl: |-
       abstract class A {

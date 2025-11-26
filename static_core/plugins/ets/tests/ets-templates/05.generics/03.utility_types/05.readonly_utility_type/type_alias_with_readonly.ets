@@ -18,7 +18,6 @@ limitations under the License.
 /*---
 desc: >-
     Checks for type alias declaration method access and member change for readonly utility type
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

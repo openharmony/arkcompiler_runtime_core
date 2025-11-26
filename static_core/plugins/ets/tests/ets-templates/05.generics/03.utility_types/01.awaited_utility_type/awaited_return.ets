@@ -17,7 +17,6 @@
 /*---
 desc: >-
     Type Awaited<T> constructs a type which has no type Promise in it.
-tags: [{{c.tags}}]
 ---*/
 
 function foo<T>(): Awaited<T> {

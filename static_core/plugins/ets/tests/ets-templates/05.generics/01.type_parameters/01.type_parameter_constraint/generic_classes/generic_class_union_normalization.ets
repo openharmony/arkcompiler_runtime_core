@@ -20,7 +20,6 @@ desc: >-
     The constraint is denoted as any type except the case when constraint is a single final class
     (see Final Classes) or becomes a single final class as a result of union normalization
     (see Union Types Normalization). Then a compile-time error occurs.
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}
