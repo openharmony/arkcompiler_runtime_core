@@ -19,7 +19,7 @@ desc: >-
     If the result of the evaluation of e is not equal to null or undefined, then the
     result of e! is the outcome of the evaluation of e. If the result of the evaluation
     of e is equal to null or undefined, then NullPointerError is thrown.
-tags: [{{c.tags}}]
+tags: [{{c.warmup}}]
 ---*/
 {{c.decl}}
 

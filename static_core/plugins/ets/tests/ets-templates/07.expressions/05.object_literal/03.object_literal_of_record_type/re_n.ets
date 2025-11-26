@@ -18,7 +18,6 @@
 desc: >-
     If a key is a union type consisting of literals, then all variants must be listed
     in the object literal; otherwise, a compile- time error occurs
-tags: {{c.tags}}
 ---*/
 
 {{c.decl}}

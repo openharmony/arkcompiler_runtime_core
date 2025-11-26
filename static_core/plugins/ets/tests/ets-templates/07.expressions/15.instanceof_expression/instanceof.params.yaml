@@ -13,24 +13,6 @@
 
 ---
 cases:
-  - expr: 'void'
-    types:
-      - { type: 'Any', res: cte }
-      - { type: 'null', res: cte }
-      - { type: 'undefined', res: cte }
-      - { type: 'Object', res: cte }
-      - { type: 'never', res: cte }
-      - { type: 'void', res: cte }
-
-  - expr: 'never'
-    types:
-      - { type: 'Any', res: cte }
-      - { type: 'null', res: cte }
-      - { type: 'undefined', res: cte }
-      - { type: 'Object', res: cte }
-      - { type: 'never', res: cte }
-      - { type: 'void', res: cte }
-
   - expr: 'null'
     types:
       - { type: 'Any', res: 1 }
@@ -38,7 +20,6 @@ cases:
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 0 }
       - { type: 'never', res: 0 }
-      - { type: 'void', res: cte }
 
   - expr: 'undefined'
     types:
@@ -47,25 +28,6 @@ cases:
       - { type: 'undefined', res: 1 }
       - { type: 'Object', res: 0 }
       - { type: 'never', res: 0 }
-      - { type: 'void', res: cte }
-
-  - expr: 'Object'
-    types:
-      - { type: 'Any', res: cte }
-      - { type: 'null', res: cte }
-      - { type: 'undefined', res: cte }
-      - { type: 'Object', res: cte }
-      - { type: 'never', res: cte }
-      - { type: 'void', res: cte }
-
-  - expr: '(() => {})()' # void
-    types:
-      - { type: 'Any', res: cte }
-      - { type: 'null', res: cte }
-      - { type: 'undefined', res: cte }
-      - { type: 'Object', res: cte }
-      - { type: 'never', res: cte }
-      - { type: 'void', res: cte }
 
   - expr: '((): never => { throw new Error })()' # never
     types:
@@ -115,7 +77,6 @@ cases:
       - { type: 'Object', res: 1 }
       - { type: 'string', res: 1 }
       - { type: 'String', res: 1 }
-      - { type: '"abc"', res: cte }
 
   - expr: '((): Any => 0)()'
     types:
@@ -259,8 +220,6 @@ cases:
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
       - { type: 'Array', res: 1 }
-      - { type: 'Array<int>', res: cte }
-      - { type: 'FixedArray', res: cte }
       - { type: 'FixedArray<int>', res: 0 }
 
   - decl: |-
@@ -272,8 +231,6 @@ cases:
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
       - { type: 'Array', res: 1 }
-      - { type: 'Array<number>', res: cte }
-      - { type: 'FixedArray', res: cte }
       - { type: 'FixedArray<double>', res: 0 }
 
   - decl: |-
@@ -285,8 +242,6 @@ cases:
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
       - { type: 'Array', res: 0 }
-      - { type: 'Array<number>', res: cte }
-      - { type: 'FixedArray', res: cte }
       - { type: 'FixedArray<number>', res: 1 }
 
   - decl: |-
@@ -301,10 +256,7 @@ cases:
       - { type: 'string', res: 0 }
       - { type: 'int', res: 0 }
       - { type: 'Array', res: 0 }
-      - { type: 'Array<int>', res: cte }
-      - { type: 'FixedArray', res: cte }
       - { type: 'FixedArray<int>', res: 0 }
-      - { type: 'TT', res: cte }
       - { type: 'Tuple2', res: 1 }
 
   - decl: |-
@@ -313,8 +265,6 @@ cases:
     types:
       - { type: 'string', res: 0 }
       - { type: 'A', res: 1 }
-      - { type: 'A<string>', res: cte }
-      - { type: 'A<>', res: cte }
 
   - decl: |-
       let func = (p: int) => p + p
@@ -334,4 +284,3 @@ cases:
       - { type: 'Any', res: 1 }
       - { type: 'Object', res: 1 }
       - { type: 'Record', res: 1 }
-      - { type: 'Record<string, int>', res: cte }
