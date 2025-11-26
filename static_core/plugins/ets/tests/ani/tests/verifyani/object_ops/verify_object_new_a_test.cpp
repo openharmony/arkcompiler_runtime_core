@@ -43,9 +43,9 @@ public:
         ASSERT_EQ(env_->FindClass("verify_object_new_a_test.CheckCtorTypes", &cls_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", "zcbsilfdC{std.core.Object}:", &ctor_), ANI_OK);
 
-        ani_value ffValue {};
-        ffValue.l = bit_cast<ani_long>(std::numeric_limits<uint64_t>::max());
-        std::fill(std::begin(args_), std::end(args_), ffValue);
+        ani_value fFVALue {};
+        fFVALue.l = bit_cast<ani_long>(std::numeric_limits<uint64_t>::max());
+        std::fill(std::begin(args_), std::end(args_), fFVALue);
         args_[nr0].b = ANI_TRUE;
         args_[nr1].c = 'c';
         args_[nr2].b = bVal;

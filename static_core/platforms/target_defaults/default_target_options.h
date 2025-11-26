@@ -31,12 +31,13 @@ std::string GetTargetString();
 
 template <class ModelMap>
 static typename ModelMap::mapped_type GetTargetSpecificOptionValue(const ModelMap &modelMap,
-                                                                   TargetGetterCallback getTargetString)
+                                                                   const TargetGetterCallback &getTargetString)
 {
     std::string model = getTargetString();
     if (modelMap.count(model) != 0) {
         return modelMap.at(model);
-    } else if (modelMap.count("default") != 0) {
+    }
+    if (modelMap.count("default") != 0) {
         return modelMap.at("default");
     }
     UNREACHABLE();

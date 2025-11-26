@@ -309,6 +309,7 @@ TEST_F(G1GCTest, CheckRemsetAfterPostBarrier)
     std::vector<VMHandle<coretypes::String>> strings;
     std::vector<void *> stringOrigPtrs;
     for (auto &array : arrays) {
+        // NOLINTNEXTLINE(readability-magic-numbers)
         auto str = ObjectAllocator::AllocString(10);
         strings.emplace_back(thread, str);
         stringOrigPtrs.push_back(str);

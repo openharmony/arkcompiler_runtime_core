@@ -38,9 +38,9 @@ public:
     }
 
 protected:
-    ani_module module {};
-    ani_ref nullRef {};
-    ani_string str {};
+    ani_module module {};  // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
+    ani_ref nullRef {};    // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
+    ani_string str {};     // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
 
 private:
     static void StackRefWithLocal(ani_env *env, ani_ref ref)
@@ -172,6 +172,7 @@ TEST_F(ReferenceStrictEqualsTest, DISABLED_stack_ref_local)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module, "checkStackRefWithLocal", ":", &fn), ANI_OK);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
 }
 
@@ -180,6 +181,7 @@ TEST_F(ReferenceStrictEqualsTest, DISABLED_stack_ref_global)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module, "checkStackRefWithGlobal", ":", &fn), ANI_OK);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
 }
 

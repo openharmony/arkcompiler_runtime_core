@@ -17,6 +17,7 @@
 
 namespace ark::ets::ani::verify::testing {
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class StringGetUtf8Test : public VerifyAniTest {
 public:
     void SetUp() override
@@ -27,10 +28,10 @@ public:
     }
 
 protected:
-    ani_string string_;
-    char res_[5];
-    const ani_size size_ = 5;
-    ani_size cnt_;
+    ani_string string_;        // NOLINT(misc-non-private-member-variables-in-classes)
+    char res_[5];              // NOLINT(misc-non-private-member-variables-in-classes,modernize-avoid-c-arrays)
+    const ani_size size_ = 5;  // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_size cnt_;             // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 TEST_F(StringGetUtf8Test, wrong_env)

@@ -30,7 +30,7 @@ private:
     struct PairOfInts {
         EtsInt int1, int2;
     };
-    static constexpr size_t MapIdxFactor = sizeof(PairOfInts) / sizeof(EtsInt);
+    static constexpr size_t MAP_IDX_FACTOR = sizeof(PairOfInts) / sizeof(EtsInt);
 
 public:
     using MapIdx = EtsInt;
@@ -98,7 +98,7 @@ public:
         if (curIdx < numEntries) {
             EtsIntArray *buckets = GetBuckets(coro);
             while (++curIdx < numEntries) {
-                if (buckets->Get(MapIdxFactor * curIdx + 1) != 0) {
+                if (buckets->Get(MAP_IDX_FACTOR * curIdx + 1) != 0) {
                     return curIdx;
                 }
             }
@@ -109,13 +109,13 @@ public:
     EtsObject *GetKey(EtsCoroutine *coro, EtsInt idx)
     {
         EtsObjectArray *data = GetData(coro);
-        return data->Get(MapIdxFactor * idx + 0);
+        return data->Get(MAP_IDX_FACTOR * idx + 0);
     }
 
     EtsObject *GetValue(EtsCoroutine *coro, EtsInt idx)
     {
         EtsObjectArray *data = GetData(coro);
-        return data->Get(MapIdxFactor * idx + 1);
+        return data->Get(MAP_IDX_FACTOR * idx + 1);
     }
 
     static uint32_t GetHashCode(EtsObject *&key);

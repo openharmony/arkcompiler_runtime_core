@@ -33,8 +33,8 @@ public:
     }
 
 protected:
-    ani_ref nullRef {};
-    ani_module module {};
+    ani_ref nullRef {};    // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
+    ani_module module {};  // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
 
 private:
     static void Foo(ani_env *env, ani_ref ref)
@@ -118,6 +118,7 @@ TEST_F(ReferenceIsNullishValueTest, DISABLED_stack_ref)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module, "checkStackRef", ":", &fn), ANI_OK);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
 }
 

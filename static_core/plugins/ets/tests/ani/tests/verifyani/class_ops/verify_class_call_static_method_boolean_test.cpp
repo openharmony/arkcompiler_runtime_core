@@ -15,6 +15,7 @@
 
 #include "verify_ani_gtest.h"
 
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 namespace ark::ets::ani::verify::testing {
 
 class ClassCallStaticMethodBooleanTest : public VerifyAniTest {
@@ -74,9 +75,9 @@ protected:
 
 class A {
 public:
-    static ani_static_method g_method;
+    static ani_static_method g_method;  // NOLINT(readability-identifier-naming)
 
-    static void NativeFoo(ani_env *env, ani_object)
+    static void NativeFoo(ani_env *env, ani_object /*unused*/)
     {
         ani_class cls {};
         ASSERT_EQ(env->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
@@ -85,14 +86,14 @@ public:
     }
 
     template <typename TestType>
-    static void NativeBaz(ani_env *env, ani_object)
+    static void NativeBaz(ani_env *env, ani_object /*unused*/)
     {
         ani_class cls {};
         ASSERT_EQ(env->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
 
         ani_boolean result;
         if constexpr (std::is_same_v<TestType, ClassCallStaticMethodBooleanATest>) {
-            ani_value args[2U];
+            ani_value args[2U];  // NOLINT(modernize-avoid-c-arrays)
             ASSERT_EQ(env->c_api->Class_CallStaticMethod_Boolean_A(env, cls, g_method, &result, args), ANI_OK);
         } else {
             ASSERT_EQ(env->c_api->Class_CallStaticMethod_Boolean(env, cls, g_method, &result), ANI_OK);
@@ -100,14 +101,14 @@ public:
     }
 
     template <typename TestType>
-    static void NativeBar(ani_env *env, ani_object, ani_ref c, ani_long m)
+    static void NativeBar(ani_env *env, ani_object /*unused*/, ani_ref c, ani_long m)
     {
-        ani_class cls = static_cast<ani_class>(c);
-        ani_static_method method = reinterpret_cast<ani_static_method>(m);
+        auto cls = static_cast<ani_class>(c);
+        auto method = reinterpret_cast<ani_static_method>(m);
 
         ani_boolean result;
         if constexpr (std::is_same_v<TestType, ClassCallStaticMethodBooleanATest>) {
-            ani_value args[2U];
+            ani_value args[2U];  // NOLINT(modernize-avoid-c-arrays)
             ASSERT_EQ(env->c_api->Class_CallStaticMethod_Boolean_A(env, cls, method, &result, args), ANI_OK);
         } else {
             ASSERT_EQ(env->c_api->Class_CallStaticMethod_Boolean(env, cls, method, &result), ANI_OK);
@@ -1331,3 +1332,5 @@ TEST_F(ClassCallStaticMethodBooleanATest, success)
 }
 
 }  // namespace ark::ets::ani::verify::testing
+
+// NOLINTEND(cppcoreguidelines-pro-type-vararg)

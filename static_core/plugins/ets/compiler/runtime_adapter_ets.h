@@ -244,6 +244,7 @@ public:
                                                      lengthMutf8};
 
             cda.EnumerateFields([&fieldId, &cda, &lengthSD](panda_file::FieldDataAccessor &fieldDataAccessor) {
+                // NOLINTNEXTLINE(readability-identifier-naming)
                 auto fieldId_ = fieldDataAccessor.GetFieldId();
                 auto &pf = cda.GetPandaFile();
                 auto stringData = pf.GetStringData(fieldDataAccessor.GetNameId());

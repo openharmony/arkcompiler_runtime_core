@@ -64,9 +64,9 @@ public:
             UNREACHABLE();
         }
 
-        constexpr double_t logBase2 = 2.0;
-        const double_t ln2 = std::log(logBase2);
-        size_t m = static_cast<size_t>(std::ceil(-static_cast<double>(n) * std::log(p) / (ln2 * ln2)));
+        constexpr double_t LOG_BASE2 = 2.0;
+        const double_t ln2 = std::log(LOG_BASE2);
+        auto m = static_cast<size_t>(std::ceil(-static_cast<double>(n) * std::log(p) / (ln2 * ln2)));
         numHashes_ = static_cast<size_t>(std::round(static_cast<double>(m) / n * ln2));
 
         bits_.resize(m);

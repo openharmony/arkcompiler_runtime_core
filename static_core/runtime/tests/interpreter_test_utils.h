@@ -51,7 +51,6 @@
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/tests/test_utils.h"
 #include "libarkbase/test_utilities.h"
-#include "libarkbase/utils/utils.h"
 
 namespace ark::interpreter::test {
 

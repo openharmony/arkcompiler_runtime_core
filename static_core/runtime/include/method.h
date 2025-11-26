@@ -175,6 +175,7 @@ public:
                             panda_file::File::EntityId codeId, uint32_t accessFlags, uint32_t numArgs,
                             const uint16_t *shorty);
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     explicit Method(const Method *method)
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible

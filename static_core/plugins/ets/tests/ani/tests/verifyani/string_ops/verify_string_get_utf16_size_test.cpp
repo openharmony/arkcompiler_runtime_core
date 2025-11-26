@@ -17,13 +17,14 @@
 
 namespace ark::ets::ani::verify::testing {
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class StringGetUtf16SizeTest : public VerifyAniTest {
 public:
     void SetUp() override
     {
         VerifyAniTest::SetUp();
 
-        uint16_t str[3] = {0U};
+        uint16_t str[3] = {0U};  // NOLINT(modernize-avoid-c-arrays)
         auto status = env_->String_NewUTF16(str, 3U, &string_);
         ASSERT_EQ(status, ANI_OK);
         ASSERT_EQ(env_->GetUndefined(&undef_), ANI_OK);
@@ -33,21 +34,23 @@ public:
         ani_method ctor {};
         ASSERT_EQ(env_->FindClass("std.core.Object", &cls), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env_->Object_New(cls, ctor, &obj_), ANI_OK);
 
         ASSERT_EQ(env_->FindClass("escompat.Error", &cls_), ANI_OK);
         ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", ":", &ctor), ANI_OK);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env_->Object_New(cls_, ctor, &err_), ANI_OK);
     }
 
 protected:
-    ani_string string_;
-    ani_size size_;
-    ani_object obj_ {};
-    ani_ref undef_ {};
-    ani_object err_ {};
-    ani_ref null_ {};
-    ani_class cls_ {};
+    ani_string string_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_size size_;      // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_object obj_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_ref undef_ {};   // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_object err_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_ref null_ {};    // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_class cls_ {};   // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 TEST_F(StringGetUtf16SizeTest, wrong_env)

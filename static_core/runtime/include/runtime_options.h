@@ -145,7 +145,7 @@ public:
             g1TrackFreedObjects = OHOS::system::GetBoolParameter("persist.sta.gc.SetG1TrackFreedObjects", false);
 #endif
             if (g1TrackFreedObjects) {
-                track = true;
+                track = true;  // NOLINT(readability-simplify-boolean-expr)
             } else {
 #ifdef NDEBUG
                 track = false;

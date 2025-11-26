@@ -456,7 +456,7 @@ public:
         return tools_;
     }
 
-    EntrypointsTable *GetEntrypointsTable(void)
+    EntrypointsTable *GetEntrypointsTable()
     {
         return &entrypoints_;
     }

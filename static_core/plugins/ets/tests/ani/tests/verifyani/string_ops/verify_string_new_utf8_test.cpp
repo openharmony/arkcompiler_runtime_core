@@ -17,11 +17,12 @@
 
 namespace ark::ets::ani::verify::testing {
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class StringNewUtf8Test : public VerifyAniTest {
 protected:
-    const char *buffer_ = "abcdef";
-    ani_size size_ = 6U;
-    ani_string res_;
+    const char *buffer_ = "abcdef";  // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_size size_ = 6U;             // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_string res_;                 // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 TEST_F(StringNewUtf8Test, wrong_env)

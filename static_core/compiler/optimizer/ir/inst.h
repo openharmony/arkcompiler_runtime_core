@@ -1033,11 +1033,11 @@ public:
     bool HasSideEffectsFlags() const
     {
         // NOTE (#31054): When adding new instruction flags, update this method accordingly.
-        const uintptr_t FORBIDDEN_FLAGS = inst_flags::CAN_THROW | inst_flags::TERMINATOR | inst_flags::ALLOC |
-                                          inst_flags::CALL | inst_flags::RUNTIME_CALL |
-                                          inst_flags::IMPLICIT_RUNTIME_CALL | inst_flags::STORE | inst_flags::BARRIER |
-                                          inst_flags::REQUIRE_STATE | inst_flags::CAN_DEOPTIMIZE | inst_flags::NO_DCE;
-        return (GetFlagsMask() & FORBIDDEN_FLAGS) != 0;
+        const uintptr_t forbiddenFlags = inst_flags::CAN_THROW | inst_flags::TERMINATOR | inst_flags::ALLOC |
+                                         inst_flags::CALL | inst_flags::RUNTIME_CALL |
+                                         inst_flags::IMPLICIT_RUNTIME_CALL | inst_flags::STORE | inst_flags::BARRIER |
+                                         inst_flags::REQUIRE_STATE | inst_flags::CAN_DEOPTIMIZE | inst_flags::NO_DCE;
+        return (GetFlagsMask() & forbiddenFlags) != 0;
     }
 
     bool HasPseudoDestination() const

@@ -156,7 +156,7 @@ private:
     mem::Reference *returnValueObject_ = nullptr;
 };
 
-class TimerEvent : public CoroutineEvent {
+class TimerEvent : public CoroutineEvent {  // NOLINT(cppcoreguidelines-special-member-functions)
 public:
     explicit TimerEvent(CoroutineManager *coroManager, EventId id) : CoroutineEvent(Type::TIMER, coroManager, id) {}
 

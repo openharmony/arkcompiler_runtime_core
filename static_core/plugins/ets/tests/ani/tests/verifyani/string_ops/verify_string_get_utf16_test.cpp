@@ -17,22 +17,23 @@
 
 namespace ark::ets::ani::verify::testing {
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class StringGetUtf16Test : public VerifyAniTest {
 public:
     void SetUp() override
     {
         VerifyAniTest::SetUp();
 
-        uint16_t input[3] = {0U};
+        uint16_t input[3] = {0U};  // NOLINT(modernize-avoid-c-arrays)
         auto status = env_->String_NewUTF16(input, 3U, &string_);
         ASSERT_EQ(status, ANI_OK);
     }
 
 protected:
-    ani_string string_;
-    uint16_t res_[5];
-    const ani_size size_ = 5;
-    ani_size cnt_;
+    ani_string string_;        // NOLINT(misc-non-private-member-variables-in-classes)
+    uint16_t res_[5];          // NOLINT(misc-non-private-member-variables-in-classes,modernize-avoid-c-arrays)
+    const ani_size size_ = 5;  // NOLINT(misc-non-private-member-variables-in-classes)
+    ani_size cnt_;             // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 TEST_F(StringGetUtf16Test, wrong_env)
