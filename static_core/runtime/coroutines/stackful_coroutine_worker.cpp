@@ -502,7 +502,7 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
 {
     ASSERT(from != nullptr);
     ASSERT(to != nullptr);
-    EnsureCoroutineSwitchEnabled();
+    EnsureCoroutineSwitchEnabled(from->GetCoroutine());
     LOG(DEBUG, COROUTINES) << "Ctx switch: " << from->GetCoroutine()->GetName() << " --> "
                            << to->GetCoroutine()->GetName();
     stats_.FinishInterval(CoroutineTimeStats::SCH_ALL);
@@ -535,10 +535,9 @@ void StackfulCoroutineWorker::UpdateLoadFactor()
     loadFactor_ = (loadFactor_ + runnables_.Size()) / 2U;
 }
 
-void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()
+void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled(Coroutine *coro)
 {
     if (IsCoroutineSwitchDisabled()) {
-        auto coro = Coroutine::GetCurrent();
         coro->PrintCallStack();
         LOG(FATAL, COROUTINES) << "ERROR ERROR ERROR >>> Trying to switch coroutines on " << GetName()
                                << " when coroutine switch is DISABLED!!! <<< ERROR ERROR ERROR";
