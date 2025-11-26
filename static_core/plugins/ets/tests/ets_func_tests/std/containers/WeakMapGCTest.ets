@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 class Key {
-    readonly id: int
+    public readonly id: int
 
     constructor(id: int) {
         this.id = id
@@ -24,7 +24,7 @@ class Key {
 }
 
 class Val {
-    readonly id: int
+    public readonly id: int
 
     constructor(id: int) {
         this.id = id
@@ -81,7 +81,7 @@ function weakMapKeyGarbageCollection(): void {
     while (reclaimedKeyId != KEY_ID) {
         try {
             const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE)
-            // We need to switch from main coroutine to coroutine created by FinalizationRegistry because 
+            // We need to switch from main coroutine to coroutine created by FinalizationRegistry because
             // if main coro is executed first, the test will return false
             Coroutine.Schedule()
             if (gcId > 0) {
@@ -94,9 +94,9 @@ function weakMapKeyGarbageCollection(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("WeakMap GC tests")
+    const suite = new arktest.ArkTestsuite('WeakMap GC tests')
 
-    suite.addTest("WeakMap keys garbage collection", weakMapKeyGarbageCollection)
+    suite.addTest('WeakMap keys garbage collection', weakMapKeyGarbageCollection)
 
     return suite.run()
 }
