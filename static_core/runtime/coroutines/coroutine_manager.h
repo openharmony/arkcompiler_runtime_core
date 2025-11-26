@@ -380,7 +380,7 @@ public:
 
     uint64_t GetCurrentTime() const
     {
-        return os::time::GetClockTimeInMilli();
+        return os::time::GetClockTimeInMicro();
     }
 
 protected:

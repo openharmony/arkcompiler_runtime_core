@@ -114,7 +114,7 @@ public:
 
     void OnCoroBecameActive(Coroutine *co);
 
-    void TriggerSchedulerExternally(Coroutine *requester);
+    void TriggerSchedulerExternally(Coroutine *requester, int64_t delayMs = 0);
 
     /// should be called once the VM is ready to create managed objects in the managed heap
     void InitializeManagedStructures();

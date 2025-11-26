@@ -240,7 +240,7 @@ void SingleEventPoster::CallbackExecutor(uv_async_t *async)
     eventPoster->callback_();
 }
 
-void SingleEventPoster::PostImpl()
+void SingleEventPoster::PostImpl([[maybe_unused]] int64_t delayMs)
 {
     uv_async_send(async_);
 }

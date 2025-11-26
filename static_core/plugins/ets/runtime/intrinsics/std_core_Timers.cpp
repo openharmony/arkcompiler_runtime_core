@@ -111,6 +111,7 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
         auto *timer = static_cast<TimerInfo *>(param);
         auto *timerCoro = Coroutine::GetCurrent();
         auto *coroMan = timerCoro->GetManager();
+        auto usDelay = timer->GetDelay() * 1000U;
 
         while (true) {
             // Atomic with relaxed order reason: sync is not needed here
@@ -121,7 +122,8 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
             }
 
             timerEvent.Lock();
-            timerEvent.SetExpirationTime(coroMan->GetCurrentTime() + timer->GetDelay());
+            timerEvent.SetExpirationTime(coroMan->GetCurrentTime() + usDelay);
+            timerCoro->GetWorker()->TriggerSchedulerExternally(timerCoro, timer->GetDelay());
             coroMan->Await(&timerEvent);
 
             if (g_timerTable.IsTimerDisarmed(timer->GetId())) {
