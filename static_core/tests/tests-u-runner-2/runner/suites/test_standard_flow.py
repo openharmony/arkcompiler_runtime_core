@@ -262,39 +262,11 @@ class TestStandardFlow(Test):
 
         return '\n'.join(expected[:index_to_delete])
 
-    def log_invalid_tags(self) -> None:
-        if len(self.invalid_tags) > 0:
-            Log.default(
-                _LOGGER,
-                f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
-                f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
-
-    def continue_after_process_dependent_files(self) -> bool:
-        """
-        Processes dependent files
-        Returns True if to continue test run
-        False - break test run
-        """
-        for test in self.dependent_tests:
-            dependent_result = test.do_run()
-            self.reproduce += dependent_result.reproduce
-            simple_failed = not dependent_result.passed
-            negative_compile = dependent_result.passed and dependent_result.is_negative_compile
-            dep_package = dependent_result.metadata.get_package_name()
-            package_neg_compile = self.dependent_packages.get(dep_package, False)
-            if simple_failed or negative_compile or package_neg_compile:
-                self.passed = dependent_result.passed if not package_neg_compile else True
-                self.report = dependent_result.report
-                self.fail_kind = dependent_result.fail_kind
-                self.last_failure_check_passed = dependent_result.last_failure_check_passed
-                return False
-        return True
-
     def do_run(self) -> 'TestStandardFlow':
-        if not self.continue_after_process_dependent_files():
+        if not self._continue_after_process_dependent_files():
             return self
 
-        self.log_invalid_tags()
+        self._log_invalid_tags()
         compile_only_test = self.is_compile_only or self.metadata.tags.not_a_test or self.parent_test_id != ""
         allowed_steps = [StepKind.COMPILER]  # steps to run for compile only or not-a-test tests
         steps = [step for step in self.test_env.config.workflow.steps
@@ -447,6 +419,34 @@ class TestStandardFlow(Test):
 
         return passed
 
+    def _log_invalid_tags(self) -> None:
+        if len(self.invalid_tags) > 0:
+            Log.default(
+                _LOGGER,
+                f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
+                f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
+
+    def _continue_after_process_dependent_files(self) -> bool:
+        """
+        Processes dependent files
+        Returns True if to continue test run
+        False - break test run
+        """
+        for test in self.dependent_tests:
+            dependent_result = test.do_run()
+            self.reproduce += dependent_result.reproduce
+            simple_failed = not dependent_result.passed
+            negative_compile = dependent_result.passed and dependent_result.is_negative_compile
+            dep_package = dependent_result.metadata.get_package_name()
+            package_neg_compile = self.dependent_packages.get(dep_package, False)
+            if simple_failed or negative_compile or package_neg_compile:
+                self.passed = dependent_result.passed if not package_neg_compile else True
+                self.report = dependent_result.report
+                self.fail_kind = dependent_result.fail_kind
+                self.last_failure_check_passed = dependent_result.last_failure_check_passed
+                return False
+        return True
+
     def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
             passed, report, fail_kind = True, None, None
@@ -514,6 +514,8 @@ class TestStandardFlow(Test):
         )
         self.reproduce += test_runner.reproduce
         self.reproduce += self.expected_err_log
+        result = "PASSED" if passed else f"FAILED with {fail_kind}"
+        self.reproduce += f"Step '{step.name}' result: {result}\n"
         return passed, report, fail_kind
 
     def __expand_last_call_in_args(self, args: list[str]) -> list[str]:
