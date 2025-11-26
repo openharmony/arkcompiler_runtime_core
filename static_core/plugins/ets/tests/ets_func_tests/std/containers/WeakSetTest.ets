@@ -14,7 +14,7 @@
  */
 
 class Key {
-    readonly id: int
+    public readonly id: int
 
     constructor(id: int) {
         this.id = id
@@ -46,8 +46,8 @@ function newWeakSetUsingElementsArray(): void {
 }
 
 function newWeakSetUsingElementsIterable(): void {
-    const elem1 = new Object()
-    const elem2 = new Object()
+    const elem1 = new Object;
+    const elem2 = new Object;
 
     const elems: Iterable<Object> = Array.of<Object>(elem1, elem2)
     const weakSet = new WeakSet<Object>(elems)
@@ -57,7 +57,7 @@ function newWeakSetUsingElementsIterable(): void {
 
 function newWeakSetUsingNullElements(): void {
     const weakSet = new WeakSet<Key>(null)
-    
+
     const elem1 = new Key(31)
     weakSet.add(elem1)
 
@@ -69,12 +69,12 @@ function  newWeakSetUsingUndefinedElements(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("WeakSet API tests")
-    suite.addTest("new WeakSet using elements array", newWeakSetUsingElementsArray)
-    suite.addTest("new WeakSet using elements iterable", newWeakSetUsingElementsIterable)
-    suite.addTest("WeakSet operations", weakSetOperations)
-    suite.addTest("new WeakSet using null elements", newWeakSetUsingNullElements)
-    suite.addTest("new WeakSet using undefined elements", newWeakSetUsingUndefinedElements)
+    const suite = new arktest.ArkTestsuite('WeakSet API tests')
+    suite.addTest('new WeakSet using elements array', newWeakSetUsingElementsArray)
+    suite.addTest('new WeakSet using elements iterable', newWeakSetUsingElementsIterable)
+    suite.addTest('WeakSet operations', weakSetOperations)
+    suite.addTest('new WeakSet using null elements', newWeakSetUsingNullElements)
+    suite.addTest('new WeakSet using undefined elements', newWeakSetUsingUndefinedElements)
 
     return suite.run()
 }
