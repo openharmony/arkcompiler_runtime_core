@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -998,6 +998,124 @@
     - uint16_t
     - ark::coretypes::String*
     - int32_t
+
+- name: StringToUpperCaseTlab
+  entrypoint: StringToUpperCaseTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToUpperCaseOddSaved
+  entrypoint: StdCoreStringToUpperCase
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToUpperCaseSlowPath
+  entrypoint: StdCoreStringToUpperCase
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToUpperCaseEntrypoint
+  entrypoint: StdCoreStringToUpperCase
+  bridge: entrypoint # to call from the codegen, not from irtoc
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLowerCaseTlab
+  entrypoint: StringToLowerCaseTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLowerCaseOddSaved
+  entrypoint: StdCoreStringToLowerCase
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLowerCaseSlowPath
+  entrypoint: StdCoreStringToLowerCase
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLowerCaseEntrypoint
+  entrypoint: StdCoreStringToLowerCase
+  bridge: entrypoint # to call from the LLVM codegen, not from irtoc
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLocaleUpperCaseTlab
+  entrypoint: StringToLocaleUpperCaseTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLocaleUpperCaseUsual
+  entrypoint: StdCoreStringToLocaleUpperCase
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLocaleUpperCaseSlowPath
+  entrypoint: StdCoreStringToLocaleUpperCase
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLocaleLowerCaseTlab
+  entrypoint: StringToLocaleLowerCaseTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLocaleLowerCaseUsual
+  entrypoint: StdCoreStringToLocaleLowerCase
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringToLocaleLowerCaseSlowPath
+  entrypoint: StdCoreStringToLocaleLowerCase
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
 - name: BeginGeneralNativeMethod
   entrypoint: BeginGeneralNativeMethod
@@ -2092,3 +2210,10 @@
     - int32_t
     - int32_t
     - int32_t
+
+- name: EtsDefaultLocaleAllowsFastLatinCaseConversion
+  entrypoint: EtsDefaultLocaleAllowsFastLatinCaseConversion
+  bridge: none
+  properties: []
+  signature:
+    - uint8_t             # boolean

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,17 +81,51 @@ function testLineStringEquals() {
     arktest.assertNE(NULL_STR, str, 'Null string must not be equal to non-null one');
     arktest.assertEQ(NULL_STR, NULL_STR, 'Null values of type String must be equal');
     arktest.assertEQ(str, str, 'String must be equal to itself');
-    arktest.assertEQ(str, 'abc', 'String must be equal to \'abc\'');
+    let abcstr = String.fromCharCode(0x61, 0x62, 0x63);
+    arktest.assertEQ(str, abcstr, 'String must be equal to \'abc\'');
     arktest.assertTrue(str.equals(str), 'String must be equal to itself');
-    arktest.assertTrue(str.equals('abc'), 'String must be equal to \'abc\'');
-    arktest.assertTrue(genericEquals(str, 'abc'), 'String must be equal to \'abc\'');
-
+    arktest.assertTrue(str.equals(abcstr), 'String must be equal to \'abc\'');
+    arktest.assertTrue(genericEquals(str, str), 'String must be equal to itself (generic)');
+    arktest.assertTrue(genericEquals(str, abcstr), 'String must be equal to \'abc\' (generic)');
 
     let longCompareStr = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl';
     arktest.assertEQ(longStr.length, 64, 'Long string must be of length 64');
     arktest.assertEQ(longStr, longCompareStr, 'long string must be == to its copy');
     arktest.assertTrue(longStr.equals(longCompareStr), 'Long string must be equal to its copy');
     arktest.assertTrue(genericEquals(longStr, longCompareStr), 'Long string must be equal to its copy (generic)');
+}
+
+function testOddLengthCompressedLineStringEquals() {
+    let oddstr1 = 'abcabcabcdefxhijklmnopqrsXQsjdiwjsjdhoelsmnxhfh';
+    let oddstr2 = String.fromCharCode(97, 98, 99, 97, 98, 99, 97, 98, 99, 100, 101, 102, 120, 104, 105, 106, 107,
+        108, 109, 110, 111, 112, 113, 114, 115, 88, 81, 115, 106, 100, 105, 119, 106, 115, 106, 100, 104, 111, 101,
+        108, 115, 109, 110, 120, 104, 102, 104);
+    arktest.assertEQ(oddstr1.length, 47);
+    arktest.assertEQ(oddstr2.length, 47);
+    arktest.assertTrue(oddstr1.equals(oddstr2),
+        'String of 47 compressible symbols, \'abcabc...\'. must be equal to \'abcabc...\'');
+}
+
+function testEvenLengthCompressedLineStringEquals() {
+    let evenstr1 = 'abcabcabcdefxhijklmnopqrsXQsjdiwjsjdhoelsmnxhf';
+    let evenstr2 = String.fromCharCode(97, 98, 99, 97, 98, 99, 97, 98, 99, 100, 101, 102, 120, 104, 105, 106, 107,
+        108, 109, 110, 111, 112, 113, 114, 115, 88, 81, 115, 106, 100, 105, 119, 106, 115, 106, 100, 104, 111, 101,
+        108, 115, 109, 110, 120, 104, 102);
+    arktest.assertEQ(evenstr1.length, 46);
+    arktest.assertEQ(evenstr2.length, 46);
+    arktest.assertTrue(evenstr1.equals(evenstr2),
+        'String of 46 compressible symbols, \'abcabc...\'. must be equal to \'abcabc...\'');
+}
+
+function testFullAlignedCompressedLineStringEquals() {
+    let aligned1 = 'abcabcabcdefxhijklmnopqrsXQsjdiwjsjdhoelsmnxhfha';
+    let aligned2 = String.fromCharCode(97, 98, 99, 97, 98, 99, 97, 98, 99, 100, 101, 102, 120, 104, 105, 106, 107,
+        108, 109, 110, 111, 112, 113, 114, 115, 88, 81, 115, 106, 100, 105, 119, 106, 115, 106, 100, 104, 111, 101,
+        108, 115, 109, 110, 120, 104, 102, 104, 97);
+    arktest.assertEQ(aligned1.length % 8, 0);
+    arktest.assertEQ(aligned2.length % 8, 0);
+    arktest.assertTrue(aligned1.equals(aligned2),
+        'String of 48 compressible symbols, \'abcabc...\'. must be equal to \'abcabc...\'');
 }
 
 function testTreeStringEquals() {
@@ -226,5 +260,8 @@ function main(): int {
     suite.addTest('testCachedSlicedStringEquals', testCachedSlicedStringEquals);
     suite.addTest('testLongSlicedStringEquals', testLongSlicedStringEquals);
     suite.addTest('testLongCachedSlicedStringEquals', testLongCachedSlicedStringEquals);
+    suite.addTest('testOddLengthCompressedLineStringEquals', testOddLengthCompressedLineStringEquals);
+    suite.addTest('testEvenLengthCompressedLineStringEquals', testEvenLengthCompressedLineStringEquals);
+    suite.addTest('testFullAlignedCompressedLineStringEquals', testFullAlignedCompressedLineStringEquals);
     return suite.run();
 }

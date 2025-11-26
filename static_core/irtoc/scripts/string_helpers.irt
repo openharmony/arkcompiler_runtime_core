@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,33 +18,53 @@ macro(:load_diff) do |ptr1, ptr2, offset|
         LoadI(ptr2).Imm(Constants::STRING_DATA_OFFSET + " + " + offset.to_s).u64).u64
 end  # load_diff
 
+###
+# get_string_length extracts the string length (the number of characters, not the size in bytes)
+# from the corresponding length field.
+#
+macro(:get_string_length) do |length, length_shift|
+    ShrI(length).Imm(length_shift).u64
+end  # get_string_length
+
+# TODO `unpack_length_with_compression` is the replacement for this when the support for strings without
+# compression is removed from the code of all the string-related intrinsics.
 scoped_macro(:unpack_length) do |length, compression, length_shift|
     if compression
-        char_length := ShrI(length).Imm(length_shift).u64
-        not_compressed := AndI(length).Imm(1).u64
-        unpacked_length := Shl(char_length, not_compressed).u64
+        unpack_length_with_compression(length, length_shift)
     elsif length_shift != 0
-        unpacked_length := ShrI(length).Imm(length_shift).u64
+        get_string_length(length, length_shift)
     end
 end  # unpack_length
 
 scoped_macro(:unpack_length_with_compression) do |length, length_shift|
-  char_length := ShrI(length).Imm(length_shift).u64
-  not_compressed := AndI(length).Imm(1).u64
-  unpacked_length := Shl(char_length, not_compressed).u64
+  char_length := get_string_length(length, length_shift)
+  uncompressed := is_string_uncompressed_u64(length)
+  unpacked_length := Shl(char_length, uncompressed).u64
 end  # unpack_length_with_compression
 
-macro(:check_string_type) do |str|
+###
+# is_string_uncompressed returns the inverted value of the `compressed` flag. The flag's value is encoded
+# as the least significant bit in the `length` field of the string object.
+#
+# More details may be found in the `bool BaseString::IsUtf8()` and `bool BaseString::IsUtf16()` method implementation
+# in the `runtime_core/common_interfaces/objects/string/base_string.h` header.
+#
+["u32", "u64"].each do |ret_type|
+  scoped_macro("is_string_uncompressed_#{ret_type}".to_sym) do |length|
+    AndI(length).Imm(1).send(ret_type)
+  end  # is_string_uncompressed_#{ret_type}
+end
+
+scoped_macro(:check_string_type) do |str, slowpath|
   baseClass := load_class(str)
   stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
   If(stringType, Constants::STRING_TYPE_SLICE).EQ {
-    Goto(:SlowPathEntrypoint)
+    GotoGlobal(slowpath)
   }
   If(stringType, Constants::STRING_TYPE_TREE).EQ {
-    Goto(:SlowPathEntrypoint)
+    GotoGlobal(slowpath)
   }
 end  # check_string_type
-
 
 scoped_macro(:get_tree_data_ptr) do |tree_str, cache_miss_label|
   stringCache := LoadI(%tr).Imm(Constants::THREAD_FLATTENED_STRING_CACHE_OFFSET).ref
@@ -70,10 +90,10 @@ end
 scoped_macro(:get_sliced_data_ptr) do |sliced_str, length_packed|
   # According to the specification the parent string must always be LineString.
   parent := LoadI(sliced_str).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
-  not_compressed := AndI(length_packed).Imm(1).u64
+  uncompressed := is_string_uncompressed_u64(length_packed)
   startIndex := LoadI(sliced_str).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
   startIndex := ShrI(startIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u64
-  offset := Shl(startIndex, not_compressed).u64
+  offset := Shl(startIndex, uncompressed).u64
   data_ptr := AddI(Cast(parent).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
   data_ptr := Add(data_ptr, offset).ptr
 end
@@ -823,8 +843,8 @@ scoped_macro(:macroStringCompareTo) do |str1, str2|
   # get the least length in chars
   length := ShrI(Cast(Min(length1, length2).i32).u64).Imm(Constants::STRING_LENGTH_SHIFT).u64
 
-  utf_1 := AndI(length1).Imm(1).u32
-  utf_2 := AndI(length2).Imm(1).u32
+  utf_1 := is_string_uncompressed_u32(length1)
+  utf_2 := is_string_uncompressed_u32(length2)
 
   # in the unlikely case the strings are in different
   # encodings the comparison gets more comlicated as
@@ -919,7 +939,7 @@ def GenerateStringEquals(lang, dynamic, cgmode = :FastPath)
         else
             check_not_tree_string_type(str1_orig) if defines.DEBUG
             # it still can be slice
-            check_string_type(str1_orig)
+            check_string_type(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
             str1 := str1_orig
         end
         str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))

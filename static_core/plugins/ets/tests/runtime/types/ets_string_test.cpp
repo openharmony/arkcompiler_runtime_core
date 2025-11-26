@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,18 @@ public:
     void TearDown() override
     {
         coroutine_->ManagedCodeEnd();
+    }
+
+    static EtsString *CreateString(std::string_view str)
+    {
+        std::vector<uint16_t> data(str.size());
+        std::copy(std::begin(str), std::end(str), data.begin());
+        return EtsString::CreateFromUtf16(data.data(), data.size());
+    }
+
+    static EtsString *CreateString(std::initializer_list<uint16_t> data)
+    {
+        return EtsString::CreateFromUtf16(data.begin(), data.size());
     }
 
 private:
@@ -732,6 +744,36 @@ TEST_F(EtsStringTest, ConvertFromUtf8)
     auto *utf8Data = reinterpret_cast<const char *>(data.data());
     EtsString *str = EtsString::CreateFromUtf8(utf8Data, data.size());
     CheckConvertString(str);
+}
+
+TEST_F(EtsStringTest, CreateCompressedString)
+{
+    std::vector<uint8_t> asciiData = {'h', 'e', 'l', 'l', 'o', 0};
+    EXPECT_TRUE(ark::coretypes::String::CanBeCompressedMUtf8(asciiData.data()));
+
+    std::vector<uint8_t> extendedData = {'h', 'e', 'l', 'l', 0xeb, 0};
+    EXPECT_FALSE(ark::coretypes::String::CanBeCompressedMUtf8(extendedData.data()));
+
+    EtsString *compressibleString =
+        CreateString("aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ1234567890./!?-+_:*'\"&@#$%^()=[]{}` ~");
+    EXPECT_TRUE(compressibleString->IsUtf8());
+
+    EtsString *fromUtf16String = CreateString({'i', 'k', 'I'});
+    EXPECT_TRUE(fromUtf16String->IsUtf8());
+}
+
+TEST_F(EtsStringTest, CreateUncomressedString)
+{
+    EtsString *dottedIString = CreateString({'i', 0x0307});  // i (this is not the same as `i`!)
+    EXPECT_FALSE(dottedIString->IsUtf8());
+    EXPECT_TRUE(dottedIString->IsUtf16());
+
+    // Only chars with codes from 0x01 to 0x7F is allowed for using in compressed strings, see the
+    // common::BaseString::IsASCIICharacter function from
+    // runtime_core/common_interfaces/objects/string/base_string-inl.h
+    EtsString *fromLatin1Suppl = CreateString({0xcc, 0xcd});  // ÌÍ
+    EXPECT_FALSE(fromLatin1Suppl->IsUtf8());
+    EXPECT_TRUE(fromLatin1Suppl->IsUtf16());
 }
 
 }  // namespace ark::ets::test

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,10 @@ public:
      * @param length of created array.
      * NOTE: Uses common allocation for objects.
      */
-    ALWAYS_INLINE static EtsByteArray *AllocateArray(EtsInt length);
+    ALWAYS_INLINE static EtsByteArray *AllocateArray(EtsInt length)
+    {
+        return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_OBJECT);
+    }
 
     ALWAYS_INLINE static EtsLong GetAddress(const EtsByteArray *array)
     {

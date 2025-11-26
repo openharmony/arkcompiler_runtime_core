@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -284,7 +284,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled, cgmode)
     else
       check_not_tree_string_type(str_orig) if defines.DEBUG
       # it still can be slice
-      check_string_type(str_orig)
+      check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
       str := str_orig
     end
 
@@ -301,13 +301,13 @@ def GenerateStringGetCharsTlab(string_compression_enabled, cgmode)
       If(Cast(end_index).u32, ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32).A.Unlikely.b {
         Goto(:SlowPathEntrypoint)  # Out of range
       }
-      not_compressed := AndI(length).Imm(1).u32
-      offset := Shl(begin_index, not_compressed).u32
+      uncompressed := is_string_uncompressed_u32(length)
+      offset := Shl(begin_index, uncompressed).u32
     else
       If(Cast(end_index).u32, length).A.Unlikely.b {
         Goto(:SlowPathEntrypoint)  # Out of range
       }
-      not_compressed := Cast(1).u32
+      uncompressed := Cast(1).u32
       offset := ShlI(begin_index).Imm(1).u32
     end
 
@@ -318,10 +318,10 @@ def GenerateStringGetCharsTlab(string_compression_enabled, cgmode)
     char_count := Sub(Cast(end_index).u32, Cast(begin_index).u32).u64
     new_arr := allocate_array_of_chars_tlab(array_klass, Cast(char_count).word, cgmode)
     new_arr_data := Add(new_arr, Cast(Constants::ARRAY_DATA_OFFSET).u64).ptr
-    If(not_compressed, Cast(0).u32).EQ.Likely.b {
+    If(uncompressed, Cast(0).u32).EQ.Likely.b {
       expand_u8_to_u16_chars(src_str_data, new_arr_data, char_count)
     }
-    If(not_compressed, Cast(1).u32).EQ.Unlikely.b {
+    If(uncompressed, Cast(1).u32).EQ.Unlikely.b {
       copy_u16_chars(src_str_data, new_arr_data, char_count)
     }
     # String is supposed to be a constant object, so all its data should be visible by all threads
@@ -367,8 +367,8 @@ end
     length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
     if string_compression_enabled
       length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
-      not_compressed := AndI(length_packed).Imm(1).u32
-      If(not_compressed, 0).EQ.Likely.b {
+      uncompressed := is_string_uncompressed_u32(length_packed)
+      If(uncompressed, 0).EQ.Likely.b {
         # String contains 8-bit chars
         h := u8_string_hashcode(str_data, length)
         StoreI(str, h).Imm(Constants::STRING_HASHCODE_OFFSET).u32
@@ -409,8 +409,8 @@ def GenerateStringCompareTo(cgmode)
         check_not_tree_string_type(str1_orig) if defines.DEBUG
         check_not_tree_string_type(str2_orig) if defines.DEBUG
         # it still can be slice
-        check_string_type(str1_orig)
-        check_string_type(str2_orig)
+        check_string_type(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
+        check_string_type(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
         str1 := str1_orig
         str2 := str2_orig
     end

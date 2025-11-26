@@ -1089,6 +1089,11 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringToLowerCase
+    irtoc_impl: StringToLowerCaseTlabNativePlus
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateStringToLowerCase
+    llvm_codegen_func: EmitStringToLowerCase
+    require_flat_check: true
 
   - name: StdCoreStringToUpperCase
     space: ets
@@ -1099,6 +1104,11 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringToUpperCase
+    irtoc_impl: StringToUpperCaseTlabNativePlus
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateStringToUpperCase
+    llvm_codegen_func: EmitStringToUpperCase
+    require_flat_check: true
 
   - name: StdCoreStringToLocaleLowerCase
     space: ets
@@ -1109,6 +1119,11 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::StdCoreStringToLocaleLowerCase
+    irtoc_impl: StringToLocaleLowerCaseTlabNativePlus
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateStringToLocaleLowerCase
+    llvm_codegen_func: EmitStringToLocaleLowerCase
+    require_flat_check: true
 
   - name: StdCoreStringToLocaleUpperCase
     space: ets
@@ -1119,6 +1134,11 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String ]
     impl: ark::ets::intrinsics::StdCoreStringToLocaleUpperCase
+    irtoc_impl: StringToLocaleUpperCaseTlabNativePlus
+    codegen_arch: [ amd64, arm64 ]
+    codegen_func: CreateStringToLocaleUpperCase
+    llvm_codegen_func: EmitStringToLocaleUpperCase
+    require_flat_check: true
 
   - name: StdCoreStringIsWellFormed
     space: ets

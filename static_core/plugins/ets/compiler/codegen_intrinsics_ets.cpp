@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -832,6 +832,72 @@ void Codegen::CreateEtsStringEquals(IntrinsicInst *inst, [[maybe_unused]] Reg ds
 {
     ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
     CallFastPath(inst, EntrypointId::ETS_STRING_EQUALS, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+}
+
+void Codegen::CreateStringToCase(IntrinsicInst *inst, RuntimeInterface::EntrypointId fastPathEntrypointId,
+                                 RuntimeInterface::EntrypointId slowPathEntrypointId, Reg dst, Reg srcStr)
+{
+    auto labelSlowPath = enc_->CreateLabel();
+    auto labelEnd = enc_->CreateLabel();
+
+    const auto etsBoolType = INT8_TYPE;
+    auto [live_regs, live_vregs] {GetLiveRegisters<false>(inst)};
+    auto ret {GetTarget().GetReturnReg(etsBoolType)};
+    live_regs.reset(ret.GetId());
+    live_regs.set(srcStr.GetId());
+
+    SaveCallerRegisters(live_regs, live_vregs, true);
+    // The intrinsic has no parameters, so a call to FillCallParams() is not needed.
+    EmitCallRuntimeCode(nullptr, EntrypointId::ETS_DEFAULT_LOCALE_ALLOWS_FAST_LATIN_CASE_CONVERSION);
+
+    {
+        ScopedTmpRegLazy tmpReg(enc_, false);
+        if (srcStr.GetId() == ret.GetId()) {
+            tmpReg.Acquire();
+            auto tmp = tmpReg.GetReg().As(ret.GetType());
+            enc_->EncodeMov(tmp, ret);
+            ret = tmp;
+        }
+        LoadCallerRegisters(live_regs, live_vregs, true);
+        enc_->EncodeJump(labelSlowPath, ret, EQ);
+    }
+
+    CallFastPath(inst, fastPathEntrypointId, dst, {}, srcStr);
+    enc_->EncodeJump(labelEnd);
+
+    enc_->BindLabel(labelSlowPath);
+    CallRuntime(inst, slowPathEntrypointId, dst, {}, srcStr);
+    enc_->BindLabel(labelEnd);
+}
+
+void Codegen::CreateStringToLowerCase(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto srcStr = src[FIRST_OPERAND];
+    CreateStringToCase(inst, EntrypointId::STRING_TO_LOWER_CASE_TLAB, EntrypointId::STRING_TO_LOWER_CASE_ENTRYPOINT,
+                       dst, srcStr);
+}
+
+void Codegen::CreateStringToUpperCase(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto srcStr = src[FIRST_OPERAND];
+    CreateStringToCase(inst, EntrypointId::STRING_TO_UPPER_CASE_TLAB, EntrypointId::STRING_TO_UPPER_CASE_ENTRYPOINT,
+                       dst, srcStr);
+}
+
+void Codegen::CreateStringToLocaleLowerCase(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    CallFastPath(inst, EntrypointId::STRING_TO_LOCALE_LOWER_CASE_TLAB, dst, {}, src[FIRST_OPERAND],
+                 src[SECOND_OPERAND]);
+}
+
+void Codegen::CreateStringToLocaleUpperCase(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    CallFastPath(inst, EntrypointId::STRING_TO_LOCALE_UPPER_CASE_TLAB, dst, {}, src[FIRST_OPERAND],
+                 src[SECOND_OPERAND]);
 }
 
 }  // namespace ark::compiler

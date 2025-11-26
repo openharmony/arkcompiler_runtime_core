@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,3 +165,24 @@ bool EmitEtsStringEquals(Inst *inst)
     ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::ETS_STRING_EQUALS, 2U);
 }
+
+llvm::Value *CreateStringToCase(Inst *inst, RuntimeInterface::EntrypointId fastPathEntrypointId,
+                                RuntimeInterface::EntrypointId slowPathEntrypointId);
+
+bool EmitStringToLowerCase(Inst *inst);
+
+bool EmitStringToUpperCase(Inst *inst);
+
+bool EmitStringToLocaleLowerCase(Inst *inst)
+{
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_TO_LOCALE_LOWER_CASE_TLAB, 2U);
+}
+
+bool EmitStringToLocaleUpperCase(Inst *inst)
+{
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_TO_LOCALE_UPPER_CASE_TLAB, 2U);
+}
+
+bool EmitDefaultLocaleSupportsFastLatinCaseConversion(Inst *inst);

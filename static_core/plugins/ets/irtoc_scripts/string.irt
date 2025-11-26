@@ -1,5 +1,5 @@
 # plugin ets_string
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,6 +16,7 @@ include_relative '../../plugins/ets/irtoc_scripts/common.irt'
 
 module Constants
   MEM_BLOCK_8_BYTES = "8"
+  MEM_BLOCK_8_ALIGN_CHECK_MASK = "8ULL - 1ULL"
   MEM_BLOCK_16_BYTES = "16"
   MEM_BLOCK_32_BYTES = "32"
   MEM_BLOCK_32_ALIGN_MASK = "~31ULL"
@@ -24,12 +25,14 @@ module Constants
   LOG2_BYTES_PER_U16 = "1"
   XOR_SUB_U8_MASK = "0x0101010101010101ULL"
   XOR_AND_U8_MASK = "0x8080808080808080ULL"
+  SINGLE_U8_MASK = "0xFFULL"
   MAX_U8_VALUE = "255"
   U8_SIZE = "1"
   U16_SIZE = "2"
   WRONG_CHAR_FLAG_MASK = "0x10000UL"
   ASCII_CHAR_CACHE_SIZE = "cross_values::GetPlatformTypesAsciiCharCacheSize(GetArch())"
   STRING_PACKED_LENGTH_ZERO = "(((uint32_t)0xFFFFFFFF) << common::BaseString::STRING_LENGTH_BITS_NUM) >> common::BaseString::STRING_LENGTH_BITS_NUM"
+  CHAR_FLIP_CASE_BIT = "1 << 5"
 end
 
 # It is assumed that _begin_index is safe and does not check/normalize them.
@@ -38,7 +41,7 @@ end
 # for the case when 'allocate_string_tlab' fails (see StringTrim as an example)
 # Now TLAB implementation initializes memory with zero, so the hashcode field
 # is not initialized with zero explicitly.
-macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _not_compressed, _cgmode|
+macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _uncompressed, _cgmode|
   If(_char_count, Cast(_str_len).u32).EQ.Unlikely.b {
     # Return the string itself
     _same_str := Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr
@@ -51,10 +54,10 @@ macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _not_compr
     Goto(:_Fast_Substring_Result)
   }
   # Allocate a new normal string
-  _offset := Shl(_begin_index, _not_compressed).u32
+  _offset := Shl(_begin_index, _uncompressed).u32
   _src_str_data := Add(Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
   _src_str_data := Add(_src_str_data, Cast(_offset).u64).ptr
-  If(_not_compressed, 1).EQ.Unlikely.b {
+  If(_uncompressed, 1).EQ.Unlikely.b {
     _compressable := is_array_of_compressable_chars(_src_str_data, Cast(_char_count).u64)
     If(_compressable, 1).EQ.Likely.b {
       _data_size1 := Cast(_char_count).word
@@ -264,10 +267,10 @@ def GenerateStringTrimLeftBase(cgmode)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-  not_compressed := AndI(length_packed).Imm(1).i32
+  uncompressed := is_string_uncompressed_u32(length_packed)
   length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   start_index := Cast(1).i32
-  If(not_compressed, 0).EQ.Likely.b {
+  If(uncompressed, 0).EQ.Likely.b {
     # String contains 8-bit chars
 Label(:Loop1)
     i := Phi(start_index, i1).i32
@@ -295,7 +298,7 @@ Label(:Loop2)
 Label(:TrimLeft)
   index := Phi(index1, index2).i32
   char_count := Sub(length, index).u32
-  trimmed := fast_substring(str, length, index, char_count, not_compressed, cgmode)
+  trimmed := fast_substring(str, length, index, char_count, uncompressed, cgmode)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
   if cgmode == :NativePlus
@@ -328,7 +331,7 @@ def GenerateStringTrimLeft(cgmode)
   else
     check_not_tree_string_type(str) if defines.DEBUG
     # it still can be slice
-    check_string_type(str_orig)
+    check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str := str_orig
   end
 
@@ -337,8 +340,8 @@ def GenerateStringTrimLeft(cgmode)
     Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
   }
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-  not_compressed := AndI(length_packed).Imm(1).i32
-  If(not_compressed, 0).EQ.Likely.b {
+  uncompressed := is_string_uncompressed_u32(length_packed)
+  If(uncompressed, 0).EQ.Likely.b {
     ws1 := is_white_space_u8(Load(str_data, 0).u8)
     Goto(:L1)
   }
@@ -353,7 +356,7 @@ Label(:L1)
     entrypoint1 = get_entrypoint_offset("STRING_EMPTY")
     Intrinsic(:TAIL_CALL).AddImm(entrypoint1).MethodAsImm("StringEmpty").Terminator.ptr
   }
-  
+
   # NativePlus is not handled by LLVM backend right now, so, passing
   # fake parameters to match the function signature is not required
   if cgmode == :NativePlus
@@ -397,8 +400,8 @@ def GenerateStringTrimRightBase(cgmode)
   length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   start_index := SubI(length).Imm(2).i32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-  not_compressed := AndI(length_packed).Imm(1).i32
-  If(not_compressed, 0).EQ.Likely.b {
+  uncompressed := is_string_uncompressed_u32(length_packed)
+  If(uncompressed, 0).EQ.Likely.b {
     # String contains 8-bit chars
 Label(:Loop1)
     i := Phi(start_index, i1).i32
@@ -426,7 +429,7 @@ Label(:Loop2)
 Label(:TrimRight)
   index := Phi(index1, index2).i32
   index := AddI(index).Imm(1).i32
-  trimmed := fast_substring(str, length, 0, Cast(index).u32, not_compressed, cgmode)
+  trimmed := fast_substring(str, length, 0, Cast(index).u32, uncompressed, cgmode)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
   if cgmode == :NativePlus
@@ -459,23 +462,23 @@ def GenerateStringTrimRight(cgmode)
   else
     check_not_tree_string_type(str) if defines.DEBUG
     # it still can be slice
-    check_string_type(str_orig)
+    check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str := str_orig
   end
- 
+
   check_not_tree_string_type(str) if defines.DEBUG
   # it still can be slice
-  check_string_type(str)
+  check_string_type(str, AsGlobalLabel(:SlowPathEntrypoint))
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   If(length_packed, 1).LE.Unlikely.b {
     Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
   }
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-  not_compressed := AndI(length_packed).Imm(1).i32
+  uncompressed := is_string_uncompressed_u32(length_packed)
   length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   last_char_index :=  SubI(length).Imm(1).i32
-  If(not_compressed, 0).EQ.Likely.b {
+  If(uncompressed, 0).EQ.Likely.b {
     ws1 := is_white_space_u8(Load(str_data, last_char_index).u8)
     Goto(:L1)
   }
@@ -535,8 +538,8 @@ def GenerateStringTrimBase(cgmode)
   left := 0
   right := SubI(length).Imm(2).i32
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-  not_compressed := AndI(length_packed).Imm(1).i32
-  If(not_compressed, 0).EQ.Likely.b {
+  uncompressed := is_string_uncompressed_u32(length_packed)
+  If(uncompressed, 0).EQ.Likely.b {
     # String contains 8-bit chars
 Label(:Loop1)  # while (utf::IsWhiteSpaceChar(str->At(right)))
     right1 := Phi(right, right2).i32
@@ -581,7 +584,7 @@ Label(:Trim)
   l := Phi(left, left1, left, left11).i32
   r := Phi(right1, right3, right11, right33).i32
   char_count := Sub(r, l).u32
-  trimmed := fast_substring(str, length, l, char_count, not_compressed, cgmode)
+  trimmed := fast_substring(str, length, l, char_count, uncompressed, cgmode)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
   if cgmode == :NativePlus
@@ -608,13 +611,13 @@ def GenerateStringTrim(cgmode)
     ReturnVoid().void
     next
   end
-   
+
   if cgmode == :NativePlus
     str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
   else
     check_not_tree_string_type(str) if defines.DEBUG
     # it still can be slice
-    check_string_type(str_orig)
+    check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str := str_orig
   end
 
@@ -624,11 +627,11 @@ def GenerateStringTrim(cgmode)
     Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
   }
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
-  not_compressed := AndI(length_packed).Imm(1).i32
+  uncompressed := is_string_uncompressed_u32(length_packed)
   length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   # length == 1
   If(length, 1).EQ.b {
-    If(not_compressed, 0).EQ.Likely.b {
+    If(uncompressed, 0).EQ.Likely.b {
       ws1 := is_white_space_u8(Load(str_data, 0).u8)
       Goto(:L1)
     }
@@ -644,7 +647,7 @@ Label(:L1)
   }
   # length > 1
   last_char_index := SubI(length).Imm(1).i32
-  If(not_compressed, 0).EQ.Likely.b {
+  If(uncompressed, 0).EQ.Likely.b {
     ws4 := is_white_space_u8(Load(str_data, last_char_index).u8)
     Goto(:L2)
   }
@@ -653,7 +656,7 @@ Label(:L2)
   ws6 := Phi(ws4, ws5).b
   If(ws6, 0).EQ.Likely.b {
     # last char is not whitespace, so check the first char
-    If(not_compressed, 0).EQ.Likely.b {
+    If(uncompressed, 0).EQ.Likely.b {
       ws7 := is_white_space_u8(Load(str_data, 0).u8)
       Goto(:L3)
     }
@@ -704,8 +707,8 @@ GenerateStringTrim(:FastPath)
 GenerateStringTrim(:NativePlus)
 
 
-scoped_macro(:at) do |str_data, index, not_compressed|
-  If(not_compressed, 0).EQ.Likely.b {
+scoped_macro(:at) do |str_data, index, uncompressed|
+  If(uncompressed, 0).EQ.Likely.b {
     # String contains 8-bit chars
     c8 := Cast(Load(str_data, index).u8).u16
     Goto(:Done)
@@ -730,11 +733,11 @@ function(:StringStartsWithBase,
   end
 
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  str_not_compressed := AndI(str_len_packed).Imm(1).i32
+  str_uncompressed := is_string_uncompressed_u32(str_len_packed)
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   pfx_len := ShrI(pfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
-  pfx_not_compressed := AndI(pfx_len_packed).Imm(1).i32
+  pfx_uncompressed := is_string_uncompressed_u32(pfx_len_packed)
   pfx_data := Add(Cast(pfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
 
 Label(:Loop)
@@ -743,8 +746,8 @@ Label(:Loop)
   If(pfx_i, pfx_len).GE.Unlikely.b {
     Goto(:Done)
   }
-  s := at(str_data, str_i, str_not_compressed)
-  p := at(pfx_data, pfx_i, pfx_not_compressed)
+  s := at(str_data, str_i, str_uncompressed)
+  p := at(pfx_data, pfx_i, pfx_uncompressed)
   If(s, p).NE.Likely.b {
     Return(0).b
   }
@@ -875,10 +878,10 @@ function(:StringEndsWithBase,
   end
 
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  str_not_compressed := AndI(str_len_packed).Imm(1).i32
+  str_uncompressed := is_string_uncompressed_u32(str_len_packed)
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   sfx_len_packed := LoadI(sfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
-  sfx_not_compressed := AndI(sfx_len_packed).Imm(1).i32
+  sfx_uncompressed := is_string_uncompressed_u32(sfx_len_packed)
   sfx_data := Add(Cast(sfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
   sfx_len := ShrI(sfx_len_packed).Imm(Constants::STRING_LENGTH_SHIFT).i32
   from_index := Sub(end_index, sfx_len).i32;
@@ -890,8 +893,8 @@ Label(:Loop)
   If(sfx_i, sfx_len).GE.Unlikely.b {
     Goto(:Done)
   }
-  s := at(str_data, str_i, str_not_compressed)
-  p := at(sfx_data, sfx_i, sfx_not_compressed)
+  s := at(str_data, str_i, str_uncompressed)
+  p := at(sfx_data, sfx_i, sfx_uncompressed)
   If(s, p).NE.Likely.b {
     Return(0).b
   }
@@ -925,8 +928,8 @@ def GenerateStringEndsWith(cgmode)
     check_not_tree_string_type(str_orig) if defines.DEBUG
     check_not_tree_string_type(sfx_orig) if defines.DEBUG
     # it still can be slice
-    check_string_type(str_orig)
-    check_string_type(sfx_orig)
+    check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    check_string_type(sfx_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str := str_orig
     sfx := sfx_orig
   end
@@ -1006,7 +1009,7 @@ def GenerateStringGetBytesTlab(cgmode)
   else
     check_not_tree_string_type(str) if defines.DEBUG
     # it still can be slice
-    check_string_type(str_orig)
+    check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str := str_orig
   end
 
@@ -1020,7 +1023,7 @@ def GenerateStringGetBytesTlab(cgmode)
 
   # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
-  uncompressed := AndI(length).Imm(1).u32;
+  uncompressed := is_string_uncompressed_u32(length);
   length := ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32;
 
   If(Cast(end_index).u32, length).A.Unlikely.b {
@@ -1660,7 +1663,7 @@ LabelGlobal(:LineString)
 
 Label(:Flat)
   str_data := Phi(tree_data, sliced_data, line_data).ptr
-  IfImm(Compare(AndI(str_len_packed).Imm(1).i32, 1).EQ.b).Imm(0).NE.Unlikely.b {
+  IfImm(Compare(is_string_uncompressed_u32(str_len_packed), 1).EQ.b).Imm(0).NE.Unlikely.b {
     str_data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFC).u32
     # 0 < data size < 16
     If(str_data_size_u16, 16).LT.Unlikely.b {
@@ -1806,7 +1809,7 @@ def GenerateStringIndexOfAfter(cgmode)
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     # it still can be slice
-    check_string_type(str_orig)
+    check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str := str_orig
   end
 
@@ -1825,7 +1828,7 @@ def GenerateStringIndexOfAfter(cgmode)
 
   str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
 
-  IfImm(Compare(AndI(str_len_packed).Imm(1).i32, 1).EQ.b).Imm(0).NE.Unlikely.b {
+  IfImm(Compare(is_string_uncompressed_u32(str_len_packed), 1).EQ.b).Imm(0).NE.Unlikely.b {
     offs := Cast(ShlI(start_index).Imm(1).i32).u32
     data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFE).u32
     data_size_u16 := Sub(data_size_u16, offs).u32
@@ -1990,7 +1993,7 @@ def GenerateStringRepeatTlab(cgmode)
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     # it still can be slice
-    check_string_type(str_orig)
+    check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str := str_orig
   end
 
@@ -2007,7 +2010,7 @@ def GenerateStringRepeatTlab(cgmode)
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
   klass := load_class(str)
   old_buf := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
-  uncompressed := AndI(length).Imm(1).u32
+  uncompressed := is_string_uncompressed_u32(length)
   codes_count := ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32
   length := Shl(ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32, uncompressed).u32
   size := Mul(length, count).u32
@@ -2081,7 +2084,7 @@ def GenerateStringConcat2Tlab(cgmode)
     length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
 
     # any of the strings is uncompressed (resulted string is uncompressed)
-    has_uncompressed := AndI(Or(length1, length2).u32).Imm(1).u32
+    has_uncompressed := is_string_uncompressed_u32(Or(length1, length2).u32)
 
     count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
     count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
@@ -2109,7 +2112,7 @@ def GenerateStringConcat2Tlab(cgmode)
       Goto(:EndCopy)
     }
 
-    If(AndI(length1).Imm(1).u32, 0).EQ.b {
+    If(is_string_uncompressed_u32(length1), 0).EQ.b {
       expand_u8_to_u16_chars(src_str_data1, dst_str_data1, count1)
     } Else {
       copy_u16_chars(src_str_data1, dst_str_data1, count1)
@@ -2119,7 +2122,7 @@ def GenerateStringConcat2Tlab(cgmode)
     src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset).ptr
 
-    If(AndI(length2).Imm(1).u32, 0).EQ.b {
+    If(is_string_uncompressed_u32(length2), 0).EQ.b {
       expand_u8_to_u16_chars(src_str_data2, dst_str_data2, count2)
     } Else {
       copy_u16_chars(src_str_data2, dst_str_data2, count2)
@@ -2166,7 +2169,7 @@ def GenerateStringConcat3Tlab(cgmode)
     length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
     length3 := LoadI(str3).Imm(Constants::STRING_LENGTH_OFFSET).u32
 
-    has_uncompressed := AndI(Or(length3, Or(length1, length2).u32).u32).Imm(1).u32
+    has_uncompressed := is_string_uncompressed_u32(Or(length3, Or(length1, length2).u32).u32)
 
     count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
     count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
@@ -2204,7 +2207,7 @@ def GenerateStringConcat3Tlab(cgmode)
       Goto(:EndCopy)
     }
 
-    If(AndI(length1).Imm(1).u32, 0).EQ.b {
+    If(is_string_uncompressed_u32(length1), 0).EQ.b {
       expand_u8_to_u16_chars(src_str_data1, dst_str_data1, count1)
     } Else {
       copy_u16_chars(src_str_data1, dst_str_data1, count1)
@@ -2213,7 +2216,7 @@ def GenerateStringConcat3Tlab(cgmode)
     src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1).ptr
 
-    If(AndI(length2).Imm(1).u32, 0).EQ.b {
+    If(is_string_uncompressed_u32(length2), 0).EQ.b {
       expand_u8_to_u16_chars(src_str_data2, dst_str_data2, count2)
     } Else {
       copy_u16_chars(src_str_data2, dst_str_data2, count2)
@@ -2222,7 +2225,7 @@ def GenerateStringConcat3Tlab(cgmode)
     src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2).ptr
 
-    If(AndI(length3).Imm(1).u32, 0).EQ.b {
+    If(is_string_uncompressed_u32(length3), 0).EQ.b {
       expand_u8_to_u16_chars(src_str_data3, dst_str_data3, count3)
     } Else {
       copy_u16_chars(src_str_data3, dst_str_data3, count3)
@@ -2271,7 +2274,7 @@ def GenerateStringConcat4Tlab(cgmode)
 
     # any of the strings is uncompressed (resulted string is uncompressed)
     has_uncompressed := Or(length3, Or(length1, length2).u32).u32
-    has_uncompressed := AndI(Or(length4, has_uncompressed).u32).Imm(1).u32
+    has_uncompressed := is_string_uncompressed_u32(Or(length4, has_uncompressed).u32)
 
     count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
     count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
@@ -2317,7 +2320,7 @@ def GenerateStringConcat4Tlab(cgmode)
       Goto(:EndCopy)
     }
 
-    If(AndI(length1).Imm(1).u32, 0).EQ.b {
+    If(is_string_uncompressed_u32(length1), 0).EQ.b {
       expand_u8_to_u16_chars(src_str_data1, dst_str_data1, count1)
     } Else {
       copy_u16_chars(src_str_data1, dst_str_data1, count1)
@@ -2326,7 +2329,7 @@ def GenerateStringConcat4Tlab(cgmode)
     src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1).ptr
 
-    If(AndI(length2).Imm(1).u32, 0).EQ.b {
+    If(is_string_uncompressed_u32(length2), 0).EQ.b {
       expand_u8_to_u16_chars(src_str_data2, dst_str_data2, count2)
     } Else {
       copy_u16_chars(src_str_data2, dst_str_data2, count2)
@@ -2335,7 +2338,7 @@ def GenerateStringConcat4Tlab(cgmode)
     src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2).ptr
 
-    If(AndI(length3).Imm(1).u32, 0).EQ.b {
+    If(is_string_uncompressed_u32(length3), 0).EQ.b {
       expand_u8_to_u16_chars(src_str_data3, dst_str_data3, count3)
     } Else {
       copy_u16_chars(src_str_data3, dst_str_data3, count3)
@@ -2344,7 +2347,7 @@ def GenerateStringConcat4Tlab(cgmode)
     src_str_data4 := AddI(str4).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data4 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset3).ptr
 
-    If(AndI(length4).Imm(1).u32, 0).EQ.b {
+    If(is_string_uncompressed_u32(length4), 0).EQ.b {
       expand_u8_to_u16_chars(src_str_data4, dst_str_data4, count4)
     } Else {
       copy_u16_chars(src_str_data4, dst_str_data4, count4)
@@ -2409,7 +2412,7 @@ function(:StringConcat2TlabAllStrings,
   tree_str := allocate_tree_string_tlab(klass)
 
   # Any of the strings is uncompressed (resulted string is uncompressed)
-  has_uncompressed := AndI(Or(length1, length2).u32).Imm(1).u32
+  has_uncompressed := is_string_uncompressed_u32(Or(length1, length2).u32)
   length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
 
   StoreI(tree_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -2490,7 +2493,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
     else
       check_not_tree_string_type(str_orig) if defines.DEBUG
       # it still can be slice
-      check_string_type(str_orig)
+      check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
       str := str_orig
     end
 
@@ -2537,10 +2540,10 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
     }
 
     if string_compression_enabled
-      not_compressed := AndI(length_packed).Imm(1).u32
-      offset := Shl(bx6, not_compressed).u32
+      uncompressed := is_string_uncompressed_u32(length_packed)
+      offset := Shl(bx6, uncompressed).u32
     else
-      not_compressed := Cast(1).u32
+      uncompressed := Cast(1).u32
       offset := ShlI(bx6).Imm(1).u32
     end
 
@@ -2567,7 +2570,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       }
 
       # create line substring from line string
-      result := fast_substring(fromStr, length, resultStartIndex, charCount, not_compressed, cgmode)
+      result := fast_substring(fromStr, length, resultStartIndex, charCount, uncompressed, cgmode)
       Return(result).ptr
 
     Label(:CreateSlicedString)
@@ -2575,7 +2578,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       klass := getSlicedStringClass(ptypes)
       result := allocate_sliced_string_tlab(klass)
 
-      slicedStringLength := Or(ShlI(charCount).Imm(Constants::STRING_LENGTH_SHIFT).u32, not_compressed).u32
+      slicedStringLength := Or(ShlI(charCount).Imm(Constants::STRING_LENGTH_SHIFT).u32, uncompressed).u32
       StoreI(result, slicedStringLength).Imm(Constants::STRING_LENGTH_OFFSET).u32
       StoreI(result, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
 
@@ -2586,7 +2589,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
 
       Return(result).ptr
     else
-      result := fast_substring(str, length, bx6, charCount, not_compressed, cgmode)
+      result := fast_substring(str, length, bx6, charCount, uncompressed, cgmode)
       Return(result).ptr
     end
 LabelGlobal(:SlowPathEntrypoint)
@@ -2608,3 +2611,212 @@ GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_ena
 GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=false)
 GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=true, :NativePlus)
 GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=true, :NativePlus)
+
+
+###
+# char_to_#{tocase}_case converts a basic-latin char to the upper case by the simplest rule applicable for ASCII
+# chars only.
+#
+[["upper", 0x61, 0x7a], ["lower", 0x41, 0x5a]].each do |tocase, min, max|
+  scoped_macro("char_to_#{tocase}_case".to_sym) do |char|
+    IfImm(Compare(SubI(char).Imm(min).u8, (max - min + 0x1)).B.b).Imm(0).NE.b {
+      new_char1 := XorI(char).Imm(Constants::CHAR_FLIP_CASE_BIT).u8
+    }
+    new_char0 := char
+    Phi(new_char0, new_char1).u8
+  end  # char_to_#{tocase}_case
+end
+
+###
+# chars_to_#{tocase}_case_8 converts 8 latin chars to the upper/lower case using the corresponding shift operations.
+#
+["upper", "lower"].each do |tocase|
+  scoped_macro("chars_to_#{tocase}_case_8".to_sym) do |chars|
+    char := u64tou8(ShrI(chars).Imm(8 * 7).u64)
+    new_chars := eval("u8tou64(char_to_#{tocase}_case(char))")
+    (6 * 8).step(8, -8) do |shift|
+      char := u64tou8(AndI(ShrI(chars).Imm("#{shift}").u64).Imm(Constants::SINGLE_U8_MASK).u64)
+      new_char := eval("u8tou64(char_to_#{tocase}_case(char))")
+      new_chars := Or(ShlI(new_chars).Imm(Constants::MEM_BLOCK_8_BYTES).u64, new_char).u64
+    end
+    char := u64tou8(AndI(chars).Imm(Constants::SINGLE_U8_MASK).u64)
+    new_char := eval("u8tou64(char_to_#{tocase}_case(char))")
+    Or(ShlI(new_chars).Imm(Constants::MEM_BLOCK_8_BYTES).u64, new_char).u64
+  end  # chars_to_#{tocase}_case_8
+end
+
+###
+# locale_code returns a locale code built from two ASCII chars as a little-endian u16 immediate.
+#
+macro(:locale_code) do |code|
+   "uint16_t(((uint16_t('#{code.chars[1]}') << 8) & 0xff00) | uint16_t('#{code.chars[0]}'))"
+end  # locale_code
+
+###
+# locale_disallows_fast_case When the locale with code `code` doesn't support the fast case conversion,
+# a jump to the `slowpath` label is emitted.
+#
+scoped_macro(:locale_disallows_fast_case) do |code, expected, slowpath|
+  IfImm(Compare(code, locale_code(expected)).EQ.b).Imm(0).NE {
+    GotoGlobal(slowpath)
+  }
+end  # locale_disallows_fast_case
+
+###
+# check_locale_supports_fast_latin_conversion checks whether the locale supports fast conversion between two different
+# cases of latin symbols, i.e., the Turkish locale contains a conversion rule 'i -> İ, I -> ı' what means it doesn't
+# support the fast conversion. When the locale doesn't support the fast conversion, the control flow jumps to the
+# `slowpath` label.
+#
+# One must be sure that `locale` points to the compressed flat string with the length not less than 2 and the string
+# contains the locale code, e.g., "en-US" or "de".
+#
+# The list of the disallowed locales must be in align with the 'ark::ets::intrinsics::LocaleAllowsFastLatinConversion'
+# method from the 'plugins/ets/runtime/intrinsics/helpers/ets_string_case_conversion.cpp' file.
+#
+scoped_macro(:check_locale_supports_fast_latin_conversion) do |locale, slowpath|
+  code := LoadI(locale).Imm(Constants::STRING_DATA_OFFSET).u16
+  ['az', 'tr'].each do |lang|
+    locale_disallows_fast_case(code, lang, slowpath)
+  end
+end  # check_locale_supports_fast_latin_conversion
+
+###
+# check_default_locale_supports_fast_latin_conversion checks whether the default locale supports fast conversion between
+# two different cases of latin symbols, see the comment to the 'check_locale_supports_fast_latin_conversion'.
+scoped_macro(:check_default_locale_supports_fast_latin_conversion) do |cgmode, slowpath|
+  if cgmode == :NativePlus
+    If(Call().Method("EtsDefaultLocaleAllowsFastLatinCaseConversion").u8, 0).EQ.Unlikely {
+      GotoGlobal(slowpath)
+    }
+  else
+    # For FastPath, the check must be performed before calling the corresponding function - the macro user.
+  end
+end  # check_default_locale_supports_fast_latin_conversion
+
+def GenerateStringToCaseTlab(with_locale, tocase, cgmode = :FastPath)
+  need_locale = (with_locale ? "Locale" : "")
+  param_tuple = (with_locale ? {orig_str: 'ref', orig_locale: 'ref'}
+                             : {orig_str: 'ref'})
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  case tocase
+    when "lower"
+      chars_converter = "chars_to_lower_case_8"
+    when "upper"
+      chars_converter = "chars_to_upper_case_8"
+    else
+      raise "Unexpected tocase argument: #{tocase}, only 'lower'- and 'upper'-case conversions are supported."
+  end
+  available_regs = $panda_mask
+  function("StringTo#{need_locale}#{tocase.capitalize}CaseTlab#{suffix}".to_sym,
+            params: param_tuple,
+            regmap: $full_regmap,
+            regalloc_set: available_regs,
+            mode: [cgmode]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      ReturnVoid().void
+      next
+    end
+
+    # There is no check of the argument against NullPointer as
+    # it's done in the InstBuilder (see AddArgNullcheckIfNeeded)
+    if cgmode == :NativePlus
+      str := try_use_cached_flat_str_reject_sliced(orig_str, AsGlobalLabel(:SlowPathEntrypoint))
+    else
+      check_not_tree_string_type(orig_str) if defines.DEBUG
+      # it still can be slice
+      check_string_type(orig_str, AsGlobalLabel(:SlowPathEntrypoint))
+      str := orig_str
+    end
+    length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    uncompressed := is_string_uncompressed_u32(length);
+    If(uncompressed, 0).NE.Unlikely {
+      Goto(:SlowPathEntrypoint)
+    }
+
+    if with_locale
+      if cgmode == :NativePlus
+        locale := try_use_cached_flat_str_reject_sliced(orig_locale, AsGlobalLabel(:SlowPathEntrypoint))
+      else
+        check_not_tree_string_type(orig_locale) if defines.DEBUG
+        # it still can be slice
+        check_string_type(orig_locale, AsGlobalLabel(:SlowPathEntrypoint))
+        locale := orig_locale
+      end
+
+      locale_length := LoadI(locale).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      If(is_string_uncompressed_u32(locale_length), 0).NE.Unlikely {
+        Goto(:SlowPathEntrypoint)
+      }
+        # we are sure the locale is compressed
+      If(get_string_length(Cast(locale_length).u64, Constants::STRING_LENGTH_SHIFT), 2).B.Unlikely {
+        Goto(:SlowPathEntrypoint)
+      }
+      check_locale_supports_fast_latin_conversion(locale, AsGlobalLabel(:SlowPathEntrypoint))
+    else
+      check_default_locale_supports_fast_latin_conversion(cgmode, AsGlobalLabel(:SlowPathEntrypoint))
+    end
+
+    klass := load_class(str)
+    # we are sure the string is compressed, the size in bytes is equal to its length
+    data_size := get_string_length(Cast(length).u64, Constants::STRING_LENGTH_SHIFT)
+    new_str := allocate_string_tlab(klass, Cast(data_size).word, cgmode)
+    StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+    # Convert string data to upper/lower case
+    src_str_data := AddI(reftoptr(str)).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
+    if defines.DEBUG
+      If(AndI(Bitcast(src_str_data).word).Imm(Constants::MEM_BLOCK_8_ALIGN_CHECK_MASK).word, 0).NE.Unlikely {
+        Intrinsic(:UNREACHABLE).Terminator.void
+      }
+    end
+    # Now we are sure that the string data are aligned by 8 bytes as well as any new allocated string so that
+    # we may process the chars in chunks. It makes no sense if we touch the padding; moreover, the padding bytes will
+    # remain intact if they contains zeros.
+    offs0 := Cast(0).word
+  Label(:TransformLoop_8b)
+    offs := Phi(offs0, offs1).word
+    new_chars := eval("#{chars_converter}(Load(src_str_data, offs).u64)")
+    Store(dst_str_data, offs, new_chars).u64
+    offs1 := AddI(offs).Imm(8).word
+    If(offs1, data_size).B.Likely.b {
+      Goto(:TransformLoop_8b)
+    }
+
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_str).ptr
+
+  LabelGlobal(:SlowPathEntrypoint)
+    if with_locale
+      if cgmode == :NativePlus
+        Return(Call(orig_str, orig_locale).Method("StdCoreStringToLocale#{tocase.capitalize}Case").ptr).ptr
+      else
+        entrypoint = get_entrypoint_offset("STRING_TO_LOCALE_#{tocase.upcase}_CASE_SLOW_PATH")
+        Intrinsic(:SLOW_PATH_ENTRY, orig_str, orig_locale).AddImm(entrypoint).MethodAsImm("StringToLocale#{tocase.capitalize}CaseUsualBridge").Terminator.ptr
+        Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      end
+    else
+      if cgmode == :NativePlus
+        Return(Call(orig_str).Method("StdCoreStringTo#{tocase.capitalize}Case").ptr).ptr
+      else
+        entrypoint = get_entrypoint_offset("STRING_TO_#{tocase.upcase}_CASE_SLOW_PATH")
+        Intrinsic(:SLOW_PATH_ENTRY, orig_str).AddImm(entrypoint).MethodAsImm("StringTo#{tocase.capitalize}CaseOddSavedBridge").Terminator.ptr
+        Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      end
+    end
+  }
+end  # def GenerateStringToCaseTlab
+
+GenerateStringToCaseTlab(with_locale = false, tocase = "upper", :FastPath)
+GenerateStringToCaseTlab(with_locale = false, tocase = "upper", :NativePlus)
+GenerateStringToCaseTlab(with_locale = false, tocase = "lower", :FastPath)
+GenerateStringToCaseTlab(with_locale = false, tocase = "lower", :NativePlus)
+GenerateStringToCaseTlab(with_locale = true, tocase = "upper", :FastPath)
+GenerateStringToCaseTlab(with_locale = true, tocase = "upper", :NativePlus)
+GenerateStringToCaseTlab(with_locale = true, tocase = "lower", :FastPath)
+GenerateStringToCaseTlab(with_locale = true, tocase = "lower", :NativePlus)

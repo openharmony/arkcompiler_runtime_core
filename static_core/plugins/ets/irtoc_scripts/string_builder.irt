@@ -1,5 +1,5 @@
 # plugin ets_string_builder
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -545,7 +545,7 @@ Label(:ForEachBufferSlot)
   n_bytes1 := src_len
   Goto(:NextObject)
 Label(:DoNotCompressString)
-  If(AndI(str_len).Imm(1).u32, 1).EQ.b {
+  If(is_string_uncompressed_u32(str_len), 1).EQ.b {
     Goto(:SrcNotCompressed)
   }
   expand_u8_to_u16_chars(src_data, dst_data, Cast(src_len).u64)

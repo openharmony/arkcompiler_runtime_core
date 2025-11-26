@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -603,4 +603,53 @@ bool LLVMIrConstructor::EmitStringConcat3(Inst *inst)
 bool LLVMIrConstructor::EmitStringConcat4(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT4_TLAB, 4U);
+}
+
+llvm::Value *LLVMIrConstructor::CreateStringToCase(Inst *inst, RuntimeInterface::EntrypointId fastPathEntrypointId,
+                                                   RuntimeInterface::EntrypointId slowPathEntrypointId)
+{
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto fastPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_fastpath"), func_);
+    auto slowPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_slowpath"), func_);
+    auto returnBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_return"), func_);
+
+    auto localeCheck = CreateEntrypointCall(
+        RuntimeInterface::EntrypointId::ETS_DEFAULT_LOCALE_ALLOWS_FAST_LATIN_CASE_CONVERSION, inst, {});
+    const auto falseValue = llvm::Constant::getNullValue(localeCheck->getType());
+    builder_.CreateCondBr(builder_.CreateICmpEQ(localeCheck, falseValue), slowPathBb, fastPathBb);
+
+    const std::array callArgs = {GetInputValue(inst, 0)};
+
+    SetCurrentBasicBlock(fastPathBb);
+    auto fastConvertedString = CreateFastPathCall(inst, fastPathEntrypointId, callArgs);
+    MarkAsAllocation(fastConvertedString);
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(slowPathBb);
+    auto slowConvertedString = CreateEntrypointCall(slowPathEntrypointId, inst, callArgs);
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(returnBb);
+    auto convertedString = builder_.CreatePHI(GetType(DataType::REFERENCE), 2U);
+    convertedString->addIncoming(fastConvertedString, fastPathBb);
+    convertedString->addIncoming(slowConvertedString, slowPathBb);
+    return convertedString;
+}
+
+bool LLVMIrConstructor::EmitStringToLowerCase(Inst *inst)
+{
+    auto converted = CreateStringToCase(inst, RuntimeInterface::EntrypointId::STRING_TO_LOWER_CASE_TLAB,
+                                        RuntimeInterface::EntrypointId::STRING_TO_LOWER_CASE_ENTRYPOINT);
+    ValueMapAdd(inst, converted);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringToUpperCase(Inst *inst)
+{
+    auto converted = CreateStringToCase(inst, RuntimeInterface::EntrypointId::STRING_TO_UPPER_CASE_TLAB,
+                                        RuntimeInterface::EntrypointId::STRING_TO_UPPER_CASE_ENTRYPOINT);
+    ValueMapAdd(inst, converted);
+    return true;
 }
