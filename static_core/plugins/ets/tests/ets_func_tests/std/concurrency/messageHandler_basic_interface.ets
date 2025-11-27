@@ -289,7 +289,7 @@ function testRemoveMultipleMessages() {
     handler.sendMessage(new concurrency.Message(countCallback, handler));
     waiter1.set(true);
     waiter2.wait();
-    eaw.quitSafely();
+    eaw.quit();
     arktest.assertEQ(executeCount, 2);
 }
 
