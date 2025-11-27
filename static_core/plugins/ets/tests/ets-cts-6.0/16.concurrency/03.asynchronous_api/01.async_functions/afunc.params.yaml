@@ -384,7 +384,7 @@ cases:
               return p
           }
           async function foo<T>(p: T): Promise<T> {
-              return launch<T, (t: T) => T>(bar, p).Await()
+              return launch<T, (t: T) => T>(bar<T>, p).Await();
           }
 
           class A<T> {
