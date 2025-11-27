@@ -142,6 +142,8 @@ export enum FaultID {
   PropertyAccessExpression,
   NoBuiltInType,
   AddDeclareToTopLevelInterfaces,
+  AddDeclareToTopLevelVariable,
+  AddDeclareToTopLevelFunction,
   RemoveLimitDecorator,
   TupleTypeToArray,
   StructDeclaration,
