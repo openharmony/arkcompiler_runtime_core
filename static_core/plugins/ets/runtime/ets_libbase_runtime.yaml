@@ -6668,15 +6668,26 @@ intrinsics:
     codegen_func: CreateSameValueZero
     llvm_codegen_func: EmitSameValueZero
 
-  - name: StdCoreRuntimeFailedTypeCastException
+  - name: StdCoreRuntimeFailedTypeCastExclUndefinedStub
     space: ets
     class_name: std.core.Runtime
-    method_name: failedTypeCastException
+    method_name: failedTypeCastExclUndefinedStub
     static: true
     signature:
       ret: std.core.ClassCastError
-      args: [ std.core.Object, std.core.String, u1 ]
-    impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
+      args: [ std.core.Object, std.core.Class ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastExclUndefinedStub
+    clear_flags: [ ]
+
+  - name: StdCoreRuntimeFailedTypeCastInclUndefinedStub
+    space: ets
+    class_name: std.core.Runtime
+    method_name: failedTypeCastInclUndefinedStub
+    static: true
+    signature:
+      ret: std.core.ClassCastError
+      args: [ std.core.Object, std.core.Class ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastInclUndefinedStub
     clear_flags: [ ]
 
   - name: StdCoreRuntimeGetTypeInfo

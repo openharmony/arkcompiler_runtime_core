@@ -517,13 +517,13 @@
 //! METHOD            "optimize_istrue.ETSGLOBAL::__noinline__testBigIntTrue2"
 //! PASS_BEFORE       "Peepholes"
 //! INST_NOT          /LoadObject.*std\.core\.BigInt\.sign/
-//! INST_COUNT        "Compare NE i32", 1
+//! INST_COUNT        "Compare NE i32", 0
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
 //! INST              /LoadObject.*std\.core\.BigInt\.sign/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
-//! INST_COUNT        "Compare NE i32", 2
+//! INST_COUNT        "Compare NE i32", 1
 //! PASS_AFTER_NEXT   "Cleanup"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 0
 //!
@@ -1205,13 +1205,13 @@
 //! METHOD            "optimize_istrue.ETSGLOBAL::__noinline__testBigIntTrue2"
 //! PASS_BEFORE       "Peepholes"
 //! INST_NOT          /LoadObject.*std\.core\.BigInt\.sign/
-//! INST_COUNT        "Compare NE i32", 1
+//! INST_COUNT        "Compare NE i32", 0
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 1
 //! PASS_AFTER        "Peepholes"
 //! INST              /LoadObject.*std\.core\.BigInt\.sign/
 //! INST_NEXT         "Compare NE i32"
 //! INST_NEXT         "Intrinsic.CompilerEtsIstrue"
-//! INST_COUNT        "Compare NE i32", 2
+//! INST_COUNT        "Compare NE i32", 1
 //! PASS_AFTER_NEXT   "Cleanup"
 //! INST_COUNT        "Intrinsic.CompilerEtsIstrue", 0
 //!

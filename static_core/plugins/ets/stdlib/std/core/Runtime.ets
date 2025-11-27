@@ -121,8 +121,9 @@ export final class Runtime {
     // Deprecated.
     native static __getTypeInfo(o: Any): Class|undefined;
 
-    // Internal stub to create a ClassCastError object in failed cast events
-    static native failedTypeCastException(src: Any, dstStr: string, isUndef: boolean): ClassCastError
+    // Internal stubs to create a ClassCastError during failed cast events
+    static native failedTypeCastExclUndefinedStub(source: Any, target: Class | undefined): ClassCastError
+    static native failedTypeCastInclUndefinedStub(source: Any, target: Class | undefined): ClassCastError
 
     // Internal stub to create a FixedArray of the specified type and length
     private native static allocSameTypeArray<T extends FixedArray<Any>>(type: Class, length: int): T;
