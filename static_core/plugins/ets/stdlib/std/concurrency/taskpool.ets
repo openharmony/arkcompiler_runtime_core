@@ -1866,22 +1866,23 @@ export namespace taskpool {
      * @see taskpool.AsyncRunner.constructor
      */
     function initWorkerPool(): void {
-        if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
+        if (isWorkersInitialized.get() || isTaskPoolUseLaunch || isInitTaskLaunched.get()) {
                 return;
         }
-        ConcurrencyHelpers.lockGuard(workersMutex, () => {
-            if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
-                return;
-            }
 
-            if (managerWorker === undefined) {
-                // Create managerWorker, and start to trigger shrink.
-                managerWorker = new TaskPoolWorker(isTaskpoolSupportInterop);
-                managerWorker.retriggerShrink();
-            }
-
-            // Init taskpool worker pool.
-            managerWorker!.run<void>(() => {
+        let initTask = ()=> {
+            ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
+                    return;
+                }
+    
+                if (managerWorker === undefined) {
+                    // Create managerWorker, and start to trigger shrink.
+                    managerWorker = new TaskPoolWorker();
+                    managerWorker.retriggerShrink();
+                }
+    
+                // Init taskpool worker pool.
                 for (let i = 0; i < initialWorkersNumber; ++i) {
                     let w = new TaskPoolWorker(isTaskpoolSupportInterop);
                     workers.add(w);
@@ -1890,8 +1891,11 @@ export namespace taskpool {
                     triggerExecuteNextTask();
                 }
                 isWorkersInitialized.set(true);
-            });
-        })
+            })
+        }
+        launch<void, ()=>void>(initTask);
+        isInitTaskLaunched.set(true);
+
     }
 
     /**
@@ -2149,6 +2153,7 @@ export namespace taskpool {
     let workers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
     let idleWorkers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
     let isWorkersInitialized: AtomicFlag = new AtomicFlag(false);
+    let isInitTaskLaunched: AtomicFlag = new AtomicFlag(false);
 
     const taskQueuesMutex = ConcurrencyHelpers.mutexCreate();
     let isTaskQueuesInitialized: boolean = false;
