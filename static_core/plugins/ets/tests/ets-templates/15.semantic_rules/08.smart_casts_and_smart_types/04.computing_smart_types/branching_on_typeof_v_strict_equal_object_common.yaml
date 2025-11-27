@@ -1,0 +1,589 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # Note: each 'check_variant_decl_data'
+  # define different types A and related to them check values for check
+  # branching on "typeof v === "object"" where A is type of v variable
+  - check_variant_decl_data: |-
+      // type A = Base /* Class */ | string
+      // Derived1<:Base
+      // Derived2<:Base
+      // Derived3<:Base
+
+      class Base {
+        methBase() {
+          return "methBase"
+        }
+      }
+      class Derived1 extends Base {
+        vd1: double = 7.8
+      }
+      class Derived2 extends Base {
+        vd2: bigint = 123n
+      }
+      class Derived3 extends Base {
+        vd3: int = 5
+      }
+
+      // type A is type of v variable used for check
+      // branching on "typeof v === "object""
+      type A = Base | string
+
+      // type T is null | Object - boolean - string - bigint - all numeric types
+
+      // type A & T is computed smart type on the positive branch
+      // after branching on "typeof v === "object""
+      type A_inter_T = Base
+
+      // type A - T is computed smart type on the negative branch
+      // after branching on "typeof v === "object""
+      type A_diff_T = string
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "object"": on positive branch, on negative branch
+      enum VarType {A_inter_T, A_diff_T}
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueFuncTypeA_diff_T = (v: A_diff_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        // check value function if VarType is A_diff_T
+        CheckValueFuncTypeA_diff_T | undefined,
+        VarType // value_type
+      ]
+
+      // Function for check value of the variable of string type as value of type A - T
+      function check_string(v: A_diff_T,
+                            v_id: int): void {
+        arktest.assertEQ(v, "abc")
+      }
+
+      // Function for check value of the variable of Derived1 class as value of type A & T
+      function check_Derived1(v: A_inter_T) {
+        if (v instanceof Derived1) {
+          arktest.assertEQ(v.vd1, 7.8)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of Derived1')
+        }
+      }
+
+      // Function for check value of the variable of Derived2 class as value of type A & T
+      function check_Derived2(v: A_inter_T) {
+        if (v instanceof Derived2) {
+          arktest.assertEQ(v.vd2, 123n)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of Derived2')
+        }
+      }
+
+      // Function for check value of the variable of Derived3 class as value of type A & T
+      function check_Derived3(v: A_inter_T) {
+        if (v instanceof Derived3) {
+          arktest.assertEQ(v.vd3, 5)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of Derived3')
+        }
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [new Derived1(), check_Derived1, undefined, VarType.A_inter_T],
+        [new Derived2(), check_Derived2, undefined, VarType.A_inter_T],
+        [new Derived3(), check_Derived3, undefined, VarType.A_inter_T],
+        ["abc", undefined, check_string, VarType.A_diff_T] ]
+      const check_values_number: int = 4
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.methBase(), \"methBase\")"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v.length, 3)"
+
+  - check_variant_decl_data: |-
+      // type A = long | int | byte | short | double | float |
+      //   I /* Interface */ | boolean | bigint | char | string | undefined
+      // C1<:I
+      // C2<:I
+      // C3<:I
+
+      interface I {
+        vi: int
+        methI(): string {
+          return "methI"
+        }
+      }
+      class C1 implements I {
+        vi: int
+        vc1: bigint = 123n
+      }
+      class C2 implements I {
+        vi: int
+        vc2: int = 321
+      }
+      class C3 implements I {
+        vi: int
+        vc3: number = 7.8
+      }
+
+      // type A is type of v variable used for check
+      // branching on "typeof v === "object""
+      type A = long | int | byte | short | double | float |
+        I | boolean | bigint | char | string | undefined
+
+      // type T is null | Object - boolean - string - bigint - all numeric types
+
+      // type A & T is computed smart type on the positive branch
+      // after branching on "typeof v === "object""
+      type A_inter_T = I
+
+      // type A - T is computed smart type on the negative branch
+      // after branching on "typeof v === "object""
+      type A_diff_T = long | int | byte | short | double | float |
+        boolean | bigint | char | string | undefined
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "object"": on positive branch, on negative branch
+      enum VarType {A_inter_T, A_diff_T}
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueFuncTypeA_diff_T = (v: A_diff_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        // check value function if VarType is A_diff_T
+        CheckValueFuncTypeA_diff_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A - T
+      function check_value_default(v: A_diff_T,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check value of the variable of C1 class as value of type A & T
+      function check_C1(v: A_inter_T) {
+        if (v instanceof C1) {
+          arktest.assertEQ(v.vc1, 123n)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C1')
+        }
+      }
+
+      // Function for check value of the variable of C2 class as value of type A & T
+      function check_C2(v: A_inter_T) {
+        if (v instanceof C2) {
+          arktest.assertEQ(v.vc2, 321)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C2')
+        }
+      }
+
+      // Function for check value of the variable of C3 class as value of type A & T
+      function check_C3(v: A_inter_T) {
+        if (v instanceof C3) {
+          arktest.assertEQ(v.vc3, 7.8)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C3')
+        }
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [new C1(), check_C1, undefined, VarType.A_inter_T],
+        [new C2(), check_C2, undefined, VarType.A_inter_T],
+        [new C3(), check_C3, undefined, VarType.A_inter_T],
+        [0x7FFF_FFFF_1, undefined, check_value_default, VarType.A_diff_T],
+        [123, undefined, check_value_default, VarType.A_diff_T],
+        [15 as byte, undefined, check_value_default, VarType.A_diff_T],
+        [517 as short, undefined, check_value_default, VarType.A_diff_T],
+        [4.59, undefined, check_value_default, VarType.A_diff_T],
+        [17.8f, undefined, check_value_default, VarType.A_diff_T],
+        [true, undefined, check_value_default, VarType.A_diff_T],
+        [567n, undefined, check_value_default, VarType.A_diff_T],
+        [c'a', undefined, check_value_default, VarType.A_diff_T],
+        [undefined, undefined, check_value_default, VarType.A_diff_T],
+        ["abc", undefined, check_value_default, VarType.A_diff_T] ]
+      const check_values_number: int = 14
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.methI(), \"methI\")"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A = long | int | byte | short | double | float | null |
+      //   I1 | C3 | I2 | C4 | boolean | bigint | char | string | undefined
+      // C1<:I1
+      // C2<:I2
+
+      interface I1 {}
+      interface I2 {}
+      class C1 implements I1 {vc1: bigint = 123n}
+      class C2 implements I2 {vc2: int = 321}
+      class C3 {vc3: number = 7.8}
+      class C4 {vc4: string = "abc"}
+
+      // type A is type of v variable used for check
+      // branching on "typeof v === "object""
+      type A = long | int | byte | short | double | float | null |
+        I1 | C3 | I2 | C4 | boolean | bigint | char | string | undefined
+
+      // type T is null | Object - boolean - string - bigint - all numeric types
+
+      // type A & T is computed smart type on the positive branch
+      // after branching on "typeof v === "object""
+      type A_inter_T = I1 | C3 | I2 | C4 | null
+
+      // type A - T is computed smart type on the negative branch
+      // after branching on "typeof v === "object""
+      type A_diff_T = long | int | byte | short | double | float |
+        boolean | bigint | char | string | undefined
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "object"": on positive branch, on negative branch
+      enum VarType {A_inter_T, A_diff_T}
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueFuncTypeA_diff_T = (v: A_diff_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        // check value function if VarType is A_diff_T
+        CheckValueFuncTypeA_diff_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A - T
+      function check_value_default(v: A_diff_T,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check value of the variable of C1 class as value of type A & T
+      function check_C1(v: A_inter_T) {
+        if (v instanceof C1) {
+          arktest.assertEQ(v.vc1, 123n)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C1')
+        }
+      }
+
+      // Function for check value of the variable of C2 class as value of type A & T
+      function check_C2(v: A_inter_T) {
+        if (v instanceof C2) {
+          arktest.assertEQ(v.vc2, 321)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C2')
+        }
+      }
+
+      // Function for check value of the variable of C3 class as value of type A & T
+      function check_C3(v: A_inter_T) {
+        if (v instanceof C3) {
+          arktest.assertEQ(v.vc3, 7.8)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C3')
+        }
+      }
+
+      // Function for check value of the variable of C4 class as value of type A & T
+      function check_C4(v: A_inter_T) {
+        if (v instanceof C4) {
+          arktest.assertEQ(v.vc4, "abc")
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C4')
+        }
+      }
+
+      // Function for check value of the variable of null type as value of type A & T
+      function check_null(v: A_inter_T) {
+        arktest.assertEQ(v, null)
+      }
+
+      // Function for skip check value of the variable by expression
+      function skip_check_value_by_expression() {
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [null, check_null, undefined, VarType.A_inter_T],
+        [new C1(), check_C1, undefined, VarType.A_inter_T],
+        [new C2(), check_C2, undefined, VarType.A_inter_T],
+        [new C3(), check_C3, undefined, VarType.A_inter_T],
+        [new C4(), check_C4, undefined, VarType.A_inter_T],
+        [0x7FFF_FFFF_1, undefined, check_value_default, VarType.A_diff_T],
+        [123, undefined, check_value_default, VarType.A_diff_T],
+        [15 as byte, undefined, check_value_default, VarType.A_diff_T],
+        [517 as short, undefined, check_value_default, VarType.A_diff_T],
+        [4.59, undefined, check_value_default, VarType.A_diff_T],
+        [17.8f, undefined, check_value_default, VarType.A_diff_T],
+        [true, undefined, check_value_default, VarType.A_diff_T],
+        [567n, undefined, check_value_default, VarType.A_diff_T],
+        [c'a', undefined, check_value_default, VarType.A_diff_T],
+        [undefined, undefined, check_value_default, VarType.A_diff_T],
+        ["abc", undefined, check_value_default, VarType.A_diff_T] ]
+      const check_values_number: int = 16
+    check_value_by_expression_on_the_positive_branch:
+      "skip_check_value_by_expression()"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A = Object
+
+      interface I1 {}
+      interface I2 {}
+      class C1 implements I1 {vc1: bigint = 123n}
+      class C2 implements I2 {vc2: int = 321}
+      class C3 {vc3: number = 7.8}
+      class C4 {vc4: string = "abc"}
+
+      // type A is type of v variable used for check
+      // branching on "typeof v === "object""
+      type A = Object
+
+      // type T is null | Object - boolean - string - bigint - all numeric types
+
+      // type A & T is computed smart type on the positive branch
+      // after branching on "typeof v === "object""
+      type A_inter_T = Object // nearest supertype for A & T
+
+      // type A - T is computed smart type on the negative branch
+      // after branching on "typeof v === "object""
+      type A_diff_T = Object // nearest supertype for A - T
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "object"": on positive branch, on negative branch
+      enum VarType {A_inter_T, A_diff_T}
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueFuncTypeA_diff_T = (v: A_diff_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        // check value function if VarType is A_diff_T
+        CheckValueFuncTypeA_diff_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A - T
+      function check_value_default(v: A_diff_T,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check value of the variable of C1 class as value of type A & T
+      function check_C1(v: A_inter_T) {
+        if (v instanceof C1) {
+          arktest.assertEQ(v.vc1, 123n)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C1')
+        }
+      }
+
+      // Function for check value of the variable of C2 class as value of type A & T
+      function check_C2(v: A_inter_T) {
+        if (v instanceof C2) {
+          arktest.assertEQ(v.vc2, 321)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C2')
+        }
+      }
+
+      // Function for check value of the variable of C3 class as value of type A & T
+      function check_C3(v: A_inter_T) {
+        if (v instanceof C3) {
+          arktest.assertEQ(v.vc3, 7.8)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C3')
+        }
+      }
+
+      // Function for check value of the variable of C4 class as value of type A & T
+      function check_C4(v: A_inter_T) {
+        if (v instanceof C4) {
+          arktest.assertEQ(v.vc4, "abc")
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C4')
+        }
+      }
+
+      // Function for skip check value of the variable by expression
+      function skip_check_value_by_expression() {
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [new C1(), check_C1, undefined, VarType.A_inter_T],
+        [new C2(), check_C2, undefined, VarType.A_inter_T],
+        [new C3(), check_C3, undefined, VarType.A_inter_T],
+        [new C4(), check_C4, undefined, VarType.A_inter_T],
+        [0x7FFF_FFFF_1, undefined, check_value_default, VarType.A_diff_T],
+        [123, undefined, check_value_default, VarType.A_diff_T],
+        [15 as byte, undefined, check_value_default, VarType.A_diff_T],
+        [517 as short, undefined, check_value_default, VarType.A_diff_T],
+        [4.59, undefined, check_value_default, VarType.A_diff_T],
+        [17.8f, undefined, check_value_default, VarType.A_diff_T],
+        [true, undefined, check_value_default, VarType.A_diff_T],
+        [567n, undefined, check_value_default, VarType.A_diff_T],
+        [c'a', undefined, check_value_default, VarType.A_diff_T],
+        ["abc", undefined, check_value_default, VarType.A_diff_T] ]
+      const check_values_number: int = 14
+    check_value_by_expression_on_the_positive_branch:
+      "skip_check_value_by_expression()"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A = Any
+
+      interface I1 {}
+      interface I2 {}
+      class C1 implements I1 {vc1: bigint = 123n}
+      class C2 implements I2 {vc2: int = 321}
+      class C3 {vc3: number = 7.8}
+      class C4 {vc4: string = "abc"}
+
+      // type A is type of v variable used for check
+      // branching on "typeof v === "object""
+      type A = Any
+
+      // type T is null | Object - boolean - string - bigint - all numeric types
+
+      // type A & T is computed smart type on the positive branch
+      // after branching on "typeof v === "object""
+      type A_inter_T = Any // nearest supertype for A & T
+
+      // type A - T is computed smart type on the negative branch
+      // after branching on "typeof v === "object""
+      type A_diff_T = Any // nearest supertype for A - T
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "object"": on positive branch, on negative branch
+      enum VarType {A_inter_T, A_diff_T}
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueFuncTypeA_diff_T = (v: A_diff_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        // check value function if VarType is A_diff_T
+        CheckValueFuncTypeA_diff_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A - T
+      function check_value_default(v: A_diff_T,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check value of the variable of C1 class as value of type A & T
+      function check_C1(v: A_inter_T) {
+        if (v instanceof C1) {
+          arktest.assertEQ(v.vc1, 123n)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C1')
+        }
+      }
+
+      // Function for check value of the variable of C2 class as value of type A & T
+      function check_C2(v: A_inter_T) {
+        if (v instanceof C2) {
+          arktest.assertEQ(v.vc2, 321)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C2')
+        }
+      }
+
+      // Function for check value of the variable of C3 class as value of type A & T
+      function check_C3(v: A_inter_T) {
+        if (v instanceof C3) {
+          arktest.assertEQ(v.vc3, 7.8)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C3')
+        }
+      }
+
+      // Function for check value of the variable of C4 class as value of type A & T
+      function check_C4(v: A_inter_T) {
+        if (v instanceof C4) {
+          arktest.assertEQ(v.vc4, "abc")
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C4')
+        }
+      }
+
+      // Function for check value of the variable of null type as value of type A & T
+      function check_null(v: A_inter_T) {
+        arktest.assertEQ(v, null)
+      }
+
+      // Function for skip check value of the variable by expression
+      function skip_check_value_by_expression() {
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [null, check_null, undefined, VarType.A_inter_T],
+        [new C1(), check_C1, undefined, VarType.A_inter_T],
+        [new C2(), check_C2, undefined, VarType.A_inter_T],
+        [new C3(), check_C3, undefined, VarType.A_inter_T],
+        [new C4(), check_C4, undefined, VarType.A_inter_T],
+        [0x7FFF_FFFF_1, undefined, check_value_default, VarType.A_diff_T],
+        [123, undefined, check_value_default, VarType.A_diff_T],
+        [15 as byte, undefined, check_value_default, VarType.A_diff_T],
+        [517 as short, undefined, check_value_default, VarType.A_diff_T],
+        [4.59, undefined, check_value_default, VarType.A_diff_T],
+        [17.8f, undefined, check_value_default, VarType.A_diff_T],
+        [true, undefined, check_value_default, VarType.A_diff_T],
+        [567n, undefined, check_value_default, VarType.A_diff_T],
+        [c'a', undefined, check_value_default, VarType.A_diff_T],
+        [undefined, undefined, check_value_default, VarType.A_diff_T],
+        ["abc", undefined, check_value_default, VarType.A_diff_T] ]
+      const check_values_number: int = 16
+    check_value_by_expression_on_the_positive_branch:
+      "skip_check_value_by_expression()"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
