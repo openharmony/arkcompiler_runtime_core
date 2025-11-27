@@ -297,12 +297,6 @@
 #30368  Cannot spread tuple of strings to FixedArray of strings
 07.expressions/06.spread_expression/spex_71.ets
 
-#30367 Cannot spread custom array
-07.expressions/06.spread_expression/spex_73.ets
-07.expressions/06.spread_expression/spex_74.ets
-07.expressions/06.spread_expression/spex_75.ets
-07.expressions/06.spread_expression/spex_76.ets
-
 #20371 Unexpected Type Error on string array
 07.expressions/06.spread_expression/spex_lmbd_28.ets
 
@@ -2190,4 +2184,3 @@
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_60.ets
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_80.ets
 18.annotations/05.standard_annotations/02.target_annotation/ClassAnnoTest.ets
-

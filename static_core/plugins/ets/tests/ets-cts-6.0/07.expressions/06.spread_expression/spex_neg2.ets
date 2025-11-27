@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,10 @@
 
 {% for c in cases %}
 /*---
-desc: If an array is spread while calling a function, then an appropriate parameter must be of the spread array kind.
+desc: A spread expression can be used only within the array literal or argument passing.
+expected_out: |-
+    {{(c.expected_out or '')|indent}}
+tags: [negative, compile-only]
 ---*/
 
 {{c.decl}}
