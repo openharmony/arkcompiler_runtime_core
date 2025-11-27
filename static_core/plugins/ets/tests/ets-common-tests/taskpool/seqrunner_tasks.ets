@@ -245,7 +245,7 @@ async function taskWithDifferentParamsTest() {
 
     let awake_waiter: (val: int)=>void = ()=>{};
     let waiter = new Promise<int>((res, rej)=>{awake_waiter = res;})
-    let test = async (a: number, b: number): number => {
+    let test = async (a: number, b: number): Promise<number> => {
         await waiter;
         return a + b;
     }
