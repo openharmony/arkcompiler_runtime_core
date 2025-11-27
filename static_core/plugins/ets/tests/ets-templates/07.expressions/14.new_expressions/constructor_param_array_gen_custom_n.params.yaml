@@ -20,9 +20,9 @@ cases:
         constructor(j: Object) { }
       }
       
-      class C<T,S> {
+      class C<T> {
         foo() {
-          let arr = new Array<T<S>> (5)
+          let arr = new Array<T> (5)
         }
       }
 
@@ -33,9 +33,9 @@ cases:
         private constructor(j: number) { }
       }
       
-      class C<T,S> {
+      class C<T> {
         foo() {
-          let arr = new Array<T<S>> (5)
+          let arr = new Array<T> (5)
         }
       }
 
@@ -48,8 +48,8 @@ cases:
         constructor(j: String) {}
       }
       
-      class C<T,S> {
+      class C<T> {
         foo() {
-          let arr = new Array<T<S>> (5)
+          let arr = new Array<T> (5)
         }
       }

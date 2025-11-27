@@ -32,7 +32,7 @@ tags: [compile-only, negative]
 {{c.decl}}
 
 function main(): void {
-  new C<A<Object>,Array<A<Object>>>().foo()
+  new C<A<Object>>().foo()
 }
 
 {% endfor %}
