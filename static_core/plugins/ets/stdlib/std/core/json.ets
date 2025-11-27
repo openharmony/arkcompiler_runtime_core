@@ -1015,11 +1015,22 @@ class JSONWriter {
                 } else {
                     this.writeArrayValue(Types.asFixedArray(obj))
                 }
+            } else if (objCls.isEnum()) {
+                this.writeEnumValue(obj, objCls)
             } else {
                 this.writeClassValue(obj, objCls)
             }
         } else {
             throw new AssertionError("Unsupported object type: " + typeof obj)
+        }
+    }
+
+    private writeEnumValue(obj: Object, cls: Class) {
+        let valMethod = cls.getInstanceMethod('valueOf')
+        if (valMethod!.getReturnType() == Class.from<String>()) {
+            this.buffer.append('\"' + obj + '\"')
+        } else {
+            this.buffer.append(obj)
         }
     }
 
