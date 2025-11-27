@@ -351,21 +351,6 @@
 #30216 Incorrect error for readonly array assignment
 07.expressions/29.assignment/01.simple_assignment_operator/readonly_array_negative.ets
 
-#30412 Incorrect evaluation order for compound assignment
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_0.ets
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_1.ets
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_2.ets
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_3.ets
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_4.ets
-07.expressions/29.assignment/02.compound_assignment_operators/no_indexing_compound_assignment_order_0.ets
-07.expressions/29.assignment/02.compound_assignment_operators/no_indexing_compound_assignment_order_2.ets
-07.expressions/29.assignment/02.compound_assignment_operators/no_indexing_compound_assignment_order_3.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_0.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_1.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_2.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_3.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_4.ets
-
 #30582
 07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
 07.expressions/32.lambda_expression/01.lambda_signature/positive_1.ets
