@@ -40,6 +40,7 @@
 #include "runtime/include/tooling/debug_inf.h"
 #include "libarkbase/trace/trace.h"
 #include "libarkbase/utils/utils.h"
+#include "runtime/trace.h"
 
 namespace ark {
 
@@ -163,6 +164,7 @@ ClassLinker::ClassLinker(mem::InternalAllocatorPtr allocator,
     : allocator_(allocator),
       aotManager_(MakePandaUnique<AotManager>()),
       copiedNames_(allocator->Adapter()),
+      isTraceEnabled_(Runtime::GetOptions().IsEnableClassLinkerTrace()),
       bootClassFilter_(NUM_BOOT_CLASSES, FILTER_RATE)
 {
     for (auto &ext : extensions) {
@@ -1413,6 +1415,8 @@ Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor,
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
+    ScopedTrace scopedTrace("ClassLinker::GetClass", isTraceEnabled_);
+
     Class *cls = FindLoadedClass(descriptor, context);
     if (cls != nullptr) {
         return cls;
@@ -1465,6 +1469,8 @@ Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::Entit
     ASSERT(context != nullptr);
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
+
+    ScopedTrace scopedTrace("ClassLinker::GetClass", isTraceEnabled_);
 
     Class *cls = pf.GetPandaCache()->GetClassFromCache(id);
     if (cls != nullptr) {
