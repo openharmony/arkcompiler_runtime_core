@@ -65,27 +65,29 @@ Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limit
     auto *runtime = Runtime::GetCurrent();
     auto *coroMan = etsVM->GetCoroutineManager();
     auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
-
+    void *jsEnv = nullptr;
+    if (needInterop) {
+        jsEnv = ifaceTable->CreateJSRuntime();
+        if (jsEnv == nullptr) {
+            jsEnvEmpty = true;
+            LOG(ERROR, COROUTINES) << "Cannot create EAWorker support interop without JsEnv";
+            return nullptr;
+        }
+    }
     auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
     // exclusiveCoro == nullptr means that we reached the limit of eaworkers count or memory resources
     if (exclusiveCoro == nullptr) {
         limitIsReached = true;
         LOG(ERROR, COROUTINES) << "The limit of Exclusive Workers has been reached";
+        if (jsEnv != nullptr) {
+            ifaceTable->CleanUpJSEnv(jsEnv);
+        }
         return nullptr;
     }
 
     // early return to avoid waste time on creating jsEnv
     if (!needInterop) {
         return exclusiveCoro;
-    }
-
-    auto *jsEnv = ifaceTable->CreateJSRuntime();
-    // current we cannot create JSVM instance without jsEnv
-    // so we cannot create eaworker support interop withoutJSEnv
-    if (jsEnv == nullptr) {
-        jsEnvEmpty = true;
-        LOG(ERROR, COROUTINES) << "Cannot create EAWorker support interop without JsEnv";
-        return nullptr;
     }
 
     ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
@@ -151,13 +153,8 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
     auto limitIsReached = false;
     auto jsEnvEmpty = false;
     bool supportInterop = static_cast<bool>(needInterop);
-    auto *interopCtx = coro->GetWorker()->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, void *>();
     int32_t workerId = 0;
 
-    if (supportInterop && interopCtx == nullptr) {
-        ThrowRuntimeException("Cannot create EAWorker support interop without JsEnv");
-        return INVALID_WORKER_ID;
-    }
     {
         PandaVector<uint8_t> nameBuf;
         EtsHandleScope handleScope(coro);
