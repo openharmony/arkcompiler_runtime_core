@@ -187,7 +187,10 @@ function setItersCounter(this: BucketsArrType, cnt: int) {
     this[this.length + Const.ITER_CNT_IDX] = cnt
 }
 function chgItersCounter(this: BucketsArrType, chg: int) {
-    this.setItersCounter(this.getItersCounter() + chg)
+    let itersCounter = this.getItersCounter()
+    if (itersCounter != Int.MAX_VALUE) {
+        this.setItersCounter(itersCounter + chg)
+    }
 }
 
 function getBucketsFromData(this: DataArrType): BucketsArrType {
