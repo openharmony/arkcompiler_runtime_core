@@ -17,7 +17,11 @@ package std.concurrency;
 
 import { launch } from "std/concurrency"
 
-/// This class provides api for sync primitives (see SyncPrimitives.ets)
+/**
+ * @class provides api for sync primitives (see SyncPrimitives.ets)
+ *
+ * @internal
+ */
 final class ConcurrencyHelpers {
     // Mutex api
     public static native mutexCreate(): Object;

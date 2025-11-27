@@ -37,6 +37,7 @@ type CoroFunT<A, R> = (
 
 /**
  * @class LaunchParams Class for coroutine launch params.
+ * @internal
  */
 export class LaunchParams {
   /** @property { boolean } abortFlag if true, aborts the program if unhandled exception were thrown inside the coroutine. */
@@ -53,6 +54,8 @@ export class LaunchParams {
  * @param args arguments for the function coroFun.
  *
  * @returns instance of the Job class that represents newly launched coroutine.
+ *
+ * @internal
  */
 export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<Any>): Job<R> {
   return launchInternal<R, F>(coroFun, args as FixedArray<Any>, launchParams);
@@ -65,6 +68,8 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams
  * @param args arguments for the function coroFun.
  *
  * @returns instance of the Job class that represents newly launched coroutine.
+ *
+ * @internal
  */
 export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<Any>): Job<R> {
   return launchInternal<R, F>(coroFun, args as FixedArray<Any>);
@@ -73,6 +78,8 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: Fix
 /**
  * @enum WorkerDomain The existing worker domains. A worker domain defines a group of workers with some common
  * properties.
+ *
+ * @internal
  */
 export enum WorkerDomain {
     // NOTE(konstanting): we need a mirror class for this to verify that the IDs match the runtime IDs
@@ -82,12 +89,23 @@ export enum WorkerDomain {
     EA,
 }
 
+/**
+ * @internal
+ */
 export type WorkerGroupId = FixedArray<long>;
+/**
+ * @internal
+ */
 export type CoroutineId = int;
+/**
+ * @internal
+ */
 export type WorkerId = int;
 
 /**
  * @class WorkerGroup a group of workers which a coroutine can be launched to.
+ *
+ * @internal
  */
 export class WorkerGroup {
     // NOTE(konstanting): we need a mirror class for this to verify that the IDs match the runtime IDs
