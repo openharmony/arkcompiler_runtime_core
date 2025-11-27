@@ -135,6 +135,7 @@ static RuntimeOptions GetRuntimeOptions(const std::string &triggerType)
         constexpr size_t YOUNG_SIZE = 512 * 1024;
         options.SetYoungSpaceSize(YOUNG_SIZE);
         options.SetInitYoungSpaceSize(YOUNG_SIZE);
+        options.SetGcWorkersCount(0);
     } else if (triggerType == "heap-trigger-test") {
         options.SetGcTriggerType("heap-trigger-test");
     } else if (triggerType == "heap-trigger") {
