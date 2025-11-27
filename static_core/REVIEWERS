@@ -70,10 +70,10 @@ static_core/plugins/ets/disassembler                     @nazarovkonstantin @oat
 static_core/plugins/ets/playground                       @anton-sysoev @Nojpg
 static_core/runtime/arch/                                @Prof @xucheng46 ^gitee-dakeQI
 static_core/runtime/bridge/                              @Prof @dingding5 @asidorov @xucheng46 ^gitee-dakeQI
-static_core/runtime/coroutines/                          ^dmitriitr @konstanting ^ychen3 @tanglu100 @MofengMa @weixin_41079876
+static_core/runtime/coroutines/                          ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
 static_core/runtime/entrypoints/                         @Prof @xucheng46 ^gitee-dakeQI
 static_core/runtime/entrypoints/entrypoints.*            @mbolshov
-static_core/runtime/fibers/                              @konstanting ^ychen3 @tanglu100 @MofengMa @weixin_41079876
+static_core/runtime/fibers/                              @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
 static_core/runtime/jit/                                 @Prof @zijiancogito @K0u1hw ^dingding5 ^chernykhsergey @zhuheng27
 static_core/runtime/mem/                                 ^dmitriitr @udav @xucheng46 ^gitee-dakeQI
 static_core/runtime/tooling/                             @slynkodenis
@@ -93,15 +93,15 @@ static_core/libarkbase/tests/ringbuf/                    @udav
 static_core/libarkbase/tests/taskmanager/                @udav @molotkovmikhail
 static_core/plugins/ets/bytecode_optimizer/              @mbolshov @oatuwwutao	^seeuiceland
 static_core/plugins/ets/compiler/                        @Prof @dingding5 @chernykhsergey
-static_core/plugins/ets/doc/concurrency                  ^konstanting @anedoria @dmitriitr @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/doc/concurrency                  ^konstanting @anedoria @dmitriitr ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/doc/spec                         ^konstanting ^Prof ^sergeyandreev ^slynkodenis ^nazarovkonstantin @mbolshov @akmaevaleksey @anedoria @qyhuo32 @klooer @godmiaozi @wanzixuan330 @zsw_zhushiwei @wuzhefengh @mengbierr @davidwulanxi @huanghuijin @egavrin @igelhaus @vpukhov @dmitriitr
 static_core/plugins/ets/irtoc_scripts/                   @Prof @mbolshov @asidorov ^dingding5 @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/isa/                             @mbolshov @xucheng46 @gitee-dakeQI
 static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon @asidorov @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/runtime/                         @vpukhov
-static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting ^ychen3 @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/runtime/ani                      @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
-static_core/plugins/ets/runtime/ets_coroutine.h          @tanglu100 @MofengMa @weixin_41079876 ^dmitriitr @konstanting
+static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/runtime/ani                      @wanzixuan330 @v-cherkashin ^slynkodenis
+static_core/plugins/ets/runtime/ets_coroutine.h          ^tanglu100 @MofengMa ^weixin_41079876 ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/ets_entrypoints*         @Prof @mbolshov ^asidorov @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/runtime/ets_handle*              ^dmitriitr @udav
 static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof @xucheng46 ^gitee-dakeQI
@@ -109,44 +109,44 @@ static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof @xucheng46 ^gitee
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
 static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @yuan-yao14
 static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039
-static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
+static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis
 static_core/plugins/ets/verification/                    @igelhaus @oatuwwutao @slynkodenis @groshevmaksim ^seeuiceland
 static_core/runtime/include/mem/                         ^dmitriitr @udav @xucheng46 ^gitee-dakeQI
 static_core/runtime/include/tooling/                     @slynkodenis
 static_core/runtime/tests/tooling/                       @slynkodenis
-static_core/plugins/ets/runtime/ani/ani_helpers*                              @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw ^asidorov
+static_core/plugins/ets/runtime/ani/ani_helpers*                              @wanzixuan330 @v-cherkashin ^slynkodenis ^asidorov
 static_core/plugins/ets/runtime/finalreg/*                                    ^dmitriitr @udav @ipetrov ^shemetovphilip
-static_core/plugins/ets/runtime/interop_js/                                   @igelhaus @nazarovkonstantin @vpukhov ^slynkodenis
-static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/runtime/interop_js/                                   @igelhaus @nazarovkonstantin @vpukhov ^slynkodenis @benzunfu
+static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @udav ^ipetrov ^molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
-static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/intrinsics/std_core_finalization_registry.cpp ^dmitriitr @udav
 static_core/plugins/ets/runtime/intrinsics/std_core_gc.cpp                    ^dmitriitr @udav
-static_core/plugins/ets/runtime/libani_helpers/                               @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
-static_core/plugins/ets/runtime/libani_helpers/concurrency_*                  @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/runtime/libani_helpers/interop_js                     @igelhaus @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
+static_core/plugins/ets/runtime/libani_helpers/                               @wanzixuan330 @v-cherkashin ^slynkodenis
+static_core/plugins/ets/runtime/libani_helpers/concurrency_*                  ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/runtime/libani_helpers/interop_js                     @igelhaus @wanzixuan330 @v-cherkashin ^slynkodenis @benzunfu
 static_core/plugins/ets/runtime/mem/                                          ^dmitriitr @udav @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/runtime/regexp/                                       ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/types/                                        @nazarovkonstantin @slynkodenis
-static_core/plugins/ets/runtime/types/*atomic*                                ^dmitriitr @konstanting @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/runtime/types/*promise*                               ^dmitriitr @konstanting @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/runtime/types/*atomic*                                ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/runtime/types/*promise*                               ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/types/*reflect*                               @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/*typeapi*                               @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/ets_class*                              @magikarp777 ^anton-sysoev @Nojpg
 static_core/plugins/ets/runtime/types/ets_method*                             @magikarp777 ^anton-sysoev @Nojpg
-static_core/plugins/ets/runtime/types/ets_promise.h                           @tanglu100 @MofengMa @weixin_41079876 ^dmitriitr @konstanting
+static_core/plugins/ets/runtime/types/ets_promise.h                           ^tanglu100 @MofengMa ^weixin_41079876 ^dmitriitr @konstanting
 static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof @asidorov
-static_core/plugins/ets/tests/benchmarks/interop_js                           @igelhaus @nazarovkonstantin @ignatenkooleg @Prof ^slynkodenis
+static_core/plugins/ets/tests/benchmarks/interop_js                           @igelhaus @nazarovkonstantin @ignatenkooleg @Prof ^slynkodenis @benzunfu
 static_core/plugins/ets/tests/checked/                                        @Prof @dingding5
 static_core/plugins/ets/tests/ets-templates/                                  ^Prof @igelhaus @fotograf @zsw_zhushiwei ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets_es_checked/                                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039
 static_core/plugins/ets/tests/ets_sdk/                                        ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @yuan-yao14
-static_core/plugins/ets/tests/interop_js/                                     @igelhaus @nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav ^slynkodenis
-static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw
+static_core/plugins/ets/tests/interop_js/                                     @igelhaus @nazarovkonstantin ^rokashevichsvetlana ^kurnevichstanislav ^slynkodenis @benzunfu
+static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
 static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg ^luobohua ^luchenxu ^Wangyuzhong11
@@ -155,36 +155,36 @@ static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @N
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
-static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong ^ychen3 @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/stdlib/std/concurrency/Atomics.ets                    ^dmitriitr @konstanting @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/stdlib/std/concurrency/taskpool.ets                   @ipetrov ^dmitriitr ^konstanting ^molotkovmikhail @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/stdlib/std/containers/BlockingQueue.ets               @konstanting @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/stdlib/std/core/Coroutine.ets                         ^dmitriitr @konstanting ^ychen3 @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/stdlib/std/core/EAWorker.ets                          ^dmitriitr @konstanting ^ychen3 @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/stdlib/std/concurrency/Atomics.ets                    ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/stdlib/std/concurrency/taskpool.ets                   @ipetrov ^dmitriitr ^konstanting ^molotkovmikhail ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/stdlib/std/containers/BlockingQueue.ets               @konstanting ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/stdlib/std/core/Coroutine.ets                         ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/stdlib/std/core/EAWorker.ets                          ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.ets              ^dmitriitr @udav ^shemetovphilip @liyiming13 ^lijin1039
 static_core/plugins/ets/stdlib/std/core/GC.ets                                ^dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/Promise.ets                           ^dmitriitr @udav @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/stdlib/std/core/Promise.ets                           ^dmitriitr @udav ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @Prof @igelhaus @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/7.expressions/                    @dmitriitr @Prof @igelhaus @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/9.classes/                        @dmitriitr @Prof @igelhaus @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets_func_tests/escompat/                        ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^jokerxd-liu
 static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^jokerxd-liu
-static_core/plugins/ets/tests/ets_test_suite/atomics/                         @konstanting @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.ets    @konstanting @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/tests/ets_test_suite/atomics/                         @konstanting ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.ets    @konstanting ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/ets_test_suite/gc/                              @udav
 static_core/plugins/ets/tests/ets_test_suite/gc/*finalization*                @udav ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/gc/*finreg*                      @udav ^shemetovphilip
-static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus @nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav ^slynkodenis
+static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus @nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav ^slynkodenis @benzunfu
 static_core/plugins/ets/tests/interop_js/xgc/                                 @ipetrov ^udav
-static_core/plugins/ets/tests/native/promise/                                 @konstanting @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/tests/native/promise/                                 @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/runtime/tooling/                                @slynkodenis
-static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^udav @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^udav ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/test-lists/ets-func-tests/                      ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev
 static_core/plugins/ets/tests/test-lists/ets-sdk/                             ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev
-static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting @tanglu100 @MofengMa @weixin_41079876
-static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^Nojpg @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^Nojpg ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/interop_js/tests/checked/                       ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof ^kurnevichstanislav @dingding5
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof @dingding5
 static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @Nojpg ^igelhaus ^trubachevilya ^ivagin ^Prof @luobohua @luchenxu ^Wangyuzhong11
