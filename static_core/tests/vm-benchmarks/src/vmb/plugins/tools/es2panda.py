@@ -113,6 +113,8 @@ class Tool(ToolBase):
             self.panda_root = self.ensure_dir(
                 panda_root, err='Please point $PANDA_SDK to sdk/package')
             os.environ['PANDA_BUILD'] = panda_root
+        elif self.custom_path:
+            self.panda_root = Path(self.custom_path).parent.parent
         else:
             self.panda_root = self.ensure_dir(
                 os.environ.get('PANDA_BUILD', ''),
@@ -124,7 +126,10 @@ class Tool(ToolBase):
         stdlib_opt = f'--stdlib={panda_stdlib_src}' if panda_stdlib_src else '--gen-stdlib=false'
         self.opts = f'{stdlib_opt} --extension=ets --opt-level=2 ' \
             f'{self.custom}'
-        self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
+        if self.custom_path:
+            self.es2panda = self.ensure_file(self.custom_path)
+        else:
+            self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
 
     @property
     def name(self) -> str:
@@ -176,8 +181,9 @@ class Tool(ToolBase):
         if OptFlags.SKIP_COMPILATION in self.flags and abc.exists():
             return ShellResult(ret=0, out="Compilation skipped")
         arktsconfig = conf if conf else self.default_arktsconfig
+        libpath = f'LD_LIBRARY_PATH={self.panda_root}/lib ' if not self.custom_path else ''
         res = self.sh.run(
-            f'LD_LIBRARY_PATH={self.panda_root}/lib '
+            f'{libpath}'
             f'{self.es2panda} {opts} '
             f'--arktsconfig={arktsconfig} '
             f'--output={abc} {src}',
