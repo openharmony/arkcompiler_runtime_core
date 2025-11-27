@@ -14,3 +14,4 @@
 persist.ark.enableDebugMode=false
 persist.sta.gc.SetG1TrackFreedObjects=false
 persist.sta.gc.SetGCUseLargerYoungSpace=false
+persist.sta.ark.EnableClassLinkerTrace=false

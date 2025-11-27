@@ -432,6 +432,7 @@ private:
     std::array<std::unique_ptr<ClassLinkerExtension>, ark::panda_file::LANG_COUNT> extensions_;
 
     bool isInitialized_ {false};
+    bool isTraceEnabled_ {false};
 
     // there are currently about 400 framework abc
     static constexpr size_t NUM_BOOT_CLASSES = 400000;
