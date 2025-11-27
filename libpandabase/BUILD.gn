@@ -200,7 +200,7 @@ if (current_cpu == "arm64" && !is_mac && target_os != "ios") {
 
 libarkbase_configs = [
   ":arkbase_public_config",
-  "$ark_root:ark_config",
+  "$ark_root:ark_public_config",
 ]
 
 group("arkbase_header_deps") {
@@ -220,6 +220,7 @@ ohos_source_set("libarkbase_static_fuzz") {
 
   public_configs = libarkbase_configs
   public_configs += [ ":arkbase_fuzz_config" ]
+  public_configs += [ "$ark_root:ark_config" ]
 
   deps = libarkbase_deps
 
@@ -239,6 +240,7 @@ ohos_source_set("libarkbase_static_fuzz") {
 ohos_static_library("libarkbase_static") {
   sources = libarkbase_sources
 
+  configs = [ "$ark_root:ark_config" ]
   public_configs = libarkbase_configs
 
   deps = libarkbase_deps
@@ -282,6 +284,7 @@ ohos_source_set("libarkbase_frontend_set_static") {
   sources = libarkbase_sources
 
   public_configs = libarkbase_configs
+  public_configs += [ "$ark_root:ark_config" ]
 
   deps = libarkbase_deps
 

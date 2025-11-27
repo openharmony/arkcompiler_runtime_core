@@ -102,13 +102,13 @@ libarkfile_sources = [
 ]
 
 libarkfile_configs = [
-  "$ark_root:ark_config",
+  "$ark_root:ark_public_config",
   "$ark_root/libpandabase:arkbase_public_config",
   ":arkfile_public_config",
 ]
 
 libarkfile_runtime_configs = [
-  "$ark_root:ark_config",
+  "$ark_root:ark_public_config",
   "$ark_root/libpandabase:arkbase_public_config",
   ":arkfile_runtime_public_config",
 ]
@@ -132,10 +132,11 @@ ohos_static_library("arkfile_header_deps") {
 ohos_static_library("libarkfile_static") {
   sources = libarkfile_sources
 
+  configs = [ "$ark_root:ark_config" ]
   public_configs = libarkfile_configs
 
   if (enabled_pac_data_protect) {
-    configs = libarkfile_configs
+    configs += libarkfile_configs
     configs += [ ":data_protect_configs" ]
   }
 
@@ -173,10 +174,11 @@ ohos_static_library("libarkfile_static") {
 ohos_static_library("libarkfile_runtime_static") {
   sources = libarkfile_sources
 
+  configs = [ "$ark_root:ark_config" ]
   public_configs = libarkfile_runtime_configs
 
   if (enabled_pac_data_protect) {
-    configs = libarkfile_runtime_configs
+    configs += libarkfile_runtime_configs
     configs += [ ":data_protect_configs" ]
   }
 
@@ -215,6 +217,7 @@ ohos_source_set("libarkfile_static_fuzz") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs
+  public_configs += [ "$ark_root:ark_config" ]
   public_configs += [ ":arkfile_fuzz_config" ]
 
   deps = [
@@ -297,6 +300,7 @@ ohos_source_set("libarkfile_frontend_set_static") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs
+  public_configs += [ "$ark_root:ark_config" ]
 
   deps = [
     ":arkfile_header_deps",
