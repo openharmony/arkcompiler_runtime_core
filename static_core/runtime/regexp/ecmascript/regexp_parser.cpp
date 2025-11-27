@@ -1161,6 +1161,11 @@ int RegExpParser::ParseAtomEscape(bool isBackward)
                 // If there is an internal parsing error, interrupt
                 break;
             }
+            if (c0_ != '}') {
+                ParseError("Unterminated Unicode property escape");
+                break;
+            }
+            Advance();
             // Generate corresponding Range OpCode based on the filled atom
             if (atom.HighestValue() <= UINT16_MAX) {
                 RangeOpCode rangeOp;
@@ -1481,6 +1486,8 @@ void RegExpParser::InsertRangeBase(RangeSet *atom, RangeSet &rangeSet, bool inve
     }
 }
 
+// CC-OFFNXT(G.FUN.05, huge_method)
+// NOLINTNEXTLINE(readability-function-size)
 int RegExpParser::ParseClassEscape(RangeSet *atom)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -1526,7 +1533,15 @@ int RegExpParser::ParseClassEscape(RangeSet *atom)
         // p{UnicodePropertyValueExpression}
         case 'P':
         case 'p':
-            ParseUnicodePropertyValueCharacters(atom, c0_ == 'P');
+            if (ParseUnicodePropertyValueCharacters(atom, c0_ == 'P') == -1) {
+                break;
+            }
+            if (c0_ != '}') {
+                ParseError("Unterminated Unicode property escape");
+                break;
+            }
+            Advance();
+            result = CLASS_RANGE_BASE;
             break;
         default:
             result = ParseCharacterEscape();
@@ -1588,7 +1603,6 @@ int RegExpParser::ParseUnicodePropertyValueCharacters(RangeSet *atom, bool inver
     if (invert) {
         icuSet.complement();
     }
-
     // 4. Convert icu:: UnicodeSet to RangeSet
     int32_t rangeCount = icuSet.getRangeCount();
     for (int32_t i = 0; i < rangeCount; i++) {
@@ -1596,8 +1610,6 @@ int RegExpParser::ParseUnicodePropertyValueCharacters(RangeSet *atom, bool inver
         UChar32 endRange = icuSet.getRangeEnd(i);
         atom->Insert(startRange, endRange);
     }
-
-    Advance();  // Consume '}'
     // Return CLASS_SHANGEBASE to inform the caller that atom has been filled and is a complex character set
     return CLASS_RANGE_BASE;
 }
