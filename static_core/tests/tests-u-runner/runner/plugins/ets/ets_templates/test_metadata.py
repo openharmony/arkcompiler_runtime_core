@@ -20,7 +20,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Union
 
 import yaml
 
@@ -80,10 +80,15 @@ class TestMetadata:
     ark_options: List[str] = field(default_factory=list)
     timeout: Optional[int] = None
     spec: Optional[str] = None
-    expected_out: Optional[str] = None
-    expected_error: Optional[str] = None
+    expected_out: Union[str, List[str], None] = None
+    expected_error: Union[str, List[str], None] = None
 
     def __post_init__(self) -> None:
+        if isinstance(self.expected_out, list):
+            self.expected_out = '\n'.join(self.expected_out)
+        if isinstance(self.expected_error, list):
+            self.expected_error = '\n'.join(self.expected_error)
+
         if self.spec is None:
             return
         self.spec = str(self.spec)

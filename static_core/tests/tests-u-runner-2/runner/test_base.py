@@ -61,8 +61,8 @@ class Test:
         self.test_id = test_id
         self.update_expected = self.test_env.config.test_suite.test_lists.update_expected
         # Expected output. Used in the Parser and CTS test suites
-        self.expected = ""
-        self.expected_err = ""
+        self.expected: str = ""
+        self.expected_err: str = ""
         # Contains fields output, error, and return_code of the last executed step
         self.report: TestReport | None = None
         # Test result: True if all steps passed, False is any step fails
