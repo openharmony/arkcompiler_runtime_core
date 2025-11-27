@@ -1714,6 +1714,7 @@ export namespace taskpool {
         let isTaskCanceled: boolean = false;
         ConcurrencyHelpers.lockGuard(mutex, () => {
             executingTasks.delete(InternalTask.of(task).coroId);
+            currentExecutingTasks.delete(InternalTask.of(task).workerId);
             workerToTasks.get(InternalTask.of(task).workerId)!.delete(task);
             const cancelByTask: boolean = popFromMap(task, runningTasks, waitingTasks, tasksToBeCanceled);
             let cancelByGroup: boolean = false;
@@ -1732,7 +1733,15 @@ export namespace taskpool {
         if (isTaskPoolUseLaunch) {
             return executingTasks.get(CoroutineExtras.getCoroutineId());
         }
-        return currentExecutingTasks.get(CoroutineExtras.getWorkerId());
+        let currTask = currentExecutingTasks.get(CoroutineExtras.getWorkerId());
+        if (currTask != undefined)
+            return currTask;
+    
+        let setTask = workerToTasks.get(CoroutineExtras.getWorkerId());  
+        if(setTask == undefined)
+            return undefined;
+        
+        return setTask.values().next().value;
     }
 
     function getCurrentTask(): Task | undefined {
