@@ -68,6 +68,8 @@ public:
     bool HasPendingException() const;
     void ClearException();
     void FreeInternalMemory();
+    void CleanUp();
+    void ReInitialize();
 
     NO_COPY_SEMANTIC(PandaEtsNapiEnv);
     NO_MOVE_SEMANTIC(PandaEtsNapiEnv);

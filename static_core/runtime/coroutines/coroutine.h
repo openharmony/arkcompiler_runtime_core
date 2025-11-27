@@ -144,8 +144,8 @@ public:
      * but is called to prepare a cached Coroutine instance for reuse when it is needed.
      * Implies that the CleanUp() method was called before caching.
      */
-    void ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
-                      CoroutinePriority priority);
+    virtual void ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
+                              CoroutinePriority priority);
     /**
      * Manual destruction, applicable only to the main coro. Other ones get deleted by the coroutine manager once they
      * finish execution of their entrypoint method.
