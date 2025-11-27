@@ -249,9 +249,8 @@ CompiledCodeToInterpreterBridge:
     fmov d0, x19
 
 4:
-    sub sp, fp, #8
     // Restore callee registers, since GC may change its values while moving objects.
-    mov x16, sp
+    sub x16, fp, #8
     ldp x27, x28, [x16, #-16]!
     CFI_RESTORE(x28)
     CFI_RESTORE(x27)
@@ -268,6 +267,7 @@ CompiledCodeToInterpreterBridge:
     CFI_RESTORE(x20)
     CFI_RESTORE(x19)
 
+    sub sp, fp, #8
     ldr fp, [sp, #8]
     CFI_RESTORE(fp)
     CFI_DEF_CFA(sp, (4 * 8))

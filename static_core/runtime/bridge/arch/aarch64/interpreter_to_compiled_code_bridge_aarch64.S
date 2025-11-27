@@ -94,19 +94,19 @@
 // 2. the part for the arguments passed via GPRs
 // 3. the part for the arguments passed via the float registers
 // These parts are located as follow:
-// +--------------+
+// +--------------+ <- sp (top of the stack)
 // |  fpreg arg7  |
 // +--------------+
 // |      ...     |
 // +--------------+
 // |  fpreg arg0  |
-// +--------------+ <- x9 (base)
+// +--------------+ <- x9 (reg args base)
 // |   gpr arg0   |
 // +--------------+
 // |      ...     |
 // +--------------+
 // |   gpr arg7   |
-// +--------------+ <- sp
+// +--------------+ <- x3 (stack args base)
 // |  stack arg0  |
 // +--------------+
 // |      ...     |
@@ -133,7 +133,8 @@
 // w2 - shorty value
 // Output (as on the picture)
 // x9 - gpr base pointer. Points to the beginning of GPR and FPR args space.
-// sp - Points to the last stack argument.
+// x3 - Points to the first stack argument.
+// sp - Points to the top of the stack frame.
 PrepareArgStack:
     // x0 - SHORTY_PTR_REG, w1 - SHORTY_REG, w2 - shorty value, w3 - GPR arg counter,
     // w4 - float arg counter, x5 - stack pointer, w11 - temp
@@ -166,11 +167,14 @@ PrepareArgStack:
     add w5, w5, w4
     sub x5, sp, x5, lsl 3
     // make sp 16 bytes aligned
-    bic x5, x5, 0xF
-    mov sp, x5
+    bic sp, x5, 0xF
 .Lfast_path:
+    // set stack args base
+    mov x3, sp
     // reserve stack space for GP regs
     sub x9, sp, #64
+    // reserve stack space for FP regs
+    sub sp, sp, #128
     ret
 
 // void InterpreterToCompiledCodeBridge(const BytecodeInstruction* insn, const Frame *iframe, const Method *method, ManagedThread* thread)
@@ -241,7 +245,6 @@ InterpreterToCompiledCodeBridge:
     // x4 - float arg ptr, x5 - insn, x6 - insn_ptr, x7 - frame.vregs, x9 - arg base ptr
     // x10 - gpr arg ptr, x11, x12, x13, x14 - temps, x19 - method.shorty, lr - method
     mov lr, x12 // move method to lr
-    mov x3, sp
     mov x4, x9
     mov x10, x9
     add SHORTY_PTR_REG, x19, #2 // since SHORTY_REG contains already read value SHORTY_REG_PTR should be shifted
@@ -273,6 +276,8 @@ InterpreterToCompiledCodeBridge:
     mov x11, x9
     LOAD_FPR_ARGS x11
     LOAD_GPR_ARGS x9
+    // restore sp to stack args
+    mov sp, x9
 
     // invoke the method
     ldr lr, [lr, #METHOD_COMPILED_ENTRY_POINT_OFFSET]
@@ -412,7 +417,6 @@ InvokeCompiledCodeWithArgArray:
     // x4 - float arg ptr, x6 - arg_ptr, x9 - arg base ptr, x10 - gpr arg ptr,
     // x11, x12, x13 - temps, x19 - method.shorty, lr - method
     mov lr, x12 // move method to lr
-    mov x3, sp
     mov x4, x9
     mov x10, x9
     add SHORTY_PTR_REG, x19, #2 // since SHORTY_REG contains already read value SHORTY_REG_PTR should be shifted
@@ -436,6 +440,8 @@ InvokeCompiledCodeWithArgArray:
     mov x11, x9
     LOAD_FPR_ARGS x11
     LOAD_GPR_ARGS x9
+    // restore sp to stack args
+    mov sp, x9
 
 .Linvoke_with_args:
     // invoke the method
