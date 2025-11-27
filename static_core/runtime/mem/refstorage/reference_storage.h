@@ -45,6 +45,15 @@ public:
 
     bool Init();
 
+    /// This method cleans up the internals of the reference storage and prepares it for caching
+    void CleanUp();
+
+    /**
+     * This method prepares a cached reference storage instance for reuse.
+     * Implies that the CleanUp() method was called before caching.
+     */
+    void ReInitialize();
+
     PANDA_PUBLIC_API static Reference::ObjectType GetObjectType(const Reference *ref);
 
     [[nodiscard]] static Reference *NewStackRef(ObjectHeader **objectPtr)

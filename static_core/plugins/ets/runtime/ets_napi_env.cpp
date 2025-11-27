@@ -65,6 +65,16 @@ void PandaEtsNapiEnv::FreeInternalMemory()
     referenceStorage_.reset();
 }
 
+void PandaEtsNapiEnv::CleanUp()
+{
+    referenceStorage_->CleanUp();
+}
+
+void PandaEtsNapiEnv::ReInitialize()
+{
+    referenceStorage_->ReInitialize();
+}
+
 void PandaEtsNapiEnv::SetException(EtsThrowable *thr)
 {
     ASSERT_MANAGED_CODE();

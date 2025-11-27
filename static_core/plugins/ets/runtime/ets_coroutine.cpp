@@ -80,8 +80,16 @@ void EtsCoroutine::Initialize()
     Coroutine::Initialize();
 }
 
+void EtsCoroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
+                                CoroutinePriority priority)
+{
+    etsNapiEnv_->ReInitialize();
+    Coroutine::ReInitialize(std::move(name), context, std::move(epInfo), priority);
+}
+
 void EtsCoroutine::CleanUp()
 {
+    etsNapiEnv_->CleanUp();
     Coroutine::CleanUp();
     // add the required local storage entries cleanup here!
 }
