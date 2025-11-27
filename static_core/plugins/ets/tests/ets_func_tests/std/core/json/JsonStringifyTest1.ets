@@ -329,6 +329,28 @@ function jsonStringifyTupleWithUndefinedValue(): void {
     arktest.assertEQ(JSON.stringify(set.next().value), "[null,null]");
 }
 
+enum EnumTest {
+    e1 = 2.0,
+    e2 = 1.23,
+    e3 = 5.1,
+}
+
+enum EnumTestStr {
+    s1 = 'abc',
+    s2 = 'def',
+}
+
+class EnumClass {
+    c1: EnumTest = EnumTest.e2
+    c2: EnumTestStr = EnumTestStr.s1
+    c3: Array<EnumTestStr | EnumTest> = [EnumTestStr.s2, EnumTestStr.s1, EnumTest.e1, EnumTest.e3]
+}
+
+function jsonStringifyEnum(): void {
+    const obj = new EnumClass()
+    arktest.assertEQ(JSON.stringify(obj), '{"c1":1.23,"c2":"abc","c3":["def","abc",2,5.1]}');
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite("Json stringify for ArrayLike tests ")
     suite.addTest('JSON.stringify for ArrayBuffer', jsonStringifyArrayBuffer);
@@ -366,6 +388,7 @@ function main(): int {
     suite.addTest('JSON.stringify for control character', jsonStringifyControlCharacter);
     suite.addTest('JSON.stringify for escape character', jsonStringifyEscapeCharacter);
     suite.addTest('JSON.stringify for tuple with undefined value', jsonStringifyTupleWithUndefinedValue);
+    suite.addTest('JSON.stringify for enum', jsonStringifyEnum);
 
     return suite.run()
 }
