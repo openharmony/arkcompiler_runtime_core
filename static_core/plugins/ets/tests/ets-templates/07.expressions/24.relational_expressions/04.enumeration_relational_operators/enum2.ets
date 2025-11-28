@@ -19,7 +19,6 @@ desc: >-
     If both operands are of the same Enumeration type, then Numerical Relational Operators
     or String Relational Operators are used depending on the kind of enumeration constant value.
     Otherwise, a compile-time error occurs.
-tags: {{c.tags}}
 ---*/
 
 {{c.decl}}

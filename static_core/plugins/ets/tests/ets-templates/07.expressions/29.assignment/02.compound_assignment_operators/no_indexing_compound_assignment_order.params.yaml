@@ -21,7 +21,7 @@ cases:
       arktest.assertEQ(test_object.fld, -2147483648)
     assert_result: '"getObj getValue "'
 
-  - desc: 'Negative case, lhs evaluation completes abruptely'
+  - desc: 'Negative case, lhs evaluation completes abruptly'
     get_object: |-
       throw new Error("Any error to break assignment")
     value: 'return -2147483648'
@@ -31,7 +31,7 @@ cases:
       arktest.assertEQ(test_object.fld, -1)
     assert_result: '"getObj "'
 
-  - desc: 'Negative case, rhs evaluation completes abruptely'
+  - desc: 'Negative case, rhs evaluation completes abruptly'
     get_object: ''
     value: |-
       throw new Error("Any error to break assignment")      
@@ -42,7 +42,7 @@ cases:
       arktest.assertEQ(test_object.fld, -1)
     assert_result: '"getObj getValue "'
 
-  - desc: 'Negative case, binary operation completes abruptely'
+  - desc: 'Negative case, binary operation completes abruptly'
     get_object: ''
     value: |-
       return 2

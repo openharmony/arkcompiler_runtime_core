@@ -18,7 +18,6 @@
 desc: >-
     The actual type of an Object value cannot be a type parameter,
     if it has no type constraint
-tags: [{{c.tags}}]
 ---*/
 {{c.decl}}
 

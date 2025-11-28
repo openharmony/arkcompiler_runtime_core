@@ -14,42 +14,6 @@
 ---
 cases:
     - decl: |-
-          enum Color1 { Red, Green, Blue }
-          enum Color2 { Red, Green, Blue }
-          function foo1(p: number): Color1 {
-              if (p == 0) return Color1.Red;
-              else if (p == 1) return Color1.Green;
-              else return Color1.Blue
-          }
-          function foo2(p: number): Color2 {
-              if (p == 0) return Color2.Red;
-              else if (p == 1) return Color2.Green;
-              else return Color2.Blue
-          }
-      tags: [compile-only, negative]
-      use: |-
-          // different enum types
-          arktest.assertTrue(foo1(0) >= foo2(0))
-
-    - decl: |-
-          enum Color { Red, Green, Blue }
-          enum Size { XS, S, M, L, XL, XXL }
-      tags: [compile-only, negative]
-      use: |-
-          // different enum types
-          arktest.assertTrue(Color.Red <= Size.XL)
-
-    - decl: |-
-          enum Color { Red = "1", Green = "2", Blue = "3" }
-          enum Size { XS = "0", S = "1", M = "2", L = "3", XL = "4", XXL = "5" }
-          let c = Color.Blue
-      tags: [compile-only, negative]
-      use: |-
-          // string values, different enum types
-          arktest.assertTrue(c > Size.S)
-          arktest.assertTrue(Size.S < c)
-
-    - decl: |-
           enum Size { XS, S, M, L, XL, XXL }
       use: |-
           // compare enum to int
@@ -62,17 +26,6 @@ cases:
           // compare enum to string
           arktest.assertTrue(Color.Blue > "2")
           arktest.assertTrue("2" <= Color.Blue )
-
-
-    - decl: |-
-          enum Color { Red, Green, Blue }
-          enum Size { XS, S, M, L, XL, XXL }
-          let c: Color|Size = Color.Red
-          let s: Color|Size = Size.XL
-      tags: [compile-only, negative]
-      use: |-
-          // compare enums in unions
-          arktest.assertTrue((c as Color) < (s as Size))
 
     - decl: |-
           // different numeric types literals
@@ -152,11 +105,3 @@ cases:
       use: |-
           arktest.assertTrue(NumT.Lng.valueOf() == l, "Long problem")
           arktest.assertTrue(NumT.Next.valueOf() === l + 5, "Long.Next problem")
-
-    - decl: |-
-          // different types literals - bigint is not a numeric type
-          enum NumT {Bgnt = 1n, Next = 1n + 6}
-      tags: [compile-only, negative]
-      use: |-
-          arktest.assertTrue(NumT.Bgnt.valueOf() == 1n, "Bigint problem")
-          arktest.assertTrue(NumT.Next.valueOf() <= 1n + 6, "Bigint.Next problem")

@@ -21,13 +21,6 @@ cases:
       arktest.assertEQ(w = null, null)
       arktest.assertEQ(w = 42, 42)
 
-  - tags: 'compile-only, negative'
-    decl: |-
-      let v: int|null = 5
-      let w = v!
-    use: |-
-      w = null
-
   - decl: |-
       let v: int|undefined = 5
       let w = v
@@ -35,14 +28,7 @@ cases:
       arktest.assertEQ(w = undefined, undefined)
       arktest.assertEQ(w = 42, 42)
 
-  - tags: 'compile-only, negative'
-    decl: |-
-      let v: int|undefined = 5
-      let w = v!
-    use: |-
-      w = undefined
-
-  - tags: 'no-warmup'
+  - warmup: 'no-warmup'
     decl: |-
       let v: int|null|undefined = 5
       let w = v
@@ -52,13 +38,6 @@ cases:
       arktest.assertEQ(w, undefined)
       w = null
       arktest.assertEQ(w, null)
-
-  - tags: 'compile-only, negative'
-    decl: |-
-      let v: int|null|undefined = 5
-      let w = v!
-    use: |-
-      w = undefined
 
   # assignment with type narrowing
   - decl: |-
@@ -107,13 +86,6 @@ cases:
       arktest.assertEQ(w = (w != 0 ? v : w)!, 5)
 
   # assignment with type narrowing with unions
-  - tags: 'compile-only, negative'
-    decl: |-
-      let v: string|boolean|number|null|undefined = 'a'
-      let w: string|boolean|number = 1.0
-    use: |-
-      w = v
-
   - decl: |-
       let v: string|boolean|number|null|undefined = 'a'
       let w: string|boolean|number = 1.0

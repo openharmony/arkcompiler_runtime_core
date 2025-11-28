@@ -17,7 +17,7 @@ limitations under the License.
 
 /*---
 desc: CTE message on instanceof A<TypeArgument>
-tags: [{{case.tags}}]
+tags: [compile-only, negative]
 ---*/
 
 class A<T> {

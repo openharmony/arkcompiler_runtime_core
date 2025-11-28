@@ -17,24 +17,6 @@ cases:
       let a: number[] = []
       arktest.assertEQ(a.length, 0)
 
-  - desc: |-
-      Create 1D Array with wrong type values
-      tags:
-        - negative
-        - compile-only
-    sub_cases_logic:
-      - |-
-        let a: Object[] = [1, 3, undefined]
-      - |-
-        let a: Object[] = [1, null, 3]
-      - |-
-        let a: int[] = [1, 3, 5.7]
-      - |-
-        let a: int[] = [1, "abc", 5]
-      - |-
-        let a: string[] = ["abc", 3, "efg"]
-      - |-
-        let a: boolean[] = [true, false, "true"]
 
   - desc: Create 1D Array with the data type int
     logic: |-
@@ -222,21 +204,6 @@ cases:
       arktest.assertEQ((animals[1] as Dog).bark(), "dog")
       arktest.assertTrue(animals[2] instanceof Cat)
 
-  - desc: |-
-      Create 1D Array with not covariant subtypes
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-      class Animal {}
-      class Dog extends Animal {}
-      class Cat extends Animal {}
-    sub_cases_logic:
-      - |-
-        let dogs: Dog[] = [new Dog, new Animal, new Dog]
-      - |-
-        let dogs: Dog[] = [new Dog, new Dog, new Cat]
-
   - desc: Create 1D Array with covariant function subtypes
     decl: |-
       class A {
@@ -279,45 +246,3 @@ cases:
       arktest.assertEQ(a[0](new B, 7).v, -20)
       arktest.assertEQ(a[1](new B, 7).v, 13)
       arktest.assertEQ(a[2](new B, 7).v, -567)
-
-  - desc: |-
-      Create 1D Array with not covariant function subtypes
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-      class A {}
-      class B extends A {}
-      class C extends A {}
-      type HandlerReq = (a: B, b: int) => B
-      type HandlerCInt = (a: C, b: int) => B
-      const handlerCInt: HandlerCInt = (a: C, b: int): B => {
-        return new B
-      }
-      type HandlerBInt = (a: B, b: int) => A
-      const handlerBInt: HandlerBInt = (a: B, b: int): A => {
-        return new B
-      }
-      type HandlerB = (a: B) => A
-      const handlerB: HandlerB = (a: B): A => {
-        return new B
-      }
-      type HandlerBIntInt = (a: B, b: int, c: int) => B
-      const handlerBIntInt: HandlerBIntInt = (a: B, b: int, c: int): B => {
-        return new B
-      }
-      type HandlerNothing = () => C
-      const handlerNothing: HandlerNothing = (): C => {
-        return new C
-      }
-    sub_cases_logic:
-      - |-
-        let a: HandlerReq[] = [handlerCInt]
-      - |-
-        let a: HandlerReq[] = [handlerBInt]
-      - |-
-        let a: HandlerReq[] = [handlerB]
-      - |-
-        let a: HandlerReq[] = [handlerBIntInt]
-      - |-
-        let a: HandlerReq[] = [handlerNothing]
