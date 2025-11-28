@@ -57,7 +57,7 @@ class TestStepsTest(TestCase):
 
     @staticmethod
     def get_steps(reproduce: str) -> list[TestStep]:
-        lines_per_step = 4
+        lines_per_step = 5
         result: list[TestStep] = []
         lines = [line for line in reproduce.split('\n') if line]
         for i in range(len(lines) // lines_per_step):
