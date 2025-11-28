@@ -56,9 +56,8 @@ export namespace StdProcess {
     /**
      * @class Represents child process created by executing process.runCmd()
      */
-    export final class ChildProcess {
-        //NOTE(ekaterinazaytseva): unable to replace internal - used outside in runCmd as public
-        internal constructor(bufferSize: int) {
+    export class ChildProcess {
+        protected constructor(bufferSize: int) {
             this.outBuffer = new ArrayBuffer(bufferSize);
             this.errBuffer = new ArrayBuffer(bufferSize);
             this.pid = -1;
@@ -129,8 +128,7 @@ export namespace StdProcess {
             this.killImpl(killSignal);
         }
 
-        // NOTE(ekaterinazaytseva): unable to replace internal - called outside as public from runCmd
-        internal native spawn(command: string, timeout: int, killSignal: int): void;
+        protected native spawn(command: string, timeout: int, killSignal: int): void;
 
         private native killImpl(signal: int): void;
         private native waitImpl(): number;
@@ -369,9 +367,9 @@ export namespace StdProcess {
     */
     export function runCmd(command: string, options?: ConditionType): ChildProcess {
         let args: int[] = getCmdOptions(options);
-        let childProcess = new ChildProcess(args[2]);
+        let childProcess = new ChildProcessHelper(args[2]);
         childProcess.spawn(command, args[0], args[1]);
-        return childProcess;
+        return childProcess as ChildProcess;
     }
 
     /**
@@ -550,4 +548,15 @@ export namespace StdProcess {
 
     let failedJobHandler: RejectedHandler = new RejectedHandler();
     let rejectedPromiseHandler: RejectedHandler = new RejectedHandler();
+}
+
+final class ChildProcessHelper extends StdProcess.ChildProcess {
+    constructor(bufferSize: int) {
+        super(bufferSize);
+    };
+
+    spawn(command: string, timeout: int, killSignal: int): void {
+        super.spawn(command, timeout, killSignal);
+    }
+
 }
