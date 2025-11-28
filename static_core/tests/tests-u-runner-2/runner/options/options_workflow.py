@@ -111,12 +111,6 @@ class WorkflowOptions(IOptions):
     def get_parameter(self, key: str, default: Any | None = None) -> Any | None:  # type: ignore[explicit-any]
         return self.__parameters.get(key, default)
 
-    def check_binary_artifacts(self) -> None:
-        for step in self.steps:
-            if step.executable_path is not None and not step.executable_path.is_file():
-                raise FileNotFoundException(
-                    f"Specified binary at {step.executable_path} was not found")
-
     def check_types(self) -> None:
         types: dict[StepKind, int] = {}
         for step in self.steps:

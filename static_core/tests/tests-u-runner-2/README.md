@@ -8,7 +8,7 @@ Universal test runner, version 2, for Open Harmony.
 -   Python3 version at least 3.8. 3.10 is recommended.
 -   Make sure to run `sudo static_core/scripts/install-deps-ubuntu -i=test` to create a ~/.venv-panda virtual environment with
 all required python libraries  (`tqdm`, `dataclasses`, `python-dotenv`, etc).
--   Suite `ets-es-checked` requires [node and some packages](#ETS-ES-checked-dependencies)
+-   Suites `ets-es-checked` and `ets-ts-subset` requires [node and some packages](#ETS-dependencies)
 
 ## Quick run
 
@@ -270,9 +270,17 @@ In workflow/test-suite configuration files following macro modifiers are support
 Macro modifiers can be used where test paths or file references need to be dynamically manipulated based on the test context or requirements.
 
 
-## ETS ES checked dependencies
+## ETS dependencies
+
+### ets-es-checked test suite dependencies
 - `ruby` (installed by default with `$PROJECT/static_core/scripts/install-deps-ubuntu -i=dev`)
 - `node` and `ts-node`, to install them see commands below
+
+### ets-ts-subset test suite dependencies
+- `node` and `ts-node`, to install them see commands below
+
+### Node installation
+The following commands install Node.js and required packages for ETS test suites:
 
 ```bash
 sudo apt-get -y install npm

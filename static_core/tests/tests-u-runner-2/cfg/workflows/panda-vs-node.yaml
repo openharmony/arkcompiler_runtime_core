@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runner-api-level: 0.0.0.1
 type: workflow
-workflow-name: panda-jit-repeats
+workflow-name: panda-vs-node
 parameters:
     # common
     build: ${PANDA_BUILD}
@@ -26,54 +25,70 @@ parameters:
     enable-es2panda: true
     enable-verifier: true
     extension: ${parameters.extension}
+    es2panda-args: [ ]
     # ark
     ark-timeout: 180
     gc-type: g1-gc
     full-gc-bombing-frequency: 0
     heap-verifier: fail_on_verification
-    compiler-enable-jit: "true"
-    compiler-ignore-failures: "false"
-    no-async-jit: "true"
-    num-repeats: 30
-    compiler-hotness-threshold: 20
     ark-args: [ ]
-    ark-workflow-args:
-        - "--compiler-check-final=true"
-        - "--compiler-ignore-failures=${parameters.compiler-ignore-failures}"
-        - "--compiler-hotness-threshold=${parameters.compiler-hotness-threshold}"
-        - "--no-async-jit=${parameters.no-async-jit}"
-        - ${parameters.ark-args}
     # adds --boot-panda-files option to verifier with all dependent and the current abc files
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: true
     boot-panda-files: ""
-    ark-stdout: ""
-    ark-stderr: ""
+    ark-stdout: "${parameters.work-dir}/intermediate/${test-id}.output"
+    # ts-node
+    ts-node-timeout: 30
+    test-ts: "${parameters.work-dir}/intermediate/${test-id:parent}/${test-id:stem}.ts"
+    ts-output: "${parameters.test-ts}.output"
 steps:
-    compile:
-        from: es2panda-verifier
-        opt-level: ${parameters.opt-level}
+    panda:
+        from: panda-int
         build: ${parameters.build}
         work-dir: ${parameters.work-dir}
+        # es2panda
+        enable-es2panda: ${parameters.enable-es2panda}
+        opt-level: ${parameters.opt-level}
         extension: ${parameters.extension}
         load-runtimes: ${parameters.load-runtimes}
-        enable-es2panda: ${parameters.enable-es2panda}
-        enable-verifier: ${parameters.enable-verifier}
         es2panda-timeout: ${parameters.es2panda-timeout}
+        es2panda-args: ${parameters.es2panda-args}
+        # verifier
+        enable-verifier: ${parameters.enable-verifier}
         verifier-timeout: ${parameters.verifier-timeout}
+        # ark
         boot-panda-files: ${parameters.boot-panda-files}
-    ark-with-jit-repeats:
-        from: ark
         ark-timeout: ${parameters.ark-timeout}
-        build: ${parameters.build}
-        work-dir: ${parameters.work-dir}
+        ark-args: ${parameters.ark-args}
         heap-verifier: ${parameters.heap-verifier}
         gc-type: ${parameters.gc-type}
         full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
-        load-runtimes: ${parameters.load-runtimes}
-        ark-args: ${parameters.ark-workflow-args}
-        compiler-enable-jit: ${parameters.compiler-enable-jit}
-        boot-panda-files: ${parameters.boot-panda-files}
         ark-stdout: ${parameters.ark-stdout}
-        ark-stderr: ${parameters.ark-stderr}
+    copy-ts:
+        pre-reqs:
+            - req: ParentExistCreate
+              value: "${parameters.test-ts}"
+        executable-path: cp
+        args:
+            - "${parameters.work-dir}/gen/${test-id}"
+            - "${parameters.test-ts}"
+        post-reqs:
+            - req: FileExist
+              value: "${parameters.test-ts}"
+    ts-node:
+        executable-path: npx
+        timeout: ${parameters.ts-node-timeout}
+        step-type: tsc
+        args:
+            - "ts-node"
+            - "-P"
+            - "${parameters.ts-config}"
+            - "${parameters.test-ts}"
+        stdout: "${parameters.ts-output}"
+    compare-outputs-ark-vs-ts-node:
+        executable-path: diff
+        args:
+            - "-w"
+            - "${parameters.ark-stdout}"
+            - "${parameters.ts-output}"
