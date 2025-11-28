@@ -1,2 +1,0 @@
-# 31582
-08.statements/14.throw_statements/throw_from_top_level_statement_1.ets
