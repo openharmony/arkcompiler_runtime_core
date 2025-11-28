@@ -16,4 +16,4 @@ cases:
   - check:
     - never
     stdout: |-
-      "Semantic error ESE0318: Type 'never' cannot be assigned to type 'never'" 
+      "Syntax error ESY0318: Class cannot be used as object." 
