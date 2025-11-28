@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 const success: int = 0
 const fail: int = 1
-let EN_US: string = intlBestFitLocale('en-US')
-let ZH_CN: string = intlBestFitLocale('zh-CN')
-let RU_RU = intlBestFitLocale('ru-RU')
+let EN_US: string = Intl.intlBestFitLocale('en-US')
+let ZH_CN: string = Intl.intlBestFitLocale('zh-CN')
+let RU_RU = Intl.intlBestFitLocale('ru-RU')
 let ER_OR = 'er-or' // Fake locale
 let localeList: string[] = [ER_OR, RU_RU, ZH_CN, EN_US]
 let correctLocaleList: string[] = [RU_RU, ZH_CN, EN_US]
@@ -444,7 +444,7 @@ function testCaseFirstFromLocale() : int {
 }
 
 function testDe() : int {
-    const collator = new Intl.Collator(intlBestFitLocale('de'))
+    const collator = new Intl.Collator(Intl.intlBestFitLocale('de'))
     arktest.assertEQ(collator.compare('ä', 'z'), -1)
     return success
 }

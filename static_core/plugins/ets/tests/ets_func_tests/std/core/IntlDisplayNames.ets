@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,10 @@ const success: int = 0;
 const fail: int = 1;
 
 // Get locales using best fit algorithm
-const en_US: string = intlBestFitLocale("en-US");
-const zh_CN: string = intlBestFitLocale("zh-CN");
-const fr_FR: string = intlBestFitLocale("fr-FR");
-const es_ES: string = intlBestFitLocale("es-ES");
+const en_US: string = Intl.intlBestFitLocale("en-US");
+const zh_CN: string = Intl.intlBestFitLocale("zh-CN");
+const fr_FR: string = Intl.intlBestFitLocale("fr-FR");
+const es_ES: string = Intl.intlBestFitLocale("es-ES");
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Intl.DisplayNames Tests");

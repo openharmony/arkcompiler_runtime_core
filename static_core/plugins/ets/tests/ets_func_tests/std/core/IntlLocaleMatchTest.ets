@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,16 +21,18 @@ const badLocale = "test"
 const localeList: string[] = [er_ER, ru_RU, zh_CN, en_US]
 
 function main() {
-    testBestFitLocaleMatchList()
-    testLookupLocaleMatchSingle()
-    testLookupLocaleMatchList()
-    negativeTestLanguageTag()
+    let suite = new arktest.ArkTestsuite('Locale matching algos')
+    suite.addTest('Bestfit list locales', testBestFitLocaleMatchList)
+    suite.addTest('Lookup locale', testLookupLocaleMatchSingle)
+    suite.addTest('Lookup list locales', testLookupLocaleMatchList)
+    suite.addTest('negitve test for locale match', negativeTestLanguageTag)
+    return suite.run()
 }
 
 function testBestFitLocaleMatchList() {
-    arktest.assertEQ(intlBestFitLocale(localeList), ru_RU)
+    arktest.assertEQ(Intl.intlBestFitLocale(localeList), ru_RU)
 
-    const result = intlBestFitLocales(localeList)
+    const result = Intl.intlBestFitLocales(localeList)
     arktest.assertEQ(result.length, 3)
     arktest.assertEQ(result[0], ru_RU)
     arktest.assertEQ(result[1], zh_CN)
@@ -38,17 +40,17 @@ function testBestFitLocaleMatchList() {
 }
 
 function testLookupLocaleMatchSingle() {
-    arktest.assertEQ(intlLookUpLocale(en_US), en_US)
+    arktest.assertEQ(Intl.intlLookUpLocale(en_US), en_US)
 
-    const result = intlLookUpLocales(en_US)
+    const result = Intl.intlLookUpLocales(en_US)
     arktest.assertEQ(result.length, 1)
     arktest.assertEQ(result[0], en_US)
 }
 
 function testLookupLocaleMatchList() {
-    arktest.assertEQ(intlLookUpLocale(localeList), ru_RU)
+    arktest.assertEQ(Intl.intlLookUpLocale(localeList), ru_RU)
 
-    let result = intlLookUpLocales(localeList)
+    let result = Intl.intlLookUpLocales(localeList)
     arktest.assertEQ(result.length, 3)
     arktest.assertEQ(result[0], ru_RU)
     arktest.assertEQ(result[1], zh_CN)
@@ -56,10 +58,10 @@ function testLookupLocaleMatchList() {
 }
 
 function negativeTestLanguageTag() {
-    arktest.expectError((): void => { intlBestFitLocale(badLocale) })
-    arktest.expectError((): void => { intlBestFitLocales(badLocale) })
-    arktest.expectError((): void => { intlBestFitLocales([badLocale]) })
-    arktest.expectError((): void => { intlLookUpLocale(badLocale) })
-    arktest.expectError((): void => { intlLookUpLocales(badLocale) })
-    arktest.expectError((): void => { intlLookUpLocales([badLocale]) })
+    arktest.expectError((): void => { Intl.intlBestFitLocale(badLocale) })
+    arktest.expectError((): void => { Intl.intlBestFitLocales(badLocale) })
+    arktest.expectError((): void => { Intl.intlBestFitLocales([badLocale]) })
+    arktest.expectError((): void => { Intl.intlLookUpLocale(badLocale) })
+    arktest.expectError((): void => { Intl.intlLookUpLocales(badLocale) })
+    arktest.expectError((): void => { Intl.intlLookUpLocales([badLocale]) })
 }

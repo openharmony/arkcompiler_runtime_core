@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -720,7 +720,7 @@ export class Date {
         }
 
         const effectiveOptions = !options ? Date.TIME_FORMAT_OPTIONS : this.appendDefaultTimeOptions(options!)
-        return new Intl.DateTimeFormat(intlLocalesToLanguageTags(locales), effectiveOptions).format(this.getTime())
+        return new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), effectiveOptions).format(this.getTime())
     }
 
     /**
@@ -731,7 +731,7 @@ export class Date {
      * @returns a language-sensitive representation of this date.
      */
     public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
-        const formatter = new Intl.DateTimeFormat(intlLocalesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
+        const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
         return formatter.format(this.getTime())
     }
 
@@ -783,7 +783,7 @@ export class Date {
         }
 
         const effectiveOptions = !options ? Date.DATE_FORMAT_OPTIONS : this.appendDefaultDateOptions(options)
-        const formatter = new Intl.DateTimeFormat(intlLocalesToLanguageTags(locales), effectiveOptions)
+        const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), effectiveOptions)
         return formatter.format(this.getTime())
     }
 

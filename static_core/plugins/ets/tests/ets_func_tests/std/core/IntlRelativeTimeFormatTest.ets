@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -300,38 +300,38 @@ function testSupportedLocalesOf() {
     runSupportedLocalesStringTest(
         "en",
         undefined,
-        intlBestFitLocales("en")
+        Intl.intlBestFitLocales("en")
     )
     runSupportedLocalesStringTest(
         fakeLocale,
         undefined,
-        intlBestFitLocales(fakeLocale)
+        Intl.intlBestFitLocales(fakeLocale)
     )
     runSupportedLocalesStringTest(
         "en",
         { localeMatcher: "lookup" } as Intl.RelativeTimeFormatOptions,
-        intlLookUpLocales("en")
+        Intl.intlLookUpLocales("en")
     )
     runSupportedLocalesArrayTest(
         ["fr", "ru"],
         undefined,
-        intlBestFitLocales(["fr", "ru"])
+        Intl.intlBestFitLocales(["fr", "ru"])
     )
     runSupportedLocalesArrayTest(
         ["ru-RU", "zh-CN", "en-US"],
         undefined,
-        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
     runSupportedLocalesArrayTest(
         ["ru-RU", "zh-CN", "en-US"],
         { localeMatcher: "best fit" } as Intl.RelativeTimeFormatOptions,
-        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
 
     runSupportedLocalesArrayTest(
         ["ru-RU", "en-US"],
         { localeMatcher: "lookup" } as Intl.RelativeTimeFormatOptions,
-        intlLookUpLocales(["ru-RU", "en-US"])
+        Intl.intlLookUpLocales(["ru-RU", "en-US"])
     )
 }
 

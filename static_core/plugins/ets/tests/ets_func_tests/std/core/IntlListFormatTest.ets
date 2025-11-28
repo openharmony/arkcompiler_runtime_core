@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,43 +185,43 @@ function testSupportedLocalesOf() {
     runSupportedLocalesTest(
         "en",
         undefined,
-        intlBestFitLocales("en")
+        Intl.intlBestFitLocales("en")
     )
     runSupportedLocalesTest(
         fakeLocale,
         undefined,
-        intlBestFitLocales(fakeLocale)
+        Intl.intlBestFitLocales(fakeLocale)
     )
     runSupportedLocalesTest(
         ["fr", fakeLocale, "ru"],
         undefined,
-        intlBestFitLocales(["fr", fakeLocale, "ru"])
+        Intl.intlBestFitLocales(["fr", fakeLocale, "ru"])
     )
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", "en-US"],
         undefined,
-        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", "en-US"],
         "best fit",
-        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
 
     runSupportedLocalesTest(
         "en",
         "lookup",
-        intlLookUpLocales("en")
+        Intl.intlLookUpLocales("en")
     )
     runSupportedLocalesTest(
         fakeLocale,
         "lookup",
-        intlLookUpLocales(fakeLocale)
+        Intl.intlLookUpLocales(fakeLocale)
     )
 
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", fakeLocale, "en-US"],
         "lookup",
-        intlLookUpLocales(["ru-RU", "zh-CN", fakeLocale, "en-US"])
+        Intl.intlLookUpLocales(["ru-RU", "zh-CN", fakeLocale, "en-US"])
     )
 }

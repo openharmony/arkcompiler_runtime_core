@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,7 +199,7 @@ export final class BigInt {
      */
     public toLocaleString(locales?: string | Intl.Locale | (string | Intl.Locale)[], options?: BigIntToLocaleStringOptions): string {
         const numFmtOptions = BigInt.toNumberFormatOptions(options)
-        const formatter = new Intl.NumberFormat(intlLocalesToLanguageTags(locales), numFmtOptions)
+        const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), numFmtOptions)
         return formatter.format(this)
     }
 

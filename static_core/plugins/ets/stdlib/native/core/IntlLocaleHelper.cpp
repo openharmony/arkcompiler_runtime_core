@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ ani_status RegisterIntlLocaleHelper(ani_env *env)
         "verifyBCP47LanguageTag", "C{std.core.String}:", reinterpret_cast<void *>(StdCoreVerifyBCP47LanguageTag)}};
 
     ani_class localeHelperClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.LocaleHelper", &localeHelperClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.LocaleHelper", &localeHelperClass));
 
     return env->Class_BindStaticNativeMethods(localeHelperClass, methods.data(), methods.size());
 }

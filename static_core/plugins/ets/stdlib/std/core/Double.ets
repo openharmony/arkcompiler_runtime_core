@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -435,7 +435,7 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     public toLocaleString(locales?: string | Intl.Locale | (string | Intl.Locale)[], options?: Intl.NumberFormatOptions): string {
-        const formatter = new Intl.NumberFormat(intlLocalesToLanguageTags(locales), options)
+        const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), options)
         return formatter.format(this.value)
     }
 

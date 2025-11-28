@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,9 +26,9 @@ function main(): int {
 }
 
 function testSupportedLocalesOf() {
-    let en_US: string = intlBestFitLocale("en-US");
-    let zh_CN: string = intlBestFitLocale("zh-CN");
-    let ru_RU: string = intlBestFitLocale("ru-RU");
+    let en_US: string = Intl.intlBestFitLocale("en-US");
+    let zh_CN: string = Intl.intlBestFitLocale("zh-CN");
+    let ru_RU: string = Intl.intlBestFitLocale("ru-RU");
     let localeList: string[] = [ru_RU, zh_CN, en_US];
     let expected: string[] = [ru_RU, zh_CN, en_US];
     let result: string[] = Intl.NumberFormat.supportedLocalesOf(localeList);
