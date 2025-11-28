@@ -2333,7 +2333,6 @@
 03.types/17.array_types/01.resizable_array_types/form_1_assign_to_2.ets
 03.types/17.array_types/01.resizable_array_types/form_2_assign_to_1.ets
 03.types/17.array_types/01.resizable_array_types/grow_array_form_one_0.ets
-03.types/17.array_types/01.resizable_array_types/grow_array_form_two_0.ets
 03.types/17.array_types/01.resizable_array_types/put_to_empty_form_1.ets
 03.types/17.array_types/01.resizable_array_types/put_to_empty_form_2.ets
 03.types/17.array_types/01.resizable_array_types/rat00.ets
@@ -3053,18 +3052,6 @@
 03.types/11.type_void/void_type_n_1.ets
 03.types/11.type_void/void_type_n_2.ets
 03.types/11.type_void/void_type_n_3.ets
-03.types/15.type_bigint/bint_n_0.ets
-03.types/15.type_bigint/bint_n_1.ets
-03.types/15.type_bigint/bint_n_10.ets
-03.types/15.type_bigint/bint_n_11.ets
-03.types/15.type_bigint/bint_n_2.ets
-03.types/15.type_bigint/bint_n_3.ets
-03.types/15.type_bigint/bint_n_4.ets
-03.types/15.type_bigint/bint_n_5.ets
-03.types/15.type_bigint/bint_n_6.ets
-03.types/15.type_bigint/bint_n_7.ets
-03.types/15.type_bigint/bint_n_8.ets
-03.types/15.type_bigint/bint_n_9.ets
 03.types/17.array_types/02.readonly_array_types/array_readonly_n_0.ets
 03.types/17.array_types/02.readonly_array_types/array_readonly_n_1.ets
 03.types/17.array_types/02.readonly_array_types/array_readonly_n_10.ets
