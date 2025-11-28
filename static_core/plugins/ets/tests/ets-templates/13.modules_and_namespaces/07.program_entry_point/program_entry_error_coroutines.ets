@@ -15,7 +15,7 @@
 
 /*---
 desc: The program terminated because multiple coroutines terminated when an error occurred.
-tags: [compile-only, positive]
+tags: [compile-only]
 ---*/
 
 async function coroutine(): Promise<number> {

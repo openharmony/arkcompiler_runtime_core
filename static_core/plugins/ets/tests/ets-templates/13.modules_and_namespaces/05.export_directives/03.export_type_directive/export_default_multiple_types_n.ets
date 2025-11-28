@@ -13,14 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-      Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-      {{c.doc}}
+desc: Default Multiple Export type. Expect error.
+tags: [compile-only, negative]
 ---*/
 
-{{c.decl}}
-
-{% endfor %}
+class C {}
+class D {}
+export default type {C, D}

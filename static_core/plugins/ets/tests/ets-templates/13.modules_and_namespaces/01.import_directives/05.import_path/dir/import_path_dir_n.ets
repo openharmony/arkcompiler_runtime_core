@@ -13,22 +13,20 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{% for stmt in import_stmts %}
 
 /*---
 desc: >-
-      If an identifier denotes an overload alias (see Function Overload Declarations),
-      then all its accessible overloaded functions, either imported or not, are considered
-      in the process of Overload Resolution for Overload Declarations for call validity.
-      {{c.doc}}
+    If the import path refers to a folder, then the way to handle the case is determined by the actual compiler.
+    If the compiler cannot locate a module source definitely, then a compile-time error occurs.
+    {{stmt.doc}}
+tags: [negative, compile-only]
 files:
-- ./modules/example.ets
+    - ./module_a.ets
+    - ./module_a/module_a.ets
+    - ./module_b/module_b.ets
 ---*/
 
-{{c.import}} from "./modules/example.ets"
-
-function main() {
-{{c.use|indent}}
-}
+{{stmt.import}}
 
 {% endfor %}

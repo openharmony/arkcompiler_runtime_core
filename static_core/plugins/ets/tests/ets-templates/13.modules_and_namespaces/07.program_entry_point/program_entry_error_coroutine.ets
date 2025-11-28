@@ -15,7 +15,7 @@
 
 /*---
 desc: The program terminated due to the coroutine terminates when an error occurs.
-tags: [compile-only, positive]
+tags: [compile-only]
 ---*/
 
 async function coroutine() {

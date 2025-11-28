@@ -1,3 +1,4 @@
+
 /*---
 Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-      Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-      {{c.doc}}
+desc: Export default is not allowed to export multiple specifiers.
+tags: [compile-only, negative]
+expected_out: "Syntax error ESY0005: export default is not allowed to export multiple specifiers."
 ---*/
 
-{{c.decl}}
-
-{% endfor %}
+class C {}
+class D {}
+export default {C, type D}
