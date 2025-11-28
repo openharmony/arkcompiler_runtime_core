@@ -15,6 +15,10 @@
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
+#include "libpandabase/os/mutex.h"
+#ifdef OHOS_PANDA_TRACE_ENABLE
+#include "syspara/parameters.h"
+#endif
 
 namespace ark::ets::interop::js {
 
@@ -36,10 +40,20 @@ namespace ark::ets::interop::js {
     UNREACHABLE();
 }
 
+#if defined(OHOS_PANDA_TRACE_ENABLE)
 void InteropTrace(const char *func, const char *file, int line)
 {
-    INTEROP_LOG(DEBUG) << "trace: " << func << ":" << file << ":" << line;
+    static std::once_flag initFlag;
+    static bool isInteropTraceEnabled = false;
+
+    std::call_once(initFlag,
+                   []() { isInteropTraceEnabled = OHOS::system::GetBoolParameter(INTEROP_TRACE_ENABLE, false); });
+
+    if (isInteropTraceEnabled) {
+        INTEROP_LOG(INFO) << "trace: " << func << ":" << file << ":" << line;
+    }
 }
+#endif
 
 std::pair<SmallVector<uint64_t, 4U>, int> GetBigInt(napi_env env, napi_value jsVal)
 {

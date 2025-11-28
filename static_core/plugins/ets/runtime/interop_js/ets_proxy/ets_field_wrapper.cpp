@@ -131,6 +131,7 @@ static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
 struct EtsFieldAccessorREFERENCE {
     static napi_value Getter(InteropCtx *ctx, napi_env env, EtsObject *etsObject, EtsFieldWrapper *etsFieldWrapper)
     {
+        INTEROP_TRACE();
         EtsObject *etsValue = etsObject->GetFieldObject(etsFieldWrapper->GetObjOffset());
         if (etsValue == nullptr) {
             return GetUndefined(env);
@@ -145,6 +146,7 @@ struct EtsFieldAccessorREFERENCE {
     static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> etsObject, EtsFieldWrapper *etsFieldWrapper,
                        napi_value jsValue)
     {
+        INTEROP_TRACE();
         EtsObject *etsValue;
         if (IsUndefined<true>(env, jsValue)) {
             etsValue = nullptr;
@@ -172,6 +174,7 @@ struct EtsFieldAccessorPRIMITIVE {
 
     static napi_value Getter(InteropCtx * /*ctx*/, napi_env env, EtsObject *etsObject, EtsFieldWrapper *etsFieldWrapper)
     {
+        INTEROP_TRACE();
         auto etsValue = etsObject->GetFieldPrimitive<PrimitiveType>(etsFieldWrapper->GetObjOffset());
         return Convertor::Wrap(env, etsValue);
     }
@@ -180,6 +183,7 @@ struct EtsFieldAccessorPRIMITIVE {
     static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> etsObject, EtsFieldWrapper *etsFieldWrapper,
                        napi_value jsValue)
     {
+        INTEROP_TRACE();
         std::optional<PrimitiveType> etsValue = Convertor::Unwrap(ctx, env, jsValue);
         if (LIKELY(etsValue.has_value())) {
             ASSERT(etsObject.GetPtr() != nullptr);

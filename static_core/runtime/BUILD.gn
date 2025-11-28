@@ -19,6 +19,18 @@ if (ark_standalone_build) {
   import("$build_root/ark.gni")
 } else {
   import("//build/ohos.gni")
+  ohos_prebuilt_etc("runtime.para") {
+      source = "//arkcompiler/runtime_core/static_core/runtime/runtime.para"
+      part_name = "runtime_core"
+      subsystem_name = "arkcompiler"
+      module_install_dir = "etc/param"
+  }
+  ohos_prebuilt_etc("runtime.para.dac") {
+      source = "//arkcompiler/runtime_core/static_core/runtime/runtime.para.dac"
+      part_name = "runtime_core"
+      subsystem_name = "arkcompiler"
+      module_install_dir = "etc/param"
+  }
 }
 
 runtime_yaml = [ "runtime.yaml" ]
@@ -517,6 +529,7 @@ if (is_ohos && is_standard_system) {
   if (!(ark_standalone_build || ark_static_standalone_build)) {
     _libarkruntime_calculated_defines += [
       "OHOS_PANDA_DEBUG_MODE_ENABLE",
+      "OHOS_PANDA_TRACE_ENABLE",
     ]
     _libarkruntime_calculated_external_deps += [
       "init:libbegetutil",
@@ -526,6 +539,8 @@ if (is_ohos && is_standard_system) {
       "$ark_root/runtime/para:RuntimeEnableDebugger.para.dac",
       "$ark_root/etc/para:code_coverage.para",
       "$ark_root/etc/para:code_coverage.para.dac",
+      "$ark_root/runtime:runtime.para",
+      "$ark_root/runtime:runtime.para.dac",
     ]
   }
 }
