@@ -43,9 +43,9 @@ function out_of_coro_test() {
         j.Await();
     }
 
-    eaw1.quitSafely();
+    eaw1.quit();
     eaw2.run<void>(()=>{});
-    eaw2.quitSafely();
+    eaw2.quit();
 }
 
 function main() {

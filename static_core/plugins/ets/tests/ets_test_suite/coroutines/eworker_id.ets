@@ -51,7 +51,7 @@ function testGetEAWorkerId() {
     arktest.assertEQ(worker1Id1, worker1Id2);
     ew1.quit();
     arktest.assertEQ(worker1Id1, ew1.getWorkerId());
-    ew2.quitSafely();
+    ew2.quit();
     arktest.assertEQ(worker2Id1, ew2.getWorkerId());
     ew3.join();
     arktest.assertEQ(worker3Id1, ew3.getWorkerId());

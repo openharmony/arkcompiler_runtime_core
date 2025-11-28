@@ -153,7 +153,8 @@ export class EAWorker {
         }
         this.worker.start(() => {
             EAWorker.getWorkers().set(CoroutineExtras.getWorkerId(), this);
-            this.initialTask();
+            let wrappedInitialTask = this.worker.wrapTask<void>(this.initialTask);
+            wrappedInitialTask();
         });
         this.worker.setPriority(this.priority);
         this.loopStarted.set(true);
@@ -187,18 +188,10 @@ export class EAWorker {
     }
 
     /**
-     * Quit the worker immediately
-     * Stops the worker without waiting for pending tasks to complete
-     */
-    public quit(): void {
-        this.join();
-    }
-
-    /**
-     * Quit the worker safely
+     * Quit the worker
      * Waits for pending tasks to complete before stopping the worker
      */
-    public quitSafely(): void {
+    public quit(): void {
         this.join().Await();
     }
 
@@ -349,7 +342,7 @@ abstract class InternalWorker {
         return this.errorHandler;
     }
 
-    protected runImpl<R>(task: () => R): Job<R> {
+    public wrapTask<R>(task: () => R): () => R {
         let wrappedTask = (): R => {
             try {
                 return task();
@@ -361,8 +354,12 @@ abstract class InternalWorker {
                 throw e;
             }
         };
+        return wrappedTask;
+    }
+
+    protected runImpl<R>(task: () => R): Job<R> {
         let wGroup: LaunchParams = {workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID, [this.workerId])};
-        return launch<R, () => R>(wrappedTask, wGroup);
+        return launch<R, () => R>(this.wrapTask<R>(task), wGroup);
     }
 
     /**

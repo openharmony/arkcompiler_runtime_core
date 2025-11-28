@@ -81,7 +81,7 @@ function testIsAliveAndQuit() {
     arktest.assertTrue(eaw2.isAlive());
     arktest.assertTrue(eaw3.isAlive());
     eaw1.quit();
-    eaw2.quitSafely();
+    eaw2.quit();
     eaw3.join();
     let maxChecks = 10;
     let sleepTime = 10;
@@ -102,14 +102,14 @@ function testMainQuit() {
         eawMain.quit();
     }, new Error('Main worker cannot be stopped'));
     arktest.expectError(() => {
-        eawMain.quitSafely();
+        eawMain.quit();
     }, new Error('Main worker cannot be stopped'));
     arktest.expectError(() => {
         eawMain.join();
     }, new Error('Main worker cannot be stopped'));
 }
 
-function testQuitSafely() {
+function testQuit() {
     let eaw2 = new EAWorker();
     eaw2.start();
     let checkPoints = 0;
@@ -119,7 +119,7 @@ function testQuitSafely() {
     let job2 = eaw2.run<void>(() => {
         checkPoints += 1;
     });
-    eaw2.quitSafely();
+    eaw2.quit();
     arktest.assertEQ(checkPoints, 2);
 }
 
@@ -243,7 +243,7 @@ function testMain() {
     }, new Error('Main worker cannot be stopped'));
 
     arktest.expectError(() => {
-        mainWorker.quitSafely();
+        mainWorker.quit();
     }, new Error('Main worker cannot be stopped'));
 
     arktest.expectError(() => {
@@ -290,18 +290,6 @@ function testQuitBeforeStart() {
     }, new Error('Worker already started or quit'));
 }
 
-function testQuitSafelyBeforeStart() {
-    let eaw = new EAWorker();
-    arktest.expectError(() => {
-        eaw.quitSafely();
-    }, new Error('Cannot stop worker before start'));
-    eaw.start();
-    eaw.quitSafely();
-    arktest.expectError(() => {
-        eaw.start();
-    }, new Error('Worker already started or quit'));
-}
-
 function testPostTaskWhenNotStarted() {
     let eaw = new EAWorker();
     arktest.expectError(() => {
@@ -326,13 +314,13 @@ function testStartafterJoin() {
     eaw.quit();
 }
 
-function testRunAfterQuitSafely() {
+function testRunAfterQuit() {
     let eaw = new EAWorker();
     eaw.start();
     eaw.run<void>(() => {
         sleep(1);
     });
-    eaw.quitSafely();
+    eaw.quit();
     /**
      * Since task below could be added to task queue in two scenarios:
      * 1. during quitting process, specifically, after enqueueing closingTask 
@@ -346,13 +334,32 @@ function testRunAfterQuitSafely() {
     });
 }
 
+function testWrapTaskErrorHandling() {
+    let errorCaught = false;
+    let waiter = new Event();
+    let eaw = new EAWorker(() => {
+        throw new Error('This is an uncaught exception!'); 
+    });
+    eaw.setUncaughtExceptionHandler((e: Error) => {
+        arktest.assertEQ(e.message, 'This is an uncaught exception!');
+        errorCaught = true;
+        waiter.fire();
+    });
+    eaw.start();
+    waiter.wait();
+    arktest.assertTrue(errorCaught);
+    arktest.expectError(() => {
+        eaw.join();
+    }, 'Unable to launch coroutine: no suitable worker was found');
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
     suite.addTest('testNamedEAWorker', testNamedEAWorker);
     suite.addTest('testTaskEAWorker', testTaskEAWorker);
     suite.addTest('testIsAliveAndQuit', testIsAliveAndQuit);
     suite.addTest('testMainQuit', testMainQuit);
-    suite.addTest('testQuitSafely', testQuitSafely);
+    suite.addTest('testQuit', testQuit);
     suite.addTest('testCurrent', testCurrent);
     suite.addTest('testUncaughtExceptionHandler', testUncaughtExceptionHandler);
     suite.addTest('testPostTask', testPostTask);
@@ -360,9 +367,9 @@ function main() {
     suite.addTest('testCommunication', testCommunication);
     suite.addTest('testMainWorker', testMain);
     suite.addTest('testQuitBeforeStart', testQuitBeforeStart);
-    suite.addTest('testQuitSafelyBeforeStart', testQuitSafelyBeforeStart);
     suite.addTest('testStartafterJoin', testStartafterJoin);
-    suite.addTest('testRunAfterQuitSafely', testRunAfterQuitSafely);
+    suite.addTest('testRunAfterQuit', testRunAfterQuit);
+    suite.addTest('testWrapTaskErrorHandling', testWrapTaskErrorHandling);
     // flaky fail test case #28321
     // suite.addTest('testTaskPool', testTaskPool);
     return suite.run();
