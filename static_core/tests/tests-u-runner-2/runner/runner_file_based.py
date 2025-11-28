@@ -178,7 +178,7 @@ class RunnerFileBased(Runner):
 
     def _process_failed(self, test_result: TestStandardFlow, ignored_still_failed: list[Test],
                         excluded_still_failed: list[Test], fail_lists: dict[str, list[Test]]) -> None:
-        if test_result.ignored:
+        if test_result.ignored and test_result.last_failure_check_passed:
             self.ignored += 1
             ignored_still_failed.append(test_result)
         elif test_result.path in self.excluded_tests:

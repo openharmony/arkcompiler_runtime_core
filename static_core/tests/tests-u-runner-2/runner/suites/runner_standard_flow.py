@@ -59,6 +59,8 @@ class RunnerStandardFlow(RunnerFileBased):
 
         test_suite: TestSuite = TestSuite(self.test_env)
         self.tests = set(test_suite.process(self.config.test_suite.ets.force_generate))
+        self.excluded = test_suite.excluded
+        self.excluded_tests.update(test_suite.excluded_tests)
         self.list_root = test_suite.list_root
         self.test_root = self.test_env.work_dir.gen
 
@@ -71,9 +73,9 @@ class RunnerStandardFlow(RunnerFileBased):
         return Path("/tmp") / self.suite_name
 
     def create_execution_plan(self) -> None:
-        _LOGGER.default(f"\n{utils.pretty_divider()}")
-        _LOGGER.default(f"Execution plan for the test suite '{self.name}'")
-        _LOGGER.default(self.config.workflow.pretty_str())
+        _LOGGER.short(f"\n{utils.pretty_divider()}")
+        _LOGGER.short(f"Execution plan for the test suite '{self.name}'")
+        _LOGGER.short(self.config.workflow.pretty_str())
 
     def create_coverage_html(self) -> None:
         """

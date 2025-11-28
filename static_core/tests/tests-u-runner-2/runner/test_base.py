@@ -60,14 +60,19 @@ class Test:
         self.test_extra_params: IOptions = params
         self.test_id = test_id
         self.update_expected = self.test_env.config.test_suite.test_lists.update_expected
-        # Expected output. Used only in the Parser test suite
+        # Expected output. Used in the Parser and CTS test suites
         self.expected = ""
+        self.expected_err = ""
         # Contains fields output, error, and return_code of the last executed step
         self.report: TestReport | None = None
         # Test result: True if all steps passed, False is any step fails
         self.passed: bool | None = None
         # If the test is mentioned in any ignored_list
         self.ignored = False
+        # failure description for a test from ignore list (if any)
+        self.last_failure: str = ""
+        # The result of last failure check for the test from ignore list
+        self.last_failure_check_passed: bool = True
         # Test can detect itself as excluded additionally to excluded_tests
         # In such case the test will be counted as `excluded by other reasons`
         self.excluded = False
@@ -78,6 +83,18 @@ class Test:
         # Reports if generated. Key is ReportFormat.XXX. Value is a path to the generated report
         self.reports: dict[ReportFormat, str] = {}
         self.repeat = 1
+        self.path_to_expected = Path(f"{self.path}.expected")
+        self.path_to_expected_err = Path(f"{self.path}.expected.err")
+
+    @property
+    def has_expected(self) -> bool:
+        """ True if test.expected file exists """
+        return self.path_to_expected.exists()
+
+    @property
+    def has_expected_err(self) -> bool:
+        """ True if test.expected.err file exists """
+        return self.path_to_expected_err.exists()
 
     def run(self, repeat: int) -> Test:
         start = datetime.now(pytz.UTC)
@@ -118,9 +135,14 @@ class Test:
     def status(self) -> TestStatus:
         if self.excluded:
             return TestStatus.EXCLUDED
+
         if self.passed:
             return TestStatus.PASSED_IGNORED if self.ignored else TestStatus.PASSED
-        return TestStatus.FAILURE_IGNORED if self.ignored else TestStatus.NEW_FAILURE
+
+        if self.ignored:
+            return TestStatus.FAILURE_IGNORED if self.last_failure_check_passed else TestStatus.NEW_FAILURE
+
+        return TestStatus.NEW_FAILURE
 
     def status_as_cstring(self) -> str:
         if self.excluded:
@@ -240,6 +262,8 @@ class Test:
             if not collection.parameters:
                 continue
             for key, val in collection.parameters.items():
+                if isinstance(val, list):
+                    val = " ".join(val)
                 if key in collection_params:
                     collection_params[key] += [*val.split()]
                 else:

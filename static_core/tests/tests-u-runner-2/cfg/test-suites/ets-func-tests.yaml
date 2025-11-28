@@ -13,7 +13,7 @@
 
 version: 0.0.0.1
 type: test-suite
-suite-name: sts-func
+suite-name: ets-func
 list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-lists/ets-func-tests
 test-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests
 
@@ -23,6 +23,8 @@ parameters:
     work-dir: ${WORK_DIR}/${suite-name}
 
 collections:
-    ets_func_tests:
+    ets_func_tests: |-
     stdlib-templates:
         generator-class: runner.extensions.generators.sts_stdlib.stdlib_templates_generator.StdlibTemplatesGenerator
+    ets-func-tests-templates:
+        generator-class: runner.extensions.generators.sts_stdlib.func_templates_generator.FuncTestsCodeGenerator

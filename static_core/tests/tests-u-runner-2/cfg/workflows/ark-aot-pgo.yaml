@@ -40,21 +40,23 @@ parameters:
     # adds --paoc-panda-files option to ark_aot with all dependent and the current abc files
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
-    is-panda: True
+    is-panda: true
+    boot-panda-files: ""
 steps:
-    imports:
-        only-runtime:
-            ark-timeout: ${parameters.ark-timeout}
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            heap-verifier: ${parameters.heap-verifier}
-            gc-type: ${parameters.gc-type}
-            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
-            load-runtimes: ${parameters.load-runtimes}
-            compiler-enable-jit: ${parameters.compiler-enable-jit}
-            ark-args:
-                - ${parameters.ark-full-args}
-    ark-aot:
+    ark-creates-profile-for-aot-pgo:
+        from: ark
+        ark-timeout: ${parameters.ark-timeout}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        heap-verifier: ${parameters.heap-verifier}
+        gc-type: ${parameters.gc-type}
+        full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+        load-runtimes: ${parameters.load-runtimes}
+        compiler-enable-jit: ${parameters.compiler-enable-jit}
+        boot-panda-files: ${parameters.boot-panda-files}
+        ark-args:
+            - ${parameters.ark-full-args}
+    ark-aot-with-profile:
         executable-path: ${parameters.build}/bin/ark_aot
         timeout: ${parameters.aot-timeout}
         step-type: aot
@@ -67,5 +69,5 @@ steps:
             - "--compiler-ignore-failures=false"
             - "--paoc-use-profile:path=${parameters.ark-aot-profdata-file},force"
             - "${parameters.aot-args}"
-            - "--boot-panda-files=${parameters.stdlib}"
+            - "--boot-panda-files=${parameters.stdlib}${parameters.boot-panda-files}"
             - "--paoc-output=${parameters.paoc-output-file}"

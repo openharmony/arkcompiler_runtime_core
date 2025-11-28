@@ -16,44 +16,47 @@
 #
 import re
 from functools import cached_property
-from os import path
+from pathlib import Path
 from typing import Any, Optional, cast
 
-from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
+from runner import utils
+from runner.common_exceptions import FileNotFoundException
 from runner.logger import Log
 from runner.options.macros import MacroNotExpanded, Macros, ParameterNotFound
 from runner.options.options import IOptions
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.options.step import Step, StepKind
-from runner.utils import get_config_workflow_folder, has_macro, load_config
 from runner.utils import indent as utils_indent
 
 _LOGGER = Log.get_logger(__file__)
 
+WORKFLOW = "workflow"
+WORKFLOW_NAME = "workflow-name"
+PARAMETERS = "parameters"
+STEPS = "steps"
+FROM = "from"
+
 
 class WorkflowOptions(IOptions):
-    __WORKFLOW = "workflow"
-    __WORKFLOW_NAME = "workflow-name"
-    __PROPERTIES = "properties"
-    __PARAMETERS = "parameters"
-    __TEST_SUITE = "test-suite"
-    __STEPS = "steps"
-    __IMPORTS = "imports"
-    __TYPE = "type"
 
     def __init__(self, cfg_content: dict[str, Any], parent_test_suite: TestSuiteOptions,  # type: ignore[explicit-any]
-                 *, parent_workflow: Optional['WorkflowOptions'] = None) -> None:
+                 *, parent_workflow: Optional['WorkflowOptions'] = None,
+                 parent_step_name: str | None = None) -> None:
         super().__init__(None)
         self._parent = parent_test_suite if parent_workflow is None else parent_workflow
         inner = parent_workflow is not None
-        self.__name = cfg_content[self.__WORKFLOW] if not inner else cfg_content[self.__WORKFLOW_NAME]
+        self.__name = cfg_content[WORKFLOW] if not inner else cfg_content[WORKFLOW_NAME]
         self.__data = cfg_content[f"{self.__name}.data"] if not inner else cfg_content
         self.__test_suite = parent_test_suite
         self.__steps: list[Step] = []
+        self.parent_step_name: str = parent_step_name if parent_step_name is not None else ""
+        workflow_kind = "It's a main config" if not inner \
+            else f"It's a nested config with the parent '{parent_workflow.__getattribute__('name')}'"
+        _LOGGER.all(f"Going to load workflow '{self.__name}'. {workflow_kind}")
         if not inner:
-            self.__parameters = dict((arg_key[(len(self.__name) + len(self.__PARAMETERS) + 2):], arg_value)
+            self.__parameters = dict((arg_key[(len(self.__name) + len(PARAMETERS) + 2):], arg_value)
                                      for arg_key, arg_value in cfg_content.items()
-                                     if arg_key.startswith(f"{self.__name}.{self.__PARAMETERS}."))
+                                     if arg_key.startswith(f"{self.__name}.{PARAMETERS}."))
             for param, value_in_workflow in self.__parameters.items():
                 value_in_test_suite = self.__test_suite.get_parameter(param)
                 if value_in_test_suite is not None:
@@ -61,27 +64,20 @@ class WorkflowOptions(IOptions):
                     value_in_workflow = value_in_test_suite
                 self.__parameters[param] = self.__expand_macro_for_param(value_in_workflow, param)
         else:
-            self.__parameters = cfg_content[self.__PARAMETERS]
-        self.__load_steps(self.__data[self.__STEPS])
+            self.__parameters = cfg_content[PARAMETERS]
+        self.__load_steps(self.__data[STEPS])
 
     def __str__(self) -> str:
         indent = 2
-        result = [f"{self.__name}\n{utils_indent(indent)}{self.__PARAMETERS}:"]
+        result = [f"{self.__name}\n{utils_indent(indent)}{PARAMETERS}:"]
         for param_name in sorted(self.__parameters.keys()):
             param_value = self.__parameters[param_name]
             result.append(f"{utils_indent(indent + 1)}{param_name}: {param_value}")
-        result.append(f"{utils_indent(indent)}{self.__STEPS}:")
+        result.append(f"{utils_indent(indent)}{STEPS}:")
         for step in self.__steps:
             result.append(str(step))
 
         return "\n".join(result)
-
-    @staticmethod
-    def __check_type(step_type: StepKind, actual_count: int, expected_max_count: int | None) -> None:
-        if expected_max_count is not None and actual_count > expected_max_count:
-            raise InvalidConfiguration(
-                f"Property 'step-type: {step_type.value}' can be set at only one step, "
-                f"but it is set at {actual_count} steps.")
 
     @cached_property
     def name(self) -> str:
@@ -92,7 +88,7 @@ class WorkflowOptions(IOptions):
         return self.__steps
 
     @cached_property
-    def parameters(self) -> dict[str, Any]:   # type: ignore[explicit-any]
+    def parameters(self) -> dict[str, Any]:  # type: ignore[explicit-any]
         return self.__parameters
 
     def get_command_line(self) -> str:
@@ -115,38 +111,37 @@ class WorkflowOptions(IOptions):
         types: dict[StepKind, int] = {}
         for step in self.steps:
             types[step.step_kind] = types.get(step.step_kind, 0) + 1
-        self.__check_type(StepKind.COMPILER, types.get(StepKind.COMPILER, 0), 1)
-        self.__check_type(StepKind.VERIFIER, types.get(StepKind.VERIFIER, 0), 1)
-        self.__check_type(StepKind.AOT, types.get(StepKind.AOT, 0), 1)
-        self.__check_type(StepKind.RUNTIME, types.get(StepKind.RUNTIME, 0), None)
 
     def pretty_str(self) -> str:
         result: list[str] = [step.pretty_str() for step in self.steps if str(step.executable_path) and step.enabled]
         return '\n'.join(result)
 
     def __expand_macro_for_param(self, value_in_workflow: str | list, param: str) -> str | list:
-        if (isinstance(value_in_workflow, str) and has_macro(value_in_workflow) and
+        if (isinstance(value_in_workflow, str) and utils.has_macro(value_in_workflow) and
                 not self.__test_suite.is_defined_in_collections(param)):
             return self.__expand_macro_for_str(value_in_workflow)
         if isinstance(value_in_workflow, list):
             return self.__expand_macro_for_list(value_in_workflow)
         return value_in_workflow
 
-    def __prepare_imported_configs(self, imported_configs: dict[str, dict[str, str]]) -> None:
-        for config_name, config_content in imported_configs.items():
-            config_name = str(path.join(get_config_workflow_folder(), f"{config_name}.yaml"))
-            args = {}
-            for param, param_value in config_content.items():
-                args.update(self.__prepare_imported_config(param, param_value))
-            self.__load_imported_config(config_name, args)
+    def __prepare_imported_configs(self, parent_step_name: str, imported_configs: dict[str, dict[str, str]]) -> None:
+        from_name = cast(str, imported_configs.get(FROM))
+        config_name_path = utils.get_config_workflow_folder() / f"{from_name}.yaml"
+        args = {}
+        for param, param_value in imported_configs.items():
+            if param == FROM:
+                continue
+            args.update(self.__prepare_imported_config(param, param_value))
+        self.__load_imported_config(parent_step_name, config_name_path, args)
 
     def __prepare_imported_config(self, param: str, param_value: Any) -> dict[str, Any]:  # type: ignore[explicit-any]
         args = {}
-        if isinstance(param_value, str) and param_value.find(self.__PARAMETERS) >= 0:
-            param_value = param_value.replace(f"${{{self.__PARAMETERS}.", "").replace("}", "")
-            args[param] = self.__parameters[param_value]
+        if isinstance(param_value, str):
+            args[param] = Macros.correct_macro(param_value, self)
         elif isinstance(param_value, list):
             args[param] = self.__prepare_list(param_value)
+        else:
+            args[param] = param_value
         return args
 
     def __prepare_list(self, param_value: list[str]) -> list[str]:
@@ -160,14 +155,20 @@ class WorkflowOptions(IOptions):
                     result_list.append(sub_item)
         return result_list
 
-    def __load_imported_config(self, cfg_path: str,         # type: ignore[explicit-any]
+    def __load_imported_config(self, parent_step_name: str, cfg_path: Path,  # type: ignore[explicit-any]
                                actual_params: dict[str, Any]) -> None:
-        cfg_content = load_config(str(cfg_path))
-        params = cast(dict, cfg_content.get(self.__PARAMETERS, {}))
+        _LOGGER.all(f"Going to load config from '{cfg_path}' with actual parameters {actual_params}")
+        cfg_content = utils.load_config(cfg_path)
+        params = cast(dict, cfg_content.get(PARAMETERS, {}))
         for param, _ in params.items():
             if param in actual_params:
                 params[param] = actual_params[param]
-        workflow_options = WorkflowOptions(cfg_content, self.__test_suite, parent_workflow=self)
+        parent_step_name = f"{self.parent_step_name}.{parent_step_name}" if self.parent_step_name else parent_step_name
+        workflow_options = WorkflowOptions(
+            cfg_content=cfg_content,
+            parent_test_suite=self.__test_suite,
+            parent_workflow=self,
+            parent_step_name=parent_step_name)
         for step in workflow_options.steps:
             names = [st.name for st in self.__steps]
             if step.name not in [names]:
@@ -178,8 +179,8 @@ class WorkflowOptions(IOptions):
 
     def __load_steps(self, steps: dict[str, dict]) -> None:
         for step_name, step_content in steps.items():
-            if step_name == self.__IMPORTS:
-                self.__prepare_imported_configs(step_content)
+            if FROM in step_content:
+                self.__prepare_imported_configs(step_name, step_content)
             else:
                 self.__load_step(step_name, step_content)
 
@@ -206,7 +207,13 @@ class WorkflowOptions(IOptions):
                 new_env[env] = new_env_var
             step_content['env'] = new_env
         step = Step(step_name, step_content)
-        self.__steps.append(step)
+        if step.enabled:
+            parent_step_name = f"{self.parent_step_name}." if self.parent_step_name else ""
+            step.name = f"{parent_step_name}{step.name}"
+            _LOGGER.all(f"Step '{step.name}' is loaded and added")
+            self.__steps.append(step)
+        else:
+            _LOGGER.all(f"Step '{step_name}' is not enabled and so not loaded")
 
     def __expand_macro_for_str(self, value_in_workflow: str) -> str | list[str]:
         try:

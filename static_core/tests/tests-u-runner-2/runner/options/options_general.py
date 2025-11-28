@@ -76,7 +76,7 @@ class GeneralOptions(IOptions):
 
     @staticmethod
     def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
-        group = parser.add_argument_group(title="URunner options")
+        group = parser.add_argument_group(title="URunner run options")
         dest = f"{dest}." if dest else ""
         group.add_argument(
             f'--{GeneralOptions.__PROCESSES}', '-j', default=GeneralOptions.__DEFAULT_PROCESSES,

@@ -50,6 +50,7 @@ class Step(IOptions):
     executable_path: Path | None = None
     can_be_instrumented: bool = False
     default_timeout: int = 30
+    skip_qemu: bool = False
 
     __MIN_ARG_LENGTH = 15
     __MAX_ARG_LENGTH = 150
@@ -66,6 +67,7 @@ class Step(IOptions):
         self.enabled = self.__get_bool_property(step_body, 'enabled', True)
         self.step_kind = self.__get_kind_property(step_body, 'step-type', StepKind.OTHER)
         self.args = self.__get_list_property(step_body, 'args', [])
+        self.skip_qemu = self.__get_bool_property(step_body, 'skip-qemu', False)
         self.env = self.__get_dict_property(step_body, 'env', {})
 
     def __str__(self) -> str:
@@ -76,6 +78,7 @@ class Step(IOptions):
         result += [f"{utils.indent(indent)}timeout: {self.timeout}"]
         result += [f"{utils.indent(indent)}can-be-instrumented: {self.can_be_instrumented}"]
         result += [f"{utils.indent(indent)}enabled: {self.enabled}"]
+        result += [f"{utils.indent(indent)}skip-qemu: {self.skip_qemu}"]
         result += [f"{utils.indent(indent)}step-type: {self.step_kind}"]
 
         if self.args:

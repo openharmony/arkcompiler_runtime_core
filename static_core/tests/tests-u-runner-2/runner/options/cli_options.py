@@ -15,9 +15,10 @@
 # limitations under the License.
 
 import argparse
+from argparse import ArgumentParser, Namespace
 from glob import glob
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 from runner import utils
 from runner.common_exceptions import FileNotFoundException, IncorrectEnumValue, InvalidConfiguration
@@ -200,6 +201,7 @@ class CliOptions:
         GeneralOptions.add_cli_args(parser)
         try:
             runner_args = parser.parse_args(runner_cli)
+        # NOTE(pronai): is it necessary to capture *all* exceptions?
         except BaseException as exc:
             raise IncorrectEnumValue(str(exc.args)) from exc
         return runner_args
@@ -386,6 +388,14 @@ class CliParserBuilder:
         return parser_options, keys_list
 
 
+class HelpAction(argparse.Action):
+
+    def __call__(self, parser: ArgumentParser, namespace: Namespace, values: Any,    # type: ignore[explicit-any]
+                 option_string: str | None = None) -> None:
+        parser.print_help()
+        namespace.remaining = [option_string]
+
+
 class CliOptionsParser:
 
     def __init__(self, configs_loader: ConfigsLoader, runner_parser: argparse.ArgumentParser,
@@ -402,15 +412,11 @@ class CliOptionsParser:
         self.full_options: dict[str, OptionType] = {}
 
     def parse_args(self) -> None:
-        usage_wf_configs = (f'WORKFLOW - workflow config name, one of '
-                            f'{cli_utils.get_config_list(Path(utils.get_config_workflow_folder()))}')
-        usage_ts_configs = ('\nTEST_SUITE - test suite config name, one of '
-                            f'{cli_utils.get_config_list(Path(utils.get_config_test_suite_folder()))}')
-        usage = (f"%(prog)s {self.configs.workflow_name} {self.configs.test_suite_name} [options]\n\n"
-                 f"{usage_wf_configs} {usage_ts_configs}")
+
+        usage = f"\n%(prog)s {self.configs.workflow_name} {self.configs.test_suite_name} [options]\n\n"
         parser = argparse.ArgumentParser(
             usage=usage,
-            description="Regression test runner",
+            description="Universal test runner",
             parents=[self.runner_parser, self.test_suite_parser, self.default_test_suite_parser,
                      self.workflow_parser],
             conflict_handler="resolve",
@@ -422,19 +428,33 @@ class CliOptionsParser:
 
 
 def get_args() -> dict[str, OptionType]:
-    usage = ("Urunner should be run with at least two options: WORKFLOW_NAME, TEST_SUITE."
-             "\nIn order to explore possible workflow and test suite options "
-             "please run 'runner.sh workflow_name test_suite_name --help'")
-    parser = argparse.ArgumentParser(description="Urunner arg parser", usage=usage)
 
-    parser.add_argument("workflow_name", help="Workflow name")
-    parser.add_argument("test_suite_name", help="Test suite name")
-    parser.add_argument("other_args", nargs=argparse.REMAINDER, help="Other urunner options")
-    args = parser.parse_args()
+    workflow_list = cli_utils.get_config_list(Path(utils.get_config_workflow_folder()))
+    test_suite_list = cli_utils.get_config_list(Path(utils.get_config_test_suite_folder()))
+
+    help_desc = ("\nTo explore possible workflow and test suite options:  \n"
+                 " './runner.sh <WORKFLOW_NAME> <TEST_SUITE_NAME> --help'\n"
+                 "\nExample: \n"
+                 " ./runner.sh panda-int ets-cts --help\n")
+
+    parser = argparse.ArgumentParser(description="URunner argument parser\n"
+                                                 f"{help_desc}",
+                                     add_help=False,
+                                     formatter_class=argparse.RawTextHelpFormatter,
+                                     usage=argparse.SUPPRESS)
+
+    parser.add_argument("workflow_name", metavar="<WORKFLOW_NAME>",
+                         choices=workflow_list,
+                        help="{%(choices)s}")
+    parser.add_argument("test_suite_name", metavar="<TEST_SUITE_NAME>",
+                        help="{%(choices)s}",
+                        choices=test_suite_list)
+    parser.add_argument("-h", "--help", action=HelpAction, dest=argparse.SUPPRESS, nargs=0)
+
+    args, remaining = parser.parse_known_args()
+    remaining = getattr(args, "remaining", []) + remaining
 
     configs_loader = ConfigsLoader(args.workflow_name, args.test_suite_name)
-    cli_utils.check_valid_workflow_name(cli_utils.WorkflowName(args.workflow_name))
-    cli_utils.check_valid_test_suite_name(cli_utils.TestSuiteName(args.test_suite_name))
 
     parser_builder = CliParserBuilder(configs_loader)
     test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
@@ -443,10 +463,10 @@ def get_args() -> dict[str, OptionType]:
     cli = CliOptionsParser(configs_loader, parser_builder.create_parser_for_runner(),
                             test_suite_parser,
                             parser_builder.create_parser_for_default_test_suite(),
-                            workflow_parser, *args.other_args)
+                            workflow_parser, *remaining)
     cli.parse_args()
 
-    cli.full_options[f"{CliOptionsConsts.CFG_RUNNER.value}.cli_options"] = args.other_args
+    cli.full_options[f"{CliOptionsConsts.CFG_RUNNER.value}.cli_options"] = remaining
 
     parsed_options = cli.full_options
     parsed_options = cli_utils.restore_duplicated_options(configs_loader, parsed_options)

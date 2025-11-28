@@ -103,6 +103,11 @@ class OptionsTest(TestCase):
         self.assertEqual(len(parts), 1 + len(checked))
         self.assertTrue(all(self.compare_list(parts[1:], checked)))
 
+    def check_boot_panda_files_ark(self, arg: str) -> None:
+        parts = arg.split(":")
+        self.assertEqual(len(parts), 1)
+        self.assertTrue('stdlib' in parts[0])
+
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
     @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
@@ -240,9 +245,7 @@ class OptionsTest(TestCase):
                     boot_panda_files = arg[0] \
                         if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
                         else ""
-                    self.check_boot_panda_files(
-                        ['intermediate/test2_dependent_test2.ets.abc', 'intermediate/test2.ets.abc'],
-                        boot_panda_files)
+                    self.check_boot_panda_files_ark(boot_panda_files)
 
         # clear up
         shutil.rmtree(work_dir.root, ignore_errors=True)

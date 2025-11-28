@@ -44,6 +44,11 @@ class BinaryParams:
     executor: Path
     flags: list[str]
     env: dict[str, str]
+    use_qemu: bool = False
+
+    @property
+    def component_name(self) -> str:
+        return self.executor.stem
 
 
 @dataclass

@@ -45,11 +45,18 @@ from runner.common_exceptions import (
     UnzipException,
     YamlException,
 )
-from runner.enum_types.base_enum import EnumT
+from runner.enum_types.base_enum import BaseEnum, EnumT
 from runner.enum_types.configuration_kind import ArchitectureKind, OSKind
+from runner.enum_types.qemu import QemuKind
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
+
+
+class FontColor(BaseEnum):
+    RED_BOLD = "\033[31;1m"
+    RED = '\033[31m'
+    RESET = "\033[0m"
 
 
 def progress(block_num: int, block_size: int, total_size: int) -> None:
@@ -141,7 +148,10 @@ def copy(source_path: Path, dest_path: Path, remove_if_exist: bool = True) -> No
     if source_path.is_file():
         shutil.copy(source_path, dest_path)
     else:
-        shutil.copytree(source_path, dest_path, dirs_exist_ok=not remove_if_exist)
+        shutil.copytree(source_path, dest_path,
+                        symlinks=True,
+                        ignore=lambda _, _2: [".git"],
+                        dirs_exist_ok=not remove_if_exist)
 
 
 def read_file(file_path: Path | str) -> str:
@@ -150,9 +160,20 @@ def read_file(file_path: Path | str) -> str:
     return text
 
 
+def remove_template_copyright(template_text: str) -> str:
+    lines = template_text.split('\n')
+    return '\n'.join([line for line in lines if not line.startswith('#')])
+
+
+def read_expected_file(path_to_file: Path) -> str:
+    with open(path_to_file, encoding='utf-8') as f:
+        return ''.join(line for line in f if not line.startswith('#')).strip()
+
+
 def get_opener(mode: int) -> Callable[[str | Path, int], int]:
     def opener(path_name: str | Path, flags: int) -> int:
         return os.open(path_name, os.O_RDWR | os.O_APPEND | os.O_CREAT | flags, mode)
+
     return opener
 
 
@@ -204,7 +225,7 @@ def iter_files(dirpath: Path | str, allowed_ext: list[str]) -> Iterator[tuple[st
             yield name, path_value
 
 
-def is_type_of(value: Any, type_: str) -> bool:     # type: ignore[explicit-any]
+def is_type_of(value: Any, type_: str) -> bool:  # type: ignore[explicit-any]
     return str(type(value)).find(type_) > 0
 
 
@@ -250,6 +271,13 @@ def has_macro(prop_value: str) -> bool:
     pattern = r"\$\{([^\}]+)\}"
     match = re.search(pattern, str(prop_value))
     return match is not None
+
+
+def list_has_macros(args: list[str]) -> bool:
+    for arg in args:
+        if has_macro(arg):
+            return True
+    return False
 
 
 def get_all_macros(prop_value: str) -> list[str]:
@@ -385,7 +413,7 @@ def load_config(config_path: str | Path | None) -> dict[str, str | dict]:
     return config_from_file
 
 
-def to_bool(value: Any) -> bool:    # type: ignore[explicit-any]
+def to_bool(value: Any) -> bool:  # type: ignore[explicit-any]
     if isinstance(value, bool):
         return value
     if isinstance(value, str) and str(value).lower() in ("true", "false"):
@@ -420,7 +448,9 @@ def prepend_list(pre_list: list, post_list: list) -> list:
     return result
 
 
-def detect_architecture() -> ArchitectureKind:
+def detect_architecture(qemu_kind: QemuKind) -> ArchitectureKind:
+    if qemu_kind != QemuKind.NONE:
+        return ArchitectureKind(qemu_kind.name)
     arch = platform.machine().lower()
     if arch == "aarch64":
         return ArchitectureKind.ARM64
@@ -486,3 +516,10 @@ def replace_special_keys(params_list: list) -> list:
                 params_list[i] = param.replace(key, val) if key in param else param
 
     return params_list
+
+
+def normalize_str(input_str: str) -> str:
+    input_str = input_str.replace("\r\n", "\n").replace("\r", "\n")
+    input_str = input_str.lower()
+    input_str = re.sub(r"\s+", " ", input_str).strip()
+    return input_str

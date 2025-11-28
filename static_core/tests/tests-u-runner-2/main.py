@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import logging
 import os
 import sys
 from datetime import datetime, timedelta
@@ -23,7 +23,7 @@ from typing import Any, cast
 
 import pytz
 
-from runner.common_exceptions import InvalidConfiguration, RunnerException
+from runner.common_exceptions import InvalidConfiguration, InvalidInitialization
 from runner.enum_types.verbose_format import VerboseKind
 from runner.environment import RunnerEnv
 from runner.init_runner import InitRunner
@@ -40,10 +40,16 @@ def main() -> None:
     if init_runner.should_runner_initialize(sys.argv):
         init_runner.initialize(RunnerEnv.get_mandatory_props())
         sys.exit(0)
-    RunnerEnv(
-        local_env=Path.cwd().with_name(".env"),
-        urunner_path=Path(__file__).parent,
-        global_env=init_runner.urunner_env_path).load_environment()
+
+    runner_help_mode = init_runner.request_runner_help(set(sys.argv))
+    try:
+        RunnerEnv(
+            local_env=Path.cwd().with_name(".env"),
+            urunner_path=Path(__file__).parent,
+            global_env=init_runner.urunner_env_path).load_environment(runner_help_mode)
+    except InvalidInitialization as exc:
+        logging.critical(exc)
+        sys.exit(1)
 
     args = get_args()
     logger = load_config(args)
@@ -57,13 +63,8 @@ def main() -> None:
         Log.default(logger, "Attention: tests are going to take only 1 process. The execution can be slow. "
                             "You can set the option `--processes` to wished processes quantity "
                             "or use special value `all` to use all available cores.")
-    failed_tests = 0
-    try:
-        failed_tests = main_cycle(config, logger)
-    except RunnerException as exc:
-        logger.logger.critical(exc.message)
-    finally:
-        sys.exit(0 if failed_tests == 0 else 1)
+    failed_tests = main_cycle(config, logger)
+    sys.exit(0 if failed_tests == 0 else 1)
 
 
 def main_cycle(config: Config, logger: Log) -> int:

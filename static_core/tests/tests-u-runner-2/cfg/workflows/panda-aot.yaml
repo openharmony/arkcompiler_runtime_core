@@ -22,8 +22,8 @@ parameters:
     opt-level: 2
     es2panda-timeout: 30
     verifier-timeout: 30
-    enable-es2panda: True
-    enable-verifier: True
+    enable-es2panda: true
+    enable-verifier: true
     extension: ${parameters.extension}
     # ark and ark_aot
     ark-timeout: 180
@@ -33,7 +33,7 @@ parameters:
     heap-verifier: fail_on_verification
     ark-args: [ ]
     compiler-enable-jit: "false"
-    ark-full-args:
+    ark-workflow-args:
         - ${parameters.ark-args}
         - "--enable-an:force"
     aot-args: [ ]
@@ -41,37 +41,43 @@ parameters:
     # adds --paoc-panda-files option to ark_aot with all dependent and the current abc files
     # adds --boot-panda-files option to ark with all dependent and the current abc files
     # adds --panda-files option to ark with all dependent and the current abc files
-    is-panda: True
+    is-panda: true
+    boot-panda-files: ""
 steps:
-    imports:
-        only-es2panda:
-            opt-level: ${parameters.opt-level}
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            extension: ${parameters.extension}
-            load-runtimes: ${parameters.load-runtimes}
-            enable-es2panda: ${parameters.enable-es2panda}
-            enable-verifier: ${parameters.enable-verifier}
-            es2panda-timeout: ${parameters.es2panda-timeout}
-            verifier-timeout: ${parameters.verifier-timeout}
-        only-ark-aot:
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            heap-verifier: ${parameters.heap-verifier}
-            gc-type: ${parameters.gc-type}
-            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
-            load-runtimes: ${parameters.load-runtimes}
-            aot-timeout: ${parameters.aot-timeout}
-            aot-args: ${parameters.aot-args}
-        only-runtime:
-            ark-timeout: ${parameters.ark-timeout}
-            build: ${parameters.build}
-            work-dir: ${parameters.work-dir}
-            heap-verifier: ${parameters.heap-verifier}
-            gc-type: ${parameters.gc-type}
-            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
-            load-runtimes: ${parameters.load-runtimes}
-            compiler-enable-jit: ${parameters.compiler-enable-jit}
-            ark-args:
-                - ${parameters.ark-full-args}
-                - "--aot-files=${parameters.paoc-output-file}"
+    compile:
+        from: es2panda-verifier
+        opt-level: ${parameters.opt-level}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        extension: ${parameters.extension}
+        load-runtimes: ${parameters.load-runtimes}
+        enable-es2panda: ${parameters.enable-es2panda}
+        enable-verifier: ${parameters.enable-verifier}
+        es2panda-timeout: ${parameters.es2panda-timeout}
+        verifier-timeout: ${parameters.verifier-timeout}
+        boot-panda-files: ${parameters.boot-panda-files}
+    ark_aot:
+        from: ark-aot
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        heap-verifier: ${parameters.heap-verifier}
+        gc-type: ${parameters.gc-type}
+        full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+        load-runtimes: ${parameters.load-runtimes}
+        aot-timeout: ${parameters.aot-timeout}
+        aot-args: ${parameters.aot-args}
+        boot-panda-files: ${parameters.boot-panda-files}
+    ark-after-aot:
+        from: ark
+        ark-timeout: ${parameters.ark-timeout}
+        build: ${parameters.build}
+        work-dir: ${parameters.work-dir}
+        heap-verifier: ${parameters.heap-verifier}
+        gc-type: ${parameters.gc-type}
+        full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+        load-runtimes: ${parameters.load-runtimes}
+        compiler-enable-jit: ${parameters.compiler-enable-jit}
+        boot-panda-files: ${parameters.boot-panda-files}
+        ark-args:
+            - ${parameters.ark-workflow-args}
+            - "--aot-files=${parameters.paoc-output-file}"

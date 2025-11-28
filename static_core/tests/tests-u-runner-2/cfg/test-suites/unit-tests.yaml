@@ -23,14 +23,34 @@ parameters:
     work-dir: ${WORK_DIR}/${suite-name}
 
 collections:
-    ets-common-tests:
+    ets-common-tests: |-
     ets-common-tests/atomics:
         parameters:
-            ark-extra-args:
+            ark-test-suite-args:
                 - "--coroutine-impl=stackful"
                 - "--coroutine-workers-count=0"
     ets-common-tests/intrinsics/stringbuilder_oom.ets:
         parameters:
-            ark-extra-args:
+            ark-test-suite-args:
                 - "--compiler-enable-osr=false"
-    ets_test_suite/strings:
+    ets-common-tests/devirt_adv_tests/test_0_same_hierarchy.ets:
+        parameters:
+            aot-test-suite-args:
+                - "--panda-files=${parameters.work-dir}/intermediate/ets-common-tests/devirt_adv_tests/imported_hierarchy/test_0_same_hierarchy_ext_module.ets.abc"
+    ets-common-tests/devirt_adv_tests/test_1_final_method.ets:
+        parameters:
+            aot-test-suite-args:
+                - "--panda-files=${parameters.work-dir}/intermediate/ets-common-tests/devirt_adv_tests/ext_module_final_method/test_1_final_method_ext_module.ets.abc"
+    ets-common-tests/devirt_adv_tests/test_2_final_class_0_n.ets:
+        parameters:
+            aot-test-suite-args:
+                - "--panda-files=${parameters.work-dir}/intermediate/ets-common-tests/devirt_adv_tests/ext_module_final_class/test_2_final_class_0_n_ext_module.ets.abc"
+    ets-common-tests/devirt_adv_tests/test_2_final_class_1_n.ets:
+        parameters:
+            aot-test-suite-args:
+                - "--panda-files=${parameters.work-dir}/intermediate/ets-common-tests/devirt_adv_tests/ext_module_final_class/test_2_final_class_1_n_ext_module.ets.abc"
+    ets-common-tests/devirt_adv_tests/test_3_interface.ets:
+        parameters:
+            aot-test-suite-args:
+                - "--panda-files=${parameters.work-dir}/intermediate/ets-common-tests/devirt_adv_tests/ext_module_interface/test_3_interface_ext_module.ets.abc"
+    ets_test_suite/strings: |-

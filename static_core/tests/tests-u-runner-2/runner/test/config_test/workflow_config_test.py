@@ -20,31 +20,35 @@ from pathlib import Path
 from typing import ClassVar
 from unittest.mock import patch
 
+from runner.options.cli_options import get_args
 from runner.options.options import IOptions
 from runner.options.options_general import GeneralOptions
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.options.options_workflow import WorkflowOptions
 from runner.options.step import StepKind
-from runner.test.config_test.data import data_1
 
 
 class WorkflowConfigTest(unittest.TestCase):
-    current_path = Path(__file__).parent
-    data_folder = current_path / "data"
+    data_folder: ClassVar[Path] = Path(__file__).with_name("data")
     test_environ: ClassVar[dict[str, str]] = {
         'ARKCOMPILER_RUNTIME_CORE_PATH': Path.cwd().as_posix(),
         'ARKCOMPILER_ETS_FRONTEND_PATH': Path.cwd().as_posix(),
         'PANDA_BUILD': Path.cwd().as_posix(),
         'WORK_DIR': Path.cwd().as_posix()
     }
-    args = data_1.args
+    sys_argv: ClassVar[list[str]] = ["runner.sh", "config-1", "test_suite1"]
 
-    def prepare_test(self) -> tuple[TestSuiteOptions, WorkflowOptions]:
-        general = GeneralOptions(self.args, IOptions())
-        test_suite = TestSuiteOptions(self.args, general)
-        workflow = WorkflowOptions(cfg_content=self.args, parent_test_suite=test_suite)
+    @staticmethod
+    def prepare_test() -> tuple[TestSuiteOptions, WorkflowOptions]:
+        args = get_args()
+        general = GeneralOptions(args, IOptions())
+        test_suite = TestSuiteOptions(args, general)
+        workflow = WorkflowOptions(cfg_content=args, parent_test_suite=test_suite)
         return test_suite, workflow
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: WorkflowConfigTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: WorkflowConfigTest.data_folder)
+    @patch('sys.argv', sys_argv)
     @patch.dict(os.environ, test_environ, clear=True)
     def test_loaded_steps(self) -> None:
         _, workflow = self.prepare_test()
@@ -54,6 +58,9 @@ class WorkflowConfigTest(unittest.TestCase):
             {'echo'}
         )
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: WorkflowConfigTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: WorkflowConfigTest.data_folder)
+    @patch('sys.argv', sys_argv)
     @patch.dict(os.environ, test_environ, clear=True)
     def test_echo_step(self) -> None:
         _, workflow = self.prepare_test()
@@ -72,6 +79,9 @@ class WorkflowConfigTest(unittest.TestCase):
             "${test-id}"
         })
 
+    @patch('runner.utils.get_config_workflow_folder', lambda: WorkflowConfigTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: WorkflowConfigTest.data_folder)
+    @patch('sys.argv', sys_argv)
     @patch.dict(os.environ, test_environ, clear=True)
     def test_test_suite(self) -> None:
         test_suite, _ = self.prepare_test()

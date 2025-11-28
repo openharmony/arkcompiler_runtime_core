@@ -123,3 +123,29 @@ class MetadataTest(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             metadata = TestMetadata.create_filled_metadata({}, Path("path"))
             self.assertIsNone(metadata)
+
+    def test_one_wrong_tag(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'tags': ['compily-only', 'negative', 'not-a-test', 'no-warmup'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(len(metadata.tags.invalid_tags), 1)
+        self.assertEqual(metadata.tags.invalid_tags, ['compily-only'])
+
+    def test_wrong_tags(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'tags': ['compily-only', 'negatives', 'not-a-test', 'no-warmup'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(len(metadata.tags.invalid_tags), 2)
+        self.assertEqual(metadata.tags.invalid_tags, ['compily-only', 'negatives'])
+
+    def test_all_valid_atgs(self) -> None:
+        metadata = TestMetadata.create_filled_metadata({
+            'tags': ['compile-only', 'negative', 'not-a-test', 'no-warmup'],
+        }, Path(__file__))
+        self.assertIsInstance(metadata, TestMetadata)
+        self.assertIsNotNone(metadata)
+        self.assertEqual(len(metadata.tags.invalid_tags), 0)
