@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import shutil
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -238,8 +239,31 @@ class Step(IOptions):
 
     @staticmethod
     def __get_path_property(step_body: RawStepData, name: str) -> Path | None:
+        """
+        Extract and resolve path property from step configuration.
+        
+        If the value is just an executable name (no directory separators), searches for it
+        in the PATH environment variable and returns the full path if found.
+        If the value contains path separators or is not found in PATH, returns it as-is.
+        
+        Args:
+            step_body: Dictionary containing step configuration data
+            name: Name of the property to extract
+            
+        Returns:
+            Path object if value exists, None otherwise. For executable names without
+            path separators, returns the full path from PATH if found.
+        """
         value: str | None = Step.__get_nullable_str_property(step_body, name)
-        return Path(value) if value is not None else None
+        if not value:
+            return None
+
+        p_value = Path(value)
+        if p_value.name == p_value.as_posix():
+            if (from_path := shutil.which(p_value.name)) is None:
+                raise MalformedStepConfigurationException(f"Path '{value}' does not exist or is not found in PATH.")
+            return Path(from_path)
+        return p_value
 
     @staticmethod
     def __get_kind_property(step_body: RawStepData, name: str, default: StepKind = StepKind.OTHER) -> StepKind:
@@ -294,7 +318,10 @@ class Step(IOptions):
     def executable_path_exists(self) -> bool:
         if self.executable_path is None:
             return False
-        return bool(self.executable_path.exists() and self.executable_path.is_file())
+        is_exist = self.executable_path.exists() and self.executable_path.is_file()
+        is_in_path = (self.executable_path.name == self.executable_path.as_posix() and
+                      shutil.which(self.executable_path.name) is not None)
+        return is_exist or is_in_path
 
     def pretty_str(self) -> str:
         if not str(self.executable_path):

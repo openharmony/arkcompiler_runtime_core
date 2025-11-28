@@ -44,6 +44,8 @@ parameters:
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: true
     boot-panda-files: ""
+    ark-stdout: ""
+    ark-stderr: ""
 steps:
     compile:
         from: es2panda-verifier
@@ -69,6 +71,8 @@ steps:
         aot-timeout: ${parameters.aot-timeout}
         aot-args: ${parameters.aot-args}
         boot-panda-files: ${parameters.boot-panda-files}
+        ark-stdout: ${parameters.ark-stdout}
+        ark-stderr: ${parameters.ark-stderr}
     ark-after-aot:
         from: ark
         ark-timeout: ${parameters.ark-timeout}
@@ -80,6 +84,8 @@ steps:
         load-runtimes: ${parameters.load-runtimes}
         compiler-enable-jit: ${parameters.compiler-enable-jit}
         boot-panda-files: ${parameters.boot-panda-files}
+        ark-stdout: ${parameters.ark-stdout}
+        ark-stderr: ${parameters.ark-stderr}
         ark-args:
             - ${parameters.ark-workflow-args}
             - "--aot-files=${parameters.paoc-output-file}"

@@ -44,6 +44,8 @@ parameters:
     # adds --panda-files option to ark with all dependent and the current abc files
     is-panda: true
     boot-panda-files: ""
+    ark-stdout: ""
+    ark-stderr: ""
 steps:
     compile:
         from: es2panda-verifier
@@ -69,3 +71,5 @@ steps:
         ark-args: ${parameters.ark-workflow-args}
         compiler-enable-jit: ${parameters.compiler-enable-jit}
         boot-panda-files: ${parameters.boot-panda-files}
+        ark-stdout: ${parameters.ark-stdout}
+        ark-stderr: ${parameters.ark-stderr}

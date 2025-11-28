@@ -56,9 +56,13 @@ class TestStepsTest(TestCase):
     env_properties: ClassVar[list[MandatoryPropDescription]] = RunnerEnv.mandatory_props
 
     @staticmethod
-    def prepare() -> list[TestStandardFlow]:
+    def get_config() -> Config:
         args = get_args(TestStepsTest.env_properties)
-        runner = RunnerStandardFlow(Config(args))
+        return Config(args)
+
+    @staticmethod
+    def prepare() -> list[TestStandardFlow]:
+        runner = RunnerStandardFlow(TestStepsTest.get_config())
         return [cast(TestStandardFlow, test.do_run()) for test in runner.tests]
 
     @staticmethod
@@ -471,6 +475,29 @@ class TestStepsTest(TestCase):
             # clear up
             work_dir = Path(os.environ["WORK_DIR"])
             shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists._cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists._gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow_executable_from_path", "test_suite", "--test-file", "simple1.ets"],),
+    ])
+    def test_check_step_executable_from_path(self, argv: Callable) -> None:
+        """
+        Steps have executable without explicit path - the search should go to PATH
+        Expected: the binary is found in Path and its path is changed correctly
+        """
+        with patch('sys.argv', argv):
+            steps = self.get_config().workflow.steps
+            execs: list[Path] = list(filter(None, (step.executable_path for step in steps)))
+            try:
+                self.assertEqual(1, len(execs))
+                self.assertNotEqual(execs[0].name, execs[0].as_posix())
+            finally:
+                test_utils.clear_after_test()
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
