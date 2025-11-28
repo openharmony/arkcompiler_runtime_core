@@ -16,9 +16,9 @@
 //! CHECKER     StringBuilder length field access AOT unoptimized
 //! SKIP_IF     @architecture == "arm32"
 //! RUN_BCO     output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
-//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation0[0-1]' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
+//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
 //!
-//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00"
+//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
 //! PASS_AFTER  "OptimizeStringConcat"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT  /StringBuilder::<ctor>/,3
@@ -30,9 +30,9 @@
 
 //! CHECKER     StringBuilder length field access AOT optimized
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*StringCalculation0[0-1]' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false"
+//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false"
 //!
-//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00"
+//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
 //! PASS_AFTER  "OptimizeStringConcat"
 //! INST_COUNT  /StringBuilder::<ctor>/,3
 //! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
@@ -44,7 +44,7 @@
 //! INST_COUNT  /LenArray/,2
 //! INST        /LoadObject \d+ std.core.StringBuilder.length/
 //!
-//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation01"
+//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation01"
 //! PASS_AFTER  "OptimizeStringConcat"
 //! INST_COUNT  /StringBuilder::<ctor>/,3
 //! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
@@ -58,7 +58,7 @@
 //! SKIP_IF     @architecture == "arm32"
 //! RUN_BCO     output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true --bco-compiler --compiler-optimize-string-concat=true"
 //!
-//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::StringCalculation00"
+//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
 //! PASS_AFTER  "BranchElimination"
 //! INST_COUNT  /StringBuilder::<ctor>/,3
 //! INST_COUNT  /StringBuilder::append/,6
@@ -83,24 +83,24 @@
 
 //! CHECKER       INTERP-IRTOC, StringBuilder length field access BCO optimized
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           options: "--compiler-regex='.*StringCalculation0[0-1]' --compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
+//! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
 //! CHECKER       INTERP-CPP, StringBuilder length field access BCO optimized
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           options: "--compiler-regex='.*StringCalculation0[0-1]' --compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
+//! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
-function GenerateFakeRandomInteger(): Int32Array {
+function generateFakeRandomInteger(): Int32Array {
   let resource: Int32Array = new Int32Array([12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]);
   return resource;
 }
 
 const N: int = 8;
 
-function StringCalculation00() {
-  let str1: string = "h";
-  let res: string = "11";
+function stringCalculation00() {
+  let str1: string = 'h';
+  let res: string = '11';
 
-  let resources: Int32Array = GenerateFakeRandomInteger();
+  let resources: Int32Array = generateFakeRandomInteger();
   for (let i: int = 0; i < N; i++) {
     if (resources[i % res.length.toInt() % 15].toInt() > resources[(i + resources[i % 15].toInt()) % res.length.toInt() % 15].toInt()) {
       res += str1 + i;
@@ -112,13 +112,14 @@ function StringCalculation00() {
   return res.length.toInt()
 }
 
-function StringCalculation01() {
-  let str1: string = "h";
-  let res: string = "11";
+function stringCalculation01() {
+  let str1: string = 'h';
+  let res: string = '11';
 
-  let resources: Int32Array = GenerateFakeRandomInteger();
+  let resources: Int32Array = generateFakeRandomInteger();
   for (let i: int = 0; i < N; i++) {
-    if (resources[i % 15].toInt() > resources[(i + resources[i % 15].toInt()) % 15].toInt()) {
+    let j = (i + resources[i % 15].toInt()) % 15;
+    if (resources[i % 15].toInt() > resources[j].toInt()) {
       res += str1 + i;
     } else {
       res += str1;
@@ -130,6 +131,6 @@ function StringCalculation01() {
 
 
 function main() {
-  arktest.assertEQ(StringCalculation00(), 11, "Wrong result at StringCalculation00");
-  arktest.assertEQ(StringCalculation01(), 12, "Wrong result at StringCalculation01");
+  arktest.assertEQ(stringCalculation00(), 11, 'Wrong result at stringCalculation00');
+  arktest.assertEQ(stringCalculation01(), 12, 'Wrong result at stringCalculation01');
 }

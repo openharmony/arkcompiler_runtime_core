@@ -124,6 +124,9 @@ ohos_shared_library("libarkassembler") {
   stack_protector_ret = false
   deps = [ ":libarkassembler_static" ]
 
+  if (enable_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
   if (!is_standard_system) {
     relative_install_dir = "ark"
   }
