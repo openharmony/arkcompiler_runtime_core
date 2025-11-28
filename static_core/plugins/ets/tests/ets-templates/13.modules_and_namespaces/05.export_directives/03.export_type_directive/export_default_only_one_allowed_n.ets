@@ -13,14 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
-desc: >-
-      Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
-      {{c.doc}}
+desc: Only one default export is allowed in a module.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0374: Only one default export is allowed in a module"
 ---*/
 
-{{c.decl}}
-
-{% endfor %}
+class D {}
+export default type N = D
+export default type S = D

@@ -19,7 +19,6 @@ limitations under the License.
 desc: >-
       Only one of the merging namespaces can have an initializer. Otherwise, a compile-time error occurs.
       {{c.doc}}
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

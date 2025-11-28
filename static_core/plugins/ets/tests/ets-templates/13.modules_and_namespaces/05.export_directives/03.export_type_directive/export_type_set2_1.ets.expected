@@ -10,7 +10,5 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import_stmts:
-  - { import: 'import * as ma from "./module_a.ets"', res: '"module_a.ets"', doc: "file and folder with the same name" }
-  - { import: 'import * as ma from "./module_a/../module_a.ets"', res: '"module_a.ets"' }
+#
+Warning: 'D' has already imported

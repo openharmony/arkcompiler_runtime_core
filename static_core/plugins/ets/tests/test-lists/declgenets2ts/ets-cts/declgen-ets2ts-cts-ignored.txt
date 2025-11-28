@@ -128,7 +128,7 @@
 17.experimental_features/packages/package_declarations_1.ets
 #FailKind.DECLGEN_ETS2TS_FAIL - 24 tests:
 03.types/19.function_types/incorrect_function_name_43.ets
-13.modules_and_namespaces/05.export_directives/01.selective_export_directive/negative_selective_exports_3.ets
+13.modules_and_namespaces/05.export_directives/01.selective_export_directive/negative_selective_exports_n_3.ets
 17.experimental_features/packages/import_and_overloading_of_function_names/bad_package_declarations/bad_package_declarations_0.ets
 17.experimental_features/packages/import_and_overloading_of_function_names/bad_package_declarations/bad_package_declarations_1.ets
 03.types/19.function_types/incorrect_function_name_50.ets
@@ -275,8 +275,8 @@
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all_from_one_by_one.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all_a_plus_c.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all_with_rename_0.ets
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all_with_rename_1.ets
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_5.ets
+13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all_with_rename_1_n.ets
+13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_5_n.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_5.ets
 15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_infer_37.ets
 15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_neg_3.ets
@@ -1745,7 +1745,7 @@
 13.modules_and_namespaces/01.import_directives/02.default_import_binding/default_import_interface.ets
 13.modules_and_namespaces/01.import_directives/02.default_import_binding/multiple_default_export_neg.ets
 13.modules_and_namespaces/01.import_directives/02.default_import_binding/multiple_default_export_neg_2.ets
-13.modules_and_namespaces/01.import_directives/04.import_type_directive/export_multiple_default_types.ets
+13.modules_and_namespaces/01.import_directives/04.import_type_directive/export_multiple_default_types_n.ets
 13.modules_and_namespaces/01.import_directives/04.import_type_directive/type_binding_interface.ets
 13.modules_and_namespaces/01.import_directives/04.import_type_directive/type_binding_abstract_class.ets
 13.modules_and_namespaces/03.import_directives/04.default_import_binding/default_import_abstract_class.ets
@@ -1753,9 +1753,9 @@
 13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level.ets
 13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level_2.ets
 13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level_3.ets
-13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations.ets
+13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations_n.ets
 13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class_same_name_2.ets
-13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations_declare.ets
+13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations_declare_n.ets
 13.modules_and_namespaces/03.top-level_declarations/bad_top_level_declarations_0.ets
 13.modules_and_namespaces/03.top-level_declarations/bad_top_level_declarations_1.ets
 13.modules_and_namespaces/03.top-level_declarations/top_level_declarations_12.ets
@@ -1777,12 +1777,12 @@
 13.modules_and_namespaces/04.namespace_declarations/ns_call_static_init_3.ets
 13.modules_and_namespaces/04.namespace_declarations/ns_merge_0.ets
 13.modules_and_namespaces/04.namespace_declarations/ns_merge_1.ets
-13.modules_and_namespaces/04.namespace_declarations/ns_merge_2.ets
-13.modules_and_namespaces/04.namespace_declarations/ns_merge_3.ets
+13.modules_and_namespaces/04.namespace_declarations/ns_merge_n_0.ets
+13.modules_and_namespaces/04.namespace_declarations/ns_merge_n_1.ets
 13.modules_and_namespaces/04.namespace_declarations/ns_single_static_init_0.ets
-13.modules_and_namespaces/04.namespace_declarations/ns_single_static_init_1.ets
-13.modules_and_namespaces/04.namespace_declarations/ns_single_static_init_2.ets
-13.modules_and_namespaces/04.namespace_declarations/ns_single_static_init_3.ets
+13.modules_and_namespaces/04.namespace_declarations/ns_single_static_init_n_0.ets
+13.modules_and_namespaces/04.namespace_declarations/ns_single_static_init_n_1.ets
+13.modules_and_namespaces/04.namespace_declarations/ns_single_static_init_n_2.ets
 13.modules_and_namespaces/05.export_directives/01.selective_export_directive/export_as_same_name.ets
 13.modules_and_namespaces/05.export_directives/01.selective_export_directive/export_default_anonymous/export_newclass.ets
 13.modules_and_namespaces/05.export_directives/01.selective_export_directive/export_default_anonymous/export_number.ets
@@ -1810,6 +1810,7 @@
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/export_source/re_export_6.ets
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/type_binding_neg.ets
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/type_binding_neg_2.ets
+13.modules_and_namespaces/05.export_directives/03.export_type_directive/export_default_only_one_allowed_n.ets
 13.modules_and_namespaces/01.import_directives/chaining_import_0.ets
 13.modules_and_namespaces/01.import_directives/chaining_import_1.ets
 13.modules_and_namespaces/01.import_directives/chaining_import_2.ets
@@ -1822,8 +1823,8 @@
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/re-export_default.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/re-export_default_rename.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/re-export_non-default.ets
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_multiple_default.ets
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexport_from_self_2.ets
+13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_multiple_default_n.ets
+13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexport_from_self_2_n.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/re_export_clash_0_0.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/re-export_all_by_old_names.ets
@@ -2760,8 +2761,8 @@
 16.concurrency/03.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/user_defined_types/async_method_returns_promise_class_interface_36.ets
 
 #TSC_FAIL
-13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations_class_interface.ets
-13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations_consts.ets
+13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations_class_interface_n.ets
+13.modules_and_namespaces/03.top-level_declarations/01.exported_declarations/default_exported_declarations/multiple_default_declarations_consts_n.ets
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/export_type_set2_1.ets
 13.modules_and_namespaces/05.export_directives/03.export_type_directive/export_type_set2_2.ets
 16.concurrency/03.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/user_defined_types/async_method_returns_promise_class_interface_36.ets

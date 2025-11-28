@@ -20,7 +20,6 @@ desc: >-
     If the import path refers to a folder, then the way to handle the case is determined by the actual compiler.
     If the compiler cannot locate a module source definitely, then a compile-time error occurs.
     {{stmt.doc}}
-tags: [{{stmt.tags}}]
 files:
     - ./module_a.ets
     - ./module_a/module_a.ets
