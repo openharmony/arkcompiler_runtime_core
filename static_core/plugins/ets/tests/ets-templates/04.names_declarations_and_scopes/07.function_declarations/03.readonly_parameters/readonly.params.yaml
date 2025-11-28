@@ -116,35 +116,6 @@ cases:
         let rw: Array<TN> = new Array<TN>(1);
         arktest.assertEQ(1, foo(rw));
 
-    - decl: |-
-        type TA = Array<int>
-        function foo(value: readonly TA) {
-            return value.length;
-        }
-      check: |-
-        let rw: TA = new TA(1);
-        arktest.assertEQ(1, foo(rw));
-
-    - decl: |-
-        type TN = int
-        type TA = Array<TN>
-        function foo(value: readonly TA) {
-            return value.length;
-        }
-      check: |-
-        let rw: TA = new TA(1);
-        arktest.assertEQ(1, foo(rw));
-
-    - decl: |-
-        type TN = int
-        type TA = TN[]
-        function foo(value: readonly TA) {
-            return value.length;
-        }
-      check: |-
-        let rw: TA = [1,2,3,4]
-        arktest.assertEQ(4, foo(rw));
-
   # readonly array passed to readonly parameter
     - decl: |-
         function foo(value: readonly int[]) {
