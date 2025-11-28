@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from collections import namedtuple
 from vmb.lang import LangBase
 from vmb.helpers import StringEnum, split_params, die
-from vmb.cli import Args, add_measurement_opts
+from vmb.cli import Args, add_measurement_opts, add_compiler_specific_opts
 
 log = logging.getLogger('vmb')
 NameVal = namedtuple("NameVal", "name value")
@@ -134,6 +134,7 @@ class DocletParser(LineParser):
         self.state: Optional[BenchClass] = None
         self.opts_parser = argparse.ArgumentParser()
         add_measurement_opts(self.opts_parser)
+        add_compiler_specific_opts(self.opts_parser)
         self.__pending_tags: List[str] = []
         self.__pending_bugs: List[str] = []
         self.__pending_imports: List[str] = []
