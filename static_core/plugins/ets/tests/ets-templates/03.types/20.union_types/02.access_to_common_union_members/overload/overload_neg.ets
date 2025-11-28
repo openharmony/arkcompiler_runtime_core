@@ -16,7 +16,7 @@
 {%- for c in cases %}
 
 /*---
-expected_error: {{c.stderr}}
+expected_out: {{c.stdout}}
 desc: Access to common union members.
 tags: [compile-only, negative]
 ---*/
