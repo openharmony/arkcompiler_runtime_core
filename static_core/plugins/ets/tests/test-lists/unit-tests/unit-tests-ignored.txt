@@ -23,6 +23,9 @@ ets-common-tests/atomics/base_operation_sub.ets
 #31104
 ets-common-tests/atomics/base_operation_or.ets
 
+#31918
+ets-common-tests/atomics/base_operation_store.ets
+
 #31166
 ets-common-tests/atomics/base_operation_xor.ets
 

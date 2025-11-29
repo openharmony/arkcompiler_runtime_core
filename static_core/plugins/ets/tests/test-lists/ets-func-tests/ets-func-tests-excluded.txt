@@ -26,7 +26,6 @@ escompat/escompat_Array_modifications_Test_escompat_Array_modifications_001.ets
 escompat/escompat_Array_modifications_Test_escompat_Array_modifications_002.ets
 escompat/escompat_Array_modifications_Test_escompat_Array_modifications_003.ets
 std/containers/ArrayTestChecked.ets
-std/core/Object.ets
 std/core/std_core_boolean_instance_Boolean_and.ets
 std/core/std_core_boolean_instance_Boolean_and.ets
 std/core/std_core_boolean_instance_Boolean_negate.ets
@@ -79,7 +78,6 @@ std/core/std_core_short_instance_Short_mul.ets
 std/core/std_core_short_instance_Short_sub.ets
 std/core/std_core_short_static_Short_valueOf.ets
 std/math/TestClz64Function.ets
-std/math/std_math_sign_double.ets
 
 ############
 # temporary place for the tests related to primitive types refactoring
