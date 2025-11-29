@@ -229,7 +229,7 @@ export default namespace buffer {
      * @param {double[]} array - An array of bytes in the range 0 – 255
      * @returns {Buffer} A new allocated Buffer containing the array data
      */
-    export function fromWithArray(array: double[]): Buffer {
+    export function from(array: double[]): Buffer {
         let arr: FixedArray<byte> = new Byte[array.length]
         for (let i = 0; i < array.length; ++i) {
             arr[i] = array[i].toByte()
@@ -246,7 +246,7 @@ export default namespace buffer {
      * @returns {Buffer} A view of the ArrayBuffer
      * @throws {Error} If byteOffset or length are out of valid range
      */
-    export function fromWithArrayBufferByteOffsetLength(arrayBuffer: ArrayBuffer, byteOffset?: int, length?: int): Buffer {
+    export function from(arrayBuffer: ArrayBuffer, byteOffset?: int, length?: int): Buffer {
         const resolvedByteOffset: int = byteOffset ?? 0;
         const resolvedLength: int = length ?? arrayBuffer.byteLength.toInt() - resolvedByteOffset;
         if (byteOffset != undefined) {
@@ -272,7 +272,7 @@ export default namespace buffer {
      * @param {Buffer | Uint8Array} buffer - An existing Buffer or Uint8Array from which to copy data
      * @returns {Buffer} A new Buffer containing a copy of the provided buffer's data
      */
-    export function fromWithBuffer(buff: Buffer | Uint8Array): Buffer {
+    export function from(buff: Buffer | Uint8Array): Buffer {
         if (buff instanceof Buffer) {
             const arrBuff: ArrayBuffer = (buff as Buffer).buffer;
             return new Buffer(ArrayBuffer.from(arrBuff));
@@ -290,7 +290,7 @@ export default namespace buffer {
     * @param { int } length - length length A length
     * @returns { Buffer } Return a new allocated Buffer
     */
-    export function fromWithObjectTypedInputOffsetOrEncodingLength(input: Object, offsetOrEncoding: int | string, length: int): Buffer {
+    export function from(input: Object, offsetOrEncoding: int | string, length: int): Buffer {
         if (offsetOrEncoding instanceof string && (!isEncoding(offsetOrEncoding))) {
             throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of "encoding" must be BufferEncoding. ` +
                 `the encoding ${offsetOrEncoding} is unknown`);
@@ -323,7 +323,7 @@ export default namespace buffer {
      * @param {BufferEncoding} [encoding='utf8'] - The character encoding to use
      * @returns {Buffer} A new Buffer containing the encoded string
      */
-    export function fromWithStringTypedInputEncoding(input: string, encoding?: BufferEncoding): Buffer {
+    export function from(input: string, encoding?: BufferEncoding): Buffer {
         const resolvedEncoding: string = (encoding ?? "utf8");
         let resolvedString = input;
         if (resolvedEncoding == 'ascii') {
@@ -346,15 +346,6 @@ export default namespace buffer {
         }
         return new Buffer(ArrayBuffer.from(resolvedString, resolvedEncoding));
     }
-
-    /**
-     * Creates a Buffer instance based on a string in the given encoding format.
-     *
-     * @overload { fromWithArray, fromWithArrayBufferByteOffsetLength, fromWithBuffer,
-                    fromWithObjectTypedInputOffsetOrEncodingLength, fromWithStringTypedInputEncoding }
-     */
-    export overload from { fromWithArray, fromWithArrayBufferByteOffsetLength, fromWithBuffer,
-        fromWithObjectTypedInputOffsetOrEncodingLength, fromWithStringTypedInputEncoding }
 
     /**
      * Returns the byte length of a string when encoded using `encoding`.
