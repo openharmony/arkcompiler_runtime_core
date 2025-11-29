@@ -1299,6 +1299,53 @@ function periodicTaskAddedAsDepedency() {
     taskpool.cancel(task1);
 }
 
+function executeOneTaskThreetimes(){
+    let task = new taskpool.Task(sum, 1, 2);
+    let count : int = 0;
+    let isTaskFinished1 = new Event();
+    let isTaskFinished2 = new Event();
+    let isTaskFinished3 = new Event();
+    taskpool.execute(task).then(()=>{
+        count++;
+        isTaskFinished1.fire();
+    });
+    taskpool.execute(task).then(()=>{
+        count++;
+        isTaskFinished2.fire();
+    });
+    taskpool.execute(task).then(()=>{
+        count++;
+        isTaskFinished3.fire();
+    });
+    isTaskFinished1.wait();
+    isTaskFinished2.wait();
+    isTaskFinished3.wait();
+    arktest.assertEQ(count,3);
+}
+
+function executeDelayedOneTaskThreetimes(){
+    let task = new taskpool.Task(sum, 1, 2);
+    let count = 0;
+    let isTaskFinished1 = new Event();
+    let isTaskFinished2 = new Event();
+    let isTaskFinished3 = new Event();
+    taskpool.executeDelayed(100, task).then(()=>{
+        count++;
+        isTaskFinished1.fire();
+    });
+    taskpool.executeDelayed(100, task).then(()=>{
+        count++;
+        isTaskFinished2.fire();
+    });
+    taskpool.executeDelayed(100, task).then(()=>{
+        count++;
+        isTaskFinished3.fire();
+    });
+    isTaskFinished1.wait();
+    isTaskFinished2.wait();
+    isTaskFinished3.wait();
+    arktest.assertEQ(count, 3);
+}
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1347,6 +1394,8 @@ function main(): int {
     commonTaskSuite.addTest('executeAfterExecutePeriodically', executeAfterExecutePeriodically);
     commonTaskSuite.addTest('periodicTaskAddDepedency', periodicTaskAddDepedency);
     commonTaskSuite.addTest('periodicTaskAddedAsDepedency', periodicTaskAddedAsDepedency);
+    commonTaskSuite.addTest('executeOneTaskThreetimes', executeOneTaskThreetimes);
+    commonTaskSuite.addTest('executeDelayedOneTaskThreetimes',executeDelayedOneTaskThreetimes);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
