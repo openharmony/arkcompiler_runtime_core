@@ -37,3 +37,8 @@ cases:
     - use: |-
         const v: String = `Hello ${TString}` // TypeError: Type name 'TString' used in the wrong context
       defs: type TString = string
+
+    # If there is no applicable conversion, then a compile-time error occurs.
+    - use: |-
+          const v = `'value' = ${c'\u0000' + '0000'}`
+          const expected = "'value' = 00000"
