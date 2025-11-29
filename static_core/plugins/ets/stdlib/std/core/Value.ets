@@ -252,11 +252,11 @@ export abstract class Value extends Object {
         } else if (t instanceof MethodType) {
             throw new Error("The MethodType cannot be instantiated")
         } else if (t instanceof EnumType) {
-            throw new Error("Not implemented")
+            throw new Error("Invalid EnumType")
         } else if (t instanceof UnionType) {
-            throw new Error("Not implemented")
+            throw new Error("Invalid UnionType")
         } else if (t instanceof TupleType) {
-            throw new Error("Not implemented")
+            throw new Error("Invalid TupleType")
         }
         throw new Error("Unknown type")
     }
@@ -727,11 +727,6 @@ export final class LambdaValue extends reflect.Value {
     public constructor(typ: LambdaType, data: Object) {
         this.typ = typ
         this.data = data
-    }
-
-    public invoke(...args: Object[]): Object {
-        // NOTE(shumilov-petr): not implemented
-        throw new Error("Not implemented")
     }
 
     public override toPrint(depth: int): string {
