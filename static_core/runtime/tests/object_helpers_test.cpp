@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <cstdlib>
 
 #include "assembly-parser.h"
 #include "runtime/include/runtime.h"
@@ -28,15 +29,6 @@
 
 namespace ark::mem {
 
-inline std::string Separator()
-{
-#ifdef _WIN32
-    return "\\";
-#else
-    return "/";
-#endif
-}
-
 class StaticObjectHelpersTest : public testing::Test {
 public:
     StaticObjectHelpersTest()
@@ -45,9 +37,10 @@ public:
         options.SetLoadRuntimes({"core"});
         options.SetGcType("epsilon");
         options.SetGcTriggerType("debug-never");
-        auto execPath = ark::os::file::File::GetExecutablePath();
-        std::string pandaStdLib =
-            execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "pandastdlib.bin";
+        auto *pandaStdLib = std::getenv("PANDA_STD_LIB");
+        if (pandaStdLib == nullptr) {
+            LOG(FATAL, RUNTIME) << "PANDA_STD_LIB env variable should be set and point to arkstdlib.abc";
+        }
         options.SetBootPandaFiles({pandaStdLib});
 
         Runtime::Create(options);

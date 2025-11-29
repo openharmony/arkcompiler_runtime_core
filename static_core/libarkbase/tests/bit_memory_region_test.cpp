@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,6 @@ TEST(BitMemoryRegion, TestBitAccess)
     static constexpr size_t MAX_BITS_COUNT = (data.size() - sizeof(uint32_t)) * BITS_PER_BYTE;
 
     for (size_t offset = 0; offset < MAX_BITS_COUNT; offset++) {
-        uint32_t mask = 0;
         for (auto fillValue : FILL_DATA) {
             for (auto value : VALUE_DATA) {
                 std::fill(data.begin(), data.end(), fillValue);
