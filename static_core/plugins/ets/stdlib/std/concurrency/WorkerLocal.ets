@@ -64,7 +64,7 @@ export class WorkerLocal<T> {
      */
     get(): T {
         let res : Any = undefined;
-        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, (): T => {
+        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, (): void => {
             res = this.getinner();
         });
         return res as T;

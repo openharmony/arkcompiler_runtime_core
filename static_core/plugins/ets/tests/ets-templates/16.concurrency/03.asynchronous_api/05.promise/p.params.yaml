@@ -94,17 +94,19 @@ cases:
     - decl: |-
       use: |-
           // test catch chain
-          const r: Promise<number|Error> = new Promise<number|Error>(
+          const r: Promise<number> = new Promise<number>(
               (resolve: (p: number) => void, reject: (p: Error) => void): void => {
                   reject(new Error('A'))
               }
-          ).catch<number|Error>(
-              (p: Error): void => {
+          ).catch<number>(
+              (p: Error): number => {
                   if (p instanceof Error) throw new Error((p as Error).message + 'B')
+                  throw p;
               }
-          ).catch<number|Error>(
-              (p: Error): string => {
+          ).catch<number>(
+              (p: Error): number => {
                   if (p instanceof Error) throw new Error((p as Error).message + 'C')
+                  throw p;
               }
           )
 
@@ -128,14 +130,14 @@ cases:
                   if (p instanceof Error) throw new Error((p as Error).message + 'C')
                   return 'D'
               }
-          ).then<string>(
+          ).then<string, string>(
               (p: string): string => {
                   return p + 'E'
               },
               (p: Error): string => {
                   return ''
               }
-          ).then<string>(
+          ).then<string, string>(
               (p: string): string => {
                   throw new Error(p + 'F')
               },
@@ -146,7 +148,7 @@ cases:
               (p: string): string => {
                   return p + 'H'
               }
-          ).then<string>(
+          ).then<string, string>(
               (p: string): string => {
                   return p + 'I'
               },
@@ -186,3 +188,20 @@ cases:
           await r2;
           
           arktest.assertTrue(true);
+
+    - decl: |-
+          //implicit cast Promise<void> to Promise<string> - one of the promise chain steps don't return value
+      use: |-
+          const checkPromise: Promise<string> = new Promise<string>(
+              (resolve: (p: string) => void, reject: (p: Error) => void): void => resolve("test")
+          ).then(
+              (data: string) => {return 'test'}
+          ).then(
+              // The following lambda will be inferred as (data: string) => never.
+              // Because it will never returns a value.
+              (data: string) =>  {
+                  throw new Error(data)
+              }
+          ).catch(
+              (p: Error): string => {}
+          );
