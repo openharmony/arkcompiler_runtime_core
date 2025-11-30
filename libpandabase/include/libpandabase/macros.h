@@ -372,4 +372,12 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 #define CONSTEXPR_IN_RELEASE constexpr
 #endif
 
+#if defined(PANDA_TARGET_UNIX)
+#define PANDA_STACK_SIZE 8 * 1024 * 1024
+#elif defined(PANDA_TARGET_WINDOWS)
+#define PANDA_STACK_SIZE 10 * 1024 * 1024
+#else
+#define PANDA_STACK_SIZE 0
+#endif
+
 #endif  // LIBPANDABASE_MACROS_H

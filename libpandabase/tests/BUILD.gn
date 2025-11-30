@@ -44,6 +44,7 @@ host_unittest_action("LibPandaBaseTest") {
       "genmc/mutex_test_2.cpp",
       "logger_test.cpp",
       "mutex_test.cpp",
+      "stack_guard_test.cpp",
       "unix_error_test.cpp",
       "unix_exec_test.cpp",
       "unix_file_test.cpp",
