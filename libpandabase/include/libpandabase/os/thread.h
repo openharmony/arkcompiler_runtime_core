@@ -137,7 +137,10 @@ native_handle_type ThreadStart(Func *func, Args... args)
     pthread_attr_init(&attr);
 #ifdef PANDA_TARGET_MACOS
     // In MacOS, the stack size of child thread is 512KB by default. Adjust it to 8MB to be consistent with Linux.
-    size_t stack_size = 8 * 1024 * 1024;
+    // Increases stack size to accommodate stack overflow protection gaps while maintaining backward
+    // compatibility with the original stack layout. Stack size must be multiple of segment alignment (16KB).
+    // Therefore, increase the stack space by 64K.
+    size_t stack_size = 8256 * 1024;
     pthread_attr_setstacksize(&attr, stack_size);
 #endif
     pthread_create(&tid, &attr,
