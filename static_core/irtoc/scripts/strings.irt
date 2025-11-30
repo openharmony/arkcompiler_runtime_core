@@ -352,8 +352,6 @@ end
       next
     end
 
-    check_string_type(str)
-
     # 1. There is no check of the argument against NullPointer as
     #    it's done in the InstBuilder (see AddArgNullcheckIfNeeded)
     # 2. Don't check if hashcode is equal to 0 as it's done in the codegen.

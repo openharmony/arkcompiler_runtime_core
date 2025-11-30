@@ -1321,6 +1321,8 @@ pseudo_instructions:
     flags: [pseudo]
   - opcode: WhilePhi
     flags: [pseudo]
+  - opcode: StaticAssertEQ
+    flags: [pseudo]
 
 types:
   - name: i8
