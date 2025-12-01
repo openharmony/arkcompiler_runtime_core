@@ -30,8 +30,12 @@ function runTestFunction(prompt: string, n: int, fn: () => void): void {
         fn();
     }
     const t = Chrono.nanoNow();
-    let durationNs: double = (t - s) / n;
-    console.log(`>> Done ${prompt}: ${durationNs / 1000} μs.`);
+    const u = Chrono.nanoNow();
+    for (let i: int = 0; i < n; i++) {
+    }
+    const v = Chrono.nanoNow();
+    let durationNs = ((t - s) - (v - u)) * 1.0 / n;
+    console.log(`>> Done ${prompt}: ${durationNs} ns.`);
 }
 
 function testImage() {

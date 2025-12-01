@@ -155,7 +155,7 @@ function test_5param2() {
 function test_5param3() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
-    instance.overloadFunc(1f, (1).toDouble(), true, "hello", (1).toByte());
+    instance.overloadFunc(1.0f, (1).toDouble(), true, "hello", (1).toByte());
 }
 function test_5param4() {
     let instance: test_overload.OverloadInterface =
@@ -318,17 +318,17 @@ function test_buffer() {
     arktest.assertEQ(res, 15);
 }
 
-function test_enum_record() {
-    const studentScores: Record<String, short> = {
-        "math": (10).toShort(),
-        "english": (85).toShort(),
-        "science": (95).toShort(),
-    };
-    let instance: test_overload.OverloadInterface =
-        test_overload.get_interface()
-    let color = test_overload.Color.red;
-    // instance.overloadFunc((test_overload.Color)color , studentScores)
-}
+// function test_enum_record() {
+//     const studentScores: Record<String, short> = {
+//         "math": (10).toShort(),
+//         "english": (85).toShort(),
+//         "science": (95).toShort(),
+//     };
+//     let instance: test_overload.OverloadInterface =
+//         test_overload.get_interface()
+//     let color = test_overload.Color.red;
+//     // instance.overloadFunc((test_overload.Color)color , studentScores)
+// }
 
 function test_array_record() {
     const studentScores: Record<String, short> = {
@@ -372,7 +372,7 @@ function main() {
     suite.addTest("test_struct", test_struct);
     suite.addTest("test_Array", test_Array);
     suite.addTest("test_buffer", test_buffer);
-    suite.addTest("test_enum_record", test_enum_record);
+    // suite.addTest("test_enum_record", test_enum_record);
     suite.addTest("test_array_record", test_array_record);
 
     // 多参数组合

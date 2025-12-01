@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from json import dumps
 from types import UnionType
 from typing import TYPE_CHECKING
 
@@ -32,13 +33,15 @@ if TYPE_CHECKING:
         EnumDecl,
         EnumItemDecl,
         IfaceDecl,
-        IfaceParentDecl,
+        IfaceExtendDecl,
         NamedDecl,
         PackageDecl,
         PackageLevelDecl,
+        StructDecl,
         Type,
         TypeDecl,
         TypeRefDecl,
+        UnionDecl,
     )
 
 
@@ -147,7 +150,7 @@ class AttrArgTypeError(DiagError):
             readable_type = " or ".join(t.__name__ for t in self.arg_type.__args__)
         else:
             readable_type = self.arg_type.__name__
-        return f"Argument {self.arg_name!r} in attribute {self.attr_name} must be of type {readable_type}, but got {self.attr_arg.value!r}"
+        return f"Argument {self.arg_name!r} in attribute {self.attr_name} must be of type {readable_type}, but got {dumps(self.attr_arg.value)}"
 
 
 @dataclass
@@ -363,9 +366,9 @@ class SymbolConflictWithNamespaceError(DiagError):
 class TypeUsageError(DiagError):
     ty: "Type"
 
-    def __init__(self, ty_ref: "TypeRefDecl"):
+    def __init__(self, ty_ref: "TypeRefDecl", ty: "Type"):
         super().__init__(loc=ty_ref.loc)
-        self.ty = ty_ref.resolved_ty
+        self.ty = ty
 
     @override
     def describe(self) -> str:
@@ -384,14 +387,29 @@ class EnumValueError(DiagError):
 
     @override
     def describe(self) -> str:
-        return f"value of {self.item.description} ({self.item.value}) is conflict with {self.enum.description} ({self.enum.ty_ref.resolved_ty.signature})"
+        return f"value of {self.item.description} ({dumps(self.item.value)}) is conflict with {self.enum.description} ({self.enum.ty.signature})"
+
+
+@dataclass
+class EmptyStructOrUnionError(DiagError):
+    decl: "StructDecl | UnionDecl"
+
+    def __init__(self, decl: "StructDecl | UnionDecl"):
+        super().__init__(loc=decl.loc)
+        self.decl = decl
+
+    @override
+    def describe(self) -> str:
+        return (
+            f"{self.decl.description} cannot be empty, at least one field is required"
+        )
 
 
 @dataclass
 class DuplicateExtendsNote(DiagNote):
-    prev: "IfaceParentDecl"
+    prev: "IfaceExtendDecl"
 
-    def __init__(self, prev: "IfaceParentDecl"):
+    def __init__(self, prev: "IfaceExtendDecl"):
         super().__init__(loc=prev.loc)
         self.prev = prev
 
@@ -402,27 +420,27 @@ class DuplicateExtendsNote(DiagNote):
 
 @dataclass
 class DuplicateExtendsWarn(DiagWarn):
-    prev: "IfaceParentDecl"
-    current: "IfaceParentDecl"
+    prev: "IfaceExtendDecl"
+    current: "IfaceExtendDecl"
     iface: "IfaceDecl"
-    parent_iface: "IfaceDecl"
+    extend_iface: "IfaceDecl"
 
     def __init__(
         self,
-        prev: "IfaceParentDecl",
-        current: "IfaceParentDecl",
+        prev: "IfaceExtendDecl",
+        current: "IfaceExtendDecl",
         iface: "IfaceDecl",
-        parent_iface: "IfaceDecl",
+        extend_iface: "IfaceDecl",
     ):
         super().__init__(loc=current.loc)
         self.prev = prev
         self.current = current
         self.iface = iface
-        self.parent_iface = parent_iface
+        self.extend_iface = extend_iface
 
     @override
     def describe(self) -> str:
-        return f"{self.parent_iface.description} is extended multiple times by {self.iface.description}"
+        return f"{self.extend_iface.description} is extended multiple times by {self.iface.description}"
 
     @override
     def notes(self):
