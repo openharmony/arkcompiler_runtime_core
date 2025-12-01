@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents parameter of function type
  */
-export final class Parameter extends Object {
+export final class TypeAPIParameter extends Object {
     private paramType: Type | undefined // not undefined if already created
     private name: string = ""
     private attributes: int
@@ -50,9 +50,9 @@ export final class Parameter extends Object {
     }
 
     public equals(oth: NullishType): boolean {
-        return oth instanceof Parameter &&
-                this.paramType!.equals((oth as Parameter).paramType!) &&
-                this.name == (oth as Parameter).name &&
-                this.attributes == (oth as Parameter).attributes
+        return oth instanceof TypeAPIParameter &&
+                this.paramType!.equals((oth as TypeAPIParameter).paramType!) &&
+                this.name == (oth as TypeAPIParameter).name &&
+                this.attributes == (oth as TypeAPIParameter).attributes
     }
 }

@@ -236,7 +236,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     findType(&EtsPlatformTypes::coreField, FIELD);
     findType(&EtsPlatformTypes::coreMethod, METHOD);
-    findType(&EtsPlatformTypes::coreParameter, PARAMETER);
+    findType(&EtsPlatformTypes::coreTypeAPIParameter, PARAMETER);
     findType(&EtsPlatformTypes::coreClassType, CLASS_TYPE);
 
     findType(&EtsPlatformTypes::reflectInstanceField, REFLECT_INSTANCE_FIELD);

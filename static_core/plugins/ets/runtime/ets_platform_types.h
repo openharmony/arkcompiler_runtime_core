@@ -123,7 +123,7 @@ public:
     /* TypeAPI */
     EtsClass *coreField {};
     EtsClass *coreMethod {};
-    EtsClass *coreParameter {};
+    EtsClass *coreTypeAPIParameter {};
     EtsClass *coreClassType {};
 
     EtsClass *reflectInstanceField {};

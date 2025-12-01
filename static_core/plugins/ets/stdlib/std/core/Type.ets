@@ -172,8 +172,8 @@ export class Attributes {
     public static readonly FINAL: int       = 1 << 2  // Method, Class
     public static readonly ABSTRACT: int    = 1 << 3  // Method
     public static readonly CONSTRUCTOR: int = 1 << 4  // Method
-    public static readonly REST: int        = 1 << 5  // Parameter
-    public static readonly OPTIONAL: int    = 1 << 6  // Parameter
+    public static readonly REST: int        = 1 << 5  // TypeAPIParameter
+    public static readonly OPTIONAL: int    = 1 << 6  // TypeAPIParameter
     public static readonly NATIVE: int      = 1 << 7  // Method, Lambda
     public static readonly ASYNC: int       = 1 << 8  // Method, Lambda
     public static readonly GETTER: int      = 1 << 9  // Method
@@ -2473,9 +2473,9 @@ export abstract class FunctionType extends Type {
      *
      * @throws TypeError when i greater then number of parameters
      *
-     * @return Parameter, corresponding ith parameter in signature
+     * @return TypeAPIParameter, corresponding ith parameter in signature
      */
-    public getParameter(i: long): Parameter {
+    public getParameter(i: long): TypeAPIParameter {
         const paramDescriptor = this.getParameterDescriptor(i)
         if (paramDescriptor) {
             const paramType = Type.resolve(paramDescriptor, this.getContextLinker())!
@@ -2512,7 +2512,7 @@ export abstract class FunctionType extends Type {
 
     private native getParameterDescriptor(i: long): RuntimeTypeDescriptor | undefined
 
-    private native getParameter(i: long, paramType: Type): Parameter
+    private native getParameter(i: long, paramType: Type): TypeAPIParameter
 }
 
 

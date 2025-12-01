@@ -126,7 +126,7 @@ TEST_F(EtsTypeAPITest, TypeAPIFieldMemoryLayout)
 
 TEST_F(EtsTypeAPITest, TypeAPIParameterMemoryLayout)
 {
-    auto *typeAPIParameterClass = PlatformTypes(vm_)->coreParameter;
+    auto *typeAPIParameterClass = PlatformTypes(vm_)->coreTypeAPIParameter;
     MirrorFieldInfo::CompareMemberOffsets(typeAPIParameterClass, GetTypeAPIParameterClassMembers());
 }
 
