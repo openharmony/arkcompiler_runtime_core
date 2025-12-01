@@ -175,7 +175,9 @@ static std::pair<EtsFinRegNode *, EtsFinRegNode *> CombineLists(EtsFinalizationR
     EtsFinRegNode *tail = finReg->GetFinalizationQueueTail();
     finReg->SetFinalizationQueueHead(nullptr);
     finReg->SetFinalizationQueueTail(nullptr);
-    finReg = finReg->GetNextFinReg();
+    auto *nextFinReg = finReg->GetNextFinReg();
+    finReg->SetNextFinReg(nullptr);
+    finReg = nextFinReg;
     while (finReg != nullptr) {
         EtsFinRegNode *newHead = finReg->GetFinalizationQueueHead();
         EtsFinRegNode *newTail = finReg->GetFinalizationQueueTail();
@@ -183,7 +185,9 @@ static std::pair<EtsFinRegNode *, EtsFinRegNode *> CombineLists(EtsFinalizationR
         finReg->SetFinalizationQueueTail(nullptr);
         tail->SetNext(newHead);
         tail = newTail;
-        finReg = finReg->GetNextFinReg();
+        nextFinReg = finReg->GetNextFinReg();
+        finReg->SetNextFinReg(nullptr);
+        finReg = nextFinReg;
     }
     return std::make_pair(head, tail);
 }
