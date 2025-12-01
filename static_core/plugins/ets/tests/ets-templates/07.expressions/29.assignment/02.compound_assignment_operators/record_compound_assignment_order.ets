@@ -67,6 +67,8 @@
 
   function main() {
     result = "";
+    map["John"] = 2;
+    map["Mary"] = -2;
     {{c.main|indent}}
     arktest.assertEQ(result, {{c.assert_result}})
   }
