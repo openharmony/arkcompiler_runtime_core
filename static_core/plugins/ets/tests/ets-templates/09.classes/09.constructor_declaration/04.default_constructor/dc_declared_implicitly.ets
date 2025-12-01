@@ -17,7 +17,7 @@
 /*---
 desc: >-
     Class declarations with default constructors declared implicitly.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 class A {

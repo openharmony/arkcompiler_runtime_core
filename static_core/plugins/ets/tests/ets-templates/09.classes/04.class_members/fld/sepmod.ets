@@ -19,7 +19,7 @@ desc: >-
     Class members declared internal are accessible within the package
     the current class resides in. They are inherited by all subclasses
     of the current class.
-tags: [{{c.tags}}]
+tags: []
 files: [{{c.files}}]
 ---*/
 

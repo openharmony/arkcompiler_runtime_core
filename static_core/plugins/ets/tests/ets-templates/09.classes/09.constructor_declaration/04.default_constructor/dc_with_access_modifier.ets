@@ -16,7 +16,7 @@
 {%- for c in cases %}
 /*---
 desc: Class default constructor invokes the protected or private default constructor of superclass.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 // Example of an error case

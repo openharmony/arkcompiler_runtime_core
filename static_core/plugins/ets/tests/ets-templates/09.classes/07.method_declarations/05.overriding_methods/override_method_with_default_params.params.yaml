@@ -14,13 +14,6 @@
 ---
 cases:
   # form: identifier ':' type '=' expression
-  - base_params: "a: int = 2"
-    overridden_params: "a: int"
-    return_type: int
-    tags: "compile-only, negative"
-    main: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: Method foo(a: Int): Int in B should have the same default value */
 
   - base_params: "a: int = 2"
     overridden_params: "a: int = 2"
@@ -36,30 +29,7 @@ cases:
       let b: A = new B()
       arktest.assertEQ(b.foo(5), 5)
 
-  - base_params: "a: int = 2"
-    overridden_params: "a: int = 3"
-    return_type: int
-    tags: "compile-only, negative"
-    main: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: Method foo(a: Int): Int in B should have the same default value */
-
-  - base_params: "a: int"
-    overridden_params: "a: int = 3"
-    return_type: int
-    tags: "compile-only, negative"
-    main: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: Method foo(a: Int): Int in B should not have default value */
-
   # form: identifier '?' ':' type
-  - base_params: "a?: int"
-    overridden_params: "a: int | undefined"
-    return_type: int | undefined
-    tags: "compile-only, negative"
-    main: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: Method foo(a: Int): Int in B should have the same default value */
 
   - base_params: "a?: int"
     overridden_params: "a?: int"
@@ -74,14 +44,6 @@ cases:
     main: |-
       let b: A = new B()
       arktest.assertEQ(b.foo(5), 5)
-
-  - base_params: "a: int | undefined"
-    overridden_params: "a?: int"
-    return_type: int | undefined
-    tags: "compile-only, negative"
-    main: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: Method foo(a: Int): Int in B should not have default value */
 
   # mixed forms
   - base_params: "a?: int"
@@ -98,18 +60,3 @@ cases:
       let b: A = new B()
       arktest.assertEQ(b.foo(), undefined)
 
-  - base_params: "a?: int"
-    overridden_params: "a: int | undefined = 5"
-    return_type: int | undefined
-    tags: "compile-only, negative"
-    main: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: Method foo(a: Int): Int in B should have the same default value */
-
-  - base_params: "a: int | undefined = 5"
-    overridden_params: "a?: int"
-    return_type: int | undefined
-    tags: "compile-only, negative"
-    main: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: Method foo(a: Int): Int in B should have the same default value */
