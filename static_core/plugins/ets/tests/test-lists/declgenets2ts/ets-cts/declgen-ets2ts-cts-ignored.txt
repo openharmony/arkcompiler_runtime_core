@@ -1726,7 +1726,7 @@
 10.interfaces/06.interface_inheritance/superinterfaces_and_subinterfaces/verify_constant_values_subinterface_class/constants_union_class_in_subclass_interface_20.ets
 11.enumerations/02.enumeration_string_values/enum_str_10.ets
 11.enumerations/02.enumeration_string_values/enum_str_9.ets
-11.enumerations/enum_cte_36.ets
+11.enumerations/enum_cte_n_36.ets
 11.enumerations/repeating_constants.ets
 11.enumerations/03.enumeration_operations/enum_implicit_type_constant_get_name_10.ets
 11.enumerations/03.enumeration_operations/enum_implicit_type_constant_get_name_11.ets
