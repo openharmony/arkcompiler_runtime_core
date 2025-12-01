@@ -219,7 +219,7 @@ static constexpr std::string_view ES_ERROR                             = "Lstd/i
 // Interop function class for invoking dynamic functions
 static constexpr std::string_view INTEROP_DYNAMIC_FUNCTION             = "Lstd/interop/js/DynamicFunction;";
 
-static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
+static constexpr std::string_view ARRAY                                = "Lstd/core/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/containers/ArrayAsListInt;";
 
 static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lstd/core/RegExpExecArray;";
@@ -239,10 +239,10 @@ static constexpr std::string_view INTERFACE_OBJ_LITERAL                = "Lstd/a
 
 // escompat
 static constexpr std::string_view DATE                                 = "Lstd/core/Date;";
-static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lescompat/ArrayEntriesIterator_T;";
+static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lstd/core/ArrayEntriesIterator_T;";
 static constexpr std::string_view ITERATOR_RESULT                      = "Lstd/core/IteratorResult;";
-static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lescompat/ArrayKeysIterator;";
-static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lescompat/ArrayValuesIterator_T;";
+static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lstd/core/ArrayKeysIterator;";
+static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lstd/core/ArrayValuesIterator_T;";
 static constexpr std::string_view MAP                                  = "Lstd/core/Map;";
 static constexpr std::string_view MAPITERATOR                          = "Lstd/core/MapIteratorImpl;";
 static constexpr std::string_view SETITERATOR                          = "Lstd/core/SetIteratorImpl;";

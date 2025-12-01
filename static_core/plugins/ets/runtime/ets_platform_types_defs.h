@@ -79,11 +79,11 @@
       coreFinalizationRegistryExecCleanup)                                                                            \
     T("Lstd/core/FinRegNode;", coreFinRegNode)                                                                        \
     /* Containers */                                                                                                  \
-    T("Lescompat/Array;", escompatArray)                                                                              \
-    I("Lescompat/Array;", "pop", ":Lstd/core/Object;", escompatArrayPop)                                              \
-    I("Lescompat/Array;", "%%get-length", ":I", escompatArrayGetLength)                                               \
-    I("Lescompat/Array;", "$_get", "I:Lstd/core/Object;", escompatArrayGet)                                           \
-    I("Lescompat/Array;", "$_set", "ILstd/core/Object;:V", escompatArraySet)                                          \
+    T("Lstd/core/Array;", escompatArray)                                                                              \
+    I("Lstd/core/Array;", "pop", ":Lstd/core/Object;", escompatArrayPop)                                              \
+    I("Lstd/core/Array;", "%%get-length", ":I", escompatArrayGetLength)                                               \
+    I("Lstd/core/Array;", "$_get", "I:Lstd/core/Object;", escompatArrayGet)                                           \
+    I("Lstd/core/Array;", "$_set", "ILstd/core/Object;:V", escompatArraySet)                                          \
     /* ArrayBuffer */                                                                                                 \
     T("Lstd/core/ArrayBuffer;", coreArrayBuffer)                                                                      \
     T("Lescompat/Int8Array;", escompatInt8Array)                                                                      \
@@ -124,8 +124,8 @@
     S("Lstd/core/reflect/Proxy;", "invokeGet", nullptr, coreReflectProxyInvokeGet)                                    \
     /* Process */                                                                                                     \
     T("Lstd/core/StdProcess;", coreProcess)                                                             /* naming! */ \
-    S("Lstd/core/StdProcess;", "listUnhandledJobs", "Lescompat/Array;:V", coreProcessListUnhandledJobs) /* naming! */ \
-    S("Lstd/core/StdProcess;", "listUnhandledPromises", "Lescompat/Array;:V",                                         \
+    S("Lstd/core/StdProcess;", "listUnhandledJobs", "Lstd/core/Array;:V", coreProcessListUnhandledJobs) /* naming! */ \
+    S("Lstd/core/StdProcess;", "listUnhandledPromises", "Lstd/core/Array;:V",                                         \
       coreProcessListUnhandledPromises) /* naming! */                                                                 \
     S("Lstd/core/StdProcess;", "HandleUncaughtError", "Lstd/core/Object;:V",                                          \
       coreProcessHandleUncaughtError) /* naming! */                                                                   \

@@ -177,7 +177,7 @@ function foo<T extends I1 | I2>(a0: T | FixedArray<T> | T[]): number | string | 
 // ANI mangled types
 const char *T1 = "X{C{app.C1}C{app.C2}C{app.I1}C{app.I2}}";
 const char *T2 = "X{C{std.core.Double}C{std.core.String}}";
-const char *T3 = "X{A{X{C{app.I1}C{app.I2}}}C{escompat.Array}C{app.I1}C{app.I2}}:X{C{std.core.Double}C{std.core.Null}C{std.core.String}}";
+const char *T3 = "X{A{X{C{app.I1}C{app.I2}}}C{std.core.Array}C{app.I1}C{app.I2}}:X{C{std.core.Double}C{std.core.Null}C{std.core.String}}";
 ```
 
 ## General Notes

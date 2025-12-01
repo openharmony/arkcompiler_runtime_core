@@ -563,7 +563,7 @@ void RegisterProcessNativeMethods(ani_env *env)
         ani_native_function {"euid", ":i", reinterpret_cast<void *>(GetEuid)},
         ani_native_function {"gid", ":i", reinterpret_cast<void *>(GetGid)},
         ani_native_function {"egid", ":i", reinterpret_cast<void *>(GetEgid)},
-        ani_native_function {"groups", ":C{escompat.Array}", reinterpret_cast<void *>(GetGroupIDs)},
+        ani_native_function {"groups", ":C{std.core.Array}", reinterpret_cast<void *>(GetGroupIDs)},
         ani_native_function {"is64Bit", ":z", reinterpret_cast<void *>(Is64BitProcess)},
         ani_native_function {"getStartRealtime", ":l", reinterpret_cast<void *>(GetProcessStartRealTime)},
         ani_native_function {"getPastCpuTime", ":l", reinterpret_cast<void *>(GetProcessPastCpuTime)},

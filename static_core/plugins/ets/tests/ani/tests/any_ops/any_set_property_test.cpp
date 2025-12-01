@@ -39,7 +39,7 @@ protected:
         ASSERT_NE(md, nullptr);
 
         ani_function fn {};
-        ASSERT_EQ(env_->Module_FindFunction(md, fnName, ":C{escompat.Array}", &fn), ANI_OK);
+        ASSERT_EQ(env_->Module_FindFunction(md, fnName, ":C{std.core.Array}", &fn), ANI_OK);
         ASSERT_NE(fn, nullptr);
 
         *mdResult = md;

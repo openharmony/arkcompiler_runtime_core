@@ -201,8 +201,8 @@ def run_ani_tests(project_root: Path, **config: Path | str):
 def run_bin_ani_tests(project_root: Path, **config: Path | str):
     log_stage("Run BIN-ANI tests...")
 
-    taihe_bin_tar_name = "taihe-linux-x86_64-0.53.0-20251028.tar.gz"
-    taihe_bin_tar_url = f"https://gitcode.com/tongdiaoZS/taihe-bin/releases/download/0.53/{taihe_bin_tar_name}"
+    taihe_bin_tar_name = "taihe-linux-x86_64-0.54.2-20251110.tar.gz"
+    taihe_bin_tar_url = f"https://gitcode.com/tongdiaoZS/taihe-bin/releases/download/0.54.2/{taihe_bin_tar_name}"
     taihe_bin_tar_path = project_root / taihe_bin_tar_name
     taihe_bin_extract_dir = project_root / "taihe_bin"
 

@@ -16,15 +16,15 @@ cases:
   - desc: How to get number[] via reflection.
     logic: |-
       let type_of_array_number: Type = Type.from<number[]>();
-      arktest.assertEQ(type_of_array_number.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_array_number.toString(), "std.core.Array");
   - desc: How to get object[] via reflection.
     logic: |-
       let type_of_Array_Object: Type = Type.from<object[]>();
-      arktest.assertEQ(type_of_Array_Object.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_Object.toString(), "std.core.Array");
   - desc: How to get Promise<number>[] via reflection.
     logic: |-
       let type_of_Array_Promise: Type = Type.from<Promise<number>[]>();
-      arktest.assertEQ(type_of_Array_Promise.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_Promise.toString(), "std.core.Array");
   - desc: How to get bigint via reflection.
     logic: |-
       let type_of_bigint: Type = Type.from<bigint>();
@@ -32,23 +32,23 @@ cases:
   - desc: How to get RegExp[] via reflection.
     logic: |-
       let type_of_Array_RegExp: Type = Type.from<RegExp[]>();
-      arktest.assertEQ(type_of_Array_RegExp.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_RegExp.toString(), "std.core.Array");
   - desc: How to get Set[] via reflection.
     logic: |-
       let type_of_Array_Set: Type = Type.from<Set<number>[]>();
-      arktest.assertEQ(type_of_Array_Set.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_Set.toString(), "std.core.Array");
   - desc: How to get string[] via reflection.
     logic: |-
       let type_of_Array_string: Type = Type.from<string[]>();
-      arktest.assertEQ(type_of_Array_string.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_string.toString(), "std.core.Array");
   - desc: How to get Promise<string>[] via reflection.
     logic: |-
       let type_of_Array_promise: Type = Type.from<Promise<string>[]>();
-      arktest.assertEQ(type_of_Array_promise.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_promise.toString(), "std.core.Array");
   - desc: How to get User[] via reflection.
     logic: |-
       let type_of_Array_UserClass: Type = Type.from<User[]>();
-      arktest.assertEQ(type_of_Array_UserClass.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_UserClass.toString(), "std.core.Array");
   - desc: How to get Boolean via reflection.
     logic: |-
       let type_of_Bool: Type = Type.from<Boolean>();
@@ -126,15 +126,15 @@ cases:
   - desc: How to get BigInt[] via reflection.
     logic: |-
       let type_of_Array_Bigint: Type = Type.from<BigInt[]>();
-      arktest.assertEQ(type_of_Array_Bigint.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_Bigint.toString(), "std.core.Array");
   - desc: How to get boolean[] via reflection.
     logic: |-
       let type_of_Array_bool: Type = Type.from<boolean[]>();
-      arktest.assertEQ(type_of_Array_bool.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_bool.toString(), "std.core.Array");
   - desc: How to get Date[] via reflection.
     logic: |-
       let type_of_Array_Date: Type = Type.from<Date[]>();
-      arktest.assertEQ(type_of_Array_Date.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_Date.toString(), "std.core.Array");
   - desc: How to get Set<Boolean> via reflection.
     logic: |-
       let type_of_Array_set: Type = Type.from<Set<Boolean>>();
@@ -142,15 +142,15 @@ cases:
   - desc: How to get int[] via reflection.
     logic: |-
       let type_of_Array_int: Type = Type.from<int[]>();
-      arktest.assertEQ(type_of_Array_int.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_int.toString(), "std.core.Array");
   - desc: How to get SomeInterface[] via reflection.
     logic: |-
       let type_of_Array_Interface: Type = Type.from<SomeInterface[]>();
-      arktest.assertEQ(type_of_Array_Interface.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_Interface.toString(), "std.core.Array");
   - desc: How to get Map[] via reflection.
     logic: |-
       let type_of_Array_Map: Type = Type.from<Map<number, string>[]>();
-      arktest.assertEQ(type_of_Array_Map.toString(), "escompat.Array");
+      arktest.assertEQ(type_of_Array_Map.toString(), "std.core.Array");
   - desc: How to get short via reflection.
     logic: |-
       let type_of_short: Type = Type.from<short>();

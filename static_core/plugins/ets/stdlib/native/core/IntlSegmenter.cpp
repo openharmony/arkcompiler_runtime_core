@@ -240,11 +240,11 @@ ani_array StdCoreIntlSentenceClusters(ani_env *env, ani_class klass, ani_string 
 ani_status RegisterIntlSegmenter(ani_env *env)
 {
     const auto methods = std::array {
-        ani_native_function {"graphemeClusters", "C{std.core.String}C{std.core.String}:C{escompat.Array}",
+        ani_native_function {"graphemeClusters", "C{std.core.String}C{std.core.String}:C{std.core.Array}",
                              reinterpret_cast<void *>(StdCoreIntlGraphemeClusters)},
-        ani_native_function {"wordClusters", "C{std.core.String}C{std.core.String}:C{escompat.Array}",
+        ani_native_function {"wordClusters", "C{std.core.String}C{std.core.String}:C{std.core.Array}",
                              reinterpret_cast<void *>(StdCoreIntlWordClusters)},
-        ani_native_function {"sentenceClusters", "C{std.core.String}C{std.core.String}:C{escompat.Array}",
+        ani_native_function {"sentenceClusters", "C{std.core.String}C{std.core.String}:C{std.core.Array}",
                              reinterpret_cast<void *>(StdCoreIntlSentenceClusters)},
     };
 

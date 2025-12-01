@@ -50,5 +50,5 @@ function testClassToString() {
 
 function testArrayToString() {
     let arrInt: int[] = [];
-    arktest.assertEQ('escompat.Array', Type.of(arrInt).toString());
+    arktest.assertEQ('std.core.Array', Type.of(arrInt).toString());
 }

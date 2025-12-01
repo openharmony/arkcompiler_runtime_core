@@ -22,9 +22,9 @@
 
 namespace {
 const std::vector<std::regex> LOG_PATTERNS = {
-    std::regex("^log:std.core.Console;.*"),       std::regex("^debug:.*;escompat.Array;void;"),
-    std::regex("^info:.*;escompat.Array;void;"),  std::regex("^warn:.*;escompat.Array;void;"),
-    std::regex("^error:.*;escompat.Array;void;"), std::regex("^fatal:.*;escompat.Array;void;")};
+    std::regex("^log:std.core.Console;.*"),       std::regex("^debug:.*;std.core.Array;void;"),
+    std::regex("^info:.*;std.core.Array;void;"),  std::regex("^warn:.*;std.core.Array;void;"),
+    std::regex("^error:.*;std.core.Array;void;"), std::regex("^fatal:.*;std.core.Array;void;")};
 
 bool IsCallLog(const abckit::Instruction &instruction)
 {

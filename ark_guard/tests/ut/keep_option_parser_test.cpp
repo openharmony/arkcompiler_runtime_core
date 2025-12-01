@@ -497,7 +497,7 @@ HWTEST(KeepOptionParserTest, keep_option_parser_test_012, TestSize.Level0)
             ASSERT_EQ(spec.memberType_, "i32,{UClassA,std.core.String}");
             ASSERT_EQ(spec.memberValue_, "{UClassB,std.core.String}");
         } else if (spec.memberName_ == "method3") {
-            ASSERT_EQ(spec.memberType_, "i32,escompat.Array");
+            ASSERT_EQ(spec.memberType_, "i32,std.core.Array");
             ASSERT_EQ(spec.memberValue_, "ClassB");
         }
     }

@@ -956,7 +956,7 @@ function(:StringGetBytesTlab,
 }
 
 ###
-# Char codes in an instance of 'escompat.Array' are represented as an array of object pointers to instances of the
+# Char codes in an instance of 'std.core.Array' are represented as an array of object pointers to instances of the
 # boxing class 'std.core.Double'. Runtime stores such objects as instances of the 'ark::ets::EtsBoxPrimitive' class
 # and every instance has a field of type 'double', the value.
 #

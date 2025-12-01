@@ -318,7 +318,7 @@ HWTEST(NameMarkerTest, name_marker_class_test_009, TestSize.Level1)
                "class_test_009.ClassC.method2:class_test_009.ClassC;i32;{Uclass_test_009.ClassA,std.core.String};{"
                "Uclass_test_009.ClassB,std.core.String};");
     AssertKept(fileView,
-               "class_test_009.ClassC.method3:class_test_009.ClassC;i32;escompat.Array;class_test_009.ClassB;");
+               "class_test_009.ClassC.method3:class_test_009.ClassC;i32;std.core.Array;class_test_009.ClassB;");
 }
 
 /**
@@ -1023,7 +1023,7 @@ HWTEST(NameMarkerTest, name_marker_module_test_008, TestSize.Level1)
     AssertKept(fileView, "module_test_008.foo11:std.core.String;void;");
     AssertKept(fileView, "module_test_008.foo12:{Ustd.core.Null,std.core.String};void;");
     AssertKept(fileView, "module_test_008.foo13:std.core.String;void;");
-    AssertKept(fileView, "module_test_008.foo14:{Uescompat.Array,std.core.String};void;");
+    AssertKept(fileView, "module_test_008.foo14:{Ustd.core.Array,std.core.String};void;");
     AssertKept(fileView, "module_test_008.foo15:std.core.Object;void;");
     AssertKept(fileView, "module_test_008.foo16:std.core.Int;void;");
 
@@ -1040,7 +1040,7 @@ HWTEST(NameMarkerTest, name_marker_module_test_008, TestSize.Level1)
     AssertKept(fileView, "module_test_008.fooEx11:std.core.String;");
     AssertKept(fileView, "module_test_008.fooEx12:{Ustd.core.Null,std.core.String};");
     AssertKept(fileView, "module_test_008.fooEx13:std.core.String;");
-    AssertKept(fileView, "module_test_008.fooEx14:{Uescompat.Array,std.core.String};");
+    AssertKept(fileView, "module_test_008.fooEx14:{Ustd.core.Array,std.core.String};");
     AssertKept(fileView, "module_test_008.fooEx15:std.core.Object;");
     AssertKept(fileView, "module_test_008.fooEx16:std.core.Int;");
 }

@@ -19,67 +19,67 @@
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_int_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
+//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_number_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
+//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_short_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
+//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_long_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
+//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_float_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 4
+//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 4
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_char_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
+//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_boolean_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
+//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_string_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /CallStatic.*escompat.Array::indexOf /, 5
+//! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_int_last_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Call(Virtual|Static).*escompat.Array::lastIndexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_number_last_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Call(Virtual|Static).*escompat.Array::lastIndexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_short_last_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Call(Virtual|Static).*escompat.Array::lastIndexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_long_last_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Call(Virtual|Static).*escompat.Array::lastIndexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_float_last_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Call(Virtual|Static).*escompat.Array::lastIndexOf /, 4
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 4
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_char_last_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Call(Virtual|Static).*escompat.Array::lastIndexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_boolean_last_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Call(Virtual|Static).*escompat.Array::lastIndexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_string_last_index_of"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Call(Virtual|Static).*escompat.Array::lastIndexOf /, 5
+//! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 
 
 function test_array_int_index_of() {

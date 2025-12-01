@@ -674,7 +674,7 @@ export final class Console {
         let keys:Array<string> = new Array<string>();
         let innerLength: number = 0;
         let innerValue: Array<string> = new Array<string>();
-        if (valueType.toString() == "escompat.Array") {
+        if (valueType.toString() == "std.core.Array") {
             let innerValueStr = (reflect.Value.of(value)).toPrint(10);
             Console.parseString(innerValueStr, keys, innerValue);
             innerLength = innerValue.length;

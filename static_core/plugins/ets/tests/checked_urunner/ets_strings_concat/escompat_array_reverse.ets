@@ -28,9 +28,9 @@ function check_array<T>(src: Array<T>, exp: Array<T>) {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_int_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*escompat.Array::reverse/
+//! INST          /CallStatic .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! INST          /CallStatic.Inlined.*escompat.Array::reverse/
+//! INST          /CallStatic.Inlined.*std.core.Array::reverse/
 //! INST          /Intrinsic.EscompatArrayReverse/
 //! ASM_METHOD    "escompat_array_reverse.ETSGLOBAL::test_array_int_reverse"
 //! ASM_INST      "Intrinsic.EscompatArrayReverse"
@@ -40,10 +40,10 @@ function check_array<T>(src: Array<T>, exp: Array<T>) {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_int_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*escompat.Array::reverse/
+//! INST          /CallStatic .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! EVENT         /Inline,escompat_array_reverse.ETSGLOBAL::test_array_int_reverse,escompat.Array::reverse,.*,STATIC,SKIP_EXTERNAL/
-//! INST_NOT      /CallStatic.Inlined.*escompat.Array::reverse/
+//! EVENT         /Inline,escompat_array_reverse.ETSGLOBAL::test_array_int_reverse,std.core.Array::reverse,.*,STATIC,SKIP_EXTERNAL/
+//! INST_NOT      /CallStatic.Inlined.*std.core.Array::reverse/
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
 
 //! CHECKER       AOT PGO: ArrayInt reverse
@@ -52,10 +52,10 @@ function check_array<T>(src: Array<T>, exp: Array<T>) {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_int_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*escompat.Array::reverse/
+//! INST          /CallStatic .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! EVENT         /Inline,escompat_array_reverse.ETSGLOBAL::test_array_int_reverse,escompat.Array::reverse,.*,STATIC,SUCCESS/
-//! INST          /CallStatic.Inlined.*escompat.Array::reverse/
+//! EVENT         /Inline,escompat_array_reverse.ETSGLOBAL::test_array_int_reverse,std.core.Array::reverse,.*,STATIC,SUCCESS/
+//! INST          /CallStatic.Inlined.*std.core.Array::reverse/
 //! INST          /Intrinsic.EscompatArrayReverse/
 //! ASM_METHOD    "escompat_array_reverse.ETSGLOBAL::test_array_int_reverse"
 //! ASM_INST      "Intrinsic.EscompatArrayReverse"
@@ -74,9 +74,9 @@ function test_array_int_reverse() {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_union_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*escompat.Array::reverse/
+//! INST          /CallStatic .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! INST          /CallStatic.Inlined.*escompat.Array::reverse/
+//! INST          /CallStatic.Inlined.*std.core.Array::reverse/
 //! INST          /Intrinsic.EscompatArrayReverse/
 //! ASM_METHOD    "escompat_array_reverse.ETSGLOBAL::test_array_union_reverse"
 //! ASM_INST      "Intrinsic.EscompatArrayReverse"
@@ -86,10 +86,10 @@ function test_array_int_reverse() {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_union_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*escompat.Array::reverse/
+//! INST          /CallStatic .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! EVENT         /Inline,escompat_array_reverse.ETSGLOBAL::test_array_union_reverse,escompat.Array::reverse,.*,STATIC,SKIP_EXTERNAL/
-//! INST_NOT      /CallStatic.Inlined.*escompat.Array::reverse/
+//! EVENT         /Inline,escompat_array_reverse.ETSGLOBAL::test_array_union_reverse,std.core.Array::reverse,.*,STATIC,SKIP_EXTERNAL/
+//! INST_NOT      /CallStatic.Inlined.*std.core.Array::reverse/
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
 
 //! CHECKER       AOT PGO: ArrayUnion reverse
@@ -98,10 +98,10 @@ function test_array_int_reverse() {
 //! METHOD        "escompat_array_reverse.ETSGLOBAL::test_array_union_reverse"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      /Intrinsic.EscompatArrayReverse/
-//! INST          /CallStatic .*escompat.Array::reverse/
+//! INST          /CallStatic .*std.core.Array::reverse/
 //! PASS_AFTER    "Inline"
-//! EVENT         /Inline,escompat_array_reverse.ETSGLOBAL::test_array_union_reverse,escompat.Array::reverse,.*,STATIC,SUCCESS/
-//! INST          /CallStatic.Inlined.*escompat.Array::reverse/
+//! EVENT         /Inline,escompat_array_reverse.ETSGLOBAL::test_array_union_reverse,std.core.Array::reverse,.*,STATIC,SUCCESS/
+//! INST          /CallStatic.Inlined.*std.core.Array::reverse/
 //! INST          /Intrinsic.EscompatArrayReverse/
 //! ASM_METHOD    "escompat_array_reverse.ETSGLOBAL::test_array_union_reverse"
 //! ASM_INST      "Intrinsic.EscompatArrayReverse"

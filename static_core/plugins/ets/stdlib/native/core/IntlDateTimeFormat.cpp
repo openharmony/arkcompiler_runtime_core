@@ -927,9 +927,9 @@ ani_status RegisterIntlDateTimeFormatMethods(ani_env *env)
 
     std::array dtfMethods {
         ani_native_function {"formatImpl", "d:C{std.core.String}", reinterpret_cast<void *>(FormatImpl)},
-        ani_native_function {"formatToPartsImpl", "d:C{escompat.Array}", reinterpret_cast<void *>(FormatToPartsImpl)},
+        ani_native_function {"formatToPartsImpl", "d:C{std.core.Array}", reinterpret_cast<void *>(FormatToPartsImpl)},
         ani_native_function {"formatRangeImpl", "dd:C{std.core.String}", reinterpret_cast<void *>(FormatRangeImpl)},
-        ani_native_function {"formatRangeToPartsImpl", "dd:C{escompat.Array}",
+        ani_native_function {"formatRangeToPartsImpl", "dd:C{std.core.Array}",
                              reinterpret_cast<void *>(FormatRangeToPartsImpl)},
         ani_native_function {"resolvedOptionsImpl", ":C{std.core.Intl.ResolvedDateTimeFormatOptions}",
                              reinterpret_cast<void *>(FormatResolvedOptionsImpl)},

@@ -489,7 +489,7 @@ TEST_F(ClassFindMethodTest, has_static_method_1)
     ASSERT_NE(cls, nullptr);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", ":C{escompat.Array}", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", ":C{std.core.Array}", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 }
 

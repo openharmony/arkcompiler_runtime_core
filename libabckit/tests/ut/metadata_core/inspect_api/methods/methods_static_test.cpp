@@ -30,13 +30,13 @@ TEST_F(LibAbcKitInspectApiMethodsTest, FunctionGetParametersStatic)
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static_other.abc");
 
     std::set<std::string> gotParamTypeNames;
-    std::set<std::string> expectParamTypeNames = {"std.core.String", "escompat.Array"};
+    std::set<std::string> expectParamTypeNames = {"std.core.String", "std.core.Array"};
 
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
             continue;
         }
-        auto result = helpers::GetFunctionByName(module, "m0F1:std.core.String;escompat.Array;void;");
+        auto result = helpers::GetFunctionByName(module, "m0F1:std.core.String;std.core.Array;void;");
         ASSERT_NE(result, std::nullopt);
         const auto &func = result.value();
         for (const auto &param : func.GetParameters()) {
@@ -60,7 +60,7 @@ TEST_F(LibAbcKitInspectApiMethodsTest, FunctionGetReturnTypeStatic)
             continue;
         }
         for (const auto &func : module.GetTopLevelFunctions()) {
-            if (func.GetName() == "m0F1:std.core.String;escompat.Array;void;") {
+            if (func.GetName() == "m0F1:std.core.String;std.core.Array;void;") {
                 gotReturnTypeNames.emplace(func.GetReturnType().GetName());
             }
         }
@@ -226,7 +226,7 @@ TEST_F(LibAbcKitInspectApiMethodsTest, FunctionIsExternalStatic)
     abckit::File file(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static_other.abc");
 
     std::set<std::string> gotMethodNames;
-    std::set<std::string> expectMethodNames = {"_cctor_:void;", "m0F1:std.core.String;escompat.Array;void;",
+    std::set<std::string> expectMethodNames = {"_cctor_:void;", "m0F1:std.core.String;std.core.Array;void;",
                                                "main:void;"};
 
     for (const auto &module : file.GetModules()) {

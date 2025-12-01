@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-//! CHECKER       escompat Array push
+//! CHECKER       std.core Array push
 //! RUN           force_jit: true, options: "--compiler-regex=.*::test_array_push_.*", entry: "escompat_array_push.ETSGLOBAL::main"
 //!
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallStatic.*escompat.Array::push/
-//! INST_COUNT    /CallStatic.*escompat.Array::push/, 5
+//! INST          /CallStatic.*std.core.Array::push/
+//! INST_COUNT    /CallStatic.*std.core.Array::push/, 5
 //!
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_unions"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallStatic.*escompat.Array::push/
-//! INST_COUNT    /CallStatic.*escompat.Array::push/, 5
+//! INST          /CallStatic.*std.core.Array::push/
+//! INST_COUNT    /CallStatic.*std.core.Array::push/, 5
 //!
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_one"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallStatic.*escompat.Array::pushOne/
-//! INST_COUNT    /CallStatic.*escompat.Array::pushOne/, 5
+//! INST          /CallStatic.*std.core.Array::pushOne/
+//! INST_COUNT    /CallStatic.*std.core.Array::pushOne/, 5
 //!
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_array"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallStatic.*escompat.Array::pushArray/
-//! INST_COUNT    /CallStatic.*escompat.Array::pushArray/, 5
+//! INST          /CallStatic.*std.core.Array::pushArray/
+//! INST_COUNT    /CallStatic.*std.core.Array::pushArray/, 5
 
 function test_array_push() {
     let array_size: int = 3;
@@ -58,13 +58,13 @@ function test_array_push() {
     arktest.assertEQ(array1.length, 10);
 }
 
-//! CHECKER       escompat Array push2
+//! CHECKER       std.core Array push2
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallStatic.*escompat.Array::push/
-//! INST_COUNT    /CallStatic.*escompat.Array::push/, 5
+//! INST          /CallStatic.*std.core.Array::push/
+//! INST_COUNT    /CallStatic.*std.core.Array::push/, 5
 function test_array_push_managed_objects() {
     let array: Array<Object> = new Array<Object>();
 

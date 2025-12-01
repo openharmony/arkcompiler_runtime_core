@@ -88,7 +88,7 @@ constexpr std::string_view BIGINT = "std.core.BigInt";
 constexpr std::string_view NULL_TYPE = "std.core.Null";
 constexpr std::string_view NEVER = "std.core.Object";
 constexpr std::string_view UNDEFINED = "std.core.Object";
-constexpr std::string_view ARRAY = "escompat.Array";
+constexpr std::string_view ARRAY = "std.core.Array";
 constexpr std::string_view PROMISE = "std.core.Promise";
 constexpr std::string_view PROMISE_LIKE = "std.core.PromiseLike";
 }  // namespace PandaFileTypesConstants
@@ -108,7 +108,7 @@ constexpr std::string_view BIGINT = "std.core.BigInt";
 constexpr std::string_view NULL_TYPE = "std.core.Null";
 constexpr std::string_view NEVER = "";
 constexpr std::string_view UNDEFINED = "";
-constexpr std::string_view ARRAY = "escompat.Array";
+constexpr std::string_view ARRAY = "std.core.Array";
 constexpr std::string_view PROMISE = "std.core.Promise";
 constexpr std::string_view PROMISE_LIKE = "std.core.PromiseLike";
 }  // namespace PandaFileUnionTypesConstants

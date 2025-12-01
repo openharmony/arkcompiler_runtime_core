@@ -34,7 +34,7 @@ public:
         ASSERT_EQ(env_->Reference_IsNullishValue(extendedArray, &isCorrect), ANI_OK);
         ASSERT_EQ(isCorrect, ANI_FALSE);
         ani_class escompatArray {};
-        ASSERT_EQ(env_->FindClass("escompat.Array", &escompatArray), ANI_OK);
+        ASSERT_EQ(env_->FindClass("std.core.Array", &escompatArray), ANI_OK);
         ASSERT_EQ(env_->Object_InstanceOf(static_cast<ani_object>(extendedArray), escompatArray, &isCorrect), ANI_OK);
         ASSERT_EQ(isCorrect, ANI_TRUE);
         *result = static_cast<ani_array>(extendedArray);

@@ -30,7 +30,7 @@ EtsEscompatArray *EtsEscompatArray::Create(EtsCoroutine *coro, size_t length)
 
     const EtsPlatformTypes *platformTypes = PlatformTypes(coro);
 
-    // Create escompat array
+    // Create std.core array
     EtsClass *klass = platformTypes->escompatArray;
     EtsHandle<EtsEscompatArray> arrayHandle(coro, FromEtsObject(EtsObject::Create(coro, klass)));
     if (UNLIKELY(arrayHandle.GetPtr() == nullptr)) {
@@ -65,7 +65,7 @@ static bool IsOutOfBounds(EtsInt index, EtsInt actualLength)
 
 EtsObject *EtsEscompatArray::EscompatArrayGet(EtsInt index)
 {
-    // Can use private fields as part of `escompat.Array` method implementation
+    // Can use private fields as part of `std.core.Array` method implementation
     if (UNLIKELY(IsOutOfBounds(index, GetActualLengthFromEscompatArrayImpl()))) {
         return nullptr;
     }
@@ -74,7 +74,7 @@ EtsObject *EtsEscompatArray::EscompatArrayGet(EtsInt index)
 
 void EtsEscompatArray::EscompatArraySet(EtsInt index, EtsObject *value)
 {
-    // Can use private fields as part of `escompat.Array` method implementation
+    // Can use private fields as part of `std.core.Array` method implementation
     if (UNLIKELY(IsOutOfBounds(index, GetActualLengthFromEscompatArrayImpl()))) {
         return;
     }
@@ -103,7 +103,7 @@ bool EtsEscompatArray::GetLength(EtsCoroutine *coro, EtsInt *result)
     ASSERT(!coro->HasPendingException());
     ASSERT(result != nullptr);
     if (LIKELY(IsExactlyEscompatArray(coro))) {
-        // Fast path, object is exactly `escompat.Array`
+        // Fast path, object is exactly `std.core.Array`
         *result = GetActualLengthFromEscompatArray();
         return true;
     }
@@ -124,7 +124,7 @@ bool EtsEscompatArray::SetRef(EtsCoroutine *coro, size_t index, EtsObject *ref)
     ASSERT(coro != nullptr);
     ASSERT(!coro->HasPendingException());
     if (LIKELY(IsExactlyEscompatArray(coro))) {
-        // Fast path, object is exactly `escompat.Array`
+        // Fast path, object is exactly `std.core.Array`
         EscompatArraySet(index, ref);
     } else {
         // Slow path, because `$_set` might be overriden
@@ -141,7 +141,7 @@ std::optional<EtsObject *> EtsEscompatArray::GetRef(EtsCoroutine *coro, size_t i
     ASSERT(coro != nullptr);
     ASSERT(!coro->HasPendingException());
     if (LIKELY(IsExactlyEscompatArray(coro))) {
-        // Fast path, object is exactly `escompat.Array`
+        // Fast path, object is exactly `std.core.Array`
         auto *obj = EscompatArrayGet(index);
         return coro->HasPendingException() ? std::nullopt : std::optional<EtsObject *>(obj);
     }
@@ -161,7 +161,7 @@ EtsObject *EtsEscompatArray::Pop(EtsCoroutine *coro)
     ASSERT(coro != nullptr);
     ASSERT(!coro->HasPendingException());
     if (LIKELY(IsExactlyEscompatArray(coro))) {
-        // Fast path, object is exactly `escompat.Array`
+        // Fast path, object is exactly `std.core.Array`
         return EscompatArrayPop();
     }
 

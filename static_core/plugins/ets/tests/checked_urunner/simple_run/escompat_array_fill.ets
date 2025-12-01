@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-//! CHECKER       escompat Array fill intrinsic
+//! CHECKER       std.core Array fill intrinsic
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--heap-size-limit=12345678 --compiler-hotness-threshold=0 --compiler-regex='.*escompat_array_fill.ETSGLOBAL::test_array.*'", entry: "escompat_array_fill.ETSGLOBAL::main"
 //! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_fill"
 //! PASS_AFTER    "Codegen"
-//! INST          /CallVirtual.*escompat.Array::fill/
-//! INST_COUNT    /CallVirtual.*escompat.Array::fill/, 8
-//! INST          /CallStatic.*escompat.Array::fill/
-//! INST_COUNT    /CallStatic.*escompat.Array::fill/, 5
+//! INST          /CallVirtual.*std.core.Array::fill/
+//! INST_COUNT    /CallVirtual.*std.core.Array::fill/, 8
+//! INST          /CallStatic.*std.core.Array::fill/
+//! INST_COUNT    /CallStatic.*std.core.Array::fill/, 5
 //!
 //! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_call_virtual_fill"
 //! PASS_AFTER    "Codegen"
