@@ -969,6 +969,6 @@ private joinObject(arr: Array<T>, visited: Set<Array<T>>, result: StringBuilder,
  * @FaAndStageModel
  * @since 24
  */
-<%= access_public %> <%= override %> entries<%= this_generic %>(<%= this_arg.chomp(', ') %>): IterableIterator<[number, <%= el_type %>]> {
+<%= access_public %> <%= override %> entries<%= this_generic %>(<%= this_arg.chomp(', ') %>): IterableIterator<[int, <%= el_type %>]> {
     return new ArrayEntriesIterator_<%= el_type %><%= this_iterator_generic || this_generic %>(<%= this %>);
 }

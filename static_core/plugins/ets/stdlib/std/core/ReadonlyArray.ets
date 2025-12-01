@@ -53,7 +53,7 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
      * @FaAndStageModel
      * @since 24
      */
-    entries(): IterableIterator<[number, @types.SkipVarianceCheckDontUseItWillBeRemoved T]>;
+    entries(): IterableIterator<[int, @types.SkipVarianceCheckDontUseItWillBeRemoved T]>;
 
     /**
      * Tests whether all elements in the array pass the test implemented by the specified function.
@@ -214,12 +214,12 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     /**
      * Returns an iterator that contains each index key in the array.
      *
-     * @returns { IterableIterator<number> } A new array iterator object.
+     * @returns { IterableIterator<int> } A new array iterator object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    keys(): IterableIterator<number>;
+    keys(): IterableIterator<int>;
 
     /**
      * Returns the last index of the specified element in the array, or -1 if it does not exist.

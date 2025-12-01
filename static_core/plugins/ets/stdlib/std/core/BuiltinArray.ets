@@ -803,7 +803,7 @@ export function values(self: FixedArray<boolean>): IterableIterator<boolean> {
  * @FaAndStageModel
  * @since 24
  */
-export function entries(self: FixedArray<boolean>): IterableIterator<[number, boolean]> {
+export function entries(self: FixedArray<boolean>): IterableIterator<[int, boolean]> {
     return new ArrayEntriesIterator_boolean(self);
 }
 
@@ -988,8 +988,7 @@ class ArrayValuesIterator_boolean implements IterableIterator<boolean> {
     }
 }
 
- // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
-class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]> {
+class ArrayEntriesIterator_boolean implements IterableIterator<[int, boolean]> {
     private parent: FixedArray<boolean>
     private idx: int = 0
     private isDone: boolean = false
@@ -998,17 +997,17 @@ class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]
         this.parent = parent
     }
 
-    override next(): IteratorResult<[number, boolean]> {
+    override next(): IteratorResult<[int, boolean]> {
         if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
-            return new IteratorResult<[number, boolean]>()
+            return new IteratorResult<[int, boolean]>()
         }
         const i = this.idx++;
-        const vl: [number, boolean] = [i.toDouble(), this.parent[i]]
-        return new IteratorResult<[number, boolean]>(vl);
+        const vl: [int, boolean] = [i, this.parent[i]]
+        return new IteratorResult<[int, boolean]>(vl);
     }
 
-    override $_iterator(): IterableIterator<[number, boolean]> {
+    override $_iterator(): IterableIterator<[int, boolean]> {
         return this;
     }
 
@@ -1748,7 +1747,7 @@ export function values(self: FixedArray<byte>): IterableIterator<byte> {
  * @FaAndStageModel
  * @since 24
  */
-export function entries(self: FixedArray<byte>): IterableIterator<[number, byte]> {
+export function entries(self: FixedArray<byte>): IterableIterator<[int, byte]> {
     return new ArrayEntriesIterator_byte(self);
 }
 
@@ -1933,8 +1932,7 @@ class ArrayValuesIterator_byte implements IterableIterator<byte> {
     }
 }
 
- // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
-class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
+class ArrayEntriesIterator_byte implements IterableIterator<[int, byte]> {
     private parent: FixedArray<byte>
     private idx: int = 0
     private isDone: boolean = false
@@ -1943,17 +1941,17 @@ class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
         this.parent = parent
     }
 
-    override next(): IteratorResult<[number, byte]> {
+    override next(): IteratorResult<[int, byte]> {
         if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
-            return new IteratorResult<[number, byte]>()
+            return new IteratorResult<[int, byte]>()
         }
         const i = this.idx++;
-        const vl: [number, byte] = [i.toDouble(), this.parent[i]]
-        return new IteratorResult<[number, byte]>(vl);
+        const vl: [int, byte] = [i, this.parent[i]]
+        return new IteratorResult<[int, byte]>(vl);
     }
 
-    override $_iterator(): IterableIterator<[number, byte]> {
+    override $_iterator(): IterableIterator<[int, byte]> {
         return this;
     }
 
@@ -2693,7 +2691,7 @@ export function values(self: FixedArray<short>): IterableIterator<short> {
  * @FaAndStageModel
  * @since 24
  */
-export function entries(self: FixedArray<short>): IterableIterator<[number, short]> {
+export function entries(self: FixedArray<short>): IterableIterator<[int, short]> {
     return new ArrayEntriesIterator_short(self);
 }
 
@@ -2878,8 +2876,7 @@ class ArrayValuesIterator_short implements IterableIterator<short> {
     }
 }
 
- // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
-class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
+class ArrayEntriesIterator_short implements IterableIterator<[int, short]> {
     private parent: FixedArray<short>
     private idx: int = 0
     private isDone: boolean = false
@@ -2888,17 +2885,17 @@ class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
         this.parent = parent
     }
 
-    override next(): IteratorResult<[number, short]> {
+    override next(): IteratorResult<[int, short]> {
         if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
-            return new IteratorResult<[number, short]>()
+            return new IteratorResult<[int, short]>()
         }
         const i = this.idx++;
-        const vl: [number, short] = [i.toDouble(), this.parent[i]]
-        return new IteratorResult<[number, short]>(vl);
+        const vl: [int, short] = [i, this.parent[i]]
+        return new IteratorResult<[int, short]>(vl);
     }
 
-    override $_iterator(): IterableIterator<[number, short]> {
+    override $_iterator(): IterableIterator<[int, short]> {
         return this;
     }
 
@@ -3638,7 +3635,7 @@ export function values(self: FixedArray<int>): IterableIterator<int> {
  * @FaAndStageModel
  * @since 24
  */
-export function entries(self: FixedArray<int>): IterableIterator<[number, int]> {
+export function entries(self: FixedArray<int>): IterableIterator<[int, int]> {
     return new ArrayEntriesIterator_int(self);
 }
 
@@ -3823,8 +3820,7 @@ class ArrayValuesIterator_int implements IterableIterator<int> {
     }
 }
 
- // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
-class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
+class ArrayEntriesIterator_int implements IterableIterator<[int, int]> {
     private parent: FixedArray<int>
     private idx: int = 0
     private isDone: boolean = false
@@ -3833,17 +3829,17 @@ class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
         this.parent = parent
     }
 
-    override next(): IteratorResult<[number, int]> {
+    override next(): IteratorResult<[int, int]> {
         if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
-            return new IteratorResult<[number, int]>()
+            return new IteratorResult<[int, int]>()
         }
         const i = this.idx++;
-        const vl: [number, int] = [i.toDouble(), this.parent[i]]
-        return new IteratorResult<[number, int]>(vl);
+        const vl: [int, int] = [i, this.parent[i]]
+        return new IteratorResult<[int, int]>(vl);
     }
 
-    override $_iterator(): IterableIterator<[number, int]> {
+    override $_iterator(): IterableIterator<[int, int]> {
         return this;
     }
 
@@ -4583,7 +4579,7 @@ export function values(self: FixedArray<long>): IterableIterator<long> {
  * @FaAndStageModel
  * @since 24
  */
-export function entries(self: FixedArray<long>): IterableIterator<[number, long]> {
+export function entries(self: FixedArray<long>): IterableIterator<[int, long]> {
     return new ArrayEntriesIterator_long(self);
 }
 
@@ -4768,8 +4764,7 @@ class ArrayValuesIterator_long implements IterableIterator<long> {
     }
 }
 
- // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
-class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
+class ArrayEntriesIterator_long implements IterableIterator<[int, long]> {
     private parent: FixedArray<long>
     private idx: int = 0
     private isDone: boolean = false
@@ -4778,17 +4773,17 @@ class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
         this.parent = parent
     }
 
-    override next(): IteratorResult<[number, long]> {
+    override next(): IteratorResult<[int, long]> {
         if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
-            return new IteratorResult<[number, long]>()
+            return new IteratorResult<[int, long]>()
         }
         const i = this.idx++;
-        const vl: [number, long] = [i.toDouble(), this.parent[i]]
-        return new IteratorResult<[number, long]>(vl);
+        const vl: [int, long] = [i, this.parent[i]]
+        return new IteratorResult<[int, long]>(vl);
     }
 
-    override $_iterator(): IterableIterator<[number, long]> {
+    override $_iterator(): IterableIterator<[int, long]> {
         return this;
     }
 
@@ -5536,7 +5531,7 @@ export function values(self: FixedArray<float>): IterableIterator<float> {
  * @FaAndStageModel
  * @since 24
  */
-export function entries(self: FixedArray<float>): IterableIterator<[number, float]> {
+export function entries(self: FixedArray<float>): IterableIterator<[int, float]> {
     return new ArrayEntriesIterator_float(self);
 }
 
@@ -5721,8 +5716,7 @@ class ArrayValuesIterator_float implements IterableIterator<float> {
     }
 }
 
- // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
-class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
+class ArrayEntriesIterator_float implements IterableIterator<[int, float]> {
     private parent: FixedArray<float>
     private idx: int = 0
     private isDone: boolean = false
@@ -5731,17 +5725,17 @@ class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
         this.parent = parent
     }
 
-    override next(): IteratorResult<[number, float]> {
+    override next(): IteratorResult<[int, float]> {
         if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
-            return new IteratorResult<[number, float]>()
+            return new IteratorResult<[int, float]>()
         }
         const i = this.idx++;
-        const vl: [number, float] = [i.toDouble(), this.parent[i]]
-        return new IteratorResult<[number, float]>(vl);
+        const vl: [int, float] = [i, this.parent[i]]
+        return new IteratorResult<[int, float]>(vl);
     }
 
-    override $_iterator(): IterableIterator<[number, float]> {
+    override $_iterator(): IterableIterator<[int, float]> {
         return this;
     }
 
@@ -6489,7 +6483,7 @@ export function values(self: FixedArray<double>): IterableIterator<double> {
  * @FaAndStageModel
  * @since 24
  */
-export function entries(self: FixedArray<double>): IterableIterator<[number, double]> {
+export function entries(self: FixedArray<double>): IterableIterator<[int, double]> {
     return new ArrayEntriesIterator_double(self);
 }
 
@@ -6674,8 +6668,7 @@ class ArrayValuesIterator_double implements IterableIterator<double> {
     }
 }
 
- // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
-class ArrayEntriesIterator_double implements IterableIterator<[number, double]> {
+class ArrayEntriesIterator_double implements IterableIterator<[int, double]> {
     private parent: FixedArray<double>
     private idx: int = 0
     private isDone: boolean = false
@@ -6684,17 +6677,17 @@ class ArrayEntriesIterator_double implements IterableIterator<[number, double]> 
         this.parent = parent
     }
 
-    override next(): IteratorResult<[number, double]> {
+    override next(): IteratorResult<[int, double]> {
         if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
-            return new IteratorResult<[number, double]>()
+            return new IteratorResult<[int, double]>()
         }
         const i = this.idx++;
-        const vl: [number, double] = [i.toDouble(), this.parent[i]]
-        return new IteratorResult<[number, double]>(vl);
+        const vl: [int, double] = [i, this.parent[i]]
+        return new IteratorResult<[int, double]>(vl);
     }
 
-    override $_iterator(): IterableIterator<[number, double]> {
+    override $_iterator(): IterableIterator<[int, double]> {
         return this;
     }
 
@@ -7434,7 +7427,7 @@ export function values(self: FixedArray<char>): IterableIterator<char> {
  * @FaAndStageModel
  * @since 24
  */
-export function entries(self: FixedArray<char>): IterableIterator<[number, char]> {
+export function entries(self: FixedArray<char>): IterableIterator<[int, char]> {
     return new ArrayEntriesIterator_char(self);
 }
 
@@ -7619,8 +7612,7 @@ class ArrayValuesIterator_char implements IterableIterator<char> {
     }
 }
 
- // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
-class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
+class ArrayEntriesIterator_char implements IterableIterator<[int, char]> {
     private parent: FixedArray<char>
     private idx: int = 0
     private isDone: boolean = false
@@ -7629,17 +7621,17 @@ class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
         this.parent = parent
     }
 
-    override next(): IteratorResult<[number, char]> {
+    override next(): IteratorResult<[int, char]> {
         if (this.isDone || this.idx >= this.parent.length) {
             this.isDone = true
-            return new IteratorResult<[number, char]>()
+            return new IteratorResult<[int, char]>()
         }
         const i = this.idx++;
-        const vl: [number, char] = [i.toDouble(), this.parent[i]]
-        return new IteratorResult<[number, char]>(vl);
+        const vl: [int, char] = [i, this.parent[i]]
+        return new IteratorResult<[int, char]>(vl);
     }
 
-    override $_iterator(): IterableIterator<[number, char]> {
+    override $_iterator(): IterableIterator<[int, char]> {
         return this;
     }
 

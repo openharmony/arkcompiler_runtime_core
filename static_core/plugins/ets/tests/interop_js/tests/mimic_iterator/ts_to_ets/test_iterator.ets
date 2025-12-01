@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,7 @@ function testMimicIteratorBoolean() {
 
 function testMimicIteratorBooleanEntries() {
     for (let elem of booArr.entries()) {
-        if (elem[1] !== booArr[elem[0].toInt()]) {
+        if (elem[1] !== booArr[elem[0]]) {
             return false;
         }
     }
@@ -84,7 +84,7 @@ function testMimicIteratorBooleanEntries() {
 
 function testMimicIteratorStringEntries() {
     for (let elem of strArr.entries()) {
-        if (elem[1] !== strArr[elem[0].toInt()]) {
+        if (elem[1] !== strArr[elem[0]]) {
             return false;
         }
     }
@@ -93,7 +93,7 @@ function testMimicIteratorStringEntries() {
 
 function testMimicIteratorNumberEntries() {
     for (let elem of numArr.entries()) {
-        if (elem[1] !== numArr[elem[0].toInt()]) {
+        if (elem[1] !== numArr[elem[0]]) {
             return false;
         }
     }
