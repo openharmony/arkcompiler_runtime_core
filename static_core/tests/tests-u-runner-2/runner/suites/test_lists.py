@@ -15,13 +15,17 @@
 # limitations under the License.
 #
 
+import os
 import re
 from fnmatch import fnmatch
 from pathlib import Path
 from typing import cast
 
+from dotenv import load_dotenv
+
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.configuration_kind import (
+    BuildSystem,
     BuildTypeKind,
     ConfigurationKind,
     SanitizerKind,
@@ -33,9 +37,13 @@ from runner.utils import correct_path, detect_architecture, detect_operating_sys
 
 _LOGGER = Log.get_logger(__file__)
 
+_GN_BUILD_PROPERTIES_FILE_NAME = "args.gn"
+_CMAKE_BUILD_PROPERTIES_FILE_NAME = "CMakeCache.txt"
+
 
 class TestLists:
     def __init__(self, list_root: Path, test_env: TestEnv, jit_repeats: int | None):
+        load_dotenv()
         self.list_root = list_root
         self.config = test_env.config
         self.explicit_list: Path | None = (
@@ -46,10 +54,16 @@ class TestLists:
         self.explicit_test: Path | None = None
         self.excluded_lists: list[Path] = []
         self.ignored_lists: list[Path] = []
+        self.build_properties: list[str] = []
+        self.build_system: BuildSystem = BuildSystem.CMAKE
         self.is_jit_with_repeats = jit_repeats is not None and jit_repeats > 0
 
         _LOGGER.default(f"Initialize TestLists: gn_build = {self.config.general.gn_build}")
-        self.cache: list[str] = self.__gn_cache() if self.config.general.gn_build else self.cmake_cache()
+        if self.config.general.gn_build:
+            self.build_properties = self.gn_build_properties()
+            self.build_system = BuildSystem.GN
+        else:
+            self.build_properties = self.cmake_build_properties()
         self.sanitizer = self.search_sanitizer()
         _LOGGER.default(f"Initialize TestLists: sanitizer = {self.sanitizer}")
         self.architecture = detect_architecture(self.config.general.qemu)
@@ -85,9 +99,16 @@ class TestLists:
 
     @staticmethod
     def __to_bool(value: str | None) -> bool | None:
-        true_list = ("on", "true")
-        false_list = ("on", "false")
-        return value in true_list if value and value in true_list + false_list else None
+        if not value:
+            return None
+        bool_map = {
+            "true": True, "on": True, "1": True,
+            "false": False, "off": False, "0": False
+        }
+        result_value = value.strip().lower()
+        if result_value not in bool_map:
+            return None
+        return bool_map[result_value]
 
     def collect_excluded_test_lists(self, extra_list: list[str] | None = None,
                                     test_name: str | None = None) -> None:
@@ -169,21 +190,49 @@ class TestLists:
         return test_lists
 
     def search_build_type(self) -> BuildTypeKind:
-        search_option = "x64" if self.config.general.gn_build else "CMAKE_BUILD_TYPE"
-        value = cast(str, self.__search(search_option))
-        if value == "fastverify":
-            value = "fast-verify"
-        return BuildTypeKind.is_value(value, option_name="from cmake CMAKE_BUILD_TYPE")
+        if self.config.general.gn_build:
+            is_debug = self.__search_in_build_properties('is_debug')
+            is_fastverify = self.__search_in_build_properties('is_fastverify')
+            if is_debug is not None:
+                build_type = 'debug' if is_debug.lower() == 'true' else 'release'
+                return BuildTypeKind.is_value(build_type, option_name=f"from gn 'is_debug={is_debug}'")
+            if is_fastverify is not None and bool(is_fastverify):
+                return BuildTypeKind.is_value('fast-verify', option_name="from gn 'is_fastverify=true'")
+        cmake_build_type = cast(str, self.__search_in_build_properties('CMAKE_BUILD_TYPE'))
+        if cmake_build_type == "fastverify":
+            cmake_build_type = "fast-verify"
+        return BuildTypeKind.is_value(cmake_build_type, option_name="from cmake CMAKE_BUILD_TYPE")
 
     def search_sanitizer(self) -> SanitizerKind:
-        is_ubsan = self.__to_bool(self.__search("PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER"))
-        is_asan = self.__to_bool(self.__search("PANDA_ENABLE_ADDRESS_SANITIZER"))
-        is_tsan = self.__to_bool(self.__search("PANDA_ENABLE_THREAD_SANITIZER"))
+        props = self.get_sanitizers_properties_names()
+
+        is_ubsan = self.__to_bool(self.__search_in_build_properties(props["ubsan"]))
+        is_asan = self.__to_bool(self.__search_in_build_properties(props["asan"]))
+        is_tsan = self.__to_bool(self.__search_in_build_properties(props["tsan"]))
+
         if is_asan or is_ubsan:
             return SanitizerKind.ASAN
         if is_tsan:
             return SanitizerKind.TSAN
         return SanitizerKind.NONE
+
+    def get_sanitizers_properties_names(self) -> dict[str, str]:
+        sanitizer_depending_on_build_system = {
+            BuildSystem.GN.value: {
+                "ubsan": "is_ubsan",
+                "asan": "is_asan",
+                "tsan": "is_tsan",
+            },
+            BuildSystem.CMAKE.value: {
+                "ubsan": "PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER",
+                "asan": "PANDA_ENABLE_ADDRESS_SANITIZER",
+                "tsan": "PANDA_ENABLE_THREAD_SANITIZER",
+            }
+        }
+        build_sys = self.build_system.value
+        if build_sys not in sanitizer_depending_on_build_system:
+            raise InvalidConfiguration(f"Unknown build system: {build_sys}")
+        return sanitizer_depending_on_build_system[build_sys]
 
     def is_aot(self) -> Step | None:
         return next((step for step in self.config.workflow.steps if step.step_kind == StepKind.AOT), None)
@@ -243,26 +292,29 @@ class TestLists:
     def get_es2panda_args(self) -> list[str] | str:
         return args if (args := self.config.workflow.get_parameter("es2panda-args")) else []
 
-    def cmake_cache(self) -> list[str]:
-        cmake_cache_txt = "CMakeCache.txt"
-        cmake_cache: Path = self.config.general.build / cmake_cache_txt
-        if not cmake_cache.exists():
+    def gn_build_properties(self) -> list[str]:
+        file_name = os.getenv('GN_BUILD_PROPERTIES_FILE_NAME', _GN_BUILD_PROPERTIES_FILE_NAME)
+        return self.__get_build_properties_from_file(file_name)
+
+    def cmake_build_properties(self) -> list[str]:
+        file_name = os.getenv('CMAKE_BUILD_PROPERTIES_FILE_NAME', _CMAKE_BUILD_PROPERTIES_FILE_NAME)
+        return self.__get_build_properties_from_file(file_name)
+
+    def __search_in_build_properties(self, property_name: str) -> str | None:
+        for prop in self.build_properties:
+            if property_name in prop:
+                match = re.match(fr'^({property_name})(?:[: \t=].*?[= \t:]| *= *)[ \t]?(.*)$', prop)
+                if match:
+                    return str(match.group(2).strip().lower())
+        return None
+
+    def __get_build_properties_from_file(self, file_name: str) -> list[str]:
+        cache_file: Path = self.config.general.build / file_name
+        if not cache_file.exists():
             raise InvalidConfiguration(
-                f"Incorrect build folder {self.config.general.build}. Cannot find '{cmake_cache_txt}' file")
-        with open(cmake_cache, encoding="utf-8") as file_handler:
+                f"Incorrect build folder {self.config.general.build}. Cannot find '{file_name}' file")
+        with open(cache_file, encoding="utf-8") as file_handler:
             cache = [line.strip()
                      for line in file_handler.readlines()
                      if line.strip() and not line.strip().startswith("#") and not line.strip().startswith("//")]
             return sorted(cache)
-
-    def __gn_cache(self) -> list[str]:
-        return self.config.general.build.name.split(".")
-
-    def __search(self, variable: str) -> str | None:
-        if self.config.general.gn_build:
-            if variable in self.cache:
-                return str(self.cache[-1].lower())
-        else:
-            found: list[str] = [var for var in self.cache if var.startswith(variable)]
-            return str(found[0].split("=")[-1].lower()) if found else None
-        return None

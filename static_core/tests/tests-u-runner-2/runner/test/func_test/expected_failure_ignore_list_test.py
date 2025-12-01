@@ -45,102 +45,117 @@ class FailuresFromIgnoreTest(TestCase):
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_load_comments_from_ignore_list(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "panda", "test_suite1"],),
+        (["runner.sh", "panda", "test_suite1", "--gn-build"],),
+    ])
+    def test_load_comments_from_ignore_list(self, argv: Callable) -> None:
         """
         Check tests are loading from ignore lists with comments
         """
-        ExpectedTest = namedtuple('ExpectedTest', 'test_id ignored last_failure')
-        test1 = ExpectedTest("test1.ets", True, "test failure")
-        test2 = ExpectedTest("test2.ets", False, "")
-        test3 = ExpectedTest("test3.ets", True, "test failed.*?error")
-        test4 = ExpectedTest("test4.ets", True, "")
-        test5 = ExpectedTest("test5_compile_only_neg.ets", False, "")
-        test6 = ExpectedTest("test1.console.ets", False, "")
-        expected_tests = [test1, test2, test3, test4, test5, test6]
+        with patch('sys.argv', argv):
+            ExpectedTest = namedtuple('ExpectedTest', 'test_id ignored last_failure')
+            test1 = ExpectedTest("test1.ets", True, "test failure")
+            test2 = ExpectedTest("test2.ets", False, "")
+            test3 = ExpectedTest("test3.ets", True, "test failed.*?error")
+            test4 = ExpectedTest("test4.ets", True, "")
+            test5 = ExpectedTest("test5_compile_only_neg.ets", False, "")
+            test6 = ExpectedTest("test1.console.ets", False, "")
+            expected_tests = [test1, test2, test3, test4, test5, test6]
 
-        config = self.get_config()
-        runner = RunnerStandardFlow(config)
-        actual_tests = list(runner.tests)
+            config = self.get_config()
+            runner = RunnerStandardFlow(config)
+            actual_tests = list(runner.tests)
 
-        self.assertEqual({(t.test_id, t.ignored, t.last_failure) for t in actual_tests},
-                            {(e.test_id, e.ignored, e.last_failure) for e in expected_tests})
+            self.assertEqual({(t.test_id, t.ignored, t.last_failure) for t in actual_tests},
+                                {(e.test_id, e.ignored, e.last_failure) for e in expected_tests})
 
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_results_with_expected_failure_pass(self) -> None:
-        test_output = "test failure"
-        test_output_test3 = "test failed failure failed blabala3 hbs[dsfds.ets]fail error"
-        err_output = ""
-        expected_result = {("test1.ets", True), ("test2.ets", True), ("test3.ets", True), ("test4.ets", True),
-                           ("test5_compile_only_neg.ets", True), ("test1.console.ets", True)}
-        expected_stat = {"passed": 0, "ignored": 3, "failed": 3, "excluded": 0}
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "panda", "test_suite1"],),
+        (["runner.sh", "panda", "test_suite1", "--gn-build"],),
+    ])
+    def test_results_with_expected_failure_pass(self, argv: Callable) -> None:
+        with patch('sys.argv', argv):
+            test_output = "test failure"
+            test_output_test3 = "test failed failure failed blabala3 hbs[dsfds.ets]fail error"
+            err_output = ""
+            expected_result = {("test1.ets", True), ("test2.ets", True), ("test3.ets", True), ("test4.ets", True),
+                            ("test5_compile_only_neg.ets", True), ("test1.console.ets", True)}
+            expected_stat = {"passed": 0, "ignored": 3, "failed": 3, "excluded": 0}
 
-        config = self.get_config()
-        runner = RunnerStandardFlow(config)
-        actual_tests = list(runner.tests)
+            config = self.get_config()
+            runner = RunnerStandardFlow(config)
+            actual_tests = list(runner.tests)
 
-        for test in actual_tests:
-            test.passed = False
-            test.reports[ReportFormat.LOG] = "failure"
-            if test.test_id == "test3.ets":
-                _ = BaseValidator.check_return_code_0(cast(TestStandardFlow, test), "step1", test_output_test3,
-                                                                               err_output, 0)
-            else:
+            for test in actual_tests:
+                test.passed = False
+                test.reports[ReportFormat.LOG] = "failure"
+                if test.test_id == "test3.ets":
+                    _ = BaseValidator.check_return_code_0(cast(TestStandardFlow, test), "step1", test_output_test3,
+                                                                                err_output, 0)
+                else:
+                    _ = BaseValidator.check_return_code_0(cast(TestStandardFlow, test), "step1", test_output,
+                                                        err_output, 0)
+
+            runner.results = actual_tests
+            failed = runner.summarize()
+            actual_stat = {"passed": runner.passed, "ignored": runner.ignored,
+                        "failed": runner.failed, "excluded": runner.excluded}
+
+            self.assertEqual({(t.test_id, t.last_failure_check_passed) for t in actual_tests}, expected_result)
+            self.assertEqual(failed, 3)
+            test_utils.compare_dicts(self, expected_stat, actual_stat)
+
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "panda", "test_suite1"],),
+        (["runner.sh", "panda", "test_suite1", "--gn-build"],),
+    ])
+    def test_results_with_expected_failure_fail(self, argv: Callable) -> None:
+        with patch('sys.argv', argv):
+            test_output = "test unexpected failure"
+            err_output = ""
+            expected_result = {("test1.ets", False), ("test2.ets", True), ("test3.ets", False), ("test4.ets", True),
+                            ("test5_compile_only_neg.ets", True), ("test1.console.ets", True)}
+            expected_stat = {"passed": 0, "ignored": 1, "failed": 5, "excluded": 0}
+            config = self.get_config()
+            runner = RunnerStandardFlow(config)
+            actual_tests = list(runner.tests)
+
+            for test in actual_tests:
+                test.passed = False
+                test.reports[ReportFormat.LOG] = "failure"
                 _ = BaseValidator.check_return_code_0(cast(TestStandardFlow, test), "step1", test_output,
-                                                      err_output, 0)
+                                                                                err_output, 0)
+            runner.results = actual_tests
+            failed = runner.summarize()
+            actual_stat = {"passed": runner.passed, "ignored": runner.ignored,
+                        "failed": runner.failed, "excluded": runner.excluded}
 
-        runner.results = actual_tests
-        failed = runner.summarize()
-        actual_stat = {"passed": runner.passed, "ignored": runner.ignored,
-                       "failed": runner.failed, "excluded": runner.excluded}
+            self.assertEqual({(t.test_id, t.last_failure_check_passed) for t in actual_tests}, expected_result)
+            self.assertEqual(failed, 5)
+            test_utils.compare_dicts(self, expected_stat, actual_stat)
 
-        self.assertEqual({(t.test_id, t.last_failure_check_passed) for t in actual_tests}, expected_result)
-        self.assertEqual(failed, 3)
-        test_utils.compare_dicts(self, expected_stat, actual_stat)
-
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
-
-    @patch('runner.utils.get_config_workflow_folder', data_folder)
-    @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
-    @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
-    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_results_with_expected_failure_fail(self) -> None:
-        test_output = "test unexpected failure"
-        err_output = ""
-        expected_result = {("test1.ets", False), ("test2.ets", True), ("test3.ets", False), ("test4.ets", True),
-                           ("test5_compile_only_neg.ets", True), ("test1.console.ets", True)}
-        expected_stat = {"passed": 0, "ignored": 1, "failed": 5, "excluded": 0}
-        config = self.get_config()
-        runner = RunnerStandardFlow(config)
-        actual_tests = list(runner.tests)
-
-        for test in actual_tests:
-            test.passed = False
-            test.reports[ReportFormat.LOG] = "failure"
-            _ = BaseValidator.check_return_code_0(cast(TestStandardFlow, test), "step1", test_output,
-                                                                               err_output, 0)
-        runner.results = actual_tests
-        failed = runner.summarize()
-        actual_stat = {"passed": runner.passed, "ignored": runner.ignored,
-                       "failed": runner.failed, "excluded": runner.excluded}
-
-        self.assertEqual({(t.test_id, t.last_failure_check_passed) for t in actual_tests}, expected_result)
-        self.assertEqual(failed, 5)
-        test_utils.compare_dicts(self, expected_stat, actual_stat)
-
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)

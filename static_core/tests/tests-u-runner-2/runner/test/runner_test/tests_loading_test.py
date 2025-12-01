@@ -41,159 +41,192 @@ class TestsLoadingTest(TestCase):
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_default_run(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite"],),
+        (["runner.sh", "workflow", "test_suite", "--gn-build"],),
+    ])
+    def test_default_run(self, argv: Callable) -> None:
         """
         Expected: loaded all tests but test4_excluded which excluded one
         Tests from ignored test list (test1 and test5) are loaded
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test1_ignored.ets",
-            "test2.ets",
-            "test3_co.ets",
-            "test5_ignored_asan.ets",
-            'test6_excluded_repeats.ets',
-            'test7_excluded_asan_repeats.ets',
-            'test8_co_neg.ets'
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test1_ignored.ets",
+                "test2.ets",
+                "test3_co.ets",
+                "test5_ignored_asan.ets",
+                'test6_excluded_repeats.ets',
+                'test7_excluded_asan_repeats.ets',
+                'test8_co_neg.ets'
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--skip-compile-only-neg"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_skip_compile_only_neg(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite", "--skip-compile-only-neg"],),
+        (["runner.sh", "workflow", "test_suite", "--skip-compile-only-neg", "--gn-build"],),
+    ])
+    def test_skip_compile_only_neg(self, argv: Callable) -> None:
         """
         Expected: loaded all tests but test4 which excluded one and test8_co_neg which is compile-only
         and negative
         Tests from ignored test list (test1 and test5) are loaded
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test1_ignored.ets",
-            "test2.ets",
-            "test3_co.ets",
-            "test5_ignored_asan.ets",
-            'test6_excluded_repeats.ets',
-            'test7_excluded_asan_repeats.ets'
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test1_ignored.ets",
+                "test2.ets",
+                "test3_co.ets",
+                "test5_ignored_asan.ets",
+                'test6_excluded_repeats.ets',
+                'test7_excluded_asan_repeats.ets'
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--exclude-ignored-tests"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_exclude_all_ignored(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite", "--exclude-ignored-tests"],),
+        (["runner.sh", "workflow", "test_suite", "--exclude-ignored-tests", "--gn-build"],),
+    ])
+    def test_exclude_all_ignored(self, argv: Callable) -> None:
         """
         Expected: loaded only test2 (normal test) and test3 (compile-only test)
         Tests from ignored test list (test1 and test5) are excluded like test3 (from excluded list)
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test2.ets",
-            "test3_co.ets",
-            "test7_excluded_asan_repeats.ets",
-            "test8_co_neg.ets"
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test2.ets",
+                "test3_co.ets",
+                "test7_excluded_asan_repeats.ets",
+                "test8_co_neg.ets"
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite",
-                        "--exclude-ignored-test-lists=test_suite-ignored-ASAN.txt"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_exclude_ignored_one_list(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite",
+            "--exclude-ignored-test-lists=test_suite-ignored-ASAN.txt"],),
+        (["runner.sh", "workflow", "test_suite",
+            "--exclude-ignored-test-lists=test_suite-ignored-ASAN.txt", "--gn-build"],),
+    ])
+    def test_exclude_ignored_one_list(self, argv: Callable) -> None:
         """
         Expected: loaded only test2 (normal test) and test3 (compile-only test)
         Tests from ignored test list (test1 and test5) are excluded like test3 (from excluded list)
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test1_ignored.ets",
-            "test2.ets",
-            "test3_co.ets",
-            "test6_excluded_repeats.ets",
-            "test7_excluded_asan_repeats.ets",
-            "test8_co_neg.ets"
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test1_ignored.ets",
+                "test2.ets",
+                "test3_co.ets",
+                "test6_excluded_repeats.ets",
+                "test7_excluded_asan_repeats.ets",
+                "test8_co_neg.ets"
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--exclude-ignored-test-lists=test_suite-*-ASAN.txt"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_exclude_ignored_one_list_regex(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite", "--exclude-ignored-test-lists=test_suite-*-ASAN.txt"],),
+        (["runner.sh", "workflow", "test_suite", "--exclude-ignored-test-lists=test_suite-*-ASAN.txt",
+            "--gn-build"],),
+    ])
+    def test_exclude_ignored_one_list_regex(self, argv: Callable) -> None:
         """
         Expected:
         Tests from ignored test list (test5_ignored_asan) is excluded like test4_excluded.ets (from excluded list)
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test1_ignored.ets",
-            "test2.ets",
-            "test3_co.ets",
-            "test6_excluded_repeats.ets",
-            "test7_excluded_asan_repeats.ets",
-            "test8_co_neg.ets"
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test1_ignored.ets",
+                "test2.ets",
+                "test3_co.ets",
+                "test6_excluded_repeats.ets",
+                "test7_excluded_asan_repeats.ets",
+                "test8_co_neg.ets"
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite",
-                        "--exclude-ignored-test-lists=test_suite-ignored-ASAN.txt",
-                        "--exclude-ignored-test-lists=test_suite-ignored-OL0.txt"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_exclude_ignored_2_lists(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite",
+            "--exclude-ignored-test-lists=test_suite-ignored-ASAN.txt",
+            "--exclude-ignored-test-lists=test_suite-ignored-OL0.txt"],),
+        (["runner.sh", "workflow", "test_suite",
+            "--exclude-ignored-test-lists=test_suite-ignored-ASAN.txt",
+            "--exclude-ignored-test-lists=test_suite-ignored-OL0.txt", "--gn-build"],),
+    ])
+    def test_exclude_ignored_2_lists(self, argv: Callable) -> None:
         """
         Expected: loaded all tests but following ones:
          - test1_ignored
@@ -201,31 +234,37 @@ class TestsLoadingTest(TestCase):
          - test4_excluded
          - test6_excluded_repeats
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test1_ignored.ets",
-            "test2.ets",
-            "test3_co.ets",
-            'test7_excluded_asan_repeats.ets',
-            'test8_co_neg.ets'
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test1_ignored.ets",
+                "test2.ets",
+                "test3_co.ets",
+                'test7_excluded_asan_repeats.ets',
+                'test8_co_neg.ets'
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite",
-                        "--exclude-ignored-tests", "--skip-compile-only-neg"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_both_exclude_ignored_skip_compile_only_neg(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite",
+            "--exclude-ignored-tests", "--skip-compile-only-neg"],),
+        (["runner.sh", "workflow", "test_suite",
+            "--exclude-ignored-tests", "--skip-compile-only-neg", "--gn-build"],),
+    ])
+    def test_both_exclude_ignored_skip_compile_only_neg(self, argv: Callable) -> None:
         """
         Expected: following tests are loaded
         - test2 - ordinary test
@@ -236,86 +275,101 @@ class TestsLoadingTest(TestCase):
         - test4_excluded because it's excluded in the common exclude list
         - test8_co_neg because it's compile-only and negative
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test2.ets",
-            "test3_co.ets",
-            'test7_excluded_asan_repeats.ets'
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test2.ets",
+                "test3_co.ets",
+                'test7_excluded_asan_repeats.ets'
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow", "test_suite", "--skip-test-lists"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_skip_test_lists(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite", "--skip-test-lists"],),
+        (["runner.sh", "workflow", "test_suite", "--skip-test-lists", "--gn-build"],),
+    ])
+    def test_skip_test_lists(self, argv: Callable) -> None:
         """
         Expected: loaded all tests, including test4 from excluded test list.
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test1_ignored.ets",
-            "test2.ets",
-            "test3_co.ets",
-            "test4_excluded.ets",
-            "test5_ignored_asan.ets",
-            'test6_excluded_repeats.ets',
-            'test7_excluded_asan_repeats.ets',
-            'test8_co_neg.ets'
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test1_ignored.ets",
+                "test2.ets",
+                "test3_co.ets",
+                "test4_excluded.ets",
+                "test5_ignored_asan.ets",
+                'test6_excluded_repeats.ets',
+                'test7_excluded_asan_repeats.ets',
+                'test8_co_neg.ets'
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow-repeats", "test_suite"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_repeats_40_lists(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow-repeats", "test_suite"],),
+        (["runner.sh", "workflow-repeats", "test_suite", "--gn-build"],),
+    ])
+    def test_repeats_40_lists(self, argv: Callable) -> None:
         """
         Expected: excluded test lists with REPEATS tag are loaded and tests test4_excluded, test6_excluded_repeats,
         test7_excluded_asan_repeats do not appear in the resulting list.
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test1_ignored.ets",
-            "test2.ets",
-            "test3_co.ets",
-            "test5_ignored_asan.ets",
-            "test8_co_neg.ets"
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test1_ignored.ets",
+                "test2.ets",
+                "test3_co.ets",
+                "test5_ignored_asan.ets",
+                "test8_co_neg.ets"
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
-    @patch('sys.argv', ["runner.sh", "workflow-repeats", "test_suite", "--exclude-ignored-tests"])
     @patch.dict(os.environ, test_environ, clear=True)
-    @patch('runner.suites.test_lists.TestLists.cmake_cache', test_utils.test_cmake_cache)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
-    def test_exclude_ignored_and_repeats_40_lists(self) -> None:
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow-repeats", "test_suite", "--exclude-ignored-tests"],),
+        (["runner.sh", "workflow-repeats", "test_suite", "--exclude-ignored-tests", "--gn-build"],),
+    ])
+    def test_exclude_ignored_and_repeats_40_lists(self, argv: Callable) -> None:
         """
         Expected: only tests not mentions in any exclude or ignored test list are shown:
         - test2
@@ -323,17 +377,18 @@ class TestsLoadingTest(TestCase):
         - test8_co_neg
         All other tests should be excluded due to different excluded and ignored test lists.
         """
-        # preparation
-        config = self.get_config()
-        # test
-        runner = RunnerStandardFlow(config)
-        actual_tests = sorted(test.test_id for test in runner.tests)
-        expected_tests = [
-            "test2.ets",
-            "test3_co.ets",
-            "test8_co_neg.ets"
-        ]
-        self.assertListEqual(actual_tests, expected_tests)
-        # clear up
-        work_dir = Path(os.environ["WORK_DIR"])
-        shutil.rmtree(work_dir, ignore_errors=True)
+        with patch('sys.argv', argv):
+            # preparation
+            config = self.get_config()
+            # test
+            runner = RunnerStandardFlow(config)
+            actual_tests = sorted(test.test_id for test in runner.tests)
+            expected_tests = [
+                "test2.ets",
+                "test3_co.ets",
+                "test8_co_neg.ets"
+            ]
+            self.assertListEqual(actual_tests, expected_tests)
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
