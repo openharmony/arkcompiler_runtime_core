@@ -195,25 +195,14 @@
 #29887
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_73.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_74.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_75.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_76.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_77.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_78.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_79.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_80.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_81.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_82.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_83.ets
 
 #31755
 06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/explicit_type_conversion_6.ets
 
 #30469
 07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets
-
-#30896
-07.expressions/03.named_reference/02.method_reference/method_ref_neg_2.ets
 
 #30653
 07.expressions/03.named_reference/01.function_reference/static_field_as_ref.ets
@@ -1680,10 +1669,6 @@
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_7.ets
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_5.ets
 
-#30546
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/negative_cases/async_lambda_returns_not_promise_1.ets
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/negative_cases/async_lambda_returns_not_promise_3.ets
-
 #30786
 16.concurrency/03.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_user_defined_array_9.ets
 16.concurrency/03.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_user_defined_array_10.ets
@@ -2095,9 +2080,6 @@
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_19.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_32.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over2_9.ets
-
-#31109
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_31.ets
 
 #29138
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_52.ets
