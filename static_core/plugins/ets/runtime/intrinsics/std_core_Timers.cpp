@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,8 +102,8 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
     // Atomic with relaxed order reason: sync is not needed here
     auto timerId = nextTimerId_.fetch_add(1, std::memory_order_relaxed);
     auto *coro = Coroutine::GetCurrent();
-    auto callbackRef =
-        coro->GetVM()->GetGlobalObjectStorage()->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    auto *refStorage = coro->GetVM()->GetGlobalObjectStorage();
+    auto *callbackRef = refStorage->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     auto *timerInfo =
         Runtime::GetCurrent()->GetInternalAllocator()->New<TimerInfo>(callbackRef, delay, periodic, timerId);
 
@@ -146,8 +146,12 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
 
     auto coroName = "Timer callback: " + ark::ToPandaString(timerId);
     auto wGroup = ark::CoroutineWorkerGroup::GenerateExactWorkerId(coro->GetWorker()->GetId());
-    coro->GetManager()->LaunchNative(timerEntrypoint, timerInfo, std::move(coroName), wGroup,
-                                     ark::ets::EtsCoroutine::TIMER_CALLBACK, true, true);
+    auto launchRes = coro->GetManager()->LaunchNative(timerEntrypoint, timerInfo, std::move(coroName), wGroup,
+                                                      ark::ets::EtsCoroutine::TIMER_CALLBACK, true, true);
+    if (launchRes != LaunchResult::OK) {
+        refStorage->Remove(callbackRef);
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(timerInfo);
+    }
     return timerId;
 }
 

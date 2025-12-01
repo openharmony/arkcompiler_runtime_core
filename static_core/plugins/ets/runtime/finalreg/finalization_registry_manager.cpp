@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -225,9 +225,11 @@ void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
         auto workerDomain = GetCoroDomain(coro);
         auto groupId = GetGroupId(coroManager, workerDomain, workerId);
         auto args = PandaVector<Value> {Value(EtsObject::ToCoreType(head))};
-        [[maybe_unused]] LaunchResult launchResult =
+        auto launchResult =
             coroManager->Launch(event, cleanup, std::move(args), groupId, CoroutinePriority::DEFAULT_PRIORITY, false);
-        ASSERT(launchResult == LaunchResult::OK);
+        if (UNLIKELY(launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED)) {
+            Runtime::GetCurrent()->GetInternalAllocator()->Delete(event);
+        }
     }
 }
 }  // namespace ark::ets

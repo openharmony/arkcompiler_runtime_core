@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -258,6 +258,14 @@ if (NOT PANDA_TARGET_ARM32)
                                 OPTION_SETS_STACKFUL "DEFAULT"
                                 WORKERS "AUTO" "ONE"
                                 MODE "INT" "JIT" "AOT"
+        )
+
+        add_ets_coroutines_test(FILE coroutine_limits.ets
+                                SKIP_ARM32_COMPILER
+                                IMPL "STACKFUL"
+                                OPTION_SETS_STACKFUL "DEFAULT"
+                                WORKERS "AUTO"
+                                MODE "INT"
         )
     endif()
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -474,7 +474,10 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        if (launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED) {
+            Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        }
+        vm->GetGlobalObjectStorage()->Remove(promiseRef);
         return 0;
     }
     return ToObjPtr(promiseHandle.GetPtr());
