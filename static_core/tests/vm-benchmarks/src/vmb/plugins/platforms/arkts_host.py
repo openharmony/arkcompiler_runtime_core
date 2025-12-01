@@ -48,7 +48,7 @@ class Platform(PlatformBase):
             log.info('AOT-Compiling %s. This may take a long time...',
                      self.ark.etsstdlib)
             res = self.paoc.run_paoc(self.ark.etsstdlib, an,
-                                     opts=aot_lib_opts, timeout=1800)
+                                     opts=aot_lib_opts, timeout=self.DEFAULT_TIMEOUT)
             if not self.ext_info.get('etsstdlib', {}):
                 self.ext_info['etsstdlib'] = {}
             self.ext_info['etsstdlib']['etsstdlib.an'] = \
