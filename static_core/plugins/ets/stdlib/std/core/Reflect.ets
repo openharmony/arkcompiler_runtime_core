@@ -15,9 +15,9 @@
 
 package std.core
 
-export class Reflect {
-    private static native isLiteralInitializedInterfaceImpl(target: Object): boolean
+native function isLiteralInitializedInterfaceImpl(target: Object): boolean
 
+export class Reflect {
     private constructor () {}
 
     /**
@@ -29,6 +29,22 @@ export class Reflect {
     *          initialized with a literal
     */
     public static isLiteralInitializedInterface(target: Object): boolean {
-        return Reflect.isLiteralInitializedInterfaceImpl(target)
+        return isLiteralInitializedInterfaceImpl(target)
     }
 }
+
+export namespace reflect {
+
+/**
+* Determines whether an object is an interface initialized with a literal
+*
+* @param target an object
+*
+* @returns a boolean indicating whether or not the target is an interface
+*          initialized with a literal
+*/
+export function isLiteralInitializedInterface(target: Object): boolean {
+    return isLiteralInitializedInterfaceImpl(target)
+}
+
+} // namespace reflect

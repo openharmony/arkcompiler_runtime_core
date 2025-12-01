@@ -9025,12 +9025,12 @@ intrinsics:
     impl: ark::ets::intrinsics::DebuggerAPISetLocalObject
 
 ##############################
-#      std.core.Reflect      #
+#      std.core.reflect      #
 ##############################
 
   - name: stdCoreReflectIsInterfaceLiteral
     space: ets
-    class_name: std.core.Reflect
+    class_name: std.core.ETSGLOBAL
     method_name: isLiteralInitializedInterfaceImpl
     static: true
     signature:
