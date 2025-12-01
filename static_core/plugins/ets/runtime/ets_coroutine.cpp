@@ -366,7 +366,6 @@ bool EtsCoroutine::IsContextSwitchRisky() const
 
 void EtsCoroutine::PrintCallStack() const
 {
-    ASSERT(this == EtsCoroutine::GetCurrent());
     auto *callStk = GetLocalStorage().Get<DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
     if (callStk == nullptr) {
         Coroutine::PrintCallStack();

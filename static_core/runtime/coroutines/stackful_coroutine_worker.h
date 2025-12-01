@@ -249,7 +249,7 @@ private:
      * This checker is called on a coroutine switch attempt. Issues fatal error in case when coroutine switch is
      * disabled.
      */
-    void EnsureCoroutineSwitchEnabled();
+    void EnsureCoroutineSwitchEnabled(Coroutine *coro);
 
     /// @return true if current method is called from another worker instance
     bool IsCrossWorkerCall()
