@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at 
@@ -17,6 +17,14 @@
 desc: Simultaneously run task A() (throws an exception) and task B() (successful task).
 assert: Stderr contains error A.
 tags: [negative]
+expected_out:
+- Task A start
+- Task B start
+expected_error: |-
+    Unhandled exception: escompat.Error
+    Error: concurrent_nested_n.ets: task A failed
+    	at escompat.Error.<ctor> (Error.ets:41:0)
+    	at concurrent_nested_n.ETSGLOBAL.%async-A (concurrent_nested_n.ets:1:0)
 ---*/
 
 async function delay(): Promise<string> {
@@ -29,7 +37,7 @@ async function delay(): Promise<string> {
 
 async function A(): Promise<void> {
     console.log("Task A start");
-    throw new Error("concurrent_nested.ets: task A failed");
+    throw new Error("concurrent_nested_n.ets: task A failed");
     console.log("Task A done");
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at 
@@ -17,6 +17,7 @@
 desc: Run async without waiting; main completes immediately.
 assert: stdout contains the text message
 tags: [no-warmup]
+expected_out: main finished (unhandled_rejection.ets)
 ---*/
 
 async function throwNow(): Promise<void> {

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,22 +13,15 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: outer() calls inner(), inner() throws; outer() is not expected.
-assert: stderr contains the error from inner and the stack from inner -> outer.
-tags: [negative]
+desc: The expressions await and wait are used while a previously launched coroutine finishes and returns a value.
+tags: [compile-only, negative]
 ---*/
 
-class ExpectedError extends Error {}
+{{c.decl}}
 
-async function inner(): Promise<void> {
-    throw new ExpectedError();
+function main() {
+    {{c.use|indent}}
 }
-
-async function outer(): Promise<void> {
-    await inner();
-}
-
-function main(): void {
-    waitForCompletion(outer);
-}
+{% endfor %}
