@@ -14,8 +14,7 @@
 ---
 cases:
  # use enum
- - tags: negative, compile-only
-   decl: |-
+ - decl: |-
      class C {
          p1: int;
          p2: int;
@@ -25,20 +24,8 @@ cases:
      let c: C = { p1 = 1, p2 = 2 };
      arktest.assertEQ(foo(c), 2);
 
- # use object literal
- - decl: |-
-     class C {
-         p1: string = "";
-         p2: int;
-     }
-     function foo(i: C) { return i.p2; }
-   use: |-
-     let c: C = { p1: "Xzc", p2: 2 };
-     arktest.assertEQ(foo(c), 2);
-
  # use tuple
- - tags: negative, compile-only
-   decl: |-
+ - decl: |-
      class C {
          p1: string = "";
          p2: int;

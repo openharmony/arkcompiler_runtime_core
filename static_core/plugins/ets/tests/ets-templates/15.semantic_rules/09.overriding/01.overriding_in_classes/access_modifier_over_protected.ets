@@ -26,7 +26,7 @@ desc: |-
         • Override a private method of a superclass;
 
     {{c.doc}}
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 let res: number = 0;

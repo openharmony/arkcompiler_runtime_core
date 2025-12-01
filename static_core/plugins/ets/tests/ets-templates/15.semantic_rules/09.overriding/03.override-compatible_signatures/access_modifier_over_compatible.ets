@@ -25,8 +25,8 @@ desc: >-
     A compile-time error occurs if an attempt is made to do the following:
         • Override a private method of a superclass;
 
-    {{c.doc}}
-tags: [{{c.tags}}]
+
+tags: []
 ---*/
 
 let res: number = 0;
@@ -55,7 +55,5 @@ function main() {
     res = 0
     {{c.use}}
 }
-
-{{c.expected_error}}
 
 {%- endfor %}

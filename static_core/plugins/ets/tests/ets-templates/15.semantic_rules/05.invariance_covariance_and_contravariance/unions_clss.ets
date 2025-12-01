@@ -18,7 +18,7 @@
 desc: >-
     Variance is how subtyping between types relates to subtyping between derived types.
     Unions are covariant on nested classes.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 class A {}

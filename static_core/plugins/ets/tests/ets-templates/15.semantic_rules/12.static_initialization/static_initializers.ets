@@ -19,7 +19,7 @@
 desc: >-
       Static initialization is a routine performed once for each class (see Classes),
       namespace (see Namespace Declarations), or module (see Modules).
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 {{c.decl}}

@@ -81,7 +81,7 @@ cases:
     derived: "i: FUN_AC"
     call: "fbc"
     res: 1
-  
+
   # paramval is contravariant, retval is contravariant
   - base: "i: FUN_BB"
     derived: "i: FUN_AA"
@@ -132,7 +132,7 @@ cases:
     derived: "i: FixedArray<A>"
     call: "[new A()]"
     res: 2
-    
+
   - base: "i: B[]"
     derived: "i: A[]"
     call: "[new A()]"

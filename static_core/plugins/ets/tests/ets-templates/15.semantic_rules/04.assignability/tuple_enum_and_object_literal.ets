@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 
 /*---
 desc: Type T1 is compatible with type T2 if there is an implicit conversion (see Implicit Conversions)
       that allows converting type T1 to type T2.
-tags: [ {{c.tags}} ]
+tags: []
 ---*/
 
-{{c.decl}}
+ class C {
+     p1: string = "";
+     p2: int;
+ }
+ function foo(i: C) { return i.p2; }
 
 function main() {
-  {{c.use}}
+     let c: C = { p1: "Xzc", p2: 2 };
+     arktest.assertEQ(foo(c), 2);
 }
 
-{% endfor %}
+

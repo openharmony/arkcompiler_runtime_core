@@ -19,7 +19,7 @@
 desc: >-
     Intersection type I defined as (I1 & ... & In) is a subtype of type T
     if Ii is a subtype of T for some i.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 interface I {}

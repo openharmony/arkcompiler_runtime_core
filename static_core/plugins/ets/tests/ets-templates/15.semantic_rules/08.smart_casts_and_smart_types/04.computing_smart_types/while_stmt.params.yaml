@@ -36,20 +36,6 @@ cases:
           return foo(new C()) + foo(new D()) + foo(new A()) + foo(null)
 
     - decl: |-
-          function foo(v: A|null): int {
-              while (v != null) {
-                  while (v instanceof K && v.meth_k(1) != 'K1') {
-                      return 1
-                  }
-                  v = null
-              }
-              return 0
-          }
-      tags: 'compile-only, negative'
-      code: |-
-          return foo(new C()) + foo(new D()) + foo(new A()) + foo(null)
-
-    - decl: |-
           function foo(v?: A): int {
               while (v != undefined) {
                   while (v.meth_i(1) != 'I1') {
@@ -68,20 +54,6 @@ cases:
               }
               return 0
           }
-      code: |-
-          return foo(new C()) + foo(new D()) + foo(new A()) + foo()
-
-    - decl: |-
-          function foo(v?: A): int {
-              while (v != undefined) {
-                  while (v instanceof K && v.meth_k(1) != 'K1') {
-                      return 1
-                  }
-                  v = undefined
-              }
-              return 0
-          }
-      tags: 'compile-only, negative'
       code: |-
           return foo(new C()) + foo(new D()) + foo(new A()) + foo()
 
@@ -135,23 +107,6 @@ cases:
 
     - decl: |-
           class X {
-              meth(v: A|null): int {
-                  while (v != null) {
-                      while (v instanceof K && v.meth_k(1) != 'K1') {
-                          return 1
-                      }
-                      v = null
-                  }
-                  return 0
-              }
-          }
-      tags: 'compile-only, negative'
-      code: |-
-          let x: X = new X()
-          return x.meth(new C()) + x.meth(new D()) + x.meth(new A()) + x.meth(null)
-
-    - decl: |-
-          class X {
               meth(v?: A): int {
                   while (v != undefined) {
                       while (v.meth_i(1) != 'I1') {
@@ -171,23 +126,6 @@ cases:
                   return 0
               }
           }
-      code: |-
-          let x: X = new X()
-          return x.meth(new C()) + x.meth(new D()) + x.meth(new A()) + x.meth()
-
-    - decl: |-
-          class X {
-              meth(v?: A): int {
-                  while (v != undefined) {
-                      while (v instanceof K && v.meth_k(1) != 'K1') {
-                          return 1
-                      }
-                      v = undefined
-                  }
-                  return 0
-              }
-          }
-      tags: 'compile-only, negative'
       code: |-
           let x: X = new X()
           return x.meth(new C()) + x.meth(new D()) + x.meth(new A()) + x.meth()
@@ -250,24 +188,6 @@ cases:
     - decl: |-
           class X {
               res: int = 5
-              constructor(v: A|null) {
-                  while (v != null) {
-                      while (v instanceof K && v.meth_k(1) != 'K1') {
-                          this.res = 1
-                          return
-                      }
-                      v = null
-                  }
-                  this.res = 0
-              }
-          }
-      tags: 'compile-only, negative'
-      code: |-
-          return new X(new C()).res + new X(new D()).res + new X(new A()).res + new X(null).res
-
-    - decl: |-
-          class X {
-              res: int = 5
               constructor(v?: A) {
                   while (v != undefined) {
                       while (v.meth_i(1) != 'I1') {
@@ -291,24 +211,6 @@ cases:
                   this.res = 0
               }
           }
-      code: |-
-          return new X(new C()).res + new X(new D()).res + new X(new A()).res + new X().res
-
-    - decl: |-
-          class X {
-              res: int = 5
-              constructor(v?: A) {
-                  while (v != undefined) {
-                      while (v instanceof K && v.meth_k(1) != 'K1') {
-                          this.res = 1
-                          return
-                      }
-                      v = undefined
-                  }
-                  this.res = 0
-              }
-          }
-      tags: 'compile-only, negative'
       code: |-
           return new X(new C()).res + new X(new D()).res + new X(new A()).res + new X().res
 

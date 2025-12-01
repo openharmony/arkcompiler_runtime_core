@@ -21,13 +21,6 @@ cases:
           sup = sub
           arktest.assertEQ(sup, subArr)
 
-    - decl: |-
-          let sup: FixedArray<A|string|null>|null|string|undefined = supArr
-          let sub: FixedArray<B|string|null>|null|string|undefined = subArr
-      use: |-
-          sub = sup
-      tags: 'compile-only, negative'
-
     # class literal
     - decl: |-
           class X {
@@ -37,15 +30,6 @@ cases:
       use: |-
           let x: X = { f: sub }
           arktest.assertEQ(x.f, subArr)
-
-    - decl: |-
-          class X {
-              f: FixedArray<B|string|null>|null|string|undefined = subArr
-          }
-          let sup: FixedArray<A|string|null>|null|string|undefined = supArr
-      use: |-
-          let x: X = { f: sup }
-      tags: 'compile-only, negative'
 
     # interface literal
     - decl: |-
@@ -57,27 +41,12 @@ cases:
           let i: I = { f: sub }
           arktest.assertEQ(i.f, subArr)
 
-    - decl: |-
-          interface I {
-              f: FixedArray<B|string|null>|null|string|undefined
-          }
-          let sup: FixedArray<A|string|null>|null|string|undefined = supArr
-      use: |-
-          let i: I = { f: sup }
-      tags: 'compile-only, negative'
-
     # array literal
     - decl: |-
           let sub: FixedArray<B|string|null>|null|string|undefined = subArr
       use: |-
           let arr: Array<FixedArray<A|string|null>|null|string|undefined> = [sub]
           arktest.assertEQ(arr[0], subArr)
-
-    - decl: |-
-          let sup: FixedArray<A|string|null>|null|string|undefined = supArr
-      use: |-
-          let arr: Array<FixedArray<B|string|null>|null|string|undefined> = [sup]
-      tags: 'compile-only, negative'
 
     # tuple literal
     - decl: |-
@@ -87,12 +56,6 @@ cases:
           arktest.assertEQ(tup[0], subArr)
           arktest.assertEQ(tup[1], subArr)
 
-    - decl: |-
-          let sup: FixedArray<A|string|null>|null|string|undefined = supArr
-      use: |-
-          let tup: [FixedArray<B|string|null>|null|string|undefined, FixedArray<B|string|null>|null|string|undefined] = [sup, sup]
-      tags: 'compile-only, negative'
-
     # call context
     - decl: |-
           let sup: FixedArray<A|string|null>|null|string|undefined = supArr
@@ -101,10 +64,3 @@ cases:
           ((p: FixedArray<A|string|null>|null|string|undefined) => {
               arktest.assertEQ(p, subArr)
           })(sub)
-
-    - decl: |-
-          let sup: FixedArray<A|string|null>|null|string|undefined = supArr
-          let sub: FixedArray<B|string|null>|null|string|undefined = subArr
-      use: |-
-          ((p: FixedArray<B|string|null>|null|string|undefined) => {})(sup)
-      tags: 'compile-only, negative'

@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,9 +13,11 @@
 
 ---
 cases:
-  - { assign: foo, call: 1, res: 1 }
-  - { assign: bars, call: 1, res: -1, tags: "compile-only, negative" }
-  - { assign: bars, call: "1, \"some str\"", res: -1, tags: "compile-only, negative" }
-  - { assign: barf, call: 1, res: -1, tags: "compile-only, negative" }
-  - { assign: barl, call: 1, res: -1, tags: "compile-only, negative" }
-  - { assign: barretstr, call: 1, res: "\"str\"", tags: "compile-only, negative" }
+
+ - run: |-
+      let b: B = new B(1, "some str");
+      let a: A = b;
+
+ - run: |-
+      let a: A = new A(1);
+      let b: B = a;

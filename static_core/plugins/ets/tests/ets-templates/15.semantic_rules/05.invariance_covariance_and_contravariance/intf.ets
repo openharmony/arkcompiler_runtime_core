@@ -19,7 +19,7 @@ desc: >-
     Variance is how subtyping between types relates to subtyping between derived types.
     Interfaces can be explicitly declared as invariant, covariant, or contravariant
     on type parameters.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 {{c.decl}}

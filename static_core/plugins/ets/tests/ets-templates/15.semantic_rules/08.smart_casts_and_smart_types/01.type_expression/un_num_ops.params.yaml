@@ -24,18 +24,6 @@ cases:
               res = v > -13.0 && v < 42.0
           }
 
-    - decl: |-
-          function foo(p: number): number {
-              return p + 1
-          }
-      tags: 'compile-only, negative'
-      code: |-
-          let v: string|number|Error|null = new Error()
-          if (!res) {
-              v = foo(0.0)
-          }
-          res = v > -13.0 && v < 42.0
-
     - code: |-
           let v: string|number|Error|null = new Error()
           res = (v = 42.0) > -13.0 && v < 44.0
@@ -46,14 +34,6 @@ cases:
           if (!res) {
               res = v >= -13.0 && v <= 0.0
           }
-
-    - code: |-
-          let v: string|number|Error|null = new Error()
-          if (!res) {
-              v = 0.0
-          }
-          res = v >= -13.0 && v <= 0.0
-      tags: 'compile-only, negative'
 
     - code: |-
           let v: string|number|Error|null = new Error()
@@ -77,14 +57,6 @@ cases:
 
     - code: |-
           let v: string|number|Error|null = new Error()
-          if (!res) {
-              v = 42.0
-          }
-          res = -v - (+v) == -84.0
-      tags: 'compile-only, negative'
-
-    - code: |-
-          let v: string|number|Error|null = new Error()
           res = (v = 42.0) * 2 + v / 2 + v % 13.0 == 108.0
 
     - code: |-
@@ -96,26 +68,10 @@ cases:
 
     - code: |-
           let v: string|number|Error|null = new Error()
-          if (!res) {
-              v = 42.0
-          }
-          res = ++v + v++ + --v + v-- == 172.0
-      tags: 'compile-only, negative'
-
-    - code: |-
-          let v: string|number|Error|null = new Error()
           v = 42.0
           if (!res) {
               res = v << 2 + v >> 2 + v >>> 1 == 21
           }
-
-    - code: |-
-          let v: string|number|Error|null = new Error()
-          if (!res) {
-              v = 42.0
-          }
-          res = v << 2 + v >> 2 + v >>> 1 == 21
-      tags: 'compile-only, negative'
 
     - code: |-
           let v: string|number|Error|null = new Error()
@@ -141,16 +97,6 @@ cases:
           }
 
     - code: |-
-          let v: string|number|Error|null = new Error()
-          let q: boolean|number|Error|null = false
-          if (!res) {
-              v = 42.0
-              q = 156.0
-          }
-          res = (v & q + v | q + v ^ q) == 90
-      tags: 'compile-only, negative'
-
-    - code: |-
           let v: number|string|boolean = true
           v = v ? (v = 20.0) / 2.0 : 1.0
           if (!res) {
@@ -166,12 +112,3 @@ cases:
               res = (q > 155.0 ? v < 41.0 ? 1.0 : 2.0 : 3.0) == 2.0
           }
 
-    - code: |-
-          let v: string|number|Error|null = new Error()
-          let q: boolean|number|Error|null = false
-          if (!res) {
-              v = 42.0
-              q = 156.0
-          }
-          res = (q > 155.0 ? v < 41.0 ? 1.0 : 2.0 : 3.0) == 2.0
-      tags: 'compile-only, negative'

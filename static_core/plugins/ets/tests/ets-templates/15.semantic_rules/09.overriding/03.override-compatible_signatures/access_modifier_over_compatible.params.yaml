@@ -13,16 +13,6 @@
 
 ---
 cases:
-  # not override-compatible
-  - tags: negative, compile-only
-    decl: |-
-      class Derived extends Base implements Interface {
-        public public_foo(): string { 
-          res = 11;
-          return "some str";
-        }
-      }
-
   - decl: |-
       class Derived<T> extends Base {
         protected protected_foo(y: T) { res = 11; }

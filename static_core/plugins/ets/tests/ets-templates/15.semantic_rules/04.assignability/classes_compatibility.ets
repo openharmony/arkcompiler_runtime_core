@@ -13,13 +13,11 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
 desc: Type T1 is compatible with type T2 if there is an implicit conversion (see Implicit Conversions)
       that allows converting type T1 to type T2.
       Classes not inherited from each other are incompatible.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 class A {
@@ -33,7 +31,9 @@ class B {
 }
 
 function main() {
-    {{c.run}}
+      let a: A = new A(1);
+      let b: B = new B(1, "some str");
+      let c: Object;
+      c = a;
+      c = b;
 }
-
-{% endfor %}

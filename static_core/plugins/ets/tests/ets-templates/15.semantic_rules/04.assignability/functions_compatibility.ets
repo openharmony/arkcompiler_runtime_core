@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
 desc: Compatible functions have same number of arguments. Arguments and return values should follow the variance rule.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 function foo(i: int) {
@@ -41,8 +39,6 @@ function barretstr(i: int) {
 }
 
 function main() {
-    let x: (i: int) => int = {{c.assign}};
-    arktest.assertEQ(x({{c.call}}), {{c.res}});
+    let x: (i: int) => int = foo;
+    arktest.assertEQ(1, x(1));
 }
-
-{% endfor %}

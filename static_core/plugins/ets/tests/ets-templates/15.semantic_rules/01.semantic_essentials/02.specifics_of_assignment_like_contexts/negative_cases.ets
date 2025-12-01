@@ -18,7 +18,7 @@
 desc: >-
     Otherwise, an attempt is made to apply the type of the left-hand-side expression to the right-hand-side expression.
     A compile-time error occurs if the attempt fails as in the example below
-tags: {{c.tags}}
+tags: [compile-only, negative]
 ---*/
 
 function assign{{loop.index}}(x: {{c.type1}}, y: {{c.type2}}) {

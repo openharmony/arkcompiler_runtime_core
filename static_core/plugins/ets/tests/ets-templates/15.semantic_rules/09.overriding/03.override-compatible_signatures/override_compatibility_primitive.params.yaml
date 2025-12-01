@@ -29,28 +29,6 @@ cases:
           arktest.assertEQ(res, 2)
       params: override-compatible with same type parameter
 
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: number): void {
-              res = 1
-          }
-      derived: |-
-          override foo(i: long): void {
-              res = 2
-          }
-      params: override-incompatible parameter
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: number): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: long): void { // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
     # VALUE TYPES, RETURN TYPE
     - base: |-
           foo(): number {
@@ -69,52 +47,3 @@ cases:
           arktest.assertEQ(res, 2)
       params: override-compatible return type
 
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): number {
-              res = 1
-              return 1.0
-          }
-      derived: |-
-          override foo(): boolean {
-              res = 2
-              return true
-          }
-      params: override-incompatible return type
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): number {
-              res = 1
-              return 1.0
-          }
-      derived: |-
-          foo(): boolean {  // override assumed
-              res = 2
-              return true
-          }
-      params: override-incompatible return type
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): void {
-              res = 1
-          }
-      derived: |-
-          foo(): number {
-              res = 2
-              return 1.0
-          }
-      params: override-incompatible return type
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): number {
-              res = 1
-              return 1.0
-          }
-      derived: |-
-          foo(): void {
-              res = 2
-          }
-      params: override-incompatible return type
