@@ -68,7 +68,13 @@ export class Autofixer {
         this[FaultID.AddDeclareToTopLevelFunction].bind(this)
       ]
     ],
-    [ts.SyntaxKind.LiteralType, [this[FaultID.NumbericLiteral].bind(this)]],
+    [
+      ts.SyntaxKind.LiteralType,
+      [
+        this[FaultID.NumbericLiteral].bind(this),
+        this[FaultID.BooleanLiteral].bind(this)
+      ]
+    ],
     [
       ts.SyntaxKind.TypeAliasDeclaration,
       [
@@ -328,6 +334,19 @@ export class Autofixer {
       }
     }
 
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-boolean-literal`
+   */
+  private [FaultID.BooleanLiteral](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isLiteralTypeNode(node)) {
+      const literal = node.literal;
+      if (literal.kind === ts.SyntaxKind.TrueKeyword || literal.kind === ts.SyntaxKind.FalseKeyword) {
+        return this.context.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
+      }
+    }
     return node;
   }
 
