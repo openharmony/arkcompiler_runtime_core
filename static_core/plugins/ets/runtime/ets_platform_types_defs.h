@@ -72,7 +72,7 @@
     T("Lstd/core/QueueSpinlock;", coreQueueSpinlock)                                                                  \
     T("Lstd/core/RWLock;", coreRWLock)                                                                                \
     /* Finalization */                                                                                                \
-    T("Lstd/core/WeakRef;", coreWeakRef)                                                                              \
+    T("Lstd/core/BaseWeakRef;", coreBaseWeakRef)                                                                      \
     T("Lstd/core/FinalizableWeakRef;", coreFinalizableWeakRef)                                                        \
     T("Lstd/core/FinalizationRegistry;", coreFinalizationRegistry)                                                    \
     S("Lstd/core/FinalizationRegistry;", "execCleanup", "Lstd/core/FinRegNode;:V",                                    \

@@ -26,7 +26,7 @@ package std.core;
  *
  * @tparam T Object type for weak reference
  */
-final class FinalizableWeakRef<T extends Object> extends WeakRef<T> {
+final class FinalizableWeakRef<T extends Object> extends BaseWeakRef<T> {
     /**
      * Constructs weak reference object referring to a given target object
      *
