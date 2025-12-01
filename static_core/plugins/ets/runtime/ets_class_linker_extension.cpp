@@ -760,7 +760,7 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
         c->SetFinalizeReference();
         c->SetWeakReference();
     });
-    CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
+    CacheClass(BASE_WEAK_REF, [](auto *c) { c->SetWeakReference(); });
 }
 
 void EtsClassLinkerExtension::InitializeBuiltinClasses()

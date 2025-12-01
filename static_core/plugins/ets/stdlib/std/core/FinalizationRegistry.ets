@@ -15,8 +15,8 @@
 
 package std.core;
 
-class FinRegNode<T> extends WeakRef<Object> {
-    constructor (obj: Object, arg: T, token: WeakRef<Object>|undefined, finReg: FinalizationRegistry<T>) {
+final class FinRegNode<T> extends BaseWeakRef<Any> {
+    constructor(obj: Any, arg: T, token: WeakRef<Object> | undefined, finReg: FinalizationRegistry<T>) {
         super(obj);
         this.token = token;
         this.arg = arg;
@@ -89,11 +89,15 @@ export final class FinalizationRegistry<T> {
      * @param token an object used to remove the entry from the registry
      */
     public register(object: Object, callbackArg: T, token?: Object): void {
+        return this.registerImpl(object, callbackArg, token);
+    }
+
+    private registerImpl(ref: Any, callbackArg: T, token?: Object): void {
         if (token != undefined) {
             // Add unregistrable node into map
             const refToken = new WeakRef<Object>(token!);
             const objectHash = Runtime.getHashCode(token!);
-            let newNode = new FinRegNode<T>(object, callbackArg, refToken, this);
+            let newNode = new FinRegNode<T>(ref, callbackArg, refToken, this);
 
             this.mutex.lock();
             try {
@@ -116,7 +120,7 @@ export final class FinalizationRegistry<T> {
             }
         } else {
             // Add non-unregistrable node into list
-            let newNode = new FinRegNode<T>(object, callbackArg, undefined, this);
+            let newNode = new FinRegNode<T>(ref, callbackArg, undefined, this);
             this.mutex.lock();
             try {
                 newNode.next = this.nonUnregistrableList;

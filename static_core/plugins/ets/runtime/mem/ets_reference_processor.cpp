@@ -102,9 +102,9 @@ template <bool USE_OBJECT_REF>
 void EtsReferenceProcessor::HandleOtherFields(const BaseClass *cls, const ObjectHeader *object,
                                               const ReferenceProcessorT &processor)
 {
-    auto *weakRefClass = ark::ets::PlatformTypes(vm_)->coreWeakRef->GetRuntimeClass();
+    auto *baseWeakRefClass = ark::ets::PlatformTypes(vm_)->coreBaseWeakRef->GetRuntimeClass();
     const auto *klass = static_cast<const Class *>(cls);
-    while (klass != weakRefClass) {
+    while (klass != baseWeakRefClass) {
         auto refNum = klass->GetRefFieldsNum<false>();
         if (refNum == 0) {
             klass = klass->GetBase();
