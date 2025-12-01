@@ -37,7 +37,7 @@ class Platform(PlatformBase):
         self.paoc = self.tools_get('paoc')
         self.ark = self.tools_get('ark')
         self.nark = self.tools_get('nark')
-        self.aot_lib_opts = ' '.join(args.aot_lib_compiler_options)
+        self.aot_lib_opts = ' '.join(args.get('aot_lib_compiler_options', ''))
 
     @property
     def name(self) -> str:
