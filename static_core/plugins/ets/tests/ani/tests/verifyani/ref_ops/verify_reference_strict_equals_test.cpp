@@ -27,20 +27,31 @@ public:
 
         ASSERT_EQ(env_->String_NewUTF8("abc", 3U, &str), ANI_OK);
 
-        ASSERT_EQ(env_->FindModule("verify_reference_strict_equals_test", &module), ANI_OK);
+        ASSERT_EQ(env_->FindModule("verify_reference_strict_equals_test", &module_), ANI_OK);
         std::array functions = {
             ani_native_function {"stackRefWithLocal",
                                  "X{C{std.core.Null}C{std.core.String}}:", reinterpret_cast<void *>(StackRefWithLocal)},
             ani_native_function {"stackRefWithGlobal", "X{C{std.core.Null}C{std.core.String}}:",
                                  reinterpret_cast<void *>(StackRefWithGlobal)},
+            ani_native_function {"anotherFrame", "C{std.core.String}:l", reinterpret_cast<void *>(AnotherFrame)},
+            ani_native_function {"checkRefFromAnotherFrame", ":l", reinterpret_cast<void *>(CheckRefFromAnotherFrame)},
+            ani_native_function {"funcAddress", "C{std.core.String}:l", reinterpret_cast<void *>(FuncAddress)},
+            ani_native_function {"badStackRef", ":l", reinterpret_cast<void *>(BadStackRef)},
         };
-        ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+        ASSERT_EQ(env_->Module_BindNativeFunctions(module_, functions.data(), functions.size()), ANI_OK);
+
+        ani_function fn {};
+        ASSERT_EQ(env_->Module_FindFunction(module_, "getVar", nullptr, &fn), ANI_OK);
+
+        ASSERT_EQ(env_->Function_Call_Ref(fn, &var_), ANI_OK);
     }
 
 protected:
-    ani_module module {};  // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
-    ani_ref nullRef {};    // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
-    ani_string str {};     // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
+    static ani_module module_;
+    static ani_ref someRef_;
+    ani_ref nullRef {};
+    ani_string str {};
+    ani_ref var_;
 
 private:
     static void StackRefWithLocal(ani_env *env, ani_ref ref)
@@ -68,7 +79,50 @@ private:
 
         ASSERT_EQ(res, ANI_TRUE);
     }
+
+    static ani_long AnotherFrame(ani_env *env, ani_ref ref)
+    {
+        someRef_ = ref;
+
+        ani_function fn;
+        auto status = env->Module_FindFunction(module_, "checkRefFromAnotherFrame", nullptr, &fn);
+        if (status != ANI_OK) {
+            return status;
+        }
+        ani_long res {};
+        status = env->Function_Call_Long(fn, &res);
+        if (status != ANI_OK) {
+            return status;
+        }
+        return res;
+    }
+
+    static ani_long CheckRefFromAnotherFrame(ani_env *env)
+    {
+        ani_boolean isEquals = ANI_FALSE;
+        ani_status status = env->c_api->Reference_StrictEquals(env, someRef_, someRef_, &isEquals);
+        return status;
+    }
+
+    static ani_long FuncAddress(ani_env *env, ani_ref ref)
+    {
+        ani_boolean res {};
+        auto status = env->c_api->Reference_StrictEquals(env, ref - sizeof(void *), ref - sizeof(void *), &res);
+        return status;
+    }
+
+    static ani_long BadStackRef(ani_env *env)
+    {
+        ani_boolean res {};
+        const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
+
+        auto status = env->c_api->Reference_StrictEquals(env, fakeRef, fakeRef, &res);
+        return status;
+    }
 };
+
+ani_ref ReferenceStrictEqualsTest::someRef_ {};
+ani_module ReferenceStrictEqualsTest::module_ {};
 
 TEST_F(ReferenceStrictEqualsTest, wrong_env)
 {
@@ -167,22 +221,102 @@ TEST_F(ReferenceStrictEqualsTest, global_ref)
     ASSERT_EQ(env_->GlobalReference_Delete(gref2), ANI_OK);
 }
 
-// NOTE: enable when #28700 is resolved
-TEST_F(ReferenceStrictEqualsTest, DISABLED_stack_ref_local)
+TEST_F(ReferenceStrictEqualsTest, stack_ref_local)
 {
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "checkStackRefWithLocal", ":", &fn), ANI_OK);
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Module_FindFunction(module_, "checkStackRefWithLocal", ":", &fn), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
 }
 
-// NOTE: enable when #28700 is resolved
-TEST_F(ReferenceStrictEqualsTest, DISABLED_stack_ref_global)
+TEST_F(ReferenceStrictEqualsTest, stack_ref_global)
 {
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "checkStackRefWithGlobal", ":", &fn), ANI_OK);
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Module_FindFunction(module_, "checkStackRefWithGlobal", ":", &fn), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
+}
+
+TEST_F(ReferenceStrictEqualsTest, anotherFrame)
+{
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module_, "anotherFrame", nullptr, &fn), ANI_OK);
+
+    ani_long res;
+    ASSERT_EQ(env_->Function_Call_Long(fn, &res, var_), ANI_OK);
+    ASSERT_EQ(res, ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref0", "ani_ref", "wrong reference"},
+        {"ref1", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+}
+
+TEST_F(ReferenceStrictEqualsTest, funcAddress)
+{
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module_, "funcAddress", nullptr, &fn), ANI_OK);
+
+    ani_long res {};
+    ASSERT_EQ(env_->Function_Call_Long(fn, &res, var_), ANI_OK);
+    ASSERT_EQ(res, ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref0", "ani_ref", "wrong reference"},
+        {"ref1", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+}
+
+TEST_F(ReferenceStrictEqualsTest, bad_stack_ref1)
+{
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module_, "badStackRef", nullptr, &fn), ANI_OK);
+
+    ani_long res {};
+    ASSERT_EQ(env_->Function_Call_Long(fn, &res, var_), ANI_OK);
+    ASSERT_EQ(res, ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref0", "ani_ref", "wrong reference"},
+        {"ref1", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+}
+
+TEST_F(ReferenceStrictEqualsTest, bad_stack_ref2)
+{
+    const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
+
+    ani_boolean res {};
+    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, fakeRef, fakeRef, &res), ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref0", "ani_ref", "wrong reference"},
+        {"ref1", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+}
+
+TEST_F(ReferenceStrictEqualsTest, bad_local_ref)
+{
+    const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff01));  // NOLINT(google-runtime-int)
+
+    ani_boolean res {};
+    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, fakeRef, fakeRef, &res), ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref0", "ani_ref", "wrong reference"},
+        {"ref1", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
 }
 
 TEST_F(ReferenceStrictEqualsTest, success)

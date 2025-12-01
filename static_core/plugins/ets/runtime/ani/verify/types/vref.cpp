@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-native function foo(str: null | String): void
+#include "plugins/ets/runtime/ani/verify/types/vref.h"
 
-function checkStackRef(): void {
-    foo(null)
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+
+namespace ark::ets::ani::verify {
+
+ani_ref VRef::GetRef()
+{
+    if (InternalRef::IsStackVRef(this)) {
+        return reinterpret_cast<ani_ref>(this);
+    }
+
+    InternalRef *iref = InternalRef::CastFromVRef(this);
+    return iref->GetRef();
 }
 
-native function anotherFrame(str: String): long
-native function checkRefFromAnotherFrame(): long
-native function funcAddress(str: String): long
-native function badStackRef(): long
-
-function getVar(): String {
-    return "var"
-}
+}  // namespace ark::ets::ani::verify

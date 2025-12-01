@@ -18,3 +18,12 @@ native function foo(str: undefined | String): void
 function checkStackRef(): void {
     foo(undefined)
 }
+
+native function anotherFrame(str: String): long
+native function checkRefFromAnotherFrame(): long
+native function funcAddress(str: String): long
+native function badStackRef(): long
+
+function getVar(): String {
+    return "var"
+}

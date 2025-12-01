@@ -56,7 +56,7 @@ public:
     VFunction *GetVerifiedFunction(ani_function function);
 
     VRef *AddGlobalVerifiedRef(ani_ref gref);
-    void DeleteDeleteGlobalRef(VRef *vgref);
+    void DeleteGlobalVerifiedRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
 
     bool IsValidRefInCurrentFrame(VRef *vref);
@@ -70,6 +70,8 @@ public:
     {
         return interactionAPI_;
     }
+
+    bool IsValidStackRef(VRef *vref);
 
 private:
     enum class SubFrameType {
