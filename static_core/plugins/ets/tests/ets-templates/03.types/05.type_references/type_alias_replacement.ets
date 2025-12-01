@@ -14,23 +14,15 @@
  */
 
 /*---
-desc: Generic named type
+desc: Deep recursive type alias replacement
 ---*/
 
-type T1 = Object
-type T2 = number
-
-function foo(t1: T1, t2: T2) {
-    arktest.assertEQ(typeof t1, 'object')
-    arktest.assertEQ(typeof t2, 'number')
-
-    t1 = t2
-    t2 = t2 + t2
-
-    arktest.assertEQ(t1, 1)    
-    arktest.assertEQ(t2, 2)
-}
+type T3 = number;
+type T2 = T3;
+type T1 = T2;
 
 function main() {
-    foo(new Object(), 1)
+    let x: T1 = 42;
+    arktest.assertTrue(x === 42);
+    arktest.assertTrue(typeof x === 'number');
 }
