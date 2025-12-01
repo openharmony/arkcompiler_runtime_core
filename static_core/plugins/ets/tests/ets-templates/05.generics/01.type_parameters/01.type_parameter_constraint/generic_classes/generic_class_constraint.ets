@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -20,7 +20,6 @@ desc: >-
     If possible instantiations need to be constrained, then an individual constraint can be set for each type parameter after
     the keyword extends. A constraint can have the form of any type.
     {{c.doc}}
-tags: [compile-only]
 params: >
     {{c.type}}
     {{cm}}
@@ -32,7 +31,8 @@ params: >
 
 function main(): void {
 {% if "abstract" not in cm %}
-    new Point<{{c.use}}>()
+    let x = new Point<{{c.use}}>()
+    arktest.assertTrue(x instanceof Point<{{c.assertion_type or c.type}}>)
 {% endif %}
 }
 {% endfor %}

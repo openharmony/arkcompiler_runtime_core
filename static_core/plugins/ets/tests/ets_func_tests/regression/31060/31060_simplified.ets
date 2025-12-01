@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-{% for fd in function_decls %}
 /*---
-desc: >-
-  An omitted function or method return type can be inferred from the function or the method body.
+desc: |
+    Issue 31060. [FE] es2panda crash. Critical issue when accessing extension functions as properties without invocation.
+    Gitcode FE issue 8240, simplified code
 tags: [compile-only, negative]
-expected_out: [{{fd.expected_out}}]
+expected_out: "Semantic error ESE0087: Property 'foo' does not exist on type 'Int'"
 ---*/
 
-{{fd.decl}}
+function foo<T>(this: T): void {}
 
 function main() {
-    {{fd.call|indent}}
+    let x: int = 5
+    let a = x.foo
 }
-{% endfor %}

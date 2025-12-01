@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-{% for fd in function_decls %}
 /*---
-desc: >-
-  An omitted function or method return type can be inferred from the function or the method body.
+desc: Issue 31724 Es2panda crash, abstract class method without body missed if there's console log
 tags: [compile-only, negative]
-expected_out: [{{fd.expected_out}}]
+expected_out: ["Semantic error ESE0017: Only abstract or native methods can't have body."]
 ---*/
 
-{{fd.decl}}
-
-function main() {
-    {{fd.call|indent}}
+abstract class A{
+    private f(): int {return 3}
+    calculation(): int
 }
-{% endfor %}
+
+class B extends A {
+    private f(): int {return 5}
+    calculation() {return this.f}
+}
+
+let x: Array<A> = [new B(), new B()]
+for(let s: A of x) {
+    console.log(s.calculation())
+}

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,19 +13,22 @@
 
 ---
 function_decls:
-    - decl: |-
+    - expected_out: '"Semantic error ESE0018: Native and Declare methods should have explicit return type."'
+      decl: |-
         native function foo(); // CTE, native function without return type
       call: |-
         foo();
 
-    - decl: |-
+    - expected_out: '"Semantic error ESE0104: Not all code paths return a value."'
+      decl: |-
         function foo() { // CTE, the execution path of the function or method body has no return statement
             if(1) return true
         }
       call: |-
         return
 
-    - decl: |-
+    - expected_out: '"Semantic error ESE0104: Not all code paths return a value."'
+      decl: |-
         class A {
             foo() { // CTE, the execution path of the function or method body has no return statement
                 if(0) return true
@@ -34,7 +37,8 @@ function_decls:
       call: |-
         return
 
-    - decl: |-
+    - expected_out: '"Semantic error ESE0078: Cannot use type ''void'' as value."'
+      decl: |-
         let i = 1
         function foo(): void {
             i += 1
@@ -42,7 +46,8 @@ function_decls:
       call: |-
         let x: number = foo();  // CTE, cannot assign void to number
 
-    - decl: |-
+    - expected_out: '"Semantic error ESE0078: Cannot use type ''void'' as value."'
+      decl: |-
         let i = 1
         function foo(): void {
             i += 1
@@ -50,22 +55,47 @@ function_decls:
       call: |-
         let x = foo();  // CTE, Cannot use type 'void' as value
 
-    - decl: |-
+    - expected_out: '"Semantic error ESE0078: Cannot use type ''void'' as value."'
+      decl: |-
         let f = (): void => {}
       call: |-
         let x = f();  // CTE, Cannot use type 'void' as value
 
-    - decl: |-
-        let foo = () { // CTE, the execution path of the function or method body has no return statement
+    - expected_out: '"Semantic error ESE0104: Not all code paths return a value."'
+      decl: |-
+        function foo() { // CTE, the execution path of the function or method body has no return statement
             if(1) return true
         }
       call: |-
         return
 
-    - decl: |-
+    - expected_out: '"Semantic error ESE0104: Not all code paths return a value."'
+      decl: |-
+        let foo = () => { // CTE, the execution path of the function or method body has no return statement
+            if(1) return true
+        }
+      call: |-
+        return
+
+    - expected_out: '"Semantic error ESE0078: Cannot use type ''void'' as value."'
+      decl: |-
         let i = 1
-        let foo(): void => {  // infer void
+        let foo = (): void => {  // infer void
             i += 1
         }
       call: |-
         let x: number = foo();  // CTE, cannot assign void to number
+
+    - expected_out: '"Semantic error ESE0392: type ''this'' can be used only as a method return type."'
+      decl: |
+        function foo(this: int): this {  // return type with the keyword this as type annotation can be used in class instance methods only
+          return this;
+        }
+      call: |
+        foo(1)
+
+    - expected_out: '"Semantic error ESE0392: type ''this'' can be used only as a method return type."'
+      decl: |
+        let foo = (this: int): this => {return this}  // return type with the keyword this as type annotation can be used in class instance methods only
+      call: |
+        foo(1)

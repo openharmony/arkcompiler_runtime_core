@@ -35,6 +35,8 @@ regression/Issue20610.ets
 regression/verify_generics.ets
 regression/verify_generics_constraint_1.ets
 regression/verify_generics_constraint_2.ets
+regression/31060/31060.ets
+regression/30856.ets
 spec/03.types/References_Types/Type_never/neverTypeInheritance.ets
 spec/03.types/References_Types/Type_never/useNeverAsClassNameAndGenericType.ets
 spec/03.types/References_Types/Type_undefined/define/define-class-extends-undefined.ets

@@ -75,7 +75,7 @@ cases:
       
       function foo(this: A): void {}
       let bb: B = new B;
-      bb.foo() 
+      bb.foo()
     expected_out: "Semantic error ESE0081: The extension function 'foo' has the same name with public method in class A"
 
   - decl: |
@@ -84,3 +84,16 @@ cases:
       function foo(): void {}
       function foo(this: A): void {}
     expected_out: "Expected output is unknown"
+
+  #31498
+  - decl: |
+      class A {
+        foo() {}
+      }
+      class B {
+        foo() {}
+      }
+      function foo(this: A) {}
+      let x: A|B = new B
+      x.foo()
+    expected_out: "Semantic error ESE0081: The extension function 'foo' has the same name with public method in class A"

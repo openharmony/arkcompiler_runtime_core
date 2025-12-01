@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -46,8 +46,14 @@ constraints:
     use: number
   - type: boolean
     use: boolean
+  - type: string
+    use: string
+  - type: string
+    use: '"a"'
   - type: void
     use: void
+  - type: void
+    use: 'undefined'
   - type: char
     use: char
   - type: 'null'
@@ -63,5 +69,29 @@ constraints:
     use: Color
   - type: Object, Z extends int
     use: Object, int
+    assertion_type: Object, int
   - type: int, Z extends Object
     use: int, Object
+    assertion_type: int, Object
+  - type: Object
+    use: Object
+  - type: Object
+    use: string
+  - type: Object
+    use: number
+  - type: Object
+    use: Array<int>
+  - type: Object
+    use: FixedArray<string>
+  - type: Object
+    use: Tuple
+  - type: Any
+    use: Any
+  - type: Any
+    use: Object
+  - type: Any
+    use: Object | undefined
+  - type: Any
+    use: Object | null
+  - type: Any
+    use: Object | undefined | null
