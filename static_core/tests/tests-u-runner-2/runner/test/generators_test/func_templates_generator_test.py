@@ -20,6 +20,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
+from runner.common_exceptions import InvalidConfiguration
 from runner.extensions.generators.sts_stdlib.func_templates_generator import FuncTestsCodeGenerator
 from runner.options.config import Config
 from runner.test.generators_test.data import data_test_suite0
@@ -74,4 +75,17 @@ class FuncTemplatesGeneratorTest(TestCase):
         self.assertListEqual(generated_tests, expected_tests)
         # clear up
         shutil.rmtree(test_source_path, ignore_errors=True)
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+
+    def test_overwrite_disabled(self) -> None:
+        test_source_path: Path = Path(__file__).with_name("data")
+        test_gen_path: Path = Path(__file__).with_name("gen")
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+        os.mkdir(test_gen_path)
+        shutil.copy(test_source_path / "test-func-0001.ets", test_gen_path)
+
+        ets_templates_generator = FuncTestsCodeGenerator(test_source_path, test_gen_path, self.config)
+
+        self.assertRaises(InvalidConfiguration, ets_templates_generator.generate)
+
         shutil.rmtree(test_gen_path, ignore_errors=True)
