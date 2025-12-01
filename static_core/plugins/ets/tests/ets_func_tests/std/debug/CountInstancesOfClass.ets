@@ -17,7 +17,7 @@ let keepAlive: object[] = [];
 
 class TestClassA1 {}
 function testCountInstancesOfClass() {
-  let type = Type.from<TestClassA1>() as ClassType;
+  const type = Class.from<TestClassA1>()
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new TestClassA1());
   keepAlive.push(new TestClassA1());
@@ -29,7 +29,7 @@ function testCountInstancesOfClass() {
 class TestClassA2 {}
 class TestSubClassB2 extends TestClassA2 {}
 function testInheritanceBaseClassCount() {
-  let type = Type.from<TestClassA2>() as ClassType;
+  const type = Class.from<TestClassA2>()
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new TestClassA2());
   keepAlive.push(new TestClassA2());
@@ -42,7 +42,7 @@ function testInheritanceBaseClassCount() {
 class TestClassA3 {}
 class TestSubClassB3 extends TestClassA3 {}
 function testInheritanceSubClassCount() {
-  let type = Type.from<TestSubClassB3>() as ClassType;
+  const type = Class.from<TestSubClassB3>()
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new TestSubClassB3());
   keepAlive.push(new TestSubClassB3());
@@ -54,7 +54,7 @@ function testInheritanceSubClassCount() {
 
 class TestUnusedClassC4 {}
 function testZeroInstanceCase() {
-  let type = Type.from<TestUnusedClassC4>() as ClassType;
+  const type = Class.from<TestUnusedClassC4>()
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new TestUnusedClassC4());
   let count = RuntimeDebug.countInstancesOfClass(type);
@@ -65,8 +65,8 @@ function testZeroInstanceCase() {
 class IsolatedA {}
 class IsolatedB {}
 function testMultipleClassIsolation() {
-  let typeA = Type.from<IsolatedA>() as ClassType;
-  let typeB = Type.from<IsolatedB>() as ClassType;
+  const typeA = Class.from<IsolatedA>()
+  const typeB = Class.from<IsolatedB>()
   let initA = RuntimeDebug.countInstancesOfClass(typeA);
   let initB = RuntimeDebug.countInstancesOfClass(typeB);
   keepAlive.push(new IsolatedA());
@@ -89,7 +89,7 @@ class Outer {
 }
  
 function testNestedObjectCount() {
-  let type = Type.from<Inner>() as ClassType;
+  const type = Class.from<Inner>()
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new Outer());
   keepAlive.push(new Outer());
@@ -106,7 +106,7 @@ class Box1<T> {
 }
 
 function testGenericClassCount() {
-  let type = Type.from<Box1<string>>() as ClassType;
+  const type = Class.from<Box1<string>>()
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new Box1<string>('a'));
   keepAlive.push(new Box1<string>('b'));
@@ -117,7 +117,7 @@ function testGenericClassCount() {
 
 class NamedAnonymousLike {}
 function testAnonymousClassCount() {
-  let type = Type.from<NamedAnonymousLike>() as ClassType;
+  const type = Class.from<NamedAnonymousLike>()
   let init = RuntimeDebug.countInstancesOfClass(type);
   keepAlive.push(new NamedAnonymousLike());
   keepAlive.push(new NamedAnonymousLike());

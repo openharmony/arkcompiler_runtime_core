@@ -41,24 +41,15 @@
 
 namespace ark::ets::intrinsics {
 
-extern "C" EtsInt CountInstancesOfClass(EtsTypeAPIType *paramType)
+extern "C" EtsInt CountInstancesOfClass(EtsClass *cls)
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    auto *heapMgr = coro->GetPandaVM()->GetHeapManager();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
-    EtsHandle<EtsTypeAPIType> safeParamType(coro, paramType);
-    EtsHandle<EtsClass> klass(coro, paramType->GetClass());
-    ASSERT(klass.GetPtr() == PlatformTypes()->coreClassType);
-    EtsField *field = klass->GetFieldIDByName("cls", nullptr);
-    if (field == nullptr) {
+    if (cls == nullptr) {
         return EtsInt(0);
     }
-    auto *clsObj = safeParamType->GetFieldObject(field);
-    if (clsObj == nullptr) {
-        return EtsInt(0);
-    }
-    auto *etsCls = EtsClass::FromEtsClassObject(clsObj);
-    return static_cast<EtsInt>(heapMgr->CountInstancesOfClass(etsCls->GetRuntimeClass()));
+    auto *heapMgr = coro->GetPandaVM()->GetHeapManager();
+    return static_cast<EtsInt>(heapMgr->CountInstancesOfClass(cls->GetRuntimeClass()));
 }
 
 extern "C" EtsArray *StdCoreStackTraceLines()
