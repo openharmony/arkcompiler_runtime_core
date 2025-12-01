@@ -107,3 +107,60 @@ cases:
           // spread array of objects to tuple of strings
           let r: [string, string] = [...a]
           arktest.assertEQ(r[0], '1')
+
+  # Custom array class
+    - decl: |-
+        class MyArray extends Array<string> {
+            constructor(p: int) {
+                super(p)
+            }
+        }
+        
+        let a: MyArray = new MyArray(2)
+        a[0] = '1'
+        a[1] = '2'
+      use: |-
+        // spread custom array of strings to custom array
+        let r: MyArray = [...a]
+        arktest.assertEQ(r.length, 2)
+        arktest.assertEQ(r[0], '1')
+        arktest.assertEQ(r[1], '2')
+
+    - decl: |-
+        class MyArray<T> extends Array<T> {
+            constructor(p: int) {
+                super(p)
+            }
+        }
+        
+        let a: MyArray<string> = new MyArray<string>(2)
+        a[0] = '1'
+        a[1] = '2'
+      use: |-
+        // spread custom array to custom array of objects
+        let r: MyArray<Object> = [...a]
+        arktest.assertEQ(r.length, 2)
+        arktest.assertEQ(r[0], '1')
+        arktest.assertEQ(r[1], '2')
+
+    - decl: |-
+        class MyArray extends Array<string> {}
+        
+        let a: [string, string] = ['1', '2']
+      use: |-
+        // spread tuple of strings to custom array
+        let r: MyArray = [...a]
+        arktest.assertEQ(r.length, 2)
+        arktest.assertEQ(r[0], '1')
+        arktest.assertEQ(r[1], '2')
+
+    - decl: |-
+        class MyArray<T> extends Array<T> {}
+        
+        let a: [string, int] = ['1', 2]
+      use: |-
+        // spread tuple to custom array
+        let r: MyArray<Object> = [...a]
+        arktest.assertEQ(r.length, 2)
+        arktest.assertEQ(r[0], '1')
+        arktest.assertEQ(r[1], 2)

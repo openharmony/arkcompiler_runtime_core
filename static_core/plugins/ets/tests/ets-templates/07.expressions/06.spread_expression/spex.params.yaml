@@ -776,3 +776,4 @@ cases:
           arktest.assertEQ(r.length, 2)
           arktest.assertEQ(r[0], '1')
           arktest.assertEQ(r[1], 2)
+
