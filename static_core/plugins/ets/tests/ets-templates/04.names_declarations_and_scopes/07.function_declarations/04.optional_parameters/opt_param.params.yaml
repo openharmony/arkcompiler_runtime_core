@@ -162,7 +162,7 @@ cases:
               arktest.assertTrue( a === undefined )
               a = (t: number): number[] => { return [t]; }
               let x = a!(42.0)
-              arktest.assertTrue( x instanceof number[] && x[0] == 42.0 )
+              arktest.assertTrue( x instanceof Array && x[0] instanceof number && x[0] == 42.0 )
           }
       call: foo()
 
@@ -171,7 +171,7 @@ cases:
           type f = (p: number) => number[]
           function foo(a?: f) {
               let x = a!(42.0)
-              arktest.assertTrue( x instanceof number[] && x[0] == 42.0 )
+              arktest.assertTrue( x instanceof Array && x[0] instanceof number && x[0] == 42.0 )
               a = undefined
               arktest.assertTrue( a === undefined )
           }

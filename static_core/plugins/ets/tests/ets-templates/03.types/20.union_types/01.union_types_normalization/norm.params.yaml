@@ -64,7 +64,7 @@ cases:
               v = undefined
               arktest.assertTrue(v === undefined)
               v = ['a', 'b'] as string[]
-              arktest.assertTrue(v instanceof string[] && v[0] == 'a' && v[1] == 'b')
+              arktest.assertTrue(v instanceof Array && v[0] == 'a' && v[1] == 'b')
               v = new Object()
               arktest.assertTrue(v instanceof Object)
       neg:
@@ -81,7 +81,7 @@ cases:
               v = null
               arktest.assertTrue(v === null)
               v = ['a', 'b'] as string[]
-              arktest.assertTrue(v instanceof string[] && v[0] == 'a' && v[1] == 'b')
+              arktest.assertTrue(v instanceof Array && v[0] == 'a' && v[1] == 'b')
               v = new Object()
               arktest.assertTrue(v instanceof Object)
               v = 'A'
@@ -170,7 +170,7 @@ cases:
               let v: UT = 'abc'
               arktest.assertEQ(v, 'abc')
               v = ['a', 'b', 'c']
-              arktest.assertTrue(v instanceof string[] && v[0] == 'a' && v[2] == 'c')
+              arktest.assertTrue(v instanceof Array && v[0] == 'a' && v[2] == 'c')
               v = new String('\uFFFF')
               arktest.assertEQ(v, '\uFFFF')
       neg:

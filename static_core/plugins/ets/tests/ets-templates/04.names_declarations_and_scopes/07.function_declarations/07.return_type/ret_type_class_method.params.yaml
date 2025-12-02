@@ -101,7 +101,7 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v instanceof number[] && v.length == 3)
+          arktest.assertTrue(v instanceof Array && v[0] instanceof number && v.length == 3)
 
     - decl: |-
           class A {
@@ -113,7 +113,7 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v instanceof Boolean[] && v.length == 0)
+          arktest.assertTrue(v instanceof Array && v.length == 0)
 
     - decl: |-
           class A {
@@ -128,7 +128,7 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(new A().foo() instanceof Long[][])
+          arktest.assertTrue(new A().foo() instanceof Array)
 
     - decl: |-
           class A {
@@ -245,7 +245,7 @@ function_decls:
           }
       call: |-
           let v = new A().foo()
-          arktest.assertTrue(v instanceof boolean|boolean[])
+          arktest.assertTrue(v instanceof boolean|Array)
 
     - decl: |-
           class B<T, U> {}
@@ -335,7 +335,7 @@ function_decls:
           }
       call: |-
           let v = A.foo()
-          arktest.assertTrue(v instanceof number[] && v.length == 3)
+          arktest.assertTrue(v instanceof Array && v[0] instanceof number && v.length == 3)
 
     - decl: |-
           class A {
@@ -346,7 +346,7 @@ function_decls:
           }
       call: |-
           let v = A.foo()
-          arktest.assertTrue(v instanceof Boolean[] && v.length == 0)
+          arktest.assertTrue(v instanceof Array && v.length == 0)
 
     - decl: |-
           class A {
@@ -359,7 +359,7 @@ function_decls:
             }
           }
       call: |-
-          arktest.assertTrue(A.foo() instanceof Long[][])
+          arktest.assertTrue(A.foo() instanceof Array)
 
     - decl: |-
           class A {
@@ -456,7 +456,7 @@ function_decls:
           }
       call: |-
           let v = A.foo()
-          arktest.assertTrue(v instanceof boolean|boolean[])
+          arktest.assertTrue(v instanceof boolean|Array)
 
     - decl: |-
           class B<T, U> {}
