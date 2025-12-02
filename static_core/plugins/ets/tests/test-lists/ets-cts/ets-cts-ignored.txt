@@ -315,6 +315,10 @@
 07.expressions/06.spread_expression/spex_lmbd_26.ets
 07.expressions/06.spread_expression/spex_lmbd_27.ets
 
+#31617 Catch NPE (tests should be updated)
+07.expressions/06.spread_expression/spex_lmbd_33.ets
+07.expressions/06.spread_expression/spex_lmbd_35.ets
+
 #28786
 07.expressions/09.field_access_expressions/field_access_to_override.ets
 
