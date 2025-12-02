@@ -21,12 +21,12 @@ function fillHeap(arr: Object[], numberOfIter: number): void
     const objectSize = GC.getObjectSize(new Object());
     const count = Math.pow(2, 20) / (objectSize / 8);
 
-    arr[globalIdx++] = new Object[count];
-    arr[globalIdx++] = new Object[count / 2];
-    arr[globalIdx++] = new Object[count / 32];
-    arr[globalIdx++] = new Object[count / 64];
-    arr[globalIdx++] = new Object[count / 128];
-    arr[globalIdx++] = new Object[count / 256];
+    arr[globalIdx++] = new Object[count.toInt()];
+    arr[globalIdx++] = new Object[(count / 2).toInt()];
+    arr[globalIdx++] = new Object[(count / 32).toInt()];
+    arr[globalIdx++] = new Object[(count / 64).toInt()];
+    arr[globalIdx++] = new Object[(count / 128).toInt()];
+    arr[globalIdx++] = new Object[(count / 256).toInt()];
 
     let newIterNmb = numberOfIter - globalIdx;
     for (let idx = 0; idx < newIterNmb; ++idx) {
