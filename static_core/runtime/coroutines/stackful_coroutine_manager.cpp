@@ -280,9 +280,6 @@ void StackfulCoroutineManager::InitializeScheduler(Runtime *runtime, PandaVM *vm
                                << " coroutine workers";
         programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(this);
     }
-    if (GetConfig().enableMigration) {
-        StartManagerThread();
-    }
 }
 
 void StackfulCoroutineManager::Finalize()
@@ -802,10 +799,6 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
         << "StackfulCoroutineManager::MainCoroutineCompleted(): waiting for other coroutines to complete";
     GetCurrentWorker()->DestroyCallbackPoster();
     WaitForNonMainCoroutinesCompletion();
-    if (GetConfig().enableMigration) {
-        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): stop manager thread";
-        StopManagerThread();
-    }
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): stopping workers";
     {
@@ -1061,83 +1054,25 @@ bool StackfulCoroutineManager::IsUserCoroutineLimitReached() const
     return limitIsReached;
 }
 
-void StackfulCoroutineManager::ManagerThreadProc()
+bool StackfulCoroutineManager::MigrateCoroutinesInward(StackfulCoroutineWorker *to)
 {
-    // calculate the time after 5 seconds.
-    auto nextCheckTime = ark::os::time::GetClockTimeInMilli() + DETECTION_INTERVAL_VALUE;
-    while (managerRunning_) {
-        {
-            os::memory::LockHolder lock(managerMutex_);
-            managerCv_.TimedWait(&managerMutex_, DETECTION_INTERVAL_VALUE);  // wait 5 seconds.
-            if (!managerRunning_) {
-                LOG(DEBUG, COROUTINES) << "The manager thread stops running.";
-                break;
-            }
-        }
-        uint32_t count = migrateCount_.exchange(0);
-        while (count > 0) {
-            MigrateCoroutinesInward(count);
-        }
-        auto now = ark::os::time::GetClockTimeInMilli();
-        if (now >= nextCheckTime) {
-            CheckForBlockedWorkers();
-            nextCheckTime = now + DETECTION_INTERVAL_VALUE;  // update to the next 5 second.
-        }
+    if (!GetConfig().enableMigration) {
+        LOG(DEBUG, COROUTINES) << "Migration is not supported.";
+        return false;
     }
-}
-
-void StackfulCoroutineManager::CheckForBlockedWorkers()
-{
-    os::memory::LockHolder lock(workersLock_);
-    ASSERT(!workers_.empty());
-    for (auto *w : workers_) {
-        // skip main worker and exclusive workers
-        if (w->IsMainWorker() || w->InExclusiveMode()) {
-            continue;
-        }
-        w->MigrateCorosOutwardsIfBlocked();
+    if (to->IsMainWorker() || to->InExclusiveMode()) {
+        return false;
     }
-}
 
-void StackfulCoroutineManager::MigrateCoroutinesInward(uint32_t &count)
-{
     auto affinityMask = CalcAffinityMask(CoroutineWorkerGroup::AnyId());
     os::memory::LockHolder lkWorkers(workersLock_);
     StackfulCoroutineWorker *from = ChooseWorkerImpl(WorkerSelectionPolicy::MOST_LOADED, affinityMask);
     if (from == nullptr || from->IsIdle()) {
-        LOG(DEBUG, COROUTINES) << "no suitable worker.";
-        count = 0;
-        return;
-    }
-
-    for (auto *w : workers_) {
-        // skip main worker and exclusive workers
-        if (w->IsMainWorker() || w->InExclusiveMode()) {
-            continue;
-        }
-        if (w->MigrateFrom(from)) {
-            --count;
-            return;
-        }
-    }
-    count = 0;
-}
-
-bool StackfulCoroutineManager::MigrateCoroutinesOutward(StackfulCoroutineWorker *from)
-{
-    if (from->IsIdle()) {
-        LOG(DEBUG, COROUTINES) << "The worker is idle, stop migration outward.";
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MigrateCoroutinesInward : no suitable worker.";
         return false;
     }
-    auto affinityMask = CalcAffinityMask(CoroutineWorkerGroup::AnyId());
-    os::memory::LockHolder lkWorkers(workersLock_);
-    StackfulCoroutineWorker *to = ChooseWorkerImpl(WorkerSelectionPolicy::LEAST_LOADED, affinityMask);
-    if (to == nullptr || to == from) {
-        LOG(DEBUG, COROUTINES) << "no suitable worker.";
-        return false;
-    }
-    from->MigrateTo(to);
-    return true;
+
+    return to->MigrateFrom(from);
 }
 
 StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerImpl(WorkerSelectionPolicy policy, AffinityMask mask)
@@ -1176,51 +1111,12 @@ StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerImpl(WorkerSelect
     return *wIt;
 }
 
-void StackfulCoroutineManager::TriggerMigration()
-{
-    auto *worker = GetCurrentWorker();
-    if (worker->IsMainWorker() || worker->InExclusiveMode()) {
-        return;
-    }
-    if (!GetConfig().enableMigration) {
-        LOG(DEBUG, COROUTINES) << "Migration is not supported.";
-        return;
-    }
-    ++migrateCount_;
-    LOG(DEBUG, COROUTINES) << "trigger migration.";
-    os::memory::LockHolder lock(managerMutex_);
-    managerCv_.Signal();
-}
-
 void StackfulCoroutineManager::MigrateAwakenedCoro(Coroutine *co)
 {
     os::memory::LockHolder lkWorkers(workersLock_);
     auto *w = ChooseWorkerForCoroutine(co);
     ASSERT(w != nullptr);
     w->AddRunnableCoroutine(co);
-}
-
-void StackfulCoroutineManager::StartManagerThread()
-{
-    // create a thread to detect worker blocking and perform coroutine migration
-    managerRunning_ = true;
-    managerThread_ = std::thread(&StackfulCoroutineManager::ManagerThreadProc, this);
-    os::thread::SetThreadName(managerThread_.native_handle(), "managerThread");
-}
-
-void StackfulCoroutineManager::StopManagerThread()
-{
-    if (!managerRunning_) {
-        return;
-    }
-    {
-        os::memory::LockHolder lock(managerMutex_);
-        managerRunning_ = false;
-        managerCv_.SignalAll();
-    }
-    if (managerThread_.joinable()) {
-        managerThread_.join();
-    }
 }
 
 PandaUniquePtr<StackfulCoroutineStateInfoTable> StackfulCoroutineManager::GetAllWorkerFullStatus() const
@@ -1265,9 +1161,6 @@ CoroutineWorkerGroup::Id StackfulCoroutineManager::GenerateWorkerGroupId(Corouti
 void StackfulCoroutineManager::PreZygoteFork()
 {
     WaitForNonMainCoroutinesCompletion();
-    if (GetConfig().enableMigration) {
-        StopManagerThread();
-    }
 
     FinalizeWorkers(commonWorkersCount_ - 1, Runtime::GetCurrent(), Runtime::GetCurrent()->GetPandaVM());
 }
@@ -1276,9 +1169,6 @@ void StackfulCoroutineManager::PostZygoteFork()
 {
     Runtime *runtime = Runtime::GetCurrent();
     CreateWorkers(commonWorkersCount_ - 1, runtime, runtime->GetPandaVM());
-    if (GetConfig().enableMigration) {
-        StartManagerThread();
-    }
 }
 
 void StackfulCoroutineManager::CalculateUserCoroutinesLimits(size_t &userCoroutineCountLimit, size_t limit)

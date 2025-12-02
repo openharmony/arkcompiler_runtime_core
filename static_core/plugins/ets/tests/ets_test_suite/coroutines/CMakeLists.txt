@@ -23,7 +23,7 @@ add_custom_target(ets_test_suite_coroutines)
 #                         [OPTIONS "--gc-type=epsilon"]
 #                         IMPL "THREADED" "STACKFUL"
 #                         OPTION_SETS_THREADED "DEFAULT"
-#                         OPTION_SETS_STACKFUL "DEFAULT" "POOL" "MIGRATE_AWAKENED"
+#                         OPTION_SETS_STACKFUL "DEFAULT" "POOL" "MIGRATE_AWAKENED" "MIGRATION"
 #                         WORKERS "AUTO" "ONE" "THREE"
 #                         MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
 # )
@@ -79,6 +79,8 @@ function(add_ets_coroutines_test)
                     set(additional_options "--coroutine-dump-stats=true")
                 elseif(option_set STREQUAL "MIGRATE_AWAKENED")
                     set(additional_options "--coroutine-enable-features:migrate-awakened")
+                elseif(option_set STREQUAL "MIGRATION")
+                    set(additional_options "--coroutine-enable-features:migration")
                 endif()
                 string(TOLOWER "${option_set}" options_name)
 
@@ -455,6 +457,14 @@ add_ets_coroutines_test(FILE migrate_awakened_coro.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "MIGRATE_AWAKENED"
+                        WORKERS "THREE"
+                        MODE "INT"
+)
+
+add_ets_coroutines_test(FILE migration.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "MIGRATION"
                         WORKERS "THREE"
                         MODE "INT"
 )

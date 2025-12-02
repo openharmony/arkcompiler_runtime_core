@@ -109,8 +109,10 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
 
     runnablesLock_.Lock();
     if (!RunnableCoroutinesExist()) {
+        runnablesLock_.Unlock();
         auto coroManager = static_cast<StackfulCoroutineManager *>(waiter->GetManager());
         LOG(FATAL, COROUTINES) << coroManager->GetAllWorkerFullStatus()->OutputInfo();
+        UNREACHABLE();
     }
     // will unlock waiters_lock_ and switch ctx.
     // NB! If migration on await is enabled, current coro can migrate to another worker, so
@@ -400,8 +402,13 @@ void StackfulCoroutineWorker::RequestScheduleImpl()
         if (!needToWait) {
             return;
         }
+
+        bool migrationHappened = coroManager_->MigrateCoroutinesInward(this);
+        if (migrationHappened) {
+            return;
+        }
+
         os::memory::LockHolder lh(runnablesLock_);
-        coroManager_->TriggerMigration();
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::RequestSchedule: No runnables, starting to wait...";
         WaitForRunnables(waitingTimeMs);
     }
@@ -618,27 +625,6 @@ bool StackfulCoroutineWorker::IsIdle()
     return GetRunnablesCount(Coroutine::Type::MUTATOR) == 0;
 }
 
-void StackfulCoroutineWorker::MigrateCorosOutwardsIfBlocked()
-{
-    if (!IsPotentiallyBlocked()) {
-        return;
-    }
-    coroManager_->MigrateCoroutinesOutward(this);
-}
-
-bool StackfulCoroutineWorker::IsPotentiallyBlocked()
-{
-    os::memory::LockHolder lock(runnablesLock_);
-    if (runnables_.Empty() || lastCtxSwitchTimeMillis_ == 0) {
-        return false;
-    }
-    if ((ark::os::time::GetClockTimeInMilli() - lastCtxSwitchTimeMillis_) >= MAX_EXECUTION_DURATION_MS) {
-        LOG(DEBUG, COROUTINES) << "The current coroutine has been executed more than 6s.";
-        return true;
-    }
-    return false;
-}
-
 void StackfulCoroutineWorker::OnBeforeContextSwitch([[maybe_unused]] StackfulCoroutineContext *from,
                                                     [[maybe_unused]] StackfulCoroutineContext *to)
 {
@@ -648,7 +634,6 @@ void StackfulCoroutineWorker::OnBeforeContextSwitch([[maybe_unused]] StackfulCor
      * so it is STRICTLY NOT RECOMMENDED to run managed code from this event handler and
      * its callees.
      */
-    lastCtxSwitchTimeMillis_ = ark::os::time::GetClockTimeInMilli();
 }
 
 void StackfulCoroutineWorker::OnAfterContextSwitch(StackfulCoroutineContext *to)
@@ -675,13 +660,15 @@ void StackfulCoroutineWorker::CacheLocalObjectsInCoroutines()
 
 void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStateInfo *info) const
 {
-    os::memory::LockHolder lock(runnablesLock_);
-    runnables_.IterateOverCoroutines([&info](Coroutine *co) { info->AddCoroutine(co); });
     {
         os::memory::LockHolder lh(waitersLock_);
         std::for_each(waiters_.begin(), waiters_.end(), [&info](const std::pair<CoroutineEvent *, Coroutine *> &pair) {
             info->AddCoroutine(pair.second);
         });
+    }
+    {
+        os::memory::LockHolder lock(runnablesLock_);
+        runnables_.IterateOverCoroutines([&info](Coroutine *co) { info->AddCoroutine(co); });
     }
 }
 
