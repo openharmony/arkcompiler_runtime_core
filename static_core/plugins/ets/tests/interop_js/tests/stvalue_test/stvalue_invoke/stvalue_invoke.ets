@@ -13,6 +13,14 @@
  * limitations under the License.
  */
 
+export function runFullGC(): void {
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
+}
+
+export function createWeakRef(dyDate: Date): WeakRef<Date> {
+    return new WeakRef<Date>(dyDate);
+}
+
 export class Student {
     private static id: int = 999;
     private age: int = 0;
