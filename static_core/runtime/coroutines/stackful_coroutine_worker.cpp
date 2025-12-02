@@ -120,7 +120,7 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
 
 void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
 {
-    bool canMigrateAwait = coroManager_->GetConfig().migrateAwakenedCoros && !IsMainWorker() && !InExclusiveMode();
+    bool canMigrateAwakened = coroManager_->GetConfig().migrateAwakenedCoros && !IsMainWorker() && !InExclusiveMode();
     Coroutine *unblockedCoro = nullptr;
     {
         os::memory::LockHolder lockW(waitersLock_);
@@ -128,7 +128,7 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
         if (w != waiters_.end()) {
             unblockedCoro = w->second;
             waiters_.erase(w);
-            if (!canMigrateAwait) {
+            if (!canMigrateAwakened) {
                 os::memory::LockHolder lockR(runnablesLock_);
                 unblockedCoro->RequestUnblock();
                 PushToRunnableQueue(unblockedCoro, unblockedCoro->GetPriority());
@@ -144,7 +144,7 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
         LOG(DEBUG, COROUTINES) << "The coroutine is nullptr.";
         return;
     }
-    if (canMigrateAwait) {
+    if (canMigrateAwakened) {
         coroManager_->MigrateAwakenedCoro(unblockedCoro);
         return;
     }

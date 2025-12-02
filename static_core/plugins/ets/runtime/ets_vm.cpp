@@ -192,7 +192,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
         // enable migration
         options.IsCoroutineEnableFeaturesMigration(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // enable migrate awakened coroutines
-        options.IsCoroutineEnableFeaturesMigrateAwait(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        options.IsCoroutineEnableFeaturesMigrateAwakened(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // workers_count
         options.GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // exclusive workers limit
