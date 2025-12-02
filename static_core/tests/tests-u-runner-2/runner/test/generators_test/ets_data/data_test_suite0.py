@@ -61,7 +61,7 @@ args = {
         'test-root': '.',
         'list-root': '.',
         'parameters': {
-            'extension': 'ets',
+            'extension': 'sts',
             'load-runtimes': 'ets',
             'work-dir': '.'
         }

@@ -450,13 +450,6 @@ class TestStandardFlow(Test):
 
         return passed
 
-    def _log_invalid_tags(self) -> None:
-        if len(self.invalid_tags) > 0:
-            Log.default(
-                _LOGGER,
-                f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
-                f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
-
     def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
             passed, report, fail_kind = True, None, None
