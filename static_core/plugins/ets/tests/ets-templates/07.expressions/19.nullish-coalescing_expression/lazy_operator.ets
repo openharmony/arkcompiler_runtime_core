@@ -18,6 +18,7 @@ desc: |-
     null safety -> Null-Coalescing Operator.
     assert: This operator is lazy, meaning that if the evaluation of the left-hand-side expression is not equal to null, the right-hand-side expression is not evaluated.
     {{c.description}}
+{% if c.expected_error%}expected_error: [{{c.expected_error}}]{% endif %}
 ---*/
 
 let a: Any
