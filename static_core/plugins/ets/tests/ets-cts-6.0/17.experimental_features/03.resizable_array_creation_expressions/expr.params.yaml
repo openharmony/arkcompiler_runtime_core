@@ -93,3 +93,19 @@ cases:
           v[0][0] = c'@'
           arktest.assertEQ(v.length, 1)
           arktest.assertEQ(v[0][0], c'@')
+
+    - decl: |-
+          enum Color: byte { Red, Green, Blue }
+      use: |-
+          let v: Color[] = new Color[Color.Green]
+          v[0] = Color.Blue
+          arktest.assertEQ(v.length, 1)
+          arktest.assertEQ(v[0], Color.Blue)
+
+    - decl: |-
+          enum Color: short { Red = 42, Green, Blue }
+      use: |-
+          let v: Color[] = new Color[Color.Green]
+          v[42] = Color.Blue
+          arktest.assertEQ(v.length, 43)
+          arktest.assertEQ(v[42], Color.Blue)

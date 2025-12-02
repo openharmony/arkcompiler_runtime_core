@@ -22,7 +22,7 @@ cases:
       arktest.assertEQ(map["Mary"], 333)
     assert_result: '"getRecord getIndex getValue "'
 
-  - desc: 'Negative case. Record reference expression completes abruptely'
+  - desc: 'Negative case. Record reference expression completes abruptly'
     record: |-
       throw new Error("Any error to break assignment")
     index: ''
@@ -33,7 +33,7 @@ cases:
       arktest.assertEQ(map["Mary"], 21)
     assert_result: '"getRecord "'
 
-  - desc: 'Negative case. Index reference expression completes abruptely'
+  - desc: 'Negative case. Index reference expression completes abruptly'
     record: ''
     index: |-
       throw new Error("Any error to break assignment")
@@ -44,7 +44,7 @@ cases:
       arktest.assertEQ(map["Mary"], 21)
     assert_result: '"getRecord getIndex "'
 
-  - desc: 'Negative case. Rhs reference expression completes abruptely'
+  - desc: 'Negative case. Rhs reference expression completes abruptly'
     record: ''
     index: ''
     value: |-
