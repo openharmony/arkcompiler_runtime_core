@@ -15,21 +15,35 @@ py -m pip install .\dist\vmb-*-py3-none-any.whl
 vmb version
 ```
 
-### Usage
+or use wrapper script - [see main readme](./readme.md#option-1-using-wrapper-script)
+
+### Node Host platform
+
 ```shell
-# Run Node ts test
-vmb all -p node_host [-v debug]  .\examples\benchmarks\ts\VoidBench.ts
+vmb all -p node_host [-v debug] .\examples\benchmarks\ts\VoidBench.ts
+```
 
-# Run ArkJs test on Windows host
-vmb all -p ark_js_vm_host [-v debug] \
+### ArkJS on OHOS device platform
 
-# Run ArkJS on OHOS device
-
+```shell
 # (optionally) Set env var pointing to hdc binary if it is not in the PATH
-$Env:HDC = "d:\hu\STUBS\hdc.bat"
+$Env:HDC = "C:\path\to\hdc.exe"
+# or add it to PATH
+$env:Path += ";C:\path\to"
 
 vmb all -p ark_js_vm_ohos [-v debug] \
     [--device=DEVSERIAL] [--device-host=DEVICE_HOST] [--device-dir=DEVICE_DIR] \
-    --es2abc-path=d:\hu\workload\1.1\tools\windows\es2abc.exe \
+    --es2abc-path=C:\hu\workload\1.1\tools\windows\es2abc.exe \
     --ark_js_vm-path=d:\hu\vm-exec-stub.bat .\examples\benchmarks\ts\VoidBench.ts
+```
+
+### ArkTs on OHOS device platform
+
+```shell
+vmb all --platform=arkts_ohos [ --log-level=debug ] \
+    --src-langs=ets --langs=ets \
+    --es2panda-path=C:\static\build-tools\es2panda\bin\es2panda.exe \
+    [ --device-dir=/data/local/tmp/my ] \
+    --device-host=10.1.1.1:11111 \
+    .\benchmarks\ets
 ```
