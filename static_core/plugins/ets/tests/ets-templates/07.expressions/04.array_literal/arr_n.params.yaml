@@ -21,7 +21,7 @@ cases:
 
     - decl: |-
           function foo(a: int[]|Object[]) {
-              if (a instanceof int[]) {
+              if (a instanceof Array) {
                   throw new Error
               }
           }
@@ -30,7 +30,7 @@ cases:
 
     - decl: |-
           function foo(a: int[][]|Object[][]) {
-              if (a instanceof int[][]) {
+              if (a instanceof Array) {
                   throw new Error
               }
           }
