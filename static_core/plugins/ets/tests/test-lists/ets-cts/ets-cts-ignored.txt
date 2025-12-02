@@ -535,19 +535,6 @@
 #29160
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
 
-# 31662 Float to float comparison
-07.expressions/33.constant_expression/check_enum/constant_calculation_16.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_17.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_18.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_19.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_21.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_4.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_4.ets
-
 #31475 False positive passed tests on runner-2
 07.expressions/19.nullish-coalescing_expression/lazy_operator_2.ets
 07.expressions/19.nullish-coalescing_expression/lazy_operator_1.ets

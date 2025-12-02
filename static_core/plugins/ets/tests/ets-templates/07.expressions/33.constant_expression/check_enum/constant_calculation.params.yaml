@@ -31,13 +31,13 @@ cases:
   - { type: long, value: 50006, sign: '-', expected: 49996 }
 
   - { type: float, value: 123.2f, sign: '*', expected: 1232 }
-  - { type: float, value: 123.2f, sign: '/', expected: 12.32 }
-  - { type: float, value: 123.2f, sign: '%', expected: 3.2 }
-  - { type: float, value: 123.2f, sign: '+', expected: 133 }
-  - { type: float, value: 123.2f, sign: '-', expected: 113 }
+  - { type: float, value: 123.2f, sign: '/', expected: 12.32f }
+  - { type: float, value: 123.2f, sign: '%', expected: 123.2f%10 }
+  - { type: float, value: 123.2f, sign: '+', expected: 133.2f }
+  - { type: float, value: 123.2f, sign: '-', expected: 113.2f }
 
   - { type: number, value: 5051.9, sign: '*', expected: 50519 }
-  - { type: number, value: 5051.9, sign: '/', expected: 505.19 }
-  - { type: number, value: 5051.9, sign: '%', expected: 1.9 }
+  - { type: number, value: 5051.9, sign: '/', expected: 5051.9/10 }
+  - { type: number, value: 5051.9, sign: '%', expected: 5051.9%10 }
   - { type: number, value: 5051.9, sign: '+', expected: 5061.9 }
   - { type: number, value: 5051.9, sign: '-', expected: 5041.9 }
