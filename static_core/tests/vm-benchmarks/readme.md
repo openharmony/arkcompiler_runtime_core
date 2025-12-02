@@ -3,15 +3,22 @@
 VMB is a tool for running benchmarks for variety of Virtual Machines,
 platforms and languages.
 
-## Quick start
+## Prerequisites
 
-Prerequisites are `python3` (3.7+) with `jinja2` module installed.
+Recommended OS to start `vmb` is Linux.
+Currently Ubuntu 22.04 is the only fully supported system.
+For experimental Windows host support please refer to [this notes](./windows.readme.md).
+
+`python3` (3.7+) with `jinja2` module should be installed.
 (`make vmb` will install missed modules).
+
+On Linux host make sure `\time -v uname` works,
+and if it doesn't, install `time` package: `sudo apt install time`
+
 Virtual Machine to test should be installed on host and/or device.
 See [Notes on setup for platforms](#platforms).
 
-For experimental Windows host support please refer to [this notes](./windows.readme.md).
-
+## Quick start
 
 #### Option 1: Using wrapper script
 
@@ -167,6 +174,10 @@ Note: options `--tests` and `--test-list` could be combined (by OR condition) in
   (no warmup, no tuning cycles).
   Benchmark will run this number of iterations, regardless of time elapsed.
 
+## Dry run
+`--dry-run` option will cause run to stop after generate and compile steps,
+so produced test sources and binaries could be used for debug and analysis.
+
 ## Reuse compiled test binaries (experimental)
 To re-run tests several times without re-compilation use combination of
 `vmb all --skip-cleanup` and `vmb run --skip-compilation`.
@@ -188,9 +199,19 @@ vmb run -p arkts_host -A -v debug --skip-cleanup --skip-compilation ./generated/
 
 
 ## Custom options
-To provide additional option to compiler or virtual machine
-`--<tool>-custom-option` could be used. F.e. add cpu profiling for `node`:
+To provide additional options to compiler or virtual machine use
+`--<tool>-custom-option`.
+
+F.e. add cpu profiling for `node`:
 `vmb all -p node_host --node-custom-option='--cpu-prof' -v debug ./examples/benchmarks/ts/VoidBench.ts`
+
+Note: Option could be provided multiple times in one command for same tool.
+
+F.e. this line `--ark-custom-option='--heap-size-limit=536870912' --ark-custom-option='--print-memory-statistics=true'`
+will result in `ark ... --heap-size-limit=536870912 --print-memory-statistics=true ...`
+
+Note: spaces inside option is not allowed. Please use `=` sign.
+
 
 ## Custom paths to executables (experimental)
 To override paths to compilers and/or virtual machines
@@ -297,14 +318,14 @@ There are several log levels which could be set via `--log-level` option.
 - `debug`
 - `trace`: most verbose
 
+Each level prints in its own color.
+`--no-color` disables color and adds `[%LEVEL]` prefix to each message.
+
 ### Print test list
 `vmb gen -l ts --show-list ./examples/benchmarks`
 
 ### Produce lists for re-run failed tests
 `vmb all -p node_host --fail-list ./failures.lst ./examples/benchmarks`
-
-Each level prints in its own color.
-`--no-color` disables color and adds `[%LEVEL]` prefix to each message.
 
 ## Extra (custom) plugins:
 
@@ -336,7 +357,7 @@ See examples in `examples/benchamrks` directory.
 Using this test format involves separate generation stage (`gen` command).
 Resulting benchmark programs will be generated using templates
 in `plugins/templates` into `generated` directory
-(which could be overriden by `--outdir` option)
+(which could be overridden by `--outdir` option)
 
 Supported doclets are:
 * `@State` on a root class which contains benchmarks tests as its methods.
@@ -350,6 +371,7 @@ Supported doclets are:
    Value can be an int, a string or a comma separated list of ints or strings.
 * `@Import {x, y...} from ./libX.ext` produces import statement and compile `libX.ext` if needed.
 * `@Include ./f.ext` paste contents of `f.ext` into generated source.
+  [See Sample.ts](./examples/benchmarks/ts/Sample.ts)
 * `@Tags t1 [, t2...]` on a root class or method. List of benchmark tags.
 * `@Bugs b1 [, b2...]` on a root class or method. List of associated issues.
 
@@ -380,7 +402,7 @@ By default `etsstdlib` will be compiled into native code,
 to avoid this use `--aot-skip-libs` (`-A`) option
 
 ### Ark JS VM (ark_js_vm_*)
-On host: env var `OHOS_SDK` sould be set to point to OHOS SDK source directory
+On host: env var `OHOS_SDK` should be set to point to OHOS SDK source directory
 inside which `out/*.release` should contain built binaries
 
 On device: `ark_js_vm` and `ark_aot_compiler` should be pushed to device.
@@ -445,8 +467,10 @@ See also [readme here](../../plugins/ets/tests/benchmarks/interop_js/README.md)
 
 ## Self tests and linters
 
-To run all unit tests and linters ussue following command:
+To run all unit tests and linters issue following command:
 
 ```sh
 make tox
 ```
+
+See also [development notes](./develop.readme.md)
