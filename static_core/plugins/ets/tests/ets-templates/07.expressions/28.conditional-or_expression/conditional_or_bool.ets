@@ -16,6 +16,7 @@
 {% for c in cases %}
 /*---
 desc: {{c.doc}}
+{% if c.expected_error%}expected_error: [{{c.expected_error}}]{% endif %}
 ---*/
 
 function fail(): boolean {

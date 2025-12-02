@@ -31,6 +31,7 @@ cases:
       arktest.assertTrue((a && fail()) == false);
 
   - doc: Conditional AND for 2x boolean - unknown false - left to right execution
+    expected_error: '"expected true but was false"'
     decl: |-
       let a: boolean = false;
       let expectedException = (e: Error): boolean => { return (e instanceof AssertionError) }
