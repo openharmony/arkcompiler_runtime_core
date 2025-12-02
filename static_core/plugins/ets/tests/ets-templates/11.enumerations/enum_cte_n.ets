@@ -14,6 +14,7 @@ limitations under the License.
 ---*/
 
 {% for c in cases %}
+{% set nsglob = namespace() %}
 
 {% if 'check_variants' in c %}
   {% set check_variants=c.check_variants %}
@@ -29,6 +30,7 @@ limitations under the License.
   {% set sub_cases_logic=[""] %}
 {% endif %}
 
+{% set nsglob.stdoutCounter = 0 %}
 {% for scl in sub_cases_logic %}
 
 {% set logic_data -%}
@@ -49,10 +51,10 @@ limitations under the License.
   {% set ns.decl = ns.decl|replace("[" ~ k ~ "]", v) %}
 {% endfor %}
 {% set decl=ns.decl %}
-
 /*---
 desc: {{c.desc}}
 tags: [negative, compile-only]
+expected_out: {{c.stdout[nsglob.stdoutCounter]}}
 ---*/
 
 {{decl}}
@@ -61,6 +63,7 @@ function main(): void {
 {{logic_data}}
 }
 
+{% set nsglob.stdoutCounter = nsglob.stdoutCounter + 1 %}
 {% endfor %}
 {% endfor %}
 {% endfor %}

@@ -31,6 +31,15 @@ cases:
       - |-
         const enum Enum1 { first = 42, second }
         const enum Enum2 { first = Enum1.first.valueOf(), second }
+    stdout:
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
 
   - desc: |-
       Wrong init type
@@ -43,6 +52,15 @@ cases:
         enum Enum { first = 1, second = false }
       - |-
         const enum Enum { first = 1, second = false }
+    stdout:
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
 
   - desc: |-
       Wrong type
@@ -55,6 +73,11 @@ cases:
         const enum Enum2 { first = 42, second }
     logic: |-
       let v: Enum2 = Enum1.first
+    stdout:
+      - |- 
+        "Semantic error ESE0318: Type 'Enum1' cannot be assigned to type 'Enum2'"
+      - |- 
+        "Semantic error ESE0318: Type 'Enum1' cannot be assigned to type 'Enum2'"
 
   - desc: |-
       Not allowed conversion
@@ -68,4 +91,10 @@ cases:
     logic: |-
       let v: Enum1 = Enum1.first
       let q: Enum2 = v as Enum2
+    stdout:
+      - |- 
+        "Semantic error ESE0326: Cannot cast type 'Enum1' to 'Enum2'"
+      - |- 
+        "Semantic error ESE0326: Cannot cast type 'Enum1' to 'Enum2'"
+    
 

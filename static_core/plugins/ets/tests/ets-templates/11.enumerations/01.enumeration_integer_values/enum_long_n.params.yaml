@@ -35,6 +35,19 @@ cases:
         enum Enum { first = (5).toLong(), second, third }
       - |-
         const enum Enum { first = (5).toLong(), second, third }
+    stdout:
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
 
   - desc: |-
       Wrong init type
@@ -47,6 +60,15 @@ cases:
         enum Enum { first = 2147483648, second = false }
       - |-
         const enum Enum { first = 2147483648, second = false }
+    stdout:
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
 
   - desc: |-
       Wrong type
@@ -59,6 +81,11 @@ cases:
         const enum Enum2 { first = 2147483648, second }
     logic: |-
       let v: Enum2 = Enum1.first
+    stdout:
+      - |- 
+        "Semantic error ESE0318: Type 'Enum1' cannot be assigned to type 'Enum2'"
+      - |- 
+        "Semantic error ESE0318: Type 'Enum1' cannot be assigned to type 'Enum2'"
 
   - desc: |-
       Not allowed conversion
@@ -72,6 +99,11 @@ cases:
     logic: |-
       let v: Enum1 = Enum1.first
       let q: Enum2 = v as Enum2
+    stdout:
+      - |- 
+        "Semantic error ESE0326: Cannot cast type 'Enum1' to 'Enum2'"
+      - |- 
+        "Semantic error ESE0326: Cannot cast type 'Enum1' to 'Enum2'"
 
   - desc: |-
       Long overflow
@@ -80,3 +112,8 @@ cases:
         enum Enum { first = 9223372036854775807 - 1, second, third }
       - |-
         const enum Enum { first = 9223372036854775807 - 1, second, third }
+    stdout:
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."

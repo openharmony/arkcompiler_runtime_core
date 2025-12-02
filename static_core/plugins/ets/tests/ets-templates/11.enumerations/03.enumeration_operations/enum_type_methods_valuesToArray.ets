@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,16 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-{% set nsglob = namespace() %}
-{% set nsglob.stdoutCounter = 0 %}
-
-{% for decl in c.decl_variants %}
-
-{% set logic_data -%}
-{% if 'logic' in c %}  {{c.logic|indent(width=2)}}{% endif -%}
-{% endset -%}
-
 /*---
-desc: {{c.desc}}
-tags: [compile-only, negative]
-expected_out: {{c.stdout[nsglob.stdoutCounter]}}
+desc: backward check FixedArray from values enumeration static method
 ---*/
 
-{{decl}}
-
-function main() {
-{{logic_data}}
+enum Status {
+    Active = "ACTIVE",
+    Inactive = "INACTIVE",
 }
 
-{% set nsglob.stdoutCounter = nsglob.stdoutCounter + 1 %}
-{% endfor %}
-{% endfor %}
+function main(): void {
+    const t: FixedArray<Status> = Status.values()
+    arktest.assertEQ( t[0], "ACTIVE" )
+}
