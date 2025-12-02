@@ -49,7 +49,7 @@ public:
         auto nextMember = ark::guard::MemberLinker::NextMember(member);
         while (nextMember) {
             LOG_I << "[Test] member[" << i++ << "]:" << nextMember->GetFullyQualifiedName() << " "
-                << member->GetDescriptor();
+                  << member->GetDescriptor();
 
             nextMember = ark::guard::MemberLinker::NextMember(nextMember);
         }
@@ -67,8 +67,8 @@ public:
 HWTEST(MemberLinkerTest, member_linker_test_001, TestSize.Level1)
 {
     abckit_wrapper::FileView fileView;
-    constexpr std::string_view abcFilePath = ARK_GUARD_ABC_FILE_DIR
-        "ut/member_link/module_member_linker_method_test.abc";
+    constexpr std::string_view abcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/member_link/module_member_linker_method_test.abc";
     ASSERT_ABCKIT_WRAPPER_SUCCESS(fileView.Init(abcFilePath));
     ark::guard::MemberLinker memberLinker(fileView);
     ASSERT_ARK_GUARD_SUCCESS(memberLinker.Link());
@@ -76,8 +76,8 @@ HWTEST(MemberLinkerTest, member_linker_test_001, TestSize.Level1)
     // print next members
     TestMemberVisitor visitor;
     ASSERT_TRUE(fileView.ModulesAccept(visitor.Wrap<abckit_wrapper::ClassMemberVisitor>()
-        .Wrap<abckit_wrapper::ModuleClassVisitor>()
-        .Wrap<abckit_wrapper::LocalModuleFilter>()));
+                                           .Wrap<abckit_wrapper::ModuleClassVisitor>()
+                                           .Wrap<abckit_wrapper::LocalModuleFilter>()));
 
     // validate last member
     const auto method1OfClassA = fileView.Get<abckit_wrapper::Method>(
@@ -109,8 +109,8 @@ HWTEST(MemberLinkerTest, member_linker_test_001, TestSize.Level1)
 HWTEST(MemberLinkerTest, member_linker_test_002, TestSize.Level1)
 {
     abckit_wrapper::FileView fileView;
-    constexpr std::string_view abcFilePath = ARK_GUARD_ABC_FILE_DIR
-        "ut/member_link/module_member_linker_field_test.abc";
+    constexpr std::string_view abcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/member_link/module_member_linker_field_test.abc";
     ASSERT_ABCKIT_WRAPPER_SUCCESS(fileView.Init(abcFilePath));
     ark::guard::MemberLinker memberLinker(fileView);
     ASSERT_ARK_GUARD_SUCCESS(memberLinker.Link());
@@ -118,8 +118,8 @@ HWTEST(MemberLinkerTest, member_linker_test_002, TestSize.Level1)
     // print next members
     TestMemberVisitor visitor;
     ASSERT_TRUE(fileView.ModulesAccept(visitor.Wrap<abckit_wrapper::ClassMemberVisitor>()
-        .Wrap<abckit_wrapper::ModuleClassVisitor>()
-        .Wrap<abckit_wrapper::LocalModuleFilter>()));
+                                           .Wrap<abckit_wrapper::ModuleClassVisitor>()
+                                           .Wrap<abckit_wrapper::LocalModuleFilter>()));
 
     // validate last member
     const auto field1SetterOfClassA = fileView.Get<abckit_wrapper::Method>(
@@ -154,7 +154,8 @@ HWTEST(MemberLinkerTest, member_linker_test_002, TestSize.Level1)
     ValidateLastMember<abckit_wrapper::Field>(fileView, "module_member_linker_field_test.ClassB.%%property-field1",
                                               field1OfClassC.value());
     // ClassB set field1
-    ValidateLastMember<abckit_wrapper::Method>(fileView,
+    ValidateLastMember<abckit_wrapper::Method>(
+        fileView,
         "module_member_linker_field_test.ClassB.%%set-field1:module_member_linker_field_test.ClassB;i32;void;",
         field1OfClassC.value());
     // ClassB get field1
@@ -193,8 +194,8 @@ HWTEST(MemberLinkerTest, member_linker_test_003, TestSize.Level1)
     // print next members
     TestMemberVisitor visitor;
     ASSERT_TRUE(fileView.ModulesAccept(visitor.Wrap<abckit_wrapper::ClassMemberVisitor>()
-        .Wrap<abckit_wrapper::ModuleClassVisitor>()
-        .Wrap<abckit_wrapper::LocalModuleFilter>()));
+                                           .Wrap<abckit_wrapper::ModuleClassVisitor>()
+                                           .Wrap<abckit_wrapper::LocalModuleFilter>()));
 
     // validate last member
     const auto method1OfClassA = fileView.Get<abckit_wrapper::Method>(
@@ -234,8 +235,8 @@ HWTEST(MemberLinkerTest, member_linker_test_004, TestSize.Level1)
     // print next members
     TestMemberVisitor visitor;
     ASSERT_TRUE(fileView.ModulesAccept(visitor.Wrap<abckit_wrapper::ClassMemberVisitor>()
-        .Wrap<abckit_wrapper::ModuleClassVisitor>()
-        .Wrap<abckit_wrapper::LocalModuleFilter>()));
+                                           .Wrap<abckit_wrapper::ModuleClassVisitor>()
+                                           .Wrap<abckit_wrapper::LocalModuleFilter>()));
 
     // validate last member
     const auto field1SetterOfClassA = fileView.Get<abckit_wrapper::Method>(
@@ -270,7 +271,8 @@ HWTEST(MemberLinkerTest, member_linker_test_004, TestSize.Level1)
     ValidateLastMember<abckit_wrapper::Field>(fileView, "ns_member_linker_field_test.Ns1.ClassB.%%property-field1",
                                               field1OfClassC.value());
     // ClassB set field1
-    ValidateLastMember<abckit_wrapper::Method>(fileView,
+    ValidateLastMember<abckit_wrapper::Method>(
+        fileView,
         "ns_member_linker_field_test.Ns1.ClassB.%%set-field1:ns_member_linker_field_test.Ns1.ClassB;i32;void;",
         field1OfClassC.value());
     // ClassB get field1

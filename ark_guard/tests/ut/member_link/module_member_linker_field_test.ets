@@ -12,25 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+interface Interface1 {
+    field1: int;
+}
 
-#include <gtest/gtest.h>
+interface Interface2 {
+    field1: int;
+}
 
-#include "ark_guard/ark_guard.h"
+class ClassA implements Interface1 {
+    public field1: int;
+}
 
-using namespace testing::ext;
+class ClassB implements Interface2 {
+    public field1: int;
+}
 
-/**
- * @tc.name: ark_guard_test_001
- * @tc.desc: test ark_guard run
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST(ArkGuardTest, ark_guard_test_001, TestSize.Level0)
-{
-    int argc = 1;
-    char *argv[1];
-    argv[0] = const_cast<char *>("xxx");
-
-    ark::guard::ArkGuard guard;
-    guard.Run(argc, const_cast<const char **>(argv));
+class ClassC extends ClassB {
+    public field1: int;
 }
