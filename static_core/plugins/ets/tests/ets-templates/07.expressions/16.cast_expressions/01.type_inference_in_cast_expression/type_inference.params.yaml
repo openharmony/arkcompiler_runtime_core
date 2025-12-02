@@ -14,65 +14,86 @@
 ---
 cases:
   - type: byte
-    val: 1
+    val: "1"
     assert: arktest.assertTrue(a instanceof byte)
   - type: short
-    val: 1
+    val: "1"
     assert: arktest.assertTrue(a instanceof short)
   - type: int
-    val: 1
+    val: "1"
     assert: arktest.assertTrue(a instanceof int)
   - type: long
-    val: 1
+    val: "1"
     assert: arktest.assertTrue(a instanceof long)
   - type: float
-    val: 1
+    val: "1"
     assert: arktest.assertTrue(a instanceof float)
   - type: double
-    val: 1
+    val: "1"
     assert: arktest.assertTrue(a instanceof double)
   - type: Object
-    val: 1
+    val: "1"
     assert: arktest.assertTrue(a instanceof Object)
   - type: Any
-    val: 1
+    val: "1"
     assert: arktest.assertTrue(a instanceof Any)
   - type: byte[]
     val: "[1, 2]"
-    assert: arktest.assertTrue(a instanceof byte[])
+    assert: |-
+      arktest.assertTrue(a instanceof Array)
+      arktest.assertTrue(a[0] instanceof byte)
+      arktest.assertTrue(a[1] instanceof byte)
   - type: short[]
     val: "[1, 2]"
-    assert: arktest.assertTrue(a instanceof short[])
+    assert: |-
+      arktest.assertTrue(a instanceof Array)
+      arktest.assertTrue(a[0] instanceof short)
+      arktest.assertTrue(a[1] instanceof short)
   - type: int[]
     val: "[1, 2]"
-    assert: arktest.assertTrue(a instanceof int[])
+    assert: |-
+      arktest.assertTrue(a instanceof Array)
+      arktest.assertTrue(a[0] instanceof int)
+      arktest.assertTrue(a[1] instanceof int)
   - type: long[]
     val: "[1, 2]"
-    assert: arktest.assertTrue(a instanceof long[])
+    assert: |-
+      arktest.assertTrue(a instanceof Array)
+      arktest.assertTrue(a[0] instanceof long)
+      arktest.assertTrue(a[1] instanceof long)
   - type: float[]
     val: "[1, 2]"
-    assert: arktest.assertTrue(a instanceof float[])
+    assert: |-
+      arktest.assertTrue(a instanceof Array)
+      arktest.assertTrue(a[0] instanceof float)
+      arktest.assertTrue(a[1] instanceof float)
   - type: double[]
     val: "[1, 2]"
-    assert: arktest.assertTrue(a instanceof double[])
+    assert: |-
+      arktest.assertTrue(a instanceof Array)
+      arktest.assertTrue(a[0] instanceof double)
+      arktest.assertTrue(a[1] instanceof double)
   - type: Object[]
     val: "[1, new Object]"
-    assert: arktest.assertTrue(a instanceof Object[])
+    assert: |-
+      arktest.assertTrue(a instanceof Array)
+      arktest.assertTrue(a[0] instanceof Object)
+      arktest.assertTrue(a[1] instanceof Object)
   - type: "[byte, short, int, long]"
     val: "[1, 2, 3, 4]"
-    assert: ""
+    assert: arktest.assertTrue(a instanceof Object)
   - type: "[float, double]"
     val: "[1, 2]"
-    assert: ""
+    assert: arktest.assertTrue(a instanceof Object)
   - type: "[char, string]"
     val: "[c'a', 'ccc']"
-    assert: ""
+    assert: arktest.assertTrue(a instanceof Object)
   - type: "[double, string, Object]"
     val: "[1, 'cc', 1]"
-    assert: ""
+    assert: arktest.assertTrue(a instanceof Object)
   - type: Record<byte, short>
     val: "{1: 2}"
-    assert: arktest.assertTrue(a instanceof Record<byte, short>)
+    assert: arktest.assertTrue(a instanceof Record)
   - type: A
     val: new A()
     assert: arktest.assertTrue(a instanceof A)

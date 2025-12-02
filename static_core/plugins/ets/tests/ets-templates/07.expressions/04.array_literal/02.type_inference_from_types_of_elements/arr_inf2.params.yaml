@@ -15,37 +15,68 @@
 cases:
     - use: |-
           let a = [new Object, new Boolean]
-          arktest.assertTrue( a instanceof Object[] )
+          arktest.assertTrue( a instanceof Array )
+          arktest.assertTrue( a[0] instanceof Object )
+          arktest.assertTrue( a[1] instanceof Object )
 
     - use: |-
           let b = ["a", "b" + "c"]
-          arktest.assertTrue( b instanceof string[] )
+          arktest.assertTrue( b instanceof Array )
+          arktest.assertTrue( b[0] instanceof string )
+          arktest.assertTrue( b[1] instanceof string )
 
     - use: |-
           let c = [1, 2, 3]
-          arktest.assertTrue( c instanceof number[] )
+          arktest.assertTrue( c instanceof Array )
+          arktest.assertTrue( c[0] instanceof number )
+          arktest.assertTrue( c[1] instanceof number )
+          arktest.assertTrue( c[2] instanceof number )
 
     - use: |-
-          let d = ["a", 1, 3.14]
-          arktest.assertTrue( d instanceof (string|number)[] )
+          let x = ["a", 1, 3.14]
+          let f = (p: (String|Int|Double)[]) => p
+          let d = f(x)
+          arktest.assertTrue( d instanceof Array, "instanceof Array failed" )
+          arktest.assertTrue( d[0] instanceof (String|Int|Double), "instanceof d[0] failed" )
+          arktest.assertTrue( d[1] instanceof (String|Int|Double), "instanceof d[1] failed" )
+          arktest.assertTrue( d[2] instanceof (String|Int|Double), "instanceof d[2] failed" )
 
     - use: |-
-          let d = ["a" + "", 1, 3.14]
-          arktest.assertTrue( d instanceof (String|Number)[] )
+          let x = ["a" + "", 1, 3.14]
+          let f = (p: (String|Int|Double)[]) => p
+          let d = f(x)
+          arktest.assertTrue( d instanceof Array, "instanceof d failed" )
+          arktest.assertTrue( d[0] instanceof (String|Int|Double), "instanceof d[0] failed" )
+          arktest.assertTrue( d[1] instanceof (String|Int|Double), "instanceof d[1] failed" )
+          arktest.assertTrue( d[2] instanceof (String|Int|Double), "instanceof d[2] failed" )
 
     - decl: |-
           class A {}
       use: |-
           let e = [(): void => {}, new A]
-          arktest.assertTrue( e instanceof ((() => void) | A)[] )
+          arktest.assertTrue( e instanceof Array )
+          arktest.assertTrue( e[0] instanceof ((() => void) | A) )
+          arktest.assertTrue( e[1] instanceof ((() => void) | A) )
 
     - use: |-
-          let x = [new Long(), new Number(), new Short()]
-          arktest.assertTrue( x instanceof Numeric[] )
+          let y = [new Long(), new Number(), new Short()]
+          let f = (p: (Long|Double|Short)[]) => p
+          let x = f(y)
+          arktest.assertTrue( x instanceof Array )
+          arktest.assertTrue( x[0] instanceof Long|Double|Short )
+          arktest.assertTrue( x[1] instanceof Long|Double|Short )
+          arktest.assertTrue( x[2] instanceof Long|Double|Short )
 
-    - use: |-
-          let x = [new Long(), new Number(), null, new Short(), undefined]
-          arktest.assertTrue( x instanceof (number|null|undefined)[] )
+    - decl: |-
+          type my_type = Long|Double|null|Short|undefined
+      use: |-
+          let y = [new Long(), new Number(), null, new Short(), undefined]
+          let f = (p: my_type[]) => p
+          let x = f(y)
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof my_type)
+          }
 
     - decl: |-
           let cnt: number
@@ -60,42 +91,98 @@ cases:
               return cnt--
           }
       use: |-
-          arktest.assertTrue( [bar, null, baz, foo] instanceof (F|null)[] )
+          let y = [bar, null, baz, foo]
+          let f = (p: (F|null)[]) => p
+          let x = f(y)
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (F|null))
+          }
 
     - use: |-
-          arktest.assertTrue( [false, 1, 14, 33.98] instanceof (Number|Boolean)[] )
+          let y = [false, 1, 14, 33.98]
+          let f = (p: (Boolean|Int|Double)[]) => p
+          let x = f(y)
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (Boolean|Int|Double))
+          }
 
     - use: |-
-          arktest.assertTrue( [0 as long, "0", 0 as short, 0x1 as int] instanceof (number|string)[] )
+          let y = [0 as long, "0" as string, 0 as short, 0x1 as int]
+          let f = (p: (Long|string|Short|Int)[]) => p
+          let x = f(y)
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (Long|string|Short|Int))
+          }
 
     - use: |-
-          arktest.assertTrue( [new Object(), null, new Error(), null] instanceof (Object|null)[] )
+          let x = [new Object(), null, new Error(), null]
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (Object|null))
+          }
 
     - use: |-
-          arktest.assertTrue( [new Boolean(true), "aaa", new Long()] instanceof (Boolean|string|long)[] )
+          let x = [new Boolean(true), "aaa", new Long()]
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (Boolean|string|long))
+          }
 
     - use: |-
-          arktest.assertTrue( ["aa", "bb", null, "cc", null] instanceof (string|null)[] )
+          let x = ["aa", "bb", null, "cc", null]
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (string|null))
+          }
 
     - use: |-
-          arktest.assertTrue( [0, 1, 2, "aaa", 3, "bbb"] instanceof (string|int)[] )
+          let x = [0, 1, 2, "aaa", 3, "bbb"]
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (string|int))
+          }
 
     - use: |-
-          arktest.assertTrue( [null, null, null, ] instanceof (null)[] )
+          let x = [null, null, null, ]
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof null)
+          }
 
     - use: |-
-          arktest.assertTrue( [undefined, undefined] instanceof (undefined)[] )
+          let x = [undefined, undefined]
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof undefined)
+          }
 
     - use: |-
-          arktest.assertTrue( [null, undefined] instanceof (null|undefined)[] )
+          let x = [null, undefined]
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (null|undefined))
+          }
 
-    - use: |-
-          arktest.assertTrue( [(p: string): number => { return p.length }] instanceof ((p: string) => number)[] )
+    - decl: |-
+          type my_type = (p: string) => number
+      use: |-
+          let x0: my_type = (p: string) => { return p.length }
+          let x = [x0]
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof my_type)
+          }
 
     - decl: |-
           let a = [true, "a", 42.0]
       use: |-
-          arktest.assertTrue( a instanceof (Boolean|string|Number)[] )
+          arktest.assertTrue( a instanceof Array )
+          for(let idx = 0; idx < a.length; idx++) {
+              arktest.assertTrue(a[idx] instanceof (Boolean|string|Number))
+          }
 
     - decl: |-
           class A {}
@@ -103,7 +190,10 @@ cases:
           class C {}
           let a = [{} as A, {} as B, {} as C, {} as A, {} as B, {} as C]
       use: |-
-          arktest.assertTrue( a instanceof (A|B|C)[] )
+          arktest.assertTrue( a instanceof Array )
+          for(let idx = 0; idx < a.length; idx++) {
+              arktest.assertTrue(a[idx] instanceof (A|B|C))
+          }
 
     - decl: |-
           class A {}
@@ -111,18 +201,27 @@ cases:
           class C extends B {}
           let a = [{} as A, {} as B, {} as C, {} as A, {} as B, {} as C]
       use: |-
-          arktest.assertTrue( a instanceof A[] )
+          arktest.assertTrue( a instanceof Array )
+          for(let idx = 0; idx < a.length; idx++) {
+              arktest.assertTrue(a[idx] instanceof A)
+          }
 
     - decl: |-
           let a = ["a", "b", "c", "s", ]
       use: |-
-          arktest.assertTrue( a instanceof string[] )
+          arktest.assertTrue( a instanceof Array )
+          for(let idx = 0; idx < a.length; idx++) {
+              arktest.assertTrue(a[idx] instanceof string)
+          }
 
     - decl: |-
           let s: string = "s"
           let a = ["a", "b", "c", s, ]
       use: |-
-          arktest.assertTrue( a instanceof string[] )
+          arktest.assertTrue( a instanceof Array )
+          for(let idx = 0; idx < a.length; idx++) {
+              arktest.assertTrue(a[idx] instanceof string)
+          }
 
     - decl: |-
           interface I {}
@@ -133,18 +232,29 @@ cases:
           let b: J = new B
       use: |-
           let x = [a, b, "a", "b", a, b, "a", "b"]
-          arktest.assertTrue( x instanceof (I|J|string)[] )
+          arktest.assertTrue( x instanceof Array )
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (I|J|string))
+          }
 
     - decl: |-
           let a = c'1'
       use: |-
           let x = [a, c'2', '1', '2',]
-          arktest.assertTrue( x instanceof (string|Char)[])
+          arktest.assertTrue( x instanceof Array)
+          for(let idx = 0; idx < x.length; idx++) {
+              arktest.assertTrue(x[idx] instanceof (string|Char))
+          }
 
     - decl: |-
+          type my_tuple = [number, Error]
           let b: bigint|double = 0n
           let c: double|string = "0"
-          let d: [number, Error] = [1.0, new Error]
+          let d: my_tuple = [1.0, new Error]
       use: |-
           let x = [b, c, d, "1"]
-          arktest.assertTrue(x instanceof (string|[number, Error]|Double|BigInt)[])
+          arktest.assertTrue(x instanceof Array)
+          arktest.assertTrue(x[0] instanceof bigint|double)
+          arktest.assertTrue(x[1] instanceof double|string)
+          arktest.assertTrue(x[2] instanceof Object)
+          arktest.assertTrue(x[3] instanceof string)

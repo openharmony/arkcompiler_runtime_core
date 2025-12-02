@@ -105,7 +105,7 @@ function_decls:
           }
       call: |-
           let arr: Boolean[] = foo<Boolean>(new Boolean[0])
-          arktest.assertTrue( arr instanceof Boolean[] && arr.length == 0 )
+          arktest.assertTrue( arr instanceof Array && arr.length == 0 )
 
     # mixed type params
     - decl: |-

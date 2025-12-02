@@ -14,9 +14,9 @@
 ---
 cases:
     # literals
-    - { val: '[[0]]', type: number }
+    - { val: '[[0]]', type: Any }
     - { val: '[[0.0, 1.0], [2.0, 3.0], [4.0]]', type: number }
-    - { val: '[[0, 1.0], [0, 2.0]]', type: number }
+    - { val: '[[0, 1.0], [0, 2.0]]', type: Any }
     - { val: '[[0.0f]]', type: float }
     - val: '[[0.0f, 1]]'
     - val: '[[0.0f, 2.0]]'
@@ -43,8 +43,11 @@ cases:
     - val: '[[0b1, 0xF, 0o7, 1e1, 3.0f, 9223372036854775807]]'
     - val: '[[new Byte(), new Short(), new Int(), new Long(), new Float(), new Double()]]'
     - val: '[[new Byte(1), new Short(2), new Int(3), new Long(4), new Float(5), new Double(6), 7n]]'
+      type: 'Numeric | BigInt'
     - val: '[[0n, 0, new Byte(0), new Short(0), new Int(0), new Long(0), new Float(0), new Double(0)]]'
+      type: 'Numeric | BigInt'
     - val: '[[new Byte, new Short(2), new Int(3), new Long(4), new Float(5.0f), new Double(6), 7n]]'
+      type: 'Numeric | BigInt'
 
     # variables
     - decl: |-
@@ -95,7 +98,7 @@ cases:
           const d: long = 4
           let e: float = 5
           const f: double = 6
-      val: '[[0, a] as Integral[], [b, c, d] as Integral[], [e, f,] as Numeric[]]'
+      val: '[[0, a] as Numeric[], [b, c, d] as Numeric[], [e, f,] as Numeric[]]'
 
     - decl: |-
           const a: Byte = 1
@@ -104,7 +107,7 @@ cases:
           let d: Long = 4
           const e: Float = 5
           let f: Double = 6
-      val: '[[a, 0, b, c] as Integral[], [d, e, f,] as Numeric[]]'
+      val: '[[a, 0, b, c] as Numeric[], [d, e, f,] as Numeric[]]'
 
     - decl: |-
           const a: byte = 1
@@ -114,7 +117,7 @@ cases:
           const e: float = 5
           let f: Double = 6
           const g: bigint = 7n
-      val: '[[a, b] as Integral[], [0, c] as Integral[], [d, e] as Numeric[], [f, g] as Object[]]'
+      val: '[[a, b] as Object[], [0, c] as Object[], [d, e] as Object[], [f, g] as Object[]]'
       type: Object
 
     - decl: |-
@@ -125,5 +128,5 @@ cases:
           const e: Float = 5
           let f: double = 6
           const g: BigInt = new BigInt(7)
-      val: '[[a, b] as Integral[], [c, 0] as Integral[], [d, e] as Numeric[], [f, g] as Object[]]'
+      val: '[[a, b] as Object[], [c, 0] as Object[], [d, e] as Object[], [f, g] as Object[]]'
       type: Object
