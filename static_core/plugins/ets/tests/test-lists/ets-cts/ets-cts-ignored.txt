@@ -602,19 +602,6 @@
 #29160
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
 
-# 31662 Float to float comparison
-07.expressions/33.constant_expression/check_enum/constant_calculation_16.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_17.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_18.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_19.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_21.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_4.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_4.ets
-
 #29971
 08.statements/04.local_declarations/post_declaration_func_n_1.ets
 08.statements/04.local_declarations/post_declaration_n_1.ets
