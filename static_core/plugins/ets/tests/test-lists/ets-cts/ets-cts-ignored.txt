@@ -2148,10 +2148,6 @@
 18.annotations/base_annotation_syntax_n_5.ets
 18.annotations/base_annotation_syntax_n_6.ets
 
-
-#30410
-18.annotations/03.exporting_and_importing_annotations/import_as_type.ets
-
 #29159
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_0.ets
 18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_100.ets
