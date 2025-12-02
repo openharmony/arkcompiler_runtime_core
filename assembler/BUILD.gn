@@ -55,7 +55,7 @@ libarkassembler_sources = [
 ]
 
 libarkassembler_configs = [
-  "$ark_root:ark_config",
+  "$ark_root:ark_public_config",
   ":arkassembler_public_config",
   "$ark_root/libpandabase:arkbase_public_config",
   "$ark_root/libpandafile:arkfile_public_config",
@@ -97,6 +97,7 @@ group("arkassembler_header_deps") {
 ohos_static_library("libarkassembler_static") {
   sources = libarkassembler_sources
 
+  configs = [ "$ark_root:ark_config" ]
   public_configs = libarkassembler_configs
 
   deps = [
@@ -139,6 +140,7 @@ ohos_source_set("libarkassembler_frontend_set_static") {
   sources = libarkassembler_sources
 
   public_configs = libarkassembler_configs
+  public_configs += [ "$ark_root:ark_config" ]
 
   deps = [
     ":arkassembler_header_deps",

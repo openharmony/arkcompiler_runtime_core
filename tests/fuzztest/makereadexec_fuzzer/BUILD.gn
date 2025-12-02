@@ -30,6 +30,7 @@ ohos_fuzztest("MakeReadExecFuzzTest") {
   ]
   sources = [ "makereadexec_fuzzer.cpp" ]
   deps = [ "$ark_root/libpandabase:libarkbase_static" ]
+  configs = [ "$ark_root:ark_config" ]
 
   # Temporary adaptation for fuzztest building without musl
   if (!use_musl && (current_cpu == "arm64" || current_cpu == "arm")) {

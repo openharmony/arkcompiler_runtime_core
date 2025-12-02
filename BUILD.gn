@@ -119,12 +119,80 @@ if (!ark_standalone_build) {
 
 # Common config for ark source
 config("ark_config") {
+  configs = [ ":ark_public_config" ]
+  visibility = [
+    "./*",
+    "//arkcompiler/ets_frontend/*",
+  ]
+  cflags_cc = [
+    "-std=c++17",
+    "-pedantic",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-fno-rtti",
+    "-Wno-invalid-offsetof",
+
+    "-Wno-gnu-statement-expression",
+    "-Wno-unused-parameter",
+    "-Wno-unused-result",
+    "-Wno-unused-but-set-variable",
+  ]
+  if (defined(ohos_indep_compiler_enable) && !ohos_indep_compiler_enable) {
+    cflags_cc += [ "-fno-exceptions" ]
+  }
+
+  cflags_c = []
+
+  if (!is_mac && use_pbqp) {
+    cflags_cc += [
+      # PBQP regalloc
+      "-mllvm",
+      "-regalloc=pbqp",
+    ]
+  }
+
+  if (is_fastverify) {
+    cflags_cc += [
+      "-O3",
+      "-ggdb3",
+      "-gdwarf-4",
+      "-fno-omit-frame-pointer",
+      "-D_GLIBCXX_ASSERTIONS",
+    ]
+    cflags_c += [
+      "-O3",
+      "-ggdb3",
+      "-gdwarf-4",
+      "-fno-omit-frame-pointer",
+      "-D_GLIBCXX_ASSERTIONS",
+    ]
+  } else if (is_debug) {
+    cflags_cc += [
+      "-Og",
+      "-ggdb3",
+      "-gdwarf-4",
+    ]
+  }
+
+  if (current_cpu == "arm") {
+    cflags_cc += [
+      "-march=armv7-a",
+      "-mfloat-abi=${arm_float_abi}",
+      "-marm",
+      "-mfpu=vfp",
+    ]
+  }
+}
+
+# used as public_configs in inner_kits
+config("ark_public_config") {
   visibility = [
     "./*",
     "//arkcompiler/ets_frontend/*",
   ]
 
-  include_dirs = [ 
+  include_dirs = [
     "$ark_root",
     "$ark_root/libpandabase/include",
     "$ark_root/libpandabase/include/libpandabase",
@@ -203,57 +271,6 @@ config("ark_config") {
     defines += [ "NDEBUG" ]
   }
 
-  cflags_cc = [
-    "-std=c++17",
-    "-pedantic",
-    "-Wall",
-    "-Wextra",
-    "-Werror",
-    "-fno-rtti",
-    "-Wno-invalid-offsetof",
-
-    "-Wno-gnu-statement-expression",
-    "-Wno-unused-parameter",
-    "-Wno-unused-result",
-    "-Wno-unused-but-set-variable",
-  ]
-  if (defined(ohos_indep_compiler_enable) && !ohos_indep_compiler_enable) {
-    cflags_cc += [ "-fno-exceptions" ]
-  }
-
-  cflags_c = []
-
-  if (!is_mac && use_pbqp) {
-    cflags_cc += [
-      # PBQP regalloc
-      "-mllvm",
-      "-regalloc=pbqp",
-    ]
-  }
-
-  if (is_fastverify) {
-    cflags_cc += [
-      "-O3",
-      "-ggdb3",
-      "-gdwarf-4",
-      "-fno-omit-frame-pointer",
-      "-D_GLIBCXX_ASSERTIONS",
-    ]
-    cflags_c += [
-      "-O3",
-      "-ggdb3",
-      "-gdwarf-4",
-      "-fno-omit-frame-pointer",
-      "-D_GLIBCXX_ASSERTIONS",
-    ]
-  } else if (is_debug) {
-    cflags_cc += [
-      "-Og",
-      "-ggdb3",
-      "-gdwarf-4",
-    ]
-  }
-
   if (enable_relayout_profile) {
     defines += [ "PANDA_ENABLE_RELAYOUT_PROFILE" ]
   }
@@ -264,13 +281,6 @@ config("ark_config") {
   }
 
   if (current_cpu == "arm") {
-    cflags_cc += [
-      "-march=armv7-a",
-      "-mfloat-abi=${arm_float_abi}",
-      "-marm",
-      "-mfpu=vfp",
-    ]
-
     if (arm_float_abi == "soft") {
       defines += [ "PANDA_TARGET_ARM32_ABI_SOFT=1" ]
     } else if (arm_float_abi == "softfp") {
