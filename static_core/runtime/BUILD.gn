@@ -607,7 +607,7 @@ ohos_static_library("libarkruntime_static") {
   subsystem_name = "$ark_subsystem_name"
 }
 
-config("ark_runtime_public_config") {
+config("ark_integrate_public_config") {
   include_dirs = [
     "$ark_root/plugins/ets/dfx",
     "$ark_root/plugins/ets/runtime/integrate",

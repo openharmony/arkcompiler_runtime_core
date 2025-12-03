@@ -13,10 +13,28 @@
 
 import("//arkcompiler/runtime_core/ark_config.gni")
 
+config("libpandabase_public_config") {
+  include_dirs = [
+    "$ark_root/libpandabase/",
+    "$ark_root/libpandabase/include",
+    "$ark_root/libpandabase/include/libpandabase",
+    "$ark_root/platforms",
+    "$target_gen_dir/include",
+    "$target_gen_dir",
+    "$ark_root/static_core/plugins",
+    "$ark_root/static_core/runtime",
+  ]
+
+  include_dirs += platform_include_dirs
+}
+
 config("arkbase_public_config") {
   include_dirs = [
     "$ark_root",
     "$ark_root/libpandabase",
+    "$ark_root/libpandabase/include",
+    "$ark_root/libpandabase/include/libpandabase",
+    "$ark_root/platforms",
     "$target_gen_dir/include",
     "$target_gen_dir",
   ]
@@ -28,6 +46,25 @@ config("arkbase_public_config") {
   include_dirs += platform_include_dirs
   if (is_arkui_x) {
     defines = [ "IS_ARKUI_X_TARGET" ]
+  }
+}
+
+if (!ark_standalone_build && !is_arkui_x) {
+  ohos_shared_headers("arkbase_public_headers") {
+    include_dirs = [
+      "$ark_root/libpandabase/include",
+      "$ark_root/libpandabase/include/libpandabase",
+      "$target_gen_dir/include",
+      "$target_gen_dir",
+    ]
+    include_dirs += platform_include_dirs
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
+  ohos_shared_headers("arkplatform_public_headers") {
+    include_dirs = [ "$ark_root/platforms" ]
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
   }
 }
 
@@ -51,27 +88,14 @@ ark_gen_file("base_options_h") {
 }
 
 action("generate_version_file") {
-  script = "$ark_root/gn/build/cmake_configure_file.py"
-
+  script = "$ark_root/gn/build/make_version_file.sh"
   sources = [ "$ark_root/libpandabase/templates/ark_version.h.in" ]
   outputs = [ "$root_gen_dir/libpandabase/ark_version.h" ]
-
-  hash = exec_script("$ark_root/gn/build/find_git.sh",
-                     [ rebase_path("${ark_root}", "$root_build_dir") ],
-                     "trim string")
-
-  if (hash == "") {
-    args = [
-      rebase_path(sources[0], "$root_build_dir"),
-      rebase_path(outputs[0], "$root_build_dir"),
-    ]
-  } else {
-    args = [
-      rebase_path(sources[0], "$root_build_dir"),
-      rebase_path(outputs[0], "$root_build_dir"),
-      "ARK_VERSION_GIT_HASH=${hash}",
-    ]
-  }
+  args = [
+    rebase_path("${ark_root}", "$root_build_dir"),
+    rebase_path(sources[0], "$root_build_dir"),
+    rebase_path(outputs[0], "$root_build_dir"),
+  ]
 }
 
 if (is_mingw) {
@@ -151,6 +175,10 @@ if (is_mingw) {
     ]
   } else {
     libarkbase_sources += [ "$ark_root/libpandabase/os/mutex.cpp" ]
+  }
+
+  if (is_arkui_x && target_os == "ios") {
+    libarkbase_sources += [ "$ark_root/libpandabase/os/filesystem.cpp" ]
   }
 
   if (is_mac && !is_arkui_x) {
@@ -262,13 +290,15 @@ ohos_source_set("libarkbase_frontend_set_static") {
 
   if (is_arkui_x) {
     deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
+    if (target_os == "ios") {
+      defines = [ "IOS_PLATFORM" ]
+    }
   } else {
     external_deps = [
       "json:nlohmann_json_static",
       sdk_libc_secshared_dep,
     ]
-    if (enable_hilog && defined(ohos_indep_compiler_enable) &&
-        ohos_indep_compiler_enable) {
+    if (enable_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
   }

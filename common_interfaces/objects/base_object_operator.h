@@ -45,6 +45,8 @@ public:
     virtual void ForEachRefField(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Iterate XRef.
     virtual void IterateXRef(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
+    // Iterate object field, and skit the weak referent, ONLY used in interop.
+    virtual void ForEachRefFieldSkipReferent(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Iterate object field And Get Object Size.
     virtual size_t ForEachRefFieldAndGetSize(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Get forwarding pointer.
