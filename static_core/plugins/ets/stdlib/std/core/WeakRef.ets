@@ -15,15 +15,7 @@
 
 package std.core;
 
-/**
- * WeakRef - weak reference to object.
- * A weak reference to an object is a reference that does not prevent the object
- * from being reclaimed by the GC.
- * @remark It's important to avoid relying on any specific GC behaviors.
- *
- * @tparam T Object type for weak reference
- */
-export class WeakRef<T extends Object> {
+class BaseWeakRef<T> {
     // Reference to target object
     private referent: T | undefined;
 
@@ -43,5 +35,24 @@ export class WeakRef<T extends Object> {
      */
     public final deref(): T | undefined {
         return this.referent;
+    }
+}
+
+/**
+ * WeakRef - weak reference to object.
+ * A weak reference to an object is a reference that does not prevent the object
+ * from being reclaimed by the GC.
+ * @remark It's important to avoid relying on any specific GC behaviors.
+ *
+ * @tparam T Object type for weak reference
+ */
+export final class WeakRef<T extends Object> extends BaseWeakRef<T> {
+    /**
+     * Constructs weak reference object referring to a given target object
+     *
+     * @param target - target object for weak reference
+     */
+    public constructor(target: T) {
+        super(target);
     }
 }

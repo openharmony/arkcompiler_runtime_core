@@ -114,11 +114,11 @@ protected:
 
 TEST_F(EtsFinalizableWeakRefTest, FinalizableWeakRefMemoryLayout)
 {
-    // Check the parent is WeakRef because it affects memory layout of fields
-    EtsClass *weakRefClass = vm_->GetClassLinker()->GetClass("Lstd/core/WeakRef;");
-    ASSERT_NE(nullptr, weakRefClass);
+    // Check the parent is BaseWeakRef because it affects memory layout of fields
+    EtsClass *baseWeakRefClass = PlatformTypes(vm_)->coreBaseWeakRef;
+    ASSERT_NE(nullptr, baseWeakRefClass);
     EtsClass *finalizableWeakRefClass = PlatformTypes(vm_)->coreFinalizableWeakRef;
-    ASSERT_EQ(weakRefClass, finalizableWeakRefClass->GetBase());
+    ASSERT_EQ(baseWeakRefClass, finalizableWeakRefClass->GetBase());
     CompareMemberOffsets(finalizableWeakRefClass, GetFinalizableWeakRefMembers());
 }
 
