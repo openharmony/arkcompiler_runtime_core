@@ -90,39 +90,32 @@ Expected<std::string, Error> File::GetExecutablePath()
 
 bool File::HasStatMode(const std::string &path, uint16_t mode)
 {
-    std::filesystem::path p(path);
-    std::string filename = p.filename().string();
-    std::filesystem::path dir = p.parent_path();
+    DWORD attrs = GetFileAttributesA(path.c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES) {
+        return false;  // does not exist
+    }
 
-    WIN32_FIND_DATA findFileData;
-    HANDLE hFind = FindFirstFile((dir / "*").string().c_str(), &findFileData);
-    if (hFind == INVALID_HANDLE_VALUE) {
+    bool isDir = (attrs & FILE_ATTRIBUTE_DIRECTORY) != 0;
+
+    bool wantFile = (mode & _S_IFREG) != 0;
+    bool wantDir = (mode & _S_IFDIR) != 0;
+
+    if (wantFile && isDir)
+        return false;
+    if (wantDir && !isDir)
+        return false;
+
+    bool isReadOnly = (attrs & FILE_ATTRIBUTE_READONLY) != 0;
+    bool wantWrite = (mode & _S_IWRITE) != 0;  // Write permission, owner
+
+    if (wantWrite && isReadOnly) {
         return false;
     }
+    // Does not check _S_IREAD because read is always allowed on Windows if the file exists.
 
-    bool result = false;
-
-    // CC-OFFNXT(G.CTL.03) false positive
-    while (true) {
-        std::string currentFileName = findFileData.cFileName;
-
-        if (currentFileName == filename) {
-            bool isDir = (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-            if ((mode & _S_IFDIR) && isDir) {
-                result = true;
-            } else if ((mode & _S_IFREG) && !isDir) {
-                result = true;
-            }
-            break;
-        }
-
-        if (!FindNextFile(hFind, &findFileData)) {
-            break;
-        }
-    }
-
-    FindClose(hFind);
-    return result;
+    // NOTE: check for _S_IFMT, _S_IFCHR, _S_IEXEC, are not implemented. Not required for current use cases.
+    // If requested something unknown like _S_IFBLK, ignore it. On Windows these modes are not applicable.
+    return true;
 }
 
 }  // namespace ark::os::windows::file
