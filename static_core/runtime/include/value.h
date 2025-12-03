@@ -20,7 +20,7 @@
 #include <type_traits>
 #include <variant>
 
-#include "libpandafile/file_items.h"
+#include "libarkfile/file_items.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/include/coretypes/tagged_value.h"
 

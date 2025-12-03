@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <cstdint>
 #include "plugins/ets/tests/native/native_test_helper.h"
+#include "plugins/ets/runtime/libani_helpers/external_array_buffer.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
 namespace ark::ets::test {
@@ -191,7 +192,7 @@ static void CreateExternalArrayBuffer(ani_env *env, ani_arraybuffer *arrayBuffer
 {
     auto *data = new int8_t[LENGTH];
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-    auto status = DoCreateExternalArrayBuffer(env, data, LENGTH, TestFinalizer, nullptr, arrayBuffer);
+    auto status = CreateFinalizableArrayBuffer(env, data, LENGTH, TestFinalizer, nullptr, arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
     CheckUnhandledError(env);
 }
@@ -304,12 +305,12 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedDetachEmpty)
     CallEtsFunction(&arrayBuffer, "ManagedTest", "createArrayBuffer", 0);
     CheckUnhandledError(env_);
 
-    bool result = false;
-    auto status = ArrayBufferIsDetached(env_, arrayBuffer, &result);
+    ani_boolean result = ANI_FALSE;
+    auto status = IsDetachedArrayBuffer(env_, arrayBuffer, &result);
     ASSERT_EQ(status, ANI_OK);
-    ASSERT_EQ(status, false);
+    ASSERT_EQ(result, ANI_FALSE);
 
-    auto status1 = ArrayBufferDetach(env_, arrayBuffer);
+    auto status1 = DetachArrayBuffer(env_, arrayBuffer);
     ASSERT_EQ(status1, ANI_INVALID_ARGS);
 }
 
@@ -319,12 +320,12 @@ TEST_F(ArrayBufferNativeManagedTest, ArrayBufferManagedDetach)
     CallEtsFunction(&arrayBuffer, "ManagedTest", "createArrayBuffer", TWENTY_FOUR);
     CheckUnhandledError(env_);
 
-    bool result = false;
-    auto status = ArrayBufferIsDetached(env_, arrayBuffer, &result);
+    ani_boolean result = ANI_FALSE;
+    auto status = IsDetachedArrayBuffer(env_, arrayBuffer, &result);
     ASSERT_EQ(status, ANI_OK);
-    ASSERT_EQ(status, false);
+    ASSERT_EQ(result, ANI_FALSE);
 
-    auto status1 = ArrayBufferDetach(env_, arrayBuffer);
+    auto status1 = DetachArrayBuffer(env_, arrayBuffer);
     ASSERT_EQ(status1, ANI_INVALID_ARGS);
 }
 

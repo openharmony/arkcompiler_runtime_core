@@ -22,8 +22,8 @@
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
-#include "utils/arena_containers.h"
-#include "utils/hash.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/hash.h"
 
 namespace ark::compiler {
 class BasicBlock;

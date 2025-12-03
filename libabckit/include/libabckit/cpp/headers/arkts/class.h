@@ -193,13 +193,22 @@ public:
     bool RemoveField(arkts::ClassField field) const;
 
     /**
-     * @brief Add function to the class declaration.
-     * @param [ in ] function - the function is added to the class.
-     * @return `true` on success.
+     * @brief Add new method to the class declaration.
+     * @param [ in ] name - Name of the method.
+     * @param [ in ] returnType - Return type of the method.
+     * @param [ in ] isStatic - Whether the method is static.
+     * @param [ in ] isAsync - Whether the method is async.
+     * @param [ in ] methodVisibility - Visibility of the method.
+     * @return Newly created Function.
+     * @note Allocates
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `Class` is false.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `returnType` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Class doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
-    bool AddMethod(arkts::Function function);
+    arkts::Function AddMethod(const std::string &name, const Type &returnType, bool isStatic = false,
+                              bool isAsync = false,
+                              enum ArktsMethodVisibility methodVisibility = ABCKIT_ARKTS_METHOD_VISIBILITY_PUBLIC);
 
     /**
      * @brief Removes method `method` from the list of methods for the class declaration.

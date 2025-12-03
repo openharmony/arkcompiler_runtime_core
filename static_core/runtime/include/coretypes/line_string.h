@@ -21,7 +21,7 @@
 #include <cstring>
 
 #include "objects/string/base_string-inl.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/object_header.h"
 #include "runtime/include/exceptions.h"
@@ -91,12 +91,14 @@ public:
 
     common::BaseString *ToString()
     {
-        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this));
+        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this),
+                                        this->ClassAddr<common::BaseClass>());
     }
 
     const common::BaseString *ToStringConst() const
     {
-        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this));
+        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this),
+                                             this->ClassAddr<common::BaseClass>());
     }
 
     common::LineString *ToLineString()

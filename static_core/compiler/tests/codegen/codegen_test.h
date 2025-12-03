@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,11 +29,11 @@
 #include "compiler/inplace_task_runner.h"
 #include "compiler/compiler_task_runner.h"
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/utils.h"
 #include "gtest/gtest.h"
 #include "compiler/tests/unit_test.h"
-#include "utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 #include "compiler/tests/vixl_exec_module.h"
 
 namespace ark::compiler {

@@ -15,7 +15,7 @@
 
 #include "json_serialization/jrpc_error.h"
 
-#include "utils/json_builder.h"
+#include "libarkbase/utils/json_builder.h"
 
 namespace ark::tooling::inspector {
 

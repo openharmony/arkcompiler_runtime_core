@@ -17,13 +17,13 @@
 #define PANDA_RUNTIME_METHOD_INL_H_
 
 #include "entrypoints/entrypoints.h"
-#include "libpandafile/code_data_accessor-inl.h"
-#include "libpandafile/code_data_accessor.h"
-#include "libpandafile/file.h"
-#include "libpandafile/method_data_accessor-inl.h"
-#include "libpandafile/method_data_accessor.h"
-#include "libpandafile/proto_data_accessor-inl.h"
-#include "libpandafile/proto_data_accessor.h"
+#include "libarkfile/code_data_accessor-inl.h"
+#include "libarkfile/code_data_accessor.h"
+#include "libarkfile/file.h"
+#include "libarkfile/method_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor.h"
+#include "libarkfile/proto_data_accessor-inl.h"
+#include "libarkfile/proto_data_accessor.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/method.h"
@@ -370,7 +370,7 @@ PandaUniquePtr<Frame, FrameDeleter> Method::InitFrame(ManagedThread *thread, uin
                                                       Frame *currentFrame)
 {
     ASSERT(codeId_.IsValid());
-    auto numVregs = panda_file::CodeDataAccessor::GetNumVregs(*(pandaFile_), codeId_);
+    auto numVregs = GetNumVregs();
     return InitFrameWithNumVRegs<InvokeHelper, ValueT, false>(thread, numVregs, numActualArgs, args, currentFrame);
 }
 

@@ -14,6 +14,18 @@
  */
 
 import TreeMap from '@ohos.util.TreeMap';
+import { BusinessError } from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: int = 10200001;
+const EmptyContainerId: int = 10200010;
+
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
 
 export type TreeSetForEachCb<T> = (value: T, key: T, set: TreeSet<T>) => void;
 export type TreeSetComparator<T> = (firstValue: T, secondValue: T) => double;
@@ -150,7 +162,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @returns the value of the first element if exists
      */
-    getFirstValue(): T | undefined {
+    getFirstValue(): T {
         return this.treeMap.getFirstKey();
     }
 
@@ -170,7 +182,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @returns the value of the last element if exists
      */
-    getLastValue(): T | undefined {
+    getLastValue(): T {
         return this.treeMap.getLastKey();
     }
 
@@ -197,31 +209,25 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
     /**
      * Remove the first element in the TreeSet
      *
-     * @returns the value of the first element in the TreeSet if exists
+     * @returns the value of the first element in the TreeSet
      */
-    popFirst(): T | undefined {
-        if (this.isEmpty()) {
-            return undefined;
-        } else {
-            const res = this.getFirstValue()!;
-            this.remove(res);
-            return res;
-        }
+    popFirst(): T {
+        this.checkEmptyContainer();
+        const res = this.getFirstValue();
+        this.remove(res);
+        return res;
     }
 
     /**
      * Remove the last element in the TreeSet
      *
-     * @returns the value of the last element in the TreeSet if exists
+     * @returns the value of the last element in the TreeSet
      */
-    popLast(): T | undefined {
-        if (this.isEmpty()) {
-            return undefined;
-        } else {
-            const res = this.getLastValue()!;
-            this.remove(res);
-            return res;
-        }
+    popLast(): T {
+        this.checkEmptyContainer();
+        const res = this.getLastValue();
+        this.remove(res);
+        return res;
     }
 
     /**
@@ -247,5 +253,11 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      */
     override $_iterator(): IterableIterator<T> {
         return this.treeMap.keys();
+    }
+
+    private checkEmptyContainer(): void {
+        if (this.isEmpty()) {
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
+        }
     }
 }

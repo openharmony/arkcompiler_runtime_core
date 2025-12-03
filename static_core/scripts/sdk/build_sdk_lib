@@ -29,6 +29,7 @@ function build_panda() {
         -GNinja \
         -S$ARK_ROOT \
         -DCMAKE_BUILD_TYPE=$PANDA_SDK_BUILD_TYPE \
+        -DPANDA_SDK_BUILD=true \
         -DPANDA_PRODUCT_BUILD=$product_build \
         -DPANDA_WITH_ECMASCRIPT=OFF \
         -DPANDA_WITH_ETS=ON \
@@ -36,7 +37,8 @@ function build_panda() {
         -DPANDA_WITH_ACCORD=OFF \
         -DPANDA_WITH_CANGJIE=OFF \
         -DPANDA_WITH_HZ_ECMASCRIPT=OFF \
-        -DPANDA_WITH_TESTS_JAVA_ECMASCRIPT=OFF"
+        -DPANDA_WITH_TESTS_JAVA_ECMASCRIPT=OFF \
+        -DPANDA_TS_BINDINGS=ON"
 
     # shellcheck disable=SC2086
     ${OHOS_SDK_NATIVE}/build-tools/cmake/bin/cmake -B"$build_dir" ${COMMONS_CMAKE_ARGS[@]} $cmake_arguments
@@ -59,10 +61,17 @@ function copy_into_sdk() {
     mkdir -p "$dst"
     cd "$src"
     for FILE in $(cat "$file_list"); do
-        for F in $(find "$FILE" -type f | grep "$include_pattern" | grep -v "$exclude_pattern"); do
-            cp --parents "$F" "$dst"
-        done
+        # See ets2panda's CMakeLists.txt for sdk arktsconfig peculiarities description.  
+        if [[ "$FILE" == "bin/arktsconfig.json" ]]; then
+            mkdir -p "$dst/bin"
+            cp "$src/bin/arktsconfig_to_deliver.json" "$dst/bin/arktsconfig.json"
+        else
+            for F in $(find "$FILE" -type f | grep "$include_pattern" | grep -v "$exclude_pattern"); do
+                cp --parents "$F" "$dst"
+            done
+        fi
     done
+
 }
 
 function copy_abc_files() {
@@ -71,7 +80,11 @@ function copy_abc_files() {
     if [[ -f "$build_dir"/plugins/ets/sdk/etssdk.abc ]]; then
         [[ -f "$PANDA_SDK_PATH"/ets/etssdk.abc ]] || cp "$build_dir"/plugins/ets/sdk/etssdk.abc "$PANDA_SDK_PATH"/ets
     fi
-    [[ -f "$PANDA_SDK_PATH"/ets/etsstdlib.abc ]] || cp "$build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
+    if [[ -f "$build_dir"/plugins/ets/etsstdlib.abc ]]; then
+        cp "$build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
+        mkdir -p "${PANDA_SDK_PATH}/ets/stdlib"
+        cp -r "$build_dir"/plugins/ets/stdlib/decls "${PANDA_SDK_PATH}/ets/stdlib"
+    fi
 }
 
 function linux_arm64_tools() {
@@ -228,6 +241,20 @@ function ts_linter() {
     rm -rf "$linter_root"/node_modules
 }
 
+function es2panda_driver() {
+    echo "> Building es2panda driver"
+    local ts_bindings_root="$ETS_FRONTEND_ROOT/ets2panda/bindings"
+    (cd "$ts_bindings_root" && npm install && npm run run)
+    local build_system_root="$ETS_FRONTEND_ROOT/ets2panda/driver/build_system"
+    (cd "$build_system_root" && npm install && npm run build)
+    mkdir -p "$PANDA_SDK_PATH"/driver/build_system
+    cp -r "$build_system_root"/dist "$PANDA_SDK_PATH"/driver/build_system/
+    cp -rL "$build_system_root"/node_modules "$PANDA_SDK_PATH"/driver/build_system/
+    cp "$build_system_root"/package.json "$PANDA_SDK_PATH"/driver/build_system/
+
+    rm -rf "$ts_bindings_root"/dist "$ts_bindings_root"/ts_bindings.node "$ts_bindings_root"/tsconfig.tsbuildinfo "$build_system_root"/dist
+}
+
 function ets_std_lib() {
     echo "> Copying ets std lib into SDK..."
     mkdir -p "$PANDA_SDK_PATH"/ets/stdlib
@@ -272,6 +299,8 @@ function print_help() {
     --windows_tools         Run building windows tools
 
     --ts_linter             Run building ts_linter
+
+    --es2panda_driver       Run building build_system
 
     --ets_std_lib           Copy ets std lib into SDK
 
@@ -347,6 +376,7 @@ function set_default() {
     LINUX_TOOLS="true"
     WINDOWS_TOOLS="true"
     TS_LINTER="true"
+    ES2PANDA_DRIVER="true"
     ETS_STD_LIB="true"
     ETS_SDK="true"
     ICU_DAT_FILE="true"
@@ -401,6 +431,11 @@ function parse_options() {
             ;;
         --ts_linter)
             TS_LINTER="true"
+            has_args="true"
+            shift
+            ;;
+        --es2panda_driver)
+            ES2PANDA_DRIVER="true"
             has_args="true"
             shift
             ;;
@@ -490,6 +525,10 @@ function build_sdk_targets() {
 
     if [ "$TS_LINTER" = "true" ]; then
         ts_linter
+    fi
+
+    if [ "$ES2PANDA_DRIVER" = "true" ]; then
+        es2panda_driver
     fi
 
     if [ "$ETS_STD_LIB" = "true" ]; then

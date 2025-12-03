@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include "libpandafile/debug_info_extractor.h"
+#include "libarkfile/debug_info_extractor.h"
 
 namespace ark::disasm {
 using LabelTable = std::map<size_t, std::string>;

@@ -19,7 +19,7 @@
 #include <string>
 #include <map>
 #include <assembly-program.h>
-#include "file.h"
+#include "libarkfile/file.h"
 #include "abc_string_table.h"
 
 namespace ark::abc2program {

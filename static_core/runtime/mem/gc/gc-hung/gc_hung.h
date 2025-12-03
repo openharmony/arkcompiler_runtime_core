@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <string>
-#include "libpandabase/utils/time.h"
-#include "libpandabase/os/library_loader.h"
+#include "libarkbase/utils/time.h"
+#include "libarkbase/os/library_loader.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/include/mtmanaged_thread.h"
 

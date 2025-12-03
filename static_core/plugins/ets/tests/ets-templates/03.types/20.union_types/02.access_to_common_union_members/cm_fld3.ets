@@ -17,7 +17,6 @@
 
 /*---
 desc: Access to common union members.
-tags: [{{c.tags}}]
 ---*/
 {{c.decl}}
 

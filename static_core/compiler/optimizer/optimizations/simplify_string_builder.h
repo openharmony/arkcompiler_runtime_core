@@ -41,7 +41,7 @@ constexpr size_t ARGS_NUM_3 = 3;
 constexpr size_t ARGS_NUM_4 = 4;
 constexpr size_t SB_APPEND_STRING_MAX_ARGS = ARGS_NUM_4;
 
-class SimplifyStringBuilder : public Optimization {
+class PANDA_PUBLIC_API SimplifyStringBuilder : public Optimization {
 public:
     explicit SimplifyStringBuilder(Graph *graph);
 
@@ -216,6 +216,7 @@ private:
     void ReconnectStringBuilderCascade(Inst *instance, Inst *inputInst, Inst *appendInstruction,
                                        SaveStateInst *saveState);
     void ReconnectStringBuilderCascades(const ConcatenationLoopMatch &match);
+    RuntimeInterface::FieldPtr GetGetterStringBuilderStringLength();
     void ReconnectToStringLengthChains(const ConcatenationLoopMatch &match);
     void ReconnectInstructions(const ConcatenationLoopMatch &match);
 
@@ -285,6 +286,7 @@ private:
     StringBuilderCallsMap &CollectStringBuilderChainCalls();
     bool CanMergeStringBuilders(Inst *instance, const InstPair &instanceCalls, Inst *inputInstance);
     void Cleanup(Inst *instance, Inst *instanceFirstAppendCall, Inst *inputInstanceToStringCall);
+    void CleanupInstruction(Inst *inst);
     void FixBrokenSaveStatesForStringBuilderCalls(Inst *instance);
     void OptimizeStringBuilderChain();
 
@@ -298,6 +300,7 @@ private:
     ArenaVector<ConcatenationLoopMatch> matches_;
     StringBuilderCallsMap stringBuilderCalls_;
     StringBuilderFirstLastCallsMap stringBuilderFirstLastCalls_;
+    RuntimeInterface::FieldPtr sbStringLengthField_ {nullptr};
 };
 
 }  // namespace ark::compiler

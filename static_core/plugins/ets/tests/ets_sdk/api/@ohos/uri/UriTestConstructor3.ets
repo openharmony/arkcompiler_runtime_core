@@ -83,8 +83,11 @@ function ConstructorTest044() {
 }
 
 function testConstructorThrow(uriText: string, errText: string) {
-  let exceptionCheck = (e: Error | Exception): boolean | string => {
-    return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).toString() == errText)
+  let exceptionCheck = (e: Error): boolean | string => {
+    if (e instanceof BusinessError) {
+      return e.name == "BusinessError" && e.toString() == errText
+    }
+    return false
   }
   arktest.expectThrow((): void => { let that = new uri.URI(uriText); }, exceptionCheck)
 }

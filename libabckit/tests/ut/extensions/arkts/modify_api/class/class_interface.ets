@@ -26,15 +26,14 @@ interface TestInterface {
 }
 
 class TestClass {
-    testHandle(): void
-    {
+    testHandle(): void {
         console.log("testHandle called");
     }
 }
 
 class MyClass implements MyInterface {
-    key: string;
-    value: number;
+    public key: string;
+    public value: number;
 
     constructor(key: string, value: number) {
         this.key = key;
@@ -42,11 +41,11 @@ class MyClass implements MyInterface {
     }
 
     handle(): void {
-        console.log("key: " + this.key + ", value: " + this.value);
+        console.log('key: ' + this.key + ', value: ' + this.value);
     }
 }
 
 function main() {
-    let c = new MyClass("key", 0);
+    let c = new MyClass('key', 0);
     c.handle();
 }

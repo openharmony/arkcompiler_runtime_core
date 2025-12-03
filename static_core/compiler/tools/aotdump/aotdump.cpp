@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,19 +15,19 @@
 
 #include "aot_manager.h"
 #include "aotdump_options.h"
-#include "class_data_accessor.h"
-#include "file.h"
-#include "file-inl.h"
-#include "mem/arena_allocator.h"
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file-inl.h"
+#include "libarkbase/mem/arena_allocator.h"
 #include "mem/gc/gc_types.h"
-#include "mem/pool_manager.h"
-#include "method_data_accessor.h"
-#include "method_data_accessor-inl.h"
-#include "proto_data_accessor.h"
-#include "proto_data_accessor-inl.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkfile/method_data_accessor.h"
+#include "libarkfile/method_data_accessor-inl.h"
+#include "libarkfile/proto_data_accessor.h"
+#include "libarkfile/proto_data_accessor-inl.h"
 #include "runtime/include/class_helper.h"
-#include "utils/arch.h"
-#include "utils/bit_memory_region-inl.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/bit_memory_region-inl.h"
 
 #ifdef PANDA_COMPILER_TARGET_AARCH64
 #include "aarch64/disasm-aarch64.h"
@@ -83,6 +83,12 @@ public:
             return "-";
         }
         auto fileId = panda_file::File::EntityId(id);
+        // NOTE(igozman): Temporary fix for case when file's index from AOT context do not know about "in-memory" files
+        //                which were counted during compilation so fileId  is not from this file #27916
+        if (fileId.GetOffset() >= file_->GetHeader()->fileSize) {
+            return "-";
+        }
+
         panda_file::MethodDataAccessor mda(*file_, fileId);
         panda_file::ProtoDataAccessor pda(*file_, panda_file::MethodDataAccessor::GetProtoId(*file_, fileId));
         std::ostringstream ss;
@@ -120,6 +126,11 @@ public:
         return ClassHelper::GetName(file_->GetStringData(panda_file::File::EntityId(id)).data);
     }
 
+    const std::string &GetFilename() const
+    {
+        return file_->GetFilename();
+    }
+
 private:
     std::unique_ptr<const panda_file::File> file_;
 };
@@ -130,6 +141,44 @@ public:
     NO_COPY_SEMANTIC(AotDump);
     NO_MOVE_SEMANTIC(AotDump);
     ~AotDump() = default;
+
+    std::string GetFilePathFromContext(size_t index) const
+    {
+        std::string_view context = aotFile_->GetClassContext();
+        if (context.empty()) {
+            return "";
+        }
+
+        size_t start = 0;
+        size_t end = context.find(AotClassContextCollector::DELIMETER, start);
+        size_t currentIndex = 1;
+
+        while (end != std::string::npos) {
+            if (currentIndex == index) {
+                auto fileContext = context.substr(start, end - start);
+                size_t hashPos = fileContext.find(AotClassContextCollector::HASH_DELIMETER);
+                if (hashPos == std::string::npos) {
+                    return "";
+                }
+                return std::string(fileContext.substr(0, hashPos));
+            }
+            start = end + 1;
+            end = context.find(AotClassContextCollector::DELIMETER, start);
+            currentIndex++;
+        }
+
+        // Check last file
+        if (currentIndex == index) {
+            auto fileContext = context.substr(start);
+            size_t hashPos = fileContext.find(AotClassContextCollector::HASH_DELIMETER);
+            if (hashPos == std::string::npos) {
+                return "";
+            }
+            return std::string(fileContext.substr(0, hashPos));
+        }
+
+        return "";
+    }
 
     int Run(int argc, const char *argv[])  // NOLINT(modernize-avoid-c-arrays)
     {
@@ -397,15 +446,28 @@ public:
         (*stream_) << prefix << "          ";
         codeInfo.Dump(*stream_, stackmap, arch);
         (*stream_) << std::endl;
-        if (stackmap.HasInlineInfoIndex()) {
-            for (auto ii : const_cast<CodeInfo &>(codeInfo).GetInlineInfos(stackmap)) {
-                (*stream_) << prefix << "          ";
-                codeInfo.DumpInlineInfo(*stream_, stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
-                auto id =
-                    const_cast<CodeInfo &>(codeInfo).GetMethod(stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
-                (*stream_) << ", method: " << pfile.GetMethodName(std::get<uint32_t>(id));
-                (*stream_) << std::endl;
+        if (!stackmap.HasInlineInfoIndex()) {
+            return;
+        }
+        for (auto ii : const_cast<CodeInfo &>(codeInfo).GetInlineInfos(stackmap)) {
+            (*stream_) << prefix << "          ";
+            codeInfo.DumpInlineInfo(*stream_, stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
+            auto id = const_cast<CodeInfo &>(codeInfo).GetMethod(stackmap, ii.GetRow() - stackmap.GetInlineInfoIndex());
+            std::string methodName;
+
+            auto i = ii.GetFileIndex();
+            if (i > 0) {
+                auto filePath = GetFilePathFromContext(i);
+                if (pfile.GetFilename() != filePath) {
+                    methodName = PandaFileHelper(filePath.c_str()).GetMethodName(std::get<uint32_t>(id));
+                }
             }
+            if (methodName.empty()) {
+                methodName = pfile.GetMethodName(std::get<uint32_t>(id));
+            }
+
+            (*stream_) << ", method: " << methodName;
+            (*stream_) << std::endl;
         }
     }
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,9 +41,8 @@ panda_target_link_libraries(arklinker PRIVATE
 panda_target_include_directories(arklinker PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_BINARY_DIR}/libpandabase
     ${PANDA_ROOT}
-    ${CMAKE_SOURCE_DIR}/libpandafile
+    ${CMAKE_BINARY_DIR}
 )
 
 panda_add_executable(ark_link link.cpp)
@@ -61,9 +60,6 @@ panda_target_link_libraries(ark_link arklinker arkbase)
 panda_target_include_directories(ark_link PUBLIC
     ${PANDA_ROOT}
 )
-
-include_directories(${PANDA_ROOT}/libpandabase/)
-include_directories(${CMAKE_BINARY_DIR}/libpandafile/include/)
 
 if (PANDA_WITH_TESTS)
     add_subdirectory(tests)

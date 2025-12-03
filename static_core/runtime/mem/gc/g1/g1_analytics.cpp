@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,9 @@
  */
 
 #include "g1_analytics.h"
-#include "libpandabase/utils/time.h"
-#include "libpandabase/os/time.h"
-#include "libpandabase/utils/type_converter.h"
+#include "libarkbase/utils/time.h"
+#include "libarkbase/os/time.h"
+#include "libarkbase/utils/type_converter.h"
 #include "runtime/mem/gc/card_table.h"
 #include <numeric>
 
@@ -407,7 +407,9 @@ uint64_t G1Analytics::PredictRemsetScanTimeInMicros(size_t edenLength) const
 
 uint64_t G1Analytics::PredictOldCollectionTimeInMicros(Region *region) const
 {
-    auto expectedLiveObjects = region->GetLiveBytes() * region->GetAllocatedObjects() / region->GetAllocatedBytes();
+    uint32_t allocated = region->GetAllocatedBytes();
+    ASSERT(allocated > 0);
+    auto expectedLiveObjects = region->GetLiveBytes() * region->GetAllocatedObjects() / allocated;
     return PredictOldCollectionTimeInMicros(region->GetRemSetSize(), region->GetLiveBytes(), expectedLiveObjects);
 }
 

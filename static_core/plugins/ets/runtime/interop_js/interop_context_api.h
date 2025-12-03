@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_API_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_API_H
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::ets {
 

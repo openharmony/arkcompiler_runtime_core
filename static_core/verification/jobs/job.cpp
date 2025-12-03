@@ -19,6 +19,7 @@
 #include "verification/cflow/cflow_check.h"
 #include "verification/config/debug_breakpoint/breakpoint.h"
 #include "verification/jobs/job.h"
+#include "verification/type/type_system.h"
 #include "verification/public_internal.h"
 
 namespace ark::verifier {
@@ -109,8 +110,12 @@ Class *Job::GetClass(panda_file::File::EntityId classId, ClassLinkerContext *ctx
 {
     const auto *desc = pfile->GetStringData(classId).data;
     if (ClassHelper::IsUnionOrArrayUnionDescriptor(desc)) {
-        return ClassHelper::GetUnionLUBClass(desc, classLinker_, ctx, classLinker_->GetExtension(langContext_),
-                                             errorHandler);
+        auto klass = classLinker_->GetClass(desc, true, ctx, errorHandler);
+        if (klass == nullptr) {
+            return klass;
+        }
+        klass = FindCommonAncestor(classLinker_, ctx, langContext_, klass, errorHandler);
+        return klass;
     }
     return classLinker_->GetClass(desc, true, ctx, errorHandler);
 }

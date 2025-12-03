@@ -61,6 +61,10 @@ cases:
       }
     bound: ' extends Object'
 
+  - use: |-
+      let v = new X[0]
+      arktest.assertEQ(foo <X[]> (v, new Y<X>[0]), v)
+
   # type argument is alias
   - use: |-
       let v: X|null = null
@@ -86,6 +90,12 @@ cases:
       }
     decl: |-
       type B = Y<X>[]|null
+
+  - use: |-
+      let v = new X[0]
+      arktest.assertEQ(foo <B>(v, new Y<X>[0]), v)
+    decl: |-
+      type B = X[]|null
 
   # use interface to create array
   - use: |-

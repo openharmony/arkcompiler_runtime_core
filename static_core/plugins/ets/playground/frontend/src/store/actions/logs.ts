@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,29 +15,57 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
-    setCompileErrLogs,
-    setCompileOutLogs, setDisasmErrLogs,
-    setDisasmOutLogs, setErrLogs,
-    setOutLogs,
-    setRunErrLogs,
-    setRunOutLogs
+    setClearHighLightErrs,
+    setErrLogs,
+    setOutLogs
 } from '../slices/logs';
+import { RootState } from '..';
+import { ELogType } from '../../models/logs';
 
 export const clearOutLogs = createAsyncThunk(
     '@logs/clearOut',
     async (_, thunkAPI) => {
-        thunkAPI.dispatch(setCompileOutLogs([]));
-        thunkAPI.dispatch(setRunOutLogs([]));
-        thunkAPI.dispatch(setDisasmOutLogs([]));
         thunkAPI.dispatch(setOutLogs([]));
+        thunkAPI.dispatch(setClearHighLightErrs());
     },
 );
+
 export const clearErrLogs = createAsyncThunk(
-    '@logs/clearOut',
+    '@logs/clearErr',
     async (_, thunkAPI) => {
-        thunkAPI.dispatch(setCompileErrLogs([]));
-        thunkAPI.dispatch(setRunErrLogs([]));
-        thunkAPI.dispatch(setDisasmErrLogs([]));
         thunkAPI.dispatch(setErrLogs([]));
+        thunkAPI.dispatch(setClearHighLightErrs());
+    },
+);
+
+export const clearCompilationLogs = createAsyncThunk(
+    '@logs/clearCompilation',
+    async (_, thunkAPI) => {
+        const state = thunkAPI.getState() as RootState;
+        const filteredOut = state.logs.out.filter(log =>
+            log.from !== ELogType.COMPILE_OUT
+        );
+        const filteredErr = state.logs.err.filter(log =>
+            log.from !== ELogType.COMPILE_ERR
+        );
+        thunkAPI.dispatch(setOutLogs(filteredOut));
+        thunkAPI.dispatch(setErrLogs(filteredErr));
+        thunkAPI.dispatch(setClearHighLightErrs());
+    },
+);
+
+export const clearRuntimeLogs = createAsyncThunk(
+    '@logs/clearRuntime',
+    async (_, thunkAPI) => {
+        const state = thunkAPI.getState() as RootState;
+        const filteredOut = state.logs.out.filter(log =>
+            log.from !== ELogType.RUN_OUT
+        );
+        const filteredErr = state.logs.err.filter(log =>
+            log.from !== ELogType.RUN_ERR
+        );
+        thunkAPI.dispatch(setOutLogs(filteredOut));
+        thunkAPI.dispatch(setErrLogs(filteredErr));
+        thunkAPI.dispatch(setClearHighLightErrs());
     },
 );

@@ -21,7 +21,7 @@
 #include "common.h"
 #include "compiler/optimizer/ir/datatype.h"
 #include "runtime_adapter.h"
-#include "utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark::bytecodeopt::test {
 

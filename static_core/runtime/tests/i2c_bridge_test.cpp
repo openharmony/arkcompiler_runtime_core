@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,11 @@
 #include <string>
 #include <vector>
 
-#include "libpandafile/bytecode_emitter.h"
-#include "libpandafile/bytecode_instruction.h"
-#include "libpandabase/utils/utils.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/value.h"
+#include "libarkfile/bytecode_emitter.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/value.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/method.h"

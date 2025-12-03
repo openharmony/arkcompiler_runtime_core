@@ -15,7 +15,7 @@
 
 //! CHECKER       AOT IR Builder, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           entry: "ets_string_builder_merge.ETSGLOBAL::main"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC      options: "--compiler-regex='.*chain_concat[0-9]*' --compiler-inlining=false"
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat0"
@@ -201,6 +201,8 @@
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! RUN           entry: "ets_string_builder_merge.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
@@ -688,6 +690,7 @@ function unsupported_usage_chain_concat18(a: String): String {
 //! CHECKER       AOT IR Builder, check String Builders merging (chain_concat19 only, with --compiler-inlining=true)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*chain_concat19' --compiler-inlining=true"
+//! RUN           entry: "ets_string_builder_merge.ETSGLOBAL::main"
 
 function chain_concat19(): void {
     const _ = "_";
@@ -751,6 +754,7 @@ function main() {
 //! CHECKER       Unsupported concat pattern AOT (IBLDF4/22718)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*bugfix_chain_concat20' --compiler-inlining=true"
+//! RUN           entry: "ets_string_builder_merge.ETSGLOBAL::main"
 
 //! CHECKER       Unsupported concat pattern JIT (IBLDF4/22718)
 //! SKIP_IF       @architecture == "arm32"
@@ -768,3 +772,208 @@ function bugfix_chain_concat20(): void
     arktest.assertEQ(abcd, "abcd");
     arktest.assertEQ(abce, "abce");
 }
+
+// NOTE: next RUN_BCO recompiles input abc with SimplifyStringBuilder BCO pass for all INT checkers below
+//! CHECKER       BCO, check String Builders merging
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat0"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",5
+//! INST_COUNT    /StringBuilder::append/,10
+//! INST_COUNT    /StringBuilder::toString/,5
+//! IN_BLOCK      /prehead \(loop 2\)/
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop 2, depth 1/
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /prehead \(loop 1\)/
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//! PASS_AFTER    "BranchElimination"
+//! IN_BLOCK      /loop 1, depth 1/
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,5
+//! IN_BLOCK      /prehead \(loop 2\)/
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 2, depth 1/
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::append/,1
+//! INST_NOT      /StringBuilder::toString/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /prehead \(loop 1\)/
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::append/,1
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1, depth 1/
+//! INST_NOT      /StringBuilder::<ctor>/
+//! INST_COUNT    /StringBuilder::append/,1
+//! INST_NOT      /StringBuilder::toString/
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat1"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",7
+//! INST_COUNT    /StringBuilder::append/,14
+//! INST_COUNT    /StringBuilder::toString/,7
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,8
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    /StringBuilder::toString/,7
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat2"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",9
+//! INST_COUNT    /StringBuilder::append/,18
+//! INST_COUNT    /StringBuilder::toString/,9
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,10
+//! INST_COUNT    /StringBuilder::toString/,9
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat3"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",14
+//! INST_COUNT    /StringBuilder::append/,28
+//! INST_COUNT    /StringBuilder::toString/,14
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    /StringBuilder::append/,16
+//! INST_COUNT    /StringBuilder::toString/,14
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::supported_chain_concat5"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    /StringBuilder::append/,8
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,7
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::supported_chain_concat6"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    /StringBuilder::append/,61
+//! INST_COUNT    /StringBuilder::toString/,2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,60
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_append_chain_concat7"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_constructor_chain_concat8"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_usage_chain_concat9"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_chain_concat10"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_chain_concat11"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_chain_concat12"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_chain_concat13"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::partially_supported_chain_concat14"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    /StringBuilder::append/,5
+//! INST_COUNT    /StringBuilder::toString/,2
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::supported_chain_concat15"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,4
+//! INST_COUNT    /StringBuilder::toString/,2
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::partially_supported_chain_concat16"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! INST_COUNT    /StringBuilder::append/,6
+//! INST_COUNT    /StringBuilder::toString/,3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    /StringBuilder::append/,5
+//! INST_COUNT    /StringBuilder::toString/,2
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_usage_chain_concat17"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//!
+//! METHOD        "ets_string_builder_merge.ETSGLOBAL::unsupported_usage_chain_concat18"
+//! PASS_AFTER    "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    /StringBuilder::append/,2
+//! INST_COUNT    /StringBuilder::toString/,1
+
+//! CHECKER       INTERP-IRTOC, check String Builders merging
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_builder_merge.ETSGLOBAL::main"
+
+//! CHECKER       INTERP-CPP, check String Builders merging
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_builder_merge.ETSGLOBAL::main"

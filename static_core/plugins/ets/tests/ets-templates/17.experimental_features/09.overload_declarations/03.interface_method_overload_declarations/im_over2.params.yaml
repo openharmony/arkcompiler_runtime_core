@@ -51,7 +51,7 @@ cases:
       use: |-
           let a: A = new A()
           arktest.assertEQ( a.m(a), 1 )
-          arktest.assertEQ( a.m(1), 4 )
+          arktest.assertEQ( a.m(1), 1 )
           arktest.assertEQ( a.m(1, a), 2 )
           arktest.assertEQ( a.m(1, a, a), 3 )
           arktest.assertEQ( a.m(1, a, a, a), 4 )

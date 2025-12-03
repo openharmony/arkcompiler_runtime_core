@@ -547,6 +547,50 @@ uint32_t GetMethodOffset(AbckitGraph *graph, AbckitCoreFunction *function)
     return methodOffset;
 }
 
+uint32_t GetFieldOffset(AbckitGraph *graph, AbckitCoreClassField *field)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (graph == nullptr || field == nullptr) {
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return 0;
+    }
+
+    auto *arktsField = field->GetArkTSImpl();
+    if (arktsField == nullptr) {
+        LIBABCKIT_LOG(DEBUG) << "GetArkTSImpl returned nullptr\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return 0;
+    }
+
+    auto *pandasmField = arktsField->GetStaticImpl();
+    if (pandasmField == nullptr) {
+        LIBABCKIT_LOG(DEBUG) << "GetStaticImpl returned nullptr\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return 0;
+    }
+
+    std::string ownerClassName = field->owner->GetArkTSImpl()->impl.GetStaticClass()->name;
+    std::string fullFieldName = ownerClassName + "." + pandasmField->name;
+
+    LIBABCKIT_LOG(DEBUG) << "full field name: " << fullFieldName << '\n';
+
+    uint32_t fieldOffset = 0;
+    for (auto &[id, s] : graph->irInterface->fields) {
+        if (s == fullFieldName) {
+            fieldOffset = id;
+            break;
+        }
+    }
+
+    if (fieldOffset == 0) {
+        LIBABCKIT_LOG(DEBUG) << "fieldOffset == 0\n";
+        LIBABCKIT_UNREACHABLE;
+    }
+
+    return fieldOffset;
+}
+
 uint32_t GetStringOffset(AbckitGraph *graph, AbckitString *string)
 {
     uint32_t stringOffset = 0;
@@ -1126,6 +1170,7 @@ AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value
         case ark::pandasm::Value::Type::I16:
         case ark::pandasm::Value::Type::U16:
         case ark::pandasm::Value::Type::I32:
+            return FindOrCreateValueIntStaticImpl(file, value.GetAsScalar()->GetValue<int>());
         case ark::pandasm::Value::Type::U32:
             return FindOrCreateValueIntStaticImpl(file, value.GetAsScalar()->GetValue<int32_t>());
         case ark::pandasm::Value::Type::I64:

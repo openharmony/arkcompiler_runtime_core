@@ -10,11 +10,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 if (PANDA_TARGET_ARM32)
     return()
 endif()
 
+set(DEFAULT_CACHE_DIR "${CMAKE_BINARY_DIR}/plugins/ets/stdlib/decls")
+file(MAKE_DIRECTORY "${DEFAULT_CACHE_DIR}")
 set(LIB_SOURCE_ETS ${CMAKE_CURRENT_SOURCE_DIR}/lib/lib.ets)
 set(LIB_SOURCE_ABC ${CMAKE_CURRENT_BINARY_DIR}/lib.abc)
 set(LIB_SOURCE_ABC_TARGET compile_lib_abc)

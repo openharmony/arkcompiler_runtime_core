@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_COROUTINES_PRIORITY_QUEUE_H
 #define PANDA_RUNTIME_COROUTINES_PRIORITY_QUEUE_H
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "include/mem/panda_containers.h"
 #include "runtime/coroutines/coroutine_worker.h"
 

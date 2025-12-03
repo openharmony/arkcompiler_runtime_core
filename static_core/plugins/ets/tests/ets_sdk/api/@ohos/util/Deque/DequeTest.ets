@@ -106,7 +106,7 @@ function testKeyIteration() {
     }
     let keyName = "";
     let key: double = 0;
-    for (key in test1) {
+    for (key of test1) {
         keyName += key;
     }
     arktest.assertEQ(keyName, "0123456789");

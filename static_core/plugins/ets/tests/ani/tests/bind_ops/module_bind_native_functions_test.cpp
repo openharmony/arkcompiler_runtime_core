@@ -203,16 +203,9 @@ static ani_long NativeMethodsLongFooNative(ani_env *, ani_class)
 
 TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
-    ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "test001A", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
+    const std::string clsName = std::string(MODULE_NAME).append(".test001A.TestA001");
+    ASSERT_EQ(env_->FindClass(clsName.c_str(), &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -249,16 +242,9 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
 
 TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001_not_found)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
-    ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "test001A", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
+    const std::string clsName = std::string(MODULE_NAME).append(".test001A.TestA001");
+    ASSERT_EQ(env_->FindClass(clsName.c_str(), &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -271,16 +257,9 @@ TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001
 
 TEST_F(ModuleBindNativeFunctionsTest, class_bindNativeMethods_combine_scenes_001_already_binded)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
-    ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "test001A", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "TestA001", &cls), ANI_OK);
+    const std::string clsName = std::string(MODULE_NAME).append(".test001A.TestA001");
+    ASSERT_EQ(env_->FindClass(clsName.c_str(), &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     std::array methods = {
@@ -350,6 +329,7 @@ TEST_F(ModuleBindNativeFunctionsTest, module_bind_native_functions_004)
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
+
 TEST_F(ModuleBindNativeFunctionsTest, bind_intrinsic)
 {
     ani_module module {};
@@ -361,6 +341,24 @@ TEST_F(ModuleBindNativeFunctionsTest, bind_intrinsic)
     };
 
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_ALREADY_BINDED);
+}
+
+TEST_F(ModuleBindNativeFunctionsTest, bind_wrong_signature)
+{
+    ani_module module {};
+    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    std::array functions = {
+        ani_native_function {"checkSignature", "C{std.core.String}:", reinterpret_cast<void *>(Abs)},
+    };
+
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+
+    functions = {
+        ani_native_function {"checkSignature", "C{std/core/String}:", reinterpret_cast<void *>(Abs)},
+    };
+    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_INVALID_DESCRIPTOR);
 }
 
 }  // namespace ark::ets::ani::testing

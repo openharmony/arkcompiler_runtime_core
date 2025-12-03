@@ -17,9 +17,9 @@
 
 #include <bitset>
 
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/utils/time.h"
-#include "libpandabase/os/time.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/time.h"
+#include "libarkbase/os/time.h"
 #include "runtime/include/coretypes/array-inl.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"

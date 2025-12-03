@@ -128,3 +128,167 @@ cases:
           return
       }
       arktest.assertTrue(false, "No expected error")
+
+  - defs: |-
+      let rc: int = 0      
+      let scc: int = 0
+      class StaticThrow extends Error {}
+      class ThrowFromClassInit {
+        static {
+          scc++
+          throw new StaticThrow
+        }
+      }
+    use: |-
+      let cc: int = 0
+  
+      try {
+        new ThrowFromClassInit
+      } catch(e) {
+        if(rc == 0) {
+          arktest.assertTrue( e instanceof StaticThrow )
+        } else {
+          arktest.assertTrue( e instanceof LinkerUnresolvedClassError )
+        }
+        cc++
+      }
+      rc++
+      try {
+        new ThrowFromClassInit
+      } catch(e) {
+        arktest.assertTrue( e instanceof LinkerUnresolvedClassError )
+        cc++
+      }
+      arktest.assertEQ(1, scc)
+      arktest.assertEQ(2, cc)
+
+  - defs: |-
+      class StaticThrow extends Error {}
+      class ThrowFromClassStatic {
+        static throwableMethod() {
+          throw new StaticThrow
+        }
+      }
+    use: |-
+      try {
+        ThrowFromClassStatic.throwableMethod()
+      } catch(e) {
+        arktest.assertTrue( e instanceof StaticThrow )
+        return;
+      }
+      arktest.assertFalse(true, "Not expected to be here");
+
+  - defs: |-
+      class StaticThrow extends Error {}
+      interface DefaultThrowable {
+        throwableMethod() {
+          throw new StaticThrow
+        }
+      }
+      class ThrowFromInterfaceDefault implements DefaultThrowable {
+
+      }
+    use: |-
+      try {
+        let ci = new ThrowFromInterfaceDefault
+        ci.throwableMethod();
+      } catch(e) {
+        arktest.assertTrue( e instanceof StaticThrow )
+        return;
+      }
+      arktest.assertFalse(true, "Not expected to be here");
+
+  - defs: |-
+      class StaticThrow extends Error {}
+      class ConstructThrowable {
+        constructor () {
+          throw new StaticThrow  
+        }
+      }
+    use: |-
+      try {
+        new ConstructThrowable
+      } catch(e) {
+        arktest.assertTrue( e instanceof StaticThrow )
+        return;
+      }
+      arktest.assertFalse(true, "Not expected to be here");
+
+  - defs: |-
+      class StaticThrow extends Error {}
+    use: |-
+      try {
+        (() => { throw new StaticThrow })()
+      } catch(e) {
+        arktest.assertTrue( e instanceof StaticThrow )
+        return
+      }
+      arktest.assertFalse(true, "Not expected to be here");
+
+  - defs: |-
+      class StaticThrow extends Error {}
+      type TL = () => void
+    use: |-
+      let tl: TL = () => { throw new StaticThrow }
+      try {
+        tl()
+      } catch(e) {
+        arktest.assertTrue( e instanceof StaticThrow )
+        return;
+      }
+      arktest.assertFalse(true, "Not expected to be here");
+
+  - defs: |-
+      class TrailingLambdaThrow extends Error {}
+      type TL = () => void
+      function foo(lambda: TL) { lambda() }
+    use: |-
+      try {
+        foo() {
+          throw new TrailingLambdaThrow  
+        }
+      } catch(e) {
+        arktest.assertTrue( e instanceof TrailingLambdaThrow )
+        return;
+      }
+      arktest.assertFalse(true, "Not expected to be here");      
+
+  - defs: |-
+      class BlockThrow extends Error {}
+    use: |-
+      try {
+            {
+              {
+                {
+                  {
+                    throw new BlockThrow 
+                  }
+                }
+              }
+            }
+      } catch(e) {
+        arktest.assertTrue( e instanceof BlockThrow )
+        return;
+      }
+      arktest.assertFalse(true, "Not expected to be here");
+
+  - defs: |-
+      class BlockThrow extends Error {}
+      class Unreachable extends Error {}
+    use: |-
+      try {
+            {
+              {
+                {
+                  {
+                    throw new BlockThrow 
+                  }
+                  new Unreachable;
+                }
+              }
+            }
+      } catch(e) {
+        arktest.assertTrue( e instanceof BlockThrow )
+        return;
+      }
+      arktest.assertFalse(true, "Not expected to be here");

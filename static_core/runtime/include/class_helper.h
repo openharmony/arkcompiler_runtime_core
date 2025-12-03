@@ -17,8 +17,8 @@
 
 #include <cstdint>
 
-#include "libpandabase/utils/span.h"
-#include "libpandafile/file_items.h"
+#include "libarkbase/utils/span.h"
+#include "libarkfile/file_items.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/object_header_config.h"
@@ -142,6 +142,10 @@ Str ClassHelper::GetName(const uint8_t *descriptor)
             return "f64";
         case 'A':
             return "any";
+        case 'Y':
+            return "Y";
+        case 'N':
+            return "N";
         default: {
             break;
         }

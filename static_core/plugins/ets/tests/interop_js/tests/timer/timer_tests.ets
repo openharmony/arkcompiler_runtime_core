@@ -129,12 +129,6 @@ function testSetInterval(isExternalTimer: boolean): void {
 }
 
 function testSetTimeoutExecuteOrder(isExternalTimer: boolean) : void {
-    if (isExternalTimer) {
-        globalTest = new Test(0);
-        globalTest!.setPassed();
-        return;
-    }
-
     globalTest = new Test(6);
     globalTest!.checkpoint(0);
     setTimeout((): void => {
@@ -149,6 +143,10 @@ function testSetTimeoutExecuteOrder(isExternalTimer: boolean) : void {
     }, 0);
     setTimeout((): void => {
         globalTest!.checkpoint(4);
+    }, 0);
+    setTimeout((): void => {
+        globalTest!.checkpoint(5);
+        globalTest!.setPassed();
     }, 0);
     globalTest!.checkpoint(1);
 }

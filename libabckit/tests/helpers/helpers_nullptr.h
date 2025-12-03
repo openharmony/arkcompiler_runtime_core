@@ -265,9 +265,6 @@ void TestNullptr(AbckitString *(*apiToCheck)(AbckitCoreNamespace *));
 void TestNullptr(AbckitCoreClass *(*apiToCheck)(AbckitType *));
 void TestNullptr(AbckitTypeId (*apiToCheck)(AbckitType *));
 void TestNullptr(AbckitString *(*apiToCheck)(AbckitType *));
-void TestNullptr(size_t (*apiToCheck)(AbckitType *));
-void TestNullptr(bool (*apiToCheck)(AbckitType *));
-void TestNullptr(bool (*apiToCheck)(AbckitType *, void *, bool (*cb)(AbckitType *, void *)));
 void TestNullptr(double (*apiToCheck)(AbckitValue *));
 void TestNullptr(AbckitFile *(*apiToCheck)(AbckitValue *));
 void TestNullptr(AbckitString *(*apiToCheck)(AbckitValue *));
@@ -397,11 +394,6 @@ void TestNullptr(AbckitArktsClassField *(*apiToCheck)(AbckitArktsClass *, const 
 void TestNullptr(AbckitArktsInterfaceField *(*apiToCheck)(AbckitArktsInterface *,
                                                           const struct AbckitArktsInterfaceFieldCreateParams *));
 void TestNullptr(AbckitArktsEnumField *(*apiToCheck)(AbckitArktsEnum *, const struct AbckitArktsFieldCreateParams *));
-void TestNullptr(void (*apiToCheck)(AbckitType *, const char *, size_t));
-void TestNullptr(void (*apiToCheck)(AbckitType *, size_t));
-void TestNullptr(AbckitInst *(*apiToCheck)(AbckitGraph *, AbckitInst *inputObj, AbckitString *field, AbckitTypeId));
-void TestNullptr(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId,
-                                           AbckitInst *value, AbckitTypeId typeId));
 
 }  // namespace libabckit::test::helpers_nullptr
 

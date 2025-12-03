@@ -28,20 +28,20 @@
 #include "assembler/assembly-literals.h"
 #include "core/core_language_context.h"
 #include "intrinsics.h"
-#include "libpandabase/events/events.h"
-#include "libpandabase/mem/mem_config.h"
-#include "libpandabase/mem/pool_manager.h"
-#include "libpandabase/os/cpu_affinity.h"
-#include "libpandabase/os/mem_hooks.h"
-#include "libpandabase/os/native_stack.h"
-#include "libpandabase/os/thread.h"
-#include "libpandabase/utils/arena_containers.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/dfx.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandafile/file-inl.h"
-#include "libpandafile/literal_data_accessor-inl.h"
-#include "libpandafile/proto_data_accessor-inl.h"
+#include "libarkbase/events/events.h"
+#include "libarkbase/mem/mem_config.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/os/cpu_affinity.h"
+#include "libarkbase/os/mem_hooks.h"
+#include "libarkbase/os/native_stack.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/dfx.h"
+#include "libarkbase/utils/utf.h"
+#include "../libarkfile/file-inl.h"
+#include "../libarkfile/literal_data_accessor-inl.h"
+#include "../libarkfile/proto_data_accessor-inl.h"
 #include "plugins.h"
 #include "public.h"
 #include "runtime/cha.h"
@@ -54,6 +54,7 @@
 #include "runtime/include/language_context.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/runtime_notification.h"
+#include "runtime/include/safepoint_timer.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/tooling/debug_inf.h"
@@ -73,13 +74,14 @@
 #include "runtime/tooling/memory_allocation_dumper.h"
 #include "runtime/include/file_manager.h"
 #include "runtime/methodtrace/trace.h"
-#include "trace/trace.h"
+#include "libarkbase/trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 #include "runtime/jit/profiling_saver.h"
+#include "runtime/coroutines/native_stack_allocator/native_stack_allocator.h"
 #ifdef ARK_HYBRID
 #include "base_runtime.h"
 #endif
-#ifdef OHOS_PANDA_DEBUG_MODE_ENABLE
+#ifdef PANDA_OHOS_GET_PARAMETER
 #include "syspara/parameters.h"
 #endif
 
@@ -392,7 +394,7 @@ bool Runtime::Create(const RuntimeOptions &options)
 
     IntrusiveTestOption::SetTestId(options);
 
-    SetDebuggerOptions(const_cast<RuntimeOptions &>(options));
+    SetRuntimeOptions(const_cast<RuntimeOptions &>(options));
     InitCoverageOptions(const_cast<RuntimeOptions &>(options));
 
     const_cast<RuntimeOptions &>(options).InitializeRuntimeSpacesAndType();
@@ -453,7 +455,13 @@ bool Runtime::Create(const RuntimeOptions &options)
     return true;
 }
 
-#ifdef OHOS_PANDA_DEBUG_MODE_ENABLE
+#ifdef PANDA_OHOS_GET_PARAMETER
+void Runtime::SetRuntimeOptions(RuntimeOptions &options)
+{
+    SetDebuggerOptions(options);
+    SetUseLargerYoungSpaceOptions(options);
+}
+
 void Runtime::SetDebuggerOptions(RuntimeOptions &options)
 {
     const std::string debugLibraryPathMode = "/system/lib64/libarkinspector.so";
@@ -465,8 +473,21 @@ void Runtime::SetDebuggerOptions(RuntimeOptions &options)
         options.SetDebuggerBreakOnStart(true);
     }
 }
+
+void Runtime::SetUseLargerYoungSpaceOptions(RuntimeOptions &options)
+{
+    bool useLargerYoung = OHOS::system::GetBoolParameter("persist.sta.gc.SetGCUseLargerYoungSpace", false);
+    const size_t initYoungSpaceSize = 16_MB;
+    const size_t youngSpaceSize = 16_MB;
+    if (useLargerYoung) {
+        options.SetInitYoungSpaceSize(initYoungSpaceSize);
+        options.SetYoungSpaceSize(youngSpaceSize);
+    }
+}
 #else
+void Runtime::SetRuntimeOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetDebuggerOptions([[maybe_unused]] RuntimeOptions &options) {}
+void Runtime::SetUseLargerYoungSpaceOptions([[maybe_unused]] RuntimeOptions &options) {}
 #endif
 
 Runtime *Runtime::GetCurrent()
@@ -705,6 +726,7 @@ Runtime::~Runtime()
 #endif
 
     delete cha_;
+    // `classLinker_` is deleted before `pandaVm_` in order to allow the former to use `pandaVm_` during destruction
     delete classLinker_;
     if (dprofiler_ != nullptr) {
         internalAllocator_->Delete(dprofiler_);
@@ -726,6 +748,7 @@ Runtime::~Runtime()
     mem::CrossingMapSingleton::Destroy();
 
     if (Runtime::IsTaskManagerUsed()) {
+        taskmanager::TaskManager::DisableTimerThread();
         taskmanager::TaskManager::Finish();
         Runtime::SetTaskManagerUsed(false);
     }
@@ -855,15 +878,15 @@ bool Runtime::CreatePandaVM(std::string_view runtimeType)
         auto idx = aotBootCtx.find_last_of(compiler::AotClassContextCollector::DELIMETER);
         if (idx == std::string::npos) {
             // Only application file is in aot_boot_ctx
-            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx);
+            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx, options_.IsArkAot());
             aotBootCtx = "";
         } else {
             // Last file is an application
-            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx.substr(idx + 1));
+            classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx.substr(idx + 1), options_.IsArkAot());
             aotBootCtx = aotBootCtx.substr(0, idx);
         }
     }
-    classLinker_->GetAotManager()->SetBootClassContext(aotBootCtx);
+    classLinker_->GetAotManager()->SetBootClassContext(aotBootCtx, options_.IsArkAot());
     if (pandaVm_->GetLanguageContext().IsEnabledCHA()) {
         classLinker_->GetAotManager()->VerifyClassHierarchy();
     }
@@ -1023,6 +1046,13 @@ static inline void InitializeCompilerOptions()
         compiler::g_options.SetCompilerOptimizeStringConcat(!Runtime::GetOptions().IsUseAllStrings());
     }
 
+#ifdef PANDA_TARGET_OHOS
+    // NOTE(compiler team): #29517 Remove this after full support of inline external methods in AOT mode
+    if (!compiler::g_options.WasSetCompilerInlineExternalMethodsAot()) {
+        compiler::g_options.SetCompilerInlineExternalMethodsAot(false);
+    }
+#endif
+
 #if defined(PANDA_COMPILER_DEBUG_INFO) && !defined(NDEBUG)
     if (!compiler::g_options.WasSetCompilerEmitDebugInfo()) {
         compiler::g_options.SetCompilerEmitDebugInfo(true);
@@ -1045,6 +1075,9 @@ bool Runtime::Initialize()
     CheckOptionsFromOs();
 
     InitializeCompilerOptions();
+
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::Initialize(options_.GetSafepointCheckersRecordingTime(),
+                                                           options_.GetSafepointCheckersReportFilepath()));
 
     if (!CreatePandaVM(GetRuntimeType())) {
         return false;
@@ -1078,12 +1111,6 @@ bool Runtime::Initialize()
 
     if (options_.WasSetMemAllocDumpExec()) {
         StartMemAllocDumper(ConvertToString(options_.GetMemAllocDumpFile()));
-    }
-
-    // NOTE(compiler team): #27075 Remove this after full support of LineString, TreeString and SliceString
-    // Disable String Concat optimizations for new types of string, due to expected performance degradation
-    if (!compiler::g_options.WasSetCompilerOptimizeStringConcat()) {
-        compiler::g_options.SetCompilerOptimizeStringConcat(!Runtime::GetOptions().IsUseAllStrings());
     }
 
 #ifdef PANDA_TARGET_MOBILE
@@ -1291,7 +1318,7 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
         appContext_.ctx->EnumeratePandaFiles(
             compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
     }
-    classLinker_->GetAotManager()->SetAppClassContext(aotCtx);
+    classLinker_->GetAotManager()->SetAppClassContext(aotCtx, options_.IsArkAot());
 
     tooling::DebugInf::AddCodeMetaInfo(pf.get());
     return {};
@@ -1339,7 +1366,7 @@ Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filenam
             }
             return true;
         });
-        return false;
+        return 0;
     }
 
     return Execute(entryPoint, args);
@@ -1397,6 +1424,7 @@ bool Runtime::Shutdown()
     if (memAllocDumper_ != nullptr) {
         internalAllocator_->Delete(memAllocDumper_);
     }
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::Destroy());
     ManagedThread::Shutdown();
     return true;
 }

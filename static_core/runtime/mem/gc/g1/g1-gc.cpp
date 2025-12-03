@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/mem/space.h"
+#include "libarkbase/mem/space.h"
 #include "runtime/include/language_config.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/panda_string.h"
@@ -26,6 +26,7 @@
 #include "runtime/mem/gc/g1/ref_cache_builder.h"
 #include "runtime/mem/gc/g1/update_remset_task_queue.h"
 #include "runtime/mem/gc/g1/update_remset_thread.h"
+#include "runtime/mem/gc/g1/update_remset_worker-inl.h"
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 #include "runtime/mem/gc/generational-gc-base-inl.h"
 #include "runtime/mem/gc/static/gc_marker_static-inl.h"
@@ -347,11 +348,11 @@ private:
 
 template <class LanguageConfig>
 template <bool ATOMIC, bool CONCURRENTLY>
-void G1GC<LanguageConfig>::CollectEmptyRegions(GCTask &task, PandaVector<Region *> *emptyTenuredRegions)
+void G1GC<LanguageConfig>::CollectEmptyRegions(GCTask &task, PandaVector<Region *> &&emptyTenuredRegions)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     CollectNonRegularObjects<ATOMIC, CONCURRENTLY>();
-    ClearEmptyTenuredMovableRegions<ATOMIC, CONCURRENTLY>(emptyTenuredRegions);
+    ClearEmptyTenuredMovableRegions<ATOMIC, CONCURRENTLY>(std::move(emptyTenuredRegions));
     task.UpdateGCCollectionType(GCCollectionType::TENURED);
 }
 
@@ -384,34 +385,17 @@ void G1GC<LanguageConfig>::CollectNonRegularObjects()
     this->memStats_.template RecordSizeFreedTenured<ATOMIC>(deleteSize);
 }
 
-static PandaVector<Region *> GetEmptyTenuredRegularRegions(PandaVector<std::pair<uint32_t, Region *>> &garbageRegions)
-{
-    auto firstEmptyRegionIter =
-        std::find_if_not(garbageRegions.rbegin(), garbageRegions.rend(),
-                         [](const std::pair<uint32_t, Region *> &entry) { return entry.first == DEFAULT_REGION_SIZE; });
-    if (firstEmptyRegionIter == garbageRegions.rend()) {
-        return {};
-    }
-    PandaVector<Region *> emptyTenuredRegions;
-    emptyTenuredRegions.reserve(garbageRegions.end() - firstEmptyRegionIter.base());
-    for (auto iter = firstEmptyRegionIter.base(); iter != garbageRegions.end(); ++iter) {
-        emptyTenuredRegions.emplace_back(iter->second);
-    }
-    garbageRegions.erase(firstEmptyRegionIter.base(), garbageRegions.end());
-    return emptyTenuredRegions;
-}
-
 template <class LanguageConfig>
 template <bool ATOMIC, bool CONCURRENTLY>
-void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *> *emptyTenuredRegions)
+void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *> &&emptyTenuredRegions)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     {
         ScopedTiming t1("Region Invalidation", *this->GetTiming());
         if constexpr (CONCURRENTLY) {
-            updateRemsetWorker_->InvalidateRegions(emptyTenuredRegions);
+            updateRemsetWorker_->InvalidateRegions(&emptyTenuredRegions);
         } else {
-            updateRemsetWorker_->GCInvalidateRegions(emptyTenuredRegions);
+            updateRemsetWorker_->GCInvalidateRegions(&emptyTenuredRegions);
         }
     }
     size_t deleteSize = 0;
@@ -419,7 +403,7 @@ void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *>
     auto deathVisitor = [](ObjectHeader *objectHeader) {
         LOG_DEBUG_OBJECT_EVENTS << "DELETE tenured object " << objectHeader;
     };
-    for (auto *region : *emptyTenuredRegions) {
+    for (auto *region : emptyTenuredRegions) {
         deleteCount += region->GetAllocatedObjects();
         deleteSize += region->GetAllocatedBytes();
         ASSERT_PRINT(region->GetLiveBitmap()->FindFirstMarkedChunks() == nullptr,
@@ -435,11 +419,11 @@ void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *>
                 ->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
                                         OSPagesPolicy::IMMEDIATE_RETURN, true, PandaVector<Region *>>(
                     // CC-OFFNXT(G.FMT.06-CPP) project code style
-                    *emptyTenuredRegions);
+                    emptyTenuredRegions);
         } else {
             this->GetG1ObjectAllocator()
                 ->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::Release,
-                                        OSPagesPolicy::NO_RETURN, false, PandaVector<Region *>>(*emptyTenuredRegions);
+                                        OSPagesPolicy::NO_RETURN, false, PandaVector<Region *>>(emptyTenuredRegions);
         }
     }
     this->memStats_.template RecordCountFreedTenured<ATOMIC>(deleteCount);
@@ -841,12 +825,19 @@ void G1GC<LanguageConfig>::RunFullGC(ark::GCTask &task)
     LOG_DEBUG_GC << "Explicit Full GC invocation due to a reason: " << task.reason;
     this->SetFullGC(true);
     FullMarking(task);
+    // Need to reset current tenured region. So we can get it in garbage or empty regions lists.
+    GetG1ObjectAllocator()->ClearCurrentTenuredRegion();
+    PandaVector<std::pair<uint32_t, Region *>> garbageRegions;
+    PandaVector<Region *> emptyTenuredRegions;
+    GetG1ObjectAllocator()->template GetTopGarbageRegions<true>(0.0, garbageRegions, emptyTenuredRegions);
+    CollectEmptyRegions<false, false>(task, std::move(emptyTenuredRegions));
+
     if (!HaveEnoughRegionsToMove(1)) {
         GetG1ObjectAllocator()->ReleaseReservedRegion();
         // After release reserved region we always have minimum 1 region for tenured collection
         ASSERT(HaveEnoughRegionsToMove(1));
     }
-    CollectionSet collectionSet = GetFullCollectionSet();
+    CollectionSet collectionSet = GetFullCollectionSet(std::move(garbageRegions));
     ClearTenuredCards(collectionSet);
     PrepareYoungRegionsForFullGC(collectionSet);
     CollectAndMoveTenuredRegions(collectionSet);
@@ -1016,6 +1007,7 @@ void G1GC<LanguageConfig>::EnsurePreWrbDisabledInThreads()
 
 template <class LanguageConfig>
 template <typename OnPauseMarker, typename ConcurrentMarker>
+// CC-OFFNXT(G.FUD.05) solid logic
 void G1GC<LanguageConfig>::RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pmarker, ConcurrentMarker &cmarker)
 {
     ASSERT(collectionSet_.empty());
@@ -1055,7 +1047,11 @@ void G1GC<LanguageConfig>::RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pma
             Remark<false>(task, pmarker);
         }
         // Enable mixed GC
-        topGarbageRegions_ = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>(regionGarbageRateThreshold_);
+        PandaVector<Region *> emptyTenuredRegions;
+        topGarbageRegions_.clear();
+        GetG1ObjectAllocator()->template GetTopGarbageRegions<false>(regionGarbageRateThreshold_, topGarbageRegions_,
+                                                                     emptyTenuredRegions);
+        std::sort(topGarbageRegions_.begin(), topGarbageRegions_.end());
         if (HaveGarbageRegions()) {
             // Atomic with release order reason: to see changes made by GC thread (which do concurrent marking
             // and than set isMixedGcRequired_) in mutator thread which waits for the end of concurrent
@@ -1071,7 +1067,7 @@ void G1GC<LanguageConfig>::RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pma
 #endif
         }
 
-        ConcurrentSweep(task);
+        ConcurrentSweep(task, std::move(emptyTenuredRegions));
     } else {
         concurrentMarkingStack_.Clear();
         ClearSatb();
@@ -1080,7 +1076,7 @@ void G1GC<LanguageConfig>::RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pma
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::ConcurrentSweep(ark::GCTask &task)
+void G1GC<LanguageConfig>::ConcurrentSweep(ark::GCTask &task, PandaVector<Region *> &&emptyTenuredRegions)
 {
     // NOTE(ipetrov, 20146): Cross reference can be allocated during concurrent sweep, so XGC should handle this
     // situation. There is hot fix: XGC does not concurrent sweep
@@ -1089,11 +1085,10 @@ void G1GC<LanguageConfig>::ConcurrentSweep(ark::GCTask &task)
     }
     ScopedTiming t("Concurrent Sweep", *this->GetTiming());
     ConcurrentScope concurrentScope(this);
-    auto emptyTenuredRegions = GetEmptyTenuredRegularRegions(topGarbageRegions_);
     if (this->IsConcurrencyAllowed()) {
-        CollectEmptyRegions<true, true>(task, &emptyTenuredRegions);
+        CollectEmptyRegions<true, true>(task, std::move(emptyTenuredRegions));
     } else {
-        CollectEmptyRegions<false, false>(task, &emptyTenuredRegions);
+        CollectEmptyRegions<false, false>(task, std::move(emptyTenuredRegions));
     }
 }
 
@@ -1101,7 +1096,7 @@ template <class LanguageConfig>
 bool G1GC<LanguageConfig>::HaveGarbageRegions()
 {
     return std::find_if(topGarbageRegions_.begin(), topGarbageRegions_.end(), [](const auto &entry) {
-               return entry.first != DEFAULT_REGION_SIZE && !entry.second->HasPinnedObjects();
+               return !entry.second->HasPinnedObjects();
            }) != topGarbageRegions_.end();
 }
 
@@ -1116,7 +1111,15 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::ProcessDirtyCards()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    updateRemsetWorker_->GCProcessCards();
+    updateRemsetWorker_->GCProcessCards([](ObjectHeader *, size_t) {});
+}
+
+template <class LanguageConfig>
+template <typename Handler>
+void G1GC<LanguageConfig>::ProcessDirtyCards(const Handler &handler)
+{
+    ScopedTiming t(__FUNCTION__, *this->GetTiming());
+    updateRemsetWorker_->GCProcessCards(handler);
 }
 
 template <class LanguageConfig>
@@ -1381,22 +1384,36 @@ void G1GC<LanguageConfig>::UpdateMetricsAfterSinglePass(size_t allocatedBytesYou
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::EvacuateCollectionSet(const RemSet<> &remset)
 {
+    ScopedTiming t(__FUNCTION__, *this->GetTiming());
     auto useGcWorkers = this->GetSettings()->ParallelCompactingEnabled();
     GCEvacuateRegionsTaskStack<Ref> refStack(this, useGcWorkers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
                                              useGcWorkers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
                                              GCWorkersTaskTypes::TASK_REGION_COMPACTING,
                                              this->GetSettings()->GCMarkingStackNewTasksFrequency());
     G1EvacuateRegionsWorkerState<LanguageConfig> state(this, &refStack);
-    state.EvacuateNonHeapRoots();
+    {
+        ScopedTiming t1("EvacuateNonHeapRoots", *this->GetTiming());
+        state.EvacuateNonHeapRoots();
+    }
 
     auto startProcessing = ark::time::GetCurrentTimeInNanos();
-    auto remsetSize = state.ScanRemset(remset);
+    auto remsetSize = 0;
+    {
+        ScopedTiming t1("ScanRemset", *this->GetTiming());
+        remsetSize = state.ScanRemset(remset);
+    }
     auto startEvacuation = ark::time::GetCurrentTimeInNanos();
     auto scanRemsetTime = startEvacuation - startProcessing;
     analytics_.ReportScanRemsetTime(remsetSize, scanRemsetTime);
 
     analytics_.ReportEvacuationStart(startEvacuation);
-    state.EvacuateLiveObjects();
+    {
+        ScopedTiming t1("EvacuateLiveObjects", *this->GetTiming());
+        state.EvacuateLiveObjects();
+    }
+    if (static_cast<bool>(LOG_DEBUG_OBJECT_EVENTS)) {
+        state.PrintObjectEvents(collectionSet_);
+    }
 
     ASSERT(refStack.Empty());
     if (useGcWorkers) {
@@ -1527,14 +1544,7 @@ bool G1GC<LanguageConfig>::SinglePassCompactionAvailable()
         }
     }
 
-    auto predictedSurvivedBytesRatio = analytics_.PredictSurvivedBytesRatio();
-    if (predictedSurvivedBytesRatio == 0) {
-        // threre are not statistics, starts with GC which is able to promote whole regions
-        return false;
-    }
-
-    // uses single pass collection for low survival ratio
-    return predictedSurvivedBytesRatio * PERCENT_100_D < g1PromotionRegionAliveRate_;
+    return true;
 }
 
 template <class LanguageConfig>
@@ -1591,7 +1601,19 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
     analytics_.ReportMarkingEnd(ark::time::GetCurrentTimeInNanos(), GetUniqueRemsetRefsCount());
 
     // HandleReferences could write a new barriers - so we need to handle them before moving
-    ProcessDirtyCards();
+    auto *refVector = this->GetInternalAllocator()->template New<RefVector>();
+    uniqueRefsFromRemsets_.push_back(refVector);
+    ProcessDirtyCards([this, refVector](ObjectHeader *object, size_t offset) {
+        if (this->InGCSweepRange(object)) {
+            return;
+        }
+        auto field = *reinterpret_cast<ObjectPointerType *>(ToUintPtr(object) + offset);
+        ASSERT(field != 0);
+        if (!this->InGCSweepRange(reinterpret_cast<ObjectHeader *>(static_cast<uintptr_t>(field)))) {
+            return;
+        }
+        refVector->emplace_back(object, offset);
+    });
 }
 
 template <class LanguageConfig>
@@ -1967,12 +1989,6 @@ void G1GC<LanguageConfig>::FullMarking(ark::GCTask &task)
     }
     // Force card updater here, after swapping bitmap, to skip dead objects
     ProcessDirtyCards();
-    // We don't save to topGarbageRegions_ here, because
-    // making topGarbageRegions_ value reusable for FullGC,
-    // GetTopGarbageRegions<true>() should be called, which is not allowed here
-    auto garbageRegions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
-    auto emptyTenuredRegions = GetEmptyTenuredRegularRegions(garbageRegions);
-    CollectEmptyRegions<false, false>(task, &emptyTenuredRegions);
 }
 
 template <class LanguageConfig>
@@ -2282,17 +2298,15 @@ uint64_t G1GC<LanguageConfig>::AddMoreOldRegionsAccordingPauseTimeGoal(Collectio
 }
 
 template <class LanguageConfig>
-CollectionSet G1GC<LanguageConfig>::GetFullCollectionSet()
+CollectionSet G1GC<LanguageConfig>::GetFullCollectionSet(PandaVector<std::pair<uint32_t, Region *>> &&garbageRegions)
 {
     ASSERT(this->IsFullGC());
     // FillRemSet should be always finished before GetCollectibleRegions
     ASSERT(updateRemsetWorker_->GetQueueSize() == 0);
     auto g1Allocator = this->GetG1ObjectAllocator();
-    g1Allocator->ClearCurrentTenuredRegion();
     CollectionSet collectionSet(g1Allocator->GetYoungRegions());
-    auto movableGarbageRegions = g1Allocator->template GetTopGarbageRegions<true>();
     LOG_DEBUG_GC << "Regions for FullGC:";
-    for (auto iter = movableGarbageRegions.begin(); iter != movableGarbageRegions.end(); ++iter) {
+    for (auto iter = garbageRegions.begin(); iter != garbageRegions.end(); ++iter) {
         auto *region = iter->second;
         if (region->HasFlag(IS_EDEN) || region->HasPinnedObjects()) {
             LOG_DEBUG_GC << (region->HasFlags(IS_EDEN) ? "Young regions" : "Region with pinned objects") << " ("
@@ -2524,7 +2538,12 @@ void G1GC<LanguageConfig>::VisitRemSets(const Visitor &visitor)
         for (auto &entry : *entryVector) {
             ObjectHeader *object = entry.GetObject();
             uint32_t offset = entry.GetReferenceOffset();
-            visitor(object, ObjectAccessor::GetObject(object, offset), offset);
+            ObjectHeader *field = ObjectAccessor::GetObject(object, offset);
+            if (field != nullptr) {
+                // The field may gets nullptr during reference processing.
+                // RefProc may remove an object from a list and set links to null.
+                visitor(object, field, offset);
+            }
         }
     }
 }
@@ -2921,12 +2940,12 @@ size_t G1GC<LanguageConfig>::GetUniqueRemsetRefsCount() const
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PrintFragmentationMetrics(const char *title)
 {
-    LOG_INFO_GC << title << "internal Old fragmentation "
-                << this->GetG1ObjectAllocator()->CalculateInternalOldFragmentation();
-    LOG_INFO_GC << title << "internal humongous fragmentation "
-                << this->GetG1ObjectAllocator()->CalculateInternalHumongousFragmentation();
-    LOG_INFO_GC << title << "nonmovable external fragmentation "
-                << this->GetG1ObjectAllocator()->CalculateNonMovableExternalFragmentation();
+    LOG_DEBUG_GC << title << "internal Old fragmentation "
+                 << this->GetG1ObjectAllocator()->CalculateInternalOldFragmentation();
+    LOG_DEBUG_GC << title << "internal humongous fragmentation "
+                 << this->GetG1ObjectAllocator()->CalculateInternalHumongousFragmentation();
+    LOG_DEBUG_GC << title << "nonmovable external fragmentation "
+                 << this->GetG1ObjectAllocator()->CalculateNonMovableExternalFragmentation();
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GC);

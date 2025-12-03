@@ -26,6 +26,7 @@
 #include "optimizer/ir/inst.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "inst_checker_gen.h"
+#include "intrinsic_string_flat_check.inl"
 
 namespace ark::compiler {
 
@@ -970,32 +971,6 @@ void GraphChecker::CheckSaveStatesWithRuntimeCallUsers(BasicBlock *block, SaveSt
 }
 
 #ifdef COMPILER_DEBUG_CHECKS
-void GraphChecker::PrepareUsers(Inst *inst, ArenaVector<User *> *users)
-{
-    for (auto &user : inst->GetUsers()) {
-        users->push_back(&user);
-    }
-    auto i = std::find_if(users->begin(), users->end(), [](User *user) { return user->GetInst()->IsCheck(); });
-    while (i != users->end()) {
-        auto userInst = (*i)->GetInst();
-        // erase before push_backs to avoid iterator invalidation
-        users->erase(i);
-        // skip AnyTypeChecks with primitive type
-        if (userInst->GetOpcode() != Opcode::AnyTypeCheck || userInst->IsReferenceOrAny()) {
-            for (auto &u : userInst->GetUsers()) {
-                users->push_back(&u);
-            }
-        }
-        i = std::find_if(users->begin(), users->end(), [](User *user) { return user->GetInst()->IsCheck(); });
-    }
-    for (auto &it : (*users)) {
-        [[maybe_unused]] auto user = it->GetInst();
-        CHECKER_IF_NOT_PRINT(!user->IsCheck());
-    }
-}
-#endif
-
-#ifdef COMPILER_DEBUG_CHECKS
 // If all indirect (through other Phis) inputs of Phi cannot be moved by GC, result of Phi itself
 // also cannot be moved (and does not need to be checked in CheckSaveStateInputs as input of its users)
 bool GraphChecker::IsPhiSafeToSkipObjectCheck(Inst *inst, Marker visited)
@@ -1744,52 +1719,17 @@ void GraphChecker::VisitLoadStatic(GraphVisitor *v, Inst *inst)
     }
 }
 
-void GraphChecker::VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
+void GraphChecker::VisitLoadClass([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::REFERENCE,
                                         (std::cerr << "LoadClass must have Reference type", inst->Dump(&std::cerr)));
-    for (auto &user : inst->GetUsers()) {
-        [[maybe_unused]] auto userInst = user.GetInst();
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            v,
-            userInst->GetOpcode() == Opcode::CheckCast || userInst->GetOpcode() == Opcode::IsInstance ||
-                userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::Intrinsic ||
-                userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
-                userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
-                userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
-                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm ||
-                userInst->GetOpcode() == Opcode::Compare || userInst->GetOpcode() == Opcode::Cmp,
-            (std::cerr << "Incorrect user of the LoadClass", inst->Dump(&std::cerr), userInst->Dump(&std::cerr)));
-    }
 }
 
-void GraphChecker::VisitLoadAndInitClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
+void GraphChecker::VisitLoadAndInitClass([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, inst->GetType() == DataType::REFERENCE,
         (std::cerr << "LoadAndInitClass must have Reference type", inst->Dump(&std::cerr)));
-    for (auto &user : inst->GetUsers()) {
-        [[maybe_unused]] auto userInst = user.GetInst();
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            v,
-            userInst->GetOpcode() == Opcode::LoadStatic ||
-                (userInst->GetOpcode() == Opcode::LoadObject &&
-                 userInst->CastToLoadObject()->GetObjectType() == ObjectType::MEM_STATIC) ||
-                userInst->GetOpcode() == Opcode::StoreStatic ||
-                (userInst->GetOpcode() == Opcode::StoreObject &&
-                 userInst->CastToStoreObject()->GetObjectType() == ObjectType::MEM_STATIC) ||
-                userInst->GetOpcode() == Opcode::NewObject || userInst->GetOpcode() == Opcode::Phi ||
-                userInst->GetOpcode() == Opcode::MultiArray || userInst->GetOpcode() == Opcode::InitObject ||
-                userInst->GetOpcode() == Opcode::UnresolvedStoreStatic || userInst->GetOpcode() == Opcode::Intrinsic ||
-                userInst->GetOpcode() == Opcode::NewArray || userInst->GetOpcode() == Opcode::IsInstance ||
-                userInst->GetOpcode() == Opcode::CheckCast || userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
-                userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
-                userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
-                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm ||
-                userInst->GetOpcode() == Opcode::Compare || userInst->GetOpcode() == Opcode::Cmp,
-            (std::cerr << "Incorrect user of the LoadAndInitClass", inst->Dump(&std::cerr),
-             userInst->Dump(&std::cerr)));
-    }
 }
 
 void GraphChecker::VisitUnresolvedLoadAndInitClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
@@ -1805,22 +1745,6 @@ void GraphChecker::VisitUnresolvedLoadAndInitClass([[maybe_unused]] GraphVisitor
         v, ss->GetOpcode() == Opcode::SaveState,
         (std::cerr << "UnresolvedLoadAndInitClass instruction first operand is not a SaveState", inst->Dump(&std::cerr),
          ss->Dump(&std::cerr)));
-    for (auto &user : inst->GetUsers()) {
-        [[maybe_unused]] auto userInst = user.GetInst();
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            v,
-            userInst->GetOpcode() == Opcode::LoadStatic || userInst->GetOpcode() == Opcode::StoreStatic ||
-                userInst->GetOpcode() == Opcode::NewObject || userInst->GetOpcode() == Opcode::NewArray ||
-                userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::MultiArray ||
-                userInst->GetOpcode() == Opcode::UnresolvedStoreStatic ||
-                userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
-                userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
-                userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
-                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm ||
-                userInst->GetOpcode() == Opcode::Compare || userInst->GetOpcode() == Opcode::Cmp,
-            (std::cerr << "Incorrect user of the UnresolvedLoadAndInitClass", inst->Dump(&std::cerr),
-             userInst->Dump(&std::cerr)));
-    }
 }
 
 void GraphChecker::VisitGetInstanceClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
@@ -1849,13 +1773,14 @@ void GraphChecker::VisitNewObject([[maybe_unused]] GraphVisitor *v, Inst *inst)
         return;
     }
     [[maybe_unused]] auto opcode = initInst->GetOpcode();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v,
-                                        opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadRuntimeClass ||
-                                            opcode == Opcode::UnresolvedLoadAndInitClass ||
-                                            opcode == Opcode::LoadImmediate,
-                                        (std::cerr << "The first input for the NewObject should be LoadAndInitClass or "
-                                                      "UnresolvedLoadAndInitClass or LoadRuntimeClass or LoadImmediate",
-                                         inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
+        opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadRuntimeClass ||
+            opcode == Opcode::UnresolvedLoadAndInitClass || opcode == Opcode::LoadImmediate || opcode == Opcode::Phi ||
+            opcode == Opcode::Select || opcode == Opcode::SelectImm,
+        (std::cerr << "The first input for the NewObject should be LoadAndInitClass, "
+                      "LoadRuntimeClass, UnresolvedLoadAndInitClass, LoadImmediate, Phi, Select or SelectImm",
+         inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
     [[maybe_unused]] auto ssInst = inst->GetInputs()[1].GetInst();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, ssInst->GetOpcode() == Opcode::SaveState,
                                         (std::cerr << "The second input for the NewObject should be SaveState",
@@ -1899,8 +1824,21 @@ void GraphChecker::VisitInitClass([[maybe_unused]] GraphVisitor *v, [[maybe_unus
                                         (std::cerr << "InitClass doesn't have type", inst->Dump(&std::cerr)));
 }
 
-void GraphChecker::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, Inst *inst)
+void GraphChecker::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
+    auto *checker = static_cast<GraphChecker *>(v);
+    auto stringFlatCheckArgMask = GetStringFlatCheckArgMask(inst->CastToIntrinsic()->GetIntrinsicId());
+    if (checker->GetPassName() == StringFlatCheck::NAME && checker->GetGraph()->GetRuntime()->CanUseStringFlatCheck() &&
+        stringFlatCheckArgMask != 0) {
+        auto argsCount = inst->RequireState() ? inst->GetInputsCount() - 1 : inst->GetInputsCount();
+        for (size_t i = 0; i < argsCount; i++) {
+            if ((stringFlatCheckArgMask & (1 << i)) != 0) {
+                CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+                    v, inst->GetInput(i).GetInst()->Is(Opcode::StringFlatCheck),
+                    (std::cerr << "\nInput must be StringFlatCheck instruction\n", inst->Dump(&std::cerr)));
+            }
+        }
+    }
     switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
 #include "intrinsics_graph_checker.inl"
         default: {
@@ -2415,12 +2353,19 @@ void GraphChecker::VisitIsInstance([[maybe_unused]] GraphVisitor *v, [[maybe_unu
                                         (std::cerr << "Types of IsInstance must be BOOL:\n", inst->Dump(&std::cerr)));
 }
 
+// Shared by Select and SelectTransform
 void GraphChecker::VisitSelectWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
+    ASSERT(inst->GetOpcode() == Opcode::Select || inst->GetOpcode() == Opcode::SelectTransform);
     [[maybe_unused]] auto op1 = inst->GetInput(1).GetInst();
     [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
     [[maybe_unused]] auto op3 = inst->GetInput(3U).GetInst();
-    [[maybe_unused]] auto cc = inst->CastToSelect()->GetCc();
+    [[maybe_unused]] ConditionCode cc;
+    if (inst->GetOpcode() == Opcode::Select) {
+        cc = inst->CastToSelect()->GetCc();
+    } else {
+        cc = inst->CastToSelectTransform()->GetCc();
+    }
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
@@ -2445,7 +2390,7 @@ void GraphChecker::VisitSelectWithReference([[maybe_unused]] GraphVisitor *v, [[
     }
 }
 
-void GraphChecker::VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+void GraphChecker::VisitSelect(GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] auto op0 = inst->GetInput(0).GetInst();
     [[maybe_unused]] auto op1 = inst->GetInput(1).GetInst();
@@ -2494,12 +2439,29 @@ void GraphChecker::VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]
     }
 }
 
-void GraphChecker::VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+void GraphChecker::VisitSelectTransform(GraphVisitor *v, Inst *inst)
 {
+    VisitSelect(v, inst);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+        (std::cerr << "SelectTransform applies to integer types only\n", inst->Dump(&std::cerr)));
+}
+
+// Shared by SelectImm and SelectImmTransform
+void GraphChecker::VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::SelectImm || inst->GetOpcode() == Opcode::SelectImmTransform);
     [[maybe_unused]] auto op1 = inst->GetInput(1).GetInst();
     [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
-    [[maybe_unused]] auto op3 = inst->CastToSelectImm()->GetImm();
-    [[maybe_unused]] auto cc = inst->CastToSelectImm()->GetCc();
+    [[maybe_unused]] uint64_t op3;
+    [[maybe_unused]] ConditionCode cc;
+    if (inst->GetOpcode() == Opcode::SelectImm) {
+        op3 = inst->CastToSelectImm()->GetImm();
+        cc = inst->CastToSelectImm()->GetCc();
+    } else {
+        op3 = inst->CastToSelectImmTransform()->GetImm();
+        cc = inst->CastToSelectImmTransform()->GetCc();
+    }
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
@@ -2518,8 +2480,10 @@ void GraphChecker::VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v,
         v, op3 == 0, (std::cerr << "Reference can be compared only with 0 immediate: \n", inst->Dump(&std::cerr)));
 }
 
+// Shared by SelectImm and SelectImmTransform
 void GraphChecker::VisitSelectImmNotReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
+    ASSERT(inst->GetOpcode() == Opcode::SelectImm || inst->GetOpcode() == Opcode::SelectImmTransform);
     [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
     [[maybe_unused]] bool isDynamic = static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod();
 
@@ -2530,7 +2494,12 @@ void GraphChecker::VisitSelectImmNotReference([[maybe_unused]] GraphVisitor *v, 
         "SelectImm 3rd operand type is not an integer or any");
 
     if (DataType::GetCommonType(op2->GetType()) == DataType::ANY) {
-        [[maybe_unused]] auto cc = inst->CastToSelectImm()->GetCc();
+        [[maybe_unused]] ConditionCode cc;
+        if (inst->GetOpcode() == Opcode::SelectImm) {
+            cc = inst->CastToSelectImm()->GetCc();
+        } else {
+            cc = inst->CastToSelectImmTransform()->GetCc();
+        }
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
             v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
             (std::cerr << "SelectImm any comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
@@ -2581,6 +2550,14 @@ void GraphChecker::VisitSelectImm([[maybe_unused]] GraphVisitor *v, [[maybe_unus
     } else {
         VisitSelectImmNotReference(v, inst);
     }
+}
+
+void GraphChecker::VisitSelectImmTransform(GraphVisitor *v, Inst *inst)
+{
+    VisitSelectImm(v, inst);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+        (std::cerr << "SelectImmTransform applies to integer types only\n", inst->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitIf(GraphVisitor *v, Inst *inst)
@@ -2885,6 +2862,32 @@ VISIT_BINARY_SHIFTED_REGISTER(OrNotSR)
 VISIT_BINARY_SHIFTED_REGISTER(XorNotSR)
 #undef VISIT_BINARY_SHIFTED_REGISTER
 
+void GraphChecker::VisitExtractBitfield(GraphVisitor *v, Inst *inst)
+{
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+        (std::cerr << "ExtractBitfield must have integer type\n", inst->Dump(&std::cerr)));
+    CheckUnaryOperationTypes(v, inst);
+
+    ExtractBitfieldInst *bfx = inst->CastToExtractBitfield();
+    auto arch = inst->GetBasicBlock()->GetGraph()->GetArch();
+    [[maybe_unused]] auto sourceBit = bfx->GetSourceBit();
+    [[maybe_unused]] auto width = bfx->GetWidth();
+    [[maybe_unused]] auto sourceTypeSize = DataType::GetTypeSize(bfx->GetInput(0).GetInst()->GetType(), arch);
+
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, sourceBit < sourceTypeSize,
+        (std::cerr << "source bit of ExtractBitfield must be < size bits of input which is " << sourceTypeSize << "\n",
+         inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, width > 0, (std::cerr << "width of ExtractBitfield must be > 0\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, sourceBit + width <= sourceTypeSize,
+        (std::cerr << "source bit + width of ExtractBitfield must be <= size bits of input which is " << sourceTypeSize
+                   << "\n",
+         inst->Dump(&std::cerr)));
+}
+
 void GraphChecker::VisitNegSR(GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
@@ -2895,4 +2898,13 @@ void GraphChecker::VisitNegSR(GraphVisitor *v, [[maybe_unused]] Inst *inst)
                                         (std::cerr << "Operation has invalid shift type\n", inst->Dump(&std::cerr)));
 }
 
+void GraphChecker::VisitStringFlatCheck([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+{
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, inst->GetType() == DataType::REFERENCE,
+        (std::cerr << "\nStringFlatCheck must have reference type\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, inst->GetInput(0).GetInst()->GetType() == DataType::REFERENCE,
+        (std::cerr << "\nStringFlatCheck input must have reference type\n", inst->Dump(&std::cerr)));
+}
 }  // namespace ark::compiler

@@ -15,70 +15,185 @@
 
 // NOTE(vpukhov): #16340 Build specialized string comparison intrinsic
 
-//! CHECKER      AOT IR Builder, check string-null equality
-//! RUN_PAOC     options: "--compiler-regex='.*(equals_).*'"
+//! CHECKER      AOT IR Builder, check string equality and intrinsic optimizations
+//! RUN_PAOC     options: "--compiler-regex='.*(eliminate|equalsStr|Equals).*'"
 //!
-//! METHOD       "ets_string_equals.ETSGLOBAL::equals_str_str"
+//! METHOD       "ets_string_equals.ETSGLOBAL::equalsStrStr"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //! INST         /Intrinsic.StdCoreStringEquals/
 //!
-//! METHOD       "ets_string_equals.ETSGLOBAL::equals_str_null"
+//! METHOD       "ets_string_equals.ETSGLOBAL::equalsStrNull"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.StdCoreStringEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic/
 //!
-//! METHOD       "ets_string_equals.ETSGLOBAL::not_equals_null_str"
+//! METHOD       "ets_string_equals.ETSGLOBAL::notEqualsNullStr"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.StdCoreStringEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic/
 //!
-//! METHOD       "ets_string_equals.ETSGLOBAL::not_equals_str_null"
+//! METHOD       "ets_string_equals.ETSGLOBAL::notEqualsStrNull"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.StdCoreStringEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic/
+//!
+//! METHOD       "ets_string_equals.ETSGLOBAL::eliminate"
+//! PASS_BEFORE_NTH  "GVN", 1
+//! INST_COUNT       /Intrinsic.StdCoreStringEquals/, 2
+//! PASS_AFTER_NTH   "GVN", 1
+//! PASS_AFTER_NEXT  "Cleanup"
+//! INST_COUNT       /Intrinsic.StdCoreStringEquals/, 2
+//!
+//! METHOD       "ets_string_equals.ETSGLOBAL::genericEqualsObjObj"
+//! PASS_AFTER      "IrBuilder"
+//! INST_COUNT      /Intrinsic.CompilerEtsEquals/, 1
+//!
+//! METHOD       "ets_string_equals.ETSGLOBAL::genericEqualsStringCaller"
+//! PASS_AFTER      "IrBuilder"
+//! INST_COUNT      /Call.*genericEqualsObjObj/, 1
+//! PASS_AFTER      "Inline"
+//! PASS_AFTER_NEXT "Peephole"
+//! INST_NOT        /Intrinsic.CompilerEtsEquals/
+//! INST_COUNT      /Intrinsic.StdCoreStringEquals/, 1
+//!
+//! METHOD       "ets_string_equals.ETSGLOBAL::genericEqualsUndefinedCaller"
+//! PASS_AFTER      "IrBuilder"
+//! INST_COUNT      /Call.*genericEqualsObjObj/, 1
+//! PASS_AFTER      "Inline"
+//! PASS_AFTER_NEXT "Peephole"
+//! INST_NOT        /Intrinsic.CompilerEtsEquals/
+//! INST_COUNT      /Intrinsic.StdCoreStringEquals/, 1
+//!
+//! METHOD       "ets_string_equals.ETSGLOBAL::genericEqualsUndefinedStringCaller"
+//! PASS_AFTER      "IrBuilder"
+//! INST_COUNT      /Call.*genericEqualsObjObj/, 1
+//! PASS_AFTER      "Inline"
+//! PASS_AFTER_NEXT "Peephole"
+//! INST_NOT        /Intrinsic.CompilerEtsEquals/
+//! INST_COUNT      /Intrinsic.StdCoreStringEquals/, 1
+//!
+//! METHOD       "ets_string_equals.ETSGLOBAL::genericEqualsStringUndefinedCaller"
+//! PASS_AFTER      "IrBuilder"
+//! INST_COUNT      /Call.*genericEqualsObjObj/, 1
+//! PASS_AFTER      "Inline"
+//! PASS_AFTER_NEXT "Peephole"
+//! INST_NOT        /Intrinsic.CompilerEtsEquals/
+//! INST_COUNT      /Intrinsic.StdCoreStringEquals/, 1
+//!
+//! METHOD       "ets_string_equals.ETSGLOBAL::genericEqualsObjCaller"
+//! PASS_AFTER      "IrBuilder"
+//! INST_COUNT      /Call.*genericEqualsObjObj/, 1
+//! PASS_AFTER      "Inline"
+//! PASS_AFTER_NEXT "Peephole"
+//! INST_NOT        /Intrinsic.StdCoreStringEquals/
+//! INST_COUNT      /Intrinsic.CompilerEtsEquals/, 1
 //!
 //! RUN          entry: "ets_string_equals.ETSGLOBAL::main"
 
-// Prevents comparison elimination by frontend type inferrence
+// Prevents comparison elimination by frontend type inference
 function getnull(): String | null {
     return null;
 }
 
-function equals_str_str(lhs: String | null, rhs: String | null) {
+function equalsStrStr(lhs: String | null, rhs: String | null) {
     return lhs == rhs;
 }
+
 function equals_null_str(str: String | null) {
     return getnull() == str;
 }
-function not_equals_null_str(str: String | null) {
+
+function notEqualsNullStr(str: String | null) {
     return getnull() != str;
 }
-function equals_str_null(str: String | null) {
+
+function equalsStrNull(str: String | null) {
     return str == getnull();
 }
-function not_equals_str_null(str: String | null) {
+
+function notEqualsStrNull(str: String | null) {
     return str != getnull();
 }
 
-function main() {
-    let str = "abc";
+function genericEqualsObjObj<T1, T2>(obj1: T1, obj2: T2): boolean {
+    return obj1 == obj2;
+}
 
-    arktest.assertTrue(equals_str_str(str, str));
-    arktest.assertTrue(!equals_str_str(null, str));
-    arktest.assertTrue(!equals_str_str(str, null));
-    arktest.assertTrue(equals_str_str(null, null));
+// NOTE: after inlining and applying the following peephole, genericEqualsObjObj will contain a call to
+// Intrinsic.StdCoreStringEquals instead of the Intrinsic.CompilerEtsEquals generated by the IrBuilder.
+function genericEqualsStringCaller(str1: String, str2: String): boolean {
+    return genericEqualsObjObj(str1, str2);
+}
+
+interface Container {
+    payload?: 'short' | 'long';
+    padding?: String;
+}
+
+enum Size {
+    SHORT = 0, LONG = 1,
+}
+
+// NOTE: after inlining and the following peephole, genericEqualsObjObj will contain a call to
+// Intrinsic.StdCoreStringEquals instead of the Intrinsic.CompilerEtsEquals generated by the IrBuilder.
+function genericEqualsUndefinedCaller(): boolean {
+    let expected: Container = { padding: 'padding' };
+    let result: Container = { padding: 'padding' };
+    return genericEqualsObjObj(expected.payload, result.payload);
+}
+
+function genericEqualsUndefinedStringCaller(size: Size): boolean {
+    let expected: Container = { padding: 'padding' };
+    let result: Container = { payload: size == Size.SHORT ? 'short' : 'long', padding: 'padding'};
+    return genericEqualsObjObj(expected.payload, result.payload);
+}
+
+function genericEqualsStringUndefinedCaller(size: Size): boolean {
+    let expected: Container = { payload: size == Size.SHORT ? 'short' : 'long', padding: 'padding' };
+    let result: Container = { padding: 'padding'};
+    return genericEqualsObjObj(expected.payload, result.payload);
+}
+
+function genericEqualsObjCaller(obj1: String, obj2: Object): boolean {
+    return genericEqualsObjObj(obj1, obj2);
+}
+
+// NOTE: Intrinsic.StdCoreStringEquals is NOT safe and may NOT be eliminated by GVN
+function eliminate(str1: String, str2: String): boolean {
+    let count: int = 0;
+    count += (str1.equals(str2) ? 1 : 0);
+    count += (str1.equals(str2) ? 1 : 0);
+    return count == 2;
+}
+
+function main() {
+    let str = 'abc';
+    let str2 = 'abc';
+
+    arktest.assertTrue(equalsStrStr(str, str));
+    arktest.assertTrue(!equalsStrStr(null, str));
+    arktest.assertTrue(!equalsStrStr(str, null));
+    arktest.assertTrue(equalsStrStr(null, null));
 
     arktest.assertTrue(!equals_null_str(str));
-    arktest.assertTrue(not_equals_null_str(str));
-    arktest.assertTrue(!equals_str_null(str));
-    arktest.assertTrue(not_equals_str_null(str));
+    arktest.assertTrue(notEqualsNullStr(str));
+    arktest.assertTrue(!equalsStrNull(str));
+    arktest.assertTrue(notEqualsStrNull(str));
 
     arktest.assertTrue(equals_null_str(null));
-    arktest.assertTrue(!not_equals_null_str(null));
-    arktest.assertTrue(equals_str_null(null));
-    arktest.assertTrue(!not_equals_str_null(null));
+    arktest.assertTrue(!notEqualsNullStr(null));
+    arktest.assertTrue(equalsStrNull(null));
+    arktest.assertTrue(!notEqualsStrNull(null));
+
+    arktest.assertTrue(eliminate(str, str2));
+
+    arktest.assertTrue(genericEqualsStringCaller(str, str2));
+    arktest.assertTrue(genericEqualsUndefinedCaller());
+    arktest.assertFalse(genericEqualsUndefinedStringCaller(Size.LONG));
+    arktest.assertFalse(genericEqualsStringUndefinedCaller(Size.LONG));
+    arktest.assertTrue(genericEqualsObjCaller(str, str));
 }

@@ -247,18 +247,18 @@ function append18(): string {
     if (sb != null) sb.toString();
 
     sb.append("0");
-    sb.append(1);
+    sb.append(1 as int);
     sb.append("2");
     sb.append("3");
-    sb.append(4);
+    sb.append(4 as int);
     sb.append("5");
     sb.append("6");
     sb.append("7");
-    sb.append(8);
+    sb.append(8 as int);
     sb.append("9");
     sb.append("10");
     sb.append("11");
-    sb.append(12);
+    sb.append(12 as int);
     sb.append("13");
     sb.append("14");
     sb.append("15");

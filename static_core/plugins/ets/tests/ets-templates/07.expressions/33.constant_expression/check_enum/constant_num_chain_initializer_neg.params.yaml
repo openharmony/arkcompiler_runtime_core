@@ -14,4 +14,3 @@
 cases:
   - { type1: byte,  type2: char  }
   - { type1: char,  type2: char  }
-      

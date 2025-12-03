@@ -69,17 +69,17 @@ public:
         return true;
     }
 
-    static bool RegisterNativeSaveRef(ani_env *env)
+    bool RegisterNativeSaveRef(ani_env *env)
     {
-        ani_module etsMod {};
-        auto status = env->FindModule("ets_functions", &etsMod);
-        if (status != ANI_OK) {
+        ani_ref classRef = GetClassRefObject(env, "ets_functions.ETSGLOBAL");
+        if (classRef == nullptr) {
             return false;
         }
         std::array methods = {
             ani_native_function {"saveHybridGref", nullptr, reinterpret_cast<void *>(NativeSaveHybridGref)},
         };
-        status = env->Module_BindNativeFunctions(etsMod, methods.data(), methods.size());
+        ani_status status =
+            env->Module_BindNativeFunctions(static_cast<ani_module>(classRef), methods.data(), methods.size());
         return status == ANI_OK;
     }
 };

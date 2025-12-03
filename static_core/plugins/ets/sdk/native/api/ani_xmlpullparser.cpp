@@ -77,9 +77,11 @@ XmlPullParser::ParseInfoClassCache::ParseInfoClassCache(ani_env *env) : env_(env
     InitFieldCache();
 }
 
-XmlPullParser::ParseInfoClassCache::~ParseInfoClassCache()
+XmlPullParser::ParseInfoClassCache::~ParseInfoClassCache() {}
+
+ani_class XmlPullParser::ParseInfoClassCache::GetCachedClass_()
 {
-    ANI_FATAL_IF_ERROR(env_->GlobalReference_Delete(static_cast<ani_ref>(cachedClass_)));
+    return cachedClass_;
 }
 
 ani_object XmlPullParser::ParseInfoClassCache::New() const
@@ -113,7 +115,7 @@ PARSE_INFO_FIELD_LIST(PARSE_INFO_SETTER)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECK_NON_NULL_PARSER_AND_RETURN(pointer, returnVal)   \
     if ((pointer) == 0) {                                      \
-        LOG_ERROR_SDK("%s:: object is nullptr", __FUNCTION__); \
+        LOG_FATAL_SDK("%s:: object is nullptr", __FUNCTION__); \
         /* CC-OFFNXT(G.PRE.05) return if invalid argument */   \
         return (returnVal);                                    \
     }                                                          \
@@ -130,7 +132,7 @@ ani_long XmlPullParser::BindNative(ani_env *env, [[maybe_unused]] ani_class self
     auto *binding = new XmlPullParser(env, strContent.substr(0, strLen));
     if (binding == nullptr) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("%s:: memory allocate failed, binding is nullptr", __FUNCTION__);
+        LOG_FATAL_SDK("%s:: memory allocate failed, binding is nullptr", __FUNCTION__);
     }
     return reinterpret_cast<ani_long>(binding);
 }
@@ -140,6 +142,8 @@ ani_boolean XmlPullParser::ReleaseNative([[maybe_unused]] ani_env *env, [[maybe_
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     CHECK_NON_NULL_PARSER_AND_RETURN(pointer, false);
+    ANI_FATAL_IF_ERROR(env->GlobalReference_Delete(static_cast<ani_ref>(that->enumTypeClass_)));
+    ANI_FATAL_IF_ERROR(env->GlobalReference_Delete(static_cast<ani_ref>(that->infoClass_.GetCachedClass_())));
     delete that;
     return static_cast<ani_boolean>(true);
 }
@@ -152,10 +156,7 @@ XmlPullParser::XmlPullParser(ani_env *env, std::string strXml) : env_(env), info
         env->GlobalReference_Create(static_cast<ani_ref>(eTypeCache), reinterpret_cast<ani_ref *>(&enumTypeClass_)));
 }
 
-XmlPullParser::~XmlPullParser()
-{
-    ANI_FATAL_IF_ERROR(env_->GlobalReference_Delete(static_cast<ani_ref>(enumTypeClass_)));
-}
+XmlPullParser::~XmlPullParser() {}
 
 // CC-OFFNXT(G.FUN.01-CPP) options of parse
 ani_boolean XmlPullParser::ParseXml(ani_env *env, [[maybe_unused]] ani_class self, ani_long pointer,
@@ -237,7 +238,7 @@ bool XmlPullParser::ParseTag(ani_env *env) const
     std::vector<ani_ref> argv {key, value};
     ani_ref returnVal {};
     env->FunctionalObject_Call(tagFunc_, argv.size(), argv.data(), &returnVal);
-    return static_cast<bool>(UnboxToBoolean(env, static_cast<ani_object>(returnVal)));
+    return static_cast<bool>(ToBoolean(env, static_cast<ani_object>(returnVal)));
 }
 
 bool XmlPullParser::ParseToken(ani_env *env) const
@@ -263,7 +264,7 @@ bool XmlPullParser::ParseToken(ani_env *env) const
     std::vector<ani_ref> argv {eTypeItem, info};
     ani_ref returnVal {};
     env->FunctionalObject_Call(tokenFunc_, argv.size(), argv.data(), &returnVal);
-    return static_cast<bool>(UnboxToBoolean(env, static_cast<ani_object>(returnVal)));
+    return static_cast<bool>(ToBoolean(env, static_cast<ani_object>(returnVal)));
 }
 
 bool XmlPullParser::ParseAttr(ani_env *env) const
@@ -273,8 +274,11 @@ bool XmlPullParser::ParseAttr(ani_env *env) const
         ani_string value = CreateStringUtf8(env, attributes_[i * 4 + 3]);  // 4 and 3: number of args
         std::vector<ani_ref> argv {key, value};
         ani_ref returnVal {};
-        env->FunctionalObject_Call(attrFunc_, argv.size(), argv.data(), &returnVal);
-        if (!static_cast<bool>(UnboxToBoolean(env, static_cast<ani_object>(returnVal)))) {
+        auto status = env->FunctionalObject_Call(attrFunc_, argv.size(), argv.data(), &returnVal);
+        if (status != ANI_OK) {
+            return false;
+        }
+        if (!static_cast<bool>(ToBoolean(env, static_cast<ani_object>(returnVal)))) {
             return false;
         }
     }

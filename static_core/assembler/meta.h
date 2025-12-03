@@ -25,7 +25,7 @@
 #include <vector>
 
 #include "annotation.h"
-#include "modifiers.h"
+#include "libarkfile/modifiers.h"
 
 #include "assembly-type.h"
 
@@ -242,43 +242,14 @@ public:
         annotations_.insert(annotations_.end(), annotations.begin(), annotations.end());
     }
 
-    void EnumerateAnnotations(const std::function<void(AnnotationData &)> &callback)
+    void DeleteAnnotationByName(const std::string_view &annotationName)
     {
-        for (auto &annotation : annotations_) {
-            callback(annotation);
-        }
-    }
-
-    void DeleteAnnotationElementByName(std::string_view annotation_name, std::string_view annotation_elem_name)
-    {
-        auto annotation_iter =
+        auto annotationIter =
             std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
+                return annotation.GetName() == annotationName;
             });
-        if (annotation_iter != annotations_.end()) {
-            annotation_iter->DeleteAnnotationElementByName(annotation_elem_name);
-        }
-    }
-
-    void DeleteAnnotationByName(const std::string_view &annotation_name)
-    {
-        auto annotation_iter =
-            std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
-            });
-        if (annotation_iter != annotations_.end()) {
-            (void)annotations_.erase(annotation_iter);
-        }
-    }
-
-    void AddAnnotationElementByName(const std::string_view &annotation_name, AnnotationElement &&element)
-    {
-        auto annotation_iter =
-            std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
-            });
-        if (annotation_iter != annotations_.end()) {
-            annotation_iter->AddElement(std::move(element));
+        if (annotationIter != annotations_.end()) {
+            (void)annotations_.erase(annotationIter);
         }
     }
 

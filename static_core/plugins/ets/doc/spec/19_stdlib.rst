@@ -26,7 +26,7 @@ The Standard Library has two parts: the common part provides |TS| compatibility,
 and the |LANG|-specific part adds more advanced features.
 
 A detailed description of all elements of the standard library is covered in
-a separate document that is part of the |LANG| distribution package.
+a separate document that is a part of the |LANG| distribution package.
 
 .. raw:: pdf
 

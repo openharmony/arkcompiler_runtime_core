@@ -92,17 +92,30 @@ public:
 private:
     void SearchSSOnWay(BasicBlock *block, Inst *startFrom, Inst *sourceInst, Marker visited, Inst *stopSearch);
     bool IsSaveStateForGc(Inst *inst);
-    void ProcessSSUserPreds(Graph *graph, Inst *inst, Inst *targetInst);
     void SearchInSaveStateAndFillBridgeVector(Inst *inst, Inst *searchedInst);
     void FixUsageInstInOtherBB(BasicBlock *block, Inst *inst);
     void FixUsagePhiInBB(BasicBlock *block, Inst *inst);
     void DeleteUnrealObjInSaveState(Inst *ss);
+
+    template <typename C>
+    void AllocOrClear(Graph *graph, C **pContainer)
+    {
+        if (*pContainer != nullptr) {
+            (*pContainer)->clear();
+            return;
+        }
+
+        auto *allocator = graph->GetAllocator();
+        *pContainer = allocator->New<C>(allocator->Adapter());
+    }
+
     /**
      * Pointer to moved out to class for reduce memory usage in each pair of equal instructions.
      * When using functions, it looks like we work as if every time get a new vector,
      * but one vector is always used and cleaned before use.
      */
     ArenaVector<Inst *> *bridges_ {nullptr};
+    ArenaVector<User *> *users_ {nullptr};
 };
 
 class InstAppender {
@@ -124,6 +137,9 @@ bool StoreValueCanBeObject(Inst *inst);
 
 bool IsConditionEqual(const Inst *inst0, const Inst *inst1, bool inverted);
 
+CallInst *FindCallerInst(BasicBlock *target, Inst *start = nullptr);
+
+void PrepareUsers(Inst *inst, ArenaVector<User *> *users);
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_ANALYSIS_H

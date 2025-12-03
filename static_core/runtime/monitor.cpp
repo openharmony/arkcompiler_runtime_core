@@ -15,7 +15,7 @@
 
 #include "runtime/monitor.h"
 
-#include "libpandabase/os/thread.h"
+#include "libarkbase/os/thread.h"
 #include "runtime/include/object_header.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"

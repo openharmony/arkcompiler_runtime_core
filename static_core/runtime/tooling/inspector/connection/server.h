@@ -20,9 +20,9 @@
 #include <functional>
 
 #include "json_serialization/serializable.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/utils/expected.h"
-#include "libpandabase/utils/json_builder.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/json_builder.h"
 
 #include "json_serialization/jrpc_error.h"
 

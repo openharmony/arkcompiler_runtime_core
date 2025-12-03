@@ -1323,6 +1323,162 @@ TEST_F(CodegenTest, Select)
     }
 }
 
+SRC_GRAPH(SelectTransform, Graph *graph, ConditionCode cc, SelectTransformType transform)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 0U);
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(5U, Opcode::SelectTransform)
+                .u64()
+                .SrcType(DataType::UINT64)
+                .CC(cc)
+                .SelectTransform(transform)
+                .Inputs(2U, 3U, 0U, 1U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
+        }
+    }
+}
+
+TEST_F(CodegenTest, SelectTransform)
+{
+    if (GetArch() != Arch::AARCH64) {
+        return;
+    }
+    auto testCasePair = std::vector<std::pair<ConditionCode, SelectTransformType>> {};
+    for (int ccint = ConditionCode::CC_FIRST; ccint <= ConditionCode::CC_LAST; ccint++) {
+        auto cc = static_cast<ConditionCode>(ccint);
+        testCasePair.emplace_back(cc, SelectTransformType::INC);
+        testCasePair.emplace_back(cc, SelectTransformType::INV);
+        testCasePair.emplace_back(cc, SelectTransformType::NEG);
+    }
+    for (auto [cc, transform] : testCasePair) {
+        auto *graph = CreateGraphStartEndBlocks();
+        RuntimeInterfaceMock runtime;
+        graph->SetRuntime(&runtime);
+
+        src_graph::SelectTransform::CREATE(graph, cc, transform);
+        SetNumVirtRegs(0U);
+        SetNumArgs(2U);
+        RegAlloc(graph);
+        EXPECT_TRUE(RunCodegen(graph));
+
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        GetExecModule().SetInstructions(codeEntry, codeExit);
+        GetExecModule().SetDump(false);
+
+        auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param2 = CutValue<uint64_t>(-1L, DataType::UINT64);
+
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param2);
+        // if param1 op param2 then result = 0 else result = 1
+        auto result = static_cast<int64_t>(!Compare(cc, param1, param2));
+        if (result != 0) {
+            result = Transform(transform, result);
+        }
+        GetExecModule().Execute();
+        int64_t retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
+
+        GetExecModule().SetParameter(0U, param2);
+        GetExecModule().SetParameter(1U, param1);
+        GetExecModule().Execute();
+        // if param2 op param1 then result = 0 else result = 1
+        result = static_cast<int64_t>(!Compare(cc, param2, param1));
+        if (result != 0) {
+            result = Transform(transform, result);
+        }
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
+
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param1);
+        result = static_cast<int64_t>(!Compare(cc, param1, param1));
+        if (result != 0) {
+            result = Transform(transform, result);
+        }
+        GetExecModule().Execute();
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
+    }
+}
+
+SRC_GRAPH(SelectImmTransform, Graph *graph, ConditionCode cc, SelectTransformType transform)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(3U, Opcode::SelectImmTransform)
+                .u64()
+                .SrcType(DataType::UINT64)
+                .CC(cc)
+                .SelectTransform(transform)
+                .Imm(1U)
+                .Inputs(1U, 2U, 0U);
+            INST(4U, Opcode::Return).u64().Inputs(3U);
+        }
+    }
+}
+
+TEST_F(CodegenTest, SelectImmTransform)
+{
+    if (GetArch() != Arch::AARCH64) {
+        return;
+    }
+    auto testCasePair = std::vector<std::pair<ConditionCode, SelectTransformType>> {};
+    for (int ccint = ConditionCode::CC_FIRST; ccint <= ConditionCode::CC_LAST; ccint++) {
+        auto cc = static_cast<ConditionCode>(ccint);
+        testCasePair.emplace_back(cc, SelectTransformType::INC);
+        testCasePair.emplace_back(cc, SelectTransformType::INV);
+        testCasePair.emplace_back(cc, SelectTransformType::NEG);
+    }
+    for (auto [cc, transform] : testCasePair) {
+        auto *graph = CreateGraphStartEndBlocks();
+        RuntimeInterfaceMock runtime;
+        graph->SetRuntime(&runtime);
+
+        src_graph::SelectImmTransform::CREATE(graph, cc, transform);
+        SetNumVirtRegs(0U);
+        SetNumArgs(2U);
+        RegAlloc(graph);
+        EXPECT_TRUE(RunCodegen(graph));
+
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        GetExecModule().SetInstructions(codeEntry, codeExit);
+        GetExecModule().SetDump(false);
+
+        auto param1 = CutValue<uint64_t>(-1L, DataType::UINT64);
+        auto param2 = CutValue<uint64_t>(1U, DataType::UINT64);  // Equal to imm (see above)
+
+        for (uint64_t curParam : {param1, param2}) {
+            GetExecModule().SetParameter(0U, curParam);
+            // If param op imm then result = 0 else result = 1 (see above)
+            auto result = static_cast<int64_t>(!Compare(cc, curParam, param2));
+            if (result != 0) {
+                result = Transform(transform, result);
+            }
+            GetExecModule().Execute();
+            int64_t retData = GetExecModule().GetRetValue();
+            EXPECT_EQ(retData, result) << "Incorrect result with condition code = " << GetConditionCodeString(cc)
+                                       << ", transformation type = " << GetSelectTransformTypeString(transform)
+                                       << ", input param = " << curParam;
+        }
+    }
+}
+
 SRC_GRAPH(CompareObj, Graph *graph)
 {
     GRAPH(graph)

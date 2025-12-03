@@ -18,6 +18,9 @@ type TimerId = int;
 type Callback = () => void;
 
 // NOTE(panferovi): fix signature after #25420
+/**
+ * @internal
+ */
 native function launchSameWorker(callback: Object): void;
 
 class EventLoop {

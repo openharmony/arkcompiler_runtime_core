@@ -38,11 +38,14 @@ public:
         SetHead(coro, weakRef);
     }
 
-    void Unlink(EtsCoroutine *coro, Node *weakRef)
+    bool Unlink(EtsCoroutine *coro, Node *weakRef)
     {
         ASSERT(weakRef != nullptr);
         auto *prev = weakRef->GetPrev();
         auto *next = weakRef->GetNext();
+        if (prev == nullptr && next == nullptr && weakRef != GetHead()) {
+            return false;
+        }
         if (prev != nullptr) {
             prev->SetNext(coro, next);
         }
@@ -54,6 +57,7 @@ public:
         }
         weakRef->SetPrev(coro, nullptr);
         weakRef->SetNext(coro, nullptr);
+        return true;
     }
 
     void UnlinkClearedReferences(EtsCoroutine *coro)

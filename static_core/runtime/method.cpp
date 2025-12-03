@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/jit/profiling_data.h"
@@ -28,21 +28,21 @@
 #include "runtime/include/value-inl.h"
 #include "runtime/interpreter/frame.h"
 #include "runtime/interpreter/interpreter.h"
-#include "libpandabase/utils/hash.h"
-#include "libpandabase/utils/span.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandafile/code_data_accessor-inl.h"
-#include "libpandafile/debug_data_accessor-inl.h"
-#include "libpandafile/debug_helpers.h"
-#include "libpandafile/file-inl.h"
-#include "libpandafile/line_number_program.h"
-#include "libpandafile/method_data_accessor-inl.h"
-#include "libpandafile/proto_data_accessor-inl.h"
-#include "libpandafile/shorty_iterator.h"
+#include "libarkbase/utils/hash.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkfile/code_data_accessor-inl.h"
+#include "libarkfile/debug_data_accessor-inl.h"
+#include "libarkfile/debug_helpers.h"
+#include "libarkfile/file-inl.h"
+#include "libarkfile/line_number_program.h"
+#include "libarkfile/method_data_accessor-inl.h"
+#include "libarkfile/proto_data_accessor-inl.h"
+#include "libarkfile/shorty_iterator.h"
 #include "runtime/handle_base-inl.h"
 #include "runtime/handle_scope-inl.h"
-#include "libpandafile/type_helper.h"
+#include "libarkfile/type_helper.h"
 #include "verification/public.h"
 #include "verification/util/is_system.h"
 
@@ -203,7 +203,9 @@ Method::Method(Class *klass, const panda_file::File *pf, panda_file::File::Entit
 
       fileId_(fileId),
       codeId_(codeId),
-      shorty_(shorty)
+      shorty_(shorty),
+      instructions_(nullptr),
+      numVregs_(NUM_VREGS_UNKNOWN)
 {
     ResetHotnessCounter();
     ResetSaverTryCounter();

@@ -18,136 +18,8 @@ Contexts and Conversions
 .. meta:
     frontend_status: Done
 
-This Chapter defines evaluation of type of expressions depending
-on expression contexts and set of conversions that can be applied
-to expressions.
-
-.. _Type of Expression:
-
-Type of Expression
-******************
-
-.. meta:
-    frontend_status: Done
-
-Every expression written in the |LANG| programming language has a type that 
-is evaluated at compile time.
-
-In most contexts, an expression must be *compatible* with a type expected in
-that context. This type is called the *target type*.
-
-If no target type is available in the context, then the expression is called a
-*standalone expression*:
-
-.. code-block:: typescript
-   :linenos:
-
-    let a = expr // no target type is available 
-
-    function foo() {
-        expr // no target type is available 
-    }
-
-Otherwise, the expression is *non-standalone*:
-
-.. index::
-   inferred type
-   expression
-   type inference
-   compatible expression
-   standalone expression
-   context
-   target type
-
-.. code-block-meta:
-   skip
-
-.. code-block:: typescript
-   :linenos:
-
-    let a: number = expr // target type of 'expr' is number
-
-    function foo(s: string) {}
-    foo(expr) // target type of 'expr' is string
-
-The type of some expressions cannot be inferred (see :ref:`Type Inference`)
-from the expression itself (see :ref:`Object Literal` as an example).
-A :index:`compile-time error` occurs if such an expression
-is used as a *standalone expression*:
-
-.. code-block:: typescript
-   :linenos:
-
-    class P { x: number, y: number }
-
-    let x = { x: 10, y: 10 } // standalone object literal - compile time error
-    let y: P = { x: 10, y: 10 } // OK, type of object literal is inferred
-
-There are two ways to facilitate the compatibility of a *non-standalone
-expression* with its surrounding context:
-
-#. The type of some non-standalone expressions can be inferred from the
-   target type (a type of expression can be different in different contexts).
-
-#. In the :ref:`Assignment-like Contexts` inferred expression type
-   can be different from the target type, then
-   performing an implicit *conversion* can ensure :ref:`Assignability`.
-   The conversion from type ``S`` to type ``T`` causes a type ``S`` expression
-   to be handled as a type ``T`` expression at compile time.
-
-.. index::
-   expression
-   standalone expression
-   non-standalone expression
-   compatible type
-   compatibility
-   surrounding context
-   context
-   inferred type
-   conversion
-   assignability
-   assignable type
-   compile time
-
-A :index:`compile-time error` occurs if neither produces an appropriate
-expression type.
-
-The rules that determine whether a *target type* allows an implicit
-*conversion* vary for different kinds of contexts and types of expressions.
-The *target type* can influence not only the type of the expression but also,
-in some cases, its runtime behavior.
-
-Some cases of conversion require action at runtime to check the
-validity of conversion, or to translate the runtime expression value
-into a form that is appropriate for the new type ``T``.
-
-.. index::
-   runtime behavior
-   expression
-   expression type
-   expression value
-   target type
-   context
-   runtime behavior
-   value
-   conversion
-
-If the type of the expression is ``readonly``, then the target type must
-also be ``readonly``. Otherwise, a :index:`compile-time error` occurs:
-
-.. code-block:: typescript
-   :linenos:
-
-      let readonly_array: readonly number[] = [1, 2, 3]
-
-      foo1(readonly_array) // OK
-      foo2(readonly_array) // compile-time error
-
-      function foo1 (p: readonly number[]) {}
-      function foo2 (p: number[]) {}
-
-      let writable_array: number [] = [1, 2, 3]
-      foo1 (writable_array) // OK, as always safe
+This Chapter defines expression contexts and conversions that can be applied
+to expressions in different contexts.
 
 Contexts can be of the following kinds:
 
@@ -158,21 +30,16 @@ Contexts can be of the following kinds:
 -  :ref:`Numeric Operator Contexts` with all numeric operators ('``+``', '``-``', etc.).
 
 .. index::
-   expression
-   readonly
-   target type
-   assignment-like context
-   assignment
-   expression value
-   string concatenation
-   concatenation
    context
-   operator
-   numeric operator
    conversion
-   type
+   expression
+   string
+   assignment-like context
+   numeric operator
+   concatenation
 
 |
+
 
 .. _Assignment-like Contexts:
 
@@ -198,6 +65,9 @@ Assignment-like Contexts
   :ref:`Function Call Expression`, :ref:`Method Call Expression`,
   :ref:`Explicit Constructor Call`, and :ref:`New Expressions`);
 
+- *Return contexts* (see :ref:`return Statements`) the allow specifying
+  a resultant value of a function, method or lambda call;
+
 - *Composite literal contexts* that allow setting an expression value to an
   array element (see :ref:`Array Literal Type Inference from Context`),
   a class, or an interface field (see :ref:`Object Literal`);
@@ -207,9 +77,12 @@ Assignment-like Contexts
    assignment-like context
    assignment context
    call context
+   variable declaration
    constant declaration
    constant
+   field
    field declaration
+   assignment
    assignment context
    expression value
    expression
@@ -218,9 +91,14 @@ Assignment-like Contexts
    constructor call
    lambda call
    method call
+   call context
+   type
+   type inference
+   interface field
    formal parameter
    array literal
    object literal
+   initial value
    value
    variable
    constant
@@ -266,8 +144,10 @@ occurs.
 
 .. index::
    expression type
+   expression
    target type
    assignability
+   conversion
 
 |
 
@@ -290,7 +170,7 @@ String Operator Contexts
 
 -  An operand of a floating-point type (see :ref:`Floating-Point Types and Operations`)
    is converted to type ``string`` with a value that represents the operand in
-   the decimal form (without the loss of information).
+   the decimal form without the loss of information.
 
 -  An operand of type ``boolean`` is converted to type ``string`` with the
    values ``true`` or ``false``.
@@ -305,8 +185,8 @@ String Operator Contexts
      - Operand ``null`` is converted to string ``null``.
      - Operand ``undefined`` is converted to string ``undefined``.
 
--  An operand of a reference type or of ``enum`` type with non-*string* values is converted by applying the
-   method call ``toString()``.
+-  An operand of a reference type or an ``enum`` type with non-*string* values
+   is converted by applying the method call ``toString()``.
 
 If there is no applicable conversion, then a :index:`compile-time error` occurs.
 
@@ -325,12 +205,14 @@ The target type in this context is always ``string``:
    floating-point type
    loss of information
    enumeration type
-   string
+   string type
+   nullish type
    boolean
    decimal
    string conversion
    operand null
    operator undefined
+   method call
    context
 
 .. code-block:: typescript
@@ -359,9 +241,10 @@ Numeric contexts use numeric types conversions
 expression can be converted to target type ``T`` while the arithmetic
 operation for the values of type ``T`` is being defined.
 
-An operand of enumeration type (see :ref:`Enumerations`) can be used in
-the numeric context if values of this enumeration are of type ``int``.
-The type of this operand is assumed to be ``int``.
+An operand of enumeration type (see :ref:`Enumerations` and
+:ref:`Enumeration with Explicit Type`) can be used in
+a numeric context if enumeration base type is a numeric type.
+The type of this operand is assumed to be the same as the enumeration base type.
 
 .. index::
    numeric context
@@ -375,7 +258,7 @@ The type of this operand is assumed to be ``int``.
    string context
    type int
 
-Numeric contexts actually take the following forms:
+Numeric contexts take the following forms:
 
 -  :ref:`Unary Expressions`;
 -  :ref:`Multiplicative Expressions`;
@@ -403,6 +286,50 @@ Numeric contexts actually take the following forms:
 
 |
 
+.. _Numeric Conversions for Relational and Equality Operands:
+
+Numeric Conversions for Relational and Equality Operands
+========================================================
+
+ .. meta:
+     frontend_status: Done
+
+Relational and equiality operators (see :ref:`Relational Expressions` and
+:ref:`Equality Expressions`) allow the following:
+
+- *Implicit conversion*, where operands are of ``numeric types`` but have
+  different sizes (see :ref:`Widening numeric conversions`), with their specific
+  details stated in :ref:`Specifics of Numeric Operator Contexts`; and
+- Conversion of operands with ``BigInt()`` function, where one operand type is
+  ``bigint`` and the other is ``numeric``. The situation for the relational
+  operator '``<``' is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+   let a: int = 1
+   let b: long = 0
+   let c: bigint = -1n
+
+   if (b<a) { // `a`` converted to `long` prior to comparison
+      ;
+   }
+
+   if (c<b) { // `b` converted to `bigint` prior to comparison
+      ;
+   }
+
+
+.. index::
+   numeric conversion
+   numeric types conversion
+   widening numeric conversion
+   operand
+   bigint type
+   numeric type
+   conversion
+
+
 .. _Implicit Conversions:
 
 Implicit Conversions
@@ -415,7 +342,7 @@ Implicit Conversions
    todo: Forbidden Conversion - note: Not exhaustively tested, should work
 
 This section describes all implicit conversions that are allowed. Each
-conversion is allowed in a particular context (for example, if an expression
+conversion is allowed in a particular context (e.g., if an expression
 that initializes a local variable is subject to :ref:`Assignment-like Contexts`,
 then the rules of this context define what specific conversion is implicitly
 chosen for the expression).
@@ -448,7 +375,7 @@ Widening Numeric Conversions
   :ref:`Numeric Types`);
 
 - Values of *enumeration* type (if enumeration constants of this type are
-  of a numeric type) to the same or a wider numeric type.
+  of a numeric type) to the same or a larger numeric type.
 
 .. index::
    widening
@@ -482,9 +409,9 @@ Widening Numeric Conversions
 | numeric constants|                                                      |
 +------------------+------------------------------------------------------+
 
-These conversions cause no loss of information about the overall magnitude of
-a numeric value. Some least significant bits of the value can be lost only in
-conversions from an integer type to a floating-point type if the IEEE 754
+The above conversions cause no loss of information about the overall magnitude
+of a numeric value. Some least significant bits of the value can be lost only
+in conversions from an integer type to a floating-point type if the IEEE 754
 *round-to-nearest* mode is used correctly. The resultant floating-point value
 is properly rounded to the integer value.
 
@@ -514,12 +441,13 @@ Enumeration to Constants Type Conversions
 .. meta:
     frontend_status: Done
 
--  A value of *enumeration* type without explicit base type is converted to
+The following conversions never cause a runtime error:
+
+-  Value of *enumeration* type without explicit base type is converted to
    the corresponding integer type (see :ref:`Enumerations`).
--  A value of *enumeration* type with explicit numeric base type
+-  Value of *enumeration* type with explicit numeric base type
    (see :ref:`Enumeration with Explicit Type`) is converted to the base type.
 
-These conversions never cause a runtime error.
 
 .. code-block:: typescript
    :linenos:
@@ -533,7 +461,10 @@ These conversions never cause a runtime error.
 
 .. index::
    enumeration type
+   numeric base type
+   base type
    conversion
+   integer type
    constant
    runtime error
    type int
@@ -550,7 +481,7 @@ a runtime error.
 
 .. index::
    enumeration type
-   type string
+   string type
    conversion
    constant
    runtime error
@@ -568,9 +499,10 @@ is converted to the declared type. This conversion never causes a runtime error.
 .. index::
    enumeration type
    conversion
+   value
    constant
+   type declaration
    runtime error
-
 
 |
 
@@ -584,17 +516,11 @@ Numeric Casting Conversions
 
 A *numeric casting conversion* occurs if the *target type* and the expression
 type are both ``numeric``.
-There are two contexts where *numeric casting conversion* is applied:
+The context for a *numeric casting conversion* is where conversion methods
+are used as defined in the standard library (see :ref:`Standard Library`).
 
--  Using conversion methods defined in the standard library
-   (see :ref:`Standard Library`);
-
--  Or, implicitly in the following arithmetic operations:
-   :ref:`Postfix Increment`, :ref:`Postfix Decrement`,
-   :ref:`Prefix Increment`, :ref:`Prefix Decrement`.
-
-The following example illustrates explicit use of
-methods for *numeric cast conversions*:
+The explicit use of methods for *numeric cast conversions* is represented in
+the following example:
 
 .. code-block-meta:
    not-subset
@@ -602,12 +528,12 @@ methods for *numeric cast conversions*:
 .. code-block:: typescript
    :linenos:
 
-    function process_int(an_int: int) { ... }
+    function process_int(an_int: int) { /* ... */ }
 
     let pi = 3.14
     process_int(pi.toInt())
 
-These conversions never cause runtime errors.
+A numeric casting conversion never causes a runtime error.
 
 Numeric casting conversion of an operand of type ``double`` to target type
 ``float`` is performed in compliance with the IEEE 754 rounding rules. This
@@ -634,6 +560,14 @@ Double infinity is converted to the same-signed floating-point infinity.
    float infinity
    infinity double
    floating-point infinity
+   double infinity
+   double NaN
+   Nan
+   float NaN
+   IEEE 754
+   rounding rule
+   conversion
+   infinity
 
 A numeric conversion of a floating-point type operand to target types ``long``
 or ``int`` is performed by the following rules:
@@ -657,6 +591,10 @@ A numeric casting conversion of a floating-point type operand to types
 .. index::
    target type
    floating-point operand
+   floating-point type
+   long type
+   int type
+   NaN
    numeric conversion
    byte
    short
@@ -671,6 +609,7 @@ A numeric casting conversion of a floating-point type operand to types
    floating-point type
    floating-point infinity
    rounding rules
+   round-toward-zero
 
 A numeric casting conversion from an integer type to a smaller integer
 type ``I`` discards all bits except the *N* lowest ones, where *N* is
@@ -681,8 +620,9 @@ value can differ from that of the original value.
 .. index::
    IEEE 754
    floating-point type
+   numeric casting conversion
    operand
-   NaN
+   conversion
    positive infinity
    target type
    negative infinity

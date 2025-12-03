@@ -16,7 +16,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '..';
 import { astService } from '../../services/ast';
-import { handleASTLogs, handleResponseLogs, IApiResponse } from '../../models/logs';
+import { handleASTLogs } from '../../models/logs';
 import { clearErrLogs, clearOutLogs } from './logs';
 import { setClearHighLightErrs } from '../slices/logs';
 import { setAstLoading, setAstRes } from '../slices/ast';
@@ -36,7 +36,7 @@ export const fetchAst = createAsyncThunk(
         const modeFromState: AstTrigger = (state.features?.astMode ?? 'auto') as AstTrigger;
         const trigger: AstTrigger = triggerArg ?? modeFromState;
     
-        thunkAPI.dispatch(setClearHighLightErrs([]));
+        thunkAPI.dispatch(setClearHighLightErrs());
         if (clearLogs) {
           thunkAPI.dispatch(clearOutLogs());
           thunkAPI.dispatch(clearErrLogs());

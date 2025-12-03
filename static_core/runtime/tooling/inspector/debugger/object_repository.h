@@ -18,7 +18,7 @@
 
 #include "include/tooling/debug_interface.h"
 #include "include/typed_value.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/handle_scope.h"
 
 #include "types/numeric_id.h"

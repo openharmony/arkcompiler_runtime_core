@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "libpandabase/os/native_stack.h"
-#include "libpandabase/os/thread.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/os/native_stack.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/utf.h"
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"

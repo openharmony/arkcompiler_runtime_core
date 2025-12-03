@@ -144,7 +144,7 @@ function push(): int {
 
 function pushECMA(): int {
     return check(() => new Array<Number>, (arr: Array<Number>) => {
-        arr.pushECMA(...d);
+        arr.push(...d);
         arktest.assertEQ(arr.length, d.length);
         for (let i: int = 0; i < d.length; ++i) {
             arktest.assertEQ(arr.at(i), d[i]);

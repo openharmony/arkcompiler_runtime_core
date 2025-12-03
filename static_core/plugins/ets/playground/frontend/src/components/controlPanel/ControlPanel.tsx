@@ -21,7 +21,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {withAstView, withDisasm, withRuntimeVerify, withVerifier} from '../../store/selectors/appState';
 import {AppDispatch} from '../../store';
 import {setDisasmAction, setRuntimeVerifAction, setVerifAction} from '../../store/actions/appState';
-import {fetchCompileCode, fetchRunCode} from '../../store/actions/code';
+import {fetchCompileCode, fetchRunCode, shareCodeLocally, flushPendingCodeUpdate} from '../../store/actions/code';
 import {selectCompileLoading, selectRunLoading, selectShareLoading} from '../../store/selectors/code';
 import {useClickOutside} from '../../utils/useClickOutside';
 import cx from 'classnames';
@@ -55,10 +55,16 @@ const ControlPanel = (): JSX.Element => {
         dispatch(setAstView(!astView));
     };
     const handleCompile = (): void => {
+        flushPendingCodeUpdate();
         dispatch(fetchCompileCode());
     };
     const handleRun = (): void => {
+        flushPendingCodeUpdate();
         dispatch(fetchRunCode());
+    };
+    const handleShare = (): void => {
+        flushPendingCodeUpdate();
+        dispatch(shareCodeLocally());
     };
     const handleClosePopover = (): void => {
         setIsOpen(false);
@@ -76,6 +82,7 @@ const ControlPanel = (): JSX.Element => {
         handleClosePopover();
     };
     useClickOutside(popoverRef, handleClosePopover);
+
     return (
         <div className={styles.container}>
             <ButtonGroup>
@@ -136,18 +143,17 @@ const ControlPanel = (): JSX.Element => {
                         />
                     </Popover>
                 </Tooltip>
-                {/* <Tooltip content="Share" placement="bottom">
+                <Tooltip content="Share" placement="bottom">
                     <Button
                         icon={isShareLoading
                             ? <div className={styles.icon}><Icon icon="build" size={11} /></div>
                             : <div className={styles.icon}><Icon icon="share" size={14}/></div>}
                         className={styles.btn}
-                        onClick={handleCompile}
-                        disabled={isCompileLoading}
+                        onClick={handleShare}
+                        disabled={isShareLoading}
+                        data-testid="share-btn"
                     />
-                        {/* Share
-                    </Button>
-                </Tooltip> */}
+                </Tooltip>
             </ButtonGroup>
             <Checkbox
                 checked={astView}

@@ -15,8 +15,8 @@
 
 #include <sstream>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/os/system_environment.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/system_environment.h"
 #include "plugins/ets/runtime/ani/ani.h"
 
 namespace {
@@ -38,7 +38,7 @@ std::vector<ani_string> SplitString(ani_env *env, std::string_view from, char de
 
 extern "C" {
 // NOLINTNEXTLINE(readability-identifier-naming)
-ANI_EXPORT ani_array getAppAbcFiles(ani_env *env, [[maybe_unused]] ani_class)
+ANI_EXPORT ani_array getAppAbcFiles(ani_env *env, [[maybe_unused]] ani_class /*unused*/)
 {
     auto appAbcFiles = ark::os::system_environment::GetEnvironmentVar("APP_ABC_FILES");
     const auto paths = SplitString(env, appAbcFiles, ':');

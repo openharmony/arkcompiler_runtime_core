@@ -22,6 +22,9 @@ if ((defined(ark_standalone_build) && ark_standalone_build) ||
       "//build/config/components/runtime_core/static_core/ark_common_config.gni")
 }
 
+typescript_dir = get_label_info("//third_party/typescript:build_typescript",
+                                "target_out_dir")
+
 action("build_declgen") {
   sources = [
     "package.json",
@@ -41,11 +44,13 @@ action("build_declgen") {
     "src/utils/LogTscDiagnostics.ts",
   ]
 
+  external_deps = [ "typescript:build_typescript_etc" ]
   script = "compile_declgen.py"
   tgz_name = "panda-declgen-1.0.0.tgz"
   args = [
     rebase_path(get_path_info("./", "abspath")),
     rebase_path("${target_out_dir}"),
+    rebase_path("${typescript_dir}/ohos-typescript-4.9.5-r4.tgz"),
     tgz_name,
   ]
 

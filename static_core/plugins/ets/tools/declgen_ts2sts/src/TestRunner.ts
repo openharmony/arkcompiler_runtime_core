@@ -161,7 +161,7 @@ function compareExpectedAndActualOutputs(test: Test, emitResult: ts.EmitResult):
 
   const expected = fs.readFileSync(test.expectedOutput).toString().replace(copyright, '');
   const actualPath = path.join(test.outDir, `${test.name}${Extension.DETS}`);
-  const actual = fs.readFileSync(actualPath).toString();
+  const actual = fs.readFileSync(actualPath).toString().replace(copyright, '');
 
   if (expected !== actual) {
     Logger.error(
@@ -252,7 +252,8 @@ function collectTests(testSuite: string, opts: TestRunnerCLIOptions): Test[] {
   const dirContents = fs.readdirSync(testSuitePath).filter((e) => {
     return fs.statSync(path.join(testSuitePath, e)).isFile();
   });
-
+  const jsonDir = path.join(opts.testDirPath, 'json_storage');
+  const detsDir = path.join(opts.testDirPath, 'dets_output');
   const basenames = new Set(
     dirContents.map((v) => {
       return v.split('.')[0];
@@ -262,20 +263,19 @@ function collectTests(testSuite: string, opts: TestRunnerCLIOptions): Test[] {
   const tests: Test[] = [];
 
   for (const name of basenames) {
-    const testSource = `${name}${ts.Extension.Ts}`;
-    const expectedReport = `${name}${ts.Extension.Json}`;
-    const expectedOutput = `${name}${Extension.DETS}`;
+    const testSourceExtension = testSuite === 'ts_source' ? ts.Extension.Ts : ts.Extension.Dts;
+    const testSource = `${name}${testSourceExtension}`;
+    const expectedReport = path.join(jsonDir, name + ts.Extension.Json);
+    const expectedOutput = path.join(detsDir, name + Extension.DETS);
 
     if (!dirContents.includes(testSource)) {
       throw new Error(`Test ${name} is missing it's source file <${testSource}>!`);
     }
-
-    if (!dirContents.includes(expectedReport)) {
-      throw new Error(`Test ${name} is missing it's expected report file <${expectedReport}>!`);
+    if (!fs.existsSync(expectedReport)) {
+      throw new Error(`Test ${name} is missing expected report file <${expectedReport}>!`);
     }
-
-    if (!dirContents.includes(expectedOutput)) {
-      throw new Error(`Test ${name} is missing it's expected output file <${expectedOutput}>!`);
+    if (!fs.existsSync(expectedOutput)) {
+      throw new Error(`Test ${name} is missing expected output file <${expectedOutput}>!`);
     }
 
     tests.push({
@@ -283,8 +283,8 @@ function collectTests(testSuite: string, opts: TestRunnerCLIOptions): Test[] {
       name: name,
       outDir: path.join(testSuiteOutPath, name),
       testSource: path.join(testSuitePath, testSource),
-      expectedOutput: path.join(testSuitePath, expectedOutput),
-      expectedReport: path.join(testSuitePath, expectedReport)
+      expectedOutput,
+      expectedReport
     });
   }
 

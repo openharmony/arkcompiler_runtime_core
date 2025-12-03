@@ -18,7 +18,7 @@ import {Modulo} from "@arkts.math.Decimal"
 function main(): int {
 
     let a: Modulo = 5
-    arktest.assertTrue(typeof a == "number", "Modulo type is not a number!")
+    arktest.assertTrue(typeof a == "int", "Modulo type is not of type int!")
 
     return 0
 }

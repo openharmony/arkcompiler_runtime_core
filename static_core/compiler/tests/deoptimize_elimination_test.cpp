@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "unit_test.h"
 #include "optimizer/ir/graph_cloner.h"
 #include "optimizer/optimizations/deoptimize_elimination.h"
@@ -900,6 +900,8 @@ TEST_F(DeoptimizeEliminationTest, ReplaceByDeoptimizeInliningTest)
             INST(8U, Opcode::Deoptimize).Inputs(4U);
         }
     }
+    INS(4U).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(3U)));
+    INS(4U).CastToSaveState()->SetInliningDepth(1U);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

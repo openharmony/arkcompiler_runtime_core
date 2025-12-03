@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,10 @@ export interface TestUserType {
     city?:string;
 }
 
-type BasicTestUser = Pick<TestUserType, 'name' | 'city' >;
+export interface BasicTestUser {
+    name: string;
+    city?: number | string;
+}
 
 export function fnWithSubSetParam(obj:BasicTestUser):string {
     return obj.city ? `${obj.name}; ${obj.city}` : obj.name;
@@ -79,13 +82,21 @@ export interface TestSecondUserType {
     city:string;
 }
 
-type TestUserTypeReduseProperty = Omit<TestSecondUserType, 'id' | 'city' >;
+export interface TestUserTypeReduseProperty {
+    name:string;
+    surname?: string;
+}
 
 export function fnWithSubSetReduseParam(obj:TestUserTypeReduseProperty):string {
     return obj.surname ? `${obj.name}; ${obj.surname}` : obj.name;
 }
 
-type PartialTestUserType = Partial<TestSecondUserType>;
+export interface PartialTestUserType {
+    name?:string;
+    surname?: string;
+    id?:number;
+    city?:string;
+}
 
 export function fnWithSubSetPartialParam(obj:PartialTestUserType):string | undefined {
     return obj.surname ? `${obj.name}; ${obj.surname}` : obj.name;

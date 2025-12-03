@@ -20,6 +20,7 @@ void BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool accRead);
 void BuildSignbitIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildEscompatArrayGetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildEscompatArraySetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildEscompatArrayGetBufferIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
 void BuildTypedUnsignedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::Inst *value,
                                          ark::compiler::DataType::Type type, bool accRead);
@@ -49,14 +50,13 @@ template <bool LOAD>
 void BuildUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildUnsafeLoadIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildUnsafeStoreIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
-// CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
+template <bool UNSIGNED = false>  // CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
 std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedArrayLoadDataAndOffset(
-    const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead, bool needBoundCheck);
-// CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
-std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedUnsignedArrayLoadDataAndOffset(
     const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead, bool needBoundCheck);
 void BuildTypedArrayDetachedDataCheck(ark::compiler::Inst **dataInst, size_t bcAddr,
                                       ark::compiler::SaveStateInst *saveState);
+void BuildTypedArrayDetachedManagedDataCheck(ark::compiler::Inst **dataInst, size_t bcAddr,
+                                             ark::compiler::SaveStateInst *saveState);
 void BuildTypedArrayBoundsCheck(ark::compiler::Inst *posInst, ark::compiler::Inst *lengthInst, size_t bcAddr,
                                 ark::compiler::SaveStateInst *saveState);
 

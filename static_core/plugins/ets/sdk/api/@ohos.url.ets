@@ -228,7 +228,7 @@ export namespace url {
         if (input.length == 0) {
             return temp;
         }
-        let pos: int = temp.indexOf("%").toInt();
+        let pos: int = temp.indexOf("%");
         while ((pos != -1) && (pos < len - 2)) {
             if (Char.isHexDigit(temp.charAt(pos.toInt() + 1)) && Char.isHexDigit(temp.charAt(pos.toInt() + 2))) {
                 let subStr = temp.substring(pos + 1, pos + 3);
@@ -270,11 +270,11 @@ export namespace url {
     }
 
     function formatIPv6(input: string): string {
-        let pos: number = input.indexOf("::");
-        let index: number = pos;
+        let pos: int = input.indexOf("::");
+        let index: int = pos;
         if (pos != -1) {
-            let left: number = 0;
-            let count: number = 0;
+            let left: int = 0;
+            let count: int = 0;
             while ((pos = input.indexOf(":", left)) != -1) {
                 count += 1;
                 left = pos + 1;
@@ -568,8 +568,8 @@ export namespace url {
         }
 
         private removalIPv4(inputStr: string): boolean {
-            let pos: number = 0;
-            let left: number = 0;
+            let pos: int = 0;
+            let left: int = 0;
             pos = inputStr.indexOf(".", left);
             while (pos != -1) {
                 this.ipv4Array.push(inputStr.substring(left, pos));
@@ -722,8 +722,10 @@ export namespace url {
 
         private analysizeFile(input: string) {
             let special: boolean = true;
-            if ((input.charAt(0) == c'/' || input.charAt(0) == c'\\') &&
-                (input.charAt(1) == c'/' || input.charAt(1) == c'\\'))
+            const firstChar = input.length > 0 ? input.charAt(0) : '';
+            const secondChar = input.length > 1 ? input.charAt(1) : '';
+            if ((firstChar == c'/' || firstChar == c'\\') &&
+                (secondChar == c'/' || secondChar == c'\\'))
             {
                 let temp: string = input.substring(2);
                 let pos: number = 0;
@@ -741,7 +743,7 @@ export namespace url {
                     }
                 }
             } else {
-                if (input.charAt(0) == c'/' || input.charAt(0) == c'\\') {
+                if (firstChar == c'/' || firstChar == c'\\') {
                     input = input.substring(1);
                 }
                 this.analysizeFilePath(input);
@@ -1049,7 +1051,7 @@ export namespace url {
             if (tempInput.indexOf(':') != -1) {
                 let pos = tempInput.indexOf(':').toInt();
                 pos++;
-                this.flags[INDEX_DOUBLE_SLASH] = (input.charAt(pos.toInt()) == c'/' && input.charAt(pos.toInt() + 1) == c'/');
+                this.flags[INDEX_DOUBLE_SLASH] = (pos.toInt() +1 < tempInput.length && input.charAt(pos.toInt()) == c'/' && input.charAt(pos.toInt() + 1) == c'/');
                 let scheme: string = tempInput.substring(0, pos);
                 if (!this.analysizeScheme(scheme)) {
                     return tempInput;
@@ -1945,11 +1947,11 @@ export namespace url {
                 result.urlInner = resUrl;
                 return result;
             }
-            if ((input.charAt(0) == c'/') && (input.charAt(1) == c'/' || (input.charAt(1) == c'\\' && possibleBaseURL.flags[INDEX_SPECIAL]))) {
-                let newInput: string = possibleBaseURL.cScheme + input;
-                resUrl.flags[INDEX_INVALID] = false
-                resUrl.parseSingleUrl(newInput);
-                result.urlInner = resUrl;
+            let needReturn = false;
+            const baseResults = URL.parseBaseInner(input, possibleBaseURL, resUrl, result, needReturn);
+	        let firstChar = baseResults[0];
+	        needReturn = baseResults[1];
+            if (needReturn) {
                 return result;
             }
             if (!possibleBaseURL.flags[INDEX_INFOPATH]) {
@@ -1988,24 +1990,22 @@ export namespace url {
                 result.urlInner = resUrl;
                 return result;
             }
-            if (input.length != 0) {
-                if ((input.charAt(0) == c'/') && (input.charAt(1) == c'/' || (input.charAt(1) == c'\\' && base.flags[INDEX_SPECIAL]))) {
-                    let newInput: string = base.cScheme + input;
-                    resUrl.flags[INDEX_INVALID] = false
-                    resUrl.initOnlyInput(newInput);
-                    result.urlInner = resUrl;
-                    return result;
-                }
+            let needReturn = false;
+            const baseResults = URL.parseBaseInner(input, base, resUrl, result, needReturn);
+	        let firstChar = baseResults[0];
+	        needReturn = baseResults[1];
+            if (needReturn) {
+                return result;
             }
             if (!base.flags[INDEX_INFOPATH]) {
                 resUrl.flags[INDEX_INVALID] = false
                 baseIntoUrl(base, resUrl, input.length == 0);
                 strInput = resUrl.toolHasBase(input, strInput);
-                if (input.length != 0 && input.charAt(0) != c'/' && resUrl.cPath.length == 0) {
+                if ((input.length > 0) && firstChar != c'/' && resUrl.cPath.length == 0) {
                     resUrl.cPath = base.cPath;
                     resUrl.flags[INDEX_PATH] = base.flags[INDEX_PATH];
                 }
-                if (input.length != 0 && input.charAt(0) != c'/' && resUrl.cPath.length != 0) {
+                if ((input.length > 0) && firstChar != c'/' && resUrl.cPath.length != 0) {
                     let isFile: boolean = resUrl.cScheme == "file:";
                     shorteningPath(resUrl, base, isFile);
                     let basePathStr: string = basePathToString(base);
@@ -2022,6 +2022,19 @@ export namespace url {
             result.urlInner = resUrl;
             return result;
         }
+
+        private static parseBaseInner(input: string, base: InnerURL, resUrl: InnerURL, result: URL, needReturn: Boolean): [Char | '' , Boolean] {
+            const firstChar = input.length > 0 ? input.charAt(0) : '';
+            const secondChar = input.length > 1 ? input.charAt(1) : '';
+            if ((input.length > 0) && (firstChar == c'/') && (secondChar == c'/' || (secondChar == c'\\' && base.flags[INDEX_SPECIAL]))) {
+                let newInput: string = base.cScheme + input;
+                resUrl.flags[INDEX_INVALID] = false;
+                resUrl.initOnlyInput(newInput);
+                result.urlInner = resUrl;
+                needReturn = true;
+            }
+            return [firstChar, needReturn];
+        }
     }
 
     function removeKeyValuePairs(str: string, key: string): string {
@@ -2033,14 +2046,26 @@ export namespace url {
         return result;
     }
 
+    class ParamNode {
+        element: [string, string];
+        prev?: ParamNode;
+        next?: ParamNode;
+
+        constructor(element: [string, string]) {
+            this.element = element;
+        }
+    }
+
     /**
     * The URLParams interface defines some practical methods to process URL query strings.
     *
     * @class URLParams
     */
     export class URLParams {
-        urlClass: NativeURLSearchParams;
         parentUrl: URL | null = null;
+        head: ParamNode | undefined;
+        tail: ParamNode | undefined;
+        cacheMap: Map<string, int>;
 
         /**
         * A parameterized constructor used to create an URLParams instance.
@@ -2054,9 +2079,8 @@ export namespace url {
         * @throws { BusinessError } 10200002 - Parameter error. Parameter verification failed.
         */
         constructor(input?: [string, string][] | Record<string, string> | string | URLParams) {
-            let arr = parameterProcess(input);
-            this.urlClass = new NativeURLSearchParams();
-            this.urlClass.setArray(arr);
+            this.cacheMap = new Map<string, int>();
+            this.parameterProcess(input);
         }
 
         /**
@@ -2066,9 +2090,17 @@ export namespace url {
         * @param { string } value - value value Values of search parameters to be inserted.
         */
         append(params1: string, params2: string): void {
-            params1 = fixUSVstring(params1);
-            params2 = fixUSVstring(params2);
-            this.urlClass.append(params1, params2);
+            let element: [string, string] = [params1, params2];
+            let tempNode: ParamNode = new ParamNode(element);
+            this.addToCache(params1);
+            if (this.head == undefined) {
+                this.head = tempNode;
+                this.tail = tempNode;
+                return;
+            }
+            this.tail!.next = tempNode;
+            tempNode.prev = this.tail;
+            this.tail = tempNode;
             if (this.parentUrl != null) {
                 this.parentUrl!.urlInner.setSearch(this.toString());
                 this.parentUrl!.cSearch = this.parentUrl!.urlInner.getSearch();
@@ -2086,9 +2118,36 @@ export namespace url {
         * @param { string } value - value value Indicates the parameter value to be set.
         */
         set(setName: string, setValues: string): void {
-            setName = fixUSVstring(setName);
-            setValues = fixUSVstring(setValues);
-            this.urlClass.set(setName, setValues);
+            let hasFound = false;
+            let current = this.head;
+            while(current != undefined) {
+                if (current!.element[0] == setName) {
+                    if (!hasFound) {
+                        current!.element[1] = setValues;
+                        hasFound = true;
+                        current = current!.next;
+                        continue;
+                    } else if (current == this.tail) {
+                        this.tail = current!.prev;
+                        this.tail!.next = undefined;
+                        current = undefined;
+                        let val = this.cacheMap.get(setName);
+                        this.cacheMap.set(setName, val! - 1);
+                        continue;
+                    } else {
+                        current!.prev!.next = current!.next;
+                        current!.next!.prev = current!.prev;
+                        let val = this.cacheMap.get(setName);
+                        this.cacheMap.set(setName, val! - 1);
+                    }
+                }
+                current = current!.next;
+            }
+
+            if (!hasFound) {
+                this.append(setName, setValues);
+            }
+
             if (this.parentUrl != null) {
                 this.parentUrl!.urlInner.setSearch(this.toString());
                 this.parentUrl!.cSearch = this.parentUrl!.urlInner.getSearch();
@@ -2101,7 +2160,17 @@ export namespace url {
         *
         */
         sort(): void {
-            this.urlClass.sort();
+            this.head = this.doMergeSort(this.head);
+            if (this.head) {
+		        let current = this.head;
+		        while (current!.next) {
+			        current = current!.next;
+		        }
+                this.tail = current;
+	        } 
+            else {
+		        this.tail = undefined;
+	        }
             if (this.parentUrl != null) {
                 this.parentUrl!.urlInner.setSearch(this.toString());
                 this.parentUrl!.cSearch = this.parentUrl!.urlInner.getSearch();
@@ -2116,8 +2185,14 @@ export namespace url {
         * @returns { boolean } Returns a Boolean value that indicates whether a found
         */
         has(hasname: string): boolean {
-            hasname = fixUSVstring(hasname);
-            return this.urlClass.isHas(hasname);
+            let current = this.head;
+            while (current != undefined) {
+                if (current!.element[0] == hasname) {
+                    return true;
+                }
+                current = current!.next;
+            }
+            return false;
         }
 
         /**
@@ -2126,7 +2201,18 @@ export namespace url {
         * @returns { string } Returns a search parameter serialized as a string, percent-encoded if necessary.
         */
         toString(): string {
-            return this.urlClass.toString();
+            let resultArray = new Array<string>();
+            let current = this.head;
+            let key: string = '';
+            let value: string = '';
+            const regStr = '%20';
+            while(current != undefined) {
+                key = encodePercentEncoding(fixUSVstring(current!.element[0]), Helper.PARAMS_TOSTRING_SIGN_CHARS).replaceAll(regStr, '+');
+                value = encodePercentEncoding(fixUSVstring(current!.element[1]), Helper.PARAMS_TOSTRING_SIGN_CHARS).replaceAll(regStr, '+');
+                resultArray.push(`${current != this.head ? '&' : ''}${key}=${value}`);
+                current = current!.next;
+            }
+            return resultArray.join('');
         }
 
         /**
@@ -2135,7 +2221,13 @@ export namespace url {
         * @returns { IterableIterator<string> } Returns an ES6 Iterator over the names of each name-value pair.
         */
         keys(): IterableIterator<string> {
-            return this.urlClass.iterByKeys().$_iterator();
+            let current = this.head;
+            let res = new Array<string>();
+            while(current != undefined) {
+                res.push(current!.element[0]);
+                current = current!.next;
+            }
+            return res.$_iterator();
         }
 
         /**
@@ -2144,7 +2236,13 @@ export namespace url {
         * @returns { IterableIterator<string> } Returns an ES6 Iterator over the names of each name-value pair.
         */
         values(): IterableIterator<string> {
-            return this.urlClass.iterByValues().$_iterator();
+            let current = this.head;
+            let res = new Array<string>();
+            while(current != undefined) {
+                res.push(current!.element[1]);
+                current = current!.next;
+            }
+            return res.$_iterator();
         }
 
         /**
@@ -2154,8 +2252,15 @@ export namespace url {
         * @returns { string[] } string[] Returns all key-value pairs with the specified name.
         */
         getAll(getAllname: string): string[] {
-            getAllname = fixUSVstring(getAllname);
-            return this.urlClass.getAll(getAllname);
+            let res = new Array<string>();
+            let current = this.head;
+            while(current != undefined) {
+                if (current!.element[0] == getAllname) {
+                    res.push(current!.element[1]);
+                }
+                current = current!.next;
+            }
+            return res;
         }
 
         /**
@@ -2166,8 +2271,14 @@ export namespace url {
         * If no value is found, undefined is returned.
         */
         get(getname: string): string | undefined {
-            getname = fixUSVstring(getname);
-            return this.urlClass.get(getname);
+            let current = this.head;
+            while(current != undefined) {
+                if (current!.element[0] == getname) {
+                    return current!.element[1];
+                }
+                current = current!.next;
+            }
+            return undefined;
         }
 
         /**
@@ -2177,7 +2288,14 @@ export namespace url {
         * @returns { IterableIterator<[string,string]> } Returns an iterator over all values.
         */
         entries(): IterableIterator<[string, string]> {
-            return this.urlClass.entries().$_iterator();
+            let result = new Array<[string, string]>();
+            let current = this.head;
+            while(current != undefined) {
+                let arr: [string, string] = current!.element;
+                result.push(arr);
+                current = current!.next;
+            }
+            return result.$_iterator();
         }
 
         /**
@@ -2186,8 +2304,51 @@ export namespace url {
         * @param { string } name - name name Name of the key-value pair to be deleted.
         */
         delete(deleteName: string): void {
-            deleteName = fixUSVstring(deleteName);
-            this.urlClass.delete(deleteName);
+            let val: int | undefined = this.cacheMap.get(deleteName);
+            if (val == undefined || val == 0) {
+                return;
+            }
+            let current = this.head;
+            while (current != undefined) {
+                if (current!.element[0] == deleteName) {
+                    this.cacheMap.set(deleteName, val - 1);
+                    if (current == this.head && current == this.tail) {
+                        this.head = undefined;
+                        this.tail = undefined;
+                        current = undefined;
+                        if ((val - 1) == 0) {
+                            return;
+                        } else {
+                           continue;
+                        }
+                    } else if (current == this.head && current != this.tail) {
+                        this.head = current!.next;
+                        this.head!.prev = undefined;
+                        current = this.head;
+                        if ((val - 1) == 0) {
+                            return;
+                        } else {
+                           continue;
+                        }
+                    } else if (current == this.tail) {
+                        this.tail = current!.prev;
+                        this.tail!.next = undefined;
+                        current = undefined;
+                        if ((val - 1) == 0) {
+                            return;
+                        } else {
+                           continue;
+                        }
+                    } else {
+                        current!.prev!.next = current!.next;
+                        current!.next!.prev = current!.prev;
+                        if ((val - 1) == 0) {
+                            return;
+                        }
+                    }
+                }
+                current = current!.next;
+            }
             if (this.parentUrl != null) {
                 let searchStr: string = removeKeyValuePairs(this.parentUrl!.urlInner.getSearch(), deleteName);
                 this.parentUrl!.urlInner.setSearch(searchStr);
@@ -2203,15 +2364,14 @@ export namespace url {
         * key Indicates the name of the key that is traversed.
         */
         forEach(objfun: UrlCbFn) {
-            let array = this.urlClass.getArray();
-            if (array.length == 0) {
+            let current = this.head;
+            if (current == undefined) {
                 return;
             }
-            let size = array.length - 1;
-            for (let i = 0; i < size; i += 2) { // 2:Searching for the number and number of keys and values 2
-                let key = array[i];
-                let value = array[i + 1];
-                objfun(value, key, this);
+            while(current != undefined) {
+                let node = current!.element;
+                objfun(node[1], node[0], this);
+                current = current!.next;
             }
         }
 
@@ -2224,7 +2384,70 @@ export namespace url {
         * The first item of Array is name, and the second item of Array is value.
         */
         $_iterator(): IterableIterator<[string, string]> {
-            return this.urlClass.entries().$_iterator();
+            return this.entries();
+        }
+
+        /**
+        * Helper function for sort
+        *
+        * @returns { ParamNode | undefined } Returns ParamNode or undefined.
+        */
+        private sortSplit(head: ParamNode | undefined) : ParamNode | undefined {
+          let fast = head;
+          let slow = head;
+
+          while (fast!.next && fast!.next!.next) {
+              fast = fast!.next!.next;
+              slow = slow!.next;
+          }
+
+          let temp = slow!.next;
+          slow!.next = undefined;
+          if (temp != undefined) {
+              temp!.prev = undefined;
+          }
+
+          return temp;
+        }
+
+        /**
+        * Helper function for sort
+        *
+        * @returns { ParamNode | undefined } Returns ParamNode or undefined.
+        */
+        private sortMerge(first: ParamNode | undefined, second: ParamNode | undefined) {
+            if (first == undefined) return second;
+
+            if (second == undefined) return first;
+
+            if (first!.element[0] <= second!.element[0]) {
+                first!.next = this.sortMerge(first!.next, second);
+                if (first!.next) first!.next!.prev = first;
+                first!.prev = undefined;
+                return first;
+            } else {
+                second!.next = this.sortMerge(first, second!.next);
+                if (second!.next) second!.next!.prev = second;
+                second!.prev = undefined;
+                return second;
+            }
+        }
+
+        /**
+        * Helper function for sort
+        *
+        * @returns { ParamNode | undefined } Returns ParamNode or undefined.
+        */
+        private doMergeSort(head: ParamNode | undefined): ParamNode | undefined {
+            if (head == undefined || head.next == undefined) {
+                return head;
+            }
+            let second = this.sortSplit(head);
+
+            head = this.doMergeSort(head);
+            second = this.doMergeSort(second);
+
+            return this.sortMerge(head, second);
         }
 
         /**
@@ -2233,211 +2456,104 @@ export namespace url {
         * @param { string } input - input string.
         */
         updateParams(input: string): void {
-            let arr = parameterProcess(input);
-            this.urlClass.setArray(arr);
+            this.parameterProcess(input);
         }
-    }
 
-    /**
-    * Handle the specific URLParams logic
-    * @class NativeURLParams
-    */
-    class NativeURLSearchParams {
-        private searchParams = new Array<string>();
+        private addToCache(key: string) {
+            let val: int | undefined = this.cacheMap.get(key);
+            if (val == undefined) {
+                this.cacheMap.set(key, 1);
+            } else {
+                this.cacheMap.set(key, (val!) + 1);
+            }
+        }
 
-        constructor() {}
+        private parameterProcess(input?: [string, string][] | Record<string, string> | string | URLParams): void {
+            // Clear the cacheMap because updateParams can call this method.
+            this.cacheMap.clear();
+            if (input == undefined || input == null || input == '') {
+                this.head = undefined;
+                this.tail = undefined;
+            } else if (typeof input == 'string') {
+                this.parseParamFromString(input as string);
+            } else if (input instanceof URLParams) {
+                this.head = input.head;
+                this.tail = input.tail;
+                this.cacheMap = input.cacheMap;
+            } else if (input instanceof [string, string][]) {
+                this.parseParamFromArray(input as [string, string][]);
+            } else if (input instanceof Record) {
+                this.parseParamFromRecord(input as Record<string, string>)
+            } else {
+                throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid input type.');
+            }
+        }
 
-        get(key: string): string | undefined {
-            let len = this.searchParams.length;
-            for (let i = 0; i < len; i += 2) {
-                if (key == this.searchParams[i]) {
-                    return this.searchParams[i + 1];
+        private parseParamFromString(input: string): void {
+            if (input.charAt(0) == c'?') {
+                input = input.slice(1);
+            }
+            let strVal = input.replaceAll('+', ' ');
+            let searchParamsArr: Array<string> = stringParmas(strVal);
+            let current = this.head;
+            for (let i: int = 0; i <= (searchParamsArr.length - 2); i += 2) {
+                let key: string = decodeStringParmas(searchParamsArr[i]);
+                let ele: [string, string] = [key, decodeStringParmas(searchParamsArr[i + 1])];
+                let tempNode: ParamNode = new ParamNode(ele);
+                this.addToCache(key);
+                if (i == 0) {
+                    this.head = tempNode;
+                    current = this.head;
+                    continue;
                 }
+                current!.next = tempNode;
+                tempNode.prev = current;
+                current = tempNode;
             }
-            return undefined;
+            this.tail = current;
         }
 
-        getAll(key: string): Array<string> {
-            let result = new Array<string>();
-            let len = this.searchParams.length;
-            for (let i = 0; i < len; i += 2) {
-                if (key == this.searchParams[i]) {
-                    result.push(this.searchParams[i + 1]);
-                }
+        private parseParamFromArray(input: [string, string][]): void {
+            if (input.length == 0) {
+                this.head = undefined;
+                this.tail = undefined;
+            } else if (input[0][0] == undefined || input[0][1] == undefined) {
+                throw createBusinessError(SyntaxErrorCodeId, 'Parameter error. The type of input must be string[][].');
             }
-            return result;
-        }
-
-        append(key: string, value: string) {
-            this.searchParams.push(key);
-            this.searchParams.push(value);
-        }
-
-        delete(name: string) {
-            for (let i = this.searchParams.length - 2; i >= 0; i -= 2) {
-                if (this.searchParams[i] == name) {
-                    this.searchParams.splice(i, 2);
-                }
-            }
-        }
-
-        entries(): Array<[string, string]> {
-            let result = new Array<[string, string]>();
-            for (let i = 0; i < this.searchParams.length; i += 2) {
-                let arr: [string, string] = [this.searchParams[i], this.searchParams[i + 1]];
-                result.push(arr);
-            }
-            return result;
-
-        }
-
-        isHas(str: string): boolean {//key
-            let len = this.searchParams.length;
-            for (let i = 0; i < len; i += 2) {
-                if (this.searchParams[i] == str) {
-                    return true;
-                }
-            }
-            return false;
-
-        }
-
-        set(key: string, value: string) {
-            let len = this.searchParams.length;
-            let flag = false;
-            for (let i = 0; i < len;) {
-                if (this.searchParams[i] == key) {
-                    if (!flag) {
-                        this.searchParams[i + 1] = value;
-                        flag = true;
-                        i += 2;
-
-                    } else {
-                        this.searchParams.splice(i, 2);
-                    }
+            let current = this.head;
+            for (let it of input) {
+                let element: [string, string] = [it[0], it[1]];
+                let temp = new ParamNode(element);
+                this.addToCache(it[0]);
+                if (this.head == undefined) {
+                    this.head = temp;
+                    current = this.head;
                 } else {
-                    i += 2;
+                    temp.prev = current;
+                    current!.next = temp;
+                    current = temp;
                 }
             }
-            if (!flag) {
-                this.append(key, value);
-            }
+            this.tail = current;
         }
 
-        sort() {
-            let len = this.searchParams.length;
-            if (len <= 2 || (len % 2 != 0)) { // 2: Iterate over key-value pairs
-                return;
-            }
-            let i = 0;
-            for (; i < len - 2; i += 2) { // 2:Iterate over key-value pairs
-                let j = i + 2; // 2:Iterate over key-value pairs
-                for (; j < len; j += 2) { // 2:Iterate over key-value pairs
-                    let tmp: boolean = (this.searchParams[i] > this.searchParams[j]);
-                    if (tmp) {
-                        let curKey = this.searchParams[i];
-                        let curVal = this.searchParams[i + 1];
-                        this.searchParams[i] = this.searchParams[j];
-                        this.searchParams[i + 1] = this.searchParams[j + 1];
-                        this.searchParams[j] = curKey;
-                        this.searchParams[j + 1] = curVal;
-                    }
+        private parseParamFromRecord(input: Record<string, string>): void {
+            let current = this.head;
+            for (let k of input.keys()) {
+                let element: [string, string] = [k, input.get(k)!];
+                let temp = new ParamNode(element);
+                this.addToCache(k);
+                if (this.head == undefined) {
+                    this.head = temp;
+                    current = this.head;
+                } else {
+                    temp.prev = current;
+                    current!.next = temp;
+                    current = temp;
                 }
             }
+            this.tail = current;
         }
-
-        iterByKeys(): Array<string> {
-            let res = new Array<string>();
-            let len = this.searchParams.length;
-            for (let i = 0; i < len; i += 2) {
-                res.push(this.searchParams[i]);
-            }
-            return res;
-        }
-
-        getArray(): Array<string> {
-            return this.searchParams;
-        }
-
-        setArray(arr: Array<string>) {
-            this.searchParams = arr;
-        }
-
-        iterByValues(): Array<string> {
-            let res = new Array<string>();
-            let len = this.searchParams.length;
-            for (let i = 1; i < len; i += 2) {
-                res.push(this.searchParams[i]);
-            }
-            return res;
-        }
-
-        toString(): string {
-            let resultArray = new Array<string>();
-            let array = this.getArray();
-            let arrayLen: number = array.length;
-            let key: string = '';
-            let value: string = '';
-            const regStr = '%20';
-            for (let pos: int = 0; pos < arrayLen; pos += 2) { // 2:Even subscripts exist as key values
-                key = encodePercentEncoding(array[pos], Helper.PARAMS_TOSTRING_SIGN_CHARS).replaceAll(regStr, '+');
-                value = encodePercentEncoding(array[pos + 1], Helper.PARAMS_TOSTRING_SIGN_CHARS).replaceAll(regStr, '+');
-                resultArray.push(`${pos > 0 ? '&' : ''}${key}=${value}`);
-            }
-            return resultArray.join('');
-        }
-    }
-
-    let seachParamsArr = new Array<string>();
-
-    export function parameterProcess(input?: [string, string][] | Record<string, string> | string | URLParams): Array<string> {
-        if (input == undefined || input == null || input == '') {
-            seachParamsArr = new Array<string>();
-            return seachParamsArr;
-        } else if (typeof input == 'string') {
-            return parseParamFromString(fixUSVstring(input as string));
-        } else if (input instanceof URLParams) {
-            return input.urlClass.getArray();
-        } else if (input instanceof [string, string][]) {
-            return parseParamFromArray(input as [string, string][]);
-        } else if (input instanceof Record) {
-            return parseParamFromRecord(input as Record<string, string>)
-        } else {
-            throw createBusinessError(SyntaxErrorCodeId, 'Syntax Error. Invalid input type.');
-        }
-    }
-
-    function parseParamFromArray(input: [string, string][]): Array<string> {
-        let result = new Array<string>();
-        if (input.length == 0) {
-            return result;
-        } else if (input[0][0] == undefined || input[0][1] == undefined) {
-            throw createBusinessError(SyntaxErrorCodeId, 'Parameter error. The type of input must be string[][].');
-        }
-
-        for (let it of input) {
-            result.push(fixUSVstring(it[0]));
-            result.push(fixUSVstring(it[1]));
-        }
-        return result;
-    }
-
-    function parseParamFromRecord(input: Record<string, string>): Array<string> {
-        let result = new Array<string>();
-        for (let k of input.keys()) {
-            result.push(fixUSVstring(k));
-            result.push(fixUSVstring(input.get(k)!));
-        }
-        return result;
-    }
-
-    function parseParamFromString(input: string): Array<string> {
-        if (input.charAt(0) == c'?') {
-            input = input.slice(1);
-        }
-        let strVal = input.replaceAll('+', ' ');
-        seachParamsArr = stringParmas(strVal);
-        return seachParamsArr.map((item: string) => item = decodeStringParmas(item));
     }
 
     function utf8Decode(uint8Array: Uint8Array) {

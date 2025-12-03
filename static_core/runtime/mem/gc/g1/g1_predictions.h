@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef PANDA_MEM_GC_G1_G1_PREDICTIONS_H
 #define PANDA_MEM_GC_G1_G1_PREDICTIONS_H
 
-#include "libpandabase/utils/sequence.h"
+#include "libarkbase/utils/sequence.h"
 
 namespace ark::mem {
 class G1Predictor {

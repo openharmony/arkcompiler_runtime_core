@@ -344,7 +344,7 @@ function testGetDepth() {
     let strXml = str.join("")
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: tokenCb}
     parser.parseXml(options)
 
     let expectedTextStr = '{  : 0 }; { note : 1 }; {  : 1 }; { title : 2 }; {  : 2 }; ' +

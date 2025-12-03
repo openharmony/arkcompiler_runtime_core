@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { launch } from "std/concurrency"
 
 type callbackT = (id: int) => void;
 
@@ -42,7 +41,7 @@ class SharedJob<T> {
         this.sharedJob.Await();
     }
 
-    private static async completeJob<T>(jobs: Array<T>, sharedJob: CompletableJob<void>) {
+    private static async completeJob(jobs: Array<T>, sharedJob: CompletableJob<void>) {
         Coroutine.Schedule();
         for (let job of jobs) {
             (job as Job<void>).Await();
@@ -54,7 +53,7 @@ class SharedJob<T> {
 }
 
 function runConcurrently(callback: callbackT, coroutines: number) {
-    let jobs = new Array<Job<void>>(coroutines);
+    let jobs = new Array<Job<void>>(coroutines.toInt());
     for (let i = 0; i < coroutines; ++i) {
         const id = i.toInt();
         jobs[id] = launch<void, callbackT>(callback, id);
@@ -136,7 +135,7 @@ function illegalLockStateTest() {
 
     arktest.assertEQ(arrError.length, 5);
     for (let error of arrError) {
-        arktest.assertTrue(error instanceof IllegalMonitorStateError);
+        arktest.assertTrue(error instanceof IllegalLockStateError);
     }
 }
 
@@ -151,14 +150,13 @@ function readWriteMutualExclusionTest() {
 
     readLock.lock();
 
-    const f0 = () => {
+    let job = launch<void, () => void>(() => {
         writeLockAttempted = true;
         event.Fire();
         writeLock.lock();
         writeAcquired = true;
         writeLock.unlock();
-    }
-    let job= launch<void, () => void>(f0);
+    });
     event.Wait();
 
     arktest.assertTrue(writeLockAttempted);

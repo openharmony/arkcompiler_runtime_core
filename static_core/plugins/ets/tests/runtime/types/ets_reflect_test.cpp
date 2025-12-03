@@ -20,7 +20,7 @@
 
 #include "plugins/ets/runtime/types/ets_reflect_field.h"
 #include "plugins/ets/runtime/types/ets_reflect_method.h"
-#include "tests/runtime/types/ets_test_mirror_classes.h"
+#include "plugins/ets/tests/runtime/types/ets_test_mirror_classes.h"
 
 namespace ark::ets::test {
 
@@ -29,7 +29,7 @@ public:
     EtsReflectTest()
     {
         options_.SetShouldLoadBootPandaFiles(true);
-        options_.SetShouldInitializeIntrinsics(false);
+        options_.SetShouldInitializeIntrinsics(true);
         options_.SetCompilerEnableJit(false);
         options_.SetGcType("g1-gc");
         options_.SetLoadRuntimes({"ets"});

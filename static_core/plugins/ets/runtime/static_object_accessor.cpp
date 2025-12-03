@@ -16,7 +16,7 @@
 #include <array>
 #include "static_object_accessor.h"
 #include "objects/base_object.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_method.h"

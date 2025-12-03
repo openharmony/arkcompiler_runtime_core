@@ -18,8 +18,10 @@ Codegen Hi-Level implementation
 */
 #include "operands.h"
 #include "codegen.h"
+#include "codegen_load_entrypoint.h"
 #include "encode_visitor.h"
 #include "compiler_options.h"
+#include "optimizer/ir/inst.h"
 #include "relocations.h"
 #include "include/compiler_interface.h"
 #include "ir-dyn-base-types.h"
@@ -28,9 +30,10 @@ Codegen Hi-Level implementation
 #include "compiler/optimizer/ir/locations.h"
 #include "compiler/optimizer/analysis/liveness_analyzer.h"
 #include "optimizer/code_generator/method_properties.h"
-#include "events/events.h"
-#include "libpandabase/utils/tsan_interface.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/events/events.h"
+#include "libarkbase/utils/tsan_interface.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkbase/utils/arena_containers.h"
 #include <algorithm>
 #include <iomanip>
 
@@ -154,7 +157,8 @@ Codegen::Codegen(Graph *graph)
       target_(graph->GetArch()),
       liveOuts_(graph->GetLocalAllocator()->Adapter()),
       disasm_(this),
-      spillFillsResolver_(graph)
+      spillFillsResolver_(graph),
+      initInputInstructions_(graph->GetLocalAllocator()->Adapter())
 {
     graph->SetCodeBuilder(codeBuilder_);
     regfile_ = graph->GetRegisters();
@@ -398,10 +402,9 @@ void Codegen::GeneratePrologue()
 
     GetCallingConvention()->GeneratePrologue(*frameInfo_);
 
-    if (!GetGraph()->GetMode().IsNative()) {
+    if (!(GetGraph()->GetMode().IsNative() || GetGraph()->GetMode().IsNativePlus())) {
+        // Set the frame kind to "Compiled"
         GetEncoder()->EncodeSti(1, 1, MemRef(ThreadReg(), GetRuntime()->GetTlsFrameKindOffset(GetArch())));
-    }
-    if (!GetGraph()->GetMode().IsNative()) {
         // Create stack overflow check
         GetEncoder()->EncodeStackOverflowCheck(-GetRuntime()->GetStackOverflowCheckOffset());
         // Create empty stackmap for the stack overflow check
@@ -603,8 +606,8 @@ bool Codegen::RunImpl()
     if (GetCallingConvention()->IsDynCallMode()) {
         auto numExpectedArgs = GetRuntime()->GetMethodTotalArgumentsCount(GetGraph()->GetMethod());
         if (numExpectedArgs > GetRuntime()->GetDynamicNumFixedArgs()) {
-            CallConvDynInfo dynInfo(numExpectedArgs,
-                                    GetRuntime()->GetEntrypointTlsOffset(
+            CallConvDynInfo dynInfo(numExpectedArgs, GetRuntime()->GetEntrypointsTablePointerTlsOffset(GetArch()),
+                                    GetRuntime()->GetEntrypointOffset(
                                         GetArch(), RuntimeInterface::EntrypointId::EXPAND_COMPILED_CODE_ARGS_DYN));
             GetCallingConvention()->SetDynInfo(dynInfo);
             frameInfo_->SetSaveFrameAndLinkRegs(true);
@@ -860,6 +863,45 @@ void Codegen::EmitSlowPaths()
     }
 }
 
+uint32_t Codegen::GetAOTBinaryFileSnapshotIndexForInst([[maybe_unused]] const Inst *inst) const
+{
+#ifdef PANDA_TARGET_OHOS  // NOTE(compiler): remove #29517
+    return panda_file::File::INVALID_FILE_INDEX;
+#else
+    ASSERT(GetGraph()->IsAotMode());
+    // If external methods are not inlined we always use original logic (current method's file)
+    if (!g_options.IsCompilerInlineExternalMethods() || !g_options.IsCompilerInlineExternalMethodsAot()) {
+        return panda_file::File::INVALID_FILE_INDEX;
+    }
+    const SaveStateInst *saveState =
+        !inst->IsSaveState() ? inst->GetSaveState() : static_cast<const SaveStateInst *>(inst);
+    ASSERT(saveState != nullptr);
+
+    uint32_t index = panda_file::File::INVALID_FILE_INDEX;
+    if (auto callInst = saveState->GetCallerInst()) {
+        auto callMethod = callInst->GetCallMethod();
+        ASSERT(callMethod != nullptr);
+        auto runtime = GetGraph()->GetRuntime();
+        // Write index only if inst is externally inlined
+        if (runtime->GetBinaryFileForMethod(callMethod) == runtime->GetBinaryFileForMethod(GetGraph()->GetMethod())) {
+            index = panda_file::File::INVALID_FILE_INDEX;
+        } else {
+            index = GetGraph()->GetRuntime()->GetAOTBinaryFileSnapshotIndexForMethod(callMethod);
+        }
+    }
+
+    return index;
+#endif
+}
+
+TypedImm Codegen::GetTypeIdImm(const Inst *inst, uint32_t typeId) const
+{
+    if (!GetGraph()->IsAotMode() || GetArch() == Arch::AARCH32) {
+        return TypedImm(typeId);
+    }
+    return TypedImm(panda_file::File::PackFileEntityIdWithIndex(typeId, GetAOTBinaryFileSnapshotIndexForInst(inst)));
+}
+
 void Codegen::CreateStackMap(Inst *inst, Inst *user)
 {
     SaveStateInst *saveState = nullptr;
@@ -919,8 +961,10 @@ void Codegen::CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, I
     if (auto callInst = saveState->GetCallerInst()) {
         CreateStackMapRec(callInst->GetSaveState(), requireVregMap, targetSite);
         auto method = GetGraph()->IsAotMode() ? nullptr : callInst->GetCallMethod();
+        auto pandaFileIndex = GetGraph()->IsAotMode() ? GetAOTBinaryFileSnapshotIndexForInst(saveState)
+                                                      : panda_file::File::INVALID_FILE_INDEX;
         codeBuilder_->BeginInlineInfo(method, GetRuntime()->GetMethodId(callInst->GetCallMethod()), saveState->GetPc(),
-                                      vregsCount);
+                                      vregsCount, pandaFileIndex);
     }
 
     if (requireVregMap) {
@@ -1062,7 +1106,7 @@ void Codegen::CallIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId id)
 {
     SCOPED_DISASM_STR(this, "CallIntrinsic");
     // Call intrinsics isn't supported for IrToc, because we don't know address of intrinsics during IRToc compilation.
-    // We store adresses of intrinsics in aot file in AOT mode.
+    // We store addresses of intrinsics in aot file in AOT mode.
     ASSERT(GetGraph()->SupportManagedCode());
     if (GetGraph()->IsAotMode()) {
         auto aotData = GetGraph()->GetAotData();
@@ -1083,8 +1127,9 @@ bool Codegen::EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> en
         encoder->MakeCall(reg);
     } else {
         auto id = std::get<EntrypointId>(entrypoint);
-        MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), id));
-        encoder->MakeCall(entry);
+        ScopedTmpReg tmpReg(encoder, true);
+        GetEntrypoint(tmpReg, id);
+        encoder->MakeCall(tmpReg);
     }
 
     SaveStateInst *saveState =
@@ -1104,6 +1149,21 @@ bool Codegen::EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> en
     ASSERT(saveState == nullptr || inst->IsRuntimeCall());
 
     return true;
+}
+
+void Codegen::InsertCallChecker(EntrypointId checkerId, TypedImm entryId)
+{
+    SCOPED_DISASM_STR(this, "CallChecker");
+    auto regfile = GetRegfile();
+    auto saveRegs = regfile->GetCallerSavedRegMask();
+    saveRegs.set(GetTarget().GetReturnRegId());
+    auto saveVregs = regfile->GetCallerSavedVRegMask();
+    saveVregs.set(GetTarget().GetReturnFpRegId());
+
+    SaveCallerRegisters(saveRegs, saveVregs, false);
+    FillCallParams(entryId);
+    EmitCallRuntimeCode(nullptr, checkerId);
+    LoadCallerRegisters(saveRegs, saveVregs, false);
 }
 
 void Codegen::SaveRegistersForImplicitRuntime(Inst *inst, RegMask *paramsMask, RegMask *mask)
@@ -1158,6 +1218,67 @@ void Codegen::CreateDebugRuntimeCallsForNewObject(Inst *inst, [[maybe_unused]] R
     }
 }
 
+void GetOriginalInstInputs(Inst *inst, ArenaVector<Inst *> &v)
+{
+    switch (inst->GetOpcode()) {
+        case Opcode::NullCheck:
+            GetOriginalInstInputs(inst->GetInput(0).GetInst(), v);
+            break;
+        case Opcode::Select:
+        case Opcode::SelectImm:
+            GetOriginalInstInputs(inst->GetInput(0).GetInst(), v);
+            GetOriginalInstInputs(inst->GetInput(1).GetInst(), v);
+            break;
+        case Opcode::Phi:
+            for (auto &phiInput : inst->GetInputs()) {
+                GetOriginalInstInputs(phiInput.GetInst(), v);
+            }
+            break;
+        default:
+            v.push_back(inst);
+    }
+}
+
+bool Codegen::CheckInitClassInputsAreEqual(Inst *init)
+{
+    if (!init->IsOneOf(Opcode::NullCheck, Opcode::Select, Opcode::SelectImm, Opcode::Phi)) {
+        return false;
+    }
+    // We can omit runtime call only if all inputs are of the same class,
+    // see checks in CreateNewObjCall below.
+    initInputInstructions_.clear();
+    GetOriginalInstInputs(init, initInputInstructions_);
+
+    auto checkOpcode = [](Opcode op) {
+        // Fastpath only works for these opcodes
+        return op == Opcode::LoadAndInitClass || op == Opcode::LoadImmediate;
+    };
+
+    auto checkInst = initInputInstructions_.front();
+    if (!checkOpcode(checkInst->GetOpcode())) {
+        return false;
+    }
+
+    auto getClass = [](Inst *inst) {
+        if (inst->GetOpcode() == Opcode::LoadAndInitClass) {
+            return inst->CastToLoadAndInitClass()->GetClass();
+        }
+        return inst->CastToLoadImmediate()->GetClass();
+    };
+
+    auto klass = getClass(checkInst);
+    for (auto inst : initInputInstructions_) {
+        if (!checkOpcode(inst->GetOpcode())) {
+            return false;
+        }
+        // We don't care about opcode equality, if klass is the same
+        if (klass != getClass(inst)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Codegen::CreateNewObjCall(NewObjectInst *newObj)
 {
     auto dst = ConvertRegister(newObj->GetDstReg(), newObj->GetType());
@@ -1166,9 +1287,14 @@ void Codegen::CreateNewObjCall(NewObjectInst *newObj)
     auto srcClass = ConvertRegister(newObj->GetSrcReg(0), DataType::POINTER);
     auto runtime = GetRuntime();
 
+    if (CheckInitClassInputsAreEqual(initClass)) {
+        initClass = initClass->GetInput(0).GetInst();
+    }
+
     auto maxTlabSize = runtime->GetTLABMaxSize();
     if (maxTlabSize == 0 ||
         (initClass->GetOpcode() != Opcode::LoadAndInitClass && initClass->GetOpcode() != Opcode::LoadImmediate)) {
+        EVENT_CODEGEN("CallRuntime for NewObj");
         CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
@@ -1180,6 +1306,7 @@ void Codegen::CreateNewObjCall(NewObjectInst *newObj)
         klass = initClass->CastToLoadImmediate()->GetClass();
     }
     if (klass == nullptr || !runtime->CanUseTlabForClass(klass)) {
+        EVENT_CODEGEN("CallRuntime for NewObj");
         CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
@@ -1188,9 +1315,11 @@ void Codegen::CreateNewObjCall(NewObjectInst *newObj)
 
     classSize = (classSize & ~(alignment - 1U)) + ((classSize % alignment) != 0U ? alignment : 0U);
     if (classSize > maxTlabSize) {
+        EVENT_CODEGEN("CallRuntime for NewObj");
         CallRuntime(newObj, EntrypointId::CREATE_OBJECT_BY_CLASS, dst, RegMask::GetZeroMask(), src);
         return;
     }
+    EVENT_CODEGEN("CallFastPath for NewObj");
     CallFastPath(newObj, EntrypointId::ALLOCATE_OBJECT_TLAB, dst, RegMask::GetZeroMask(), srcClass,
                  TypedImm(classSize));
 }
@@ -1252,7 +1381,7 @@ void Codegen::CreateNewObjCallOld(NewObjectInst *newObj)
     slowPath->BindBackLabel(encoder);
 }
 
-// CC-OFFNXT(G.FUD.05) CodeCheck yields iocorrect line count
+// CC-OFFNXT(G.FUD.05) CodeCheck yields incorrect line count
 void Codegen::LoadClassFromObject(Reg classReg, Reg objReg)
 {
     Reg reg = ConvertRegister(classReg.GetId(), DataType::REFERENCE);
@@ -1313,7 +1442,8 @@ void Codegen::CreateLoadClassFromPLT(Inst *inst, Reg tmpReg, Reg dst, size_t cla
     auto encoder = GetEncoder();
     auto graph = GetGraph();
     auto aotData = graph->GetAotData();
-    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, false);
+    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, false,
+                                                  GetAOTBinaryFileSnapshotIndexForInst(inst));
     auto label = encoder->CreateLabel();
     ASSERT(tmpReg.GetId() != dst.GetId());
     ASSERT(inst->IsRuntimeCall());
@@ -1458,7 +1588,7 @@ void Codegen::IntfInlineCachePass(ResolveVirtualInst *resolver, Reg methodReg, R
         GetEncoder()->MakeLoadAotTableAddr(offset, regTmp64, INVALID_REGISTER);
         LoadMethod(methodReg);
         CallFastPath(resolver, EntrypointId::INTF_INLINE_CACHE, methodReg, {}, methodReg, objReg,
-                     TypedImm(resolver->GetCallMethodId()), regTmp64);
+                     GetTypeIdImm(resolver, resolver->GetCallMethodId()), regTmp64);
     } else {
         // we don't have tmp reg here, so use x3 directly
         Reg reg3 = Reg(3U, INT64_TYPE);
@@ -1468,7 +1598,7 @@ void Codegen::IntfInlineCachePass(ResolveVirtualInst *resolver, Reg methodReg, R
         GetEncoder()->MakeLoadAotTableAddr(offset, reg3, INVALID_REGISTER);
         LoadMethod(methodReg);
         CallFastPath(resolver, EntrypointId::INTF_INLINE_CACHE, methodReg, {}, methodReg, objReg,
-                     TypedImm(resolver->GetCallMethodId()), reg3);
+                     GetTypeIdImm(resolver, resolver->GetCallMethodId()), reg3);
         GetEncoder()->EncodeMov(reg3, vtmp);
     }
 
@@ -1534,7 +1664,7 @@ void Codegen::EmitResolveUnknownVirtual(ResolveVirtualInst *resolver, Reg method
     if (GetGraph()->IsAotMode()) {
         LoadMethod(methodReg);
         CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL_AOT, methodReg, {}, methodReg, objReg,
-                    TypedImm(resolver->GetCallMethodId()), TypedImm(0));
+                    GetTypeIdImm(resolver, resolver->GetCallMethodId()), TypedImm(0));
     } else {
         auto runtime = GetRuntime();
         auto utypes = runtime->GetUnresolvedTypes();
@@ -1570,7 +1700,8 @@ void Codegen::EmitResolveVirtualAot(ResolveVirtualInst *resolver, Reg methodReg)
     auto methodReg64 = Reg(methodReg.GetId(), INT64_TYPE);
     auto tmpReg64 = Reg(tmpReg.GetReg().GetId(), INT64_TYPE);
     auto aotData = GetGraph()->GetAotData();
-    intptr_t offset = aotData->GetVirtIndexSlotOffset(GetEncoder()->GetCursorOffset(), resolver->GetCallMethodId());
+    intptr_t offset = aotData->GetVirtIndexSlotOffset(GetEncoder()->GetCursorOffset(), resolver->GetCallMethodId(),
+                                                      GetAOTBinaryFileSnapshotIndexForInst(resolver));
     GetEncoder()->MakeLoadAotTableAddr(offset, tmpReg64, methodReg64);
     auto label = GetEncoder()->CreateLabel();
     GetEncoder()->EncodeJump(label, methodReg, Condition::NE);
@@ -1578,8 +1709,9 @@ void Codegen::EmitResolveVirtualAot(ResolveVirtualInst *resolver, Reg methodReg)
     // PLT CallVirtual Resolver has a very special calling convention:
     //   First encoder temporary (method_reg) works as a parameter and return value
     CHECK_EQ(methodReg64.GetId(), GetTarget().GetTempRegsMask().GetMinRegister());
-    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), EntrypointId::CALL_VIRTUAL_RESOLVER));
-    GetEncoder()->MakeCall(entry);
+    ScopedTmpReg tmpReg1(GetEncoder(), true);
+    GetEntrypoint(tmpReg1, EntrypointId::CALL_VIRTUAL_RESOLVER);
+    GetEncoder()->MakeCall(tmpReg1);
     // Need a stackmap to build correct boundary frame
     CreateStackMap(resolver);
     GetEncoder()->BindLabel(label);
@@ -1613,7 +1745,7 @@ void Codegen::EmitResolveVirtual(ResolveVirtualInst *resolver)
                 EVENT_CODEGEN("Interface cache not used");
                 LoadMethod(tmpMethodReg);
                 CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL_AOT, tmpMethodReg, {}, tmpMethodReg, objectReg,
-                            TypedImm(resolver->GetCallMethodId()), TypedImm(0));
+                            GetTypeIdImm(resolver, resolver->GetCallMethodId()), TypedImm(0));
 #ifdef PANDA_32_BIT_MANAGED_POINTER
             }
 #endif
@@ -1712,7 +1844,7 @@ void Codegen::EmitResolveStatic(ResolveStaticInst *resolver)
     if (GetGraph()->IsAotMode()) {
         LoadMethod(methodReg);
         CallRuntime(resolver, EntrypointId::GET_UNKNOWN_CALLEE_METHOD, methodReg, RegMask::GetZeroMask(), methodReg,
-                    TypedImm(resolver->GetCallMethodId()), TypedImm(0));
+                    GetTypeIdImm(resolver, resolver->GetCallMethodId()), TypedImm(0));
         return;
     }
     auto method = GetCallerOfUnresolvedMethod(resolver);
@@ -1770,7 +1902,8 @@ void Codegen::EmitCallStatic(CallInst *call)
     } else {
         if (GetGraph()->IsAotMode()) {
             auto aotData = GetGraph()->GetAotData();
-            intptr_t offset = aotData->GetPltSlotOffset(GetEncoder()->GetCursorOffset(), call->GetCallMethodId());
+            intptr_t offset = aotData->GetPltSlotOffset(GetEncoder()->GetCursorOffset(), call->GetCallMethodId(),
+                                                        GetAOTBinaryFileSnapshotIndexForInst(call));
             // PLT CallStatic Resolver transparently uses param_0 (Method) register
             GetEncoder()->MakeLoadAotTable(offset, param0);
         } else {  // usual JIT case
@@ -2365,7 +2498,7 @@ void Codegen::VisitCall(CallInst *inst)
     ASSERT(GetGraph()->GetRelocationHandler() != nullptr);
 
     auto mode = GetGraph()->GetMode();
-    ASSERT(mode.IsFastPath() || mode.IsInterpreter() || mode.IsNative());
+    ASSERT(mode.IsFastPath() || mode.IsInterpreter() || mode.IsNative() || mode.IsNativePlus());
     ASSERT(mode.IsFastPath() || !HasLiveCallerSavedRegs(inst));
 
     RegMask callerRegs;
@@ -2541,9 +2674,7 @@ void Codegen::CreateFloatIsInf([[maybe_unused]] IntrinsicInst *inst, Reg dst, SR
 
 void Codegen::CreateStringEquals([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    auto entrypointId = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_EQUALS_COMPRESSED
-                                                                   : EntrypointId::STRING_EQUALS;
-    CallFastPath(inst, entrypointId, dst, {}, src[0], src[1U]);
+    CallFastPath(inst, EntrypointId::STRING_EQUALS, dst, {}, src[0], src[1U]);
 }
 
 void Codegen::CreateMathCeil([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
@@ -2627,14 +2758,6 @@ void Codegen::CreateStringFromStringTlab(IntrinsicInst *inst, Reg dst, SRCREGS s
                                                               : EntrypointId::CREATE_STRING_FROM_STRING_TLAB;
     auto srcStr = src[FIRST_OPERAND];
     CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), srcStr);
-}
-
-void Codegen::CreateStringSubstringTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
-{
-    auto entrypointId = GetRuntime()->IsCompressedStringsEnabled()
-                            ? EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED
-                            : EntrypointId::SUB_STRING_FROM_STRING_TLAB;
-    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
 }
 
 void Codegen::CreateStringGetCharsTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
@@ -2796,6 +2919,19 @@ Reg Codegen::ConvertInstTmpReg(const Inst *inst) const
     return ConvertInstTmpReg(inst, Is64BitsArch(GetArch()) ? DataType::INT64 : DataType::INT32);
 }
 
+void Codegen::GetEntrypoint(Reg entry, intptr_t epOffset) const
+{
+    auto epTable = MemRef(ThreadReg(), GetRuntime()->GetEntrypointsTablePointerTlsOffset(GetArch()));
+    LoadEntrypoint(entry, GetEncoder(), epTable, epOffset);
+}
+
+void Codegen::GetEntrypoint(Reg entry, EntrypointId id) const
+{
+    auto epTable = MemRef(ThreadReg(), GetRuntime()->GetEntrypointsTablePointerTlsOffset(GetArch()));
+    auto epOffset = GetRuntime()->GetEntrypointOffset(GetArch(), id);
+    LoadEntrypoint(entry, GetEncoder(), epTable, epOffset);
+}
+
 void PostWriteBarrier::Encode(MemRef mem, Reg reg1, Reg reg2, bool checkObject, RegMask preserved)
 {
     ASSERT(reg1.IsValid());
@@ -2856,8 +2992,9 @@ void PostWriteBarrier::EncodeOnlineIrtocBarrier(Args args)
         cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
         auto paramReg0 = enc->GetTarget().GetParamReg(0);
         enc->EncodeMov(paramReg0, base);
-        MemRef entry(cg_->ThreadReg(), cg_->GetRuntime()->GetEntrypointTlsOffset(cg_->GetArch(), ENTRYPOINT_ID));
-        enc->MakeCall(entry);
+        ScopedTmpReg tmpReg(enc, true);
+        cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+        enc->MakeCall(tmpReg);
         cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
     }
 }
@@ -2882,7 +3019,6 @@ void PostWriteBarrier::EncodeOnlineIrtocRegionTwoRegsBarrier(Args args)
     auto *enc {cg_->GetEncoder()};
     auto base = GetBase(args);
     auto paramReg0 = enc->GetTarget().GetParamReg(0);
-    MemRef entry(cg_->ThreadReg(), cg_->GetRuntime()->GetEntrypointTlsOffset(cg_->GetArch(), ENTRYPOINT_ID));
     auto paramRegs = GetParamRegs(1U, args);
     auto lblMarkCardAndExit = enc->CreateLabel();
     auto lblCheck1Obj = enc->CreateLabel();
@@ -2895,14 +3031,17 @@ void PostWriteBarrier::EncodeOnlineIrtocRegionTwoRegsBarrier(Args args)
         enc->EncodeAnd(tmp, paramReg0, Imm(cross_values::GetCardAlignmentMask(cg_->GetArch())));
         enc->EncodeJump(lblMarkCardAndExit, tmp, Condition::NE);
     }
-    enc->MakeCall(entry);
+    ScopedTmpReg tmpReg(enc, true);
+    cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+    enc->MakeCall(tmpReg);
     cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
     enc->BindLabel(lblCheck1Obj);
     EncodeCheckObject(base, args.reg1, lblDone, args.checkObject);
     cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
     EncodeWrapOneArg(paramReg0, base, args.mem);
     enc->BindLabel(lblMarkCardAndExit);
-    enc->MakeCall(entry);
+    cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+    enc->MakeCall(tmpReg);
     cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
     enc->BindLabel(lblDone);
 }
@@ -2913,13 +3052,14 @@ void PostWriteBarrier::EncodeOnlineIrtocRegionOneRegBarrier(Args args)
     auto *enc {cg_->GetEncoder()};
     auto base = GetBase(args);
     auto paramReg0 = enc->GetTarget().GetParamReg(0);
-    MemRef entry(cg_->ThreadReg(), cg_->GetRuntime()->GetEntrypointTlsOffset(cg_->GetArch(), ENTRYPOINT_ID));
     auto paramRegs = GetParamRegs(1U, args);
     auto skip = enc->CreateLabel();
     EncodeCheckObject(base, args.reg1, skip, args.checkObject);
     cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
     EncodeWrapOneArg(paramReg0, base, args.mem);
-    enc->MakeCall(entry);
+    ScopedTmpReg tmpReg(enc, true);
+    cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
+    enc->MakeCall(tmpReg);
     cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
     enc->BindLabel(skip);
 }

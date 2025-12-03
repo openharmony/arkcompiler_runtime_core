@@ -74,6 +74,7 @@ Expected<EtsNativeLibrary, os::Error> LoadNativeLibraryFromNamespace(const char 
 std::optional<std::string> NativeLibraryProvider::LoadLibrary(ani_env *env, const PandaString &name,
                                                               bool shouldVerifyPermission, const PandaString &fileName)
 {
+    ASSERT(env != nullptr);
     if (shouldVerifyPermission && !CheckLibraryPermission(env, fileName)) {
         return "NativeLibraryProvider::CheckLibraryPermission failed";
     }

@@ -11,5 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-E/runtime: Unhandled exception: std.core.AssertionError
-E/runtime: AssertionError: expected equality failed: 'undefined' === '[object Object]'
+Unhandled exception: std.core.AssertionError
+AssertionError: expected equality failed: 'undefined' === '[object Object]'
+	at std.core.AssertionError.<ctor> (Errors.ets:23:0)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,9 @@
 #include <tuple>
 #include <unordered_set>
 
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/os/thread.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/utils/utils.h"
 #include "runtime/mem/bump-allocator.h"
 #include "runtime/mem/mem_stats_additional_info.h"
 #include "runtime/mem/mem_stats_default.h"
@@ -123,17 +123,17 @@ protected:
         size_t copied = 0;
         size_t firstCopySize = std::min(size, BYTE_ARRAY_SIZE - startIndex);
         // Set head of memory
-        memcpy_s(mem, firstCopySize, &byteArray_[startIndex], firstCopySize);
+        MemcpyUnsafe(mem, &byteArray_[startIndex], firstCopySize);
         size -= firstCopySize;
         copied += firstCopySize;
         // Set middle part of memory
         while (size > BYTE_ARRAY_SIZE) {
-            memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), BYTE_ARRAY_SIZE, byteArray_.data(), BYTE_ARRAY_SIZE);
+            MemcpyUnsafe(ToVoidPtr(ToUintPtr(mem) + copied), byteArray_.data(), BYTE_ARRAY_SIZE);
             size -= BYTE_ARRAY_SIZE;
             copied += BYTE_ARRAY_SIZE;
         }
         // Set tail of memory
-        memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), size, byteArray_.data(), size);
+        MemcpyUnsafe(ToVoidPtr(ToUintPtr(mem) + copied), byteArray_.data(), size);
 
         return startIndex;
     }

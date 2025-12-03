@@ -114,3 +114,9 @@ final class C extends B {
         return (this.data1 + value).toByte();
     }
 }
+
+class CheckWrongSignature {
+    public method(a: String): byte {
+        return 1;
+    }
+}

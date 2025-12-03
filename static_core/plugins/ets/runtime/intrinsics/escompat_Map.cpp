@@ -14,24 +14,27 @@
  */
 
 #include "plugins/ets/runtime/types/ets_map.h"
-
-#include "types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_bigint.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets::intrinsics {
 
-extern "C" EtsBoolean EtsEscompatMapHas(EtsEscompatMap *map, EtsObject *key)
+extern "C" EtsLong GetHashCodeString(EtsObject *obj)
 {
-    return EtsEscompatMap::Has(map, key);
+    ASSERT(obj->GetClass()->IsStringClass());
+    return static_cast<EtsInt>(EtsString::FromEtsObject(obj)->GetCoreType()->GetHashcode());
 }
 
-extern "C" EtsObject *EtsEscompatMapGet(EtsEscompatMap *map, EtsObject *key)
+extern "C" EtsLong GetHashCodeBigint(EtsObject *obj)
 {
-    return EtsEscompatMap::Get(map, key);
+    ASSERT(obj->GetClass()->IsBigInt());
+    return static_cast<EtsInt>(reinterpret_cast<EtsBigInt *>(obj)->GetHashCode());
 }
 
-extern "C" EtsBoolean EtsEscompatMapDelete(EtsEscompatMap *map, EtsObject *key)
+extern "C" EtsLong GetHashCodeObject(EtsObject *obj)
 {
-    return EtsEscompatMap::Delete(map, key);
+    return static_cast<EtsInt>(obj->GetHashCode());
 }
 
 }  // namespace ark::ets::intrinsics

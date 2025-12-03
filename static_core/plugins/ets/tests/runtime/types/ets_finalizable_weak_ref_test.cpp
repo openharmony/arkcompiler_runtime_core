@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include <array>
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/tests/test_utils.h"
@@ -37,7 +37,7 @@ public:
     {
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(true);
-        options.SetShouldInitializeIntrinsics(false);
+        options.SetShouldInitializeIntrinsics(true);
         options.SetCompilerEnableJit(false);
         options.SetGcType("g1-gc");
         options.SetLoadRuntimes({"ets"});
@@ -84,7 +84,6 @@ public:
     static std::vector<MirrorFieldInfo> GetFinalizableWeakRefMembers()
     {
         return std::vector<MirrorFieldInfo> {
-            MIRROR_FIELD_INFO(EtsFinalizableWeakRef, referent_, "referent"),
             MIRROR_FIELD_INFO(EtsFinalizableWeakRef, prev_, "prevRef"),
             MIRROR_FIELD_INFO(EtsFinalizableWeakRef, next_, "nextRef"),
             MIRROR_FIELD_INFO(EtsFinalizableWeakRef, finalizerPtr_, "finalizerPtr"),
@@ -115,7 +114,11 @@ protected:
 
 TEST_F(EtsFinalizableWeakRefTest, FinalizableWeakRefMemoryLayout)
 {
+    // Check the parent is WeakRef because it affects memory layout of fields
+    EtsClass *weakRefClass = vm_->GetClassLinker()->GetClass("Lstd/core/WeakRef;");
+    ASSERT_NE(nullptr, weakRefClass);
     EtsClass *finalizableWeakRefClass = PlatformTypes(vm_)->coreFinalizableWeakRef;
+    ASSERT_EQ(weakRefClass, finalizableWeakRefClass->GetBase());
     CompareMemberOffsets(finalizableWeakRefClass, GetFinalizableWeakRefMembers());
 }
 
@@ -172,8 +175,14 @@ TEST_F(EtsFinalizableWeakRefTest, RegisterFinalizerTest)
         std::array<EtsHandle<EtsObject>, EVENT_COUNT> arrayHandles;
         for (auto &handle : arrayHandles) {
             handle = EtsHandle<EtsObject>(coro, EtsObjectArray::Create(objectClass, ARRAY_SIZE)->AsObject());
-            vm_->RegisterFinalizerForObject(coro, handle, TestEvent<EVENT_COUNT>::Finalize, &event);
+            ASSERT_NE(vm_->RegisterFinalizerForObject(coro, handle, TestEvent<EVENT_COUNT>::Finalize, &event), nullptr);
         }
+
+        auto handle = EtsHandle<EtsObject>(coro, EtsObject::Create(objectClass));
+        auto finWeakRef = vm_->RegisterFinalizerForObject(
+            coro, handle, [](void *) { ASSERT_TRUE(false); }, nullptr);
+        ASSERT_NE(finWeakRef, nullptr);
+        ASSERT_EQ(vm_->UnregisterFinalizerForObject(coro, finWeakRef), true);
 
         // Trigger GC
         TriggerGC();
@@ -189,6 +198,21 @@ TEST_F(EtsFinalizableWeakRefTest, RegisterFinalizerTest)
     // Check that finalizer was called
     event.Wait();
     ASSERT(event.IsHappened());
+}
+
+TEST_F(EtsFinalizableWeakRefTest, UnregisterFinalizerTwiceTest)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThread managedScope(coro);
+    EtsHandleScope handleScope(coro);
+
+    auto *objectClass = vm_->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
+    auto handle = EtsHandle<EtsObject>(coro, EtsObject::Create(objectClass));
+    auto finWeakRef = vm_->RegisterFinalizerForObject(
+        coro, handle, [](void *) {}, nullptr);
+    ASSERT_NE(finWeakRef, nullptr);
+    ASSERT_EQ(vm_->UnregisterFinalizerForObject(coro, finWeakRef), true);
+    ASSERT_EQ(vm_->UnregisterFinalizerForObject(coro, finWeakRef), false);
 }
 
 }  // namespace ark::ets::test

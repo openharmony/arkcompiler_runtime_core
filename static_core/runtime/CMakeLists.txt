@@ -49,7 +49,6 @@ set(SOURCES
     dprofiler/dprofiler.cpp
     hotreload/hotreload.cpp
     interpreter/interpreter.cpp
-    interpreter/runtime_interface.cpp
     intrinsics.cpp
     coretypes/line_string.cpp
     coretypes/string.cpp
@@ -113,6 +112,7 @@ set(SOURCES
     monitor_object_lock.cpp
     monitor_pool.cpp
     global_object_lock.cpp
+    class_lock.cpp
     object_header.cpp
     regexp/ecmascript/regexp_parser.cpp
     regexp/ecmascript/regexp_executor.cpp
@@ -171,6 +171,7 @@ set(SOURCES
     coroutines/stackful_coroutine_manager.cpp
     coroutines/stackful_coroutine_worker.cpp
     coroutines/stackful_coroutine_state_info.cpp
+    coroutines/native_stack_allocator/native_stack_allocator.cpp
     coroutines/coroutine_events.cpp
     coroutines/coroutine_stats.cpp
     coroutines/priority_queue.cpp
@@ -261,6 +262,14 @@ else()
     list(APPEND SOURCES ${PANDA_ROOT}/platforms/common/runtime/verify_app_install.cpp)
 endif()
 
+if (PANDA_WITH_SAFEPOINT_CHECKER)
+    list(APPEND SOURCES
+        timer_table.cpp
+        safepoint_timer.cpp
+    )
+    add_runtime_options(${CMAKE_CURRENT_SOURCE_DIR}/safepoint_checker_options.yaml)
+endif()
+
 set(INTERPRETER_IMPL_SOURCES
     interpreter/interpreter_impl.cpp
 )
@@ -292,6 +301,7 @@ panda_gen_file(
 )
 add_custom_target(core_any_intrinsics_inc DEPENDS ${GEN_INCLUDE_DIR}/core_any_intrinsics.inc)
 add_dependencies(arkruntime_interpreter_impl core_any_intrinsics_inc)
+add_dependencies(panda_gen_files core_any_intrinsics_inc)
 
 set(ISA "${CMAKE_BINARY_DIR}/isa/isa.yaml")
 set(ISA_API "${PANDA_ROOT}/isa/isapi.rb")
@@ -327,9 +337,9 @@ foreach(arch ${BRIDGE_ARCHS})
 
 endforeach()
 
-set(GENERATOR ${PANDA_ROOT}/libpandafile/types.rb)
+set(GENERATOR ${ARKFILE_ROOT}/types.rb)
 set(TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/templates/shorty_values.h.erb)
-set(DATAFILE ${PANDA_ROOT}/libpandafile/types.yaml)
+set(DATAFILE ${ARKFILE_ROOT}/types.yaml)
 set(DEPENDENCIES ${GENERATOR} ${TEMPLATE} ${DATAFILE})
 set(OUTFILE "${CMAKE_CURRENT_BINARY_DIR}/include/shorty_values.h")
 add_custom_command(OUTPUT "${OUTFILE}"
@@ -358,12 +368,8 @@ panda_target_include_directories(arkruntime_interpreter_impl
     PUBLIC ${PANDA_ROOT}
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/compiler
-    PUBLIC ${PANDA_ROOT}/libpandabase
-    PUBLIC ${PANDA_ROOT}/libpandafile
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_ROOT}/../common_interfaces
@@ -394,7 +400,6 @@ if (HOST_TOOLS)
 elseif (PANDA_LLVM_INTERPRETER AND PANDA_LLVM_INTERPRETER_INLINING)
     set(sources
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/entrypoints/entrypoints.cpp
-            $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/interpreter/runtime_interface.cpp
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/object_header.cpp
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/mem/heap_manager.cpp
             $<TARGET_PROPERTY:arkruntime_obj,SOURCE_DIR>/mem/tlab.cpp
@@ -625,14 +630,10 @@ panda_target_include_directories(csa_tests_arkruntime_interpreter_impl
     PUBLIC ${PANDA_ROOT}
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/compiler
-    PUBLIC ${PANDA_ROOT}/libpandabase
-    PUBLIC ${PANDA_ROOT}/libpandafile
     PUBLIC ${PANDA_ROOT}/../common_interfaces
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}
     PUBLIC ${PANDA_BINARY_ROOT}/compiler/generated
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_BINARY_ROOT}
 )
@@ -679,12 +680,8 @@ if(PANDA_WITH_TESTS)
     PUBLIC ${PANDA_ROOT}
     PUBLIC ${GEN_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/compiler
-    PUBLIC ${PANDA_ROOT}/libpandabase
-    PUBLIC ${PANDA_ROOT}/libpandafile
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandafile/include
     PUBLIC ${PANDA_BINARY_ROOT}
-    PUBLIC ${PANDA_BINARY_ROOT}/libpandabase/generated
     PUBLIC ${VERIFIER_INCLUDE_DIR}
     PUBLIC ${PANDA_ROOT}/../common_interfaces
     )
@@ -830,17 +827,25 @@ add_gtests(
     NO_WARNING_FILTER
 )
 
-add_gtests(
-    arkruntime_core_layout_test
+set(LAYOUT_TESTS_SOURCES
     tests/array_test.cpp
     tests/mark_word_test.cpp
-    tests/method_test.cpp
     tests/compiler_thread_pool.cpp
     tests/mock_queue_thread_pool.cpp
     tests/string_table_test.cpp
     tests/string_test.cpp
     tests/compilation_status_test.cpp
     tests/osr_code_test.cpp
+)
+if (NOT PANDA_QEMU_BUILD OR NOT PANDA_TARGET_ARM32)
+    # NOTE: not enough user space for class allocation after enabling AOT veifier by default.
+    # Issue: #29519
+    list(APPEND LAYOUT_TESTS_SOURCES tests/method_test.cpp)
+endif()
+
+add_gtests(
+    arkruntime_core_layout_test
+    ${LAYOUT_TESTS_SOURCES}
 )
 
 add_gtests(
@@ -851,6 +856,11 @@ add_gtests(
 add_gtests(
     arkruntime_memory_mem_leak_test
     tests/mem_leak_test.cpp
+)
+
+add_gtests(
+    arkruntime_native_stack_allocator_test
+    tests/native_stack_allocator_test.cpp
 )
 
 add_gtests(
@@ -925,6 +935,7 @@ add_gtests(
     tests/gc_task_test.cpp
     tests/epsilon_gcs_test.cpp
     tests/g1gc_test.cpp
+    tests/heap_verifier_test.cpp
     tests/collection_set_test.cpp
     tests/g1gc_fullgc_test.cpp
     tests/object_helpers_test.cpp
@@ -1023,17 +1034,25 @@ if (NOT PANDA_PRODUCT_BUILD)
 endif()
 
 if (TARGET arkruntime_test_interpreter_impl)
-    add_gtests(
+    set(INTERPRETER_TESTS_SOURCES
         arkruntime_interpreter_test
         tests/c2i_bridge_test.cpp
         tests/class_linker_test.cpp
         tests/class_linker_test_extension.cpp
-        tests/exception_test.cpp
         tests/interpreter/test_interpreter.cpp
         tests/interpreter/test_runtime_interface.cpp
         tests/interpreter_test.cpp
         tests/interpreter_test_switch.cpp
         tests/invokation_helper.cpp
+    )
+    if (NOT PANDA_QEMU_BUILD OR NOT PANDA_TARGET_ARM32)
+        # NOTE: not enough user space for class allocation after enabling AOT veifier by default.
+        # Issue: #29519
+        list(APPEND INTERPRETER_TESTS_SOURCES tests/exception_test.cpp)
+    endif()
+
+    add_gtests(
+        ${INTERPRETER_TESTS_SOURCES}
         $<TARGET_OBJECTS:arkruntime_test_interpreter_impl>
         ${INVOKE_HELPER}
     )
@@ -1046,6 +1065,12 @@ endif()
 add_gtests(
     interpreter_test_resolve_field
     tests/interpreter_test_resolve_field.cpp
+)
+
+add_gtests(
+    arkruntime_interpreter_frame_test
+    tests/interpreter_frame_test.cpp
+    ${INVOKE_HELPER}
 )
 
 add_gtests(
@@ -1105,6 +1130,11 @@ add_gtests(
     ${INVOKE_HELPER}
     ${PANDA_ROOT}/compiler/tests/panda_runner.cpp
     $<TARGET_OBJECTS:arkruntime_stack_walker_obj>
+)
+
+add_gtests(
+    arkruntime_flattened_string_cache_test
+    tests/flattened_string_cache_test.cpp
 )
 
 include(intrinsics.cmake)

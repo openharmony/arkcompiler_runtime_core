@@ -20,7 +20,7 @@
 #include "types/ets_array.h"
 #include "tests/runtime/types/ets_test_mirror_classes.h"
 #include "types/ets_string_builder.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -32,7 +32,7 @@ public:
     EtsStringBuilderMembersTest()
     {
         options_.SetShouldLoadBootPandaFiles(true);
-        options_.SetShouldInitializeIntrinsics(false);
+        options_.SetShouldInitializeIntrinsics(true);
         options_.SetCompilerEnableJit(false);
         options_.SetGcType("epsilon");
         options_.SetLoadRuntimes({"ets"});

@@ -18,6 +18,7 @@ import { BusinessError, RecordData } from "@ohos.base";
 
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
+const EmptyContainerId: int = 10200010;
 
 function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
@@ -34,7 +35,7 @@ export type ListReplaceCb<T> = (value: T, index: int, list: List<T>) => T;
 export class List<T> implements Iterable<T>, JsonReplacer {
     private buffer: LinkedList<T>;
 
-    public jsonReplacer(): Record<String, NullishType> {
+    public jsonReplacer(): Record<String, Any> {
         return this.buffer.jsonReplacer();
     }
 
@@ -132,7 +133,7 @@ export class List<T> implements Iterable<T>, JsonReplacer {
      * @param index The index of the element to get.
      * @returns The element at the specified index, or undefined if the index is out of range.
      */
-    public get(index: int): T | undefined {
+    public get(index: int): T {
         this.checkIndexType(index);
 
         return this.buffer.get(index);
@@ -143,7 +144,7 @@ export class List<T> implements Iterable<T>, JsonReplacer {
      *
      * @returns The first element of the list.
      */
-    public getFirst(): T | undefined {
+    public getFirst(): T {
         return this.buffer.getFirst();
     }
 
@@ -163,7 +164,7 @@ export class List<T> implements Iterable<T>, JsonReplacer {
      * @returns The last element of the list.
      * @throws Error if the list is empty.
      */
-    public getLast(): T | undefined {
+    public getLast(): T {
         return this.buffer.getLast();
     }
 
@@ -287,11 +288,7 @@ export class List<T> implements Iterable<T>, JsonReplacer {
      * @returns The previous element at the specified index, or undefined if the index is out of range.
      * @throws BusinessError if the index is out of range.
      */
-    public set(index: int, element: T): T | undefined {
-        this.checkIndexType(index);
-        this.checkEmptyContainer();
-        this.checkIndex(index, this.length - 1);
-
+    public set(index: int, element: T): T {
         return this.buffer.set(index, element);
     }
 
@@ -396,7 +393,7 @@ export class List<T> implements Iterable<T>, JsonReplacer {
     }
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
         }
     }
 
@@ -410,7 +407,7 @@ export class List<T> implements Iterable<T>, JsonReplacer {
      * Gets the element at the specified index.
      *
      * @param index - The index of the element to retrieve.
-     * @returns { T } The element in the buffer matching the given index. 
+     * @returns { T } The element in the buffer matching the given index.
      * @throws { BusinessError } 10200001 - The value of index is out of range.
      */
     public $_get(index: int): T {

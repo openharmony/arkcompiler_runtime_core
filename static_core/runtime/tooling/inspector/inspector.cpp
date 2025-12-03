@@ -21,10 +21,10 @@
 #include <vector>
 
 #include "debugger/breakpoint.h"
-#include "macros.h"
-#include "os/mutex.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include "error.h"
 #include "evaluation/base64.h"
@@ -135,7 +135,9 @@ void Inspector::MethodEntry(PtThread thread, Method * /* method */)
     os::memory::ReadLockHolder lock(debuggerEventsLock_);
 
     auto *debuggableThread = GetDebuggableThread(thread);
-    ASSERT(debuggableThread != nullptr);
+    if (debuggableThread == nullptr) {
+        return;
+    }
     auto stack = StackWalker::Create(thread.GetManagedThread());
     if (stack.IsCFrame()) {
         return;
@@ -193,8 +195,9 @@ void Inspector::SingleStep(PtThread thread, Method *method, const PtLocation &lo
     }
 
     auto *debuggableThread = GetDebuggableThread(thread);
-    ASSERT(debuggableThread != nullptr);
-    debuggableThread->OnSingleStep(location, sourceFile);
+    if (debuggableThread != nullptr) {
+        debuggableThread->OnSingleStep(location, sourceFile);
+    }
 }
 
 void Inspector::ThreadStart(PtThread thread)

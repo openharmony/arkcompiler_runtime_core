@@ -1,0 +1,29 @@
+{
+  "abcPath": "xxx",
+  "obfAbcPath": "xxx",
+  "defaultNameCachePath": "xxx",
+  "obfuscationRules": {
+    "keepOptions": {
+      "keeps": [
+        "-keep class XXX {\n    fooEx1():int|string;\n    }",
+        "-keep class XXX {\n    fooEx2():byte|string;\n    }",
+        "-keep class XXX {\n    fooEx3():short|string;\n    }",
+        "-keep class XXX {\n    fooEx4():number|string;\n    }",
+        "-keep class XXX {\n    fooEx5():long|string;\n    }",
+        "-keep class XXX {\n    fooEx6():float|string;\n    }",
+        "-keep class XXX {\n    fooEx7():double|string;\n    }",
+        "-keep class XXX {\n    fooEx8():char|string;\n    }",
+        "-keep class XXX {\n    fooEx9():boolean|string;\n    }",
+        "-keep class XXX {\n    fooEx10():bigint|string;\n    }",
+        "-keep class XXX {\n    fooEx11():never|string;\n    }",
+        "-keep class XXX {\n    fooEx12():null|string;\n    }",
+        "-keep class XXX {\n    fooEx13():undefined|string;\n    }",
+        "-keep class XXX {\n    fooEx14():int[]|string;\n    }",
+        "-keep class XXX {\n    fooEx15():undefined|never;\n    }",
+        "-keep class XXX {\n    fooEx16():undefined|never|int;\n    }",
+        "-keep class XXX {\n    fooEx17():Promise;\n    }",
+        "-keep class XXX {\n    fooEx18():void|Promise;\n    }"
+      ]
+    }
+  }
+}

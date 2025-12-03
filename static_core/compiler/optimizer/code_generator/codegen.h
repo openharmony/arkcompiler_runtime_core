@@ -39,7 +39,8 @@ Codegen interface for compiler
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/optimizations/regalloc/spill_fills_resolver.h"
 #include "optimizer/pass_manager.h"
-#include "utils/cframe_layout.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/cframe_layout.h"
 
 namespace ark::compiler {
 // Maximum size in bytes
@@ -207,6 +208,9 @@ public:
         return runtime_->IsCompressedStringsEnabled();
     }
 
+    uint32_t GetAOTBinaryFileSnapshotIndexForInst(const Inst *inst) const;
+    TypedImm GetTypeIdImm(const Inst *inst, uint32_t typeId) const;
+
     void CreateStackMap(Inst *inst, Inst *user = nullptr);
 
     void CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, Inst *targetSite);
@@ -241,6 +245,9 @@ public:
 #if defined(EVENT_METHOD_ENTER_ENABLED) && EVENT_METHOD_ENTER_ENABLED != 0
     void MakeTrace();
 #endif
+
+    void InsertCallChecker(EntrypointId checkerId, TypedImm entryId);
+
     void CallIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId id);
 
     template <bool IS_FASTPATH, typename... Args>
@@ -352,6 +359,9 @@ public:
     PANDA_PUBLIC_API Reg ConvertInstTmpReg(const Inst *inst, DataType::Type type) const;
     Reg ConvertInstTmpReg(const Inst *inst) const;
 
+    void GetEntrypoint(Reg entry, intptr_t epOffset) const;
+    void GetEntrypoint(Reg entry, EntrypointId id) const;
+
     bool OffsetFitReferenceTypeSize(uint64_t offset) const;
 
 protected:
@@ -429,6 +439,7 @@ private:
     template <typename T>
     void EncodeImms(const T &imms, bool skipFirstLocation);
 
+    bool CheckInitClassInputsAreEqual(Inst *phi);
     static bool EnsureParamsFitIn32Bit(std::initializer_list<std::variant<Reg, TypedImm>> params);
 
     template <typename... Args>
@@ -474,6 +485,10 @@ private:
 
     Disassembly disasm_;
     SpillFillsResolver spillFillsResolver_;
+
+    // Used in `CheckPhiClassInputsAreEqual` to collect
+    // origin (not aliased) instructions
+    ArenaVector<Inst *> initInputInstructions_;
 
     friend class EncodeVisitor;
     friend class BaselineCodegen;

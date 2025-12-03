@@ -16,7 +16,7 @@
 #ifndef PANDA_VERIFIER_JOB_QUEUE_JOB_H_
 #define PANDA_VERIFIER_JOB_QUEUE_JOB_H_
 
-#include "source_lang_enum.h"
+#include <libarkfile/include/source_lang_enum.h>
 #include "verification/cflow/cflow_info.h"
 #include "verification/verification_options.h"
 #include "verification/plugins.h"

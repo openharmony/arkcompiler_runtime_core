@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-class ByteWrapper {
+export class ByteWrapper {
     constructor(value: byte) {
         this.value = value;
     }
@@ -21,7 +21,7 @@ class ByteWrapper {
     public value: byte;
 }
 
-class ShortWrapper {
+export class ShortWrapper {
     constructor(value: short) {
         this.value = value;
     }
@@ -29,7 +29,7 @@ class ShortWrapper {
     public value: short;
 }
 
-class IntWrapper {
+export class IntWrapper {
     constructor(value: int) {
         this.value = value;
     }
@@ -37,7 +37,7 @@ class IntWrapper {
     public value: int;
 }
 
-class LongWrapper {
+export class LongWrapper {
     constructor(value: long) {
         this.value = value;
     }
@@ -45,7 +45,7 @@ class LongWrapper {
     public value: long;
 }
 
-class FloatWrapper {
+export class FloatWrapper {
     constructor(value: float) {
         this.value = value;
     }
@@ -53,7 +53,7 @@ class FloatWrapper {
     public value: float;
 }
 
-class DoubleWrapper {
+export class DoubleWrapper {
     constructor(value: double) {
         this.value = value;
     }
@@ -261,7 +261,7 @@ export class NativeModule {
                               i8: ByteWrapper, i9: byte, i10: ShortWrapper, i11: short, i12: IntWrapper, i13: int, i14: LongWrapper, i15: long,
                               f0: FloatWrapper, f1: float, f2: DoubleWrapper, f3: double, f4: FloatWrapper, f5: float, f6: DoubleWrapper, f7: double,
                               f8: FloatWrapper, f9: float, f10: DoubleWrapper, f11: double, f12: FloatWrapper, f13: float, f14: DoubleWrapper, f15: double): int;
-    
+
     static native generalStaticObj(i0: ByteWrapper, i1: byte, i2: ShortWrapper, i3: short, i4: IntWrapper, i5: int, i6: LongWrapper, i7: long,
                                  i8: ByteWrapper, i9: byte, i10: ShortWrapper, i11: short, i12: IntWrapper, i13: int, i14: LongWrapper, i15: long,
                                  f0: FloatWrapper, f1: float, f2: DoubleWrapper, f3: double, f4: FloatWrapper, f5: float, f6: DoubleWrapper, f7: double,
@@ -755,7 +755,7 @@ function testNativeGeneral(): boolean {
 function runModuleLevelTest(): int {
 
     loadLibrary("checked_test_quick_native");
-    
+
     if (!testNativeQuick()) {
         console.log('testNativeQuick failed!');
         return 1;

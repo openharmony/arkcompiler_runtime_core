@@ -21,6 +21,7 @@ add_custom_target(ets_panda_gtests)
 add_dependencies(ets_tests ets_gtests ets_panda_gtests)
 
 include(cmake/native_gtest.cmake)
+include(cmake/managed_helpers.cmake)
 
 set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
 
@@ -534,13 +535,22 @@ if(PANDA_TEST_COMPILE_STDLIB)
     add_dependencies(ets_tests ets-compile-stdlib)
 endif()
 
+
+if(NOT CMAKE_CROSSCOMPILING)
+    add_subdirectory(abc2program)
+    add_subdirectory(static_linker)
+endif()
+
 add_subdirectory(common)
 add_subdirectory(equals)
 add_subdirectory(lookup_by_name)
 add_subdirectory(ets_test_suite)
 add_subdirectory(runtime)
 add_subdirectory(ani)
+add_subdirectory(any_never)
+add_subdirectory(compiler)
 add_subdirectory(libani_helpers)
+add_subdirectory(verifier-tests-ets)
 if(NOT (PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER))
     add_subdirectory(micro-benchmarks)
 endif()
@@ -668,6 +678,7 @@ add_target_to_group(ets_time02_tests ets_run_jit_ets_code_tests)
 add_target_to_group(ets_time02_tests ets_tests_equals)
 add_target_to_group(ets_time02_tests ets_modules_tests)
 add_target_to_group(ets_time02_tests ets_app_linker_context_tests)
+add_target_to_group(ets_time02_tests ets_veriifier_tests)
 
 if (PANDA_USE_CUSTOM_SIGNAL_STACK)
     add_target_to_group(ets_time01_tests sampler_asm_test_suite)

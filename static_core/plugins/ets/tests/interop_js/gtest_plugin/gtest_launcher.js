@@ -88,12 +88,12 @@ function main() {
 	let createRuntimeOptions = {
 		'log-level': 'info',
 		'log-components': 'ets_interop_js',
-		'boot-panda-files': stdlibPath + ':' + userPandaFiles,
-		'panda-files': userPandaFiles,
+		'boot-panda-files': stdlibPath,
 		'gc-trigger-type': 'heap-trigger',
 		'compiler-enable-jit': 'false',
 		'interpreter-type': 'irtoc',
 		'taskpool-support-interop': 'true',
+		'verification-mode': 'disabled',
 	};
 
 	const etsVmRes = globalThis.gtest.etsVm.createRuntime(createRuntimeOptions);

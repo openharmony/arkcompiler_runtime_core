@@ -29,6 +29,8 @@ cases:
       @SomeAnnotation({field1: c + 100, field2: "Some_string"})
       class SomeClass {}
   - decl: |-
+      function foo() @SomeAnnotation({field2: "Some_string"}) {} // Wrong target for annotation
+  - decl: |-
       @SomeAnnotation({field1: c, field2: "Some_string"})
       class SomeClass {}
   - value: |-

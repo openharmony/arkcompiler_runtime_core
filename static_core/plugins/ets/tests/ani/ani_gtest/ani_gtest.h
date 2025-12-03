@@ -21,8 +21,9 @@
 #include <optional>
 #include <vector>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
+#include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 namespace ark::ets::ani::testing {
@@ -138,20 +139,40 @@ public:
 
     bool IsRuntimeClassInitialized(std::string_view classDescriptor, bool isClass = true)
     {
-        PandaString desc;
+        std::optional<PandaString> desc;
         if (isClass) {
             desc = Mangle::ConvertDescriptor(classDescriptor, true);
         } else {
             desc = Mangle::ConvertDescriptor(std::string(classDescriptor) + ".ETSGLOBAL", true);
         }
+        ASSERT(desc.has_value());
         PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env_);
         ScopedManagedCodeFix s(pandaEnv);
 
         EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
-        EtsClass *klass = classLinker->GetClass(desc.c_str(), true, GetClassLinkerContext(s.GetCoroutine()));
+        EtsClass *klass = classLinker->GetClass(desc.value().c_str(), true, GetClassLinkerContext(s.GetCoroutine()));
         ASSERT(klass);
 
         return klass->IsInitialized();
+    }
+
+    void ThrowError()
+    {
+        ani_ref undef {};
+        ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
+
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass("escompat.Error", &cls), ANI_OK);
+        ani_method ctor {};
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
+
+        ani_object err {};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        ASSERT_EQ(env_->Object_New(cls, ctor, &err, undef, undef), ANI_OK);
+        ASSERT_EQ(env_->ThrowError(static_cast<ani_error>(err)), ANI_OK);
+
+        ASSERT_EQ(env_->Reference_Delete(err), ANI_OK);
+        ASSERT_EQ(env_->Reference_Delete(undef), ANI_OK);
     }
 
 protected:

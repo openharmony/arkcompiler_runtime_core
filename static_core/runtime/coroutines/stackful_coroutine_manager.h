@@ -23,6 +23,8 @@
 
 #include "runtime/coroutines/stackful_coroutine_state_info.h"
 
+#include "runtime/coroutines/native_stack_allocator/native_stack_allocator.h"
+
 namespace ark {
 
 /**
@@ -44,7 +46,7 @@ public:
     ~StackfulCoroutineManager() override = default;
 
     /* CoroutineManager interfaces, see CoroutineManager class for the details */
-    void Initialize(Runtime *runtime, PandaVM *vm) override;
+    void InitializeScheduler(Runtime *runtime, PandaVM *vm) override;
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
@@ -55,7 +57,7 @@ public:
                                    bool abortFlag) override;
     LaunchResult LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
                               const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                              bool abortFlag) override;
+                              bool launchImmediately, bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -146,6 +148,8 @@ protected:
 
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
                               unsigned int xorMask) const override;
+    bool EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const override;
+
     CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) override;
     void DeleteCoroutineContext(CoroutineContext *ctx) override;
 
@@ -314,6 +318,8 @@ private:  // data members
 
     CoroutineWorkerGroup::Id generalWorkerGroup_ = CoroutineWorkerGroup::Empty();
     CoroutineWorkerGroup::Id eaWorkerGroup_ = CoroutineWorkerGroup::Empty();
+
+    NativeStackAllocator nativeStackAllocator_;
 };
 
 }  // namespace ark

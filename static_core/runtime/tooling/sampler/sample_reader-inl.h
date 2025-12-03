@@ -19,7 +19,7 @@
 #include <securec.h>
 #include <string>
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include "runtime/tooling/sampler/sample_info.h"
 #include "runtime/tooling/sampler/sample_reader.h"

@@ -13,52 +13,89 @@
  * limitations under the License.
  */
 
-import { tsBinary, systemBinary } from 'main_js';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('main_js');
+
+let tsBinary = module.getProperty('tsBinary');
+let systemBinary = module.getProperty('systemBinary');
 
 function checkConversionBinaryToInt(): boolean {
-    const val = Double.toInt(parseInt(tsBinary, systemBinary as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsBinary, systemBinary);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToNumber(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsBinary, systemBinary);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToFloat(): boolean {
-    const val = Double.toFloat(parseInt(tsBinary, systemBinary as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsBinary, systemBinary);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToByte(): boolean {
-    const val = Double.toByte(parseInt(tsBinary, systemBinary as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsBinary, systemBinary);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToShort(): boolean {
-    const val = Double.toShort(parseInt(tsBinary, systemBinary as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsBinary, systemBinary);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToLong(): boolean {
-    const val = Double.toLong(parseInt(tsBinary, systemBinary as int));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsBinary, systemBinary);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToDouble(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsBinary, systemBinary);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToChar(): boolean {
-    const val = Int.toChar(Double.toInt(parseInt(tsBinary, systemBinary as int)));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsBinary, systemBinary);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }

@@ -20,7 +20,7 @@
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
-#include "utils/small_vector.h"
+#include "libarkbase/utils/small_vector.h"
 
 #include <node_api.h>
 
@@ -166,40 +166,23 @@ class NapiEscapableScope {
 public:
     explicit NapiEscapableScope(napi_env env) : env_(env)
     {
-        auto coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] napi_status status;
-        if (coro->IsManagedCode()) {
-            ScopedNativeCodeThread nativeScope(coro);
-            status = napi_open_escapable_handle_scope(env_, &scope_);
-        } else {
-            status = napi_open_escapable_handle_scope(env_, &scope_);
-        }
+        ASSERT_MANAGED_CODE();
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        [[maybe_unused]] auto status = napi_open_escapable_handle_scope(env_, &scope_);
         ASSERT(status == napi_ok);
     }
 
     void Escape(napi_value &val)
     {
-        auto coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] napi_status status;
-        if (coro->IsManagedCode()) {
-            ScopedNativeCodeThread nativeScope(coro);
-            status = napi_escape_handle(env_, scope_, val, &val);
-        } else {
-            status = napi_escape_handle(env_, scope_, val, &val);
-        }
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        [[maybe_unused]] auto status = napi_escape_handle(env_, scope_, val, &val);
         ASSERT(status == napi_ok);
     }
 
     ~NapiEscapableScope()
     {
-        auto coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] napi_status status;
-        if (coro->IsManagedCode()) {
-            ScopedNativeCodeThread nativeScope(coro);
-            status = napi_close_escapable_handle_scope(env_, scope_);
-        } else {
-            status = napi_close_escapable_handle_scope(env_, scope_);
-        }
+        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        [[maybe_unused]] auto status = napi_close_escapable_handle_scope(env_, scope_);
         ASSERT(status == napi_ok);
     }
 

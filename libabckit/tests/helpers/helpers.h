@@ -307,6 +307,11 @@ struct ClassFieldByNameContext {
     const char *name;
 };
 
+struct NamespaceFieldByNameContext {
+    AbckitCoreNamespaceField *cnf;
+    const char *name;
+};
+
 AbckitCoreFunction *FindMethodByName(AbckitFile *file, const std::string &name);
 AbckitCoreNamespace *FindNamespaceByName(AbckitFile *file, const std::string &name);
 bool ModuleByNameFinder(AbckitCoreModule *module, void *data);
@@ -350,6 +355,7 @@ std::optional<abckit::core::Enum> GetEnumByName(const abckit::core::Module &modu
 std::optional<abckit::core::Namespace> GetNamespaceByName(const abckit::core::Module &module, const std::string &name);
 std::optional<abckit::core::Function> GetFunctionByName(const abckit::core::Module &module, const std::string &name);
 
+bool InterfaceByNameFinder(AbckitCoreInterface *iface, void *data);
 bool FieldByNameFinder(AbckitCoreInterfaceField *field, void *data);
 bool ClassFieldFinder(AbckitCoreClassField *field, void *data);
 }  // namespace libabckit::test::helpers

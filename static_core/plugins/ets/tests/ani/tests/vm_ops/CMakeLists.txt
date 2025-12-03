@@ -28,12 +28,12 @@ ani_add_gtest(ani_test_get_created_vms
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_get_created_virtual_machines_test.ets
 )
 
-ani_add_gtest(ani_attach_thread
+ani_add_gtest(ani_test_attach_thread
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/attach_thread_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/attach_thread_test.ets
 )
 
-ani_add_gtest(ani_detach_thread
+ani_add_gtest(ani_test_detach_thread
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/detach_thread_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/detach_thread_test.ets
 )

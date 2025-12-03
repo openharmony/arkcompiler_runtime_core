@@ -36,7 +36,6 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue.h"
-#include "generated/logger_options.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "interop_js/napi_impl/napi_impl.h"
@@ -121,7 +120,8 @@ napi_value STValueIsBigIntImpl(napi_env env, napi_callback_info info)
         }
 
         ani_class bigintCls = nullptr;
-        ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("escompat.BigInt", &bigintCls));
+
+        AniCheckAndThrowToDynamic(env, aniEnv->FindClass("std.core.BigInt", &bigintCls));
         auto bigintClsType = reinterpret_cast<ani_type>(bigintCls);
         ANI_CHECK_ERROR_RETURN(env,
                                aniEnv->Object_InstanceOf(reinterpret_cast<ani_object>(ref), bigintClsType, &isBigint));

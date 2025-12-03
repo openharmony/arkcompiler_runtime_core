@@ -25,17 +25,11 @@ function max(a: int, b: int): int {
     return (a > b) ? a : b;
 }
 
-function delayWithYield(duration: int): void {
-    let t = Date.now();
-    while ((Date.now() - t) < duration) {}
-    Coroutine.Schedule();
-}
-
-function launchImpl(func: () => NullishType): Promise<NullishType> {
-    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+function launchImpl(func: () => Any): Promise<Any> {
+    const job: Job<Any> = launch<Any, () => Any>(
         func
     );
-    return new Promise<NullishType>((resolve, reject) => {
+    return new Promise<Any>((resolve, reject) => {
         try {
             let res = job.Await();
             resolve(res);
@@ -91,21 +85,14 @@ async function executePeriodicallyTest() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
-function testPeriodFunc(): NullishType {
+function testPeriodFunc(): Any {
     let task = new taskpool.Task(sum, 80, 90);
     taskpool.executePeriodically(200, task);
-    let isTaskCanceled: AtomicFlag = new AtomicFlag(false);
-    setTimeout(() => {
-        taskpool.cancel(task);
-        isTaskCanceled.set(true);
-    }, 50);
-    while (!isTaskCanceled.get()) {
-        delayWithYield(50);
-    }
     let runner = new taskpool.SequenceRunner();
     arktest.expectError(() => {
         runner.execute(task);
     }, new Error('taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask'));
+    taskpool.cancel(task);
     return 'success';
 }
 
@@ -255,12 +242,11 @@ async function taskWithDifferentParamsTest() {
         }
         return str + ' res: ' + res;
     }
-    let test = (a: number, b: number): number => {
-        let t = Date.now();
-        // mock time-consuming operation
-        while ((Date.now() - t) < 500) {
-            continue;
-        }
+
+    let awake_waiter: (val: int)=>void = ()=>{};
+    let waiter = new Promise<int>((res, rej)=>{awake_waiter = res;})
+    let test = async (a: number, b: number): number => {
+        await waiter;
         return a + b;
     }
     let task1 = new taskpool.Task(testWithZeroParam);
@@ -273,6 +259,7 @@ async function taskWithDifferentParamsTest() {
     let res2 = await runner.execute(task2);
     let res3 = await runner.execute(task3);
     let res4 = await runner.execute(task4);
+    awake_waiter(0);
     let res5 = await runner.execute(longTask);
     arktest.assertEQ(res1, 'testWithZeroParam');
     arktest.assertEQ(res2, 50);

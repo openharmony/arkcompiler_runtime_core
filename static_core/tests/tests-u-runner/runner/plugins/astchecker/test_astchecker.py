@@ -15,17 +15,46 @@
 # limitations under the License.
 #
 
+from dataclasses import dataclass
+from io import StringIO
 import logging
 from json import JSONDecoder
-from typing import List, Any, Tuple, Dict
+from typing import List, cast
 
 from runner.descriptor import Descriptor
 from runner.enum_types.params import TestEnv
 from runner.logger import Log
 from runner.plugins.astchecker.util_astchecker import UtilASTChecker
 from runner.test_file_based import TestFileBased
+from runner.utils import unlines
+from runner.parser import DIAG_PATTERN
 
 _LOGGER = logging.getLogger("runner.plugins.astchecker")
+
+@dataclass(frozen=True)
+class _CategorizedLines:
+    diagnostics: List[str]
+    others: List[str]
+
+def _categorize_lines(stderr: str) -> _CategorizedLines:
+    errors = []
+    other = []
+    for line in StringIO(stderr):
+        if DIAG_PATTERN.match(line):
+            errors.append(line)
+        else:
+            other.append(line)
+    return _CategorizedLines(errors, other)
+
+
+def _decode_dump_json(dump: str) -> dict:
+
+    if any(char != '\b' for char in dump):
+        decoder = JSONDecoder()
+        obj, _ = decoder.raw_decode(dump, 0)
+        return cast(dict, obj)
+
+    return {}
 
 
 class TestASTChecker(TestFileBased):
@@ -35,25 +64,6 @@ class TestASTChecker(TestFileBased):
         self.util = self.test_env.util
         self.test_cases = test_cases
 
-    @staticmethod
-    def handle_error_dump(input_string: str) -> Tuple[str, dict]:
-        errors_list = []
-        lines = input_string.splitlines()
-        for line in lines:
-            if line.split()[0] in ("Warning:", "SyntaxError:", "TypeError:", "Error:"):
-                errors_list.append(line)  # Add the line to the errors list
-
-        errors = "\n".join(errors_list)
-
-        filtered_lines = [line for line in lines if line not in errors_list]
-        dump = "\n".join(filtered_lines)
-
-        if any(char != '\b' for char in dump):
-            decoder = JSONDecoder()
-            obj, _ = decoder.raw_decode(dump, 0)
-            return errors, obj
-
-        return errors, {}
 
     def do_run(self) -> TestFileBased:
         es2panda_flags = self.flags
@@ -75,15 +85,17 @@ class TestASTChecker(TestFileBased):
         )
         return self
 
-    def es2panda_result_validator(self, actual_output: str, _: Any, return_code: int) -> bool:
-        error = str()
-        dump: Dict[str, Any] = {}
+    def es2panda_result_validator(self, actual_stdout: str, actual_stderr: str, return_code: int) -> bool:
         try:
-            error, dump = self.handle_error_dump(actual_output)
+            # NOTE(pronai) merging stdout and stderr until #29808
+            # this is fine because we can separate diagnostics using a regex
+            categorized = _categorize_lines(actual_stdout + actual_stderr)
         except ValueError as err:
             Log.exception_and_raise(_LOGGER, f'Output from file: {self.path}.\nThrows JSON error: {err}.')
 
-        passed = self.util.run_tests(self.path, self.test_cases, dump, error=error)
+        passed = self.util.run_tests(self.path, self.test_cases,
+                                     _decode_dump_json(''.join(categorized.others)),
+                                     error=unlines(categorized.diagnostics))
 
         if self.test_cases.has_error_tests and not self.test_cases.skip_errors:
             return passed and return_code == 1

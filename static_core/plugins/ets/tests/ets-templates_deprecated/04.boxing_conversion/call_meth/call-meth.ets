@@ -27,7 +27,7 @@ function main(): int {
     let a: A = new A()
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (a.meth(s{{loop.index}}).unboxed() != {{t.val}}) {
+    if (a.meth(s{{loop.index}}) != {{t.val}}) {
         return 1
     }
 {%- endfor %}

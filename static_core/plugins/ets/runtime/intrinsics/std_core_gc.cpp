@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"

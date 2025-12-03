@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 namespace ark::compiler {
 class PANDA_PUBLIC_API BranchElimination : public Optimization {
@@ -78,10 +78,20 @@ private:
     std::optional<bool> GetCompareAnyTypeResult(IfImmInst *ifImm);
     std::optional<bool> TryResolveCompareAnyTypeResult(CompareAnyTypeInst *compareAny,
                                                        CompareAnyTypeInst *domCompareAny, IfImmInst *ifImmDomBlock);
+    void ProtectReturnInlinedPaths();
+    void ProcessReturnInlinedInstruction(Inst *inst, BasicBlock *block);
+    void UnmarkConnectionPath(BasicBlock *current, BasicBlock *target);
+    void UnmarkConnectionToLiveCode(BasicBlock *block);
+    bool IsNeedToProtect(BasicBlock *block) const;
+    bool HasThrowInSuccessors(BasicBlock *block, Marker marker) const;
+    bool HasThrowInPredecessors(BasicBlock *block, Marker marker) const;
+    bool HasThrowInBlock(const BasicBlock *block) const;
 
 private:
     bool isApplied_ {false};
     Marker rmBlockMarker_ {UNDEF_MARKER};
+    // Auxiliary removal marker.
+    Marker auxRmMarker_ {UNDEF_MARKER};
     ArenaUnorderedMap<ConditionOps, InstVector, CcHash, CcEqual> sameInputCompares_;
     ArenaUnorderedMap<Inst *, ArenaVector<CompareAnyTypeInst *>> sameInputCompareAnyType_;
 };

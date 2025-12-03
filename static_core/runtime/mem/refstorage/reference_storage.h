@@ -45,7 +45,7 @@ public:
 
     bool Init();
 
-    static Reference::ObjectType GetObjectType(const Reference *ref);
+    PANDA_PUBLIC_API static Reference::ObjectType GetObjectType(const Reference *ref);
 
     [[nodiscard]] static Reference *NewStackRef(ObjectHeader **objectPtr)
     {

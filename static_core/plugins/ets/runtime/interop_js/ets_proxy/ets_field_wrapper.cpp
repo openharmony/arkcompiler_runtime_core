@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_field_wrapper.h"
 
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "plugins/ets/runtime/ets_class_root.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"

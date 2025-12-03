@@ -16,7 +16,7 @@
 #include <cstring>
 #include "plugins/ets/runtime/ets_namespace_manager.h"
 #include "plugins/ets/runtime/ets_namespace_manager_impl.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::ets {
 

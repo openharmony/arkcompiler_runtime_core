@@ -16,7 +16,7 @@
 #ifndef COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H
 #define COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H
 
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 #include "optimizer/analysis/liveness_use_table.h"
 #include "optimizer/ir/constants.h"
 #include "optimizer/ir/inst.h"

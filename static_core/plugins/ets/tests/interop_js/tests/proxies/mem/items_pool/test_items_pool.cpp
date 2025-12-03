@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "libpandabase/os/mem.h"
+#include "libarkbase/os/mem.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/mem/items_pool.h"
 
 namespace ark::ets::interop::js::ets_proxy::testing {

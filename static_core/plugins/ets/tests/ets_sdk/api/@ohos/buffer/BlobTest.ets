@@ -149,7 +149,7 @@ async function testBlobFromBlob() {
 
 async function testBlobWithOptions() {
     const blobParts: FixedArray<string> = ['<q id="a"><span id="b">hey!</span></q>'];
-    const blob = new buffer.Blob(blobParts, { type: 'text/html' } as buffer.BlobOptions);
+    const blob = new buffer.Blob(blobParts, { type: 'text/html', endings: 'transparent' } as buffer.BlobOptions);
     arktest.assertEQ(blob.type, 'text/html')
     let text = await blob.text()
     arktest.assertEQ(text, '<q id="a"><span id="b">hey!</span></q>')

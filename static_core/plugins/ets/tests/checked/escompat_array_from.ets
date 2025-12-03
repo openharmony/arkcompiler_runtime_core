@@ -59,14 +59,14 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
 
     public push(val: T): number {
         this.ensureUnusedCapacity(1);
-        this.buffer[this.actualLength] = val as NullishType;
+        this.buffer[this.actualLength] = val as Any;
         this.actualLength += 1;
         return this.actualLength;
     }
 
     private ensureUnusedCapacity(cap: int): void {
         if (this.actualLength + cap > this.buffer.length) {
-            const copy = new NullishType[this.buffer.length * 2 + cap];
+            const copy = new Any[this.buffer.length * 2 + cap];
             for (let i = 0; i < this.actualLength; i++) {
                 copy[i] = this.buffer[i];
             }
@@ -75,7 +75,7 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
     }
 
     public constructor() {
-        this.buffer = new NullishType[4]
+        this.buffer = new Any[4]
         this.actualLength = 0
     }
 }

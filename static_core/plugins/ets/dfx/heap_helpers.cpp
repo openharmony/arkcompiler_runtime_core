@@ -36,7 +36,7 @@ uint64_t GetHeapUsedSize(ani_vm *vm)
 uint64_t GetArrayBufferSize(ani_vm *vm)
 {
     auto *etsVM = ark::ets::PandaEtsVM::FromAniVM(vm);
-    auto arrayBufferClass = ark::ets::PlatformTypes()->escompatArrayBuffer->GetRuntimeClass();
+    auto arrayBufferClass = ark::ets::PlatformTypes()->coreArrayBuffer->GetRuntimeClass();
 
     size_t totalArrayBufferSize = 0;
     auto arrayBufferVisitor = [&totalArrayBufferSize, &arrayBufferClass](ark::ObjectHeader *obj) {

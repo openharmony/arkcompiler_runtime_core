@@ -21,8 +21,8 @@
 #include "paoc_clusters.h"
 #include "runtime/compiler.h"
 #include "runtime/jit/profiling_loader.h"
-#include "utils/expected.h"
-#include "utils/span.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/span.h"
 
 namespace ark::compiler {
 class Graph;

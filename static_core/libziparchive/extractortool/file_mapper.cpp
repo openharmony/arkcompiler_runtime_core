@@ -15,8 +15,8 @@
 
 #include "file_mapper.h"
 
-#include "libpandabase/os/mem.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/os/mem.h"
+#include "libarkbase/utils/logger.h"
 #include "zip_file_reader.h"
 
 namespace ark::extractor {

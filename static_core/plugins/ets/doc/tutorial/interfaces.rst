@@ -123,5 +123,5 @@ An interface can extend other interfaces as in the example below:
 An extended interface contains all properties and methods of the
 interface it extends. It also can add its own properties and methods.
 
-|
+
 |

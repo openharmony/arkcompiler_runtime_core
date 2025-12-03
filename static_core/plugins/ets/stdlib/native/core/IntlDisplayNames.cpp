@@ -17,7 +17,7 @@
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
 #include "plugins/ets/stdlib/native/core/IntlState.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "unicode/numberformatter.h"
 #include "unicode/numberrangeformatter.h"
 #include "unicode/locid.h"

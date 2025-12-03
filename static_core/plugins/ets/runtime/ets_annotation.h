@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_ANNOTATION_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_ANNOTATION_H_
 
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 
 namespace ark {
 class Method;

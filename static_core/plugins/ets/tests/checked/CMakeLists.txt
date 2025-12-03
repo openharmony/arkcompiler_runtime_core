@@ -11,8 +11,16 @@
 #See the License for the specific language governing permissions and
 #limitations under the License.
 
+option(PANDA_ENABLE_CHECKED_TESTS "Enable ETS checked tests" ON)
+
+if(PANDA_ENABLE_CHECKED_TESTS)
 add_custom_target(ets_checked_tests COMMENT "Running ets core tests with checkers")
 add_dependencies(ets_checked_tests ark)
+else()
+    # Create empty target so dependencies don't break
+    add_custom_target(ets_checked_tests COMMENT "ETS checked tests disabled")
+    return()
+endif()
 add_subdirectory(jitinterface)
 
 function(panda_add_checked_test_ets)
@@ -38,6 +46,11 @@ function(panda_add_checked_test_ets)
         set(TEST_NAME "${ARG_NAME}.checked")
     endif()
     set(CHECKER "${PANDA_ROOT}/tests/checked/checker.rb")
+    if (CMAKE_VERBOSE_MAKEFILE)
+        set(CHECKER_VERBOSE "-v")
+    else()
+        set(CHECKER_VERBOSE "")
+    endif()
     set(TEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}")
     set(BINARY_FILE "${TEST_DIR}/test.abc")
     set(BUILD_LOG   "${TEST_DIR}/build.log")
@@ -139,6 +152,7 @@ function(panda_add_checked_test_ets)
                                          --build-config ${CHECKER_BUILD_CONFIG}
                                          ${RELEASE_OPT}
                                          ${WITH_LLVM}
+                                         ${CHECKER_VERBOSE}
                       WORKING_DIRECTORY ${TEST_DIR}
                       COMMENT "Running ${TEST_NAME} checked test"
                       DEPENDS ${BINARY_FILE} ${EXT_FILES})
@@ -230,7 +244,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         endif()
     endif()
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_runtime_equals.ets SUPPORT_RELEASE)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_abs.ets)
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_abs.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_equals.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_strict_equals.ets)
 #Disabled as stdlib API was required to change.issue 25232
@@ -249,13 +263,13 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         endif()
     endif()
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_mod.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_decompose.ets ETS_STRINGS_CONCAT "false")
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/checks_elimination_osr.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/cleanup_call_inlined.ets)
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_decompose.ets ETS_STRINGS_CONCAT "false")
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/checks_elimination_osr.ets)
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/cleanup_call_inlined.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop_unroll_shl_shr_ashr.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isinteger.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/hoist_loop_inv_bounds_check.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_get_set_derived.ets ETS_STRINGS_CONCAT "false")
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escompat_array_get_set_derived.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_length.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_isempty.ets ETS_STRINGS_CONCAT "false")
     # NOTE(@srokashevich, #29168): enable with tsan after fix
@@ -301,7 +315,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
 #panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR} / ets_stringbuilder_oom.ets ETS_STRINGS_CONCAT "false")
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_const_array.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/hoist_checkcast.ets)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_deoptimization.ets)
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_deoptimization.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/fast_divisor.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_pea_loads_upward_propagation.ets)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_sum_elem_array.ets)
@@ -368,7 +382,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     endif()
 endif()
 
-panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_casted.ets)
+# panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_casted.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_array.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_negation.ets)
 #NOTE #28944

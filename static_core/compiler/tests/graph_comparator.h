@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -265,6 +265,19 @@ public:
                 instCompareMap_.erase(inst1);
                 return false;
             }
+        }
+        if (svSt1->GetInliningDepth() != svSt2->GetInliningDepth()) {
+            instCompareMap_.erase(inst1);
+            return false;
+        }
+        if ((svSt1->GetCallerInst() == nullptr) != (svSt2->GetCallerInst() == nullptr)) {
+            instCompareMap_.erase(inst1);
+            return false;
+        }
+        if (svSt1->GetCallerInst() != nullptr && svSt2->GetCallerInst() != nullptr &&
+            svSt1->GetCallerInst()->GetId() != svSt2->GetCallerInst()->GetId()) {
+            instCompareMap_.erase(inst1);
+            return false;
         }
         return true;
     }

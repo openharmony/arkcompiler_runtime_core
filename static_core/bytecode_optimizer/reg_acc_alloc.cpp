@@ -372,11 +372,49 @@ void RegAccAlloc::MarkInstruction(compiler::Inst *inst)
     }
 }
 
+bool MustMoveInputsFromAcc(compiler::Inst *inst)
+{
+    bool mustMove = false;
+    if (inst->IsPhi()) {
+        auto inputs = inst->GetInputs();
+        bool allInputsIsConst = true;
+        for (auto input : inputs) {
+            auto inputInst = input.GetInst();
+            if (!inputInst->IsConst()) {
+                allInputsIsConst = false;
+                break;
+            }
+        }
+        mustMove = allInputsIsConst;
+    }
+    return mustMove;
+}
+
+void RegAccAlloc::MoveInputsFromAcc(compiler::Inst *inst)
+{
+    inst->SetDstReg(compiler::GetInvalidReg());
+    for (auto input : inst->GetInputs()) {
+        auto inputInst = input.GetInst();
+        inputInst->SetDstReg(compiler::GetInvalidReg());
+    }
+
+    for (auto &user : inst->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (IsAccRead(userInst)) {
+            SetNeedLda(userInst, true);
+        }
+    }
+}
+
 void RegAccAlloc::MarkInstructions()
 {
     for (auto block : GetGraph()->GetBlocksRPO()) {
         for (auto inst : block->AllInsts()) {
             MarkInstruction(inst);
+
+            if (MustMoveInputsFromAcc(inst)) {
+                MoveInputsFromAcc(inst);
+            }
         }
 
         // Check if acc is written between inst and its intput

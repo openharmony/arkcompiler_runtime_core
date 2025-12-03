@@ -16,8 +16,11 @@
 #define PANDA_RUNTIME_OPTIONS_H_
 
 #include "generated/runtime_options_gen.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/plugins.h"
+#ifdef PANDA_OHOS_GET_PARAMETER
+#include "syspara/parameters.h"
+#endif
 
 namespace ark {
 
@@ -135,13 +138,21 @@ public:
     bool IsG1TrackFreedObjects() const
     {
         bool track = false;
+        bool g1TrackFreedObjects = false;
         auto option = GetG1TrackFreedObjects();
         if (option == "default") {
-#ifdef NDEBUG
-            track = false;
-#else
-            track = true;
+#ifdef PANDA_OHOS_GET_PARAMETER
+            g1TrackFreedObjects = OHOS::system::GetBoolParameter("persist.sta.gc.SetG1TrackFreedObjects", false);
 #endif
+            if (g1TrackFreedObjects) {
+                track = true;  // NOLINT(readability-simplify-boolean-expr)
+            } else {
+#ifdef NDEBUG
+                track = false;
+#else
+                track = true;
+#endif
+            }
         } else if (option == "true") {
             track = true;
         } else if (option == "false") {
@@ -173,6 +184,16 @@ public:
         }
     }
 
+    void SetLangExtensionOptions(panda_file::SourceLang lang, std::shared_ptr<void> langExtensionOption)
+    {
+        langExtensionOptions_[ark::panda_file::GetLangArrIndex(lang)] = std::move(langExtensionOption);
+    }
+
+    const void *GetLangExtensionOptions(panda_file::SourceLang lang) const
+    {
+        return langExtensionOptions_[ark::panda_file::GetLangArrIndex(lang)].get();
+    }
+
 private:
     // Fix default value for possible missing plugins.
     void CheckAndFixIntrinsicSpaces()
@@ -201,6 +222,7 @@ private:
     void *unwindstack_ {nullptr};
     void *crashConnect_ {nullptr};
     bool verifyRuntimeLibraries_ {false};
+    std::array<std::shared_ptr<void>, panda_file::LANG_COUNT> langExtensionOptions_ {};
 };
 }  // namespace ark
 

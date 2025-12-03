@@ -30,7 +30,7 @@ from vmb.cli import Args
 from vmb.lang import LangBase
 from vmb.doclet import DocletParser, TemplateVars
 from vmb.gensettings import GenSettings
-from vmb.shell import ShellUnix
+from vmb.shell import ShellHost
 
 SrcPath = namedtuple("SrcPath", "full rel")
 log = logging.getLogger('vmb')
@@ -201,7 +201,7 @@ class BenchGenerator:
         script = src_full.parent.joinpath(values.generator)
         cmd = f'{script} {bench_dir} bench_{values.bench_name}{ext}'
         log.trace('Test generator: %s', script)
-        ShellUnix().run(cmd)
+        ShellHost().run(cmd)
 
     @staticmethod
     def emit_bench_variant(values: TemplateVars,

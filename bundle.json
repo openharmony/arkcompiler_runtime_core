@@ -17,7 +17,8 @@
             "SystemCapability.ArkCompiler.ANI"
         ],
         "features": [
-            "runtime_core_enable_codegen"
+            "runtime_core_enable_codegen",
+            "runtime_core_enable_ffrt"
         ],
         "adapted_system_type": [
             "standard"
@@ -38,6 +39,7 @@
                 "icu",
                 "vixl",
                 "c_utils",
+                "ets_utils",
                 "openssl",
                 "libuv",
                 "pcre2",
@@ -45,7 +47,8 @@
                 "musl",
                 "elfio",
                 "node",
-                "qos_manager"
+                "qos_manager",
+                "ffrt"
             ],
             "third_party": []
         },
@@ -173,24 +176,24 @@
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandabase:libarktsbase",
+                    "name": "//arkcompiler/runtime_core/static_core/libarkbase:libarktsbase",
                     "header": {
                         "header_files": [],
-                        "header_base": "//arkcompiler/runtime_core/static_core/libpandabase"
+                        "header_base": "//arkcompiler/runtime_core/static_core/libarkbase"
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandabase:libarktsbase_package",
+                    "name": "//arkcompiler/runtime_core/static_core/libarkbase:libarktsbase_package",
                     "header": {
                         "header_files": [],
-                        "header_base": "//arkcompiler/runtime_core/static_core/libpandabase"
+                        "header_base": "//arkcompiler/runtime_core/static_core"
                     }
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandafile:libarktsfile_package",
+                    "name": "//arkcompiler/runtime_core/static_core/libarkfile:libarktsfile_package",
                     "header": {
                         "header_files": [],
-                        "header_base": "//arkcompiler/runtime_core/static_core/libpandafile"
+                        "header_base": "//arkcompiler/runtime_core/static_core/"
                     }
                 },
                 {
@@ -303,6 +306,9 @@
                     "name": "//arkcompiler/runtime_core/static_core/plugins/ets/stdlib:ohos_ets_stdlib"
                 },
                 {
+                    "name": "//arkcompiler/runtime_core/static_core/plugins/ets:etsstdlib"
+                },
+                {
                     "name": "//arkcompiler/runtime_core/static_core/assembler:assembler_headers"
                 },
                 {
@@ -312,10 +318,10 @@
                     "name": "//arkcompiler/runtime_core/static_core/bytecode_optimizer:bytecode_optimizer_headers"
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandabase:libpandabase_headers"
+                    "name": "//arkcompiler/runtime_core/static_core/libarkbase:libpandabase_headers"
                 },
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/libpandafile:libpandafile_headers"
+                    "name": "//arkcompiler/runtime_core/static_core/libarkfile:libpandafile_headers"
                 },
                 {
                     "name": "//arkcompiler/runtime_core/static_core/runtime:runtime_headers"

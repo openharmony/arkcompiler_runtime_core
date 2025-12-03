@@ -60,4 +60,9 @@ virtual FieldPtr GetEscompatArrayBufferDataAddress([[maybe_unused]] ClassPtr kla
     return nullptr;
 }
 
+virtual FieldPtr GetEscompatArrayBufferManagedData([[maybe_unused]] ClassPtr klass) const
+{
+    return nullptr;
+}
+
 #endif  // PANDA_PLUGINS_ETS_COMPILER_ETS_COMPILER_INTERFACE_H

@@ -15,8 +15,8 @@
 #ifndef PANDA_GC_BARRIER_H
 #define PANDA_GC_BARRIER_H
 
-#include "libpandabase/mem/gc_barrier.h"
-#include "libpandabase/mem/ringbuf/lock_free_ring_buffer.h"
+#include "libarkbase/mem/gc_barrier.h"
+#include "libarkbase/mem/ringbuf/lock_free_ring_buffer.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/mem/gc/card_table.h"
@@ -257,6 +257,8 @@ public:
     void PostBarrier(const void *objAddr, size_t offset, size_t count) override;
 
     void Enqueue(CardTable::CardPtr card);
+
+    void PostCardToQueue(CardTable::CardPtr card);
 
     ~GCG1BarrierSet() override = default;
 

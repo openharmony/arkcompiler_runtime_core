@@ -37,6 +37,21 @@ public:
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_V(cls, name, "ii:", args), ANI_OK);
         va_end(args);
     }
+    void TestFuncVCorrectSignature(ani_class cls, ...)
+    {
+        va_list args {};
+        va_start(args, cls);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_V(cls, "method", "C{std.core.String}:", args), ANI_OK);
+        va_end(args);
+    }
+    void TestFuncVWrongSignature(ani_class cls, ...)
+    {
+        va_list args {};
+        va_start(args, cls);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_V(cls, "method", "C{std/core/String}:", args),
+                  ANI_INVALID_DESCRIPTOR);
+        va_end(args);
+    }
     void GetCount(ani_class cls, ani_int *value)
     {
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "getCount", ":i", value), ANI_OK);
@@ -148,10 +163,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_a_in
 
 TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_void_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_void_test.na.A", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "funcA", "ii:", VAL1, VAL2), ANI_OK);
     ani_int value = 0;
@@ -174,12 +187,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_comb
 
 TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_2)
 {
-    ani_namespace nb {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_void_test.nb", &nb), ANI_OK);
-    ani_namespace nc {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(nb, "nc", &nc), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(nc, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_void_test.nb.nc.A", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "funcA", "ii:", VAL1, VAL2), ANI_OK);
     ani_int value = 0;
@@ -202,10 +211,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_comb
 
 TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_3)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_void_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_void_test.na.A", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "funcA", "ii:", VAL1, VAL2), ANI_OK);
     ani_int value = 0;
@@ -234,10 +241,8 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_comb
 
 TEST_F(ClassCallStaticMethodByNameVoidTest, call_static_method_by_name_void_combine_scenes_4)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_void_test.nd", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "B", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_void_test.nd.B", &cls), ANI_OK);
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "funcA", "ii:", VAL1, VAL2), ANI_OK);
     ani_int value = 0;
@@ -413,6 +418,30 @@ TEST_F(ClassCallStaticMethodByNameVoidTest, check_initialization_void_a)
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "publicMethod", "ii:", args), ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_void_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameVoidTest, check_wrong_signature)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_void_test.CheckWrongSignature", &cls), ANI_OK);
+
+    std::string input = "hello";
+
+    ani_string str;
+    ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Void(env_, cls, "method", "C{std.core.String}:", str), ANI_OK);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Void(env_, cls, "method", "C{std/core/String}:", str),
+              ANI_INVALID_DESCRIPTOR);
+
+    ani_value arg;
+    arg.r = str;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "method", "C{std.core.String}:", &arg), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void_A(cls, "method", "C{std/core/String}:", &arg),
+              ANI_INVALID_DESCRIPTOR);
+
+    TestFuncVCorrectSignature(cls, str);
+    TestFuncVWrongSignature(cls, str);
 }
 
 }  // namespace ark::ets::ani::testing

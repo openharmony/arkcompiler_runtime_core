@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "runtime/mem/gc/g1/g1_analytics.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/runtime.h"

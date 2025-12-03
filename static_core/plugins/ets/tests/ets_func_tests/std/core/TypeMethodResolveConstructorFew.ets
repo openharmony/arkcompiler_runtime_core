@@ -35,7 +35,7 @@ class Test {
     }
 }
 
-function test(args: FixedArray<NullishType>, exp: int): int {
+function test(args: FixedArray<Any>, exp: int): int {
     called = -1
     try {
         TestType.make(args)
@@ -53,8 +53,8 @@ function test(args: FixedArray<NullishType>, exp: int): int {
     return 0
 }
 
-function from(x: NullishType): FixedArray<NullishType> {
-    const ret : FixedArray<NullishType> = new NullishType[1]
+function from(x: Any): FixedArray<Any> {
+    const ret : FixedArray<Any> = new Any[1]
     ret[0] = x
     return ret
 }

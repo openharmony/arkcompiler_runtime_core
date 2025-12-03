@@ -16,8 +16,8 @@
 #include "runtime/jit/profile_saver_worker.h"
 #include "include/runtime.h"
 #include "runtime/jit/profiling_saver.h"
-#include "taskmanager/task_manager.h"
-#include "utils/logger.h"
+#include "libarkbase/taskmanager/task_manager.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark {
 

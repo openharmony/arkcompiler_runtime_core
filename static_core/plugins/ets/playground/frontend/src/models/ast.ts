@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-import { IObj } from "../store/slices/options";
+import { IObj } from '../store/slices/options';
 
 export interface IAstFetch {
     code: string;
     options?: IObj | null;
 }
-  
 export interface IAstReq {
     ast: string | null;
     output: string;
     error: string;
     exit_code: number;
 }
-  
+
 export const astModel = {
-    fromApi: (data: any): IAstReq => ({
+    fromApi: (data: Partial<IAstReq>): IAstReq => ({
       ast: data?.ast ?? null,
       output: data?.output ?? '',
       error: data?.error ?? '',

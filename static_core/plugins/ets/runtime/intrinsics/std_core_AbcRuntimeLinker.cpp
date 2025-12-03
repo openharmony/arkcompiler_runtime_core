@@ -14,14 +14,15 @@
  */
 
 #include "ets_platform_types.h"
-#include "file.h"
+#include "libarkfile/file.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_abc_file.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -36,7 +37,7 @@ void EtsAbcRuntimeLinkerAddNewAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, Objec
     [[maybe_unused]] EtsHandleScope hs(coro);
     EtsHandle newAbcFilesHandle(coro, EtsTypedObjectArray<EtsAbcFile>::FromCoreType(newAbcFilesArray));
     EtsHandle linkerHandle(coro, runtimeLinker);
-    auto *ctx = reinterpret_cast<EtsClassLinkerContext *>(linkerHandle->GetClassLinkerContext());
+    auto *ctx = EtsClassLinkerContext::FromCoreType(linkerHandle->GetClassLinkerContext());
 
     os::memory::LockHolder lock(ctx->GetAbcFilesMutex());
     EtsHandle currentAbcFilesHandle(coro, linkerHandle->GetAbcFiles());
@@ -58,9 +59,9 @@ void EtsAbcRuntimeLinkerAddNewAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, Objec
 EtsClass *EtsAbcRuntimeLinkerLoadClassFromAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, EtsString *clsName,
                                                    EtsBoolean init)
 {
-    const auto name = clsName->GetMutf8();
-    PandaString descriptor;
-    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);
+    ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
+    const auto name = parser.Resolve();
+    auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
     if (classDescriptor == nullptr) {
         return nullptr;
     }

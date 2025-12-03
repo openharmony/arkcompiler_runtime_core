@@ -35,7 +35,6 @@ parameters:
     es2panda-timeout: 60
     verifier-timeout: 60
     checker-timeout: 180
-    checker-frontend-relpath: "bin/es2panda"
     checker-run-prefix: "''"
     checker-boot_self: ""
     checker-compiler-check-final: "--compiler-check-final=true"
@@ -65,7 +64,6 @@ steps:
         enable-checker: ${parameters.enable-checker}
         extension: ${parameters.extension}
         load-runtimes: ${parameters.load-runtimes}
-        checker-frontend-relpath: ${parameters.checker-frontend-relpath}
         checker-timeout: ${parameters.checker-timeout}
         checker-run-prefix: ${parameters.checker-run-prefix}
         checker-boot_self: ${parameters.checker-boot_self}

@@ -13,6 +13,7 @@
 
 module EtsConstants
     CORO_NULL_VALUE_OFFSET = "cross_values::GetEtsCoroutineNullValueOffset(graph->GetArch())"
+    CORO_LOCAL_STORAGE_OFFSET = "cross_values::GetEtsCoroutineLocalStorageOffset(graph->GetArch())"
     ESCOMPAT_ARRAY_DATA_OFFSET = "cross_values::GetEscompatArrayBufferOffset(graph->GetArch())"
     ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET = "cross_values::GetEscompatArrayActualLengthOffset(graph->GetArch())"
     BOX_PRIMITIVE_VALUE_OFFSET = "cross_values::GetEtsBoxPrimitiveValueOffset(graph->GetArch())"
@@ -21,7 +22,6 @@ module EtsConstants
     TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET = "cross_values::GetTypedUnsignedArrayBufferOffset(graph->GetArch())"
     TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedUnsignedArrayByteOffsetOffset(graph->GetArch())"
     ARRAY_BUFFER_DATA_OFFSET = "cross_values::GetArrayBufferDataOffset(graph->GetArch())"
-    CORO_LOCAL_STORAGE_OFFSET = "cross_values::GetEtsCoroutineLocalStorageOffset(graph->GetArch())"
 
     ETS_CLASS_RUNTIME_CLASS_OFFSET = "cross_values::GetEtsClassRuntimeClassOffset(graph->GetArch())"
     ETS_CLASS_FLAGS_OFFSET = "cross_values::GetEtsClassFlagsOffset(graph->GetArch())"
@@ -34,12 +34,14 @@ module EtsConstants
     ETS_CLASS_BOXED_TYPE_DOUBLE_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeDoubleMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
 
     OBJ_PTR_SIZE = "ark::OBJECT_POINTER_SIZE"
-    LOG2_BYTES_PER_OBJ_PTR = "2" # object pointer has a size of 4 bytes on each supported platform
+    OBJ_PTR_LOG2_SIZE = "ark::OBJECT_POINTER_LOG2_SIZE"
 
     FLOAT32_NAN = "0x7fc00000"
     FLOAT64_NAN = "0x7ff8000000000000"
     FLOAT64_INF = "0x7ff0000000000000"
     FLOAT64_MINUS_INF = "0xfff0000000000000"
+
+    MAX_ALLOWED_INVALIDATING_CARDS = "2"
 end
 
 scoped_macro(:getBoxedType) do |flags|
@@ -54,20 +56,103 @@ macro(:ets_nullvalue) do
   LoadI(%tr).Imm(EtsConstants::CORO_NULL_VALUE_OFFSET).ref
 end
 
-###
-# Resolves a value of type 'ref_uint' stored in the memory by address 'base + offset', where 'offset` is an immediate
-# value, and returns it as a pointer. See also the 'ark::ObjectPointerType' alias and the 'ark::ObjectPointer' class.
-#
-macro(:get_object_pointer_imm) do |base, offset|
-  # Cast makes no problem when panda's codegen is in use but leads to an ill-formed 'addrspacecast i32 to ptr'
-  # instruction when the LLVM codegen is used. 'Bitcast' is lowered to the expected instruction 'inttoptr i32 to ptr'.
-  Bitcast(Cast(LoadI(base).Imm(offset).ref_uint).word).ptr
+scoped_macro(:getPlatformTypes) do
+  ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+end
+
+scoped_macro(:getPlatformTypeClass) do |ptypes, ofs|
+  ptype := LoadI(ptypes).Imm(ofs).ref_uint
+  klass := Bitcast(AddI(ptype).Imm(EtsConstants::ETS_CLASS_RUNTIME_CLASS_OFFSET).ref_uint).ref
+end
+
+scoped_macro(:getLineStringClass) do |ptypes|
+  klass := getPlatformTypeClass(ptypes, Constants::LINE_STRING_CLASS_OFFSET)
+end
+
+scoped_macro(:getSlicedStringClass) do |ptypes|
+  klass := getPlatformTypeClass(ptypes, Constants::SLICED_STRING_CLASS_OFFSET)
+end
+
+scoped_macro(:getTreeStringClass) do |ptypes|
+  klass := getPlatformTypeClass(ptypes, Constants::TREE_STRING_CLASS_OFFSET)
 end
 
 ###
-# Resolves a value of type 'ref_uint' stored in the memory by address 'base + offset', and returns it as a pointer.
+# Resolves a value of type 'ref' stored in the memory by address 'base + offset', where 'offset` is an immediate
+# value, and returns it as a pointer. See also the 'ark::ObjectPointerType' alias and the 'ark::ObjectPointer' class.
+#
+macro(:get_object_pointer_imm) do |base, offset|
+  Cast(LoadI(base).Imm(offset).ref).ptr
+end
+
+###
+# Resolves a value of type 'ref' stored in the memory by address 'base + offset', and returns it as a pointer.
 # See also the 'ark::ObjectPointerType' alias and the 'ark::ObjectPointer' class.
 #
 macro(:get_object_pointer) do |base, offset|
-  Bitcast(Cast(Load(Cast(base).ptr, Cast(offset).word).ref_uint).word).ptr
+  Cast(Load(base, Cast(offset).word).ref).ptr
 end
+
+###
+# Load an address value (either as `ref` or `ref_uint`) from the EtsPlatformTypes storage. The deserved address must
+# be stored in the platform types by offset `offset`.
+#
+["ref", "ref_uint"].each do |ret_type|
+  macro("get_platform_type_#{ret_type}".to_sym) do |offset|
+    ptypes := LoadI(%tr).Imm(EtsConstants::CORO_LOCAL_STORAGE_OFFSET).ptr
+    LoadI(ptypes).Imm(offset).send(ret_type)
+  end # get_platform_type_#{ret_type}
+end
+
+scoped_macro(:post_inter_region_barrier) do |data, size|
+  addr_first := Cast(data).ptr
+  addr_last := SubI(Add(addr_first.ptr, Cast(size.u32).word).ptr).Imm(1).ptr
+
+  min_addr := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_MIN_ADDR_OFFSET).word
+  addr_first_word := Bitcast(addr_first).word
+  first_card_offset := ShrI(Sub(addr_first_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
+  addr_last_word := Bitcast(addr_last).word
+  last_card_offset := ShrI(Sub(addr_last_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
+  cards := Sub(last_card_offset, first_card_offset).word
+
+  # If the fist and the last addresses belong to different cards, we need to invalidate two subsequent cards.
+  # Invariant: size <= (1 << CARD_TABLE_CARD_BITS), but no one guarantees addr_first_word is aligned at card size.
+  if defines.DEBUG
+    If(cards, Cast(EtsConstants::MAX_ALLOWED_INVALIDATING_CARDS).word).AE.Unlikely {
+      Intrinsic(:UNREACHABLE).Terminator.void
+    }
+  end
+
+  If(cards, Cast(1).word).EQ.Unlikely {
+    # `addr_second` here is a pointer to the slot just at the start of the 2nd card. A slot just at the start
+    # of a card must be aligned at card size.
+    addr_second := Add(ShlI(last_card_offset).Imm(Constants::CARD_TABLE_CARD_BITS).word, min_addr).word
+    addr_second_ref := Cast(addr_second).SrcType(Options.arch_64_bits? ? "DataType::UINT64" :
+        "DataType::UINT32").ref_uint
+    if defines.DEBUG
+      If(AndI(addr_second_ref).Imm(Constants::CARD_ALIGNMENT_MASK).ref_uint, 0).NE.Unlikely {
+        Intrinsic(:UNREACHABLE).Terminator.void
+      }
+    end
+    LiveOut(addr_second_ref).DstReg(regmap[:arg0]).ref_uint
+    ep_offset = get_entrypoint_offset("POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW")
+    Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("PostInterRegionBarrierTwoCardsSlow").Terminator.void
+  }
+
+  addr_first_ref := Cast(Bitcast(addr_first).SrcType("DataType::POINTER").word).SrcType(Options.arch_64_bits? ?
+      "DataType::UINT64" : "DataType::UINT32").ref_uint
+  LiveOut(addr_first_ref).DstReg(regmap[:arg0]).ref_uint
+  ep_offset = get_entrypoint_offset("POST_INTER_REGION_BARRIER_SLOW")
+  Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("PostInterRegionBarrierSlow").Terminator.void
+end # post_inter_region_barrier
+
+scoped_macro(:post_inter_generational_barrier) do |obj|
+  min_addr := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_MIN_ADDR_OFFSET).word
+  cards := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_ADDR_OFFSET).ptr
+
+  # GCGenBarrierSet just ignores the offset to the data and count and works with the dst object only.
+  mem_word := Bitcast(obj).word
+  card_offset := ShrI(Sub(mem_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
+  card := Add(cards, card_offset).ptr
+  StoreI(card, Constants::CARD_DIRTY_VALUE).Imm(Constants::CARD_VALUE_OFFSET).u8
+end # post_inter_generational_barrier

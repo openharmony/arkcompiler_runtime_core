@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/ets_call_stack.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -35,10 +36,15 @@
 #include "plugins/ets/runtime/interop_js/napi_impl/napi_impl.h"
 #include "plugins/ets/runtime/interop_js/timer_helper/interop_timer_helper.h"
 
+#if defined(PANDA_USE_ETS_UTILS)
+#include "console.h"
+#endif
+
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
 napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
+napi_status __attribute__((weak)) napi_destroy_runtime(napi_env env);
 napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value error);
 napi_status __attribute__((weak)) napi_setup_hybrid_environment(napi_env env);
 // NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
@@ -394,7 +400,6 @@ void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
     nullValueClass = CacheClass(etsClassLinker, descriptors::NULL_VALUE);
     promiseClass = CacheClass(etsClassLinker, descriptors::PROMISE);
     errorClass = CacheClass(etsClassLinker, descriptors::ERROR);
-    exceptionClass = CacheClass(etsClassLinker, descriptors::EXCEPTION);
     typeClass = CacheClass(etsClassLinker, descriptors::TYPE);
 
     boxIntClass = CacheClass(etsClassLinker, descriptors::BOX_INT);
@@ -430,17 +435,33 @@ void InteropCtx::InitExternalInterfaces()
         napi_value global = nullptr;
         napi_get_global(resultJsEnv, &global);
         ark::ets::interop::js::helper::Init(resultJsEnv, global);
+#if defined(PANDA_USE_ETS_UTILS)
+        OHOS::JsSysModule::Console::InitConsoleModule(resultJsEnv);
+#endif
         return resultJsEnv;
     });
+
+    interfaceTable_.SetGetJSEnvFunction([]() -> ExternalIfaceTable::JSEnv {
+        auto *ctx = InteropCtx::Current();
+        if (ctx == nullptr) {
+            return nullptr;
+        }
+        return ctx->GetJSEnv();
+    });
+
+    interfaceTable_.SetCleanUpJSEnvFunction([](ExternalIfaceTable::JSEnv jsEnv) -> void {
+        auto env = static_cast<napi_env>(jsEnv);
+        [[maybe_unused]] auto status = napi_destroy_runtime(env);
+        ASSERT(status == napi_ok);
+    });
+
 #endif
     interfaceTable_.SetCreateInteropCtxFunction([](Coroutine *coro, ExternalIfaceTable::JSEnv jsEnv) {
         auto env = static_cast<napi_env>(jsEnv);
         auto *etsCoro = static_cast<EtsCoroutine *>(coro);
         InteropCtx::Init(etsCoro, env);
-        // It's a hack and we should use INTEROP_CODE_SCOPE to allocate records.
-        // Will be fixed in near future.
-        InteropCtx::Current()->CallStack().AllocRecord(etsCoro->GetCurrentFrame(), nullptr);
 #if defined(PANDA_TARGET_OHOS) && defined(PANDA_ETS_INTEROP_JS)
+        INTEROP_CODE_SCOPE_ETS_TO_JS(etsCoro);
         // Here need to init interop in the given JSVM instance.
         TryInitInteropInJsEnv(jsEnv);
 #endif
@@ -566,7 +587,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     }
 
     auto klass = etsObj->GetClass()->GetRuntimeClass();
-    if (LIKELY(ctx->GetErrorClass()->IsAssignableFrom(klass) || ctx->GetExceptionClass()->IsAssignableFrom(klass))) {
+    if (LIKELY(ctx->GetErrorClass()->IsAssignableFrom(klass))) {
         coro->SetException(etsObj->GetCoreType());
         return;
     }
@@ -670,7 +691,7 @@ void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
     coro->ClearException();
 
     auto klass = exc->ClassAddr<Class>();
-    ASSERT(GetErrorClass()->IsAssignableFrom(klass) || GetExceptionClass()->IsAssignableFrom(klass));
+    ASSERT(GetErrorClass()->IsAssignableFrom(klass));
     JSRefConvert *refconv = JSRefConvertResolve<true>(this, klass);
     if (UNLIKELY(refconv == nullptr)) {
         INTEROP_LOG(INFO) << "Exception thrown while forwarding ets exception: " << klass->GetDescriptor();
@@ -780,7 +801,7 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     auto ctx = InteropCtx::Current(coro);
 
     INTEROP_LOG(ERROR) << "======================== ETS stack ============================";
-    auto istk = ctx->interopStk_.GetRecords();
+    auto istk = ctx->GetOrCreateCallStack().GetRecords();
     auto istkIt = istk.rbegin();
 
     auto printIstkFrames = [&istkIt, &istk](void *fp) {
@@ -953,6 +974,19 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 #else
     return true;
 #endif
+}
+
+/* static */
+InteropCallStack &InteropCtx::GetOrCreateCallStack()
+{
+    auto &coroStorage = EtsCoroutine::GetCurrent()->GetLocalStorage();
+    auto *callStk = coroStorage.Get<EtsCoroutine::DataIdx::INTEROP_CALL_STACK_PTR, InteropCallStack *>();
+    if (callStk == nullptr) {
+        callStk = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCallStack>();
+        coroStorage.Set<EtsCoroutine::DataIdx::INTEROP_CALL_STACK_PTR>(
+            callStk, [](void *param) { Runtime::GetCurrent()->GetInternalAllocator()->Delete(param); });
+    }
+    return *callStk;
 }
 
 }  // namespace ark::ets::interop::js

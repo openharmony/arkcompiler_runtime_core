@@ -58,23 +58,23 @@ public:
 
 namespace {
 
-void QueueCallbackInternal(void *w)
+void QueueCallbackInternal(ani_env *env, void *w)
 {
     auto *impl = CastWork(w);
     auto queued = QUEUED;
     if (impl->status.compare_exchange_strong(queued, RUNNING)) {
-        impl->execute(impl->env, impl->data);
+        impl->execute(env, impl->data);
     }
 }
 
-void CompleteCallbackInternal(void *w)
+void CompleteCallbackInternal(ani_env *env, void *w)
 {
     auto *impl = CastWork(w);
     auto status = WorkStatus::OK;
     if (impl->status == CANCELED) {
         status = WorkStatus::CANCELED;
     }
-    impl->complete(impl->env, status, impl->data);
+    impl->complete(env, status, impl->data);
 }
 
 }  // namespace
@@ -102,7 +102,7 @@ WorkStatus QueueAsyncWork(ani_env *env, AsyncWork *work)
     }
 
     ani_class cls = nullptr;
-    env->FindClass("Lstd/concurrency/NativeAsyncWorkHelper;", &cls);
+    env->FindClass("std.concurrency.NativeAsyncWorkHelper", &cls);
     ani_static_method queueMethod;
     env->Class_FindStaticMethod(cls, "queue", nullptr, &queueMethod);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

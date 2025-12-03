@@ -14,6 +14,7 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet GetLowerValue GetHigherValue API tests")
@@ -73,10 +74,22 @@ function testGetLowerValueGetHigherValueValidValues() {
 function testGetLowerValueGetHigherValueEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): double => { return secondValue.compareTo(firstValue) });
-    let lower = treeSet.getLowerValue("bb");
-    let higher = treeSet.getHigherValue("aa");
-    arktest.assertEQ(lower, undefined, "The treeSet should return undefined for the lower value in an empty set");
-    arktest.assertEQ(higher, undefined, "The treeSet should return undefined for the higher value in an empty set");
+    try {
+        let lower = treeSet.getLowerValue("bb");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let higher = treeSet.getHigherValue("aa");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")
 }
 
@@ -118,10 +131,22 @@ function testGetLowerValueAndHigherValueNonExistingValue() {
 function testGetLowerValueGetHigherValueEmptyStringValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
         secondValue: string): double => { return secondValue.compareTo(firstValue) });
-    let lower = treeSet.getLowerValue("");
-    let higher = treeSet.getHigherValue("");
-    arktest.assertEQ(lower, undefined, "The treeSet should return undefined for the lower value in an empty set");
-    arktest.assertEQ(higher, undefined, "The treeSet should return undefined for the higher value in an empty set");
+    try {
+        let lower = treeSet.getLowerValue("");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let higher = treeSet.getHigherValue("");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")
 }
 

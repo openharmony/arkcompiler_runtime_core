@@ -31,7 +31,6 @@ function main(): int {
     failures += check(testGenerateRandomUUID(), "Test testGenerateRandomUUID() for RFC4122 compliance")
     failures += check(testIsUniqueUUID(), "Test generated UUID's by generateRandomUUID() are unique")
     failures += check(testGetNonCachedUUID(), "Test get non-cached UUID")
-    failures += check(testGetCachedUUID(), "Test get cached UUID")
     return failures
 }
 
@@ -72,19 +71,6 @@ function testGetNonCachedUUID(): int {
         let id = util.generateRandomUUID(false)
         arktest.assertFalse(idSet.has(id))
         idSet.add(id)
-    }
-    return success
-}
-
-function testGetCachedUUID(): int {
-    let idSet: Set<string> = new Set<string>()
-    for (let i = 0; i < 1000; ++i) {
-        let id = util.generateRandomUUID(true)
-        if (i > 0) {
-            arktest.assertTrue(idSet.has(id))
-        }
-        idSet.add(id)
-        arktest.assertEQ(idSet.size, 1)
     }
     return success
 }

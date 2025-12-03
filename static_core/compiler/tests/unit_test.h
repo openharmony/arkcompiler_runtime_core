@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +16,18 @@
 #ifndef COMPILER_TESTS_UNIT_TEST_H
 #define COMPILER_TESTS_UNIT_TEST_H
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "optimizer/ir/ir_constructor.h"
 #include "gtest/gtest.h"
-#include "mem/arena_allocator.h"
-#include "mem/pool_manager.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkbase/mem/pool_manager.h"
 #include <numeric>
 #include <unordered_map>
 #include "compiler.h"
 #include "compiler_logger.h"
 #include "graph_comparator.h"
 #include "include/runtime.h"
-#include "libpandafile/file_item_container.h"
+#include "libarkfile/file_item_container.h"
 
 namespace ark::compiler {
 struct RuntimeInterfaceMock : public compiler::RuntimeInterface {
@@ -97,7 +97,18 @@ struct RuntimeInterfaceMock : public compiler::RuntimeInterface {
 
     DataType::Type GetArrayComponentType(PandaRuntimeInterface::ClassPtr klass) const override
     {
-        return classTypes_ == nullptr ? DataType::NO_TYPE : (*classTypes_)[klass];
+        return arrayComponentTypes_ == nullptr ? DataType::NO_TYPE : (*arrayComponentTypes_)[klass];
+    }
+
+    PandaRuntimeInterface::ClassPtr GetClass([[maybe_unused]] MethodPtr method,
+                                             [[maybe_unused]] IdType id) const override
+    {
+        return classes_ == nullptr ? nullptr : (*classes_)[id];
+    }
+
+    bool CanUseStringFlatCheck() const override
+    {
+        return true;
     }
 
 private:
@@ -110,7 +121,8 @@ private:
     DataType::Type returnType_ {DataType::NO_TYPE};
     ArenaVector<DataType::Type> *argTypes_ {nullptr};
     ArenaUnorderedMap<PandaRuntimeInterface::FieldPtr, DataType::Type> *fieldTypes_ {nullptr};
-    ArenaUnorderedMap<PandaRuntimeInterface::ClassPtr, DataType::Type> *classTypes_ {nullptr};
+    ArenaUnorderedMap<PandaRuntimeInterface::ClassPtr, DataType::Type> *arrayComponentTypes_ {nullptr};
+    ArenaUnorderedMap<IdType, PandaRuntimeInterface::ClassPtr> *classes_ {nullptr};
 
     friend class GraphTest;
     friend class GraphCreator;
@@ -265,9 +277,14 @@ public:
             graph_->GetAllocator()->New<ArenaUnorderedMap<PandaRuntimeInterface::FieldPtr, DataType::Type>>(
                 graph_->GetAllocator()->Adapter());
 
-        runtime_.classTypes_ =
+        runtime_.arrayComponentTypes_ =
             graph_->GetAllocator()->New<ArenaUnorderedMap<PandaRuntimeInterface::ClassPtr, DataType::Type>>(
                 graph_->GetAllocator()->Adapter());
+
+        runtime_.classes_ =
+            graph_->GetAllocator()
+                ->New<ArenaUnorderedMap<PandaRuntimeInterface::IdType, PandaRuntimeInterface::ClassPtr>>(
+                    graph_->GetAllocator()->Adapter());  // CC-OFF(G.FMT.06-CPP) project code style
     }
     ~GraphTest() override = default;
 
@@ -308,9 +325,14 @@ public:
         (*runtime_.fieldTypes_)[field] = type;
     }
 
-    void RegisterClassType(PandaRuntimeInterface::ClassPtr klass, DataType::Type type)
+    void RegisterArrayComponentType(PandaRuntimeInterface::ClassPtr klass, DataType::Type type)
     {
-        (*runtime_.classTypes_)[klass] = type;
+        (*runtime_.arrayComponentTypes_)[klass] = type;
+    }
+
+    void RegisterClass(PandaRuntimeInterface::IdType id, PandaRuntimeInterface::ClassPtr klass)
+    {
+        (*runtime_.classes_)[id] = klass;
     }
 
 protected:

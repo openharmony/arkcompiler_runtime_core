@@ -265,4 +265,11 @@ bool GetExportedClassDescriptorsFromModule(ark::ets::EtsClass *etsGlobalClass, s
     return found;
 }
 
+const std::map<PandaString, char> ClassPublicNameParser::primitiveNameMapping = {
+    {"u16", 'C'}, {"i8", 'B'}, {"i16", 'S'}, {"i32", 'I'}, {"i64", 'J'}, {"f32", 'F'}, {"f64", 'D'}, {"u1", 'Z'}};
+
+const std::map<char, PandaString> RuntimeDescriptorParser::primitiveNameMapping = {
+    {'C', "u16"}, {'B', "i8"},  {'S', "i16"}, {'I', "i32"}, {'J', "i64"},
+    {'F', "f32"}, {'D', "f64"}, {'Z', "u1"},  {'V', "void"}};
+
 }  // namespace ark::ets

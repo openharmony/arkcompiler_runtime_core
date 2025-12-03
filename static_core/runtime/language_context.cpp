@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 #include "runtime/include/language_context.h"
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/core/core_itable_builder.h"
 #include "runtime/core/core_vm.h"
 #include "runtime/core/core_vtable_builder.h"

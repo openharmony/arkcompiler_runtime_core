@@ -20,14 +20,14 @@
 #include "cross_values.h"
 #include "datatype.h"
 #include "ir-dyn-base-types.h"
-#include "mem/gc_barrier.h"
+#include "libarkbase/mem/gc_barrier.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/profiling/profiling.h"
 #include "source_languages.h"
-#include "utils/arch.h"
-#include "utils/span.h"
-#include "utils/arena_containers.h"
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/mem/mem.h"
 
 namespace ark {
 class Thread;
@@ -155,6 +155,21 @@ public:
         return nullptr;
     }
 
+    virtual uint32_t GetAOTBinaryFileSnapshotIndexForMethod([[maybe_unused]] MethodPtr method) const
+    {
+        return 0;
+    }
+
+    virtual BinaryFilePtr GetAOTBinaryFileBySnapshotIndex([[maybe_unused]] uint32_t index) const
+    {
+        return nullptr;
+    }
+
+    virtual uint32_t GetAOTBinaryFileSnapshotIndex([[maybe_unused]] BinaryFilePtr file) const
+    {
+        return 0;
+    }
+
     // File offsets
     uint32_t GetBinaryFileBaseOffset(Arch arch) const
     {
@@ -169,6 +184,12 @@ public:
 
     virtual MethodPtr GetMethodByIdAndSaveJsFunction([[maybe_unused]] MethodPtr parentMethod,
                                                      [[maybe_unused]] MethodId id)
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetInstanceMethodByName([[maybe_unused]] ClassPtr klass,
+                                              [[maybe_unused]] std::string_view name) const
     {
         return nullptr;
     }
@@ -411,6 +432,16 @@ public:
         return false;
     }
 
+    virtual bool IsMethodStringGetLength([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual Field *GetFieldPtrByName([[maybe_unused]] ClassPtr klass, [[maybe_unused]] std::string_view name) const
+    {
+        return nullptr;
+    }
+
     virtual bool IsMethodStringBuilderConstructorWithStringArg([[maybe_unused]] MethodPtr method) const
     {
         return false;
@@ -441,11 +472,6 @@ public:
         return false;
     }
 
-    virtual bool IsMethodEscompatMapCtor([[maybe_unused]] MethodPtr method) const
-    {
-        return false;
-    }
-
     virtual bool IsClassEscompatArray([[maybe_unused]] ClassPtr klass) const
     {
         return false;
@@ -457,6 +483,11 @@ public:
     }
 
     virtual bool IsClassEscompatMap([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassEscompatSet([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
@@ -586,6 +617,11 @@ public:
         return nullptr;
     }
 
+    virtual MethodPtr GetGetterStringBuilderStringLength([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
+    }
+
     virtual std::string GetFileName([[maybe_unused]] MethodPtr method) const
     {
         return "UnknownFile";
@@ -629,9 +665,29 @@ public:
         return false;
     }
 
+    virtual bool IsEnumClass([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsBigIntClass([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsFunctionReference([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
     virtual bool IsClassBoxedBoolean([[maybe_unused]] ClassPtr klass) const
     {
         return false;
+    }
+
+    virtual DataType::Type GetBoxedClassDataType([[maybe_unused]] ClassPtr klass) const
+    {
+        return DataType::NO_TYPE;
     }
 
     virtual std::string GetMethodName([[maybe_unused]] MethodPtr method) const
@@ -982,8 +1038,8 @@ public:
         return cross_values::GetManagedThreadStringClassPtrOffset(arch);
     }
 
-    // StringBuilder offsets.
-    // cross_values are not used here as StringBuilder doesn't have a corresponding c++ representative.
+    // StringBuilder offsets: cross_values are not used as the core part
+    // does not contain corresponding StringBuilder C++ representative.
     static constexpr uint32_t GetSbBufferOffset()
     {
         return ObjectHeader::ObjectHeaderSize();
@@ -1070,6 +1126,11 @@ public:
     }
 
     virtual bool IsStringClass([[maybe_unused]] MethodPtr method, [[maybe_unused]] IdType id) const
+    {
+        return false;
+    }
+
+    virtual bool IsStringClass([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
@@ -1518,9 +1579,14 @@ public:
         UNREACHABLE();
     }
 
-    uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const
+    uintptr_t GetEntrypointsTablePointerTlsOffset(Arch arch) const
     {
-        return cross_values::GetManagedThreadEntrypointOffset(arch, ark::EntrypointId(id));
+        return cross_values::GetManagedThreadEntrypointsTableOffset(arch);
+    }
+
+    uintptr_t GetEntrypointOffset(Arch arch, EntrypointId id) const
+    {
+        return cross_values::GetEntrypointOffset(arch, ark::EntrypointId(id));
     }
 
     virtual EntrypointId GetGlobalVarEntrypointId()
@@ -1738,7 +1804,22 @@ public:
         return nullptr;
     }
 
+    virtual void *GetAsciiCharCache() const
+    {
+        return nullptr;
+    }
+
     virtual bool IsStringCachesUsed() const
+    {
+        return false;
+    }
+
+    virtual bool CanUseStringFlatCheck() const
+    {
+        return false;
+    }
+
+    virtual bool IsUseAllStrings() const
     {
         return false;
     }

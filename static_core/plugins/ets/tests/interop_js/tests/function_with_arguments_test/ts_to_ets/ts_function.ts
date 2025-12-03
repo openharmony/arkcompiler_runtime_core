@@ -12,6 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export function jsonStringFyTest(msg: string | number | undefined) {
+export function jsonStringFyTest(msg: string | number | undefined): string | undefined {
   return JSON.stringify(msg);
 }

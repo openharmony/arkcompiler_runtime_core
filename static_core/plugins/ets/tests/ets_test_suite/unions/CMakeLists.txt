@@ -94,6 +94,8 @@ add_ets_verifier_test(FILE "correct_union_arg_2")
 add_ets_verifier_test(FILE "correct_union_override")
 add_ets_verifier_test(FILE "correct_union_override_2")
 add_ets_verifier_test(FILE "neg_union_arg" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad call incompatible parameter")
+add_ets_verifier_test(FILE "neg_union_not_in_boot_context" 
+    VERIFIER_FAIL_TEST SEARCH_STDERR "Error: method void ETSGLOBAL::color(ULresource.Resource\;Lstd.core.Double\;Lstd.core.String\;) failed to verify")
 add_ets_verifier_test(FILE "neg_union_override_multi1" VERIFIER_FAIL_TEST SEARCH_STDERR "Cannot link class: Multiple override LE\;foo LD\;foo")
 add_ets_verifier_test(FILE "neg_union_override_multi2" VERIFIER_FAIL_TEST SEARCH_STDERR "Cannot link class: Multiple override LE\;foo LD\;foo")
 add_ets_verifier_test(FILE "neg_union_override_multi3" VERIFIER_FAIL_TEST SEARCH_STDERR "Cannot link class: Multiple override LE\;foo LD\;foo")

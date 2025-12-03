@@ -21,8 +21,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "libpandabase/utils/logger.h"
-#include "libpandafile/file.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkfile/file.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"

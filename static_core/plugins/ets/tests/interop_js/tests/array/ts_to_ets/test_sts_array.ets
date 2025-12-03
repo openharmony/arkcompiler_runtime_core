@@ -63,21 +63,21 @@ let arraySplice4: Array<Number> = arrSplice4 as Array<Number>
 let arrayToSorted: Array<Number> = arrToSorted as Array<Number>
 let arrayUnShift: Array<Number> = arrUnShift as Array<Number>
 
-const funcPredicate1 = (num: number, index: number, array: Array<Number>): boolean => num % 2 === 0
+const funcPredicate1 = (num: number, index: int, array: Array<Number>): boolean => num % 2 === 0
 
-const funcPredicate2 = (num: number, index: number, array: Array<Number>): boolean => num < 6
+const funcPredicate2 = (num: number, index: int, array: Array<Number>): boolean => num < 6
 
-const mapAndFlatten = (num: number, k: number, arr: Array<Number>): Number => num * num
+const mapAndFlatten = (num: number, k: int, arr: Array<Number>): Number => num * num
 
 const flatMapAndFlatten = (num: number): FixedArray<Number> => [num * num]
 
-const processElement = (element: number, index: number, array: Array<Number>): void => result = (element === index + 1)
+const processElement = (element: number, index: int, array: Array<Number>): void => result = (element === index + 1)
 
-const sumReducer = (previousValue: number, currentValue: number, index: number, array: Array<Number>): number => {
+const sumReducer = (previousValue: number, currentValue: number, index: int, array: Array<Number>): number => {
     return previousValue + currentValue
 }
 
-const concatenateReducer = (previousValue: string, currentValue: string, index: number, array: Array<string>): string => {
+const concatenateReducer = (previousValue: string, currentValue: string, index: int, array: Array<string>): string => {
     return previousValue + "" + currentValue
 }
 
@@ -120,7 +120,7 @@ function testConcat(): boolean {
 }
 
 function testCopyWithin(): boolean {
-    return arrayCopyWithin1.copyWithin(1).toString() === "1,1,2,3" && arrayCopyWithin2.copyWithin(0, 2).toString() === "3,4,3,4" && arrayCopyWithin3.copyWithin(0.0, 1, 3).toString() === "2,3,3,4"
+    return arrayCopyWithin1.copyWithin(1).toString() === "1,1,2,3" && arrayCopyWithin2.copyWithin(0, 2).toString() === "3,4,3,4" && arrayCopyWithin3.copyWithin(0, 1, 3).toString() === "2,3,3,4"
 }
 
 function testEntries(): boolean {
@@ -132,7 +132,7 @@ return !array.every(funcPredicate1) && array.every(funcPredicate2)
 }
 
 function testFill(): boolean {
-    return arrayFill.fill(8.0, 1.0, 3.0).toString() === "1,8,8,4"
+    return arrayFill.fill(8.0, 1, 3).toString() === "1,8,8,4"
 }
 
 function testFilter(): boolean {
@@ -248,7 +248,7 @@ function testSort(): boolean {
 }
 
 function testSplice(): boolean {
-    return arraySplice1.splice(1).toString() === "2,3,4" && arraySplice3.splice(1.0, 1, 2).toString() === "2"  && arraySplice4.splice(1.0, 2, 6, 7).toString() === "2,3"
+    return arraySplice1.splice(1).toString() === "2,3,4" && arraySplice3.splice(1, 1, 2).toString() === "2"  && arraySplice4.splice(1, 2, 6, 7).toString() === "2,3"
 }
 
 function testToLocaleString(): boolean {
@@ -282,6 +282,6 @@ function testValues(): boolean {
 }
 
 function testWith(): boolean {
-    let a = array.with(1.0, 8.0)
+    let a = array.with(1, 8.0)
     return a.toString() === "1,8,3,4"
 }

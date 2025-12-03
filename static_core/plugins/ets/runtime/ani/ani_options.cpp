@@ -50,6 +50,7 @@ Expected<bool, std::string> ANIOptions::SetOption(std::string_view key, std::str
     return true;
 }
 
+// CC-OFFNXT(G.FUD.05) solid logic
 const std::map<std::string_view, ANIOptions::OptionHandler> &ANIOptions::GetOptionsMap()
 {
     static const std::map<std::string_view, OptionHandler> OPTIONS_MAP = {
@@ -67,6 +68,23 @@ const std::map<std::string_view, ANIOptions::OptionHandler> &ANIOptions::GetOpti
                         return Unexpected(std::string("'--logger' option has 'extra==NULL'"));
                     }
                     return std::make_unique<OptionValue>(OptionValue {std::string(value), extra});
+                },
+            },
+        },
+        {
+            "--verify:ani",
+            {
+                OptionKey::VERIFY_ANI,
+                [](std::string_view value, void *extra) -> Expected<std::unique_ptr<OptionValue>, std::string> {
+                    if (!value.empty()) {
+                        std::stringstream ss;
+                        ss << "'--verify:ani' option mustn't have value, value='" << value << "'";
+                        return Unexpected(ss.str());
+                    }
+                    if (extra != nullptr) {
+                        return Unexpected(std::string("'--verify:ani' option has 'extra != NULL'"));
+                    }
+                    return std::make_unique<OptionValue>(OptionValue {true, extra});
                 },
             },
         },

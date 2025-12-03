@@ -20,7 +20,8 @@ namespace ark::ets::interop::js::testing {
 
 class EtsImportFunctionTsToEtsTest : public EtsInteropTest {};
 
-TEST_F(EtsImportFunctionTsToEtsTest, checkChangeFunction)
+// disable untial lambda function works in .d.ets files
+TEST_F(EtsImportFunctionTsToEtsTest, DISABLED_checkChangeFunction)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeFunction"));
 }

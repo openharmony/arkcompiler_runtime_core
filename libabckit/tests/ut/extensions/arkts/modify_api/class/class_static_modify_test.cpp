@@ -38,6 +38,11 @@ static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitArkTSModifyApiClassTests : public ::testing::Test {};
 
+struct CaptureData {
+    AbckitGraph *graph = nullptr;
+    AbckitCoreFunction *targetFunc = nullptr;
+};
+
 void SuperClassTransformCtorIr(AbckitFile *file)
 {
     helpers::ModuleByNameContext ctxFinder = {nullptr, "super_class"};
@@ -58,17 +63,45 @@ void SuperClassTransformCtorIr(AbckitFile *file)
     AbckitGraph *graph = g_implI->createGraphFromFunction(funcFinder.method);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto call = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
-    auto refObj = g_implG->iGetInput(call, 0);
-    ASSERT_NE(refObj, nullptr);
-    auto newInst = g_statG->iCreateCallStatic(graph, targetFuncFinder.method, 1, refObj);
-    ASSERT_NE(newInst, nullptr);
-    g_implG->iInsertBefore(newInst, call);
-    g_implG->iRemove(call);
+    CaptureData capData;
+    capData.graph = graph;
+    capData.targetFunc = targetFuncFinder.method;
+
+    g_implG->gVisitBlocksRpo(graph, &capData, [](AbckitBasicBlock *bb, void *data) -> bool {
+        auto *capData = reinterpret_cast<CaptureData *>(data);
+        for (auto inst = g_implG->bbGetFirstInst(bb); inst != nullptr; inst = g_implG->iGetNext(inst)) {
+            if (g_statG->iGetOpcode(inst) == ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC) {
+                auto del = g_implG->iGetNext(inst);
+                auto newInst = g_statG->iCreateCallStatic(capData->graph, capData->targetFunc, 0);
+                g_implG->iInsertBefore(newInst, inst);
+                g_implG->iRemove(inst);
+                g_implG->iRemove(del);
+            }
+            if (g_statG->iGetOpcode(inst) == ABCKIT_ISA_API_STATIC_OPCODE_NULLPTR) {
+                g_implG->iRemove(inst);
+            }
+        }
+        return true;
+    });
 
     g_implM->functionSetGraph(funcFinder.method, graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->destroyGraph(graph);
+}
+
+bool CallSuHandleCb(AbckitBasicBlock *bb, void *data)
+{
+    auto *capData = reinterpret_cast<CaptureData *>(data);
+    for (auto inst = g_implG->bbGetFirstInst(bb); inst != nullptr; inst = g_implG->iGetNext(inst)) {
+        if (g_statG->iGetOpcode(inst) == ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID) {
+            auto preInst = g_implG->iGetPrev(inst);
+            auto objRef = g_implG->iGetInput(preInst, 0);
+            g_implG->iRemove(preInst);
+            auto newInst = g_statG->iCreateCallVirtual(capData->graph, objRef, capData->targetFunc, 0);
+            g_implG->iInsertBefore(newInst, inst);
+        }
+    }
+    return true;
 }
 
 void SuperClassTransformMainIr(AbckitFile *file)
@@ -83,14 +116,10 @@ void SuperClassTransformMainIr(AbckitFile *file)
         helpers::MethodByNameContext targetFuncFinder = {nullptr, "suHandle"};
         g_implI->classEnumerateMethods(classCtxFinder.klass, &targetFuncFinder, helpers::MethodByNameFinder);
 
-        auto call = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_VIRTUAL);
-        ASSERT_NE(call, nullptr);
-        auto objRef = g_implG->iGetInput(call, 0);
-        ASSERT_NE(objRef, nullptr);
-        auto newInst = g_statG->iCreateCallVirtual(graph, objRef, targetFuncFinder.method, 0);
-        ASSERT_NE(newInst, nullptr);
-        g_implG->iInsertBefore(newInst, call);
-        g_implG->iRemove(call);
+        CaptureData capData;
+        capData.graph = graph;
+        capData.targetFunc = targetFuncFinder.method;
+        g_implG->gVisitBlocksRpo(graph, &capData, CallSuHandleCb);
     };
 
     helpers::TransformMethod(file, "main", transformCb);
@@ -605,7 +634,7 @@ TEST_F(LibAbcKitArkTSModifyApiClassTests, ClassSetName2)
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::ClassAddField, abc-kind=ArkTS2, category=positive, extension=c
-TEST_F(LibAbcKitArkTSModifyApiClassTests, ClassAddField1)
+TEST_F(LibAbcKitArkTSModifyApiClassTests, ClassAddField)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/classset_static.abc", &file);

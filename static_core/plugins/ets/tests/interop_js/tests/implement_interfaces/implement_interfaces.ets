@@ -12,27 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- import { getId  } from "test_class"
- import { TestClass } from "test_class"
- 
 
-function getProperty():boolean{
-     const testObj = new TestClass('OneTestClass',123);
-    return testObj.name == 'OneTestClass' && testObj.id as number == 123;
+let module = ESValue.load('test_class')
+let getId = module.getProperty('getId');
+let testClass = module.getProperty('TestClass');
+
+function getProperty(): boolean {
+    const testObj = testClass.instantiate('OneTestClass', 123);
+    return testObj.getProperty('name').toString() === 'OneTestClass' &&
+        testObj.getProperty('id').toNumber() === 123;
 }
 
-function useStringFn():boolean{
-    const testObj = new TestClass('OneTestClass',123);
-   return testObj.greet() == 'This is OneTestClass'
+function useStringFn(): boolean {
+    const testObj = testClass.instantiate('OneTestClass', 123);
+    return testObj.invokeMethod('greet').toString() === 'This is OneTestClass';
 }
 
-function useNumberFn():boolean{
-    const testObj = new TestClass('OneTestClass',123);
-   return testObj.myId() as number == 123
+function useNumberFn(): boolean {
+    const testObj = testClass.instantiate('OneTestClass', 123);
+    return testObj.invokeMethod('myId').toNumber() === 123;
 }
 
-function useExternalFn():boolean{
-    const testObj = new TestClass('OneTestClass',123);
-    const objId = getId(testObj)
-   return objId as number == 123
+function useExternalFn(): boolean {
+    const testObj = testClass.instantiate('OneTestClass', 123);
+    const objId = getId.invoke(testObj);
+    return objId.toNumber() === 123;
 }

@@ -25,12 +25,8 @@ public:
 
     void GetMethod(ani_namespace *nsResult, ani_function *fnResult1, ani_function *fnResult2)
     {
-        ani_module module {};
-        ASSERT_EQ(env_->FindModule("@functionModule.function_call_void_test", &module), ANI_OK);
-        ASSERT_NE(module, nullptr);
-
         ani_namespace ns {};
-        ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.ops", &ns), ANI_OK);
         ASSERT_NE(ns, nullptr);
 
         ani_function fn1 {};
@@ -116,14 +112,10 @@ TEST_F(FunctionCallVoidTest, function_call_void_a_invalid_args)
 
 TEST_F(FunctionCallVoidTest, function_call_void_001)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_void_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
     ani_function fGetInt {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "voidFunctionA", "ii:", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -145,17 +137,13 @@ TEST_F(FunctionCallVoidTest, function_call_void_001)
 
 TEST_F(FunctionCallVoidTest, function_call_void_002)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_void_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_namespace nB {};
     ani_function fB {};
     ani_function fGetIntB {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A.B", &nB), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.A.B", &nB), ANI_OK);
     ASSERT_NE(nB, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nB, "voidFunctionB", "ii:", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
@@ -177,14 +165,10 @@ TEST_F(FunctionCallVoidTest, function_call_void_002)
 
 TEST_F(FunctionCallVoidTest, function_call_void_003)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_void_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
     ani_function fGetChar {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "voidFunctionA", "c:", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -258,14 +242,10 @@ TEST_F(FunctionCallVoidTest, function_call_void_005)
 
 TEST_F(FunctionCallVoidTest, function_call_void_006)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_void_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
     ani_function fGetInt {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "voidFunctionA", "ii:", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -287,14 +267,10 @@ TEST_F(FunctionCallVoidTest, function_call_void_006)
 
 TEST_F(FunctionCallVoidTest, function_call_void_007)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_void_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
     ani_function fGetInt {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "i:", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -317,16 +293,12 @@ TEST_F(FunctionCallVoidTest, function_call_void_007)
 
 TEST_F(FunctionCallVoidTest, function_call_void_008)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_void_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
     ani_function fGetInt {};
     ani_function fGetChar {};
     ani_function fGetDouble {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "icd:", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -366,14 +338,10 @@ TEST_F(FunctionCallVoidTest, function_call_void_008)
 
 TEST_F(FunctionCallVoidTest, function_call_void_009)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_void_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
     ani_function fGetInt {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_void_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "voidFunctionA", "ii:", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);

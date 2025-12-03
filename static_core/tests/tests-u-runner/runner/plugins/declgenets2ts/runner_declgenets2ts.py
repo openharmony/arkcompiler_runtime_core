@@ -89,14 +89,30 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
         Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
-        self.collect_excluded_test_lists(test_name=self.__declgen_ets_name)
-        self.collect_ignored_test_lists(test_name=self.__declgen_ets_name)
+        self.collect_ignored_excluded_tests()
 
         self.add_directories([TestDirectory(self.test_root, "ets", [])])
 
     @property
     def default_work_dir_root(self) -> Path:
         return Path("/tmp/declgenets2ts") / self.__declgen_ets_name
+
+    def collect_ignored_excluded_tests(self) -> None:
+        self.collect_excluded_test_lists(test_name=self.__declgen_ets_name)
+        self.collect_ignored_test_lists(test_name=self.__declgen_ets_name)
+
+        if self.__declgen_ets_name == "declgen-ets2ts-cts":
+            self.ignored_cts_ets_prefix = "ets-cts"
+        elif self.__declgen_ets_name == "declgen-ets2ts-func-tests":
+            self.ignored_cts_ets_prefix = "ets-func-tests"
+        elif self.__declgen_ets_name == "declgen-ets2ts-runtime":
+            self.ignored_cts_ets_prefix = "ets-runtime"
+        else:
+            return
+
+        self.list_root = os.path.join(self.default_list_root, self.ignored_cts_ets_prefix)
+        self.collect_excluded_test_lists(test_name=self.ignored_cts_ets_prefix)
+        self.excluded_lists.extend(self.collect_test_lists("ignored", None, self.ignored_cts_ets_prefix))
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenETS2TS:
         test = TestDeclgenETS2TS(self.test_env, test_file, flags, get_test_id(

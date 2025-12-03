@@ -29,9 +29,14 @@ import DisasmCode from '../../pages/disasmView/DisasmCode';
 import {AppDispatch} from '../../store';
 import {fetchOptions} from '../../store/actions/options';
 import {fetchSyntax} from '../../store/actions/syntax';
-import {selectErrLogs, selectOutLogs} from '../../store/selectors/logs';
+import {
+    selectCompilationLogs,
+    selectRuntimeLogs,
+    selectOutLogs,
+    selectErrLogs
+} from '../../store/selectors/logs';
 import LogsView from '../../pages/logs/LogsView';
-import {clearErrLogs, clearOutLogs} from '../../store/actions/logs';
+import {clearCompilationLogs, clearRuntimeLogs} from '../../store/actions/logs';
 import AstView from '../../pages/astView/AstView';
 import { fetchFeatures } from '../../store/actions/features';
 import { selectASTLoading } from '../../store/selectors/ast';
@@ -48,16 +53,19 @@ const TITLE_MAP: Record<ViewId, string> = {
 };
 
 const MosaicApp = (): JSX.Element => {
-    const [activeTab, setActiveTab] = useState<'output' | 'err'>('output');
+    const [activeTab, setActiveTab] = useState<'compilation' | 'runtime'>('compilation');
     const withDisasmRender = useSelector(withDisasm);
     const withASTRender = useSelector(withAstView);
     const isAstLoading = useSelector(selectASTLoading);
     const astmode = useSelector(selectAstMode);
-    const outLogsSelector = useSelector(selectOutLogs);
-    const errLogsSelector = useSelector(selectErrLogs);
+    const compilationLogs = useSelector(selectCompilationLogs);
+    const runtimeLogs = useSelector(selectRuntimeLogs);
+    const outLogs = useSelector(selectOutLogs);
+    const errLogs = useSelector(selectErrLogs);
+
     const dispatch = useDispatch<AppDispatch>();
-    const [outLogsCount, setOutLogsCount] = useState(0);
-    const [errLogsCount, setErrLogsCount] = useState(0);
+    const [compilationLogsCount, setCompilationLogsCount] = useState(0);
+    const [runtimeLogsCount, setRuntimeLogsCount] = useState(0);
 
     useLayoutEffect(() => {
         dispatch(fetchOptions());
@@ -65,7 +73,7 @@ const MosaicApp = (): JSX.Element => {
         dispatch(fetchFeatures());
     }, []);
 
-    const handleTabChange = (newTab: 'output' | 'err'): void => {
+    const handleTabChange = (newTab: 'compilation' | 'runtime'): void => {
         setActiveTab(newTab);
     };
 
@@ -74,9 +82,19 @@ const MosaicApp = (): JSX.Element => {
     };
 
     useEffect(() => {
-        setOutLogsCount(outLogsSelector?.filter(el => !el?.isRead).length);
-        setErrLogsCount(errLogsSelector?.filter(el => !el?.isRead).length);
-    }, [outLogsSelector, errLogsSelector]);
+        const compilationUnread = [
+            ...(outLogs?.filter(el => !el?.isRead && (el.from === 'compileOut' || el.from === 'compileErr')) || []),
+            ...(errLogs?.filter(el => !el?.isRead && (el.from === 'compileOut' || el.from === 'compileErr')) || [])
+        ].length;
+
+        const runtimeUnread = [
+            ...(outLogs?.filter(el => !el?.isRead && (el.from === 'runOut' || el.from === 'runErr')) || []),
+            ...(errLogs?.filter(el => !el?.isRead && (el.from === 'runOut' || el.from === 'runErr')) || [])
+        ].length;
+
+        setCompilationLogsCount(compilationUnread);
+        setRuntimeLogsCount(runtimeUnread);
+    }, [outLogs, errLogs]);
 
     const header = useCallback((id: string): JSX.Element => {
         switch (id) {
@@ -100,28 +118,28 @@ const MosaicApp = (): JSX.Element => {
             case 'logs':
                 return (<Tabs
                     id="logs-tabs"
-                    onChange={(tabId): void => handleTabChange(tabId as 'output' | 'err')}
+                    onChange={(tabId): void => handleTabChange(tabId as 'compilation' | 'runtime')}
                     selectedTabId={activeTab}
                 >
-                    <Tab id="output" className={styles.tab}>
-                        Output
-                        {outLogsCount > 0 && <div className={styles.notif} />}
+                    <Tab id="compilation" className={styles.tab}>
+                        Compile
+                        {compilationLogsCount > 0 && <div className={styles.notif} />}
                     </Tab>
-                    <Tab id="err" className={styles.tab}>
-                        Error
-                        {errLogsCount > 0 && <div className={styles.notif} />}
+                    <Tab id="runtime" className={styles.tab}>
+                        Execute
+                        {runtimeLogsCount > 0 && <div className={styles.notif} />}
                     </Tab>
                 </Tabs>);
             default:
                 return <></>;
         }
-    }, [activeTab, outLogsCount, errLogsCount, astmode, isAstLoading]);
+    }, [activeTab, compilationLogsCount, runtimeLogsCount, astmode, isAstLoading]);
 
-    const handleClearOutLogs = (): void => {
-        dispatch(clearOutLogs());
+    const handleClearCompilationLogs = (): void => {
+        dispatch(clearCompilationLogs());
     };
-    const handleClearErrLogs = (): void => {
-        dispatch(clearErrLogs());
+    const handleClearRuntimeLogs = (): void => {
+        dispatch(clearRuntimeLogs());
     };
 
     const content = useCallback((title: string): JSX.Element => {
@@ -143,17 +161,17 @@ const MosaicApp = (): JSX.Element => {
             case 'Logs':
                 return (
                     <div className={styles.tabContent}>
-                                {activeTab === 'output' ? (
+                                {activeTab === 'compilation' ? (
                                     <LogsView
-                                        logArr={outLogsSelector}
-                                        logType='out'
-                                        clearFilters={handleClearOutLogs}
+                                        logArr={compilationLogs}
+                                        logType='compilation'
+                                        clearFilters={handleClearCompilationLogs}
                                     />
                                 ) : (
                                     <LogsView
-                                        logArr={errLogsSelector}
-                                        logType='err'
-                                        clearFilters={handleClearErrLogs}
+                                        logArr={runtimeLogs}
+                                        logType='runtime'
+                                        clearFilters={handleClearRuntimeLogs}
                                     />
                                 )}
                     </div>)
@@ -170,7 +188,7 @@ const MosaicApp = (): JSX.Element => {
             default:
                 return <h1>{title}</h1>
         }
-    }, [withDisasmRender, outLogsSelector, errLogsSelector, activeTab]);
+    }, [withDisasmRender, compilationLogs, runtimeLogs, activeTab]);
 
     return (
         <div

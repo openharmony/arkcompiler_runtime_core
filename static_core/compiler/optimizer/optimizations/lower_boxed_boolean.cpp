@@ -23,7 +23,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/ir/inst.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 namespace ark::compiler {
 

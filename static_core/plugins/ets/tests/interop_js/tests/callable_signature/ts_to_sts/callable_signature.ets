@@ -13,20 +13,56 @@
  * limitations under the License.
  */
 
-import {
-    callableInstance,
-} from 'main_js';
+let module = ESValue.load('main_js');
+let callableInstance = module.getProperty('callableInstance');
 
 const etsInt: int = 1;
 
 function checkCallableSignatureWithArg(): boolean {
-    const res = callableInstance(etsInt);
+    try {
+        if (callableInstance.isUndefined() || callableInstance.isNull() || !callableInstance.isFunction()) {
+            return false;
+        }
 
-    return res as Array<int> instanceof Array && res[0] as int == etsInt as int;
+        const res = callableInstance.invoke(ESValue.wrapInt(etsInt));
+
+        if (res.isUndefined() || res.isNull()) {
+            return false;
+        }
+
+        const unwrapped = res.unwrap();
+        if (!(unwrapped instanceof Array)) {
+            return false;
+        }
+
+        const firstElement = res.getProperty(0);
+        if (!firstElement.isNumber()) {
+            return false;
+        }
+
+        return firstElement.toNumber() == etsInt;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCallableSignatureWithoutArg(): boolean {
-    const res = callableInstance();
+    try {
+        if (callableInstance.isUndefined() || callableInstance.isNull() || !callableInstance.isFunction()) {
+            return false;
+        }
 
-    return res as Array<int> instanceof Array;
+        const res = callableInstance.invoke();
+
+        if (res.isUndefined() || res.isNull()) {
+            return false;
+        }
+
+        const unwrapped = res.unwrap();
+        return unwrapped instanceof Array;
+
+    } catch (e) {
+        return false;
+    }
 }

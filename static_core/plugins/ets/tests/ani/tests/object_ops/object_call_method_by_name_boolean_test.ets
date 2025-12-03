@@ -148,3 +148,9 @@ final class C extends B {
         }
     }
 }
+
+class CheckWrongSignature {
+    public method(a: String): boolean {
+        return true;
+    }
+}

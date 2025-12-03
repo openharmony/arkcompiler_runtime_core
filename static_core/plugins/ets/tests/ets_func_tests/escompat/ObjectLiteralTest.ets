@@ -39,7 +39,7 @@ function testObjectAssignKeys(): void {
 	}
 }
 
-function objEntriesComparator(l: [String, NullishType], r: [String, NullishType]): number {
+function objEntriesComparator(l: [String, Any], r: [String, Any]): number {
 	const lname = l[0]
 	const rname = r[0]
 
@@ -105,7 +105,7 @@ function testObjectAssignGetOwnPropNames(): void {
 }
 
 function main(): int {
-	const suite = new arktest.ArkTestsuite("Object literal of escompat.Record type tests")
+	const suite = new arktest.ArkTestsuite("Object literal of std.core.Record type tests")
 
 	suite.addTest("Object.assign(Record) result keys", testObjectAssignKeys)
 	suite.addTest("Object.assign(Record) result entries", testObjectAssignEntries)

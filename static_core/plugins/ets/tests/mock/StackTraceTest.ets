@@ -17,10 +17,8 @@ class StackTraceTest {
     public static invokeException(): void {
         try {
             StackTraceTest.nestedFunc1();
-        } catch (e: Error)  {
+        } catch (e)  {
             console.println(e.toString());
-        } catch (e) {
-            arktest.assertTrue(false, "Unexpected catch clause");
         }
     }
 

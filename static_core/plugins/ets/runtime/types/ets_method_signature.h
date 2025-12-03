@@ -16,10 +16,9 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_METHOD_SIGNATURE_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_METHOD_SIGNATURE_H_
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/include/method.h"
 #include "plugins/ets/runtime/types/ets_value.h"
-#include "plugins/ets/runtime/ani/ani_mangle.h"
 
 namespace ark::ets {
 
@@ -29,10 +28,9 @@ namespace ark::ets {
  */
 class EtsMethodSignature {
 public:
-    explicit EtsMethodSignature(const std::string_view sign, bool isANIFormat = false)
+    explicit EtsMethodSignature(const std::string_view sign)
     {
-        const PandaString signature = isANIFormat ? ani::Mangle::ConvertSignature(sign) : PandaString(sign);
-
+        auto signature = PandaString(sign);
         size_t dots = signature.find(':');
         // Return if ':' wasn't founded or was founded at the end
         if (dots == PandaString::npos || dots == signature.size() - 1) {
@@ -56,12 +54,20 @@ public:
         }
     }
 
-    bool IsValid()
+    explicit EtsMethodSignature(Method::Proto &&pandaProto, PandaSmallVector<PandaString> &&paramTypes)
+        : paramTypes_(std::move(paramTypes)), pandaProto_(std::move(pandaProto)), isValid_(true)
+    {
+        for (auto &paramType : paramTypes_) {
+            pandaProto_.GetRefTypes().push_back(paramType);
+        }
+    }
+
+    bool IsValid() const
     {
         return isValid_;
     }
 
-    Method::Proto &GetProto()
+    const Method::Proto &GetProto() const
     {
         return pandaProto_;
     }

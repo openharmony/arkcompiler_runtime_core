@@ -20,11 +20,11 @@ function main(): int {
     return suite.run(); 
 }
 
-type FuncType = (prevVal: number, curVal: number, idx: number, obj: Array<number>) => number;
+type FuncType = (prevVal: number, curVal: number, idx: int, obj: Array<number>) => number;
 
 class TestData {
     static arr = new Array<number>(1, 2, 3, 4, 5);
-    static readonly callbackfn: FuncType = (prevVal: number, curVal: number, idx: number, obj: Array<number>): number => {
+    static readonly callbackfn: FuncType = (prevVal: number, curVal: number, idx: int, obj: Array<number>): number => {
         TestData.arr.length = 2;
         return prevVal + curVal;
     }
@@ -33,7 +33,7 @@ class TestData {
 
 class TestData1 {
     static arr = new Array<number>(1, 2, 3, 4, 5);
-    static readonly callbackfn: FuncType = (prevVal: number, curVal: number, idx: number, obj: Array<number>): number => {
+    static readonly callbackfn: FuncType = (prevVal: number, curVal: number, idx: int, obj: Array<number>): number => {
         TestData1.arr.push(6,7,8);
         return prevVal + curVal;
     }

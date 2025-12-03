@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_PLATFORM_TYPES_H_
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types_defs.h"
 
 namespace ark::ets {
 
@@ -28,126 +29,29 @@ template <typename T>
 class EtsTypedObjectArray;
 
 // A set of types defined and used in platform implementation, owned by the VM
+// All the definitions are listed in ets_platform_types_defs.h
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class PANDA_PUBLIC_API EtsPlatformTypes {
 public:
-    // Classes should follow the common naming schema
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.09) macro expansion
+#define T(descr, name) EtsClass *name;
+// CC-OFFNXT(G.PRE.09) macro expansion
+#define I(descr, mname, msig, name) EtsMethod *name;
+// CC-OFFNXT(G.PRE.09) macro expansion
+#define S(descr, mname, msig, name) EtsMethod *name;
+    ETS_PLATFORM_TYPES_LIST(T, I, S)
+#undef T
+#undef I
+#undef S
+    // NOLINTEND(cppcoreguidelines-macro-usage)
 
     // Arity threshold for functional types
     static constexpr uint32_t CORE_FUNCTION_ARITY_THRESHOLD = 17U;
     static constexpr uint32_t ASCII_CHAR_TABLE_SIZE = 128;
 
-    /* Core runtime type system */
-    EtsClass *coreObject {};        // IsObjectClass
-    EtsClass *coreClass {};         // IsClassClass
-    EtsClass *coreString {};        // IsStringClass
-    EtsClass *coreLineString {};    // IsLineStringClass
-    EtsClass *coreSlicedString {};  // IsSlicedStringClass
-    EtsClass *coreTreeString {};    // IsTreeStringClass
-
-    /* ets numeric classes */
-    EtsClass *coreBoolean {};
-    EtsClass *coreByte {};
-    EtsClass *coreChar {};
-    EtsClass *coreShort {};
-    EtsClass *coreInt {};
-    EtsClass *coreLong {};
-    EtsClass *coreFloat {};
-    EtsClass *coreDouble {};
-
-    /* ets base language classes */
-    EtsClass *escompatBigint {};
-    EtsClass *escompatError {};
-    EtsClass *coreFunction {};
     std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctions {};
     std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctionRs {};
-    EtsClass *coreTuple {};
-    EtsClass *coreTupleN {};
-
-    /* Runtime linkage classes */
-    EtsClass *coreRuntimeLinker {};
-    EtsClass *coreBootRuntimeLinker {};
-    EtsClass *coreAbcRuntimeLinker {};
-    EtsClass *coreMemoryRuntimeLinker {};
-    EtsClass *coreAbcFile {};
-
-    /* Error handling */
-    EtsClass *coreOutOfMemoryError {};
-    EtsClass *coreException {};
-    EtsClass *coreStackTraceElement {};
-
-    /* StringBuilder */
-    EtsClass *coreStringBuilder {};
-
-    /* Concurrency classes */
-    EtsClass *corePromise {};
-    EtsClass *coreJob {};
-    EtsMethod *corePromiseSubscribeOnAnotherPromise {};
-    EtsClass *corePromiseRef {};
-    EtsClass *coreWaitersList {};
-    EtsClass *coreMutex {};
-    EtsClass *coreEvent {};
-    EtsClass *coreCondVar {};
-    EtsClass *coreQueueSpinlock {};
-    EtsClass *coreRWLock {};
-
-    /* Finalization */
-    EtsClass *coreFinalizableWeakRef {};
-    EtsClass *coreFinalizationRegistry {};
-    EtsMethod *coreFinalizationRegistryExecCleanup {};
-
-    /* Containers */
-    EtsClass *escompatArray {};
-    EtsMethod *escompatArrayPush {};
-    EtsMethod *escompatArrayPop {};
-    EtsClass *escompatArrayBuffer {};
-    EtsClass *escompatInt8Array {};
-    EtsClass *escompatUint8Array {};
-    EtsClass *escompatUint8ClampedArray {};
-    EtsClass *escompatInt16Array {};
-    EtsClass *escompatUint16Array {};
-    EtsClass *escompatInt32Array {};
-    EtsClass *escompatUint32Array {};
-    EtsClass *escompatFloat32Array {};
-    EtsClass *escompatFloat64Array {};
-    EtsClass *escompatBigInt64Array {};
-    EtsClass *escompatBigUint64Array {};
-    EtsClass *containersArrayAsListInt {};
-    EtsClass *escompatRecord {};
-    EtsMethod *escompatRecordGetter {};
-    EtsMethod *escompatRecordSetter {};
-
-    /* InteropJS */
-    EtsClass *interopJSValue {};
-
-    /* TypeAPI */
-    EtsClass *coreField {};
-    EtsClass *coreMethod {};
-    EtsClass *coreTypeAPIParameter {};
-    EtsClass *coreClassType {};
-
-    EtsClass *reflectInstanceField {};
-    EtsClass *reflectInstanceMethod {};
-    EtsClass *reflectStaticField {};
-    EtsClass *reflectStaticMethod {};
-    EtsClass *reflectConstructor {};
-
-    /* Proxy */
-    EtsClass *coreReflectProxy {};
-    EtsMethod *coreReflectProxyConstructor {};
-    EtsMethod *coreReflectProxyInvoke {};
-    EtsMethod *coreReflectProxyInvokeSet {};
-    EtsMethod *coreReflectProxyInvokeGet {};
-
-    /* escompat.Process */
-    EtsClass *escompatProcess {};
-    EtsMethod *escompatProcessListUnhandledJobs {};
-    EtsMethod *escompatProcessListUnhandledPromises {};
-
-    EtsClass *escompatRegExpExecArray {};
-    EtsClass *escompatJsonReplacer {};
-    EtsClass *escompatErrorOptions {};
-    EtsClass *escompatErrorOptionsImpl {};
 
     struct Entry {
         size_t slotIndex {};
@@ -156,34 +60,46 @@ public:
     /* Internal Caches */
     void CreateAndInitializeCaches();
     void VisitRoots(const GCRootVisitor &visitor) const;
-    void UpdateCachesVmRefs(const GCRootUpdater &updater) const;
     EtsTypedObjectArray<EtsString> *GetAsciiCacheTable() const
     {
         return asciiCharCache_;
     }
     Entry const *GetTypeEntry(const uint8_t *descriptor) const;
 
-    EtsClass *escompatMap {};
-    EtsClass *escompatMapEntry {};
+    // Managed object caches:
+    static constexpr uint32_t GetAsciiCharCacheSize()
+    {
+        return ASCII_CHAR_TABLE_SIZE;
+    }
+    static constexpr size_t GetAsciiCharCacheOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, asciiCharCache_);
+    }
 
-public:
-    static constexpr size_t GetCoreLongTypeOffset()
+    // Class entry offsets:
+    static constexpr size_t GetEscompatArrayClassOffset()
     {
-        return MEMBER_OFFSET(EtsPlatformTypes, coreLong);
+        return MEMBER_OFFSET(EtsPlatformTypes, escompatArray);
     }
-    static constexpr size_t GetCoreFloatTypeOffset()
+    static constexpr size_t GetCoreLineStringClassOffset()
     {
-        return MEMBER_OFFSET(EtsPlatformTypes, coreFloat);
+        return MEMBER_OFFSET(EtsPlatformTypes, coreLineString);
     }
-    static constexpr size_t GetCoreDoubleTypeOffset()
+    static constexpr size_t GetCoreSlicedStringClassOffset()
     {
-        return MEMBER_OFFSET(EtsPlatformTypes, coreDouble);
+        return MEMBER_OFFSET(EtsPlatformTypes, coreSlicedString);
+    }
+    static constexpr size_t GetCoreTreeStringClassOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreTreeString);
     }
 
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
-    mutable EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
+    // asciiCharCache_ must be allocated in a non-movable heap region; therefore, we should need to handle
+    // this pointer in `ark::ets::PandaEtsVM::UpdateVmRefs`.
+    EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
     void PreloadType(EtsClassLinker *linker, EtsClass **slot, std::string_view descriptor);
     PandaUnorderedMap<const uint8_t *, Entry, utf::Mutf8Hash, utf::Mutf8Equal> entryTable_;
 

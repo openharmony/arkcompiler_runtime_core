@@ -20,6 +20,7 @@ set(linker_tests
     # end #17626
     implements_basic
     implements_variance
+    itf_resolution
     override_abstract
     override_basic
     variance
@@ -114,10 +115,7 @@ function(test_runtime_linker_extensions test)
     panda_target_include_directories(${native_lib} PRIVATE
         ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
         ${PANDA_ROOT}
-        ${PANDA_ROOT}/libpandabase
-        ${CMAKE_BINARY_DIR}/libpandabase
-        ${PANDA_BINARY_ROOT}
-        ${PANDA_BINARY_ROOT}/libpandabase/generated)
+        ${PANDA_BINARY_ROOT})
     panda_target_link_libraries(${native_lib}
         arkbase
         arkfile
@@ -133,11 +131,15 @@ function(test_runtime_linker_extensions test)
         ADDITIONAL_ABC_FILES=${additional_abc_files}
         ${PANDA_RUN_PREFIX})
 
-    add_custom_target(additional_dependencies DEPENDS ${compilations_targets_list} ${native_lib})
-    add_linker_test(${test} additional_dependencies
+    add_custom_target(${test}-add-deps DEPENDS ${compilations_targets_list} ${native_lib})
+    # Note that some functions must be deliberately not inlined due to tests purposes.
+    # For more information please refer to definitions of those methods
+    add_linker_test(${test} ${test}-add-deps
         SKIP_ARM32_COMPILER
-        # issues:22179: remove "--verification-mode=disabled" option after fix
-        RUNTIME_EXTRA_OPTIONS "--compiler-inlining-blacklist=${test}.Test::createWeakRef" "--verification-mode=disabled")
+        RUNTIME_EXTRA_OPTIONS
+        "--compiler-inlining-blacklist='${test}.Test::createReferencedLinker,${test}.Test::createUnreferencedLinker'"
+        "--verification-mode=disabled" # issues:22179: remove "--verification-mode=disabled" option after fix
+        )
 
 endfunction()
 
@@ -170,3 +172,39 @@ endfunction()
 
 test_app_linker_context_exception(ets_app_linker_context_tests ${linker_tests_out_dir})
 add_dependencies(ets_tests ets_app_linker_context_tests)
+
+# Test case showing how AbcRuntimeLinker can be used for basic mocking
+function(test_mock_linker test)
+    set(mock_app_sources
+        "${linker_tests_in_dir}/mock_linker/app.ets"
+        "${linker_tests_in_dir}/mock_linker/a.ets"
+        "${linker_tests_in_dir}/mock_linker/mock_a.ets")
+
+    set(abc_dir "${linker_tests_out_dir}/mock_linker")
+    set(app_abc_files_list "")
+    set(compilations_targets_list "")
+
+    foreach(ets_source ${mock_app_sources})
+        get_filename_component(src_filename ${ets_source} NAME)
+        set(output_abc ${abc_dir}/${src_filename}.abc)
+        list(APPEND app_abc_files_list ${output_abc})
+
+        set(compilation_target ${test}-${src_filename}-ets-es2panda)
+        list(APPEND compilations_targets_list ${compilation_target})
+        compile_ets_code(${ets_source} ${output_abc} ${compilation_target})
+    endforeach()
+
+    # Run prefix with list of ABC files
+    list(JOIN app_abc_files_list ":" app_abc_files)
+    set(PANDA_RUN_PREFIX
+        APP_ABC_FILES=${app_abc_files}
+        ${PANDA_RUN_PREFIX})
+
+    add_custom_target(${test}-add-deps DEPENDS ${compilations_targets_list})
+    add_linker_test(${test} ${test}-add-deps
+        SKIP_ARM32_COMPILER
+        RUNTIME_EXTRA_OPTIONS
+        )
+endfunction()
+
+test_mock_linker(mock_runtime_linker)

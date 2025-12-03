@@ -17,7 +17,11 @@ package std.concurrency;
 
 import { launch } from "std/concurrency"
 
-/// This class provides api for sync primitives (see SyncPrimitives.ets)
+/**
+ * @class provides api for sync primitives (see SyncPrimitives.ets)
+ *
+ * @internal
+ */
 final class ConcurrencyHelpers {
     // Mutex api
     public static native mutexCreate(): Object;
@@ -27,10 +31,24 @@ final class ConcurrencyHelpers {
     public static native eventCreate(): Object;
     public static native eventWait(event: Object): void;
     public static native eventFire(event: Object): void;
+    // CondVar api
+    public static native condVarCreate(): Object;
+    public static native condVarWait(condVar: Object, mutex: Object): void;
+    public static native condVarNotifyOne(condVar: Object, mutex: Object): void;
+    public static native condVarNotifyAll(condVar: Object, mutex: Object): void;
     // Spinlock api
     public static native spinlockCreate(): Object;
     public static spinlockGuard(spinlock: Object, callback: () => void) {
         ConcurrencyHelpers.spinlockGuard(spinlock, callback as Object);
+    }
+
+    public static lockGuard(mutex: Object, callback: () => void): void {
+        ConcurrencyHelpers.mutexLock(mutex);
+        try {
+            callback();
+        } finally {
+            ConcurrencyHelpers.mutexUnlock(mutex);
+        }
     }
 
     private static native spinlockGuard(spinlock: Object, callback: Object): void;

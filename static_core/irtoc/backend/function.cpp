@@ -16,6 +16,7 @@
 #include "function.h"
 #include "compiler/codegen_boundary.h"
 #include "compiler/codegen_fastpath.h"
+#include "compiler/codegen_nativeplus.h"
 #include "compiler/codegen_interpreter.h"
 #include "compiler/optimizer_run.h"
 #include "compiler/dangling_pointers_checker.h"
@@ -211,6 +212,9 @@ std::string_view Function::GraphModeToString()
     if (GetGraph()->GetMode().IsNative()) {
         return "native";
     }
+    if (GetGraph()->GetMode().IsNativePlus()) {
+        return "native_plus";
+    }
     UNREACHABLE();
 }
 #endif
@@ -333,6 +337,11 @@ static bool RunIrtocOptimizations(Graph *graph)
         }
     } else if (graph->GetMode().IsBoundary()) {
         if (!graph->RunPass<compiler::CodegenBoundary>()) {
+            LOG(FATAL, IRTOC) << "RunOptimizations failed: code generation error";
+            return false;
+        }
+    } else if (graph->GetMode().IsNativePlus()) {
+        if (!graph->RunPass<compiler::CodegenNativePlus>()) {
             LOG(FATAL, IRTOC) << "RunOptimizations failed: code generation error";
             return false;
         }

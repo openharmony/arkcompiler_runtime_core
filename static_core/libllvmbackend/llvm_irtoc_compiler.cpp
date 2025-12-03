@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "compiler/code_info/code_info.h"
 #include "compiler/optimizer/code_generator/relocations.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #include "optimizer/ir/graph.h"
 #include "runtime/include/method.h"
 #include "compiler_options.h"

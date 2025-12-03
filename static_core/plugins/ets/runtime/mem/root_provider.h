@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_MEM_ROOT_PROVIDER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_MEM_ROOT_PROVIDER_H
 
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/mem/mem.h"
 
 namespace ark::mem {
 

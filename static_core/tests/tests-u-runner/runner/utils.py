@@ -212,3 +212,6 @@ def compare_files(files: List[Path]) -> bool:
         if not cmp(f1, f2):
             return False
     return True
+
+def unlines(lines: Iterable[str]) -> str:
+    return ''.join(line+"\n" for line in lines)

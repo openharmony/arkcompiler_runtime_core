@@ -16,7 +16,6 @@
 
 import os
 import shutil
-import stat
 import argparse
 from pathlib import Path
 

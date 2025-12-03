@@ -19,11 +19,29 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <functional>
+
+#include "libarkbase/macros.h"
 
 namespace ark::default_target_options {
-uint32_t GetGcWorkersCount(const std::map<std::string, uint32_t> &modelMap);
 
-uint32_t GetTaskmanagerWorkersCount(const std::map<std::string, uint32_t> &modelMap);
+using TargetGetterCallback = std::function<std::string()>;
+
+std::string GetTargetString();
+
+template <class ModelMap>
+static typename ModelMap::mapped_type GetTargetSpecificOptionValue(const ModelMap &modelMap,
+                                                                   const TargetGetterCallback &getTargetString)
+{
+    std::string model = getTargetString();
+    if (modelMap.count(model) != 0) {
+        return modelMap.at(model);
+    }
+    if (modelMap.count("default") != 0) {
+        return modelMap.at("default");
+    }
+    UNREACHABLE();
+}
 
 bool GetCoverageEnable();
 

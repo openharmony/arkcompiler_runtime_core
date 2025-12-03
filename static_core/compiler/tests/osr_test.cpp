@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "unit_test.h"
 #include "code_info/code_info_builder.h"
 #include "codegen.h"
 #include "panda_runner.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #include <fstream>
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::test {
 class OsrTest : public testing::Test {
@@ -181,6 +181,7 @@ TEST_F(OsrTest, OsrAfterIFrameOptimizing)
 static constexpr auto OSR_AFTER_IFRAME_RESTORE_ACC_AFTER_VOID = R"(
     .function i32 main() {
         call f1
+        ldai 0x0
         return
     }
 

@@ -18,13 +18,14 @@
 #include "objects/base_object.h"
 #include "objects/string/base_string-inl.h"
 
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/utils/hash.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/utils/hash.h"
+#include "libarkbase/utils/span.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/runtime.h"
 #include "runtime/handle_base-inl.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/include/flattened_string_cache.h"
 
 namespace ark::coretypes {
 
@@ -38,7 +39,7 @@ String *FlatStringInfo::SlowFlatten(VMHandle<String> &str, const LanguageContext
     bool compressed = str->IsUtf8();
     auto thread = ManagedThread::GetCurrent();
 
-    String *result = String::AllocLineStringObject(length, compressed, ctx, vm);
+    String *result = String::AllocLineStringObject(thread, length, compressed, ctx, vm);
     if (result == nullptr) {
         return nullptr;
     }
@@ -103,6 +104,14 @@ String *FlatStringInfo::SlowFlattenWithNativeMemory(VMHandle<String> &str, const
 FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, const LanguageContext &ctx,
                                                  bool withNativeMemory)
 {
+    auto *thread = ManagedThread::GetCurrent();
+    VMHandle<coretypes::Array> cache(thread, coretypes::Array::Cast(thread->GetFlattenedStringCache()));
+    auto *cachedFlatStr = FlattenedStringCache::Get(cache.GetPtr(), treeStr.GetPtr());
+    // cache hitted
+    if (cachedFlatStr != nullptr) {
+        return FlatStringInfo(cachedFlatStr, 0, cachedFlatStr->GetLength());
+    }
+
     common::TreeString *treeString = treeStr->ToTreeString();
     auto readBarrier = [](void *obj, size_t offset) {
         return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
@@ -112,13 +121,24 @@ FlatStringInfo FlatStringInfo::FlattenTreeString(VMHandle<String> &treeStr, cons
             return reinterpret_cast<common::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
-        // NOLINTNEXTLINE(modernize-use-auto)
-        common::BaseString *first = treeString->GetLeftSubString<common::BaseString *>(std::move(readBarrierLeft));
-        return FlatStringInfo(String::Cast(first), 0, treeString->GetLength());
+        auto *first = String::Cast(treeString->GetLeftSubString<common::BaseString *>(std::move(readBarrierLeft)));
+        FlattenedStringCache::Update(cache.GetPtr(), treeStr.GetPtr(), first);
+        return FlatStringInfo(first, 0, treeString->GetLength());
     }
 
-    String *s = withNativeMemory ? SlowFlattenWithNativeMemory(treeStr, ctx) : SlowFlatten(treeStr, ctx);
-    return FlatStringInfo(s, 0, s->GetLength(), withNativeMemory);
+    // cached missed , no need to cache native memory string
+    if (withNativeMemory) {
+        String *s = SlowFlattenWithNativeMemory(treeStr, ctx);
+        return FlatStringInfo(s, 0, s->GetLength(), true);
+    }
+
+    // cache it
+    String *s = SlowFlatten(treeStr, ctx);
+    // check for OOME
+    if (s != nullptr) {
+        FlattenedStringCache::Update(cache.GetPtr(), treeStr.GetPtr(), s);
+    }
+    return FlatStringInfo(s, 0, treeStr->GetLength());
 }
 
 /* static */

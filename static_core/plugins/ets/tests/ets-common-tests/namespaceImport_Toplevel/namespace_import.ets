@@ -14,7 +14,8 @@
  */
 
 /*---
-  files: [namespace_export.ets, MyUtil.ets]
+  files: [MyUtil.ets]
+  files: [namespace_export.ets]
 ---*/
 
 import MyUtil from './MyUtil';
@@ -22,11 +23,11 @@ import * as compareSpecFunc from './namespace_export';
 
 class MyPriKey implements MyUtil.PriKey {
     public privateKey: string;
-    
+
     constructor(privateKey: string) {
         this.privateKey = privateKey;
     }
-    
+
     getKey(key: string): string {
         if (key === this.privateKey) {
             return 'correct';
@@ -38,11 +39,11 @@ class MyPriKey implements MyUtil.PriKey {
 
 class MyPubKey implements MyUtil.PubKey {
     public publicKey: string;
-    
+
     constructor(publicKey: string) {
         this.publicKey = publicKey;
     }
-    
+
     getKey(key: string): string {
         if (key === this.publicKey) {
             return 'correct';

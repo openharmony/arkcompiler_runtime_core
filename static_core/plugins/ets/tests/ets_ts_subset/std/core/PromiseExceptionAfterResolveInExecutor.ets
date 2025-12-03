@@ -15,8 +15,8 @@
 
 class Thenable implements PromiseLike<string> {
     then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
-            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
-        return Promise.resolve(onFulfilled!('abc'));
+            (error: Error) => E | PromiseLike<E>): PromiseLike<Awaited<U|E>> {
+        return Promise.resolve(onFulfilled!('abc')) as PromiseLike<Awaited<U|E>>;
     }
 };
 
@@ -27,10 +27,10 @@ function executor(resolve: (value: string | PromiseLike<string>) => void): void 
 
 new Promise<string>(executor).then<void, void>((value: string): void => {
     if (value != 'abc') {
-        console.log('Test failed. Expected value \'abc\' but got ' + value + '.');
+        console.error('Test failed. Expected value \'abc\' but got ' + value + '.');
         return;
     }
     console.log('Test passed.');
 }, (error: Error): void => {
-    console.log('Test failed. The promise should not be rejected.');
+    console.error('Test failed. The promise should not be rejected.');
 });

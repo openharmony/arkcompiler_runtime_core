@@ -69,10 +69,13 @@ function testSetValueAtLeftExceededIndex() {
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 2. Received value is: -1") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 2. Received value is: -1" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {lightWeightMap.setValueAt(-1, 777)}, exceptionCheck);
     arktest.expectThrow(() => {lightWeightMap.getValueAt(-1)}, exceptionCheck);
@@ -83,10 +86,13 @@ function testSetValueAtRightExceededIndex() {
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 2. Received value is: 6") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 2. Received value is: 6" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {lightWeightMap.setValueAt(6, 777)}, exceptionCheck);
     arktest.expectThrow(() => {lightWeightMap.getValueAt(6)}, exceptionCheck);
@@ -94,9 +100,11 @@ function testSetValueAtRightExceededIndex() {
 
 function testSetValueAtIndexOfEmptyMap() {
     let lightWeightMap: LightWeightMap<string, double> = new LightWeightMap<string, double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty";
+        }
+        return false;
     }
     arktest.expectThrow(() => {lightWeightMap.setValueAt(6, 777)}, exceptionCheck);
     arktest.expectThrow(() => {lightWeightMap.getValueAt(6)}, exceptionCheck);

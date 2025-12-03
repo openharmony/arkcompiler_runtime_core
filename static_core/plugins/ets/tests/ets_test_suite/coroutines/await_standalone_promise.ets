@@ -19,7 +19,7 @@ async function testAwaitStandalonePromise(): Promise<void> {
                           from the expected value. Actual value: ' + value);
     try {
         await Promise.reject(new Error('Panda'));
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertTrue(err.toString().contains('Panda', 0), 'Awaited value of rejected promise is different\
                                                           from the expected value. Actual value: ' + err);
     }

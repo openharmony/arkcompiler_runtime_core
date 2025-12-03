@@ -19,8 +19,8 @@
 #include <atomic>
 #include <csignal>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/os/pipe.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/pipe.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/mem/panda_containers.h"

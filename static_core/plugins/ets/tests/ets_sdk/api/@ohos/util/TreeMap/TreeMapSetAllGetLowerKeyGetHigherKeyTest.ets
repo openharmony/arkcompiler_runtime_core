@@ -14,6 +14,7 @@
  */
 
 import TreeMap from "@ohos.util.TreeMap";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeMap SetAll GetLowerKey GetHigherKey API tests")
@@ -131,23 +132,41 @@ function testSetAllToNonEmptyMap() {
 //Test cases ported from ArkTS 1.0:TREEMAP_5400
 function testGetLowerKeyEmptyStringOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
-    let result = treeMap.getLowerKey("");
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeMap.getLowerKey("");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5700
 function testGetLowerKeyNonExistingKeyOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
-    let result = treeMap.getLowerKey("key");
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeMap.getLowerKey("key");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5800
 function testGetLowerKeyWithOnlyKeyInMap() {
     let treeMap = new TreeMap<string, double>();
     treeMap.set("squirrel", 123);
-    let result = treeMap.getLowerKey("squirrel");
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeMap.getLowerKey("squirrel");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_5900
@@ -175,23 +194,41 @@ function testGetLowerKeyNonExistingKeyWithLower() {
 //Test cases ported from ArkTS 1.0:TREEMAP_6100
 function testGetHigherKeyEmptyStringOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
-    let result = treeMap.getHigherKey("");
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeMap.getHigherKey("");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6400
 function testGetHigherKeyNonExistingKeyOnEmptyMap() {
     let treeMap = new TreeMap<string, double>();
-    let result = treeMap.getHigherKey('key');
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeMap.getHigherKey('key');
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6500
 function testGetHigherKeyWithOnlyKeyInMap() {
     let treeMap = new TreeMap<string, double>();
     treeMap.set("AAA", 123);
-    let result = treeMap.getHigherKey('AAA');
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeMap.getHigherKey('AAA');
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREEMAP_6600

@@ -12,6 +12,15 @@ Before starting, ensure you have the following tools installed:
 
 ## Local Development
 
+### Backend port
+If the backend is running on a different port (this is the case if you are not using the Docker setup) then you need to modify `public/env.js`, for example:
+
+```js
+window.runEnv = {
+   apiUrl: 'http://localhost:8000/',
+};
+```
+
 ### Installing Dependencies
 
 Install the dependencies:
@@ -35,6 +44,8 @@ To start the application in development mode:
    ```
 
    The application will be available at: `http://localhost:3000`
+
+   You don't need to restart it for most changes, the server supports live reloading of changed source files.
 
 ### Testing the Application
 

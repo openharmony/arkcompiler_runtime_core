@@ -22,11 +22,11 @@ import os
 import pytest  # type: ignore
 from unittest import TestCase
 from pathlib import Path
-from vmb.shell import ShellUnix, ShellResult, ShellHdc
+from vmb.shell import ShellHost, ShellResult, ShellHdc
 from vmb.unit import BenchUnit
 
 here = os.path.realpath(os.path.dirname(__file__))
-sh = ShellUnix()
+sh = ShellHost()
 
 
 def posix_only(f):
@@ -90,3 +90,10 @@ def test_hilog_output() -> None:
     bu.parse_run_output(res)
     assert_eq(bu.result.execution_forks[0].avg_time, 9.6343)
     assert_eq(bu.result.name, 'testTwo')
+
+
+def test_file_size():
+    t = TestCase()
+    t.assertEqual(0, sh.get_filesize('/some/unexising/path'),
+                  "Unexisting file returns zero size")
+    t.assertGreater(sh.get_filesize(os.path.realpath(__file__)), 0)

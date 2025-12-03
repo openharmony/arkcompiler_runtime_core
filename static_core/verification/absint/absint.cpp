@@ -15,7 +15,7 @@
 
 #include "absint.h"
 #include "exec_context.h"
-#include "file_items.h"
+#include "libarkfile/file_items.h"
 #include "include/thread_scopes.h"
 #include "plugins.h"
 #include "verification_context.h"
@@ -30,7 +30,7 @@
 #include "runtime/include/method.h"
 #include "runtime/include/method-inl.h"
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 #include <locale>
 #include <optional>

@@ -17,13 +17,14 @@
 
 #include "include/coretypes/string.h"
 #include "include/object_header.h"
-#include "libpandafile/shorty_iterator.h"
+#include "libarkfile/shorty_iterator.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_runtime_interface.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
@@ -482,14 +483,10 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Metho
     UNREACHABLE();
 }
 
-extern "C" coretypes::String *CreateStringFromCharCodeEntrypoint(ObjectHeader *array)
+extern "C" coretypes::String *CreateStringFromCharCodeSingleNoCacheEntrypoint(uint64_t charCode)
 {
-    auto *charCodes = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(array));
-    return EtsString::CreateNewStringFromCharCode(charCodes->GetData(), charCodes->GetActualLength())->GetCoreType();
-}
-
-extern "C" coretypes::String *CreateStringFromCharCodeSingleEntrypoint(uint64_t charCode)
-{
+    // We could use `ark::ets::intrinsics::StdCoreStringFromCharCodeSingle` as the entrypoint, it works, but
+    // that function lookups the char code in the cache while we are sure the char code is not cached.
     return EtsString::CreateNewStringFromCharCode(bit_cast<double>(charCode))->GetCoreType();
 }
 
@@ -504,7 +501,9 @@ extern "C" int32_t WriteStringToMem(int64_t buf, ObjectHeader *s)
             return -1;
         }
     } else {
-        if (memcpy_s(addr, size, str->GetDataMUtf8(), size) != 0) {
+        PandaVector<uint8_t> tree8Buf;
+        if (memcpy_s(addr, size, str->IsTreeString() ? str->GetTreeStringDataMUtf8(tree8Buf) : str->GetDataMUtf8(),
+                     size) != 0) {
             return -1;
         }
     }
@@ -520,6 +519,21 @@ extern "C" ObjectHeader *CreateStringFromMem(int64_t buf, int32_t len)
 extern "C" int32_t GetStringSizeInBytes(ObjectHeader *str)
 {
     return reinterpret_cast<EtsString *>(str)->GetUtf8Length();
+}
+
+extern "C" bool SameValueZeroEntrypoint(ObjectHeader *o1, ObjectHeader *o2)
+{
+    return ark::ets::intrinsics::helpers::SameValueZero(EtsCoroutine::GetCurrent(), EtsObject::FromCoreType(o1),
+                                                        EtsObject::FromCoreType(o2));
+}
+
+extern "C" uint8_t EtsStringEqualsEntrypoint(coretypes::String *str1, coretypes::String *str2)
+{
+    // We could use `ark::ets::intrinsics::StdCoreStringEquals` as the entrypoint, it works, but
+    // `ark::ets::intrinsics::StdCoreStringEquals` repeats the checks that the irtoc implementation
+    // of the intrinsic has already performed: whether both pointers contain the same memory address
+    // as well as for whether the pointees are actually strings.
+    return ToEtsBoolean(EtsString::FromCoreType(str1)->Compare(EtsString::FromCoreType(str2)) == 0);
 }
 
 }  // namespace ark::ets

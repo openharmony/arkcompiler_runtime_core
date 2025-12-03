@@ -22,14 +22,14 @@
 #include <string>
 #include <vector>
 
-#include <libpandafile/include/source_lang_enum.h>
+#include <libarkfile/include/source_lang_enum.h>
 
 #include "include/mem/panda_smart_pointers.h"
 #include "jit/profile_saver_worker.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/utils/expected.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/external_callback_poster.h"
@@ -59,13 +59,14 @@
 #include "plugins/ets/runtime/mem/ets_gc_stat.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "plugins/ets/runtime/ani/ani.h"
+#include "plugins/ets/runtime/ani/verify/ani_verifier.h"
 #include "plugins/ets/runtime/ets_native_library_provider.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/mem/root_provider.h"
 #include "plugins/ets/runtime/ets_object_state_table.h"
-#include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
+#include "plugins/ets/runtime/ets_stdlib_cache.h"
 #include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
 
 namespace ark::ets {
@@ -74,6 +75,7 @@ class FloatToStringCache;
 class LongToStringCache;
 class EtsAbcRuntimeLinker;
 class EtsFinalizableWeakRef;
+class FinalizationRegistryManager;
 
 using WalkEventLoopCallback = std::function<void(void *, void *)>;
 
@@ -107,6 +109,7 @@ public:
     void StopGC() override;
     void VisitVmRoots(const GCRootVisitor &visitor) override;
     void UpdateVmRefs(const GCRootUpdater &gcRootUpdater) override;
+    void SweepVmRefs(const GCObjectVisitor &gcObjectVisitor) override;
     void UninitializeThreads() override;
 
     void HandleReferences(const GCTask &task, const mem::GC::ReferenceClearPredicateT &pred) override;
@@ -247,6 +250,11 @@ public:
         return saverWorker_;
     }
 
+    const StdlibCache *GetStdlibCache() const
+    {
+        return stdLibCache_.get();
+    }
+
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
     PANDA_PUBLIC_API ObjectHeader *GetNullValue() const;
@@ -291,6 +299,16 @@ public:
         return aniBindMutex_;
     }
 
+    bool IsVerifyANI() const
+    {
+        return aniVerifier_.get() != nullptr;
+    }
+
+    ani::verify::ANIVerifier *GetANIVerifier()
+    {
+        return aniVerifier_.get();
+    }
+
     os::memory::Mutex &GetAtomicsMutex()
     {
         return atomicsMutex_;
@@ -321,8 +339,10 @@ public:
         return MEMBER_OFFSET(PandaEtsVM, doubleToStringCache_);
     }
 
-    void RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object, void (*finalizer)(void *),
-                                    void *finalizerArg);
+    EtsFinalizableWeakRef *RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,
+                                                      void (*finalizer)(void *), void *finalizerArg);
+
+    bool UnregisterFinalizerForObject(EtsCoroutine *coro, EtsFinalizableWeakRef *object);
 
     void CleanFinalizableReferenceList();
 
@@ -404,7 +424,7 @@ public:
     ClassLinkerContext *CreateApplicationRuntimeLinker(const PandaVector<PandaString> &abcFiles);
 
     /// @brief print stack and exit the program
-    [[noreturn]] void HandleUncaughtException() override;
+    void HandleUncaughtException() override;
 
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
@@ -453,6 +473,7 @@ private:
     os::memory::Mutex rootProviderlock_;
     PandaUnorderedSet<mem::RootProvider *> rootProviders_ GUARDED_BY(rootProviderlock_);
     os::memory::Mutex aniBindMutex_;
+    PandaUniquePtr<ani::verify::ANIVerifier> aniVerifier_;
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
     // for JS Atomics
@@ -466,6 +487,7 @@ private:
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;
     WalkEventLoopFunction walkEventLoop_ = nullptr;
+    PandaUniquePtr<StdlibCache> stdLibCache_ {nullptr};
 
     size_t preForkWorkerCount_ = 0;
 

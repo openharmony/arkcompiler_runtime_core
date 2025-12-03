@@ -23,7 +23,7 @@ function main(): int {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
     const d{{loop.index}}: {{c.to_type}} = s{{loop.index}}
-    if (! {{c.to_type}}.isNaN(d{{loop.index}}.unboxed())) {
+    if (! {{c.to_type}}.isNaN(d{{loop.index}})) {
         return 1
     }
 {%- endfor %}

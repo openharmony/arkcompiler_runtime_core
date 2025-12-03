@@ -87,3 +87,16 @@ cases:
           let a: int[] = [800000, 80000, 8000, 800, 80, 8]
           arktest.assertEQ( a.sum(), 888888 )
 
+    # 6. Extension function for Array class with generic type
+    - decl: |-
+          function foo<T>(this: Array<Int>, el: int): T {
+              return this[el] as T
+          }
+          
+          function bar<B>(this: Array<Int>, el: int): B {
+              return this.foo<B>(el) 
+          }
+      use: |-
+          let x: Array<Int> = [1, 2]
+          arktest.assertEQ(x.bar<int>(0), 1)
+          arktest.assertEQ(x.bar<int>(1), 2)

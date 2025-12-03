@@ -17,8 +17,8 @@
 desc: The exception extends to the surrounding scope if no catch clause can handle the exception.
 ---*/
 
-class Ex extends Exception {}
-class F extends Exception {}
+class Ex extends Error {}
+class F extends Error {}
 
 function main(): int {
     try {

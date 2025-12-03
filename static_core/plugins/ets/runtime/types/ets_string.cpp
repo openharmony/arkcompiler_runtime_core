@@ -15,6 +15,9 @@
 
 #include "plugins/ets/runtime/types/ets_string.h"
 
+#include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
+
 namespace ark::ets {
 
 /* static */
@@ -94,50 +97,6 @@ EtsString *EtsString::CreateFromUtf16(const EtsChar *utf16, EtsInt length)
     coretypes::LineString *s =
         coretypes::LineString::CreateFromUtf16(utf16, length, ctx, Runtime::GetCurrent()->GetPandaVM());
     return reinterpret_cast<EtsString *>(s);
-}
-
-/* static */
-EtsString *EtsString::CreateNewStringFromCharCode(CharCodeArray *charCodes, size_t actualLength)
-{
-    if (actualLength == 0) {
-        return CreateNewEmptyString();
-    }
-
-    // allocator may trig gc and move the 'charCodes' array, need to hold it
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle arrayHandle(coroutine, charCodes);
-
-    auto isCompressed = [actualLength](CharCodeArray *codes) -> bool {
-        if (!Runtime::GetOptions().IsRuntimeCompressedStringsEnabled()) {
-            return false;
-        }
-
-        for (size_t i = 0; i < actualLength; ++i) {
-            if (!IsASCIICharacter(
-                    // CC-OFFNXT(G.FMT.06-CPP) project code style
-                    CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue()))) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    auto copyCharsIntoString = [actualLength](CharCodeArray *codes, auto *dstData) {
-        Span<std::remove_pointer_t<decltype(dstData)>> to(dstData, actualLength);
-        for (size_t i = 0; i < actualLength; ++i) {
-            to[i] = CodeToChar(EtsBoxPrimitive<EtsDouble>::FromCoreType(codes->Get(i))->GetValue());
-        }
-    };
-
-    bool compress = isCompressed(arrayHandle.GetPtr());
-    EtsString *s = AllocateNonInitializedString(actualLength, compress);
-    if (compress) {
-        copyCharsIntoString(arrayHandle.GetPtr(), s->GetDataMUtf8());
-    } else {
-        copyCharsIntoString(arrayHandle.GetPtr(), s->GetDataUtf16());
-    }
-    return s;
 }
 
 /* static */

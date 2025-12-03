@@ -17,7 +17,7 @@
 #include "ets_class_linker_extension.h"
 #include "ets_to_string_cache.h"
 #include "ets_intrinsics_helpers.h"
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/mem/mem.h"
 
 namespace ark::ets::detail {
 

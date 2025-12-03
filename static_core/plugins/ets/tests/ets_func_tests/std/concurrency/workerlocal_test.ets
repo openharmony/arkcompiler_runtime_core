@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
-function test_init() {
+ /*---
+    tags: [no-warmup]
+ ---*/
+
+function testInit() {
     let str = 'workerLocal';
     let wl = new WorkerLocal<string>(() => str);
     arktest.assertEQ(wl.get(), str);
@@ -29,44 +33,35 @@ function test_init() {
     arktest.assertEQ(wl.get(), 'main');
 }
 
-function test_without_init() {
+async function testWithoutInit() {
     let wl = new WorkerLocal<int>();
-    try {
+    arktest.expectError(() => {
         wl.get();
-        throw new Error('Call get() before set() without \'init\' should throw an error');
-    } catch(err: Error) {
-        arktest.assertEQ(err.message, 'WorkerLocal value not initialized. Call set() first or provide an init function.');
-    }
+    }, new Error('WorkerLocal value not initialized. Call set() first or provide an init function.'))
     wl.set(1);
     arktest.assertEQ(wl.get(), 1);
     wl.set(wl.get() + 1);
     arktest.assertEQ(wl.get(), 2);
     await taskpool.execute(() => {
-        try {
+        arktest.expectError(() => {
             wl.get();
-            throw new Error('Call get() before set() without \'init\' should throw an error');
-        } catch(err: Error) {
-            arktest.assertEQ(err.message, 'WorkerLocal value not initialized. Call set() first or provide an init function.');
-        }
+        }, new Error('WorkerLocal value not initialized. Call set() first or provide an init function.'))
         wl.set(1);
         arktest.assertEQ(wl.get(), 1);
         wl.set(wl.get() + 1);
         arktest.assertEQ(wl.get(), 2);
         wl.delete()
-        try {
+        arktest.expectError(() => {
             wl.get();
-            throw new Error('Call get() after delete() without \'init\' should throw an error');
-        } catch(err: Error) {
-            arktest.assertEQ(err.message, 'WorkerLocal value not initialized. Call set() first or provide an init function.');
-        }
+        }, new Error('WorkerLocal value not initialized. Call set() first or provide an init function.'))
     })
     arktest.assertEQ(wl.get(), 2);
 }
 
 function main() {
     const testSuite = new arktest.ArkTestsuite("WorkerLocalTest");
-    testSuite.addTest("test_init", test_init);
-    testSuite.addTest("test_without_init", test_without_init);
+    testSuite.addTest("testInit", testInit);
+    testSuite.addAsyncTest("testWithoutInit", testWithoutInit);
     testSuite.run();
     CoroutineExtras.stopTaskpool();
 }

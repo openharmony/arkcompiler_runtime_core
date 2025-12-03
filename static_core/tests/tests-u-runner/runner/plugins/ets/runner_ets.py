@@ -19,7 +19,7 @@ import json
 import logging
 from os import path
 from pathlib import Path
-from typing import Set, List, Any
+from typing import Set, List
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.logger import Log
@@ -140,11 +140,13 @@ class RunnerETS(RunnerFileBased):
 
     # We use Log.exception_and_raise which throws exception. no need in return
     # pylint: disable=inconsistent-return-statements
-    def _get_std_from_arktsconfig(self) -> Any:
+    def _get_std_from_arktsconfig(self) -> str:
         with open(self.arktsconfig, encoding="utf-8") as file:
             arkconfig = json.load(file)
             try:
-                return arkconfig.get("compilerOptions").get("paths").get("std")[0]
+                r = arkconfig.get("compilerOptions").get("paths").get("std")[0]
+                assert isinstance(r, str)
+                return r
             except (AttributeError, KeyError, IndexError):
                 Log.exception_and_raise(
                     _LOGGER,

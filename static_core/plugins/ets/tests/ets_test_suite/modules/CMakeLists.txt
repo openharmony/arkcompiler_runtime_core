@@ -15,18 +15,6 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-function(compile_arktsconfig_unit TARGET ABC_FILES WORK_DIR ARKTS_CONFIG ETS_SOURCES)
-    set(oneValueArgs OPT_LEVEL)
-    set(multiValueArgs )
-    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    compile_ets_sources(${WORK_DIR} ${TARGET} RESULT "${ETS_SOURCES}"
-                        ARKTS_CONFIG ${ARKTS_CONFIG}
-                        OPT_LEVEL ${ARG_OPT_LEVEL}
-    )
-    set(${ABC_FILES} ${RESULT} PARENT_SCOPE)
-endfunction()
-
 function(compile_pandasm_source ABC_TARGET ABC_FILES WORK_DIR PA_SOURCES)
     add_custom_target(${ABC_TARGET})
     set(RESULT "")

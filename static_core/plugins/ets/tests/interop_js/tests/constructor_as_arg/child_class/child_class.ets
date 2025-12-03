@@ -13,102 +13,503 @@
  * limitations under the License.
  */
 
-import {
-    tsInt,
-    MainClass,
-    AnonymousClass,
-    ChildClass,
-    createChildClassWithArgFromTs,
-    createChildClassWithMainFromTs,
-    childClassWithMainInstance,
-    createChildClassWithAnonymousFromTs,
-    childClassWithAnonymousInstance,
-    createChildClassWithIIFEFromTs,
-    childClassWithIIFEInstance,
-    IIFEClass,
-    checkInstance,
-} from "main_js"
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('main_js');
+
+let tsInt = module.getProperty('tsInt');
+let MainClass = module.getProperty('MainClass');
+let AnonymousClass = module.getProperty('AnonymousClass');
+let ChildClass = module.getProperty('ChildClass');
+let createChildClassWithArgFromTs = module.getProperty('createChildClassWithArgFromTs');
+let createChildClassWithMainFromTs = module.getProperty('createChildClassWithMainFromTs');
+let childClassWithMainInstance = module.getProperty('childClassWithMainInstance');
+let createChildClassWithAnonymousFromTs = module.getProperty('createChildClassWithAnonymousFromTs');
+let childClassWithAnonymousInstance = module.getProperty('childClassWithAnonymousInstance');
+let createChildClassWithIIFEFromTs = module.getProperty('createChildClassWithIIFEFromTs');
+let childClassWithIIFEInstance = module.getProperty('childClassWithIIFEInstance');
+let IIFEClass = module.getProperty('IIFEClass');
+let checkInstance = module.getProperty('checkInstance');
 
 function checkInheritorClassMain(): boolean {
-    const TSClass = new ChildClass(MainClass);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (ChildClass.isUndefined() || ChildClass.isNull() || 
+            MainClass.isUndefined() || MainClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildClass.instantiate(MainClass);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInheritorClassAnonymous(): boolean {
-    const TSClass = new ChildClass(AnonymousClass);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (ChildClass.isUndefined() || ChildClass.isNull() || 
+            AnonymousClass.isUndefined() || AnonymousClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildClass.instantiate(AnonymousClass);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkInheritorClassIIFE(): boolean {
-    const TSClass = new ChildClass(IIFEClass);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (ChildClass.isUndefined() || ChildClass.isNull() || 
+            IIFEClass.isUndefined() || IIFEClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildClass.instantiate(IIFEClass);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassWithArgMainFromTs(): boolean {
-    const TSClass = createChildClassWithArgFromTs(MainClass);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (createChildClassWithArgFromTs.isUndefined() || createChildClassWithArgFromTs.isNull() ||
+            MainClass.isUndefined() || MainClass.isNull() ||
+            ChildClass.isUndefined() || ChildClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassWithArgFromTs.invoke(MainClass);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassWithArgAnonymousFromTs(): boolean {
-    const TSClass = createChildClassWithArgFromTs(AnonymousClass);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (createChildClassWithArgFromTs.isUndefined() || createChildClassWithArgFromTs.isNull() ||
+            AnonymousClass.isUndefined() || AnonymousClass.isNull() ||
+            ChildClass.isUndefined() || ChildClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassWithArgFromTs.invoke(AnonymousClass);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassWithArgIIFEFromTs(): boolean {
-    const TSClass = createChildClassWithArgFromTs(IIFEClass);
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (createChildClassWithArgFromTs.isUndefined() || createChildClassWithArgFromTs.isNull() ||
+            IIFEClass.isUndefined() || IIFEClass.isNull() ||
+            ChildClass.isUndefined() || ChildClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassWithArgFromTs.invoke(IIFEClass);
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassWithMainFromTs(): boolean {
-    const TSClass = createChildClassWithMainFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (createChildClassWithMainFromTs.isUndefined() || createChildClassWithMainFromTs.isNull() ||
+            ChildClass.isUndefined() || ChildClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassWithMainFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkChildClassWithMainInstance(): boolean {
-    const TSClass = childClassWithMainInstance;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (childClassWithMainInstance.isUndefined() || childClassWithMainInstance.isNull() ||
+            ChildClass.isUndefined() || ChildClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = childClassWithMainInstance;
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassWithAnonymousFromTs(): boolean {
-    const TSClass = createChildClassWithAnonymousFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (createChildClassWithAnonymousFromTs.isUndefined() || createChildClassWithAnonymousFromTs.isNull() ||
+            ChildClass.isUndefined() || ChildClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassWithAnonymousFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkChildClassWithAnonymousInstance(): boolean {
-    const TSClass = childClassWithAnonymousInstance;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (childClassWithAnonymousInstance.isUndefined() || childClassWithAnonymousInstance.isNull() ||
+            ChildClass.isUndefined() || ChildClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = childClassWithAnonymousInstance;
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassWithIIFEFromTs(): boolean {
-    const TSClass = createChildClassWithIIFEFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (createChildClassWithIIFEFromTs.isUndefined() || createChildClassWithIIFEFromTs.isNull() ||
+            ChildClass.isUndefined() || ChildClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassWithIIFEFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkChildClassWithIIFEInstance(): boolean {
-    const TSClass = childClassWithIIFEInstance;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass._otherClass._value as int == tsInt as int;
+        if (childClassWithIIFEInstance.isUndefined() || childClassWithIIFEInstance.isNull() ||
+            ChildClass.isUndefined() || ChildClass.isNull() ||
+            checkInstance.isUndefined() || checkInstance.isNull() ||
+            tsInt.isUndefined() || tsInt.isNull()) {
+            return false;
+        }
+
+        const TSClass = childClassWithIIFEInstance;
+
+        const checkResult = checkInstance.invoke(ChildClass, TSClass);
+        if (!checkResult.isBoolean() || !checkResult.toBoolean()) {
+            return false;
+        }
+
+        const otherClass = TSClass.getPropertySafe('_otherClass');
+        if (otherClass.isUndefined()) {
+            return false;
+        }
+
+        const value = otherClass.getPropertySafe('_value');
+        if (value.isUndefined()) {
+            return false;
+        }
+
+        return value.toNumber() == tsInt.toNumber();
+
+    } catch (e) {
+        return false;
+    }
 }

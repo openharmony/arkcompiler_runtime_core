@@ -13,95 +13,99 @@
 
 ---
 cases:
-    - use: |-
-          let size = 3 
-          let v: string[] = new string[size] 
-          arktest.assertEQ( v[0], "") 
-          arktest.assertEQ( v[1], "")
-          arktest.assertEQ( v[2], "") 
+    - decl: |-
+          let size = 0  // int, zero-length array
+      use: |-
+          let v = new string[size]
+          arktest.assertEQ(v.length, 0)
 
-    - use: |-
-          let size = 1  // identity dimension conversion
+    - decl: |-
+          const size = 256  // int
+      use: |-
+          let v = new number[size]
+          v[255] = 42.0
+          arktest.assertEQ(v.length, 256)
+          arktest.assertEQ(v[255], 42.0)
+
+    - decl: |-
+          let size: Int = new Int(1)  // int alias
+      use: |-
           let v: number[] = new number[size]
-
           v[0] = 42.0
-          arktest.assertEQ( v[0], 42.0 )
+          arktest.assertEQ(v.length, 1)
+          arktest.assertEQ(v[0], 42.0)
 
-    - use: |-
-          let size: Int = new Int(1)  // unboxing dimension conversion
-          let v: number[] = new number[size]
-
-          v[0] = 42.0
-          arktest.assertEQ( v[0], 42.0 )
-
-    - use: |-
-          let size: number = 1  // narrowing dimension conversion
-          let v: Byte[] = new Byte[size]
-
-          v[0] = new Byte(42 as byte)
-            arktest.assertTrue( v[0] instanceof Byte && v[0] == 42 )
-
-    - use: |-
-          let size: Number = new Number(1)  // unboxing and narrowing dimension conversion
-          let v: Byte[] = new Byte[size]
-
-          v[0] = new Byte(42 as byte)
-            arktest.assertTrue( v[0] instanceof Byte && v[0] == 42 )
-
-    - use: |-
-          let size: float = 1.0f  // narrowing dimension conversion
-          let v: Byte[] = new Byte[size]
-
-          v[0] = new Byte(42 as byte)
-            arktest.assertTrue( v[0] instanceof Byte && v[0] == 42 )
-
-    - use: |-
-          let size: Float = new Float(1.0)  // unboxing and narrowing dimension conversion
-            let v: Byte[] = new Byte[size]
-
-          v[0] = new Byte(42 as byte)
-            arktest.assertTrue( v[0] instanceof Byte && v[0] == 42 )
-
-    - use: |-
-          let size: byte = 10 as byte  // widening dimension conversion
+    - decl: |-
+          const size: byte = 10
+      use: |-
           let v: Error[] = new Error[size]
-
           v[9] = new Error()
-          arktest.assertTrue( v[9] instanceof Error )
+          arktest.assertEQ(v.length, 10)
+          arktest.assertTrue(v[9] instanceof Error)
 
-    - use: |-
-          let size: Byte = new Byte(10 as byte)  // unboxing and widening dimension conversion
+    - decl: |-
+          let size: Byte = new Byte(0x7f as byte)  // byte alias
+      use: |-
           let v: Error[] = new Error[size]
+          v[0x7e] = new Error()
+          arktest.assertEQ(v.length, 0x7f)
+          arktest.assertTrue(v[0x7e] instanceof Error)
 
-          v[9] = new Error()
-          arktest.assertTrue( v[9] instanceof Error )
-
-    - use: |-
-          let size: short = 1000 as short  // widening dimension conversion
+    - decl: |-
+          const size: short = 0o52
+      use: |-
           let v: Number[] = new Number[size]
+          v[0o37] = new Number(42.0)
+          arktest.assertEQ(v.length, 0o52)
+          arktest.assertEQ(v[0o37], 42.0)
 
-          v[999] = new Number(42.0)
-          arktest.assertTrue( v[999] instanceof Number && v[999] == 42 )
+    - decl: |-
+          let size: Short = new Short(0b0101 as short)  // short alias
+      use: |-
+          let v: Long[] = new Long[size]
+          v[0b0100] = new Long(42 as long)
+          arktest.assertEQ(v.length, 0b0101)
+          arktest.assertEQ(v[0b0100], 42)
 
-    - use: |-
-          let size: Short = new Short(1000 as short)  // unboxing and widening dimension conversion
-          let v: Number[] = new Number[size]
-
-          v[999] = new Number(42.0)
-          arktest.assertEQ( v[999] instanceof Number && v[999], 42.0 )
-
-    - use: |-
-          let size1: Byte = new Byte(7 as byte)
-          let size2: Short = new Short(8 as short)
-          let size3: Int = new Int(9)
-
-          let v: string[][][] = new string[size1][size2][size3]  // unboxing and widening
+    - decl: |-
+          let size1: byte = 7
+          let size2: short = 8
+          const size3: int = 9
+      use: |-
+          let v: string[][][] = new string[size1][size2][size3]
           v[size1 - 1][size2 - 1][size3 - 1] = "abc"
-          arktest.assertEQ( v[size1 - 1][size2 - 1][size3 - 1], "abc" )
+          arktest.assertEQ(v.length, size1)
+          arktest.assertEQ(v[size1 - 1][size2 - 1][size3 - 1], "abc")
 
-    - use: |-
-          let size: Char = c'A'  // widening conversion
-          let v: Char[] = new Char[size.toInt()]
+    - decl: |-
+          enum Color { Red, Green, Blue }
+          let size = 3
+      use: |-
+          let v: Color[] = new Color[size]
+          v[0] = Color.Blue
+          arktest.assertEQ(v.length, 3)
+          arktest.assertEQ(v[0], Color.Blue)
 
-          v[0] = c'X'
-          arktest.assertEQ( v[0], c'X' )
+    - decl: |-
+          enum Color { Red, Green, Blue }
+      use: |-
+          let v: char[][] = new char[Color.Green][Color.Blue]
+          v[0][0] = c'@'
+          arktest.assertEQ(v.length, 1)
+          arktest.assertEQ(v[0][0], c'@')
+
+    - decl: |-
+          enum Color: byte { Red, Green, Blue }
+      use: |-
+          let v: Color[] = new Color[Color.Green]
+          v[0] = Color.Blue
+          arktest.assertEQ(v.length, 1)
+          arktest.assertEQ(v[0], Color.Blue)
+
+    - decl: |-
+          enum Color: short { Red = 42, Green, Blue }
+      use: |-
+          let v: Color[] = new Color[Color.Green]
+          v[42] = Color.Blue
+          arktest.assertEQ(v.length, 43)
+          arktest.assertEQ(v[42], Color.Blue)

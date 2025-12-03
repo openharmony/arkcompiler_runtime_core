@@ -19,7 +19,7 @@
 #include "runtime/mem/gc/g1/ref_updater.h"
 #include "runtime/mem/gc/gc_root.h"
 #include "runtime/thread_pool_queue.h"
-#include "libpandabase/utils/range.h"
+#include "libarkbase/utils/range.h"
 
 namespace ark::mem {
 

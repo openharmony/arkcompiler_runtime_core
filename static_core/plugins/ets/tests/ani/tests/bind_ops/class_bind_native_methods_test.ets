@@ -82,3 +82,7 @@ class C extends B {
 class D {
     native constructor();
 }
+
+class CheckWrongSignature {
+    public native method(a: String): void;
+}

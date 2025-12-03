@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_REFLECT_METHOD_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_REFLECT_METHOD_H
 
-#include "libpandabase/mem/object_pointer.h"
+#include "libarkbase/mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_string.h"

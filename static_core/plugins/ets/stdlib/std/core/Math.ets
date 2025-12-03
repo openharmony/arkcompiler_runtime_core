@@ -88,7 +88,7 @@ export class Math {
      * @returns Arccosine of angle `v`
      *
      * @remark
-     * Implemented as native function,  @see `acos()` intrinsic [declaration].
+     * Implemented as native function,  @see `acos()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
      *
      * @example
      * ```
@@ -516,6 +516,14 @@ export class Math {
         return log2(x);
     }
 
+    /**
+     * Largest value of `u` and `v`
+     *
+     * @param u arbitrary number (of type `Int`)
+     * @param v arbitrary number (of type `Int`)
+     *
+     * @returns Largest value of `u` and `v`
+     */
     public static max(): double {
         return -Infinity;
     }
@@ -534,14 +542,6 @@ export class Math {
         return val2;
     }
 
-    /**
-     * Largest value of `u` and `v`
-     *
-     * @param u arbitrary number (of type `Int`)
-     * @param v arbitrary number (of type `Int`)
-     *
-     * @returns Largest value of `u` and `v`
-     */
     public static max(...values: double[]): double {
         if (values.length == 0) {
             return -Infinity;
@@ -556,6 +556,14 @@ export class Math {
         return max;
     }
 
+    /**
+     * Smallest value of `u` and `v`
+     *
+     * @param u arbitrary number (of type `Int`)
+     * @param v arbitrary number (of type `Int`)
+     *
+     * @returns Smallest value of `u` and `v`
+     */
     public static min(): double {
         return Infinity;
     }
@@ -574,14 +582,6 @@ export class Math {
         return val2;
     }
 
-    /**
-     * Smallest value of `u` and `v`
-     *
-     * @param u arbitrary number (of type `Int`)
-     * @param v arbitrary number (of type `Int`)
-     *
-     * @returns Smallest value of `u` and `v`
-     */
     public static min(...values: double[]): double {
         if (values.length == 0) {
             return Infinity;
@@ -622,9 +622,7 @@ export class Math {
      * Initial seed to the random number generator algorithm can be given using {@link seedRandom()} function.
      *
      */
-    public static random(): double {
-        return random();
-    }
+    public static native random(): double
 
     /**
      * `v` rounded to nearest integer

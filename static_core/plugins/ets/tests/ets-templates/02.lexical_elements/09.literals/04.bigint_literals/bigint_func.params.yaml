@@ -34,3 +34,11 @@ bigint_functions:
     - { func: 'BigInt.asUintN(4, 16n)', res: 0n }
     - { func: 'BigInt.asUintN(4, 15n)', res: 15n }
     - { func: 'BigInt.asUintN(32, 12345678901234567890n)', res: 3944680146n }
+
+    - { func: 'BigInt(0o12345670)', res: 2739128n }
+    - { func: 'BigInt(0x123456AF)', res: 305419951n }
+    - { func: 'BigInt(0b0101010101010)', res: 2730n }
+    - { func: 'BigInt(-0o12345670)', res: -2739128n }
+    - { func: 'BigInt(-0x123456AF)', res: -305419951n }
+    - { func: 'BigInt(-0b0101010101010)', res: -2730n }
+    - { func: 'BigInt("-1234567890")', res: -1234567890n }

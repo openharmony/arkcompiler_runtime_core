@@ -13,16 +13,49 @@
  * limitations under the License.
  */
 
-import {
-    user,
-    InterfaceStatic,
-    userInterfaceFromTs
-} from "main_js"
+let module = ESValue.load('main_js')
+let InterfaceStatic = module.getProperty('InterfaceStatic');
+let userInterfaceFromTs = module.getProperty('userInterfaceFromTs');
+let user = module.getProperty('user');
 
 function checkUserInterfaceStatic(): boolean {
-   return InterfaceStatic.get(user).tsInt as int == user.tsInt as int;
+    try {
+        const res = InterfaceStatic.invokeMethod('get', user);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        const resTsInt = res.getProperty('tsInt');
+        const userTsInt = user.getProperty('tsInt');
+        
+        if (resTsInt == null || userTsInt == null) {
+            return false;
+        }
+        
+        return resTsInt.toNumber() === userTsInt.toNumber();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkUserInterfaceFromTs(): boolean {
-   return userInterfaceFromTs(user).tsInt as int == user.tsInt as int;
+    try {
+        const res = userInterfaceFromTs.invoke(user);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        const resTsInt = res.getProperty('tsInt');
+        const userTsInt = user.getProperty('tsInt');
+        
+        if (resTsInt == null || userTsInt == null) {
+            return false;
+        }
+        
+        return resTsInt.toNumber() === userTsInt.toNumber();
+    } catch (e) {
+        return false;
+    }
 }

@@ -19,10 +19,6 @@ const throwErrorFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'thro
 const throwErrorWithCauseFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwErrorWithCauseFromSts');
 const throwCustomErrorFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwCustomErrorFromSts');
 
-const throwExceptionFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwExceptionFromSts');
-const throwExceptionWithCauseFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwExceptionWithCauseFromSts');
-const throwCustomExceptionFromSts = stsVm.getFunction('Lexceptions/test/ETSGLOBAL;', 'throwCustomExceptionFromSts');
-
 function catchErrorFromSts() {
     try {
         throwErrorFromSts();
@@ -52,36 +48,6 @@ function catchCustomErrorFromSts() {
     }
 }
 
-function catchExceptionFromSts() {
-    try {
-        throwExceptionFromSts();
-    } catch (e) {
-        ASSERT_TRUE(e.message === 'Throw Exception from ets!');
-    }
-}
-
-function catchExceptionWithCauseFromSts() {
-    try {
-        throwExceptionWithCauseFromSts();
-    } catch (e) {
-        ASSERT_TRUE(e.message === 'Throw Exception with cause from ets!');
-        ASSERT_TRUE(e.getCause().reason === 'Test cause');
-    }
-}
-
-function catchCustomExceptionFromSts() {
-    try {
-        throwCustomExceptionFromSts();
-    } catch (e) {
-        ASSERT_TRUE(e.message === 'Throw Custom Exception from ets!');
-        ASSERT_TRUE(e.code === 54321);
-    }
-}
-
 catchErrorFromSts();
 catchErrorWithCauseFromSts();
 catchCustomErrorFromSts();
-
-catchExceptionFromSts();
-catchExceptionWithCauseFromSts();
-catchCustomExceptionFromSts();

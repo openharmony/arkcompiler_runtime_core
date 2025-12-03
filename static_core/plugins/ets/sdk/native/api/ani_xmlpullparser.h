@@ -88,6 +88,7 @@ private:
         ~ParseInfoClassCache();
         ani_object New() const;
         void InitFieldCache();
+        ani_class GetCachedClass_();
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define FIELD_SETTER(_cache, func, _item, type, _typeName) \
@@ -173,7 +174,7 @@ private:
     TagEnum DealLtGroup();
     void DealWhiteSpace(unsigned char c);
 
-    ani_env *env_ {};
+    [[maybe_unused]] ani_env *env_ {};
     ParseInfoClassCache infoClass_;
     ani_enum enumTypeClass_ {};
     bool bDoctype_ {};

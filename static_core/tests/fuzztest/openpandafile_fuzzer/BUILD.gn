@@ -29,7 +29,7 @@ ohos_fuzztest("OpenPandaFileFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "openpandafile_fuzzer.cpp" ]
-  deps = [ "$ark_root/libpandafile:libarktsfile_static" ]
+  deps = [ "$ark_root/libarkfile:libarktsfile_static" ]
 }
 
 ###############################################################################

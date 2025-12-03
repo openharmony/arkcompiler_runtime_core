@@ -75,16 +75,18 @@ extern "C" int StopDebugger()
     return 0;
 }
 
-extern "C" bool StartDebuggerForSocketpair(int socketfd, bool breakOnStart)
+extern "C" bool StartDebuggerForSocketpair([[maybe_unused]] int socketfd, bool breakOnStart)
 {
     if (g_inspector) {
         g_server.Stop();
         g_inspector->Stop();
     }
 
+#ifndef PANDA_TOOLING_ASIO
     if (!g_server.StartForSocketpair(socketfd)) {
         return false;
     }
+#endif  // PANDA_TOOLING_ASIO
 
     if (!g_inspector) {
         g_debugSession = ark::Runtime::GetCurrent()->StartDebugSession();

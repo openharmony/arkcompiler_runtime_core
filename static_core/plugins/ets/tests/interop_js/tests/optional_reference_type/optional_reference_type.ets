@@ -12,131 +12,149 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- import {
-  fnWithAnyParamObject, ObjectTypeWithArr, TestUserType, fnWithUserInterface, fnWithUserClass, TestUserClass,
-  UnionArrOrObj, fnWithUnionParam, UserPartial, UserOmit, fnWithSubsetPick, UserPick, AddressType,
-  fnWithExtraSetParam, fnWithLiteralParam, fnWithAnyParams
-  } from "js_code"
 
- function referenceAnyParam(): boolean {
-    return fnWithAnyParams(['one', 'two']) == 'one';
- }
+import {
+    fnWithAnyParamObject,
+    ObjectTypeWithArr,
+    TestUserType,
+    fnWithUserInterface,
+    fnWithUserClass,
+    TestUserClass,
+    UnionArrOrObj,
+    fnWithUnionParam,
+    UserPartial,
+    UserOmit,
+    fnWithSubsetPick,
+    UserPick,
+    AddressType,
+    fnWithExtraSetParam,
+    fnWithLiteralParam,
+    fnWithAnyParams
+} from "js_code"
 
- function referenceAnyWithoutParam(): boolean {
-    return fnWithAnyParams() == 'Argument not found'
- }
+function referenceAnyParam(): boolean {
+    return fnWithAnyParams(['one', 'two']) === 'one';
+}
+
+function referenceAnyWithoutParam(): boolean {
+    return fnWithAnyParams() === 'Argument not found'
+}
 
 function referenceLiteralParam(): boolean {
-    return fnWithLiteralParam(['Moscow', 'London', 'Paris']) == 'Moscow';
- }
+    return fnWithLiteralParam(['Moscow', 'London', 'Paris']) === 'Moscow';
+}
 
- function referenceLiteralWithoutParam(): boolean {
-    return fnWithLiteralParam() == 'Argument not found';
- }
+function referenceLiteralWithoutParam(): boolean {
+    return fnWithLiteralParam() === 'Argument not found';
+}
 
- function referenceExtraSetParam(): boolean {
-    return fnWithExtraSetParam(['Param1', 'Param2', 'Param3']) == 'Param1';
- }
+function referenceExtraSetParam(): boolean {
+    return fnWithExtraSetParam(['Param1', 'Param2', 'Param3']) === 'Param1';
+}
 
- function referenceExtraSetWithoutParam(): boolean {
-    return fnWithExtraSetParam() == 'Argument not found';
- }
+function referenceExtraSetWithoutParam(): boolean {
+    return fnWithExtraSetParam() as string === 'Argument not found';
+}
 
- function referenceSubsetPickParam(): boolean {
-    const testAddress:AddressType = {
+function referenceSubsetPickParam(): boolean {
+    const testAddress: AddressType = {
         street: 'main',
         city: 'Moscow'
     };
-    const testObj:UserPick = {
+    const testObj: UserPick = {
         name: 'Fill',
         address: testAddress
     };
-    return fnWithSubsetPick(testObj) == 'Moscow';
- }
+    return fnWithSubsetPick(testObj) === 'Moscow';
+}
 
- function referenceSubsetPickWithoutParam(): boolean {
-    const testObj:UserPick = {
+function referenceSubsetPickWithoutParam(): boolean {
+    const testObj: UserPick = {
         name: 'Fill'
     };
-    return fnWithSubsetPick(testObj) == 'Address not found';
- }
+    return fnWithSubsetPick(testObj) === 'Address not found';
+}
 
- function referenceSubsetOmitParam(): boolean {
-    const testAddress:AddressType = {
+function referenceSubsetOmitParam(): boolean {
+    const testAddress: AddressType = {
         street: 'main',
         city: 'London'
     };
-    const testObj: UserOmit = {
+    const testObj: UserPick = {
         name: 'Fill',
         address: testAddress
     };
-    return fnWithSubsetPick(testObj) == 'London';
- }
+    return fnWithSubsetPick(testObj) === 'London';
+}
 
- function referenceSubsetOmitWithoutParam(): boolean {
-    const testObj:UserOmit = {
+function referenceSubsetOmitWithoutParam(): boolean {
+    const testObj: UserPick = {
         name: 'Fill'
     };
-    return fnWithSubsetPick(testObj) == 'Address not found';
- }
+    return fnWithSubsetPick(testObj) === 'Address not found';
+}
 
- function referenceSubsetPartialParam(): boolean {
-    const testAddress:AddressType = {
+function referenceSubsetPartialParam(): boolean {
+    const testAddress: AddressType = {
         street: 'main',
         city: 'London'
     };
-    const testObj:UserPartial = {
+    const testObj: UserPick = {
         name: 'Fill',
         address: testAddress
     };
-    return fnWithSubsetPick(testObj) == 'London';
- }
+    return fnWithSubsetPick(testObj) === 'London';
+}
 
- function referenceSubsetPartialWithoutParam(): boolean {
-    const testObj:UserPartial = {
+function referenceSubsetPartialWithoutParam(): boolean {
+    const testObj: UserPick = {
         name: 'Fill'
     };
-    return fnWithSubsetPick(testObj) == 'Address not found';
- }
+    return fnWithSubsetPick(testObj) === 'Address not found';
+}
 
- function referenceUnionArrParam(): boolean {
-   const arr: FixedArray<string> = ['param1', 'param2'];
-   return fnWithUnionParam(arr) == 'This is an array';
- }
+function referenceUnionArrParam(): boolean {
+    const arr: FixedArray<string> = ['param1', 'param2'];
+    return fnWithUnionParam(arr) === 'This is an array';
+}
 
- function referenceUnionObjParam(): boolean {
-   const testObj:UnionArrOrObj = {
-      name: 'testName',
-      id: 123
-   };
-   return fnWithUnionParam(testObj) == 'This is an object';
- }
+interface IUnionArr {
+    name: string,
+    id: number,
+}
+function referenceUnionObjParam(): boolean {
+    const testObj: IUnionArr = {
+        name: 'testName',
+        id: 123
+    };
+    return fnWithUnionParam(testObj) === 'This is an object';
+}
 
- function referenceUnionWithoutParam():boolean {
-   return fnWithUnionParam() == 'Argument not found';
- }
+function referenceUnionWithoutParam(): boolean {
+    return fnWithUnionParam() === 'Argument not found';
+}
 
- function referenceClassParam(): boolean {
-   const testUser = new TestUserClass(123, 'TestName');
-   return fnWithUserClass(testUser) == 'TestName';
- }
+function referenceClassParam(): boolean {
+    const testUser = new TestUserClass(123, 'TestName');
+    return fnWithUserClass(testUser) === 'TestName';
+}
 
- function referenceClassWithoutParam(): boolean {
-   return fnWithUserClass() == 'Class was not passed';
- }
+function referenceClassWithoutParam(): boolean {
+    return fnWithUserClass() === 'Class was not passed';
+}
 
- function referenceInterfaceParam(): boolean {
-   const testObj:TestUserType = {
-      id: 321,
-      name: 'TestName1',
-      age: 30
-   };
-   return fnWithUserInterface(testObj) == 'TestName1'
- }
+function referenceInterfaceParam(): boolean {
+    const testObj: TestUserType = {
+        id: 321,
+        name: 'TestName1',
+        age: 30
+    };
+    return fnWithUserInterface(testObj) === 'TestName1'
+}
 
- function referenceInterfaceWithoutParam(): boolean {
-   return fnWithUserInterface() == 'Object was not passed';
- }
+function referenceInterfaceWithoutParam(): boolean {
+    return fnWithUserInterface() === 'Object was not passed';
+}
 
 // NOTE(pishin) enable after fixing #17878
 //  function referenceObjectWithArr(): boolean {

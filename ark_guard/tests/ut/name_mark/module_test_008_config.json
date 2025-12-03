@@ -1,0 +1,43 @@
+{
+  "abcPath": "xxx",
+  "obfAbcPath": "xxx",
+  "defaultNameCachePath": "xxx",
+  "obfuscationRules": {
+    "keepOptions": {
+      "keeps": [
+        "-keep package module_test_008 {\n    foo1(int|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo2(byte|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo3(short|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo4(number|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo5(long|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo6(float|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo7(double|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo8(char|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo9(boolean|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo10(bigint|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo11(never|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo12(null|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo13(undefined|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo14(int[]|string):void;\n    }",
+        "-keep package module_test_008 {\n    foo15(undefined|never):void;\n    }",
+        "-keep package module_test_008 {\n    foo16(undefined|never|int):void;\n    }",
+        "-keep package module_test_008 {\n    fooEx1():int|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx2():byte|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx3():short|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx4():number|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx5():long|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx6():float|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx7():double|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx8():char|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx9():boolean|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx10():bigint|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx11():never|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx12():null|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx13():undefined|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx14():int[]|string;\n    }",
+        "-keep package module_test_008 {\n    fooEx15():undefined|never;\n    }",
+        "-keep package module_test_008 {\n    fooEx16():undefined|never|int;\n    }"
+      ]
+    }
+  }
+}

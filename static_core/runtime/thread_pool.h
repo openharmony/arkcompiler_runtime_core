@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,8 @@
 #define PANDA_RUNTIME_THREAD_POOL_H_
 
 #include <atomic>
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/os/thread.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/os/thread.h"
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/thread_pool_queue.h"

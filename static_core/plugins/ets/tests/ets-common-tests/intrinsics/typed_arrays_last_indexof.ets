@@ -170,7 +170,7 @@ function checkArrayForInt(data: Float32Array, elem: int, expected: number): void
 
 function checkArray(data: Float32Array, elem: number, expected: number, fromIndex: int | undefined): void {
     arktest.assertEQ(data.lastIndexOf((elem.toFloat()).toDouble(), fromIndex), expected,
-        'data.lastIndexOf(elem: number, fromIndex: number | undefined) must return ' + expected);
+        'data.lastIndexOf(elem: number, fromIndex: int | undefined) must return ' + expected);
 }
 
 function checkArray(data: Float32Array, elem: number, expected: number): void {

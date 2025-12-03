@@ -21,7 +21,7 @@ package std.core;
 export class AssertionError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("AssertionError", message, options)
-        console.log(message ?? "Assertion failed.");
+        console.error(message ?? "Assertion failed.");
     }
 }
 
@@ -88,11 +88,22 @@ export class RangeError extends Error {
 }
 
 /**
+ * @class Represents exception that is thrown when negative array size is supplied
+ */
+export final class NegativeArraySizeError extends RangeError {
+    constructor(message?: String, options?: ErrorOptions) {
+        super(message, options)
+        this.name = "NegativeArraySizeError"
+    }
+}
+
+/**
  * @class Represents an error that occurs when array is oging to be indexed out of its bounds
  */
-export final class ArrayIndexOutOfBoundsError extends Error {
+export final class ArrayIndexOutOfBoundsError extends RangeError {
     constructor(message?: String, options?: ErrorOptions) {
-        super("ArrayIndexOutOfBoundsError", message, options)
+        super(message, options)
+        this.name = "ArrayIndexOutOfBoundsError"
     }
 }
 
@@ -153,18 +164,20 @@ export class IllegalMonitorStateError extends Error {
 /**
  * @class Represents exception that is thrown when provided collection index is out of bounds
  */
-export class IndexOutOfBoundsError extends Error {
+export class IndexOutOfBoundsError extends RangeError {
     constructor(message?: String, options?: ErrorOptions) {
-        super("IndexOutOfBoundsError", message, options)
+        super(message, options)
+        this.name = "IndexOutOfBoundsError"
     }
 }
 
 /**
  * @class Represents exception that is thrown when provided string index is out of bounds
  */
-export final class StringIndexOutOfBoundsError extends Error {
+export final class StringIndexOutOfBoundsError extends RangeError {
     constructor(message?: String, options?: ErrorOptions) {
-        super("StringIndexOutOfBoundsError", message, options)
+        super(message, options)
+        this.name = "StringIndexOutOfBoundsError"
     }
 }
 
@@ -186,15 +199,6 @@ export final class ArrayStoreError extends Error {
     }
 }
 
-/**
- * @class Represents exception that is thrown when negative array size is supplied
- */
-export final class NegativeArraySizeError extends Error {
-    constructor(message?: String, options?: ErrorOptions) {
-        super("NegativeArraySizeError", message, options)
-    }
-}
-
 export class ExceptionInInitializerError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("ExceptionInInitializerError", message, options)
@@ -204,6 +208,12 @@ export class ExceptionInInitializerError extends Error {
 export class CoroutinesLimitExceedError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("CoroutinesLimitExceedError", message, options)
+    }
+}
+
+export class IllegalLockStateError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("IllegalLockStateError", message, options)
     }
 }
 
@@ -219,5 +229,11 @@ export class InvalidCoroutineOperationError extends Error {
 export class ArgumentsUnderapplicationError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("ArgumentsUnderapplicationError", message, options)
+    }
+}
+
+export class InvalidStoreAccessError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("InvalidStoreAccessError", message, options)
     }
 }

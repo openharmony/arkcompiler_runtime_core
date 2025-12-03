@@ -15,7 +15,7 @@
 
 #include "types/debugger_evaluation_request.h"
 
-#include "utils/json_parser.h"
+#include "libarkbase/utils/json_parser.h"
 
 #include "types/numeric_id.h"
 

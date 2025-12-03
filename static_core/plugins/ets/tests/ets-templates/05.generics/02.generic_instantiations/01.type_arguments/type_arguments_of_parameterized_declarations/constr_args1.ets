@@ -17,7 +17,6 @@ limitations under the License.
 /*---
 desc: Type arguments
 params: constructor
-tags: [{{c.tags}}]
 ---*/
 
 interface I {}
@@ -38,8 +37,10 @@ enum Color { Red, Green, Blue }
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+
     {{c.use|indent}}
-    return 0;
+    arktest.assertTrue(v instanceof A)
+    
 }
 {% endfor %}

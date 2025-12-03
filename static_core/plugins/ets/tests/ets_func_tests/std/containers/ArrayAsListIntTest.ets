@@ -52,8 +52,12 @@ function createDefault(): int {
 function createWithNegativeInitialCapacity(): int {
     try {
         new containers.ArrayAsListInt(-1);
-    } catch(nse: NegativeArraySizeError) {
-        return 0;
+    } catch(nse) {
+        if (nse instanceof NegativeArraySizeError) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
     return 1;
 }
@@ -63,8 +67,12 @@ function accessOutOfBoundsValue(): int {
     try {
         list.at(0);
         list.at(12);
-    } catch(aiobe: ArrayIndexOutOfBoundsError) {
-        return 0;
+    } catch(aiobe) {
+        if (aiobe instanceof ArrayIndexOutOfBoundsError) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
     return 1;
 }

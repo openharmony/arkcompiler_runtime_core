@@ -19,7 +19,7 @@ import { addMessage, removeMessage } from '../slices/notifications';
 
 const DEFAULT_NOTIFICATION_DURATION = 3000;
 
-export const getMessageId = () => (new Date()).getTime();
+export const getMessageId = (): number => (new Date()).getTime();
 
 export const showMessage = createAsyncThunk(
     '@notification/showMessage',

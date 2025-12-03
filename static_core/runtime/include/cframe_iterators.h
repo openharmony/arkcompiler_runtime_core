@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +16,13 @@
 #ifndef PANDA_CFRAME_ITERATORS_H
 #define PANDA_CFRAME_ITERATORS_H
 
-#include "libpandabase/utils/arch.h"
-#include "libpandabase/utils/range.h"
-#include "libpandafile/shorty_iterator.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/range.h"
+#include "libarkfile/shorty_iterator.h"
 #include "runtime/arch/helpers.h"
 #include "runtime/include/cframe.h"
 #include "runtime/include/method.h"
-#include "utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 
 namespace ark {
 

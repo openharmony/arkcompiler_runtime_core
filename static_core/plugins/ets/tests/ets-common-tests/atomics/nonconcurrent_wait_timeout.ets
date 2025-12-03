@@ -21,8 +21,26 @@ function testMain(): void {
     arktest.assertEQ(r, "timed-out")
 }
 
+function testTimeoutZero(): void {
+    let buf = new ArrayBuffer(1024);
+    let arr: Int32Array = new Int32Array(buf, 0);
+    Atomics.store(arr, 0, 0);
+    let r = Atomics.wait(arr, 0, 0, 0);
+    arktest.assertEQ(r, "timed-out")
+}
+
+function testTimeoutNegative(): void {
+    let buf = new ArrayBuffer(1024);
+    let arr: Int32Array = new Int32Array(buf, 0);
+    Atomics.store(arr, 0, 0);
+    let r = Atomics.wait(arr, 0, 0, -10);
+    arktest.assertEQ(r, "timed-out")
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Function Atomics nonconcurrent_wait_timeout tests')
     suite.addTest('Function testMain', testMain)
+    suite.addTest('Function testTimeoutZero', testTimeoutZero)
+    suite.addTest('Function testTimeoutNegative', testTimeoutNegative)
     return suite.run()
 }

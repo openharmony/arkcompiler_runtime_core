@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package escompat;
+package std.core;
 
 export final class DataView implements ArrayBufferView {
     /** Underlying buffer */
@@ -35,7 +35,7 @@ export final class DataView implements ArrayBufferView {
         return this.byteOffset_
     }
 
-    private readonly actualBuffer: Buffer
+    private readonly actualBuffer: ArrayBuffer
 
     /**
      * Constructs view

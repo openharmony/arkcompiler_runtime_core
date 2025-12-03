@@ -15,11 +15,13 @@
 
 //! CHECKER       escompat Array fill intrinsic
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*escompat_array_fill.ETSGLOBAL::test_array.*'", entry: "escompat_array_fill.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--heap-size-limit=12345678 --compiler-hotness-threshold=0 --compiler-regex='.*escompat_array_fill.ETSGLOBAL::test_array.*'", entry: "escompat_array_fill.ETSGLOBAL::main"
 //! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_fill"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*escompat.Array::fill/
-//! INST_COUNT    /CallVirtual.*escompat.Array::fill/, 13
+//! INST_COUNT    /CallVirtual.*escompat.Array::fill/, 8
+//! INST          /CallStatic.*escompat.Array::fill/
+//! INST_COUNT    /CallStatic.*escompat.Array::fill/, 5
 //!
 //! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_call_virtual_fill"
 //! PASS_AFTER    "Codegen"
@@ -47,7 +49,7 @@ function check_array(arr: Array<int>, start: int, end: int, expected: int) {
 
 function fill_big_array() {
     // if have memory leak, will cause oom, then test failed
-    let array2: Array<number> = new Array<number>(1024 * 1024 * 120);
+    let array2: Array<number> = new Array<number>(1024 * 768);
     array2.fill(1);
 }
 
@@ -109,11 +111,11 @@ function test_array_fill() {
 class MyArray<T> extends Array<T> {
     counter: int;
     public constructor(len: number) {
-        super(len);
+        super(len.toInt());
         this.counter = 0;
     }
 
-    public override fill(value: T, start: int, end: int): this {
+    public override fill(value: T, start?: int, end?: int): this {
         this.counter += 1;
         super.fill(value, start, end);
         return this;

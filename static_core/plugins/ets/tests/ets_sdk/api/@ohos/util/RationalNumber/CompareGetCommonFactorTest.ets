@@ -215,9 +215,12 @@ function testGetCommonFactor007() {
  * @tc.level: Level 1
  */
 function testGetCommonFactor008() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The Parameter cannot be zero") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The Parameter cannot be zero" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let result = util.RationalNumber.getCommonFactor(0, 6) }, exceptionCheck);
 }
@@ -231,9 +234,12 @@ function testGetCommonFactor008() {
  * @tc.level: Level 1
  */
 function testGetCommonFactor009() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "Parameter error. The Parameter cannot be zero") && ((e as BusinessError).code == 401);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "Parameter error. The Parameter cannot be zero" && e.code == 401;
+        }
+        return false;
     }
     arktest.expectThrow(() => { let result = util.RationalNumber.getCommonFactor(0, 0) }, exceptionCheck);
 }

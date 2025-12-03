@@ -14,7 +14,7 @@
  */
 
 #include "checkheader_fuzzer.h"
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 
 namespace OHOS {
 void CheckHeaderFuzzTest(const uint8_t *data, size_t size)

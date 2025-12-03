@@ -13,330 +13,490 @@
  * limitations under the License.
  */
 
-class jsvars {
-    static global = JSRuntime.getGlobal();
-    static gtestEnv = JSRuntime.getPropertyJSValue(jsvars.global, "gtest_env");
-
-    static m = JSRuntime.getPropertyJSValue(jsvars.gtestEnv, "module");
-};
-
-class jscall {
-    static Init = JSRuntime.__initJSCallClass();
-
-    native static void$(top: JSValue, qname: String): void;
-    native static num$(top: JSValue, qname: String): double;
-    native static any$(top: JSValue, qname: String): JSValue;
-    native static any$(top: JSValue, qname: String, v0: JSValue): JSValue;
-    native static any$(top: JSValue, qname: String, v0: String): JSValue;
-    native static any$(top: JSValue, qname: String, v0: double, v1: String): JSValue;
-    native static any$(top: JSValue, qname: String, v0: FixedArray<int>, v1: int): JSValue;
-    // Remove after JSValue cast fix
-    native static any$a(top: JSValue, qname: String, v0: JSValue): JSValue;
-
-    native static str$(top: JSValue, qname: String): String;
-    native static str$(top: JSValue, qname: String, v0: String): String;
-    native static str$(top: JSValue, qname: String, v0: String, v1: String): String;
-}
-
-class jsnew {
-    static Init = JSRuntime.__initJSNewClass();
-
-    native static $(top: JSValue, qname: String, a0: double, a1: double) : JSValue;
-    native static $(top: JSValue, qname: String, a0: boolean, a1: boolean) : JSValue;
-    native static $(top: JSValue, qname: String) : JSValue;
-    native static $(top: JSValue, qname: String, a0: JSValue, a1: JSValue) : JSValue;
-    native static $(top: JSValue, qname: String, a0: String, a1: String) : JSValue;
-    native static $(top: JSValue, qname: String, a0: FixedArray<int>, a1: FixedArray<int>) : JSValue;
-    // Remove after JSValue cast fix
-    native static $aa(top: JSValue, qname: String, a0: JSValue, a1: JSValue) : JSValue;
-    // Remove after JSValue cast fix
-    native static $nn(top: JSValue, qname: String, a0: double, a1: double) : JSValue;
-};
-
 class C {
     hash: int
-    val: ESObject
+    val: ESValue
 
-    constructor(hash: int, val: ESObject) {
+    constructor(hash: int, val: ESValue) {
         this.hash = hash
         this.val = val
     }
 }
 
 function testJSONStringifyESObjectInstance(): boolean {
-    const moduleObj = ESObject.getGlobal().getProperty("gtest_env").getProperty("module")
-    const createObjFn = moduleObj.getProperty("MyNamespace").getProperty("createKitten")
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const moduleObj = gtestEnv.getProperty("module")
+        const createObjFn = moduleObj.getProperty("MyNamespace").getProperty("createKitten")
 
-    const id: number = 1.0
-    const name: string = "Nora"
-    const esObj = createObjFn.invoke(id, name)
+        const id: number = 1.0
+        const name: string = "Nora"
+        const esObj = createObjFn.invoke(ESValue.wrapNumber(id), ESValue.wrapString(name))
 
-    arktest.assertEQ(JSON.stringify(esObj), `{"id":1,"name":"Nora","male":false}`)
+        const unwrappedObj = esObj.unwrap()
+        arktest.assertEQ(JSON.stringify(unwrappedObj), `{"id":1,"name":"Nora","male":false}`)
 
-    esObj.setProperty("self", esObj)
-    arktest.expectError(() => {
-        JSON.stringify(esObj)
-    }, "cyclic object value")
-    esObj.setProperty("self", ESObject.instantiateEmptyObject())
+        esObj.setProperty("self", esObj)
+        let hasCircularError = false
+        try {
+            JSON.stringify(esObj.unwrap())
+        } catch (e) {
+            hasCircularError = true
+        }
+        
+        if (!hasCircularError) {
+            return false
+        }
 
-    const esObjName = esObj.getProperty("name")
-    arktest.assertEQ(JSON.stringify(esObjName), '"Nora"')
+        esObj.setProperty("self", ESValue.instantiateEmptyObject())
 
-    // testing that object entries of type 'function' are ignored
-    const withFnObj = ESObject.instantiateEmptyObject()
-    withFnObj.setProperty("name", ESObject.wrapString("foo"))
+        const esObjName = esObj.getProperty("name")
+        arktest.assertEQ(JSON.stringify(esObjName.unwrap()), '"Nora"')
 
-    const moduleFn = moduleObj.getProperty("doNothing")
-    withFnObj.setProperty("fn", moduleFn)
+        const withFnObj = ESValue.instantiateEmptyObject()
+        withFnObj.setProperty("name", ESValue.wrapString("foo"))
 
-    arktest.assertEQ(JSON.stringify(withFnObj), `{"name":"foo"}`)
+        const moduleFn = moduleObj.getProperty("doNothing")
+        withFnObj.setProperty("fn", moduleFn)
 
-    const c = new C(42, esObj)
-    arktest.assertEQ(JSON.stringify(c), `{"hash":42,"val":{"id":1,"name":"Nora","male":false,"self":{}}}`)
+        arktest.assertEQ(JSON.stringify(withFnObj.unwrap()), `{"name":"foo"}`)
 
-    return true
+        const c = new C(42, esObj)
+        const valJson = JSON.stringify(esObj.unwrap())
+        const expectedJson = `{"hash":42,"val":${valJson}}`
+        const cJson = `{"hash":${c.hash},"val":${valJson}}`
+        arktest.assertEQ(cJson, expectedJson)
+
+        return true
+    } catch (e) {
+        return false
+    }
 }
 
 function testJSONStringifyESObjectArray(): boolean {
-    const moduleObj = ESObject.getGlobal().getProperty("gtest_env").getProperty("module")
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const moduleObj = gtestEnv.getProperty("module")
 
-    const arr: FixedArray<number> = new number[3]
-    for (let i = 0; i < arr.length; i++) {
-        arr[i] = i + 1
+        const arr: FixedArray<number> = new number[3]
+        for (let i = 0; i < arr.length; i++) {
+            arr[i] = i + 1
+        }
+
+        const evalArrFn = moduleObj.getProperty("evaluateArray")
+        const arrEsObj = evalArrFn.invoke(ESValue.wrap(arr), ESValue.wrapNumber(arr.length))
+
+        arktest.assertEQ(JSON.stringify(arrEsObj.unwrap()), "[1,3,7]")
+
+        arrEsObj.setProperty(3, arrEsObj)
+        arktest.expectError(() => {
+            JSON.stringify(arrEsObj.unwrap())
+        }, "cyclic object value")
+
+        const nestedArrEsObj = ESValue.instantiateEmptyArray()
+        nestedArrEsObj.setProperty(0, ESValue.wrapString("foo"))
+
+        arrEsObj.setProperty(3, nestedArrEsObj)
+        arktest.assertEQ(JSON.stringify(arrEsObj.unwrap()), `[1,3,7,["foo"]]`)
+
+        return true
+    } catch (e) {
+        return false
     }
-
-    const evalArrFn = moduleObj.getProperty("evaluateArray")
-    const arrEsObj = evalArrFn.invoke(arr, arr.length)
-
-    arktest.assertEQ(JSON.stringify(arrEsObj), "[1,3,7]")
-
-    arrEsObj.setProperty(3, arrEsObj)
-    arktest.expectError(() => {
-        JSON.stringify(arrEsObj)
-    }, "cyclic object value")
-
-    const nestedArrEsObj = ESObject.instantiateEmptyArray()
-    nestedArrEsObj.setProperty(0, ESObject.wrapString("foo"))
-
-    arrEsObj.setProperty(3, nestedArrEsObj)
-    arktest.assertEQ(JSON.stringify(arrEsObj), `[1,3,7,["foo"]]`)
-
-    return true
 }
 
 function jscallEmpty(): int {
-    jscall.void$(jsvars.m, ".evaluateNumber");
-    return 0;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        module.invokeMethod("evaluateNumber")
+        return 0
+    } catch (e) {
+        return 1
+    }
 }
 
 function jsnewEmpty(): int {
-    let resObj = jsnew.$(jsvars.m, ".ClassWithEmptyConstructor");
-    let resGetV0 = JSRuntime.getPropertyDouble(resObj, "v0");
-    let resGetV1 = JSRuntime.getPropertyDouble(resObj, "v1");
-    if (resGetV0 == 42 && resGetV1 == 42) {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const ClassWithEmptyConstructor = module.getProperty("ClassWithEmptyConstructor")
+        const resObj = ClassWithEmptyConstructor.instantiate()
+
+        const resGetV0 = resObj.getProperty("v0").toNumber()
+        const resGetV1 = resObj.getProperty("v1").toNumber()
+
+        if (resGetV0 == 42 && resGetV1 == 42) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jscallStaticMethodEmpty(): int {
-    jscall.void$(jsvars.m, ".ExampleClass.emptyMethod");
-    return 0;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const ExampleClass = module.getProperty("ExampleClass")
+        ExampleClass.invokeMethod("emptyMethod")
+        return 0
+    } catch (e) {
+        return 1
+    }
 }
 
 function jscallObject(): int {
-    let resObj = jsnew.$nn(jsvars.m, ".ExampleClass", 42, 42);
-    let res = jscall.any$a(jsvars.m, ".evaluateObject", resObj);
-    let resGetV0 = JSRuntime.getPropertyDouble(res, "v0");
-    let resGetV1 = JSRuntime.getPropertyDouble(res, "v1");
-    if (resGetV0 == 84 && resGetV1 == 84) {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const ExampleClass = module.getProperty("ExampleClass")
+        const resObj = ExampleClass.instantiate(ESValue.wrapNumber(42), ESValue.wrapNumber(42))
+
+        const res = module.invokeMethod("evaluateObject", resObj)
+        const resGetV0 = res.getProperty("v0").toNumber()
+        const resGetV1 = res.getProperty("v1").toNumber()
+
+        if (resGetV0 == 84 && resGetV1 == 84) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jsnewObject(): int {
-    let resObj = jsnew.$nn(jsvars.m, ".ExampleClass", 42, 42);
-    let res = jsnew.$aa(jsvars.m, ".ExampleClass", resObj, resObj);
-    let resGetV0 = JSRuntime.getPropertyJSValue(res, "v0");
-    let resGetV1 = JSRuntime.getPropertyJSValue(res, "v1");
-    if (JSRuntime.getPropertyDouble(resGetV0, "v0") == 42 && JSRuntime.getPropertyDouble(resGetV0, "v1") == 42 &&
-        JSRuntime.getPropertyDouble(resGetV1, "v0") == 42 && JSRuntime.getPropertyDouble(resGetV1, "v1") == 42) {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const ExampleClass = module.getProperty("ExampleClass")
+        const resObj = ExampleClass.instantiate(ESValue.wrapNumber(42), ESValue.wrapNumber(42))
+        const res = ExampleClass.instantiate(resObj, resObj)
+
+        const resGetV0 = res.getProperty("v0")
+        const resGetV1 = res.getProperty("v1")
+
+        if (resGetV0.getProperty("v0").toNumber() == 42 && resGetV0.getProperty("v1").toNumber() == 42 &&
+            resGetV1.getProperty("v0").toNumber() == 42 && resGetV1.getProperty("v1").toNumber() == 42) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jsnewSetPropertyObject(): int {
-    let resObj = jsnew.$(jsvars.m, ".ClassWithEmptyConstructor");
-    let res = jsnew.$(jsvars.m, ".ClassWithEmptyConstructor");
-    JSRuntime.setPropertyJSValue(resObj,"v0", res);
-    JSRuntime.setPropertyJSValue(resObj,"v1", res);
-    let resGetV0 = JSRuntime.getPropertyJSValue(resObj, "v0");
-    let resGetV1 = JSRuntime.getPropertyJSValue(resObj, "v1");
-    if (JSRuntime.getPropertyDouble(resGetV0, "v0") == 42 && JSRuntime.getPropertyDouble(resGetV0, "v1") == 42 &&
-        JSRuntime.getPropertyDouble(resGetV1, "v0") == 42 && JSRuntime.getPropertyDouble(resGetV1, "v1") == 42) {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const ClassWithEmptyConstructor = module.getProperty("ClassWithEmptyConstructor")
+        const resObj = ClassWithEmptyConstructor.instantiate()
+        const res = ClassWithEmptyConstructor.instantiate()
+
+        resObj.setProperty("v0", res)
+        resObj.setProperty("v1", res)
+
+        const resGetV0 = resObj.getProperty("v0")
+        const resGetV1 = resObj.getProperty("v1")
+
+        if (resGetV0.getProperty("v0").toNumber() == 42 && resGetV0.getProperty("v1").toNumber() == 42 &&
+            resGetV1.getProperty("v0").toNumber() == 42 && resGetV1.getProperty("v1").toNumber() == 42) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jscallMethodObject(): int {
-    let resObj = jsnew.$nn(jsvars.m, ".ExampleClass", 42, 42);
-    let res = jscall.any$(jsvars.m, ".evaluateObject", resObj);
-    let resGetV0 = JSRuntime.getPropertyDouble(res, "v0");
-    let resGetV1 = JSRuntime.getPropertyDouble(res, "v1");
-    if (resGetV0 == 84 && resGetV1 == 84) {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const ExampleClass = module.getProperty("ExampleClass")
+        const resObj = ExampleClass.instantiate(ESValue.wrapNumber(42), ESValue.wrapNumber(42))
+
+        const res = module.invokeMethod("evaluateObject", resObj)
+        const resGetV0 = res.getProperty("v0").toNumber()
+        const resGetV1 = res.getProperty("v1").toNumber()
+
+        if (resGetV0 == 84 && resGetV1 == 84) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jscallMethodSimple(): int {
-    let resObj = jsnew.$nn(jsvars.m, ".ExampleClass", 42, 42);
-    let res = jscall.num$(resObj, ".instanceEvaluateNumber");
-    if (res == 84) {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const ExampleClass = module.getProperty("ExampleClass")
+        const resObj = ExampleClass.instantiate(ESValue.wrapNumber(42), ESValue.wrapNumber(42))
+
+        const res = resObj.invokeMethod("instanceEvaluateNumber").toNumber()
+
+        if (res == 84) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jscallString(): int {
-    let v0: String = "hello";
-    let v1: String = "world";
-    let res = jscall.str$(jsvars.m, ".evaluateNumber", v0, v1);
-    if (res == "helloworld") {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const v0: String = "hello"
+        const v1: String = "world"
+        const res = module.invokeMethod("evaluateNumber", ESValue.wrapString(v0), ESValue.wrapString(v1)).toString()
+
+        if (res == "helloworld") {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jsnewString(): int {
-    let v0: String = "hello";
-    let v1: String = "world";
-    let resObj = jsnew.$(jsvars.m, ".ExampleClass", v0, v1);
-    let resGetV0 = JSRuntime.getPropertyString(resObj, "v0");
-    let resGetV1 = JSRuntime.getPropertyString(resObj, "v1");
-    if (resGetV0 == v0 && resGetV1 == v1) {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const v0: String = "hello"
+        const v1: String = "world"
+        
+        const ExampleClass = module.getProperty("ExampleClass")
+        const resObj = ExampleClass.instantiate(ESValue.wrapString(v0), ESValue.wrapString(v1))
+
+        const resGetV0 = resObj.getProperty("v0").toString()
+        const resGetV1 = resObj.getProperty("v1").toString()
+
+        if (resGetV0 == v0 && resGetV1 == v1) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jsnewSetPropertyString(): int {
-    let v0: String = "hello";
-    let v1: String = "world";
-    let resObj = jsnew.$(jsvars.m, ".ClassWithEmptyConstructor");
-    JSRuntime.setPropertyString(resObj, "v0", v0);
-    JSRuntime.setPropertyString(resObj, "v1", v1);
-    let resGetV0 = JSRuntime.getPropertyString(resObj, "v0");
-    let resGetV1 = JSRuntime.getPropertyString(resObj, "v1");
-    if (resGetV0 == v0 && resGetV1 == v1) {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const v0: String = "hello"
+        const v1: String = "world"
+
+        const ClassWithEmptyConstructor = module.getProperty("ClassWithEmptyConstructor")
+        const resObj = ClassWithEmptyConstructor.instantiate()
+
+        resObj.setProperty("v0", ESValue.wrapString(v0))
+        resObj.setProperty("v1", ESValue.wrapString(v1))
+
+        const resGetV0 = resObj.getProperty("v0").toString()
+        const resGetV1 = resObj.getProperty("v1").toString()
+
+        if (resGetV0 == v0 && resGetV1 == v1) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jscallStaticMethodString(): int {
-    let v0: String = "hello";
-    let v1: String = "world";
-    let res = jscall.str$(jsvars.m, ".ExampleClass.evaluateNumber", v0, v1);
-    if (res == "helloworld") {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const v0: String = "hello"
+        const v1: String = "world"
+
+        const ExampleClass = module.getProperty("ExampleClass")
+        const res = ExampleClass.invokeMethod("evaluateNumber", ESValue.wrapString(v0), ESValue.wrapString(v1)).toString()
+
+        if (res == "helloworld") {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }
 
 function jscallArray(): int {
-    let v0: FixedArray<int> = new int[10];
-    for (let i = 0; i < 10; ++i) {
-        v0[i] = i * i;
-    }
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
 
-    let res = jscall.any$(jsvars.m, ".evaluateArray", v0, 10);
-    for (let i = 0; i < 10; ++i) {
-        if (JSRuntime.getElementInt(res, i) != 2 * i * i) {
-            return 1;
+        const v0: FixedArray<int> = new int[10]
+        for (let i = 0; i < 10; ++i) {
+            v0[i] = i * i
         }
-    }
 
-    return 0;
+        const res = module.invokeMethod("evaluateArray", ESValue.wrap(v0), ESValue.wrapNumber(10))
+
+        for (let i = 0; i < 10; ++i) {
+            if (res.getProperty(i).toNumber() != 2 * i * i) {
+                return 1
+            }
+        }
+
+        return 0
+    } catch (e) {
+        return 1
+    }
 }
 
 function jsnewArray(): int {
-    let v0: FixedArray<int> = new int[10];
-    for (let i = 0; i < 10; ++i) {
-        v0[i] = i * i;
-    }
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
 
-
-    let resObj = jsnew.$(jsvars.m, ".ExampleClass", v0, v0);
-    let resGetV0 = JSRuntime.getPropertyJSValue(resObj, "v0");
-    let resGetV1 = JSRuntime.getPropertyJSValue(resObj, "v1");
-
-    for (let i = 0; i < 10; ++i) {
-        if (JSRuntime.getElementInt(resGetV0, i) != v0[i] || JSRuntime.getElementInt(resGetV1, i) != v0[i]) {
-            return 1;
+        const v0: FixedArray<int> = new int[10]
+        for (let i = 0; i < 10; ++i) {
+            v0[i] = i * i
         }
+
+        const ExampleClass = module.getProperty("ExampleClass")
+        const resObj = ExampleClass.instantiate(ESValue.wrap(v0), ESValue.wrap(v0))
+
+        const resGetV0 = resObj.getProperty("v0")
+        const resGetV1 = resObj.getProperty("v1")
+
+        for (let i = 0; i < 10; ++i) {
+            if (resGetV0.getProperty(i).toNumber() != v0[i] || resGetV1.getProperty(i).toNumber() != v0[i]) {
+                return 1
+            }
+        }
+        return 0
+    } catch (e) {
+        return 1
     }
-    return 0;
 }
 
 function jsnewSetPropertyArray(): int {
-    let v0: FixedArray<int> = new int[10];
-    for (let i = 0; i < 10; ++i) {
-        v0[i] = i * i;
-    }
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
 
-    let resObj = jsnew.$(jsvars.m, ".ClassWithEmptyConstructor");
-
-    JSRuntime.setPropertyJSValue(resObj,"v0", JSRuntime.newJSValueObject(v0));
-    JSRuntime.setPropertyJSValue(resObj,"v1", JSRuntime.newJSValueObject(v0));
-    let resGetV0 = JSRuntime.getPropertyJSValue(resObj, "v0");
-    let resGetV1 = JSRuntime.getPropertyJSValue(resObj, "v1");
-
-    for (let i = 0; i < 10; ++i) {
-        if (resGetV0[i] as int != v0[i] || resGetV1[i] as int != v0[i]) {
-            return 1;
+        const v0: FixedArray<int> = new int[10]
+        for (let i = 0; i < 10; ++i) {
+            v0[i] = i * i
         }
+
+        const ClassWithEmptyConstructor = module.getProperty("ClassWithEmptyConstructor")
+        const resObj = ClassWithEmptyConstructor.instantiate()
+
+        resObj.setProperty("v0", ESValue.wrap(v0))
+        resObj.setProperty("v1", ESValue.wrap(v0))
+
+        const resGetV0 = resObj.getProperty("v0")
+        const resGetV1 = resObj.getProperty("v1")
+
+        for (let i = 0; i < 10; ++i) {
+            if (resGetV0.getProperty(i).toNumber() != v0[i] || resGetV1.getProperty(i).toNumber() != v0[i]) {
+                return 1
+            }
+        }
+        return 0
+    } catch (e) {
+        return 1
     }
-    return 0;
 }
 
 function jscallStaticMethodArray(): int {
-    let v0: FixedArray<int> = new int[10];
-    for (let i = 0; i < 10; ++i) {
-        v0[i] = i * i;
-    }
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
 
-    let res = jscall.any$(jsvars.m, ".ExampleClass.evaluateArray", v0, 10);
-    for (let i = 0; i < 10; ++i) {
-        if (JSRuntime.getElementInt(res, i) != 2 * i * i) {
-            return 1;
+        const v0: FixedArray<int> = new int[10]
+        for (let i = 0; i < 10; ++i) {
+            v0[i] = i * i
         }
+
+        const ExampleClass = module.getProperty("ExampleClass")
+        const res = ExampleClass.invokeMethod("evaluateArray", ESValue.wrap(v0), ESValue.wrapNumber(10))
+
+        for (let i = 0; i < 10; ++i) {
+            if (res.getProperty(i).toNumber() != 2 * i * i) {
+                return 1
+            }
+        }
+        return 0
+    } catch (e) {
+        return 1
     }
-    return 0;
 }
 
 function testNamespace(): int {
-    let v0: int = 1;    
-    let v1: String = "Pinky";
-    let resObj = jscall.any$(jsvars.m, ".MyNamespace.createKitten", v0, v1);
-    let resId = JSRuntime.getPropertyDouble(resObj, "id");
-    let resName = JSRuntime.getPropertyString(resObj, "name");
-    if (resId == v0 && resName == v1) {
-        return 0;
-    } else {
-        return 1;
+    try {
+        const global = ESValue.getGlobal()
+        const gtestEnv = global.getProperty("gtest_env")
+        const module = gtestEnv.getProperty("module")
+
+        const v0: int = 1
+        const v1: String = "Pinky"
+
+        const resObj = module.getProperty("MyNamespace").invokeMethod("createKitten", ESValue.wrapNumber(v0), ESValue.wrapString(v1))
+        const resId = resObj.getProperty("id").toNumber()
+        const resName = resObj.getProperty("name").toString()
+
+        if (resId == v0 && resName == v1) {
+            return 0
+        } else {
+            return 1
+        }
+    } catch (e) {
+        return 1
     }
 }

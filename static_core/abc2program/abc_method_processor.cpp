@@ -18,8 +18,8 @@
 #include "abc_annotation_processor.h"
 #include "assembly-function.h"
 #include "mangling.h"
-#include "source_lang_enum.h"
-#include "proto_data_accessor-inl.h"
+#include <libarkfile/include/source_lang_enum.h>
+#include "libarkfile/proto_data_accessor-inl.h"
 
 namespace ark::abc2program {
 

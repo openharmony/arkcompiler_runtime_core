@@ -48,9 +48,9 @@ async function mustCallCheckAll() {
                 });
                 mustChecks.length = 0;
                 resolve(undefined);
-            } catch (e: Error) {
+            } catch (e) {
                 mustChecks.length = 0;
-                reject(e);
+                reject(e)
             }
         }, 2000);
     })
@@ -155,7 +155,7 @@ function testReadableStreamSetEncodingParameterError() {
         readableStream.setEncoding('my valid encoding');
     }
 
-    let exceptionCheck = (e: Error | Exception): string | boolean => {
+    let exceptionCheck = (e: Error): string | boolean => {
         return ((e as BusinessError).message == "Parameter error. The type of my valid encoding must be string.");
     }
     arktest.expectThrow(() => {test()}, exceptionCheck);

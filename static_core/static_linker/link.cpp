@@ -15,9 +15,9 @@
 
 #include <algorithm>
 
-#include "libpandabase/os/file.h"
-#include "libpandabase/utils/pandargs.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/os/file.h"
+#include "libarkbase/utils/pandargs.h"
+#include "libarkbase/utils/logger.h"
 #include "generated/link_options.h"
 
 #include "linker.h"

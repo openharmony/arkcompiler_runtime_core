@@ -21,7 +21,7 @@ async function checkRejectAsync(promise: Promise<String>, rejection: Error): Pro
     try {
         await promise;
         return false;
-    } catch (exception: Error) {
+    } catch (exception) {
         return exception == rejection;
     }
 }

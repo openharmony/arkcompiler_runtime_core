@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -54,7 +54,7 @@ catch_begin:
 
 .function u1 main2() {
     newobj v0, C
-    ldobj v0, C.a
+    ldobj.obj v0, C.a
 try_begin:
     checkcast A
     ldai 0
@@ -120,6 +120,10 @@ catch_begin:
 #! PASS_AFTER   "ChecksElimination"
 #! INST_NOT     "CheckCast"
 #! INST         "Deoptimize"
+#! PASS_BEFORE  "EscapeAnalysis"
+#! INST_COUNT   "NewObject", 2
+#! PASS_AFTER   "EscapeAnalysis"
+#! INST_COUNT   "NewObject", 2
 
 .function u1 test2(u1 a0) {
     newobj v0, A

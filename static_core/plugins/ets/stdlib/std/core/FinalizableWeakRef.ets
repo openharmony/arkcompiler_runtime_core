@@ -17,8 +17,8 @@ package std.core;
 
 /**
  * FinalizableWeakRef - weak reference to object with finalizer.
- * This is an iternal class and is only used in napi and intrerop.
- * It's a expected that finalizer is a native function that doesn't need managed scope
+ * This is an iternal class which is used only in napi and interop.
+ * It's expected that finalizer is a native function that doesn't need managed scope
  * and used to finalize some native data via finalizerPtr.
  * A weak reference to an object is a reference that does not prevent the object
  * from being reclaimed by the GC.
@@ -26,18 +26,16 @@ package std.core;
  *
  * @tparam T Object type for weak reference
  */
-final class FinalizableWeakRef<T extends Object> {
+final class FinalizableWeakRef<T extends Object> extends WeakRef<T> {
     /**
      * Constructs weak reference object referring to a given target object
      *
      * @param target - target object for weak reference
      */
     public constructor(target: T) {
-        this.referent = target;
+        super(target);
     }
 
-    // Reference to target object
-    private referent: T | undefined;
     private prevRef: FinalizableWeakRef<T> | null = null;
     private nextRef: FinalizableWeakRef<T> | null = null;
     private finalizerPtr: long;

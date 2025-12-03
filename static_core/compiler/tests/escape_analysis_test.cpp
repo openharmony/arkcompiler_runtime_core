@@ -27,6 +27,8 @@ inline const RuntimeInterface::FieldPtr INT32_FIELD = reinterpret_cast<void *>(0
 inline const RuntimeInterface::FieldPtr UINT8_FIELD = reinterpret_cast<void *>(0xB00B00UL);
 inline const RuntimeInterface::FieldPtr INT8_FIELD = reinterpret_cast<void *>(0xB00B01UL);
 inline const RuntimeInterface::ClassPtr INT32_CLASS = reinterpret_cast<void *>(0xDEAD5320U);
+inline const RuntimeInterface::IdType CUSTOM_CLASS_ID = 0xDEAD1337U;
+inline const RuntimeInterface::ClassPtr CUSTOM_CLASS = reinterpret_cast<void *>(0x00133700U);
 
 class EscapeAnalysisTest : public GraphTest {
 public:
@@ -39,7 +41,9 @@ public:
         RegisterFieldType(UINT8_FIELD, DataType::UINT8);
         RegisterFieldType(INT8_FIELD, DataType::INT8);
 
-        RegisterClassType(INT32_CLASS, DataType::INT32);
+        RegisterArrayComponentType(INT32_CLASS, DataType::INT32);
+
+        RegisterClass(CUSTOM_CLASS_ID, CUSTOM_CLASS);
     }
 
     bool Run() const
@@ -95,7 +99,7 @@ TEST_F(EscapeAnalysisTest, NewEmptyUnusedArray)
         BASIC_BLOCK(2U, -1L)
         {
             INST(1U, Opcode::SaveState);
-            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U).Class(INT32_CLASS);
             INST(3U, Opcode::NewArray).ref().Inputs(2U, 5U, 1U);
             INST(4U, Opcode::ReturnVoid).v0id();
         }
@@ -111,7 +115,7 @@ TEST_F(EscapeAnalysisTest, NewEmptyUnusedArray)
         BASIC_BLOCK(2U, -1L)
         {
             INST(1U, Opcode::SaveState);
-            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U).Class(INT32_CLASS);
             INST(4U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
@@ -194,7 +198,7 @@ SRC_GRAPH(NewUnusedArrayAndControlFlow, Graph *graph)
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(3U, 1U, 2U);
             INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
@@ -221,7 +225,7 @@ OUT_GRAPH(NewUnusedArrayAndControlFlow, Graph *graph)
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(INT32_CLASS);
             INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
@@ -327,7 +331,7 @@ SRC_GRAPH(NewUnusedArrayFromDifferentBranches, Graph *graph)
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(3U, 1U, 2U);  // virt
             INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
@@ -358,7 +362,7 @@ OUT_GRAPH(NewUnusedArrayFromDifferentBranches, Graph *graph)
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(INT32_CLASS);
             INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
 
@@ -508,7 +512,7 @@ SRC_GRAPH(MergeDifferentMaterializedStatesForSameArray, Graph *graph)
         BASIC_BLOCK(2U, 3U, 7U)
         {
             INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(3U, 42U, 2U);  // virt
             INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(0U);
         }
@@ -558,7 +562,7 @@ OUT_GRAPH(MergeDifferentMaterializedStatesForSameArray, Graph *graph)
         BASIC_BLOCK(2U, 3U, 7U)
         {
             INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(INT32_CLASS);
             INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(0U);
         }
 
@@ -636,7 +640,7 @@ TEST_F(EscapeAnalysisTest, ArrayEscapement)
         BASIC_BLOCK(2U, -1L)
         {
             INST(1U, Opcode::SaveState);
-            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U).Class(INT32_CLASS);
             INST(3U, Opcode::NewArray).ref().Inputs(2U, 0U, 1U);
             INST(4U, Opcode::Return).ref().Inputs(3U);
         }
@@ -857,7 +861,7 @@ TEST_F(EscapeAnalysisTest, ArrayPartialEscapementNonConstantIndex)
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(3U, 1U, 2U);
             INST(10U, Opcode::NullCheck).ref().Inputs(4U, 2U);
             INST(11U, Opcode::StoreArray).s32().Inputs(10U, 0U, 1U);
@@ -906,44 +910,6 @@ TEST_F(EscapeAnalysisTest, ObjectEscapementThroughPhi)
             INST(7U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
             INST(8U, Opcode::LoadAndInitClass).ref().Inputs(7U);
             INST(9U, Opcode::NewObject).ref().Inputs(8U, 7U);
-        }
-
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(10U, Opcode::Phi).Inputs(6U, 9U).ref();
-            INST(11U, Opcode::Return).Inputs(10U).ref();
-        }
-        // NOLINTEND(readability-magic-numbers)
-    }
-
-    ASSERT_FALSE(Run());
-}
-
-TEST_F(EscapeAnalysisTest, ArrayEscapementThroughPhi)
-{
-    GRAPH(GetGraph())
-    {
-        // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0U, 0U).s32();
-        CONSTANT(1U, 42U).s32();
-
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(2U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
-        }
-
-        BASIC_BLOCK(3U, 5U)
-        {
-            INST(4U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U);
-            INST(6U, Opcode::NewArray).ref().Inputs(5U, 1U, 4U);
-        }
-
-        BASIC_BLOCK(4U, 5U)
-        {
-            INST(7U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(8U, Opcode::LoadAndInitClass).ref().Inputs(7U);
-            INST(9U, Opcode::NewArray).ref().Inputs(8U, 1U, 7U);
         }
 
         BASIC_BLOCK(5U, -1L)
@@ -1011,7 +977,7 @@ SRC_GRAPH(ReturnSumOf2Elements, Graph *graph)
         BASIC_BLOCK(2U, -1L)
         {
             INST(4U, Opcode::SaveState).Inputs(3U).SrcVregs({3U});
-            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U);
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U).Class(INT32_CLASS);
             INST(6U, Opcode::NewArray).ref().Inputs(5U, 2U, 4U);
 
             INST(7U, Opcode::SaveState).Inputs(3U, 6U).SrcVregs({0U, 1U});
@@ -1170,7 +1136,7 @@ TEST_F(EscapeAnalysisTest, VirtualArraysChain)
         BASIC_BLOCK(2U, -1L)
         {
             INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U).Class(INT32_CLASS);
             INST(3U, Opcode::NewArray).ref().Inputs(2U, 42U, 1U);  // should not escape
             INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
             INST(6U, Opcode::NewArray).ref().Inputs(2U, 42U, 4U);  // should not escape
@@ -1196,7 +1162,7 @@ TEST_F(EscapeAnalysisTest, VirtualArraysChain)
         BASIC_BLOCK(2U, -1L)
         {
             INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U).Class(INT32_CLASS);
             INST(11U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
@@ -1215,7 +1181,7 @@ TEST_F(EscapeAnalysisTest, VirtualArraysChainMaterialize)
         BASIC_BLOCK(2U, -1L)
         {
             INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U).Class(INT32_CLASS);
             INST(3U, Opcode::NewArray).ref().Inputs(2U, 42U, 1U);  // should not escape
             INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
             INST(6U, Opcode::NewArray).ref().Inputs(2U, 42U, 4U);  // should not escape
@@ -2197,11 +2163,11 @@ OUT_GRAPH(RemoveVirtualObjectFromSaveStates, Graph *graph)
         {
             INST(6U, Opcode::SaveState);
             INST(7U, Opcode::CallStatic).v0id().InputsAutoType(18U, 6U).Inlined();
-            INST(8U, Opcode::SaveState);
+            INST(8U, Opcode::SaveState).Caller(7U);
             INST(9U, Opcode::CallStatic).v0id().InputsAutoType(18U, 8U).Inlined();
-            INST(41U, Opcode::SaveState);
+            INST(41U, Opcode::SaveState).Caller(9U);
             INST(42U, Opcode::NewObject).ref().Inputs(2U, 41U);
-            INST(10U, Opcode::SaveState).Inputs(42U).SrcVregs({0U});
+            INST(10U, Opcode::SaveState).Caller(9U).Inputs(42U).SrcVregs({0U});
             INST(11U, Opcode::CallStatic).v0id().InputsAutoType(42U, 10U);
             INST(12U, Opcode::ReturnInlined).Inputs(8U);
             INST(13U, Opcode::ReturnInlined).Inputs(6U);
@@ -2737,78 +2703,6 @@ TEST_F(EscapeAnalysisTest, EliminateStoreToNarrowIntField)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-SRC_GRAPH(PatchSaveStates, Graph *graph)
-{
-    GRAPH(graph)
-    {
-        // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0U, 0U).ref();
-        PARAMETER(1U, 1U).u32();
-
-        BASIC_BLOCK(2U, 5U, 4U)
-        {
-            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
-            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
-            INST(5U, Opcode::IfImm).SrcType(DataType::UINT32).CC(CC_EQ).Inputs(1U).Imm(0U);
-        }
-
-        BASIC_BLOCK(4U, 5U) {}
-
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(6U, Opcode::Phi).ref().Inputs(0U, 4U);
-            INST(7U, Opcode::SaveState).Inputs(0U, 6U).SrcVregs({0U, 1U});
-            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(0U, 6U, 7U);
-            INST(9U, Opcode::ReturnVoid).v0id();
-        }
-        // NOLINTEND(readability-magic-numbers)
-    }
-}
-
-OUT_GRAPH(PatchSaveStates, Graph *graph)
-{
-    GRAPH(graph)
-    {
-        // NOLINTBEGIN(readability-magic-numbers)
-        PARAMETER(0U, 0U).ref();
-        PARAMETER(1U, 1U).u32();
-
-        BASIC_BLOCK(2U, 5U, 4U)
-        {
-            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
-            INST(5U, Opcode::IfImm).SrcType(DataType::UINT32).CC(CC_EQ).Inputs(1U).Imm(0U);
-        }
-
-        BASIC_BLOCK(4U, 5U)
-        {
-            INST(10U, Opcode::SaveState).Inputs(0U).SrcVregs({VirtualRegister::BRIDGE});
-            INST(4U, Opcode::NewObject).ref().Inputs(3U, 10U);
-        }
-
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(6U, Opcode::Phi).ref().Inputs(0U, 4U);
-            INST(7U, Opcode::SaveState).Inputs(0U, 6U).SrcVregs({0U, 1U});
-            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(0U, 6U, 7U);
-            INST(9U, Opcode::ReturnVoid).v0id();
-        }
-        // NOLINTEND(readability-magic-numbers)
-    }
-}
-
-TEST_F(EscapeAnalysisTest, PatchSaveStates)
-{
-    src_graph::PatchSaveStates::CREATE(GetGraph());
-
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
-    out_graph::PatchSaveStates::CREATE(graph);
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
-}
-
 TEST_F(EscapeAnalysisTest, InverseMaterializationOrder)
 {
     GRAPH(GetGraph())
@@ -2991,6 +2885,8 @@ TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
 
     auto graph = CreateEmptyGraph();
     out_graph::MaterializeBeforeReferencedObjectMaterialization::CREATE(graph);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 SRC_GRAPH(FillSaveStateBetweenSaveState, Graph *graph)
@@ -3260,7 +3156,7 @@ SRC_GRAPH(SplitDeoptimizationP1, Graph *graph)
         BASIC_BLOCK(3U, -1L)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3287,7 +3183,7 @@ OUT_GRAPH(SplitDeoptimizationP1, Graph *graph)
         BASIC_BLOCK(3U, 10U, 11U)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U}).ClearFlag(inst_flags::NO_DCE);
             INST(54U, Opcode::Compare).b().Inputs(4U, 53U).SrcType(DataType::REFERENCE).CC(ConditionCode::CC_EQ);
@@ -3331,7 +3227,7 @@ OUT_GRAPH(SplitDeoptimizationP2, Graph *graph)
         BASIC_BLOCK(3U, -1L)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(57U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(58U, Opcode::NullCheck).ref().Inputs(4U, 57U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3358,7 +3254,7 @@ SRC_GRAPH(SplitDeoptimizationP3, Graph *graph)
         BASIC_BLOCK(3U, -1L)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3382,7 +3278,7 @@ OUT_GRAPH(SplitDeoptimizationP3, Graph *graph)
         BASIC_BLOCK(3U, -1L)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(55U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(56U, Opcode::NullCheck).ref().Inputs(4U, 55U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3408,7 +3304,7 @@ SRC_GRAPH(SplitDeoptimizationP4, Graph *graph)
         BASIC_BLOCK(3U, 4U)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3507,7 +3403,7 @@ SRC_GRAPH(SplitDeoptimizationP6, Graph *graph)
         BASIC_BLOCK(3U, -1L)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3532,7 +3428,7 @@ OUT_GRAPH(SplitDeoptimizationP6, Graph *graph)
         BASIC_BLOCK(3U, -1L)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(55U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(56U, Opcode::NullCheck).ref().Inputs(4U, 55U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3558,7 +3454,7 @@ SRC_GRAPH(SplitDeoptimizationP7, Graph *graph)
         BASIC_BLOCK(3U, -1L)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3584,7 +3480,7 @@ OUT_GRAPH(SplitDeoptimizationP7, Graph *graph)
         BASIC_BLOCK(3U, -1L)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(55U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(56U, Opcode::NullCheck).ref().Inputs(4U, 55U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3611,7 +3507,7 @@ SRC_GRAPH(SplitDeoptimizationP8, Graph *graph)
         BASIC_BLOCK(3U, 4U)
         {
             INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
             INST(10U, Opcode::SaveStateDeoptimize).Inputs(4U).SrcVregs({4U});
             INST(11U, Opcode::NullCheck).ref().Inputs(4U, 10U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
@@ -3989,6 +3885,8 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationP9)
 
     auto graph = CreateEmptyGraph();
     out_graph::MaterializeBeforeReferencedObjectMaterialization::CREATE(graph);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -4006,6 +3904,8 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationP10)
 
     auto graph = CreateEmptyGraph();
     out_graph::SplitDeoptimizationP10::CREATE(graph);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -4022,6 +3922,7 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationP11)
 
     auto graph = CreateEmptyGraph();
     out_graph::SplitDeoptimizationP11::CREATE(graph);
+    INS(SS_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST2_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -4040,6 +3941,8 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationN1)
 
     auto graph = CreateEmptyGraph();
     src_graph::SplitDeoptimizationN1::CREATE(graph, CALL_INST1_ID, CALL_INST2_ID, SS1_ID, SS2_ID);
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST1_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST2_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -4055,7 +3958,150 @@ TEST_F(EscapeAnalysisTest, SplitDeoptimizationN2)
 
     auto graph = CreateEmptyGraph();
     src_graph::SplitDeoptimizationN2::CREATE(graph, CALL_INST_ID, SS_ID);
+    INS(SS_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+// CC-OFFNXT(G.FUD.05) long test representation of IR
+SRC_GRAPH(PhiAndPhiInputMaterialization, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+
+        CONSTANT(2U, 1U).i32();
+        CONSTANT(3U, 2U).i32();
+        CONSTANT(4U, 3U).i32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(20U, Opcode::SaveState);
+            INST(21U, Opcode::LoadAndInitClass).ref().Inputs(20U).Class(CUSTOM_CLASS);
+            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(0U).Imm(0U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(30U, Opcode::SaveState);
+            INST(31U, Opcode::NewObject).ref().Inputs(21U, 30U).TypeId(CUSTOM_CLASS_ID);
+            INST(32U, Opcode::StoreObject).s32().Inputs(31U, 2U).ObjField(INT32_FIELD);
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(40U, Opcode::SaveState);
+            INST(41U, Opcode::NewObject).ref().Inputs(21U, 40U).TypeId(CUSTOM_CLASS_ID);
+            INST(42U, Opcode::StoreObject).s32().Inputs(41U, 3U).ObjField(INT32_FIELD);
+        }
+        BASIC_BLOCK(5U, 6U, 7U)
+        {
+            INST(50U, Opcode::Phi).ref().Inputs(31U, 41U, 53U);
+            INST(51U, Opcode::Phi).s32().Inputs(2U, 2U, 77U);
+            INST(52U, Opcode::SaveState).Inputs(50U, 51U).SrcVregs({0U, 1U});
+            INST(53U, Opcode::NewObject).ref().Inputs(21U, 52U).TypeId(CUSTOM_CLASS_ID);
+            INST(54U, Opcode::StoreObject).s32().Inputs(53U, 4U).ObjField(INT32_FIELD);
+            INST(55U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(61U, Opcode::SaveStateDeoptimize).Inputs(50U, 51U, 53U).SrcVregs({0U, 1U, 2U});
+            INST(62U, Opcode::Deoptimize).Inputs(61U);
+        }
+        BASIC_BLOCK(7U, 5U, 8U)
+        {
+            INST(71U, Opcode::SaveState).Inputs(50U, 51U, 53U).SrcVregs({0U, 1U, 2U});
+            INST(72U, Opcode::CallStatic).v0id().InputsAutoType(50U, 53U, 71U).Inlined();
+            INST(73U, Opcode::LoadObject).s32().Inputs(50U).ObjField(INT32_FIELD);
+            INST(74U, Opcode::LoadObject).s32().Inputs(53U).ObjField(INT32_FIELD);
+            INST(75U, Opcode::Add).s32().Inputs(73U, 74U);
+            INST(76U, Opcode::ReturnInlined).v0id().Inputs(71U);
+            INST(77U, Opcode::Add).s32().Inputs(51U, 75U);
+            INST(78U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_GT).Inputs(77U).Imm(30U);
+        }
+        BASIC_BLOCK(8U, -1L)
+        {
+            INST(81U, Opcode::Return).i32().Inputs(77U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+// CC-OFFNXT(G.FUD.05) long test representation of IR
+OUT_GRAPH(PhiAndPhiInputMaterialization, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+
+        CONSTANT(2U, 1U).i32();
+        CONSTANT(3U, 2U).i32();
+        CONSTANT(4U, 3U).i32();
+        NULLPTR(115U);
+
+        BASIC_BLOCK(2U, 14U, 4U)
+        {
+            INST(20U, Opcode::SaveState);
+            INST(21U, Opcode::LoadAndInitClass).ref().Inputs(20U).Class(CUSTOM_CLASS);
+            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(0U).Imm(0U);
+        }
+        BASIC_BLOCK(4U, 14U) {}
+        BASIC_BLOCK(14U, 5U)
+        {
+            // preheader
+            INST(105, Opcode::Phi).i32().Inputs(2U, 3U);
+            INST(109U, Opcode::SaveState);
+            INST(110U, Opcode::NewObject).Inputs(21U, 109U).ref();
+            INST(111U, Opcode::StoreObject).s32().Inputs(110U, 105U).ObjField(INT32_FIELD);
+        }
+        BASIC_BLOCK(5U, 6U, 7U)
+        {
+            // First input dominates phi, materialized
+            INST(50U, Opcode::Phi).ref().Inputs(110U, 113U);
+            INST(51U, Opcode::Phi).s32().Inputs(2U, 77U);
+            INST(55U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Inputs(1U).Imm(0U);
+        }
+        BASIC_BLOCK(7U, 5U, 8U)
+        {
+            INST(71U, Opcode::SaveState).Inputs(50U, 51U).SrcVregs({0U, 1U});
+            INST(72U, Opcode::CallStatic).v0id().InputsAutoType(50U, 115U, 71U).Inlined();
+            INST(73U, Opcode::LoadObject).s32().Inputs(50U).ObjField(INT32_FIELD);
+            INST(75U, Opcode::Add).s32().Inputs(73U, 4U);
+            INST(76U, Opcode::ReturnInlined).v0id().Inputs(71U);
+            INST(77U, Opcode::Add).s32().Inputs(51U, 75U);
+            INST(112U, Opcode::SaveState).Inputs();
+            INST(113U, Opcode::NewObject).Inputs(21U, 112U).ref();
+            INST(114U, Opcode::StoreObject).s32().Inputs(113U, 4U).ObjField(INT32_FIELD);
+            INST(78U, Opcode::IfImm).SrcType(DataType::INT32).CC(CC_GT).Inputs(77U).Imm(30U);
+        }
+        BASIC_BLOCK(8U, -1L)
+        {
+            INST(81U, Opcode::Return).i32().Inputs(77U);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(106U, Opcode::SaveState).Inputs(50U).SrcVregs({VirtualRegister::BRIDGE});
+            INST(107U, Opcode::NewObject).Inputs(21U, 106U).ref();
+            INST(108U, Opcode::StoreObject).s32().Inputs(107U, 4U).ObjField(INT32_FIELD);
+            // Do not crash when phi (v50) input (new v107) is also input to savestate
+            INST(61U, Opcode::SaveStateDeoptimize).Inputs(50U, 51U, 107U).SrcVregs({0U, 1U, 2U});
+            INST(62U, Opcode::Deoptimize).Inputs(61U);
+        }
+
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+TEST_F(EscapeAnalysisTest, PhiAndPhiInputMaterialization)
+{
+    src_graph::PhiAndPhiInputMaterialization::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::PhiAndPhiInputMaterialization::CREATE(graph);
+
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
 }  // namespace ark::compiler

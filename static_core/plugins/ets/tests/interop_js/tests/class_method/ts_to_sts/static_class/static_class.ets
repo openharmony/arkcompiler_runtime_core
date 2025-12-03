@@ -13,19 +13,80 @@
  * limitations under the License.
  */
 
-import {
-    StaticClass,
-    createStaticClassFromTs,
-} from 'main_js';
+let module = ESValue.load('main_js');
+let StaticClass = module.getProperty('StaticClass');
+let createStaticClassFromTs = module.getProperty('createStaticClassFromTs');
 
 function checkStaticClassMethod(): boolean {
-    const TSClass = StaticClass;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (StaticClass.isUndefined() || StaticClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = StaticClass;
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateStaticClassFromTs(): boolean {
-    const TSClass = createStaticClassFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (createStaticClassFromTs.isUndefined() || createStaticClassFromTs.isNull()) {
+            return false;
+        }
+
+        const TSClass = createStaticClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }

@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "bytecode_instruction-inl.h"
-#include "file_items.h"
-#include "macros.h"
+#include "libarkfile/bytecode_instruction-inl.h"
+#include "libarkfile/file_items.h"
+#include "libarkbase/macros.h"
 #include "include/runtime.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/method-inl.h"
 
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include "util/str.h"
 

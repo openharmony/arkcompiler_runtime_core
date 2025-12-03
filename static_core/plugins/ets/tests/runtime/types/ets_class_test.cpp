@@ -31,7 +31,7 @@ public:
     EtsClassTest()
     {
         options_.SetShouldLoadBootPandaFiles(true);
-        options_.SetShouldInitializeIntrinsics(false);
+        options_.SetShouldInitializeIntrinsics(true);
         options_.SetCompilerEnableJit(false);
         options_.SetGcType("epsilon");
         options_.SetLoadRuntimes({"ets"});
@@ -71,10 +71,17 @@ public:
         return std::vector<MirrorFieldInfo> {
             MIRROR_FIELD_INFO(EtsClass, name_, "name"),
             MIRROR_FIELD_INFO(EtsClass, superClass_, "superClass"),
+            MIRROR_FIELD_INFO(EtsClass, linker_, "linker"),
             MIRROR_FIELD_INFO(EtsClass, typeMetaData_, "typeMetaData"),
             MIRROR_FIELD_INFO(EtsClass, overloadMap_, "overloadMap"),
             MIRROR_FIELD_INFO(EtsClass, flags_, "flags"),
+            MIRROR_FIELD_INFO(EtsClass, methodsNum_, "methodsNum"),
         };
+    }
+
+    static uint32_t GetClassMethodsNum(EtsClass *cls)
+    {
+        return cls->methodsNum_;
     }
 
 protected:
@@ -89,6 +96,29 @@ TEST_F(EtsClassTest, ClassMemoryLayout)
 {
     EtsClass *classClass = vm_->GetClassLinker()->GetClassRoot(EtsClassRoot::CLASS);
     MirrorFieldInfo::CompareMemberOffsets(classClass, GetClassMembers());
+}
+
+TEST_F(EtsClassTest, GetMethodsNum)
+{
+    const char *source = R"(
+        .language eTS
+        .record Test {}
+
+        .function i32 Test.foo1() {
+            ldai 0
+            return
+        }
+        .function i32 Test.foo2(f32 a0) {
+            ldai 0
+            return
+        }
+    )";
+
+    EtsClass *testKlass = GetTestClass(source, "LTest;");
+    ASSERT(testKlass);
+
+    ASSERT_TRUE(testKlass->GetMethodsNum() == testKlass->GetMethods().size());
+    ASSERT_TRUE(testKlass->GetMethodsNum() == GetClassMethodsNum(testKlass));
 }
 
 }  // namespace ark::ets::test

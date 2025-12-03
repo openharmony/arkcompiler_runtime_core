@@ -71,7 +71,6 @@ function(add_bouncing_peas_test PEAS_NAME PEAS_SOURCE)
         panda_target_include_directories(${PEAS_NAME}
             PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
             PUBLIC ${PANDA_ROOT}
-            PRIVATE ${PANDA_BINARY_ROOT}/libpandabase/panda_gen_options/generated
         )
         panda_target_compile_options(${PEAS_NAME} PUBLIC "-Wno-ignored-attributes")
 

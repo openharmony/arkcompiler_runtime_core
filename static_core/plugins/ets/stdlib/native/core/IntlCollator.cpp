@@ -17,7 +17,7 @@
 #include "IntlCommon.h"
 #include "ani.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "stdlib_ani_helpers.h"
 #include <unicode/coll.h>
 #include <unicode/locid.h>

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/os/time.h"
+#include "libarkbase/os/time.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 #include "runtime/coroutines/stackful_coroutine.h"
@@ -64,17 +64,17 @@ void StackfulCoroutineWorker::AddCreatedCoroutineAndSwitchToIt(Coroutine *newCor
 {
     // precondition: called within the current worker, no cross-worker calls allowed
     ASSERT(GetCurrentContext()->GetWorker() == this);
+    RegisterIncomingActiveCoroutine(newCoro);
 
+    // suspend current coro...
     auto *coro = Coroutine::GetCurrent();
     ScopedNativeCodeThread n(coro);
     coro->RequestSuspend(false);
-
-    newCoro->LinkToExternalHolder(IsMainWorker() || InExclusiveMode());
+    // ..and resume the new one
     auto *currentCtx = GetCurrentContext();
     auto *nextCtx = newCoro->GetContext<StackfulCoroutineContext>();
     nextCtx->RequestResume();
     Coroutine::SetCurrent(newCoro);
-    RegisterIncomingActiveCoroutine(newCoro);
 
     SwitchCoroutineContext(currentCtx, nextCtx);
 
@@ -303,6 +303,7 @@ void StackfulCoroutineWorker::ScheduleLoop()
 
 void StackfulCoroutineWorker::ScheduleLoopBody()
 {
+    // run the loop
     while (IsActive()) {
         RequestScheduleImpl();
         os::memory::LockHolder lkRunnables(runnablesLock_);
@@ -426,6 +427,10 @@ void StackfulCoroutineWorker::SuspendCurrentCoroGeneric()
 {
     auto *currentCoro = Coroutine::GetCurrent();
     ASSERT(currentCoro != nullptr);
+    if (currentCoro->IsContextSwitchRisky()) {
+        LOG(ERROR, COROUTINES) << "RISKY CONTEXT SWITCH!!! Call stack: ";
+        currentCoro->PrintCallStack();
+    }
     currentCoro->RequestSuspend(SUSPEND_AS_BLOCKED);
     if constexpr (!SUSPEND_AS_BLOCKED) {
         os::memory::LockHolder lock(runnablesLock_);
@@ -533,6 +538,8 @@ void StackfulCoroutineWorker::UpdateLoadFactor()
 void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()
 {
     if (IsCoroutineSwitchDisabled()) {
+        auto coro = Coroutine::GetCurrent();
+        coro->PrintCallStack();
         LOG(FATAL, COROUTINES) << "ERROR ERROR ERROR >>> Trying to switch coroutines on " << GetName()
                                << " when coroutine switch is DISABLED!!! <<< ERROR ERROR ERROR";
         UNREACHABLE();
@@ -642,6 +649,18 @@ void StackfulCoroutineWorker::OnAfterContextSwitch(StackfulCoroutineContext *to)
     coroTo->OnContextSwitchedTo();
 }
 
+void StackfulCoroutineWorker::CacheLocalObjectsInCoroutines()
+{
+    os::memory::LockHolder lock(runnablesLock_);
+    runnables_.IterateOverCoroutines([](Coroutine *co) { co->UpdateCachedObjects(); });
+    {
+        os::memory::LockHolder lh(waitersLock_);
+        for (auto &[_, co] : waiters_) {
+            co->UpdateCachedObjects();
+        }
+    }
+}
+
 void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStateInfo *info) const
 {
     os::memory::LockHolder lock(runnablesLock_);
@@ -656,7 +675,7 @@ void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStat
 
 void StackfulCoroutineWorker::ProcessTimerEvents()
 {
-    PandaVector<TimerEvent *> timerEvents;
+    PandaVector<TimerEvent *> expiredTimers;
     {
         os::memory::LockHolder lh(waitersLock_);
         auto curTime = coroManager_->GetCurrentTime();
@@ -664,16 +683,16 @@ void StackfulCoroutineWorker::ProcessTimerEvents()
             if (evt->GetType() == CoroutineEvent::Type::TIMER) {
                 auto *timerEvent = static_cast<TimerEvent *>(evt);
                 timerEvent->SetCurrentTime(curTime);
-                timerEvents.push_back(timerEvent);
+                if (timerEvent->IsExpired()) {
+                    expiredTimers.push_back(timerEvent);
+                }
             }
         }
     }
-    std::sort(timerEvents.begin(), timerEvents.end(),
+    std::sort(expiredTimers.begin(), expiredTimers.end(),
               [](const TimerEvent *evt1, const TimerEvent *evt2) { return evt1->GetId() < evt2->GetId(); });
-    for (auto *evt : timerEvents) {
-        if (evt->IsExpired()) {
-            evt->Happen();
-        }
+    for (auto *evt : expiredTimers) {
+        evt->Happen();
     }
 }
 
@@ -694,7 +713,8 @@ std::pair<bool, uint64_t> StackfulCoroutineWorker::CalculateShortestTimerDelay()
             minTimerDelay = std::min(delay, minTimerDelay);
         }
     }
-    return {hasTimerEvents, minTimerDelay};
+    auto msDelay = minTimerDelay / 1000U;
+    return {hasTimerEvents, msDelay};
 }
 
 }  // namespace ark

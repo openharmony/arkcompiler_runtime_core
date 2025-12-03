@@ -12,21 +12,6 @@
 # limitations under the License.
 
 - {
-    method_name: unboxed,
-    object_type: Char,
-    init_object_data_type: "FixedArray<char>",
-    init_object_type: char,
-    init_object_type_nature: primitive,
-    param_init_data_types: {} ,
-    param_types: {},
-    param_list: {},
-    method_return_type: char,
-    init_object_data: "[c'x', c'X']",
-    expected_data_type: "FixedArray<char>",
-    expected_test_data: "[c'x', c'X']",
-    verify_test_result_function: comparePrimitiveValue
-  }
-- {
     method_name: toString,
     object_type: Char,
     init_object_data_type: "FixedArray<char>",
@@ -238,7 +223,7 @@
     result_nature: primitive,
     result_storage: this,
     result_type: char,
-    result_retrieve_function: "unboxed()",
+    result_retrieve_function: "toChar()",
     expected_data_item_type: char,
     expected_data_type: "FixedArray<char>",
     param_list: {},
@@ -258,7 +243,7 @@
     result_nature: primitive,
     result_type: char,
     result_storage: this,
-    result_retrieve_function: "unboxed()",
+    result_retrieve_function: "toChar()",
     expected_data_item_type: char,
     expected_data_type: "FixedArray<char>",
     param_list: {},

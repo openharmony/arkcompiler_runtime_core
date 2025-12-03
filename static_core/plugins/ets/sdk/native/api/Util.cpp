@@ -20,6 +20,9 @@
 #include <securec.h>
 #include <sys/types.h>
 #include <random>
+#ifdef PANDA_TARGET_OHOS
+#include <uv.h>
+#endif
 
 #include "stdlib/native/core/stdlib_ani_helpers.h"
 #include "tools/format_logger.h"
@@ -42,6 +45,15 @@ constexpr uint8_t UUID_VERSION4_MARK = 0x40;
 constexpr uint8_t UUID_LOW_SIX_BITS_MASK = 0x3F;
 constexpr uint8_t UUID_RESERVED_MARK = 0x80;
 
+#ifndef PANDA_TARGET_OHOS
+extern "C" {
+__attribute__((weak)) const char *uv_strerror([[maybe_unused]] int err)
+{
+    return "unknown error";
+}
+}
+#endif
+
 template <typename S>
 S GenRandUint()
 {
@@ -56,10 +68,11 @@ std::string GenUuid4(ani_env *env)
 {
     std::array<char, UUID_LEN> uuidStr = {0};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    int n = snprintf_s(
-        uuidStr.begin(), UUID_LEN, UUID_LEN - 1, "%08x-%04x-%04x-%04x-%012x", GenRandUint<uint32_t>(),
-        GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
-        (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
+    int n = snprintf_s(uuidStr.begin(), UUID_LEN, UUID_LEN - 1, "%08x-%04x-%04x-%04x-%08x%04x", GenRandUint<uint32_t>(),
+                       GenRandUint<uint16_t>(),
+                       (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
+                       (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS,
+                       GenRandUint<uint32_t>(), GenRandUint<uint16_t>());
     if ((n < 0) || (n > static_cast<int>(UUID_LEN))) {
         stdlib::ThrowNewError(env, "std.core.RuntimeError", "GenerateRandomUUID failed", "C{std.core.String}:");
         return std::string();
@@ -74,10 +87,11 @@ std::array<uint8_t, UUID_BINARY_LEN> GenUuid4Binary(ani_env *env)
 {
     std::array<char, UUID_STR_LEN_NO_DASH> uuidStr = {0};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    int charsWritten = snprintf_s(
-        uuidStr.data(), uuidStr.size(), UUID_STR_LEN_NO_DASH - 1, "%08x%04x%04x%04x%012x", GenRandUint<uint32_t>(),
-        GenRandUint<uint16_t>(), (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
-        (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS, GenRandUint<uint64_t>());
+    int charsWritten = snprintf_s(uuidStr.data(), uuidStr.size(), UUID_STR_LEN_NO_DASH - 1, "%08x%04x%04x%04x%08x%04x",
+                                  GenRandUint<uint32_t>(), GenRandUint<uint16_t>(),
+                                  (GenRandUint<uint16_t>() & NULL_FOUR_HIGH_BITS_IN_16) | RFC4122_UUID_VERSION_MARKER,
+                                  (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS,
+                                  GenRandUint<uint32_t>(), GenRandUint<uint16_t>());
     if ((charsWritten < 0) || (charsWritten > UUID_STR_LEN_NO_DASH)) {
         stdlib::ThrowNewError(env, "std.core.RuntimeError", "generateRandomBinaryUUID failed",
                               "C{escompat.Uint8Array}:");
@@ -120,12 +134,9 @@ ani_object NewUint8Array(ani_env *env, const char *signature, Args... args)
 
 extern "C" {
 ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_unused]] ani_class klass,
-                                                         ani_boolean entropyCache)
+                                                         [[maybe_unused]] ani_boolean entropyCache)
 {
-    static std::string lastGeneratedUUID;
-    if (entropyCache != ANI_TRUE || lastGeneratedUUID.empty()) {
-        lastGeneratedUUID = GenUuid4(env);
-    }
+    std::string lastGeneratedUUID = GenUuid4(env);
     return stdlib::CreateUtf8String(env, lastGeneratedUUID.data(), lastGeneratedUUID.size());
 }
 
@@ -160,6 +171,12 @@ ANI_EXPORT ani_object ETSApiUtilHelperGenerateRandomBinaryUUID(ani_env *env, [[m
     }
 
     return arr;
+}
+
+ANI_EXPORT ani_string ETSApiUtilHelperGetErrorString(ani_env *env, [[maybe_unused]] ani_class klass, ani_int err)
+{
+    std::string errInfo = uv_strerror(err);
+    return stdlib::CreateUtf8String(env, errInfo.c_str(), errInfo.size());
 }
 }  // extern "C"
 
@@ -196,7 +213,7 @@ ani_error CreateBusinessError(ani_env *env, int code, const std::string &message
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ANI_FATAL_IF_ERROR(env->Object_New(cls, ctor, &errObj));
     if (code != 0) {
-        ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(errObj, "code", static_cast<ani_int>(code)));
+        ANI_FATAL_IF_ERROR(env->Object_SetPropertyByName_Int(errObj, "code", static_cast<ani_int>(code)));
     }
     ANI_FATAL_IF_ERROR(
         env->Object_SetPropertyByName_Ref(errObj, "message", static_cast<ani_ref>(CreateStringUtf8(env, message))));
@@ -211,16 +228,20 @@ void ThrowBusinessError(ani_env *env, int code, const std::string &message)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define FUN_UNBOX_METHOD(aniType, typeName, signature)                                                         \
-    aniType UnboxTo##typeName(ani_env *env, ani_object value)                                                  \
-    {                                                                                                          \
-        aniType result {};                                                                                     \
-        ANI_FATAL_IF_ERROR(env->Object_CallMethodByName_##typeName(value, "unboxed", ":" signature, &result)); \
-        /* CC-OFFNXT(G.PRE.05) function defination, no effects */                                              \
-        return result;                                                                                         \
+#define STR_IMPL(x) #x
+#define STR(x) STR_IMPL(x)
+#define MAKE_TOTYPE_METHOD(x) STR(to##x)
+#define FUN_TOTYPE_METHOD(aniType, typeName, signature)                                                            \
+    aniType To##typeName(ani_env *env, ani_object value)                                                           \
+    {                                                                                                              \
+        aniType result {};                                                                                         \
+        ANI_FATAL_IF_ERROR(                                                                                        \
+            env->Object_CallMethodByName_##typeName(value, MAKE_TOTYPE_METHOD(typeName), ":" signature, &result)); \
+        /* CC-OFFNXT(G.PRE.05) function defination, no effects */                                                  \
+        return result;                                                                                             \
     }
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-BOX_VALUE_LIST(FUN_UNBOX_METHOD);
-#undef FUN_UNBOX_METHOD
+BOX_VALUE_LIST(FUN_TOTYPE_METHOD);
+#undef FUN_TOTYPE_METHOD
 
 }  // namespace ark::ets::sdk::util

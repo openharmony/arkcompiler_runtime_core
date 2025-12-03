@@ -40,7 +40,7 @@ function asyncLockQueryNonexistentNameTest(): int {
     let lockname = "name";
     try {
         AsyncLock.query(lockname);
-    } catch (e: Error) {
+    } catch (e) {
         if(e.message != "AsyncLock " + lockname + " not found") {
             result += 1;
         }
@@ -66,7 +66,7 @@ async function asyncLockDeadLockTest(): Promise<int> {
             await lock.lockAsync((): int => {
                 return 0;
             }, AsyncLockMode.EXCLUSIVE, new AsyncLockOptions(false, null, 1));
-        } catch (err: Error) {
+        } catch (err) {
             return 0;
         }
         StdDebug.Logger.log("FAILED: AsyncLock dead lock test");
@@ -88,7 +88,7 @@ async function asyncLockAvailableTest(): Promise<int> {
             await lock.lockAsync((): int => {
                 return 0;
             }, AsyncLockMode.EXCLUSIVE, options);
-        } catch (err: Error) {
+        } catch (err) {
             return 0;
         }
         StdDebug.Logger.log("FAILED: AsyncLock isAvailable test");
@@ -234,6 +234,22 @@ asyncLockAppTestsuite.addTest("doubleExitSharedLock", () => {
     arktest.assertTrue(doubleExitSharedLock())
 })
 
+asyncLockAppTestsuite.addTest("simpleDeadLock", () => {
+    arktest.assertTrue(simpleDeadLock())
+})
+
+asyncLockAppTestsuite.addTest("simpleDeadLock2Locks", () => {
+    arktest.assertTrue(simpleDeadLock2Locks())
+})
+
+asyncLockAppTestsuite.addTest("warningDeadLock", () => {
+    arktest.assertTrue(warningDeadLockTest())
+})
+
+asyncLockAppTestsuite.addTest("cyclicDeadLockTest", () => {
+    arktest.assertTrue(cyclicDeadLockTest())
+})
+
 
 async function applyLockJob(lockName: string, mode: AsyncLockMode, tidBuf: Uint32Array, tid: number): Promise<void> {
     let lock = AsyncLock.request(lockName);
@@ -251,7 +267,7 @@ async function check<T>(p: Promise<T>, currentTest: string): Promise<boolean> {
     try {
         await p;
         return true;
-    } catch (e: Error) {
+    } catch (e) {
         return false;
     }
 }
@@ -260,7 +276,7 @@ async function check_negative<T>(p: Promise<T>, currentTest: string): Promise<bo
     try {
         await p;
         return false;
-    } catch (e: Error) {
+    } catch (e) {
         return true;
     }
 }
@@ -581,7 +597,7 @@ async function lockHolderJob(lockName: string, timeout: number, flagBuf: Uint32A
     let lock = AsyncLock.request(lockName);
     return lock.lockAsync<void>(async () => {
         Atomics.compareExchange(flagBuf, 0, 0, 1);
-        await new Promise<void>((resolve: (val : int ) => void): void => {setTimeout(() => {resolve(10)}, timeout)});
+        await new Promise<void>((resolve: (val : int ) => void): void => {setTimeout(() => {resolve(10)}, timeout.toInt())});
     }, AsyncLockMode.EXCLUSIVE);
     
 }
@@ -766,7 +782,7 @@ async function acquireLockTwiceReject(outerMode: AsyncLockMode, innerMode: Async
     return new Promise<void>((resolve: (v : int) => void, reject: (e: Error) => void): void => {
         let innerOptions = new AsyncLockOptions<void>();
         innerOptions.isAvailable = isAvailable;
-        lock.lockAsync((): void => {
+        lock.lockAsync(async (): void => {
              await  lock.lockAsync(() => {
             }, innerMode, innerOptions).then((): void => {
                 reject(new Error("Test failed"));
@@ -807,7 +823,7 @@ function acquireLockTwiceExclusiveExclusiveNotAvailable(): boolean {
             "acquireLockTwiceExclusiveExclusiveNotAvailable"));
 }
 
-async function mainExecutor(index: number, flagBuf: Uint32Array, timeout: number) {
+async function mainExecutor(index: int, flagBuf: Uint32Array, timeout: number) {
     let lock: AsyncLock = AsyncLock.request("doubleExitSharedLock");
     await lock.lockAsync(async () => {
         flagBuf[index] = 1;
@@ -842,6 +858,134 @@ function doubleExitSharedLock(): boolean {
         launch(taskExecutor, flagBuf, 100),
     ]), "doubleExitSharedLock"));
 }
+
+function simpleDeadLock()
+{
+    let name = 'LockSimpleDeadLock';
+    let lock = AsyncLock.request(name);
+    let options = new AsyncLockOptions<string>();
+    options.timeout = 1000;
+    
+    let p = lock.lockAsync( async  () => {
+        await lock.lockAsync( async  () => {},
+        AsyncLockMode.EXCLUSIVE, options)
+    }, AsyncLockMode.EXCLUSIVE, options).then( () => {
+        throw Error ('Promise is fullfilled')}, ( e : Error) => {
+        arktest.assertTrue(e.message.search(name) > 0, "Test failed");
+    });
+    return waitForCompletion(() => check(p, "simpleDeadLock2"));
+}
+
+function simpleDeadLock2Locks()
+{
+    let nameA = 'LockSimpleDeadLock2A';
+    let nameB = 'LockSimpleDeadLock2B';
+    let lockA = AsyncLock.request(nameA);
+    let lockB = AsyncLock.request(nameB);
+    let options = new AsyncLockOptions<string>();
+    options.timeout = 1000;
+    
+    let p1 = lockA.lockAsync( async  () => {
+        await lockB.lockAsync(() => {}
+        , AsyncLockMode.EXCLUSIVE,options)
+    }, AsyncLockMode.EXCLUSIVE, options).then(()=> {
+        throw Error ('Test is failed. Promise is fullfilled');
+    }, (error : Error) => {
+        arktest.assertTrue(error.message.search(nameA) > 0,  "Test failed");
+    })
+   
+   let p2 =  lockB.lockAsync(async  () => {
+        await lockA.lockAsync(() => {}, AsyncLockMode.EXCLUSIVE, options)
+    }, AsyncLockMode.EXCLUSIVE, options) .then( () => { 
+        throw Error ('Test is failed. Promise is fullfilled');
+    }, 
+    (error : Error ) => {
+         arktest.assertTrue(error.message.search(nameB) > 0,  "Test failed");
+    });
+    return  waitForCompletion(() => check(Promise.all([p1, p2]), "simpleDeadLock2"));
+}
+
+function warningDeadLockTest()
+{
+    let name1 = 'WarningLock1';
+    let name2 = 'WarningLock2';
+    let name3 = 'WarningLock3';
+
+    let lockA1 = AsyncLock.request(name1);
+    let lockB1 = AsyncLock.request(name2);
+    let lockC1 = AsyncLock.request(name3);
+    
+    let options = new AsyncLockOptions<string>();
+    options.timeout = 1000;
+
+    let p1 = lockA1.lockAsync( async () => {
+        let lockB2 = AsyncLock.request('WarningLock2');
+        await lockB2.lockAsync(() => {}
+        , AsyncLockMode.EXCLUSIVE,options)
+    }).then(()=> {
+        throw Error ('Test is failed. Promise is fullfilled');
+    }, (error : Error) => {
+    });
+    
+    let p2 = lockB1.lockAsync( async () => {
+        let lockC2 = AsyncLock.request('WarningLock3');
+        await lockC2.lockAsync(() => {}
+        , AsyncLockMode.EXCLUSIVE,options)
+    }).then(()=> {
+        throw Error ('Test is failed. Promise is fullfilled');
+    }, (error : Error) => {
+    });
+
+    let p3 = lockC1.lockAsync(async  () => {
+        let lockA2 = AsyncLock.request('WarningLock1');
+        await lockA2.lockAsync(() => {}
+        , AsyncLockMode.EXCLUSIVE,options)
+    }).then(()=> {
+        throw Error ('Test is failed. Promise is fullfilled');
+    }, (error : Error) => {
+        let str = error.message;
+        arktest.assertTrue(str.search(name1) > 0, "Test failed. WarningLock1 must be in  deadlock warning message");
+        arktest.assertTrue(str.search(name2) > 0, "Test failed. WarningLock2 must be in  deadlock warning message");
+        arktest.assertTrue(str.search(name3) > 0, "Test failed. WarningLock3 must be in  deadlock warning message");
+    });
+    return  waitForCompletion(() => check(Promise.all([p1,p2,p3]), "warningDeadLockTest"));
+}
+
+function cyclicDeadLockTest()
+{
+    let name = 'A_Cyclic';
+    let A  = AsyncLock.request(name);
+    let B = AsyncLock.request('B_Cyclic');
+    let C = AsyncLock.request('C_Cyclic');
+    let D = AsyncLock.request('D_Cyclic');
+    let E = AsyncLock.request('E_Cyclic');
+    let F = AsyncLock.request('F_Cyclic');
+    let options = new AsyncLockOptions<string>();
+    options.timeout = 1000
+
+    let p = A.lockAsync( async () => {
+        await B.lockAsync( async  () => {
+          await  C.lockAsync( async  () => {
+             await   D.lockAsync( async  () => {
+              await      E.lockAsync( async  () => {
+                await       A.lockAsync( async  () => {
+                 await       F.lockAsync( async () => {
+                    
+                 } , AsyncLockMode.EXCLUSIVE,options)  
+                } , AsyncLockMode.EXCLUSIVE,options)
+            }, AsyncLockMode.EXCLUSIVE,options) 
+        } , AsyncLockMode.EXCLUSIVE,options)
+      }, AsyncLockMode.EXCLUSIVE,options)
+    } , AsyncLockMode.EXCLUSIVE,options)
+   }, AsyncLockMode.EXCLUSIVE,options).then(()=> {
+        throw Error ('Test is failed. Promise is fullfilled')
+    }, (error : Error) => {
+        arktest.assertTrue(error.message.search(name) > 0 , "Test failed: the name of the lock (A_Cyclic), cause deadlock is not found");
+    });
+
+    return waitForCompletion(() => check(p, "cyclicDeadLockTest"));
+}
+
 
 function main(): int {
     let asyncLockTestsuite = new arktest.ArkTestsuite("asyncLockTestsuite");

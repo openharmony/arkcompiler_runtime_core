@@ -421,6 +421,8 @@ class DebuggerClient:
         async for event in receiver:
             if trio.current_time() > deadline:
                 break
+            if isinstance(event, debugger.Paused) and event.reason == "Break on start":
+                continue
             events_received.append((session_id, event))
 
     async def _collect_events_with_timeout(self, receivers, events_received, wait_time):

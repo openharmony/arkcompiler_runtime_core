@@ -26,9 +26,8 @@
 #include "assembly-program.h"
 #include "assembly-type.h"
 #include "assembly-function.h"
-#include "bytecode_emitter.h"
-#include "file_item_container.h"
-#include "pgo.h"
+#include "libarkfile/file_item_container.h"
+#include "libarkfile/pgo.h"
 
 namespace ark::pandasm {
 
@@ -143,6 +142,7 @@ private:
         panda_file::ItemContainer *items, Program &program, AsmEntityCollections &entities,
         const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes,
         bool emitDebugInfo);
+    static void AddFakeIndexDependenciesForUnusedItems(AsmEmitter::AsmEntityCollections &entities);
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static bool MakeFunctionItems(
         panda_file::ItemContainer *items, const Program &program, AsmEntityCollections &entities,

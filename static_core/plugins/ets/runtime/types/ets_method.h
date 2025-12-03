@@ -17,9 +17,9 @@
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_METHOD_H_
 
 #include <string_view>
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandafile/file_items.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkfile/file_items.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/method.h"
 #include "runtime/include/thread.h"

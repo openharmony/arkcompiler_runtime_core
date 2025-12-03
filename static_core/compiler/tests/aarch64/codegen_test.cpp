@@ -17,7 +17,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/code_generator/codegen.h"

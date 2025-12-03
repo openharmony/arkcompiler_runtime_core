@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "assembler/assembly-program.h"
 #include "compiler/optimizer/ir/graph.h"
 #include "ir_interface.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::bytecodeopt {
 PANDA_PUBLIC_API bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface = nullptr);

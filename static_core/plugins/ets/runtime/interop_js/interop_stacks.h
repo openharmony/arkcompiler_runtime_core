@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,11 @@
 
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 
+#include "plugins/ets/runtime/ets_call_stack.h"
+
 namespace ark::ets::interop::js {
 
-class InteropCallStack {
+class InteropCallStack final : public EtsCallStack {
 public:
     InteropCallStack()
     {
@@ -37,13 +39,6 @@ public:
     {
         ark::os::mem::UnmapRaw(startAddr_, POOL_SIZE);
     }
-
-    struct Record {
-        Record(void *etsCurFrame, char const *codeDescr) : etsFrame(etsCurFrame), descr(codeDescr) {}
-
-        void *etsFrame {};     // NOLINT(misc-non-private-member-variables-in-classes)
-        char const *descr {};  // NOLINT(misc-non-private-member-variables-in-classes)
-    };
 
     template <typename... Args>
     Record *AllocRecord(Args &&...args)
@@ -63,13 +58,13 @@ public:
         InteropFatal("InteropCallStack is empty");
     }
 
-    Record *Current()
+    Record *Current() override
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return curAddr_ != startAddr_ ? (curAddr_ - 1) : nullptr;
     }
 
-    Span<Record> GetRecords()
+    Span<Record> GetRecords() override
     {
         return {startAddr_, (ToUintPtr(curAddr_) - ToUintPtr(startAddr_)) / sizeof(Record)};
     }

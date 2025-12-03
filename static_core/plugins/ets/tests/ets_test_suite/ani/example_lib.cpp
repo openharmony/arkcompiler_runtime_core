@@ -76,13 +76,9 @@ static void TestCheck3()
     ASSERT_EQ(env->GetVersion(&aniVersin), ANI_OK);
     ASSERT_TRUE(aniVersin == ANI_VERSION_1) << "Incorrect ani version";
 
-    // Locate the class "Lexample_lib/Aaa;" in the environment
-    ani_module module;
-    ASSERT_EQ(env->FindModule("example_lib", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
+    // Locate the class "example_lib.Aaa;" in the environment
     ani_class cls;
-    ASSERT_EQ(env->Module_FindClass(module, "Aaa", &cls), ANI_OK);
+    ASSERT_EQ(env->FindClass("example_lib.Aaa", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     // Emulate the allocation of instance of the class
@@ -94,7 +90,7 @@ static void TestCheck3()
     ASSERT_EQ(env->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
     ASSERT_NE(ref, nullptr);
 
-    // Retrieve a method named "boolean_method" with signature "II:Z"
+    // Retrieve a method named "boolean_method" with signature "ii:z"
     ani_method method;
     ASSERT_EQ(env->Class_FindMethod(cls, "boolean_method", "ii:z", &method), ANI_OK);
     ASSERT_NE(method, nullptr);

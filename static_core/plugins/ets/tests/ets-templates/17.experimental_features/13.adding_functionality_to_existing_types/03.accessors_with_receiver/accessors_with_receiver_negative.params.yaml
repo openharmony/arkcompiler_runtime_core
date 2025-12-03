@@ -13,7 +13,8 @@
 
 ---
 cases:
-  - decl: |
+  - desc: "A compile-time error occurs if an accessor is used in the form of a function or a method call."
+    decl: |
       class A {
         member: int = 0
       }
@@ -23,7 +24,8 @@ cases:
     use: |
       let a = new A()
       m(a, 1)
-  - decl: |
+  - desc: "A compile-time error occurs if an accessor is used in the form of a function or a method call."
+    decl: |
       class A {
         member: int = 0
       }
@@ -33,217 +35,94 @@ cases:
     use: |
       let a = new A()
       a.m()
-  - decl: |
+  - desc: "The keyword this can be used inside a function with receiver. It corresponds to the first parameter. 
+          Otherwise, a compile-time error occurs. The type of parameter this is called the receiver type"
+    decl: |
+      set m(this: null, param: int) {}
+    use: ""
+  - desc: "The keyword this can be used inside a function with receiver. It corresponds to the first parameter. 
+          Otherwise, a compile-time error occurs. The type of parameter this is called the receiver type"
+    decl: |
+      get m(this: Any): int {}
+    use: ""
+  - desc: "The keyword this can be used inside a function with receiver. It corresponds to the first parameter. 
+          Otherwise, a compile-time error occurs. The type of parameter this is called the receiver type"
+    decl: |
+      class A {m: int}
+      class B {m: int}
+      get m(this: A|B): int {}
+    use: ""
+  - desc: "If the receiver type is a class type or an interface type, then private or protected members are not accessible
+(see Accessible) within the body of a function with receiver. Only public members can be accessed."
+    decl: |
       class A {
-        member: int = 0
-      }
-      set m(this: A, param: int) {
-        this.member = param
-      }
-    use: |
-      let a = new A()
-      m(a, 1)
-  - decl: |
-      class A {
-        member: int = 0
+        private _m: int
       }
       get m(this: A): int {
-        return this.member
+        return this._m
       }
-    use: |
-      let a = new A()
-      m(a)
-  - decl: |
+    use: ""
+  - desc: "If the receiver type is a class type or an interface type, then private or protected members are not accessible
+(see Accessible) within the body of a function with receiver. Only public members can be accessed."
+    decl: |
       class A {
-        member: int = 0
-      }
-      set m(this: A): int {
-        return this.member
-      }
-    use: |
-      let a = new A()
-      a.m
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      get m(this: A, param: int) {
-        this.member = param
-      }
-    use: |
-      let a = new A()
-      a.m = 1
-  - decl: |
-      class A {
-        member: int = 0
+        protected _m: int
       }
       get m(this: A): int {
-        return this.member
+        return this._m
       }
-    use: |
-      let a = new A()
-      a.m += 1
-  - decl: |
+    use: ""
+  - desc: "A get-accessor (getter) must have the keyword this as the only getter parameter (receiverParameter) and an explicit
+return type. Additional param in getter"
+    decl: |
       class A {
-        member: int = 0
+        _m: int
       }
-      get m(this: A): int {
-        return this.member
+      get m(this: A, param: int): int {
+        return this._m
       }
-    use: |
-      let a = new A()
-      a.m -= 1
-  - decl: |
+    use: ""
+  - desc: "A get-accessor (getter) must have the keyword this as the only getter parameter (receiverParameter) and an explicit
+return type. No explicit return type in getter"
+    decl: |
       class A {
-        member: int = 0
+        _m: int
       }
-      get m(this: A): int {
-        return this.member
+      get m(this: A) {
+        return this._m
       }
-    use: |
-      let a = new A()
-      a.m *= 1
-  - decl: |
+    use: ""
+  - desc: "A set-accessor (setter) must have a keyword this as a first setter parameter (receiver parameter), one other parameter,
+and no return type. Two params"
+    decl: |
       class A {
-        member: int = 0
+        _m: int
+        _n: string
       }
-      get m(this: A): int {
-        return this.member
+      set m(this: A, param1: int, param2: string) {
+        this._m = param1;
+        this._n = param2;
       }
-    use: |
-      let a = new A()
-      a.m /= 1
-  - decl: |
+    use: ""
+  - desc: "A set-accessor (setter) must have a keyword this as a first setter parameter (receiver parameter), one other parameter,
+and no return type. Return type"
+    decl: |
       class A {
-        member: int = 0
+        _m: int
       }
+      set m(this: A, param: int): void {
+        this._m = param;
+      }
+    use: ""
+  - desc: "The keyword this can be used inside an accessor with receiver. It corresponds to the first parameter. Other-
+wise, a compile-time error occurs."
+    decl: |
+      class A {
+        _m: int
+      }
+      class B extends A {}
       set m(this: A, param: int) {
-        this.member = param
+        this = new B()
+        this._m = param;
       }
-    use: |
-      let a = new A()
-      a.m += 1
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      set m(this: A, param: int) {
-        this.member = param
-      }
-    use: |
-      let a = new A()
-      a.m -= 1
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      set m(this: A, param: int) {
-        this.member = param
-      }
-    use: |
-      let a = new A()
-      a.m *= 1
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      set m(this: A, param: int) {
-        this.member = param
-      }
-    use: |
-      let a = new A()
-      a.m /= 1
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      get m(this: A): int {
-        return this.member
-      }
-    use: |
-      let a = new A()
-      a.m++
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      get m(this: A): int {
-        return this.member
-      }
-    use: |
-      let a = new A()
-      ++a.m
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      get m(this: A): int {
-        return this.member
-      }
-    use: |
-      let a = new A()
-      a.m--
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      get m(this: A): int {
-        return this.member
-      }
-    use: |
-      let a = new A()
-      --a.m
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      set m(this: A, param: int) {
-        this.member = param
-      }
-    use: |
-      let a = new A()
-      a.m++
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      set m(this: A, param: int) {
-        this.member = param
-      }
-    use: |
-      let a = new A()
-      ++a.m
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      set m(this: A, param: int) {
-        this.member = param
-      }
-    use: |
-      let a = new A()
-      a.m--
-  - decl: |
-      class A {
-        member: int = 0
-      }
-      set m(this: A, param: int) {
-        this.member = param
-      }
-    use: |
-      let a = new A()
-      --a.m
-  - decl: |
-      class A {
-        member: int = 0
-        get m(this: A): int {
-          return this.member
-        }
-        set m(this: A, param: int) {
-          this.member = param
-        }
-      }
-    use: |
-      let a = new A()
-      a.m++
-      
+    use: ""

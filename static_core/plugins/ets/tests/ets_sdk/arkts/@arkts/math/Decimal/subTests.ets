@@ -17,6 +17,7 @@ import { Decimal } from "@arkts.math.Decimal";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Decimal sub API tests");
+    suite.addTest("Decimal sub with rounding 3 expect -0 ", testSubEqualsNegativeZero);
     suite.addTest("Decimal sub with specific config", testSubWithSpecificConfig001);
     suite.addTest("Decimal sub with specific config", testSubWithSpecificConfig002);
     suite.addTest("Decimal sub with specific config", testSubWithSpecificConfig003);
@@ -38,6 +39,19 @@ function checkSubResult(minuend: string, subtrahend: string, expected: string, s
     Decimal.precision = sd;
     Decimal.rounding = rm;
     arktest.assertEQ(new Decimal(minuend).sub(subtrahend).valueOf(), expected);
+}
+
+function testSubEqualsNegativeZero(){
+    Decimal.set({ rounding: 3 });
+    arktest.assertEQ(Decimal.sub("1", "1").valueOf(),'-0');
+    arktest.assertEQ(Decimal.sub("0", "-0").valueOf(),'0');
+    arktest.assertEQ(Decimal.sub("-0", "0").valueOf(),'-0');
+    arktest.assertEQ(Decimal.sub("0", "0").valueOf(),'-0');
+    arktest.assertEQ(Decimal.sub("-0", "-0").valueOf(),'-0');
+    arktest.assertEQ(Decimal.sub("-1", "-1").valueOf(),'-0');
+    arktest.assertEQ(Decimal.sub("1E-33", "1E-33").valueOf(),'-0');
+    arktest.assertEQ(Decimal.div(1, '-Infinity').valueOf(),'-0');
+    arktest.assertEQ(Decimal.div(34.56, '-Infinity').valueOf(),'-0');
 }
 
 function testSubWithSpecificConfig001() {

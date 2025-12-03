@@ -361,6 +361,26 @@ const Inst *SkipSingleUserCheckInstruction(const Inst *inst)
     return inst;
 }
 
+bool IsMethodStringGetLength(const Inst *inst)
+{
+    if (inst->GetOpcode() != Opcode::CallStatic) {
+        return false;
+    }
+
+    auto call = inst->CastToCallStatic();
+    if (call->IsInlined()) {
+        return false;
+    }
+
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    return runtime->IsMethodStringGetLength(call->GetCallMethod());
+}
+
+bool IsStringLength(const Inst *inst)
+{
+    return IsStringLengthAccessor(inst) || IsMethodStringGetLength(inst);
+}
+
 bool IsStringLengthAccessor(const Inst *inst)
 {
     return inst->GetOpcode() == compiler::Opcode::LenArray;
@@ -369,7 +389,7 @@ bool IsStringLengthAccessor(const Inst *inst)
 bool IsStringLengthAccessorChain(const Inst *inst)
 {
     inst = SkipSingleUserCheckInstruction(inst);
-    return IsStringLengthAccessor(inst);
+    return IsStringLength(inst);
 }
 
 Inst *GetStringLengthCompressedShr(Inst *lenArrayCall)

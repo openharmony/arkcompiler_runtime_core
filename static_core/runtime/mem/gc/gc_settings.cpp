@@ -16,7 +16,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/mem/gc/gc_settings.h"
-#include "libpandabase/globals.h"
+#include "libarkbase/globals.h"
 
 namespace ark::mem {
 

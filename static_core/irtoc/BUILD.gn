@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -113,6 +113,7 @@ if (enable_irtoc) {
       "backend/compilation.cpp",
       "backend/compiler/codegen_boundary.cpp",
       "backend/compiler/codegen_fastpath.cpp",
+      "backend/compiler/codegen_nativeplus.cpp",
       "backend/compiler/dangling_pointers_checker.cpp",
       "backend/function.cpp",
       "backend/irtoc.cpp",
@@ -121,8 +122,8 @@ if (enable_irtoc) {
     configs = [
       ":irtoc_public_config",
       "$ark_root:ark_config",
-      "$ark_root/libpandabase:arkbase_public_config",
-      "$ark_root/libpandafile:arkfile_public_config",
+      "$ark_root/libarkbase:arkbase_public_config",
+      "$ark_root/libarkfile:arkfile_public_config",
       "$ark_root/compiler:arkcompiler_public_config",
       "$ark_root/compiler/optimizer/code_generator:arkencoder_config",
       "$ark_root/runtime/asm_defines:asmdefines_public_config",
@@ -136,7 +137,7 @@ if (enable_irtoc) {
       "$ark_root/compiler/optimizer/code_generator:libarkencoder",
       "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
       "$ark_root/irtoc:irtoc_compile",
-      "$ark_root/libpandabase:libarktsbase",
+      "$ark_root/libarkbase:libarktsbase",
       "$ark_root/runtime/asm_defines:asm_defines_generator",
     ]
 
@@ -174,50 +175,45 @@ if (enable_irtoc) {
     irtoc_cmd = "${irtoc_root_out_dir}/irtoc"
     outputs = [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
 
-    if (ark_static_standalone_build) {
-      script = irtoc_cmd
-      args = [
-        "--irtoc-output",
-        rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o", root_build_dir),
-        "--compiler-cross-arch",
-        current_cpu,
-      ]
-    } else {
-      script = "//arkcompiler/ets_runtime/script/run_ark_executable.py"
-      args = [
-        "--script-file",
-        rebase_path(irtoc_cmd),
-        "--script-args",
-        string_join(" ",
-                    [
-                      "--irtoc-output",
-                      rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o",
-                                  root_build_dir),
-                      "--compiler-cross-arch",
-                      current_cpu,
-                    ]),
-        "--env-path",
-        rebase_path(irtoc_root_out_dir),
-        "--expect-output",
-        "0",
-      ]
-    }
+    irtoc_args = [
+      "--irtoc-output",
+      rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o", root_build_dir),
+      "--compiler-cross-arch",
+      current_cpu,
+    ]
     deps = [ ":irtoc(${host_toolchain})" ]
 
     if (is_llvm_interpreter || is_llvm_fastpath) {
       outputs += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
-      args += [
+      irtoc_args += [
         "--irtoc-output-llvm",
         rebase_path("$ark_root_gen_dir/generated/irtoc_llvm_lib.o"),
       ]
       if (is_llvm_interpreter) {
-        args += [
+        irtoc_args += [
           "--llvm-inline-module",
           rebase_path(
               "$target_gen_dir/../libllvmbackend/interpreter_inline.bc"),
         ]
       }
       deps += [ "$ark_root/libllvmbackend:irtoc_int_llvm_inl_module" ]
+    }
+
+    if (ark_static_standalone_build) {
+      script = irtoc_cmd
+      args = irtoc_args
+    } else {
+      script = "//arkcompiler/ets_runtime/script/run_ark_executable.py"
+      args = [
+        "--script-file",
+        rebase_path(irtoc_cmd),
+        "--script-args",
+        string_join(" ", irtoc_args),
+        "--env-path",
+        rebase_path(irtoc_root_out_dir),
+        "--expect-output",
+        "0",
+      ]
     }
   }
 }

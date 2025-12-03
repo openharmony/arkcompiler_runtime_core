@@ -14,6 +14,7 @@
  */
 
 //! CHECKER      Check JIT for ZeroCheck after ChecksElimination
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, options: "--compiler-hotness-threshold=0 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_overflow.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_overflow.ETSGLOBAL::__noinline__overflow,.*,COMPILED/
 //! METHOD       "ets_overflow.ETSGLOBAL::__noinline__overflow"
@@ -37,8 +38,10 @@ function __noinline__overflow(): int {
         i0 += 2;
       }
     }
-  } catch (expected: ArithmeticError) {
-    return 0;
+  } catch (expected) {
+    if (expected instanceof  ArithmeticError) {
+      return 0;
+    }
   }
   return 1;
 }

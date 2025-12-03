@@ -154,7 +154,6 @@ void StackfulCoroutineContext::ThreadProcImpl()
     }
     if (co->HasPendingException() && co->HasAbortFlag()) {
         co->HandleUncaughtException();
-        UNREACHABLE();
     }
     SetStatus(Coroutine::Status::TERMINATING);
     co->GetManager()->TerminateCoroutine(co);

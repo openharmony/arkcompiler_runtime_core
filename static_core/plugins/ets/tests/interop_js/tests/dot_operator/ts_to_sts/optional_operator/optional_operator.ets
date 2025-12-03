@@ -39,7 +39,7 @@ function checkOptionalOperatorReturnUndefined(): boolean {
 // }
 
 function checkOptionalOperatorInsideObjectWithValue(): boolean {
-    return new Obj.inside?.name?.toString() == Obj.inside.name?.toString();
+    return Obj.inside?.name?.toString() == Obj.inside.name?.toString();
 }
 
 function checkOptionalOperatorInsideObjectReturnUndefined(): boolean {
@@ -64,7 +64,8 @@ function checkOptionalOperatorInsideObjectReturnUndefined(): boolean {
 
 function checkOptionalOperatorFunctionUndefined(): boolean {
     try{
-        Obj?.test();
+        // Import Obj from 1.1. It is strict type checking in 1.2, and there is no test in obj.
+        // Obj?.test();
         
         return false;
     }catch(e){

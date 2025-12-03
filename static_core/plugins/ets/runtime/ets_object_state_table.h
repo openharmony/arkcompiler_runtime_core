@@ -19,7 +19,7 @@
 #include <atomic>
 #include <cstdint>
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 
 #include "runtime/include/mem/panda_containers.h"
 

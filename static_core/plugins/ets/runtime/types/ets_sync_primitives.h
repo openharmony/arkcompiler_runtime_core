@@ -15,8 +15,8 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MUTEX_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MUTEX_H
 
-#include "libpandabase/mem/object_pointer.h"
-#include "macros.h"
+#include "libarkbase/mem/object_pointer.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/thread_scopes.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"

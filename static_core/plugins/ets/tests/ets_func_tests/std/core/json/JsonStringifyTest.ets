@@ -47,8 +47,6 @@ function main(): int {
     suite.addTest("Stringify complex nested objects", testStringifyComplexObjects);
     suite.addTest("Stringify deeply nested structures", testStringifyDeeplyNested);
 
-    suite.addTest("Stringify Date with negative number in constructor", stringifyNegativeDate);
-
     return suite.run();
 }
 
@@ -218,6 +216,12 @@ function testStringifyObjects(): void {
     arktest.assertTrue(result.startsWith('{') && result.endsWith('}'), "Object should be wrapped in braces");
     arktest.assertFalse(result.includes("\n"), "Object should not contain newlines");
     arktest.assertEQ(result.length, 39, "Object should be 39 characters long");
+
+    const root = new jsonx.JsonElement({} as Record<string, jsonx.JsonElement>)
+    const unionElmt = new jsonx.JsonElement()
+    unionElmt.setUndefined()
+    root.setElement("union", unionElmt)
+    arktest.assertEQ(JSON.stringifyJsonElement(root), "{}", "Undefined object should not stringify")
 }
 
 function testStringifyNestedStructures(): void {
@@ -475,9 +479,4 @@ function testStringifyDeeplyNested(): void {
     }
 
     arktest.assertTrue(maxIndentLevel >= 3, "Should have at least 3 levels of indentation for deep nesting");
-}
-
-function stringifyNegativeDate() {
-    let d = new Date(-271822)
-    arktest.assertEQ(JSON.stringify(d), "\"1969-12-31T23:55:28.178Z\"")
 }

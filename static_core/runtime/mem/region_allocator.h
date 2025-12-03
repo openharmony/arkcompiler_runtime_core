@@ -155,6 +155,8 @@ protected:
 template <typename AllocConfigT, typename LockConfigT = RegionAllocatorLockConfig::CommonLock>
 class RegionAllocator final : public RegionAllocatorBase<LockConfigT> {
 public:
+    using GarbageRegions = PandaVector<std::pair<uint32_t, Region *>>;
+
     static constexpr bool USE_PARTIAL_TLAB = true;
     static constexpr size_t REGION_SIZE = DEFAULT_REGION_SIZE;
 
@@ -239,7 +241,8 @@ public:
     }
 
     template <bool INCLUDE_CURRENT_REGION>
-    PandaVector<std::pair<uint32_t, Region *>> GetTopGarbageRegions(double garbageThreshold);
+    void GetTopGarbageRegions(double garbageThreshold, GarbageRegions &garbageRegions,
+                              PandaVector<Region *> &emptyRegions);
 
     /**
      * Return a vector of all regions with the specific type.

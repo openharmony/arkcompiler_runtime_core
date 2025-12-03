@@ -36,7 +36,7 @@ void Codegen::EtsGetNativeMethod(IntrinsicInst *inst, Reg dst, [[maybe_unused]] 
         encoder->EncodeJump(skipLabel, methodReg, Condition::NE);
         LoadMethod(methodReg);
         CallRuntime(inst, EntrypointId::GET_CALLEE_METHOD, methodReg, RegMask::GetZeroMask(), methodReg,
-                    TypedImm(methodId));
+                    GetTypeIdImm(inst, methodId));
         encoder->EncodeStr(methodReg, MemRef(addrReg));
         encoder->BindLabel(skipLabel);
     }
@@ -109,8 +109,9 @@ void Codegen::EtsBeginNativeMethod(IntrinsicInst *inst, [[maybe_unused]] Reg dst
         bool switchesToNative = GetRuntime()->IsNecessarySwitchThreadState(inst->GetCallMethod());
         auto id =
             switchesToNative ? EntrypointId::BEGIN_GENERAL_NATIVE_METHOD : EntrypointId::BEGIN_QUICK_NATIVE_METHOD;
-        MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), id));
-        GetEncoder()->MakeCall(entry);
+        ScopedTmpReg tmpReg(GetEncoder(), true);
+        GetEntrypoint(tmpReg, id);
+        GetEncoder()->MakeCall(tmpReg);
     }
 }
 
@@ -139,8 +140,9 @@ void Codegen::EtsEndNativeMethod(IntrinsicInst *inst, [[maybe_unused]] Reg dst, 
         } else {
             id = isObject ? EntrypointId::END_QUICK_NATIVE_METHOD_OBJ : EntrypointId::END_QUICK_NATIVE_METHOD_PRIM;
         }
-        MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), id));
-        GetEncoder()->MakeCall(entry);
+        ScopedTmpReg tmpReg(GetEncoder(), true);
+        GetEntrypoint(tmpReg, id);
+        GetEncoder()->MakeCall(tmpReg);
     }
 }
 

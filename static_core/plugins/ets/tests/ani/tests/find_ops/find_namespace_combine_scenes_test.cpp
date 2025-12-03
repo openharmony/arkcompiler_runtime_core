@@ -22,12 +22,8 @@ class FindNamespaceCombineScenesTest : public AniTest {};
 
 TEST_F(FindNamespaceCombineScenesTest, find_namespace_combine_scenes_001)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@abcModule.find_namespace_combine_scenes_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "spaceB", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@abcModule.find_namespace_combine_scenes_test.spaceB", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_function fn {};

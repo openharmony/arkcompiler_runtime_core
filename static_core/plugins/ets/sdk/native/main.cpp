@@ -154,7 +154,7 @@ static ani_status BindTextDecoder(ani_env *env)
     std::array barMethods = {
         ani_native_function {
             "doEncodeInto",
-            "C{std.core.String}C{std.core.String}:C{escompat.ArrayBuffer}",
+            "C{std.core.String}C{std.core.String}:C{std.core.ArrayBuffer}",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeInto),
         },
         ani_native_function {
@@ -186,7 +186,9 @@ static ani_status BindUtilHelper(ani_env *env)
         ani_native_function {"generateRandomUUID", "z:C{std.core.String}",
                              reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomUUID)},
         ani_native_function {"generateRandomBinaryUUID", "z:C{escompat.Uint8Array}",
-                             reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomBinaryUUID)}};
+                             reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGenerateRandomBinaryUUID)},
+        ani_native_function {"getErrorString", "i:C{std.core.String}",
+                             reinterpret_cast<void *>(ark::ets::sdk::util::ETSApiUtilHelperGetErrorString)}};
 
     if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
         std::cerr << "Cannot bind static native methods to '" << className << "'" << std::endl;

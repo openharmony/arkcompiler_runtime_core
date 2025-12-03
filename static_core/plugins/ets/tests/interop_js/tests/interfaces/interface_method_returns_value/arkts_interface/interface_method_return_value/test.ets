@@ -181,10 +181,10 @@ function getArrayValue(): IReturnArray {
 function getRefValue(): ISuperInterface {
     return new TestClass();
 }
-
-function getUnion(): IReturnUnion {
-    class UnionLocalClass extends ReturnsUnion implements IReturnUnion{
+class UnionLocalClass extends ReturnsUnion implements IReturnUnion{
 
     };
+function getUnion(): IReturnUnion {
+    
     return (new UnionLocalClass())
 }

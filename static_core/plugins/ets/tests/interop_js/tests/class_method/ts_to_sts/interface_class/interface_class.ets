@@ -13,27 +13,120 @@
  * limitations under the License.
  */
 
-import {
-    InterfaceClass,
-    createInterfaceClassFromTs,
-    instanceInterfaceClass,
-} from 'main_js';
+let module = ESValue.load('main_js');
+let InterfaceClass = module.getProperty('InterfaceClass');
+let createInterfaceClassFromTs = module.getProperty('createInterfaceClassFromTs');
+let instanceInterfaceClass = module.getProperty('instanceInterfaceClass');
 
 function checkInterfaceClassMethod(): boolean {
-    const TSClass = new InterfaceClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (InterfaceClass.isUndefined() || InterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = InterfaceClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateInterfaceClassFromTs(): boolean {
-    const TSClass = createInterfaceClassFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (createInterfaceClassFromTs.isUndefined() || createInterfaceClassFromTs.isNull()) {
+            return false;
+        }
+
+        const TSClass = createInterfaceClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
-
 function checkInstanceInterfaceClass(): boolean {
-    const TSClass = instanceInterfaceClass;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (instanceInterfaceClass.isUndefined() || instanceInterfaceClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceInterfaceClass;
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }

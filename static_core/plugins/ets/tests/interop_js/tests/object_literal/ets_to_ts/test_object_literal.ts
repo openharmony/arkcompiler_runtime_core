@@ -21,7 +21,7 @@ const isDataModel = etsVm.getFunction('Lobject_literal/ETSGLOBAL;', 'isDataModel
 const DataModel = etsVm.getClass('Lobject_literal/DataModel;');
 
 const hasValidRecordProperty = etsVm.getFunction('Lobject_literal/ETSGLOBAL;', 'hasValidRecordProperty');
-const testRecord = etsVm.getInstance('Lescompat/Record;');
+const testRecord = etsVm.getInstance('Lstd/core/Record;');
 
 const IDataInterface = etsVm.getClass('Lobject_literal/object_literal$IDataInterface$ObjectLiteral;');
 const isValidDataInterface = etsVm.getFunction('Lobject_literal/ETSGLOBAL;', 'isValidDataInterface');

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,12 +15,17 @@
 set -e
 
 if [[ -z "$1" ]]; then
-    echo "Usage: $0 <sources>"
-    echo "    <sources> path where the sources to be checked are located"
+    echo "Usage: $0 <sources_dir> [list_of_sources]"
+    echo "    <sources_dir> - path where the sources to be checked are located"
+    echo "    [list_of_sources] - list of sources to check. Will check all "
+    echo "                        *.py files in sources_dir if not provided"
     exit 1
 fi
 
-root_dir=$(realpath "$1")
+sources_dir=$(realpath "$1")
+list_of_sources="${2:-}"
+num_checked=0
+
 # For pylint, we only enable certain rules
 # - C0121 - comparison to True / False / None
 # - C0123 - use instanceof() instead of type
@@ -76,31 +81,45 @@ function save_exit_code() {
     return $(($1 + $2))
 }
 
-source "${root_dir}/scripts/python/venv-utils.sh"
+source "${sources_dir}/scripts/python/venv-utils.sh"
 activate_venv
 
 set +e
 
 EXIT_CODE=0
 
-skip_options="^${root_dir}/third_party/\|^${root_dir}/plugins/ets/tests/debugger/src/arkdb/"
+skip_options="^${sources_dir}/third_party/\|^${sources_dir}/plugins/ets/tests/debugger/src/arkdb/"
 if [ -n "$SKIP_FOLDERS" ]; then
     for pt in $SKIP_FOLDERS; do
-        skip_options="${skip_options}\|^${root_dir}/${pt}/"
+        skip_options="${skip_options}\|^${sources_dir}/${pt}/"
     done
 fi
 
-# Check all files with '.py' extensions except *conf.py which are config files for sphinx
-while read file_to_check; do
-    pylint -s false --timeout-methods subprocess.Popen.communicate --disable=all -e "${PYLINT_RULES}" "${file_to_check}"
+function run_linter() {
+    local filename="$1"
+    pylint -s false --timeout-methods subprocess.Popen.communicate --disable=all -e "${PYLINT_RULES}" "${filename}"
     save_exit_code ${EXIT_CODE} $?
     EXIT_CODE=$?
-    flake8 --select "${FLAKE8_RULES}" "${file_to_check}"
+    flake8 --select "${FLAKE8_RULES}" "${filename}"
     save_exit_code ${EXIT_CODE} $?
     EXIT_CODE=$?
-done <<<$(find "${root_dir}" -name "*.py" -type f | grep -v "${skip_options}")
+    ((num_checked++))
+}
 
-num_checked=$(find "${root_dir}" -name "*.py" -type f | grep -c -v "${skip_options}")
+# Check all files with '.py' extensions except *conf.py which are config files for sphinx
+if [[ -z "${list_of_sources}" ]]; then
+    while read file_to_check; do
+        run_linter "${file_to_check}"
+    done <<<$(find "${sources_dir}" -name "*.py" -type f | grep -v "${skip_options}")
+else
+    while read relpath; do
+        file_to_check=$(realpath "${ROOT_DIR}/${relpath}" || true)
+        echo "file_to_check = ${file_to_check}"
+        [[ "$file_to_check" != "${sources_dir}/"*.py ]] && continue
+        run_linter "${file_to_check}"
+    done <<<$(grep -v "${skip_options}" "${list_of_sources}")
+fi
+
 echo "Checked ${num_checked} files"
 
 deactivate_venv

@@ -29,37 +29,6 @@ interface DerivedDerivedIface extends DerivedIface {
     goo()
 }
 
-interface OverridedIface extends DerivedDerivedIface {
-    foo()
-    boo()
-    goo()
-    defaultMethod(): int {
-        return 1
-    }
-}
-
-interface ABase1 {
-    abase1method()
-}
-interface ABase2 {
-    abase2method()
-}
-interface BBase1 {
-    bbase1method()
-}
-interface BBase2 {
-    bbase2method()
-}
-interface AIface extends ABase1, ABase2 {
-    amethod()
-}
-interface BIface extends BBase1, BBase2 {
-    bmethod()
-}
-
-interface MultiExtendIface extends AIface, BIface {
-}
-
 interface Iface {
     someDefaultMethod(): string {
         return "111"
@@ -107,9 +76,6 @@ class B extends A {
     public static stboo2(n: int): string {
         return "222"
     }
-
-    // shadows A.stfoo3
-    public static stfoo3(p: string): void {}
 }
 
 class CtorsTest {
@@ -153,16 +119,6 @@ class C<T> {
 }
 
 final class D extends B {
-    // shadows A.stfoo2
-    public static stfoo2(p: string): string {
-        return p
-    }
-
-    // shadows B.stboo2
-    public static stboo2(p: string): string {
-        return p + "222"
-    }
-
     public static stboo3(): string {
         return "333"
     }
@@ -178,6 +134,18 @@ final class D extends B {
     protected static stbar2(): string {
         return "protec"
     }
+}
+
+final class P {
+    fldBoolean: boolean = false
+    fldByte: byte = 100
+    fldShort: short = 1000
+    fldChar: char = c'x'
+    fldInt: int = 100000
+    fldLong: long = 3000000
+    fldFloat: float = 5.0
+    fldDouble: double = 123456789.99
+    foo() {}
 }
 
 function testGetName(type: Class, expected: string) {
@@ -197,10 +165,10 @@ function testGetInstanceMethods(classType: Class, expectedMethodsArrB: string[])
 
 function testGetInstanceMethodByName(classType: Class, methodsToFind: string[]) {
     for (let i = 0; i < methodsToFind.length; ++i) {
-        let obtainedMethod = classType.getInstanceMethodByName(methodsToFind[i])
+        let obtainedMethod = classType.getInstanceMethod(methodsToFind[i])
 
         if (obtainedMethod == undefined) {
-            throw new Error(`Can't find given method '${methodsToFind[i]}' in testGetInstanceMethodByName`)
+            throw new Error(`Can't find given method '${methodsToFind[i]}' in testgetInstanceMethod`)
         }
 
         arktest.assertEQ(obtainedMethod.getName(), methodsToFind[i])
@@ -209,7 +177,7 @@ function testGetInstanceMethodByName(classType: Class, methodsToFind: string[]) 
 
 function tryGetPrivateInstanceMethodByName(classType: Class, methods: string[]) {
     for (let i = 0; i < methods.length; ++i) {
-        let obtainedMethod = classType.getInstanceMethodByName(methods[i])
+        let obtainedMethod = classType.getInstanceMethod(methods[i])
         if (obtainedMethod != undefined) {
             throw new Error(`Given method '${methods[i]}' in tryGetPrivateInstanceMethodByName should be undefined`)
         }
@@ -226,13 +194,6 @@ function testGetInterfaces(intfs: FixedArray<Class>, expectedIntfs: string[]) {
     }
 }
 
-function testOverridenInstanceMethodInInterface(intf: Class) {
-    let methods = intf.getInstanceMethods()
-    for (let i = 0; i < methods.length; ++i) {
-        arktest.assertEQ(methods[i].getOwner().getName(), intf.getName())
-    }
-}
-
 function testGetConstructors() {
     let ctorTestType = Class.of(new CtorsTest(1))
     let ctors: FixedArray<reflect.Constructor> = ctorTestType.getConstructors()
@@ -244,21 +205,9 @@ function testGetConstructors() {
 }
 
 function testGetStaticMethods() {
-    let expectedMethodsArrA = ([ "keys", "keys", "assign", "hasOwn",
-                                 "hasOwn", "values", "values", "entries",
-                                 "entries", "fromEntries", "getOwnPropertyNames",
-                                 "getOwnPropertyNames", "stfoo1", "stfoo2", "stfoo3",
-                                 "stfoo3" ])
-    let expectedMethodsArrB = ([ "keys", "keys", "assign", "hasOwn",
-                                 "hasOwn", "values", "values", "entries",
-                                 "entries", "fromEntries", "getOwnPropertyNames",
-                                 "getOwnPropertyNames", "stboo1", "stboo2",
-                                 "stfoo1", "stfoo2", "stfoo3" ])
-    let expectedMethodsArrD = ([ "keys", "keys", "assign", "hasOwn",
-                                 "hasOwn", "values", "values", "entries",
-                                 "entries", "fromEntries", "getOwnPropertyNames",
-                                 "getOwnPropertyNames", "stboo1", "stboo2",
-                                 "stfoo1", "stfoo2", "stfoo3", "stboo3", "stboo3" ])
+    let expectedMethodsArrA = ([ "stfoo1", "stfoo2", "stfoo3", "stfoo3" ])
+    let expectedMethodsArrB = ([ "stboo1", "stboo2" ])
+    let expectedMethodsArrD = ([ "stboo3", "stboo3" ])
 
     let expectedMtdsSetA: Set<string> = new Set<string>(expectedMethodsArrA)
     let expectedMtdsSetB: Set<string> = new Set<string>(expectedMethodsArrB)
@@ -274,96 +223,61 @@ function testGetStaticMethods() {
     let infoB = Class.of(new B())
     let methodsB: FixedArray<reflect.StaticMethod> = infoB.getStaticMethods()
     arktest.assertEQ(methodsB.length, expectedMethodsArrB.length)
-    for (let i = 0; i < methodsB.length; ++i) {
-        arktest.assertTrue(expectedMtdsSetB.has(methodsB[i].getName()))
-        if (methodsB[i].getName() == "stfoo3") {
-            arktest.assertEQ(methodsB[i].getOwner(), infoB) // shadowed in A
-        }
-    }
 
     let infoD = Class.of(new D())
     let methodsD: FixedArray<reflect.StaticMethod> = infoD.getStaticMethods()
     arktest.assertEQ(methodsD.length, expectedMethodsArrD.length)
     for (let i = 0; i < methodsD.length; ++i) {
         arktest.assertTrue(expectedMtdsSetD.has(methodsD[i].getName()))
-        if (methodsD[i].getName() == "stfoo3") {
-            arktest.assertEQ(methodsD[i].getOwner(), infoB) // shadowed in A by B
-        } else if (methodsD[i].getName() == "stfoo2") {
-            arktest.assertEQ(methodsD[i].getOwner(), infoD) // shadowed in A by D
-        } else if (methodsD[i].getName() == "stboo2") {
-            arktest.assertEQ(methodsD[i].getOwner(), infoD) // shadowed in B by D
-        }
     }
 }
 
-function testGetStaticMethodByName() {
+function testGetStaticMethod() {
     let infoA = Class.of(new A())
-    let methodA1 = infoA.getStaticMethodByName("getOwnPropertyNames");
-    arktest.assertNE(methodA1, undefined) // inherited from Object
-    let methodA2 = infoA.getStaticMethodByName("stfoo1");
+    let methodA1 = infoA.getStaticMethod("getOwnPropertyNames");
+    arktest.assertEQ(methodA1, undefined) // look up only direct methods
+    let methodA2 = infoA.getStaticMethod("stfoo1");
     arktest.assertNE(methodA2, undefined)
-    let methodA3 = infoA.getStaticMethodByName("stfoo3", []);
+    let methodA3 = infoA.getStaticMethod("stfoo3", []);
     arktest.assertNE(methodA3, undefined)
-    let methodA4 = infoA.getStaticMethodByName("stfoo3", [ Class.of(new int()), Class.of(new long()) ]);
+    let methodA4 = infoA.getStaticMethod("stfoo3", [ Class.PRIMITIVE_INT, Class.PRIMITIVE_LONG ]);
     arktest.assertNE(methodA4, undefined)
     let paramsMethodA4 = methodA4!.getParametersTypes()
-    let methodA5 = infoA.getStaticMethodByName("stfoo3", paramsMethodA4);
+    let methodA5 = infoA.getStaticMethod("stfoo3", paramsMethodA4);
     arktest.assertNE(methodA5, undefined)
-    let methodA6 = infoA.getStaticMethodByName("stboo1")
+    let methodA6 = infoA.getStaticMethod("stboo1")
     arktest.assertEQ(methodA6, undefined) // not exist in A
 
     let infoB = Class.of(new B())
-    let methodB1 = infoB.getStaticMethodByName("stfoo2");
-    arktest.assertNE(methodB1, undefined) // inherited from A
-    arktest.assertEQ(methodB1!.getOwner(), infoA) // owner is A
-    let methodB2 = infoB.getStaticMethodByName("stboo2", [ Class.of(new int()) ]);
+    let methodB1 = infoB.getStaticMethod("stfoo2");
+    arktest.assertEQ(methodB1, undefined) // look up only direct methods
+    let methodB2 = infoB.getStaticMethod("stboo2", [ Class.PRIMITIVE_INT ]);
     arktest.assertNE(methodB2, undefined)
-    let methodB3 = infoB.getStaticMethodByName("stfoo3");
+    let methodB3 = infoB.getStaticMethod("stboo1");
     arktest.assertNE(methodB3, undefined)
     arktest.assertEQ(methodB3!.getOwner(), infoB) // owner is B
-    let methodB4 = infoB.getStaticMethodByName("stfoo3", []);
-    arktest.assertEQ(methodB4, undefined) // shadowed
-    let methodB5 = infoB.getStaticMethodByName("stfoo3", paramsMethodA4);
-    arktest.assertEQ(methodB5, undefined) // shadowed
 
     let infoD = Class.of(new D())
-    let methodD1 = infoD.getStaticMethodByName("stbar1");
+    let methodD1 = infoD.getStaticMethod("stbar1");
     arktest.assertEQ(methodD1, undefined) // private in D
-    let methodD2 = infoD.getStaticMethodByName("stbar2");
+    let methodD2 = infoD.getStaticMethod("stbar2");
     arktest.assertEQ(methodD2, undefined) // protected in D
-    let methodD3 = infoD.getStaticMethodByName("stboo1");
-    arktest.assertNE(methodD3, undefined) // inherited from B
-    arktest.assertEQ(methodD3!.getOwner(), infoB) // owner is B
-    let methodD4 = infoD.getStaticMethodByName("stboo2", [ Class.of(new string()) ]);
-    arktest.assertNE(methodD4, undefined)
-    arktest.assertEQ(methodD4!.getOwner(), infoD) // owner is D
-    let methodD5 = infoD.getStaticMethodByName("stboo3");
-    arktest.assertNE(methodD5, undefined)
-    arktest.assertEQ(methodD5!.getOwner(), infoD) // owner is D
-    let methodD6 = infoD.getStaticMethodByName("stboo2", [ Class.of(new int()) ]);
-    arktest.assertEQ(methodD6, undefined) // shadowed
-    let methodD7 = infoD.getStaticMethodByName("stfoo1");
-    arktest.assertNE(methodD7, undefined) // inherited from A
-    arktest.assertEQ(methodD7!.getOwner(), infoA) // owner is A
-    let methodD8 = infoD.getStaticMethodByName("stfoo3");
-    arktest.assertNE(methodD8, undefined) // inherited from B
-    arktest.assertEQ(methodD8!.getOwner(), infoB) // owner is B
-    let methodD9 = infoD.getStaticMethodByName("stfoo3", paramsMethodA4);
-    arktest.assertEQ(methodD9, undefined) // shadowed by B
-    let methodD10 = infoD.getStaticMethodByName("stboo3", [ infoB ]);
+
+    const expectedErrors = (e: Error): boolean => {
+        return e.message == "Found two methods with the same name 'stboo3'. Please specify signature."
+    }
+    arktest.expectThrow(()=>{infoD.getStaticMethod("stboo3")}, expectedErrors)
+
+    let methodD10 = infoD.getStaticMethod("stboo3", [ infoB ]);
     arktest.assertNE(methodD10, undefined)
     arktest.assertEQ(methodD10!.getOwner(), infoD) // owner is D
-    let methodD11 = infoD.getStaticMethodByName("stboo3", [ infoA ]);
+    let methodD11 = infoD.getStaticMethod("stboo3", [ infoA ]);
     arktest.assertEQ(methodD11, undefined) // A is not accepted as B
-    let methodD12 = infoD.getStaticMethodByName("stboo2");
-    arktest.assertNE(methodD12, undefined)
-    arktest.assertFalse(methodD4 == methodD12)
-    arktest.assertTrue(methodD12!.equals(methodD4!)) // the same with and without signature passed
 }
 
 function testGetStaticFields() {
-    let info = Class.of(new B())
-    let expectedFldSet: Set<string> = new Set<string>([ "stfooFld1", "stfooFld2", "stbooFld1", "stbooFld2"]);
+    let info = Class.from<B>()
+    let expectedFldSet: Set<string> = new Set<string>([ "stbooFld1", "stbooFld2"]);
 
     let fields: FixedArray<reflect.StaticField> = info.getStaticFields()
     arktest.assertEQ(fields.length, expectedFldSet.size)
@@ -373,8 +287,8 @@ function testGetStaticFields() {
 }
 
 function testGetInstanceFields() {
-    let info = Class.of(new B())
-    let expectedFldSet: Set<string> = new Set<string>([ "fooFld1", "fooFld2", "booFld1", "booFld2"]);
+    let info = Class.from<B>()
+    let expectedFldSet: Set<string> = new Set<string>([ "booFld1", "booFld2" ]);
 
     let fields: FixedArray<reflect.InstanceField> = info.getInstanceFields()
     arktest.assertEQ(fields.length, expectedFldSet.size)
@@ -386,13 +300,13 @@ function testGetInstanceFields() {
 function testInstanceFieldEquals(): void {
     const aCls = Class.of(new A())
 
-    const fld1 = aCls.getInstanceFieldByName("fooFld1")!
-    const fld2 = aCls.getInstanceFieldByName("fooFld1")!
+    const fld1 = aCls.getInstanceField("fooFld1")!
+    const fld2 = aCls.getInstanceField("fooFld1")!
 
     arktest.assertFalse(fld1 == fld2)
     arktest.assertTrue(fld1.equals(fld2))
 
-    const fld3 = aCls.getInstanceFieldByName("fooFld2")!
+    const fld3 = aCls.getInstanceField("fooFld2")!
 
     arktest.assertFalse(fld1 == fld3)
     arktest.assertFalse(fld1.equals(fld3))
@@ -426,7 +340,7 @@ function testStaticFieldEquals(): void {
     arktest.assertFalse(fld1.equals(fld3))
 }
 
-function classGetStaticMethodByName(cls: Class, name: string): reflect.StaticMethod | undefined {
+function classGetStaticMethod(cls: Class, name: string): reflect.StaticMethod | undefined {
     const methods = cls.getStaticMethods()
     for (let i = 0; i < methods.length; i++) {
         const method = methods[i]
@@ -441,13 +355,13 @@ function classGetStaticMethodByName(cls: Class, name: string): reflect.StaticMet
 function testStaticMethodEquals(): void {
     const aCls = Class.of(new A())
 
-    const meth1 = classGetStaticMethodByName(aCls, 'stfoo1')!
-    const meth2 = classGetStaticMethodByName(aCls, 'stfoo1')!
+    const meth1 = classGetStaticMethod(aCls, 'stfoo1')!
+    const meth2 = classGetStaticMethod(aCls, 'stfoo1')!
 
     arktest.assertFalse(meth1 == meth2)
     arktest.assertTrue(meth1.equals(meth2))
 
-    const meth = classGetStaticMethodByName(aCls, 'stfoo2')!
+    const meth = classGetStaticMethod(aCls, 'stfoo2')!
 
     arktest.assertFalse(meth1 == meth)
     arktest.assertFalse(meth1.equals(meth))
@@ -457,61 +371,61 @@ function testIsUnion() {
     let clsC = new C<B>()
     let classType = Class.of(clsC)
 
-    let fldInfo1 = classType.getInstanceFieldByName('fld1')
+    let fldInfo1 = classType.getInstanceField('fld1')
     let uniInfo1 = fldInfo1!.getType()
     let constituentTypes1 = uniInfo1!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo1!.isUnion())
     arktest.assertNE(constituentTypes1, undefined)
 
-    let fldInfo2 = classType.getInstanceFieldByName('fld2')
+    let fldInfo2 = classType.getInstanceField('fld2')
     let uniInfo2 = fldInfo2!.getType()
     let constituentTypes2 = uniInfo2!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo2!.isUnion())
     arktest.assertEQ(constituentTypes2, undefined)
 
-    let fldInfo3 = classType.getInstanceFieldByName('fld3')
+    let fldInfo3 = classType.getInstanceField('fld3')
     let uniInfo3 = fldInfo3!.getType()
     let constituentTypes3 = uniInfo3!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo3!.isUnion())
     arktest.assertNE(constituentTypes3, undefined)
 
-    let fldInfo4 = classType.getInstanceFieldByName('fld4')
+    let fldInfo4 = classType.getInstanceField('fld4')
     let uniInfo4 = fldInfo4!.getType()
     let constituentTypes4 = uniInfo4!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo4!.isUnion())
     arktest.assertEQ(constituentTypes4, undefined)
 
-    let fldInfo5 = classType.getInstanceFieldByName('fld5')
+    let fldInfo5 = classType.getInstanceField('fld5')
     let uniInfo5 = fldInfo5!.getType()
     let constituentTypes5 = uniInfo5!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo5!.isUnion())
     arktest.assertNE(constituentTypes5, undefined)
 
-    let fldInfo6 = classType.getInstanceFieldByName('fld6')
+    let fldInfo6 = classType.getInstanceField('fld6')
     let uniInfo6 = fldInfo6!.getType()
     let constituentTypes6 = uniInfo6!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo6!.isUnion())
     arktest.assertEQ(constituentTypes6, undefined)
 
-    let fldInfo7 = classType.getInstanceFieldByName('fld7')
+    let fldInfo7 = classType.getInstanceField('fld7')
     let uniInfo7 = fldInfo7!.getType()
     let constituentTypes7 = uniInfo7!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo7!.isUnion())
     arktest.assertEQ(constituentTypes7, undefined)
 
-    let fldInfo8 = classType.getInstanceFieldByName('fld8')
+    let fldInfo8 = classType.getInstanceField('fld8')
     let uniInfo8 = fldInfo8!.getType()
     let constituentTypes8 = uniInfo8!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo8!.isUnion())
     arktest.assertEQ(constituentTypes8, undefined)
 
-    let fldInfo9 = classType.getInstanceFieldByName('fld9')
+    let fldInfo9 = classType.getInstanceField('fld9')
     let uniInfo9 = fldInfo9!.getType()
     let constituentTypes9 = uniInfo9!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo9!.isUnion())
     arktest.assertNE(constituentTypes9, undefined)
 
-    let fldInfo10 = classType.getInstanceFieldByName('fld10')
+    let fldInfo10 = classType.getInstanceField('fld10')
     let uniInfo10 = fldInfo10!.getType()
     let constituentTypes10 = uniInfo10!.getUnionConstituentTypes()
     arktest.assertTrue(uniInfo10!.isUnion())
@@ -520,31 +434,31 @@ function testIsUnion() {
     arktest.assertEQ(constituentTypes10![0].getName(), 'ReflectTypeTest.A')
     arktest.assertEQ(constituentTypes10![1].getName(), 'std.core.Null')
 
-    let fldInfo11 = classType.getInstanceFieldByName('fld11')
+    let fldInfo11 = classType.getInstanceField('fld11')
     let uniInfo11 = fldInfo11!.getType()
     let constituentTypes11 = uniInfo11!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo11!.isUnion())
     arktest.assertEQ(constituentTypes11, undefined)
 
-    let fldInfo12 = classType.getInstanceFieldByName('fld12')
+    let fldInfo12 = classType.getInstanceField('fld12')
     let uniInfo12 = fldInfo12!.getType()
     let constituentTypes12 = uniInfo12!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo12!.isUnion())
     arktest.assertEQ(constituentTypes12, undefined)
 
-    let fldInfo13 = classType.getInstanceFieldByName('fld13')
+    let fldInfo13 = classType.getInstanceField('fld13')
     let uniInfo13 = fldInfo13!.getType()
     let constituentTypes13 = uniInfo13!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo13!.isUnion())
     arktest.assertEQ(constituentTypes13, undefined)
 
-    let fldInfo14 = classType.getInstanceFieldByName('fld14')
+    let fldInfo14 = classType.getInstanceField('fld14')
     let uniInfo14 = fldInfo14!.getType()
     let constituentTypes14 = uniInfo14!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo14!.isUnion())
     arktest.assertEQ(constituentTypes14, undefined)
 
-    let fldInfo15 = classType.getInstanceFieldByName('fld15')
+    let fldInfo15 = classType.getInstanceField('fld15')
     let uniInfo15 = fldInfo15!.getType()
     let constituentTypes15 = uniInfo15!.getUnionConstituentTypes()
     arktest.assertFalse(uniInfo15!.isUnion())
@@ -554,7 +468,7 @@ function testIsUnion() {
 function testUnionField() {
     let clsC = new C<String>()
     let classType = Class.of(clsC)
-    let fldInfo = classType.getInstanceFieldByName('fld')
+    let fldInfo = classType.getInstanceField('fld')
     let uniInfo = fldInfo!.getType()
     arktest.assertTrue(uniInfo!.isUnion())
     let uniTypes = uniInfo!.getUnionConstituentTypes()
@@ -569,7 +483,7 @@ function testUnionField() {
 function testUnionParameter() {
     let clsC = new C<String>()
     let classType = Class.of(clsC)
-    let methodInfo1 = classType.getInstanceMethodByName('foo')
+    let methodInfo1 = classType.getInstanceMethod('foo')
     let paramType1 = methodInfo1!.getParameterType(0)
     arktest.assertTrue(paramType1!.isUnion())
     let uniTypes1 = paramType1!.getUnionConstituentTypes()
@@ -580,7 +494,7 @@ function testUnionParameter() {
         arktest.assertTrue(expectedTypeSet1.has(uniTypes1![i].getName()))
     }
 
-    let methodInfo2 = classType.getInstanceMethodByName('bar')
+    let methodInfo2 = classType.getInstanceMethod('bar')
     let paramType2 = methodInfo2!.getParameterType(0)
     arktest.assertTrue(paramType2!.isFixedArray())
     let componentType = paramType2!.getFixedArrayComponentType()
@@ -597,7 +511,7 @@ function testUnionParameter() {
 function testUnionRet() {
     let clsC = new C<String>()
     let classType = Class.of(clsC)
-    let methodInfo = classType.getInstanceMethodByName('foo')
+    let methodInfo = classType.getInstanceMethod('foo')
     let retClass = methodInfo!.getReturnType()
     arktest.assertTrue(retClass!.isUnion())
     let uniTypes = retClass.getUnionConstituentTypes()
@@ -607,6 +521,105 @@ function testUnionRet() {
     for (let i = 0; i < uniTypes!.length; ++i) {
         arktest.assertTrue(expectedTypeSet.has(uniTypes![i].getName()))
     }
+}
+
+function testPrimitive() {
+    let arr1: FixedArray<Int> = [ 1, 2 ]
+    let arr2: FixedArray<Int | undefined> = [ 1, undefined, 3 ]
+    let arr3: FixedArray<boolean> = [ true, false ]
+    let arr4: FixedArray<boolean | undefined> = [ undefined, false ]
+
+    let classType1 = Class.of(arr1)
+    let classType2 = Class.of(arr2)
+    let classType3 = Class.of(arr3)
+    let classType4 = Class.of(arr4)
+
+    arktest.assertFalse(classType1.isPrimitive())
+    arktest.assertFalse(classType2.isPrimitive())
+    arktest.assertFalse(classType3.isPrimitive())
+    arktest.assertFalse(classType4.isPrimitive())
+
+    let componentType1 = classType1.getFixedArrayComponentType()!
+    let componentType2 = classType2.getFixedArrayComponentType()!
+    let componentType3 = classType3.getFixedArrayComponentType()!
+    let componentType4 = classType4.getFixedArrayComponentType()!
+
+    arktest.assertTrue(componentType1.isPrimitive())
+    arktest.assertFalse(componentType2.isPrimitive())
+    arktest.assertTrue(componentType3.isPrimitive())
+    arktest.assertFalse(componentType4.isPrimitive())
+
+    arktest.assertEQ(componentType1, Class.PRIMITIVE_INT)
+    arktest.assertEQ(componentType3, Class.PRIMITIVE_BOOLEAN)
+
+    arktest.assertEQ(componentType2.getName(), 'std.core.Int')
+    arktest.assertEQ(componentType4.getName(), 'std.core.Boolean')
+
+    const pCls = Class.of(new P())
+    const fld1 = pCls.getInstanceField('fldBoolean')!
+    const fldType1 = fld1.getType()
+    arktest.assertTrue(fldType1.isPrimitive())
+    arktest.assertEQ(fldType1, Class.PRIMITIVE_BOOLEAN)
+    arktest.assertEQ(fldType1.getName(), 'u1')
+    const fld2 = pCls.getInstanceField('fldByte')!
+    const fldType2 = fld2.getType()
+    arktest.assertTrue(fldType2.isPrimitive())
+    arktest.assertEQ(fldType2, Class.PRIMITIVE_BYTE)
+    arktest.assertEQ(fldType2.getName(), 'i8')
+    const fld3 = pCls.getInstanceField('fldShort')!
+    const fldType3 = fld3.getType()
+    arktest.assertTrue(fldType3.isPrimitive())
+    arktest.assertEQ(fldType3, Class.PRIMITIVE_SHORT)
+    arktest.assertEQ(fldType3.getName(), 'i16')
+    const fld4 = pCls.getInstanceField('fldChar')!
+    const fldType4 = fld4.getType()
+    arktest.assertTrue(fldType4.isPrimitive())
+    arktest.assertEQ(fldType4, Class.PRIMITIVE_CHAR)
+    arktest.assertEQ(fldType4.getName(), 'u16')
+    const fld5 = pCls.getInstanceField('fldInt')!
+    const fldType5 = fld5.getType()
+    arktest.assertTrue(fldType5.isPrimitive())
+    arktest.assertEQ(fldType5, Class.PRIMITIVE_INT)
+    arktest.assertEQ(fldType5.getName(), 'i32')
+    const fld6 = pCls.getInstanceField('fldLong')!
+    const fldType6 = fld6.getType()
+    arktest.assertTrue(fldType6.isPrimitive())
+    arktest.assertEQ(fldType6, Class.PRIMITIVE_LONG)
+    arktest.assertEQ(fldType6.getName(), 'i64')
+    const fld7 = pCls.getInstanceField('fldFloat')!
+    const fldType7 = fld7.getType()
+    arktest.assertTrue(fldType7.isPrimitive())
+    arktest.assertEQ(fldType7, Class.PRIMITIVE_FLOAT)
+    arktest.assertEQ(fldType7.getName(), 'f32')
+    const fld8 = pCls.getInstanceField('fldDouble')!
+    const fldType8 = fld8.getType()
+    arktest.assertTrue(fldType8.isPrimitive())
+    arktest.assertEQ(fldType8, Class.PRIMITIVE_DOUBLE)
+    arktest.assertEQ(fldType8, Class.PRIMITIVE_NUMBER)
+    arktest.assertEQ(fldType8.getName(), 'f64')
+    const meth1 = pCls.getInstanceMethod('foo')!
+    const methRetType1 = meth1.getReturnType()
+    arktest.assertTrue(methRetType1.isPrimitive())
+    arktest.assertEQ(methRetType1, Class.PRIMITIVE_VOID)
+    arktest.assertEQ(methRetType1.getName(), 'void')
+
+    arktest.assertTrue(fldType5.isFinal())
+    arktest.assertTrue(fldType5.isAbstract())
+    arktest.assertFalse(fldType5.isNamespace())
+    arktest.assertFalse(fldType5.isEnum())
+    arktest.assertFalse(fldType5.isInterface())
+    arktest.assertFalse(fldType5.isUnion())
+    arktest.assertFalse(fldType5.isFixedArray())
+    arktest.assertEQ(fldType5.getSuper(), undefined)
+    arktest.assertEQ(fldType5.getLinker(), getBootRuntimeLinker())
+    arktest.assertEQ(fldType5.getFixedArrayComponentType(), undefined)
+    arktest.assertEQ(fldType5.getInterfaces().length, 0)
+    arktest.assertEQ(fldType5.getInstanceMethods().length, 0)
+    arktest.assertEQ(fldType5.getInstanceFields().length, 0)
+    arktest.assertEQ(fldType5.getStaticMethods().length, 0)
+    arktest.assertEQ(fldType5.getStaticFields().length, 0)
+    arktest.assertEQ(fldType5.getConstructors().length, 0)
+    arktest.assertEQ(fldType5.getUnionConstituentTypes(), undefined)
 }
 
 function main(): int {
@@ -627,15 +640,15 @@ function main(): int {
     arktest.assertEQ(typeA.getSuper(), typeBaseObj)
     arktest.assertEQ(typeB.getSuper(), typeA)
 
-    arktest.assertEQ((Type.from<BaseIface>() as InterfaceType).getClass().getSuper(), undefined)
-    arktest.assertEQ((Type.from<DerivedIface>() as InterfaceType).getClass().getSuper(), undefined)
-    arktest.assertEQ((Type.from<DerivedDerivedIface>() as InterfaceType).getClass().getSuper(), undefined)
+    arktest.assertEQ(Class.from<BaseIface>().getSuper(), undefined)
+    arktest.assertEQ(Class.from<DerivedIface>().getSuper(), undefined)
+    arktest.assertEQ(Class.from<DerivedDerivedIface>().getSuper(), undefined)
 
     // GetInterfaces()
     let emptyClass: Class[] = []
-    arktest.assertEQ((Type.from<BaseIface>() as InterfaceType).getClass().getInterfaces().length, 0)
-    testGetInterfaces((Type.from<DerivedIface>() as InterfaceType).getClass().getInterfaces(), ["ReflectTypeTest.BaseIface"])
-    testGetInterfaces((Type.from<DerivedDerivedIface>() as InterfaceType).getClass().getInterfaces(), ["ReflectTypeTest.DerivedIface"])
+    arktest.assertEQ(Class.from<BaseIface>().getInterfaces().length, 0)
+    testGetInterfaces(Class.from<DerivedIface>().getInterfaces(), ["ReflectTypeTest.BaseIface"])
+    testGetInterfaces(Class.from<DerivedDerivedIface>().getInterfaces(), ["ReflectTypeTest.DerivedIface"])
 
     // Test methods getters
     let baseObjInstanceMethodsExpected =
@@ -646,30 +659,29 @@ function main(): int {
           "entries", "fromEntries", "getOwnPropertyNames", "getOwnPropertyNames" ]
 
     testGetInstanceMethods(typeBaseObj, baseObjInstanceMethodsExpected)
-    testGetInstanceMethods(typeA, baseObjInstanceMethodsExpected.concat(["someDefaultMethod", "foo1", "foo2"]))
-    testGetInstanceMethods(typeB, baseObjInstanceMethodsExpected.concat(["someDefaultMethod", "foo1", "foo2", "boo1", "boo2"]))
+    testGetInstanceMethods(typeA, ["someDefaultMethod", "foo1", "foo2"])
+    testGetInstanceMethods(typeB, ["boo1", "boo2"])
 
     // Test instanceMethods for interfaces
-    testGetInstanceMethods((Type.from<BaseIface>() as InterfaceType).getClass(), ["foo"])
-    testGetInstanceMethods((Type.from<DerivedIface>() as InterfaceType).getClass(), ["foo", "boo", "defaultMethod"])
-    testGetInstanceMethods((Type.from<DerivedDerivedIface>() as InterfaceType).getClass(), ["foo", "goo", "boo", "defaultMethod"])
+    testGetInstanceMethods(Class.from<BaseIface>(), ["foo"])
+    testGetInstanceMethods(Class.from<DerivedIface>(), ["boo", "defaultMethod"])
+    testGetInstanceMethods(Class.from<DerivedDerivedIface>(), ["foo", "goo"])
 
-    testGetInstanceMethods((Type.from<AIface>() as InterfaceType).getClass(), ["amethod", "abase1method", "abase2method"])
-    testGetInstanceMethods((Type.from<BIface>() as InterfaceType).getClass(), ["bmethod", "bbase1method", "bbase2method"])
-    testGetInstanceMethods((Type.from<MultiExtendIface>() as InterfaceType).getClass(), ["amethod", "bmethod",
-        "abase1method", "abase2method", "bbase1method", "bbase2method"])
+    testGetInstanceMethodByName(typeBaseObj, [ "toString", "toLocaleString", "$_hashCode"])
+    let hasOwnProperty1 = typeBaseObj.getInstanceMethod("hasOwnProperty", [ Class.from<string>() ])
+    let hasOwnProperty2 = typeBaseObj.getInstanceMethod("hasOwnProperty", [ Class.PRIMITIVE_DOUBLE ])
+    arktest.assertNE(hasOwnProperty1, undefined)
+    arktest.assertNE(hasOwnProperty2, undefined)
+    arktest.assertNE(hasOwnProperty1, hasOwnProperty2)
 
-    testOverridenInstanceMethodInInterface((Type.from<OverridedIface>() as InterfaceType).getClass())
-
-    testGetInstanceMethodByName(typeBaseObj, baseObjInstanceMethodsExpected)
-    testGetInstanceMethodByName(typeA, baseObjInstanceMethodsExpected.concat(["someDefaultMethod", "foo1", "foo2"]))
-    testGetInstanceMethodByName(typeB, baseObjInstanceMethodsExpected.concat(["someDefaultMethod", "foo1", "foo2", "boo1", "boo2"]))
+    testGetInstanceMethodByName(typeA, ["someDefaultMethod", "foo1", "foo2"])
+    testGetInstanceMethodByName(typeB, ["boo1", "boo2"])
 
     tryGetPrivateInstanceMethodByName(typeA, [ "prfoo1", "prfoo2" ])
 
     testGetConstructors()
     testGetStaticMethods()
-    testGetStaticMethodByName()
+    testGetStaticMethod()
     testGetStaticFields()
     testGetInstanceFields()
 
@@ -681,6 +693,8 @@ function main(): int {
     testUnionField()
     testUnionParameter()
     testUnionRet()
+
+    testPrimitive()
 
     return 0
 }

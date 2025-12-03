@@ -45,7 +45,7 @@ async function testUtilPromisifyRejectsWithError() {
         }
     }
     let value = util.promisify(func);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
+    let exceptionCheck = (e: Error): boolean | string => {
         return e.message == 'Invalid argument type, expected string';
     }
     arktest.expectThrow(() => { await value([1, 2]); }, exceptionCheck);

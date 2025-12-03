@@ -36,7 +36,7 @@ void EtsMutexUnlock(EtsObject *mutex)
 {
     ASSERT(mutex->GetClass() == PlatformTypes()->coreMutex);
     if (!EtsMutex::FromEtsObject(mutex)->IsHeld()) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_ERROR,
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ILLEGAL_LOCK_STATE_ERROR,
                           "Unable to unlock Mutex: state is already unlocked");
         return;
     }
@@ -116,7 +116,7 @@ void EtsReadUnlock(EtsObject *rwLock)
     ASSERT(rwLock->GetClass() == PlatformTypes()->coreRWLock);
     auto state = EtsRWLock::FromEtsObject(rwLock)->GetState();
     if (EtsRWLock::State::IsUnlocked(state) || EtsRWLock::State::HasWriteLock(state)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_ERROR,
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ILLEGAL_LOCK_STATE_ERROR,
                           "Unable to unlock ReadLock: state is already unlocked or write-locked");
         return;
     }
@@ -134,7 +134,7 @@ void EtsWriteUnlock(EtsObject *rwLock)
     ASSERT(rwLock->GetClass() == PlatformTypes()->coreRWLock);
     auto state = EtsRWLock::FromEtsObject(rwLock)->GetState();
     if (EtsRWLock::State::IsUnlocked(state) || EtsRWLock::State::HasReadLock(state)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_ERROR,
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ILLEGAL_LOCK_STATE_ERROR,
                           "Unable to unlock WriteLock: state is already unlocked or read-locked");
         return;
     }

@@ -17,7 +17,7 @@
 #include "runtime/include/thread_proxy.h"
 #include "runtime/interpreter/runtime_interface.h"
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark {
 
@@ -219,7 +219,7 @@ void ThreadProxyStatic::MakeTSANHappyForThreadState()
 
 #ifdef ARK_HYBRID
 
-using namespace panda;
+using namespace common;
 
 static thread_local ThreadHolder *g_SharedExternalHolder = nullptr;
 

@@ -26,16 +26,15 @@ from typing import Union, Iterable, Optional, List, Set, Dict, Tuple, Any
 from dataclasses import dataclass
 from statistics import geometric_mean, mean
 from pathlib import Path
-from vmb.helpers import Jsonable, pad_left, read_list_file, create_file, Timer
+from vmb.helpers import Jsonable, pad_left, read_list_file, create_file, Timer, check_file_exists
 from vmb.unit import BenchUnit
 from vmb.result import RunReport, TestResult, AotStatEntry, AotPasses, \
     MachineMeta, BUStatus
+from vmb.result_tolerance import Tolerance, ToleranceSettings, ToleranceDefault
 from vmb.cli import Args, Command
 
 
 OptList = Optional[List[str]]
-# results that differ less than 0.5% treated as the same
-TOLERANCE = 0.5
 log = logging.getLogger('vmb')
 
 
@@ -85,12 +84,33 @@ class VMBComparison(Jsonable):
 
     def process_perf_regressions(self) -> int:
         if len(self._perf_regressions) == 0:
-            log.passed('No performance degradation (within %.1f%%)', TOLERANCE)
+            log.passed('No performance degradation')
             return 0
-        log.warning('Some tests have perfomance degradation more than %.1f%%', TOLERANCE)
+        log.warning('Some tests have perfomance degradation')
         for r in self._perf_regressions:
-            print(f'{r[0]:<{self._name_len}} {r[1]}')
+            print(f'{r[0]:<{self._name_len}} {r[1]}', file=sys.stderr)
         return 1
+
+    def compare_one_result(self, test: str, t1: TestResult, t2: TestResult,
+                           status_diff: str,
+                           tolerance: Optional[Tolerance] = None) -> None:
+        time_t = tolerance.time if tolerance else ToleranceDefault.time
+        size_t = tolerance.code_size if tolerance else ToleranceDefault.code_size
+        rss_t = tolerance.rss if tolerance else ToleranceDefault.rss
+        comp_t = tolerance.compile_time if tolerance else ToleranceDefault.compile_time
+        time_diff, time_regr = cmp(t1.mean_time, t2.mean_time, tolerance=time_t)
+        size_diff, size_regr = cmp(t1.code_size, t2.code_size, tolerance=size_t)
+        rss_diff, rss_regr = cmp(t1.mem_bytes, t2.mem_bytes, tolerance=rss_t)
+        comp_diff, comp_regr = cmp(t1.compile_time, t2.compile_time, tolerance=comp_t)
+        self.add(test, VMBDiff(time_diff, size_diff, rss_diff, status_diff))
+        for diff in (
+                         (time_diff, time_regr, 'Time        ', time_t),
+                         (size_diff, size_regr, 'Code Size   ', size_t),
+                         (rss_diff, rss_regr, 'RSS         ', rss_t),
+                         (comp_diff, comp_regr, 'Compile Time', comp_t),
+        ):
+            if diff[1]:
+                self.add_perf_regression(test, f'{diff[2]} {diff[0]} (>{diff[3]:.1f}%)')
 
 
 @dataclass
@@ -121,7 +141,8 @@ class VMBReport(Jsonable):
 
     @staticmethod
     def compare_vmb(r1: VMBReport, r2: VMBReport,
-                    flaky: OptList = None
+                    flaky: OptList = None,
+                    tolerances: Optional[ToleranceSettings] = None
                     ) -> VMBComparison:
         if not flaky:
             flaky = []
@@ -148,12 +169,8 @@ class VMBReport(Jsonable):
                 elif status1 and not status2:
                     comparison._regressions += 1
                     new_fail += 1
-            time_diff = diff_str(t1.mean_time, t2.mean_time)
-            if 'worse' in time_diff:
-                comparison.add_perf_regression(t, time_diff)
-            size_diff = diff_str(t1.code_size, t2.code_size)
-            rss_diff = diff_str(t1.mem_bytes, t2.mem_bytes)
-            comparison.add(t, VMBDiff(time_diff, size_diff, rss_diff, status_diff))
+            comparison.compare_one_result(t, t1, t2, status_diff,
+                                          tolerance=tolerances[t] if tolerances else None)
             if status1 and status2:
                 times1.append(t1.mean_time)
                 times2.append(t2.mean_time)
@@ -171,9 +188,9 @@ class VMBReport(Jsonable):
         comparison.title = f'Comparison: {short_title(r1.title, r2.title)}'
         # GM should be recalculated because
         # of possible difference in test set for report1 and report2
-        t_diff = diff_str_gm(times1, times2)
-        s_diff = diff_str_gm(sizes1, sizes2)
-        r_diff = diff_str_gm(rss1, rss2)
+        t_diff = diff_str_gm(times1, times2, tolerance=ToleranceDefault.time)
+        s_diff = diff_str_gm(sizes1, sizes2, tolerance=ToleranceDefault.code_size)
+        r_diff = diff_str_gm(rss1, rss2, tolerance=ToleranceDefault.rss)
         comparison.set_summary(t_diff, s_diff, r_diff, new, fixed, new_fail, missed)
         return comparison
 
@@ -197,7 +214,7 @@ class VMBReport(Jsonable):
         times, sizes, rsss = [], [], []
         if not exclude:
             exclude = []
-        self.total_cnt, self.excluded_cnt, self.fail_cnt = 0, len(exclude), 0
+        self.total_cnt, self.excluded_cnt, self.fail_cnt = 0, 0, 0
         if tags:
             tags = set(t.lower() for t in tags)
             self.report.tests = list(filter(lambda t: tags.intersection(t.tags), self.report.tests))
@@ -207,9 +224,10 @@ class VMBReport(Jsonable):
             self.report.tests = list(filter(lambda t: not skips.intersection(t.tags), self.report.tests))
         for t in self.report.tests:
             name = t.name
-            if name in exclude:
-                continue
             self.total_cnt += 1
+            if name in exclude:
+                self.excluded_cnt += 1
+                continue
             self._name_len = max(self._name_len, len(name))
             if not test_passed(t):
                 self.fail_cnt += 1
@@ -254,7 +272,7 @@ class VMBReport(Jsonable):
         self.print_full_time()
         caption(f'{self.summary}')
         print()
-        if self.fail_cnt > 0 or full:
+        if self.fail_cnt > 0 or full or exclude:
             time_head = '    Time    ' if 'nano' == fmt else '  Time  '
             caption(f"{'Test':<{self._name_len}} | {time_head} | "
                     f'CodeSize |   RSS    | Status  |')
@@ -376,28 +394,38 @@ def short_title(t1, t2):
     return f'{x1} vs {x2}'
 
 
-def diff_str(x, y, less_is_better=True):
+def cmp(x: Optional[float], y: Optional[float], less_is_better: bool = True,
+        tolerance: float = ToleranceDefault.time) -> Tuple[str, bool]:
+    """Return comparison str representation and regression status."""
     if not x or not y:
         # cannot compare if one of the results is missing
-        return 'n/a'
+        return 'n/a', False
     if x < 0 or y < 0:
-        return 'n/a'
+        return 'n/a', False
     try:  # just to make linter happy
         diff_percent = (y / x - 1.0) * 100
     except ZeroDivisionError:
-        return 'n/a'
-    if abs(diff_percent) < TOLERANCE:
-        return f'{x:.2e}->{y:.2e}(same)'
+        return 'n/a', False
+    if abs(diff_percent) < tolerance:
+        return f'{x:.2e}->{y:.2e}(same)', False
     better = (less_is_better and diff_percent < 0) \
         or (not less_is_better and diff_percent > 0)
     return f'{x:.2e}->{y:.2e}' \
-           f'({"better" if better else "worse"} {diff_percent:+.1f}%)'
+           f'({"better" if better else "worse"} {diff_percent:+.1f}%)', not better
 
 
-def diff_str_gm(xs, ys, less_is_better=True):
+def diff_str(x: Optional[float], y: Optional[float], less_is_better: bool = True,
+             tolerance: float = ToleranceDefault.time) -> str:
+    """Proxy to 'cmp'."""
+    diff, _ = cmp(x, y, less_is_better, tolerance)
+    return diff
+
+
+def diff_str_gm(xs: Iterable[Optional[float]], ys: Iterable[Optional[float]],
+                less_is_better: bool = True, tolerance: float = ToleranceDefault.time) -> str:
     xs_gm = safe_geomean(xs)
     ys_gm = safe_geomean(ys)
-    return diff_str(xs_gm, ys_gm, less_is_better)
+    return diff_str(xs_gm, ys_gm, less_is_better=less_is_better, tolerance=tolerance)
 
 
 def test_passed(t: TestResult) -> bool:
@@ -455,18 +483,17 @@ def compare_aot_stats(r_1: VMBReport, r_2: VMBReport) -> AOTStatsComparison:
         times2.append(l2.time)
         sizes1.append(l1.size)
         sizes2.append(l2.size)
-        meth_diff = diff_str(
-            l1.aot_stats.number_of_methods,
-            l2.aot_stats.number_of_methods, less_is_better=False)
-        time_diff = diff_str(l1.time, l2.time)
-        size_diff = diff_str(l1.size, l2.size)
+        meth_diff = diff_str(l1.aot_stats.number_of_methods, l2.aot_stats.number_of_methods,
+                             less_is_better=False, tolerance=ToleranceDefault.count)
+        time_diff = diff_str(l1.time, l2.time, tolerance=ToleranceDefault.time)
+        size_diff = diff_str(l1.size, l2.size, tolerance=ToleranceDefault.code_size)
         comparison.add(lib, AOTStatsDiff(meth_diff, time_diff, size_diff))
     gm_times1 = safe_geomean(times1)
     gm_times2 = safe_geomean(times2)
-    t_diff = diff_str(gm_times1, gm_times2)
+    t_diff = diff_str(gm_times1, gm_times2, tolerance=ToleranceDefault.time)
     gm_sizes1 = safe_geomean(sizes1)
     gm_sizes2 = safe_geomean(sizes2)
-    s_diff = diff_str(gm_sizes1, gm_sizes2)
+    s_diff = diff_str(gm_sizes1, gm_sizes2, tolerance=ToleranceDefault.code_size)
     comparison.summary = f'Time: {t_diff}; Size: {s_diff}'
     return comparison
 
@@ -488,11 +515,11 @@ def compare_aot_passes(r_1: VMBReport, r_2: VMBReport) -> AOTPassesComparison:
         time2, ir2, loc2 = [], [], []
         opt_diff = {}
         for lib in set(opt1.keys()).intersection(set(opt2.keys())):
-            runs_diff = diff_str(
-                opt1[lib].runs, opt2[lib].runs, less_is_better=False)
-            ir_diff = diff_str(opt1[lib].ir_mem, opt2[lib].ir_mem)
-            local_diff = diff_str(opt1[lib].local_mem, opt2[lib].local_mem)
-            time_diff = diff_str(opt1[lib].time, opt2[lib].time)
+            runs_diff = diff_str(opt1[lib].runs, opt2[lib].runs,
+                                 less_is_better=False, tolerance=ToleranceDefault.count)
+            ir_diff = diff_str(opt1[lib].ir_mem, opt2[lib].ir_mem, tolerance=ToleranceDefault.rss)
+            local_diff = diff_str(opt1[lib].local_mem, opt2[lib].local_mem, tolerance=ToleranceDefault.rss)
+            time_diff = diff_str(opt1[lib].time, opt2[lib].time, tolerance=ToleranceDefault.time)
             opt_diff[lib] = AOTPassesDiff(
                 runs_diff, ir_diff, local_diff, time_diff)
             time1.append(opt1[lib].time)
@@ -501,9 +528,9 @@ def compare_aot_passes(r_1: VMBReport, r_2: VMBReport) -> AOTPassesComparison:
             ir2.append(opt2[lib].ir_mem)
             loc1.append(opt1[lib].local_mem)
             loc2.append(opt2[lib].local_mem)
-        tm_gm = diff_str_gm(time1, time2)
-        ir_gm = diff_str_gm(ir1, ir2)
-        loc_gm = diff_str_gm(loc1, loc2)
+        tm_gm = diff_str_gm(time1, time2, tolerance=ToleranceDefault.time)
+        ir_gm = diff_str_gm(ir1, ir2, tolerance=ToleranceDefault.rss)
+        loc_gm = diff_str_gm(loc1, loc2, tolerance=ToleranceDefault.rss)
         comparison.add(
             opt,
             f'Time: {tm_gm}; IR size: {ir_gm}; Local size: {loc_gm}',
@@ -561,24 +588,24 @@ def compare_gc_stats(r1: VMBReport, r2: VMBReport) -> GCComparison:
         avg2.append(t2.get('avg_time'))
         max1.append(t1.get('max_time'))
         max2.append(t2.get('max_time'))
-        score_diff = diff_str(t1.get('bench_time'), t2.get('bench_time'))
+        score_diff = diff_str(t1.get('bench_time'), t2.get('bench_time'), tolerance=ToleranceDefault.time)
         through_diff = diff_str(t1.get('throughput'), t2.get('throughput'),
-                                less_is_better=False)
-        avg_diff = diff_str(t1.get('avg_time'), t2.get('avg_time'))
-        max_diff = diff_str(t1.get('max_time'), t2.get('max_time'))
+                                less_is_better=False, tolerance=ToleranceDefault.time)
+        avg_diff = diff_str(t1.get('avg_time'), t2.get('avg_time'), tolerance=ToleranceDefault.time)
+        max_diff = diff_str(t1.get('max_time'), t2.get('max_time'), tolerance=ToleranceDefault.time)
         comparison.add(t, GCDiff(score_diff, through_diff, avg_diff, max_diff))
     gm_sc1 = safe_geomean(sc1)
     gm_sc2 = safe_geomean(sc2)
-    sc_diff = diff_str(gm_sc1, gm_sc2)
+    sc_diff = diff_str(gm_sc1, gm_sc2, tolerance=ToleranceDefault.time)
     gm_tp1 = safe_geomean(tp1)
     gm_tp2 = safe_geomean(tp2)
-    tp_diff = diff_str(gm_tp1, gm_tp2, less_is_better=False)
+    tp_diff = diff_str(gm_tp1, gm_tp2, less_is_better=False, tolerance=ToleranceDefault.time)
     gm_avg1 = safe_geomean(avg1)
     gm_avg2 = safe_geomean(avg2)
-    avg_diff = diff_str(gm_avg1, gm_avg2)
+    avg_diff = diff_str(gm_avg1, gm_avg2, tolerance=ToleranceDefault.time)
     gm_max1 = safe_geomean(max1)
     gm_max2 = safe_geomean(max2)
-    max_diff = diff_str(gm_max1, gm_max2)
+    max_diff = diff_str(gm_max1, gm_max2, tolerance=ToleranceDefault.time)
     comparison.summary = \
         f'Time: {sc_diff}; Throughput: {tp_diff}; ' \
         f'AvgTime: {avg_diff}; MaxTime: {max_diff}'
@@ -596,14 +623,31 @@ def compare_meta(r1: VMBReport, r2: VMBReport) -> None:
     print('=' * (name_len + 11))
     for t in tests1.intersection(tests2):
         t1, t2 = rep1[t], rep2[t]
-        print(f'{t:<{name_len}}|{t1:>4.0f}|{t2:>4.0f}|{diff_str(t1, t2)}')
+        print(f'{t:<{name_len}}|{t1:>4.0f}|{t2:>4.0f}|{cmp(t1, t2)}')
+
+
+def set_tolerance_defaults(args) -> None:
+    if args.tolerance > 0:  # overall option set
+        ToleranceDefault.time = args.tolerance
+        ToleranceDefault.code_size = args.tolerance
+        ToleranceDefault.rss = args.tolerance
+        ToleranceDefault.compile_time = args.tolerance
+        ToleranceDefault.count = args.tolerance
+        return
+    # read user settings for default tolerances
+    ToleranceDefault.time = abs(args.tolerance_time)
+    ToleranceDefault.code_size = abs(args.tolerance_code_size)
+    ToleranceDefault.rss = abs(args.tolerance_rss)
+    ToleranceDefault.compile_time = abs(args.tolerance_compile_time)
+    ToleranceDefault.count = abs(args.tolerance_count)
 
 
 def compare_reports(args):
     if len(args.paths) != 2:
         print('Need 2 reports for comparison')
         sys.exit(1)
-    flaky = read_list_file(args.flaky_list) if args.flaky_list else []
+    check_file_exists(args.paths[0])
+    check_file_exists(args.paths[1])
     with open(args.paths[0], 'r', encoding="utf-8") as f1:
         r1 = VMBReport.parse(f1.read(), tags=args.tags, skip_tags=args.skip_tags)
     with open(args.paths[1], 'r', encoding="utf-8") as f2:
@@ -611,7 +655,12 @@ def compare_reports(args):
     if args.compare_meta:
         compare_meta(r1, r2)
         return
-    cmp_vmb = VMBReport.compare_vmb(r1, r2, flaky=flaky)
+    flaky = read_list_file(args.flaky_list) if args.flaky_list else []
+    set_tolerance_defaults(args)
+    # read fine tuning if any
+    tolerances = ToleranceSettings.from_csv(args.tolerance_list) \
+        if args.tolerance_list else None
+    cmp_vmb = VMBReport.compare_vmb(r1, r2, flaky=flaky, tolerances=tolerances)
     cmp_vmb.print(full=args.full)
     if args.json:
         cmp_vmb.save(args.json)
@@ -634,6 +683,16 @@ def compare_reports(args):
         else 1)
 
 
+def exit_with_dry_run_status(bus: List[BenchUnit]) -> None:
+    if not bus:
+        log.fatal('No tests run!')
+        sys.exit(1)
+    failed = [bu for bu in bus if bu.status == BUStatus.COMPILATION_FAILED]
+    for bu in failed:
+        log.error("%s : Compilation failed", bu.name)
+    sys.exit(1 if failed else 0)
+
+
 def report_main(args: Args,
                 bus: Optional[List[BenchUnit]] = None,
                 ext_info: Optional[Any] = None,
@@ -643,6 +702,8 @@ def report_main(args: Args,
         ext_info = {}
     # if called after run
     if bus:
+        if args.dry_run:
+            exit_with_dry_run_status(bus)
         name = args.get('name', None)
         if not name:
             name = '-'.join([args.platform, args.mode])
@@ -669,19 +730,18 @@ def report_main(args: Args,
     if not args.paths:
         print('Report files (paths) missed')
         Args.print_help(Command.REPORT)
-    global TOLERANCE
-    TOLERANCE = args.tolerance
     if args.compare or args.compare_meta:
         compare_reports(args)
     else:
         flaky = read_list_file(args.flaky_list) if args.flaky_list else []
+        check_file_exists(args.paths[0])
         with open(args.paths[0], 'r', encoding="utf-8") as f:
             r = VMBReport.parse(f.read(), exclude=flaky, tags=args.tags, skip_tags=args.skip_tags)
         if args.compile_time:
             r.compile_time()
             sys.exit(0)
         if not args.status_only:
-            r.text_report(full=args.full, exclude=args.exclude_list, fmt=args.number_format)
+            r.text_report(full=args.full, exclude=flaky, fmt=args.number_format)
             print_flaky(flaky)
         exit_code = r.get_exit_code()
         if exit_code == 0:

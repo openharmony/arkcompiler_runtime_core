@@ -18,13 +18,13 @@
 #include <gtest/gtest.h>
 
 #include "assembly-parser.h"
-#include "libpandabase/mem/pool_manager.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/utils/utils.h"
-#include "libpandafile/bytecode_emitter.h"
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/value.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkfile/bytecode_emitter.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/value.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/compiler_interface.h"
@@ -46,7 +46,9 @@
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/tests/test_utils.h"
-#include "libpandabase/test_utilities.h"
+#include "libarkbase/test_utilities.h"
+#include "libarkbase/utils/utils.h"
+#include "runtime/tests/interpreter_test_utils.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -83,14 +85,6 @@ private:
     ark::MTManagedThread *thread_;
 };
 
-auto CreateFrame(uint32_t nregs, Method *method, Frame *prev)
-{
-    auto frameDeleter = [](Frame *frame) { RuntimeInterface::FreeFrame(ManagedThread::GetCurrent(), frame); };
-    std::unique_ptr<Frame, decltype(frameDeleter)> frame(
-        RuntimeInterface::template CreateFrame<false>(nregs, method, prev), frameDeleter);
-    return frame;
-}
-
 static void InitializeFrame(Frame *f)
 {
     ManagedThread::GetCurrent()->SetCurrentFrame(f);
@@ -98,64 +92,6 @@ static void InitializeFrame(Frame *f)
     for (size_t i = 0; i < f->GetSize(); i++) {
         frameHandler.GetVReg(i).Set(static_cast<int64_t>(0));
     }
-}
-
-static Class *CreateClass(panda_file::SourceLang lang)
-{
-    const std::string className("Foo");
-    auto runtime = Runtime::GetCurrent();
-    auto etx = runtime->GetClassLinker()->GetExtension(runtime->GetLanguageContext(lang));
-    auto klass = etx->CreateClass(reinterpret_cast<const uint8_t *>(className.data()), 0, 0,
-                                  AlignUp(sizeof(Class), OBJECT_POINTER_SIZE));
-    return klass;
-}
-
-static std::pair<PandaUniquePtr<Method>, std::unique_ptr<const panda_file::File>> CreateMethod(
-    Class *klass, uint32_t accessFlags, uint32_t nargs, uint32_t nregs, uint16_t *shorty,
-    const std::vector<uint8_t> &bytecode)
-{
-    // Create panda_file
-
-    panda_file::ItemContainer container;
-    panda_file::ClassItem *classItem = container.GetOrCreateGlobalClassItem();
-    classItem->SetAccessFlags(ACC_PUBLIC);
-
-    panda_file::StringItem *methodName = container.GetOrCreateStringItem("test");
-    panda_file::PrimitiveTypeItem *retType = container.GetOrCreatePrimitiveTypeItem(panda_file::Type::TypeId::VOID);
-    std::vector<panda_file::MethodParamItem> params;
-    panda_file::ProtoItem *protoItem = container.GetOrCreateProtoItem(retType, params);
-    panda_file::MethodItem *methodItem = classItem->AddMethod(methodName, protoItem, ACC_PUBLIC | ACC_STATIC, params);
-
-    auto *codeItem = container.CreateItem<panda_file::CodeItem>(nregs, nargs, bytecode);
-    methodItem->SetCode(codeItem);
-
-    panda_file::MemoryWriter memWriter;
-    container.Write(&memWriter);
-
-    auto data = memWriter.GetData();
-
-    auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    auto buf = allocator->AllocArray<uint8_t>(data.size());
-    memcpy_s(buf, data.size(), data.data(), data.size());
-
-    os::mem::ConstBytePtr ptr(reinterpret_cast<std::byte *>(buf), data.size(), [](std::byte *buffer, size_t) noexcept {
-        auto a = Runtime::GetCurrent()->GetInternalAllocator();
-        a->Free(buffer);
-    });
-    auto pf = panda_file::File::OpenFromMemory(std::move(ptr));
-
-    // Create method
-
-    auto method = MakePandaUnique<Method>(klass, pf.get(), methodItem->GetFileId(), codeItem->GetFileId(),
-                                          accessFlags | ACC_PUBLIC | ACC_STATIC, nargs, shorty);
-    method->SetInterpreterEntryPoint();
-    return {std::move(method), std::move(pf)};
-}
-
-static std::pair<PandaUniquePtr<Method>, std::unique_ptr<const panda_file::File>> CreateMethod(
-    Class *klass, Frame *f, const std::vector<uint8_t> &bytecode)
-{
-    return CreateMethod(klass, 0, 0, f->GetSize(), nullptr, bytecode);
 }
 
 static std::unique_ptr<ClassLinker> CreateClassLinker([[maybe_unused]] ManagedThread *thread)
@@ -2744,131 +2680,6 @@ TEST_F(InterpreterTest, DISABLED_TestCallNative)
 
     EXPECT_EQ(f->GetAccAsVReg().GetLong(), 102L);
 }
-
-class InterpreterWithSTWTest : public testing::Test {
-public:
-    InterpreterWithSTWTest()
-    {
-        RuntimeOptions options;
-        options.SetShouldLoadBootPandaFiles(false);
-        options.SetShouldInitializeIntrinsics(false);
-        options.SetRunGcInPlace(true);
-        options.SetGcTriggerType("debug-never");
-        options.SetVerifyCallStack(false);
-        options.SetGcType("stw");
-        Runtime::Create(options);
-        thread_ = ark::MTManagedThread::GetCurrent();
-        thread_->ManagedCodeBegin();
-    }
-
-    ~InterpreterWithSTWTest() override
-    {
-        thread_->ManagedCodeEnd();
-        Runtime::Destroy();
-    }
-
-    NO_COPY_SEMANTIC(InterpreterWithSTWTest);
-    NO_MOVE_SEMANTIC(InterpreterWithSTWTest);
-
-private:
-    ark::MTManagedThread *thread_;
-};
-
-Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *method, Frame *prev, ManagedThread *current)
-{
-    uint32_t extSz = CORE_EXT_FRAME_DATA_SIZE;
-    size_t allocSz = Frame::GetAllocSize(size, extSz);
-    size_t mirrorOffset = extSz + sizeof(Frame) + sizeof(interpreter::VRegister) * nregs;
-    void *frame = current->GetStackFrameAllocator()->Alloc<false>(allocSz);
-    auto mirrorPartBytes = reinterpret_cast<uint64_t *>(ToVoidPtr(ToUintPtr(frame) + mirrorOffset));
-    for (size_t i = 0; i < nregs; i++) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        mirrorPartBytes[i] = 0x00;
-    }
-    return new (Frame::FromExt(frame, extSz)) Frame(frame, method, prev, nregs);
-}
-
-static inline void RunTask(ark::mem::GC *gc)
-{
-    ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
-    GCTask task(GCTaskCause::OOM_CAUSE);
-    task.Run(*gc);
-}
-
-#if defined(PANDA_TARGET_ARM32) && defined(NDEBUG)
-DEATH_TEST_F(InterpreterWithSTWTest, DISABLED_TestCreateFrame)
-#else
-DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
-#endif
-{
-    testing::FLAGS_gtest_death_test_style = "threadsafe";
-
-    size_t vregNum1 = 16U;
-
-    BytecodeEmitter emitter1;
-
-    emitter1.CallShort(1U, 3U, RuntimeInterface::METHOD_ID.AsIndex());
-    emitter1.ReturnWide();
-
-    std::vector<uint8_t> bytecode1;
-    ASSERT_EQ(emitter1.Build(&bytecode1), BytecodeEmitter::ErrorCode::SUCCESS);
-
-    auto f1 = CreateFrame(vregNum1, nullptr, nullptr);
-
-    auto cls1 = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto methodData1 = CreateMethod(cls1, f1.get(), bytecode1);
-    auto method1 = std::move(methodData1.first);
-    f1->SetMethod(method1.get());
-
-    auto frameHandler1 = StaticFrameHandler(f1.get());
-    frameHandler1.GetVReg(1U).SetPrimitive(1_I);
-    frameHandler1.GetVReg(3U).SetPrimitive(2_I);
-
-    size_t vregNum2 = 65535;
-
-    BytecodeEmitter emitter2;
-
-    emitter2.LdaObj(1);
-    emitter2.ReturnObj();
-
-    std::vector<uint8_t> bytecode2;
-    ASSERT_EQ(emitter2.Build(&bytecode2), BytecodeEmitter::ErrorCode::SUCCESS);
-
-    auto f2 = CreateFrameWithSize(Frame::GetActualSize<false>(vregNum2), vregNum2, method1.get(), f1.get(),
-                                  ManagedThread::GetCurrent());
-
-    auto cls2 = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto methodData2 = CreateMethod(cls2, f2, bytecode2);
-    auto method2 = std::move(methodData2.first);
-    f2->SetMethod(method2.get());
-    ManagedThread::GetCurrent()->SetCurrentFrame(f2);
-
-    auto frameHandler2 = StaticFrameHandler(f2);
-    for (size_t i = 0; i < vregNum2; i++) {
-        frameHandler2.GetVReg(i).SetReference(ark::mem::AllocNonMovableObject());
-    }
-
-    size_t allocSz = sizeof(interpreter::VRegister) * vregNum2;
-    memset_s(ToVoidPtr(ToUintPtr(f2) + CORE_EXT_FRAME_DATA_SIZE + sizeof(Frame)), allocSz, 0xff, allocSz);
-
-    ark::mem::GC *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
-
-    {
-        ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
-        GCTask task(GCTaskCause::OOM_CAUSE);
-        ASSERT_DEATH(task.Run(*gc), "");
-    }
-
-    ark::FreeFrameInterp(f2, ManagedThread::GetCurrent());
-
-    f2 = CreateFrameWithSize(Frame::GetActualSize<false>(vregNum2), vregNum2, method1.get(), f1.get(),
-                             ManagedThread::GetCurrent());
-
-    RunTask(gc);
-
-    ark::FreeFrameInterp(f2, ManagedThread::GetCurrent());
-}
-
 }  // namespace ark::interpreter::test
 
 // NOLINTEND(readability-magic-numbers)

@@ -142,7 +142,7 @@ template("interop_test") {
       configs += invoker.configs
     }
     deps = [
-      "$ark_root/libpandabase:libarktsbase",
+      "$ark_root/libarkbase:libarktsbase",
       "$ark_root/runtime:libarkruntime",
       "$arkui_root/napi:ace_napi",
     ]

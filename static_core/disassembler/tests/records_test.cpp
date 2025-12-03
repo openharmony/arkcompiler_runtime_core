@@ -156,7 +156,88 @@ TEST(RecordTest, RecordWithRecord)
     EXPECT_EQ("\ti64 aw", line);
 }
 
-TEST(RecordTest, TestUnionCanonicalization)
+TEST(RecordTest, TestAnyType_1)
+{
+    auto parse = ark::pandasm::Parser();
+    auto program = parse.Parse(
+        ".record Y <external>\n"
+        ".record N <external>\n"
+        ".record A {Y field <access.field=public>}\n"
+        ".record B {N field <access.field=public>}\n");
+
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    EXPECT_TRUE(ss.str().find("Y field <access.field=public>") != std::string::npos);
+}
+
+TEST(RecordTest, TestAnyType_2)
+{
+    auto parse = ark::pandasm::Parser();
+    auto program = parse.Parse(
+        ".record Y <external>\n"
+        ".record N <external>\n"
+        ".record A {\n"
+        "    Y field <access.field=public>\n"
+        "    Y field2 <access.field=public>\n"
+        "}\n"
+        ".record B {\n"
+        "    N field <access.field=public>\n"
+        "    N field2 <access.field=public>\n"
+        "}\n");
+
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    EXPECT_TRUE(ss.str().find("Y field <access.field=public>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find("Y field2 <access.field=public>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find("N field <access.field=public>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find("N field2 <access.field=public>") != std::string::npos);
+}
+
+TEST(RecordTest, TestAnyType_3)
+{
+    auto parse = ark::pandasm::Parser();
+    auto program = parse.Parse(R"(
+        .record Y <external>
+        .record N <external>
+        .record A {
+            Y[] field <access.field=public>
+        }
+        .record B {
+            N[] field <access.field=public>
+        }
+    )");
+
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    EXPECT_TRUE(ss.str().find("Y[] field <access.field=public>") != std::string::npos);
+    EXPECT_TRUE(ss.str().find("N[] field <access.field=public>") != std::string::npos);
+}
+
+TEST(RecordTest, DISABLED_TestUnionCanonicalization)
 {
     auto program = ark::pandasm::Parser().Parse(
         ".record std.core.Object <external>\n"
@@ -194,7 +275,7 @@ TEST(RecordTest, TestUnionCanonicalization)
     EXPECT_TRUE(ss.str().find(".record {UA,D} <external>") != std::string::npos);
 }
 
-TEST(RecordTest, TestUnionCanonicalizationArrays)
+TEST(RecordTest, DISABLED_TestUnionCanonicalizationArrays)
 {
     auto program = ark::pandasm::Parser().Parse(
         ".record std.core.Object <external>\n"

@@ -1193,7 +1193,8 @@ export class Decimal {
             if (other.isNaN()) {
                 result = other;
                 break;
-            } else if (result.lessThan(other)) {
+            }
+            if (Utils.lessThan(result, other)) {
                 result = other;
             }
         }
@@ -1213,7 +1214,9 @@ export class Decimal {
             if (other.isNaN()) {
                 result = other;
                 break;
-            } else if (result.greaterThan(other)) {
+            }
+
+            if (Utils.greaterThan(result, other)) {
                 result = other;
             }
         }
@@ -2367,7 +2370,7 @@ export class Decimal {
             } else if (xd[0]) {
                 y = new Decimal(x);
             } else {
-                return new Decimal(rm === 3 ? -0 : 0);
+                return new Decimal(rm === 3 ? -0.0 : 0);
             }
             return external ? Utils.finalise(y, pr, rm) : y;
         }
@@ -2450,7 +2453,7 @@ export class Decimal {
         }
 
         if (xd.length == 0 || (xd.length > 0 && !xd[0])) {
-            return new Decimal(rm === 3 ? -0 : 0);
+            return new Decimal(rm === 3 ? -0.0 : 0);
         }
         y.digits = xd;
         y.exponent = this.getBase10Exponent(xd, yExp);
@@ -2472,7 +2475,7 @@ export class Decimal {
         if (!xd || !(xd!.at(0)) || !yd || !(yd!.at(0))) {
             return new Decimal((!y.s || xd && !(xd!.at(0)) && !yd || yd && !(yd!.at(0)) && !xd)
                 ? NaN
-                : (!xd || !yd) ? y.s / 0 : y.s * 0);
+                : (!xd || !yd) ? y.s / 0 : y.s * 0.0);
         }
         let e = Math.floor(this.exponent / LOG_BASE) + Math.floor(y.e / LOG_BASE);
         let xdL: int = xd!.length;
@@ -2624,9 +2627,9 @@ export class Decimal {
             e = str.length;
         }
 
-        for (i = 0; str.charCodeAt(i) === 48; i++);
+        for (i = 0; i < str.length && str.charCodeAt(i) === 48; i++);
 
-        for (len = str.length; str.charCodeAt(len - 1) === 48; --len);
+        for (len = str.length; len > 0 && str.charCodeAt(len - 1) === 48; --len);
         str = str.slice(i, len);
         if (str) {
             len -= i;
@@ -3252,7 +3255,7 @@ export class Decimal {
             return this.sign < 0 ? '-' + str : str;
         } else {
             let str = this.finiteToString(false);
-            let i = str.indexOf('.');
+            let i: number = str.indexOf('.');
             let base: int = baseOut;
             if (isExp) {
                 base = 2;
@@ -3749,7 +3752,7 @@ class Utils {
         if (!xd || !xd![0] || !yd || !yd![0]) {
             return new Decimal(
                 !x.s || !y.s || (xd ? yd && xd![0] == yd![0] : !yd) ? NaN :
-                xd && xd![0] == 0 || !yd ? sign * 0 : sign * Infinity);
+                xd && xd![0] == 0 || !yd ? sign * 0.0 : sign * Infinity);
         }
         xd = x.d!;
         yd = y.d!;
@@ -3975,5 +3978,15 @@ class Utils {
 
     public static createBusinessError(code: int, message: string) {
         return new BusinessError(code, new Error('BusinessError', message, undefined));
+    }
+
+    public static greaterThan(left: Decimal, right: Decimal): boolean {
+        let result = left.comparedTo(right);
+        return result > 0 || result === 0 && left.s > right.s;
+    }
+
+    public static lessThan(left: Decimal, right: Decimal): boolean {
+        let result = left.comparedTo(right);
+        return result < 0 || result === 0 && left.s < right.s;
     }
 }

@@ -21,7 +21,7 @@ This chapter explains why it makes sense to migrate from the standard |TS| to
 - Program stability. Dynamically-typed languages like |JS| are very good at
   allowing programs to write code fast. At the same time, these languages are
   notorious for unexpected runtime errors. For example, if you forget to check
-  some variable for ``undefined`` value, then your program would crash as a
+  a variable for an ``undefined`` value, then your program would crash as a
   result, causing inconvenience to users. Detecting such issues during the
   development would be more beneficial. |TS| helps greatly here: it allows you
   to annotate code with types, and have the compiler detect many errors prior

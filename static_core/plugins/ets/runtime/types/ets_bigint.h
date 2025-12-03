@@ -63,12 +63,27 @@ public:
         return MEMBER_OFFSET(EtsBigInt, sign_);
     }
 
+    uint32_t GetHashCode() const
+    {
+        auto hashCode = static_cast<uint32_t>(GetSign());
+        auto *bytes = reinterpret_cast<const EtsIntArray *>(GetBytes());
+        if (bytes == nullptr) {
+            return hashCode;
+        }
+        for (size_t i = 0; i < bytes->GetLength(); i++) {
+            hashCode = hashCode * HASH_SIGN_SHIFT + static_cast<int32_t>(bytes->Get(i));
+        }
+        return hashCode;
+    }
+
     EtsBigInt() = delete;
     ~EtsBigInt() = delete;
 
 private:
     NO_COPY_SEMANTIC(EtsBigInt);
     NO_MOVE_SEMANTIC(EtsBigInt);
+
+    static constexpr uint32_t HASH_SIGN_SHIFT = 31;
 
     ObjectPointer<EtsIntArray> bytes_;
     EtsInt sign_;

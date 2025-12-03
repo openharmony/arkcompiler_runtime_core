@@ -17,8 +17,8 @@
 #include "compiler/aot/aot_manager.h"
 #include "include/mem/panda_string.h"
 #include "zlib.h"
-#include "utils/expected.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/logger.h"
 
 #include <iostream>
 #include <iomanip>
@@ -438,7 +438,11 @@ Expected<PandaVector<PandaString>, PandaString> AotPgoFile::ReadPandaFilesSectio
             return UnexpectedS("Cannot read panda file info header");
         }
 
+        ASSERT(fileInfoHeader.fileNameLen != 0);
+        pandaFile.reserve(fileInfoHeader.fileNameLen - 1);
+        ASSERT(pandaFile.data() != nullptr);
         pandaFile.resize(fileInfoHeader.fileNameLen - 1, '\0');
+
         if (!Read(inputFile, pandaFile.data(), fileInfoHeader.fileNameLen - 1) ||
             // fileNameLen is written with the 0-terminator
             !ReadBytes(inputFile, nullptr, 1)) {

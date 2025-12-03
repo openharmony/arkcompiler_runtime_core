@@ -84,7 +84,7 @@ Error tests check that `es2panda` fails with a specified error/raises a warning,
 
 ```
 function foo(): void {
-  let a = new int[/* @@ Error TypeError: Index fractional part should be zero. */5.1]
+  let a = new int[/* @@ Error Semantic error: Index fractional part should be zero. */5.1]
 }
 
 ```
@@ -94,7 +94,7 @@ function foo(): void {
   let a = new int[5.1]
 }
 
-/* @@? 2:19 Error TypeError: Index fractional part should be zero. */
+/* @@? 2:19 Error Semantic error: Index fractional part should be zero. */
 ```
 
 ## Errors and Warnings skipping
@@ -107,7 +107,7 @@ function foo(): void {
   let a = new int[5.1]
 }
 
-/* @@? 2:19 Error TypeError: Index fractional part should be zero. */
+/* @@? 2:19 Error Semantic error: Index fractional part should be zero. */
 /* @@# SkipErrors = true  */
 ```
 
@@ -145,7 +145,7 @@ function main(): void {
     } catch (e) {}
 }
 
-/* @@? 2:19 Error TypeError: Index fractional part should be zero. */
+/* @@? 2:19 Error Semantic error: Index fractional part should be zero. */
 /* @@? 10:17 Warning Warning: Finally clause cannot complete normally  */
 /* @@# SkipErrors = true  SkipWarnings = true  */
 ```

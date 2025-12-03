@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-let removed_object_callbacks: boolean[] = new boolean[4];
+let removed_object_callbacks: boolean[] = new boolean[5];
 // Make it global beacuse optimizer is free to kill local variables
 let object1: Object | null = null;
 let object2: Object | null = null;
 let object3: Object | null = null;
+let object4: Object | null = null;
 let registry: FinalizationRegistry<String> | null = null;
 let unusedRegistry: FinalizationRegistry<String> | null = null;
 let emptyArgCallbackRegistry: FinalizationRegistry<Int> | null = null;
@@ -35,6 +36,8 @@ function callback(string: String): void {
         removed_object_callbacks[0] = true;
     } else if (string.equals("Third object removed")) {
         removed_object_callbacks[2] = true;
+    } else if (string.equals("Fifth object removed")) {
+        removed_object_callbacks[4] = true;
     } else {
         // Must be unreachable
         arktest.assertTrue(false, "Calling unexpected callback: " + string);
@@ -85,6 +88,57 @@ function registerTest(registry: FinalizationRegistry<String> | null): void {
     object1 = null;
     object3 = null;
     doFullGC();
+
+    // Test cleanup for deleted token
+    object4 = new Object();
+    let object4_callbackArg = new String("Fifth object removed");
+    {
+        let object4_token = new Object();
+        registry!.register(object4!, object4_callbackArg, object4_token);
+    }
+    object4 = null;
+    doFullGC();
+}
+
+
+let jobsNoToken = new Array<CompletableJob<void> | undefined>(undefined, undefined, undefined);
+let resultsNoToken = new Array<int>();
+let finRegNoToken = new FinalizationRegistry<int>((i: int) => {
+    resultsNoToken.push(i);
+    jobsNoToken[i]!.finish();
+});
+function registerNoTokenTest() {
+
+    for (let seq of [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]) {
+        arktest.assertEQ(finRegNoToken.getSize(), 0);
+        arktest.assertEQ(resultsNoToken.length, 0);
+
+        // Fill finReg
+        let objects = new Array<Object>({}, {}, {});
+        finRegNoToken.register(objects[0], 0);
+        finRegNoToken.register(objects[1], 1);
+        finRegNoToken.register(objects[2], 2);
+
+        for (let i of seq) {
+            jobsNoToken[i] = new CompletableJob<void>();
+        }
+
+        // Cleanup finReg in given order
+        for (let i of seq) {
+            objects[i] = {};
+            doFullGC();
+            jobsNoToken[i]!.Await();
+
+            arktest.assertEQ(resultsNoToken.length, 1);
+            arktest.assertEQ(resultsNoToken[0], i);
+            resultsNoToken.pop();
+            for (let i = 0; i < 2; i++) {
+                doFullGC();
+                Coroutine.Schedule();
+            }
+            arktest.assertEQ(resultsNoToken.length, 0);
+        }
+    }
 }
 
 //========================= CTOR tests ===========================================
@@ -263,11 +317,13 @@ function main(): void {
     arktest.assertTrue(removed_object_callbacks[0], "First callback hasn't been called");
     arktest.assertFalse(removed_object_callbacks[1], "Second callback has been called");
     arktest.assertTrue(removed_object_callbacks[2], "Third callback hasn't been called");
-    arktest.assertTrue(removed_object_callbacks[3], "Fouth callback hasn't been called");
+    arktest.assertTrue(removed_object_callbacks[3], "Forth callback hasn't been called");
+    arktest.assertTrue(removed_object_callbacks[4], "Fifth callback hasn't been called");
     arktest.assertNE(registry, null, "Instance still alive");
 
     ctorTests();
     getSizeTests();
     unregisterTests();
 
+    registerNoTokenTest();
 }

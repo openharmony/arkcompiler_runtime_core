@@ -23,7 +23,7 @@ In general we have several directions for concurrency in |LANG| stdlib:
 - interfaces for coroutines
 - concurrency/async primitives required for the compatibility with JS/TS
 - support for the OHOS-specific concurrency features(such as TaskPool, AsyncLock, etc.)
-- new concurrent containers/concurrency primitives 
+- new concurrent containers/concurrency primitives
 
 *************************
 Interfaces for coroutines
@@ -41,7 +41,7 @@ Job object represents the job which will be scheduled and executed. There is no 
 
 If coroutine completes normally, it puts its return value to the linked Job instance and marks the Job as successfully completed.
 
-If the during execution job function throws error this error will be propagated to the `Await` method and rethrown. 
+If the during execution job function throws error this error will be propagated to the `Await` method and rethrown.
 
 In general Job class have these public API:
 
@@ -54,7 +54,7 @@ In general Job class have these public API:
     }
 
     // Awaits execution of the job.
-    // On success return value, on fail the Error will be thrown 
+    // On success return value, on fail the Error will be thrown
     Await() : T {
       // ...
     }
@@ -93,7 +93,7 @@ The created coroutine will be scheduled on the one of the coroutine worker threa
 Schedule
 ========
 
-The `Schedule` is the method of `Coroutine` class which notifies Scheduler that current coroutine could be suspended at this moment, 
+The `Schedule` is the method of `Coroutine` class which notifies Scheduler that current coroutine could be suspended at this moment,
 so if it is non-empty execution queue - current coroutine will be suspended and best suspended coroutine will be scheduled on current coroutine worker.
 
 ***************************************
@@ -109,7 +109,7 @@ Promise
 The Promise object is introduced for the support asynchronous API. It is the object which represents a proxy for the result of the asynchronous operation. The semantic of the Promise is similar to the semantic of Promise in JS/TS if it used in the context of one coroutine.
 
 Promise object represents the values returned by call of async function.
-It belongs to the core packages of the standard library, 
+It belongs to the core packages of the standard library,
 and thus it is imported by default and may be used
 without any qualification.
 
@@ -141,12 +141,12 @@ The following methods are used as follows:
    method
 
 ..
-        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
+        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
 
 .. code-block:: typescript
   :donotcompile:
 
-        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
+        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
 
 -  ``catch`` takes one argument(the callback called after promise is rejected) and returns ``Promise<U|T>``
 
@@ -155,7 +155,7 @@ The following methods are used as follows:
 .. code-block:: typescript
   :donotcompile:
 
-        Promise<U>::catch<U = never>(onRejected?: (error: NullishType) => U|PromiseLike<U> throws): Promise<T|U>
+        Promise<U>::catch<U = never>(onRejected?: (error: Any) => U|PromiseLike<U> throws): Promise<T|U>
 
 -  ``finally`` takes one argument (the callback called after ``promise`` is
    either fulfilled or rejected) and returns ``Promise<T>``.
@@ -168,7 +168,7 @@ The following methods are used as follows:
 .. code-block:: typescript
   :donotcompile:
 
-        finally(onFinally?: () => void throws): Promise<T> 
+        finally(onFinally?: () => void throws): Promise<T>
 
 
 ---------------------------
@@ -182,7 +182,7 @@ either default promise rejection handler will be called upon the whole program c
 Concurrency extensions
 ****************************
 
-Besides JS/TS compatible concurrency primitives, there are some extensions in |LANG| which introduce some additional concurrency functionality. 
+Besides JS/TS compatible concurrency primitives, there are some extensions in |LANG| which introduce some additional concurrency functionality.
 
 ========
 TaskPool
@@ -203,7 +203,7 @@ The unit of execution in TaskPool is concurrent function (function with @Concurr
 We have some limitations for the TaskPool used in JS context:
 
 * functions used as tasks in TaskPool should be defined with @Concurrent decorator
-* it is not allowed to use closure variables in @Concurrent function 
+* it is not allowed to use closure variables in @Concurrent function
 
 ---------------------------
 TaskPool for static context
@@ -232,7 +232,7 @@ For this we need introduce special type of lock, which will not block the whole 
 
 .. uml:: os_based_lock_deadlock_seq.plantuml
 
-In Java language we have `synchronized` methods for guarantee that only one thread executing such method. For |LANG| we can introduce special class `AsyncLock`, which have method `async` for running code 
+In Java language we have `synchronized` methods for guarantee that only one thread executing such method. For |LANG| we can introduce special class `AsyncLock`, which have method `async` for running code
 
 .. code-block:: ts
     :donotcompile:
@@ -260,7 +260,7 @@ The semantic of such lock should be something like this:
             yield(); // suspend current coroutine
         }
     }
-    
+
     bool try_lock(ObjectHeader* obj) {
         if (obj.SetState(LOCKED) == SUCCESS) {
           return SUCCESS;
@@ -271,7 +271,7 @@ The semantic of such lock should be something like this:
 
 For this it is enough to have special state in `ObjectHeader` and change it atomically. Or we can have just some atomic field `state`.
 
-But `while (1)` can be optimized if we will have explicit scheduler for such tasks. For example we can group locked coroutines by lock object, and have queue for unlock events, when we process something from this queue, we can add next coroutine from this queue to the queue for scheduler. 
+But `while (1)` can be optimized if we will have explicit scheduler for such tasks. For example we can group locked coroutines by lock object, and have queue for unlock events, when we process something from this queue, we can add next coroutine from this queue to the queue for scheduler.
 
 Example with `AsyncLock` usage:
 
@@ -411,4 +411,4 @@ For VMs without shared memory, however, the implementation of AsyncLock requires
 AsyncLock Deadlock Detector
 ===========================
 
-It is possible that the developer make a mistake and create code which lead to the deadlock situation while using AsyncLock. For this it is possible to specify the maximum time which we expect is enough for successful Lock acquirence. In case if we reach the limit - the provided by developer callback will be called. 
+It is possible that the developer make a mistake and create code which lead to the deadlock situation while using AsyncLock. For this it is possible to specify the maximum time which we expect is enough for successful Lock acquirence. In case if we reach the limit - the provided by developer callback will be called.

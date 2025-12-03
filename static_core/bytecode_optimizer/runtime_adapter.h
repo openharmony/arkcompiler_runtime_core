@@ -16,16 +16,16 @@
 #define PANDA_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
 
 #include "compiler/optimizer/ir/runtime_interface.h"
-#include "libpandafile/bytecode_instruction.h"
-#include "libpandafile/class_data_accessor-inl.h"
-#include "libpandafile/code_data_accessor.h"
-#include "libpandafile/field_data_accessor.h"
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/method_data_accessor.h"
-#include "libpandafile/proto_data_accessor.h"
-#include "libpandafile/proto_data_accessor-inl.h"
-#include "libpandafile/type_helper.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/code_data_accessor.h"
+#include "libarkfile/field_data_accessor.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/method_data_accessor.h"
+#include "libarkfile/proto_data_accessor.h"
+#include "libarkfile/proto_data_accessor-inl.h"
+#include "libarkfile/type_helper.h"
 
 namespace ark {
 using compiler::RuntimeInterface;
@@ -341,6 +341,13 @@ public:
         return typeId.GetOffset();
     }
 
+    FieldId GetFieldId([[maybe_unused]] FieldPtr field) const override
+    {
+        panda_file::FieldDataAccessor fda(pandaFile_, FieldCast(field));
+
+        return fda.GetFieldId().GetOffset();
+    }
+
     bool IsFieldVolatile(FieldPtr field) const override
     {
         panda_file::FieldDataAccessor fda(pandaFile_, FieldCast(field));
@@ -411,7 +418,7 @@ public:
         return utf::Mutf8AsCString(stringData.data);
     }
 
-private:
+protected:
     static compiler::DataType::Type ToCompilerType(panda_file::Type type)
     {
         switch (type.GetId()) {
@@ -468,7 +475,7 @@ private:
     static IntrinsicId GetIntrinsicId(std::string_view className, std::string_view methodName,
                                       panda_file::MethodDataAccessor mda);
 
-    const panda_file::File &pandaFile_;
+    const panda_file::File &pandaFile_;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 }  // namespace ark
 

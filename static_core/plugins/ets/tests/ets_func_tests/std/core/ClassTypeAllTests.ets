@@ -105,7 +105,7 @@ function testGetInterfaceOutOfRange() {
     const n = tE.getInterfacesNum();
     arktest.expectThrow(
     () => { tE.getInterface(n); },
-    (e: Error | Exception): boolean => {
+    (e: Error): boolean => {
         return e instanceof TypeError && `${e}` === `TypeError: no interface at ${n}`;
     }
 );
@@ -116,7 +116,7 @@ function testGetFieldOutOfRange() {
     const n = tSub.getFieldsNum();
     arktest.expectThrow(
         () => { tSub.getField(n); },
-        (e: Error | Exception): boolean => {
+        (e: Error): boolean => {
             return e instanceof TypeError && `${e}` === `TypeError: no field at ${n}`;
         }
     );
@@ -127,7 +127,7 @@ function testGetOwnFieldOutOfRange() {
     const n = tSub.getOwnFieldsNum();
     arktest.expectThrow(
         () => { tSub.getOwnField(n); },
-        (e: Error | Exception): boolean => {
+        (e: Error): boolean => {
             return e instanceof TypeError && `${e}` === `TypeError: no own field at ${n}`;
         }
     );
@@ -138,7 +138,7 @@ function testGetConstructorOutOfRange() {
     const n = tA.getConstructorsNum();
     arktest.expectThrow(
         () => { tA.getConstructor(n); },
-        (e: Error | Exception): boolean => {
+        (e: Error): boolean => {
             return e instanceof TypeError && `${e}` === `TypeError: no constructor at ${n}`;
         }
     );
@@ -149,7 +149,7 @@ function testGetMethodOutOfRange() {
     const n = tBase.getMethodsNum();
     arktest.expectThrow(
         () => { tBase.getMethod(n as long); },
-        (e: Error | Exception): boolean => {
+        (e: Error): boolean => {
             return e instanceof TypeError && `${e}` === `TypeError: no method at ${n}`;
         }
     );
@@ -272,7 +272,7 @@ function testMake() {
     const tA = Type.of(new MakeA()) as ClassType;
     arktest.assertEQ(42 as int, (tA.make() as MakeA).value);
     const tB = Type.of(new MakeB(0, "")) as ClassType;
-    const args = new Object[2] as FixedArray<NullishType>;
+    const args = new Object[2] as FixedArray<Any>;
     args[0] = new Int(7);
     args[1] = new String("hi");
     const b = tB.make(args) as MakeB;

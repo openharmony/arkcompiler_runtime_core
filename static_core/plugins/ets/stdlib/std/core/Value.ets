@@ -142,12 +142,12 @@ export abstract class Value extends Object {
         return new BooleanValue(BooleanType.VAL, v)
     }
 
-    public static of(v: char): Value {
-        return new CharValue(CharType.VAL, v)
-    }
-
     public static of(v: byte): Value {
         return new ByteValue(ByteType.VAL, v)
+    }
+
+    public static of(v: char): Value {
+        return new CharValue(CharType.VAL, v)
     }
 
     public static of(v: short): Value {
@@ -170,16 +170,18 @@ export abstract class Value extends Object {
         return new DoubleValue(DoubleType.VAL, v)
     }
 
+    // -----
+
     public static of(v: FixedArray<boolean>): Value {
         return new ArrayValue(ArrayType.BOOLEAN_VAL, v)
     }
 
-    public static of(v: FixedArray<char>): Value {
-        return new ArrayValue(ArrayType.CHAR_VAL, v)
-    }
-
     public static of(v: FixedArray<byte>): Value {
         return new ArrayValue(ArrayType.BYTE_VAL, v)
+    }
+
+    public static of(v: FixedArray<char>): Value {
+        return new ArrayValue(ArrayType.CHAR_VAL, v)
     }
 
     public static of(v: FixedArray<short>): Value {
@@ -211,7 +213,7 @@ export abstract class Value extends Object {
      *
      * @returns {@link Value} of this object
      */
-    public static of(o: NullishType): Value {
+    public static of(o: Any): Value {
         if (o instanceof Value) {
             return o as Value
         } else if (o instanceof Boolean) {
@@ -240,13 +242,13 @@ export abstract class Value extends Object {
         } else if (t instanceof VoidType) {
             return VoidValue.INSTANCE
         } else if (t instanceof ClassType) {
-            return new ClassValue(t as ClassType, __narrowAny(o)!)
+            return new ClassValue(t as ClassType, o as object)
         } else if (t instanceof ArrayType) {
-            return new ArrayValue(t as ArrayType, __narrowAny(o)!)
+            return new ArrayValue(t as ArrayType, o as object)
         } else if (t instanceof StringType) {
             return new StringValue(t as StringType, o! as string)
         } else if (t instanceof LambdaType) {
-            return new LambdaValue(t as LambdaType, __narrowAny(o)!)
+            return new LambdaValue(t as LambdaType, o as object)
         } else if (t instanceof MethodType) {
             throw new Error("The MethodType cannot be instantiated")
         } else if (t instanceof EnumType) {
@@ -259,11 +261,9 @@ export abstract class Value extends Object {
         throw new Error("Unknown type")
     }
 
-    // -----
-
     public abstract getType(): Type
 
-    public abstract getData(): NullishType
+    public abstract getData(): Any
 
     public abstract toPrint(depth: int): string
 }
@@ -282,10 +282,10 @@ export final class ClassValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return this.data
     }
-    
+
     public constructor(typ: ClassType, data: Object) {
         this.typ = typ
         this.data = data
@@ -412,11 +412,11 @@ export final class ClassValue extends reflect.Value {
         } else if (ft.assignableFrom(StringType.REF) && val instanceof StringValue) {
             ValueAPISetFieldByNameObject(this.data, name, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetFieldByNameObject(this.data, name, __narrowAny((val as ArrayValue).getData())!)
+            ValueAPISetFieldByNameObject(this.data, name, (val as ArrayValue).getData() as object)
         } else if (ft instanceof ClassType && this.isAssignableToObject(val)) {
-            ValueAPISetFieldByNameObject(this.data, name, __narrowAny(val.getData())!)
+            ValueAPISetFieldByNameObject(this.data, name, val.getData() as object)
         } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
-            ValueAPISetFieldByNameObject(this.data, name, __narrowAny((val as LambdaValue).getData())!)
+            ValueAPISetFieldByNameObject(this.data, name, (val as LambdaValue).getData() as object)
         } else if (ft instanceof DoubleType && val instanceof ByteValue) {
             ValueAPISetFieldByNameDouble(this.data, name, val.getValueData())
         } else if (ft instanceof DoubleType && val instanceof ShortValue) {
@@ -502,23 +502,23 @@ export final class ClassValue extends reflect.Value {
         } else if (ft instanceof StringType && val instanceof StringValue) {
             ValueAPISetFieldObject(this.data, i, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetFieldObject(this.data, i, __narrowAny((val as ArrayValue).getData())!)
+            ValueAPISetFieldObject(this.data, i, (val as ArrayValue).getData() as object)
         } else if (ft instanceof ClassType && this.isAssignableToObject(val)) {
-            ValueAPISetFieldObject(this.data, i, __narrowAny((val as ClassValue).getData())!)
+            ValueAPISetFieldObject(this.data, i, (val as ClassValue).getData() as object)
         } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
-            ValueAPISetFieldObject(this.data, i, __narrowAny(val.getData())!)
+            ValueAPISetFieldObject(this.data, i, val.getData() as object)
         } else {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
     }
 
     public override toPrint(depth: int): string {
-        
-        if (this.typ.getName() == "escompat.ArrayBuffer") {
+
+        if (this.typ.getName() == "std.core.ArrayBuffer") {
             if (depth == 0) {
-                return "escompat.ArrayBuffer {...}";
+                return "std.core.ArrayBuffer {...}";
             }
-            const result = new StringBuilder("escompat.ArrayBuffer {");
+            const result = new StringBuilder("std.core.ArrayBuffer {");
             const dataField = this.getFieldByName('data');
             result.append("data: ").append(dataField.toPrint(depth - 1));
             const byteLengthField = this.getFieldByName('_byteLength');
@@ -527,7 +527,7 @@ export final class ClassValue extends reflect.Value {
             return result.toString();
         }
 
-        if (this.typ.getName() == "escompat.Date") {
+        if (this.typ.getName() == "std.core.Date") {
             return new StringBuilder("Date: ").append("\"").append((this.data as Date).toISOString()).append("\"").toString()
         }
         if (depth == 0) {
@@ -582,7 +582,7 @@ export final class ArrayValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return this.data
     }
 
@@ -654,9 +654,9 @@ export final class ArrayValue extends reflect.Value {
         } else if (et instanceof StringType && val instanceof StringValue) {
             ValueAPISetElementObject(this.data, i, (val as StringValue).getData()! as string)
         } else if (et instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetElementObject(this.data, i, __narrowAny((val as ArrayValue).getData())!)
+            ValueAPISetElementObject(this.data, i, (val as ArrayValue).getData() as object)
         } else if (et instanceof ClassType && val instanceof ClassValue) {
-            ValueAPISetElementObject(this.data, i, __narrowAny((val as ClassValue).getData())!)
+            ValueAPISetElementObject(this.data, i, (val as ClassValue).getData() as object)
         } else {
             throw new Error("Cannot assign array of type " + et + " with value of type " + vt)
         }
@@ -720,7 +720,7 @@ export final class LambdaValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return this.data
     }
 
@@ -758,7 +758,7 @@ export final class BooleanValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return new Boolean(this.data)
     }
 
@@ -795,7 +795,7 @@ export final class ByteValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return new Byte(this.data)
     }
 
@@ -832,7 +832,7 @@ export final class ShortValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return new Short(this.data)
     }
 
@@ -869,7 +869,7 @@ export final class CharValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return new Char(this.data)
     }
 
@@ -906,7 +906,7 @@ export final class IntValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return new Int(this.data)
     }
 
@@ -943,7 +943,7 @@ export final class FloatValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return new Float(this.data)
     }
 
@@ -980,7 +980,7 @@ export final class DoubleValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return this.data
     }
 
@@ -1017,7 +1017,7 @@ export final class LongValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return new Long(this.data)
     }
 
@@ -1054,7 +1054,7 @@ export final class StringValue extends reflect.Value {
         return this.typ as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return this.data
     }
 
@@ -1086,7 +1086,7 @@ export final class NullValue extends reflect.Value {
         return NullType.REF as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return null
     }
 
@@ -1115,7 +1115,7 @@ export final class UndefinedValue extends reflect.Value {
         return UndefinedType.REF as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return undefined
     }
 
@@ -1144,7 +1144,7 @@ export final class VoidValue extends reflect.Value {
         return VoidType.REF as Type
     }
 
-    public override getData(): NullishType {
+    public override getData(): Any {
         return Void.void_instance
     }
 

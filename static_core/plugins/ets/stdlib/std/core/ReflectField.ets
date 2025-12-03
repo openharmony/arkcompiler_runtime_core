@@ -29,7 +29,7 @@ class Field {
     protected fieldPtr: long
     protected accessMod: byte
 
-    private native constructor()
+    protected native constructor()
 
     public isReadonly(): boolean {
         return (this.attributes & Attributes.READONLY) != 0
@@ -59,6 +59,8 @@ class Field {
         return this.name ?? Field.getNameInternal(this.fieldPtr)
     }
 
+    protected native setValueInternal(thisObj: Object | undefined, value: Any): void
+    protected native getValueInternal(thisObj: Object | undefined): Any
     private static native getNameInternal(fieldPtr: long): string
 }
 

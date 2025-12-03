@@ -21,39 +21,47 @@
 #include "objects/string/sliced_string.h"
 
 namespace common {
+using SlicedString = SlicedStringTemplate<COMMON_POINTER_SIZE>;
+
+template <size_t POINTER_SIZE>
 template <typename Allocator, typename WriteBarrier, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>,
           objects_traits::enable_if_is_write_barrier<WriteBarrier>>
-SlicedString *SlicedString::Create(Allocator &&allocator, WriteBarrier &&writeBarrier,
-                                   ReadOnlyHandle<BaseString> parent)
+SlicedStringTemplate<POINTER_SIZE> *SlicedStringTemplate<POINTER_SIZE>::Create(Allocator &&allocator,
+                                                                               WriteBarrier &&writeBarrier,
+                                                                               ReadOnlyHandle<BaseString> parent)
 {
-    SlicedString *slicedString = SlicedString::Cast(
-        std::invoke(std::forward<Allocator>(allocator), SlicedString::SIZE, ObjectType::SLICED_STRING));
+    SlicedStringTemplate<POINTER_SIZE> *slicedString = SlicedStringTemplate<POINTER_SIZE>::Cast(std::invoke(
+        std::forward<Allocator>(allocator), SlicedStringTemplate<POINTER_SIZE>::SIZE, ObjectType::SLICED_STRING));
     slicedString->SetMixHashcode(0);
     slicedString->SetParent(std::forward<WriteBarrier>(writeBarrier), parent.GetBaseObject());
     return slicedString;
 }
 
-inline uint32_t SlicedString::GetStartIndex() const
+template <size_t POINTER_SIZE>
+inline uint32_t SlicedStringTemplate<POINTER_SIZE>::GetStartIndex() const
 {
     uint32_t bits = GetStartIndexAndFlags();
     return StartIndexBits::Decode(bits);
 }
 
-inline void SlicedString::SetStartIndex(uint32_t startIndex)
+template <size_t POINTER_SIZE>
+inline void SlicedStringTemplate<POINTER_SIZE>::SetStartIndex(uint32_t startIndex)
 {
-    DCHECK_CC(startIndex <= SlicedString::MAX_STRING_LENGTH);
+    DCHECK_CC(startIndex <= SlicedStringTemplate<POINTER_SIZE>::MAX_STRING_LENGTH);
     uint32_t bits = GetStartIndexAndFlags();
     uint32_t newVal = StartIndexBits::Update(bits, startIndex);
     SetStartIndexAndFlags(newVal);
 }
 
-inline bool SlicedString::GetHasBackingStore() const
+template <size_t POINTER_SIZE>
+inline bool SlicedStringTemplate<POINTER_SIZE>::GetHasBackingStore() const
 {
     uint32_t bits = GetStartIndexAndFlags();
     return HasBackingStoreBit::Decode(bits);
 }
 
-inline void SlicedString::SetHasBackingStore(bool hasBackingStore)
+template <size_t POINTER_SIZE>
+inline void SlicedStringTemplate<POINTER_SIZE>::SetHasBackingStore(bool hasBackingStore)
 {
     uint32_t bits = GetStartIndexAndFlags();
     uint32_t newVal = HasBackingStoreBit::Update(bits, hasBackingStore);
@@ -61,8 +69,9 @@ inline void SlicedString::SetHasBackingStore(bool hasBackingStore)
 }
 
 // Minimum length for a sliced string
+template <size_t POINTER_SIZE>
 template <bool VERIFY, typename ReadBarrier>
-uint16_t SlicedString::Get(ReadBarrier &&readBarrier, int32_t index) const
+uint16_t SlicedStringTemplate<POINTER_SIZE>::Get(ReadBarrier &&readBarrier, int32_t index) const
 {
     auto length = static_cast<int32_t>(GetLength());
     if constexpr (VERIFY) {

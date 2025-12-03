@@ -14,13 +14,6 @@
 
 include_relative 'string_helpers.irt'
 
-module Constants
-    ETS_SB_BUFFER_OFFSET = "ark::ObjectHeader::ObjectHeaderSize()"
-    ETS_SB_INDEX_OFFSET = ETS_SB_BUFFER_OFFSET + " + ark::OBJECT_POINTER_SIZE"
-    ETS_SB_LENGTH_OFFSET = ETS_SB_INDEX_OFFSET + " + sizeof(int32_t)"
-    ETS_SB_COMPRESS_OFFSET = ETS_SB_LENGTH_OFFSET + " + sizeof(int32_t)"
-end
-
 class SynchronizationType
   :Sync
   :Async
@@ -134,8 +127,8 @@ function(:StringBuilderAppendLong,
   end
 
   # 1. Check if there is a free slot in the buffer
-  index := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
-  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  index := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).i32
+  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
   If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
@@ -152,11 +145,11 @@ function(:StringBuilderAppendLong,
   slot_offs := AddI(ShlI(index).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
   Store(buffer, slot_offs, char_array).SetNeedBarrier(true).ref
   # 6. Increment 'index' field
-  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::SB_INDEX_OFFSET).i32
   # 7. Update 'length' field
-  length := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  length := LoadI(sb).Imm(Constants::SB_LENGTH_OFFSET).i32
   length := Add(length, n_digits).i32
-  StoreI(sb, length).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  StoreI(sb, length).Imm(Constants::SB_LENGTH_OFFSET).i32
   # Do not update 'compress' field, as a string representation of a number is always compressable
   Return(sb).ref
 Label(:SlowPathEntrypoint)
@@ -179,8 +172,8 @@ function(:StringBuilderAppendBool,
   end
 
   # 1. Check if there is a free slot in the buffer
-  index := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
-  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  index := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).i32
+  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
   If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
@@ -201,11 +194,11 @@ function(:StringBuilderAppendBool,
   slot_offs := AddI(ShlI(index).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
   Store(buffer, slot_offs, char_array).SetNeedBarrier(true).ref
   # 5. Increment 'index' field
-  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::SB_INDEX_OFFSET).i32
   # 6. Update 'length' field
-  length := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  length := LoadI(sb).Imm(Constants::SB_LENGTH_OFFSET).i32
   length := Add(length, Cast(n_digits).i32).i32
-  StoreI(sb, length).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  StoreI(sb, length).Imm(Constants::SB_LENGTH_OFFSET).i32
   # Do not update 'compress' field, as 'true' and 'false' are always compressable
   Return(sb).ref
 Label(:SlowPathEntrypoint)
@@ -230,8 +223,8 @@ def GenerateStringBuilderAppendChar(string_compression_enabled)
   end
 
   # 1. Check if there is a free slot in the buffer
-  index := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
-  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  index := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).i32
+  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
   If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
@@ -246,21 +239,21 @@ def GenerateStringBuilderAppendChar(string_compression_enabled)
   slot_offs := AddI(ShlI(index).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
   Store(buffer, slot_offs, char_array).SetNeedBarrier(true).ref
   # 5. Increment 'index' field
-  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::SB_INDEX_OFFSET).i32
   # 6. Update 'length' field
-  length := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  length := LoadI(sb).Imm(Constants::SB_LENGTH_OFFSET).i32
   length := AddI(length).Imm(1).i32
-  StoreI(sb, length).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  StoreI(sb, length).Imm(Constants::SB_LENGTH_OFFSET).i32
   # 7. Update 'compress' field
-  compress := LoadI(sb).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+  compress := LoadI(sb).Imm(Constants::SB_COMPRESS_OFFSET).u8
   If(compress, 0).NE.Likely.b {
     if string_compression_enabled
       compressable := Compare(SubI(ch).Imm(1).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).B.b
       If(compressable, 0).EQ.Unlikely.b {
-        StoreI(sb, 0).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+        StoreI(sb, 0).Imm(Constants::SB_COMPRESS_OFFSET).u8
       }
     else
-      StoreI(sb, 0).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+      StoreI(sb, 0).Imm(Constants::SB_COMPRESS_OFFSET).u8
     end
   }
   Return(sb).ref
@@ -318,7 +311,7 @@ def GenerateStringBuilderAppendStrings(num_args, sync_type)
 
   # 2. Check if there is a free slot in the buffer
   if num_args > 0
-    index0 := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+    index0 := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).i32
   end
   if num_args > 1
     index1 := AddI(index0).Imm(1).i32
@@ -342,14 +335,14 @@ def GenerateStringBuilderAppendStrings(num_args, sync_type)
       raise "Unexpected number of arguments: #{num_args}"
   end
 
-  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
   If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
-  buffer_uint := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref_uint
+  buffer_uint := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref_uint
 
   # 3. Increment 'index' field
-  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::SB_INDEX_OFFSET).i32
 
   # 4. Store input strings into buffer
   if num_args > 0
@@ -388,7 +381,7 @@ def GenerateStringBuilderAppendStrings(num_args, sync_type)
   end
 
   # 6. Update 'compress' field
-  compress := LoadI(sb).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+  compress := LoadI(sb).Imm(Constants::SB_COMPRESS_OFFSET).u8
   If(compress, 0).NE.Likely.b {
     if num_args > 0
       compress0 := XorI(length0).Imm(1).i32
@@ -407,12 +400,12 @@ def GenerateStringBuilderAppendStrings(num_args, sync_type)
       compress  := And(compress, compress3).i32
     end
     If(compress, 0).EQ.Unlikely.b {
-      StoreI(sb, 0).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+      StoreI(sb, 0).Imm(Constants::SB_COMPRESS_OFFSET).u8
     }
   }
 
   # 7. Update 'length' field
-  length := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  length := LoadI(sb).Imm(Constants::SB_LENGTH_OFFSET).i32
   if num_args > 0
     length0 := ShrI(length0).Imm(Constants::STRING_LENGTH_SHIFT).i32
     length := Add(length, length0).i32
@@ -430,7 +423,7 @@ def GenerateStringBuilderAppendStrings(num_args, sync_type)
     length := Add(length, length3).i32
   end
 
-  StoreI(sb, length).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  StoreI(sb, length).Imm(Constants::SB_LENGTH_OFFSET).i32
 
   Return(sb).ref
 Label(:SlowPathEntrypoint)
@@ -485,8 +478,8 @@ function(:StringBuilderToString,
   end
 
   # Compute data size and length of a new string.
-  n_chars := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).u32
-  sb_compress := LoadI(sb).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+  n_chars := LoadI(sb).Imm(Constants::SB_LENGTH_OFFSET).u32
+  sb_compress := LoadI(sb).Imm(Constants::SB_COMPRESS_OFFSET).u8
   If(sb_compress, 1).EQ.Likely.b {
     data_size1 := Cast(n_chars).word
   } Else {
@@ -511,8 +504,8 @@ function(:StringBuilderToString,
   }
 
   # Walk through the buffer elements and append their content to new_str
-  index := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
-  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  index := LoadI(sb).Imm(Constants::SB_INDEX_OFFSET).i32
+  buffer := LoadI(sb).Imm(Constants::SB_BUFFER_OFFSET).ref
   dst_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
   i1 := Cast(0).i32
 Label(:ForEachBufferSlot)
@@ -528,9 +521,9 @@ Label(:ForEachBufferSlot)
   # -------------------
   # Object is a string
   # -------------------
-  check_string_type(obj)
-  str_len := LoadI(obj).Imm(Constants::STRING_LENGTH_OFFSET).i32
-  src_data := AddI(Cast(obj).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
+  flat_str := try_use_cached_flat_str_reject_sliced(obj)
+  str_len := LoadI(flat_str).Imm(Constants::STRING_LENGTH_OFFSET).i32
+  src_data := AddI(Cast(flat_str).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
   src_len := ShrI(str_len).Imm(Constants::STRING_LENGTH_SHIFT).i32
   If(sb_compress, 0).EQ.Unlikely.b {
     Goto(:DoNotCompressString)

@@ -219,7 +219,7 @@ function testABProxyClass() {
     let handler1 = new Handler(obj, (Type.from<AIface>() as InterfaceType).getClass())
     let proxyInstance1 = reflect.Proxy.create(linker, interfaces1, handler1)
 
-    const errorcheck = (e: Error | Exception) => {
+    const errorcheck = (e: Error) => {
         return e.message === BAD_OWNER_ERROR
     }
 
@@ -279,8 +279,8 @@ function testOverloads() {
 
     testInvokeDIface(proxyInstance2 as DIface)
 
-    const errorcheck = (e: Error | Exception) => {
-        return e instanceof LinkerAbstractMethodError
+    const errorcheck = (e: Error) => {
+        return e.name === "LinkerAbstractMethodError"
     }
 
     handler2.setOwner((Type.from<CIface>() as InterfaceType).getClass())

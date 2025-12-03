@@ -159,3 +159,9 @@ class G {
         return G.privateMethod(c0, c1);
     }
 }
+
+class CheckWrongSignature {
+    static method(a: String): char {
+        return c'a';
+    }
+}

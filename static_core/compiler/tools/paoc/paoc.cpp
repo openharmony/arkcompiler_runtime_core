@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandafile/class_data_accessor.h"
+#include "libarkfile/class_data_accessor.h"
 #include "paoc_options.h"
 #include "aot/compiled_method.h"
 #include "paoc_clusters.h"
@@ -21,13 +21,13 @@
 #include "compiler_options.h"
 #include "compiler_events_gen.h"
 #include "compiler_logger.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #include "include/runtime.h"
 #include "mem/gc/gc_types.h"
 #include "optimizer_run.h"
 #include "optimizer/ir_builder/ir_builder.h"
-#include "os/filesystem.h"
-#include "generated/logger_options.h"
+#include "libarkbase/os/filesystem.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 
 #include "paoc.h"
 #ifdef PANDA_LLVM_AOT
@@ -1058,6 +1058,7 @@ void Paoc::MakeAotData(CompilingContext *ctx, uintptr_t codeAddress)
     ASSERT(aotData != nullptr);
     aotData->SetUseCha(paocOptions_->IsPaocUseCha());
     aotData->SetHasProfileData(ctx->method->GetProfilingData() != nullptr);
+    aotData->SetIsLLVMAotMode(IsLLVMAotMode());
     ctx->graph->SetAotData(aotData);
 }
 

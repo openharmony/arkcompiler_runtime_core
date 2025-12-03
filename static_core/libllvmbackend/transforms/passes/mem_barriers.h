@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,9 @@
 
 #include "llvm_ark_interface.h"
 
+#include <llvm/IR/Instruction.h>
 #include <llvm/IR/PassManager.h>
+#include <llvm/IR/Instructions.h>
 
 namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
@@ -45,6 +47,8 @@ private:
     void MergeBarriers(llvm::SmallVector<llvm::Instruction *> &mergeSet,
                        llvm::SmallVector<llvm::Instruction *> &needsBarrier);
     bool RelaxBarriers(llvm::Function &function);
+    bool IsProtectedPath(llvm::BasicBlock &block, llvm::SmallVector<llvm::Instruction *> &mergeSet);
+    bool SinkBarriers(llvm::BasicBlock &block, llvm::SmallVector<llvm::Instruction *> &mergeSet);
 
 private:
     LLVMArkInterface *arkInterface_;

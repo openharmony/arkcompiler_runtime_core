@@ -18,8 +18,8 @@
 #include "compiler/compile_method.h"
 #include "compiler/compiler_task_runner.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
-#include "libpandabase/mem/code_allocator.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/mem/code_allocator.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/hclass.h"
 #include "runtime/include/compiler_interface.h"
@@ -37,7 +37,7 @@
 #include "runtime/include/thread.h"
 
 #include "runtime/osr.h"
-#include "source_language.h"
+#include "libarkbase/generated/source_language.h"
 
 namespace ark {
 
@@ -128,6 +128,12 @@ public:
     {
         return const_cast<panda_file::File *>(MethodCast(method)->GetPandaFile());
     }
+
+    uint32_t GetAOTBinaryFileSnapshotIndexForMethod(MethodPtr method) const override;
+
+    BinaryFilePtr GetAOTBinaryFileBySnapshotIndex(uint32_t index) const override;
+
+    uint32_t GetAOTBinaryFileSnapshotIndex(BinaryFilePtr file) const override;
 
     MethodId ResolveMethodIndex(MethodPtr parentMethod, MethodIndex index) const override;
 
@@ -476,6 +482,7 @@ public:
     bool IsArrayClass(MethodPtr method, IdType id) const override;
 
     bool IsStringClass(MethodPtr method, IdType id) const override;
+    bool IsStringClass(ClassPtr klass) const override;
 
     bool IsArrayClass(ClassPtr cls) const override
     {
@@ -644,6 +651,10 @@ public:
     {
         return Thread::GetCurrent();
     }
+
+    bool CanUseStringFlatCheck() const override;
+
+    bool IsUseAllStrings() const override;
 
 private:
     static compiler::DataType::Type ToCompilerType(panda_file::Type type)

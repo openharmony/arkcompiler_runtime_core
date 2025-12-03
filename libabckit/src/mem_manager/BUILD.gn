@@ -24,10 +24,10 @@ ohos_source_set("abckit_mem_manager_source_set") {
 
   configs = [
     "$ark_root_static:ark_config",
-    "$ark_root_static/libpandabase:arkbase_public_config",
+    "$ark_root_static/libarkbase:arkbase_public_config",
   ]
 
   configs += [ "$abckit_root:abckit_config" ]
 
-  deps = [ "$ark_root_static/libpandabase:libarktsbase" ]
+  deps = [ "$ark_root_static/libarkbase:libarktsbase" ]
 }

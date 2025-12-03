@@ -281,6 +281,14 @@ def create_file(path: Union[str, Path]):
         mode='w', encoding='utf-8')
 
 
+def check_file_exists(file_path: Union[str, Path]) -> None:
+    path = Path(file_path)
+    if not path.exists():
+        error_text = 'File not found: "' + str(path) + '"'
+        log.error(error_text)
+        sys.exit(1)
+
+
 def copy_file(src: Union[str, Path], dst: Union[str, Path]) -> None:
     s = Path(src)
     if not s.exists():
@@ -339,6 +347,9 @@ def force_link(link: Path, dest: Path) -> None:
     log.trace('Force link: %s -> %s', str(link), str(dest))
     if link.exists():
         link.unlink()
+    if 'nt' == os.name:
+        copy_file(dest, link)
+        return
     link.symlink_to(dest)
 
 

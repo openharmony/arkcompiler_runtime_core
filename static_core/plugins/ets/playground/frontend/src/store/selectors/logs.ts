@@ -13,17 +13,29 @@
  * limitations under the License.
  */
 
+import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '..';
-import { ILog } from '../../models/logs';
+import { ELogType, ILog } from '../../models/logs';
 import { HighlightError, JumpTo } from '../slices/logs';
 
-export const selectCompileOutLogs = (state: RootState): ILog[] => state.logs.compileOut;
-export const selectCompileErrLogs = (state: RootState): ILog[] => state.logs.compileErr;
-export const selectRunOutLogs = (state: RootState): ILog[] => state.logs.runOut;
-export const selectRunErrLogs = (state: RootState): ILog[] => state.logs.runErr;
-export const selectDisasmOutLogs = (state: RootState): ILog[] => state.logs.disasmOut;
-export const selectDisasmErrLogs = (state: RootState): ILog[] => state.logs.disasmErr;
 export const selectOutLogs = (state: RootState): ILog[] => state.logs.out;
 export const selectErrLogs = (state: RootState): ILog[] => state.logs.err;
 export const selectHighlightErrors = (state: RootState): HighlightError[] => state.logs.highlightErrors;
 export const selectJumpTo = (state: RootState): JumpTo | null => state.logs.jumpTo;
+
+// Combined selectors for new tab structure - memoized to prevent unnecessary re-renders
+export const selectCompilationLogs = createSelector(
+    [selectOutLogs, selectErrLogs],
+    (outLogs, errLogs): ILog[] =>
+        [...outLogs, ...errLogs].filter(log =>
+            log.from === ELogType.COMPILE_OUT || log.from === ELogType.COMPILE_ERR
+        )
+);
+
+export const selectRuntimeLogs = createSelector(
+    [selectOutLogs, selectErrLogs],
+    (outLogs, errLogs): ILog[] =>
+        [...outLogs, ...errLogs].filter(log =>
+            log.from === ELogType.RUN_OUT || log.from === ELogType.RUN_ERR
+        )
+);

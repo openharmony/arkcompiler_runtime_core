@@ -15,10 +15,10 @@
 
 #include "disassembler.h"
 
-#include "utils/logger.h"
-#include "utils/pandargs.h"
-#include "ark_version.h"
-#include "file_format_version.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/pandargs.h"
+#include "libarkbase/generated/ark_version.h"
+#include <libarkfile/include/file_format_version.h>
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Options {
@@ -103,15 +103,19 @@ static bool ProcessArgs(ark::PandArgParser &paParser, const Options &options, in
     if (options.debug.GetValue()) {
         auto debugFile = options.debugFile.GetValue();
         if (debugFile.empty()) {
-            ark::Logger::InitializeStdLogging(ark::Logger::Level::DEBUG,
-                                              ark::Logger::ComponentMask().set(ark::Logger::Component::DISASSEMBLER));
+            ark::Logger::InitializeStdLogging(ark::Logger::Level::DEBUG, ark::Logger::ComponentMask()
+                                                                             .set(ark::Logger::Component::DISASSEMBLER)
+                                                                             .set(ark::Logger::Component::PANDAFILE));
         } else {
             ark::Logger::InitializeFileLogging(debugFile, ark::Logger::Level::DEBUG,
-                                               ark::Logger::ComponentMask().set(ark::Logger::Component::DISASSEMBLER));
+                                               ark::Logger::ComponentMask()
+                                                   .set(ark::Logger::Component::DISASSEMBLER)
+                                                   .set(ark::Logger::Component::PANDAFILE));
         }
     } else {
-        ark::Logger::InitializeStdLogging(ark::Logger::Level::ERROR,
-                                          ark::Logger::ComponentMask().set(ark::Logger::Component::DISASSEMBLER));
+        ark::Logger::InitializeStdLogging(ark::Logger::Level::ERROR, ark::Logger::ComponentMask()
+                                                                         .set(ark::Logger::Component::DISASSEMBLER)
+                                                                         .set(ark::Logger::Component::PANDAFILE));
     }
 
     return true;

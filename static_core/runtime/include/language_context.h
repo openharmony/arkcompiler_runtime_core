@@ -15,10 +15,10 @@
 #ifndef PANDA_RUNTIME_LANGUAGE_CONTEXT_H_
 #define PANDA_RUNTIME_LANGUAGE_CONTEXT_H_
 
-#include "libpandabase/utils/utf.h"
-#include "libpandafile/class_data_accessor-inl.h"
-#include "libpandafile/file_items.h"
-#include "macros.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/file_items.h"
+#include "libarkbase/macros.h"
 #include "compiler/code_info/vreg_info.h"
 #include "runtime/class_initializer.h"
 #include "runtime/include/class-inl.h"
@@ -288,6 +288,11 @@ public:
     }
 
     virtual void WrapClassInitializerException(ClassLinker *classLinker, ManagedThread *thread) const;
+
+    virtual bool HasValueEqualitySemantic() const
+    {
+        return false;
+    }
 };
 
 class LanguageContext {
@@ -665,6 +670,12 @@ public:
     void WrapClassInitializerException(ClassLinker *classLinker, ManagedThread *thread) const
     {
         base_->WrapClassInitializerException(classLinker, thread);
+    }
+
+    /// operator '==' has value equality semantic
+    bool HasValueEqualitySemantic() const
+    {
+        return base_->HasValueEqualitySemantic();
     }
 
 private:

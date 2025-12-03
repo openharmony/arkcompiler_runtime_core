@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-//! CHECKER      Forward gotos offsets in DISASM JIS
+//! CHECKER      Forward gotos offsets in DISASM JIT
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, entry: "gotos.ETSGLOBAL::main"
 //! EVENT        /Compilation,gotos.ETSGLOBAL::main,.*,COMPILED/
 //! EVENT        /Compilation,gotos.ETSGLOBAL::__noinline__while,.*,COMPILED/

@@ -22,20 +22,22 @@ cases:
       }
     logic: |-
       let result = multiplePromises(10);
-      let a: string | number = await result;
+      let a: string | number = waitForCompletion(async () => await result);
       let result1 = multiplePromises(2);
-      let b: string | number = await result1;
+      let b: string | number = waitForCompletion(async () => await result1);
       arktest.assertEQ(a, "string");
       arktest.assertEQ(b, 20);
+
   - desc: Start a coroutine using an normal function.
     decl: |-
       function testAwaitBasic(): void {
         let promise: Promise<number> = new Promise<number>((resolve:  (p: number) => void) => resolve(20));
-        let res = await promise;
+        let res = waitForCompletion(async () => await promise);
         arktest.assertEQ(res, 20);
       }
     logic: |-
       testAwaitBasic();
+
   - desc: Handling of await union types.
     decl: |-
       async function testAwaitUnion(a: number): Promise<string | number> {
@@ -43,13 +45,14 @@ cases:
           return a > 5 ? "text" : b;
       }
     logic: |-
-      let result1: string | number = await testAwaitUnion(10);
-      let result2: string | number = await testAwaitUnion(1);
+      let result1: string | number = waitForCompletion(async () => await testAwaitUnion(10));
+      let result2: string | number = waitForCompletion(async () => await testAwaitUnion(1));
       arktest.assertEQ(result1, "text");
       arktest.assertEQ(result2, 20);
+
   - desc: Use await to eliminate the multi-layer nesting of promise types.
     decl: |-
-      function asyncOperation1(): Promise<string> {
+      async function asyncOperation1(): Promise<string> {
         return new Promise<string>((resolve: (p: string) => void) => {
           setTimeout(() => {
             resolve("Hello");
@@ -57,7 +60,7 @@ cases:
         });
       }
 
-      function asyncOperation2(input: string): Promise<string> {
+      async function asyncOperation2(input: string): Promise<string> {
         return new Promise<string>((resolve: (p: string) => void) => {
           setTimeout(() => {
             resolve(input + " World");
@@ -65,7 +68,7 @@ cases:
         });
       }
 
-      function asyncOperation3(input: string): Promise<string> {
+      async function asyncOperation3(input: string): Promise<string> {
         return new Promise<string>((resolve: (p: string) => void) => {
           setTimeout(() => {
             resolve(input + "!");
@@ -83,17 +86,18 @@ cases:
         }
       }
     logic: |-
-      testNestedPromises();
+      waitForCompletion(testNestedPromises);
+
   - desc: |-
       Ignore the result of the await operation.
-      tags: [compile-only, positive]
     decl: |-
       async function testAwaitBasic(): Promise<void> {
         let promise: Promise<number> = new Promise<number>((resolve: (p: number) => void) => resolve(20));
         await promise;
       }
     logic: |-
-      testAwaitBasic();
+      waitForCompletion(testAwaitBasic);
+
   - desc: Start a coroutine using an async function.
     decl: |-
       async function testAwaitBasic(): Promise<void> {
@@ -102,4 +106,4 @@ cases:
         arktest.assertEQ(res, 20);
       }
     logic: |-
-      testAwaitBasic();
+      waitForCompletion(testAwaitBasic);

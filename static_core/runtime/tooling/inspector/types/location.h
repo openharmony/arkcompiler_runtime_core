@@ -22,7 +22,7 @@
 #include <optional>
 #include <string>
 
-#include "utils/expected.h"
+#include "libarkbase/utils/expected.h"
 
 #include "types/numeric_id.h"
 

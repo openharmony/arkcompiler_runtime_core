@@ -15,7 +15,7 @@
 
 #include <cstring>
 #include "plugins/ets/runtime/ets_namespace_manager_impl.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::ets {
 
@@ -42,7 +42,7 @@ Expected<EtsNativeLibrary, os::Error> EtsNamespaceManagerImpl::LoadNativeLibrary
 {
     LOG(INFO, RUNTIME) << "EtsNamespaceManagerImpl::LoadNativeLibraryFromNs pathKey :" << pathKey.c_str()
                        << " loading library name :" << name;
-#if defined(PANDA_TARGET_OHOS) && !defined(PANDA_CMAKE_SDK)
+#if defined(PANDA_TARGET_OHOS)
     PandaString errInfo = "EtsNamespaceManagerImpl::LoadNativeLibraryFromNs: ";
     std::string abcPath = pathKey;
     std::string namespaceName;

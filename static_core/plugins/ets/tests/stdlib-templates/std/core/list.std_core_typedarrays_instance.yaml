@@ -84,5 +84,5 @@
   cast2primitive: ".toFloat()",
   create: "",
   primitiveSizeBytes: 4,
-  data: "[Float.MIN_VALUE, Float.MAX_VALUE, 0.0f, -0.0f, Float.POSITIVE_INFINITY, -Float.NEGATIVE_INFINITY, 1e10f, 3.141592653589793f, 30f, 0.5f]"
+  data: "[Float.MIN_VALUE, Float.MAX_VALUE, 0.0f, -0.0f, Float.POSITIVE_INFINITY, -Float.NEGATIVE_INFINITY, 1e10f, 3.141592653589793f, 30.0f, 0.5f]"
 }

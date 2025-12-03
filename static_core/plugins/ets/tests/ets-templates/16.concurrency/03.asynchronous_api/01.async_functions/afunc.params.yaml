@@ -14,13 +14,6 @@
 ---
 cases:
     - decl: |-
-          async function foo(): Promise<void> {}
-      use: |-
-          // Promise of void
-          let r = foo()
-          arktest.assertTrue((await r) == undefined)
-
-    - decl: |-
           async function foo(p: int): Promise<Int> {
               return p + p
           }
@@ -180,15 +173,6 @@ cases:
       use: |-
           // Promise of promise
           arktest.assertTrue((await bar('A')) == 'AA')
-
-    - decl: |-
-          async function foo(): Promise<int[]> {
-              return [1, 2, 3] as int[]
-          }
-      use: |-
-          // Promise of array
-          let q: int[] = await foo()
-          arktest.assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
 
     - decl: |-
           async function foo(): Promise<int[]> {
@@ -386,7 +370,7 @@ cases:
               constructor(p: T) {
                   this.fld = foo<T>(p)
               }
-              meth(): T {
+              meth(): Awaited<T> {
                   return await this.fld
               }
           }
@@ -400,7 +384,7 @@ cases:
               return p
           }
           async function foo<T>(p: T): Promise<T> {
-              return launch<T, (t: T) => T>(bar, p).Await()
+              return launch<T, (t: T) => T>(bar<T>, p).Await();
           }
 
           class A<T> {
@@ -408,7 +392,7 @@ cases:
               constructor(p: T) {
                   this.fld = foo<T>(p)
               }
-              meth(): T {
+              meth(): Awaited<T> {
                   return await this.fld
               }
           }

@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include <node_api.h>
 #include <unordered_map>
 

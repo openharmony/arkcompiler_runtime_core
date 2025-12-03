@@ -20,11 +20,9 @@
 #include <cmath>
 #include <cstdint>
 #include <type_traits>
-#include "ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_utils.h"
-#include "libpandabase/utils/bit_helpers.h"
-#include "libpandabase/utils/utils.h"
-#include "intrinsics.h"
+
+#include "ets_coroutine.h"
+#include "libarkbase/utils/bit_helpers.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -112,6 +110,12 @@ inline double PowHelper(uint64_t number, int exponent, uint8_t radix)
     const double log2Radix {std::log2(radix)};
 
     double expRem = log2Radix * exponent;
+
+    // Check for overflow before casting to int
+    if (expRem > static_cast<double>(INT32_MAX)) {
+        return POSITIVE_INFINITY;
+    }
+
     int expI = static_cast<int>(expRem);
     expRem = expRem - expI;
 
@@ -418,20 +422,7 @@ EtsString *FpToString(FpType number, int radix)
     return EtsString::CreateFromMUtf8(result.c_str());
 }
 
-bool CheckReceiverType(EtsCoroutine *coro, EtsObject *arg, EtsClass *paramClass, Value *argValue);
-EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsCoroutine *coro, Value *args);
-EtsMethod *ValidateAndResolveInstanceMethod(EtsCoroutine *coro, EtsObject *thisObj, EtsMethod *method);
-
-template <typename T>
-bool CheckAndUnpackBoxedType(EtsClassLinkerExtension *linkExt, EtsObject *arg, EtsClass *paramClass, Value *argValue,
-                             ClassRoot primitiveRoot)
-{
-    if (paramClass != EtsClass::FromRuntimeClass(linkExt->GetClassRoot(primitiveRoot))) {
-        return false;
-    }
-    *argValue = Value(EtsBoxPrimitive<T>::Unbox(arg));
-    return true;
-}
+bool SameValueZero(EtsCoroutine *coro, EtsObject *a, EtsObject *b);
 
 }  // namespace ark::ets::intrinsics::helpers
 

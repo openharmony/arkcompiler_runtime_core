@@ -23,7 +23,6 @@ parameters:
     extension: sts
     load-runtimes: ets
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
-    checker-frontend-relpath: "bin/es2panda"
     checker-timeout: 180
     ark_asm-timeout: 60
     checker-run-prefix: "''"
@@ -52,7 +51,6 @@ steps:
         enable-checker: ${parameters.enable-checker}
         extension: ${parameters.extension}
         load-runtimes: ${parameters.load-runtimes}
-        checker-frontend-relpath: ${parameters.checker-frontend-relpath}
         checker-timeout: ${parameters.checker-timeout}
         checker-run-prefix: ${parameters.checker-run-prefix}
         checker-boot_self: ${parameters.checker-boot_self}

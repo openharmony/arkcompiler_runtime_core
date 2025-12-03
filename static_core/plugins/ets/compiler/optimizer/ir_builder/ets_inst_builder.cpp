@@ -14,15 +14,15 @@
  */
 
 #include <cstdint>
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "compiler_logger.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "optimizer/ir_builder/inst_builder.h"
 #include "optimizer/ir_builder/ir_builder.h"
 #include "optimizer/ir/inst.h"
-#include "bytecode_instruction.h"
-#include "bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 
 namespace ark::compiler {
 
@@ -38,6 +38,7 @@ static RuntimeInterface::IntrinsicId GetIntrinsicId(DataType::Type type)
         case DataType::UINT64:
         case DataType::INT64:
             return RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I64;
+        case DataType::BOOL:
         case DataType::UINT8:
         case DataType::INT8:
         case DataType::UINT16:
@@ -221,14 +222,23 @@ void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
             intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_EQUALS;
         }
     }
+#else
 #endif
     auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::BOOL, pc, intrinsicId);
-    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsic->RequireState() ? 3_I : 2_I);
 
     intrinsic->AppendInput(obj1);
     intrinsic->AddInputType(DataType::REFERENCE);
     intrinsic->AppendInput(obj2);
     intrinsic->AddInputType(DataType::REFERENCE);
+
+    if (intrinsic->RequireState()) {
+        // Create SaveState instruction
+        auto *saveState = CreateSaveState(Opcode::SaveState, pc);
+        intrinsic->AppendInput(saveState);
+        intrinsic->AddInputType(DataType::NO_TYPE);
+        AddInstruction(saveState);
+    }
 
     AddInstruction(intrinsic);
     UpdateDefinitionAcc(intrinsic);

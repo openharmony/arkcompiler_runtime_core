@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_PROMISE_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_PROMISE_H_
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"

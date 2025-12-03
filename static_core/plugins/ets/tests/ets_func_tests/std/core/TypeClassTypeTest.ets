@@ -83,7 +83,7 @@ final class HTMLWriter extends Writer {
     }
 }
 
-function findMethodsByName(type: ClassType, names: Array<string>): Array<Method | null> {
+function findMethodsByNameArray(type: ClassType, names: Array<string>): Array<Method | null> {
     const methods = new Array<Method | null>()
     const namesLength = names.length.toInt()
 
@@ -110,7 +110,7 @@ function findMethodsByName(type: ClassType, names: Array<string>): Array<Method 
 function findMethodsByName(type: ClassType, ...names: Array<string>): Array<Method | null> {
     const methodNames = new Array<string>()
     methodNames.push(...names)
-    return findMethodsByName(type, methodNames)
+    return findMethodsByNameArray(type, methodNames)
 }
 
 function testFields(ct: ClassType): int {
@@ -127,26 +127,26 @@ function testGetFieldError(ct: ClassType): int {
     try {
         ct.getField(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     try {
         ct.getOwnField(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     try {
         ct.getFieldByName("nonExistingField")
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     return failures
 }
@@ -156,18 +156,18 @@ function testGetMethodError(ct: ClassType): int {
     try {
         ct.getMethod(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     try {
         ct.getConstructor(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     return failures
 }
@@ -177,10 +177,10 @@ function testGetInterfaceError(ct: ClassType): int {
     try {
         ct.getInterface(1000)
         failures += 1
-    } catch (ignored: TypeError) {
-        // Expected error is catched
-    } catch (other) {
-        failures += 1
+    } catch (ignored) {
+        if (!(ignored instanceof TypeError)) {
+            failures += 1
+        }
     }
     return failures
 }
@@ -203,7 +203,7 @@ function testClassExtendsObject(ct: ClassType): int {
         objectMethodNames.push(objectMethodName)
     }
 
-    const methods = findMethodsByName(ct, objectMethodNames)
+    const methods = findMethodsByNameArray(ct, objectMethodNames)
     for (let i = 0; i < objectMethodsNum; ++i) {
         const objectMethodName = objectMethodNames[i]
         failures += test(methods[i] != null,  "       " + objectMethodName + " method")
@@ -306,9 +306,9 @@ function testMake(): int {
     let pt = Type.of(new Point()) as ClassType
     let wt = Type.of(new HTMLWriter(0)) as ClassType
     let p3t = Type.of(new Point3D(10)) as ClassType
-    let point = pt.make([new Double(1.0), new Double(2.0)] as FixedArray<NullishType>) as Point
-    let point3D = p3t.make([new Double(1.0), new Double(2.0), new Double(3.0)] as FixedArray<NullishType>) as Point3D
-    let writer = wt.make([new Int(10)] as FixedArray<NullishType>) as HTMLWriter
+    let point = pt.make([new Double(1.0), new Double(2.0)] as FixedArray<Any>) as Point
+    let point3D = p3t.make([new Double(1.0), new Double(2.0), new Double(3.0)] as FixedArray<Any>) as Point3D
+    let writer = wt.make([new Int(10)] as FixedArray<Any>) as HTMLWriter
     failures += test(point.serialize() == "{1,2}", "Point")
     failures += test(point3D.serialize() == "{1,2}" && point3D.z == 3, "Point3D")
     failures += test(writer.getState() == 10, "HTMLWriter" )

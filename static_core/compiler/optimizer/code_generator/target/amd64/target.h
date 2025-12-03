@@ -305,10 +305,10 @@ public:
     void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding) override;
 
-    void EncodeSelect(ArgsSelect &&args) override;
-    void EncodeSelect(ArgsSelectImm &&args) override;
-    void EncodeSelectTest(ArgsSelect &&args) override;
-    void EncodeSelectTest(ArgsSelectImm &&args) override;
+    void EncodeSelect(const ArgsSelect &args) override;
+    void EncodeSelect(const ArgsSelectImm &args) override;
+    void EncodeSelectTest(const ArgsSelect &args) override;
+    void EncodeSelectTest(const ArgsSelectImm &args) override;
 
     void EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem) override;
     void EncodeStp(Reg src0, Reg src1, MemRef mem) override;
@@ -338,8 +338,10 @@ public:
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
     bool CanEncodeScale(uint64_t imm, uint32_t size) override;
     bool CanEncodeBitCount() override;
+    bool CanEncodeCompressedStringCharAt() override;
     bool CanOptimizeImmDivMod(uint64_t imm, bool isSigned) const override;
 
+    void EncodeCompressedStringCharAt(ArgsCompressedStringCharAt &&args) override;
     void EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval) override;
     void EncodeCompareAndSwap(Reg dst, Reg addr, Reg val, Reg newval) override;
     void EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val) override;
@@ -491,6 +493,7 @@ public:
     void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
     void GenerateNativePrologue(const FrameInfo &frameInfo) override;
     void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
+    void GenerateEpilogueHead(const FrameInfo &frameInfo, std::function<void()> postJob) override;
 
     void *GetCodeEntry() override;
     uint32_t GetCodeSize() override;
@@ -503,6 +506,9 @@ public:
     // Calculating information about parameters and save regs_offset registers for special needs
     ParameterInfo *GetParameterInfo(uint8_t regsOffset) override;
     asmjit::x86::Assembler *GetMasm();
+
+private:
+    void GenerateEpilogueImpl(const FrameInfo &frameInfo, const std::function<void()> &postJob);
 };  // Amd64CallingConvention
 }  // namespace ark::compiler::amd64
 

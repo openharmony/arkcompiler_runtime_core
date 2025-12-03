@@ -25,13 +25,12 @@ function  {{.item.method_name}}{{.test_name|capitalize}}() : boolean {
       {{.item.method_name}}({{.item.method_signature.keys() | join(", ")}});
       actual = {{.item.result}}
 {%- endif %}
-  }  catch (e : {{.item.method_expected_exception}})  {
-       console.println("Expected exception was catched")
-       return true;
-  } catch (e) {
-       console.println("Unexpected exception was catched");
-       console.println(e.toString());
-       return false;
+  }  catch (e)  {
+    if (e instanceof {{.item.method_expected_exception}}) {
+      console.println("Expected exception was catched")
+      return true;
+    }
+    return false;
   }
   return false;
 }

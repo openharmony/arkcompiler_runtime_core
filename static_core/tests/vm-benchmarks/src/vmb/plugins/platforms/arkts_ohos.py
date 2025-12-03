@@ -16,18 +16,15 @@
 #
 
 import logging
+from typing import Optional
 from vmb.plugins.platforms.arkts_device import Platform as ArkTS_hos
 from vmb.target import Target
-from vmb.cli import Args
+from vmb.gensettings import GenSettings
 
 log = logging.getLogger('vmb')
 
 
 class Platform(ArkTS_hos):
-
-    def __init__(self, args: Args) -> None:
-        super().__init__(args)
-        self.hdc.run('hilog -p off')  # turn off privacy
 
     @property
     def name(self) -> str:
@@ -36,3 +33,9 @@ class Platform(ArkTS_hos):
     @property
     def target(self) -> Target:
         return Target.OHOS
+
+    @property
+    def template(self) -> Optional[GenSettings]:
+        """Use console.println to write directly to console."""
+        return GenSettings(src=set(), template='', out='',
+                           print_func='console_println')

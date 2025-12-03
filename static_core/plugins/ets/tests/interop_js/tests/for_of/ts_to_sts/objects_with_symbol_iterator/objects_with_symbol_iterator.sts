@@ -15,7 +15,6 @@
 
 import {
     CustomArrayIterTest,
-    NonIterable
 } from 'array_with_symbol_iterator_js';
 
 function checkArrayWithSymbolIterator()
@@ -36,7 +35,7 @@ function checkArrayWithSymbolIterator()
         ++length;
     };
 
-    JSRuntime.iterate(arr, callback);
+    // JSRuntime.iterate(arr, callback);
 
     if (!result) {
         console.log(`checkArrayWithSymbolIterator test failed.`);

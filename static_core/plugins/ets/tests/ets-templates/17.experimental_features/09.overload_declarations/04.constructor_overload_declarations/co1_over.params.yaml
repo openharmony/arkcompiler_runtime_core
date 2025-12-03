@@ -82,7 +82,7 @@ cases:
           arktest.assertTrue(new A(new Long(-1 as long)).getType() == "long")
           arktest.assertTrue(new A(new Char(c'A')).getType() == "char")
           arktest.assertTrue(new A(new Boolean(false)).getType() == "boolean")
-          arktest.assertTrue(new A(new Float(3.14 as float)).getType() == "float")
+          arktest.assertTrue(new A(new Float(3.14.toFloat())).getType() == "float")
           arktest.assertTrue(new A(new Double(3.14)).getType() == "double")
           arktest.assertTrue(new A(-1 as long).getType() == "long")
           arktest.assertTrue(new A(-1).getType() == "byte")
@@ -91,7 +91,7 @@ cases:
           arktest.assertTrue(new A(c'A').getType() == "char")
           arktest.assertTrue(new A(false).getType() == "boolean")
           arktest.assertTrue(new A(3.14).getType() == "double")
-          arktest.assertTrue(new A(3.14 as float).getType() == "float")
+          arktest.assertTrue(new A(3.14.toFloat()).getType() == "float")
 
     - decl: |-
           // primitives and boxed with sub/superclass
@@ -153,7 +153,7 @@ cases:
           arktest.assertTrue(new A(c'A').getType() == "char")
           arktest.assertTrue(new A(false).getType() == "boolean")
           arktest.assertTrue(new A(3.14).getType() == "double")
-          arktest.assertTrue(new A(3.14 as float).getType() == "float")
+          arktest.assertTrue(new A(3.14.toFloat()).getType() == "float")
 
     - decl: |-
           // enums

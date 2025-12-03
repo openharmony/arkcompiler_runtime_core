@@ -330,7 +330,7 @@ AliasType AliasAnalysis::CheckMemAddressEmptyIntersectionCase(const PointerWithI
         return NO_ALIAS;
     }
     // Different fields cannot alias each other even if they are not created locally
-    if (p1.GetType() == OBJECT_FIELD && !p1.HasSameOffset(p2)) {
+    if (p1.GetType() == OBJECT_FIELD && !p1.HasSameOffsetDroppedIdx(p2)) {
         return NO_ALIAS;
     }
     if (p1.GetType() == ARRAY_ELEMENT) {
@@ -378,9 +378,8 @@ AliasType AliasAnalysis::CheckMemAddress(const Pointer &p1, const Pointer &p2, b
         return NO_ALIAS;
     }
 
-    if (p1.GetType() == STATIC_FIELD || p2.GetType() == STATIC_FIELD || p1.GetType() == POOL_CONSTANT ||
-        p2.GetType() == POOL_CONSTANT) {
-        if (p1.HasSameOffset(p2)) {
+    if (p1.GetType() == STATIC_FIELD || p1.GetType() == POOL_CONSTANT) {
+        if (p1.HasSameOffsetDroppedIdx(p2)) {
             return MUST_ALIAS;
         }
         return NO_ALIAS;
@@ -484,7 +483,7 @@ AliasType AliasAnalysis::SingleIntersectionAliasing(const Pointer &p1, const Poi
             }
             break;
         case OBJECT_FIELD:
-            if (!p1.HasSameOffset(p2)) {
+            if (!p1.HasSameOffsetDroppedIdx(p2)) {
                 return NO_ALIAS;
             }
             break;

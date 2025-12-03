@@ -26,7 +26,6 @@ import {
     setVersionsLoading,
     Theme
 } from '../slices/appState';
-import { RootState } from '..';
 import { versionService } from '../../services/versions';
 
 export const setThemeAction = createAsyncThunk(
@@ -76,7 +75,6 @@ export const fetchVersions = createAsyncThunk(
     '@versions/fetchVersions',
     async (_, thunkAPI) => {
         thunkAPI.dispatch(setVersionsLoading(true));
-        const state: RootState = thunkAPI.getState() as RootState;
         try {
             const response = await versionService.fetchVersions();
             if (response.error) {

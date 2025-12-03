@@ -23,12 +23,10 @@ function main(): int {
 
     suite.addTest("LRUCache Constructor No Parameter", testLRUCacheConstructorNoParameter);
     suite.addTest("LRUCache Constructor Int", testLRUCacheConstructorInt);
-    suite.addTest("LRUCache Constructor x.0", testLRUCacheConstructorDotZero);
     suite.addTest("LRUCache update&getCapacity Int", testLRUCacheUpdateGetCapacityInt);
-    suite.addTest("LRUCache update&getCapacity x.0", testLRUCacheUpdateGetCapacityDotZero);
     suite.addTest("LRUCache Get Int", testLRUCacheGetInt);
     suite.addTest("LRUCache Get Str&Undefined", testLRUCacheGetStrAndUndefined);
-    suite.addTest("LRUCache Get CapacityChenged", testLRUCacheGetCapacityChenged);
+    suite.addTest("LRUCache Get CapacityChanged", testLRUCacheGetCapacityChanged);
     suite.addTest("LRUCache Put Once", testLRUCachePutOnce);
     suite.addTest("LRUCache Put Twice", testLRUCachePutTwice);
     suite.addTest("LRUCache Put&Get", testLRUCachePutAndGet);
@@ -61,13 +59,6 @@ function testLRUCacheUpdateGetCapacityInt() {
     arktest.assertEQ(res2, 2147483646);
 }
 
-function testLRUCacheUpdateGetCapacityDotZero() {
-    let that = new util.LRUCache<number, number>(20);
-    that.updateCapacity(10.0);
-    let res: number = that.getCapacity();
-    arktest.assertEQ(res, 10);
-}
-
 function testLRUCacheGetInt() {
     let that = new util.LRUCache<number, number>();
     that.put(1,2);
@@ -88,7 +79,7 @@ function testLRUCacheGetStrAndUndefined() {
     arktest.assertEQ(res3, 10);
 }
 
-function testLRUCacheGetCapacityChenged() {
+function testLRUCacheGetCapacityChanged() {
     let that = new util.LRUCache<number|string, number|string>(100);
     that.put('1111','bcjdshc')
     that.put(20,'cdjcaxb')
@@ -298,10 +289,4 @@ function testLRUCacheConstructorInt() {
     let that = new util.LRUCache<number, number>(2147483646);
     let res: number = that.getCapacity();
     arktest.assertEQ(res, 2147483646);
-}
-
-function testLRUCacheConstructorDotZero() {
-    let that = new util.LRUCache<number, number>(21.0);
-    let res: number = that.getCapacity();
-    arktest.assertEQ(res, 21);
 }

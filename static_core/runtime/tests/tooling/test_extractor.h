@@ -16,8 +16,8 @@
 #ifndef PANDA_RUNTIME_TESTS_TOOLING_TEST_EXTRACTOR_H
 #define PANDA_RUNTIME_TESTS_TOOLING_TEST_EXTRACTOR_H
 
-#include "libpandafile/debug_info_extractor.h"
-#include "libpandafile/line_number_program.h"
+#include "libarkfile/debug_info_extractor.h"
+#include "libarkfile/line_number_program.h"
 #include "runtime/include/tooling/debug_interface.h"
 
 namespace ark::tooling::test {

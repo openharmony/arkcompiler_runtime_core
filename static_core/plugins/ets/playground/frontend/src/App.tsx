@@ -21,15 +21,25 @@ import Header from './components/header/Header';
 import {Provider} from 'react-redux';
 import {store} from './store';
 import { Notifications } from './components/notif/notification';
+import { useShareFromUrl } from './utils/useShareFromUrl';
 
+function AppContent(): JSX.Element {
+  useShareFromUrl();
+
+  return (
+      <>
+          <Header />
+          <Notifications />
+          <MosaicApp />
+      </>
+  );
+}
 
 function App(): JSX.Element {
   return (
       <Provider store={store}>
           <ThemeProvider>
-              <Header />
-              <Notifications />
-              <MosaicApp />
+              <AppContent />
           </ThemeProvider>
       </Provider>
   );

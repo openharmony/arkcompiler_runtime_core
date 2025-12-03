@@ -119,7 +119,7 @@ Exceptions
   import {foo} from "file1";
     try {
         foo();
-    } catch (e: Error) {
+    } catch (e) {
         e.message; // ok
     }
 

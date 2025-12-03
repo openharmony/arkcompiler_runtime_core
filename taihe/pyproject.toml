@@ -112,6 +112,7 @@ ignore = [
     # -> "would imply to update tests every time you update exception message"
     "SIM108",
     "F541", # "f-string without any placeholders"
+    "F841",
     "E731",
     "D100",
     "D101",

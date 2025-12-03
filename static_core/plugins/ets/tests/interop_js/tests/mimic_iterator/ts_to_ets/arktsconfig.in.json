@@ -12,6 +12,7 @@
         "dependencies": {
             "iterator_ts": {
                 "language": "js",
+                "path": "${CMAKE_CURRENT_SOURCE_DIR}/iterator.d.ets",
                 "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/iterator"
             }
         }

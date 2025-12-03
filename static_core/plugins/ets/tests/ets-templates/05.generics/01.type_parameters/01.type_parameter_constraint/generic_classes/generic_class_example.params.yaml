@@ -15,17 +15,9 @@
 cases:
   - decl: let x = new G<Base>
   - decl: let x = new G<Derived>
-  - decl: let x = new G<Sometype>
-    tags: compile-only, negative
   - decl: let h1 = new H<Base>
   - decl: let h2 = new H<Derived>
   - decl: let h3 = new H<SomeType>
-  - decl: let h4 = new H<Object>
-    tags: compile-only, negative
   - decl: let e1 = new Exotic<"aa">
-  - decl: let e2 = new Exotic<"cc">
-    tags: compile-only, negative
   - decl: let b1 = new B<'f1'>
-  - decl: let b2 = new B<'f0'>
-    tags: compile-only, negative
   - decl: let b3 = new B<keyof A>

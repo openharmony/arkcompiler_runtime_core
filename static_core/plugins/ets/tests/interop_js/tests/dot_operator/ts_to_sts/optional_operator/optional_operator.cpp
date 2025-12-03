@@ -65,7 +65,8 @@ TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorFunction)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorFunction"));
 }
 
-TEST_F(EtsOptionalOperatorTsToEtsTest, checkOptionalOperatorFunctionUndefined)
+// There is a strict type check in 1.2, it will be CTE if there not exist attribute.
+TEST_F(EtsOptionalOperatorTsToEtsTest, DISABLED_checkOptionalOperatorFunctionUndefined)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalOperatorFunctionUndefined"));
 }

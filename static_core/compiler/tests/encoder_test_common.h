@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 #include <random>
 #include <gtest/gtest.h>
 
-#include "utils/utils.h"
-#include "mem/code_allocator.h"
-#include "mem/pool_manager.h"
-#include "mem/base_mem_stats.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkbase/mem/code_allocator.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/mem/base_mem_stats.h"
 #include "scoped_tmp_reg.h"
 #include "callconv.h"
 

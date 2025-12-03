@@ -137,6 +137,7 @@ export enum FaultID {
   InstanceType,
   NoEmptyImport,
   NoEmptyExport,
+  NoLazyImport,
   LimitExtends,
   PropertyAccessExpression,
   NoBuiltInType,
@@ -144,10 +145,11 @@ export enum FaultID {
   RemoveLimitDecorator,
   TupleTypeToArray,
   StructDeclaration,
-  FunctionType,
   NoVoidUnionType,
   ConstLiteralToType,
   AddDeclareToClass,
+  FunctionType,
+  MergeOverloadedMethods,
   // this should always be last enum
   LAST_ID
 }

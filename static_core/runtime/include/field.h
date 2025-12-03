@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@
 #include <atomic>
 
 #include "intrinsics_enum.h"
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/modifiers.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/modifiers.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/class_helper.h"
 #include "runtime/include/value-inl.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark {
 

@@ -55,7 +55,7 @@ function testUriGetLastSegment007() {
   try {
     let route = new uri.URI('content://com.test.uri/files/a a');
     let segments = route.getSegment();
-  } catch (err: BusinessError) {
+  } catch (err) {
     arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string.");
     arktest.assertEQ(err.code, 10200002);
     arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string.");
@@ -170,7 +170,7 @@ function testUriAddEncodedSegment003() {
   try {
     let route = new uri.URI('http://www.test.com/');  // CC-OFF(G.OTH.05) test logic
     let newRoute = route.addEncodedSegment("my files");
-  } catch (err: BusinessError) {
+  } catch (err) {
     arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string.");
     arktest.assertEQ(err.code, 10200002);
     arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string.");
@@ -181,7 +181,7 @@ function testUriAddEncodedSegment004() {
   try {
     let route = new uri.URI('http://www.test.com/');  // CC-OFF(G.OTH.05) test logic
     let newRoute = route.addEncodedSegment("my`files");
-  } catch (err: BusinessError) {
+  } catch (err) {
     arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Path does not conform to the rule.");
     arktest.assertEQ(err.code, 10200002);
     arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Path does not conform to the rule.");

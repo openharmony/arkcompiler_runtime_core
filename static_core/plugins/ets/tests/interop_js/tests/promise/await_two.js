@@ -18,7 +18,7 @@ let PROMISE_RESOLVE_VALUE = 'JS_PROMISE_RESULT';
 
 function sleep(ms) {
     return new Promise((resolve) => {
-        helper.setTimeout(() => { resolve(PROMISE_RESOLVE_VALUE) }, ms);
+        setTimeout(() => { resolve(PROMISE_RESOLVE_VALUE) }, ms);
     });
 }
 

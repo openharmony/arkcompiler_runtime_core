@@ -31,7 +31,7 @@ const globStsBigInt: BigInt;
 static {
     buffer = new ArrayBuffer(1);
     dataView = new DataView(buffer);
-    dataView.setUint8(0, 255)
+    dataView.setUint8(0, 255);
     globStsString = new String("Hello");
     globStsNumber = new Number(42 as number);
     globStsInt = new Int(42);
@@ -55,7 +55,7 @@ class DeferentIntTypes {
     intString: string = '1';
     l: long = 1;
     doub: double = 1;
-    ch: char = 1;
+    ch: char = c'1';
     by = dataView.getUint8(0);
 }
 

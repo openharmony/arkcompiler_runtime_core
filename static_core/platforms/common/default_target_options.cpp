@@ -14,17 +14,17 @@
  */
 
 #include "platforms/target_defaults/default_target_options.h"
+#include <string>
 
 namespace ark::default_target_options {
 
-uint32_t GetGcWorkersCount(const std::map<std::string, uint32_t> &modelMap)
+std::string GetTargetString()
 {
-    return modelMap.at("default");
-}
-
-uint32_t GetTaskmanagerWorkersCount(const std::map<std::string, uint32_t> &modelMap)
-{
-    return modelMap.at("default");
+    std::string model = "default";
+#ifdef PANDA_TARGET_ARM32
+    model = "arm32";
+#endif
+    return model;
 }
 
 bool GetCoverageEnable()
@@ -36,4 +36,5 @@ std::string GetCodeCoverageOutput()
 {
     return "";
 }
+
 }  // namespace ark::default_target_options

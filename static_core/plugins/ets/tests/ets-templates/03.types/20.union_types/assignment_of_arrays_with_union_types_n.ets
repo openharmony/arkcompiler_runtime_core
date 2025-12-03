@@ -18,15 +18,16 @@
 /*---
 desc: {{c.desc}}
 tags: [compile-only, negative]
-ark_options: ['--compiler-inlining=false']
+expected_out: {{c.stdout}}
 ---*/
 // NOTE(mgroshev): remove ark_options after #29029
 
 {{c.class}}
 {{c.function}}
 
+type MyArray = {{c.type}};
+
 function main(): void {
-  type MyArray = {{c.type}};
   let arr: MyArray[] = [{{c.value}}];
 }
 {%- endfor %}

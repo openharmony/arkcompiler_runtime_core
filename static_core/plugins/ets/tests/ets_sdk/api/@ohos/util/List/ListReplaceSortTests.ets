@@ -125,10 +125,13 @@ function testSortAndGetSubList() {
     list.insert(10, 0);
     list.insert(8, 0);
     list.sort((first, second) => first - second);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 5") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 5" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {list.getSubList(5, 1)}, exceptionCheck);
 }

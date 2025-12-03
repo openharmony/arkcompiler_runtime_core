@@ -47,15 +47,6 @@ export final class Float extends Floating implements Comparable<Float> {
     }
 
     /**
-     * Returns value of this instance as a primitive
-     *
-     * @returns value of this instance
-     */
-    public unboxed(): float {
-        return this.value;
-    }
-
-    /**
      * Returns boxed representation of the primitive
      *
      * @param value value to box
@@ -309,10 +300,16 @@ export final class Float extends Floating implements Comparable<Float> {
      *
      * @param other Float object to compare with
      *
-     * @returns result of the comparison
+     * @returns result of the comparison, -1 if this instance is less than provided object, 0 if equal, 1 if greater
      */
     public override compareTo(other: Float): int {
-        return (this.value - other.unboxed()).toInt();
+        if ((this.isNaN() && other.isNaN()) || (Math.abs(this.value - other) < Float.EPSILON)) {
+            return 0;
+        }
+        if (this.isNaN() || this.value > other) {
+            return 1;
+        }
+        return -1;
     }
 
     /**
@@ -344,6 +341,15 @@ export final class Float extends Floating implements Comparable<Float> {
     public override toString(): String {
         return Float.toString(this.value, 10);
     }
+    
+    /**
+     * Converts this object to a locale-specific string representation
+     *
+     * @returns result of the locale-specific conversion
+     */
+    public toLocaleString(): String {
+        return new Intl.NumberFormat().format(this.value)
+    }
 
     /**
      * compare(float, float) checks if two floats are differs no more than by Float.DELTA
@@ -366,7 +372,7 @@ export final class Float extends Floating implements Comparable<Float> {
      * @returns true if provided object and this instance have same value, false otherwise
      * Returns false if type of provided object is not the same as this type
      */
-    public equals(other: NullishType): boolean {
+    public equals(other: Any): boolean {
         if (this === other) {
             return true
         }

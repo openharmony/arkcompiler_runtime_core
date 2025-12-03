@@ -13,399 +13,873 @@
  * limitations under the License.
  */
 
-import {
-    tsInt,
-    tsBigInt,
-    tsBinary,
-    tsHexadecimal,
-    tsIntString,
-    tsByte,
-    tsFloat,
-    systemHexadecimal,
-    systemBinary,
-    tsExponential,
-} from 'main_js';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('main_js');
+
+let tsInt = module.getProperty('tsInt');
+let tsBigInt = module.getProperty('tsBigInt');
+let tsBinary = module.getProperty('tsBinary');
+let tsHexadecimal = module.getProperty('tsHexadecimal');
+let tsIntString = module.getProperty('tsIntString');
+let tsByte = module.getProperty('tsByte');
+let tsFloat = module.getProperty('tsFloat');
+let systemHexadecimal = module.getProperty('systemHexadecimal');
+let systemBinary = module.getProperty('systemBinary');
+let tsExponential = module.getProperty('tsExponential');
 
 function checkConversionIntToArrayInt(): boolean {
-    const val: FixedArray<int> = [tsInt as int];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsInt);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntToArrayNumber(): boolean {
-    const val: FixedArray<number> = [tsInt as number];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsInt);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntToArrayFloat(): boolean {
-    const val: FixedArray<float> = [tsInt as float];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsInt);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntToArrayByte(): boolean {
-    const val: FixedArray<byte> = [tsInt as byte];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsInt);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntToArrayShort(): boolean {
-    const val: FixedArray<short> = [tsInt as short];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsInt);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntToArrayLong(): boolean {
-    const val: FixedArray<long> = [tsInt as long];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsInt);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntToArrayDouble(): boolean {
-    const val: FixedArray<double> = [tsInt as double];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsInt);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntToArrayChar(): boolean {
-    const val: FixedArray<char> = [tsInt as char];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsInt);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToArrayInt(): boolean {
-    const val: FixedArray<int> = [Double.toInt(parseInt(tsBinary, systemBinary as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsBinary, systemBinary);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToArrayNumber(): boolean {
-    const val: FixedArray<number> = [parseInt(tsBinary, systemBinary as int) as number];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsBinary, systemBinary);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToArrayFloat(): boolean {
-    const val: FixedArray<float> = [Double.toFloat(parseInt(tsBinary, systemBinary as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsBinary, systemBinary);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToArrayByte(): boolean {
-    const val: FixedArray<byte> = [Double.toByte(parseInt(tsBinary, systemBinary as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsBinary, systemBinary);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToArrayShort(): boolean {
-    const val: FixedArray<short> = [Double.toShort(parseInt(tsBinary, systemBinary as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsBinary, systemBinary);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToArrayLong(): boolean {
-    const val: FixedArray<long> = [Double.toLong(parseInt(tsBinary, systemBinary as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsBinary, systemBinary);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToArrayDouble(): boolean {
-    const val: FixedArray<double> = [parseInt(tsBinary, systemBinary as int) as double];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsBinary, systemBinary);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBinaryToArrayChar(): boolean {
-    const val: FixedArray<char> = [Double.toChar(parseInt(tsBinary, systemBinary as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsBinary, systemBinary);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToArrayInt(): boolean {
-    const val: FixedArray<int> = [Double.toInt(parseInt(tsHexadecimal, systemHexadecimal as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToArrayNumber(): boolean {
-    const val: FixedArray<number> = [parseInt(tsHexadecimal, systemHexadecimal as int) as number];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToArrayFloat(): boolean {
-    const val: FixedArray<float> = [Double.toFloat(parseInt(tsHexadecimal, systemHexadecimal as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToArrayByte(): boolean {
-    const val: FixedArray<byte> = [Double.toByte(parseInt(tsHexadecimal, systemHexadecimal as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToArrayShort(): boolean {
-    const val: FixedArray<short> = [Double.toShort(parseInt(tsHexadecimal, systemHexadecimal as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToArrayLong(): boolean {
-    const val: FixedArray<long> = [Double.toLong(parseInt(tsHexadecimal, systemHexadecimal as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToArrayDouble(): boolean {
-    const val: FixedArray<double> = [parseInt(tsHexadecimal, systemHexadecimal as int) as double];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionHexadecimalToArrayChar(): boolean {
-    const val: FixedArray<char> = [Double.toChar(parseInt(tsHexadecimal, systemHexadecimal as int))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsHexadecimal, systemHexadecimal);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntStringToArrayInt(): boolean {
-    const val: FixedArray<int> = [Double.toInt(parseInt(tsIntString))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsIntString);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntStringToArrayNumber(): boolean {
-    const val: FixedArray<number> = [parseInt(tsIntString) as number];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsIntString);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntStringToArrayFloat(): boolean {
-    const val: FixedArray<float> = [Double.toFloat(parseInt(tsIntString))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsIntString);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntStringToArrayByte(): boolean {
-    const val: FixedArray<byte> = [Double.toByte(parseInt(tsIntString))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsIntString);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntStringToArrayShort(): boolean {
-    const val: FixedArray<short> = [Double.toShort(parseInt(tsIntString))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsIntString);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntStringToArrayLong(): boolean {
-    const val: FixedArray<long> = [Double.toLong(parseInt(tsIntString))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsIntString);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntStringToArrayDouble(): boolean {
-    const val: FixedArray<double> = [parseInt(tsIntString) as double];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsIntString);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionIntStringToArrayChar(): boolean {
-    const val: FixedArray<char> = [Double.toChar(parseInt(tsIntString))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsIntString);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToArrayInt(): boolean {
-    const val: FixedArray<int> = [tsFloat as int];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsFloat);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToArrayNumber(): boolean {
-    const val: FixedArray<number> = [tsFloat as number];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsFloat);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToArrayFloat(): boolean {
-    const val: FixedArray<float> = [tsFloat as float];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsFloat);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToArrayByte(): boolean {
-    const val: FixedArray<byte> = [tsFloat as byte];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsFloat);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToArrayShort(): boolean {
-    const val: FixedArray<short> = [tsFloat as short];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsFloat);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToArrayLong(): boolean {
-    const val: FixedArray<long> = [tsFloat as long];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsFloat);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToArrayDouble(): boolean {
-    const val: FixedArray<double> = [tsFloat as double];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsFloat);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionFloatToArrayChar(): boolean {
-    const val: FixedArray<char> = [tsFloat as char];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        val.setProperty(0, tsFloat);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToArrayInt(): boolean {
-    const val: FixedArray<int> = [tsByte.getUint8(0) as int];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const byteValue = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        val.setProperty(0, byteValue);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToArrayNumber(): boolean {
-    const val: FixedArray<number> = [tsByte.getUint8(0) as number];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const byteValue = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        val.setProperty(0, byteValue);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToArrayFloat(): boolean {
-    const val: FixedArray<float> = [tsByte.getUint8(0) as float];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const byteValue = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        val.setProperty(0, byteValue);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToArrayByte(): boolean {
-    const val: FixedArray<byte> = [tsByte.getUint8(0) as byte];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const byteValue = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        val.setProperty(0, byteValue);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToArrayShort(): boolean {
-    const val: FixedArray<short> = [tsByte.getUint8(0) as short];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const byteValue = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        val.setProperty(0, byteValue);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToArrayLong(): boolean {
-    const val: FixedArray<long> = [tsByte.getUint8(0) as long];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const byteValue = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        val.setProperty(0, byteValue);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToArrayDouble(): boolean {
-    const val: FixedArray<double> = [tsByte.getUint8(0) as double];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const byteValue = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        val.setProperty(0, byteValue);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionByteToArrayChar(): boolean {
-    const val: FixedArray<char> = [tsByte.getUint8(0) as char];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const byteValue = tsByte.invokeMethod('getUint8', ESValue.wrapNumber(0));
+        val.setProperty(0, byteValue);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToArrayInt(): boolean {
-    const val: FixedArray<int> = [Double.toInt(Number(tsBigInt))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
+        val.setProperty(0, converted);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToArrayNumber(): boolean {
-    const val: FixedArray<number> = [Number(tsBigInt) as number];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
+        val.setProperty(0, converted);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToArrayFloat(): boolean {
-    const val: FixedArray<float> = [Double.toFloat(Number(tsBigInt))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
+        val.setProperty(0, converted);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToArrayByte(): boolean {
-    const val: FixedArray<byte> = [Double.toByte(Number(tsBigInt))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
+        val.setProperty(0, converted);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToArrayShort(): boolean {
-    const val: FixedArray<short> = [Double.toShort(Number(tsBigInt))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
+        val.setProperty(0, converted);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToArrayLong(): boolean {
-    const val: FixedArray<long> = [Double.toLong(Number(tsBigInt))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
+        val.setProperty(0, converted);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToArrayDouble(): boolean {
-    const val: FixedArray<double> = [Number(tsBigInt) as double];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
+        val.setProperty(0, converted);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionBigIntToArrayChar(): boolean {
-    const val: FixedArray<char> = [Double.toChar(Number(tsBigInt))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const NumberData = global.getProperty('Number');
+        const converted = NumberData.invoke(tsBigInt);
+        val.setProperty(0, converted);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToArrayInt(): boolean {
-    const val: FixedArray<int> = [Double.toInt(parseInt(tsExponential))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsExponential);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToArrayNumber(): boolean {
-    const val: FixedArray<number> = [parseInt(tsExponential) as number];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsExponential);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToArrayFloat(): boolean {
-    const val: FixedArray<float> = [Double.toFloat(parseInt(tsExponential))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsExponential);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToArrayByte(): boolean {
-    const val: FixedArray<byte> = [Double.toByte(parseInt(tsExponential))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsExponential);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToArrayShort(): boolean {
-    const val: FixedArray<short> = [Double.toShort(parseInt(tsExponential))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsExponential);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToArrayLong(): boolean {
-    const val: FixedArray<long> = [Double.toLong(parseInt(tsExponential))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsExponential);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToArrayDouble(): boolean {
-    const val: FixedArray<double> = [parseInt(tsExponential) as double];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsExponential);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToArrayChar(): boolean {
-    const val: FixedArray<char> = [Double.toChar(parseInt(tsExponential))];
+    try {
+        const val = ESValue.instantiateEmptyArray();
+        const parseInt = global.getProperty('parseInt');
+        const parsed = parseInt.invoke(tsExponential);
+        val.setProperty(0, parsed);
 
-    return typeof val[0] == 'number';
+        const firstElement = val.getProperty(0);
+        return firstElement.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }

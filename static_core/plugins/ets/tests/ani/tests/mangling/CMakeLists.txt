@@ -21,3 +21,7 @@ ani_add_gtest(ani_test_mangle_signature
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mangle_signature_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mangle_signature_test.ets
 )
+
+ani_add_gtest(ani_test_mangle_signature_to_proto
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mangle_signature_to_proto_test.cpp
+)

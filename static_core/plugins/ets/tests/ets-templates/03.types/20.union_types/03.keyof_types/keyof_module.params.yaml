@@ -13,14 +13,6 @@
 
 cases:
   - import: |-
-        import {A} from "./module.ets"
-
-        type t = keyof A
-    call: |-
-        let n: never
-        let a: t = n
-
-  - import: |-
         import {B} from "./module.ets"
 
         type t = keyof B

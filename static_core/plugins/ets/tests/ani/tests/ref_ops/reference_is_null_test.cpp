@@ -79,4 +79,23 @@ TEST_F(ReferenceIsNullTest, mix_test)
     ASSERT_EQ(env_->Reference_Equals(ref, objectRef, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_FALSE);
 }
+
+TEST_F(ReferenceIsNullTest, get_undef_test)
+{
+    ani_ref ref {};
+    ani_boolean isNull = ANI_FALSE;
+    ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNull(ref, &isNull), ANI_OK);
+    ASSERT_EQ(isNull, ANI_FALSE);
+}
+
+TEST_F(ReferenceIsNullTest, get_null_test)
+{
+    ani_ref ref {};
+    ani_boolean isNull = ANI_FALSE;
+    ASSERT_EQ(env_->GetNull(&ref), ANI_OK);
+    ASSERT_EQ(env_->Reference_IsNull(ref, &isNull), ANI_OK);
+    ASSERT_EQ(isNull, ANI_TRUE);
+}
+
 }  // namespace ark::ets::ani::testing

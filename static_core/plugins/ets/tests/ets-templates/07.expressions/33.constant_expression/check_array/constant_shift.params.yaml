@@ -35,4 +35,3 @@ cases:
   - { type: number, value: 61.9, sign: '<<',  expected: 488 }
   - { type: number, value: 61.9, sign: '>>',  expected: 7   }
   - { type: number, value: 61.9, sign: '>>>', expected: 7   }
-      

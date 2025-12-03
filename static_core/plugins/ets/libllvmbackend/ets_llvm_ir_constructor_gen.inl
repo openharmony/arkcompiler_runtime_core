@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "plugins/ets/compiler/compiler_constants_inl.h"
 
 bool LLVMIrConstructor::EmitArrayCopyTo(Inst *inst)
 {
@@ -48,7 +49,10 @@ bool LLVMIrConstructor::EmitArrayCopyTo(Inst *inst)
 
 bool LLVMIrConstructor::EmitStdStringSubstring(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED, 3U);
+    auto entrypointId = GetGraph()->GetRuntime()->IsUseAllStrings()
+                            ? RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_ALL_STRINGS_COMPRESSED
+                            : RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED;
+    return EmitFastPath(inst, entrypointId, 3U);
 }
 
 bool LLVMIrConstructor::EmitStringBuilderAppendBool(Inst *inst)
@@ -417,20 +421,32 @@ bool LLVMIrConstructor::EmitStringIndexOfAfter(Inst *inst)
 
 bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
 {
-    ASSERT(GetGraph()->GetRuntime()->IsCompressedStringsEnabled());
-    auto getEntryId = [inst]() {
-        switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
-            case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE:
-                return RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB_COMPRESSED;
-            case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE:
-                return RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB_COMPRESSED;
-            default:
-                UNREACHABLE();
-        }
-    };
+    auto intrId = inst->CastToIntrinsic()->GetIntrinsicId();
+    ASSERT(intrId == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE ||
+           intrId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE);
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto eid = intrId == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE
+                   ? RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB
+                   : RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_TLAB;
+    auto array = GetInputValue(inst, 0);
     auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
     auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
-    auto call = CreateFastPathCall(inst, getEntryId(), {GetInputValue(inst, 0), klass});
+    auto call = CreateFastPathCall(inst, eid, {array, klass});
+    MarkAsAllocation(call);
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringFromCharCodeSingle(Inst *inst)
+{
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    ASSERT(GetGraph()->GetRuntime()->IsStringCachesUsed());
+    constexpr auto eid = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
+    auto cache = GetInputValue(inst, 0);
+    auto number = GetInputValue(inst, 1);
+    auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
+    auto call = CreateFastPathCall(inst, eid, {cache, number, klass});
     MarkAsAllocation(call);
     ValueMapAdd(inst, call);
     return true;
@@ -438,13 +454,13 @@ bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
 
 bool LLVMIrConstructor::EmitFloat32ArrayFillInternal(Inst *inst)
 {
-    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL_FAST_PATH,
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL,
                                       builder_.getInt32Ty());
 }
 
 bool LLVMIrConstructor::EmitFloat64ArrayFillInternal(Inst *inst)
 {
-    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL_FAST_PATH,
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL,
                                       builder_.getInt64Ty());
 }
 
@@ -463,4 +479,128 @@ bool LLVMIrConstructor::EmitFloatArrayFillInternal(Inst *inst, RuntimeInterface:
     ArenaVector<llvm::Value *> args({ref, bitcast, beginPos, endPos}, GetGraph()->GetLocalAllocator()->Adapter());
     CreateFastPathCall(inst, eid, args);
     return true;
+}
+
+static RuntimeInterface::EntrypointId GetArrayFastCopyToRefEntrypointId(mem::BarrierType barrierType)
+{
+    using EntrypointId = RuntimeInterface::EntrypointId;
+    switch (barrierType) {
+        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:  // Gen GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_ASYNC_MANUAL;
+        case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_HYBRID;
+        case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_ASYNC;
+        default:  // STW GC
+            return EntrypointId::ARRAY_FAST_COPY_TO_REF_SYNC;
+    }
+}
+bool LLVMIrConstructor::EmitArrayFastCopyToRef(Inst *inst)
+{
+    if (GetGraph()->GetArch() == Arch::AARCH32) {
+        return false;
+    }
+
+    auto srcObj = GetInputValue(inst, 0);
+    auto dstObj = GetInputValue(inst, 1);
+    auto dstStart = GetInputValue(inst, 2);
+    auto srcStart = GetInputValue(inst, 3);
+    auto srcEnd = GetInputValue(inst, 4);
+
+    // Check whether the source range less or equal to what fits in a single GC card table. If not, go to the
+    // slow path.
+    static constexpr size_t IN_ONE_CARD_TABLE_PAGE_ITERATION_THRESHOLD =
+        mem::CardTable::GetCardSize() / sizeof(ObjectPointerType);
+    auto onePageThreshold = builder_.getInt32(IN_ONE_CARD_TABLE_PAGE_ITERATION_THRESHOLD);
+
+    auto fastPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_fastpath"), func_);
+    auto slowPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_slowpath"), func_);
+    auto returnBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_return"), func_);
+    auto rangeSize = builder_.CreateSub(srcEnd, srcStart);
+    builder_.CreateCondBr(builder_.CreateICmpUGT(rangeSize, onePageThreshold), slowPathBb, fastPathBb);
+    const std::array callArgs = {srcObj, dstObj, dstStart, srcStart, srcEnd};
+
+    SetCurrentBasicBlock(fastPathBb);
+    auto fastPathEntrypointId = GetArrayFastCopyToRefEntrypointId(GetGraph()->GetRuntime()->GetPostType());
+    CreateFastPathCall(inst, fastPathEntrypointId, callArgs);
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(slowPathBb);
+    constexpr auto slowPathEntrypointId = RuntimeInterface::EntrypointId::ARRAY_FAST_COPY_TO_REF_ENTRYPOINT;
+    CreateEntrypointCall(slowPathEntrypointId, inst, callArgs);
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(returnBb);
+    return true;
+}
+
+static RuntimeInterface::EntrypointId GetArrayFastReverseEntrypointId(mem::BarrierType barrierType)
+{
+    using EntrypointId = RuntimeInterface::EntrypointId;
+    switch (barrierType) {
+        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:  // Gen GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_ASYNC_MANUAL;
+        case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_HYBRID;
+        case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_ASYNC;
+        default:  // STW GC
+            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_SYNC;
+    }
+}
+
+bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
+{
+    auto arch = GetGraph()->GetArch();
+    if (arch == Arch::AARCH32) {
+        return false;
+    }
+
+    auto arrLength = GetInputValue(inst, 1);
+
+    auto shortArrayThreshold = builder_.getInt32(MAGIC_NUM_FOR_SHORT_ARRAY_THRESHOLD);
+
+    auto fastPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_fastpath"), func_);
+    auto slowPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_go_to_slowpath"), func_);
+    auto returnBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "emit_return"), func_);
+    builder_.CreateCondBr(builder_.CreateICmpUGT(arrLength, shortArrayThreshold), slowPathBb, fastPathBb);
+    // NOTE(srokashevich, #30178): remove fake arg after fix
+    auto fake = GetInputValue(inst, 0);
+    const std::array callArgs = {GetInputValue(inst, 0), fake, arrLength};
+
+    SetCurrentBasicBlock(fastPathBb);
+    auto fastPathEntrypointId = GetArrayFastReverseEntrypointId(GetGraph()->GetRuntime()->GetPostType());
+    CreateFastPathCall(inst, fastPathEntrypointId, callArgs);
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(slowPathBb);
+    constexpr auto slowPathEntrypointId = RuntimeInterface::EntrypointId::ESCOMPAT_ARRAY_REVERSE;
+    CreateEntrypointCall(slowPathEntrypointId, inst, {GetInputValue(inst, 0), arrLength});
+    builder_.CreateBr(returnBb);
+
+    SetCurrentBasicBlock(returnBb);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringConcat2(Inst *inst)
+{
+    if (GetGraph()->GetRuntime()->IsUseAllStrings()) {
+        return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT2_TLAB_ALL_STRINGS, 2U);
+    } else {
+        return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT2_TLAB, 2U);
+    }
+}
+
+bool LLVMIrConstructor::EmitStringConcat3(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT3_TLAB, 3U);
+}
+
+bool LLVMIrConstructor::EmitStringConcat4(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT4_TLAB, 4U);
 }

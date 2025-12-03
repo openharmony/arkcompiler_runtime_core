@@ -18,9 +18,9 @@
 
 #include <node_api.h>
 #include "include/mem/panda_string.h"
-#include "utils/expected.h"
-#include "utils/span.h"
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/mem/mem.h"
 
 namespace ark {
 class Method;

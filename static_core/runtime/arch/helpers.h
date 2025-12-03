@@ -15,9 +15,9 @@
 #ifndef PANDA_RUNTIME_ARCH_HELPERS_H_
 #define PANDA_RUNTIME_ARCH_HELPERS_H_
 
-#include "libpandabase/utils/arch.h"
-#include "libpandabase/utils/bit_utils.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/span.h"
 #include "runtime/include/value.h"
 #include "runtime/include/mem/panda_containers.h"
 

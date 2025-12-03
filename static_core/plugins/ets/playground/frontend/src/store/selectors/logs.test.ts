@@ -14,18 +14,15 @@
  */
 
 import {
-    selectCompileOutLogs,
-    selectCompileErrLogs,
-    selectRunOutLogs,
-    selectRunErrLogs,
-    selectDisasmOutLogs,
-    selectDisasmErrLogs,
     selectOutLogs,
     selectErrLogs,
-    selectHighlightErrors
+    selectHighlightErrors,
+    selectCompilationLogs,
+    selectRuntimeLogs
 } from './logs';
 import { RootState } from '..';
 import {mockAllState} from './appState.test';
+import { ELogType } from '../../models/logs';
 
 describe('Log Selectors', () => {
     let mockState: RootState;
@@ -33,60 +30,51 @@ describe('Log Selectors', () => {
     beforeEach(() => {
         mockState = {...mockAllState,
             logs: {
-                compileOut: [{ message: [{message: 'compile output log'}], isRead: true }],
-                compileErr: [{ message: [{message:  'compile error log'}], isRead: false }],
-                runOut: [{ message: [{message:  'run output log'}], isRead: true }],
-                runErr: [{ message: [{message:  'run error log'}], isRead: false }],
-                disasmOut: [{ message: [{message:  'disassembly output log'}], isRead: true }],
-                disasmErr: [{ message: [{message:  'disassembly error log'}], isRead: false }],
-                verifierOut: [{ message: [{message:  'verifier output log'}], isRead: true }],
-                verifierErr: [{ message: [{message:  'verifier error log'}], isRead: false }],
-                out: [{ message: [{message:  'general output log'}], isRead: true }],
-                err: [{ message: [{message:  'general error log'}], isRead: false }],
+                out: [
+                    { message: [{message: 'compile output', source: 'output' as const}], isRead: true, from: ELogType.COMPILE_OUT },
+                    { message: [{message: 'run output', source: 'output' as const}], isRead: true, from: ELogType.RUN_OUT }
+                ],
+                err: [
+                    { message: [{message: 'compile error', source: 'error' as const}], isRead: false, from: ELogType.COMPILE_ERR },
+                    { message: [{message: 'run error', source: 'error' as const}], isRead: false, from: ELogType.RUN_ERR }
+                ],
                 highlightErrors: [],
                 jumpTo: null
             },
         };
     });
 
-    it('should select compile output logs', () => {
-        expect(selectCompileOutLogs(mockState))
-            .toEqual([{ message: [{message: 'compile output log'}], isRead: true }]);
-    });
-
-    it('should select compile error logs', () => {
-        expect(selectCompileErrLogs(mockState))
-            .toEqual([{ message: [{message:  'compile error log'}], isRead: false }]);
-    });
-
-    it('should select run output logs', () => {
-        expect(selectRunOutLogs(mockState))
-            .toEqual([{ message: [{message:  'run output log'}], isRead: true }]);
-    });
-
-    it('should select run error logs', () => {
-        expect(selectRunErrLogs(mockState))
-            .toEqual([{ message: [{message:  'run error log'}], isRead: false }]);
-    });
-
-    it('should select disassembly output logs', () => {
-        expect(selectDisasmOutLogs(mockState))
-            .toEqual([{ message: [{message:  'disassembly output log'}], isRead: true }]);
-    });
-
-    it('should select disassembly error logs', () => {
-        expect(selectDisasmErrLogs(mockState))
-            .toEqual([{ message: [{message:  'disassembly error log'}], isRead: false }]);
-    });
-
     it('should select general output logs', () => {
-        expect(selectOutLogs(mockState))
-            .toEqual([{ message: [{message:  'general output log'}], isRead: true }]);
+        expect(selectOutLogs(mockState)).toHaveLength(2);
+        expect(selectOutLogs(mockState)[0].message[0].message).toBe('compile output');
     });
 
     it('should select general error logs', () => {
-        expect(selectErrLogs(mockState))
-            .toEqual([{ message: 'general error log', isRead: false }]);
+        expect(selectErrLogs(mockState)).toHaveLength(2);
+        expect(selectErrLogs(mockState)[0].message[0].message).toBe('compile error');
+    });
+
+    it('should select compilation logs (compile out + err)', () => {
+        const compilationLogs = selectCompilationLogs(mockState);
+        expect(compilationLogs).toHaveLength(2);
+        expect(compilationLogs.some(log => log.from === ELogType.COMPILE_OUT)).toBe(true);
+        expect(compilationLogs.some(log => log.from === ELogType.COMPILE_ERR)).toBe(true);
+    });
+
+    it('should select runtime logs (run out + err)', () => {
+        const runtimeLogs = selectRuntimeLogs(mockState);
+        expect(runtimeLogs).toHaveLength(2);
+        expect(runtimeLogs.some(log => log.from === ELogType.RUN_OUT)).toBe(true);
+        expect(runtimeLogs.some(log => log.from === ELogType.RUN_ERR)).toBe(true);
+    });
+
+    it('should select highlight errors', () => {
+        mockState.logs.highlightErrors = [
+            { line: 1, column: 2, message: 'Syntax error' },
+        ];
+        expect(selectHighlightErrors(mockState)).toEqual([
+            { line: 1, column: 2, message: 'Syntax error' },
+        ]);
     });
     it('should select highlight errors', () => {
         mockState.logs.highlightErrors = [

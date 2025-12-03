@@ -16,13 +16,13 @@
 #include <algorithm>
 #include <atomic>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/gc_task.h"
 #include "runtime/mem/gc/gc_trigger.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::mem {
 
@@ -121,6 +121,7 @@ void GCTriggerHeap::FinishPostponeGCIfNeeded(GC *gc)
 {
     if (gc->IsPostponeEnabled() && ++gcPostponeCount_ == POSTPONE_GC_LIMIT) {
         gc->PostponeGCEnd();
+        gcPostponeCount_ = 0;
     }
 }
 

@@ -17,22 +17,30 @@
 
 #include <map>
 #include <string>
-#include <libpandabase/macros.h>
 #include <functional>
 using CreateNamespaceCallback = std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)>;
 using ExtensionApiCheckCallback = std::function<bool(const std::string &className, const std::string &fileName)>;
 
+#ifndef PANDA_TARGET_WINDOWS
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define PANDA_NAMESPACE_MANAGER_PUBLIC_API __attribute__((visibility("default")))
+#else
+#define PANDA_NAMESPACE_MANAGER_PUBLIC_API __declspec(dllexport)
+#endif
+
 // key is abcPath, value is namespaceName
 using AppBundleModuleNamePathMap = std::map<std::string, std::string>;
 namespace ark::ets {
-class PANDA_PUBLIC_API EtsNamespaceManager {
+class PANDA_NAMESPACE_MANAGER_PUBLIC_API EtsNamespaceManager {
 public:
     static void SetAppLibPaths(const AppBundleModuleNamePathMap &appModuleNames, CreateNamespaceCallback &cb);
     static void SetExtensionApiCheckCallback(const ExtensionApiCheckCallback &cb);
     ~EtsNamespaceManager() = default;
 
-    NO_COPY_SEMANTIC(EtsNamespaceManager);
-    NO_MOVE_SEMANTIC(EtsNamespaceManager);
+    EtsNamespaceManager(const EtsNamespaceManager &) = delete;
+    void operator=(const EtsNamespaceManager &) = delete;
+    EtsNamespaceManager(EtsNamespaceManager &&) = delete;
+    EtsNamespaceManager &operator=(EtsNamespaceManager &&) = delete;
 
 private:
     EtsNamespaceManager() = default;

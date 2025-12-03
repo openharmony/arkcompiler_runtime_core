@@ -20,14 +20,11 @@ desc: >-
     The supertype for string literals (see String Literals) is type string.
     This affects the overriding -
     {{c.doc}}
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl|indent}}
 
-{% if "negative" not in c.tags %}
 function main() {
     {{c.use|indent}}
 }
-{% endif %}
 {% endfor %}

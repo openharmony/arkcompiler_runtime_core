@@ -144,10 +144,10 @@ public:
         return napi_set_named_property(env, global, "nativeWrapRef", fn) == napi_ok;
     }
 
-    static bool RegisterETSGetter(ani_env *env)
+    bool RegisterETSGetter(ani_env *env)
     {
-        ani_module mod {};
-        if (env->FindModule("ets_functions", &mod) != ANI_OK) {
+        ani_ref classRef = GetClassRefObject(env, "ets_functions.ETSGLOBAL");
+        if (classRef == nullptr) {
             return false;
         }
 
@@ -155,7 +155,8 @@ public:
             ani_native_function {"nativeGetRef", nullptr, reinterpret_cast<void *>(NativeGetRef)},
             ani_native_function {"nativeGetWrappedPtr", nullptr, reinterpret_cast<void *>(NativeGetWrappedPtr)},
         };
-        return env->Module_BindNativeFunctions(mod, methods.data(), methods.size()) == ANI_OK;
+        return env->Module_BindNativeFunctions(static_cast<ani_module>(classRef), methods.data(), methods.size()) ==
+               ANI_OK;
     }
 };
 

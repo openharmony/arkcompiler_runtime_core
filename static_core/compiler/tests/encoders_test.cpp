@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,13 @@
  */
 
 #include <gtest/gtest.h>
-#include "macros.h"
-#include "mem/code_allocator.h"
-#include "mem/pool_manager.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/code_allocator.h"
+#include "libarkbase/mem/pool_manager.h"
 #include "target/aarch64/target.h"
 
 #include "vixl_exec_module.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::compiler::tests {
 
@@ -82,13 +83,13 @@ public:
 
         {
             T tmpValue;
-            memcpy_s(&tmpValue, sizeof(T), data, sizeof(T));
+            MemcpyUnsafe(&tmpValue, data, sizeof(T));
             ASSERT_EQ(tmpValue, badValue);
         }
 
         // We use memcpy here (instead of just assigning), because the data can be aligned by 4 for 64-bit target, and
         // asan will complain about this.
-        memcpy_s(data, sizeof(T), &goodValue, sizeof(T));
+        MemcpyUnsafe(data, &goodValue, sizeof(T));
 
         GetEncoder()->SetCodeOffset(0U);
 
@@ -108,7 +109,7 @@ public:
 
         {
             T tmpValue;
-            memcpy_s(&tmpValue, sizeof(T), data, sizeof(T));
+            MemcpyUnsafe(&tmpValue, data, sizeof(T));
             ASSERT_EQ(tmpValue, goodValue);
         }
 
@@ -125,7 +126,7 @@ public:
             }
         }
 
-        memcpy_s(data, sizeof(T), &badValue, sizeof(T));
+        MemcpyUnsafe(data, &badValue, sizeof(T));
 
         if (getAddress) {
             EXPECT_EQ(execModule_->GetSimulator()->ReadXRegister(1U), reinterpret_cast<int64_t>(data));

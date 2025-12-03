@@ -39,9 +39,9 @@ async function mustCallCheckAll() {
                 });
                 mustChecks.length = 0;
                 resolve(undefined);
-            } catch (e: Error) {
+            } catch (e) {
                 mustChecks.length = 0;
-                reject(e);
+                reject(e)
             }
         }, 2000);
     })
@@ -194,7 +194,7 @@ function testMyWritableDoWrite() {
 
 // Test cases ported from ArkTS 1.0:testStreamWritableWriteError003
 function testWritableUnknownEncoding() {
-    let exceptionCheck = (e: Error | Exception): boolean => {
+    let exceptionCheck = (e: Error): boolean => {
         return ((e as BusinessError).message == "Parameter error. The type of test must be string.")
     }
     arktest.expectThrow(testMyWritableDoWrite, exceptionCheck);

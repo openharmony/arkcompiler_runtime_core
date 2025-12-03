@@ -15,8 +15,8 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_ROOT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_ROOT_H
 
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/type_helpers.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/type_helpers.h"
 #include "runtime/include/class_root.h"
 
 namespace ark::ets {

@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-package std.core;
+package std.core
 
 /**
  * Returns RuntimeLinker instance used for bootloaded classes.
  */
 export function getBootRuntimeLinker(): BootRuntimeLinker {
-    return BootRuntimeLinker.instance;
+    return BootRuntimeLinker.instance
 }
 
-export native function getNearestNonBootRuntimeLinker(): RuntimeLinker | undefined;
+export native function getNearestNonBootRuntimeLinker(): RuntimeLinker | undefined
 
-final class BootRuntimeLinker extends RuntimeLinker {
-    public static instance: BootRuntimeLinker = Class.of(new Object()).getLinker() as BootRuntimeLinker;
+export final class BootRuntimeLinker extends RuntimeLinker {
+    public static final instance: BootRuntimeLinker = new BootRuntimeLinker()
 
     private constructor() {
-        super();
+        super()
     }
 
     /**
@@ -40,5 +40,5 @@ final class BootRuntimeLinker extends RuntimeLinker {
      *
      * @returns Class if it was found, undefined otherwise.
      */
-    public native override findAndLoadClass(clsName: string, init: boolean): Class | undefined;
+    public native override findAndLoadClass(clsName: string, init: boolean): Class | undefined
 }

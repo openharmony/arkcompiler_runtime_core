@@ -108,7 +108,7 @@ function testField(): int {
             test(zf.getType() == DoubleType.VAL,                            "   Type: double") +
             test(zf.getAttributes() == Attributes.STATIC,                   "   static attribute") +
             test(zf.getAccessModifier() == AccessModifier.PUBLIC,           "   public access modififer") +
-            test((zf.getStaticValue() as Double).unboxed() == Point3D.ZERO, "   static value") +
+            test((zf.getStaticValue() as Double) == Point3D.ZERO, "   static value") +
             test(!zf.isReadonly(),                                          "   not readonly") +
             test(!isInherited(zf, pt),                                      "   not inherited") +
             test(!isOverrided(zf, pt),                                      "   not override") +

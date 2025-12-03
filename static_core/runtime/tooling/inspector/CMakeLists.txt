@@ -82,10 +82,13 @@ else()
     list(APPEND ARKINSPECTOR_LINKED_LIBRARIES toolchain_websocket)
     set(ARKINSPECTOR_INCLUDES
         ${PANDA_THIRD_PARTY_SOURCES_DIR}/arkcompiler/toolchain/
-        ${PANDA_ROOT}/runtime/tooling/
     )
 endif()
 
+set(ARKINSPECTOR_INCLUDES
+    ${ARKINSPECTOR_INCLUDES}
+    ${PANDA_ROOT}/runtime/tooling/
+)
 
 panda_add_library(${PROJECT_NAME} SHARED ${ARKINSPECTOR_ROOTS})
 

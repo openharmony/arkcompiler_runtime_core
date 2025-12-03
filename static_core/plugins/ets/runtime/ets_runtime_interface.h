@@ -38,16 +38,18 @@ public:
     char *GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const override;
     uint64_t GetFuncPropNameOffset(MethodPtr methodPtr, uint32_t strId) const override;
     bool IsMethodStringConcat(MethodPtr method) const override;
+    bool IsMethodStringGetLength(MethodPtr method) const override;
+    Field *GetFieldPtrByName(ClassPtr klass, std::string_view name) const override;
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override;
     bool IsMethodStringBuilderConstructorWithCharArrayArg(MethodPtr method) const override;
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override;
     bool IsMethodStringBuilderToString(MethodPtr method) const override;
     bool IsMethodStringBuilderAppend(MethodPtr method) const override;
-    bool IsMethodEscompatMapCtor(MethodPtr method) const override;
     bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const override;
     bool IsMethodTypedArrayCtor([[maybe_unused]] MethodPtr method) const override;
     bool IsClassStringBuilder(ClassPtr klass) const override;
     bool IsClassEscompatMap(ClassPtr klass) const override;
+    bool IsClassEscompatSet(ClassPtr klass) const override;
     bool IsClassEscompatArray(ClassPtr klass) const override;
     bool IsClassEscompatInt8Array(ClassPtr klass) const override;
     bool IsClassEscompatUint8Array(ClassPtr klass) const override;
@@ -68,6 +70,7 @@ public:
     ClassPtr GetEscompatArrayClass() const override;
     MethodPtr GetStringBuilderDefaultConstructor() const override;
     uint32_t GetMethodId([[maybe_unused]] MethodPtr method) const override;
+    MethodPtr GetInstanceMethodByName(ClassPtr klass, std::string_view name) const override;
     bool IsFieldBooleanFalse(FieldPtr field) const override;
     bool IsFieldBooleanTrue(FieldPtr field) const override;
     bool IsFieldBooleanValue(FieldPtr field) const override;
@@ -77,6 +80,7 @@ public:
     FieldPtr GetFieldStringBuilderIndex(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderLength(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderCompress(ClassPtr klass) const override;
+    MethodPtr GetGetterStringBuilderStringLength(ClassPtr klass) const override;
     FieldPtr GetEscompatArrayBuffer(ClassPtr klass) const override;
     FieldPtr GetEscompatArrayActualLength(ClassPtr klass) const override;
     FieldPtr GetEscompatTypedArrayBuffer(ClassPtr klass) const override;
@@ -85,6 +89,7 @@ public:
     FieldPtr GetEscompatTypedArrayLengthInt(ClassPtr klass) const override;
     ClassPtr GetEscompatArrayBufferClass() const override;
     FieldPtr GetEscompatArrayBufferDataAddress(ClassPtr klass) const override;
+    FieldPtr GetEscompatArrayBufferManagedData(ClassPtr klass) const override;
     bool IsIntrinsicStringBuilderToString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppendString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppend(IntrinsicId id) const override;
@@ -96,11 +101,17 @@ public:
     IntrinsicId GetStringBuilderToStringIntrinsicId() const override;
     bool IsClassValueTyped(ClassPtr klass) const override;
     void *GetDoubleToStringCache() const override;
+    void *GetAsciiCharCache() const override;
     bool IsStringCachesUsed() const override;
+    bool IsUseAllStrings() const override;
     bool IsNativeMethodOptimizationEnabled() const override;
     uint32_t GetRuntimeClassOffset(Arch arch) const override;
     bool IsBoxedClass(ClassPtr klass) const override;
+    bool IsEnumClass(ClassPtr klass) const override;
+    bool IsBigIntClass(ClassPtr klass) const override;
+    bool IsFunctionReference(ClassPtr klass) const override;
     bool IsClassBoxedBoolean(ClassPtr klass) const override;
+    compiler::DataType::Type GetBoxedClassDataType(ClassPtr klass) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;

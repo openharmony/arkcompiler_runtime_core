@@ -34,11 +34,9 @@ void AniNamespaceFindClassFuzzTest(const char *data, size_t size)
     AniFuzzEngine *engine = AniFuzzEngine::GetInstance();
     ani_env *env {};
     engine->GetAniEnv(&env);
-    ani_namespace ns {};
-    env->FindNamespace("escompat.taskpool", &ns);
     ani_class cls {};
-    std::string input(data, size);
-    env->Namespace_FindClass(ns, input.c_str(), &cls);
+    std::string clsName = "std.concurrency.taskpool." + std::string(data, size);
+    env->FindClass(clsName.c_str(), &cls);
 }
 }  // namespace OHOS
 

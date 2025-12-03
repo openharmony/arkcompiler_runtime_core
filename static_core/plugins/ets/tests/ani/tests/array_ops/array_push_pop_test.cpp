@@ -16,12 +16,30 @@
 #include <limits>
 #include "ani.h"
 #include "array_gtest_helper.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArrayGetSetTest : public ArrayHelperTest {};
+class ArrayGetSetTest : public ArrayHelperTest {
+public:
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr const char *MODULE_NAME = "array_push_pop_test";
+
+public:
+    void GetExtendedArray(ani_array *resultArray)
+    {
+        auto throwingArray = CallEtsFunction<ani_object>(MODULE_NAME, "getExtendedArray");
+        ani_boolean result = ANI_FALSE;
+        ASSERT_EQ(env_->Reference_IsNullishValue(throwingArray, &result), ANI_OK);
+        ASSERT_EQ(result, ANI_FALSE);
+        ani_class escompatArray {};
+        ASSERT_EQ(env_->FindClass("escompat.Array", &escompatArray), ANI_OK);
+        ASSERT_EQ(env_->Object_InstanceOf(throwingArray, escompatArray, &result), ANI_OK);
+        ASSERT_EQ(result, ANI_TRUE);
+        *resultArray = static_cast<ani_array>(throwingArray);
+    }
+};
 
 TEST_F(ArrayGetSetTest, PushTest)
 {
@@ -75,19 +93,48 @@ TEST_F(ArrayGetSetTest, PopTest)
     ASSERT_EQ(len, 0);
 }
 
-TEST_F(ArrayGetSetTest, PushPopInvalidArgsTest)
+static void CheckUnhandledError(ani_env *env, std::string_view expectedMessage)
+{
+    ani_boolean hasUnhandledError = ANI_FALSE;
+    ASSERT_EQ(env->ExistUnhandledError(&hasUnhandledError), ANI_OK);
+    ASSERT_EQ(hasUnhandledError, ANI_TRUE);
+    ani_error pendingError {};
+    ASSERT_EQ(env->GetUnhandledError(&pendingError), ANI_OK);
+    ASSERT_EQ(env->ResetError(), ANI_OK);
+    ani_ref message {};
+    ASSERT_EQ(env->Object_CallMethodByName_Ref(pendingError, "%%get-message", ":C{std.core.String}", &message), ANI_OK);
+    std::string messageStr;
+    AniTest::GetStdString(env, static_cast<ani_string>(message), messageStr);
+    ASSERT_STREQ(messageStr.c_str(), expectedMessage.data());
+}
+
+TEST_F(ArrayGetSetTest, PushInvalidArgsTest)
 {
     InitTest();
 
     ani_object boxedInt {};
-    env_->Object_New(intClass, intCtor, &boxedInt, 0);
+    ASSERT_EQ(env_->Object_New(intClass, intCtor, &boxedInt, 0), ANI_OK);
     ASSERT_EQ(env_->Array_Push(nullptr, boxedInt), ANI_INVALID_ARGS);
+
+    ani_array throwingArray {};
+    GetExtendedArray(&throwingArray);
+    ASSERT_EQ(env_->Array_Push(static_cast<ani_array>(throwingArray), boxedInt), ANI_PENDING_ERROR);
+    CheckUnhandledError(env_, "pushOne was called");
+}
+
+TEST_F(ArrayGetSetTest, PopInvalidArgsTest)
+{
+    InitTest();
+
     ani_ref res {};
     ASSERT_EQ(env_->Array_Pop(nullptr, &res), ANI_INVALID_ARGS);
 
-    ani_array array {};
-    ASSERT_EQ(env_->Array_New(0U, nullptr, &array), ANI_OK);
-    ASSERT_EQ(env_->Array_Pop(array, nullptr), ANI_INVALID_ARGS);
+    ani_array throwingArray {};
+    GetExtendedArray(&throwingArray);
+    ASSERT_EQ(env_->Array_Pop(throwingArray, nullptr), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Array_Pop(throwingArray, &res), ANI_PENDING_ERROR);
+    CheckUnhandledError(env_, "pop was called");
 }
 
 }  // namespace ark::ets::ani::testing

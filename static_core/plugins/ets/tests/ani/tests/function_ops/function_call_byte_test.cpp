@@ -26,12 +26,8 @@ public:
 
     void GetMethod(ani_namespace *nsResult, ani_function *fnResult)
     {
-        ani_module module {};
-        ASSERT_EQ(env_->FindModule("@functionModule.function_call_byte_test", &module), ANI_OK);
-        ASSERT_NE(module, nullptr);
-
         ani_namespace ns {};
-        ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_byte_test.ops", &ns), ANI_OK);
         ASSERT_NE(ns, nullptr);
 
         ani_function fn {};
@@ -127,13 +123,9 @@ TEST_F(FunctionCallByteTest, function_call_byte_a_invalid_args)
 
 TEST_F(FunctionCallByteTest, function_call_byte_001)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_byte_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_byte_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "byteFunctionA", "bb:b", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -151,16 +143,12 @@ TEST_F(FunctionCallByteTest, function_call_byte_001)
 
 TEST_F(FunctionCallByteTest, function_call_byte_002)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_byte_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_namespace nB {};
     ani_function fB {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_byte_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A.B", &nB), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_byte_test.A.B", &nB), ANI_OK);
     ASSERT_NE(nB, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nB, "byteFunctionB", "bb:b", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
@@ -178,13 +166,9 @@ TEST_F(FunctionCallByteTest, function_call_byte_002)
 
 TEST_F(FunctionCallByteTest, function_call_byte_003)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_byte_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_byte_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "byteFunctionA", "bbb:b", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -245,13 +229,9 @@ TEST_F(FunctionCallByteTest, function_call_byte_005)
 
 TEST_F(FunctionCallByteTest, function_call_byte_006)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_byte_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_byte_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "bb:b", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -269,13 +249,9 @@ TEST_F(FunctionCallByteTest, function_call_byte_006)
 
 TEST_F(FunctionCallByteTest, function_call_byte_007)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_byte_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_byte_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "i:b", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -294,13 +270,9 @@ TEST_F(FunctionCallByteTest, function_call_byte_007)
 
 TEST_F(FunctionCallByteTest, function_call_byte_008)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_byte_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_byte_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "bbci:b", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -327,13 +299,9 @@ TEST_F(FunctionCallByteTest, function_call_byte_008)
 
 TEST_F(FunctionCallByteTest, function_call_byte_009)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_byte_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_byte_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "byteFunctionA", "bb:b", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);

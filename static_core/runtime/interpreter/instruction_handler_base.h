@@ -17,6 +17,7 @@
 #define PANDA_INTERPRETER_INSTRUCTION_HANDLER_BASE_H_
 
 #include <isa_constants_gen.h>
+#include "runtime/include/safepoint_timer.h"
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/interpreter/instruction_handler_state.h"
@@ -349,6 +350,7 @@ protected:
         if (offset > 0) {
             return false;
         }
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetThread()->GetInternalId(), true));
         if (this->GetThread()->TestAllFlags()) {
             this->GetFrame()->SetAcc(this->GetAcc());
             RuntimeIfaceT::Safepoint();

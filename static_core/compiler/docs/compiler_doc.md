@@ -194,7 +194,7 @@ examples:
 
 ## log-components
 
-The option `--log-components=COMPONENT1:COMPONENT2...COMPONENT_N` enables logging of various components. [full list of the runtime components](../../libpandabase/templates/logger.yaml)
+The option `--log-components=COMPONENT1:COMPONENT2...COMPONENT_N` enables logging of various components. [full list of the runtime components](../../libarkbase/templates/logger.yaml)
 
 - `compiler` - displays information about which methods are compiled and the result of compilation
 - `AOT` - displays information about which AOT files were found and for which methods the compiled code was found in the AOT files

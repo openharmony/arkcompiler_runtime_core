@@ -16,15 +16,10 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_H
 
-#include "include/mem/allocator.h"
 #include "include/object_accessor.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/ets_platform_types.h"
-#include "runtime/include/thread_scopes.h"
 
 #include <cstdint>
 
@@ -57,12 +52,19 @@ public:
     /**
      * Creates a byte array in non-movable space.
      * @param length of created array.
-     * NOTE: non-movable creation ensures that native code can obtain raw pointer to buffer.
+     * NOTE: Non-movable creation ensures that native code can obtain raw pointer to buffer.
      */
     ALWAYS_INLINE static EtsByteArray *AllocateNonMovableArray(EtsInt length)
     {
         return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     }
+
+    /**
+     * Creates a managed byte array.
+     * @param length of created array.
+     * NOTE: Uses common allocation for objects.
+     */
+    ALWAYS_INLINE static EtsByteArray *AllocateArray(EtsInt length);
 
     ALWAYS_INLINE static EtsLong GetAddress(const EtsByteArray *array)
     {
@@ -70,75 +72,39 @@ public:
     }
 
     /// Creates ArrayBuffer with managed buffer.
-    static EtsEscompatArrayBuffer *Create(EtsCoroutine *coro, size_t length, void **resultData)
-    {
-        ASSERT_MANAGED_CODE();
-        ASSERT(!coro->HasPendingException());
+    static EtsEscompatArrayBuffer *Create(EtsCoroutine *coro, size_t length);
+    static EtsEscompatArrayBuffer *CreateNonMovable(EtsCoroutine *coro, size_t length, void **resultData);
 
-        [[maybe_unused]] EtsHandleScope scope(coro);
-        auto *cls = PlatformTypes(coro)->escompatArrayBuffer;
-        EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
-        if (UNLIKELY(handle.GetPtr() == nullptr)) {
-            ASSERT(coro->HasPendingException());
-            return nullptr;
-        }
+    static bool IsNonMovableArray(EtsCoroutine *coro, EtsEscompatArrayBuffer *self);
+    static bool IsNativeArray(EtsEscompatArrayBuffer *self);
 
-        auto *buf = AllocateNonMovableArray(length);
-        handle->InitializeByDefault(coro, buf);
-        *resultData = handle->GetData();
-        return handle.GetPtr();
-    }
-
-    /// Creates ArrayBuffer with user-provided buffer and finalization function.
-    static EtsEscompatArrayBuffer *Create(EtsCoroutine *coro, void *externalData, size_t length,
-                                          EtsFinalize finalizerFunction, void *finalizerHint)
-    {
-        ASSERT_MANAGED_CODE();
-        ASSERT(!coro->HasPendingException());
-
-        [[maybe_unused]] EtsHandleScope scope(coro);
-        auto *cls = PlatformTypes(coro)->escompatArrayBuffer;
-        EtsHandle<EtsEscompatArrayBuffer> handle(coro, EtsEscompatArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
-        if (UNLIKELY(handle.GetPtr() == nullptr)) {
-            ASSERT(coro->HasPendingException());
-            return nullptr;
-        }
-
-        handle->InitBufferByExternalData(coro, handle, externalData, finalizerFunction, finalizerHint, length);
-        return handle.GetPtr();
-    }
+    static void ReallocateNonMovableArray(EtsCoroutine *coro, EtsEscompatArrayBuffer *self, EtsInt bytesLen);
 
     EtsObject *AsObject()
     {
         return this;
     }
 
-    EtsInt GetByteLength() const
-    {
-        return byteLength_;
-    }
-
-    /// @brief Returns non-null data for a non-detached buffer
-    void *GetData() const
-    {
-        ASSERT(!WasDetached());
-        return reinterpret_cast<void *>(nativeData_);
-    }
-
-    void Detach()
-    {
-        ASSERT(IsDetachable());
-        byteLength_ = 0;
-        // Do not free memory, as the address was already passed into finalizer.
-        // Memory will be freed after GC execution with object destruction
-        nativeData_ = 0;
-        ASSERT(WasDetached());
-    }
+    EtsInt GetByteLength() const;
 
     /// NOTE: behavior of this method must repeat implementation of `detached` property in ArkTS `ArrayBuffer`
-    bool WasDetached() const
+    ALWAYS_INLINE bool WasDetached() const
     {
-        return nativeData_ == 0;
+        return GetManagedDataImpl() != nullptr ? false : GetNativeDataImpl() == nullptr;
+    }
+
+    /// @brief Returns managed or native data. Data can be movable in memory or empty.
+    ALWAYS_INLINE void *GetData() const
+    {
+        ASSERT(!WasDetached());
+        auto managedData = GetManagedDataImpl();
+        return managedData != nullptr ? managedData->GetData<void>() : GetNativeDataImpl();
+    }
+
+    template <typename T>
+    ALWAYS_INLINE T GetData() const
+    {
+        return reinterpret_cast<T>(GetData());
     }
 
     bool IsExternal() const
@@ -151,40 +117,10 @@ public:
         return !WasDetached() && IsExternal();
     }
 
-    EtsByte At(EtsInt pos) const
-    {
-        if (!DoBoundaryCheck(pos)) {
-            return 0;
-        }
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return reinterpret_cast<int8_t *>(GetData())[pos];
-    }
+    EtsByte At(EtsInt pos) const;
+    void Set(EtsInt pos, EtsByte val);
 
-    void Set(EtsInt pos, EtsByte val)
-    {
-        if (!DoBoundaryCheck(pos)) {
-            return;
-        }
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        reinterpret_cast<int8_t *>(GetData())[pos] = val;
-    }
-
-    void SetValues(EtsEscompatArrayBuffer *other, EtsInt begin)
-    {
-        ASSERT(!WasDetached());
-        ASSERT(other != nullptr);
-        ASSERT(!other->WasDetached());
-        ASSERT(begin >= 0);
-        auto thisByteLength = GetByteLength();
-        ASSERT(begin + thisByteLength <= other->GetByteLength());
-
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto *srcData = reinterpret_cast<int8_t *>(other->GetData()) + begin;
-        auto *dstData = GetData();
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        [[maybe_unused]] errno_t res = memcpy_s(dstData, thisByteLength, srcData, thisByteLength);
-        ASSERT(res == 0);
-    }
+    void SetValues(EtsEscompatArrayBuffer *other, EtsInt begin);
 
     static constexpr size_t GetByteLengthOffset()
     {
@@ -206,17 +142,8 @@ public:
         return MEMBER_OFFSET(EtsEscompatArrayBuffer, isResizable_);
     }
 
-    /// Initializes ArrayBuffer with its own array.
-    void Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array)
-    {
-        ASSERT(array != nullptr);
-        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), array->GetCoreType());
-        byteLength_ = length;
-        nativeData_ =
-            GetAddress(EtsByteArray::FromCoreType(ObjectAccessor::GetObject(coro, this, GetManagedDataOffset())));
-        ASSERT(nativeData_ != 0);
-        isResizable_ = ToEtsBoolean(false);
-    }
+    /// Initializes ArrayBuffer with its own non-movable array
+    void Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array);
 
     template <typename T>
     T GetElement(uint32_t index, uint32_t offset);
@@ -243,125 +170,30 @@ public:
     T GetAndBitwiseXor(uint32_t index, uint32_t offset, T element);
 
 private:
-    struct FinalizationInfo final {
-        // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-        void *data;
-        EtsFinalize function;
-        void *hint;
-        // NOLINTEND(misc-non-private-member-variables-in-classes)
-
-        explicit FinalizationInfo(void *d, EtsFinalize f, void *h) : data(d), function(f), hint(h) {}
-    };
-
-private:
-    /**
-     * Creates `FinalizableWeakRef` for created ArrayBuffer.
-     * @param coro in which the ArrayBuffer is created.
-     * @param arrayBufferHandle handle for the created object.
-     * @param finalizerFunction user-provided function to call upon finalization.
-     * @param finalizerHint an additional argument for the finalizer.
-     * NOTE: method must be called under `EtsHandleScope`.
-     */
-    static void RegisterFinalizationInfo(EtsCoroutine *coro, const EtsHandle<EtsEscompatArrayBuffer> &arrayBufferHandle,
-                                         EtsFinalize finalizerFunction, void *finalizerHint)
+    ALWAYS_INLINE ObjectPointer<EtsByteArray> GetManagedDataImpl() const
     {
-        if (finalizerFunction == nullptr) {
-            return;
-        }
-
-        auto *allocator = static_cast<mem::Allocator *>(Runtime::GetCurrent()->GetInternalAllocator());
-        auto *pandaVm = coro->GetPandaVM();
-
-        ASSERT(arrayBufferHandle.GetPtr() != nullptr);
-        auto *finalizationInfo =
-            allocator->New<FinalizationInfo>(arrayBufferHandle.GetPtr()->GetData(), finalizerFunction, finalizerHint);
-        EtsHandle<EtsObject> handle(arrayBufferHandle);
-        pandaVm->RegisterFinalizerForObject(coro, handle, DoFinalization, finalizationInfo);
-
-        ScopedNativeCodeThread s(coro);
-        pandaVm->GetGC()->RegisterNativeAllocation(sizeof(FinalizationInfo));
+        return ObjectAccessor::GetPrimitive<ObjectPointer<EtsByteArray>>(this, GetManagedDataOffset());
     }
 
-    static void DoFinalization(void *arg)
+    ALWAYS_INLINE void *GetNativeDataImpl() const
     {
-        ASSERT(arg != nullptr);
-        auto *info = reinterpret_cast<FinalizationInfo *>(arg);
-
-        ASSERT(info->function != nullptr);
-        auto *allocator = static_cast<mem::Allocator *>(Runtime::GetCurrent()->GetInternalAllocator());
-
-        info->function(info->data, info->hint);
-
-        auto *vm = Runtime::GetCurrent()->GetPandaVM();
-        vm->GetGC()->RegisterNativeFree(sizeof(FinalizationInfo));
-
-        allocator->Free(info);
+        return ObjectAccessor::GetPrimitive<void *>(this, GetNativeDataOffset());
     }
-
-    /**
-     * Initializes ArrayBuffer.
-     * NOTE: behavior of this method must repeat initialization from managed constructor.
-     */
-    void InitializeByDefault(EtsCoroutine *coro, EtsByteArray *buffer)
-    {
-        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), buffer->GetCoreType());
-        ASSERT(buffer->GetLength() <= static_cast<size_t>(std::numeric_limits<EtsInt>::max()));
-        byteLength_ = static_cast<EtsInt>(buffer->GetLength());
-        nativeData_ =
-            GetAddress(EtsByteArray::FromCoreType(ObjectAccessor::GetObject(coro, this, GetManagedDataOffset())));
-        ASSERT(nativeData_ != 0);
-        isResizable_ = ToEtsBoolean(false);
-    }
-
-    /// Initializes ArrayBuffer with externally provided buffer.
-    void InitBufferByExternalData(EtsCoroutine *coro, const EtsHandle<EtsEscompatArrayBuffer> &arrayBufferHandle,
-                                  void *data, EtsFinalize finalizerFunction, void *finalizerHint, size_t length)
-    {
-        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), nullptr);
-        ASSERT(length <= static_cast<size_t>(std::numeric_limits<EtsInt>::max()));
-        byteLength_ = static_cast<EtsInt>(length);
-        nativeData_ = reinterpret_cast<EtsLong>(data);
-        ASSERT(nativeData_ != 0);
-        isResizable_ = ToEtsBoolean(false);
-
-        RegisterFinalizationInfo(coro, arrayBufferHandle, finalizerFunction, finalizerHint);
-    }
-
     /**
      * @brief Checks position is inside array, throws ets exception if not.
      * NOTE: behavior of this method must repeat initialization from managed `doBoundaryCheck`.
      */
-    bool DoBoundaryCheck(EtsInt pos) const
-    {
-        if (pos < 0 || pos >= byteLength_) {
-            PandaString message = "ArrayBuffer position ";
-            message.append(std::to_string(pos)).append(" is out of bounds");
-            ThrowEtsException(EtsCoroutine::GetCurrent(),
-                              panda_file_items::class_descriptors::INDEX_OUT_OF_BOUNDS_ERROR, message.c_str());
-            return false;
-        }
-        return true;
-    }
+    bool DoBoundaryCheck(EtsInt pos) const;
 
 private:
-    // ClassLinker reorders fileds based on them size. Object pointer size can be different for different configs
-#if !defined(PANDA_32_BIT_MANAGED_POINTER)
     // Managed array used in this `ArrayBuffer`, null if buffer is external
     ObjectPointer<EtsByteArray> managedData_;
+    ObjectPointer<EtsFinalizableWeakRef> weakRef_;
     // Contains pointer to either managed non-movable data or external data.
     // Null if `ArrayBuffer` was detached, non-null otherwise
     EtsLong nativeData_;
     EtsInt byteLength_;
     EtsBoolean isResizable_;
-#else
-    // Managed array used in this `ArrayBuffer`, null if buffer is external
-    ObjectPointer<EtsByteArray> managedData_;
-    EtsInt byteLength_;
-    // Contains pointer to either managed non-movable data or external data.
-    // Null if `ArrayBuffer` was detached, non-null otherwise
-    EtsLong nativeData_;
-    EtsBoolean isResizable_;
-#endif
 
     friend class test::EtsArrayBufferTest;
 };

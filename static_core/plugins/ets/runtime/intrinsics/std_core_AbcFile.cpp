@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "file.h"
+#include "libarkfile/file.h"
 #include "include/object_header.h"
 #include "include/thread_scopes.h"
 #include "intrinsics.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/utf.h"
 #include "libziparchive/extractortool/extractor.h"
 #include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"

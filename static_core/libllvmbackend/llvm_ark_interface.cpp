@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "compiler/optimizer/ir/aot_data.h"
 #include "runtime/include/method.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 #include "compiler_options.h"
-#include "utils/cframe_layout.h"
+#include "libarkbase/utils/cframe_layout.h"
 #include "llvm_ark_interface.h"
 #include "llvm_logger.h"
 #include "utils.h"
@@ -134,6 +134,7 @@ int32_t LLVMArkInterface::CreateIntfInlineCacheSlotId(const llvm::Function *call
     int32_t slot = aotData.GetIntfInlineCacheSlotId(intfInlineCacheIndex);
     intfInlineCacheIndex++;
     aotData.SetIntfInlineCacheIndex(intfInlineCacheIndex);
+    aotData.SetIsLLVMAotMode(true);
     return slot;
 }
 
@@ -159,11 +160,17 @@ LLVMArkInterface::RegMasks LLVMArkInterface::GetCalleeSavedRegistersMask(llvm::S
     return calleeSavedRegisters_.lookup(method);
 }
 
-uintptr_t LLVMArkInterface::GetEntrypointTlsOffset(EntrypointId id) const
+uintptr_t LLVMArkInterface::GetEntrypointsTablePointerTlsOffset() const
+{
+    Arch arkArch = LLVMArchToArkArch(triple_.getArch());
+    return runtime_->GetEntrypointsTablePointerTlsOffset(arkArch);
+}
+
+uintptr_t LLVMArkInterface::GetEntrypointOffset(EntrypointId id) const
 {
     Arch arkArch = LLVMArchToArkArch(triple_.getArch());
     using PandaEntrypointId = ark::compiler::RuntimeInterface::EntrypointId;
-    return runtime_->GetEntrypointTlsOffset(arkArch, static_cast<PandaEntrypointId>(id));
+    return runtime_->GetEntrypointOffset(arkArch, static_cast<PandaEntrypointId>(id));
 }
 
 size_t LLVMArkInterface::GetTlsFrameKindOffset() const
@@ -669,14 +676,16 @@ int32_t LLVMArkInterface::GetPltSlotId(const llvm::Function *caller, const llvm:
     ASSERT_PRINT(callerOriginFile != nullptr,
                  std::string("No origin for function = '") + callerName.str() +
                      "'. Use RememberFunctionOrigin to store the origin before calling GetPltSlotId");
-    return GetAotDataFromBuilder(callerOriginFile, aotBuilder_).GetPltSlotId(GetMethodId(caller, callee));
+    auto aotData = GetAotDataFromBuilder(callerOriginFile, aotBuilder_);
+    aotData.SetIsLLVMAotMode(true);
+    return aotData.GetPltSlotId(GetMethodId(caller, callee), 0);
 }
 
 int32_t LLVMArkInterface::GetClassIndexInAotGot(ark::compiler::AotData *aotData, uint32_t klassId, bool initialized)
 {
     ASSERT(aotData != nullptr);
     llvm::sys::ScopedLock scopedLock {*lock_};
-    auto index = aotData->GetClassSlotId(klassId);
+    auto index = aotData->GetClassSlotId(klassId, 0);
     if (initialized) {
         return index - 1;
     }
@@ -687,7 +696,7 @@ int32_t LLVMArkInterface::GetStringSlotId(AotData *aotData, uint32_t typeId)
 {
     ASSERT(aotData != nullptr);
     llvm::sys::ScopedLock scopedLock {*lock_};
-    return aotData->GetStringSlotId(typeId);
+    return aotData->GetStringSlotId(typeId, 0);
 }
 
 LLVMArkInterface::RuntimeCallee LLVMArkInterface::GetEntrypointCallee(EntrypointId id) const

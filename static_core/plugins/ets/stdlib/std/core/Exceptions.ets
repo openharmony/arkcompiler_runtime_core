@@ -17,19 +17,12 @@ package std.core;
 
 // TODO(orlovskiymaxim): what cause?
 /**
- * Represents exception that is thrown in case of ?
+ * Represents error that is thrown in case of ?
  */
-export final class NoDataException extends Exception {
-    constructor() {
-        super();
-    }
-
-    constructor(s: String) {
-        super(s);
-    }
-
-    constructor(s: String, cause: Object) {
-        super(s, cause);
+export final class NoDataError extends Error {
+    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
+    constructor(message?: String, options?: ErrorOptions) {
+        super("NoDataError", message, options)
     }
 }
 

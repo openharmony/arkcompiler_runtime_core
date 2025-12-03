@@ -16,7 +16,7 @@
 #include "include/mem/panda_string.h"
 #include "objects/base_type.h"
 #include "objects/dynamic_object_accessor_util.h"
-#include "plugins/ets/runtime/ets_stubs.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
@@ -457,6 +457,16 @@ uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsCls)
     return 0;
 }
 
+static ALWAYS_INLINE inline bool CheckEtsObjectFoundException(EtsCoroutine *coroutine, EtsObject *etsObject)
+{
+    if (EtsReferenceNullish(coroutine, etsObject)) {
+        PandaString message = "Need object";
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::TYPE_ERROR, message.c_str());
+        return true;
+    }
+    return false;
+}
+
 std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view module)
 {
     static const std::unordered_set<std::string_view> NATIVE_MODULE_LIST = {
@@ -542,6 +552,7 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
             InteropCtx::ThrowETSError(coro, exp.c_str());
             return nullptr;
         }
+        jsHandleScope.Escape(modObj);
     }
 
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
@@ -617,7 +628,7 @@ JSValue *JSRuntimeGetProperty(JSValue *object, JSValue *property)
             ctx->ForwardJSException(coro);
         }
         ASSERT(ctx->SanityETSExceptionPending());
-        return nullptr;
+        return {};
     }
 
     return res.value();
@@ -907,7 +918,9 @@ EtsString *JSRuntimeTypeOf(JSValue *object)
 EtsObject *JSRuntimeInvoke(EtsObject *recv, EtsObject *func, EtsArray *args)
 {
     auto coro = EtsCoroutine::GetCurrent();
-
+    if (CheckEtsObjectFoundException(coro, func)) {
+        return nullptr;
+    }
     HandleScope<ObjectHeader *> scope(coro);
     size_t argc = args->GetLength();
     std::vector<VMHandle<ObjectHeader>> argsVec;
@@ -942,17 +955,6 @@ EtsObject *JSRuntimeInstantiate(EtsObject *callable, EtsArray *args)
     }
     Span<VMHandle<ObjectHeader>> internalArgs = Span<VMHandle<ObjectHeader>>(argsVec.data(), argc);
     return EtsCallNew(coro, callable, internalArgs);
-}
-
-bool CheckEtsObjectFoundException(EtsCoroutine *coroutine, EtsObject *etsObject)
-{
-    PandaString message = "Need object";
-    if (etsObject == nullptr ||
-        etsObject->GetClass()->GetDescriptor() == ark::ets::panda_file_items::class_descriptors::NULL_VALUE) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::TYPE_ERROR, message.c_str());
-        return true;
-    }
-    return false;
 }
 
 void ESValueAnyIndexedSetter(EtsObject *etsObject, int32_t index, EtsObject *value)
@@ -1052,7 +1054,13 @@ uint8_t ESValueAnyHasPropertyObject(EtsObject *etsObject, EtsObject *property)
 uint8_t ESValueAnyInstanceOf(EtsObject *etsObject, EtsObject *ctor)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    bool result = EtsIsinstance(coro, etsObject, ctor);
+    bool result = false;
+    if (etsObject == nullptr || ctor == nullptr) {
+        PandaString message = "Need object";
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, message.c_str());
+    } else {
+        result = EtsIsinstance(coro, etsObject, ctor);
+    }
     return static_cast<uint8_t>(result);
 }
 
@@ -1659,9 +1667,14 @@ EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
     // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
     NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, dynamicArrayBuffer, &data, &byteLength));
 
-    void *etsData = nullptr;
-    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coro, byteLength, &etsData);
-    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, reinterpret_cast<uint8_t *>(etsData));
+    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coro, byteLength);
+    if (UNLIKELY(arrayBuffer == nullptr)) {
+        return nullptr;
+    }
+    auto *etsData = arrayBuffer->GetData<uint8_t *>();
+    if (LIKELY(byteLength > 0 && etsData != nullptr)) {
+        std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, etsData);
+    }
     return arrayBuffer;
 }
 

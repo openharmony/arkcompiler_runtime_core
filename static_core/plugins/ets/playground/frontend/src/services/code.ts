@@ -16,7 +16,6 @@
 import { IServiceResponse } from './types';
 import {fetchGetEntity, fetchPostEntity} from './common';
 import {codeModel, ICodeFetch, ICodeReq, ICodeShare, IRunReq, IShareReq} from '../models/code';
-import { fetchShareCode } from '../store/actions/code';
 
 export enum EActionsEndpoints {
     COMPILE = '/compile',
