@@ -1,0 +1,1058 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License")
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # Note: each 'check_variant_decl_data'
+  # define different types A
+  # and related to them check values for check
+  # branching on "v (truthiness check)" where A is type of v variable
+  - check_variant_decl_data: |-
+      // type A = C /* Class */ | undefined
+
+      class C {
+        methC() {
+          return "methC"
+        }
+      }
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = C | undefined
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = C
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = undefined
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A & T
+      function check_value_default(v: A_inter_T,
+                                    v_id: int): void {
+        arktest.assertEQ(v, undefined)
+      }
+
+      // Function for check value of the variable of C class as value of type A - U
+      function check_value_C(v: A_diff_U) {
+        arktest.assertEQ(v.methC(), "methC")
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [new C(), check_value_C, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_default, VarType.A_inter_T] ]
+      const check_values_number: int = 2
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.methC(), \"methC\")"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, undefined)"
+
+  - check_variant_decl_data: |-
+      // type A = I /* Interface */ | undefined
+      // C<:I
+
+      interface I {
+        vi: int
+        methI(): string {
+          return "methI"
+        }
+      }
+      class C implements I {
+        vi: int
+        vc: bigint = 123n
+      }
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = I | undefined
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = I
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = undefined
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A & T
+      function check_value_default(v: A_inter_T,
+                                    v_id: int): void {
+        arktest.assertEQ(v, undefined)
+      }
+
+      // Function for check value of the variable of C class as value of type A - U
+      function check_value_C(v: A_diff_U) {
+        if (v instanceof C) {
+          arktest.assertEQ(v.vc, 123n)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C')
+        }
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [new C(), check_value_C, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_default, VarType.A_inter_T] ]
+      const check_values_number: int = 2
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.methI(), \"methI\")"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, undefined)"
+
+  - check_variant_decl_data: |-
+      // type A = Base | undefined | null
+      // Derived1<:Base
+      // Derived2<:Base
+      // Derived3<:Base
+
+      class Base {
+        methBase() {
+          return "methBase"
+        }
+      }
+      class Derived1 extends Base {
+        vd1: string = "abc"
+      }
+      class Derived2 extends Base {
+        vd2: bigint = 123n
+      }
+      class Derived3 extends Base {
+        vd3: int = 5
+      }
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = Base | undefined | null
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = Base
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = undefined | null
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A & T
+      function check_value_default(v: A_inter_T,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check value of the variable of Derived1 class as value of type A - U
+      function check_value_Derived1(v: A_diff_U) {
+        if (v instanceof Derived1) {
+          arktest.assertEQ(v.vd1, "abc")
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of Derived1')
+        }
+      }
+
+      // Function for check value of the variable of Derived2 class as value of type A - U
+      function check_value_Derived2(v: A_diff_U) {
+        if (v instanceof Derived2) {
+          arktest.assertEQ(v.vd2, 123n)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of Derived2')
+        }
+      }
+
+      // Function for check value of the variable of Derived3 class as value of type A - U
+      function check_value_Derived3(v: A_diff_U) {
+        if (v instanceof Derived3) {
+          arktest.assertEQ(v.vd3, 5)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of Derived3')
+        }
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [new Derived1(), check_value_Derived1, undefined, VarType.A_diff_U],
+        [new Derived2(), check_value_Derived2, undefined, VarType.A_diff_U],
+        [new Derived3(), check_value_Derived3, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_default, VarType.A_inter_T],
+        [null, undefined, check_value_default, VarType.A_inter_T] ]
+      const check_values_number: int = 5
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.methBase(), \"methBase\")"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A = I | undefined | null
+      // C1<:I
+      // C2<:I
+      // C3<:I
+
+      interface I {
+        vi: int
+        methI(): string {
+          return "methI"
+        }
+      }
+      class C1 implements I {
+        vi: int
+        vc1: bigint = 123n
+      }
+      class C2 implements I {
+        vi: int
+        vc2: int = 321
+      }
+      class C3 implements I {
+        vi: int
+        vc3: number = 7.8
+      }
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = I | undefined | null
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = I
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = undefined | null
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A & T
+      function check_value_default(v: A_inter_T,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check value of the variable of C1 class as value of type A - U
+      function check_value_C1(v: A_diff_U) {
+        if (v instanceof C1) {
+          arktest.assertEQ(v.vc1, 123n)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C1')
+        }
+      }
+
+      // Function for check value of the variable of C2 class as value of type A - U
+      function check_value_C2(v: A_diff_U) {
+        if (v instanceof C2) {
+          arktest.assertEQ(v.vc2, 321)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C2')
+        }
+      }
+
+      // Function for check value of the variable of C3 class as value of type A - U
+      function check_value_C3(v: A_diff_U) {
+        if (v instanceof C3) {
+          arktest.assertEQ(v.vc3, 7.8)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C3')
+        }
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [new C1(), check_value_C1, undefined, VarType.A_diff_U],
+        [new C2(), check_value_C2, undefined, VarType.A_diff_U],
+        [new C3(), check_value_C3, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_default, VarType.A_inter_T],
+        [null, undefined, check_value_default, VarType.A_inter_T] ]
+      const check_values_number: int = 5
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.methI(), \"methI\")"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A = I1 | C3 | I2 | C4 | undefined | null
+      // C1<:I1
+      // C2<:I2
+
+      interface I1 {}
+      interface I2 {}
+      class C1 implements I1 {vc1: bigint = 123n}
+      class C2 implements I2 {vc2: int = 321}
+      class C3 {vc3: number = 7.8}
+      class C4 {vc4: string = "abc"}
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = I1 | C3 | I2 | C4 | undefined | null
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = I1 | C3 | I2 | C4
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = undefined | null
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A & T
+      function check_value_default(v: A_inter_T,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check value of the variable of C1 class as value of type A - U
+      function check_value_C1(v: A_diff_U) {
+        if (v instanceof C1) {
+          arktest.assertEQ(v.vc1, 123n)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C1')
+        }
+      }
+
+      // Function for check value of the variable of C2 class as value of type A - U
+      function check_value_C2(v: A_diff_U) {
+        if (v instanceof C2) {
+          arktest.assertEQ(v.vc2, 321)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C2')
+        }
+      }
+
+      // Function for check value of the variable of C3 class as value of type A - U
+      function check_value_C3(v: A_diff_U) {
+        if (v instanceof C3) {
+          arktest.assertEQ(v.vc3, 7.8)
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C3')
+        }
+      }
+
+      // Function for check value of the variable of C4 class as value of type A - U
+      function check_value_C4(v: A_diff_U) {
+        if (v instanceof C4) {
+          arktest.assertEQ(v.vc4, "abc")
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C4')
+        }
+      }
+
+      // Function for skip check value of the variable by expression
+      function skip_check_value_by_expression() {
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [new C1(), check_value_C1, undefined, VarType.A_diff_U],
+        [new C2(), check_value_C2, undefined, VarType.A_diff_U],
+        [new C3(), check_value_C3, undefined, VarType.A_diff_U],
+        [new C4(), check_value_C4, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_default, VarType.A_inter_T],
+        [null, undefined, check_value_default, VarType.A_inter_T] ]
+      const check_values_number: int = 6
+    check_value_by_expression_on_the_positive_branch:
+      "skip_check_value_by_expression()"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A = long | int | short | byte | double | float |
+      //   boolean | bigint | char | string | null | undefined
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = long | int | short | byte | double | float |
+        boolean | bigint | char | string | null | undefined
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = long | int | short | byte | double | float |
+        boolean | bigint | char | string
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = long | int | short | byte | double | float |
+        boolean | bigint | string | null | undefined
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Function for check values of variables of type A - U
+      function check_value_A_diff_U(v: A_diff_U,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check values of variables of type A & T
+      function check_value_A_inter_T(v: A_inter_T,
+                                      v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check NaN values of variables of type A & T
+      function check_value_isNaN(v: A_inter_T,
+                                      v_id: int): void {
+        if (v instanceof double) {
+          arktest.assertTrue(isNaN(v))
+        }
+        else if (v instanceof float) {
+          arktest.assertTrue(isNaN(v))
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of double or float')
+        }
+      }
+
+      // Function for skip check value of the variable by expression
+      function skip_check_value_by_expression() {
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [567 as long, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [123, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [517 as short, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [15 as byte, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [4.59, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [17.8f, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [567n, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [c'a', check_value_A_diff_U, undefined, VarType.A_diff_U],
+        ["abc", check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [true, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [null, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        ["", undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0 as long, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0 as short, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0 as byte, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0.0, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [Double.NaN, undefined, check_value_isNaN, VarType.A_inter_T],
+        [0.0f, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [Float.NaN, undefined, check_value_isNaN, VarType.A_inter_T],
+        [0n, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        ["", undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [false, undefined, check_value_A_inter_T, VarType.A_inter_T] ]
+      const check_values_number: int = 24
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+    check_value_by_expression_on_the_negative_branch:
+      "skip_check_value_by_expression()"
+
+  - check_variant_decl_data: |-
+      // type A = ImpLongEnumP | ImpLongEnumNP | ImpIntEnumP | ImpIntEnumNP |
+      //   ImpStrEnumP | ImpStrEnumNP | ExpLongEnumP | ExpLongEnumNP |
+      //   ExpIntEnumP | ExpIntEnumNP | ExpByteEnumP | ExpByteEnumNP |
+      //   ExpShortEnumP | ExpShortEnumNP |
+      //   ExpDoubleEnumP | ExpDoubleEnumNP1 | ExpDoubleEnumNP2 |
+      //   ExpFloatEnumP | ExpFloatEnumNP1 | ExpFloatEnumNP2 |
+      //   null | undefined
+
+      // All enumerations with names:
+      // Imp*Enum* - has implicit enumeration base type
+      // Exp*Enum* - has explicit enumeration base type
+      // *EnumP - has values only from positive branch
+      // *EnumNP* - has values from negative and positive branches
+
+      enum ImpLongEnumP { V1 = 0x7FFF_FFFF_1, V2 = 2 }
+      enum ImpLongEnumNP { V1 = 0x7FFF_FFFF_1, V2 = 0 }
+      enum ImpIntEnumP { V1 = 1, V2 = 2 }
+      enum ImpIntEnumNP { V1 = 1, V2 = 0 }
+      enum ImpStrEnumP { V1 = "abc", V2 = "efg" }
+      enum ImpStrEnumNP { V1 = "abc", V2 = "" }
+      enum ExpLongEnumP: long { V1 = 0x7FFF_FFFF_1, V2 = 2 }
+      enum ExpLongEnumNP: long { V1 = 0x7FFF_FFFF_1, V2 = 0 }
+      enum ExpIntEnumP: int { V1 = 1, V2 = 2 }
+      enum ExpIntEnumNP: int { V1 = 1, V2 = 0 }
+      enum ExpByteEnumP: byte { V1 = 1, V2 = 2 }
+      enum ExpByteEnumNP: byte { V1 = 1, V2 = 0 }
+      enum ExpShortEnumP: short { V1 = 1, V2 = 2 }
+      enum ExpShortEnumNP: short { V1 = 1, V2 = 0 }
+      enum ExpDoubleEnumP: double { V1 = 1.0, V2 = 2.0 }
+      enum ExpDoubleEnumNP1: double { V1 = 1.0, V2 = 0.0 }
+      enum ExpDoubleEnumNP2: double { V1 = 1.0, V2 = 0.0 / 0.0 /* Double.NaN */ }
+      enum ExpFloatEnumP: float { V1 = 1.0f, V2 = 2.0f }
+      enum ExpFloatEnumNP1: float { V1 = 1.0f, V2 = 0.0f }
+      enum ExpFloatEnumNP2: float { V1 = 1.0f, V2 = 0.0f / 0.0f /* Float.NaN */ }
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = ImpLongEnumP | ImpLongEnumNP | ImpIntEnumP | ImpIntEnumNP |
+        ImpStrEnumP | ImpStrEnumNP | ExpLongEnumP | ExpLongEnumNP |
+        ExpIntEnumP | ExpIntEnumNP | ExpByteEnumP | ExpByteEnumNP |
+        ExpShortEnumP | ExpShortEnumNP |
+        ExpDoubleEnumP | ExpDoubleEnumNP1 | ExpDoubleEnumNP2 |
+        ExpFloatEnumP | ExpFloatEnumNP1 | ExpFloatEnumNP2 |
+        null | undefined
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = ImpLongEnumP | ImpLongEnumNP | ImpIntEnumP | ImpIntEnumNP |
+        ImpStrEnumP | ImpStrEnumNP | ExpLongEnumP | ExpLongEnumNP |
+        ExpIntEnumP | ExpIntEnumNP | ExpByteEnumP | ExpByteEnumNP |
+        ExpShortEnumP | ExpShortEnumNP |
+        ExpDoubleEnumP | ExpDoubleEnumNP1 | ExpDoubleEnumNP2 |
+        ExpFloatEnumP | ExpFloatEnumNP1 | ExpFloatEnumNP2
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = ImpLongEnumNP | ImpIntEnumNP |
+        ImpStrEnumNP | ExpLongEnumNP |
+        ExpIntEnumNP | ExpByteEnumNP |
+        ExpShortEnumNP |
+        ExpDoubleEnumNP1 | ExpDoubleEnumNP2 |
+        ExpFloatEnumNP1 | ExpFloatEnumNP2 |
+        null | undefined
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Function for check values of variables of type A - U
+      function check_value_A_diff_U(v: A_diff_U,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check values of variables of type A & T
+      function check_value_A_inter_T(v: A_inter_T,
+                                      v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [ImpLongEnumP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpLongEnumP.V2, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpLongEnumNP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpIntEnumP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpIntEnumP.V2, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpIntEnumNP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpStrEnumP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpStrEnumP.V2, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpStrEnumNP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpLongEnumP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpLongEnumP.V2, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpLongEnumNP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpIntEnumP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpIntEnumP.V2, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpIntEnumNP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpByteEnumP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpByteEnumP.V2, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpByteEnumNP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpShortEnumP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpShortEnumP.V2, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpShortEnumNP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpDoubleEnumP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpDoubleEnumP.V2, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpDoubleEnumNP1.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpDoubleEnumNP2.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpFloatEnumP.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpFloatEnumP.V2, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpFloatEnumNP1.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpFloatEnumNP2.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [null, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ImpLongEnumNP.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ImpIntEnumNP.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ImpStrEnumNP.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpLongEnumNP.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpIntEnumNP.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpByteEnumNP.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpShortEnumNP.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpDoubleEnumNP1.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpDoubleEnumNP2.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpFloatEnumNP1.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpFloatEnumNP2.V2, undefined, check_value_A_inter_T, VarType.A_inter_T] ]
+      const check_values_number: int = 42
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A = Object | null | undefined
+
+      class C {
+        methC() {
+          return "methC"
+        }
+      }
+
+      // All enumerations with names:
+      // Imp*Enum - has implicit enumeration base type
+      // Exp*Enum - has explicit enumeration base type
+
+      enum ImpLongEnum { V1 = 0x7FFF_FFFF_1, V2 = 0 }
+      enum ImpIntEnum { V1 = 1, V2 = 0 }
+      enum ImpStrEnum { V1 = "abc", V2 = "" }
+      enum ExpLongEnum: long { V1 = 0x7FFF_FFFF_1, V2 = 0 }
+      enum ExpIntEnum: int { V1 = 1, V2 = 0 }
+      enum ExpByteEnum: byte { V1 = 2, V2 = 0 }
+      enum ExpShortEnum: short { V1 = 3, V2 = 0 }
+      enum ExpDoubleEnum: double { V1 = 4.0, V2 = 0.0, V3 = 0.0 / 0.0 /* Double.NaN */ }
+      enum ExpFloatEnum: float { V1 = 5.0f, V2 = 0.0f, V3 = 0.0f / 0.0f /* Float.NaN */ }
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = Object | null | undefined
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = Object // nearest supertype for A - U
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = Object | null | undefined // nearest supertype for A & T
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A - U
+      function check_value_A_diff_U(v: A_diff_U,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check value of the variable of C class as value of type A - U
+      function check_value_C(v: A_diff_U) {
+        if (v instanceof C) {
+          arktest.assertEQ(v.methC(), "methC")
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C')
+        }
+      }
+
+      // Function for check values of variables of type A & T
+      function check_value_A_inter_T(v: A_inter_T,
+                                      v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check NaN values of variables of type A & T
+      function check_value_isNaN(v: A_inter_T,
+                                      v_id: int): void {
+        if (v instanceof double) {
+          arktest.assertTrue(isNaN(v))
+        }
+        else if (v instanceof float) {
+          arktest.assertTrue(isNaN(v))
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of double or float')
+        }
+      }
+
+      // Function for skip check value of the variable by expression
+      function skip_check_value_by_expression() {
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [567 as long, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [123, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [517 as short, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [15 as byte, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [4.59, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [17.8f, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [567n, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [c'a', check_value_A_diff_U, undefined, VarType.A_diff_U],
+        ["abc", check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [true, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpLongEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpIntEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpStrEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpLongEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpIntEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpByteEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpShortEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpDoubleEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpFloatEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [new C(), check_value_C, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [null, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        ["", undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0 as long, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0 as short, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0 as byte, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0.0, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [Double.NaN, undefined, check_value_isNaN, VarType.A_inter_T],
+        [0.0f, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [Float.NaN, undefined, check_value_isNaN, VarType.A_inter_T],
+        [0n, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        ["", undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [false, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ImpLongEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ImpIntEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ImpStrEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpLongEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpIntEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpByteEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpShortEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpDoubleEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpDoubleEnum.V3, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpFloatEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpFloatEnum.V3, undefined, check_value_A_inter_T, VarType.A_inter_T] ]
+      const check_values_number: int = 45
+    check_value_by_expression_on_the_positive_branch:
+      "skip_check_value_by_expression()"
+    check_value_by_expression_on_the_negative_branch:
+      "skip_check_value_by_expression()"
+
+  - check_variant_decl_data: |-
+      // type A = Any
+
+      class C {
+        methC() {
+          return "methC"
+        }
+      }
+
+      // All enumerations with names:
+      // Imp*Enum - has implicit enumeration base type
+      // Exp*Enum - has explicit enumeration base type
+
+      enum ImpLongEnum { V1 = 0x7FFF_FFFF_1, V2 = 0 }
+      enum ImpIntEnum { V1 = 1, V2 = 0 }
+      enum ImpStrEnum { V1 = "abc", V2 = "" }
+      enum ExpLongEnum: long { V1 = 0x7FFF_FFFF_1, V2 = 0 }
+      enum ExpIntEnum: int { V1 = 1, V2 = 0 }
+      enum ExpByteEnum: byte { V1 = 2, V2 = 0 }
+      enum ExpShortEnum: short { V1 = 3, V2 = 0 }
+      enum ExpDoubleEnum: double { V1 = 4.0, V2 = 0.0, V3 = 0.0 / 0.0 /* Double.NaN */ }
+      enum ExpFloatEnum: float { V1 = 5.0f, V2 = 0.0f, V3 = 0.0f / 0.0f /* Float.NaN */ }
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = Any
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = Any // nearest supertype for A - U
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = Any // nearest supertype for A & T
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Default function for check values of variables of type A - U
+      function check_value_A_diff_U(v: A_diff_U,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check value of the variable of C class as value of type A - U
+      function check_value_C(v: A_diff_U) {
+        if (v instanceof C) {
+          arktest.assertEQ(v.methC(), "methC")
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of C')
+        }
+      }
+
+      // Function for check values of variables of type A & T
+      function check_value_A_inter_T(v: A_inter_T,
+                                      v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check NaN values of variables of type A & T
+      function check_value_isNaN(v: A_inter_T,
+                                      v_id: int): void {
+        if (v instanceof double) {
+          arktest.assertTrue(isNaN(v))
+        }
+        else if (v instanceof float) {
+          arktest.assertTrue(isNaN(v))
+        }
+        else {
+          arktest.assertTrue(false,
+            'v should be instance of double or float')
+        }
+      }
+
+      // Function for skip check value of the variable by expression
+      function skip_check_value_by_expression() {
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [567 as long, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [123, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [517 as short, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [15 as byte, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [4.59, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [17.8f, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [567n, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [c'a', check_value_A_diff_U, undefined, VarType.A_diff_U],
+        ["abc", check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [true, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpLongEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpIntEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ImpStrEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpLongEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpIntEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpByteEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpShortEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpDoubleEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [ExpFloatEnum.V1, check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [new C(), check_value_C, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [null, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        ["", undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0 as long, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0 as short, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0 as byte, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [0.0, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [Double.NaN, undefined, check_value_isNaN, VarType.A_inter_T],
+        [0.0f, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [Float.NaN, undefined, check_value_isNaN, VarType.A_inter_T],
+        [0n, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        ["", undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [false, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ImpLongEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ImpIntEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ImpStrEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpLongEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpIntEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpByteEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpShortEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpDoubleEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpDoubleEnum.V3, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpFloatEnum.V2, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [ExpFloatEnum.V3, undefined, check_value_A_inter_T, VarType.A_inter_T] ]
+      const check_values_number: int = 45
+    check_value_by_expression_on_the_positive_branch:
+      "skip_check_value_by_expression()"
+    check_value_by_expression_on_the_negative_branch:
+      "skip_check_value_by_expression()"
+
+  - check_variant_decl_data: |-
+      // type A = "V1" | "V2" | "" | undefined | null
+
+      // type A is type of v variable used for check
+      // branching on "v (truthiness check)"
+      type A = "V1" | "V2" | "" | undefined | null
+      type U =  undefined | null | ""
+
+      // type A - U is computed smart type on the positive branch
+      // after branching on "v (truthiness check)"
+      type A_diff_U = "V1" | "V2"
+
+      // type T is union of all types the contain at least one value
+      // considered as false in Extended Conditional Expressions
+
+      // type A & T is computed smart type on the negative branch
+      // after branching on "v (truthiness check)"
+      type A_inter_T = undefined | null | ""
+
+      // VarType is type of v variable after branching on
+      // "v (truthiness check)": on positive branch, on negative branch
+      enum VarType { A_diff_U, A_inter_T }
+      type CheckValueFuncTypeA_diff_U = (v: A_diff_U, v_id: int) => void
+      type CheckValueFuncTypeA_inter_T = (v: A_inter_T, v_id: int) => void
+      type CheckValueData = [
+        A, // value
+        // check value function if VarType is A_diff_U
+        CheckValueFuncTypeA_diff_U | undefined,
+        // check value function if VarType is A_inter_T
+        CheckValueFuncTypeA_inter_T | undefined,
+        VarType // value_type
+      ]
+
+      // Function for check values of variables of type A - U
+      function check_value_A_diff_U(v: A_diff_U,
+                                    v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      // Function for check values of variables of type A & T
+      function check_value_A_inter_T(v: A_inter_T,
+                                      v_id: int): void {
+        arktest.assertEQ(v, check_values[v_id][0])
+      }
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        ["V1", check_value_A_diff_U, undefined, VarType.A_diff_U],
+        ["V2", check_value_A_diff_U, undefined, VarType.A_diff_U],
+        [undefined, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        [null, undefined, check_value_A_inter_T, VarType.A_inter_T],
+        ["", undefined, check_value_A_inter_T, VarType.A_inter_T] ]
+      const check_values_number: int = 5
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
