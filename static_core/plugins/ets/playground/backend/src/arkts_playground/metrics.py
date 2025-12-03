@@ -14,10 +14,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Literal
+from prometheus_client import Counter
 
-from pydantic import BaseModel
+COMPILER_FAILURES = Counter(
+    "compiler_failures_total",
+    "Number of compiler failures (including segfaults)",
+    ["type"]  # "normal" | "segfault"
+)
 
+DISASM_FAILURES = Counter(
+    "disasm_failures_total",
+    "Number of disassembler failures (including segfaults)",
+    ["type"]
+)
 
-class FeaturesResponse(BaseModel):
-    ast_mode: Literal["auto", "manual"]
+AST_FAILURES = Counter(
+    "ast_dumper_failures_total",
+    "Number of AST dumper failures (including segfaults)",
+    ["type"]
+)
+
+RUNTIME_FAILURES = Counter(
+    "runtime_failures_total",
+    "Number of runtime failures (including segfaults)",
+    ["type"]
+)
