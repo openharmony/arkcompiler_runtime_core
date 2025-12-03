@@ -529,6 +529,8 @@ Import with ``type`` modifier is discussed in :ref:`Import Type Directive`.
 
 A :index:`compile-time error` occurs if:
 
+-  ``import`` directive is preceded by any non-import directive,
+   declaration or statement.
 -  Entity added to the scope of a module by a binding is not
    distinguishable;
 -  Module imports itself directly: ``importPath`` refers to the
