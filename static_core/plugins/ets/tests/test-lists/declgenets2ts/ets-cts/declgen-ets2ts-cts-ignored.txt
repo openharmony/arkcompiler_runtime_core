@@ -369,6 +369,7 @@
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/two_interfaces_16.ets
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/two_interfaces_5.ets
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/two_interfaces_7.ets
+17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/cte_int_cls_n_4.ets
 17.experimental_features/13.adding_functionality_to_existing_types/extension_functions_interface_3.ets
 03.types/20.union_types/03.keyof_types/keyof_inheritance_12.ets
 03.types/20.union_types/03.keyof_types/keyof_inheritance_8.ets
