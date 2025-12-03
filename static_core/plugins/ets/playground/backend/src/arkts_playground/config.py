@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import typing as t
 from argparse import ArgumentParser
 from collections.abc import Sequence
 from functools import lru_cache
-import typing as t
 
 import yaml
 from pydantic import BaseModel, Field
@@ -59,6 +59,7 @@ class PlaygroundSettings(BaseSettings):
     options: list[OptionModel]
     syntax: SyntaxModel
     features: t.Annotated[Features, Field(default_factory=Features)]
+    env: t.Literal["production", "dev"] = "production"
 
 
 @lru_cache

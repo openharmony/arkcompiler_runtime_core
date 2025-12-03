@@ -18,13 +18,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from ..deps.runner import get_runner, Runner
+from ..config import get_settings
+from ..deps.runner import Runner, get_runner
 from ..models.ast import AstRequestModel, AstResponse
 from ..models.common import VersionsResponse
-from ..models.compile import CompileResponse, CompileRequestModel, RunResponse
+from ..models.compile import CompileRequestModel, CompileResponse, RunResponse
 from ..models.features import FeaturesResponse
-
-from ..config import get_settings
 
 router = APIRouter()
 
