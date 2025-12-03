@@ -14,7 +14,7 @@
  */
 
 #include "intrinsics.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/include/thread_scopes.h"
@@ -31,7 +31,7 @@ using TimerId = int32_t;
 class TimerInfo {
 public:
     TimerInfo(mem::Reference *callback, int delay, bool isPeriodic, TimerId id)
-        : callback_(callback), delay_(delay), isPeriodic_(isPeriodic), event_(Coroutine::GetCurrent()->GetManager(), id)
+        : callback_(callback), delay_(delay), isPeriodic_(isPeriodic), id_(id)
     {
     }
 
@@ -53,65 +53,41 @@ public:
         return isPeriodic_;
     }
 
-    TimerEvent *GetEvent()
+    TimerId GetId() const
     {
-        return &event_;
+        return id_;
     }
-
-    bool IsCancelled() const;
 
 private:
     mem::Reference *callback_;
     const int delay_;
     const bool isPeriodic_;
-
-    TimerEvent event_;
+    const TimerId id_;
 };
 
 class TimerTable {
 public:
-    void RegisterTimer(TimerEvent *event)
-    {
-        os::memory::LockHolder lh(lock_);
-        timers_.insert({event->GetId(), event});
-    }
+    bool RegisterTimer(TimerId timerId, TimerEvent *event);
 
-    void DisarmTimer(TimerId timerId)
-    {
-        os::memory::LockHolder lh(lock_);
-        auto timerIter = timers_.find(timerId);
-        if (timerIter != timers_.end()) {
-            auto *timerEvent = timerIter->second;
-            timerEvent->SetExpired();
-            timers_.erase(timerIter);
-            os::memory::LockHolder lk(*timerEvent);
-            timerEvent->Happen();
-        }
-    }
+    void RetireTimer(TimerId timerId);
 
-    void RemoveTimer(TimerId timerId)
-    {
-        os::memory::LockHolder lh(lock_);
-        auto timerIter = timers_.find(timerId);
-        if (timerIter != timers_.end()) {
-            timers_.erase(timerIter);
-        }
-    }
+    void DisarmTimer(TimerId timerId);
 
-    bool HasTimer(TimerId timerId)
-    {
-        os::memory::LockHolder lh(lock_);
-        auto timerIter = timers_.find(timerId);
-        return timerIter != timers_.end();
-    }
+    void RemoveTimer(TimerId timerId);
+
+    bool IsTimerDisarmed(TimerId timerId);
 
 private:
+    static constexpr TimerEvent *disarmedTimer_ = nullptr;
+    static inline TimerEvent *retiredTimer_ = reinterpret_cast<TimerEvent *>(std::numeric_limits<uintptr_t>::max());
+
     os::memory::Mutex lock_;
     std::unordered_map<TimerId, TimerEvent *> timers_;
 };
 
 static TimerTable g_timerTable = {};
 static std::atomic<TimerId> nextTimerId_ = 1;
+static std::atomic<TimerId> internalEventId_ = 0;
 
 static void InvokeCallback(mem::Reference *callback)
 {
@@ -119,11 +95,6 @@ static void InvokeCallback(mem::Reference *callback)
     ScopedManagedCodeThread managedScope(coro);
     auto *lambda = coro->GetVM()->GetGlobalObjectStorage()->Get(callback);
     LambdaUtils::InvokeVoid(coro, EtsObject::FromCoreType(lambda));
-}
-
-bool TimerInfo::IsCancelled() const
-{
-    return !g_timerTable.HasTimer(event_.GetId());
 }
 
 TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodic)
@@ -135,21 +106,27 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
         coro->GetVM()->GetGlobalObjectStorage()->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     auto *timerInfo =
         Runtime::GetCurrent()->GetInternalAllocator()->New<TimerInfo>(callbackRef, delay, periodic, timerId);
-    g_timerTable.RegisterTimer(timerInfo->GetEvent());
 
     auto timerEntrypoint = [](void *param) {
         auto *timer = static_cast<TimerInfo *>(param);
         auto *timerCoro = Coroutine::GetCurrent();
+        auto *coroMan = timerCoro->GetManager();
+        auto usDelay = timer->GetDelay() * 1000U;
+
         while (true) {
-            auto *timerEvent = timer->GetEvent();
-            if (timer->GetDelay() != 0) {
-                auto *coroMan = timerCoro->GetManager();
-                timerEvent->SetNotHappened();
-                timerEvent->Lock();
-                timerEvent->SetExpirationTime(coroMan->GetCurrentTime() + timer->GetDelay());
-                coroMan->Await(timerEvent);
+            // Atomic with relaxed order reason: sync is not needed here
+            TimerEvent timerEvent(coroMan, internalEventId_.fetch_add(1, std::memory_order_relaxed));
+
+            if (!g_timerTable.RegisterTimer(timer->GetId(), &timerEvent)) {
+                break;
             }
-            if (timer->IsCancelled()) {
+
+            timerEvent.Lock();
+            timerEvent.SetExpirationTime(coroMan->GetCurrentTime() + usDelay);
+            timerCoro->GetWorker()->TriggerSchedulerExternally(timerCoro, timer->GetDelay());
+            coroMan->Await(&timerEvent);
+
+            if (g_timerTable.IsTimerDisarmed(timer->GetId())) {
                 break;
             }
 
@@ -158,10 +135,11 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
             if (!timer->IsPeriodic()) {
                 break;
             }
-            timerCoro->GetManager()->Schedule();
+
+            g_timerTable.RetireTimer(timer->GetId());
         }
 
-        g_timerTable.RemoveTimer(timer->GetEvent()->GetId());
+        g_timerTable.RemoveTimer(timer->GetId());
         timerCoro->GetVM()->GetGlobalObjectStorage()->Remove(timer->GetCallback());
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(timer);
     };
@@ -169,13 +147,70 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
     auto coroName = "Timer callback: " + ark::ToPandaString(timerId);
     auto wGroup = ark::CoroutineWorkerGroup::GenerateExactWorkerId(coro->GetWorker()->GetId());
     coro->GetManager()->LaunchNative(timerEntrypoint, timerInfo, std::move(coroName), wGroup,
-                                     ark::ets::EtsCoroutine::TIMER_CALLBACK, true);
+                                     ark::ets::EtsCoroutine::TIMER_CALLBACK, true, true);
     return timerId;
 }
 
 void StdCoreClearTimer(TimerId timerId)
 {
     g_timerTable.DisarmTimer(timerId);
+}
+
+bool TimerTable::RegisterTimer(TimerId timerId, TimerEvent *event)
+{
+    ASSERT(event != disarmedTimer_);
+    ASSERT(event != retiredTimer_);
+    os::memory::LockHolder lh(lock_);
+    auto [timerIter, inserted] = timers_.insert({timerId, event});
+    if (inserted) {
+        return true;
+    }
+    if (timerIter->second == retiredTimer_) {
+        timerIter->second = event;
+        return true;
+    }
+    return false;
+}
+
+void TimerTable::RetireTimer(TimerId timerId)
+{
+    os::memory::LockHolder lh(lock_);
+    auto timerIter = timers_.find(timerId);
+    ASSERT(timerIter != timers_.end());
+    if (timerIter->second != disarmedTimer_) {
+        timerIter->second = retiredTimer_;
+    }
+}
+
+void TimerTable::DisarmTimer(TimerId timerId)
+{
+    os::memory::LockHolder lh(lock_);
+    auto timerIter = timers_.find(timerId);
+    if (timerIter != timers_.end()) {
+        auto &timerEvent = timerIter->second;
+        if (timerEvent != disarmedTimer_ && timerEvent != retiredTimer_) {
+            timerEvent->SetExpired();
+            timerEvent->Happen();
+        }
+        timerEvent = disarmedTimer_;
+    }
+}
+
+void TimerTable::RemoveTimer(TimerId timerId)
+{
+    os::memory::LockHolder lh(lock_);
+    auto timerIter = timers_.find(timerId);
+    if (timerIter != timers_.end()) {
+        timers_.erase(timerIter);
+    }
+}
+
+bool TimerTable::IsTimerDisarmed(TimerId timerId)
+{
+    os::memory::LockHolder lh(lock_);
+    auto timerIter = timers_.find(timerId);
+    ASSERT(timerIter != timers_.end());
+    return timerIter->second == disarmedTimer_;
 }
 
 }  // namespace ark::ets::intrinsics

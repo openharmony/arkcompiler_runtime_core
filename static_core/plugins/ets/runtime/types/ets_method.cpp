@@ -15,9 +15,10 @@
 
 #include "plugins/ets/runtime/types/ets_method.h"
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandafile/param_annotations_data_accessor.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkfile/param_annotations_data_accessor.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_annotation.h"
@@ -47,6 +48,14 @@ static EtsMethod *FindInvokeMethodInFunctionalType(EtsClass *type)
         if (method != nullptr) {
             return method;
         }
+        PandaStringStream ssR;
+        ssR << STD_CORE_FUNCTION_INVOKE_R_PREFIX << arity;
+        PandaString strR = ssR.str();
+
+        EtsMethod *methodR = type->GetInstanceMethod(strR.c_str(), nullptr);
+        if (methodR != nullptr) {
+            return methodR;
+        }
     }
     UNREACHABLE();
 }
@@ -59,8 +68,8 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker
     EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     if (td[0] == METHOD_PREFIX) {
         // here we resolve method in existing class, which is stored as pointer to panda file + entity id
-        uint64_t filePtr;
-        uint64_t id;
+        uint64_t filePtr = 0;
+        uint64_t id = 0;
         const auto scanfStr = std::string_view {td}.substr(1).data();
         // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg,cert-err34-c)
         [[maybe_unused]] auto res = sscanf_s(scanfStr, "%" PRIu64 ";%" PRIu64 ";", &filePtr, &id);
@@ -205,7 +214,10 @@ EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
     }
 
     // get reference type
-    EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    PandaEtsVM *currentVM = PandaEtsVM::GetCurrent();
+    ASSERT(currentVM != nullptr);
+    EtsClassLinker *classLinker = currentVM->GetClassLinker();
+    ASSERT(classLinker != nullptr);
     auto type = GetPandaMethod()->GetArgType(idx);
     if (!type.IsPrimitive()) {
         size_t refIdx = 0;

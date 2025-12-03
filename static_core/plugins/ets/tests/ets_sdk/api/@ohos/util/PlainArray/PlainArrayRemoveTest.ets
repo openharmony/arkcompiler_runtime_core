@@ -72,10 +72,13 @@ function testRemoveRangeFromWithSizeZero() {
     let plainArray = new PlainArray<string>();
     plainArray.add(1, "squirrel");
     plainArray.add(2, "sparrow");
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            `The value of \"size\" is out of range. It must be > 0. Received value is: 0`) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                `The value of \"size\" is out of range. It must be > 0. Received value is: 0` &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {plainArray.removeRangeFrom(1, 0)}, exceptionCheck);
 }
@@ -101,9 +104,11 @@ function testRemoveRangeFromWithMathFloorSize() {
 // Test cases ported from ArkTS 1.0: PLAINARRAY_REMOVERANGEFROM_0400
 function testRemoveRangeFromWithEmptyArray() {
     let plainArray = new PlainArray<string>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == `Container is empty`) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == `Container is empty`
+        }
+        return false;
     }
     arktest.expectThrow(() => {plainArray.removeRangeFrom(0, 0)}, exceptionCheck);
 }

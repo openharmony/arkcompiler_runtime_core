@@ -143,7 +143,7 @@ export class ArrayAsList<T> implements List {
             }
             return res;
         }
-        throw new NoDataException();
+        throw new NoDataError();
     }
 
     public foldWith<U>(combine: (lhs: U, rhs: T): U, initVal: U): U {

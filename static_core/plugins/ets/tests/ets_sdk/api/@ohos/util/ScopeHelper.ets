@@ -20,14 +20,15 @@ class NumberType implements util.ScopeType<NumberType> {
     constructor(n: number) {
       this.n = n
     }
-   
+    
+    // NOTE (aleksander-sotov): Remove after internal issue #22930 fix
+
     compareTo(other: NumberType): boolean {
        	return this.n >= other.n
     }
 
-    // NOTE (aleksander-sotov): Remove after internal issue #22930 fix
     compareTo(other: Object): boolean {
-        return this.compareTo(other as NumberType)
+       return this.compareTo(other as NumberType)
     }
    
     toString(): string {
@@ -97,7 +98,7 @@ function testIntersectByRange() {
 
 function testIntersectWrongRanges() {
     let sh = createScopeHelper(10, 30)
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
+    let exceptionCheck = (e: Error): boolean | string => {
         return (e instanceof Error) && ((e as Error).toString() == "Error: lower limit must be less than upper limit")
     }
     arktest.expectThrow(() => {sh.intersect(createScopeHelper(100, 200))}, exceptionCheck)
@@ -106,7 +107,7 @@ function testIntersectWrongRanges() {
 
 function testLowerUpperAreEqual() {
     
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
+    let exceptionCheck = (e: Error): boolean | string => {
         return (e instanceof Error) && ((e as Error).toString() == "Error: lower limit must be less than upper limit")
     }
     arktest.expectThrow(() => {createScopeHelper(10, 10)}, exceptionCheck)

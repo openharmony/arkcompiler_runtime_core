@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "cacheDir": "${DEFAULT_CACHE_DIR}",
         "dependencies": {
             "@panda/lib":  { "path": "${LIB_SOURCE_ABC}" }
         }

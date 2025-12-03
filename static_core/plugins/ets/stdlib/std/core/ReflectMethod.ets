@@ -27,7 +27,7 @@ class Method {
     protected attributes: int
     protected accessMod: byte
 
-    private native constructor()
+    protected native constructor()
 
     public isNative(): boolean {
         return (this.attributes & Attributes.NATIVE) != 0

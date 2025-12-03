@@ -15,7 +15,7 @@
 cases:
   # Ex catch goes twice
   - defs: |-
-      class Ex extends Exception {}
+      class Ex extends Error {}
       class Er extends Error {}
 
     use: |-
@@ -35,7 +35,7 @@ cases:
 
   # default catch is not the last
   - defs: |-
-      class Ex extends Exception {}
+      class Ex extends Error {}
       class Er extends Error {}
 
     use: |-
@@ -69,8 +69,8 @@ cases:
 
   # main is not a throwing function but try doesn't have default catch clause
   - defs: |-
-      class Ex extends Exception {}
-      class Fx extends Exception {}
+      class Ex extends Error {}
+      class Fx extends Error {}
 
     use: |-
       try {
@@ -83,7 +83,7 @@ cases:
 
   # parameterized class is not allowed
   - defs: |-
-      class Ex<T> extends Exception {}
+      class Ex<T> extends Error {}
 
     use: |-
       let exc: Ex<Long> = new Ex<Long>();

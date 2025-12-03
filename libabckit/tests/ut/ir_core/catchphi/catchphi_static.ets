@@ -31,7 +31,7 @@ function bar(a: int): int {
         if (a == 0) {
             bar0();
         }
-    } catch (e: Error) {
+    } catch (e) {
         return 13;
     }
     return a;

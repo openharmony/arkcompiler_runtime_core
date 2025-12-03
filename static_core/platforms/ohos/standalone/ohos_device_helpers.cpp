@@ -15,8 +15,8 @@
 
 #include "platforms/ohos/ohos_device_helpers.h"
 
-#include "libpandabase/os/library_loader.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/os/library_loader.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::ohos_device {
 std::string GetHardwareModelString()

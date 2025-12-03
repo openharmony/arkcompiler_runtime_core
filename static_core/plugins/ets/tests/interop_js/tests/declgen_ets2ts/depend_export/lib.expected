@@ -25,10 +25,10 @@ export declare let p3: E5;
 export declare function foo3(a: E6): E7;
 export declare let p12: Promise<E8>;
 declare interface I0 {
-    I0Method(a: string): string;
+    I0Method?(a: string): string;
 }
 declare interface I1 {
-    I1Method(a: number): number;
+    I1Method?(a: number): number;
 }
 declare class Base {
     public get a(): number;

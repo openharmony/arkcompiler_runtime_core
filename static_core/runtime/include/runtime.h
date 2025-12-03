@@ -22,14 +22,13 @@
 #include <string>
 #include <vector>
 
-#include "libpandabase/mem/arena_allocator.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/taskmanager/task_scheduler.h"
-#include "libpandabase/utils/expected.h"
-#include "libpandabase/utils/dfx.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/literal_data_accessor.h"
-#include "platforms/target_defaults/default_target_options.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/taskmanager/task_scheduler.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/dfx.h"
+#include "../libarkfile/file_items.h"
+#include "../libarkfile/literal_data_accessor.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -48,8 +47,8 @@
 #include "runtime/string_table.h"
 #include "runtime/thread_manager.h"
 #include "verification/public.h"
-#include "libpandabase/os/native_stack.h"
-#include "libpandabase/os/library_loader.h"
+#include "libarkbase/os/native_stack.h"
+#include "libarkbase/os/library_loader.h"
 #include "runtime/include/loadable_agent.h"
 #include "runtime/tooling/tools.h"
 
@@ -186,7 +185,11 @@ public:
     static bool GetLiteralTagAndValue(const panda_file::File &pf, uint32_t id, panda_file::LiteralTag *tag,
                                       panda_file::LiteralDataAccessor::LiteralValue *value);
 
+    static void SetRuntimeOptions(RuntimeOptions &options);
+
     static void SetDebuggerOptions(RuntimeOptions &options);
+
+    static void SetUseLargerYoungSpaceOptions(RuntimeOptions &options);
 
     uintptr_t GetPointerToConstArrayData(const panda_file::File &pf, uint32_t id) const;
 
@@ -460,6 +463,11 @@ public:
         return tools_;
     }
 
+    EntrypointsTable *GetEntrypointsTable()
+    {
+        return &entrypoints_;
+    }
+
 private:
     void NotifyAboutLoadedModules();
 
@@ -587,6 +595,8 @@ private:
     UnwindStackFn unwindStackFn_ {nullptr};
 
     tooling::Tools tools_;
+
+    EntrypointsTable entrypoints_ {};
 
     NO_COPY_SEMANTIC(Runtime);
     NO_MOVE_SEMANTIC(Runtime);

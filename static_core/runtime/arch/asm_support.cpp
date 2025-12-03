@@ -14,13 +14,14 @@
  */
 
 #include "runtime/arch/asm_support.h"
-#include "libpandabase/utils/arch.h"
+#include "libarkbase/utils/arch.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/method.h"
 #include "runtime/include/mtmanaged_thread.h"
 #include "runtime/include/thread.h"
+#include "runtime/include/flattened_string_cache.h"
 #include "runtime/jit/profiling_data.h"
 #include "plugins_defines.h"
 

@@ -17,21 +17,71 @@ config("ark_guard_public_config") {
   include_dirs = [ "$ark_root/ark_guard/include" ]
 }
 
-ark_guard_sources = [ "library/ark_guard.cpp" ]
+ark_guard_sources = [
+  "library/args_parser.cpp",
+  "library/ark_guard.cpp",
+  "library/configuration/configuration.cpp",
+  "library/configuration/configuration_parser.cpp",
+  "library/configuration/keep_option_parser.cpp",
+  "library/configuration/word_reader.cpp",
+  "library/error.cpp",
+  "library/name_cache/name_cache_dumper.cpp",
+  "library/name_cache/name_cache_keeper.cpp",
+  "library/name_cache/name_cache_parser.cpp",
+  "library/name_mapping/name_mapping_manager.cpp",
+  "library/name_mapping/order_name_generator.cpp",
+  "library/obfuscator/element_obfuscator.cpp",
+  "library/obfuscator/element_preprocessor.cpp",
+  "library/obfuscator/member_descriptor_util.cpp",
+  "library/obfuscator/member_linker.cpp",
+  "library/obfuscator/member_obfuscator.cpp",
+  "library/obfuscator/member_preprocessor.cpp",
+  "library/obfuscator/name_marker.cpp",
+  "library/obfuscator/obfuscator.cpp",
+  "library/obfuscator/obfuscator_data_manager.cpp",
+  "library/obfuscator/remove_log_obfuscator.cpp",
+  "library/obfuscator/seeds_dumper.cpp",
+  "library/util/file_util.cpp",
+  "library/util/json_util.cpp",
+  "library/util/string_util.cpp",
+]
+
+ark_guard_include_dirs = [
+  "$ark_root/ark_guard/library",
+  "$ark_root/libabckit/include",
+  "$ark_root/static_core",
+]
+
+ark_guard_configs = [
+  "$ark_root/libabckit:abckit_config",
+  "$ark_root/ark_guard/abckit_wrapper:abckit_wrapper_public_config",
+  "$ark_root/static_core/libarkbase:arkbase_public_config",
+]
+
+ohos_shared_library("ark_guard_shared") {
+  sources = ark_guard_sources
+
+  include_dirs = ark_guard_include_dirs
+
+  configs = ark_guard_configs
+
+  public_configs = [ ":ark_guard_public_config" ]
+
+  deps = [
+    "$ark_root/ark_guard/abckit_wrapper:abckit_wrapper_shared",
+    "$ark_root/static_core/libarkbase:libarktsbase",
+  ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
 
 ohos_static_library("ark_guard_static") {
   sources = ark_guard_sources
 
-  include_dirs = [
-    "$ark_root/libabckit/include",
-    "$ark_root/static_core",
-  ]
+  include_dirs = ark_guard_include_dirs
 
-  configs = [
-    "$ark_root/libabckit:abckit_config",
-    "$ark_root/ark_guard/abckit_wrapper:abckit_wrapper_public_config",
-    "$ark_root/static_core/libpandabase:arkbase_public_config",
-  ]
+  configs = ark_guard_configs
 
   public_configs = [ ":ark_guard_public_config" ]
 

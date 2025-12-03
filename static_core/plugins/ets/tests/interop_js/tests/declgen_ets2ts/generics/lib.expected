@@ -20,10 +20,10 @@ export declare class GenericClass<T extends Object> {
     constructor();
 }
 export declare interface IGeneric0<T> {
-    I0Method(a: T): T;
+    I0Method?(a: T): T;
 }
 export declare interface IGeneric1<T> {
-    I1Method(a: T): T;
+    I1Method?(a: T): T;
 }
 export declare class BaseGeneric<T, U> {
     public get c(): T;

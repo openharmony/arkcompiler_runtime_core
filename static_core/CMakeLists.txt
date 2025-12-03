@@ -44,6 +44,7 @@ set(PANDA_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(PANDA_BINARY_ROOT ${CMAKE_CURRENT_BINARY_DIR})
 set(PANDA_THIRD_PARTY_SOURCES_DIR ${PANDA_ROOT}/third_party)
 set(PANDA_THIRD_PARTY_CONFIG_DIR ${PANDA_ROOT}/cmake/third_party)
+set(ARKFILE_ROOT ${PANDA_ROOT}/libarkfile)
 
 add_definitions(-DBUILD_FOLDER="${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -248,15 +249,15 @@ if(PANDA_WITH_TOOLCHAIN)
     add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/openssl)
     set(TOOLCHAIN_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/arkcompiler/toolchain)
     add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/toolchain_websocket)
-    add_subdirectory(libpandabase)
+    add_subdirectory(libarkbase)
 
     set(ZLIB_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/zlib)
     add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/zlib)
     add_subdirectory(libziparchive)
 
-    add_subdirectory(libpandafile)
+    add_subdirectory(libarkfile)
     if(NOT PANDA_TARGET_WINDOWS)
-        add_subdirectory(libpandafile/external)
+        add_subdirectory(libarkfile/external)
     endif()
 
     add_subdirectory(abc2program)

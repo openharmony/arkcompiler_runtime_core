@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <libdwarf/dwarf.h>
-#include "os/debug_info.h"
+#include "debug_info.h"
 #include "utils/logger.h"
 
 namespace panda {
@@ -194,11 +194,8 @@ void DebugInfo::Destroy()
     cu_list_.clear();
     ranges_.clear();
     dwarf_finish(dbg_, nullptr);
-    {
-        os::memory::LockHolder lock(fd_mutex_);
-        close(fd_);
-        fd_ = INVALID_FD;
-    }
+    close(fd_);
+    fd_ = INVALID_FD;
     dbg_ = nullptr;
 }
 
@@ -214,11 +211,8 @@ DebugInfo::ErrorCode DebugInfo::ReadFromFile(const char *filename)
         // But since dbg is NULL, dwarf_dealloc just returns in case of dbg == nullptr and doesn't free this memory
         // A possible solution is to use 20201201 version and call dwarf_dealloc.
         free(err);  // NOLINT(cppcoreguidelines-no-malloc)
-        {
-            os::memory::LockHolder lock(fd_mutex_);
-            close(fd_);
-            fd_ = INVALID_FD;
-        }
+        close(fd_);
+        fd_ = INVALID_FD;
         dbg_ = nullptr;
     }
     if (res == DW_DLV_ERROR) {

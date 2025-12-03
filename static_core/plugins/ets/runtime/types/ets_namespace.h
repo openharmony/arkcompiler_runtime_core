@@ -40,14 +40,24 @@ public:
         return EtsVariable::FromField(field);
     }
 
-    EtsMethod *GetFunction(const char *name, const char *signature, bool isANIFormat = false)
+    EtsMethod *GetFunction(const char *name, const char *signature)
     {
-        return GetStaticMethod(name, signature, isANIFormat);
+        return GetStaticMethod(name, signature);
     }
 
-    PandaVector<EtsMethod *> GetFunctionOverload(const char *name, const char *signature, bool isANIFormat = false)
+    EtsMethod *GetFunction(const char *name, std::optional<EtsMethodSignature> &methodSignature)
     {
-        return GetStaticMethodOverload(name, signature, isANIFormat);
+        return GetStaticMethod(name, methodSignature);
+    }
+
+    PandaVector<EtsMethod *> GetFunctionOverload(const char *name, const char *signature)
+    {
+        return GetStaticMethodOverload(name, signature);
+    }
+
+    PandaVector<EtsMethod *> GetFunctionOverload(const char *name, std::optional<EtsMethodSignature> &methodSignature)
+    {
+        return GetStaticMethodOverload(name, methodSignature);
     }
 };
 

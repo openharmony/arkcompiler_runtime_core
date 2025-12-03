@@ -331,10 +331,12 @@ function testParamsConstruction007() {
 //   ];
 // try {
 //     let params = new url.URLParams(param);
-// } catch(err:BusinessError) {
+// } catch(err) {
+//     if (err instanceof BusinessError) {
 //     arktest.assertEQ(err.toString(),`BusinessError: Parameter error. The type of ${param} must be string[][]`)
 //     arktest.assertEQ(err.code,401)
 //     arktest.assertEQ(err.message,`Parameter error. The type of ${param} must be string[][]`);
+// }
 // }
 // }
 

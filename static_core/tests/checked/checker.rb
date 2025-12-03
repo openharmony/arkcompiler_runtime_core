@@ -39,9 +39,13 @@ OptionParser.new do |opts|
   opts.banner = 'Usage: checker.rb [options] TEST_FILE'
 
   opts.on('--run-prefix=PREFIX', 'Prefix that will be inserted before panda run command') do |v|
-    options.run_prefix = v
+    v = v.gsub ',', ' '
+    options.run_prefix = v.eql?("\'\'") ? "" : v
   end
   opts.on('--source=FILE', 'Path to source file')
+  opts.on('--test-dir=DIR', 'Path to test directory') do |v|
+    options.test_dir = v
+  end
   opts.on('--test-file=FILE', 'Path to test file') do |v|
     options.test_file = v
   end
@@ -51,13 +55,13 @@ OptionParser.new do |opts|
   end
   opts.on('--frontend=FRONTEND', 'Path to frontend binary')
   opts.on('--panda-options=OPTIONS', 'Default options for panda run') do |v|
-    options.panda_options = v
+    options.panda_options = v.gsub ',', ' '
   end
   opts.on('--paoc-options=OPTIONS', 'Default options for paoc run') do |v|
-    options.paoc_options = v
+    options.paoc_options = v.gsub ',', ' '
   end
   opts.on('--frontend-options=OPTIONS', 'Default options for frontend+bco run') do |v|
-    options.frontend_options = v
+    options.frontend_options = v.gsub ',', ' '
   end
   opts.on('--method=METHOD', 'Method to optimize')
   opts.on('--command-token=STRING', 'String that is recognized as command start') do |v|
@@ -76,10 +80,18 @@ OptionParser.new do |opts|
   opts.on('--checker-filter=STRING', 'Run only checkers with filter-matched name') do |v|
     options.checker_filter = v
   end
+  opts.on('--is-llvm=ISLLVM', 'Uranner option if --with-llvm should be added') do |v|
+    options.with_llvm = v.eql?("true") ? true : false
+  end
+  opts.on('--is-verbose=ISVERBOSE', 'Uranner option if --verbose should be added') do |v|
+    options.verbose = v.eql?("true") ? true : false
+  end
+  opts.on('--is-release=ISRELEASE', 'Uranner option if --release should be added') do |v|
+    options.release = v.eql?("true") ? true : false
+  end
   opts.on('--interop', 'Do interop-specific actions')
     options.interop = true
 end.parse!(into: options)
-
 $LOG_LEVEL = options.verbose ? Logger::DEBUG : Logger::ERROR
 $curr_cmd = nil
 
@@ -115,9 +127,11 @@ end
 class SearchScope
 
   attr_reader :lines
+  attr_reader :init_lines
   attr_reader :current_index
 
   def initialize(lines, name)
+    @init_lines = lines
     @lines = lines
     @name = name
     @current_index = 0
@@ -134,15 +148,29 @@ class SearchScope
     @current_index = 0
   end
 
-  def find_block(match)
-    @lines = @lines.drop(@current_index)
+  def find_block(match, nth = 1)
+    @lines = @init_lines
     @current_index = 0
-    find(match)
-    @lines = @lines.drop(@current_index - 1)
-    @current_index = 0
-    find(/succs:/)
-    @lines = @lines.slice(0, @current_index)
-    @current_index = 0
+    i = nth
+    begin
+      while i > 0 do
+        find(match)
+        i -= 1
+        @current_index = @current_index - 1 if i == 0
+        @lines = @lines.drop(@current_index)
+        @current_index = 0
+        if i == 0
+#          log.debug "Block found: #{@lines[@current_index]}, #{@lines[@current_index + 1]}"
+          find(/succs:/)
+          @lines = @lines.slice(0, @current_index)
+          @current_index = 0
+#        elsif
+#          log.debug "Block found by regexp: #{match_str(match)}, #{i} matches to find"
+        end
+      end
+    rescue RuntimeError
+      raise_error "Block not found by regexp: #{match_str(match)} , #{i} matches to find"
+    end
   end
 
   def self.from_file(fname, name)
@@ -193,6 +221,7 @@ class Checker
 
   public
   attr_reader :name
+  attr_reader :code
 
   module AotMode
     PAOC = 1
@@ -455,15 +484,16 @@ class Checker
     inputs = @options.test_file
     output = "#{@cwd}/#{File.basename(@options.test_file, '.*')}.abc"
     @args = ''
-
+    # handles evaluation of expressions in arguments such as #{@options.test_file}
+    # specifically to use them in ets test annotations
     args.each do |name, value|
       case name
       when :options
-        @args << value
+        @args << eval("\"" + value + "\"")
       when :inputs
-        inputs = value
+        inputs = eval("\"" + value + "\"")
       when :output
-        output = value
+        output = eval("\"" + value + "\"")
       when :method
         @args << "--bco-optimizer --method-regex=#{value}:.*"
       end
@@ -593,10 +623,10 @@ class Checker
     raise_error "IR_COUNT mismatch for #{match}: expected=#{count}, real=#{real_count}" unless real_count == count
   end
 
-  def IN_BLOCK(match)
+  def IN_BLOCK(match, nth = 1)
     return if @options.release
 
-    @ir_scope.find_block(/prop: #{match}/)
+    @ir_scope.find_block(/prop: #{match}/, nth)
   end
 
   def LLVM_METHOD(match)
@@ -733,6 +763,31 @@ class Checker
     @ir_scope = SearchScope.from_file(@ir_files[@current_file_index], 'IR')
   end
 
+  def PASS_AFTER_NTH(pass, nth = 1)
+    return if @options.release
+
+    $current_pass = "Pass after #{nth}th occurrence of: #{pass}"
+    matches = @ir_files.each_with_index.select { |x, i| File.basename(x).include? pass }
+    raise_error "IR file not found for pass: #{pass}. Possible cause: you forgot to select METHOD first" if matches.empty?
+    raise_error "Not enough occurrences (#{matches.size}) of pass #{pass} (requested #{nth})" if matches.size < nth
+
+    @current_file_index = matches[nth-1][1]
+    @ir_scope = SearchScope.from_file(@ir_files[@current_file_index], 'IR')
+  end
+
+  def PASS_BEFORE_NTH(pass, nth = 1)
+    return if @options.release
+
+    $current_pass = "Pass before #{nth}th occurrence of: #{pass}"
+    matches = @ir_files.each_with_index.select { |x, i| File.basename(x).include? pass }
+    raise_error "IR file not found for pass: #{pass}. Possible cause: you forgot to select METHOD first" if matches.empty?
+    raise_error "Not enough occurrences (#{matches.size}) of pass #{pass} (requested #{nth})" if matches.size < nth
+
+    @current_file_index = matches[nth-1][1] - 1
+    raise_error "No pass before first occurrence of #{pass}" if @current_file_index < 0
+    @ir_scope = SearchScope.from_file(@ir_files[@current_file_index], 'IR')
+  end
+
   def PASS_BEFORE(pass)
     return if @options.release
 
@@ -785,18 +840,40 @@ end
 
 def read_checks(options)
   checks = []
+  checks_recheck = {}
   check = nil
+  checkgroups = {}
+  checkgroup = nil
   command_token = /[ ]*#{options.command_token}(.*)/
   checker_start = /[ ]*#{options.command_token} CHECKER[ ]*(.*)/
   disabled_checker_start = /[ ]*#{options.command_token} DISABLED_CHECKER[ ]*(.*)/
+  checkgroup_start = /[ ]*#{options.command_token} CHECK_GROUP[ ]*(.*)/
   File.readlines(options.source).each_with_index do |line, line_no|
-    if check
+    if check || checkgroup
       unless line.start_with? command_token
         check = nil
+        checkgroup = nil
         next
       end
-      raise "No space between two checkers: '#{line.strip}'" if line.start_with? checker_start
-      check.append_line(command_token.match(line)[1]) unless check == :disabled_check
+      raise "No space between two checkers: '#{line.strip}'" if line.start_with? checker_start or (checkgroup and line.start_with? checkgroup_start)
+      command_text = command_token.match(line)[1]
+      if check
+        if line.start_with? checkgroup_start
+          if checkgroups.key?(command_text)
+            check.append_line(checkgroups[command_text])
+            next
+          else
+            unless checks_recheck.key?(check.name)
+              checks_recheck[check.name] = []
+            end
+            checks_recheck[check.name].append(command_text)
+          end
+        end
+        check.append_line(command_text) unless check == :disabled_check
+      elsif checkgroup
+        checkgroups[checkgroup] += command_text
+        checkgroups[checkgroup] += "\n"
+      end
     else
       next unless line.start_with? command_token
       if line.start_with? checker_start
@@ -804,7 +881,14 @@ def read_checks(options)
         raise "Checker with name '#{name}'' already exists" if checks.any? { |x| x.name == name }
 
         check = Checker.new(options, name, line_no: line_no)
+        check.append_line(" SKIP_IF      @architecture == \"arm32\"") if name.include? "AOT"
         checks << check
+
+      elsif line.start_with? checkgroup_start
+        checkgroup = command_token.match(line)[1]
+        raise "CheckGroup with name '#{checkgroup}'' already exists" if checkgroups.key?(checkgroup)
+
+        checkgroups[checkgroup] = ""
       else
         raise "Line '#{line.strip}' does not belong to any checker" unless line.start_with? disabled_checker_start
         check = :disabled_check
@@ -812,10 +896,26 @@ def read_checks(options)
       end
     end
   end
+  checks_recheck.each do |ch_name, d_name_lst|
+    checks.each do |check|
+      if check.name == ch_name
+        d_name_lst.each do |d_name|
+          raise "CheckGroup with name '#{d_name}' not specified" unless checkgroups.key?(d_name)
+
+          check.code.source.sub! d_name, checkgroups[d_name]
+        end
+      end
+    end
+  end
   checks
 end
 
 def main(options)
+  if options.test_dir
+    require 'fileutils'
+    FileUtils.mkdir_p options.test_dir
+    Dir.chdir options.test_dir
+  end
   read_checks(options).flat_map(&:populate).each(&:run)
   0
 end

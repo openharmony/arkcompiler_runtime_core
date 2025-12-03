@@ -22,8 +22,8 @@
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
 #include "code_info/code_info_builder.h"
-#include "libpandabase/utils/cframe_layout.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/cframe_layout.h"
+#include "libarkbase/utils/utils.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/stack_walker-inl.h"
@@ -126,6 +126,7 @@ static auto g_modifyVregSource = R"(
         call.short testa, v0
         jmp try_end
     try_end:
+        ldai 0
         return
     .catchall try_begin, try_end, try_end
     }
@@ -138,13 +139,14 @@ static auto g_modifyVregSource = R"(
         return
     }
     .function i32 testc(i64 a0) {
-        lda a0
+        lda.64 a0
     try_begin:
         call.short hook  # change vregs in all frames
         jnez exit
         call.short hook  # verify vregs in all frames
         jmp exit
     exit:
+        ldai 0
         return
     .catchall try_begin, exit, exit
     }
@@ -271,6 +273,7 @@ static auto g_testModifyManyVregsSource = R"(
         call.short test
         jmp try_end
     try_end:
+        ldai 0
         return
 
     .catchall try_begin, try_end, try_end
@@ -307,13 +310,14 @@ static auto g_testModifyManyVregsSource = R"(
         movi.64 v28, 28
         movi.64 v29, 29
         movi.64 v30, 30
-        movi.64 v31, 31
+        movi v31, 31
     try_begin:
         mov v0, v31
         newarr v0, v0, i32[]
         call.short stub
         jmp try_end
     try_end:
+        ldai 0
         return
 
     .catchall try_begin, try_end, try_end
@@ -326,6 +330,7 @@ static auto g_testModifyManyVregsSource = R"(
         call.short hook  # verify vregs in all frames
         jmp exit
     exit:
+        ldai 0
         return
 
     .catchall try_begin, exit, exit
@@ -547,7 +552,7 @@ TEST_F(StackWalkerTest, CatchInCompiledCode)
 
         .function i32 f2() {
             movi v0, 4
-            newarr v1, v0, i64[]
+            newarr v1, v0, i32[]
             ldai 42
             ldarr v1 # BoundsException
             return

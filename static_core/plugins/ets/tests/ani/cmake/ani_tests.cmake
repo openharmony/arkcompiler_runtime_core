@@ -12,10 +12,13 @@
 # limitations under the License.
 
 add_custom_target(ani_tests COMMENT "Common target to run ANI ETS tests")
+add_custom_target(ani_tests_without_bridges COMMENT "Common target to run ANI ETS tests exclude bridges tests")
+
+add_dependencies(ani_tests ani_tests_without_bridges)
 
 add_dependencies(ets_tests ani_tests)
 
-# Add gtest-based tests to ani_tests target.
+# Add gtest-based tests to ani_tests_without_bridges target.
 #
 # Example usage:
 #   ani_add_gtest(test_name
@@ -33,10 +36,20 @@ function(ani_add_gtest TARGET)
     cmake_parse_arguments(
         ARG # give prefix `ARG` to each argument
         ""
-        "ETS_CONFIG"
+        "ETS_CONFIG;TARGET_PREFIX"
         "CPP_SOURCES;ETS_SOURCES;LIBRARIES;TSAN_EXTRA_OPTIONS"
         ${ARGN}
     )
+
+    # Check TARGET prefix
+    set(TARGET_PREFIX "ani_test_")
+    if(DEFINED ARG_TARGET_PREFIX)
+        set(TARGET_PREFIX ${ARG_TARGET_PREFIX})
+    endif()
+    string(FIND "${TARGET}" "${TARGET_PREFIX}" PREFIX_INDEX)
+    if(NOT ${PREFIX_INDEX} EQUAL 0)
+        message(FATAL_ERROR "TARGET (${TARGET}) should have '${TARGET_PREFIX}' prefix")
+    endif()
 
     set(VERIFY_SOURCES true)
     # NOTE(dslynko, #24335) Disable verifier on arm32 qemu due to flaky OOM
@@ -58,6 +71,7 @@ function(ani_add_gtest TARGET)
         ETS_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH"
         INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
         VERIFY_SOURCES ${VERIFY_SOURCES}
-        TEST_GROUP ani_tests
+        TEST_GROUP ani_tests_without_bridges
     )
+
 endfunction(ani_add_gtest)

@@ -21,155 +21,21 @@
 
 namespace ark::ets {
 
-class EtsEscompatMapEntry : public EtsObject {
-public:
-    EtsEscompatMapEntry() = delete;
-    ~EtsEscompatMapEntry() = delete;
-
-    NO_COPY_SEMANTIC(EtsEscompatMapEntry);
-    NO_MOVE_SEMANTIC(EtsEscompatMapEntry);
-
-    static EtsEscompatMapEntry *Create(EtsObject *key, EtsObject *val)
-    {
-        auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro->HasPendingException() == false);
-
-        [[maybe_unused]] EtsHandleScope scope(coro);
-        EtsHandle<EtsObject> keyHandle(coro, key);
-        EtsHandle<EtsObject> valHandle(coro, val);
-
-        const EtsPlatformTypes *platformTypes = PlatformTypes(coro->GetPandaVM());
-        EtsHandle<EtsClass> klass(coro, platformTypes->escompatMapEntry);
-        EtsHandle<EtsEscompatMapEntry> entryHandle(coro, FromEtsObject(EtsObject::Create(klass.GetPtr())));
-        entryHandle->SetKey(coro, keyHandle.GetPtr());
-        entryHandle->SetVal(coro, valHandle.GetPtr());
-
-        if (UNLIKELY(coro->HasPendingException())) {
-            if (coro->GetPandaVM()->GetOOMErrorObject() == nullptr ||
-                (coro->GetException()->ClassAddr<Class>() ==
-                 coro->GetPandaVM()->GetOOMErrorObject()->ClassAddr<Class>())) {
-                coro->ClearException();
-                return nullptr;
-            }
-            // We do not expect any other exception than OOM
-            UNREACHABLE();
-        }
-
-        return entryHandle.GetPtr();
-    }
-
-    static EtsEscompatMapEntry *Create()
-    {
-        auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro->HasPendingException() == false);
-
-        EtsHandleScope scope(coro);
-        const EtsPlatformTypes *platformTypes = PlatformTypes(coro->GetPandaVM());
-        EtsHandle<EtsClass> klass(coro, platformTypes->escompatMapEntry);
-        EtsHandle<EtsEscompatMapEntry> entryHandle(coro, FromEtsObject(EtsObject::Create(klass.GetPtr())));
-
-        if (UNLIKELY(coro->HasPendingException())) {
-            if (coro->GetPandaVM()->GetOOMErrorObject() == nullptr ||
-                (coro->GetException()->ClassAddr<Class>() ==
-                 coro->GetPandaVM()->GetOOMErrorObject()->ClassAddr<Class>())) {
-                coro->ClearException();
-                return nullptr;
-            }
-            // We do not expect any other exception than OOM
-            UNREACHABLE();
-        }
-
-        return entryHandle.GetPtr();
-    }
-
-    static EtsEscompatMapEntry *FromCoreType(ObjectHeader *obj)
-    {
-        return reinterpret_cast<EtsEscompatMapEntry *>(obj);
-    }
-
-    static EtsEscompatMapEntry *FromEtsObject(EtsObject *etsObj)
-    {
-        return reinterpret_cast<EtsEscompatMapEntry *>(etsObj);
-    }
-
-    EtsObject *AsObject()
-    {
-        return this;
-    }
-
-    static constexpr size_t GetPrevOffset()
-    {
-        return MEMBER_OFFSET(EtsEscompatMapEntry, prev_);
-    }
-
-    static constexpr size_t GetNextOffset()
-    {
-        return MEMBER_OFFSET(EtsEscompatMapEntry, next_);
-    }
-
-    static constexpr size_t GetKeyOffset()
-    {
-        return MEMBER_OFFSET(EtsEscompatMapEntry, key_);
-    }
-
-    static constexpr size_t GetValOffset()
-    {
-        return MEMBER_OFFSET(EtsEscompatMapEntry, val_);
-    }
-
-    EtsEscompatMapEntry *GetPrev(EtsCoroutine *coro)
-    {
-        auto *obj = ObjectAccessor::GetObject(coro, this, GetPrevOffset());
-        return EtsEscompatMapEntry::FromCoreType(obj);
-    }
-
-    EtsEscompatMapEntry *GetNext(EtsCoroutine *coro)
-    {
-        auto *obj = ObjectAccessor::GetObject(coro, this, GetNextOffset());
-        return EtsEscompatMapEntry::FromCoreType(obj);
-    }
-
-    EtsObject *GetKey(EtsCoroutine *coro)
-    {
-        auto *obj = ObjectAccessor::GetObject(coro, this, GetKeyOffset());
-        return EtsEscompatMapEntry::FromCoreType(obj);
-    }
-
-    EtsObject *GetVal(EtsCoroutine *coro)
-    {
-        auto *obj = ObjectAccessor::GetObject(coro, this, GetValOffset());
-        return EtsEscompatMapEntry::FromCoreType(obj);
-    }
-
-    void SetVal(EtsCoroutine *coro, EtsObject *val)
-    {
-        ObjectAccessor::SetObject(coro, this, GetValOffset(), val->GetCoreType());
-    }
-
-    void SetKey(EtsCoroutine *coro, EtsObject *key)
-    {
-        ObjectAccessor::SetObject(coro, this, GetKeyOffset(), key->GetCoreType());
-    }
-
-    void SetPrev(EtsCoroutine *coro, EtsEscompatMapEntry *prev)
-    {
-        ObjectAccessor::SetObject(coro, this, GetPrevOffset(), prev->GetCoreType());
-    }
-
-    void SetNext(EtsCoroutine *coro, EtsEscompatMapEntry *next)
-    {
-        ObjectAccessor::SetObject(coro, this, GetNextOffset(), next->GetCoreType());
-    }
-
-private:
-    ObjectPointer<EtsEscompatMapEntry> prev_;
-    ObjectPointer<EtsEscompatMapEntry> next_;
-    ObjectPointer<EtsObject> key_;
-    ObjectPointer<EtsObject> val_;
-};
+namespace test {
+class EtsMapTest;
+}  // namespace test
 
 class EtsEscompatMap : public EtsObject {
+private:
+    struct PairOfInts {
+        EtsInt int1, int2;
+    };
+    static constexpr size_t MAP_IDX_FACTOR = sizeof(PairOfInts) / sizeof(EtsInt);
+
 public:
+    using MapIdx = EtsInt;
+    static constexpr MapIdx MAP_IDX_END = -1;
+
     EtsEscompatMap() = delete;
     ~EtsEscompatMap() = delete;
 
@@ -181,9 +47,9 @@ public:
         return this;
     }
 
-    static constexpr size_t GetHeadOffset()
+    static constexpr size_t GetDataOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatMap, head_);
+        return MEMBER_OFFSET(EtsEscompatMap, data_);
     }
 
     static constexpr size_t GetBucketsOffset()
@@ -191,53 +57,96 @@ public:
         return MEMBER_OFFSET(EtsEscompatMap, buckets_);
     }
 
-    static constexpr size_t GetSizeOffset()
+    static constexpr size_t GetCapOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatMap, cap_);
+    }
+
+    static constexpr size_t GetNumEntriesOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatMap, numEntries_);
+    }
+
+    static constexpr size_t GetSizeValOffset()
     {
         return MEMBER_OFFSET(EtsEscompatMap, sizeVal_);
     }
 
-    EtsEscompatMapEntry *GetHead(EtsCoroutine *coro)
+    static constexpr size_t GetInitialCapacityOffset()
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, GetHeadOffset());
-        return EtsEscompatMapEntry::FromCoreType(obj);
-    }
-
-    EtsEscompatArray *GetBuckets(EtsCoroutine *coro)
-    {
-        auto *obj = ObjectAccessor::GetObject(coro, this, GetBucketsOffset());
-        return reinterpret_cast<EtsEscompatArray *>(obj);
+        return MEMBER_OFFSET(EtsEscompatMap, initialCapacity_);
     }
 
     EtsInt GetSize()
     {
-        return ObjectAccessor::GetPrimitive<EtsInt>(this, GetSizeOffset());
+        return ObjectAccessor::GetPrimitive<EtsInt>(this, GetSizeValOffset());
     }
 
-    void SetSize(EtsInt size)
+    EtsInt GetInitialCapacity() const
     {
-        ObjectAccessor::SetPrimitive(this, GetSizeOffset(), size);
+        return ObjectAccessor::GetPrimitive<EtsInt>(this, GetInitialCapacityOffset());
     }
 
-    void SetHead(EtsCoroutine *coro, ObjectHeader *head)
+    MapIdx GetFirstIdx(EtsCoroutine *coro)
     {
-        ObjectAccessor::SetObject(coro, this, GetHeadOffset(), head);
+        return GetNextIdx(coro, (0 - 1));
     }
 
-    void SetBuckets(EtsCoroutine *coro, EtsEscompatArray *buckets)
+    MapIdx GetNextIdx(EtsCoroutine *coro, MapIdx curIdx)
     {
-        ASSERT(buckets != nullptr);
-        ObjectAccessor::SetObject(coro, this, GetBucketsOffset(), buckets->GetCoreType());
+        const EtsInt numEntries = GetNumEntries();
+        if (curIdx < numEntries) {
+            EtsIntArray *buckets = GetBuckets(coro);
+            while (++curIdx < numEntries) {
+                if (buckets->Get(MAP_IDX_FACTOR * curIdx + 1) != 0) {
+                    return curIdx;
+                }
+            }
+        }
+        return MAP_IDX_END;
     }
 
-    static EtsBoolean Has(EtsEscompatMap *map, EtsObject *key);
-    static EtsObject *Get(EtsEscompatMap *map, EtsObject *key);
-    static EtsBoolean Delete(EtsEscompatMap *map, EtsObject *key);
+    EtsObject *GetKey(EtsCoroutine *coro, EtsInt idx)
+    {
+        EtsObjectArray *data = GetData(coro);
+        return data->Get(MAP_IDX_FACTOR * idx + 0);
+    }
+
+    EtsObject *GetValue(EtsCoroutine *coro, EtsInt idx)
+    {
+        EtsObjectArray *data = GetData(coro);
+        return data->Get(MAP_IDX_FACTOR * idx + 1);
+    }
+
     static uint32_t GetHashCode(EtsObject *&key);
 
 private:
-    ObjectPointer<EtsEscompatMapEntry> head_;
-    ObjectPointer<EtsEscompatArray> buckets_;
-    FIELD_UNUSED EtsInt sizeVal_;
+    EtsObjectArray *GetData(EtsCoroutine *coro)
+    {
+        auto *obj = ObjectAccessor::GetObject(coro, this, GetDataOffset());
+        return reinterpret_cast<EtsObjectArray *>(obj);
+    }
+
+    EtsIntArray *GetBuckets(EtsCoroutine *coro)
+    {
+        auto *obj = ObjectAccessor::GetObject(coro, this, GetBucketsOffset());
+        return reinterpret_cast<EtsIntArray *>(obj);
+    }
+
+    EtsInt GetNumEntries()
+    {
+        return ObjectAccessor::GetPrimitive<EtsInt>(this, GetNumEntriesOffset());
+    }
+
+private:
+    ObjectPointer<EtsObjectArray> data_;
+    ObjectPointer<EtsIntArray> buckets_;
+    EtsInt cap_;
+    EtsInt numEntries_;
+    EtsInt sizeVal_;
+    EtsInt initialCapacity_;
+
+    friend class test::EtsMapTest;
 };
 
 }  // namespace ark::ets

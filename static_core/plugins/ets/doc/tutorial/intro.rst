@@ -18,7 +18,7 @@ Introduction
 |
 
 Welcome to the tutorial for |LANG|, a |TS|-based programming language
-designed specifically to build high-performance mobile applications!
+designed specifically to build high-performance mobile applications.
 
 |LANG| is optimized to provide better performance and efficiency, while
 maintaining the familiar syntax of |TS|.

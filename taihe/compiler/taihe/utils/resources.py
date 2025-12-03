@@ -384,8 +384,8 @@ class _LegacyPandaVm(PathResource):
 class PandaVm(CachedResource):
     CLI_NAME = "panda-vm"
     PATH_CACHE = "panda-vm"
-    VERSION: Final = "sdk-1.5.0-dev.43957"
-    URL: Final = "https://raw.gitcode.com/m0_52007851/panda_vm/blobs/64114d3d133f12695b582ca5f30426790ae5870a"
+    VERSION: Final = "sdk-1.5.0-dev.51158"
+    URL: Final = "https://gitcode.com/m0_52007851/panda_vm/releases/download/51158"
 
     # Computed attributes
     ani_header_dir: Path = field(init=False)
@@ -482,10 +482,10 @@ class PythonBuild(CachedResource):
     DARWIN_X86_64: Final = "darwin-x86_64"
 
     # Bundle tarball file names for each platform
-    LINUX_X86_64_PY_BUNDLE: Final = "python-linux-x86-GLIBC2.27-3.11.4_20250219.tar.gz"
-    WINDOWS_X86_64_PY_BUNDLE: Final = "python-mingw-x86-3.11.4_20250509.tar.gz"
-    DARWIN_ARM64_PY_BUNDLE: Final = "python-darwin-arm64-3.11.4_20250228.tar.gz"
-    DARWIN_X86_64_PY_BUNDLE: Final = "python-darwin-x86-3.11.4_20250228.tar.gz"
+    LINUX_X86_64_PY_BUNDLE: Final = "python-linux-x86-GLIBC2.27-3.11.4_20250807.tar.gz"
+    WINDOWS_X86_64_PY_BUNDLE: Final = "python-mingw-x86-3.11.4_20250617.tar.gz"
+    DARWIN_ARM64_PY_BUNDLE: Final = "python-darwin-arm64-3.11.4_20250804.tar.gz"
+    DARWIN_X86_64_PY_BUNDLE: Final = "python-darwin-x86-3.11.4_20250804.tar.gz"
 
     @override
     def fetch(self):

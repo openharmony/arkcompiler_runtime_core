@@ -14,7 +14,7 @@
 
 #! CHECKER      ark_aot inlines external constructor
 #! SKIP_IF      @architecture == "arm32"
-#! RUN_PAOC     options: ""
+#! RUN_PAOC     options: "--compiler-inline-external-methods-aot=true"
 #! EVENT        /Inline,_GLOBAL::bar,Test::.ctor,.*STATIC,SUCCESS/
 
 .record Test <external>

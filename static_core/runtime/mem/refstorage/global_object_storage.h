@@ -15,7 +15,7 @@
 #ifndef PANDA_GLOBAL_OBJECT_STORAGE_H
 #define PANDA_GLOBAL_OBJECT_STORAGE_H
 
-#include <libpandabase/os/mutex.h>
+#include <libarkbase/os/mutex.h>
 
 #include "runtime/include/runtime.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -27,8 +27,8 @@
 #include "runtime/include/class.h"
 #include "runtime/include/panda_vm.h"
 #include "reference.h"
-#include "utils/logger.h"
-#include "utils/dfx.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/dfx.h"
 
 namespace ark::mem::test {
 class ReferenceStorageTest;

@@ -62,7 +62,7 @@ function throwingExceptionUnderLock() {
     let errorCatched = false;
     try {
         spinlockGuard(spinlock, () => { throw new Error(); });
-    } catch (e: Error) {
+    } catch (e) {
         errorCatched = true;
         arktest.assertTrue(!spinlockIsHeld(spinlock));
     }

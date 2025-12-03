@@ -195,7 +195,7 @@ function testEncodeSyncMineAndMineUrlSafe():void{
 	}, 'Parameter error. The target encoding type option must be BASIC or BASIC_URL_SAFE.');
 }
 
-async function testEncodeDecodeBasicAsync(): Promise<int> {
+async function testEncodeDecodeBasicAsync(): Promise<void> {
     let helper = new util.Base64Helper();
     let input = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
     let encodedStr: string = await helper.encodeToString(input, util.Type.BASIC);

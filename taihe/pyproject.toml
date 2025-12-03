@@ -12,7 +12,7 @@
 # limitations under the License.
 
 [project]
-version = "0.42.0"
+version = "0.50.0"
 name = "taihe"
 description = "Language-neutral API tooling"
 requires-python = ">=3.10"
@@ -112,6 +112,7 @@ ignore = [
     # -> "would imply to update tests every time you update exception message"
     "SIM108",
     "F541", # "f-string without any placeholders"
+    "F841",
     "E731",
     "D100",
     "D101",

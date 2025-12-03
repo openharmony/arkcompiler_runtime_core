@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
-import {
-    TestClass,
-    testFuncReturnStr,
-    getThis,
-    getThisAsFunction,
-    getThisAsAsyncFunction
-} from 'js_code';
+let module = ESValue.load('js_code');
+let TestClass = module.getProperty('TestClass');
+let testFuncReturnStr = module.getProperty('testFuncReturnStr');
+let getThis = module.getProperty('getThis');
+let getThisAsFunction = module.getProperty('getThisAsFunction');
+let getThisAsAsyncFunction = module.getProperty('getThisAsAsyncFunction');
 
-const TEST_NUM_ARRAY: FixedArray<number> = [1, 2, 3, 4, 5]
+const TEST_NUM_ARRAY: FixedArray <number> = [1, 2, 3, 4, 5]
 const TEST_STRING: string = 'Test'
 const TEST_NUMBER: number = 100
 const TEST_NULL: null = null
@@ -30,55 +29,56 @@ const TEST_TUPLE: [string, number] = ['Test', 1]
 const TEST_MAP: Map<string,string> = new Map<string,string>()
 TEST_MAP.set('TEST', 'test')
 
-type TestTupleType = [string, number] 
+type TestTupleType = [string, number] ;
 
 function returnThis<T>(arg: T): T {
-    return getThis.call(arg) as T
+    return getThis.invokeMethod('call', ESValue.wrap(arg)).unwrap() as T;
 }
 
 function testReturnThisInClass(): boolean {
-    let testClass = new TestClass()
-    let testVal = testClass.getThis()
-    return testClass === testVal
+    let testClass = TestClass.instantiate();
+    let testVal = testClass.invokeMethod('getThis');
+    return ESValue.areStrictlyEqual(testClass, testVal);
 }
 
 function testReturnThisAsNumber(): boolean {
-    return getThis.call(TEST_NUMBER) == TEST_NUMBER
+    let tmp = getThis.invokeMethod('call', TEST_NUMBER);
+    return tmp.toNumber() == TEST_NUMBER;
 }
 
 function testReturnThisAsString(): boolean {
-    return getThis.call(TEST_STRING) == TEST_STRING
+    return getThis.invokeMethod('call',TEST_STRING).toString() == TEST_STRING;
 }
 
 function testReturnThisAsNull(): boolean {
-    return getThis.call(TEST_NULL) as NullishType == TEST_NULL
+    return getThis.invokeMethod('call',TEST_NULL).toNull() == TEST_NULL;
 }
 
 function testReturnThisAsMap(): boolean {
-    return getThis.call(TEST_MAP) == TEST_MAP
+   return getThis.invokeMethod('call',TEST_MAP) == TEST_MAP;
 }
 
 function testReturnThisAsTuple(): boolean {
-    return returnThis<TestTupleType>(TEST_TUPLE) == TEST_TUPLE
+    return returnThis<TestTupleType>(TEST_TUPLE) == TEST_TUPLE;
 }
 
 function testReturnThisAsArray(): boolean {
-    return returnThis<FixedArray<number>>(TEST_NUM_ARRAY) == TEST_NUM_ARRAY
+    return returnThis<FixedArray<number>>(TEST_NUM_ARRAY) == TEST_NUM_ARRAY;
 }
 
 function testReturnThisAsObj(): boolean {
-    return returnThis<Object>(TEST_OBJ) == TEST_OBJ
+    return returnThis<Object>(TEST_OBJ) == TEST_OBJ;
 }
 
 function testReturnThisAsObjClass(): boolean {
-    const testClass = new TestClass()
-    const testVal = getThis.call(testClass)
-    return testVal === testClass
+    const testClass = TestClass.instantiate();
+    const testVal = getThis.invokeMethod('call',testClass);
+    return ESValue.areStrictlyEqual(testVal, testClass);
 }
 
 function testReturnThisAsFunc(): boolean {
-    const testVal = getThisAsFunction.call(testFuncReturnStr)
-    return testVal() == TEST_STRING
+    const testVal = getThisAsFunction.invokeMethod('call',testFuncReturnStr);
+    return testVal.invoke().toString() == TEST_STRING;
 }
 
 // Note: Test is commented until #18468 is resolved
@@ -92,7 +92,7 @@ function testReturnThisAsAsyncFunc(): boolean {
         testVal = value;
         return null;
     });
-    p.catch<string | null>((err: NullishType): string | null => {
+    p.catch<string | null>((err: Any): string | null => {
         return null;
     });
     return testVal == TEST_STRING;

@@ -16,7 +16,7 @@
 #ifndef COMPILER_OPTIMIZER_ANALYSIS_TYPED_REF_SET_H
 #define COMPILER_OPTIMIZER_ANALYSIS_TYPED_REF_SET_H
 
-#include "libpandabase/utils/bit_vector.h"
+#include "libarkbase/utils/bit_vector.h"
 #include "optimizer/ir/inst.h"
 
 namespace ark::compiler {
@@ -410,8 +410,10 @@ public:
         return typeInfo_;
     }
 
-    template <typename Alloc>
-    friend std::ostream &operator<<(std::ostream &os, const TypedRefSet<Alloc> &typedRefSet);
+    const SmallSet<Allocator> &GetRefSet() const
+    {
+        return *this;
+    }
 
 private:
     ObjectTypeInfo typeInfo_ {ObjectTypeInfo::INVALID};
@@ -430,12 +432,6 @@ std::ostream &operator<<(std::ostream &os, const SmallSet<Allocator> &smallSet)
         os << ref;
     });
     return os << "}";
-}
-
-template <typename Allocator>
-std::ostream &operator<<(std::ostream &os, const TypedRefSet<Allocator> &typedRefSet)
-{
-    return os << static_cast<const SmallSet<Allocator> &>(typedRefSet);
 }
 
 using ArenaSmallSet = SmallSet<ArenaAllocator>;

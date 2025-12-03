@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -179,14 +179,23 @@ public:
 
     explicit CallConvDynInfo() = default;
 
-    explicit CallConvDynInfo(uint32_t numExpectedArgs, uintptr_t expandEntrypointTlsOffset)
-        : expandEntrypointTlsOffset_(expandEntrypointTlsOffset), numExpectedArgs_(numExpectedArgs), checkRequired_(true)
+    explicit CallConvDynInfo(uint32_t numExpectedArgs, uintptr_t expandEntrypointsTableTlsOffset,
+                             uintptr_t expandEntrypointOffset)
+        : expandEntrypointsTableTlsOffset_(expandEntrypointsTableTlsOffset),
+          expandEntrypointOffset_(expandEntrypointOffset),
+          numExpectedArgs_(numExpectedArgs),
+          checkRequired_(true)
     {
     }
 
-    auto GetExpandEntrypointTlsOffset()
+    auto GetExpandEntrypointsTableTlsOffset()
     {
-        return expandEntrypointTlsOffset_;
+        return expandEntrypointsTableTlsOffset_;
+    }
+
+    auto GetExpandEntrypointOffset()
+    {
+        return expandEntrypointOffset_;
     }
 
     auto GetNumExpectedArgs()
@@ -200,7 +209,8 @@ public:
     }
 
 private:
-    uintptr_t expandEntrypointTlsOffset_ {0};
+    uintptr_t expandEntrypointsTableTlsOffset_ {0};
+    uintptr_t expandEntrypointOffset_ {0};
     uint32_t numExpectedArgs_ {0};
     bool checkRequired_ {false};
 };
@@ -311,6 +321,7 @@ public:
 
     virtual void GenerateNativePrologue(const FrameInfo &frameInfo) = 0;
     virtual void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) = 0;
+    virtual void GenerateEpilogueHead(const FrameInfo &frameInfo, std::function<void()> postJob) = 0;
 
     // Code generation completion interfaces
     virtual void *GetCodeEntry() = 0;

@@ -21,13 +21,13 @@
 #include <string_view>
 
 #include "intrinsics_enum.h"
-#include "libpandabase/utils/arch.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandafile/code_data_accessor-inl.h"
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/method_data_accessor.h"
-#include "libpandafile/modifiers.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkfile/code_data_accessor-inl.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/method_data_accessor.h"
+#include "libarkfile/modifiers.h"
 #include "runtime/bridge/bridge.h"
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/class_helper.h"
@@ -175,6 +175,7 @@ public:
                             panda_file::File::EntityId codeId, uint32_t accessFlags, uint32_t numArgs,
                             const uint16_t *shorty);
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     explicit Method(const Method *method)
         // Atomic with acquire order reason: data race with access_flags_ with dependecies on reads after the load which
         // should become visible
@@ -199,6 +200,10 @@ public:
         compiledEntryPoint_.store(method->IsNative() ? method->GetCompiledEntryPoint()
                                                      : GetCompiledCodeToInterpreterBridge(method),
                                   std::memory_order_release);
+        // Atomic with release order reason: exclude data races with GetNumVRegs
+        numVregs_.store(method->numVregs_, std::memory_order_release);
+        // Atomic with release order reason: exclude data races with GetInstructions
+        instructions_.store(method->instructions_, std::memory_order_release);
         SetCompilationStatus(CompilationStage::NOT_COMPILED);
     }
 
@@ -219,7 +224,14 @@ public:
         if (!codeId_.IsValid()) {
             return 0;
         }
-        return panda_file::CodeDataAccessor::GetNumVregs(*(pandaFile_), codeId_);
+        // Atomic with acquire order reason: exclude data races in parallel execution
+        uint32_t numVregs = numVregs_.load(std::memory_order_acquire);
+        if (numVregs == NUM_VREGS_UNKNOWN) {
+            numVregs = panda_file::CodeDataAccessor::GetNumVregs(*(pandaFile_), codeId_);
+            // Atomic with release order reason: exclude data races in parallel execution
+            numVregs_.store(numVregs, std::memory_order_release);
+        }
+        return numVregs;
     }
 
     uint32_t GetCodeSize() const
@@ -236,7 +248,14 @@ public:
         if (!codeId_.IsValid()) {
             return nullptr;
         }
-        return panda_file::CodeDataAccessor::GetInstructions(*pandaFile_, codeId_);
+        // Atomic with acquire order reason: exclude data races in parallel execution
+        const uint8_t *instructions = instructions_.load(std::memory_order_acquire);
+        if (instructions == nullptr) {
+            instructions = panda_file::CodeDataAccessor::GetInstructions(*(pandaFile_), codeId_);
+            // Atomic with release order reason: exclude data races in parallel execution
+            instructions_.store(instructions, std::memory_order_release);
+        }
+        return instructions;
     }
 
     /*
@@ -791,6 +810,16 @@ public:
     {
         return MEMBER_OFFSET(Method, shorty_);
     }
+    // CC-OFFNXT(G.INC.10) false positive: static method
+    static constexpr uint32_t GetNumVregsOffset()
+    {
+        return MEMBER_OFFSET(Method, numVregs_);
+    }
+    // CC-OFFNXT(G.INC.10) false positive: static method
+    static constexpr uint32_t GetInstructionsOffset()
+    {
+        return MEMBER_OFFSET(Method, instructions_);
+    }
 
     template <typename Callback>
     void EnumerateTryBlocks(Callback callback) const;
@@ -903,6 +932,8 @@ public:
         }
     }
 
+    static constexpr uint16_t NUM_VREGS_UNKNOWN = UINT16_MAX;
+
 private:
     inline void FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls,
                                 PandaVector<uint32_t> &branches, PandaVector<uint32_t> &throws) const;
@@ -994,6 +1025,13 @@ private:
     int16_t saverTryCounter_ {0};
 
     std::atomic<IntrinsicIdType> intrinsicId_ {0U};
+
+    // The instructions_ and numVregs_ fields are used as caches for fast access to corresponding data.
+    // Declared as mutable because they employ lazy (on-demand) initialization,
+    // which requires modification even in const member functions.
+    // The atomic types ensure thread-safe access during concurrent operations.
+    mutable std::atomic<const uint8_t *> instructions_;
+    mutable std::atomic_uint32_t numVregs_;
 };
 
 static_assert(!std::is_polymorphic_v<Method>);

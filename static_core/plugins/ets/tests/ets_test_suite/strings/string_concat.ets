@@ -27,5 +27,5 @@ function main() {
     add(2 + 3 + "_" + 4 + 5, "5_45")
     add(`a${1}b${2 + 0.1}c`, "a1b2.1c")
 
-    ts.run()
+    return ts.run()
 }

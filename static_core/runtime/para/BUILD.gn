@@ -13,15 +13,15 @@
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 
-ohos_prebuilt_etc("RuntimeEnableDebugger.para") {
-  source = "$ark_root/runtime/para/RuntimeEnableDebugger.para"
+ohos_prebuilt_etc("Runtime.para") {
+  source = "$ark_root/runtime/para/Runtime.para"
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
   module_install_dir = "etc/param"
 }
 
-ohos_prebuilt_etc("RuntimeEnableDebugger.para.dac") {
-  source = "$ark_root/runtime/para/RuntimeEnableDebugger.para.dac"
+ohos_prebuilt_etc("Runtime.para.dac") {
+  source = "$ark_root/runtime/para/Runtime.para.dac"
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
   module_install_dir = "etc/param"

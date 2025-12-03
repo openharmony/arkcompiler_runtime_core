@@ -109,7 +109,6 @@ export class AsyncLock {
                 this.held.add(asyncLockInfo);
                 this.holderCID = callerCID;
                 this.mode = mode;
-                this.event = ConcurrencyHelpers.eventCreate();
                 return true;
             }
             if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED) {
@@ -124,16 +123,18 @@ export class AsyncLock {
         }
     }
 
-    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<T> {
+    private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<Awaited<T>> {
         return Promise.resolve<T>(callback()).finally(() => {
-            if (options.signal != null && options.signal!.aborted == true ) {
-            this.fireCondEvent();
-            throw new Error('Aborted');
-        }
-        this.unlock(asyncLockInfo); });
+             if (options.signal != null && options.signal!.aborted == true) {
+                this.fireCondEvent();
+                throw new Error('Aborted');
+            }
+            this.unlock(asyncLockInfo);
+        });
+
     }
 
-    private static launchPromise<T>(f: Function, ...args: FixedArray<NullishType>): Promise<T> {
+    private static launchPromise<T>(f: Function, ...args: FixedArray<Any>): Promise<T> {
         let resolver: (((v: T | PromiseLike<T>) => void) | undefined) = undefined;
         let rejecter: (((error: Error) => void) | undefined) = undefined;
         let p = new Promise<T>((res, rej) => {
@@ -144,15 +145,16 @@ export class AsyncLock {
             try {
                 let v = f.unsafeCall(...args) as T
                 resolver!(v)
-            } catch (e: Error) {
-                rejecter!(e)
+            } catch (e) {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                rejecter!(e as Error)
             }
         }
         launchSameWorker(cb)
         return p;
     }
 
-    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>, asyncLockInfo : AsyncLockInfo) : Promise<T> {
+    private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>, asyncLockInfo : AsyncLockInfo) : Promise<Awaited<T>> {
 
         this.lock<U>(callerCID, mode,  asyncLockInfo, options);
         return Promise.resolve<T>(callback()).finally(() => {if (options.signal != null && options.signal!.aborted == true ) {
@@ -170,18 +172,20 @@ export class AsyncLock {
 
         if (timeout) {
            setTimeout(() => {
-                 this.fireCondEvent();
-               isTimeoutExec = true;
+              this.queryAllDeadlocks();
+              this.fireCondEvent();
+              isTimeoutExec = true;
            }, timeout);
         }
 
         while (isDone == false) {
-            if (options.signal != null && options.signal!.aborted == true) {
+
+             if (options.signal != null && options.signal!.aborted == true) {
                  this.fireCondEvent();
                  throw new Error('Aborted');
             }
             if(isTimeoutExec == true) {
-                throw new Error('AsyncLock timeout');
+                throw new Error (this.deadLockPrinter.toString('lockAsync timed out'));
             }
 
             if(options.isAvailable) {
@@ -195,7 +199,6 @@ export class AsyncLock {
                 this.counter = 1;
                 this.pending.delete(asyncLockInfo);
                 this.held.add(asyncLockInfo);
-                this.event = ConcurrencyHelpers.eventCreate();
                 isDone = true;
             } else if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED) {
                 this.counter++;
@@ -204,17 +207,18 @@ export class AsyncLock {
                 isDone = true;
             }
 
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-
             if (isDone == false) {
-                ConcurrencyHelpers.eventWait(this.event)
+                ConcurrencyHelpers.condVarWait(this.condVar, this.mutex);
             }
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
         }
     }
 
     private fireCondEvent()
     {
-        ConcurrencyHelpers.eventFire(this.event);
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        ConcurrencyHelpers.condVarNotifyAll(this.condVar, this.mutex);
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
     private unlock(asyncLockInfo: AsyncLockInfo): void {
@@ -224,7 +228,7 @@ export class AsyncLock {
         if (this.counter == 0) {
             this.holderCID = 0;
             this.mode = AsyncLockMode.UNLOCKED;
-            this.fireCondEvent();
+            ConcurrencyHelpers.condVarNotifyAll(this.condVar, this.mutex);
         }
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
@@ -238,7 +242,7 @@ export class AsyncLock {
     public static query(name: string): AsyncLockState {
         try {
             return asyncLockManager.query(name);
-        } catch (e: Error) {
+        } catch (e) {
             throw e;
         }
     }
@@ -264,6 +268,25 @@ export class AsyncLock {
         return state;
     }
 
+    private queryDeadlock(deadLockPrinter : DeadLockInfo) {
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        this.held.forEach((v : AsyncLockInfo) => {
+            this.pending.forEach((p : AsyncLockInfo) => {
+                if (v.contextId != p.contextId) {
+                    deadLockPrinter.add(v, p);
+                }
+            })
+        });
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
+    }
+
+    private  queryAllDeadlocks() {
+        let arr = asyncLockManager.queryAllLocks() ;
+        for (let i = 0; i < arr.length; ++i) {
+            arr[i].queryDeadlock(this.deadLockPrinter);
+        }
+    }
+
     private static generateAnonymousLockName() {
         return "__AnonymousLockName__" + Number.toString(AsyncLock.LastAnonymousId++);
     }
@@ -276,7 +299,48 @@ export class AsyncLock {
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private held: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
     private pending: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
-    private event: Object = ConcurrencyHelpers.eventCreate();
+    private condVar: Object = ConcurrencyHelpers.condVarCreate();
+    private deadLockPrinter: DeadLockInfo = new DeadLockInfo();
+}
+
+
+type StoreType  = [string, int, int];
+
+class DeadLockInfo {
+    public  constructor() {}
+
+    public toString(head : string ) : string {
+        return head + this.toStringHelper();
+    }
+
+    public add(h: AsyncLockInfo, p : AsyncLockInfo) {
+        this.arr.push([h.name, h.contextId, p.contextId]);
+    }
+
+    private toStringHelper()
+    {
+        let sb =  new StringBuilder();
+
+        for (let i  = 0; i < this.arr.length; ++i) {
+            sb.append(this.helper(this.arr[i]).toString());
+        }
+        return sb;
+    }
+    private helper(t : StoreType)
+    {
+        let sb  = new StringBuilder();
+
+        sb.append('\n');
+        sb.append('!!! DEADLOCK WARNING !!!');
+        sb.append(t[1]);
+        sb.append(' <--  {');
+        sb.append(t[0]);
+        sb.append('} -- WAITED BY TID: ');
+        sb.append(t[2]);
+        return sb;
+    }
+
+    private arr: Array<StoreType>  = new Array<StoreType>;
 }
 
 final class AsyncLockHelper extends AsyncLock {

@@ -15,7 +15,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_WAITERS_LIST_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_WAITERS_LIST_H
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/coroutines/coroutine_events.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"

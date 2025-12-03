@@ -297,11 +297,6 @@ public:
         return TempArgs<T, OPT_SZ>(sz);
     }
 
-    InteropCallStack &CallStack()
-    {
-        return interopStk_;
-    }
-
     JSRefConvertCache *GetRefConvertCache()
     {
         return &refconvertCache_;
@@ -360,11 +355,6 @@ public:
     Class *GetErrorClass() const
     {
         return sharedEtsVmState_->errorClass;
-    }
-
-    Class *GetExceptionClass() const
-    {
-        return sharedEtsVmState_->exceptionClass;
     }
 
     Class *GetTypeClass() const
@@ -514,6 +504,9 @@ public:
         return sharedEtsVmState_->stsVMInterface.get();
     }
 
+    // hybrid call stack support
+    PANDA_PUBLIC_API static InteropCallStack &GetOrCreateCallStack();
+
 protected:
     static InteropCtx *Current(CoroutineWorker *worker)
     {
@@ -560,7 +553,6 @@ private:
         Class *nullValueClass {};
         Class *promiseClass {};
         Class *errorClass {};
-        Class *exceptionClass {};
         Class *typeClass {};
         Class *arrayClass {};
         Class *boxIntClass {};
@@ -612,9 +604,6 @@ private:
     EtsHandle<EtsObject> pendingNewInstance_ {};
     ets_proxy::EtsMethodWrappersCache etsMethodWrappersCache_ {};
     ets_proxy::EtsClassWrappersCache etsClassWrappersCache_ {};
-
-    // hybrid call stack support
-    InteropCallStack interopStk_ {};
 
     StackInfoManager stackInfoManager_;
 

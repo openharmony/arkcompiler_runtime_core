@@ -27,8 +27,8 @@
 
 #include "libabckit/src/wrappers/graph_wrapper/graph_wrapper.h"
 
-#include "libpandabase/mem/arena_allocator.h"
-#include "libpandafile/modifiers.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkfile/modifiers.h"
 #include "src/logger.h"
 #include "static_core/assembler/assembly-program.h"
 #include "static_core/assembler/mangling.h"

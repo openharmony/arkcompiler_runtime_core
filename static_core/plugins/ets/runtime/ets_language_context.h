@@ -16,10 +16,10 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_LANGUAGE_CONTEXT_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_LANGUAGE_CONTEXT_H_
 
-#include <libpandafile/include/source_lang_enum.h>
+#include <libarkfile/include/source_lang_enum.h>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/utf.h"
 #include "runtime/class_initializer.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker.h"
@@ -344,6 +344,11 @@ public:
     std::unique_ptr<tooling::PtLangExt> CreatePtLangExt() const override
     {
         return std::make_unique<PtEtsExtension>();
+    }
+
+    bool HasValueEqualitySemantic() const override
+    {
+        return true;
     }
 };
 

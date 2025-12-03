@@ -16,6 +16,7 @@ import {xml} from "@ohos.xml"
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part2");
+    suite.addTest("Testing XML PullParser with attributeValueCallbackFunction as function throw error.", testXmlPullParserParseOptions0010)
     suite.addTest("Testing XML PullParser with tokenValueCallbackFunction as undefined.", testXmlPullParserParseOptions0009)
     suite.addTest("Testing XML PullParser with tokenValueCallbackFunction as function.", testXmlPullParserParseOptions0008)
     suite.addTest("Testing XML PullParser with tagValueCallbackFunction as function.", testXmlPullParserParseOptions0006)
@@ -71,7 +72,7 @@ function testWithTagValueCb() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tagValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: false, tagValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -123,7 +124,7 @@ function testWithTagValueCbWithIgnoreNS() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: false, ignoreNameSpace: true, tagValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -172,7 +173,7 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tagValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -224,7 +225,7 @@ function testWithAttributeValueCb() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: false, ignoreNameSpace: true, attributeValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -254,7 +255,7 @@ function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, attributeValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -476,5 +477,35 @@ function testXmlPullParserParseOptions0009() {
         console.error(`${TAG} failed, error: ${err}`);
         arktest.assertTrue(false)
     }
+}
+
+function testXmlPullParserParseOptions0010() {
+    const str : ReadonlyArray<string> = Array.of<string>(
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "<note importance='hi&amp;gh' logged='&lt;true'>",
+        " <title>Hello&gt;World&apos;</title>",
+        " <todo>Wo&quot;rk</todo>",
+        "</note>");
+    
+    let textStr = ''
+    let tokenCb = (eventType: xml.EventType, value: xml.ParseInfo) => { 
+        if (eventType === xml.EventType.TEXT) {
+            textStr += value.getText()
+        }
+        return true
+    }
+
+    let attrCb = (name: string, value: string): boolean => {
+        throw new Error("123")
+        return true 
+    }
+
+    let strXml = str.join("")
+    let data = rawStringToBuffer(strXml)
+    let parser = new xml.XmlPullParser(data, "utf-8")
+    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true,  "tokenValueCallbackFunction":tokenCb, "attributeValueCallbackFunction": attrCb}
+    arktest.expectError(() => {
+		parser.parseXml(options)
+	}, '123');
 }
 

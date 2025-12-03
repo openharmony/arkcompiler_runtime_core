@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_COROUTINES_THREADED_COROUTINE_MANAGER_H
 #define PANDA_RUNTIME_COROUTINES_THREADED_COROUTINE_MANAGER_H
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/priority_queue.h"
@@ -43,7 +43,7 @@ public:
     ~ThreadedCoroutineManager() override = default;
 
     /* CoroutineManager interfaces, see CoroutineManager class for the details */
-    void Initialize(Runtime *runtime, PandaVM *vm) override;
+    void InitializeScheduler(Runtime *runtime, PandaVM *vm) override;
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
@@ -54,7 +54,7 @@ public:
                                    bool abortFlag) override;
     LaunchResult LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
                               const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                              bool abortFlag) override;
+                              bool launchImmediately, bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -82,6 +82,8 @@ public:
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
                               unsigned int xorMask) const override;
+    bool EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const override;
+
     CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) override;
     void DeleteCoroutineContext(CoroutineContext *ctx) override;
 

@@ -18,8 +18,8 @@
 #include <algorithm>
 
 #include "include/class_linker_extension.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/utils/bit_utils.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/class_linker.h"
 
@@ -176,26 +176,6 @@ bool ClassHelper::IsUnionOrArrayUnionDescriptor(const uint8_t *descriptor)
         return IsUnionDescriptor(&descriptor[GetDimensionality(descriptor)]);
     }
     return false;
-}
-
-/* static */
-Class *ClassHelper::GetUnionLUBClass(const uint8_t *descriptor, ClassLinker *classLinker,
-                                     ClassLinkerContext *classLinkerCtx, ClassLinkerExtension *ext,
-                                     ClassLinkerErrorHandler *handler)
-{
-    if (!ClassHelper::IsUnionOrArrayUnionDescriptor(descriptor)) {
-        return nullptr;
-    }
-    if (ClassHelper::IsUnionDescriptor(descriptor)) {
-        const auto *handledDescr = ext->ComputeLUB(classLinkerCtx, descriptor);
-        return classLinker->GetClass(handledDescr, true, classLinkerCtx, handler);
-    }
-    auto dim = ClassHelper::GetDimensionality(descriptor);
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    const auto *handledDescrComponent = ext->ComputeLUB(classLinkerCtx, &(descriptor[dim]));
-    PandaString dimCopy(utf::Mutf8AsCString(descriptor), dim);
-    auto descrCopy = dimCopy + utf::Mutf8AsCString(handledDescrComponent);
-    return classLinker->GetClass(utf::CStringAsMutf8(descrCopy.c_str()), true, classLinkerCtx, handler);
 }
 
 static size_t GetUnionTypeComponentsNumber(const uint8_t *descriptor)

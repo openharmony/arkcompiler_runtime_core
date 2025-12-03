@@ -68,9 +68,9 @@ common::BoxedValue StaticTypeConverter::WrapBoxed(common::BaseType value)
                 for (uint32_t i = 0; i < len; i++) {
                     etsIntArray->Set(i, static_cast<int32_t>(arg.data[i]));
                 }
-                ASSERT(ptypes->escompatBigint != nullptr);
+                ASSERT(ptypes->coreBigint != nullptr);
                 VMHandle<EtsIntArray> arrHandle(coro, etsIntArray->GetCoreType());
-                auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(ptypes->escompatBigint));
+                auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(ptypes->coreBigint));
                 bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(arrHandle.GetPtr()));
                 bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), arg.data.empty() ? 0 : sign == 0 ? 1 : -1);
                 etsObject = reinterpret_cast<EtsObject *>(bigInt);
@@ -113,7 +113,7 @@ common::BaseType StaticTypeConverter::UnwrapBoxed(common::BoxedValue value)
         return EtsBoxPrimitive<EtsFloat>::Unbox(etsObj);
     } else if (cls == ptypes->coreChar) {
         return EtsBoxPrimitive<EtsChar>::Unbox(etsObj);
-    } else if (cls == ptypes->escompatBigint) {
+    } else if (cls == ptypes->coreBigint) {
         common::BaseBigInt baseBigInt;
         auto bigInt = EtsBigInt::FromEtsObject(etsObj);
         auto etsValue = bigInt->GetBytes();

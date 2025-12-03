@@ -461,7 +461,11 @@ AbckitInst *IcreateLoadObjectStatic(AbckitGraph *graph, AbckitInst *inputObj, Ab
                                     AbckitTypeId returnTypeId);
 AbckitInst *IcreateStoreObjectStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId, AbckitInst *value,
                                      AbckitTypeId typeId);
+AbckitInst *IcreateLoadObjectStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreClassField *field);
 bool IcheckIsCallStatic(AbckitInst *inst);
+AbckitInst *IcreateStobjObjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
+                                  AbckitString *newKeyString);
+AbckitInst *IcreateLdobjObjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString);
 }  // namespace libabckit
 
 #endif

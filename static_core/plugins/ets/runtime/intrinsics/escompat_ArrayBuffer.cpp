@@ -15,12 +15,15 @@
 
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "plugins/ets/runtime/types/ets_arraybuffer.h"
-#include "plugins/ets/runtime/types/ets_string.h"
-#include "plugins/ets/runtime/ets_handle_scope.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_handle.h"
-#include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/ets_handle_scope.h"
+#include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/intrinsics/helpers/array_buffer_helper.h"
+#include "plugins/ets/runtime/types/ets_arraybuffer.h"
+#include "plugins/ets/runtime/types/ets_finalizable_weak_ref.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 using namespace std::string_view_literals;
 constexpr std::array UTF8_ENCODINGS = {"utf8"sv, "utf-8"sv, "ascii"sv};
@@ -36,13 +39,13 @@ namespace ark::ets::intrinsics {
 static EtsHandle<EtsEscompatArrayBuffer> CreateArrayBuffer(EtsCoroutine *coro, EtsInt byteLength,
                                                            const uint8_t *data = nullptr)
 {
-    void *buffer = nullptr;
-    EtsHandle<EtsEscompatArrayBuffer> newBuffer(coro, EtsEscompatArrayBuffer::Create(coro, byteLength, &buffer));
+    EtsHandle<EtsEscompatArrayBuffer> newBuffer(coro, EtsEscompatArrayBuffer::Create(coro, byteLength));
     if (UNLIKELY(newBuffer.GetPtr() == nullptr)) {
         return newBuffer;
     }
-    if (data != nullptr && byteLength > 0) {
-        std::copy_n(data, byteLength, reinterpret_cast<uint8_t *>(buffer));
+    auto *buffer = newBuffer->GetData<uint8_t *>();
+    if (LIKELY(data != nullptr && buffer != nullptr && byteLength > 0)) {
+        std::copy_n(data, byteLength, buffer);
     }
     return newBuffer;
 }
@@ -252,6 +255,29 @@ extern "C" EtsString *EtsArrayBufferToString(EtsEscompatArrayBuffer *buffer, Ets
         return nullptr;
     }
     return EtsString::CreateFromUtf8(output.data(), output.size());
+}
+
+extern "C" EtsObject *EtsArrayBufferRegisterWeakRef(EtsEscompatArrayBuffer *buffer, EtsLong finalizer,
+                                                    EtsLong finalizerData)
+{
+    using FinalizerCallback = void (*)(void *);
+
+    auto *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<EtsObject> bufferHandle(coro, buffer);
+    return coro->GetPandaVM()->RegisterFinalizerForObject(
+        coro, bufferHandle, reinterpret_cast<FinalizerCallback>(finalizer), reinterpret_cast<void *>(finalizerData));
+}
+
+extern "C" EtsLong EtsArrayBufferUnregisterWeakRef(EtsObject *weakRef)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *finalizableWeakRef = EtsFinalizableWeakRef::FromEtsObject(weakRef);
+    if (LIKELY(coro->GetPandaVM()->UnregisterFinalizerForObject(coro, finalizableWeakRef))) {
+        auto finalizer = finalizableWeakRef->ReleaseFinalizer();
+        return reinterpret_cast<EtsLong>(finalizer.GetFinalizerArg());
+    }
+    return 0U;
 }
 
 }  // namespace ark::ets::intrinsics

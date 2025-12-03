@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef PANDA_VERIFIER_UTIL_TAGGED_INDEX_HPP_
 #define PANDA_VERIFIER_UTIL_TAGGED_INDEX_HPP_
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/bit_utils.h"
 
 #include "verification/util/index.h"
 #include "verification/util/hash.h"

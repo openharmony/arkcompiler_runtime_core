@@ -16,15 +16,23 @@
 #define PLUGINS_ETS_RUNTIME_NAMESPACE_MANAGER_IMPL_H
 
 #include <map>
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include <string>
 #include <cstddef>
-#include <libpandabase/macros.h>
+#include <libarkbase/macros.h>
 #include <functional>
-#if defined(PANDA_TARGET_OHOS) && !defined(PANDA_CMAKE_SDK)
+
+#if defined(PANDA_TARGET_OHOS)
 #include <dlfcn.h>
+#if defined(PANDA_CMAKE_SDK)
+// NOTE(ivagin): cmake uses toolchain/sysroot from ohos sdk, and ohos sdk doesn't have below functions
+// This should be fixed when panda sdk will use gn instead of cmake
+extern "C" __attribute__((weak)) int dlns_get(const char *, Dl_namespace *);
+extern "C" __attribute__((weak)) void *dlopen_ns(Dl_namespace *, const char *, int);
 #endif
-#include "os/library_loader.h"
+#endif
+
+#include "libarkbase/os/library_loader.h"
 #include "plugins/ets/runtime/ets_native_library.h"
 using CreateNamespaceCallback = std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)>;
 using ExtensionApiCheckCallback = std::function<bool(const std::string &className, const std::string &fileName)>;

@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "plugins/ets/runtime/ani/ani.h"
-#include "libpandabase/os/file.h"
+#include "libarkbase/os/file.h"
 
 static ani_fixedarray_byte LoadFile(ani_env *env, [[maybe_unused]] ani_class cls, ani_string path)
 {

@@ -374,11 +374,14 @@ private:
     static constexpr Opcode GetInstructionWithShiftedOperand(Opcode opcode);
     static constexpr Opcode GetInstructionWithInvertedOperand(Opcode opcode);
     static ShiftType GetShiftTypeByOpcode(Opcode opcode);
-    static Inst *GetCheckInstAndGetConstInput(Inst *inst);
+    static ConstantInst *GetCheckInstAndGetConstInput(Inst *inst);
     static ShiftOpcode ConvertOpcode(Opcode newOpcode);
 
     static void LowerMemInstScale(Inst *inst);
     static void LowerShift(Inst *inst);
+    static bool TryLowerShrAsBitfieldExtraction(Inst *inst, uint64_t shrValue);
+    static bool TryLowerShrAsBitfieldExtractionCase1(Inst *inst, Inst *input, uint64_t shlValue, uint64_t shrValue);
+    static bool TryLowerShrAsBitfieldExtractionCase2(Inst *inst, Inst *input, uint64_t mask, uint64_t shrValue);
     static bool ConstantFitsCompareImm(Inst *cst, uint32_t size, ConditionCode cc);
     static Inst *LowerAddSub(Inst *inst);
     template <Opcode OPCODE>
@@ -395,6 +398,7 @@ private:
     template <Opcode OPCODE>
     static void LowerUnaryOperationWithShiftedOperand(Inst *inst);
     static Inst *LowerLogic(Inst *inst);
+    static Inst *LowerAndAsBitfieldExtraction(Inst *inst);
     template <typename LowLevelType>
     static void LowerConstArrayIndex(Inst *inst, Opcode lowLevelOpcode);
     static void LowerStateInst(SaveStateInst *saveState);

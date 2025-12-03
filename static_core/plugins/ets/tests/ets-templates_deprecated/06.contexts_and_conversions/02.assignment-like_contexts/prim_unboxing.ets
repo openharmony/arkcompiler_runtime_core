@@ -26,7 +26,7 @@ let dest:   {{conv.dest}};
 
 function main(): void {
   dest = origin;
-  artktest.assertEQ(dest, origin.unboxed());
+  artktest.assertEQ(dest, origin);
 }
 
 {% endfor %}

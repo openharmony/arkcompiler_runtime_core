@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "ets_class_linker_extension.h"
 #include "plugins/ets/assembler/extension/ets_meta.h"
-#include "libpandabase/os/stacktrace.h"
+#include "libarkbase/os/stacktrace.h"
 #include "assembly-program.h"
 #include "assembler/assembly-parser.h"
 #include "plugins/ets/runtime/types/ets_object.h"

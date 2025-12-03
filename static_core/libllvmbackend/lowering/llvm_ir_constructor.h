@@ -39,9 +39,6 @@ private:
     bool EmitStringBuilderBool(Inst *inst);
     bool EmitStringBuilderChar(Inst *inst);
     bool EmitStringBuilderString(Inst *inst);
-    bool EmitStringConcat2(Inst *inst);
-    bool EmitStringConcat3(Inst *inst);
-    bool EmitStringConcat4(Inst *inst);
     bool EmitStringCompareTo(Inst *inst);
     bool EmitIsInf(Inst *inst);
     bool EmitMemmoveUnchecked(Inst *inst);
@@ -390,6 +387,7 @@ protected:
     static void VisitLoadRuntimeClass(GraphVisitor *v, Inst *inst);
     static void VisitLoadUniqueObject(GraphVisitor *v, Inst *inst);
     static void VisitLoadImmediate(GraphVisitor *v, Inst *inst);
+    static void VisitStringFlatCheck(GraphVisitor *v, Inst *inst);
 
     void VisitDefault(Inst *inst) override;
 

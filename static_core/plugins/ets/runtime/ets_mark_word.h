@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/mark_word.h"
 #include "plugins/ets/runtime/ets_object_state_info.h"
 

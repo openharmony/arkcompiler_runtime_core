@@ -24,7 +24,7 @@ function foo(p: {{c.to_type}}): {{c.to_type}} { return p }
 function main(): int {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (foo(s{{loop.index}}).unboxed() != {{t.val}}) {
+    if (foo(s{{loop.index}}) != {{t.val}}) {
         return 1
     }
 {%- endfor %}

@@ -14,7 +14,7 @@
  */
 
 import {LinkedList} from "@ohos.util.LinkedList";
-import {BusinessError} from "@ohos.base";
+import { BusinessError } from "@ohos.base";
 
 const OutOfBoundsErrorCodeId: int = 10200001;
 
@@ -112,10 +112,13 @@ function testInsertAddFirstGetIndexOfRemoveByIndexHas() {
 function testInsertIndexGreaterThanLength() {
     let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: 10000") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: 10000" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {linkedList.insert(TestData.testNumber1w, TestData.testNumber6)}, exceptionCheck);
 }
@@ -123,10 +126,13 @@ function testInsertIndexGreaterThanLength() {
 function testInsertIndexLessThanZero() {
     let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: -6") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 21. Received value is: -6" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => {linkedList.insert(-TestData.testNumber6, TestData.testNumber1)}, exceptionCheck);
 }
@@ -177,7 +183,14 @@ function testGetWithinRange() {
 function testGetOutsideRange() {
     let linkedList = new LinkedList<double>();
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
-    arktest.assertEQ(linkedList.get(TestData.testNumber1w), undefined, "Element at index 10000 should be undefined");
+    try {
+        let result = linkedList.get(TestData.testNumber1w);
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.code, 10200001);
+    }
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {

@@ -18,9 +18,9 @@
 #include <atomic>
 
 #include "assembler/assembly-parser.h"
-#include "libpandafile/file.h"
-#include "libpandabase/trace/trace.h"
-#include "generated/logger_options.h"
+#include "libarkfile/file.h"
+#include "libarkbase/trace/trace.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/runtime.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"

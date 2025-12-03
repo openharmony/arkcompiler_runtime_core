@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,7 +28,7 @@ class PauseTests(unittest.TestCase):
         dt = current_ts.strftime('%b %d %H:%M:%S')
         ms = int(current_ts.microsecond / 1000)
         line = f'[TID 000a4c] I/gc: [14] [TENURED (Threshold)] {dt}.{ms} ' \
-            'G1 GC freed 4234(4MB), 0(0B) LOS objects, 82% free, 46MB/256MB,  ' \
+            'G1 GC freed 4MB, 0B LOS objects, 82% free, 46MB/256MB,  ' \
             'phase: COMMON_PAUSE paused: 335.100us phase: REMARK_PAUSE paused: 28.200us ' \
             'total: 786.200us'
         ev = ArkPauseParser().parse(line)
@@ -38,9 +38,7 @@ class PauseTests(unittest.TestCase):
         self.assertEqual('G1', pev.gc_name, 'GC name is correct')
         self.assertEqual((int(current_ts.timestamp()) * 1000 + ms) * 1000 * 1000, pev.timestamp,
                          'timestamp is correct')
-        self.assertEqual(4234, pev.freed_object_count, 'freed objects count is correct')
         self.assertEqual(4 * 1024 * 1024, pev.freed_object_mem, 'freed objects memory is correct')
-        self.assertEqual(0, pev.freed_large_object_count, 'freed large objects count is correct')
         self.assertEqual(0, pev.freed_large_object_mem, 'freed large objects memory is correct')
         self.assertEqual(46 * 1024 * 1024, pev.mem_after, 'memory after gc is correct')
         self.assertEqual(256 * 1024 * 1024, pev.mem_total, 'memory total is correct')

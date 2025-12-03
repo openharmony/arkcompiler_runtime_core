@@ -37,6 +37,24 @@ public:
         va_end(args);
     }
 
+    void TestFuncVCorrectSignature(ani_class cls, ani_boolean *value, ...)
+    {
+        va_list args {};
+        va_start(args, value);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_V(cls, "method", "C{std.core.String}:z", value, args),
+                  ANI_OK);
+        va_end(args);
+    }
+
+    void TestFuncVWrongSignature(ani_class cls, ani_boolean *value, ...)
+    {
+        va_list args {};
+        va_start(args, value);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_V(cls, "method", "C{std/core/String}:z", value, args),
+                  ANI_INVALID_DESCRIPTOR);
+        va_end(args);
+    }
+
     void TestCombineScene(const char *className, const char *methodName, ani_boolean initValue,
                           ani_boolean expectedValue)
     {
@@ -228,10 +246,8 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_A
 
 TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_boolean_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.na.A", &cls), ANI_OK);
 
     ani_boolean value = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "funcA", "zz:z", &value, ANI_TRUE, ANI_FALSE), ANI_OK);
@@ -251,12 +267,8 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_c
 
 TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_2)
 {
-    ani_namespace nb {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_boolean_test.nb", &nb), ANI_OK);
-    ani_namespace nc {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(nb, "nc", &nc), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(nc, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.nb.nc.A", &cls), ANI_OK);
 
     ani_boolean value = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "funcA", "zz:z", &value, ANI_TRUE, ANI_FALSE), ANI_OK);
@@ -276,10 +288,8 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_c
 
 TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_3)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_boolean_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.na.A", &cls), ANI_OK);
 
     ani_boolean value = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "funcA", "zz:z", &value, ANI_TRUE, ANI_FALSE), ANI_OK);
@@ -305,10 +315,8 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_c
 
 TEST_F(ClassCallStaticMethodByNameBooleanTest, call_static_method_by_name_bool_combine_scenes_4)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_boolean_test.nd", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "B", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.nd.B", &cls), ANI_OK);
     ani_boolean value = ANI_FALSE;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean(cls, "funcA", "zz:z", &value, ANI_TRUE, ANI_FALSE), ANI_OK);
     ASSERT_EQ(value, ANI_FALSE);
@@ -478,6 +486,36 @@ TEST_F(ClassCallStaticMethodByNameBooleanTest, check_initialization_boolean_a)
 
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "publicMethod", "zz:z", &value, args), ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_boolean_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameBooleanTest, check_wrong_signature)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_boolean_test.CheckWrongSignature", &cls), ANI_OK);
+
+    std::string input = "hello";
+
+    ani_string str;
+    ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
+
+    ani_boolean value {};
+    ASSERT_EQ(
+        env_->c_api->Class_CallStaticMethodByName_Boolean(env_, cls, "method", "C{std.core.String}:z", &value, str),
+        ANI_OK);
+
+    ASSERT_EQ(
+        env_->c_api->Class_CallStaticMethodByName_Boolean(env_, cls, "method", "C{std/core/String}:z", &value, str),
+        ANI_INVALID_DESCRIPTOR);
+
+    ani_value arg;
+    arg.r = str;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "method", "C{std.core.String}:z", &value, &arg),
+              ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Boolean_A(cls, "method", "C{std/core/String}:z", &value, &arg),
+              ANI_INVALID_DESCRIPTOR);
+
+    TestFuncVCorrectSignature(cls, &value, str);
+    TestFuncVWrongSignature(cls, &value, str);
 }
 
 }  // namespace ark::ets::ani::testing

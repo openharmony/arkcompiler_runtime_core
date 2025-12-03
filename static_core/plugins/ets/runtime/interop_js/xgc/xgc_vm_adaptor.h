@@ -20,7 +20,7 @@
 #include "heap/heap_visitor.h"
 #endif
 #include "hybrid/ecma_vm_interface.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include <node_api.h>
 
 namespace ark::ets::interop::js {

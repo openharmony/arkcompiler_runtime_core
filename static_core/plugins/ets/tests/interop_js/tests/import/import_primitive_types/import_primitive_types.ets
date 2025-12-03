@@ -43,44 +43,44 @@ function checkChangeString(): boolean {
     const oldValue = tsString;
     concatString();
 
-    return tsString as string != oldValue as string;
+    return tsString !== oldValue;
 }
 
 function checkChangeTrue(): boolean {
     const oldValue = tsTrue;
     changeTrue();
 
-    return oldValue as boolean != tsTrue as boolean;
+    return oldValue !== tsTrue;
 }
 
 function checkChangeFalse(): boolean {
     changeFalse();
 
-    return tsFalse as boolean;
+    return tsFalse;
 }
 
 function checkChangeUndefined() {
     changeUndefined();
 
-    return tsUndefined as int == tsNumber as int;
+    return tsUndefined === tsNumber;
 }
 
 function checkChangeNull() {
     changeNull();
 
-    return tsNull as int == tsNumber as int;
+    return tsNull === tsNumber;
 }
 
 function checkChangeSymbol(): boolean {
     const oldValue = tsSymbol;
     changeSymbol();
 
-    return oldValue != tsSymbol;
+    return oldValue !== tsSymbol;
 }
 
 function checkChangeBigInt(): boolean {
     const oldValue = tsBigInt;
     changeBigInt();
 
-    return oldValue as BigInt != tsBigInt as BigInt;
+    return oldValue !== tsBigInt;
 }

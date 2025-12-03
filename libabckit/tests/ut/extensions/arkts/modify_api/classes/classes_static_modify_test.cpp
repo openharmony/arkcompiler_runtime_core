@@ -175,9 +175,7 @@ TEST_F(LibAbcKitArkTSModifyApiClassesTest, ClassAddInstanceMethodStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(fieldFinder.filed, nullptr);
 
-    auto strField1 = g_implM->createString(file, "classes_static_modify.Class1.field1",
-                                           strlen("classes_static_modify.Class1.field1"));
-    auto *loadField = g_statG->iCreateLoadObject(graph, thisParam, strField1, ABCKIT_TYPE_ID_I32);
+    auto *loadField = g_statG->iCreateLoadObject(graph, thisParam, fieldFinder.filed);
     ASSERT_NE(loadField, nullptr);
     auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 1);
     ASSERT_NE(const1, nullptr);

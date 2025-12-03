@@ -75,7 +75,7 @@ const FROM_BUFFER: FromBuffer;
 type arrType = String | undefined;
 
 export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
-    private buffer: FixedArray<NullishType>
+    private buffer: FixedArray<Any>
     protected actualLength: int
 
     override get length(): int {
@@ -102,15 +102,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Creates a new instance of Array
      */
     public constructor(arrayLen: int) {
-        this.buffer = new NullishType[arrayLen]
+        this.buffer = new Any[arrayLen]
         this.actualLength = arrayLen
     }
 
-    public constructor(arrayLen: number) {
-        this(arrayLen.toInt())
-    }
-
-    protected constructor(_tag: FromBuffer, buf: FixedArray<NullishType>) {
+    private constructor(_tag: FromBuffer, buf: FixedArray<Any>) {
         this.buffer = buf
         this.actualLength = buf.length
     }
@@ -126,13 +122,31 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param d Array initializer
      */
     public constructor(first: T, ...d: T[]) {
-        this.buffer = new NullishType[d.length + 1]
+        this.buffer = new Any[d.length + 1]
         this.actualLength = d.length.toInt() + 1
 
         this.buffer[0] = first
 
         for (let k: int = 0; k < d.length; k++) {
             this.$_set_unsafe(k + 1, d[k])
+        }
+    }
+
+    /**
+     * Creates a new instance of Array.
+     *
+     * @param arrayLen amount of elements.
+     *
+     * @param initializer custom initialization for each elements.
+     *
+     * @returns A new Array instance with the specified length
+     *
+     */
+    public constructor(arrayLen: int, initializer: (index: int) => T) {
+        this.buffer = new Any[arrayLen]
+        this.actualLength = arrayLen
+        for (let k: int = 0; k < arrayLen; k++) {
+            this.$_set_unsafe(k, initializer(k))
         }
     }
 
@@ -158,12 +172,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param initialValue initial value of added elements.
      *
      */
-    public extendTo(arrayLength: number, initialValue: T): void {
-        if (arrayLength > Int.MAX_VALUE) {
-            throw new RangeError("arrayLength must be <= int32 max")
+    public extendTo(arrayLength: int, initialValue: T): void {
+        if(arrayLength < 0){
+            throw new RangeError("Parameter error.Invalid array length.")
         }
-        const len = arrayLength.toInt()
-        const delta: int = len - this.actualLength
+        const delta: int = arrayLength - this.actualLength
         if (delta <= 0) {
             return
         }
@@ -171,7 +184,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         for (let i: int = 0; i < delta; i++) {
             this.buffer[this.actualLength + i] = initialValue
         }
-        this.actualLength = len
+        this.actualLength = arrayLength
     }
 
     /**
@@ -180,11 +193,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param arrayLength length at which to shrink.
      *
      */
-    public shrinkTo(arrayLength: number): void {
+    public shrinkTo(arrayLength: int): void {
+        if(arrayLength < 0){
+            throw new RangeError("Parameter error.Invalid array length.")
+        }
         if (arrayLength >= this.actualLength) {
             return
         }
-        let newLen: int = arrayLength.toInt()
+        let newLen: int = arrayLength
         if (newLen < 0) {
             // Convert from signed to unsigned
             newLen = newLen & Int.MAX_VALUE
@@ -214,7 +230,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     static $_invoke<T>(arrayLength?: number): Array<T> {
         if (arrayLength != undefined) {
-            return new Array<T>(arrayLength);
+            return new Array<T>(arrayLength.toInt());
         } else {
             return new Array<T>();
         }
@@ -235,18 +251,19 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new `Array` instance from `Object[]` primitive array.
-     *
-     * @param iterable an iterable object to convert to an array.
-     *
-     * @returns `Array` intance constructed from `Object[]` primitive array.
-     */
-    public static from<T>(iterable: ArrayLike<T> | Iterable<T>): Array<T> {
-        const ret = new Array<T>()
-        iteratorForEach<T>(iterable.$_iterator(), (x: T): void => {
-            ret.push(x)
-        })
-        return ret
+    * Creates a new `Array` instance from `Object[]` primitive array.
+    *
+    * @param arr primitive array.
+    *
+    * @returns `Array` intance constructed from `Object[]` primitive array.
+    */
+    public static from<T>(arr: FixedArray<T>): Array<T> {
+        const len = arr.length
+        const ret : FixedArray<Any> = new Any[len.toInt()]
+        for (let i: int = 0; i < len; i++) {
+            ret[i] = arr[i] as Any
+        }
+        return new Array<T>(FROM_BUFFER, ret)
     }
 
     /**
@@ -271,6 +288,29 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @param iterable an iterable object to convert to an array.
      *
+     * @returns `Array` intance constructed from `Object[]` primitive array.
+     */
+    public static from<T>(iterable: ArrayLike<T> | Iterable<T>): Array<T> {
+        const ret = new Array<T>()
+        iteratorForEach<T>(iterable.$_iterator(), (x: T): void => {
+            ret.push(x)
+        })
+        return ret
+    }
+
+    public static from<T, U>(values: FixedArray<T>, mapfn: (v: T, k: number) => U): Array<U> {
+        const ret = new Array<U>(values.length)
+        for (let i = 0; i < values.length; ++i) {
+            ret[i] = mapfn(values[i], i)
+        }
+        return ret
+    }
+
+    /**
+     * Creates a new `Array` instance from `Object[]` primitive array.
+     *
+     * @param iterable an iterable object to convert to an array.
+     *
      * @param mapfn a mapping function to call on every element of the array.
      * Every value to be added to the array is first passed through this function, and `mapfn`'s return value
      * is added to the array instead.
@@ -287,30 +327,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             idx[0] += 1
         })
         return ret
-    }
-
-    public static from<T, U>(values: FixedArray<T>, mapfn: (v: T, k: number) => U): Array<U> {
-        const ret = new Array<U>(values.length)
-        for (let i = 0; i < values.length; ++i) {
-            ret[i] = mapfn(values[i], i)
-        }
-        return ret
-    }
-
-    /**
-    * Creates a new `Array` instance from `Object[]` primitive array.
-    *
-    * @param arr primitive array.
-    *
-    * @returns `Array` intance constructed from `Object[]` primitive array.
-    */
-    public static from<T>(arr: FixedArray<T>): Array<T> {
-        const len = arr.length
-        const ret : FixedArray<NullishType> = new NullishType[len.toInt()]
-        for (let i: int = 0; i < len; i++) {
-            ret[i] = arr[i] as NullishType
-        }
-        return new Array<T>(FROM_BUFFER, ret)
     }
 
     private searchUndefined(fi: int, len: int): boolean {
@@ -344,12 +360,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private searchNumber(val: Number, fi: int, len: int): boolean {
-        const unboxedVal: number = val.valueOf()
-        if (isNaN(unboxedVal)) {
+        if (isNaN(val)) {
             for (let i = fi; i < len; i++) {
                 const tmp = this.$_get_unsafe(i)
                 if (tmp instanceof Number) {
-                    if (isNaN(tmp.valueOf())) {
+                    if (isNaN(tmp)) {
                         return true
                     }
                 }
@@ -358,7 +373,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             for (let i = fi; i < len; i++) {
                 const tmp = this.$_get_unsafe(i)
                 if (tmp instanceof Number) {
-                    if (unboxedVal == tmp.unboxed()) {
+                    if (val == tmp) {
                         return true
                     }
                 }
@@ -368,12 +383,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private searchFloat(val: Float, fi: int, len: int): boolean {
-        const unboxedVal: float = val.unboxed()
-        if (isNaN(unboxedVal)) {
+        if (isNaN(val)) {
             for (let i = fi; i < len; i++) {
                 const tmp = this.$_get_unsafe(i)
                 if (tmp instanceof Float) {
-                    if (isNaN(tmp.unboxed())) {
+                    if (isNaN(tmp)) {
                         return true
                     }
                 }
@@ -382,7 +396,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             for (let i = fi; i < len; i++) {
                 const tmp = this.$_get_unsafe(i)
                 if (tmp instanceof Float) {
-                    if (unboxedVal == tmp.unboxed()) {
+                    if (val == tmp) {
                         return true
                     }
                 }
@@ -392,11 +406,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private searchLong(val: Long, fi: int, len: int): boolean {
-        const unboxedVal: long = val.unboxed()
         for (let i = fi; i < len; i++) {
             const tmp = this.$_get_unsafe(i)
             if (tmp instanceof Long) {
-                if (tmp == unboxedVal) {
+                if (tmp == val) {
                     return true
                 }
             }
@@ -405,11 +418,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private searchInt(val: Int, fi: int, len: int): boolean {
-        const unboxedVal: int = val.unboxed()
         for (let i = fi; i < len; i++) {
             const tmp = this.$_get_unsafe(i)
             if (tmp instanceof Int) {
-                if (tmp == unboxedVal) {
+                if (tmp == val) {
                     return true
                 }
             }
@@ -437,7 +449,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns Returns one of values -1, 0, 1 (_less_, _equal_, _greater_ respectively).
      */
-    private static defaultComparator(a: NullishType, b: NullishType): number {
+    private static defaultComparator(a: Any, b: Any): number {
         if (a instanceof Number && b instanceof Number) {
             const x = a
             const y = b
@@ -495,9 +507,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns Copy of an `Array`'s primitive array data.
      */
-    private copyArray(): FixedArray<NullishType> {
+    private copyArray(): FixedArray<Any> {
         let len: int = this.actualLength
-        let res : FixedArray<NullishType> = new NullishType[len]
+        let res : FixedArray<Any> = new Any[len]
         for (let i = 0; i < len; i++) {
             res[i] = this.$_get_unsafe(i)
         }
@@ -526,7 +538,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 this.$_set_unsafe(i, undefined as T)
             }
 
-            sort_default<NullishType>(this.buffer, strArr, 0, sortTo)
+            sort_default<Any>(this.buffer, strArr, 0, sortTo)
         }
         catch (e) {
             if (e instanceof OutOfMemoryError) {
@@ -539,7 +551,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     private slow_default_sort(): void {
         let idxNonUndef = 0
-        const cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
+        const cmp: (l: Any, r: Any) => number = (l: Any, r: Any): number => {
             return Array.defaultComparator(l, r)
         }
         for (let i = 0; i < this.actualLength; i++) {
@@ -553,7 +565,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         for (let i = idxNonUndef; i < this.actualLength; i++) {
             this.$_set_unsafe(i, undefined as T)
         }
-        sort_stable<NullishType>(this.buffer, 0, sortTo, cmp)
+        sort_stable<Any>(this.buffer, 0, sortTo, cmp)
     }
 
     private move_undefined_end(): int {
@@ -596,10 +608,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         }
 
         const compareTo: int = this.move_undefined_end()
-        let cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
+        let cmp: (l: Any, r: Any) => number = (l: Any, r: Any): number => {
             return comparator!(l as T, r as T)
         }
-        sort_stable<NullishType>(this.buffer, 0, compareTo, cmp)
+        sort_stable<Any>(this.buffer, 0, compareTo, cmp)
         return this
     }
 
@@ -641,17 +653,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns new length
      */
-    public pushArray(...val: T[]): number {
+    public pushArray(...val: T[]): int {
         this.ensureUnusedCapacity(val.length.toInt())
         for (let i = 0; i < val.length; i++) {
             this.buffer[this.actualLength + i] = val[i]
         }
         this.actualLength += val.length.toInt()
         return this.actualLength
-    }
-
-    private pushSingle(value: T): void {
-        this.pushOne(value)
     }
 
     /**
@@ -659,7 +667,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns new length
      */
-    public pushOne(val: T): number {
+    public pushOne(val: T): int {
         this.ensureUnusedCapacity(1)
         this.buffer[this.actualLength] = val
         this.actualLength += 1
@@ -667,28 +675,75 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     overload push{ pushOne, pushArray }
-    /**
-     * Adds the specified elements to the end of an array and returns the new length of the array.
-     *
-     * @returns new length
-     */
-    public pushECMA(...val: T[]): number {
-        this.ensureUnusedCapacity(val.length.toInt())
-        for (let i = 0; i < val.length; i++) {
-            this.buffer[this.actualLength + i] = val[i]
-        }
-        this.actualLength += val.length.toInt()
-        return this.actualLength
-    }
 
     private ensureUnusedCapacity(cap: int): void {
         if (this.actualLength + cap > this.buffer.length) {
-            const copy : FixedArray<NullishType> = new NullishType[this.buffer.length * 2 + cap]
+            const copy : FixedArray<Any> = new Any[this.buffer.length * 2 + cap]
             for (let i = 0; i < this.actualLength; i++) {
                 copy[i] = this.buffer[i]
             }
             this.buffer = copy
         }
+    }
+
+    /**
+     * Changes the contents of an array by removing or replacing existing elements
+     * and/or adding new elements in place.
+     *
+     * @param start index
+     *
+     * @param delete number of items after start index
+     *
+     * @returns an Array with deleted elements
+     */
+    public splice(start: int, delete: int | undefined, ...items: T[]): Array<T> {
+        if (delete === undefined) {
+            delete = 0
+        }
+        start = normalizeIndex(start, this.actualLength)
+        if (delete < 0) {
+            delete = 0
+        }
+        if (start > this.actualLength - delete) {
+            delete = this.actualLength - start
+        }
+        // this: [left middle right], we must replace middle with `items`
+
+        const itemsLength = items.length
+        this.ensureUnusedCapacity(itemsLength - delete)
+        const oldLen = this.actualLength
+        const newLen = this.actualLength - delete + itemsLength
+        // Extend `actualLength` to ensure correct operations.
+        // Note that shrinking the array will lead to incorrect behavior
+        if (newLen > oldLen) {
+            this.actualLength = newLen
+        }
+
+        let ret = new Array<T>(delete)
+        // left part remains unchanged
+        // copy excluded part
+        for (let i = 0; i < delete; i++) {
+            ret.$_set_unsafe(i, this.$_get_unsafe(start + i))
+        }
+        // move right part to the right of the buffer
+        const rightLen = oldLen - start - delete
+        if (itemsLength > delete) {
+            for (let i = 0; i < rightLen; i++) {
+                // This operation is correct because `actualLength` was extended before
+                this.$_set_unsafe(newLen - 1 - i, this.$_get_unsafe(oldLen - 1 - i))
+            }
+        } else {
+            for (let i = 0; i < rightLen; i++) {
+                this.$_set_unsafe(start + itemsLength + i, this.$_get_unsafe(start + delete + i))
+            }
+        }
+        // insert middle part
+        for (let i = 0; i < itemsLength; i++) {
+            this.$_set_unsafe(start + i, items.$_get_unsafe(i))
+        }
+        // Update length in the end to ensure correct `this` operations
+        this.actualLength = newLen
+        return ret
     }
 
     /**
@@ -704,88 +759,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
-     *
-     * @param start index
-     *
-     * @returns an Array with deleted elements from start to the last element of the current instance
-     */
-    public splice(start: number): Array<T> {
-        return this.splice(start.toInt())
-    }
-
-    /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
-     *
-     * @param start index
-     *
-     * @param delete number of items after start index
-     *
-     * @returns an Array with deleted elements
-     */
-    public splice(start: int, delete: int, ...items: T[]): Array<T> {
-        start = normalizeIndex(start, this.actualLength)
-        if (delete < 0) {
-            delete = 0
-        }
-        if (start > this.actualLength - delete) {
-            delete = this.actualLength - start
-        }
-        // this: [left middle right], we must replace middle with `items`
-
-        this.ensureUnusedCapacity(items.length.toInt() - delete)
-        const oldLen = this.actualLength
-        this.actualLength = this.actualLength - delete + items.length.toInt()
-
-        let ret = new Array<T>(delete)
-        let lastSet = start
-        // left part remains unchanged
-        // copy excluded part
-        for (let i = 0; i < delete; i++) {
-            ret.buffer[i] = this.buffer[start + i]
-        }
-        // move right part to the right of the buffer
-        const rightLen = oldLen - start - delete
-        if (items.length > delete) {
-            for (let i = 0; i < rightLen; i++) {
-                this.buffer[this.actualLength - 1 - i] = this.buffer[oldLen - 1 - i]
-            }
-        } else {
-            for (let i = 0; i < rightLen; i++) {
-                this.buffer[start + items.length.toInt() + i] = this.buffer[start + delete + i]
-            }
-        }
-        // insert middle part
-        for (let i = 0; i < items.length; i++) {
-            this.buffer[start + i] = items[i]
-        }
-        return ret
-    }
-
-    /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
-     *
-     * @param start index
-     *
-     * @param delete number of items after start index
-     *
-     * @returns an Array with deleted elements
-     */
-    public splice(start: number, delete: Number | undefined, ...items: T[]): Array<T> {
-        return this.splice(start.toInt(), asIntOrDefault(delete, 0), ...items)
-    }
-
-    /**
      * Checks whether the passed value is an Array.
      *
      * @param arr
      *
      * @returns true is arr is a non-nullish array, false otherwise
      */
-    public static isArray(o: NullishType): boolean {
+    public static isArray(o: Any): boolean {
         if (o instanceof Array) {
             return true
         }
@@ -817,21 +797,20 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns new length of the Array
      */
-    public unshift(...values: T[]): number {
-        let buffer = this.buffer
-        if (this.buffer.length <= values.length + this.actualLength) {
-            buffer = new NullishType[this.buffer.length * 2 + values.length]
+    public unshift(...values: T[]): int {
+        if (this.buffer.length <= values.actualLength + this.actualLength) {
+            let buffer: FixedArray<Any> = new Any[this.buffer.length * 2 + values.actualLength]
+            Array.unshiftInternal(this.buffer, this.actualLength, buffer, values)
+            this.buffer = buffer
+        } else {
+            Array.unshiftInternal(this.buffer, this.actualLength, this.buffer, values)
         }
-        for (let i = 0; i < this.actualLength; i++) {
-            buffer[this.actualLength + values.length.toInt() - i - 1] = this.buffer[this.actualLength - 1 - i]
-        }
-        for (let i = 0; i < values.length; i++) {
-            buffer[i] = values[i]
-        }
-        this.buffer = buffer
-        this.actualLength += values.length.toInt()
+
+        this.actualLength += values.actualLength
         return this.actualLength
     }
+
+    private static native unshiftInternal(self: FixedArray<Any>, selfLen: int, buffer: FixedArray<Any>, values: Array<T>): void
 
     /**
      * Returns an iterator over all indices
@@ -855,11 +834,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
      */
-    public override filter(predicate: (value: T, index: number, array: Array<T>) => boolean): Array<T> {
+    public override filter(predicate: (value: T, index: int, array: Array<T>) => boolean): Array<T> {
         const res = new Array<T>()
         for (let i: int = 0; i < this.actualLength; i++) {
             const val = this.$_get_unsafe(i)
-            if (predicate(val, i.toDouble(), this)) {
+            if (predicate(val, i, this)) {
                 res.push(val)
             }
         }
@@ -874,26 +853,76 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a flattened Array with respect to depth
      */
-    public flat<U>(depth: number): Array<U> {
-        return this.flat<U>(depth.toInt())
-    }
-
-    /**
-     * Creates a new Array with all sub-array elements concatenated
-     * into it recursively up to the specified depth.
-     *
-     * @param depth
-     *
-     * @returns a flattened Array with respect to depth
-     */
-    public flat<U>(depth: int): Array<U> {
+    public flat<U = T>(depth: int): Array<U> {
         let ret = new Array<U>()
         this.flatImpl<U>(depth, ret)
         return ret
     }
 
+    /**
+     * Determines whether obj is exactly an instance of the escompat.Array class.
+     *
+     * @param obj
+     *
+     * @return true if obj is an instance of escompat.Array and false otherwise.
+     */
+    private static native isPlatformArray(obj: Object): boolean
+
+    /**
+     * Returns the buffer from an instance arr of the escompat.Array class. We must be sure obj is an
+     * instance of escompat.Array, the isPlatfromArray(obj: Object) method may be used for this.
+     *
+     * @param obj
+     *
+     * @return a reference to the (obj as Array<T>).buffer field.
+     */
+    private static native getBuffer(obj: Object): FixedArray<Any>;
+
+    /**
+     * Creates a new `Array` from this `Array` instance and given `Array` instance.
+     *
+     * @param other to concatenate into a new array.
+     *
+     * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+     */
+    public concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
+        let totalAdd = this.actualLength;
+        for (let i = 0; i < items.length; i++) {
+            totalAdd += items[i].length.toInt()
+        }
+
+        const buf : FixedArray<Any> = new Any[totalAdd];
+        copyTo(this.buffer, buf, 0, 0, this.actualLength)
+
+        let insertTo = this.actualLength;
+        for (let i = 0; i < items.length; i++) {
+            const arr = items[i]
+            const len = arr.length.toInt()
+            if (Array.isPlatformArray(arr)) {
+                copyTo(Array.getBuffer(arr), buf, insertTo, 0, len)
+                insertTo += len
+            } else {
+                for (let j = 0; j < len; j++) {
+                    buf[insertTo++] = arr.$_get(j)
+                }
+            }
+        }
+
+        return new Array<T>(FROM_BUFFER, buf);
+    }
+
     private flatImpl<U>(depth: int, to: Array<U>) {
-        throw new Error("not implemented")
+        for (let i = 0; i < this.actualLength; i++) {
+            let element = this.buffer[i]
+            if (depth > 0 && element instanceof Array) {
+                let subArray = (element as Array<T>).flat<U>(depth - 1)
+                for (let j = 0; j < subArray.length; j++) {
+                    to.push(subArray[j] as U)
+                }
+            } else {
+                to.push(element as U)
+            }
+        }
     }
 
     /**
@@ -901,7 +930,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a flattened Array
      */
-    public flat<U>(): Array<U> {
+    public flat<U = T>(): Array<U> {
         return this.flat<U>(1)
     }
 
@@ -913,7 +942,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @return new Array after map and than flat
      */
     // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
-    public flatMap<U>(fn: (v: T, k: number, arr: Array<T>) => U): Array<U> {
+    public flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
         let mapped: Array<U> = this.map<U>(fn)
         return mapped.flat<U>()
     }
@@ -929,9 +958,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
      *
      * @returns The element in the array matching the given index.
-     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+     * Throw range error if `index` < `-length()` or `index` >= `length()`.
      */
-    public at(index: int): T | undefined {
+    public override at(index: int): T {
         let len = this.actualLength;
         let k: int;
         if (index >= 0) {
@@ -941,60 +970,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         }
 
         if (k < 0 || k >= len) {
-            return undefined;
+            throw new RangeError("Invalid index");
         }
 
         return this.$_get_unsafe(k);
-    }
-
-    /**
-     * Takes an integer value and returns the item at that index,
-     * allowing for positive and negative integers. Negative integers count back
-     * from the last item in the array.
-     *
-     * @param index Zero-based index of the array element to be returned.
-     * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
-     *
-     * @returns The element in the array matching the given index.
-     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
-     */
-    public override at(index: number): T | undefined {
-        return this.at(index.toInt())
-    }
-
-    /**
-     * Creates a new `Array` from this `Array` instance and given `Array` instance.
-     *
-     * @param other to concatenate into a new array.
-     *
-     * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
-     */
-    // public override concat(...items: (T | ConcatArray<T>)[]): Array<T> {
-    //     throw new Error("not implemented")
-    // }
-
-    public concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
-        let totalAdd = this.actualLength;
-        for (let i = 0; i < items.length; i++) {
-            totalAdd += items[i].length.toInt()
-        }
-
-        const buf : FixedArray<NullishType> = new NullishType[totalAdd];
-
-        for (let i = 0; i < this.actualLength; i++) {
-            buf[i] = this.$_get_unsafe(i);
-        }
-
-        let insertTo = this.actualLength;
-        for (let i = 0; i < items.length; i++) {
-            const arr = items[i]
-            const len = arr.length.toInt()
-            for (let j = 0; j < len; j++) {
-                buf[insertTo++] = arr.$_get(j)
-            }
-        }
-
-        return new Array<T>(FROM_BUFFER, buf);
     }
 
     /**
@@ -1034,10 +1013,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: int, start: int, end: int): this {
+    public copyWithin(target: int, start: int, end?: int): this {
         target = normalizeIndex(target, this.actualLength)
         start = normalizeIndex(start, this.actualLength)
-        end = normalizeIndex(end, this.actualLength)
+        end = normalizeIndex(end ?? this.actualLength, this.actualLength)
 
         if (end <= start) {
             return this;
@@ -1063,22 +1042,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
-     *
-     * @param target index at which to copy the sequence
-     *
-     * @param start index at which to start copying elements from
-     *
-     * @param end index at which to end copying elements from
-     *
-     * @returns this array after transformation
-     */
-    public copyWithin(target: number, start: number, end?: Number): this {
-        this.copyWithin(target.toInt(), start.toInt(), asIntOrDefault(end, this.actualLength));
-        return this;
-    }
-
-    /**
      * Changes all elements in the Array to a static value, from a start index to an end index
      *
      * @param value to fill the array with
@@ -1089,23 +1052,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public native fill(value: T, start: int, end: int): this;
-
-    /**
-     * Changes all elements in the Array to a static value, from a start index to an end index
-     *
-     * @param value to fill the array with
-     *
-     * @param start index at which to start filling
-     *
-     * @param end index at which to end filling, but not including
-     *
-     * @returns this array after transformation
-     */
-    public fill(value: T, start?: Number, end?: Number): this {
-        this.fill(value, asIntOrDefault(start, 0), asIntOrDefault(end, this.actualLength));
-        return this;
+    public fill(value: T, start?: int, end?: int): this {
+        Array.fillImpl(this.buffer, this.actualLength, value, start ?? 0, end ?? this.actualLength)
+        return this
     }
+
+    private static native fillImpl(buffer: FixedArray<Any>, actualLength: int, value: T, start: int, end: int): void;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -1117,12 +1069,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns the value of the first element in the array or undefined
      */
-    public override find(predicate: (value: T, index: number, array: Array<T>) => boolean): T | undefined {
+    public override find(predicate: (value: T, index: int, array: Array<T>) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
             return undefined
         }
-        return this.$_get_unsafe(res.toInt());
+        return this.$_get_unsafe(res);
     }
 
     /**
@@ -1135,9 +1087,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns found element index or -1 otherwise
      */
-    public override findIndex(predicate: (value: T, index: number, array: Array<T>) => boolean): number {
+    public override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): int {
         for (let i = 0; i < this.actualLength; i++) {
-            if (predicate(this.$_get_unsafe(i), i.toDouble(), this)) {
+            if (predicate(this.$_get_unsafe(i), i, this)) {
                 return i;
             }
         }
@@ -1152,10 +1104,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns found element or undefined otherwise
      */
-    public override findLast(predicate: (elem: T, index: number, array: Array<T>) => boolean): T | undefined {
+    public override findLast(predicate: (elem: T, index: int, array: Array<T>) => boolean): T | undefined {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             const val = this.$_get_unsafe(i);
-            if (predicate(val, i.toDouble(), this)) {
+            if (predicate(val, i, this)) {
                 return val;
             }
         }
@@ -1171,10 +1123,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public override every(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    public override every(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         let curArrLength = this.actualLength
         for (let i = 0; i < curArrLength && i < this.actualLength; i++) {
-            if (!predicate(this.$_get_unsafe(i), i.toDouble(), this)) {
+            if (!predicate(this.$_get_unsafe(i), i, this)) {
                 return false
             }
         }
@@ -1190,9 +1142,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public override some(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    public override some(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (predicate(this.$_get_unsafe(i), i.toDouble(), this)) {
+            if (predicate(this.$_get_unsafe(i), i, this)) {
                 return true
             }
         }
@@ -1208,9 +1160,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of first element satisfying to predicate, -1 if no such element
      */
-    public override findLastIndex(predicate: (element: T, index: number, array: Array<T>) => boolean): number {
+    public override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): int {
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            if (predicate(this.$_get_unsafe(i), i.toDouble(), this)) {
+            if (predicate(this.$_get_unsafe(i), i, this)) {
                 return i
             }
         }
@@ -1224,13 +1176,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+    public override reduce(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(0);
         for (let i = 1; i < this.actualLength; i++) {
-            acc = callbackfn(acc, this.$_get_unsafe(i), i.toDouble(), this)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i, this)
         }
         return acc
     }
@@ -1244,10 +1196,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
+    public override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = 0; i < this.actualLength; i++) {
-            acc = callbackfn(acc, this.$_get_unsafe(i), i.toDouble(), this)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i, this)
         }
         return acc
     }
@@ -1261,12 +1213,27 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
+    public override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            acc = callbackfn(acc, this.$_get_unsafe(i), i.toDouble(), this)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i, this)
         }
         return acc
+    }
+
+    /**
+     * Performs the specified action for each element in an array.
+     *
+     * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     */
+    public override forEach(callbackfn: (value: T, index: int, array: Array<T>) => void): void {
+        const len0 = this.actualLength;
+        for (let i = 0; i < len0; i++) {
+            if (i >= this.actualLength) {
+                break
+            }
+            callbackfn(this.$_get_unsafe(i), i, this)
+        }
     }
 
     /**
@@ -1282,21 +1249,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Performs the specified action for each element in an array.
-     *
-     * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
-     */
-    public override forEach(callbackfn: (value: T, index: number, array: Array<T>) => void): void {
-        const len0 = this.actualLength;
-        for (let i = 0; i < len0; i++) {
-            if (i >= this.actualLength) {
-                break
-            }
-            callbackfn(this.$_get_unsafe(i), i.toDouble(), this)
-        }
-    }
-
-    /**
      * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
      * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
      *
@@ -1306,71 +1258,59 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
-    public slice(start: int, end: int): Array<T> {
+    public slice(start?: int, end?: int): Array<T> {
         const len: int = this.actualLength;
-        const relStart = normalizeIndex(start, len)
-        const relEnd = normalizeIndex(end, len)
+        const relStart = normalizeIndex(start ?? 0, len)
+        const relEnd = normalizeIndex(end ?? len, len)
 
         let count = relEnd - relStart;
         if (count < 0) {
             count = 0;
         }
-        let res : FixedArray<NullishType> = new NullishType[count]
-        for (let i = 0; i < count; i++) {
-            res[i] = this.$_get_unsafe(relStart + i);
-        }
-
+        let res : FixedArray<Any> = new Any[count]
+        copyToFast(this.buffer, res, 0, relStart, relStart + count);
         return new Array<T>(FROM_BUFFER, res)
     }
 
     /**
-     * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
-     * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+     * Returns the last index at which a given element can be found in the array,
+     * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
      *
-     * @param start zero-based index at which to start extraction
+     * @param buffer Array's underlying buffer.
      *
-     * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
+     * @param actualLength Array's underlying length, might be greater than buffer's length.
      *
-     * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param searchElement element to locate in the array.
+     *
+     * @param fromIndex zero-based index at which to start searching backwards.
+     * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
+     * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
+     * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
+     * If `fromIndex` is undefined then `fromIndex = 0`.
+     * If `fromIndex` is ommited then `fromIndex = length()-1`.
+     *
+     * @returns The last index of the element in the array; -1 if not found.
      */
-    public override slice(start?: Number, end?: Number): Array<T> {
-        const len: int = this.actualLength;
-        return this.slice(asIntOrDefault(start, 0), asIntOrDefault(end, len))
+    private static native lastIndexOfImpl(buffer: FixedArray<Any>, actualLength: int, searchElement: T, fromIndex: int): int;
+
+    /**
+     * Returns the last index at which a given element can be found in the array,
+     * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+     *
+     * @param searchElement element to locate in the array.
+     *
+     * @param fromIndex zero-based index at which to start searching backwards.
+     * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
+     * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
+     * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
+     * If `fromIndex` is undefined then `fromIndex = 0`.
+     * If `fromIndex` is ommited then `fromIndex = length()-1`.
+     *
+     * @returns The last index of the element in the array; -1 if not found.
+     */
+    public lastIndexOf(searchElement: T): int {
+        return Array.lastIndexOfImpl(this.buffer, this.actualLength, searchElement, this.actualLength - 1)
     }
-
-    /**
-     * Returns the last index at which a given element can be found in the array,
-     * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
-     *
-     * @param searchElement element to locate in the array.
-     *
-     * @param fromIndex zero-based index at which to start searching backwards.
-     * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
-     * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
-     * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
-     * If `fromIndex` is undefined then `fromIndex = 0`.
-     * If `fromIndex` is ommited then `fromIndex = length()-1`.
-     *
-     * @returns The last index of the element in the array; -1 if not found.
-     */
-     private native lastIndexOfImpl(searchElement: T, fromIndex: int): int;
-
-    /**
-     * Returns the last index at which a given element can be found in the array,
-     * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
-     *
-     * @param searchElement element to locate in the array.
-     *
-     * @param fromIndex zero-based index at which to start searching backwards.
-     * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
-     * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
-     * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
-     * If `fromIndex` is undefined then `fromIndex = 0`.
-     * If `fromIndex` is ommited then `fromIndex = length()-1`.
-     *
-     * @returns The last index of the element in the array; -1 if not found.
-     */
-    public native lastIndexOf(searchElement: T): int;
 
     /**
      * Returns the last index at which a given element can be found in the array,
@@ -1388,7 +1328,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns The last index of the element in the array; -1 if not found.
      */
     public lastIndexOf(searchElement: T, fromIndex?: int): int {
-        return this.lastIndexOfImpl(searchElement, fromIndex ?? 0);
+        return Array.lastIndexOfImpl(this.buffer, this.actualLength, searchElement, fromIndex ?? 0)
     }
 
     private isPrimitive(element: T): boolean {
@@ -1403,7 +1343,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 element instanceof Byte ||
                 element == null);
     }
-    private native joinInternal(sep: String): string;
+    private static native joinInternal(buffer: FixedArray<Any>, actualLength: int, sep: string): string;
 
     private joinObject(sep?: String): string {
         const sepReal = sep === undefined ? "," : sep!
@@ -1454,7 +1394,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             return this.joinObject(sep);
         }
 
-        return this.joinInternal(sep === undefined ? "," : sep!);
+        return Array.joinInternal(this.buffer, this.actualLength, sep === undefined ? "," : sep!);
     }
 
     /**
@@ -1502,7 +1442,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             if (i != 0) {
                 sb.append(",")
             }
-            let x = this.$_get_unsafe(i) as NullishType;
+            let x = this.$_get_unsafe(i) as Any;
             if ((null !== x) && (undefined !== x)) {
                 sb.append((x! as object).toLocaleString()) // #26217
             }
@@ -1541,7 +1481,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (start > len - delete) {
             delete = len - start
         }
-        const res : FixedArray<NullishType> = new NullishType[len - delete + items.length];
+        const res : FixedArray<Any> = new Any[len - delete + items.length];
         for (let i = 0; i < start; i++) {
             res[i] = this.$_get_unsafe(i)
         }
@@ -1563,21 +1503,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a new Array with some elements removed and/or replaced at a given index.
      */
-    public toSpliced(start: number, delete: number, ...items: FixedArray<T>): Array<T> {
-        const len = this.actualLength;
-        return this.toSpliced(start.toInt(), delete.toInt(), ...items)
-    }
-
-    /**
-     * Copying version of the splice() method.
-     *
-     * @param start index
-     *
-     * @param delete number of items after start index
-     *
-     * @returns a new Array with some elements removed and/or replaced at a given index.
-     */
-    public toSpliced(start?: Number, delete?: Number): Array<T> {
+    public toSpliced(start?: int, delete?: int): Array<T> {
         const len = this.actualLength;
         return this.toSpliced(asIntOrDefault(start, len), asIntOrDefault(delete, len))
     }
@@ -1592,7 +1518,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns true if val is in Array
      */
-    public override includes(val: T, fromIndex?: Number): boolean {
+    public override includes(val: T, fromIndex?: int): boolean {
         const len = this.actualLength;
         const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
         if (val instanceof String) {
@@ -1624,9 +1550,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of val, -1 otherwise
      */
-    private native indexOfImpl(val: T, fromIndex1: int): int;
+    private static native indexOfImpl(buffer: FixedArray<Any>, actualLength: int, val: T, fromIndex1: int): int;
 
-    public native indexOf(val: T): int;
+    public indexOf(val: T): int {
+        return Array.indexOfImpl(this.buffer, this.actualLength, val, 0)
+    }
 
     /**
      * Returns the first index at which a given element
@@ -1639,7 +1567,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns index of val, -1 otherwise
      */
     public override indexOf(val: T, fromIndex?: int): int {
-        return this.indexOfImpl(val, asIntOrDefault(fromIndex, 0))
+        return Array.indexOfImpl(this.buffer, this.actualLength, val, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -1675,15 +1603,15 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @note Mutating method
      */
     public reverse(): this {
-        for (let i = 0; i < this.actualLength / 2; i++) {
-            const tmp = this.$_get_unsafe(i);
-            const idx_r = this.actualLength - 1 - i;
-            const val_r = this.$_get_unsafe(idx_r);
-            this.$_set_unsafe(i, val_r);
-            this.$_set_unsafe(idx_r, tmp);
+        /* otherwise the result will be exactly the same as it is */
+        if (this.actualLength > 1) {
+            Array.reverseImpl(this.buffer, this.actualLength)
         }
-        return this;
+
+        return this
     }
+
+    private static native reverseImpl(buffer: FixedArray<Any>, actualLength: int): void;
 
     /**
      * Copying version of the reverse() method.
@@ -1692,7 +1620,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns reversed copy of the current Array
      */
     public toReversed(): Array<T> {
-        let arr : FixedArray<NullishType> = new NullishType[this.actualLength]
+        let arr : FixedArray<Any> = new Any[this.actualLength]
         for (let i = 0; i < this.actualLength; i++) {
             arr[this.actualLength - 1 - i] = this.$_get_unsafe(i)
         }
@@ -1722,20 +1650,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Copying version of using the bracket notation to change the value of a given index.
-     * It returns a new Array with the element at the given index replaced with the given value.
-     *
-     * @param index to replace
-     *
-     * @param value new value
-     *
-     * @returns a new Array with the element at the given index replaced with the given value
-     */
-    public with(index: number, value: T): Array<T> {
-        return this.with(index.toInt(), value)
-    }
-
-    /**
      * Returns an iterator over all values
      */
     public override values(): IterableIterator<T> {
@@ -1756,11 +1670,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public override map<U>(callbackfn: (value: T, index: number, array: Array<T>) => U): Array<U> {
+    public override map<U>(callbackfn: (value: T, index: int, array: Array<T>) => U): Array<U> {
         const len = this.actualLength;
-        let res : FixedArray<NullishType> = new NullishType[len];
+        let res : FixedArray<Any> = new Any[len];
         for (let i = 0; i < this.actualLength; i++) {
-            res[i] = callbackfn(this.$_get_unsafe(i), i.toDouble(), this);
+            res[i] = callbackfn(this.$_get_unsafe(i), i, this);
         }
         return new Array<U>(FROM_BUFFER, res);
     }
@@ -1772,19 +1686,50 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+    public override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1);
         for (let i = this.actualLength - 2; i >= 0; i--) {
             if (this.actualLength > i) {
-                acc = callbackfn(acc, this.$_get_unsafe(i), i.toDouble(), this)
+                acc = callbackfn(acc, this.$_get_unsafe(i), i, this)
             }
         }
         return acc
     }
 
+}
+
+/**
+ * copies src array into dst with respect to passed indexes and without setting pre-write barriers.
+ * dst must be a new allocated array and have enough space, otherwise out-of-bounds might occur
+ *
+ * @param src source array to be copied
+ *
+ * @param dst destination array
+ *
+ * @param dstStart index of dst to start from
+ *
+ * @param srcStart index of src to start from
+ *
+ * @param srcEnd last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
+ *
+ * @example: copy src to dst
+ * ```
+ * copyToFast(src, dst, 0, 0, src.length)
+ * ```
+ */
+native function copyToFast(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
+
+function tryGetIteratorLength(obj: Object): int | undefined {
+    const objCls = Class.of(obj)
+    for (const method of objCls.getInstanceMethods()) {
+        if (method.getName() == "__Iterator_getLength" && method.getParametersNum() == 0) {
+            return method.invoke(obj, []) as int
+        }
+    }
+    return undefined
 }
 
 class ArrayValuesIterator_T<T> implements IterableIterator<T> {

@@ -13,27 +13,6 @@
 
 ---
 cases:
-  - tags: compile-only, negative
-    code: |-
-      class A {}
-      class C<T extends A> {}
-      function main() {
-          new C<Object>()
-      }
-  - tags: compile-only, negative
-    code: |-
-      class A {}
-      class C<T extends A> {}
-      function main() {
-          new C<null>()
-      }
-  - tags: compile-only, negative
-    code: |-
-      class A {}
-      class C<T extends A> {}
-      function main() {
-          new C<undefined>()
-      }
   - tags: compile-only
     code: |-
       class A<T> {}
@@ -42,7 +21,7 @@ cases:
           new A<null>()
           new A<undefined>()
       }
-  - tags:
+  - tags: |-
     code: |-
       let res = 0
       class A {
@@ -57,14 +36,4 @@ cases:
           res = 0
           new C<A>(new A())
           arktest.assertEQ( res, 1)
-      }
-  - tags: compile-only, negative
-    code: |-
-      class A {
-          foo() { res = 1 }
-      }
-      class C<T> {
-          constructor(i: T) {
-              i.foo()
-          }
       }

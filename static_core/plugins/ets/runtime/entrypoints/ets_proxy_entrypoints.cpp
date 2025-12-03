@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_reflect_method.h"
 #include "runtime/arch/helpers.h"
-#include "type.h"
+#include "libarkfile/include/type.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"

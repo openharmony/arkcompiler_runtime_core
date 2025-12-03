@@ -30,7 +30,7 @@ function testToJson() {
 	arktest.assertTrue(jsonedT2.getBoolean("biz"))
 }
 
-class T2 implements jsonx.JsonElementDeserializable {
+class T2 implements jsonx.JsonElementSerializable {
 	biz: boolean = true
 
 	toJSON(): jsonx.JsonElement {
@@ -42,7 +42,7 @@ class T2 implements jsonx.JsonElementDeserializable {
 	}
 }
 
-class T1 implements jsonx.JsonElementDeserializable {
+class T1 implements jsonx.JsonElementSerializable {
 	foo: int = 5
 	bar: string = "34"
 	t2: T2 = new T2

@@ -191,6 +191,7 @@ libarkcompiler_sources = [
   "optimizer/optimizations/string_builder_utils.cpp",
   "optimizer/optimizations/try_catch_resolving.cpp",
   "optimizer/optimizations/vn.cpp",
+  "optimizer/optimizations/string_flat_check.cpp",
   "optimizer/pass.cpp",
   "optimizer/pass_manager.cpp",
   "optimizer/pass_manager_statistics.cpp",
@@ -226,8 +227,8 @@ if (abckit_enable) {
 
 libarkcompiler_configs = [
   ":arkcompiler_public_config",
-  "$ark_root/libpandabase:arkbase_public_config",
-  "$ark_root/libpandafile:arkfile_public_config",
+  "$ark_root/libarkbase:arkbase_public_config",
+  "$ark_root/libarkfile:arkfile_public_config",
   "$ark_root/runtime:arkruntime_public_config",
 ]
 
@@ -254,6 +255,8 @@ group("arktscompiler_header_deps") {
     ":intrinsics_lse_heap_inv_args_inl",
     ":intrinsics_peephole_inl_h",
     ":ir_dyn_base_types_h",
+    ":li_customize_memmove_intrinsic_switch_case_inl",
+    ":li_memmove_intrinsic_id_switch_case_inl",
     ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
@@ -268,6 +271,7 @@ group("arktscompiler_header_deps") {
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_inline_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_peephole_inl",
+    ":libarkcompiler_intrinsics_gen_inl_intrinsic_string_flat_check_inl",
     ":libarkcompiler_opcodes_h_IR-instructions_md",
     ":libarkcompiler_opcodes_h_arch_info_gen_h",
     ":libarkcompiler_opcodes_h_codegen_arm64_gen_inc",
@@ -279,9 +283,9 @@ group("arktscompiler_header_deps") {
     ":plugin_create_pipeline_inl",
     ":source_languages_h",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
-    "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
-    "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
-    "$ark_root/libpandafile:libarkfile_type_gen_h",
+    "$ark_root/libarkfile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
+    "$ark_root/libarkfile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
+    "$ark_root/libarkfile:libarkfile_type_gen_h",
     "$ark_root/runtime:arkruntime_gen_entrypoints_compiler_checksum_entrypoints_compiler_checksum_inl",
     "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
     "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_gen_S",
@@ -305,8 +309,8 @@ _libarktscompiler_calculated_configs = libarkcompiler_configs
 _libarktscompiler_calculated_deps = [
   ":arktscompiler_header_deps",
   ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
-  "$ark_root/libpandabase:libarktsbase",
-  "$ark_root/libpandafile:libarktsfile",
+  "$ark_root/libarkbase:libarktsbase",
+  "$ark_root/libarkfile:libarktsfile",
 ]
 
 _libarktscompiler_calculated_external_deps = [ sdk_libc_secshared_dep ]
@@ -314,14 +318,16 @@ _libarktscompiler_calculated_external_deps = [ sdk_libc_secshared_dep ]
 _libarktscompiler_calculated_configs += [ ":arkassembler_isa_h_public_config" ]
 
 if (enable_codegen && !is_mac) {
-  _libarktscompiler_calculated_deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
+  _libarktscompiler_calculated_deps +=
+      [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
 }
 
 _libarktscompiler_calculated_deps += plugin_compiler_deps
 
 _libarktscompiler_calculated_include_dirs = [ "$ark_root/compiler/optimizer" ]
 if (!is_mac) {
-  _libarktscompiler_calculated_include_dirs += [ "$ark_root/compiler/optimizer/code_generator" ]
+  _libarktscompiler_calculated_include_dirs +=
+      [ "$ark_root/compiler/optimizer/code_generator" ]
 }
 
 if (abckit_enable) {
@@ -334,7 +340,6 @@ ohos_shared_library("libarktscompiler") {
 
   public_configs = _libarktscompiler_calculated_configs
   public_configs += ["$ark_root:ark_config"]
-
 
   deps = _libarktscompiler_calculated_deps
 
@@ -390,8 +395,8 @@ ohos_source_set("libarktscompiler_frontend_static") {
   deps = [
     ":arktscompiler_header_deps",
     ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
-    "$ark_root/libpandabase:libarktsbase_frontend_static",
-    "$ark_root/libpandafile:libarktsfile_frontend_static",
+    "$ark_root/libarkbase:libarktsbase_frontend_static",
+    "$ark_root/libarkfile:libarktsfile_frontend_static",
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
@@ -460,13 +465,14 @@ ark_gen("libarkcompiler_intrinsics_gen_inl") {
     "intrinsics_flags.inl.erb",
     "intrinsics_inline.inl.erb",
     "intrinsics_peephole.inl.erb",
+    "intrinsic_string_flat_check.inl.erb",
   ]
   sources = "optimizer/templates/intrinsics"
   destination = "$target_gen_dir/generated"
   api = [
     "$ark_root/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
   ]
-  requires = [ "$ark_root/libpandabase/utils.rb" ]
+  requires = [ "$ark_root/libarkbase/utils.rb" ]
   extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   if (abckit_enable) {
     extra_dependencies += [
@@ -670,6 +676,22 @@ ark_gen_file("intrinsics_extensions_inl_h") {
   data = [ ark_plugin_options_yaml ]
   api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/generated/intrinsics_extensions.inl.h"
+}
+
+ark_gen_file("li_memmove_intrinsic_id_switch_case_inl") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "optimizer/templates/intrinsics/loop_idioms_memmove_intrinsic_id_switch_case.inl.erb"
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/generated/loop_idioms_memmove_intrinsic_id_switch_case.inl"
+}
+
+ark_gen_file("li_customize_memmove_intrinsic_switch_case_inl") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "optimizer/templates/intrinsics/loop_idioms_customize_memmove_intrinsic_switch_case.inl.erb"
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/generated/loop_idioms_customize_memmove_intrinsic_switch_case.inl"
 }
 
 generated_file("plugin_create_pipeline_inl") {

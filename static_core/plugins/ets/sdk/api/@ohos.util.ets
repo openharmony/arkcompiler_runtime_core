@@ -33,7 +33,7 @@ export namespace util {
     export class LRUCache<K, V> {
         private cache: Map<K, V>;
         // Default current size
-        private maxSize: number;
+        private maxSize: int;
         // Default maximum size
         private putCount: long = 0;
         private createCount: long = 0;
@@ -41,11 +41,11 @@ export namespace util {
         private hitCount: long = 0;
         private missCount: long = 0;
 
-        get length(): number {
+        get length(): int {
             return this.cache.size;
         }
 
-        public constructor(capacity?: number) {
+        public constructor(capacity?: int) {
             if (capacity == undefined) {
                 this.maxSize = 64;
             } else {
@@ -57,8 +57,8 @@ export namespace util {
             this.cache = new Map<K, V>();
         }
 
-        private checkCapacityIsIllegal(capacity: number): boolean {
-            return (capacity > Int.MAX_VALUE || capacity <= 0 || (capacity % 1) != 0);
+        private checkCapacityIsIllegal(capacity: int): boolean {
+            return (capacity <= 0 || (capacity % 1) != 0);
         }
 
         private getLRUKey(): K {
@@ -69,7 +69,7 @@ export namespace util {
             return this.cache.values().next().value as V;
         }
 
-        private reduceCapacity(newCapacity: number): void {
+        private reduceCapacity(newCapacity: int): void {
             while (this.cache.keys().next() && this.cache.size > newCapacity) {
                 let lruKey = this.getLRUKey();
                 this.afterRemoval(true, lruKey, this.getLRUValue(), undefined);
@@ -82,7 +82,7 @@ export namespace util {
             newValue: V | undefined): void {
         }
 
-        public updateCapacity(newCapacity: number): void {
+        public updateCapacity(newCapacity: int): void {
             if (this.checkCapacityIsIllegal(newCapacity)) {
                 throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of ${newCapacity} must be small integer`)
             } else if (this.cache.size > newCapacity) {
@@ -91,7 +91,7 @@ export namespace util {
             this.maxSize = newCapacity;
         }
 
-        public getCapacity(): number {
+        public getCapacity(): int {
             return this.maxSize;
         }
 
@@ -131,8 +131,8 @@ export namespace util {
         }
 
         override toString(): String {
-            let peek: number = 0;
-            let hitRate: number = 0;
+            let peek: long = 0;
+            let hitRate: long = 0;
             peek = this.hitCount + this.missCount;
             if (peek != 0) {
                 // The value is 100 times larger
@@ -142,24 +142,24 @@ export namespace util {
                 ', misses = ' + this.missCount + ', hitRate = ' + hitRate + '% ]';
         }
 
-        public getCreateCount(): number {
-            return this.createCount.toDouble();
+        public getCreateCount(): long {
+            return this.createCount;
         }
 
-        public getMissCount(): number {
-            return this.missCount.toDouble();
+        public getMissCount(): long {
+            return this.missCount;
         }
 
-        public getRemovalCount(): number {
-            return this.evictionCount.toDouble();
+        public getRemovalCount(): long{
+            return this.evictionCount;
         }
 
-        public getMatchCount(): number {
-            return this.hitCount.toDouble();
+        public getMatchCount(): long {
+            return this.hitCount;
         }
 
-        public getPutCount(): number {
-            return this.putCount.toDouble();
+        public getPutCount(): long {
+            return this.putCount;
         }
 
         public $_iterator(): IterableIterator<[K, V]> {
@@ -482,8 +482,8 @@ export namespace util {
     * @returns Returns: <string> The formatted string
     */
     export function format(s: string, ...args: Object[]): string {
-        // arrays are invariant, need to copy Objects to NullishTypes
-        let a = new Array<NullishType>(args.length)
+        // arrays are invariant, need to copy
+        let a = new Array<Any>(args.length)
         for (let i = 0; i < args.length; ++i) {
             a[i] = args[i]
         }
@@ -735,9 +735,8 @@ export namespace util {
         private static native nativeDestroy(ptr: long): void;
     }
     export class RationalNumber {
-        private mnum: number = 0;
-        private mden: number = 0;
-        private sign: number;
+        private mnum: long = 0;
+        private mden: long = 0;
 
         constructor() {}
 
@@ -753,17 +752,14 @@ export namespace util {
 
         /**
          * Used to create a RationalNumber instance with a given numerator and denominator.
-         * @param { number } num represents the numerator.
-         * @param { number } den represents the denominator.
+         * @param { long } num represents the numerator.
+         * @param { long } den represents the denominator.
          * @returns { RationalNumber } return a RationalNumber object.
          */
-        static parseRationalNumber(num: number, den: number): RationalNumber {
-            if (!Number.isInteger(num) || !Number.isInteger(den)) {
-                console.error('parseRationalNumber: The type of Parameter must be integer');
-            }
+        static parseRationalNumber(num: long, den: long): RationalNumber {
             let sign = (num < 0) !== (den < 0) ? -1 : 1;
-            num = Math.abs(num);
-            den = Math.abs(den);
+            num = Math.abs(num).toLong();
+            den = Math.abs(den).toLong();
             let ratNum = new RationalNumber();
             if (den === 0) {
                 if (num !== 0) {
@@ -807,7 +803,7 @@ export namespace util {
                 if (!Number.isInteger(num1) || !Number.isInteger(num2)) {
                     console.error('createRationalFromString: The type of Parameter must be integer string');
                 }
-                return RationalNumber.parseRationalNumber(num1, num2);
+                return RationalNumber.parseRationalNumber(num1.toLong(), num2.toLong());
             } else {
                 throw createBusinessError(TypeErrorCodeId,
                     `Parameter error. The type of ${str} must be character string`);
@@ -819,7 +815,7 @@ export namespace util {
          * @param { RationalNumber } other RationalNumber object.
          * @returns { number } if equal return 0, If the givens smaller than the current return 1, otherwise return -1.
          */
-        public compare(other: RationalNumber): number {
+        public compare(other: RationalNumber): int {
             if (this.mnum === other.mnum && this.mden === other.mden) {
                 return 0;
             } else if (this.isNaN()) {
@@ -857,9 +853,9 @@ export namespace util {
         /**
          * Gets the value of the current RationalNumber object as an integer or float number.
          *
-         * @returns { number } returns the value of an integer or float number.
+         * @returns { double } returns the value of an integer or float number.
          */
-        public valueOf(): number {
+        public valueOf(): double {
             if (this.mnum > 0 && this.mden === 0) {
                 return Number.POSITIVE_INFINITY;
             } else if (this.mnum < 0 && this.mden === 0) {
@@ -867,29 +863,26 @@ export namespace util {
             } else if (this.isNaN()) {
                 return Number.NaN;
             } else {
-                return this.mnum / this.mden;
+                return Number(this.mnum) / Number(this.mden);
             }
         }
 
         /**
          * Gets the greatest common divisor of two specified integers.
-         * @param { number } firNum the integer.
-         * @param { number } SecNum the integer.
-         * @returns { number } returns the greatest common divisor of firNum and SecNum.
+         * @param { long } firNum the integer.
+         * @param { long } SecNum the integer.
+         * @returns { long } returns the greatest common divisor of firNum and SecNum.
          */
-        static getCommonFactor(firNum: number, SecNum: number): number {
+        static getCommonFactor(firNum: long, SecNum: long): long {
             if (firNum === 0 || SecNum === 0) {
                 throw createBusinessError(TypeErrorCodeId,
                     `Parameter error. The Parameter cannot be zero`);
             }
-            if (!Number.isInteger(firNum) || !Number.isInteger(SecNum)) {
-                console.error('getCommonFactor: The type of Parameter must be integer');
-            }
             return RationalNumber.getGCD(firNum, SecNum);
         }
 
-        private static getGCD(firNum: number, SecNum: number): number {
-            let temp: number = 0;
+        private static getGCD(firNum: long, SecNum: long): long {
+            let temp: long = 0;
             if (firNum < SecNum) {
                 temp = firNum;
                 firNum = SecNum;
@@ -906,18 +899,18 @@ export namespace util {
         /**
          * Gets the denominator of the current RationalNumber object.
          *
-         * @returns { number } returns the denominator.
+         * @returns { long } returns the denominator.
          */
-        public getDenominator(): number {
+        public getDenominator(): long {
             return this.mden;
         }
 
         /**
          * Gets the numerator of the current RationalNumber object.
          *
-         * @returns { number } returns the numerator.
+         * @returns { long } returns the numerator.
          */
-        public getNumerator(): number {
+        public getNumerator(): long {
             return this.mnum;
         }
 
@@ -1112,11 +1105,13 @@ export namespace util {
 
         static native generateRandomBinaryUUID(entropyCache: boolean): Uint8Array
 
+        static native getErrorString(err: int): string
+
         private static objectToString(obj: Object, full: boolean = false): string {
             return (new UtilHelper).stringifyObject(obj, '\n', 1, full)
         }
 
-        private static isNullObject(obj: NullishType): boolean {
+        private static isNullObject(obj: Any): boolean {
             return (obj == undefined) || (obj == null)
         }
 
@@ -1136,25 +1131,25 @@ export namespace util {
             return obj instanceof Array
         }
 
-        private stringifySubObject(delimiter: string, subObj: NullishType, subObjName: string, depth: number, full: boolean = false): string {
+        private stringifySubObject(delimiter: string, subObj: Any, subObjName: string, depth: number, full: boolean = false): string {
 
             if (UtilHelper.isNullObject(subObj)) {
                 return UtilHelper.nullObjectDescription(subObjName) + ',' + delimiter
             }
 
             let strB = new StringBuilder
-            subObj = __narrowAny(subObj)
+            subObj = subObj as object
 
-            if (UtilHelper.isArray(subObj!)) {
-                strB.append(subObjName + ':' + delimiter + UtilHelper.arrayToString(delimiter + '  ', subObj! as Array<Object>, depth, full))
-            } else if (UtilHelper.isObject(subObj!)) {
-                strB.append(this.subObjectDescription(subObj!, subObjName, this.isCircular(subObj!), delimiter, depth))
-            } else if (UtilHelper.isFunction(subObj!)) {
-                strB.append(UtilHelper.functionDescription(subObj!, delimiter, true, full))
+            if (UtilHelper.isArray(subObj)) {
+                strB.append(subObjName + ':' + delimiter + UtilHelper.arrayToString(delimiter + '  ', subObj as Array<Object>, depth, full))
+            } else if (UtilHelper.isObject(subObj)) {
+                strB.append(this.subObjectDescription(subObj, subObjName, this.isCircular(subObj), delimiter, depth))
+            } else if (UtilHelper.isFunction(subObj)) {
+                strB.append(UtilHelper.functionDescription(subObj, delimiter, true, full))
             } else {
-                strB.append(UtilHelper.simpleObjectDescription(subObj!, subObjName, true))
+                strB.append(UtilHelper.simpleObjectDescription(subObj, subObjName, true))
             }
-            this.objects.add(subObj!)
+            this.objects.add(subObj)
 
             strB.append(',' + delimiter)
             return strB.toString()
@@ -1189,12 +1184,12 @@ export namespace util {
 
         private objects = new Set<Object>
 
-        private isCircular(obj: NullishType): boolean {
+        private isCircular(obj: Any): boolean {
             if (obj == null) {
                 return false
             }
 
-            return this.objects.has(__narrowAny<object>(obj))
+            return this.objects.has(obj as object)
         }
 
         private static nullObjectDescription(objName: string = ''): string {
@@ -1206,25 +1201,25 @@ export namespace util {
             return (isSub ? objName + ': ' : '') + quotesStr + obj + quotesStr
         }
 
-        private stringifyObject(obj: NullishType, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
+        private stringifyObject(obj: Any, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
 
             if (UtilHelper.isNullObject(obj)) {
                 return UtilHelper.nullObjectDescription()
             }
-            obj = __narrowAny(obj)
-            this.objects.add(obj!)
+            obj = obj as object
+            this.objects.add(obj)
             let strB = new StringBuilder
-            if (UtilHelper.isArray(obj!)) {
-                strB.append(UtilHelper.arrayToString(delimiter, obj! as Array<Object>, depth, full))
-            } else if (UtilHelper.isFunction(obj!)) {
-                strB.append(UtilHelper.functionDescription(obj!, delimiter, false, full))
+            if (UtilHelper.isArray(obj)) {
+                strB.append(UtilHelper.arrayToString(delimiter, obj as Array<Object>, depth, full))
+            } else if (UtilHelper.isFunction(obj)) {
+                strB.append(UtilHelper.functionDescription(obj, delimiter, false, full))
                 if (!full) {
                     strB = (new StringBuilder).append('{ ').append(strB.toString()).append(' }')
                 }
-            } else if (UtilHelper.isObject(obj!)) {
-                strB.append(this.objectDescription(obj!, delimiter, depth, full))
+            } else if (UtilHelper.isObject(obj)) {
+                strB.append(this.objectDescription(obj, delimiter, depth, full))
             } else {
-                strB.append(UtilHelper.simpleObjectDescription(obj!, ''))
+                strB.append(UtilHelper.simpleObjectDescription(obj, ''))
             }
             return strB.toString()
         }
@@ -1293,7 +1288,7 @@ export namespace util {
             return subObj ? subObj! as int : 0
         }
 
-        private static getValue(key: string, obj: Object): NullishType {
+        private static getValue(key: string, obj: Object): Any {
             if (!obj) {
                 return null
             }
@@ -1516,7 +1511,7 @@ export namespace util {
          * @returns { boolean } Returns true if the value is an iterator returned for a built-in Map instance.
          */
         isMapIterator(value: Object): boolean {
-            return value instanceof MapIterator || value instanceof EmptyMapIterator;
+            return value instanceof MapIterator;
         }
 
         /**
@@ -1698,13 +1693,13 @@ export namespace util {
     /**
      * Get the hash code of an object.
      * @param { RecordData } [obj] - The object that need to get hash code.
-     * @returns { number } Return a hash code of an object.
+     * @returns { long } Return a hash code of an object.
      */
-    export function getHash(obj: RecordData): number {
+    export function getHash(obj: RecordData): long {
         if (obj === undefined || obj === null) {
             throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of Parameter must be object.`);
         }
-        let result: number = Runtime.getHashCodeByValue(obj!);
+        let result: long = Runtime.getHashCodeByValue(obj!);
         return result;
     }
 
@@ -1734,5 +1729,18 @@ export namespace util {
             uuidArray[i] = parseInt(hex.substr(i * 2, 2), 16);
         }
         return uuidArray;
+    }
+
+    /**
+    * Obtain detailed information about the system error code.
+    * @param { int } errno - Error codes generated by system errors
+    * @returns { string } Details about the error code.
+    */
+    export function errnoToString(errno: int): string {
+        let result = UtilHelper.getErrorString(errno);
+        if (result == undefined) {
+            result = `Unknown system error ${errno}`;
+        }
+        return result;
     }
 }

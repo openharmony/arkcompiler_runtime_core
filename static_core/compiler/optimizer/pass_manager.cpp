@@ -16,7 +16,7 @@
 #include <iomanip>
 #include "pass_manager.h"
 #include "compiler_logger.h"
-#include "trace/trace.h"
+#include "libarkbase/trace/trace.h"
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_checker.h"
@@ -45,7 +45,7 @@
 
 #include <fstream>
 #include <ctime>
-#include "os/filesystem.h"
+#include "libarkbase/os/filesystem.h"
 #endif  // ENABLE_IR_DUMP
 
 namespace ark::compiler {

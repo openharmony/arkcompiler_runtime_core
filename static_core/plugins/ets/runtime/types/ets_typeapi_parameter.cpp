@@ -22,7 +22,7 @@ namespace ark::ets {
 
 EtsTypeAPIParameter *EtsTypeAPIParameter::Create(EtsCoroutine *etsCoroutine)
 {
-    EtsClass *klass = PlatformTypes(etsCoroutine)->coreParameter;
+    EtsClass *klass = PlatformTypes(etsCoroutine)->coreTypeAPIParameter;
     EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
     return reinterpret_cast<EtsTypeAPIParameter *>(etsObject);
 }

@@ -17,7 +17,6 @@ limitations under the License.
 /*---
 desc: Type arguments
 params: function
-tags: [{{c.tags}}]
 ---*/
 
 interface I {}
@@ -37,8 +36,9 @@ function foo <T{{c.bound}}> (t: T, v: T): T {
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+
     {{c.use|indent}}
-    return 0;
+    
 }
 {% endfor %}

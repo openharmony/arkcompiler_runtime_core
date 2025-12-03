@@ -15,7 +15,7 @@
 
 #include "runtime/include/exceptions.h"
 
-#include <libpandabase/utils/cframe_layout.h>
+#include <libarkbase/utils/cframe_layout.h>
 
 #include "runtime/bridge/bridge.h"
 #include "runtime/deoptimization.h"
@@ -25,12 +25,12 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/mem/vm_handle.h"
-#include "libpandabase/utils/asan_interface.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandafile/class_data_accessor-inl.h"
-#include "libpandafile/method_data_accessor-inl.h"
-#include "events/events.h"
+#include "libarkbase/utils/asan_interface.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor-inl.h"
+#include "libarkbase/events/events.h"
 #include "runtime/handle_base-inl.h"
 
 namespace ark {

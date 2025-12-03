@@ -21,14 +21,6 @@ cases:
           let a: A = { age: 42 } // CTE, no such field
 
     - decl: |-
-          interface A {
-              name: string|null
-              foo(): void
-          }
-      use: |-
-          let a: A = { name: "John" } // CTE, interface can contain fields only
-
-    - decl: |-
           class B {
               name: string|null = null
           }
@@ -41,3 +33,26 @@ cases:
           }
       use: |-
           let a: A = { name: "John", name: "James" } // CTE, duplicate field
+
+    - decl: |-
+          interface A {
+              name?: string
+              age: number
+          }
+      use: |-
+          let a: A = { name: "John" } // CTE, missed field
+
+    - decl: |-
+          interface A {
+              age: number
+          }
+      use: |-
+          let a: A = {} // CTE, non-optional property must be assigned a value.
+
+    - decl: |-
+        interface A {
+            name: string | null
+            foo(): void
+        }
+      use: |-
+        let a: A = { name: 'John' } // CTE, empty method foo is not specified in literal

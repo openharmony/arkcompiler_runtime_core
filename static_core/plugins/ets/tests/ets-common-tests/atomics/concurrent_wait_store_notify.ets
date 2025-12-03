@@ -24,8 +24,6 @@ let arr: Int32Array = new Int32Array;
 let bytearr: Int8Array = new Int8Array;
 
 function testMain() {
-    let c = Console.getInstance()
-
     buf = new ArrayBuffer(4);
     arr = new Int32Array(buf, 0, 1);
     bytearr = new Int8Array(buf, 0, 4)
@@ -33,26 +31,13 @@ function testMain() {
     launch<Int, () => Int>(writer)
 
     let res = Atomics.wait(arr, 0, 0) as string
-    c.println(res)
     arktest.assertTrue(res == 'ok' || res == 'not-equal')
 }
 
 function writer(): Int {
-    let c = Console.getInstance()
-
-    wait()
     Atomics.store(bytearr, 0, 5 as byte)
     let count = Atomics.notify(arr, 0)
-    c.println(count)
     return 1
-}
-
-function wait(): int {
-    let i = 1
-    for (let j = 0; j < 10000; j++) {
-        i += j
-    }
-    return i
 }
 
 function main() {

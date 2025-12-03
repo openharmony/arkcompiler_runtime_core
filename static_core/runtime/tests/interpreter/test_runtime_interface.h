@@ -19,8 +19,8 @@
 
 #include <cstdint>
 
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
 #include "runtime/include/coretypes/array-inl.h"
 #include "runtime/include/coretypes/line_string.h"
 #include "runtime/include/method.h"
@@ -276,7 +276,7 @@ public:
         arrayObject_ = obj;
     }
 
-    static ObjectHeader *CreateObject(Class *klass)
+    static ObjectHeader *CreateObject([[maybe_unused]] ManagedThread *thread, Class *klass)
     {
         EXPECT_EQ(klass, objectClass_);
         return object_;

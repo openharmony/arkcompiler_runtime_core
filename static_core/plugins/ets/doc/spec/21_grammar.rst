@@ -47,6 +47,11 @@ Grammar Summary
        type '[' ']'
        ;
 
+.. functionType:
+   typeParameters? '(' ftParameterList? ')' ftReturnType
+   ;
+
+
     functionType:
         '(' ftParameterList? ')' ftReturnType
         ;
@@ -155,7 +160,7 @@ Grammar Summary
         ;
 
     optionalParameter:
-        identifier ':' type '=' expression
+        identifier (':' type)? '=' expression
         | identifier '?' ':' type
         ;
 
@@ -202,7 +207,7 @@ Grammar Summary
         | unaryExpression
         | binaryExpression
         | assignmentExpression
-        | conditionalExpression
+        | ternaryConditionalExpression
         | stringInterpolation
         | lambdaExpression
         | lambdaExpressionWithReceiver
@@ -404,9 +409,10 @@ Grammar Summary
 
     assignmentOperator
         : '='
-        | '+='  | '-='  | '*='   | '='  | '%='
+        | '+='  | '-='  | '*='   | '='  | '%=' | `**=` | `/=`
         | '<<=' | '>>=' | '>>>='
-        | '&='  | '|='  | '^='
+        | '&='  | '|='  | '^=' | `&&=` | `||=`
+        | `??=`
         ;
 
     lhsExpression:
@@ -417,7 +423,7 @@ Grammar Summary
         expression
         ;
 
-    conditionalExpression:
+    ternaryConditionalExpression:
         expression '?' expression ':' expression
         ;
 
@@ -600,6 +606,11 @@ Grammar Summary
         'abstract' | 'final'
         ;
 
+.. classModifier:
+   'abstract' | 'final' | 'sealed'
+   ;
+
+
     classExtendsClause:
         'extends' typeReference
         ;
@@ -676,13 +687,13 @@ Grammar Summary
 
 
     classAccessorDeclaration:
-        accessorModifier*
-        ( 'get' identifier '(' ')' returnType block?
+        classAccessorModifier*
+        ( 'get' identifier '(' ')' returnType? block?
         | 'set' identifier '(' parameter ')' block?
         )
         ;
 
-    accessorModifier:
+    classAccessorModifier:
         'abstract'
         | 'static'
         | 'final'
@@ -746,18 +757,8 @@ Grammar Summary
         identifier ('=' constantExpression)?
         ;
 
-    compilationUnit:
-        moduleDeclaration
-        | declarationModule
-        | libraryDescription
-        ;
-
     moduleDeclaration:
         importDirective* (topDeclaration | topLevelStatements | exportDirective)*
-        ;
-
-    libraryDescription:
-        (importDirective|reExportDirective)*
         ;
 
     importDirective:
@@ -779,7 +780,7 @@ Grammar Summary
         ;
 
     defaultBinding:
-        identifier
+        'type'? identifier
         ;
 
     selectiveBindings:
@@ -787,7 +788,7 @@ Grammar Summary
         ;
 
     nameBinding:
-        identifier bindingAlias?
+        `type`? identifier bindingAlias?
         | 'default' 'as' identifier
         ;
 
@@ -795,13 +796,6 @@ Grammar Summary
         StringLiteral
         ;
 
-    declarationModule:
-        importDirective*
-        ( 'export'? ambientDeclaration
-        | 'export'? typeAlias
-        | selectiveExportDirective
-        )*
-        ;
 
     topDeclaration:
         ('export' 'default'?)?
@@ -811,11 +805,12 @@ Grammar Summary
         | constantDeclarations
         | functionDeclaration
         | overloadFunctionDeclaration
-        | functionWithReceiverDeclaration
-        | accessorWithReceiverDeclaration
         | namespaceDeclaration
         | ambientDeclaration
         | annotationDeclaration
+        | accessorDeclaration
+        | functionWithReceiverDeclaration
+        | accessorWithReceiverDeclaration
         )
         ;
 
@@ -841,7 +836,7 @@ Grammar Summary
 
     singleExportDirective:
         'export'
-        ( identifier
+        ( `type`? identifier
         | 'default' (expression | identifier)
         | '{' identifier 'as' 'default' '}'
         )
@@ -872,6 +867,7 @@ Grammar Summary
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | ambientAnnotationDeclaration
+        | ambientAccessorDeclaration
         | 'const'? enumDeclaration
         | typeAlias
         )
@@ -904,7 +900,7 @@ Grammar Summary
         ( ambientFieldDeclaration
         | ambientConstructorDeclaration
         | ambientMethodDeclaration
-        | ambientAccessorDeclaration
+        | ambientClassAccessorDeclaration
         | ambientIndexerDeclaration
         | ambientCallSignatureDeclaration
         | ambientIterableDeclaration
@@ -935,7 +931,7 @@ Grammar Summary
         'static'
         ;
 
-    ambientAccessorDeclaration:
+    ambientClassAccessorDeclaration:
         ambientMethodModifier*
         ( 'get' identifier '(' ')' returnType
         | 'set' identifier '(' parameter ')'
@@ -988,8 +984,15 @@ Grammar Summary
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
+        | ambientAccessorDeclaration
         | 'const'? enumDeclaration
         | typeAlias
+        )
+        ;
+
+    ambientAccessorDeclaration:
+        ( 'get' identifier '(' ')' returnType
+        | 'set' identifier '(' parameter ')' 
         )
         ;
 

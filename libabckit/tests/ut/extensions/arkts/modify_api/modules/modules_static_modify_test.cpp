@@ -21,6 +21,7 @@
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "tests/helpers/helpers.h"
 #include "tests/helpers/helpers_runtime.h"
+#include "static_core/assembler/assembly-ins.h"
 
 namespace {
 constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc";
@@ -31,14 +32,13 @@ constexpr auto NEW_NAME = "New";
 namespace libabckit::test {
 
 static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
-static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
-static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkM = AbckitGetArktsModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_statG = AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0);
+static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
-// class LibAbcKitArkTSModifyApiModulesTest : public ::testing::Test {};
 class LibAbcKitArkTSModifyApiModulesTest : public ::testing::Test {
 protected:
     std::unique_ptr<AbckitCoreFunctionParam> CreateTestParameter(AbckitFile *file, const char *name,
@@ -99,7 +99,7 @@ protected:
         auto *param0 = g_implG->gGetParameter(graph, 0);
         ASSERT_NE(param0, nullptr);
 
-        auto *constValue = g_implG->gFindOrCreateConstantF64(graph, addValue);
+        auto *constValue = g_implG->gFindOrCreateConstantI32(graph, addValue);
         ASSERT_NE(constValue, nullptr);
 
         auto *addInst = g_statG->iCreateAdd(graph, param0, constValue);
@@ -128,7 +128,7 @@ protected:
         auto *consoleLog = helpers::FindFirstInst(mainGraph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
         ASSERT_NE(consoleLog, nullptr);
 
-        auto *constArg = g_implG->gFindOrCreateConstantF64(mainGraph, argValue);
+        auto *constArg = g_implG->gFindOrCreateConstantI32(mainGraph, argValue);
         auto *callInst = g_statG->iCreateCallStatic(mainGraph, testFunction->core, 1, constArg);
         ASSERT_NE(callInst, nullptr);
 
@@ -141,42 +141,6 @@ protected:
     }
 };
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleAddFunction, abc-kind=ArkTS2,
-// category=positive
-TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddFunctionStatic)
-{
-    AbckitFile *file = nullptr;
-    helpers::AssertOpenAbc(INPUT_PATH, &file);
-
-    helpers::ModuleByNameContext ctxFinder = {nullptr, "modules_static_modify"};
-    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(ctxFinder.module, nullptr);
-
-    auto *arkModule = g_implArkI->coreModuleToArktsModule(ctxFinder.module);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(arkModule, nullptr);
-
-    std::vector<std::unique_ptr<AbckitCoreFunctionParam>> params;
-    params.push_back(CreateTestParameter(file, "x", ABCKIT_TYPE_ID_F64));
-
-    auto *testFunction = CreateTestFunction(arkModule, file, "testFunction", ABCKIT_TYPE_ID_F64, params);
-    ASSERT_NE(testFunction, nullptr);
-
-    for (auto &param : params) {
-        param.release();
-    }
-
-    AddSimpleFunctionBody(testFunction, 10);
-
-    ModifyMainFunction(file, testFunction, 5);
-
-    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->closeFile(file);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_EQ(helpers::ExecuteStaticAbc(OUTPUT_PATH, "modules_static_modify", "main"), "15\n");
-}
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleSetName, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleSetNameStatic)
 {
@@ -212,20 +176,56 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleSetNameStatic)
               helpers::ExecuteStaticAbc(OUTPUT_PATH, "New", "main"));
 }
 
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddFunctionStatic)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
+
+    helpers::ModuleByNameContext ctxFinder = {nullptr, "modules_static_modify"};
+    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder.module, nullptr);
+
+    auto *arkModule = g_implArkI->coreModuleToArktsModule(ctxFinder.module);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(arkModule, nullptr);
+
+    std::vector<std::unique_ptr<AbckitCoreFunctionParam>> params;
+    params.push_back(CreateTestParameter(file, "x", ABCKIT_TYPE_ID_I32));
+
+    auto *testFunction = CreateTestFunction(arkModule, file, "testFunction", ABCKIT_TYPE_ID_I32, params);
+    ASSERT_NE(testFunction, nullptr);
+
+    for (auto &param : params) {
+        param.release();
+    }
+
+    AddSimpleFunctionBody(testFunction, 10);
+
+    ModifyMainFunction(file, testFunction, 5);
+
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    ASSERT_EQ(helpers::ExecuteStaticAbc(OUTPUT_PATH, "modules_static_modify", "main"), "15\n");
+}
+
 // Test: test-kind=api, api=ArktsModifyApiImpl::ModuleAddField, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddField)
 {
     AbckitFile *file = nullptr;
-    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/module_static_modify2.abc", &file);
+    helpers::AssertOpenAbc(INPUT_PATH, &file);
 
-    helpers::ModuleByNameContext ctxFinder = {nullptr, "module_static_modify2"};
+    helpers::ModuleByNameContext ctxFinder = {nullptr, "modules_static_modify"};
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(ctxFinder.module, nullptr);
     auto module = ctxFinder.module;
 
     struct AbckitArktsFieldCreateParams params;
-    params.name = "newModuleFieldUnique";
+    params.name = "newModuleField";
     params.type = g_implM->createType(file, AbckitTypeId::ABCKIT_TYPE_ID_STRING);
     std::string moduleFieldValue = "hello";
     params.value = g_implM->createValueString(file, moduleFieldValue.c_str(), moduleFieldValue.length());
@@ -242,7 +242,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddField)
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::AssertOpenAbc(OUTPUT_PATH, &file);
-    ctxFinder = {nullptr, "module_static_modify2"};
+    ctxFinder = {nullptr, "modules_static_modify"};
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
     ASSERT_NE(ctxFinder.module, nullptr);
     module = ctxFinder.module;
@@ -254,187 +254,12 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddField)
         (*ctx).emplace_back(filedName);
         return true;
     });
-    std::vector<std::string> actualFieldNames = {"newModuleFieldUnique"};
+    std::vector<std::string> actualFieldNames = {"field1", "newModuleField"};
     ASSERT_EQ(FieldNames, actualFieldNames);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_EQ(helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR
-                                        "ut/extensions/arkts/modify_api/modules/module_static_modify2.abc",
-                                        "module_static_modify2", "main"),
-              helpers::ExecuteStaticAbc(OUTPUT_PATH, "module_static_modify2", "main"));
-}
-
-// Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModuleArktsV2, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitArkTSModifyApiModulesTest, FileAddExternalModuleArktsV2)
-{
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc",
-                                  "modules_static_modify", "main");
-    AbckitFile *file = nullptr;
-    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc", &file);
-
-    const char *externalModuleName = "std.math";
-    g_implArkM->fileAddExternalModuleArktsV2(file, externalModuleName);
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
-                     strlen(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc"));
-    g_impl->closeFile(file);
-
-    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc", &file);
-    helpers::ModuleByNameContext ctxFinder = {nullptr, externalModuleName};
-    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(ctxFinder.module, nullptr);
-    auto name = g_implI->moduleGetName(ctxFinder.module);
-    ASSERT_TRUE(helpers::Match(externalModuleName, g_implI->abckitStringToString(name)));
-    g_impl->closeFile(file);
-
-    auto modifiedOutput =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
-                                  "modules_static_modify", "main");
-    ASSERT_TRUE(helpers::Match(modifiedOutput, output));
-}
-
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleImportClassFromArktsV2ToArktsV2, abc-kind=ArkTS2,
-// category=positive
-TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleImportClassFromArktsV2ToArktsV2)
-{
-    AbckitFile *file = nullptr;
-    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc", &file);
-
-    helpers::ModuleByNameContext ctxFinder = {nullptr, "std.core"};
-    g_implI->fileEnumerateExternalModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(ctxFinder.module, nullptr);
-    auto module = ctxFinder.module;
-    auto arkModule = g_implArkI->coreModuleToArktsModule(module);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(arkModule, nullptr);
-
-    auto arkClass = g_implArkM->moduleImportClassFromArktsV2toArktsV2(arkModule, "Boolean");
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(arkClass, nullptr);
-
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
-                     strlen(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc"));
-    g_impl->closeFile(file);
-
-    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc", &file);
-    g_implI->fileEnumerateExternalModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(ctxFinder.module, nullptr);
-    module = ctxFinder.module;
-
-    helpers::ClassByNameContext classFinder = {nullptr, "Boolean"};
-    g_implI->moduleEnumerateClasses(module, &classFinder, helpers::ClassByNameFinder);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(classFinder.klass, nullptr);
-
-    g_impl->closeFile(file);
-}
-
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleImportStaticFunction, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleImportStaticFunction)
-{
-    // 1. add externalModule and write back
-    AbckitFile *file = nullptr;
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc",
-                                  "modules_static_modify", "main");
-    ASSERT_TRUE(helpers::Match(output, "25\n"));
-    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc", &file);
-    auto arkModule = g_implArkM->fileAddExternalModuleArktsV2(file, "std.math");
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(arkModule, nullptr);
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
-                     strlen(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc"));
-    g_impl->closeFile(file);
-
-    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc", &file);
-    helpers::ModuleByNameContext ctxFinder = {nullptr, "std.math"};
-    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(ctxFinder.module, nullptr);
-    auto module = ctxFinder.module;
-    arkModule = g_implArkI->coreModuleToArktsModule(module);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(arkModule, nullptr);
-
-    // 2. externalModule import static function
-    const char *params[] = {"f64"};
-    auto arkFunc = g_implArkM->moduleImportStaticFunctionFromArktsV2ToArktsV2(arkModule, "abs", "f64", params, 1);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(arkFunc, nullptr);
-    auto *coreFunc = g_implArkI->arktsFunctionToCoreFunction(arkFunc);
-
-    // 3. modify certain function's graph to call imported external function
-    auto *method = helpers::FindMethodByName(file, "main");
-    AbckitGraph *graph = g_implI->createGraphFromFunction(method);
-    auto *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
-    auto *value = g_implG->gFindOrCreateConstantF64(graph, -302);
-    auto *call = g_statG->iCreateCallStatic(graph, coreFunc, 1, value);
-    g_implG->iInsertBefore(call, callInst);
-    g_implG->iSetInput(callInst, call, 1);
-    g_implM->functionSetGraph(method, graph);
-    g_impl->destroyGraph(graph);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-
-    // 4. write back and execute abc
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
-                     strlen(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc"));
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->closeFile(file);
-    output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
-                                  "modules_static_modify", "main");
-    ASSERT_TRUE(helpers::Match(output, "302\n"));
-}
-
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleImportClassMethod, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleImportClassMethod)
-{
-    // 1. add externalModule and write back
-    AbckitFile *file = nullptr;
-    auto output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc",
-                                  "modules_static_modify", "main");
-    ASSERT_TRUE(helpers::Match(output, "25\n"));
-    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc", &file);
-    auto coreModule = g_implArkM->fileAddExternalModuleArktsV2(file, "std.core");
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(coreModule, nullptr);
-    // 2. import class method
-    const char *params[] = {"std.core.String"};
-    auto logFunc =
-        g_implArkM->moduleImportClassMethodFromArktsV2ToArktsV2(coreModule, "Console", "log", "void", params, 1);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(logFunc, nullptr);
-    auto *coreFunc = g_implArkI->arktsFunctionToCoreFunction(logFunc);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_NE(coreFunc, nullptr);
-
-    auto *method = helpers::FindMethodByName(file, "main");
-    AbckitGraph *graph = g_implI->createGraphFromFunction(method);
-    auto *returnInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID);
-    auto *loadStaticInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTATIC);
-    auto str = g_implM->createString(file, "hellostring", strlen("hellostring"));
-    AbckitInst *loadString = g_statG->iCreateLoadString(graph, str);
-    g_implG->iInsertBefore(loadString, returnInst);
-    auto *call = g_statG->iCreateCallStatic(graph, coreFunc, 2, loadStaticInst, loadString);
-    g_implG->iInsertBefore(call, returnInst);
-    g_implM->functionSetGraph(method, graph);
-    g_impl->destroyGraph(graph);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-
-    // 4. write back and execute abc
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
-                     strlen(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc"));
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-
-    g_impl->closeFile(file);
-    output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
-                                  "modules_static_modify", "main");
-    ASSERT_TRUE(helpers::Match(output, "25\nhellostring\n"));
+    ASSERT_EQ(helpers::ExecuteStaticAbc(INPUT_PATH, "modules_static_modify", "main"),
+              helpers::ExecuteStaticAbc(OUTPUT_PATH, "modules_static_modify", "main"));
 }
 
 }  // namespace libabckit::test

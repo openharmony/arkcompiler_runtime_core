@@ -166,8 +166,10 @@ JSProxy *JSProxy::CreateBuiltinProxy(EtsClass *etsClass, Span<Method *> targetMe
 JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
 {
     auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto ctx = InteropCtx::Current(coro);
-
+    ASSERT(functionInterface != nullptr);
+    ASSERT(ctx != nullptr);
     Class *interfaceCls = functionInterface->GetRuntimeClass();
     ASSERT(interfaceCls->IsInterface());
 
@@ -176,7 +178,7 @@ JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
 
     // use `Object` as the base class for the proxy function
     Class *objectClass = ctx->GetObjectClass();
-
+    ASSERT(objectClass != nullptr);
     // get the proxy function class if it is already created
     // otherwise, create the class
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();

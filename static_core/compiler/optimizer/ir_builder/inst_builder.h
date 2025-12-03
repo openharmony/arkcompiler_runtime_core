@@ -21,11 +21,11 @@
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "code_info/vreg_info.h"
-#include "code_data_accessor.h"
-#include "file_items.h"
+#include "libarkfile/code_data_accessor.h"
+#include "libarkfile/file_items.h"
 #include "compiler_logger.h"
 
-#include "bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction.h"
 
 namespace ark::compiler {
 constexpr int64_t INVALID_OFFSET = std::numeric_limits<int64_t>::max();

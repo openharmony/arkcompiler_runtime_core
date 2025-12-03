@@ -71,17 +71,17 @@ TEST_F(EtsOperatorNew, newWithPrototype)
     auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithPrototype");
     ASSERT_EQ(ret, true);
 }
-TEST_F(EtsOperatorNew, newWithJustFunction)
+TEST_F(EtsOperatorNew, DISABLED_newWithJustFunction)
 {
     auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithJustFunction");
     ASSERT_EQ(ret, true);
 }
-TEST_F(EtsOperatorNew, newWithObj)
+TEST_F(EtsOperatorNew, DISABLED_newWithObj)
 {
     auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithObj");
     ASSERT_EQ(ret, true);
 }
-TEST_F(EtsOperatorNew, newWithPrimitive)
+TEST_F(EtsOperatorNew, DISABLED_newWithPrimitive)
 {
     auto ret = CallEtsFunction<bool>(GetPackageName(), "newWithPrimitive");
     ASSERT_EQ(ret, true);

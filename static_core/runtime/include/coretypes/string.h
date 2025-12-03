@@ -19,7 +19,7 @@
 #include <cstdint>
 #include "objects/string/base_string-inl.h"
 #include "objects/string/line_string-inl.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "objects/base_class.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/exceptions.h"
@@ -97,8 +97,9 @@ public:
      * stored one byte one char in mutf8 format
      * @return The LineString created
      */
-    static String *AllocLineStringObject(size_t length, bool compressed, const LanguageContext &ctx,
-                                         PandaVM *vm = nullptr, bool movable = true, bool pinned = false);
+    static String *AllocLineStringObject(ManagedThread *thread, size_t length, bool compressed,
+                                         const LanguageContext &ctx, PandaVM *vm = nullptr, bool movable = true,
+                                         bool pinned = false);
 
     /**
      * @brief make slice of src string
@@ -118,8 +119,9 @@ public:
      * @param [in]compressed : true if all chars stored in tree are ASCII
      * @return The TreeString created
      */
-    static String *CreateTreeString(String *left, String *right, uint32_t length, bool compressed,
-                                    const LanguageContext &ctx, PandaVM *vm, bool movable = true, bool pinned = false);
+    static String *CreateTreeString(ManagedThread *thread, VMHandle<String> &leftHandle, VMHandle<String> &rightHandle,
+                                    uint32_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm,
+                                    bool movable = true, bool pinned = false);
 
     /**
      * @brief Concat two compressed Strings
@@ -368,12 +370,14 @@ public:
 
     common::BaseString *ToString()
     {
-        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this));
+        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this),
+                                        this->ClassAddr<common::BaseClass>());
     }
 
     const common::BaseString *ToStringConst() const
     {
-        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this));
+        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this),
+                                             this->ClassAddr<common::BaseClass>());
     }
 
     static constexpr uint32_t GetLengthOffset()
@@ -471,19 +475,19 @@ public:
     common::LineString *ToLineString()
     {
         ASSERT(IsLineString());
-        return common::LineString::Cast(ToString());
+        return common::LineString::Cast(ToString(), this->ClassAddr<common::BaseClass>());
     }
 
     const common::SlicedString *ToSlicedString() const
     {
         ASSERT(IsSlicedString());
-        return common::SlicedString::ConstCast(ToStringConst());
+        return common::SlicedString::ConstCast(ToStringConst(), this->ClassAddr<common::BaseClass>());
     }
 
     common::TreeString *ToTreeString()
     {
         ASSERT(IsTreeString());
-        return common::TreeString::Cast(ToString());
+        return common::TreeString::Cast(ToString(), this->ClassAddr<common::BaseClass>());
     }
 
     uint16_t *GetDataUtf16()
@@ -640,8 +644,8 @@ protected:
      * @brief Alloc a TreeString
      * @return The TreeString created
      */
-    static String *AllocTreeStringObject(const LanguageContext &ctx, PandaVM *vm = nullptr, bool movable = true,
-                                         bool pinned = false);
+    static String *AllocTreeStringObject(ManagedThread *thread, const LanguageContext &ctx, PandaVM *vm = nullptr,
+                                         bool movable = true, bool pinned = false);
 
 private:
     // In last bit of length_ we store if this string is compressed or not.

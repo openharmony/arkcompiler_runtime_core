@@ -1,0 +1,31 @@
+# Disabled as this test needs to reimplement. issue 28520
+simple_run/escape_analysis_casted.ets
+
+#Disabled as stdlib API was required to change.issue 25232
+simple_run/ets_escape_array.ets
+
+#NOTE(vpukhov) : #16340 requires ets.equals profiling
+simple_run/ets_inline_intrinsics.ets
+
+#Disabled as stdlib API was required to change.issue 25232
+simple_run/ets_string_concat_func.ets
+
+#triggers an OOM segfault in ReallocateBuffer
+ets_strings_concat/ets_stringbuilder_oom.ets
+
+#Issue : 25424
+simple_run/ets_pea_loads_upward_propagation.ets
+
+#NOTE : #21521 typeof peephole for numeric types
+simple_run/ets_typeof_compare1.ets
+simple_run/ets_typeof_compare5.ets
+simple_run/ets_typeof_compare2.ets
+simple_run/ets_typeof_compare3.ets
+simple_run/ets_typeof_compare4.ets
+simple_run/ets_typeof_compare6.ets
+
+# 24004 jit assert
+simple_run/ets_promise_launch.ets
+
+#Disabled - Replace typedarray length LoadObject with constant with external inlining support.issue 28689
+simple_run/typedarray_get_length_loadobject.ets

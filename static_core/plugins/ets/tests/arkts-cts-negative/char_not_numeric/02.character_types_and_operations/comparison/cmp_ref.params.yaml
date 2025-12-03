@@ -15,8 +15,6 @@ vals:
     - v1: c'\u0000'
       v2: c'\u0000'
       cases:
-          - { op: '==', r: 'true' }
-          - { op: '!=', r: 'false' }
           - { op: '<', r: 'false' }
           - { op: '<=', r: 'true' }
           - { op: '>', r: 'false' }
@@ -25,8 +23,6 @@ vals:
     - v1: c'\uFFFF'
       v2: c'\uFFFF'
       cases:
-          - { op: '==', r: 'true' }
-          - { op: '!=', r: 'false' }
           - { op: '<', r: 'false' }
           - { op: '<=', r: 'true' }
           - { op: '>', r: 'false' }
@@ -35,8 +31,6 @@ vals:
     - v1: c'\u000F'
       v2: c'\uF000'
       cases:
-          - { op: '==', r: 'false' }
-          - { op: '!=', r: 'true' }
           - { op: '<', r: 'true' }
           - { op: '<=', r: 'true' }
           - { op: '>', r: 'false' }
@@ -45,8 +39,6 @@ vals:
     - v1: c'\u0100'
       v2: c'\u00FF'
       cases:
-          - { op: '==', r: 'false' }
-          - { op: '!=', r: 'true' }
           - { op: '<', r: 'false' }
           - { op: '<=', r: 'false' }
           - { op: '>', r: 'true' }

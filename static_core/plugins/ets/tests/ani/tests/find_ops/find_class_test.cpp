@@ -30,14 +30,14 @@ TEST_F(FindClassTest, invalid_arguments)
 {
     ani_class cls {};
 
-    ASSERT_EQ(env_->FindClass("find_class_test/bla-bla-bla", &cls), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindClass("find_class_test/bla-bla-bla", &cls), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->FindClass(nullptr, &cls), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->FindClass("find_class_test.Point", nullptr), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->c_api->FindClass(nullptr, "Point", &cls), ANI_INVALID_ARGS);
 
-    ASSERT_EQ(env_->FindClass("", &cls), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindClass("", &cls), ANI_INVALID_DESCRIPTOR);
     ASSERT_EQ(env_->FindClass("\t", &cls), ANI_NOT_FOUND);
 }
 

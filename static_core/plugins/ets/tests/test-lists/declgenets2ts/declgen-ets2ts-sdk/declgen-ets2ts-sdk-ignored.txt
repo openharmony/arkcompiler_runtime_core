@@ -17,3 +17,10 @@ arkts/@arkts.collections.ets
 api/@ohos.url.ets
 api/@ohos.util.LightWeightMap.ets
 api/@ohos.base.ets
+api/@ohos.uri.ets
+api/@ohos.util.HashMap.ets
+api/@ohos.util.HashSet.ets
+api/@ohos.util.Queue.ets
+api/@ohos.util.Stack.ets
+api/@ohos.util.TreeMap.ets
+api/@ohos.util.TreeSet.ets

@@ -21,6 +21,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {selectSyntax} from '../../store/selectors/syntax';
 import {setCodeAction} from '../../store/actions/code';
 import {AppDispatch} from '../../store';
+import {selectCode} from '../../store/selectors/code';
 import debounce from 'lodash.debounce';
 import * as monaco from 'monaco-editor';
 import { editor as monacoEditor } from 'monaco-editor';
@@ -37,6 +38,7 @@ const ArkTSEditor: React.FC = () => {
     const [syn, setSyn] = useState(backendSyntax);
     const highlightErrors = useSelector(selectHighlightErrors);
     const jumpTo = useSelector(selectJumpTo);
+    const codeFromStore = useSelector(selectCode);
     const [editorInstance, setEditorInstance] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
     const [cursorPos, setCursorPos] = useState<{ lineNumber: number; column: number }>({ lineNumber: 1, column: 1 });
 
@@ -55,7 +57,6 @@ const ArkTSEditor: React.FC = () => {
             return;
         }
         const pos = { lineNumber: jumpTo.line, column: jumpTo.column || 1 };
-      
         editorInstance.setSelection({
           startLineNumber: pos.lineNumber,
           startColumn: pos.column,
@@ -119,9 +120,57 @@ const ArkTSEditor: React.FC = () => {
         return () => debouncedDispatchRef.current.cancel();
       }, []);
 
-    const handleEditorChange = (value?: string) => {
+    const hasCancel = (fn: unknown): fn is { cancel: () => void } =>
+        !!fn && typeof (fn as { cancel?: unknown }).cancel === 'function';
+
+    const hasFlush = (fn: unknown): fn is { flush: () => void } =>
+        !!fn && typeof (fn as { flush?: unknown }).flush === 'function';
+
+    const debouncedDispatchRef = useRef<ReturnType<typeof debounce>>(
+        debounce((value: string) => {
+          dispatch(setCodeAction(value));
+        }, 800)
+    );
+
+    useEffect(() => {
+        const handleFlush = (): void => {
+            const d = debouncedDispatchRef.current;
+            if (hasFlush(d)) {
+                d.flush();
+            }
+        };
+
+        window.addEventListener('flushPendingCodeUpdate', handleFlush);
+
+        return () => {
+            window.removeEventListener('flushPendingCodeUpdate', handleFlush);
+            const d = debouncedDispatchRef.current;
+            if (hasCancel(d)) {
+                d.cancel();
+            };
+        }
+    }, []);
+
+    const handleEditorChange = (value?: string): void => {
         debouncedDispatchRef.current(value ?? '');
     };
+
+    useEffect(() => {
+        if (!editorInstance || !codeFromStore) {
+            return;
+        }
+
+        const currentEditorValue = editorInstance.getValue();
+
+        if (currentEditorValue !== codeFromStore) {
+            const position = editorInstance.getPosition();
+            editorInstance.setValue(codeFromStore);
+
+            if (position) {
+                editorInstance.setPosition(position);
+            }
+        }
+    }, [codeFromStore, editorInstance]);
 
     useEffect(() => {
         if (!monaco || !editorInstance) {
@@ -142,7 +191,6 @@ const ArkTSEditor: React.FC = () => {
              : monaco.MarkerSeverity.Error
         })
     );
-    
         monacoEditor.setModelMarkers(model, 'arkts', markers);
     }, [highlightErrors, monaco, editorInstance]);
 
@@ -157,7 +205,7 @@ const ArkTSEditor: React.FC = () => {
                 theme={theme === 'dark' ? 'vs-dark' : 'light'}
                 onChange={handleEditorChange}
                 className={styles.editor}
-                options={{ 
+                options={{
                     fixedOverflowWidgets: true,
                     automaticLayout: true
                  }}

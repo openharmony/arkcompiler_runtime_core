@@ -121,3 +121,8 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_STRING: {
     }
     break;
 }
+
+case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_GET_BUFFER: {
+    Builder()->BuildEscompatArrayGetBufferIntrinsic(bcInst_, ACC_READ);
+    break;
+}

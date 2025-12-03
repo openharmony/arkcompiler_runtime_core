@@ -16,8 +16,8 @@
 #ifndef PANDA_RUNTIME_INCLUDE_LOADABLE_AGENT_H
 #define PANDA_RUNTIME_INCLUDE_LOADABLE_AGENT_H
 
-#include "libpandabase/os/library_loader.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/library_loader.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
 

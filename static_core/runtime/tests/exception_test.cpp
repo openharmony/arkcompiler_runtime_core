@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "assembly-parser.h"
-#include "libpandafile/value.h"
+#include "libarkfile/value.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"

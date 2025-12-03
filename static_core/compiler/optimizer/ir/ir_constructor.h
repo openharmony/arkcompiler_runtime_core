@@ -417,11 +417,33 @@ public:
             case Opcode::SelectImm:
                 inst->CastToSelectImm()->SetCc(cc);
                 break;
+            case Opcode::SelectTransform:
+                inst->CastToSelectTransform()->SetCc(cc);
+                break;
+            case Opcode::SelectImmTransform:
+                inst->CastToSelectImmTransform()->SetCc(cc);
+                break;
             case Opcode::DeoptimizeCompare:
                 inst->CastToDeoptimizeCompare()->SetCc(cc);
                 break;
             case Opcode::DeoptimizeCompareImm:
                 inst->CastToDeoptimizeCompareImm()->SetCc(cc);
+                break;
+            default:
+                UNREACHABLE();
+        }
+        return *this;
+    }
+
+    IrConstructor &SelectTransform(SelectTransformType type)
+    {
+        auto *inst = CurrentInst();
+        switch (inst->GetOpcode()) {
+            case Opcode::SelectTransform:
+                inst->CastToSelectTransform()->SetSelectTransformType(type);
+                break;
+            case Opcode::SelectImmTransform:
+                inst->CastToSelectImmTransform()->SetSelectTransformType(type);
                 break;
             default:
                 UNREACHABLE();
@@ -524,6 +546,9 @@ public:
                 break;
             case Opcode::SelectImm:
                 inst->CastToSelectImm()->SetImm(imm);
+                break;
+            case Opcode::SelectImmTransform:
+                inst->CastToSelectImmTransform()->SetImm(imm);
                 break;
             case Opcode::LoadArrayPairI:
                 inst->CastToLoadArrayPairI()->SetImm(imm);
@@ -1055,6 +1080,12 @@ public:
                 break;
             case Opcode::SelectImm:
                 inst->CastToSelectImm()->SetOperandsType(type);
+                break;
+            case Opcode::SelectTransform:
+                inst->CastToSelectTransform()->SetOperandsType(type);
+                break;
+            case Opcode::SelectImmTransform:
+                inst->CastToSelectImmTransform()->SetOperandsType(type);
                 break;
             case Opcode::IfImm:
                 inst->CastToIfImm()->SetOperandsType(type);

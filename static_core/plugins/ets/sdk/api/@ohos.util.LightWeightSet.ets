@@ -77,15 +77,15 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T>, JsonReplace
         }
     }
 
-    public jsonReplacer(): Record<String, NullishType> {
+    public jsonReplacer(): Record<String, Any> {
         const buf = this.buckets;
         const len = buf.length;
-        let arrayObj: Record<String, NullishType> = {};
+        let arrayObj: Record<String, Any> = {};
         for (let i = 0; i < len; i++) {
             if (Array.isArray(buf.getKeyAt(i))) {
-                for (let i = 0; i < (buf.getKeyAt(i) as Array<NullishType>).length; i++) {
-                    if ((buf.getKeyAt(i) as Array<NullishType>)[i] === undefined) {
-                        (buf.getKeyAt(i) as Array<NullishType>)[i] = null;
+                for (let i = 0; i < (buf.getKeyAt(i) as Array<Any>).length; i++) {
+                    if ((buf.getKeyAt(i) as Array<Any>)[i] === undefined) {
+                        (buf.getKeyAt(i) as Array<Any>)[i] = null;
                     }
                 }
             }
@@ -244,7 +244,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T>, JsonReplace
      * @param index the index to get the value from
      *
      * @returns the value at the specified index
-     * 
+     *
      * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
     getValueAt(index: int): T | undefined {
@@ -280,7 +280,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T>, JsonReplace
      * Increases the capacity of the LightWeightSet to the specified minimum capacity
      *
      * @param minimumCapacity the minimum capacity to increase to
-     * 
+     *
      * throws BusinessError if the minimumCapacity out of range.
      */
     increaseCapacityTo(minimumCapacity: int): void {
@@ -310,7 +310,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T>, JsonReplace
      * @param index the index to remove the value from
      *
      * @returns true if the value was removed, false otherwise
-     * 
+     *
      * @throws BusinessError if the index exceeds Int.MAX_VALUE.
      */
     removeAt(index: int): boolean {

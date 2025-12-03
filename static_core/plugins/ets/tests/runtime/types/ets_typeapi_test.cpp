@@ -31,7 +31,7 @@ public:
     EtsTypeAPITest()
     {
         options_.SetShouldLoadBootPandaFiles(true);
-        options_.SetShouldInitializeIntrinsics(false);
+        options_.SetShouldInitializeIntrinsics(true);
         options_.SetCompilerEnableJit(false);
         options_.SetGcType("g1-gc");
         options_.SetLoadRuntimes({"ets"});
@@ -126,7 +126,7 @@ TEST_F(EtsTypeAPITest, TypeAPIFieldMemoryLayout)
 
 TEST_F(EtsTypeAPITest, TypeAPIParameterMemoryLayout)
 {
-    auto *typeAPIParameterClass = PlatformTypes(vm_)->coreParameter;
+    auto *typeAPIParameterClass = PlatformTypes(vm_)->coreTypeAPIParameter;
     MirrorFieldInfo::CompareMemberOffsets(typeAPIParameterClass, GetTypeAPIParameterClassMembers());
 }
 

@@ -20,7 +20,7 @@ case_negative:
 
     logic: |-
       let numArray: MyArray<number> = new Array<number>(1, 2, 3);
-      let expectedException= (e: Error | Exception): boolean => {return (e instanceof RangeError)}
+      let expectedException= (e: Error): boolean => {return (e instanceof RangeError)}
       numArray.length = 2;
       arktest.expectThrow(() => {numArray[2] = 2;}, expectedException)
 
@@ -30,6 +30,6 @@ case_negative:
       type MyArray<T> = Array<T>;
 
     logic: |-
-      let expectedException= (e: Error | Exception): boolean => {return (e instanceof RangeError)}
+      let expectedException= (e: Error): boolean => {return (e instanceof RangeError)}
       let numArray: MyArray<number> = new Array<number>(1, 2, 3);
       arktest.expectThrow(() => {numArray.length = 5;}, expectedException)

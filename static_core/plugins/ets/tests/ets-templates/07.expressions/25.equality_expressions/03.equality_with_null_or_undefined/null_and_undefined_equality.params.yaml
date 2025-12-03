@@ -18,6 +18,18 @@ cases:
         arktest.assertTrue( a == undefined )
 
     - use: |-
+        let a: undefined;
+        arktest.assertTrue( a == null )
+
+    - use: |-
+        let a: undefined;
+        arktest.assertFalse( a != null )
+
+    - use: |-
+        let a: undefined;
+        arktest.assertTrue( a !== null )
+
+    - use: |-
         let a: undefined|null;
         arktest.assertTrue( a == undefined )
 
@@ -44,6 +56,34 @@ cases:
     - use: |-
         let a: undefined|null;
         arktest.assertFalse( a !== undefined )
+
+    - use: |-
+        let a: null = null;
+        arktest.assertTrue( a == undefined )
+
+    - use: |-
+        let a: null = null;
+        arktest.assertTrue( a == null )
+
+    - use: |-
+        let a: null = null;
+        arktest.assertFalse( a != null )
+
+    - use: |-
+        let a: null = null;
+        arktest.assertFalse( a !== null )
+
+    - use: |-
+        let a: null = null;
+        arktest.assertFalse( a === undefined )
+
+    - use: |-
+        let a: null = null;
+        arktest.assertFalse( a != undefined )
+
+    - use: |-
+        let a: null = null;
+        arktest.assertTrue( a !== undefined )
 
     - decl: |-
         class A {}
@@ -163,22 +203,6 @@ cases:
       use: |-
         arktest.assertTrue( !foo("") )
 
-    - use: |-
-        let a: Float;
-        arktest.assertTrue( a != null );
-
-    - use: |-
-        let a: Float;
-        arktest.assertTrue( a != undefined );
-
-    - use: |-
-        let a: Object = new Object();
-        arktest.assertFalse( a == null )
-
-    - use: |-
-        let a: Object = new Object();
-        arktest.assertFalse( a == undefined )
-
     - decl: |-
         class A {}
       use: |-
@@ -204,3 +228,21 @@ cases:
         }
       use: |-
         arktest.assertTrue( foo(null) )
+
+    - use: |-
+        //local smart cast
+        let x: string|undefined = "test"
+        arktest.assertFalse(x == undefined)
+        arktest.assertFalse(x === undefined)
+
+    - use: |-
+        //local smart cast
+        let x: string|null = "test"
+        arktest.assertFalse(x == null)
+        arktest.assertFalse(x === null)
+
+    - use: |-
+        arktest.assertTrue(!undefined)
+        arktest.assertTrue(!null)
+    
+    

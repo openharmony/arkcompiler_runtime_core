@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "IntlCommon.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "stdlib_ani_helpers.h"
 #include <cassert>
 

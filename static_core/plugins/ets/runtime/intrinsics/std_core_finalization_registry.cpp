@@ -14,22 +14,20 @@
  */
 
 #include "plugins/ets/runtime/ets_vm.h"
-#include "runtime/include/thread.h"
+#include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 
 namespace ark::ets::intrinsics {
-
-/**
- * The function register FinalizationRegistry instance in ETS VM.
- * @param instance - FinalizationRegistry class instance needed to register for managing by GC.
- */
-extern "C" EtsInt StdFinalizationRegistryRegisterInstance(EtsObject *instance)
+extern "C" EtsInt StdFinalizationRegistryGetWorkerId()
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
-    coro->GetPandaVM()->GetFinalizationRegistryManager()->RegisterInstance(instance);
-    auto workerDomain =
-        coro->GetWorker()->IsMainWorker() ? CoroutineWorkerDomain::MAIN : CoroutineWorkerDomain::GENERAL;
-    return static_cast<EtsInt>(workerDomain);
+    return static_cast<EtsInt>(coro->GetWorker()->GetId());
+}
+
+extern "C" EtsInt StdFinalizationRegistryGetWorkerDomain()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    return static_cast<EtsInt>(FinalizationRegistryManager::GetCoroDomain(coro));
 }
 
 extern "C" void StdFinalizationRegistryFinishCleanup()
@@ -38,5 +36,4 @@ extern "C" void StdFinalizationRegistryFinishCleanup()
     ASSERT(coro != nullptr);
     coro->GetPandaVM()->GetFinalizationRegistryManager()->CleanupCoroFinished();
 }
-
 }  // namespace ark::ets::intrinsics

@@ -537,12 +537,8 @@ ArenaVector<Inst *> *SaveStateBridgesBuilder::SearchMissingObjInSaveStates(Graph
     ASSERT(targetBlock != nullptr);
     ASSERT(source->IsMovableObject());
 
-    if (bridges_ == nullptr) {
-        auto adapter = graph->GetLocalAllocator();
-        bridges_ = adapter->New<ArenaVector<Inst *>>(adapter->Adapter());
-    } else {
-        bridges_->clear();
-    }
+    AllocOrClear(graph, &bridges_);
+
     auto visited = graph->NewMarker();
     SearchSSOnWay(targetBlock, target, source, visited, stopSearch);
     graph->EraseMarker(visited);
@@ -578,7 +574,12 @@ void SaveStateBridgesBuilder::SearchSSOnWay(BasicBlock *block, Inst *startFrom, 
             }
         }
     }
+
+    auto sourceBlock = sourceInst->GetBasicBlock();
     for (auto pred : block->GetPredsBlocks()) {
+        if (!sourceBlock->IsDominate(pred)) {
+            continue;
+        }
         SearchSSOnWay(pred, pred->GetLastInst(), sourceInst, visited, stopSearch);
     }
 }
@@ -694,7 +695,8 @@ void SaveStateBridgesBuilder::FixSaveStatesInBB(BasicBlock *block)
 
 bool SaveStateBridgesBuilder::IsSaveStateForGc(Inst *inst)
 {
-    return inst->GetOpcode() == Opcode::SafePoint || inst->GetOpcode() == Opcode::SaveState;
+    return inst->GetOpcode() == Opcode::SafePoint || inst->GetOpcode() == Opcode::SaveState ||
+           inst->GetOpcode() == Opcode::SaveStateDeoptimize;
 }
 
 void SaveStateBridgesBuilder::CreateBridgeInSS(Inst *source)
@@ -733,26 +735,23 @@ void SaveStateBridgesBuilder::SearchAndCreateMissingObjInSaveState(Graph *graph,
     }
 }
 
-void SaveStateBridgesBuilder::ProcessSSUserPreds(Graph *graph, Inst *inst, Inst *targetInst)
-{
-    for (auto predBlock : targetInst->GetBasicBlock()->GetPredsBlocks()) {
-        if (targetInst->CastToPhi()->GetPhiInput(predBlock) == inst) {
-            SearchAndCreateMissingObjInSaveState(graph, inst, predBlock->GetLastInst(), nullptr, predBlock);
-        }
-    }
-}
-
 void SaveStateBridgesBuilder::FixInstUsageInSS(Graph *graph, Inst *inst)
 {
     if (!inst->IsMovableObject()) {
         return;
     }
-    for (auto &user : inst->GetUsers()) {
-        auto targetInst = user.GetInst();
+
+    AllocOrClear(graph, &users_);
+    PrepareUsers(inst, users_);
+
+    for (auto &user : *users_) {
+        auto *targetInst = user->GetInst();
         COMPILER_LOG(DEBUG, BRIDGES_SS) << " Check usage: Try to do SSB for real source inst: " << *inst << "\n"
                                         << "  For target inst: " << *targetInst << "\n";
-        if (targetInst->IsPhi() && !(graph->IsAnalysisValid<DominatorsTree>() && inst->IsDominate(targetInst))) {
-            ProcessSSUserPreds(graph, inst, targetInst);
+        if (targetInst->IsPhi()) {
+            // check SaveStates on path between inst and the end of corresponding predecessor of Phi's block
+            auto *predBlock = targetInst->GetBasicBlock()->GetPredecessor(user->GetBbNum());
+            SearchAndCreateMissingObjInSaveState(graph, inst, predBlock->GetLastInst(), nullptr, predBlock);
         } else {
             SearchAndCreateMissingObjInSaveState(graph, inst, targetInst);
         }
@@ -954,4 +953,68 @@ void InstAppender::Append(std::initializer_list<Inst *> instructions)
     }
 }
 
+CallInst *FindCallerInst(BasicBlock *target, Inst *start)
+{
+    auto block = start == nullptr ? target->GetDominator() : target;
+    size_t depth = 0;
+    while (block != nullptr) {
+        auto iter = InstBackwardIterator<IterationType::INST>(*block, start);
+        for (auto inst : iter) {
+            if (inst == nullptr) {
+                return nullptr;
+            }
+            if (inst == start) {
+                continue;
+            }
+            if (inst->Is(Opcode::ReturnInlined)) {
+                depth++;
+            }
+            if (!inst->IsCall()) {
+                continue;
+            }
+            auto callInst = static_cast<CallInst *>(inst);
+            auto isInlined = callInst->IsInlined();
+            if (isInlined && depth == 0) {
+                return callInst;
+            }
+            if (isInlined) {
+                depth--;
+            }
+        }
+        block = block->GetDominator();
+        start = nullptr;
+    }
+    return nullptr;
+}
+
+void PrepareUsers(Inst *inst, ArenaVector<User *> *users)
+{
+    for (auto &user : inst->GetUsers()) {
+        users->push_back(&user);
+    }
+
+    auto findCheckUser = [](auto begin, auto end) {
+        return std::find_if(begin, end, [](User *user) { return user->GetInst()->IsCheck(); });
+    };
+
+    auto i = findCheckUser(users->begin(), users->end());
+    if (i == users->end()) {
+        return;
+    }
+
+    do {
+        auto pos = std::distance(users->begin(), i);
+        auto userInst = (*i)->GetInst();
+        // skip AnyTypeChecks with primitive type
+        if (userInst->GetOpcode() != Opcode::AnyTypeCheck || userInst->IsReferenceOrAny()) {
+            for (auto &u : userInst->GetUsers()) {
+                users->push_back(&u);
+            }
+        }
+        i = findCheckUser(users->begin() + pos + 1, users->end());
+    } while (i != users->end());
+
+    auto newEnd = std::remove_if(users->begin(), users->end(), [](User *user) { return user->GetInst()->IsCheck(); });
+    users->erase(newEnd, users->end());
+}
 }  // namespace ark::compiler

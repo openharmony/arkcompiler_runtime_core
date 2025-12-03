@@ -118,3 +118,59 @@ for (tmpBool of arrBool) {
     idxBool++;
 }
 arktest.assertEQ(okBool, true);
+
+// equal tests
+class A {
+    foo() {}
+}
+
+class B extends A {
+    foo() {}
+}
+
+function cmp(a: Any, b: Any) {
+    return a == b;
+}
+
+function test(a: A, b: B) {
+    arktest.assertEQ(cmp(a.foo, b.foo), true);
+}
+
+let v = new B();
+test(v, v);
+
+
+// Virtual override resolution
+class VBase { foo(): Int { return 1; } }
+class VSub extends VBase { override foo(): Int { return 1; } }
+let vb = new VSub();
+let va: VBase = vb;
+arktest.assertEQ(va.foo == vb.foo, true);
+let vb2 = new VSub();
+arktest.assertEQ(vb.foo == vb2.foo, false);
+let vbaseOnly = new VBase();
+arktest.assertEQ(va.foo == vbaseOnly.foo, false);
+
+// Interface method comparison
+interface IFace { foo(): Int }
+class IFImpl1 implements IFace { foo(): Int { return 7; } }
+class IFImpl2 implements IFace { foo(): Int { return 8; } }
+let iobj1 = new IFImpl1();
+let iface1: IFace = iobj1;
+arktest.assertEQ(iface1.foo == iobj1.foo, true);
+let iobj1b = new IFImpl1();
+arktest.assertEQ(iobj1.foo == iobj1b.foo, false);
+let iobj2 = new IFImpl2();
+arktest.assertEQ(iobj1.foo == iobj2.foo, false);
+
+
+// Non-virtual (final) method comparison
+class WithFinal {
+    final baz(): Int { return 42; }
+    getBaz() { return this.baz; }
+}
+let f1 = new WithFinal();
+let f2 = f1;
+arktest.assertEQ(f1.getBaz() == f2.getBaz(), true);
+let f3 = new WithFinal();
+arktest.assertEQ(f1.getBaz() == f3.getBaz(), false);

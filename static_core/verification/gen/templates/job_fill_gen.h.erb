@@ -95,7 +95,9 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %       combination_flags += "FieldId_"
 %   end
 %   if i.properties.include?('static_field_id')
-%       combination_flags += "StaticFieldId_"
+%       # NOTE(mgroshev): Letter case is not alligned with field_id to avoid of incorrect generation
+%       # so, do not change it
+%       combination_flags += "StaticFieldID_"
 %   end
 %   if i.properties.include?('type_id')
 %       if i.verification.include?('type_id_class')
@@ -138,7 +140,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %                ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %                cachedClass = classLinker_->GetClass(utf::CStringAsMutf8(descr), false, classLinkerCtx_, &errorHandler);
 %            };
-%            // descriptors for primitive types get from libpandafile/templates/type
+%            // descriptors for primitive types get from libarkfile/templates/type
 %            switch (tag) {
 %                case panda_file::LiteralTag::ARRAY_U1:
 %                    resolveAndLink("[Z");
@@ -222,7 +224,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %                                 << method_->GetFullName();
 %        }
 %    }),
-%    "StaticFieldId_" => %({
+%    "StaticFieldID_" => %({
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
 %        auto *cachedField = GetField(fieldIdx, true, &errorHandler);

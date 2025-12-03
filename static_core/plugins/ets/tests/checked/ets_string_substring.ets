@@ -16,6 +16,7 @@
 let original: String = new String("abcde");
 
 //! CHECKER       Equal Substring JIT
+//! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "", entry: "ets_string_substring.ETSGLOBAL::main"
 //! METHOD        "ets_string_substring.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
@@ -43,10 +44,10 @@ function __noinline__SubString(str: String, begin: int, end: int): String {
 }
 function main(): int {
     let subs: String = __noinline__SubString(original, 0, original.getLength());
-    if(!Runtime.equals(original, subs)) return 1;
+    if(original !== subs) return 1;
     let subs1: String = __noinline__SubString(original, -1, 100);
-    if(!Runtime.equals(original, subs1)) return 2;
+    if(original !== subs1) return 2;
     let subs2: String = original.substring(0, original.getLength());
-    if(!Runtime.equals(original, subs2)) return 3;
+    if(original !== subs2) return 3;
     return 0
 }

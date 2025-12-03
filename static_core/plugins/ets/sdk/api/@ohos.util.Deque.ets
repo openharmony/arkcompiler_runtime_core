@@ -17,6 +17,7 @@ import { BusinessError } from "@ohos.base";
 
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
+const EmptyContainerId: int = 10200010;
 
 function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
@@ -39,10 +40,10 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
         return "[object Deque]";
     }
 
-    public jsonReplacer(): Record<String, NullishType> {
+    public jsonReplacer(): Record<String, Any> {
         const buf = this.buffer;
         const len = buf.length;
-        let arrayObj: Record<String, NullishType> = {};
+        let arrayObj: Record<String, Any> = {};
         for (let i = 0; i < len; i++) {
             arrayObj[String(i)] = buf[i];
         }
@@ -59,38 +60,30 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
     /**
      * Returns the first element of the deque without removing it.
      *
-     * @returns {T | undefined} The first element of the deque if it exists, otherwise `undefined` if the deque is empty.
+     * @returns { T } The first element of the deque.
      */
-    public getFirst(): T | undefined {
-        if (this.isEmpty()) {
-            return undefined;
-        }
-
+    public getFirst(): T {
+        this.checkEmptyContainer();
         return this.buffer[this.front];
     }
 
     /**
      * Returns the last element of the deque without removing it.
      *
-     * @returns {T | undefined} The last element of the deque if it exists, otherwise `undefined` if the deque is empty.
+     * @returns { T } The last element of the deque.
      */
-    public getLast(): T | undefined {
-        if (this.isEmpty()) {
-            return undefined;
-        }
-
+    public getLast(): T {
+        this.checkEmptyContainer();
         return this.buffer[(this.rear - 1 + this.capacity) % this.capacity];
     }
 
     /**
      * Removes and returns the first element from the deque.
      *
-     * @returns {T | undefined} The first element of the deque if it exists, otherwise `undefined` if the deque is empty.
+     * @returns { T } The first element of the deque.
      */
-    public popFirst(): T | undefined {
-        if (this.isEmpty()) {
-            return undefined;
-        }
+    public popFirst(): T {
+        this.checkEmptyContainer();
 
         let firstElement: T = this.buffer[this.front];
         this.front = (this.front + 1) % this.capacity;
@@ -100,13 +93,11 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
 
     /**
      * Removes and returns the last element from the deque.
-     * 
-     * @returns {T | undefined} The last element of the deque if it exists, otherwise `undefined` if the deque is empty.
+     *
+     * @returns { T } The last element of the deque.
      */
-    public popLast(): T | undefined {
-        if (this.isEmpty()) {
-            return undefined;
-        }
+    public popLast(): T {
+        this.checkEmptyContainer();
 
         this.rear = (this.rear - 1 + this.capacity) % this.capacity;
         let element: T = this.buffer[this.rear];
@@ -118,6 +109,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
      * Creates a new instance of Deque.
      */
     public constructor() {
+        this.capacity = this.DEFAULT_CAPACITY;
         this.buffer = new Array<T>(this.capacity);
     }
 
@@ -271,7 +263,7 @@ export default class Deque<T> implements Iterable<T>, JsonReplacer {
 
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
         }
     }
 

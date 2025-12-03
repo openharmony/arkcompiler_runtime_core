@@ -18,4 +18,3 @@ cases:
   - { type: long,   value: 510,   expected: 510 }
   - { type: float,  value: 12.2f, expected: 12  }
   - { type: number, value: 50.9,  expected: 50  }
-      

@@ -21,10 +21,10 @@
 #include "assembly-type.h"
 #include "assembly-debug.h"
 #include "assembly-file-location.h"
-#include "bytecode_emitter.h"
+#include "libarkfile/bytecode_emitter.h"
 #include "extensions/extensions.h"
-#include "file_items.h"
-#include "file_item_container.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/file_item_container.h"
 #include "ide_helpers.h"
 #include "meta.h"
 
@@ -182,8 +182,16 @@ public:
 
     uint32_t GetColumnNumber(size_t i) const;
 
+    struct LocalVariablePair {
+        size_t insnOrder;
+        size_t variableIndex;
+        LocalVariablePair(size_t order, size_t index) : insnOrder(order), variableIndex(index) {}
+    };
+    void CollectLocalVariable(std::vector<LocalVariablePair> &localVariableInfo) const;
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     void EmitLocalVariable(panda_file::LineNumberProgramItem *program, panda_file::ItemContainer *container,
-                           std::vector<uint8_t> *constantPool, uint32_t &pcInc, size_t instructionNumber) const;
+                           std::vector<uint8_t> *constantPool, uint32_t &pcInc, size_t instructionNumber,
+                           size_t variableIndex) const;
     void EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool, uint32_t pcInc,
                     int32_t lineInc) const;
     void EmitLineNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,

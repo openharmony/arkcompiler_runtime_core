@@ -25,3 +25,13 @@ class Woman {
 function newSarahObject() {
     return new Woman("Sarah", 24);
 }
+
+class Parent {
+    parentField: int = 1;
+    overridedField: int = 2;
+}
+class Child extends Parent {
+    // NOTE: uncomment when issue #23050 is resolved
+    // overridedField: int = 4;
+    childField: int = 3;
+}

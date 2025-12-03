@@ -18,7 +18,7 @@ Encoder (implementation of math and mem Low-level emitters)
 
 #include <iomanip>
 
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "compiler/optimizer/code_generator/relocations.h"
 #include "compiler/optimizer/code_generator/fast_divisor.h"
 #include "operands.h"
@@ -2258,7 +2258,7 @@ void Amd64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)
     GetMasm()->bind(end);
 }
 
-void Amd64Encoder::EncodeSelect(ArgsSelect &&args)
+void Amd64Encoder::EncodeSelect(const ArgsSelect &args)
 {
     auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat());
@@ -2295,7 +2295,7 @@ void Amd64Encoder::EncodeSelect(ArgsSelect &&args)
     }
 }
 
-void Amd64Encoder::EncodeSelect(ArgsSelectImm &&args)
+void Amd64Encoder::EncodeSelect(const ArgsSelectImm &args)
 {
     auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -2321,7 +2321,7 @@ void Amd64Encoder::EncodeSelect(ArgsSelectImm &&args)
     }
 }
 
-void Amd64Encoder::EncodeSelectTest(ArgsSelect &&args)
+void Amd64Encoder::EncodeSelectTest(const ArgsSelect &args)
 {
     auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -2340,7 +2340,7 @@ void Amd64Encoder::EncodeSelectTest(ArgsSelect &&args)
     }
 }
 
-void Amd64Encoder::EncodeSelectTest(ArgsSelectImm &&args)
+void Amd64Encoder::EncodeSelectTest(const ArgsSelectImm &args)
 {
     auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -2656,6 +2656,46 @@ void Amd64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
     constexpr int64_t HALF = 0x3FE0000000000000;  // double precision representation of 0.5
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr int64_t ONE = 0x3FF0000000000000;  // double precision representation of 1.0
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t NEG_HALF = 0xBFE0000000000000;  // double precision representation of -0.5
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t ZERO = 0x0000000000000000;  // double precision representation of 0.0
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t NEG_ZERO = 0x8000000000000000;  // double precision representation of -0.0
+
+    auto skipZero = GetMasm()->newLabel();
+    auto negZeroCase = GetMasm()->newLabel();
+    auto end = GetMasm()->newLabel();
+    {
+        ScopedTmpRegF64 constReg(this);
+        ScopedTmpRegU64 tmpReg(this);
+
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(HALF));
+        GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+        GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
+        GetMasm()->jae(skipZero);
+
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(NEG_HALF));
+        GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+        GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
+        GetMasm()->jb(skipZero);
+
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(ZERO));
+        GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+        GetMasm()->comisd(ArchVReg(src), ArchVReg(constReg));
+        GetMasm()->jb(negZeroCase);
+
+        GetMasm()->xorpd(ArchVReg(dst), ArchVReg(dst));
+        GetMasm()->jmp(end);
+    }
+    GetMasm()->bind(negZeroCase);
+    {
+        ScopedTmpRegU64 tmpReg(this);
+        GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(NEG_ZERO));
+        GetMasm()->movq(ArchVReg(dst), ArchReg(tmpReg));
+        GetMasm()->jmp(end);
+    }
+    GetMasm()->bind(skipZero);
 
     ScopedTmpRegF64 ceil(this);
     GetMasm()->roundsd(ArchVReg(ceil), ArchVReg(src), asmjit::imm(0b10));
@@ -2685,6 +2725,7 @@ void Amd64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
 
     // move result to destination register
     GetMasm()->movapd(ArchVReg(dst), ArchVReg(ceil));
+    GetMasm()->bind(end);
 }
 
 template <typename T>
@@ -2760,6 +2801,11 @@ bool Amd64Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
 bool Amd64Encoder::CanEncodeBitCount()
 {
     return asmjit::CpuInfo::host().hasFeature(asmjit::x86::Features::kPOPCNT);
+}
+
+bool Amd64Encoder::CanEncodeCompressedStringCharAt()
+{
+    return true;
 }
 
 bool Amd64Encoder::CanOptimizeImmDivMod(uint64_t imm, bool isSigned) const
@@ -3374,4 +3420,26 @@ size_t Amd64Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t codeOf
 
     return pc + instruction.length;
 }
+
+void Amd64Encoder::EncodeCompressedStringCharAt(ArgsCompressedStringCharAt &&args)
+{
+    auto [dst, str, idx, length, tmp, dataOffset, shift] = args;
+    ASSERT(dst.GetSize() == HALF_SIZE);
+
+    auto labelNotCompressed = CreateLabel();
+    auto labelCharLoaded = CreateLabel();
+
+    EncodeAdd(tmp, str, Imm(dataOffset));
+
+    EncodeJumpTest(labelNotCompressed, length, Imm(1U), Condition::TST_NE);
+
+    GetMasm()->movzx(ArchReg(dst, WORD_SIZE), asmjit::x86::byte_ptr(ArchReg(tmp), ArchReg(idx)));
+    EncodeJump(labelCharLoaded);
+
+    BindLabel(labelNotCompressed);
+    GetMasm()->movzx(ArchReg(dst, WORD_SIZE), asmjit::x86::word_ptr(ArchReg(tmp), ArchReg(idx), shift));
+
+    BindLabel(labelCharLoaded);
+}
+
 }  // namespace ark::compiler::amd64

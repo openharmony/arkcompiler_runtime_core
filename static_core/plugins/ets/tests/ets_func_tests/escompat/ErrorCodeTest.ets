@@ -26,7 +26,7 @@ function testConstructor01() {
     let cause = 'cause'
     try {
         throw new Error();
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, '');
         arktest.assertTrue(err.cause === undefined);
@@ -34,7 +34,7 @@ function testConstructor01() {
 
     try {
         throw new Error(message);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, message);
         arktest.assertTrue(err.cause === undefined);
@@ -42,7 +42,7 @@ function testConstructor01() {
 
     try {
         throw new Error(message, {cause: cause} as ErrorOptions);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, message);
         arktest.assertEQ(err.cause, cause);
@@ -55,7 +55,7 @@ function testConstructor02() {
     let cause = 'cause'
     try {
         throw new Error(code);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, '');
         arktest.assertTrue(err.cause === undefined);
@@ -63,7 +63,7 @@ function testConstructor02() {
 
     try {
         throw new Error(code, message);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, message);
         arktest.assertTrue(err.cause === undefined);
@@ -71,7 +71,7 @@ function testConstructor02() {
 
     try {
         throw new Error(code, message, {cause: cause} as ErrorOptions);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, message);
         arktest.assertEQ(err.cause, cause);
@@ -83,7 +83,7 @@ function testConstructor03() {
     let cause = 'cause'
     try {
         throw new Error('name', undefined, undefined);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, '');
         arktest.assertTrue(err.cause === undefined);
@@ -91,7 +91,7 @@ function testConstructor03() {
 
     try {
         throw new Error('name', message, undefined);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, message);
         arktest.assertTrue(err.cause === undefined);
@@ -99,7 +99,7 @@ function testConstructor03() {
 
     try {
         throw new Error('name', undefined, {cause: cause} as ErrorOptions);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, '');
         arktest.assertEQ(err.cause, cause);
@@ -107,7 +107,7 @@ function testConstructor03() {
 
     try {
         throw new Error('name', message, {cause: cause} as ErrorOptions);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, 0);
         arktest.assertEQ(err.message, message);
         arktest.assertEQ(err.cause, cause);
@@ -120,7 +120,7 @@ function testConstructor04() {
     let cause = 'cause'
     try {
         throw new Error('name', code, undefined, undefined);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, '');
         arktest.assertTrue(err.cause === undefined);
@@ -128,7 +128,7 @@ function testConstructor04() {
 
     try {
         throw new Error('name', code, message, undefined);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, message);
         arktest.assertTrue(err.cause === undefined);
@@ -136,7 +136,7 @@ function testConstructor04() {
 
     try {
         throw new Error('name', code, undefined, {cause: cause} as ErrorOptions);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, '');
         arktest.assertEQ(err.cause, cause);
@@ -144,7 +144,7 @@ function testConstructor04() {
 
     try {
         throw new Error('name', code, message, {cause: cause} as ErrorOptions);
-    } catch (err: Error) {
+    } catch (err) {
         arktest.assertEQ(err.code, code);
         arktest.assertEQ(err.message, message);
         arktest.assertEQ(err.cause, cause);

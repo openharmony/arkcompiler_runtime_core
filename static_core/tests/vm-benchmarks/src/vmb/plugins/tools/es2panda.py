@@ -22,7 +22,7 @@ from pathlib import Path
 from string import Template
 from typing import List, Any, Union, Iterable
 
-from vmb.tool import ToolBase, VmbToolExecError
+from vmb.tool import ToolBase, VmbToolExecError, OptFlags
 from vmb.unit import BenchUnit
 from vmb.shell import ShellResult
 from vmb.result import BuildResult, BUStatus
@@ -108,6 +108,7 @@ class Tool(ToolBase):
         # PANDA_SDK and PANDA_BUILD could be set simultaneously
         panda_sdk = os.environ.get('PANDA_SDK', '')
         if panda_sdk and Target.OHOS == self.target:
+            # NOTE: This could be also 'windows_host_tools'
             panda_root = os.path.join(panda_sdk, 'linux_host_tools')
             self.panda_root = self.ensure_dir(
                 panda_root, err='Please point $PANDA_SDK to sdk/package')
@@ -118,7 +119,7 @@ class Tool(ToolBase):
                 err='Please set $PANDA_BUILD env var'
             )
         self.default_arktsconfig = str(Path(self.panda_root).joinpath(
-            'tools', 'es2panda', 'generated', 'arktsconfig.json'))
+            'bin', 'arktsconfig.json'))
         panda_stdlib_src = os.environ.get('PANDA_STDLIB_SRC', None)
         stdlib_opt = f'--stdlib={panda_stdlib_src}' if panda_stdlib_src else '--gen-stdlib=false'
         self.opts = f'{stdlib_opt} --extension=ets --opt-level=2 ' \
@@ -171,6 +172,9 @@ class Tool(ToolBase):
                      opts: str,
                      bu: BenchUnit,
                      conf: str = '') -> ShellResult:
+        # Do not re-build if specifically asked so
+        if OptFlags.SKIP_COMPILATION in self.flags and abc.exists():
+            return ShellResult(ret=0, out="Compilation skipped")
         arktsconfig = conf if conf else self.default_arktsconfig
         res = self.sh.run(
             f'LD_LIBRARY_PATH={self.panda_root}/lib '

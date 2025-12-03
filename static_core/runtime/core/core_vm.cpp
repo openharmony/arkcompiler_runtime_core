@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/utils/expected.h"
+#include "libarkbase/utils/expected.h"
 #include "runtime/compiler.h"
 #include "runtime/core/core_vm.h"
 #include "runtime/handle_scope-inl.h"

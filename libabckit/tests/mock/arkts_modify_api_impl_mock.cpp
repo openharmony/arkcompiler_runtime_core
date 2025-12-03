@@ -343,6 +343,23 @@ bool EnumSetName(AbckitArktsEnum *enm, const char *name)
     return DEFAULT_BOOL;
 }
 
+bool ModuleFieldAddAnnotation(AbckitArktsModuleField *field,
+                              [[maybe_unused]] const struct AbckitArktsAnnotationCreateParams *params)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_ARKTS_MODULE_FIELD);
+    EXPECT_TRUE(params->ai == DEFAULT_ANNOTATION_INTERFACE);
+    return DEFAULT_BOOL;
+}
+
+bool ModuleFieldRemoveAnnotation(AbckitArktsModuleField *field, AbckitArktsAnnotation *annotation)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(field == DEFAULT_ARKTS_MODULE_FIELD);
+    EXPECT_TRUE(annotation == DEFAULT_ANNOTATION);
+    return DEFAULT_BOOL;
+}
+
 bool ModuleFieldSetName(AbckitArktsModuleField *field, const char *name)
 {
     g_calledFuncs.push(__func__);
@@ -544,7 +561,6 @@ AbckitArktsFunction *ModuleAddFunction(AbckitArktsModule *module, struct AbckitA
 }
 
 AbckitArktsFunction *ClassAddMethod(AbckitArktsClass *klass, struct ArktsMethodCreateParams *params)
-
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_ARKTS_CLASS);
@@ -647,7 +663,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Module Field
     // ========================================
 
-    ModuleFieldSetName, ModuleFieldSetType, ModuleFieldSetValue,
+    ModuleFieldAddAnnotation, ModuleFieldRemoveAnnotation, ModuleFieldSetName, ModuleFieldSetType, ModuleFieldSetValue,
 
     // ========================================
     // Namespace Field

@@ -20,7 +20,7 @@
 #include "types/ets_class.h"
 #include "types/ets_arraybuffer.h"
 #include "types/ets_typed_arrays.h"
-#include "tests/runtime/types/ets_test_mirror_classes.h"
+#include "plugins/ets/tests/runtime/types/ets_test_mirror_classes.h"
 #include "cross_values.h"
 #include "intrinsics.h"
 
@@ -30,7 +30,7 @@ public:
     AbstractTypedArrayTest()
     {
         options_.SetShouldLoadBootPandaFiles(true);
-        options_.SetShouldInitializeIntrinsics(false);
+        options_.SetShouldInitializeIntrinsics(true);
         options_.SetCompilerEnableJit(false);
         options_.SetGcType("epsilon");
         options_.SetLoadRuntimes({"ets"});
@@ -181,7 +181,7 @@ TEST_F(TypedArrayRelatedMemberOffsetTest, UBigUInt64ArrayLayout)
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, ArrayBufferLayout)
 {
-    auto *klass = GetClass("Lescompat/ArrayBuffer;");
+    auto *klass = GetClass("Lstd/core/ArrayBuffer;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetArrayBufferMembers(), false);
 }
 
@@ -276,9 +276,10 @@ protected:
         *static_cast<EtsDouble *>(ToVoidPtr(ToUintPtr(array) + TypedArray::GetByteLengthOffset())) =
             static_cast<EtsDouble>(byteLength);
 
-        void *buffer = nullptr;
-        auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coroutine_, byteLength, &buffer);
+        auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coroutine_, byteLength);
         ASSERT(arrayBuffer != nullptr);
+        auto *buffer = arrayBuffer->GetData();
+        ASSERT(buffer != nullptr);
 
         *static_cast<ObjectPointer<EtsObject> *>(ToVoidPtr(ToUintPtr(array) + TypedArray::GetBufferOffset())) =
             arrayBuffer;

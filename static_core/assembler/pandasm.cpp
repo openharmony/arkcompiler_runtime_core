@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,20 +21,20 @@
 #include <string>
 #include <vector>
 
-#include "ark_version.h"
+#include "libarkbase/generated/ark_version.h"
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
 #ifdef PANDA_WITH_BYTECODE_OPTIMIZER
 #include "bytecode_optimizer/optimize_bytecode.h"
 #endif
-#include "file_format_version.h"
+#include <libarkfile/include/file_format_version.h>
 #include "error.h"
 #include "lexer.h"
 #include "pandasm.h"
-#include "utils/expected.h"
-#include "utils/logger.h"
-#include "utils/pandargs.h"
+#include "libarkbase/utils/expected.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/pandargs.h"
 
 namespace ark::pandasm {
 

@@ -92,7 +92,7 @@ function checkArrayForInt(data: Uint8Array, elem: int, expected: number, fromInd
 
 function checkArray(data: Uint8Array, elem: number, expected: number, fromIndex?: int): void {
     arktest.assertEQ(data.indexOf(elem, fromIndex), expected,
-        'data.indexOf(elem: number, fromIndex?: numbinter) must return ' + expected);
+        'data.indexOf(elem: number, fromIndex?: int) must return ' + expected);
 }
 
 function checkArrayForInt(data: Float32Array, elem: int, expected: number): void {

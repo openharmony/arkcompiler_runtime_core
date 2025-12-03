@@ -192,7 +192,7 @@ function testArrayList0006() {
     }
     let keyName = "";
     let key: double = 0;
-    for (key in test1) {
+    for (key of test1) {
         keyName += key;
     }
     arktest.assertEQ(keyName, "0123456789", "The concatenated keys should match the sequence '0123456789'");
@@ -209,12 +209,17 @@ function testArrayList0007() {
     arktest.assertEQ(myAl[1], 2, "The element at index 1 should be 2 after removal");
 }
 
-function exceptionCheckEmptyContainer(e: Error | Exception): boolean | string {
-    return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == `Container is empty`) &&
-        ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+function exceptionCheckEmptyContainer(e: Error): boolean | string {
+    if (e instanceof BusinessError) {
+        return e.name == "BusinessError" && e.message == `Container is empty`
+    }
+    return false
 }
 
-function exceptionCheckType(e: Error | Exception): boolean | string {
-    return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message.startsWith(`The type of \"index\" must be small integer.`)) &&
-        ((e as BusinessError).code == TypeErrorCodeId);
+function exceptionCheckType(e: Error): boolean | string {
+    if (e instanceof BusinessError) {
+        return e.name == "BusinessError" && e.message.startsWith(`The type of \"index\" must be small integer.`) &&
+            e.code == TypeErrorCodeId
+    }
+    return false
 }

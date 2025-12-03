@@ -28,6 +28,11 @@ import { Extension } from './utils/Extension';
 
 export type CheckerResult = ts.Diagnostic[];
 
+export interface CodeInput {
+  fileName: string;
+  content: string;
+}
+
 export interface DeclgenResult {
   emitResult: ts.EmitResult;
   checkResult: CheckerResult;
@@ -39,18 +44,34 @@ export class Declgen {
   private readonly rootFiles: readonly string[];
   private readonly compilerOptions: ts.CompilerOptions;
   private readonly declgenOptions: DeclgenCLIOptions;
+  private readonly codeInputs?: CodeInput[];
 
   constructor(
     declgenOptions: DeclgenCLIOptions,
     customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[],
-    compilerOptions?: ts.CompilerOptions
+    compilerOptions?: ts.CompilerOptions,
+    codeInputs?: CodeInput[]
   ) {
     const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
     this.rootFiles = rootNames;
     this.declgenOptions = declgenOptions;
-
+    this.codeInputs = codeInputs;
     this.sourceFileMap = new Map<string, ts.SourceFile>();
+
+    // Create SourceFile based on code content.
+    if (codeInputs) {
+      for (const input of codeInputs) {
+        const sourceFile = ts.createSourceFile(
+          input.fileName,
+          input.content,
+          ts.ScriptTarget.Latest,
+          true
+        );
+        this.sourceFileMap.set(input.fileName, sourceFile);
+      }
+    }
+
     this.compilerOptions = Object.assign({}, options, {
       declaration: true,
       emitDeclarationOnly: true,
@@ -72,7 +93,13 @@ export class Declgen {
      * First compilation with the hooked CompilerHost:
      * collect the SourceFiles after transformation to the hooked Map
      */
-    let program = this.recompile();
+    let program: ts.Program
+
+    if (this.codeInputs && this.codeInputs.length > 0) {
+      program = this.recompileWithCodeInputs();
+    } else {
+      program = this.recompile();
+    }
 
     /**
      * If the rootFiles contains declaration files,
@@ -112,6 +139,16 @@ export class Declgen {
         this.processDeclarationFile(program, sourceFile, typeChecker);
       }
     });
+
+    // Handle declaration files when converting based on file content.
+    if (this.codeInputs && this.codeInputs.length > 0) {
+      for (const codeInput of this.codeInputs) {
+        const sourceFile = program.getSourceFile(codeInput.fileName);
+        if (sourceFile && sourceFile.isDeclarationFile) {
+          this.processDeclarationFile(program, sourceFile, typeChecker);
+        }
+      }
+    }
   }
 
   private processDeclarationFile(program: ts.Program, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker): void {
@@ -270,5 +307,10 @@ export class Declgen {
     }
 
     return inputFiles;
+  }
+
+  private recompileWithCodeInputs(): ts.Program {
+    const rootFileNames = this.codeInputs!.map(input => input.fileName);
+    return compile(rootFileNames, this.compilerOptions, this.hookedHost);
   }
 }

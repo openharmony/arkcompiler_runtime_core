@@ -16,7 +16,7 @@
 #include <thread>
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/include/thread_scopes.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/panda_vm.h"
@@ -25,7 +25,7 @@
 
 namespace ark {
 
-void ThreadedCoroutineManager::Initialize(Runtime *runtime, PandaVM *vm)
+void ThreadedCoroutineManager::InitializeScheduler(Runtime *runtime, PandaVM *vm)
 {
     // create and activate workers
     size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
@@ -218,7 +218,8 @@ LaunchResult ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] Comple
 
 LaunchResult ThreadedCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
                                                     [[maybe_unused]] const CoroutineWorkerGroup::Id &groupId,
-                                                    CoroutinePriority priority, [[maybe_unused]] bool abortFlag)
+                                                    CoroutinePriority priority, [[maybe_unused]] bool launchImmediately,
+                                                    [[maybe_unused]] bool abortFlag)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchNative started";
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
@@ -322,6 +323,17 @@ bool ThreadedCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callbac
     os::memory::LockHolder lock(coroListLock_);
     for (auto *t : coroutines_) {
         if (!ApplyCallbackToThread(cb, t, incMask, xorMask)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ThreadedCoroutineManager::EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const
+{
+    os::memory::LockHolder lock(workersLock_);
+    for (auto *w : workers_) {
+        if (!cb(w)) {
             return false;
         }
     }

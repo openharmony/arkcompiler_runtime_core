@@ -27,7 +27,7 @@
 
 namespace ark {
 #ifdef ARK_HYBRID
-using CommonRootVisitor = panda::CommonRootVisitor;
+using CommonRootVisitor = common::CommonRootVisitor;
 
 extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor);
 #endif
@@ -73,8 +73,12 @@ public:
     /// the type of work that a coroutine performs
     enum class Type { MUTATOR, SCHEDULER, FINALIZER };
 
-    /// Needed for object locking
-    static constexpr ThreadId MAX_COROUTINE_ID = MarkWord::LIGHT_LOCK_THREADID_MAX_COUNT;
+    /**
+     * Needed for object locking
+     * Now 10,000 coroutines is the maximum number of coroutines that can exist at the moment.
+     * So MAX_COROUTINE_ID is the value of the smallest power of two that is greater than 10,000.
+     */
+    static constexpr ThreadId MAX_COROUTINE_ID = 1U << 14U;
 
     /// A helper struct that aggregates all EP related data for a coroutine with a managed EP
     struct ManagedEntrypointInfo {
@@ -343,6 +347,17 @@ public:
     {
         return abortFlag_;
     }
+
+    virtual void UpdateCachedObjects() {}
+
+    /// The method returns true if context switching at this point in the managed code is risky
+    virtual bool IsContextSwitchRisky() const
+    {
+        return false;
+    }
+
+    /// The method prints managed call stack of coroutine
+    virtual void PrintCallStack() const;
 
     /**
      * a converter function that stores the data from EntrypointInfo in the member variables

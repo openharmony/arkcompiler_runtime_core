@@ -17,9 +17,9 @@
 #define PANDA_ASSEMBLER_ASSEMBLY_TYPE_H
 
 #include "define.h"
-#include "file_items.h"
+#include "libarkfile/file_items.h"
 #include "isa.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::pandasm {
 
@@ -122,6 +122,16 @@ public:
         return namePa;
     }
 
+    /**
+     * @brief Returns:
+     *   Type name for regular types
+     *   Component name for (multi-dimensional) arrays
+     *   Full union type name for unions
+     * Output examples:
+     *   std.core.Object            -> std.core.Object
+     *   i32[][]                    -> i32
+     *   {Ui32[],std.core.Object}   -> {Ui32[],std.core.Object}
+     */
     std::string GetComponentName() const
     {
         if (componentNames_.size() == 1) {

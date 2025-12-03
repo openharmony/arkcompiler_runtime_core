@@ -172,6 +172,11 @@ public:
         return stackFrameAllocator_;
     }
 
+    static constexpr uint32_t GetStackFrameAllocatorOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, stackFrameAllocator_);
+    }
+
     ark::mem::InternalAllocator<>::LocalSmallObjectAllocator *GetLocalInternalAllocator() const
     {
         return internalLocalAllocator_;
@@ -295,9 +300,9 @@ public:
         return ThreadProxy::GetFlagOffset();
     }
 
-    static constexpr uint32_t GetEntrypointsOffset()
+    static constexpr uint32_t GetEntrypointsTableOffset()
     {
-        return MEMBER_OFFSET(ManagedThread, entrypoints_);
+        return MEMBER_OFFSET(ManagedThread, entrypointsTable_);
     }
     static constexpr uint32_t GetObjectOffset()
     {
@@ -376,6 +381,11 @@ public:
         return MEMBER_OFFSET(ManagedThread, interpreterCache_);
     }
 
+    static constexpr uint32_t GetFlattenedStringCacheOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, flattenedStringCache_);
+    }
+
     void *GetLanguageExtensionsData() const
     {
         return languageExtensionData_;
@@ -436,6 +446,9 @@ public:
     PANDA_PUBLIC_API CustomTLSData *GetCustomTLSData(const char *key);
     PANDA_PUBLIC_API void SetCustomTLSData(const char *key, CustomTLSData *data);
     PANDA_PUBLIC_API bool EraseCustomTLSData(const char *key);
+
+    void SetFlattenedStringCache(ObjectHeader *cacheInstance);
+    ObjectHeader *GetFlattenedStringCache() const;
 
 #if EVENT_METHOD_ENTER_ENABLED || EVENT_METHOD_EXIT_ENABLED
     uint32_t RecordMethodEnter()
@@ -513,6 +526,8 @@ public:
         // on other reads or writes
         return id_.load(std::memory_order_relaxed);
     }
+
+    ThreadId GetInternalId();
 
     void FreeInternalMemory() override;
     void DestroyInternalResources();
@@ -704,6 +719,9 @@ private:
     InterpreterCache interpreterCache_;
 
     PandaMap<const char *, PandaUniquePtr<CustomTLSData>> customTlsCache_ GUARDED_BY(Locks::customTlsLock_);
+
+    // NOTE(konstanting): this is to be moved once we decouple Thread from ManagedThread
+    ObjectHeader *flattenedStringCache_ {nullptr};
 
     mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1PostBarrierRingBuffer_ {nullptr};
     // Keep these here to speed up interpreter

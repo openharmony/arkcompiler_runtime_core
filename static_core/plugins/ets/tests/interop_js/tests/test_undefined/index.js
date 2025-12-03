@@ -14,8 +14,10 @@
  */
 'use strict';
 
-export let etsUndefinedConsume = (x) => x === undefined && x !== null;
-export let etsUndefinedProduce = () => undefined;
+export let etsUndefinedConsume = (x) => {
+   return x === undefined && x !== null;
+}
 
+export let etsUndefinedProduce = () => undefined;
 export let etsNullConsume = (x) => x === null && x !== undefined;
 export let etsNullProduce = () => null;

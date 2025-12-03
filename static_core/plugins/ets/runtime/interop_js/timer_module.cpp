@@ -15,7 +15,7 @@
 
 #include <unistd.h>
 #include <string_view>
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/interop_js/timer_module.h"
@@ -84,16 +84,16 @@ __attribute__((weak)) void uv_walk([[maybe_unused]] uv_loop_t *loop, [[maybe_unu
 bool TimerModule::Init(ani_env *env)
 {
     ani_module module {};
-    auto status = env->FindModule("Lescompat;", &module);
+    auto status = env->FindModule("escompat", &module);
     if (status != ANI_OK) {
         INTEROP_LOG(ERROR) << "Cannot find ESCOMPAT module";
         return false;
     }
 
     std::array methods = {
-        ani_native_function {"startTimerImpl", "Lstd/core/Object;IZ:I",
+        ani_native_function {"startTimerImpl", "C{std.core.Object}iz:i",
                              reinterpret_cast<void *>(TimerModule::StartTimer)},
-        ani_native_function {"stopTimerImpl", "I:V", reinterpret_cast<void *>(TimerModule::StopTimer)},
+        ani_native_function {"stopTimerImpl", "i:", reinterpret_cast<void *>(TimerModule::StopTimer)},
     };
     return env->Module_BindNativeFunctions(module, methods.data(), methods.size()) == ANI_OK;
 }
@@ -106,7 +106,7 @@ ani_int TimerModule::StartTimer(ani_env *env, ani_object funcObject, ani_int del
     auto timerTable = GetTimerTable(env);
     ani_ref timerInfoRef {};
 
-    static constexpr auto SIGNATURE = "Lstd/core/Object;IZJ:Lstd/concurrency/Timer;";
+    static constexpr auto SIGNATURE = "C{std.core.Object}izl:C{std.concurrency.Timer}";
     [[maybe_unused]] auto status =
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         env->Object_CallMethodByName_Ref(timerTable, "createTimer", SIGNATURE, &timerInfoRef, funcObject, delayMs,
@@ -116,7 +116,7 @@ ani_int TimerModule::StartTimer(ani_env *env, ani_object funcObject, ani_int del
 
     ani_int timerId {};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->Object_CallMethodByName_Int(timerInfo, "getId", ":I", &timerId);
+    status = env->Object_CallMethodByName_Int(timerInfo, "getId", ":i", &timerId);
     ASSERT(status == ANI_OK);
 
     timer->data = reinterpret_cast<void *>(timerId);
@@ -177,7 +177,7 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
         coro->GetCoroutineManager()->LaunchNative(timerFunc, timer, std::move(coroName),
                                                   ark::CoroutineWorkerGroup::GenerateExactWorkerId(
                                                       ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),
-                                                  ark::ets::EtsCoroutine::TIMER_CALLBACK, true);
+                                                  ark::ets::EtsCoroutine::TIMER_CALLBACK, false, true);
     }
     uv_timer_stop(timer);
 }
@@ -200,12 +200,8 @@ void TimerModule::DisarmTimer(uv_timer_t *timer)
 
 ani_object TimerModule::GetTimerTable(ani_env *env)
 {
-    ani_module concurrencyModule {};
-    [[maybe_unused]] auto status = env->FindModule("Lstd/concurrency;", &concurrencyModule);
-    ASSERT(status == ANI_OK);
-
     ani_class loopCls {};
-    status = env->Module_FindClass(concurrencyModule, "LEventLoop;", &loopCls);
+    [[maybe_unused]] auto status = env->FindClass("std.concurrency.EventLoop", &loopCls);
     ASSERT(status == ANI_OK);
 
     ani_ref timerTable {};
@@ -218,7 +214,7 @@ std::pair<ani_object, bool> TimerModule::FindTimerInfo(ani_env *env, ani_int tim
 {
     auto timerTable = GetTimerTable(env);
     ani_ref timerInfoRef {};
-    static constexpr auto SIGNATURE = "I:Lstd/concurrency/Timer;";
+    static constexpr auto SIGNATURE = "i:C{std.concurrency.Timer}";
     [[maybe_unused]] ani_status status {};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     status = env->Object_CallMethodByName_Ref(timerTable, "findTimer", SIGNATURE, &timerInfoRef, timerId);
@@ -235,7 +231,7 @@ void TimerModule::ClearTimerInfo(ani_env *env, ani_int timerId)
 {
     auto timerTable = GetTimerTable(env);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    [[maybe_unused]] auto status = env->Object_CallMethodByName_Void(timerTable, "clearTimer", "I:V", timerId);
+    [[maybe_unused]] auto status = env->Object_CallMethodByName_Void(timerTable, "clearTimer", "i:", timerId);
     ASSERT(status == ANI_OK);
 }
 

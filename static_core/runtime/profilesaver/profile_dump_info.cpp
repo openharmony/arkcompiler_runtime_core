@@ -24,8 +24,8 @@
 #include <climits>
 #include <cstring>
 
-#include "libpandabase/os/failure_retry.h"
-#include "trace/trace.h"
+#include "libarkbase/os/failure_retry.h"
+#include "libarkbase/trace/trace.h"
 
 #ifndef PATH_MAX
 constexpr uint16_t PATH_MAX = 1024;

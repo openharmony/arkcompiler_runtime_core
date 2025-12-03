@@ -692,6 +692,12 @@ instructions:
     flags: [can_throw, no_dce, no_cse, is_check, no_hoist, require_state, runtime_call, can_deoptimize]
     description: Check that hclass of object is suitable for dynamic call.
 
+  - opcode: StringFlatCheck
+    base: FixedInputsInst<2>
+    signature: [d-ref, ref, save_state]
+    flags: [can_throw, no_hoist, no_cse, require_state, runtime_call]
+    description: Make sure result string is flat
+
   - opcode: Deoptimize
     base: DeoptimizeInst
     signature: [save_state]
@@ -1189,12 +1195,34 @@ instructions:
     modes: [jit_aot, irtoc]
     description: Select which value to move to destination based on comparison.
 
+  - opcode: SelectTransform
+    base: SelectTransformInst
+    signature: [d-int, int, int, real-any, real-any]
+    flags: [low_level, ifcvt]
+    modes: [jit_aot, irtoc]
+    description: >-
+      Select which value to move to destination based on comparison.
+      If comparison result is true, then the first operand is selected; Otherwise, let y be the second operand and
+      τ be the specified transform function, then τ(y) is selected.
+      τ(y) may be one of the following:
+        INC: τ(y) = y + 1;
+        INV: τ(y) = ~y where ~y is bitwise inversion of y;
+        NEG: τ(y) = -y where -y is the arithmetic negation of y.
+      This low-level IR is abstruction of Aarch64 selecting instruction family.
+
   - opcode: SelectImm
     base: SelectImmInst
     signature: [d-real-any, real-any, real-any, real-any]
     flags: [low_level, ifcvt]
     modes: [jit_aot, irtoc]
     description: Select which value to move to destination based on comparison with immediate.
+
+  - opcode: SelectImmTransform
+    base: SelectImmTransformInst
+    signature: [d-int, int, int, real-any]
+    flags: [low_level, ifcvt]
+    modes: [jit_aot, irtoc]
+    description: Analogous to SelectTransform with the fourth operand replaced as immediate.
 
   - opcode: AddOverflow
     base: BinaryOverflowInst
@@ -1322,7 +1350,7 @@ arch_info:
   regs_count: 16
   temp_regs: [8, 9, 12]
   fp_regs_count: 32
-  fp_temp_regs: [14, 15]
+  fp_temp_regs: [30, 31]
 
 - name: x86_64
   regs_count: 16

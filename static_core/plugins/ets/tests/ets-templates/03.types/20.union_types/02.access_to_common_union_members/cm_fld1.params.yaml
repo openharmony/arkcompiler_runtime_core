@@ -201,38 +201,30 @@ cases:
           arktest.assertEQ(u2.fld, Color.Blue)
 
     - decl: |-
-          // classes, fields of different types
-          class A {
-              fld: number = 42.0
-          }
-          class B {}
-          let u1: A|B = new A
-      tags: compile-only, negative
+        class A {
+            //optional field effectively (T|undefined): Object|null|undefined
+            fld?: Object|null
+        }
+        class B {
+            fld: Object|null|undefined = null
+        }
+        let u1: A|B = new A
+        let u2: A|B = new B
       use: |-
-          arktest.assertEQ(u1.fld * 2, 84.0)  // CTE: no fld in class B
+        arktest.assertTrue(u1.fld === undefined)
+        arktest.assertTrue(u2.fld === null)
 
     - decl: |-
-          // classes, fields of different types
-          class A {
-              fld: number = 42.0
-          }
-          class B {
-              fld: string = 'abc'
-          }
-          let u1: A|B = new A
-      tags: compile-only, negative
+        class A {
+            //optional field effectively (T|undefined): Object|null|undefined
+            readonly fld?: Object|null
+        }
+        class B {
+            fld: Object|null|undefined = null
+        }
+        let u1: A|B = new A
+        let u2: A|B = new B
       use: |-
-          arktest.assertEQ(u1.fld * 2, 84.0)  // CTE: different types
-
-    - decl: |-
-          // classes, fields of different types
-          class A {
-              fld: number[] = [42.0]
-          }
-          class B {
-              fld: string[] = ['abc']
-          }
-          let u1: A|B = new A
-      tags: compile-only, negative
-      use: |-
-          arktest.assertEQ(u1.fld[0] * 2, 84.0)  // CTE: different types
+        arktest.assertTrue(u1.fld === undefined)
+        arktest.assertTrue(u2.fld === null)
+    

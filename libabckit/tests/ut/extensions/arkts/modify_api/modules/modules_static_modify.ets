@@ -13,7 +13,15 @@
  * limitations under the License.
  */
 
-function main() {
-    let a :number= 25;
+const field1 = 'Module';
+
+function main(){
+    let a:int = 12;
     console.log(a);
-}
+};
+
+class Class1 {}
+
+interface Interface1 {}
+
+namespace Ns1 {}

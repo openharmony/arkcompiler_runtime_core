@@ -56,6 +56,24 @@ entrypoints:
   - void const*
   - size_t
 
+- name: AnnotateSanitizersPoison
+  entrypoint: AnnotateSanitizersPoisonEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - void
+  - void const*
+  - size_t
+
+- name: AnnotateSanitizersPoisonNoBridge
+  entrypoint: AnnotateSanitizersPoisonEntrypoint
+  bridge: none
+  properties: []
+  signature:
+  - void
+  - void const*
+  - size_t
+
 - name: CheckCast
   entrypoint: CheckCastEntrypoint
   bridge: entrypoint
@@ -308,6 +326,22 @@ entrypoints:
   signature:
   - void
 
+- name: RegisterSafepointTimer
+  entrypoint: RegisterSafepointTimerEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - void
+  - uint32_t
+
+- name: DisarmSafepointTimer
+  entrypoint: DisarmSafepointTimerEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - void
+  - uint32_t
+
 - name: GetCalleeMethod
   entrypoint: GetCalleeMethodEntrypoint
   bridge: entrypoint
@@ -315,7 +349,7 @@ entrypoints:
   signature:
   - ark::Method*
   - const ark::Method*
-  - size_t
+  - ark::FileEntityId
 
 - name: GetCalleeMethodDirect
   entrypoint: GetCalleeMethodEntrypoint
@@ -324,7 +358,7 @@ entrypoints:
   signature:
   - ark::Method*
   - const ark::Method*
-  - size_t
+  - ark::FileEntityId
 
 - name: GetUnknownCalleeMethod
   entrypoint: GetUnknownCalleeMethodEntrypoint
@@ -333,7 +367,7 @@ entrypoints:
   signature:
   - ark::Method*
   - const ark::Method*
-  - size_t
+  - ark::FileEntityId
   - size_t*
 
 - name: GetFieldOffset
@@ -343,7 +377,7 @@ entrypoints:
   signature:
   - size_t
   - ark::Method*
-  - uint32_t
+  - ark::FileEntityId
 
 - name: GetStaticFieldAddress
   entrypoint: GetStaticFieldAddressEntrypoint
@@ -352,7 +386,7 @@ entrypoints:
   signature:
   - uintptr_t
   - ark::Method*
-  - uint32_t
+  - ark::FileEntityId
 
 - name: UnresolvedStoreStaticBarriered
   entrypoint: UnresolvedStoreStaticBarrieredEntrypoint
@@ -361,7 +395,7 @@ entrypoints:
   signature:
   - void
   - ark::Method*
-  - uint32_t
+  - ark::FileEntityId
   - ark::ObjectHeader*
 
 - name: GetUnknownStaticFieldMemoryAddress
@@ -371,7 +405,7 @@ entrypoints:
   signature:
   - uintptr_t
   - ark::Method*
-  - uint32_t
+  - ark::FileEntityId
   - size_t*
 
 - name: InitializeClass
@@ -472,7 +506,7 @@ entrypoints:
   - uintptr_t
   - const ark::Method*
   - ark::ObjectHeader*
-  - size_t
+  - ark::FileEntityId
   - size_t*
 
 - name: ResolveVirtualCallAot
@@ -483,7 +517,7 @@ entrypoints:
   - uintptr_t
   - const ark::Method*
   - ark::ObjectHeader*
-  - size_t
+  - ark::FileEntityId
   - uintptr_t
 
 - name: ResolveVirtualCallAotSlowPath
@@ -494,7 +528,7 @@ entrypoints:
   - uintptr_t
   - const ark::Method*
   - ark::ObjectHeader*
-  - size_t
+  - ark::FileEntityId
   - uintptr_t
 
 - name: ResolveVirtualCall
@@ -818,26 +852,8 @@ entrypoints:
     - ark::coretypes::String*
     - ark::coretypes::String*
 
-- name: StringEqualsCompressed
-  entrypoint: StringEqualsCompressed
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
 - name: StringEqualsUnroll
   entrypoint: StringEqualsUnroll
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringEqualsUnrollCompressed
-  entrypoint: StringEqualsUnrollCompressed
   bridge: none
   properties: [irtoc]
   signature:
@@ -1081,46 +1097,6 @@ entrypoints:
     - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
 
-- name: SubStringFromStringTlab
-  entrypoint: SubStringFromStringTlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::coretypes::String*  # resulting string
-    - ark::ObjectHeader*       # src string
-    - int32_t                  # begin index
-    - int32_t                  # end index
-
-- name: SubStringFromStringTlabCompressed
-  entrypoint: SubStringFromStringTlabCompressed
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::coretypes::String*  # resulting string
-    - ark::ObjectHeader*       # src string
-    - int32_t                  # begin index
-    - int32_t                  # end index
-
-- name: SubStringFromStringSlowPath
-  entrypoint: SubStringFromStringEntrypoint
-  bridge: slow_path
-  properties: []
-  signature:
-    - ark::coretypes::String*  # resulting string
-    - ark::ObjectHeader*       # src string
-    - int32_t                  # begin index
-    - int32_t                  # end index
-
-- name: SubStringFromStringOddSaved
-  entrypoint: SubStringFromStringEntrypoint
-  bridge: odd_saved
-  properties: []
-  signature:
-    - ark::coretypes::String*  # resulting string
-    - ark::ObjectHeader*       # src string
-    - int32_t                  # begin index
-    - int32_t                  # end index
-
 - name: StringGetCharsTlab
   entrypoint: StringGetCharsTlab
   bridge: none
@@ -1279,96 +1255,6 @@ entrypoints:
     - void*
     - int32_t
 
-- name: StringConcat2Tlab
-  entrypoint: StringConcat2Tlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringConcat3Tlab
-  entrypoint: StringConcat3Tlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringConcat4Tlab
-  entrypoint: StringConcat4Tlab
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringConcat2SlowPath
-  entrypoint: CoreStringConcat2
-  bridge: slow_path
-  properties: []
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringConcat3SlowPath
-  entrypoint: CoreStringConcat3
-  bridge: slow_path
-  properties: []
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringConcat4SlowPath
-  entrypoint: CoreStringConcat4
-  bridge: slow_path
-  properties: []
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringConcat2Usual
-  entrypoint: CoreStringConcat2
-  bridge: entrypoint
-  properties: []
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringConcat3OddSaved
-  entrypoint: CoreStringConcat3
-  bridge: odd_saved
-  properties: []
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
-- name: StringConcat4Usual
-  entrypoint: CoreStringConcat4
-  bridge: entrypoint
-  properties: []
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
 - name: StringCompareTo
   entrypoint: StringCompareTo
   bridge: none
@@ -1378,8 +1264,26 @@ entrypoints:
     - ark::coretypes::String*  # first string
     - ark::coretypes::String*  # second string
 
+- name: StringCompareToUsual
+  entrypoint: CoreStringCompareTo
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - int32_t                  # compare result
+    - ark::coretypes::String*  # first string
+    - ark::coretypes::String*  # second string
+
+- name: StringCompareToSlowPath
+  entrypoint: CoreStringCompareTo
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t                  # compare result
+    - ark::coretypes::String*  # first string
+    - ark::coretypes::String*  # second string
+
 - name: StringEqualsUsual
-  entrypoint: CoreStringEquals
+  entrypoint: CoreStringEqualsEntrypoint
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -1388,10 +1292,42 @@ entrypoints:
     - ark::coretypes::String*
 
 - name: StringEqualsSlowPath
-  entrypoint: CoreStringEquals
+  entrypoint: CoreStringEqualsEntrypoint
   bridge: slow_path
   properties: [intrinsic]
   signature:
     - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringFlatCheck
+  entrypoint: StringFlatCheck
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringFlatCheckSlowPath
+  entrypoint: CoreStringFlatCheck
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringFlatCheckOddSaved
+  entrypoint: CoreStringFlatCheck
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringFlatCheckArm32
+  entrypoint: CoreStringFlatCheck
+  bridge: entrypoint
+  properties: []
+  signature:
     - ark::coretypes::String*
     - ark::coretypes::String*

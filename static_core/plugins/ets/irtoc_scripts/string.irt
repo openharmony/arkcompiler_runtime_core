@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_relative 'string_helpers.irt'
 include_relative '../../plugins/ets/irtoc_scripts/common.irt'
 
 module Constants
@@ -29,16 +28,16 @@ module Constants
   U8_SIZE = "1"
   U16_SIZE = "2"
   WRONG_CHAR_FLAG_MASK = "0x10000UL"
+  ASCII_CHAR_CACHE_SIZE = "cross_values::GetPlatformTypesAsciiCharCacheSize(GetArch())"
 end
 
-# It is assumed that _begin_index and _end_index are safe and does not check/normalize them.
-# The range is [_begin_index, _end_index).
+# It is assumed that _begin_index is safe and does not check/normalize them.
+# The range is [_begin_index, _begin_index + _char_count).
 # Note, a caller of this macro must provide a corresponding 'SlowPathEntrypoint'
 # for the case when 'allocate_string_tlab' fails (see StringTrim as an example)
 # Now TLAB implementation initializes memory with zero, so the hashcode field
 # is not initialized with zero explicitly.
-macro(:fast_substring) do |_str, _str_len, _begin_index, _end_index, _not_compressed|
-  _char_count := Sub(_end_index, _begin_index).u32
+macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _not_compressed|
   If(_char_count, Cast(_str_len).u32).EQ.Unlikely.b {
     # Return the string itself
     _same_str := Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr
@@ -212,7 +211,7 @@ function(:CharIsWhiteSpace,
           params: {ch: 'u16'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -221,6 +220,10 @@ function(:CharIsWhiteSpace,
   end
   Return(is_white_space_u16(ch)).b
 }
+
+
+GenerateStringEquals(lang='Ets', dynamic=false, :FastPath)
+GenerateStringEquals(lang='Ets', dynamic=false, :NativePlus)
 
 
 function(:StringEmpty,
@@ -245,15 +248,6 @@ Label(:SlowPathEntrypoint)
   Intrinsic(:SLOW_PATH_ENTRY).AddImm(entrypoint).MethodAsImm("CreateEmptyString1ArgBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
-
-
-if Options.arch == :arm64
-  trim_left_regs = $temps_mask + :callee0 + :callee1
-  trim_right_regs = $temps_mask + :callee0 + :callee1
-else
-  trim_left_regs = $temps_mask + :callee0 + :caller0 + :caller1
-  trim_right_regs = $temps_mask + :callee0 + :caller0 + :caller1
-end
 
 
 function(:StringTrimLeftBase,
@@ -300,7 +294,8 @@ Label(:Loop2)
   index2 := Phi(j, j1).i32
 Label(:TrimLeft)
   index := Phi(index1, index2).i32
-  trimmed := fast_substring(str, length, index, length, not_compressed)
+  char_count := Sub(length, index).u32
+  trimmed := fast_substring(str, length, index, char_count, not_compressed)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
@@ -312,7 +307,7 @@ Label(:SlowPathEntrypoint)
 function(:StringTrimLeft,
           params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
-          regalloc_set: $trim_left_regs,
+          regalloc_set: $panda_mask,
           mode: [:FastPath]) {
 
   if Options.arch == :arm32
@@ -321,6 +316,8 @@ function(:StringTrimLeft,
     next
   end
   
+  check_not_tree_string_type(str) if defines.DEBUG
+  # it still can be slice
   check_string_type(str)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -401,7 +398,7 @@ Label(:Loop2)
 Label(:TrimRight)
   index := Phi(index1, index2).i32
   index := AddI(index).Imm(1).i32
-  trimmed := fast_substring(str, length, 0, index, not_compressed)
+  trimmed := fast_substring(str, length, 0, Cast(index).u32, not_compressed)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
@@ -413,7 +410,7 @@ Label(:SlowPathEntrypoint)
 function(:StringTrimRight,
           params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
-          regalloc_set: $trim_right_regs,
+          regalloc_set: $panda_mask,
           mode: [:FastPath]) {
 
   if Options.arch == :arm32
@@ -422,6 +419,8 @@ function(:StringTrimRight,
     next
   end
   
+  check_not_tree_string_type(str) if defines.DEBUG
+  # it still can be slice
   check_string_type(str)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -521,7 +520,8 @@ Label(:Loop4)  # while (left < right && utf::IsWhiteSpaceChar(str->At(left)))
 Label(:Trim)
   l := Phi(left, left1, left, left11).i32
   r := Phi(right1, right3, right11, right33).i32
-  trimmed := fast_substring(str, length, l, r, not_compressed)
+  char_count := Sub(r, l).u32
+  trimmed := fast_substring(str, length, l, char_count, not_compressed)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
@@ -542,6 +542,8 @@ function(:StringTrim,
     next
   end
 
+  check_not_tree_string_type(str) if defines.DEBUG
+  # it still can be slice
   check_string_type(str)
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -625,10 +627,10 @@ end
 
 
 function(:StringStartsWithBase,
-          params: {str: 'ref', pfx: 'ref', from_index: 'i32'},
+          params: {str: 'ref', pfx: 'ref', from_index: 'i32', pfx_i1: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -644,7 +646,6 @@ function(:StringStartsWithBase,
   pfx_not_compressed := AndI(pfx_len_packed).Imm(1).i32
   pfx_data := Add(Cast(pfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
 
-  pfx_i1 := 0
 Label(:Loop)
   str_i := Phi(from_index, str_i1).i32
   pfx_i := Phi(pfx_i1, pfx_i2).i32
@@ -663,12 +664,14 @@ Label(:Done)
   Return(1).b
 }
 
-
-function(:StringStartsWith,
-          params: {str: 'ref', pfx: 'ref', from_index: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringStartsWith(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringStartsWith#{suffix}".to_sym,
+           params: {str_orig: 'ref', pfx_orig: 'ref', from_index: 'i32', arg4: 'i32'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -676,10 +679,43 @@ function(:StringStartsWith,
     next
   end
 
-  check_string_type(str)
-  check_string_type(pfx)
+  if cgmode == :NativePlus
+    str_orig0 := try_use_cached_flat_str_accept_sliced(str_orig)
+    pfx_orig0 := try_use_cached_flat_str_accept_sliced(pfx_orig)
+  else
+    check_not_tree_string_type(str_orig) if defines.DEBUG
+    check_not_tree_string_type(pfx_orig) if defines.DEBUG
+    str_orig0 := str_orig
+    pfx_orig0 := pfx_orig
+  end
 
-  pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  strBaseClass := load_class(str_orig0)
+  strType := LoadI(strBaseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+
+  zeroIndex := Cast(0).u32
+
+  If(strType, Constants::STRING_TYPE_SLICE).EQ {
+    strParent := LoadI(str_orig0).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+    strStartIndexAndBits := LoadI(str_orig0).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+    strStartIndex := ShrI(strStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
+  }
+
+  str := Phi(str_orig0, strParent).ref
+  resultStrStartIndex := Phi(zeroIndex, strStartIndex).u32
+
+  pfxBaseClass := load_class(pfx_orig0)
+  pfxType := LoadI(pfxBaseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+
+  If(pfxType, Constants::STRING_TYPE_SLICE).EQ {
+    pfxParent := LoadI(pfx_orig0).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+    pfxStartIndexAndBits := LoadI(pfx_orig0).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+    pfxStartIndex := ShrI(pfxStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
+  }
+
+  pfx := Phi(pfx_orig0, pfxParent).ref
+  resultPfxStartIndex := Phi(zeroIndex, pfxStartIndex).u32
+
+  pfx_len_packed := LoadI(pfx_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if prefix is empty
   # The least significant bit indicates COMPRESSED/UNCOMPRESSED,
   # thus if (packed length <= 1) then the actual length is equal to 0.
@@ -687,7 +723,7 @@ function(:StringStartsWith,
     Return(1).b
   }
 
-  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  str_len_packed := LoadI(str_orig).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'false' if 'str' is empty as 'prefix' is not empty.
   If(str_len_packed, 1).LE.Unlikely.b {
     Return(0).b
@@ -708,23 +744,38 @@ function(:StringStartsWith,
     Return(0).b
   }
 
-  LiveOut(str).DstReg(regmap[:arg0]).ref
-  LiveOut(pfx).DstReg(regmap[:arg1]).ref
-  LiveOut(from_index2).DstReg(regmap[:arg2]).i32
-  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_BASE")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase").Terminator.b
-Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, pfx, from_index).AddImm(entrypoint).MethodAsImm("StringStartsWithOddSavedBridge").Terminator.b
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  from_index3 := Add(from_index2, resultStrStartIndex).i32
+
+  if cgmode == :NativePlus
+    LiveOut(str).DstReg(regmap[:arg1]).ref
+    LiveOut(pfx).DstReg(regmap[:arg2]).ref
+    LiveOut(from_index3).DstReg(regmap[:arg3]).i32
+    LiveOut(resultPfxStartIndex).DstReg(regmap[:arg4]).i32
+  else
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    LiveOut(pfx).DstReg(regmap[:arg1]).ref
+    LiveOut(from_index3).DstReg(regmap[:arg2]).i32
+    LiveOut(resultPfxStartIndex).DstReg(regmap[:arg3]).i32
+  end
+  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_BASE#{upsuffix}")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase#{suffix}").Terminator.b
+
+  if cgmode == :NativePlus
+  Label(:SlowPathEntrypoint)
+    Return(Call(str_orig, pfx_orig, from_index).Method("StdCoreStringStartsWith").b).b
+  end
 }
+end
+
+GenerateStringStartsWith(:FastPath)
+GenerateStringStartsWith(:NativePlus)
 
 
 function(:StringEndsWithBase,
           params: {str: 'ref', sfx: 'ref', end_index: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -761,12 +812,14 @@ Label(:Done)
   Return(1).b
 }
 
-
-function(:StringEndsWith,
-          params: {str: 'ref', sfx: 'ref', end_index: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringEndsWith(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringEndsWith#{suffix}".to_sym,
+           params: {str_orig: 'ref', sfx_orig: 'ref', end_index: 'i32'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -774,8 +827,18 @@ function(:StringEndsWith,
     next
   end
 
-  check_string_type(str)
-  check_string_type(sfx)
+  if cgmode == :NativePlus
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
+    sfx := try_use_cached_flat_str_reject_sliced(sfx_orig)
+  else
+    check_not_tree_string_type(str_orig) if defines.DEBUG
+    check_not_tree_string_type(sfx_orig) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str_orig)
+    check_string_type(sfx_orig)
+    str := str_orig
+    sfx := sfx_orig
+  end
 
   sfx_len_packed := LoadI(sfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return 'true' if suffix is empty
@@ -809,16 +872,31 @@ function(:StringEndsWith,
     Return(0).b
   }
 
-  LiveOut(str).DstReg(regmap[:arg0]).ref
-  LiveOut(sfx).DstReg(regmap[:arg1]).ref
-  LiveOut(end_index2).DstReg(regmap[:arg2]).i32
-  entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase").Terminator.b
+  if cgmode == :NativePlus
+    LiveOut(str).DstReg(regmap[:arg1]).ref
+    LiveOut(sfx).DstReg(regmap[:arg2]).ref
+    LiveOut(end_index2).DstReg(regmap[:arg3]).i32
+  else
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    LiveOut(sfx).DstReg(regmap[:arg1]).ref
+    LiveOut(end_index2).DstReg(regmap[:arg2]).i32
+  end
+  entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE#{upsuffix}")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase#{suffix}").Terminator.b
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, sfx, end_index).AddImm(entrypoint).MethodAsImm("StringEndsWithOddSavedBridge").Terminator.b
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str_orig, sfx_orig, end_index).Method("StdCoreStringEndsWith").b).b
+  else
+    entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, sfx_orig, end_index).AddImm(entrypoint).MethodAsImm("StringEndsWithOddSavedBridge").Terminator.b
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+
+GenerateStringEndsWith(:FastPath)
+GenerateStringEndsWith(:NativePlus)
+
 
 function(:StringGetBytesTlab,
         params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
@@ -832,6 +910,8 @@ function(:StringGetBytesTlab,
     next
   end
 
+  check_not_tree_string_type(str) if defines.DEBUG
+  # it still can be slice
   check_string_type(str)
 
   If(begin_index, end_index).GT.Unlikely.b {
@@ -841,8 +921,6 @@ function(:StringGetBytesTlab,
   If(begin_index, Cast(0).i32).LT.Unlikely.b {
     Goto(:SlowPathEntrypoint)  # Out of range
   }
-
-  check_string_type(str)
 
   # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
@@ -921,7 +999,7 @@ scoped_macro(:is_array_of_convertible_char_codes) do |codes_data, codes_count|
     _convertible := Cast(1).b
   else
     _offset1 := Cast(0).u64
-    _codes_len := ShlI(codes_count).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
+    _codes_len := ShlI(codes_count).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64
     _convertible1 := Cast(1).b
 Label(:Loop)
     _offset := Phi(_offset1, _offset2).u64
@@ -972,7 +1050,7 @@ end  # get_char_from_code
 #
 scoped_macro(:is_array_of_compressible_char_codes) do |codes_data, codes_count|
   _offset1 := Cast(0).u64
-  _codes_len := ShlI(codes_count).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
+  _codes_len := ShlI(codes_count).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64
   _compressible1 := Cast(1).b
 Label(:Loop)
   _offset := Phi(_offset1, _offset2).u64
@@ -1004,7 +1082,7 @@ Label(:Loop)
     If(_i, count).AE.Unlikely {
       Goto(:LoopDone)
     }
-    _code_offset := ShlI(_i).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
+    _code_offset := ShlI(_i).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64
     _char := get_char_from_code(load_char_code(src, _code_offset).f64)
     if compressed_string
       _char_offset := Cast(_i).u64
@@ -1020,90 +1098,84 @@ Label(:LoopDone)
   end  # convert_char_codes_to_#{type}_chars
 end
 
-def GenerateCreateStringFromCharCodeTlab(string_compression_enabled)
-  suffix = (string_compression_enabled ? "Compressed" : "")
-  available_regs = $panda_mask
-  function("CreateStringFromCharCodeTlab#{suffix}".to_sym,
-            params: {char_codes: 'ref', string_klass: 'ref'},
-            regmap: $full_regmap,
-            regalloc_set: available_regs,
-            mode: [:FastPath]) {
+###
+# Reads a string formed from a one-byte char 'char' from the cache 'cache'
+#
+scoped_macro(:read_from_cache) do |cache, char|
+  _string_offset := AddI(ShlI(Cast(char).u64).Imm(EtsConstants::OBJ_PTR_LOG2_SIZE).u64).Imm(Constants::ARRAY_DATA_OFFSET).u64
+  get_object_pointer(cache, _string_offset)
+end # read_from_cache
 
-    if Options.arch == :arm32
-      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
-      ReturnVoid().void
-      next
-    end
+function(:CreateStringFromCharCodeTlab,
+        params: {char_codes: 'ref', string_klass: 'ref'},
+        regmap: $full_regmap,
+        regalloc_set: $panda_mask,
+        mode: [:FastPath]) {
 
-    # There is no check of the arguments against NullPointer as
-    # it's done in the InstBuilder (see AddArgNullcheckIfNeeded) for non-empty arrays
-    # and we suppose that the `NewArray (size=0)` instruction never returns `null`.
-    if defines.DEBUG
-      If(char_codes, 0).EQ {
-        Intrinsic(:UNREACHABLE).Terminator.void
-      }
-    end
-
-    char_codes_array := get_object_pointer_imm(char_codes, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
-    codes_data := AddI(char_codes_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
-    codes_count := LoadI(char_codes).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
-
-    # Validate if all the char codes are convertible: whenever an overflow or underflow takes place during the
-    # conversion of a denormalized number we have to go to the slow path. The validation must take place before
-    # any attempts to allocate the memory in TLAB.
-    convertible := is_array_of_convertible_char_codes(codes_data, Cast(codes_count).u64)
-    If(convertible, 0).EQ.Unlikely {
-      Goto(:SlowPathEntrypoint)
-    }
-
-    # Allocate a new string
-    if string_compression_enabled
-      compressible := is_array_of_compressible_char_codes(codes_data, Cast(codes_count).u64)
-      If(compressible, 1).EQ.Likely {
-        data_size1 := Cast(codes_count).word
-      } Else {
-        data_size2 := Cast(ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).word
-      }
-      data_size := Phi(data_size1, data_size2).word
-    else
-      data_size := Cast(ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).word
-    end
-    new_str := allocate_string_tlab(string_klass, data_size)
-    str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
-
-    # Copy data from char_codes to the new string with the required preprocessing
-    # String length field is set according to SetLength() from runtime/include/coretypes/string.h
-    if string_compression_enabled
-      If(compressible, 1).EQ.Likely {
-        convert_char_codes_to_u8_chars(codes_data, str_data, Cast(codes_count).u64)
-        StoreI(new_str, ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
-      } Else {
-        convert_char_codes_to_u16_chars(codes_data, str_data, Cast(codes_count).u64)
-        StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
-      }
-    else
-      convert_char_codes_to_u16_chars(codes_data, str_data, Cast(codes_count).u64)
-      StoreI(new_str, codes_count).Imm(Constants::STRING_LENGTH_OFFSET).u32
-    end
-    # String is supposed to be a constant object, so all its data should be visible by all threads
-    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
-    Return(new_str).ptr
-
-  Label(:SlowPathEntrypoint)
-    entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_CODE_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, char_codes).AddImm(entrypoint).MethodAsImm("CreateStringFromCharCode2ArgBridge").Terminator.ptr
+  if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    ReturnVoid().void
+    next
+  end
+
+  # There is no check of the arguments against NullPointer as
+  # it's done in the InstBuilder (see AddArgNullcheckIfNeeded) for non-empty arrays
+  # and we suppose that the `NewArray (size=0)` instruction never returns `null`.
+  if defines.DEBUG
+    If(char_codes, 0).EQ {
+      Intrinsic(:UNREACHABLE).Terminator.void
+    }
+  end
+
+  char_codes_array := get_object_pointer_imm(char_codes, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
+  codes_data := AddI(char_codes_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
+  codes_count := LoadI(char_codes).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+
+  # Validate if all the char codes are convertible: whenever an overflow or underflow takes place during the
+  # conversion of a denormalized number we have to go to the slow path. The validation must take place before
+  # any attempts to allocate the memory in TLAB.
+  convertible := is_array_of_convertible_char_codes(codes_data, Cast(codes_count).u64)
+  If(convertible, 0).EQ.Unlikely {
+    Goto(:SlowPathEntrypoint)
   }
-end # def GenerateCreateStringFromCharCodeTlab
 
-GenerateCreateStringFromCharCodeTlab(string_compression_enabled=true)
-GenerateCreateStringFromCharCodeTlab(string_compression_enabled=false)
+  # Allocate a new string
+  compressible := is_array_of_compressible_char_codes(codes_data, Cast(codes_count).u64)
+  If(compressible, 1).EQ.Likely {
+    data_size1 := Cast(codes_count).word
+  } Else {
+    data_size2 := Cast(ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).word
+  }
+  data_size := Phi(data_size1, data_size2).word
+  new_str := allocate_string_tlab(string_klass, data_size)
+  str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
 
-def GenerateCreateStringFromCharCodeSingleTlab(string_compression_enabled)
-  suffix = (string_compression_enabled ? "Compressed" : "")
+  # Copy data from char_codes to the new string with the required preprocessing
+  # String length field is set according to SetLength() from runtime/include/coretypes/string.h
+  If(compressible, 1).EQ.Likely {
+    convert_char_codes_to_u8_chars(codes_data, str_data, Cast(codes_count).u64)
+    StoreI(new_str, ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  } Else {
+    convert_char_codes_to_u16_chars(codes_data, str_data, Cast(codes_count).u64)
+    StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  }
+  # String is supposed to be a constant object, so all its data should be visible by all threads
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  Return(new_str).ptr
+
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_CODE_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, char_codes).AddImm(entrypoint).MethodAsImm("CreateStringFromCharCode2ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
+  nocache = (cache_flag ? "" : "NoCache")
+  param_tuple = (cache_flag ? {cache: 'ref', char_code: 'u64', string_klass: 'ref'}
+                            : {char_code: 'u64', string_klass: 'ref'})
   available_regs = $panda_mask
-  function("CreateStringFromCharCodeSingleTlab#{suffix}".to_sym,
-            params: {char_code: 'u64', string_klass: 'ref'},
+  function("CreateStringFromCharCodeSingle#{nocache}Tlab".to_sym,
+            params: param_tuple,
             regmap: $full_regmap,
             regalloc_set: available_regs,
             mode: [:FastPath]) {
@@ -1122,56 +1194,55 @@ def GenerateCreateStringFromCharCodeSingleTlab(string_compression_enabled)
       # any attempts to allocate the memory in TLAB.
       convertible := validate_flag_char_pair(flag_char_pair)
       If(convertible, 0).EQ.Unlikely {
-         Goto(:SlowPathEntrypoint)
+        Goto(:SlowPathEntrypoint)
+      }
+    end
+
+    char := get_char_from_flag_char_pair(flag_char_pair)
+    # Try to read from the one-byte char cache
+    if cache_flag
+      IfImm(Compare(char, Constants::ASCII_CHAR_CACHE_SIZE).B.b).Imm(0).NE.b {
+        Return(read_from_cache(cache, char)).ptr
       }
     end
 
     # Allocate a new string
-    char := get_char_from_flag_char_pair(flag_char_pair)
-    if string_compression_enabled
-      If(SubI(char).Imm(Constants::STRING_MUTF8_1B_MIN).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely {
-        compressible1 := Cast(0).b
-        data_size1 := Cast(2).word
-      } Else {
-        compressible2 := Cast(1).b
-        data_size2 := Cast(1).word
-      }
-      compressible := Phi(compressible1, compressible2).b
-      data_size := Phi(data_size1, data_size2).word
-    else
-      data_size := Cast(2).word
-    end
+    If(SubI(char).Imm(Constants::STRING_MUTF8_1B_MIN).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely {
+      compressible1 := Cast(0).b
+      data_size1 := Cast(2).word
+    } Else {
+      compressible2 := Cast(1).b
+      data_size2 := Cast(1).word
+    }
+    compressible := Phi(compressible1, compressible2).b
+    data_size := Phi(data_size1, data_size2).word
 
     new_str := allocate_string_tlab(string_klass, data_size)
     str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
 
     # Copy the char to the new string with the required preprocessing
     # String length field is set according to SetLength() from runtime/include/coretypes/string.h
-    if string_compression_enabled
-      If(compressible, 1).EQ.Likely {
-        Store(str_data, Cast(0).u64, char).u8
-        StoreI(new_str, Cast(4).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
-      } Else {
-        Store(str_data, Cast(0).u64, char).u16
-        StoreI(new_str, OrI(Cast(4).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
-      }
-    else
-      Store(str_data, Cast(0).u64, char).u16  
-      StoreI(new_str, Cast(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
-    end
+    If(compressible, 1).EQ.Likely {
+      Store(str_data, Cast(0).u64, char).u8
+      StoreI(new_str, Cast(4).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    } Else {
+      Store(str_data, Cast(0).u64, char).u16
+      StoreI(new_str, OrI(Cast(4).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    }
+
     # String is supposed to be a constant object, so all its data should be visible by all threads
     Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     Return(new_str).ptr
 
   Label(:SlowPathEntrypoint)
-    entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_CODE_SINGLE_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, char_code).AddImm(entrypoint).MethodAsImm("CreateStringFromCharCodeSingle2ArgBridge").Terminator.ptr
+    entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, char_code).AddImm(entrypoint).MethodAsImm("CreateStringFromCharCodeSingleNoCache#{param_tuple.size}ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end # def GenerateCreateStringFromCharCodeSingleTlab
 
-GenerateCreateStringFromCharCodeSingleTlab(string_compression_enabled=true)
-GenerateCreateStringFromCharCodeSingleTlab(string_compression_enabled=false)
+GenerateCreateStringFromCharCodeSingleTlab(cache_flag=false)
+GenerateCreateStringFromCharCodeSingleTlab(cache_flag=true)
 
 # String contains 8-bit chars
 # 0 < str_data_size < 8
@@ -1179,7 +1250,7 @@ function(:StringIndexOfCompressedSmall,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1206,7 +1277,7 @@ function(:StringIndexOfCompressedMedium,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1245,7 +1316,7 @@ function(:StringIndexOfCompressedLarge,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1277,7 +1348,7 @@ function(:StringIndexOfCompressed,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1333,7 +1404,7 @@ function(:StringIndexOfUncompressedSmall,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u16'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1361,7 +1432,7 @@ function(:StringIndexOfUncompressedMedium,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u16'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1393,7 +1464,7 @@ function(:StringIndexOfUncompressed,
           params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u16'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [:FastPathPlus]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1442,12 +1513,14 @@ Label(:Loop)
   Return(-1).i32
 }
 
-
-function(:StringIndexOf,
-          params: {str: 'ref', ch: 'u16', fake: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_regs,
-          mode: [:FastPath]) {
+def GenerateStringIndexOf(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringIndexOf#{suffix}".to_sym,
+            params: {str_orig: 'ref', ch: 'u16', fake: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1455,7 +1528,14 @@ function(:StringIndexOf,
     next
   end
 
-  check_string_type(str)
+  if cgmode == :NativePlus
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
+  else
+    check_not_tree_string_type(str_orig) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str_orig)
+    str := str_orig
+  end
 
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
 
@@ -1473,23 +1553,38 @@ function(:StringIndexOf,
         LiveOut(str_data).DstReg(regmap[:arg0]).ptr
         LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
         LiveOut(ch).DstReg(regmap[:arg2]).u16
-        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL")
-        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.i32
+        name = "StringIndexOfUncompressedSmall#{suffix}"
+        if cgmode == :NativePlus
+          Return(Call(0, str_data, str_data_size_u16, ch).Method(name).i32).i32
+        else
+          entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL#{upsuffix}")
+          Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+        end
     }
     # 16 <= data size < 32
     If(str_data_size_u16, 32).LT.Unlikely.b {
         LiveOut(str_data).DstReg(regmap[:arg0]).ptr
         LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
         LiveOut(ch).DstReg(regmap[:arg2]).u16
-        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM")
-        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.i32
+        name = "StringIndexOfUncompressedMedium#{suffix}"
+        if cgmode == :NativePlus
+          Return(Call(0, str_data, str_data_size_u16, ch).Method(name).i32).i32
+        else
+          entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM#{upsuffix}")
+          Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+        end
     }
     # 32 <= data size
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
     LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u16
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.i32
+    name = "StringIndexOfUncompressed#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, str_data_size_u16, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
 
   IfImm(Compare(ch, Constants::MAX_U8_VALUE).A.b).Imm(0).NE.Unlikely.b {
@@ -1502,37 +1597,64 @@ function(:StringIndexOf,
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
     LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.i32
+    name = "StringIndexOfCompressedSmall#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, str_data_size_u8, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 8 <= data size < 16
   If(str_data_size_u8, 16).LT.Unlikely.b {
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
     LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.i32
+    name = "StringIndexOfCompressed#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, str_data_size_u8, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 16 <= data size < 32
   If(str_data_size_u8, 32).LT.Unlikely.b {
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
     LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.i32
+    name = "StringIndexOfCompressedLarge#{suffix}"
+    if cgmode == :NativePlus
+      Return(Call(0, str_data, str_data_size_u8, ch).Method(name).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 32 <= data size
   LiveOut(str_data).DstReg(regmap[:arg0]).ptr
   LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
   LiveOut(ch).DstReg(regmap[:arg2]).u8
-  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
+  name = "StringIndexOfCompressed#{suffix}"
+  if cgmode == :NativePlus
+    Return(Call(0, str_data, str_data_size_u8, ch).Method(name).i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED#{upsuffix}")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+  end
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, ch).AddImm(entrypoint).MethodAsImm("StringIndexOf3ArgBridge").Terminator.i32
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+      Return(Call(str_orig, ch).Method("StdCoreStringIndexOf").i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, ch, fake).AddImm(entrypoint).MethodAsImm("StringIndexOfOddSavedBridge").Terminator.i32
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
 
+GenerateStringIndexOf(:FastPath)
+GenerateStringIndexOf(:NativePlus)
 
 # 'IndexOfAfter' calls the corresponding functions from the 'IndexOf' family
 # for the purpose of code efficiency and to avoid code duplication.
@@ -1540,11 +1662,14 @@ Label(:SlowPathEntrypoint)
 # never returns to 'StringIndexOfAfter' because of TAIL_CALL. So the codegen and libllvm
 # take care of it and emit instructions adding 'start_index' to the result returned
 # by 'StringIndexOfAfter'.
-function(:StringIndexOfAfter,
-          params: {str: 'ref', ch: 'u16', start_index: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringIndexOfAfter(cgmode)
+  suffix = (cgmode == :NativePlus ? 'NativePlus': '')
+  upsuffix = (cgmode == :NativePlus ? '_NATIVE_PLUS': '')
+  function("StringIndexOfAfter#{suffix}".to_sym,
+            params: {str_orig: 'ref', ch: 'u16', start_index: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
 
   if Options.arch == :arm32 || Options.arch == :x86_64
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1552,7 +1677,24 @@ function(:StringIndexOfAfter,
     next
   end
 
-  check_string_type(str)
+  # make any negative index zero only for Native mode as
+  # the codegen takes care of it if the mode is FastPath
+  if cgmode == :NativePlus
+    start_index0 := start_index
+    IfImm(Compare(start_index, 0).LT.b).Imm(0).NE.Unlikely.b {
+      start_index1 := 0
+    }
+    start_index := Phi(start_index0, start_index1).i32
+  end
+
+  if cgmode == :NativePlus
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
+  else
+    check_not_tree_string_type(str_orig) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str_orig)
+    str := str_orig
+  end
 
   str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # Return '-1' if 'str' is empty.
@@ -1579,23 +1721,50 @@ function(:StringIndexOfAfter,
       LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
       LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
       LiveOut(ch).DstReg(regmap[:arg2]).u16
-      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL")
-      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.i32
+      name = "StringIndexOfUncompressedSmall#{suffix}"
+      if cgmode == :NativePlus
+        rc0 := Call(0, data_ptr_u16, data_size_u16, ch).Method(name).i32
+        If(rc0, -1).NE.b {
+          rc1 := Add(rc0, start_index).i32
+        }
+        Return(Phi(rc0, rc1).i32).i32
+      else
+        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL#{upsuffix}")
+        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+      end
     }
     # 16 <= data size < 32
     If(data_size_u16, 32).LT.Unlikely.b {
       LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
       LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
       LiveOut(ch).DstReg(regmap[:arg2]).u16
-      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM")
-      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.i32
+      name = "StringIndexOfUncompressedMedium#{suffix}"
+      if cgmode == :NativePlus
+        rc0 := Call(0, data_ptr_u16, data_size_u16, ch).Method(name).i32
+        If(rc0, -1).NE.b {
+          rc1 := Add(rc0, start_index).i32
+        }
+        Return(Phi(rc0, rc1).i32).i32
+      else
+        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM#{upsuffix}")
+        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+      end
     }
     # 32 <= data size
     LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
     LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u16
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.i32
+    name = "StringIndexOfUncompressed#{suffix}"
+    if cgmode == :NativePlus
+      rc0 := Call(0, data_ptr_u16, data_size_u16, ch).Method(name).i32
+      If(rc0, -1).NE.b {
+        rc1 := Add(rc0, start_index).i32
+      }
+      Return(Phi(rc0, rc1).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
 
   IfImm(Compare(ch, Constants::MAX_U8_VALUE).A.b).Imm(0).NE.Unlikely.b {
@@ -1610,36 +1779,81 @@ function(:StringIndexOfAfter,
     LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
     LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.i32
+    name = "StringIndexOfCompressedSmall#{suffix}"
+    if cgmode == :NativePlus
+      rc0 := Call(0, data_ptr_u8, data_size_u8, ch).Method(name).i32
+      If(rc0, -1).NE.b {
+        rc1 := Add(rc0, start_index).i32
+      }
+      Return(Phi(rc0, rc1).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 8 <= data size < 16
   If(data_size_u8, 16).LT.Unlikely.b {
     LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
     LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.i32
+    name = "StringIndexOfCompressedMedium#{suffix}"
+    if cgmode == :NativePlus
+      rc0 := Call(0, data_ptr_u8, data_size_u8, ch).Method(name).i32
+      If(rc0, -1).NE.b {
+          rc1 := Add(rc0, start_index).i32
+      }
+      Return(Phi(rc0, rc1).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 16 <= data size < 32
   If(data_size_u8, 32).LT.Unlikely.b {
     LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
     LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
-    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.i32
+    name = "StringIndexOfCompressedLarge#{suffix}"
+    if cgmode == :NativePlus
+      rc0 := Call(0, data_ptr_u8, data_size_u8, ch).Method(name).i32
+      If(rc0, -1).NE.b {
+        rc1 := Add(rc0, start_index).i32
+      }
+      Return(Phi(rc0, rc1).i32).i32
+    else
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE#{upsuffix}")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+    end
   }
   # 32 <= data size
   LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
   LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
   LiveOut(ch).DstReg(regmap[:arg2]).u8
-  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
+  name = "StringIndexOfCompressed#{suffix}"
+  if cgmode == :NativePlus
+    rc0 := Call(0, data_ptr_u8, data_size_u8, ch).Method(name).i32
+    If(rc0, -1).NE.b {
+      rc1 := Add(rc0, start_index).i32
+    }
+    Return(Phi(rc0, rc1).i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED#{upsuffix}")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
+  end
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_AFTER_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, ch, start_index).AddImm(entrypoint).MethodAsImm("StringIndexOfAfterOddSavedBridge").Terminator.i32
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+      Return(Call(str_orig, ch, start_index).Method("StdCoreStringIndexOfAfter").i32).i32
+  else
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_AFTER_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, ch, start_index).AddImm(entrypoint).MethodAsImm("StringIndexOfAfterOddSavedBridge").Terminator.i32
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+
+GenerateStringIndexOfAfter(:FastPath)
+GenerateStringIndexOfAfter(:NativePlus)
+
 
 function(:StringRepeatTlab,
         params: {str: 'ref', cnt: 'i32'},
@@ -1657,6 +1871,8 @@ function(:StringRepeatTlab,
     Goto(:SlowPathEntrypoint)
   }
 
+  check_not_tree_string_type(str) if defines.DEBUG
+  # it still can be slice
   check_string_type(str)
 
   IfImm(Compare(count, 0).EQ.b).Imm(0).NE {
@@ -1718,3 +1934,507 @@ Label(:SlowPathEntrypoint)
   Intrinsic(:SLOW_PATH_ENTRY, str, count).AddImm(entrypoint).MethodAsImm("StringRepeatUsualBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
+
+function(:StringConcat2Tlab,
+          params: {str1_orig: 'ref', str2_orig: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void.Terminator
+      next
+    end
+
+    str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
+    str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
+
+    klass := load_class(str1)
+    length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+    # any of the strings is uncompressed (resulted string is uncompressed)
+    has_uncompressed := AndI(Or(length1, length2).u32).Imm(1).u32
+
+    count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
+
+    size := Add(count1, count2).u32
+    data_size := Shl(size, has_uncompressed).u32
+    length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
+    new_str := allocate_string_tlab(klass, data_size)
+
+    StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+    src_str_data1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+    # has no uncompressed then everyting is compressed, data is stored as bytes
+    If(has_uncompressed, 0).EQ.b {
+      copy_u8_chars(src_str_data1, dst_str_data1, count1)
+
+      offset := count1
+
+      src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset).ptr
+      copy_u8_chars(src_str_data2, dst_str_data2, count2)
+      Goto(:EndCopy)
+    }
+
+    If(AndI(length1).Imm(1).u32, 0).EQ.b {
+      expand_u8_to_u16_chars(src_str_data1, dst_str_data1, count1)
+    } Else {
+      copy_u16_chars(src_str_data1, dst_str_data1, count1)
+    }
+
+    offset := ShlI(count1).Imm(1).u32
+    src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset).ptr
+
+    If(AndI(length2).Imm(1).u32, 0).EQ.b {
+      expand_u8_to_u16_chars(src_str_data2, dst_str_data2, count2)
+    } Else {
+      copy_u16_chars(src_str_data2, dst_str_data2, count2)
+    }
+
+    Label(:EndCopy)
+
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_str).ptr
+
+Label(:SlowPathEntrypoint)
+    ep_offset = get_entrypoint_offset("STRING_CONCAT2_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig).AddImm(ep_offset).MethodAsImm("StringConcat2UsualBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+function(:StringConcat3Tlab,
+         params: {str1_orig: 'ref', str2_orig: 'ref', str3_orig: 'ref'},
+         regmap: $full_regmap,
+         regalloc_set: $panda_mask,
+         mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void.Terminator
+      next
+    end
+
+    str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
+    str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
+    str3 := try_use_cached_flat_str_reject_sliced(str3_orig)
+
+    klass := load_class(str1)
+    length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length3 := LoadI(str3).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+    has_uncompressed := AndI(Or(length3, Or(length1, length2).u32).u32).Imm(1).u32
+
+    count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count3 := ShrI(length3).Imm(Constants::STRING_LENGTH_SHIFT).u32
+
+    size := Add(count1, Add(count2, count3).u32).u32
+    data_size := Shl(size, has_uncompressed).u32
+    length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
+    new_str := allocate_string_tlab(klass, data_size)
+
+    StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+    src_str_data1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+    offset1 := ShlI(count1).Imm(1).u32
+    offset2 := Add(offset1, ShlI(count2).Imm(1).u32).u32
+
+    # everything is compressed
+    If(has_uncompressed, 0).EQ.b {
+      copy_u8_chars(src_str_data1, dst_str_data1, count1)
+
+      offset1_ := ShrI(offset1).Imm(1).u32
+
+      src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1_).ptr
+      copy_u8_chars(src_str_data2, dst_str_data2, count2)
+
+      offset2_ := ShrI(offset2).Imm(1).u32
+
+      src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2_).ptr
+      copy_u8_chars(src_str_data3, dst_str_data3, count3)
+      Goto(:EndCopy)
+    }
+
+    If(AndI(length1).Imm(1).u32, 0).EQ.b {
+      expand_u8_to_u16_chars(src_str_data1, dst_str_data1, count1)
+    } Else {
+      copy_u16_chars(src_str_data1, dst_str_data1, count1)
+    }
+
+    src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1).ptr
+
+    If(AndI(length2).Imm(1).u32, 0).EQ.b {
+      expand_u8_to_u16_chars(src_str_data2, dst_str_data2, count2)
+    } Else {
+      copy_u16_chars(src_str_data2, dst_str_data2, count2)
+    }
+
+    src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2).ptr
+
+    If(AndI(length3).Imm(1).u32, 0).EQ.b {
+      expand_u8_to_u16_chars(src_str_data3, dst_str_data3, count3)
+    } Else {
+      copy_u16_chars(src_str_data3, dst_str_data3, count3)
+    }
+
+Label(:EndCopy)
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_str).ptr
+
+Label(:SlowPathEntrypoint)
+    ep_offset = get_entrypoint_offset("STRING_CONCAT3_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig, str3_orig).AddImm(ep_offset).MethodAsImm("StringConcat3OddSavedBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+function(:StringConcat4Tlab,
+         params: {str1_orig: 'ref', str2_orig: 'ref', str3_orig: 'ref', str4_orig: 'ref'},
+         regmap: $full_regmap,
+         regalloc_set: $panda_mask,
+         mode: [:FastPath]) {
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).void.Terminator
+      next
+    end
+
+    str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
+    str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
+    str3 := try_use_cached_flat_str_reject_sliced(str3_orig)
+    str4 := try_use_cached_flat_str_reject_sliced(str4_orig)
+
+    klass := load_class(str1)
+    length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length3 := LoadI(str3).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    length4 := LoadI(str4).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+    # any of the strings is uncompressed (resulted string is uncompressed)
+    has_uncompressed := Or(length3, Or(length1, length2).u32).u32
+    has_uncompressed := AndI(Or(length4, has_uncompressed).u32).Imm(1).u32
+
+    count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count3 := ShrI(length3).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    count4 := ShrI(length4).Imm(Constants::STRING_LENGTH_SHIFT).u32
+
+    size := Add(count1, Add(count2, Add(count3, count4).u32).u32).u32
+    data_size := Shl(size, has_uncompressed).u32
+    length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
+    new_str := allocate_string_tlab(klass, data_size)
+
+    StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+    src_str_data1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+    offset1 := ShlI(count1).Imm(1).u32
+    offset2 := Add(offset1, ShlI(count2).Imm(1).u32).u32
+    offset3 := Add(offset2, ShlI(count3).Imm(1).u32).u32
+
+    # has no uncompressed then everything is compressed, data is stored as bytes
+    If(has_uncompressed, 0).EQ.b {
+      copy_u8_chars(src_str_data1, dst_str_data1, count1)
+
+      offset1_ := ShrI(offset1).Imm(1).u32
+
+      src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1_).ptr
+      copy_u8_chars(src_str_data2, dst_str_data2, count2)
+
+      offset2_ := ShrI(offset2).Imm(1).u32
+
+      src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2_).ptr
+      copy_u8_chars(src_str_data3, dst_str_data3, count3)
+
+      offset3_ := ShrI(offset3).Imm(1).u32
+
+      src_str_data4 := AddI(str4).Imm(Constants::STRING_DATA_OFFSET).ptr
+      dst_str_data4 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset3_).ptr
+      copy_u8_chars(src_str_data4, dst_str_data4, count4)
+      Goto(:EndCopy)
+    }
+
+    If(AndI(length1).Imm(1).u32, 0).EQ.b {
+      expand_u8_to_u16_chars(src_str_data1, dst_str_data1, count1)
+    } Else {
+      copy_u16_chars(src_str_data1, dst_str_data1, count1)
+    }
+
+    src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1).ptr
+
+    If(AndI(length2).Imm(1).u32, 0).EQ.b {
+      expand_u8_to_u16_chars(src_str_data2, dst_str_data2, count2)
+    } Else {
+      copy_u16_chars(src_str_data2, dst_str_data2, count2)
+    }
+
+    src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2).ptr
+
+    If(AndI(length3).Imm(1).u32, 0).EQ.b {
+      expand_u8_to_u16_chars(src_str_data3, dst_str_data3, count3)
+    } Else {
+      copy_u16_chars(src_str_data3, dst_str_data3, count3)
+    }
+
+    src_str_data4 := AddI(str4).Imm(Constants::STRING_DATA_OFFSET).ptr
+    dst_str_data4 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset3).ptr
+
+    If(AndI(length4).Imm(1).u32, 0).EQ.b {
+      expand_u8_to_u16_chars(src_str_data4, dst_str_data4, count4)
+    } Else {
+      copy_u16_chars(src_str_data4, dst_str_data4, count4)
+    }
+Label(:EndCopy)
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    Return(new_str).ptr
+
+Label(:SlowPathEntrypoint)
+    ep_offset = get_entrypoint_offset("STRING_CONCAT4_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig, str3_orig, str4_orig).AddImm(ep_offset).MethodAsImm("StringConcat4UsualBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+###
+# StringConcat2 supporting all string types
+#
+function(:StringConcat2TlabAllStrings,
+          params: {str1: 'ref', str2: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).void.Terminator
+    next
+  end
+
+  # Handle empty string cases
+  length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  count1 := ShrI(length1).Imm(Constants::STRING_LENGTH_SHIFT).u32
+  IfImm(Compare(count1, 0).EQ.b).Imm(0).NE.Unlikely.b {
+    Return(Cast(str2).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+  }
+  length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  count2 := ShrI(length2).Imm(Constants::STRING_LENGTH_SHIFT).u32
+  IfImm(Compare(count2, 0).EQ.b).Imm(0).NE.Unlikely.b {
+    Return(Cast(str1).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+  }
+
+  size := Add(count1, count2).u32
+  # Create LineString if size is small enough
+  If(size, Cast(Constants::TREE_STRING_MIN_LENGTH).u32).LE.b {
+    LiveOut(str1).DstReg(regmap[:arg0]).ref
+    LiveOut(str2).DstReg(regmap[:arg1]).ref
+    ep_offset = get_entrypoint_offset("STRING_CONCAT2_TLAB")
+    Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("StringConcat2Tlab").Terminator.ptr
+  }
+
+  # Create TreeString
+  ptypes := getPlatformTypes()
+  klass := getTreeStringClass(ptypes)
+  tree_str := allocate_tree_string_tlab(klass)
+
+  # Any of the strings is uncompressed (resulted string is uncompressed)
+  has_uncompressed := AndI(Or(length1, length2).u32).Imm(1).u32
+  length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
+
+  StoreI(tree_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  StoreI(tree_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+  StoreI(tree_str, str1).Imm(Constants::TREE_STRING_LEFT_OFFSET).SetNeedBarrier(true).ref
+  StoreI(tree_str, str2).Imm(Constants::TREE_STRING_RIGHT_OFFSET).SetNeedBarrier(true).ref
+
+  # String is supposed to be a constant object, so all its data should be visible by all threads
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  Return(tree_str).ptr
+
+Label(:SlowPathEntrypoint)
+    ep_offset = get_entrypoint_offset("STRING_CONCAT2_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(ep_offset).MethodAsImm("StringConcat2UsualBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+function(:StringCharAt,
+        params: {strOrig: 'ref', indexOrig: 'i32'},
+        regmap: $full_regmap,
+        regalloc_set: $panda_mask,
+        mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    next
+  end
+
+  check_not_tree_string_type(strOrig) if defines.DEBUG
+
+  baseClass := load_class(strOrig)
+  stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+  If(stringType, Constants::STRING_TYPE_SLICE).EQ {
+    parentStr := LoadI(strOrig).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+    startIndexAndFlags := LoadI(strOrig).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).i32
+    startIndex := ShrI(startIndexAndFlags).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).i32
+    slicedIndex := Add(startIndex, indexOrig).i32
+  }
+
+  str := Phi(strOrig, parentStr).ref
+  index := Phi(indexOrig, slicedIndex).i32
+
+  lengthPacked := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  length := ShrI(lengthPacked).Imm(Constants::STRING_LENGTH_SHIFT).i32
+
+  If(index, length).GE.b {
+    Goto(:SlowPathEntrypoint)
+  }
+
+  Return(LoadCompressedStringChar(str, index, lengthPacked).u16).u16
+
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_CHAR_AT_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, strOrig, indexOrig).AddImm(entrypoint).MethodAsImm("StringCharAtUsualBridge").Terminator.u16
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enabled)
+  suffix = (all_strings_enabled ? "AllStrings" : "")
+  suffix += (string_compression_enabled ? "Compressed" : "")
+  available_regs = $panda_mask
+  function("SubStringFromStringTlab#{suffix}".to_sym,
+           params: {str: 'ref', begin_index: 'i32', end_index: 'i32'},
+           regmap: $full_regmap,
+           regalloc_set: available_regs,
+           mode: [:FastPath]) {
+
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      ReturnVoid().void
+      next
+    end
+
+    check_not_tree_string_type(str) if defines.DEBUG
+
+    # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
+    length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    if string_compression_enabled
+      length := ShrI(length_packed).Imm(Constants::STRING_LENGTH_SHIFT).u32
+    else
+      length := length_packed
+    end
+
+    # If begin_index < 0, then it is assumed to be equal to zero
+    If(begin_index, Cast(0).i32).LT.Unlikely.b {
+      bx1 := Cast(0).i32
+    }
+    bx2 := Phi(begin_index, bx1).u32
+    # If end_index < 0, then it is assumed to be equal to zero
+    If(end_index, Cast(0).i32).LT.Unlikely.b {
+      ex1 := Cast(0).i32
+    }
+    ex2 := Phi(end_index, ex1).u32
+    # If begin_index > str.length(), then make it equal to str.length()
+    If(bx2, length).A.Unlikely.b {
+      bx3 := length
+    }
+    bx4 := Phi(bx2, bx3).u32
+    # If end_index > str.length(), then make it equal to str.length()
+    If(ex2, length).A.Unlikely.b {
+      ex3 := length
+    }
+    ex4 := Phi(ex2, ex3).u32
+    # If begin_index > end_index, then swap them.
+    If(bx4, ex4).GT.Unlikely.b {
+      bx5 := ex4
+      ex5 := bx4
+    }
+    bx6 := Phi(bx4, bx5).u32
+    ex6 := Phi(ex4, ex5).u32
+
+    charCount := Sub(ex6, bx6).u32
+
+    If(charCount, length).EQ.Unlikely.b {
+      Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+    }
+
+    if string_compression_enabled
+      not_compressed := AndI(length_packed).Imm(1).u32
+      offset := Shl(bx6, not_compressed).u32
+    else
+      not_compressed := Cast(1).u32
+      offset := ShlI(bx6).Imm(1).u32
+    end
+
+    if all_strings_enabled
+      baseClass := load_class(str)
+      stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
+
+      If(stringType, Constants::STRING_TYPE_SLICE).EQ {
+        strParent := LoadI(str).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+        strStartIndexAndBits := LoadI(str).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+        strStartIndex := ShrI(strStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
+        addedStartIndex := Add(bx6, strStartIndex).u32
+      } Else {
+        str0 := str
+        startIndex := bx6
+      }
+
+      fromStr := Phi(strParent, str0).ref
+      resultStartIndex := Phi(addedStartIndex, startIndex).u32
+
+      If(charCount, Constants::SLICED_STRING_MIN_LENGTH).GE.b {
+        Goto(:CreateSlicedString)
+      }
+
+      # create line substring from line string
+      result := fast_substring(fromStr, length, resultStartIndex, charCount, not_compressed)
+      Return(result).ptr
+
+    Label(:CreateSlicedString)
+      ptypes := getPlatformTypes()
+      klass := getSlicedStringClass(ptypes)
+      result := allocate_sliced_string_tlab(klass)
+
+      slicedStringLength := Or(ShlI(charCount).Imm(Constants::STRING_LENGTH_SHIFT).u32, not_compressed).u32
+      StoreI(result, slicedStringLength).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      StoreI(result, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+
+      StoreI(result, fromStr).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+      # hasBackingStoreBit become zero after shift left
+      startIndexAndBits := ShlI(resultStartIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
+      StoreI(result, startIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+
+      Return(result).ptr
+    else
+      result := fast_substring(str, length, bx6, charCount, not_compressed)
+      Return(result).ptr
+    end
+  Label(:SlowPathEntrypoint)
+    entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  }
+end  # def GenerateSubstringFromStringTlab
+
+GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=true)
+GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=false)
+GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=true)
+GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=false)

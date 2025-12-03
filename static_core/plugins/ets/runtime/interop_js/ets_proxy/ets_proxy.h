@@ -19,7 +19,7 @@
 #include <string_view>
 #include <node_api.h>
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::ets::interop::js::ets_proxy {
 

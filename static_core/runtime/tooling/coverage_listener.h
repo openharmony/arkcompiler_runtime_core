@@ -24,7 +24,7 @@
 #include <thread>
 
 #include "include/runtime_notification.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 
 namespace std {
 template <>

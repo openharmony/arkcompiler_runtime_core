@@ -43,48 +43,53 @@ bool EmitStringGetBytesTlab(Inst *inst);
 bool EmitStringIndexOf(Inst *inst);
 bool EmitStringIndexOfAfter(Inst *inst);
 bool EmitStringFromCharCode(Inst *inst);
+bool EmitStringFromCharCodeSingle(Inst *inst);
 bool EmitStringRepeat(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_REPEAT, 2U);
 }
+bool EmitStringCharAt(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CHAR_AT, 2U);
+}
 bool EmitInt8ArrayFillInternal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_FILL_INTERNAL, 4U);
 }
 bool EmitInt16ArrayFillInternal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT16_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT16_ARRAY_FILL_INTERNAL, 4U);
 }
 bool EmitInt32ArrayFillInternal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT32_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT32_ARRAY_FILL_INTERNAL, 4U);
 }
 bool EmitBigInt64ArrayFillInternal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_INT64_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_INT64_ARRAY_FILL_INTERNAL, 4U);
 }
 bool EmitFloat32ArrayFillInternal(Inst *inst);
 bool EmitFloat64ArrayFillInternal(Inst *inst);
 bool EmitFloatArrayFillInternal(Inst *inst, RuntimeInterface::EntrypointId eid, llvm::IntegerType *bitcastType);
 bool EmitUInt8ClampedArrayFillInternal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT8_CLAMPED_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT8_CLAMPED_ARRAY_FILL_INTERNAL, 4U);
 }
 bool EmitUInt8ArrayFillInternal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT8_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT8_ARRAY_FILL_INTERNAL, 4U);
 }
 bool EmitUInt16ArrayFillInternal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT16_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT16_ARRAY_FILL_INTERNAL, 4U);
 }
 bool EmitUInt32ArrayFillInternal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT32_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT32_ARRAY_FILL_INTERNAL, 4U);
 }
 bool EmitBigUInt64ArrayFillInternal(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_U_INT64_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_U_INT64_ARRAY_FILL_INTERNAL, 4U);
 }
 
 bool EmitInt8ArraySetValuesFromArray(Inst *inst)
@@ -132,27 +137,31 @@ bool EmitBigUint64ArraySetValuesFromArray(Inst *inst)
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_UINT64_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
 }
 
-bool EmitMapGet(Inst *inst)
+bool EmitGetHashCodeByValue(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_GET_FAST_PATH, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::GET_HASH_CODE_BY_VALUE_FAST_PATH, 1U);
 }
 
-bool EmitMapHas(Inst *inst)
+bool EmitEscompatArrayIsPlatformArray(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_HAS_FAST_PATH, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::ESCOMPAT_ARRAY_IS_PLATFORM_ARRAY_FAST, 1U);
 }
 
-bool EmitMapDelete(Inst *inst)
+bool EmitArrayFastCopyToRef(Inst *inst);
+
+bool EmitEscompatArrayReverse(Inst *inst);
+
+bool EmitSameValueZero(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_DELETE, 2U);
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SAME_VALUE_ZERO_FAST_PATH, 2U);
 }
 
-bool EmitSetHas(Inst *inst)
-{
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SET_HAS, 2U);
-}
+bool EmitStringConcat2(Inst *inst);
+bool EmitStringConcat3(Inst *inst);
+bool EmitStringConcat4(Inst *inst);
 
-bool EmitSetDelete(Inst *inst)
+bool EmitEtsStringEquals(Inst *inst)
 {
-    return EmitFastPath(inst, RuntimeInterface::EntrypointId::SET_DELETE, 2U);
+    ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::ETS_STRING_EQUALS, 2U);
 }

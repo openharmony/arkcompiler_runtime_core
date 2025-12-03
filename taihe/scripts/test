@@ -19,6 +19,7 @@ import subprocess
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from subprocess import CalledProcessError
 
 
 class Color:
@@ -94,17 +95,46 @@ def get_project_root() -> Path:
     return Path(__file__).parent.parent.resolve()
 
 
-def init_py_env(project_root: Path):
-    compiler_path = project_root / "compiler"
-    venv_bin = project_root / ".venv/bin"
+class PythonEnv:
+    """Context manager for activating and restoring a Python virtual environment."""
 
-    if not venv_bin.exists():
-        log_error(f"virtual environment directory not found: {venv_bin}")
-        sys.exit(1)
+    def __init__(self, project_root: Path):
+        self.project_root = project_root
+        self.compiler_path = project_root / "compiler"
+        self.venv_bin = project_root / ".venv/bin"
+        self._original_env: dict[str, str] = {}
 
-    # enable virtual environment
-    os.environ["PYTHONPATH"] = str(compiler_path)
-    os.environ["PATH"] = str(venv_bin) + os.pathsep + os.environ["PATH"]
+    def __enter__(self):
+        if not self.venv_bin.exists():
+            log_error(f"virtual environment directory not found: {self.venv_bin}")
+            sys.exit(1)
+
+        # Save current environment
+        self._original_env = {
+            "PATH": os.environ.get("PATH", ""),
+            "PYTHONPATH": os.environ.get("PYTHONPATH", ""),
+        }
+
+        # Modify environment
+        os.environ["PYTHONPATH"] = str(self.compiler_path)
+        os.environ["PATH"] = str(self.venv_bin) + os.pathsep + os.environ["PATH"]
+        log_verbose(f"Python env activated: {self.venv_bin}")
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Restore original environment."""
+        if not self._original_env:
+            log_verbose("exit_py_env called before activation, skipping.")
+            return
+
+        os.environ["PATH"] = self._original_env["PATH"]
+        if self._original_env["PYTHONPATH"]:
+            os.environ["PYTHONPATH"] = self._original_env["PYTHONPATH"]
+        else:
+            os.environ.pop("PYTHONPATH", None)
+
+        log_verbose("Python env deactivated.")
 
 
 def run_module(module_name: str, args: Sequence[Path | str], project_root: Path):
@@ -134,22 +164,78 @@ def run_core_tests(project_root: Path, **config: Path | str):
         log_stage(f"Testing: {test_dir}")
         run_taihe_tryit(["test", "-u", "cpp", test_dir], project_root)
 
-
-def run_ani_tests(project_root: Path, **config: Path | str):
-    log_stage("Run ANI tests...")
-    build_dir = project_root / "build"
+def run_ani_test_build(
+    project_root: Path,
+    build_dir_name: str,
+    enable_coverage: bool = True,
+    taihec_path: Path | None = None,
+    panda_home: Path | str | None = None
+):
+    build_dir = project_root / build_dir_name
 
     if not build_dir.exists():
         log_verbose("Build directory not found. Running CMake configuration.")
-        ninja_cmd = ["cmake", "-B", "build", "-GNinja", "-DENABLE_COVERAGE=ON"]
-        if panda_home := config.get("panda_home"):
-            ninja_cmd.append(f"-DPANDA_HOME={str(panda_home)}")
+        ninja_cmd = ["cmake", "-B", str(build_dir), "-GNinja"]
+        if enable_coverage:
+            ninja_cmd.append("-DENABLE_COVERAGE=ON")
+        if taihec_path:
+            ninja_cmd.append(f"-DBIN_TAIHEC_PATH={taihec_path}")
+        if panda_home:
+            ninja_cmd.append(f"-DPANDA_HOME={panda_home}")
         run_command(ninja_cmd, cwd=project_root)
     else:
         log_verbose("Build directory exists. Skipping configuration.")
 
-    build_cmd = ["cmake", "--build", "build", "--verbose"]
+    build_cmd = ["cmake", "--build", str(build_dir), "--verbose"]
     run_command(build_cmd, cwd=project_root)
+
+def run_ani_tests(project_root: Path, **config: Path | str):
+    log_stage("Run ANI tests...")
+    run_ani_test_build(
+        project_root,
+        build_dir_name="build",
+        enable_coverage=True,
+        panda_home=config.get("panda_home")
+    )
+
+def run_bin_ani_tests(project_root: Path, **config: Path | str):
+    log_stage("Run BIN-ANI tests...")
+
+    taihe_bin_tar_name = "taihe-linux-x86_64-0.53.0-20251028.tar.gz"
+    taihe_bin_tar_url = f"https://gitcode.com/tongdiaoZS/taihe-bin/releases/download/0.53/{taihe_bin_tar_name}"
+    taihe_bin_tar_path = project_root / taihe_bin_tar_name
+    taihe_bin_extract_dir = project_root / "taihe_bin"
+
+    if not taihe_bin_tar_path.exists():
+        log_verbose("Downloading Taihe binary package...")
+        try:
+            run_command(["curl", "-fSL", "-o", str(taihe_bin_tar_path), taihe_bin_tar_url], cwd=project_root)
+        except CalledProcessError as e:
+            log_error(f"Failed to download Taihe binary package from {taihe_bin_tar_url}")
+            log_error(f"curl exited with code {e.returncode}")
+            raise
+    else:
+        log_verbose("Taihe binary already exists. Skipping download.")
+
+    if not taihe_bin_extract_dir.exists():
+        log_verbose("Extracting Taihe binary package...")
+        run_command(["mkdir", "-p", str(taihe_bin_extract_dir)], cwd=project_root)
+        run_command(["tar", "-xzf", str(taihe_bin_tar_path), "-C", str(taihe_bin_extract_dir)], cwd=project_root)
+    else:
+        log_verbose("Taihe binary directory already exists. Skipping extraction.")
+
+    taihe_bin_path = taihe_bin_extract_dir / "taihe" / "bin" / "taihec"
+
+    if not taihe_bin_path.exists():
+        raise FileNotFoundError(f"taihec not found at {taihe_bin_path}")
+
+    run_ani_test_build(
+        project_root,
+        build_dir_name="build_bin",
+        enable_coverage=False,
+        taihec_path=taihe_bin_path,
+        panda_home=config.get("panda_home")
+    )
 
 
 def run_cmake_test(project_root: Path, **config: Path | str):
@@ -190,13 +276,14 @@ TESTS = {
     "pytest": run_pytest,
     "core": run_core_tests,
     "ani": run_ani_tests,
+    "bin_ani": run_bin_ani_tests,
     "cmake": run_cmake_test,
 }
 
 MODE_TO_TESTS = {
-    "github-push-ci": list(TESTS.keys()),
-    "github-pr-ci": list(TESTS.keys()),
-    "ggw-ci": ["pytest", "ani"],
+    "github-push-ci": ["pytest", "core", "ani", "cmake"],
+    "github-pr-ci": ["pytest", "core", "ani", "cmake"],
+    "ggw-ci": ["pytest", "ani", "bin_ani"],
 }
 
 
@@ -223,21 +310,30 @@ def main():
     args = parser.parse_args()
 
     project_root = get_project_root()
-    init_py_env(project_root)
 
     if args.mode:
         selected_tests = MODE_TO_TESTS[args.mode]
     elif args.run:
         selected_tests = args.run
     else:
-        selected_tests = list(TESTS.keys())
+        selected_tests = ["pytest", "core", "ani", "cmake"]
 
-    try:
-        for name in selected_tests:
-            log_stage(f"=== Running test: {name} ===")
+    only_bin_ani = all(name == "bin_ani" for name in selected_tests)
+
+    for name in selected_tests:
+        log_stage(f"=== Running test: {name} ===")
+
+        if name == "bin_ani":
             TESTS[name](project_root, panda_home=args.panda_home)
-    finally:
-        generate_coverage_report(project_root)
+        else:
+            with PythonEnv(project_root):
+                TESTS[name](project_root, panda_home=args.panda_home)
+
+    if not only_bin_ani:
+        with PythonEnv(project_root):
+            generate_coverage_report(project_root)
+    else:
+        log_verbose("Only 'bin_ani' tests run, skipping coverage report.")
 
 
 if __name__ == "__main__":

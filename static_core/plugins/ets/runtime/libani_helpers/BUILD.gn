@@ -33,6 +33,7 @@ ohos_source_set("ani_helpers_static") {
   sources = [
     "ani_signature_builder.cpp",
     "concurrency_helpers.cpp",
+    "external_array_buffer.cpp",
   ]
   if (ark_ets_interop_js) {
     deps = [ "interop_js:hybridgref_static" ]

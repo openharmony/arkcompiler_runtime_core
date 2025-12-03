@@ -27,7 +27,7 @@
 #include <unicode/dtitvfmt.h>
 #include <unicode/numsys.h>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/stdlib/native/core/IntlDateTimeFormat.h"
 
 #include "stdlib_ani_helpers.h"
@@ -37,6 +37,7 @@ constexpr const char *FORMAT_HOUR_SYMBOLS = "hHkK";
 constexpr const char *FORMAT_AM_PM_SYMBOLS = "a";
 
 constexpr const char *OPTIONS_FIELD_HOUR_CYCLE = "hourCycle_";
+constexpr const char *OPTIONS_PROPERTY_HOUR_CYCLE = "hourCycle";
 
 constexpr const char *LOCALE_KEYWORD_HOUR_CYCLE = "hours";
 constexpr const char *LOCALE_KEYWORD_CALENDAR = "calendar";
@@ -694,9 +695,13 @@ static ani_object FormatResolvedOptionsImpl(ani_env *env, ani_object self)
         return ThrowInternalError(env, std::string("failed to get locale lang tag: ") + u_errorName(status));
     }
     ani_string langTag = CreateUtf8String(env, langTagStr.data(), langTagStr.size());
-
-    const char *calendarType = dateFormat->getCalendar()->getType();
-    ani_string calendar = CreateUtf8String(env, calendarType, strlen(calendarType));
+    std::string icuCalendar = dateFormat->getCalendar()->getType();
+    ani_string calendarStr = CreateUtf8String(env, icuCalendar.c_str(), icuCalendar.length());
+    if (icuCalendar == "gregorian") {
+        calendarStr = CreateUtf8String(env, "gregory", strlen("gregory"));
+    } else if (icuCalendar == "ethiopic-amete-alem") {
+        calendarStr = CreateUtf8String(env, "ethioaa", strlen("ethioaa"));
+    }
 
     std::unique_ptr<icu::NumberingSystem> numSys(icu::NumberingSystem::createInstance(locale, status));
     if (U_FAILURE(status) == TRUE) {
@@ -719,7 +724,7 @@ static ani_object FormatResolvedOptionsImpl(ani_env *env, ani_object self)
 
     ani_object resolvedOpts = nullptr;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    env->Object_New(optsClass, optsCtor, &resolvedOpts, langTag, calendar, numSysName, timeZone);
+    env->Object_New(optsClass, optsCtor, &resolvedOpts, langTag, calendarStr, numSysName, timeZone);
 
     auto localeHours = locale.getKeywordValue<std::string>(LOCALE_KEYWORD_HOUR_CYCLE, status);
     if (U_FAILURE(status) == TRUE) {
@@ -730,7 +735,7 @@ static ani_object FormatResolvedOptionsImpl(ani_env *env, ani_object self)
         ani_string hourCycle = CreateUtf8String(env, localeHours.data(), localeHours.size());
 
         ani_method setter = nullptr;
-        ANI_FATAL_IF_ERROR(env->Class_FindSetter(optsClass, OPTIONS_FIELD_HOUR_CYCLE, &setter));
+        ANI_FATAL_IF_ERROR(env->Class_FindSetter(optsClass, OPTIONS_PROPERTY_HOUR_CYCLE, &setter));
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_FATAL_IF_ERROR(env->Object_CallMethod_Void(resolvedOpts, setter, hourCycle));

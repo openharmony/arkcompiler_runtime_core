@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/include/thread.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"

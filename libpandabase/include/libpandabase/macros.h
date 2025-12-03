@@ -285,10 +285,10 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 // Ref: https://doc.rust-lang.org/src/alloc/sync.rs.html#58-74
 #if defined(USE_THREAD_SANITIZER)
 // CC-OFFNXT(G.PRE.02) code readability
-#define ATOMIC_THREAD_FENCE_ACQUIRE(expr) expr.load(std::memory_order_acquire)
+#define ATOMIC_THREAD_FENCE_ACQUIRE(expr) expr.load(std::memory_order_acquire) // NOLINT(cppcoreguidelines-macro-usage)
 #else
 // CC-OFFNXT(G.PRE.02) code readability
-#define ATOMIC_THREAD_FENCE_ACQUIRE(expr) std::atomic_thread_fence(std::memory_order_acquire)
+#define ATOMIC_THREAD_FENCE_ACQUIRE(expr) std::atomic_thread_fence(std::memory_order_acquire) // NOLINT(cppcoreguidelines-macro-usage)
 #endif
 
 // for clang
@@ -340,6 +340,16 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 #else
 #define NO_ADDRESS_SANITIZE
 #endif  // USE_ADDRESS_SANITIZER
+
+// std::exit performs static object destrution which is not suitable for us, but in ohos we still need it for now
+// eventually we will come up with better solution
+#ifndef PANDA_BUILD_IN_OHOS_TREE
+// CC-OFFNXT(G.PRE.02) code readability
+#define PROCESS_EXIT(code) std::quick_exit(code) // NOLINT(cppcoreguidelines-macro-usage)
+#else
+// CC-OFFNXT(G.PRE.02) code readability
+#define PROCESS_EXIT(code) std::exit(code) // NOLINT(cppcoreguidelines-macro-usage)
+#endif
 
 #if defined(__has_include)
 #if __has_include(<filesystem>)

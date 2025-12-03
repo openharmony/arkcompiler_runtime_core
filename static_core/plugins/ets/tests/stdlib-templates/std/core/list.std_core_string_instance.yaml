@@ -316,23 +316,6 @@
   }
 
 - {
-    method_name: charAt,
-    object_type: String,
-    init_object_data_type: "FixedArray<String>",
-    init_object_type: String,
-    init_object_data: '["abcdefghij", "чижикпыжик", "你好世界你你好世界你好", "1234567890"]',
-    param_init_data_types: {"param1": "FixedArray<number>"},
-    param_types: {"param1": number},
-    param_nature: {"param1": primitive},
-    param_list: {"param1": "[0,1,2,3]"},
-    method_return_type: String,
-    expected_data_item_type: String,
-    expected_data_type: "FixedArray<String>",
-    expected_test_data: '["a", "и", "世", "4"]',
-    verify_test_result_function: compareStringTrivial,
-  }
-
-- {
     method_name: substring,
     object_type: String,
     init_object_data_type: "FixedArray<String>",
@@ -406,9 +389,9 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": "[0, 1, 10]"},
 
-    method_return_type: number,
-    expected_data_item_type: number,
-    expected_data_type: "FixedArray<number>",
+    method_return_type: int,
+    expected_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
 
     expected_test_data:  "[0x61, 0x62, 0x6a]",
     verify_test_result_function: comparePrimitiveValue,
@@ -433,26 +416,6 @@
     expected_test_data:  "[0, 0, 11, 3]",
     verify_test_result_function: comparePrimitiveValue,
   }
-
-- {
-  method_name: codePointAt,
-  object_type: String,
-  init_object_data_type: "FixedArray<String>",
-  init_object_type: String,
-  init_object_data: '["abcdefhghijk", "abcdefhghijk", "abcdefhghijk"]',
-
-  param_init_data_types: {"param1": "FixedArray<number>"},
-  param_types: {"param1": number},
-  param_nature: {"param1": primitive},
-  param_list: {"param1": "[0, 1, 10]"},
-
-  method_return_type: number,
-  expected_data_item_type: number,
-  expected_data_type: "FixedArray<number>",
-
-  expected_test_data:  "[0x61, 0x62, 0x6a]",
-  verify_test_result_function: comparePrimitiveValue,
-}
 
 - {
     method_name: indexOf,
@@ -781,10 +744,10 @@
     "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
     "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]',
 
-    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<number>"},
-    param_types: {"param1": String, "param2": number},
+    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<int>"},
+    param_types: {"param1": String, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
-    param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijk", "", "", ""]', "param2": "[0, 2.9, 8, 12.4, 0, 2.8, 8, 12.04, 23, -2, -2, 22, 23.5]"},
+    param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijk", "", "", ""]', "param2": "[0, 2, 8, 12, 0, 2, 8, 12, 23, -2, -2, 22, 23]"},
     method_return_type: double,
 
     expected_data_type: "FixedArray<double>",
@@ -844,13 +807,13 @@
     "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
     "abcdefhgijkabcdefghijk"]',
 
-    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<number>"},
-    param_types: {"param1": String, "param2": number},
+    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<int>"},
+    param_types: {"param1": String, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
-    param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijkl", "eabc", "", "", "", ""]', "param2": "[4.54, 14.88, 100.66, -1.9, 8, 15, 18, 19, 40, 40.66, 40, 28.7, 22, 14.06, -5]"},
-    method_return_type: number,
+    param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijkl", "eabc", "", "", "", ""]', "param2": "[4, 14, 100, -1, 8, 15, 18, 19, 40, 40, 40, 28, 22, 14, -5]"},
+    method_return_type: int,
 
-    expected_data_type: "FixedArray<number>",
+    expected_data_type: "FixedArray<int>",
     expected_test_data: "[0, 11, 11, 0,  8, 8, 8, 19, 19, -1, -1, 22, 22, 14, 0]",
     verify_test_result_function: comparePrimitiveValue
  }

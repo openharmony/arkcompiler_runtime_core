@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+initModule("./lib1")
 export type IntAlias = int;
 
 export class Lib2Class {

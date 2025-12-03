@@ -18,7 +18,6 @@ limitations under the License.
 
 /*---
 desc: Type Required<T> constructs a type with all properties of T set to required. T must be a class or an interface type.
-tags: [{% if c.result == -1 %}compile-only, negative{% endif %}]
 ---*/
 
 class C {

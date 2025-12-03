@@ -17,7 +17,7 @@
 
 /*---
 desc: Variance is used to describe the subtyping operation on parameterized types. Test {{c.desc}}.
-tags: [compile-only, {{c.tag}}]
+tags: [compile-only]
 ---*/
 
 {{c.class}} A {}

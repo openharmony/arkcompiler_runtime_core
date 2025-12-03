@@ -86,7 +86,7 @@ function supportedLocalesOfTest06() {
     try {
         const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
     } catch(error) {
-        arktest.assertEQ(error as string, 'RangeError: invalid locale')
+        arktest.assertEQ(error.message, 'RangeError: invalid locale')
     }
 }
 
@@ -108,7 +108,7 @@ function supportedLocalesOfTest08() {
     try {
         const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
     } catch(error) {
-        arktest.assertEQ(error as string, 'RangeError: invalid locale')
+        arktest.assertEQ(error.message, 'RangeError: invalid locale')
     }
 }
 

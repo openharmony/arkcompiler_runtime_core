@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "libpandabase/utils/utf.h"
-#include "generated/logger_options.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/scheduler/worker_thread.h"

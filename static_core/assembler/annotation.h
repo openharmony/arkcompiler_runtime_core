@@ -27,7 +27,7 @@
 #include "assembly-literals.h"
 #include "assembly-type.h"
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::pandasm {
 

@@ -15,12 +15,10 @@
 
 #include <string>
 #include <vector>
-
 #include <node_api.h>
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
-
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_vm_api.h"
 

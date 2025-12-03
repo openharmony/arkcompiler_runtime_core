@@ -348,7 +348,7 @@ bool BoundsRange::CanOverflowNeg(DataType::Type type) const
 /**
  * Return the minimal value for a type.
  *
- * We consider that REFERENCE type has only non-negative address values
+ * We consider pointer types to have only non-negative address values
  */
 int64_t BoundsRange::GetMin(DataType::Type type)
 {
@@ -360,6 +360,7 @@ int64_t BoundsRange::GetMin(DataType::Type type)
         case DataType::UINT32:
         case DataType::UINT64:
         case DataType::REFERENCE:
+        case DataType::POINTER:
             return 0;
         case DataType::INT8:
             return INT8_MIN;
@@ -400,8 +401,8 @@ int64_t BoundsRange::GetMax(DataType::Type type)
             return INT32_MAX;
         case DataType::INT64:
         case DataType::UINT64:
-            return INT64_MAX;
         case DataType::REFERENCE:
+        case DataType::POINTER:
             return INT64_MAX;
         default:
             UNREACHABLE();
@@ -689,8 +690,7 @@ std::optional<int64_t> BoundsRange::DivWithOverflowCheck(int64_t left, int64_t r
 BoundsRange BoundsRangeInfo::FindBoundsRange(const BasicBlock *block, const Inst *inst) const
 {
     ASSERT(block != nullptr && inst != nullptr);
-    ASSERT(!IsFloatType(inst->GetType()));
-    ASSERT(inst->GetType() == DataType::REFERENCE || DataType::GetCommonType(inst->GetType()) == DataType::INT64);
+    ASSERT(DataType::IsGeneralizedIntType(inst->GetType()));
     if (inst->GetOpcode() == Opcode::NullPtr) {
         ASSERT(inst->GetType() == DataType::REFERENCE);
         return BoundsRange(0);
@@ -739,7 +739,7 @@ void BoundsRangeInfo::SetBoundsRange(const BasicBlock *block, const Inst *inst, 
         auto val = static_cast<int64_t>(static_cast<const ConstantInst *>(inst)->GetIntValue());
         range = BoundsRange(val, val, range.GetLenArray());
     }
-    ASSERT(inst->GetType() == DataType::REFERENCE || DataType::GetCommonType(inst->GetType()) == DataType::INT64);
+    ASSERT(DataType::IsGeneralizedIntType(inst->GetType()));
     ASSERT(range.GetLeft() >= BoundsRange::GetMin(inst->GetType()));
     ASSERT(range.GetRight() <= BoundsRange::GetMax(inst->GetType()));
     if (!range.IsMaxRange() || range.GetLenArray() != nullptr) {

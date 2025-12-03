@@ -1,3 +1,6 @@
+#24357 Koala related issues
+koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
+
 ### Undefined type
 spec/undefined-type/undefined-union-array-type_2.ets
 ### End of Undefined type
@@ -10,7 +13,7 @@ std/core/IntlPluralRulesTest.ets
 std/core/TypeAssignableFromTest.ets
 std/core/std_core_char_instance_Char_toLowerCase.ets
 std/core/std_core_type_numeric_type_numeric_type.ets
-escompat/JsonTest.ets
+std/core/JsonTest.ets
 regression/15867_spread_in_arrayof_segfaut.ets
 spec/05.Generics/callFromAsyncLambda.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
@@ -19,21 +22,5 @@ spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
 std/containers/concurrent_set/ConcurrentSet_ConstructorTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_ConstructorTest.ets
 std/core/NumberTest.ets
-escompat/JsonStringifyTest.ets
+std/core/json/JsonStringifyTest1.ets
 
-#28355
-escompat/escompat_regexp_match_String.ets
-
-#29408
-std/core/std_core_array_includes_byte_array_byte.ets
-std/core/std_core_array_indexOf_char_array_char.ets
-std/core/std_core_long_instance_Long_toFloat.ets
-std/core/SortStringsTest.ets
-std/containers/BasicSetTest.ets
-std/math/std_math_max_int_int.ets
-spec/03.types/References_Types/string/constructor_with_nullish_0090.ets
-spec/03.types/References_Types/Tuples_type/tuple_as_rest_param_6.ets
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_lm_param.ets
-spec/expressions/compound_assignment_01_double_mult_long.ets
-spec/expressions/compound_assignment_01_int_mult_double.ets
-regression/18012_enum_fromInt_error_at_cast.ets

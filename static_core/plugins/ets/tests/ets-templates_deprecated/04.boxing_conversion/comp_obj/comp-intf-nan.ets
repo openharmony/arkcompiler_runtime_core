@@ -26,7 +26,7 @@ let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}};
 function main(): int {
 {%- for t in c['values'] %}
     let d{{loop.index}}: J{{loop.index}} = { fld: s{{loop.index}} }
-    if (! {{c.to_type}}.isNaN(d{{loop.index}}.fld.unboxed())) {
+    if (! {{c.to_type}}.isNaN(d{{loop.index}}.fld)) {
         return 1
     }
 {%- endfor %}

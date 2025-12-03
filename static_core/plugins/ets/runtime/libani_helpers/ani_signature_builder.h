@@ -59,7 +59,7 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-class Type {
+class Type final {
 public:
     class Impl;
 
@@ -73,13 +73,18 @@ public:
     std::string Descriptor() const;
 
 private:
+    std::string AniDescriptor() const;
     std::unique_ptr<Impl> impl_;
+
+    friend class Builder;
+    friend class SignatureBuilder;
 };
 
 class Builder {
 public:
     static Type BuildUndefined();
     static Type BuildNull();
+    static Type BuildAny();
 
     static Type BuildBoolean();
     static Type BuildChar();
@@ -110,6 +115,17 @@ public:
     static std::string BuildConstructorName();
     static std::string BuildSetterName(std::string_view name);
     static std::string BuildGetterName(std::string_view name);
+    static std::string BuildPropertyName(std::string_view name);
+    static std::string BuildPartialName(std::string_view name);
+    static std::string BuildAsyncName(std::string_view name);
+    static std::string GetSetterNamePrefix();
+    static std::string GetGetterNamePrefix();
+    static std::string GetPropertyNamePrefix();
+    static std::string GetPartialNamePrefix();
+    static std::string GetAsyncNamePrefix();
+    static std::string GetUnionPropertyNamePrefix();
+    static std::string GetLambdaPrefix();
+    static std::string GetLambdaInvokePrefix();
 };
 
 class SignatureBuilder {
@@ -125,6 +141,7 @@ public:
 
     SignatureBuilder &AddUndefined();
     SignatureBuilder &AddNull();
+    SignatureBuilder &AddAny();
 
     SignatureBuilder &AddBoolean();
     SignatureBuilder &AddChar();
@@ -149,6 +166,7 @@ public:
 
     SignatureBuilder &SetReturnUndefined();
     SignatureBuilder &SetReturnNull();
+    SignatureBuilder &SetReturnAny();
 
     SignatureBuilder &SetReturnBoolean();
     SignatureBuilder &SetReturnChar();

@@ -20,7 +20,7 @@ function foo(a: int) {
             throw new Error("aaa")
         }
         console.log("TRY3")
-    } catch (e: Error) {
+    } catch (e) {
         if (a == 2) {
             console.log("CATCH_IF")
         }
@@ -47,7 +47,7 @@ function bar0(a: int) {
             console.log("THROW")
             throw new Error("MOCK_ERROR");
         }
-    } catch(e: Error) {
+    } catch(e) {
         print_catch();
     }
 }
@@ -55,7 +55,7 @@ function bar0(a: int) {
 function main0() {
     try {
         bar(0)
-    } catch(e: Error) {
+    } catch(e) {
         bar(1);
     }
 }

@@ -41,9 +41,9 @@ public:
         return EtsVariable::FromField(field);
     }
 
-    EtsMethod *GetFunction(const char *name, const char *signature, bool isANIFormat = false)
+    EtsMethod *GetFunction(const char *name, const char *signature)
     {
-        return GetStaticMethod(name, signature, isANIFormat);
+        return GetStaticMethod(name, signature);
     }
 
     ani_status GetModulePrefix(PandaString &prefix)

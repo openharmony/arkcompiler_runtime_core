@@ -15,26 +15,26 @@
 
 type FormatResult = [string | undefined, Intl.DateTimeFormatOptions | undefined, string]
 
-const FORMAT_RESULTS = new Array<FormatResult>()
+const expectedResults: FormatResult[] = []
 
-function addFormatResult(locale: string | undefined, options: Intl.DateTimeFormatOptions | undefined, result: string): void {
+function addResult(locale: string | undefined, options: Intl.DateTimeFormatOptions | undefined, result: string): void {
     const res: [string | undefined, Intl.DateTimeFormatOptions | undefined, string] = [locale, options, result]
-    FORMAT_RESULTS.push(res)
+    expectedResults.push(res)
 }
 
-const TEST_RANGE_BEGIN = new Date("2024-10-11T10:20:30Z")
-const TEST_RANGE_END = new Date("2024-10-12T07:35:50Z")
+const TEST_RANGE_BEGIN = new Date('2024-10-11T10:20:30Z')
+const TEST_RANGE_END = new Date('2024-10-12T07:35:50Z')
 
-function initFormatResults(): void {
-    if (FORMAT_RESULTS.length > 0) {
+function initExpectedResults(): void {
+    if (expectedResults.length > 0) {
         return
     }
 
-    addFormatResult("en-US", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "UTC" }, "10/11/2024 – 10/12/2024")
+    addResult('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' }, '10/11/2024 – 10/12/2024')
 }
 
 function dateFormatRangeUsingFormattingOptionsTest(): void {
-    FORMAT_RESULTS.forEach((res: FormatResult) => {
+    expectedResults.forEach((res: FormatResult) => {
         const locale = res[0]
         const options = res[1]
 
@@ -49,9 +49,9 @@ function dateFormatRangeUsingFormattingOptionsTest(): void {
 }
 
 function main(): int {
-    initFormatResults()
+    initExpectedResults()
 
-    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat.formatRange()")
-    suite.addTest("using formatting options", dateFormatRangeUsingFormattingOptionsTest)
+    const suite = new arktest.ArkTestsuite('Intl.DateTimeFormat.formatRange()')
+    suite.addTest('using formatting options', dateFormatRangeUsingFormattingOptionsTest)
     return suite.run()
 }

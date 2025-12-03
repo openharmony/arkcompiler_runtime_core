@@ -41,9 +41,16 @@ function testAttributeNull() {
   arktest.assertEQ(gaogao.encodedFragment, null);
 }
 
+function testTwoColonPortTest() {
+  const Uri = "https://username:password@host::8080/directory/file?foo=1&bar=2#fragment";
+  const uriInstance = new uri.URI(Uri);
+  arktest.assertEQ(uriInstance.port, "-1");
+}
+
 function main(): int {
   let suite = new arktest.ArkTestsuite("URI UT tests");
   suite.addTest("testAttributeNull", testAttributeNull);
+  suite.addTest("Two-Colon Port Test", testTwoColonPortTest);
   //passed
   return suite.run();
 }

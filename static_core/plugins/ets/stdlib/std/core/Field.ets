@@ -15,8 +15,8 @@
 
 package std.core;
 
-native function TypeAPIGetStaticFieldValue(ownerType: Type, name: string): NullishType
-native function TypeAPISetStaticFieldValue(ownerType: Type, name: string, val: NullishType): void
+native function TypeAPIGetStaticFieldValue(ownerType: Type, name: string): Any
+native function TypeAPISetStaticFieldValue(ownerType: Type, name: string, val: Any): void
 
 /**
  * Represents field of class or interface
@@ -56,14 +56,14 @@ export final class Field extends Object {
         return this.accessMod
     }
 
-    public getStaticValue(): NullishType {
+    public getStaticValue(): Any {
         if (!this.isStatic()) {
             throw new AssertionError("Field value is not static!")
         }
         return TypeAPIGetStaticFieldValue(this.ownerType!, this.name)
     }
 
-    public setStaticValue(v: NullishType): void {
+    public setStaticValue(v: Any): void {
         if (!this.isStatic()) {
             throw new AssertionError("Field value is not static!")
         }
@@ -85,7 +85,7 @@ export final class Field extends Object {
         return this.getName() + ": " + this.getType().toString()
     }
 
-    public equals(oth: NullishType): boolean {
+    public equals(oth: Any): boolean {
         return oth instanceof Field &&
                 this.fieldType!.equals((oth as Field).fieldType!) &&
                 this.name == (oth as Field).name &&

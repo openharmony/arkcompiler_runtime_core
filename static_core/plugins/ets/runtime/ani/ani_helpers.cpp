@@ -15,8 +15,8 @@
 
 #include "plugins/ets/runtime/ani/ani_helpers.h"
 
-#include "libpandafile/shorty_iterator.h"
-#include "macros.h"
+#include "libarkfile/shorty_iterator.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"

@@ -17,9 +17,9 @@
 
 #include <cstddef>
 
-#include <libpandafile/include/source_lang_enum.h>
+#include <libarkfile/include/source_lang_enum.h>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker.h"
@@ -52,6 +52,8 @@ public:
     bool InitializeUnionClass(Class *unionClass, Span<Class *> constituentClasses) override;
 
     void InitializePrimitiveClass(Class *primitiveClass) override;
+
+    void InitializeSyntheticClass(Class *synClass) override;
 
     size_t GetClassVTableSize(ClassRoot root) override;
 
@@ -122,16 +124,8 @@ public:
 
     void InitializeFinish();
 
-    static EtsRuntimeLinker *GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx);
-
     ClassLinkerContext *GetCommonContext(Span<Class *> classes) const override;
     static ClassLinkerContext *GetParentContext(ClassLinkerContext *ctx);
-
-    /// @brief Removes reference to `RuntimeLinker` from `BootContext` and `EtsClassLinkerContext`.
-    static void RemoveRefToLinker(ClassLinkerContext *ctx);
-
-    /// @brief Compute LUB type for union.
-    const uint8_t *ComputeLUB(const ClassLinkerContext *ctx, const uint8_t *descriptor) override;
 
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);

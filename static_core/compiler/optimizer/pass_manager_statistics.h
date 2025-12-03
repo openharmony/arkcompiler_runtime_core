@@ -17,7 +17,7 @@
 #define PANDA_PASS_STATISTICS_H
 
 #include <chrono>
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 namespace ark::compiler {
 class Graph;

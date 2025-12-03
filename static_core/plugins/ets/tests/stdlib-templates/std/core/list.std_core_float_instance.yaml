@@ -12,20 +12,6 @@
 # limitations under the License.
 
 - {
-    method_name: unboxed,
-    object_type: Float,
-    init_object_data_type: "FixedArray<float>",
-    init_object_type: float,
-    param_init_data_types: {},
-    param_types: {},
-    param_list: {},
-    method_return_type: float,
-    init_object_data: "[0.0f, 1.0f, Float.MIN_VALUE, Float.MAX_VALUE]",
-    expected_data_type: "FixedArray<float>",
-    expected_test_data: "[0.0f, 1.0f, Float.MIN_VALUE, Float.MAX_VALUE]",
-    verify_test_result_function: compareFloatPointValue
-  }
-- {
     method_name: toByte,
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
@@ -92,7 +78,7 @@
     method_return_type: float,
     init_object_data: "[0 as byte, 1 as byte, Float.MIN_VALUE.toByte(), Float.MAX_VALUE.toByte()]",
     expected_data_type: "FixedArray<float>",
-    expected_test_data: "[0f, 1f, Float.MIN_VALUE.toByte(), Float.MAX_VALUE.toByte()]",
+    expected_test_data: "[0.0f, 1.0f, Float.MIN_VALUE.toByte(), Float.MAX_VALUE.toByte()]",
     verify_test_result_function: compareFloatPointValue
   }
 - {
@@ -176,7 +162,7 @@
     method_return_type: float,
     init_object_data: "[0 as byte, 1 as byte, Float.MIN_VALUE.toByte(), Float.MAX_VALUE.toByte()]",
     expected_data_type: "FixedArray<float>",
-    expected_test_data: "[0f, 1f, Float.MIN_VALUE.toByte(), Float.MAX_VALUE.toByte()]",
+    expected_test_data: "[0.0f, 1.0f, Float.MIN_VALUE.toByte(), Float.MAX_VALUE.toByte()]",
     verify_test_result_function: compareFloatPointValue
   }
 - {
@@ -212,16 +198,16 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[0f, 1f, -1f]",
+    init_object_data: "[0.0f, 1.0f, -1.0f]",
     param_init_data_types: {"param1": "FixedArray<float>"},
     param_types: {"param1": Float},
-    param_list: {"param1": "[0f, 1f, -1f]"},
+    param_list: {"param1": "[0.0f, 1.0f, -1.0f]"},
     param_nature: {"param1": object},
     method_return_type: Float,
     expected_data_item_type: float,
     expected_data_type: "FixedArray<float>",
 
-    expected_test_data: "[0f, 2f, -2f]",
+    expected_test_data: "[0.0f, 2.0f, -2.0f]",
     verify_test_result_function: compareWrapperObjectValue,
   }
 - {
@@ -229,16 +215,16 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[0f, 1f, -1f]",
+    init_object_data: "[0.0f, 1.0f, -1.0f]",
     param_init_data_types: {"param1": "FixedArray<float>"},
     param_types: {"param1": Float},
-    param_list: {"param1": "[0f, 1f, -1f]"},
+    param_list: {"param1": "[0.0f, 1.0f, -1.0f]"},
     param_nature: {"param1": object},
     method_return_type: Float,
     expected_data_item_type: float,
     expected_data_type: "FixedArray<float>",
 
-    expected_test_data: "[0f, 0f, 0f]",
+    expected_test_data: "[0.0f, 0.0f, 0.0f]",
     verify_test_result_function: compareWrapperObjectValue,
   }
 - {
@@ -246,16 +232,16 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[0f, 1f, -1f, 1f]",
+    init_object_data: "[0.0f, 1.0f, -1.0f, 1.0f]",
     param_init_data_types: {"param1": "FixedArray<float>"},
     param_types: {"param1": Float},
-    param_list: {"param1": "[0f, 1f, -1f, -1f]"},
+    param_list: {"param1": "[0.0f, 1.0f, -1.0f, -1.0f]"},
     param_nature: {"param1": object},
     method_return_type: Float,
     expected_data_item_type: float,
     expected_data_type: "FixedArray<float>",
 
-    expected_test_data: "[0f, 1f, 1f, -1f]",
+    expected_test_data: "[0.0f, 1.0f, 1.0f, -1.0f]",
     verify_test_result_function: compareWrapperObjectValue,
   }
 - {
@@ -263,15 +249,15 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[0f, 1f, -1f, 1f]",
+    init_object_data: "[0.0f, 1.0f, -1.0f, 1.0f]",
     param_init_data_types: {"param1": "FixedArray<float>"},
     param_types: {"param1": Float},
-    param_list: {"param1": "[1f, 1f, -1f, -1f]"},
+    param_list: {"param1": "[1.0f, 1.0f, -1.0f, -1.0f]"},
     param_nature: {"param1": object},
     method_return_type: Float,
     expected_data_item_type: float,
     expected_data_type: "FixedArray<float>",
-    expected_test_data: "[0f, 1f, 1f, -1]",
+    expected_test_data: "[0.0f, 1.0f, 1.0f, -1]",
     verify_test_result_function: compareWrapperObjectValue,
   }
 - {
@@ -279,9 +265,9 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f]",
+    init_object_data: "[126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f]",
 
-    param_list: {"param1" : "[125f, 125f, 126f, 126f, 127f, 127f, -127f, -127f, -128f, -128f]"},
+    param_list: {"param1" : "[125.0f, 125.0f, 126.0f, 126.0f, 127.0f, 127.0f, -127.0f, -127.0f, -128.0f, -128.0f]"},
     param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
@@ -300,9 +286,9 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f]",
+    init_object_data: "[126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f]",
 
-    param_list: {"param1" : "[125f, 125f, 126f, 126f, 127f, 127f, -127f, -127f, -128f, -128f]"},
+    param_list: {"param1" : "[125.0f, 125.0f, 126.0f, 126.0f, 127.0f, 127.0f, -127.0f, -127.0f, -128.0f, -128.0f]"},
     param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
@@ -321,9 +307,9 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f]",
+    init_object_data: "[126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f]",
 
-    param_list: {"param1" : "[125f, 125f, 126f, 126f, 127f, 127f, -127f, -127f, -128f, -128f]"},
+    param_list: {"param1" : "[125.0f, 125.0f, 126.0f, 126.0f, 127.0f, 127.0f, -127.0f, -127.0f, -128.0f, -128.0f]"},
     param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
@@ -342,9 +328,9 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f]",
+    init_object_data: "[126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f]",
 
-    param_list: {"param1" : "[125f, 125f, 126f, 126f, 127f, 127f, -127f, -127f, -128f, -128f]"},
+    param_list: {"param1" : "[125.0f, 125.0f, 126.0f, 126.0f, 127.0f, 127.0f, -127.0f, -127.0f, -128.0f, -128.0f]"},
     param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
@@ -363,9 +349,9 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f, 126f, -128f]",
+    init_object_data: "[126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f, 126.0f, -128.0f]",
 
-    param_list: {"param1" : "[125f, 125f, 126f, 126f, 127f, 127f, -127f, -127f, -128f, -128f]"},
+    param_list: {"param1" : "[125.0f, 125.0f, 126.0f, 126.0f, 127.0f, 127.0f, -127.0f, -127.0f, -128.0f, -128.0f]"},
     param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
@@ -384,9 +370,9 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[126f, -128f, 126f, -128f]",
+    init_object_data: "[126.0f, -128.0f, 126.0f, -128.0f]",
 
-    param_list: {"param1" : "[125f, -128f, 127f, -128f]"},
+    param_list: {"param1" : "[125.0f, -128.0f, 127.0f, -128.0f]"},
     param_init_data_types: {"param1": "FixedArray<float>"} ,
     param_types: {"param1": Float},
     param_nature: {"param1": object},
@@ -406,7 +392,7 @@
     object_type: Float,
     init_object_data_type: "FixedArray<float>",
     init_object_type: float,
-    init_object_data: "[-1f, 0f, 1f, Float.MAX_SAFE_INTEGER, Float.MAX_SAFE_INTEGER + 1, 12.5f, -Float.MAX_SAFE_INTEGER, (-Float.MAX_SAFE_INTEGER - 1)]",
+    init_object_data: "[-1.0f, 0.0f, 1.0f, Float.MAX_SAFE_INTEGER, Float.MAX_SAFE_INTEGER + 1, 12.5f, -Float.MAX_SAFE_INTEGER, (-Float.MAX_SAFE_INTEGER - 1)]",
 
     param_list: {},
     param_init_data_types: {},

@@ -38,7 +38,7 @@ intrinsics:
     compiler_only: true
     static: true
     signature:
-      ret: i32 
+      ret: i32
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameI32
     clear_flags: [ acc_read ]
@@ -163,7 +163,7 @@ intrinsics:
       args: [ ref, ref ]
     impl: ark::ets::intrinsics::CompilerEtsEquals
     set_flags: [ commutative ]
-    clear_flags: [ acc_read, require_state, can_throw, heap_inv, no_dce, no_cse, no_hoist ]
+    clear_flags: [ acc_read, heap_inv, no_dce, no_cse, no_hoist ]
     peephole_func: PeepholeEquals
 
   - name: CompilerEtsStrictEquals
@@ -175,7 +175,7 @@ intrinsics:
       args: [ ref, ref ]
     impl: ark::ets::intrinsics::CompilerEtsStrictEquals
     set_flags: [ commutative ]
-    clear_flags: [ acc_read, require_state, can_throw, heap_inv, no_dce, no_cse, no_hoist ]
+    clear_flags: [ acc_read, heap_inv, no_dce, no_cse, no_hoist ]
     peephole_func: PeepholeStrictEquals
 
   - name: CompilerEtsTypeof
@@ -200,6 +200,7 @@ intrinsics:
     impl: ark::ets::intrinsics::CompilerEtsIstrue
     clear_flags: [ acc_read, require_state, can_throw, heap_inv, no_dce, no_cse, no_hoist  ]
     need_param_locations: true
+    peephole_func: PeepholeIstrue
 
   - name: CompilerEtsDoubleToStringDecimal
     space: ets
@@ -223,10 +224,21 @@ intrinsics:
       args: [ ref ]
     impl: ark::ets::intrinsics::CompilerEtsNullcheck
     set_flags: [ no_nullptr ]
-    clear_flags: [ ]
+    clear_flags: [ heap_inv ]
     peephole_func: PeepholeNullcheck
 
   - name: CompilerEtsStringFromCharCodeSingle
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ ref, u64 ]
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateStringFromCharCodeSingle
+    llvm_codegen_func: EmitStringFromCharCodeSingle
+
+  - name: CompilerEtsStringFromCharCodeSingleNoCache
     space: ets
     compiler_only: true
     static: true
@@ -236,4 +248,17 @@ intrinsics:
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateStringFromCharCode
     llvm_codegen_func: EmitStringFromCharCode
-    need_param_locations: true
+
+  - name: CompilerEtsMemmoveUnchecked_Ref
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: void
+      args:
+        - std.core.Object\[
+        - std.core.Object\[
+        - i32
+        - i32
+        - i32
+    impl: ark::ets::intrinsics::CompilerMemmoveUnchecked

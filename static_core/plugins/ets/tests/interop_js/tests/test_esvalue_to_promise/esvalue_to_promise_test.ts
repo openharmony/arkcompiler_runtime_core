@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-let helper = globalThis.gtest.helper;
 let etsVm = globalThis.gtest.etsVm;
 let checkToPromise = etsVm.getFunction('Lesvalue_to_promise_test/ETSGLOBAL;', 'checkToPromise');
 let checkToNumber = etsVm.getFunction('Lesvalue_to_promise_test/ETSGLOBAL;', 'checkToNumber');
@@ -22,7 +21,7 @@ let checkToBigInt = etsVm.getFunction('Lesvalue_to_promise_test/ETSGLOBAL;', 'ch
 
 export function sleep(ms: number): Promise<void> {
     return new Promise<void>((resolve) => {
-        helper.setTimeout(resolve, ms);
+        setTimeout(resolve, ms);
     });
 }
 

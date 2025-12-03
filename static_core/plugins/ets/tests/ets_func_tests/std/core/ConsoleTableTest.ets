@@ -88,7 +88,7 @@ class NestedData {
 // Data display utility class
 class DataDisplay {
     static displayUsers(): void {
-        const users : Array<NullishType> = [
+        const users : Array<Any> = [
             new User(1, "John", 30),
             new User(2, "Alice", 25),
             new User(3, "Bob", 35)
@@ -102,11 +102,11 @@ class DataDisplay {
             ["A2", "B2", "C2"],
             ["A3", "B3", "C3"]
         ];
-        console.table(matrix as Object as Array<NullishType>);
+        console.table(matrix as Object as Array<Any>);
     }
 
     static displayProducts(): void {
-        const products : Array<NullishType> = [
+        const products : Array<Any> = [
             new Product(1, "Phone", 699, 50),
             new Product(2, "Laptop", 999, 30),
             new Product(3, "Tablet", 399, 75)
@@ -115,7 +115,7 @@ class DataDisplay {
     }
 
     static displayMixedData(): void {
-        const mixedData : Array<NullishType> = [
+        const mixedData : Array<Any> = [
             new MixedData(1, "string"),
             new MixedData(2, 42),
             new MixedData(3, true)

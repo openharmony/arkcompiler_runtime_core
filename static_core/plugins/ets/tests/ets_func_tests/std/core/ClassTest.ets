@@ -86,11 +86,11 @@ namespace NameSpace {
     }
 
     export final class FinalClass {
-        
+
     }
 
     final class HiddenFinalClass {
-        
+
     }
 
     export function returnHiddenFinalClassObject(): HiddenFinalClass {
@@ -293,9 +293,57 @@ function checkSubTypeOf() {
     arktest.assertTrue(b.isSubtypeOf(a), "BB is subtype of AA")
     arktest.assertTrue(c.isSubtypeOf(a), "CC is subtype of AA")
     arktest.assertTrue(c.isSubtypeOf(b), "CC is subtype of BB")
-    
     arktest.assertFalse(a.isSubtypeOf(b), "AA is not subtype of BB")
     arktest.assertFalse(a.isSubtypeOf(c), "AA is not subtype of CC")
+}
+
+class MyUnion {
+    public f1(): FixedArray<string> {
+        return [""]
+    }
+
+    public f2(): FixedArray<object> {
+        return [new Object]
+    }
+
+    public f3(): string | double {
+        return 0.0
+    }
+
+    public f4(): string | double | Date {
+        return new Date()
+    }
+}
+
+class Gen<T> {
+    public gen1<T>(x: T): T {
+        return x
+    }
+    public gen2<T>(): T | undefined {
+        return undefined
+    }
+}
+
+function checkSubTypeOfUnion() {
+    let u = Class.of(new MyUnion)
+    let faStr = u.getInstanceMethod("f1")!.getReturnType()
+    let faObj = u.getInstanceMethod("f2")!.getReturnType()
+    arktest.assertTrue(faStr.isSubtypeOf(faObj))
+
+    let f3 = u.getInstanceMethod("f3")!.getReturnType()
+    let f4 = u.getInstanceMethod("f4")!.getReturnType()
+
+    let obj = Class.of(new Object)
+    arktest.assertTrue(f3.isSubtypeOf(obj))
+    arktest.assertTrue(Class.of("").isSubtypeOf(f3))
+    arktest.assertTrue(f3.isSubtypeOf(f4))
+
+    let g = Class.of(new Gen<int>())
+    let gen1 = g.getInstanceMethod("gen1")!.getReturnType()
+    let gen2 = g.getInstanceMethod("gen2")!.getReturnType()
+
+    arktest.assertEQ(gen1, gen2)
+    arktest.assertEQ(gen1, obj)
 }
 
 function checkSubTypeOfMultipleInterfaces() {
@@ -337,7 +385,6 @@ function checkClassOfAny() {
     arktest.assertEQ(Class.ofAny(1.0), Class.ofAny(2.0))
     arktest.assertEQ(Class.ofAny("foo"), Class.ofAny("bar"))
     arktest.assertEQ(Class.ofAny(c'a'), Class.ofAny(c'b'))
-    arktest.assertEQ(Class.ofAny(() => {}), Class.ofAny(() => {}))
     arktest.assertEQ(Class.ofAny([1,23]), Class.ofAny([1,2,3]))
 }
 
@@ -355,7 +402,6 @@ function checkClassOfObject() {
     arktest.assertEQ(Class.of(1.0), Class.of(2.0))
     arktest.assertEQ(Class.of("foo"), Class.of("bar"))
     arktest.assertEQ(Class.of(c'a'), Class.of(c'b'))
-    arktest.assertEQ(Class.of(() => {} as Function), Class.of(() => {} as Function))
     arktest.assertEQ(Class.of([1,23]), Class.of([1,2,3]))
 }
 
@@ -458,7 +504,7 @@ function checkAbstract() {
     arktest.assertFalse(Class.of(cont.normalClass).isAbstract())
 }
 
-function main(): void {
+function main(): int {
     let ts = new arktest.ArkTestsuite("Class API test")
     ts.addTest("checkClassIsNotEnumAndNotInterface", checkClassIsNotEnumAndNotInterface)
     ts.addTest("checkEnumIsEnumAndNotInterface", checkEnumIsEnumAndNotInterface)
@@ -472,5 +518,7 @@ function main(): void {
     ts.addTest("checkClassOfObject", checkClassOfObject)
     ts.addTest("checkFinal", checkFinal)
     ts.addTest("checkAbstract", checkAbstract)
-    ts.run();
+    ts.addTest("checkSubTypeOfUnion", checkSubTypeOfUnion)
+
+    return ts.run();
 }

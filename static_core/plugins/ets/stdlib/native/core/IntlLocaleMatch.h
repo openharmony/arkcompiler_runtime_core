@@ -29,13 +29,13 @@ std::vector<std::string> GetAvailableLocales();
 icu::Locale GetLocale(ani_env *env, std::string &locTag);
 ani_status RegisterIntlLocaleMatch(ani_env *env);
 
-ani_string StdCoreIntlBestFitLocale(ani_env *env, ani_class klass, ani_array_ref locales);
+ani_string StdCoreIntlBestFitLocale(ani_env *env, ani_class klass, ani_array locales);
 
 ani_string StdCoreIntlLookupLocale(ani_env *env, ani_class klass, ani_array locales);
 
-ani_array_ref StdCoreIntlBestFitLocales(ani_env *env, ani_class klass, ani_array_ref locales);
+ani_array StdCoreIntlBestFitLocales(ani_env *env, ani_class klass, ani_array locales);
 
-ani_array_ref StdCoreIntlLookupLocales(ani_env *env, ani_class klass, ani_array_ref locales);
+ani_array StdCoreIntlLookupLocales(ani_env *env, ani_class klass, ani_array locales);
 
 }  // namespace ark::ets::stdlib
 

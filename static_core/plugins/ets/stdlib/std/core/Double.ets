@@ -83,16 +83,6 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * Returns value of this instance as a primitive
-     *
-     * @returns value of this instance
-     * @tag arkts
-     */
-    public unboxed(): double {
-        return this.value;
-    }
-
-    /**
      * Returns boxed representation of the primitive
      *
      * @param value value to box
@@ -387,11 +377,30 @@ export final class Double extends Floating implements Comparable<Double> {
      *
      * @param other Double object to compare with
      *
-     * @returns result of the comparison
+     * @returns result of the comparison, -1 if this instance is less than provided object, 0 if equal, 1 if greater
      * @tag arkts
      */
     public override compareTo(other: Double): int {
-        return (this.value - other).toInt();
+        if ((this.isNaN() && other.isNaN()) || (Math.abs(this.value - other) < Double.EPSILON)) {
+            return 0;
+        }
+        if (this.isNaN() || this.value > other) {
+            return 1;
+        }
+        return -1;
+    }
+
+    /**
+     * toString(d: double, r: int): String -- returns a string representation of d by radix r
+     * @tag arkts
+     */
+    public static native toString(d: double, r: int): String;
+
+    /**
+     * @tag arkts
+     */
+    public static toString(d: double): String {
+        return Double.toString(d, 10);
     }
 
     /**
@@ -404,19 +413,6 @@ export final class Double extends Floating implements Comparable<Double> {
     public toString(d: Number): String {
         return Double.toString(this.value, d.toInt());
     }
-
-    /**
-     * @tag arkts
-     */
-    public static toString(d: double): String {
-        return Double.toString(d, 10);
-    }
-
-    /**
-     * toString(d: double, r: int): String -- returns a string representation of d by radix r
-     * @tag arkts
-     */
-    public static native toString(d: double, r: int): String;
 
     /**
      * Converts this object to a string
@@ -466,7 +462,7 @@ export final class Double extends Floating implements Comparable<Double> {
     * Returns false if type of provided object is not the same as this type
     * @tag arkts
     */
-    public equals(other: NullishType): boolean {
+    public equals(other: Any): boolean {
         if (this === other) {
             return true
         }
@@ -681,7 +677,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If arg can not be parsed into a number, NaN is returned
      *
      * @remark
-     * Implemented as native function,  @see `parseFloat()` intrinsic [declaration].
+     * Implemented as native function,  @see `parseFloat()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#653).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parsefloat
      *
@@ -704,13 +700,25 @@ export final class Double extends Floating implements Comparable<Double> {
      * etc.
      *
      * @remark
-     * Implemented as native function,  @see `parseInt()` intrinsic [declaration].
+     * Implemented as native function,  @see `parseInt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#663).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
      *
     */
     public static native parseIntCore(s: String, r: int): double;
 
+    /**
+     * parseInt(String) parses from String an integer of radix 10
+     *
+     * @param s the string to convert
+     *
+     * @returns the result of parsing
+     *
+    */
+    public static parseInt(s: String): double {
+        return Double.parseIntCore(s, -1 as int);
+    }
+    
     /**
      * parseInt(String, int) parses from String an integer of specified radix
      *
@@ -727,7 +735,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * etc.
      *
      * @remark
-     * Implemented as native function,  @see `parseInt()` intrinsic [declaration].
+     * Implemented as native function,  @see `parseInt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#663).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
      *
@@ -741,7 +749,7 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * parseInt(String, int) parses from String an integer of specified radix
+     * parseInt(String, double) parses from String an integer of specified radix
      *
      * @param s the string to convert
      * @param r the radix of conversion; should be [2, 36]; 0 assumed to be 10
@@ -756,7 +764,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * etc.
      *
      * @remark
-     * Implemented as native function,  @see `parseInt()` intrinsic [declaration].
+     * Implemented as native function,  @see `parseInt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#663).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
      *
@@ -770,18 +778,6 @@ export final class Double extends Floating implements Comparable<Double> {
         } else {
             return Double.parseIntCore(s.trim(), Double.toInt(r));
         }
-    }
-
-    /**
-     * parseInt(String) parses from String an integer of radix 10
-     *
-     * @param s the string to convert
-     *
-     * @returns the result of parsing
-     *
-    */
-    public static parseInt(s: String): double {
-        return Double.parseIntCore(s, -1 as int);
     }
 
     /**
@@ -801,7 +797,7 @@ export final class Double extends Floating implements Comparable<Double> {
      *                                                                     '-Infinity' for negative
      *
      * @remark
-     * Implemented as native function,  @see `toExponential()` intrinsic [declaration].
+     * Implemented as native function,  @see `toExponential()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#673).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/doubles-and-dates.html#sec-double.prototype.toexponential
      *
@@ -846,7 +842,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If d = new Double(12345.123455); d.toPrecision(10) -> '12345.12346'
      *
      * @remark
-     * Implemented as native function,  @see `toPrecision()` intrinsic [declaration].
+     * Implemented as native function,  @see `toPrecision()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#683).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.toprecision
      *
@@ -882,7 +878,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If d = new Double(0.25); d.toFixed(200) -> thrown ArgumentOutOfRangeError
      *
      * @remark
-     * Implemented as native function,  @see `toFixed()` intrinsic [declaration].
+     * Implemented as native function,  @see `toFixed()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#693).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.tofixed
      *
@@ -950,3 +946,13 @@ export final class Double extends Floating implements Comparable<Double> {
      */
     private static native numberFromString(s: String): double;
 }
+
+/**
+ * `Number' values represent floating-point numbers like 6 or -3.14
+ */
+export type Number = Double;
+
+/**
+ Number is a synonym for type number
+ */
+export type number = double;

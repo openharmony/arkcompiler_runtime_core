@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,14 @@
 #ifndef PANDA_VERIFIER_CFLOW_ITER_INL_H_
 #define PANDA_VERIFIER_CFLOW_ITER_INL_H_
 
-#include "bytecode_instruction-inl.h"
-#include "file_items.h"
-#include "macros.h"
+#include "libarkfile/bytecode_instruction-inl.h"
+#include "libarkfile/file_items.h"
+#include "libarkbase/macros.h"
 #include "include/method.h"
 #include "include/runtime.h"
 #include "verification/verification_status.h"
 
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include <cstdint>
 #include <cmath>

@@ -66,13 +66,13 @@ function main(): int {
   {%- endfor %}
 
   {%- if item.method_throws == true %}
-        let exceptionTypeMatched: boolean = false;
-        let actualExceptionMessage: string = "";
+        let errorTypeMatched: boolean = false;
+        let actualErrorMessage: string = "";
   {%- endif %}
   {%- if item.method_return_type == "void" %}
         {%- if item.method_throws == true %} try { {%- endif %}
         obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
-        {%- if item.method_throws == true %} } catch (e) { console.println("Unexpected exception in positive test"); } {%- endif %}
+        {%- if item.method_throws == true %} } catch (e) { console.println("Unexpected error in positive test"); } {%- endif %}
     {% if item.result_storage == "this" %}
         {% set actualType = item.result_type %}
         let actual: {{.actualType}};
@@ -83,26 +83,26 @@ function main(): int {
         let actual: {{.actualType}}{% if item.method_throws == true %} | undefined | null{%- endif %}{%- if item.init_object_init_value is defined %} = {{.item.init_object_init_value}}{%- endif %};
       {% if item.method_throws == true %} try { {%- endif %}
         {%- if item.method_name == "codePointAt" %}
-      let tmp: Number | undefined = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
+      let tmp: int | undefined = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
       if (tmp == undefined) {
         console.print("FAILED");
         console.println();
         continue;
       }
-        actual = tmp.toDouble();
+        actual = tmp;
         {%- else %}
         actual = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
         {%- endif %}
       {% if item.method_throws == true %} }
-        {%- if item.expected_exception_type is defined %}
-          catch (e: {{.item.expected_exception_type}}) {
-            exceptionTypeMatched = true
-            actualExceptionMessage = e.message
+        {%- if item.expected_error_type is defined %}
+          catch (e: {{.item.expected_error_type}}) {
+            errorTypeMatched = true
+            actualErrorMessage = e.message
           }
         {%- endif %}
           catch (e) {
-            if (e instanceof Exception) {
-              actualExceptionMessage = e.toString()
+            if (e instanceof Error) {
+              actualErrorMessage = e.toString()
             }
           }
       {%- endif %}
@@ -115,16 +115,16 @@ function main(): int {
 //      console.print("EXPECTED:" + TEST_DATA_EXPECTED[exp_idx] + ";");
       {% if item.method_throws == true %}
       if (actual instanceof undefined || actual instanceof null) {
-        // Exception caught
-        {%- if item.expected_exception_type is defined %}
-        if (!exceptionTypeMatched) {
-          console.print("FAILED: Unexpected exception");
+        // Error caught
+        {%- if item.expected_error_type is defined %}
+        if (!errorTypeMatched) {
+          console.print("FAILED: Unexpected error");
           console.println();
           continue;
         }
-          {% if item.expected_exception_message is defined %}
-        if (!compareStringTrivial(actualExceptionMessage, "{{.item.expected_exception_message}}")) {
-          console.print("FAILED: Unexpected exception message: " + actualExceptionMessage);
+          {% if item.expected_error_message is defined %}
+        if (!compareStringTrivial(actualErrorMessage, "{{.item.expected_error_message}}")) {
+          console.print("FAILED: Unexpected error message: " + actualErrorMessage);
           console.println();
           continue;
         }
@@ -134,18 +134,18 @@ function main(): int {
         continue;
           {%- endif %}
         {%- else %}
-        console.print("FAILED: Unexpected exception in positive test. Additional info: " + actualExceptionMessage);
+        console.print("FAILED: Unexpected error in positive test. Additional info: " + actualErrorMessage);
         console.println();
         continue;
         {%- endif %}
       } else {
-        // No exception occurs. Check test result
+        // No error occurs. Check test result
         let expected = TEST_DATA_EXPECTED[exp_idx];
         {% raw %}// Workaround possible verifier bug, since we can't simply write: "actual as {{.actualType}}" for primitive types {% endraw %}
         let toCompare = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
         if ({{.item.verify_test_result_function}}(toCompare, expected)) {
       {%- else %}
-        // No exception occurs. Check test result
+        // No error occurs. Check test result
         let expected = TEST_DATA_EXPECTED[exp_idx];
         if ({{.item.verify_test_result_function}}(actual, expected)) {
       {%- endif %}

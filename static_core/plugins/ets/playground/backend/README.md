@@ -7,8 +7,27 @@
 
 ## Running
 
-* Create `config.yaml` following the [sample](./config.yaml.sample)
-* Run server
+### Create `config.yaml`
+Use `config.yaml.sample` as a starting point.
+
+The build directory might be different in your environment, but otherwise by default it's set up for running locally out of the box.
+
+### CORS
+This is needed if the backend and frontend are on different ports, as is the case when developing locally outside of Docker.
+
+This is already pre-configured in `config.yaml.sample`.
+
+```yaml
+# in config.yaml
+server:
+  cors_allow_origins: ["*"]
+  cors_allow_methods: ["*"]
+  cors_allow_headers: ["*"]
+  cors_allow_credentials: true
+  cors: true
+```
+
+### Run server
 
 `arkts-playground -c /path/to/config.yaml`
 

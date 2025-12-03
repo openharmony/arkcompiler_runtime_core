@@ -43,16 +43,19 @@ constexpr std::string_view ETS_ANNOTATION_MODULE = "ets.annotation.Module";
 constexpr std::string_view ETS_EXTENDS = "ets.extends";
 constexpr std::string_view ETS_IMPLEMENTS = "ets.implements";
 constexpr std::string_view ENUM_BASE = "std.core.BaseEnum";
-constexpr std::string_view INTERFACE_GET_FUNCTION_PATTERN = ".*<get>(.*)";
-constexpr std::string_view INTERFACE_SET_FUNCTION_PATTERN = ".*<set>(.*)";
+constexpr std::string_view INTERFACE_GET_FUNCTION_PATTERN = ".*%%get-(.*)";
+constexpr std::string_view INTERFACE_SET_FUNCTION_PATTERN = ".*%%set-(.*)";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
 constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 constexpr std::string_view OBJECT_CLASS = "std.core.Object";
 constexpr std::string_view OBJECT_LITERAL_NAME = "$ObjectLiteral";
-constexpr std::string_view INTERFACE_FIELD_PREFIX = "<property>";
+constexpr std::string_view INTERFACE_FIELD_PREFIX = "%%property-";
 constexpr std::string_view ASYNC_ORIGINAL_RETURN = "std.core.Promise;";
 constexpr std::string_view PARTIAL = "$partial";
 const std::unordered_set<std::string> GLOBAL_CLASS_NAMES = {"ETSGLOBAL", "_GLOBAL"};
+
+using CoreTypePointer = std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *,
+                                     AbckitCoreInterface *, AbckitCoreEnum *, AbckitCoreAnnotationInterface *>;
 }  // namespace
 
 namespace libabckit {
@@ -113,6 +116,41 @@ std::vector<std::string> GetAnnotationNames(
 {
     return std::visit([](auto &&object) { return object->metadata->GetAttributeValues(ETS_ANNOTATION_CLASS.data()); },
                       impl);
+}
+
+static std::optional<CoreTypePointer> GetCoreTypeByName(AbckitFile *file, const std::string &name)
+{
+    const auto container = static_cast<Container *>(file->data);
+    if (const auto it = container->nameToModule.find(name); it != container->nameToModule.end()) {
+        return it->second.get();
+    }
+
+    if (const auto it = container->nameToNamespace.find(name); it != container->nameToNamespace.end()) {
+        return it->second;
+    }
+
+    if (const auto it = container->nameToClass.find(name); it != container->nameToClass.end()) {
+        return it->second;
+    }
+
+    if (const auto it = container->nameToInterface.find(name); it != container->nameToInterface.end()) {
+        return it->second;
+    }
+
+    if (const auto it = container->nameToEnum.find(name); it != container->nameToEnum.end()) {
+        return it->second;
+    }
+
+    if (const auto it = container->nameToPartials.find(name); it != container->nameToPartials.end()) {
+        return it->second;
+    }
+
+    if (const auto it = container->nameToAnnotationInterface.find(name);
+        it != container->nameToAnnotationInterface.end()) {
+        return it->second;
+    }
+
+    return std::nullopt;
 }
 
 static std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *, std::nullptr_t> GetTypeReference(
@@ -235,8 +273,8 @@ static void DumpHierarchy(AbckitFile *file)
 
 static std::unique_ptr<AbckitCoreAnnotation> CreateAnnotation(
     AbckitFile *file,
-    std::variant<AbckitCoreClass *, AbckitCoreFunction *, AbckitCoreClassField *, AbckitCoreInterface *,
-                 AbckitCoreInterfaceField *>
+    const std::variant<AbckitCoreClass *, AbckitCoreFunction *, AbckitCoreClassField *, AbckitCoreInterface *,
+                       AbckitCoreInterfaceField *>
         owner,
     const std::string &name)
 {
@@ -544,6 +582,29 @@ static void AssignAnnotationInterfaceToAnnotation(AbckitFile *file)
     }
 }
 
+static void AssignRecordToValues(AbckitFile *file, pandasm::Record *record, const std::vector<std::string> &values)
+{
+    for (auto &value : values) {
+        auto coreType = GetCoreTypeByName(file, value);
+        if (!coreType.has_value()) {
+            continue;
+        }
+        std::visit([record](auto &&type) { type->recordUsers.emplace_back(record); }, coreType.value());
+    }
+}
+
+static void AssignRecordUsers(AbckitFile *file, pandasm::Program *program)
+{
+    for (auto &[_, record] : program->recordTable) {
+        if (record.metadata->IsForeign()) {
+            continue;
+        }
+        for (auto &[_, values] : record.metadata->GetAttributes()) {
+            AssignRecordToValues(file, &record, values);
+        }
+    }
+}
+
 static void AssignSuperClass(std::unordered_map<std::string, AbckitCoreClass *> &nameToClass,
                              std::unordered_map<std::string, AbckitCoreInterface *> &nameToInterface,
                              const std::vector<std::unique_ptr<AbckitCoreClass>> &classes)
@@ -613,6 +674,10 @@ static void AssignObjectLiteral(std::vector<std::unique_ptr<AbckitCoreClass>> &o
         }
         for (const auto &className : record->metadata->GetAttributeValues(ETS_EXTENDS.data())) {
             if (className == OBJECT_CLASS) {
+                continue;
+            }
+            if (IsPartial(className)) {
+                nameToPartial[className]->objectLiterals.emplace_back(std::move(objectLiteral));
                 continue;
             }
             ASSERT(nameToClass.find(className) != nameToClass.end());
@@ -1334,6 +1399,7 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     AssignAsyncFunction(file);
     AssignArrayEnum(file);
     AssignAnnotationInterfaceToAnnotation(file);
+    AssignRecordUsers(file, prog);
     AssignSuperClass(containerPtr->nameToClass, containerPtr->nameToInterface, containerPtr->classes);
     AssignSuperInterface(containerPtr->nameToInterface, containerPtr->interfaces);
     AssignObjectLiteral(containerPtr->objectLiterals, containerPtr->nameToClass, containerPtr->nameToInterface,

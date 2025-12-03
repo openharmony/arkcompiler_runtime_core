@@ -18,7 +18,6 @@ limitations under the License.
 /*---
 desc: Type Readonly<T> constructs a type with all properties of T set to readonly. It means that the properties of the
       constructed value cannot be reassigned. T must be a class or an interface type
-tags: [{% if c.result == -1 %}compile-only, negative{% endif %}]
 ---*/
 
 interface I {

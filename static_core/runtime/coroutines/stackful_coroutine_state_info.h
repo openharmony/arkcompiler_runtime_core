@@ -19,7 +19,7 @@
 #include <cstddef>
 #include "coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_context.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/stack_walker.h"
 

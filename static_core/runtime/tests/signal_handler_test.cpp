@@ -19,13 +19,13 @@
 #include <string>
 #include <vector>
 
-#include "libpandafile/file_items.h"
-#include "libpandafile/value.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/value.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/utils.h"
-#include "os/thread.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkbase/os/thread.h"
 #include "runtime/include/managed_thread.h"
 #include <sys/syscall.h>
 #include "assembly-parser.h"
@@ -171,7 +171,7 @@ static auto g_callTestSource = R"(
         call.short main, v0
         return.void
     }
-    .function i32 main(i64 a0) {
+    .function i32 main(i32 a0) {
     movi v5, 0
     loop:
         lda v5

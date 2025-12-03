@@ -15,15 +15,15 @@
 #ifndef PANDA_QUICKENER_QUICKENER_H
 #define PANDA_QUICKENER_QUICKENER_H
 
-#include "file.h"
-#include "file_item_container.h"
-#include "file_items.h"
-#include "libpandafile/class_data_accessor-inl.h"
-#include "source_lang_enum.h"
-#include "bytecode_instruction.h"
-#include "bytecode_instruction-inl.h"
-#include "bytecode_instruction_enum_gen.h"
-#include "debug_data_accessor.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_item_container.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include <libarkfile/include/source_lang_enum.h>
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction-inl.h"
+#include <bytecode_instruction_enum_gen.h>
+#include "libarkfile/debug_data_accessor.h"
 #include <cstdint>
 
 namespace ark::quick {

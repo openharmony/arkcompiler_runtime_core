@@ -22,7 +22,6 @@ namespace ark::ets {
 
 class FullGCLongTimeListener : public ark::mem::GCListener {
 public:
-    static constexpr uint64_t LONG_GC_THRESHOLD_NS = 40'000'000;
     FullGCLongTimeListener() = default;
     ~FullGCLongTimeListener() override = default;
     PANDA_PUBLIC_API static FullGCLongTimeListener *CreateGCListener();

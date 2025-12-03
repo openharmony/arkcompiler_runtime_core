@@ -15,24 +15,17 @@
 
 /*---
 desc: Verifying asymmetric compatibility between object and string.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: object;
-}
-
-class A {
-  i: string;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
-  const val1: object = {key: "value"};
+  const val1: Record<string, string> = {"key": "value"};
   const val2: string = "test";
 
   const result1 = checkTypeIdentity(val1, val2);
-  const result2 = checkTypeIdentity(val2, val1);
 
   arktest.assertEQ(result1, false);
-  arktest.assertEQ(result2, false);
 }

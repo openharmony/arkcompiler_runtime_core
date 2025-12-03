@@ -15,8 +15,9 @@
 
 /*---
 desc: >-
-    If a key is a union type consisting of literals, then all variants must be listed in the object literal;
-    otherwise, a compile-time error occurs
+    If a key is a union of literal types or an enum type,
+    then all variants must be listed in the object literal.
+    Otherwise, a compile-time error occurs
 tags: [compile-only, negative]
 ---*/
 

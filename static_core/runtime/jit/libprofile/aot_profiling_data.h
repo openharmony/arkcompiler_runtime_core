@@ -16,7 +16,7 @@
 #ifndef AOT_PROFILING_DATA_H
 #define AOT_PROFILING_DATA_H
 
-#include "utils/span.h"
+#include "libarkbase/utils/span.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/jit/profiling_data.h"

@@ -15,7 +15,7 @@
 
 #include "runtime/mem/gc/gc_root.h"
 
-#include "libpandafile/panda_cache.h"
+#include "libarkfile/panda_cache.h"
 #include "runtime/include/object_header.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/stack_walker-inl.h"

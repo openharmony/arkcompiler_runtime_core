@@ -15,20 +15,15 @@
 
 /*---
 desc: Ensuring type identity in type guards.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: string | number;
-}
-
-class A {
-  i: string & number;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.ofAny(a as Any) === Class.ofAny(b as Any);
 }
 
 function main(): void {
-  const val1: string | number = "test";
-  const val2: string & number = {} as never;
+  const val1: string | number = 123;
+  const val2: string  = "test";
 
   const result = checkTypeIdentity(val1, val2);
 

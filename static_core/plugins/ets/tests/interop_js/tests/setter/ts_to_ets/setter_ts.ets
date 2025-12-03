@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 
-import {
-    UnionSetter,
-    InterfaceSetter,
-    BaseClass,
-    AbstractClass,
-    SubsetRefSet,
-    SubsetValueSet,
-    UnionSetterObject,
-    InterfaceSetterObject,
-    TupleSetObject,
-    SetterAnyTypeObject,
-    BaseClassObject,
-    SubsetRefSetObject,
-    SubsetValueSetObject,
-    tsTestString,
-    AbstractClassObject
-} from 'js/setter';
+let module = ESValue.load('js/setter')
+let clsUnionSetter = module.getProperty('UnionSetter');
+let clsInterfaceSetter = module.getProperty('InterfaceSetter');
+let clsBaseClass = module.getProperty('BaseClass');
+let clsAbstractClass = module.getProperty('AbstractClass');
+let clsSubsetRefSet = module.getProperty('SubsetRefSet');
+let clsSubsetValueSet = module.getProperty('SubsetValueSet');
+let unionSetterObject = module.getProperty('UnionSetterObject');
+let interfaceSetterObject = module.getProperty('InterfaceSetterObject');
+let tupleSetObject = module.getProperty('TupleSetObject');
+let setterAnyTypeObject = module.getProperty('SetterAnyTypeObject');
+let baseClassObject = module.getProperty('BaseClassObject');
+let subsetRefSetObject = module.getProperty('SubsetRefSetObject');
+let subsetValueSetObject = module.getProperty('SubsetValueSetObject');
+let tsTestString = module.getProperty('tsTestString');
+let abstractClassObject = module.getProperty('AbstractClassObject');
 
 type TupleT = [int, string];
 
@@ -42,51 +41,52 @@ function errLog(op: String) {
 }
 
 function checkAbstractClassSetter(): boolean {
-    const abstractClass = new AbstractClass();
-    abstractClass.value = strContent;
+    const abstractClass = clsAbstractClass.instantiate();
+    abstractClass.setProperty('value', strContent);
 
-    return strContent == abstractClass.value;
+    return strContent == abstractClass.getProperty('value').toString();
 }
 
 function checkUnionSetter(): boolean {
-    const unionSetter = new UnionSetter();
-    unionSetter.value = numContent;
+    const unionSetter = clsUnionSetter.instantiate();
+    unionSetter.setProperty('value', numContent);
 
-    return numContent == unionSetter.value;
+    return numContent == unionSetter.getProperty('value').toNumber().toInt();
 }
 
 function checkInterfaceSetter(): boolean {
-        const interfaceSetter = new InterfaceSetter();
-        interfaceSetter.value = strContent;
+    const interfaceSetter = clsInterfaceSetter.instantiate();
+    interfaceSetter.setProperty('value', strContent);
 
-        return interfaceSetter.value == strContent;
+    return strContent == interfaceSetter.getProperty('value').toString();
 }
 
 function checkUserClassSetter() {
-    const base = new BaseClass();
-    base.value = strContent;
+    const base = clsBaseClass.instantiate();
+    base.setProperty('value', strContent);
 
-    return strContent == base.value;
+    return strContent == base.getProperty('value').toString();
 }
 
 function checkExtendsClass() {
-    const subsetRefSet = new SubsetRefSet();
-    subsetRefSet.value = strContent;
+    const subsetRefSet = clsSubsetRefSet.instantiate();
+    subsetRefSet.setProperty('value', strContent);
 
-    return strContent == subsetRefSet.value;
+    return strContent == subsetRefSet.getProperty('value').toString();
 }
 
 function checkExtendsClassWithValue() {
-    const subsetValueSet = new SubsetValueSet();
-    subsetValueSet.value = strContent;
+    const subsetValueSet = clsSubsetValueSet.instantiate();
+    subsetValueSet.setProperty('value', strContent);
 
-    return strContent == subsetValueSet.value;
+    return strContent == subsetValueSet.getProperty('value').toString();
 }
 
 function checkTupleTypeObjectFormTs() {
-    TupleSetObject.value = tupleContent;
+    tupleSetObject.setProperty('value', tupleContent);
 
-    if (TupleSetObject.value[0] == tupleContent[0] && TupleSetObject.value[1] == tupleContent[1]) {
+    if (tupleSetObject.getProperty('value').getProperty(0).toNumber() == tupleContent[0] &&
+        tupleSetObject.getProperty('value').getProperty(1).toString() == tupleContent[1]) {
         return true;
     } else {
         errLog('tuple type object setter not work.');
@@ -96,51 +96,51 @@ function checkTupleTypeObjectFormTs() {
 }
 
 function checkSetterAnyTypeObjectFormTs() {
-    SetterAnyTypeObject.value = strContent;
+    setterAnyTypeObject.setProperty('value', strContent);
 
-    return check(SetterAnyTypeObject.value as string, strContent, 'setter any type object not work.');
+    return check(setterAnyTypeObject.getProperty('value').toString(), strContent, 'setter any type object not work.');
 }
 
 function checkSetterUnionTypeObjectFormTs() {
-    UnionSetterObject.value = numContent;
+    unionSetterObject.setProperty('value', numContent);
 
-    return check(UnionSetterObject.value as int, numContent, 'setter union type object not work.');
+    return check(unionSetterObject.getProperty('value').toNumber().toInt(), numContent, 'setter union type object not work.');
 }
 
 function checkSetterInterfaceObjectFormTs() {
-    InterfaceSetterObject.value = strContent;
+    interfaceSetterObject.setProperty('value', strContent);
 
-    return check(InterfaceSetterObject.value as string, strContent, 'setter interface object not work.');
+    return check(interfaceSetterObject.getProperty('value').toString(), strContent, 'setter interface object not work.');
 }
 
 function checkSetterUserObjectFormTs() {
-    BaseClassObject.value = strContent;
+    baseClassObject.setProperty('value', strContent);
 
-    return check(BaseClassObject.value as string, strContent, 'setter user object not work.');
+    return check(baseClassObject.getProperty('value').toString(), strContent, 'setter user object not work.');
 }
 
 function checkSetterSubsetRefSetObjectFormTs() {
-    SubsetRefSetObject.value = strContent;
+    subsetRefSetObject.setProperty('value', strContent);
 
-    return check(SubsetRefSetObject.value as string, strContent, 'setter subset ref set object not work.');
+    return check(subsetRefSetObject.getProperty('value').toString(), strContent, 'setter subset ref set object not work.');
 }
 
 function checkSetterSubsetValueSetObjectFormTs() {
-    if (SubsetValueSetObject.value !== tsTestString) {
+    if (!ESValue.areEqualSafe(subsetValueSetObject.getProperty('value'), tsTestString)) {
         errLog('incorect value in object.');
 
         return false;
     }
 
-    SubsetValueSetObject.value = strContent;
+    subsetValueSetObject.setProperty('value', strContent);
 
-    return check(SubsetValueSetObject.value as string, strContent, 'setter subset value set object not work.');
+    return check(subsetValueSetObject.getProperty('value').toString(), strContent, 'setter subset value set object not work.');
 }
 
 function checkSetterAbstractClassObjectFormTs() {
-    AbstractClassObject.value = strContent;
+    abstractClassObject.setProperty('value', strContent);
 
-    return check(AbstractClassObject.value as string, strContent, 'setter abstract class object not work.');
+    return check(abstractClassObject.getProperty('value').toString(), strContent, 'setter abstract class object not work.');
 }
 
 function check(value: string | int, content: string | int, message: string): boolean {

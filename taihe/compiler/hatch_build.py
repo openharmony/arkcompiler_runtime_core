@@ -68,28 +68,31 @@ class Inspector:
 
 def generate_ast(file: TextIO, parser: Any):
     file.write(
-        "from dataclasses import dataclass\n"
-        "from typing import Any, Union, List, Optional\n"
-        "\n"
-        "from taihe.utils.sources import SourceLocation\n"
-        "\n"
-        "\n"
-        "class TaiheAST:\n"
-        "    @dataclass(kw_only=True)\n"
-        "    class any:\n"
-        "        loc: SourceLocation\n"
-        "\n"
-        "        def _accept(self, visitor) -> Any:\n"
-        "            raise NotImplementedError()\n"
-        "\n"
-        "\n"
-        "    @dataclass\n"
-        "    class TOKEN(any):\n"
-        "        text: str\n"
-        "\n"
-        "        def _accept(self, visitor) -> Any:\n"
-        "            return visitor.visit_token(self)\n"
-        "\n"
+        f"from dataclasses import dataclass\n"
+        f"from typing import TYPE_CHECKING, Any, List, Optional, Union\n"
+        f"\n"
+        f"from taihe.utils.sources import SourceLocation\n"
+        f"\n"
+        f"if TYPE_CHECKING:\n"
+        f"    from {ANTLR_PKG}.TaiheVisitor import TaiheVisitor\n"
+        f"\n"
+        f"\n"
+        f"class TaiheAST:\n"
+        f"    @dataclass(kw_only=True)\n"
+        f"    class any:\n"
+        f"        loc: SourceLocation\n"
+        f"\n"
+        f'        def accept(self, visitor: "TaiheVisitor") -> Any:\n'
+        f"            raise NotImplementedError()\n"
+        f"\n"
+        f"\n"
+        f"    @dataclass\n"
+        f"    class TOKEN(any):\n"
+        f"        text: str\n"
+        f"\n"
+        f'        def accept(self, visitor: "TaiheVisitor") -> Any:\n'
+        f"            return visitor.visit_token(self)\n"
+        f"\n"
     )
     type_list = []
     for rule_name in parser.ruleNames:
@@ -116,7 +119,7 @@ def generate_ast(file: TextIO, parser: Any):
                 file.write(f"        {attr_name}: {attr_hint}\n")
             file.write(
                 f"\n"
-                f"        def _accept(self, visitor) -> Any:\n"
+                f'        def accept(self, visitor: "TaiheVisitor") -> Any:\n'
                 f"            return visitor.visit_{snake_case(node_kind)}(self)\n"
                 f"\n"
             )
@@ -124,17 +127,15 @@ def generate_ast(file: TextIO, parser: Any):
 
 def generate_visitor(file: TextIO, parser: Any):
     file.write(
-        f"from {ANTLR_PKG}.TaiheAST import TaiheAST\n"
+        f"from typing import TYPE_CHECKING, Any\n"
         f"\n"
-        f"from typing import Any\n"
+        f"if TYPE_CHECKING:\n"
+        f"    from {ANTLR_PKG}.TaiheAST import TaiheAST\n"
         f"\n"
         f"\n"
         f"class TaiheVisitor:\n"
-        f"    def visit(self, node: TaiheAST.any) -> Any:\n"
-        f"        return node._accept(self)\n"
-        f"\n"
-        f"    def visit_token(self, node: TaiheAST.TOKEN) -> Any:\n"
-        f"        raise NotImplementedError()\n"
+        f'    def visit_token(self, node: "TaiheAST.TOKEN") -> Any:\n'
+        f"        raise NotImplementedError\n"
         f"\n"
     )
     type_list = []
@@ -150,22 +151,22 @@ def generate_visitor(file: TextIO, parser: Any):
                 sub_kind = sub_type.__name__
                 attr_kind = sub_kind[:-7]
                 file.write(
-                    f"    def visit_{snake_case(attr_kind)}(self, node: TaiheAST.{attr_kind}) -> Any:\n"
+                    f'    def visit_{snake_case(attr_kind)}(self, node: "TaiheAST.{attr_kind}") -> Any:\n'
                     f"        return self.visit_{snake_case(node_kind)}(node)\n"
                     f"\n"
                 )
         file.write(
-            f"    def visit_{snake_case(node_kind)}(self, node: TaiheAST.{node_kind}) -> Any:\n"
-            f"        raise NotImplementedError()\n"
+            f'    def visit_{snake_case(node_kind)}(self, node: "TaiheAST.{node_kind}") -> Any:\n'
+            f"        raise NotImplementedError\n"
             f"\n"
         )
 
 
-def has_generated(grammar_input: Path, parser_output: Path) -> bool:
-    return (
-        parser_output.exists()
-        and grammar_input.stat().st_mtime < parser_output.stat().st_mtime
-    )
+def has_generated(out_file: Path, *dep_files: Path) -> bool:
+    if not out_file.exists():
+        return False
+    out_mtime = out_file.stat().st_mtime
+    return all(dep.exists() and dep.stat().st_mtime <= out_mtime for dep in dep_files)
 
 
 class TaiheBuildHook(BuildHookInterface):
@@ -176,11 +177,11 @@ class TaiheBuildHook(BuildHookInterface):
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
         # Build modes
         #
-        # | Input | Target | Has Git? | Artifacts |
-        # |-------+--------+----------+-----------|
-        # | Git   | sdist  | Y        | Generate  |
-        # | Git   | wheel  | Y        | Generate  |
-        # | sdist | wheel  | N        | Reuse     |
+        # | Source | Target | Has Git? | Artifacts |
+        # |--------+--------+----------+-----------|
+        # | source | sdist  | Maybe    | Generate  |
+        # | source | wheel  | Maybe    | Generate  |
+        # | sdist  | wheel  | N        | Reuse     |
         del version
 
         # Setup paths first.
@@ -189,39 +190,24 @@ class TaiheBuildHook(BuildHookInterface):
 
         self.antlr_in = g_compiler_dir / "Taihe.g4"
         self.antlr_dir = g_compiler_dir / ANTLR_PKG.replace(".", "/")
-        self.antlr_out_example = self.antlr_dir / "TaiheParser.py"
 
         # Always bundle artifacts.
         self._setup_artifacts(build_data)
 
-        # Only generate artifacts for in-tree build.
-        if not self._is_inside_git_repo():
+        # Determine if we are building from sdist.
+        if (self.repo_root / "PKG-INFO").exists():
+            print("Building from sdist, reusing existing artifacts")
             return
 
         # Now generate version.py and antlr.
         self._generate_version()
-        if has_generated(self.antlr_in, self.antlr_out_example):
-            print("ANTLR: skipping generation, already generated")
-        else:
-            print("ANTLR: generating...")
-            self._generate_grammar()
+        self._generate_grammar()
 
     def _setup_artifacts(self, build_data: dict[str, Any]):
         build_data["artifacts"] += [
             f"{self.version_path.relative_to(g_repo_dir)}",
             f"{self.antlr_dir.relative_to(g_repo_dir)}/*.py",
         ]
-
-    def _is_inside_git_repo(self) -> bool:
-        try:
-            self._git("rev-parse", "--is-inside-work-tree")
-            print(f"Build environment: git -> {self.target_name}")
-            return True
-        except subprocess.CalledProcessError:
-            print(f"Build environment: ??? -> {self.target_name}")
-        except FileNotFoundError:
-            print("No git installed?")
-        return False
 
     def _git(self, *args: str) -> str:
         return subprocess.run(
@@ -233,8 +219,13 @@ class TaiheBuildHook(BuildHookInterface):
         ).stdout
 
     def _generate_version(self):
-        git_commit = self._git("rev-parse", "HEAD").strip()
-        git_message = self._git("log", "-1", "--pretty=%B").splitlines()[0]
+        try:
+            self._git("rev-parse", "--is-inside-work-tree")
+            git_commit = self._git("rev-parse", "HEAD").strip()
+            git_message = self._git("log", "-1", "--pretty=%B").splitlines()[0]
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            git_commit = "0" * 40
+            git_message = ""
 
         now = datetime.now()
         build_timestamp = now.astimezone(timezone.utc).timestamp()
@@ -249,13 +240,21 @@ class TaiheBuildHook(BuildHookInterface):
         )
 
     def _generate_grammar(self):
+        if has_generated(self.antlr_dir / "TaiheParser.py", self.antlr_in):
+            print("ANTLR: skipping generation, already generated")
+            return
+
+        print("ANTLR: generating parser and lexer...")
         ResourceContext.initialize()
         antlr_opts = ["-Dlanguage=Python3", "-no-listener"]
         antlr_opts += [str(self.antlr_in), "-o", str(self.antlr_dir)]
         Antlr.resolve().run_tool(antlr_opts)
 
-        p = get_parser()
-        with open(self.antlr_dir / "TaiheAST.py", "w") as f:
-            generate_ast(f, p)
-        with open(self.antlr_dir / "TaiheVisitor.py", "w") as f:
-            generate_visitor(f, p)
+        print("ANTLR: generating AST and visitor...")
+        parser = get_parser()
+        with open(self.antlr_dir / "TaiheAST.py", "w") as ast_file:
+            generate_ast(ast_file, parser)
+        with open(self.antlr_dir / "TaiheVisitor.py", "w") as visitor_file:
+            generate_visitor(visitor_file, parser)
+
+        print("ANTLR: generation completed")

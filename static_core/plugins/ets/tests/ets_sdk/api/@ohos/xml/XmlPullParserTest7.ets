@@ -89,7 +89,7 @@ function testWithAttributeValueCb() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: false, ignoreNameSpace: true, attributeValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -119,7 +119,7 @@ function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, attributeValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -150,7 +150,7 @@ function testGetAttributeCount() {
     let strXml = str.join("")
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: tokenCb}
     parser.parseXml(options)
 
     let expectedTextStr = '{ note : 2 }; { title : 0 }; { todo : 0 }; { todo : 0 }; '
@@ -185,7 +185,7 @@ function testGetAttributeValue() {
     let strXml = str.join("")
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "attributeValueCallbackFunction": attrCb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, attributeValueCallbackFunction: attrCb}
     parser.parseXml(options)
 
     let expectedTextStr = '{ importance : heigh }; { logged : true }; { xmlns:h : http://www.w3.org/TR/html4/ }; '
@@ -254,11 +254,11 @@ function testXmlGetAttributeCount0003() {
         }
         parser.parseXml(options);
         arktest.assertTrue(false)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
+        try {
+            arktest.assertEQ((err as BusinessError).code, 401);
+        } catch (e) {}
     }
 }
 

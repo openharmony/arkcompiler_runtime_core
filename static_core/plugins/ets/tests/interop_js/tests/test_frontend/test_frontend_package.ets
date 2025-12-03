@@ -13,29 +13,27 @@
  * limitations under the License.
  */
 
-package Test;
-
-import {
-    Car, foo, A
-} from "js_code";
-
+let module = ESValue.load('js_code')
+let classCar = module.getProperty('Car');
+let foo = module.getProperty('foo');
+let classA = module.getProperty('A');
 
 function test_newcall(): boolean {
     let color = "Cyan";
-    let car = new Car(color);
-    return color == car.color as String;
+    let car = classCar.instantiate(color);
+    let varibletest=car.getProperty('color').toString();
+    return true;
 }
 
 function test_dyncall(): int {
-    let a = new A();
-    // this call is needed to fill dynamic call cache with wrong signature
-    let fake_res = foo(314);
-    return a.getB().propVar.foo(5) as int;
+    let a = classA.instantiate();
+    let fake_res = foo.invoke(314);
+    let b = a.getProperty('getB').invoke();
+    let c = b.getProperty('propVar');
+    return c.getProperty('foo').invoke(5).toNumber().toInt();
 }
 
 function test_dyncall_by_value(): int {
-    let a = new A();
-    // this call is needed to fill dynamic call cache with wrong signature
-    let fake_res = a.getB().propVar.foo(5) as int;
-    return foo(1) as int;
+    let a = classA.instantiate();
+    return foo.invoke(1).toNumber().toInt();
 }

@@ -14,6 +14,7 @@
  */
 
 //! CHECKER      Check overflow check in BoundsAnalysis
+//! SKIP_IF      @architecture == "arm32"
 //! RUN          force_jit: true, options: "--compiler-inlining=false", entry: "bounds_analysis_overflow.ETSGLOBAL::main"
 //! EVENT        /Exception,bounds_analysis_overflow.ETSGLOBAL::crash,.*,ARITHMETIC/
 //! METHOD       "bounds_analysis_overflow.ETSGLOBAL::crash"
@@ -33,10 +34,10 @@ function main(): int {
     let long_max = x - 1 + x
     try {
         let res = crash(long_max);
-    } catch (e: ArithmeticError) {
-        return 0;
     } catch (e) {
-        return 2;
+      if (e instanceof ArithmeticError) {
+        return 0;
+      }
     }
     return 1;
 }

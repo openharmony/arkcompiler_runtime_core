@@ -16,8 +16,8 @@
 #include "runtime/compiler.h"
 
 #include "intrinsics.h"
-#include "libpandafile/bytecode_instruction.h"
-#include "libpandafile/type_helper.h"
+#include "libarkfile/bytecode_instruction.h"
+#include "libarkfile/type_helper.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/runtime_interface.h"
 #include "runtime/cha.h"
@@ -27,6 +27,7 @@
 #include "runtime/include/field.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
+#include "runtime/include/thread_scopes.h"
 #include "runtime/include/coretypes/native_pointer.h"
 #include "runtime/mem/heap_manager.h"
 #include "runtime/mem/refstorage/reference.h"
@@ -62,6 +63,29 @@ bool PandaRuntimeInterface::IsGcValidForFastPath(SourceLanguage lang) const
     }
     auto gcType = runtime->GetGCType(runtime->GetOptions(), lang);
     return gcType == mem::GCType::G1_GC;
+}
+
+uint32_t PandaRuntimeInterface::GetAOTBinaryFileSnapshotIndexForMethod(MethodPtr method) const
+{
+    const auto *pfile = const_cast<panda_file::File *>(MethodCast(method)->GetPandaFile());
+    return panda_file::File::FILE_INDEX_BASE_OFFSET +
+           Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->GetPandaFileSnapshotIndex(
+               pfile->GetFullFileName());
+}
+
+compiler::RuntimeInterface::BinaryFilePtr PandaRuntimeInterface::GetAOTBinaryFileBySnapshotIndex(uint32_t index) const
+{
+    ASSERT(index != panda_file::File::INVALID_FILE_INDEX);
+    index -= panda_file::File::FILE_INDEX_BASE_OFFSET;
+    auto pfile = Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->GetPandaFileBySnapshotIndex(index);
+    return const_cast<BinaryFilePtr>(reinterpret_cast<const void *>(pfile));
+}
+
+uint32_t PandaRuntimeInterface::GetAOTBinaryFileSnapshotIndex(BinaryFilePtr file) const
+{
+    return panda_file::File::FILE_INDEX_BASE_OFFSET +
+           Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->GetPandaFileSnapshotIndex(
+               reinterpret_cast<const panda_file::File *>(file)->GetFullFileName());
 }
 
 compiler::RuntimeInterface::MethodId PandaRuntimeInterface::ResolveMethodIndex(MethodPtr parentMethod,
@@ -251,6 +275,14 @@ bool PandaRuntimeInterface::IsStringClass(MethodPtr method, IdType id) const
         return false;
     }
     return ClassCast(cls)->IsStringClass();
+}
+
+bool PandaRuntimeInterface::IsStringClass(ClassPtr klass) const
+{
+    if (klass == nullptr) {
+        return false;
+    }
+    return ClassCast(klass)->IsStringClass();
 }
 
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayElementClass(ClassPtr cls) const
@@ -949,6 +981,9 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr,
         AddTask(std::move(ctx), func);
     }
     if (noAsyncJit_) {
+        // Change thread status to release mutator lock, in case JIT thread needs to invalidate compiled code
+        ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_COMPILER_WAITING);
+
         auto status = method->GetCompilationStatus();
         for (; (status == Method::WAITING) || (status == Method::COMPILATION);
              status = method->GetCompilationStatus()) {
@@ -1042,6 +1077,25 @@ ObjectPointerType PandaRuntimeInterface::GetNonMovableString(MethodPtr method, S
     auto vm = Runtime::GetCurrent()->GetPandaVM();
     auto pf = MethodCast(method)->GetPandaFile();
     return ToObjPtrType(vm->GetNonMovableString(*pf, panda_file::File::EntityId {id}));
+}
+
+bool PandaRuntimeInterface::CanUseStringFlatCheck() const
+{
+    if (!IsUseAllStrings()) {
+        // No need StringFlatCheck since TreeString is disabled
+        return false;
+    }
+
+    auto ctx = Runtime::GetCurrent()->GetPandaVM()->GetLanguageContext();
+    // If StringFlatCheck is inserted it replaces all usages.
+    // It can break code in case of reference comparison.
+    // So value equality semantic is required for operator '=='
+    return ctx.HasValueEqualitySemantic();
+}
+
+bool PandaRuntimeInterface::IsUseAllStrings() const
+{
+    return Runtime::GetOptions().IsUseAllStrings();
 }
 
 #ifndef PANDA_PRODUCT_BUILD

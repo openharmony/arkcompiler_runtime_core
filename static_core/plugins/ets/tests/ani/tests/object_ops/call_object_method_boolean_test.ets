@@ -97,3 +97,34 @@ class E extends D {
         }
     }
 }
+
+let parentMethodInParentWasCalled: int = 1;
+let childMethodInChildWasCalled: int = 2;
+let overridedMethodInChildWasCalled: int = 3;
+let overridedMethodInParentWasCalled: int = 4;
+
+class Parent {
+    methodChecker: int = 0;
+    getCheckerValue(): int {
+        return this.methodChecker;
+    }
+
+    parentMethod(): boolean {
+        this.methodChecker = parentMethodInParentWasCalled;
+        return true;
+    }
+    overridedMethod(): boolean {
+        this.methodChecker = overridedMethodInParentWasCalled;
+        return true;
+    }
+}
+class Child extends Parent {
+    childMethod(): boolean {
+        this.methodChecker = childMethodInChildWasCalled;
+        return true;
+    }
+    overridedMethod(): boolean {
+        this.methodChecker = overridedMethodInChildWasCalled;
+        return true;
+    }
+}

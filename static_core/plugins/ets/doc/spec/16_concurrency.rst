@@ -38,6 +38,16 @@ multimedia processing, data analysis, simulation, modelling, databases etc.).
 Providing support to a number of asynchronous APIs at different levels
 is also crucial.
 
+.. index::
+   hardware
+   core
+   performance
+   data analysis
+   multimedia processing
+   simulation
+   modelling
+   database
+
 |
 
 .. _Concurrency Subsystem Overview:
@@ -75,6 +85,15 @@ following:
 4. Synchronization primitives and "thread"-safe containers in
    :ref:`Standard Library`.
 
+.. index::
+   concurrency
+   asynchronous programming
+   coroutine
+   shared memory
+   functionality
+   parallel-run coroutine
+   structured concurrency
+   synchronization
 
 |
 
@@ -96,13 +115,16 @@ Asynchronous API
 .. meta:
     frontend_status: Done
 
-``Async`` functions are implicit coroutines that can be called as regular
-functions. ``Async`` functions cannot be called in static initializers,
-including top-scope. ``Async`` functions can be neither ``abstract`` nor
-``native``.
+``Async`` functions are coroutines (i.e., functions which can be suspended and
+resumed later) that can be called as regular functions.
+A :index:`compile-time error` occurs if:
 
-The return type of an ``async`` function must be ``Promise<T>``. It is
-a library type discussed in detail in the |LANG| Concurrency Specification.
+- ``Async`` function is called in a static initializer, including module scope;
+- ``Async`` function has an ``abstract`` or a ``native`` modifier;
+- Return type of an ``async`` function is other than ``Promise<T>``.
+
+Type ``Promise<T>`` is a library type discussed in detail in the |LANG| 
+Concurrency Specification.
 
 The returning values of both type ``Promise<T>`` and type ``T`` are allowed
 inside the ``async`` function body (see :ref:`Return Type Inference`).
@@ -117,9 +139,12 @@ with the return ``Promise<void>``.
 supported for the sake of backward |TS| compatibility only.
 
 .. index::
-   function async
+   async function
    coroutine
    return type
+   static initializer
+   abstract function
+   native function
    function body
    backward compatibility
    annotation
@@ -145,6 +170,9 @@ is an implicit coroutine that can be called as a regular lambda.
 
 .. index::
    async lambda
+   async modifier
+   lambda expression
+   coroutine
 
 |
 
@@ -163,26 +191,49 @@ is an implicit coroutine that can be called as a regular method.
 
 .. index::
    async method
+   class method
+   async modifier
+   method declaration
+   coroutine
 
 |
 
-.. _await:
+.. _await Expression:
 
-await
-=====
+``await``
+=========
 
 .. meta:
     frontend_status: Done
+
+The syntax of *await expression* is presented below:
+
+.. code-block:: abnf
+
+    awaitExpression:
+        'await' expression
+        ;
+
+The expression is a subtype of :ref:`Promise<Concurrency Promise Class>`.
+If expression is `Promise<T>`, then type of *awaitExpression* is `Awaited<T>`.
 
 ``await`` is used to wait for :ref:`Promise<Concurrency Promise Class>`
 
 If ``Promise`` not resolved, then the current coroutine is suspended until
 it is resolved.
 
-If :ref:'Promise<Concurrency Promise Class>' is rejected, then the reason of
+If :ref:`Promise<Concurrency Promise Class>` is rejected, then the reason of
 the rejection is thrown.
 
 Using ``await`` outside of :ref:`async functions<async functions>` is forbidden.
+
+.. index::
+   syntax
+   await expression
+   subtype
+   expression
+   resolution
+   async function
 
 |
 
@@ -200,11 +251,24 @@ semantics of ``Promise`` is similar to the semantics of ``Promise`` in |JS|/|TS|
 if it is used in the context of a single coroutine.
 
 ``Promise object`` represents the values returned by the call of an ``async``
-function. ``Promise object`` is defined in the :ref:`Standard Library` and thus
-it can be used without any qualification.
+function. ``Promise object`` can be used without any qualification as it is
+defined in the :ref:`Standard Library`.
 
 The ``Promise`` lifetime is not limited to the lifetime of the root coroutine
 as it is created.
+
+.. index::
+   promise object
+   asynchronous API
+   asynchronous operation
+   API
+   semantics
+   proxy
+   coroutine
+   context
+   async function
+   qualification
+   root coroutine
 
 ``Promise`` is not in general designed to be used concurrently and
 simultaneously from multiple coroutines. However, it is safe to do
@@ -230,43 +294,41 @@ The methods are used as follows:
    The callback is called on the coroutine when ``then`` called, and if
    ``Promise`` is passed from one coroutine to another and called ``then`` in
    both, then they are called in different coroutines (possibly concurrently).
-   The developer must take care of possible data races.
+   The developer must consider a possible data race, and take appropriate care.
 
 .. index::
-   class
-   value
-   launch
+   coroutine
+   custom synchronization
+   method
    argument
    callback
-   standard library
-   method
+   concurrency
+   data race
 
 ..
-        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
+        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
 
 .. code-block:: typescript
 
-        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
+        Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<Awaited<U|E>>
 
--  ``catch`` takes one argument(the callback called after promise is rejected) and returns ``Promise<U|T>``
+-  ``catch`` takes one argument (the callback called after promise is rejected) and returns ``Promise<Awaited<U|T>>``
 
 .. code-block-meta:
 
 .. code-block:: typescript
 
-        Promise<U>::catch<U = never>(onRejected?: (error: NullishType) => U|PromiseLike<U> throws): Promise<T|U>
+        Promise<U>::catch<U = never>(onRejected?: (error: Any) => U|PromiseLike<U> throws): Promise<Awaited<T | U>>
 
 -  ``finally`` takes one argument (the callback called after ``promise`` is
-   either fulfilled or rejected) and returns ``Promise<T>``.
+   either fulfilled or rejected) and returns ``Promise<Awaited<T>>``.
 
-.. index::
-   alias
-   callback
-   call
 
 .. code-block:: typescript
 
-        finally(onFinally?: () => void throws): Promise<T>
+        finally(onFinally?: () => void throws): Promise<Awaited<T>>
+
+|
 
 .. _Unhandled Rejected Promises:
 
@@ -280,6 +342,14 @@ In case of an unhandled rejection of ``Promise``, either the custom handler
 provided for ``Promise`` rejection is called, or the default ``Promise``
 rejection handler is called upon the entire program completion.
 
+.. index::
+   unhandled promise
+   rejected promise
+   unhandled rejection
+   rejection handler
+   call
+   program completion
+
 |
 
 .. _Coroutines (Experimental):
@@ -291,14 +361,21 @@ Coroutines (Experimental)
 .. meta:
     frontend_status: Done
 
-A function or lambda can be a *coroutine*. |LANG| supports *basic coroutines*,
-*structured coroutines*.
-Basic coroutines are used to create and launch a coroutine. The result is then
+A function or lambda can be a *coroutine*. |LANG| supports *basic coroutines*
+and *structured coroutines*.
+*Basic coroutines* are used to create and launch a coroutine. The result is then
 to be awaited. Details are provided in :ref:`Standard Library`.
 
 .. index::
+   function
+   lambda
    structured coroutine
    basic coroutine
    coroutine
 
 |
+
+
+.. raw:: pdf
+
+   PageBreak

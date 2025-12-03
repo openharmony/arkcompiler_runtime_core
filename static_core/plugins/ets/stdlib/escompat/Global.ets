@@ -34,6 +34,17 @@ export const Infinity: number;
  *
  * @returns result of parsing
  */
+export function parseInt(s: String): number {
+    return Double.parseInt(s);
+}
+
+/**
+ * Parses integer number from `String` with specified radix
+ *
+ * This function is an equivalent to @link{<Double.parseInt(s, radix)>}
+ *
+ * @returns result of parsing
+ */
 export function parseInt(s: String, radix: int): number {
     return Double.parseInt(s, radix);
 }
@@ -47,17 +58,6 @@ export function parseInt(s: String, radix: int): number {
  */
 export function parseInt(s: String, radix: number): number {
     return Double.parseInt(s, radix);
-}
-
-/**
- * Parses integer number from `String` with specified radix
- *
- * This function is an equivalent to @link{<Double.parseInt(s, radix)>}
- *
- * @returns result of parsing
- */
-export function parseInt(s: String): number {
-    return Double.parseInt(s);
 }
 
 /**
@@ -304,10 +304,10 @@ export function setTimeout(func: Function): int {
  *
  * @param { Function } func - the function to be executed after the timer expires.
  * @param { int | null | undefined}  delayMs - timeout in milliseconds, if pass null or undefined will be treated as 0 milliseconds.
- * @param { ...NullishType } args - parameters passed to func.
+ * @param { ...Any } args - parameters passed to func.
  * @returns { int } timer id
  */
-export function setTimeout(func: Function, delayMs: int | null | undefined, ...args: FixedArray<NullishType>): int {
+export function setTimeout(func: Function, delayMs: int | null | undefined, ...args: FixedArray<Any>): int {
     if (delayMs) {
         return startTimer((): void => { func.unsafeCall(...args) }, delayMs, false);
     } else {
@@ -346,24 +346,14 @@ export function clearTimeout(timerId?: int | null): void {
 }
 
 /**
- * Repeatedly do asynchronous call of the function.
- *
- * @param { Function } func - the function to be executed.
- * @returns { int } timer id
- */
-export function setInterval(func: Function): int {
-    return setInterval(func, 0);
-}
-
-/**
  * Repeatedly call the function with delayMs interval between calls. The first call will be after delayMs.
  *
  * @param { Function } func - the function to be executed.
  * @param { int | null | undefined} delayMs - timeout in milliseconds, if pass null or undefined will be treated as 0 milliseconds.
- * @param { ...NullishType } args - parameters passed to func.
+ * @param { ...Any } args - parameters passed to func.
  * @returns { int } - timer id
  */
-export function setInterval(func: Function, delayMs: int | null | undefined, ...args: FixedArray<NullishType>): int {
+export function setInterval(func: Function, delayMs: int | null | undefined, ...args: FixedArray<Any>): int {
     if (delayMs) {
         return startTimer((): void => { func.unsafeCall(...args) }, delayMs, true);
     } else {

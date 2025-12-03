@@ -20,11 +20,19 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ani/ani_options.cpp
     ${ETS_EXT_SOURCES}/ani/ani_options_parser.cpp
     ${ETS_EXT_SOURCES}/ani/ani_vm_api.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/ani_verifier.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/env_ani_verifier.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/types/venv.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/types/vmethod.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/verify_ani_checker.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/verify_ani_interaction_api.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/verify_ani_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_annotation.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_context.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_extension.cpp
     ${ETS_EXT_SOURCES}/ets_exceptions.cpp
+    ${ETS_EXT_SOURCES}/ets_itable_builder.cpp
     ${ETS_EXT_SOURCES}/ets_language_context.cpp
     ${ETS_EXT_SOURCES}/ets_napi_env.cpp
     ${ETS_EXT_SOURCES}/ets_native_library.cpp
@@ -33,22 +41,24 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_namespace_manager_impl.cpp
     ${ETS_EXT_SOURCES}/ets_platform_types.cpp
     ${ETS_EXT_SOURCES}/ets_runtime_interface.cpp
-    ${ETS_EXT_SOURCES}/ets_vm.cpp
+    ${ETS_EXT_SOURCES}/ets_stdlib_cache.cpp
     ${ETS_EXT_SOURCES}/ets_stubs.cpp
+    ${ETS_EXT_SOURCES}/ets_vm.cpp
+    ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
+    ${ETS_EXT_SOURCES}/integrate/ark_vm_api.cpp
     ${ETS_EXT_SOURCES}/integrate/ets_ani_expo.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core.cpp
-    ${ETS_EXT_SOURCES}/ets_itable_builder.cpp
-    ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Array.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_ArrayBuffer.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_TypedArrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_JSON.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_JSON.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Reflect.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Map.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_Set.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_containers_WeakMap.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Set.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/debugger_api.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AniHelpers.cpp
@@ -79,27 +89,33 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_Field.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_reflect_internals.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Job.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Timers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Launch.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
     ${ETS_EXT_SOURCES}/intrinsics/unsafe_memory.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/dtoa_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/array_buffer_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_intrinsics_helpers.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/reflection_helpers.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_string_helpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_to_string_cache.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/json_helper.cpp
     ${ETS_EXT_SOURCES}/finalreg/finalization_registry_manager.cpp
     ${ETS_EXT_SOURCES}/unhandled_manager/unhandled_object_manager.cpp
+    ${ETS_EXT_SOURCES}/main_worker_external_scheduler.cpp
     ${ETS_EXT_SOURCES}/mem/ets_gc_stat.cpp
     ${ETS_EXT_SOURCES}/mem/ets_reference_processor.cpp
     ${ETS_EXT_SOURCES}/ani/ani_helpers.cpp
     ${ETS_EXT_SOURCES}/ets_coroutine.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
+    ${ETS_EXT_SOURCES}/types/ets_arraybuffer.cpp
+    ${ETS_EXT_SOURCES}/types/ets_escompat_array.cpp
     ${ETS_EXT_SOURCES}/types/ets_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
@@ -115,10 +131,11 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_reflect_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_parameter.cpp
     ${ETS_EXT_SOURCES}/types/ets_waiters_list.cpp
-    ${ETS_EXT_SOURCES}/types/ets_weak_reference.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_job.cpp
     ${ETS_EXT_SOURCES}/types/ets_map.cpp
+    ${ETS_EXT_SOURCES}/types/ets_finreg_node.cpp
+    ${ETS_EXT_SOURCES}/types/ets_finalization_registry.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_utils.cpp
     ${ETS_EXT_SOURCES}/ets_object_state_info.cpp
@@ -127,11 +144,10 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/static_type_converter.cpp
     ${ETS_EXT_SOURCES}/entrypoints/ets_proxy_entrypoints.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/RegExp.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/regexp/regexp.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/regexp/regexp_16.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/regexp/regexp_8.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/RegExp.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_executor.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_16.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_8.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/etsstdlib.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/Intl.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCommon.cpp
@@ -151,6 +167,7 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDisplayNames.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlRelativeTimeFormat.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLanguageTag.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/Process.cpp
 )
 
 get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)
@@ -219,10 +236,12 @@ set(IRTOC_ETS_SCRIPTS ${PANDA_ROOT}/plugins/ets/irtoc_scripts)
 set(IRTOC_ETS_SCRIPTS ${IRTOC_ETS_SCRIPTS} PARENT_SCOPE)
 if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
     irtoc_compile(TARGET_NAME irtoc_ets_fastpath
-                  INPUT_FILES ${IRTOC_ETS_SCRIPTS}/to_string_cache.irt
+                  # Workaround for #30178: file order of arrays.irt and escompat_array.irt are changed
+                  INPUT_FILES ${IRTOC_ETS_SCRIPTS}/escompat_array.irt
+                              ${IRTOC_ETS_SCRIPTS}/to_string_cache.irt
                               ${IRTOC_ETS_SCRIPTS}/typed_arrays.irt
-                              ${IRTOC_ETS_SCRIPTS}/map.irt
-                              ${IRTOC_ETS_SCRIPTS}/set.irt
+                              ${IRTOC_ETS_SCRIPTS}/arrays.irt
+                              ${IRTOC_ETS_SCRIPTS}/runtime.irt
                   TARGET_VARIABLE IRTOC_ETS_FASTPATH_OBJ
                   TARGET_VARIABLE_LLVM IRTOC_ETS_FASTPATH_LLVM_OBJ)
 
@@ -269,3 +288,5 @@ endif()
 
 panda_target_sources(arkruntime_interpreter_static PRIVATE ${IRTOC_ETS_FASTPATH_OBJ} ${IRTOC_ETS_LLVM_OBJECTS})
 panda_target_sources(arkruntime_static PRIVATE ${IRTOC_ETS_FASTPATH_OBJ} ${IRTOC_ETS_LLVM_OBJECTS})
+
+panda_target_link_libraries(arkruntime_obj ani_interface)

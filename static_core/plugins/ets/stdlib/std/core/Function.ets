@@ -40,25 +40,114 @@ export abstract class LambdaN implements FunctionN<Any> {
     }
 }
 
+// Implementation body for the Runtime.lambdaUnsafeCallStub
+function __lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
+    let arity: int = r.length
+    if (arity > 16) { throw new Error("Internal arity exceeds threshold") }
+    switch (arity) {
+        case 0:
+            if (!(fn instanceof FunctionR0)) { break }
+            return (fn as FunctionR0<Any, Any>)
+                .invokeR0(
+                r)
+        case 1:
+            if (!(fn instanceof FunctionR1)) { break }
+            return (fn as FunctionR1<Any, Any, Any>)
+                .invokeR1(r[0],
+                ...Runtime.removeFrontElementsStub(r, 1))
+        case 2:
+            if (!(fn instanceof FunctionR2)) { break }
+            return (fn as FunctionR2<Any, Any, Any, Any>)
+                .invokeR2(r[0], r[1],
+                ...Runtime.removeFrontElementsStub(r, 2))
+        case 3:
+            if (!(fn instanceof FunctionR3)) { break }
+            return (fn as FunctionR3<Any, Any, Any, Any, Any>)
+                .invokeR3(r[0], r[1], r[2],
+                ...Runtime.removeFrontElementsStub(r, 3))
+        case 4:
+            if (!(fn instanceof FunctionR4)) { break }
+            return (fn as FunctionR4<Any, Any, Any, Any, Any, Any>)
+                .invokeR4(r[0], r[1], r[2], r[3],
+                ...Runtime.removeFrontElementsStub(r, 4))
+        case 5:
+            if (!(fn instanceof FunctionR5)) { break }
+            return (fn as FunctionR5<Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR5(r[0], r[1], r[2], r[3], r[4],
+                ...Runtime.removeFrontElementsStub(r, 5))
+        case 6:
+            if (!(fn instanceof FunctionR6)) { break }
+            return (fn as FunctionR6<Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR6(r[0], r[1], r[2], r[3], r[4], r[5],
+                ...Runtime.removeFrontElementsStub(r, 6))
+        case 7:
+            if (!(fn instanceof FunctionR7)) { break }
+            return (fn as FunctionR7<Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR7(r[0], r[1], r[2], r[3], r[4], r[5], r[6],
+                ...Runtime.removeFrontElementsStub(r, 7))
+        case 8:
+            if (!(fn instanceof FunctionR8)) { break }
+            return (fn as FunctionR8<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7],
+                ...Runtime.removeFrontElementsStub(r, 8))
+        case 9:
+            if (!(fn instanceof FunctionR9)) { break }
+            return (fn as FunctionR9<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8],
+                ...Runtime.removeFrontElementsStub(r, 9))
+        case 10:
+            if (!(fn instanceof FunctionR10)) { break }
+            return (fn as FunctionR10<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9],
+                ...Runtime.removeFrontElementsStub(r, 10))
+        case 11:
+            if (!(fn instanceof FunctionR11)) { break }
+            return (fn as FunctionR11<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10],
+                ...Runtime.removeFrontElementsStub(r, 11))
+        case 12:
+            if (!(fn instanceof FunctionR12)) { break }
+            return (fn as FunctionR12<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11],
+                ...Runtime.removeFrontElementsStub(r, 12))
+        case 13:
+            if (!(fn instanceof FunctionR13)) { break }
+            return (fn as FunctionR13<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12],
+                ...Runtime.removeFrontElementsStub(r, 13))
+        case 14:
+            if (!(fn instanceof FunctionR14)) { break }
+            return (fn as FunctionR14<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13],
+                ...Runtime.removeFrontElementsStub(r, 14))
+        case 15:
+            if (!(fn instanceof FunctionR15)) { break }
+            return (fn as FunctionR15<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14],
+                ...Runtime.removeFrontElementsStub(r, 15))
+        case 16:
+            if (!(fn instanceof FunctionR16)) { break }
+            return (fn as FunctionR16<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>)
+                .invokeR16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15],
+                ...Runtime.removeFrontElementsStub(r, 16))
+    }
+    throw new ArgumentsUnderapplicationError()
+}
+
 
 export interface FunctionR0<in PR, out R>
-    extends Function, __FunctionR1
+    extends Function, FunctionR1<Any, Any, Any>
 {
-    invokeR0(...r: FixedArray<PR>): R;
+    invokeR0(...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function0<out R>
-    extends FunctionR0<Any, R>, __Function1
+    extends FunctionR0<Any, R>, Function1<Any, Any>
 {
     invoke0(): R;
 }
-export interface __FunctionR0 extends FunctionR0<Any, Any> {}
-export interface __Function0 extends Function0<Any> {}
-export abstract class LambdaR0 implements __FunctionR0 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR0<in PR, out R>
+    implements FunctionR0<PR, R> {
     abstract invokeR0(...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
         return this.invokeR0(...r)
@@ -127,16 +216,14 @@ export abstract class LambdaR0 implements __FunctionR0 {
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda0 implements __Function0 {
+export abstract class Lambda0<out R>
+    implements Function0<R> {
     abstract invoke0(): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 0) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 0) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke0()
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke1 (p1: Any): Any {
         return this.invoke0()
@@ -237,29 +324,25 @@ export abstract class Lambda0 implements __Function0 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke0()
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR1<in P1, in PR, out R>
-    extends Function, __FunctionR2
+    extends Function, FunctionR2<Any, Any, Any, Any>
 {
-    invokeR1(p1: P1, ...r: FixedArray<PR>): R;
+    invokeR1(p1: P1, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function1<in P1, out R>
-    extends FunctionR1<P1, Any, R>, __Function2
+    extends FunctionR1<P1, Any, R>, Function2<Any, Any, Any>
 {
     invoke1(p1: P1): R;
 }
-export interface __FunctionR1 extends FunctionR1<Any, Any, Any> {}
-export interface __Function1 extends Function1<Any, Any> {}
-export abstract class LambdaR1 implements __FunctionR1 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR1<in P1, in PR, out R>
+    implements FunctionR1<P1, PR, R> {
     abstract invokeR1(p1: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 1) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 1) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR1(r[0], 
             ...Runtime.removeFrontElementsStub(r, 1))
     }
@@ -323,16 +406,14 @@ export abstract class LambdaR1 implements __FunctionR1 {
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda1 implements __Function1 {
+export abstract class Lambda1<in P1, out R>
+    implements Function1<P1, R> {
     abstract invoke1(p1: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 1) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 1) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke1(r[0])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke2 (p1: Any, p2: Any): Any {
         return this.invoke1(p1)
@@ -427,29 +508,25 @@ export abstract class Lambda1 implements __Function1 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke1(p1)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR2<in P1, in P2, in PR, out R>
-    extends Function, __FunctionR3
+    extends Function, FunctionR3<Any, Any, Any, Any, Any>
 {
-    invokeR2(p1: P1, p2: P2, ...r: FixedArray<PR>): R;
+    invokeR2(p1: P1, p2: P2, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function2<in P1, in P2, out R>
-    extends FunctionR2<P1, P2, Any, R>, __Function3
+    extends FunctionR2<P1, P2, Any, R>, Function3<Any, Any, Any, Any>
 {
     invoke2(p1: P1, p2: P2): R;
 }
-export interface __FunctionR2 extends FunctionR2<Any, Any, Any, Any> {}
-export interface __Function2 extends Function2<Any, Any, Any> {}
-export abstract class LambdaR2 implements __FunctionR2 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR2<in P1, in P2, in PR, out R>
+    implements FunctionR2<P1, P2, PR, R> {
     abstract invokeR2(p1: Any, p2: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 2) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 2) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR2(r[0], r[1], 
             ...Runtime.removeFrontElementsStub(r, 2))
     }
@@ -509,16 +586,14 @@ export abstract class LambdaR2 implements __FunctionR2 {
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda2 implements __Function2 {
+export abstract class Lambda2<in P1, in P2, out R>
+    implements Function2<P1, P2, R> {
     abstract invoke2(p1: Any, p2: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 2) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 2) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke2(r[0], r[1])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke3 (p1: Any, p2: Any, p3: Any): Any {
         return this.invoke2(p1, p2)
@@ -607,29 +682,25 @@ export abstract class Lambda2 implements __Function2 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke2(p1, p2)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR3<in P1, in P2, in P3, in PR, out R>
-    extends Function, __FunctionR4
+    extends Function, FunctionR4<Any, Any, Any, Any, Any, Any>
 {
-    invokeR3(p1: P1, p2: P2, p3: P3, ...r: FixedArray<PR>): R;
+    invokeR3(p1: P1, p2: P2, p3: P3, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function3<in P1, in P2, in P3, out R>
-    extends FunctionR3<P1, P2, P3, Any, R>, __Function4
+    extends FunctionR3<P1, P2, P3, Any, R>, Function4<Any, Any, Any, Any, Any>
 {
     invoke3(p1: P1, p2: P2, p3: P3): R;
 }
-export interface __FunctionR3 extends FunctionR3<Any, Any, Any, Any, Any> {}
-export interface __Function3 extends Function3<Any, Any, Any, Any> {}
-export abstract class LambdaR3 implements __FunctionR3 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR3<in P1, in P2, in P3, in PR, out R>
+    implements FunctionR3<P1, P2, P3, PR, R> {
     abstract invokeR3(p1: Any, p2: Any, p3: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 3) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 3) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR3(r[0], r[1], r[2], 
             ...Runtime.removeFrontElementsStub(r, 3))
     }
@@ -685,16 +756,14 @@ export abstract class LambdaR3 implements __FunctionR3 {
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda3 implements __Function3 {
+export abstract class Lambda3<in P1, in P2, in P3, out R>
+    implements Function3<P1, P2, P3, R> {
     abstract invoke3(p1: Any, p2: Any, p3: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 3) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 3) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke3(r[0], r[1], r[2])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke4 (p1: Any, p2: Any, p3: Any, p4: Any): Any {
         return this.invoke3(p1, p2, p3)
@@ -777,29 +846,25 @@ export abstract class Lambda3 implements __Function3 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke3(p1, p2, p3)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR4<in P1, in P2, in P3, in P4, in PR, out R>
-    extends Function, __FunctionR5
+    extends Function, FunctionR5<Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR4(p1: P1, p2: P2, p3: P3, p4: P4, ...r: FixedArray<PR>): R;
+    invokeR4(p1: P1, p2: P2, p3: P3, p4: P4, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function4<in P1, in P2, in P3, in P4, out R>
-    extends FunctionR4<P1, P2, P3, P4, Any, R>, __Function5
+    extends FunctionR4<P1, P2, P3, P4, Any, R>, Function5<Any, Any, Any, Any, Any, Any>
 {
     invoke4(p1: P1, p2: P2, p3: P3, p4: P4): R;
 }
-export interface __FunctionR4 extends FunctionR4<Any, Any, Any, Any, Any, Any> {}
-export interface __Function4 extends Function4<Any, Any, Any, Any, Any> {}
-export abstract class LambdaR4 implements __FunctionR4 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR4<in P1, in P2, in P3, in P4, in PR, out R>
+    implements FunctionR4<P1, P2, P3, P4, PR, R> {
     abstract invokeR4(p1: Any, p2: Any, p3: Any, p4: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 4) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 4) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR4(r[0], r[1], r[2], r[3], 
             ...Runtime.removeFrontElementsStub(r, 4))
     }
@@ -851,16 +916,14 @@ export abstract class LambdaR4 implements __FunctionR4 {
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda4 implements __Function4 {
+export abstract class Lambda4<in P1, in P2, in P3, in P4, out R>
+    implements Function4<P1, P2, P3, P4, R> {
     abstract invoke4(p1: Any, p2: Any, p3: Any, p4: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 4) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 4) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke4(r[0], r[1], r[2], r[3])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke5 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): Any {
         return this.invoke4(p1, p2, p3, p4)
@@ -937,29 +1000,25 @@ export abstract class Lambda4 implements __Function4 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke4(p1, p2, p3, p4)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR5<in P1, in P2, in P3, in P4, in P5, in PR, out R>
-    extends Function, __FunctionR6
+    extends Function, FunctionR6<Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR5(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, ...r: FixedArray<PR>): R;
+    invokeR5(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function5<in P1, in P2, in P3, in P4, in P5, out R>
-    extends FunctionR5<P1, P2, P3, P4, P5, Any, R>, __Function6
+    extends FunctionR5<P1, P2, P3, P4, P5, Any, R>, Function6<Any, Any, Any, Any, Any, Any, Any>
 {
     invoke5(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5): R;
 }
-export interface __FunctionR5 extends FunctionR5<Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function5 extends Function5<Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR5 implements __FunctionR5 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR5<in P1, in P2, in P3, in P4, in P5, in PR, out R>
+    implements FunctionR5<P1, P2, P3, P4, P5, PR, R> {
     abstract invokeR5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 5) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 5) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR5(r[0], r[1], r[2], r[3], r[4], 
             ...Runtime.removeFrontElementsStub(r, 5))
     }
@@ -1007,16 +1066,14 @@ export abstract class LambdaR5 implements __FunctionR5 {
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda5 implements __Function5 {
+export abstract class Lambda5<in P1, in P2, in P3, in P4, in P5, out R>
+    implements Function5<P1, P2, P3, P4, P5, R> {
     abstract invoke5(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 5) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 5) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke5(r[0], r[1], r[2], r[3], r[4])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke6 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any {
         return this.invoke5(p1, p2, p3, p4, p5)
@@ -1087,29 +1144,25 @@ export abstract class Lambda5 implements __Function5 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR6<in P1, in P2, in P3, in P4, in P5, in P6, in PR, out R>
-    extends Function, __FunctionR7
+    extends Function, FunctionR7<Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR6(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, ...r: FixedArray<PR>): R;
+    invokeR6(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
-    extends FunctionR6<P1, P2, P3, P4, P5, P6, Any, R>, __Function7
+    extends FunctionR6<P1, P2, P3, P4, P5, P6, Any, R>, Function7<Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke6(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6): R;
 }
-export interface __FunctionR6 extends FunctionR6<Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function6 extends Function6<Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR6 implements __FunctionR6 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR6<in P1, in P2, in P3, in P4, in P5, in P6, in PR, out R>
+    implements FunctionR6<P1, P2, P3, P4, P5, P6, PR, R> {
     abstract invokeR6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 6) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 6) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR6(r[0], r[1], r[2], r[3], r[4], r[5], 
             ...Runtime.removeFrontElementsStub(r, 6))
     }
@@ -1153,16 +1206,14 @@ export abstract class LambdaR6 implements __FunctionR6 {
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda6 implements __Function6 {
+export abstract class Lambda6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
+    implements Function6<P1, P2, P3, P4, P5, P6, R> {
     abstract invoke6(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 6) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 6) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke6(r[0], r[1], r[2], r[3], r[4], r[5])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke7 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
@@ -1227,29 +1278,25 @@ export abstract class Lambda6 implements __Function6 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in PR, out R>
-    extends Function, __FunctionR8
+    extends Function, FunctionR8<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR7(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, ...r: FixedArray<PR>): R;
+    invokeR7(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, out R>
-    extends FunctionR7<P1, P2, P3, P4, P5, P6, P7, Any, R>, __Function8
+    extends FunctionR7<P1, P2, P3, P4, P5, P6, P7, Any, R>, Function8<Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke7(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7): R;
 }
-export interface __FunctionR7 extends FunctionR7<Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function7 extends Function7<Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR7 implements __FunctionR7 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in PR, out R>
+    implements FunctionR7<P1, P2, P3, P4, P5, P6, P7, PR, R> {
     abstract invokeR7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 7) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 7) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR7(r[0], r[1], r[2], r[3], r[4], r[5], r[6], 
             ...Runtime.removeFrontElementsStub(r, 7))
     }
@@ -1289,16 +1336,14 @@ export abstract class LambdaR7 implements __FunctionR7 {
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda7 implements __Function7 {
+export abstract class Lambda7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, out R>
+    implements Function7<P1, P2, P3, P4, P5, P6, P7, R> {
     abstract invoke7(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 7) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 7) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke7(r[0], r[1], r[2], r[3], r[4], r[5], r[6])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke8 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
@@ -1357,29 +1402,25 @@ export abstract class Lambda7 implements __Function7 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in PR, out R>
-    extends Function, __FunctionR9
+    extends Function, FunctionR9<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR8(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, ...r: FixedArray<PR>): R;
+    invokeR8(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, out R>
-    extends FunctionR8<P1, P2, P3, P4, P5, P6, P7, P8, Any, R>, __Function9
+    extends FunctionR8<P1, P2, P3, P4, P5, P6, P7, P8, Any, R>, Function9<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke8(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8): R;
 }
-export interface __FunctionR8 extends FunctionR8<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function8 extends Function8<Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR8 implements __FunctionR8 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in PR, out R>
+    implements FunctionR8<P1, P2, P3, P4, P5, P6, P7, P8, PR, R> {
     abstract invokeR8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 8) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 8) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 
             ...Runtime.removeFrontElementsStub(r, 8))
     }
@@ -1415,16 +1456,14 @@ export abstract class LambdaR8 implements __FunctionR8 {
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda8 implements __Function8 {
+export abstract class Lambda8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, out R>
+    implements Function8<P1, P2, P3, P4, P5, P6, P7, P8, R> {
     abstract invoke8(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 8) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 8) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke8(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke9 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
@@ -1477,29 +1516,25 @@ export abstract class Lambda8 implements __Function8 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in PR, out R>
-    extends Function, __FunctionR10
+    extends Function, FunctionR10<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR9(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, ...r: FixedArray<PR>): R;
+    invokeR9(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, out R>
-    extends FunctionR9<P1, P2, P3, P4, P5, P6, P7, P8, P9, Any, R>, __Function10
+    extends FunctionR9<P1, P2, P3, P4, P5, P6, P7, P8, P9, Any, R>, Function10<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke9(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9): R;
 }
-export interface __FunctionR9 extends FunctionR9<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function9 extends Function9<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR9 implements __FunctionR9 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in PR, out R>
+    implements FunctionR9<P1, P2, P3, P4, P5, P6, P7, P8, P9, PR, R> {
     abstract invokeR9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 9) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 9) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], 
             ...Runtime.removeFrontElementsStub(r, 9))
     }
@@ -1531,16 +1566,14 @@ export abstract class LambdaR9 implements __FunctionR9 {
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda9 implements __Function9 {
+export abstract class Lambda9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, out R>
+    implements Function9<P1, P2, P3, P4, P5, P6, P7, P8, P9, R> {
     abstract invoke9(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 9) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 9) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke9(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke10 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
@@ -1587,29 +1620,25 @@ export abstract class Lambda9 implements __Function9 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in PR, out R>
-    extends Function, __FunctionR11
+    extends Function, FunctionR11<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR10(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, ...r: FixedArray<PR>): R;
+    invokeR10(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, out R>
-    extends FunctionR10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, Any, R>, __Function11
+    extends FunctionR10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, Any, R>, Function11<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke10(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10): R;
 }
-export interface __FunctionR10 extends FunctionR10<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function10 extends Function10<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR10 implements __FunctionR10 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in PR, out R>
+    implements FunctionR10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, PR, R> {
     abstract invokeR10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 10) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 10) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], 
             ...Runtime.removeFrontElementsStub(r, 10))
     }
@@ -1637,16 +1666,14 @@ export abstract class LambdaR10 implements __FunctionR10 {
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda10 implements __Function10 {
+export abstract class Lambda10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, out R>
+    implements Function10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, R> {
     abstract invoke10(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 10) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 10) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke10(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke11 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
@@ -1687,29 +1714,25 @@ export abstract class Lambda10 implements __Function10 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in PR, out R>
-    extends Function, __FunctionR12
+    extends Function, FunctionR12<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR11(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, ...r: FixedArray<PR>): R;
+    invokeR11(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, out R>
-    extends FunctionR11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, Any, R>, __Function12
+    extends FunctionR11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, Any, R>, Function12<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke11(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11): R;
 }
-export interface __FunctionR11 extends FunctionR11<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function11 extends Function11<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR11 implements __FunctionR11 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in PR, out R>
+    implements FunctionR11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, PR, R> {
     abstract invokeR11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 11) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 11) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], 
             ...Runtime.removeFrontElementsStub(r, 11))
     }
@@ -1733,16 +1756,14 @@ export abstract class LambdaR11 implements __FunctionR11 {
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda11 implements __Function11 {
+export abstract class Lambda11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, out R>
+    implements Function11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, R> {
     abstract invoke11(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 11) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 11) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke11(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke12 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
@@ -1777,29 +1798,25 @@ export abstract class Lambda11 implements __Function11 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in PR, out R>
-    extends Function, __FunctionR13
+    extends Function, FunctionR13<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR12(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, ...r: FixedArray<PR>): R;
+    invokeR12(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, out R>
-    extends FunctionR12<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, Any, R>, __Function13
+    extends FunctionR12<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, Any, R>, Function13<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke12(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12): R;
 }
-export interface __FunctionR12 extends FunctionR12<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function12 extends Function12<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR12 implements __FunctionR12 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in PR, out R>
+    implements FunctionR12<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, PR, R> {
     abstract invokeR12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 12) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 12) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], 
             ...Runtime.removeFrontElementsStub(r, 12))
     }
@@ -1819,16 +1836,14 @@ export abstract class LambdaR12 implements __FunctionR12 {
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13, p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda12 implements __Function12 {
+export abstract class Lambda12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, out R>
+    implements Function12<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, R> {
     abstract invoke12(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 12) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 12) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke12(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke13 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
@@ -1857,29 +1872,25 @@ export abstract class Lambda12 implements __Function12 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in PR, out R>
-    extends Function, __FunctionR14
+    extends Function, FunctionR14<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR13(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, ...r: FixedArray<PR>): R;
+    invokeR13(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, out R>
-    extends FunctionR13<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Any, R>, __Function14
+    extends FunctionR13<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Any, R>, Function14<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke13(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13): R;
 }
-export interface __FunctionR13 extends FunctionR13<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function13 extends Function13<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR13 implements __FunctionR13 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in PR, out R>
+    implements FunctionR13<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, PR, R> {
     abstract invokeR13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 13) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 13) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], 
             ...Runtime.removeFrontElementsStub(r, 13))
     }
@@ -1895,16 +1906,14 @@ export abstract class LambdaR13 implements __FunctionR13 {
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
             ...Runtime.addFrontElementsStub(r, [p14, p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda13 implements __Function13 {
+export abstract class Lambda13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, out R>
+    implements Function13<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, R> {
     abstract invoke13(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 13) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 13) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke13(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke14 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
@@ -1927,29 +1936,25 @@ export abstract class Lambda13 implements __Function13 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in PR, out R>
-    extends Function, __FunctionR15
+    extends Function, FunctionR15<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR14(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, ...r: FixedArray<PR>): R;
+    invokeR14(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, out R>
-    extends FunctionR14<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, Any, R>, __Function15
+    extends FunctionR14<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, Any, R>, Function15<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke14(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14): R;
 }
-export interface __FunctionR14 extends FunctionR14<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function14 extends Function14<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR14 implements __FunctionR14 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in PR, out R>
+    implements FunctionR14<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, PR, R> {
     abstract invokeR14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 14) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 14) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], 
             ...Runtime.removeFrontElementsStub(r, 14))
     }
@@ -1961,16 +1966,14 @@ export abstract class LambdaR14 implements __FunctionR14 {
         return this.invokeR14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, 
             ...Runtime.addFrontElementsStub(r, [p15, p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda14 implements __Function14 {
+export abstract class Lambda14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, out R>
+    implements Function14<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, R> {
     abstract invoke14(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 14) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 14) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke14(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke15 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
@@ -1987,29 +1990,25 @@ export abstract class Lambda14 implements __Function14 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in PR, out R>
-    extends Function, __FunctionR16
+    extends Function, FunctionR16<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
-    invokeR15(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, ...r: FixedArray<PR>): R;
+    invokeR15(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, out R>
-    extends FunctionR15<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, Any, R>, __Function16
+    extends FunctionR15<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, Any, R>, Function16<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any>
 {
     invoke15(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15): R;
 }
-export interface __FunctionR15 extends FunctionR15<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function15 extends Function15<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR15 implements __FunctionR15 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in PR, out R>
+    implements FunctionR15<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, PR, R> {
     abstract invokeR15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 15) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 15) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], 
             ...Runtime.removeFrontElementsStub(r, 15))
     }
@@ -2017,16 +2016,14 @@ export abstract class LambdaR15 implements __FunctionR15 {
         return this.invokeR15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, 
             ...Runtime.addFrontElementsStub(r, [p16]))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda15 implements __Function15 {
+export abstract class Lambda15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, out R>
+    implements Function15<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, R> {
     abstract invoke15(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 15) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 15) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke15(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invoke16 (p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any {
         return this.invoke15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
@@ -2037,45 +2034,40 @@ export abstract class Lambda15 implements __Function15 {
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 
 export interface FunctionR16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, in PR, out R>
     extends Function, FunctionN<Any>
 {
-    invokeR16(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16, ...r: FixedArray<PR>): R;
+    invokeR16(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16, ...r: FixedArray<@types.SkipVarianceCheckDontUseItWillBeRemoved PR>): R;
 }
 export interface Function16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, out R>
     extends FunctionR16<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, Any, R>
 {
     invoke16(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16): R;
 }
-export interface __FunctionR16 extends FunctionR16<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export interface __Function16 extends Function16<Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any> {}
-export abstract class LambdaR16 implements __FunctionR16 {
 
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
-    }
-
+export abstract class LambdaR16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, in PR, out R>
+    implements FunctionR16<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, PR, R> {
     abstract invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 16) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 16) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invokeR16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15], 
             ...Runtime.removeFrontElementsStub(r, 16))
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
-export abstract class Lambda16 implements __Function16 {
+export abstract class Lambda16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, out R>
+    implements Function16<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, R> {
     abstract invoke16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any): Any;
     final unsafeCall(...r: FixedArray<Any>): Any {
-        if (r.length < 16) { throw new ArgumentsUnderapplicationError() }
+        if (r.length < 16) { return Runtime.lambdaUnsafeCallStub(this, r) }
         return this.invoke16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15])
-    }
-
-    get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object)
     }
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): Any {
         return this.invoke16(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16)
     }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 

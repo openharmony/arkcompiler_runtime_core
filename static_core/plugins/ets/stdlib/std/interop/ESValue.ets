@@ -128,7 +128,16 @@ export final class ESValue {
     }
 
     public isNumber(): boolean {
-        return this.typeOf() == "number";
+        switch (this.typeOf()) {
+            case "byte":
+            case "short":
+            case "int":
+            case "long":
+            case "float":
+            case "number":
+                return true;
+        }
+        return false;
     }
 
     public isBigInt(): boolean {

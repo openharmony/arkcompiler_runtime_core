@@ -600,6 +600,27 @@ AbckitInst *IcreateLoadObject(AbckitGraph *graph, AbckitInst *inputObj, AbckitCo
     return DEFAULT_INST;
 }
 
+AbckitInst *IcreateStobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1, AbckitString *keyString)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(input0 == DEFAULT_INST);
+    EXPECT_TRUE(input1 == DEFAULT_INST);
+    EXPECT_TRUE(keyString == DEFAULT_STRING);
+    return DEFAULT_INST;
+}
+
+AbckitInst *IcreateLdobjObj(AbckitGraph *graph, AbckitInst *input0, AbckitString *keyString)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(input0 == DEFAULT_INST);
+    EXPECT_TRUE(keyString == DEFAULT_STRING);
+    return DEFAULT_INST;
+}
+
 AbckitIsaApiStatic g_isaApiStaticImpl = {
     IgetClass,
     IsetClass,
@@ -630,7 +651,6 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateNewArray,
     IcreateNewObject,
     IcreateInitObject,
-    IcreateLoadObject,
     IcreateStoreObject,
     IcreateLoadArray,
     IcreateStoreArray,
@@ -659,6 +679,9 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateThrow,
     IcreateIsUndefined,
     IcreateNullCheck,
+    IcreateLoadObject,
+    IcreateStobjObj,
+    IcreateLdobjObj,
 };
 
 // NOLINTEND(readability-identifier-naming)

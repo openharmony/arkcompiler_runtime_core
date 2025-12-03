@@ -17,7 +17,7 @@
 package generic_static.test;
 
 const stsInt = 1;
-type Union = int | string;
+type Union = int | string | number;
 interface IUser {
     num: int;
 }

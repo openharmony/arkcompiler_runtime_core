@@ -21,7 +21,7 @@
 
 function main(): void {
     // create object of exception class
-    let e: Exception = new Exception("test");
+    let e: Error = new Error("test");
 
     // adding a couple Full GC to be run without waiting for its completion
     // in order to have GC running during exception processing

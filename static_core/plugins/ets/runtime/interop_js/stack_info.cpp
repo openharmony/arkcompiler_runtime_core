@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/stack_info.h"
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "interop_js/napi_impl/napi_impl.h"

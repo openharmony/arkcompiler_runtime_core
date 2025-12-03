@@ -15,7 +15,7 @@
 
 #include "connection/server_endpoint_base.h"
 
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::tooling::inspector {
 

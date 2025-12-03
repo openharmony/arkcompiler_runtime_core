@@ -24,7 +24,7 @@
 #include "unicode/coll.h"
 #include "unicode/numberformatter.h"
 #include "unicode/unistr.h"
-#include "utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "plugins/ets/runtime/intrinsics/helpers/dtoa_helper.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 

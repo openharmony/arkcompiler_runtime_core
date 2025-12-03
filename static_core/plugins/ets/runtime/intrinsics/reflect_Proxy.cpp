@@ -17,7 +17,9 @@
 
 #include "plugins/ets/runtime/types/ets_typeapi_method.h"
 #include "plugins/ets/runtime/entrypoints/entrypoints.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_reflect_method.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/include/class-inl.h"
 
 namespace ark::ets::intrinsics {
@@ -55,26 +57,27 @@ static void CreateProxyMethod(Class *klass, EtsMethod *method, Method *out)
     EtsMethod::FromRuntimeMethod(out)->SetProxyPointer(method);
 }
 
-static Span<Method> GenerateMethods(EtsEscompatArray *methods, Class *klass, EtsClassLinkerExtension *classLinkerExt,
-                                    InternalAllocatorPtr allocator)
+static Span<Method> GenerateMethods(EtsHandle<EtsEscompatArray> &methods, Class *klass,
+                                    EtsClassLinkerExtension *classLinkerExt, InternalAllocatorPtr allocator)
 {
-    ASSERT(methods != nullptr);
     ASSERT(klass != nullptr);
     ASSERT(classLinkerExt != nullptr);
 
     size_t idx = 0;
 
     constexpr size_t NUM_OF_CONSTRUCTORS = 1U;
-    size_t numMethods = methods->GetActualLength() + NUM_OF_CONSTRUCTORS;
+    size_t numMethods = methods->GetActualLengthFromEscompatArray() + NUM_OF_CONSTRUCTORS;
     Span<Method> proxyMethods(allocator->AllocArray<Method>(numMethods), numMethods);
 
     CreateProxyConstructor(klass, classLinkerExt->GetPlatformTypes()->coreReflectProxyConstructor,
                            &proxyMethods[idx++]);
 
-    for (size_t i = 0; i < methods->GetActualLength(); ++i) {
-        EtsObject *methodObject = nullptr;
-        [[maybe_unused]] bool getRefSucc = methods->GetRef(i, &methodObject);
-        ASSERT(getRefSucc);
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
+    for (EtsInt i = 0; i < methods->GetActualLengthFromEscompatArray(); ++i) {
+        auto refOpt = methods->GetRef(coroutine, i);
+        ASSERT(refOpt.has_value());
+        EtsObject *methodObject = refOpt.value();
 
         auto reflectMethod = EtsReflectMethod::FromEtsObject(methodObject);
         auto *method = reflectMethod->GetEtsMethod();
@@ -138,8 +141,7 @@ extern "C" EtsClass *ReflectProxyGenerateProxy(EtsRuntimeLinker *linker, EtsStri
     tempKlass->SetAccessFlags(PROXY_CLASS_ACCESS_FLAGS);
 
     auto internalAllocator = coroutine->GetPandaVM()->GetHeapManager()->GetInternalAllocator();
-    Span<Method> generatedProxyMethods =
-        GenerateMethods(methodsH.GetPtr(), tempKlass, classLinkerExt, internalAllocator);
+    Span<Method> generatedProxyMethods = GenerateMethods(methodsH, tempKlass, classLinkerExt, internalAllocator);
     Span<Class *> proxyInterfaces = TrasformInterfaces(interfacesH.GetPtr(), internalAllocator);
 
     Class *baseProxyClass = classLinkerExt->GetPlatformTypes()->coreReflectProxy->GetRuntimeClass();

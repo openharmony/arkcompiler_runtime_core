@@ -528,7 +528,8 @@ function testXtsActsXml015() {
         }
         that.parseXml(options);
         arktest.assertTrue(false);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        e = e as BusinessError;
         try {
             arktest.assertEQ(e.toString(), "BusinessError: The node name contains invalid characters: <");
             arktest.assertEQ(e.code, 401);
@@ -561,13 +562,17 @@ function testXtsActsXml016() {
     try {
         pullParse.parseXml(options);
         arktest.assertTrue(false);
-    } catch (e: BusinessError) {
-        try {
-            arktest.assertEQ(e.toString(), "BusinessError: Cannot find the ']]>' in xml string.");
-            arktest.assertEQ(e.code, 401);
-        } catch (e) {
-            console.error(`testXtsActsXml016 failed, error: ${e}`);
-            LogStack(e);
+    } catch (e) {
+        if (e instanceof BusinessError) {
+            try {
+                arktest.assertEQ(e.toString(), "BusinessError: Cannot find the ']]>' in xml string.");
+                arktest.assertEQ(e.code, 401);
+            } catch (e) {
+                console.error(`testXtsActsXml016 failed, error: ${e}`);
+                LogStack(e);
+            }
+        } else {
+            throw e;
         }
     }
 }
@@ -591,7 +596,8 @@ function testXtsActsXml017() {
     try {
         pullParse.parseXml(options);
         arktest.assertTrue(false);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        e = e as BusinessError;
         try {
             arktest.assertEQ(e.toString(), "BusinessError: Cannot find the ']]>' in xml string.");
             arktest.assertEQ(e.code, 401);
@@ -623,7 +629,8 @@ function testXtsActsXml018() {
     try {
         pullParse.parseXml(options);
         arktest.assertTrue(false);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        e = e as BusinessError;
         try {
             arktest.assertEQ(e.toString(), "BusinessError: Cannot find the '?>' in xml string.");
             arktest.assertEQ(e.code, 401);
@@ -654,7 +661,8 @@ function testXtsActsXml019() {
     try {
         pullParse.parseXml(options);
         arktest.assertTrue(false);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        e = e as BusinessError;
         try {
             arktest.assertEQ(e.toString(), "BusinessError: Cannot find the '?>' in xml string.");
             arktest.assertEQ(e.code, 401);
@@ -686,7 +694,8 @@ function testXtsActsXml020() {
     try {
         pullParse.parseXml(options);
         arktest.assertTrue(false);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        e = e as BusinessError;
         try {
             arktest.assertEQ(e.toString(), "BusinessError: Cannot find the '--' in xml string.");
             arktest.assertEQ(e.code, 401);

@@ -19,11 +19,11 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/mem/space.h"
-#include "libpandabase/utils/span.h"
-#include "libpandafile/bytecode_instruction-inl.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/space.h"
+#include "libarkbase/utils/span.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/object_header.h"
@@ -200,7 +200,7 @@ public:
     static constexpr size_t GetElementSize();
 
     template <class T>
-    T GetBase();
+    T GetBase() const;
 
     // Pass thread parameter to speed up interpreter
     template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
@@ -244,7 +244,7 @@ public:
     static Array *CreateMultiDimensionalArray(ManagedThread *thread, ark::Class *klass, uint32_t nargs,
                                               const DimIterator &iter, size_t dimIdx = 0);
 
-private:
+protected:
     void SetLength(ArraySizeT length)
     {
         // Atomic with relaxed order reason: data race with length_ with no synchronization or ordering constraints
@@ -252,6 +252,7 @@ private:
         length_.store(length, std::memory_order_relaxed);
     }
 
+private:
     template <class T>
     void FillPrimitiveElem(T elem, ArraySizeT start, ArraySizeT end, size_t elemSize);
 

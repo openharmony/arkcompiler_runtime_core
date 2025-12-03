@@ -33,7 +33,8 @@ extern "C" {
  *  This API can be called only from NAPI code
  * Returned `hybridgref` can be used from both NAPI and ANI code
  */
-HYBRIDGREF_EXPORT bool hybridgref_create_from_napi(napi_env env, napi_value value, hybridgref *result);
+__attribute__((visibility("default"))) bool hybridgref_create_from_napi(napi_env env, napi_value value,
+                                                                        hybridgref *result);
 
 /**
  * @brief Delete a reference previously created by `hybridgref_create_from_napi`
@@ -42,7 +43,7 @@ HYBRIDGREF_EXPORT bool hybridgref_create_from_napi(napi_env env, napi_value valu
  * Notes:
  *  This API can be called only from NAPI code
  */
-HYBRIDGREF_EXPORT bool hybridgref_delete_from_napi(napi_env env, hybridgref ref);
+__attribute__((visibility("default"))) bool hybridgref_delete_from_napi(napi_env env, hybridgref ref);
 
 /**
  * @brief Returns napi_value for previously saved reference
@@ -52,10 +53,11 @@ HYBRIDGREF_EXPORT bool hybridgref_delete_from_napi(napi_env env, hybridgref ref)
  * Notes:
  *  This API can be called only from NAPI code
  */
-HYBRIDGREF_EXPORT bool hybridgref_get_napi_value(napi_env env, hybridgref ref, napi_value *result);
+__attribute__((visibility("default"))) bool hybridgref_get_napi_value(napi_env env, hybridgref ref, napi_value *result);
 
 #ifdef __cplusplus
 }
 #endif
 // NOLINTEND(readability-identifier-naming)
+
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_LIBANI_HELPERS_INTEROP_JS_HYBRIDGREF_NAPI_H

@@ -21,6 +21,18 @@ import os
 import shutil
 
 
+def extract(package_path, dest_path, package_name):
+    try:
+        with tarfile.open(package_path, 'r:gz') as tar:
+            tar.extractall(path=dest_path)
+    except tarfile.TarError as e:
+        print(f'Error extracting files: {e}')
+    dest_package_path = os.path.join(dest_path, package_name)
+    if (os.path.exists(dest_package_path)):
+        shutil.rmtree(dest_package_path)
+    os.rename(os.path.join(dest_path, 'package'), dest_package_path)
+
+
 def copy_dir(source_path, dest_path):
     try:
         run_cmd(["rm", "-rf", dest_path])
@@ -64,9 +76,12 @@ def run_pack(execution_path):
 def main(args):
     source_path = args[0]
     dest_and_exec_path = args[1]
-    tgz_name = args[2]
+    tsc_package_path = args[2]
+    tgz_name = args[3]
     tmp_build_dir = os.path.join(dest_and_exec_path, "build_tmp")
 
+    node_modules_path = os.path.join(source_path, "node_modules")
+    extract(tsc_package_path, node_modules_path, "typescript")
     copy_dir(source_path, tmp_build_dir)
     run_build(tmp_build_dir)
     run_pack(tmp_build_dir)

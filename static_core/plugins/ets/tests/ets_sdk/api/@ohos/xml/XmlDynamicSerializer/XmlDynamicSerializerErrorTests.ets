@@ -45,10 +45,11 @@ function performXmlTest(
 
     setupFunction(thatSer);
 
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
-               ((e as BusinessError).code == errorCodeId) &&
-               ((e as BusinessError).message == errorMessage);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == errorCodeId && e.message == errorMessage;
+        }
+        return false;
     }
 
     arktest.expectThrow(() => { testFunction(thatSer) }, exceptionCheck);

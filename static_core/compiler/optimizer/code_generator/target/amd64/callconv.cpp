@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 /*
 Low-level calling convention
 */
+#include "optimizer/code_generator/codegen_load_entrypoint.h"
+#include "scoped_tmp_reg.h"
 #include "target/amd64/target.h"
 
 namespace ark::compiler::amd64 {
@@ -161,9 +163,11 @@ void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &
         encoder->EncodeJump(expandDone, NUM_ACTUAL_REG, Imm(numExpected), Condition::GE);
         encoder->EncodeMov(NUM_EXPECTED_REG, Imm(numExpected));
 
-        MemRef expandEntrypoint(Reg(GetThreadReg(Arch::X86_64), GetTarget().GetPtrRegType()),
-                                GetDynInfo().GetExpandEntrypointTlsOffset());
-        GetEncoder()->MakeCall(expandEntrypoint);
+        ScopedTmpRegU64 tmpReg(encoder);
+        MemRef epTable = MemRef(Reg(GetThreadReg(Arch::X86_64), GetTarget().GetPtrRegType()),
+                                GetDynInfo().GetExpandEntrypointsTableTlsOffset());
+        LoadEntrypoint(tmpReg, encoder, epTable, GetDynInfo().GetExpandEntrypointOffset());
+        encoder->MakeCall(tmpReg);
         encoder->BindLabel(expandDone);
     }
 
@@ -190,8 +194,8 @@ void Amd64CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &
             DOUBLE_WORD_SIZE_BYTES));
 }
 
-void Amd64CallingConvention::GenerateEpilogue([[maybe_unused]] const FrameInfo &frameInfo,
-                                              std::function<void()> postJob)
+void Amd64CallingConvention::GenerateEpilogueImpl([[maybe_unused]] const FrameInfo &frameInfo,
+                                                  const std::function<void()> &postJob)
 {
     auto encoder = GetEncoder();
     const CFrameLayout &fl = encoder->GetFrameLayout();
@@ -219,7 +223,6 @@ void Amd64CallingConvention::GenerateEpilogue([[maybe_unused]] const FrameInfo &
 
     GetMasm()->pop(asmjit::x86::rbp);  // frame pointer
     SET_CFI_OFFSET(popFplr, encoder->GetCursorOffset());
-    GetMasm()->ret();
 }
 
 void Amd64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo)
@@ -227,9 +230,21 @@ void Amd64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo)
     GeneratePrologue(frameInfo);
 }
 
+void Amd64CallingConvention::GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
+{
+    GenerateEpilogueImpl(frameInfo, postJob);
+    GetMasm()->ret();
+}
+
 void Amd64CallingConvention::GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
 {
-    GenerateEpilogue(frameInfo, postJob);
+    GenerateEpilogueImpl(frameInfo, postJob);
+    GetMasm()->ret();
+}
+
+void Amd64CallingConvention::GenerateEpilogueHead(const FrameInfo &frameInfo, std::function<void()> postJob)
+{
+    GenerateEpilogueImpl(frameInfo, postJob);
 }
 
 asmjit::x86::Assembler *Amd64CallingConvention::GetMasm()

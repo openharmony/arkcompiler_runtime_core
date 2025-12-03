@@ -257,7 +257,11 @@ public:
     void WalkEdges();
     Ref NewRef(ObjectTypeInfo info = ObjectTypeInfo::INVALID);
     ObjectTypeInfo GetRefTypeInfo(Ref ref) const;
-    std::string ToString(ObjectTypeInfo typeInfo);
+    auto Printer(ObjectTypeInfo typeInfo);
+    template <typename T>
+    auto Printer(const TypedRefSet<T> &typedRefSet);
+    template <typename T>
+    auto Printer(TypedRefSet<T> &&typedRefSet);
     void DumpRefInfos(std::ostream &os);
     ArenaTypedRefSet &GetInstRefSet(const Inst *inst);
     ArenaTypedRefSet &TryGetInstRefSet(const Inst *inst);
@@ -292,9 +296,10 @@ private:
     void VisitLoop(Loop *loop);
     void RollbackChains();
     void AddTempEdge(const Pointer &from, const Pointer &to);
-    bool AddEdge(Pointer from, Pointer to);
-    bool AddLoadEdge(const Pointer &from, const Inst *toObj, const ArenaTypedRefSet &srcRefSet);
-    bool AddStoreEdge(const Inst *fromObj, const Pointer &to, const ArenaTypedRefSet &srcRefSet);
+    bool AddEdge(const Pointer &from, const Pointer &to);
+    bool AddLoadEdge(const PointerOffset &fromOffset, const Inst *toObj, const ArenaTypedRefSet &srcRefSet);
+    bool AddStoreEdge(const Inst *fromObj, const Inst *toObj, const PointerOffset &toOffset,
+                      const ArenaTypedRefSet &srcRefSet);
 
     friend class LoopPropagationVisitor;
 
@@ -319,6 +324,48 @@ private:
     ArenaTypedRefSet allSet_;
     bool inLoop_ {false};
 };
+
+template <typename LambdaT>
+struct LambdaPrinter : LambdaT {
+    explicit LambdaPrinter(LambdaT &&self) : LambdaT(std::move(self)) {}
+
+    friend std::ostream &operator<<(std::ostream &o, const LambdaPrinter &p)
+    {
+        return p(o);
+    }
+};
+
+auto ObjectTypePropagationVisitor::Printer(ObjectTypeInfo typeInfo)
+{
+    // CC-OFFNXT(G.FMT.14-CPP) project code style
+    return LambdaPrinter([this, typeInfo](std::ostream &o) -> std::ostream & {
+        if (typeInfo == ObjectTypeInfo::UNKNOWN) {
+            return o << "UNKNOWN";
+        }
+        if (typeInfo == ObjectTypeInfo::INVALID) {
+            return o << "INVALID";
+        }
+        return o << GetGraph()->GetRuntime()->GetClassName(typeInfo.GetClass());
+    });
+}
+
+template <typename T>
+auto ObjectTypePropagationVisitor::Printer(const TypedRefSet<T> &typedRefSet)
+{
+    // CC-OFFNXT(G.FMT.14-CPP) project code style
+    return LambdaPrinter([this, &typedRefSet](std::ostream &o) -> std::ostream & {
+        return o << typedRefSet.GetRefSet() << " :: " << Printer(typedRefSet.GetTypeInfo());
+    });
+}
+
+template <typename T>
+auto ObjectTypePropagationVisitor::Printer(TypedRefSet<T> &&typedRefSet)
+{
+    // CC-OFFNXT(G.FMT.14-CPP) project code style
+    return LambdaPrinter([this, localTypedRefSet = std::move(typedRefSet)](std::ostream &o) -> std::ostream & {
+        return o << localTypedRefSet.GetRefSet() << " :: " << Printer(localTypedRefSet.GetTypeInfo());
+    });
+}
 
 bool ObjectTypePropagationVisitor::RunImpl()
 {
@@ -357,7 +404,7 @@ void ObjectTypePropagationVisitor::SetTypeInfosInGraph()
         });
         ASSERT_DO(info != ObjectTypeInfo::UNKNOWN || isNull,
                   (std::cerr << "Inst shoulnd't have UNKNOWN TypeInfo: " << *inst << "\n"
-                             << "refs: " << refs << "\n",
+                             << "refs: " << Printer(refs) << "\n",
                    GetGraph()->Dump(&std::cerr)));
         auto commonInfo = refs.GetTypeInfo();
         TryImproveTypeInfo(info, commonInfo);
@@ -439,22 +486,11 @@ ObjectTypeInfo ObjectTypePropagationVisitor::GetRefTypeInfo(Ref ref) const
     return refInfos_.at(ref);
 }
 
-std::string ObjectTypePropagationVisitor::ToString(ObjectTypeInfo typeInfo)
-{
-    if (typeInfo == ObjectTypeInfo::UNKNOWN) {
-        return "UNKNOWN";
-    }
-    if (typeInfo == ObjectTypeInfo::INVALID) {
-        return "INVALID";
-    }
-    return GetGraph()->GetRuntime()->GetClassName(typeInfo.GetClass());
-}
-
 void ObjectTypePropagationVisitor::DumpRefInfos(std::ostream &os)
 {
     for (Ref ref = BasicBlockState::REAL_REF_START; ref < refInfos_.size(); ref++) {
         auto typeInfo = GetRefTypeInfo(ref);
-        os << ref << ": " << ToString(typeInfo) << "\n";
+        os << ref << ": " << Printer(typeInfo) << "\n";
     }
 }
 
@@ -514,7 +550,7 @@ void ObjectTypePropagationVisitor::AddDirectEdge(const Pointer &p)
     ASSERT(inst != nullptr);
     auto &refs = IsZeroConstantOrNullPtr(inst) ? nullSet_ : currentBlockState_->NewUnknownRef();
     instRefSets_.try_emplace(inst, refs);
-    COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "Add Direct " << *inst << ": " << instRefSets_.at(inst);
+    COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "Add Direct " << *inst << ": " << Printer(instRefSets_.at(inst));
 }
 
 void ObjectTypePropagationVisitor::AddConstantDirectEdge(Inst *inst, [[maybe_unused]] uint32_t id)
@@ -527,7 +563,8 @@ void ObjectTypePropagationVisitor::AddCopyEdge(const Pointer &from, const Pointe
 {
     COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "Add Copy " << from << " -> " << to;
     [[maybe_unused]] auto changed = AddEdge(from, to);
-    COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  ToSet: " << TryGetInstRefSet(to.GetBase()) << " changed: " << changed;
+    COMPILER_LOG(DEBUG, TYPE_PROPAGATION)
+        << "  ToSet: " << Printer(TryGetInstRefSet(to.GetBase())) << " changed: " << changed;
 }
 
 void ObjectTypePropagationVisitor::VisitHeapInv([[maybe_unused]] Inst *inst)
@@ -554,10 +591,11 @@ void ObjectTypePropagationVisitor::SetTypeInfo(Inst *inst, ObjectTypeInfo info)
 {
     // should be data-flow input instead of check inst
     ASSERT(!inst->IsCheck() || inst->GetOpcode() == Opcode::RefTypeCheck);
-    COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "SetTypeInfo inst " << inst->GetId() << " " << ToString(info);
+    COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "SetTypeInfo inst " << inst->GetId() << " " << Printer(info);
     auto &refSet = TryGetInstRefSet(inst);
     if (&refSet == &nullSet_) {
         ASSERT(inLoop_);
+        COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  -> now has type " << Printer(refSet.GetTypeInfo());
         return;
     }
     if (refSet.PopCount() == 1) {
@@ -565,6 +603,7 @@ void ObjectTypePropagationVisitor::SetTypeInfo(Inst *inst, ObjectTypeInfo info)
         TryImproveTypeInfo(refInfos_[ref], info);
     }
     refSet.TryImproveTypeInfo(info);
+    COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  -> now has type " << Printer(refSet.GetTypeInfo());
 }
 
 BasicBlockState *ObjectTypePropagationVisitor::GetState(const BasicBlock *block)
@@ -661,32 +700,28 @@ void ObjectTypePropagationVisitor::AddTempEdge(const Pointer &from, const Pointe
 {
     ASSERT(from.GetBase() != nullptr);
     {
-        auto &instEdges =
-            loopEdges_.try_emplace(from.GetBase(), GetGraph()->GetLocalAllocator()->Adapter()).first->second;
-        auto &ptrEdges =
-            instEdges.try_emplace(from.GetOffset(), GetGraph()->GetLocalAllocator()->Adapter()).first->second;
+        auto [fromObj, fromOffset] = from.DropIdx();
+        auto &instEdges = loopEdges_.try_emplace(fromObj, GetGraph()->GetLocalAllocator()->Adapter()).first->second;
+        auto &ptrEdges = instEdges.try_emplace(fromOffset, GetGraph()->GetLocalAllocator()->Adapter()).first->second;
         ptrEdges.push_back(to);
     }
     if (from.IsObject() && !to.IsObject() && to.GetType() != STATIC_FIELD && to.GetType() != POOL_CONSTANT) {
         // store
-        auto &instEdges =
-            loopStoreEdges_.try_emplace(to.GetBase(), GetGraph()->GetLocalAllocator()->Adapter()).first->second;
-        auto &ptrEdges =
-            instEdges.try_emplace(to.GetOffset(), GetGraph()->GetLocalAllocator()->Adapter()).first->second;
+        auto [toObj, toOffset] = to.DropIdx();
+        auto &instEdges = loopStoreEdges_.try_emplace(toObj, GetGraph()->GetLocalAllocator()->Adapter()).first->second;
+        auto &ptrEdges = instEdges.try_emplace(toOffset, GetGraph()->GetLocalAllocator()->Adapter()).first->second;
         ptrEdges.push_back(from.GetBase());
     }
 }
 
-bool ObjectTypePropagationVisitor::AddEdge(Pointer from, Pointer to)
+bool ObjectTypePropagationVisitor::AddEdge(const Pointer &from, const Pointer &to)
 {
-    from = from.DropIdx();
-    to = to.DropIdx();
-    auto fromObj = from.GetBase();
+    auto [fromObj, fromOffset] = from.DropIdx();
+    auto [toObj, toOffset] = to.DropIdx();
     auto it = instRefSets_.find(fromObj);
     const ArenaTypedRefSet *srcRefSet = nullptr;
-    auto toObj = to.GetBase();
     if (fromObj == nullptr) {
-        ASSERT(from.GetType() == STATIC_FIELD || from.GetType() == POOL_CONSTANT);
+        ASSERT(fromOffset.GetType() == STATIC_FIELD || fromOffset.GetType() == POOL_CONSTANT);
         srcRefSet = &currentBlockState_->NewUnknownRef();
     } else if (it != instRefSets_.end()) {
         srcRefSet = &it->second;
@@ -698,7 +733,7 @@ bool ObjectTypePropagationVisitor::AddEdge(Pointer from, Pointer to)
         return false;
     }
     ASSERT(currentBlockState_ != nullptr);
-    if (from.IsObject() && to.IsObject()) {
+    if (fromOffset.IsObject() && toOffset.IsObject()) {
         // copy
         bool changed = false;
         auto &destRefSet = GetOrCreateInstRefSet(toObj, changed);
@@ -708,33 +743,33 @@ bool ObjectTypePropagationVisitor::AddEdge(Pointer from, Pointer to)
         }
         return changed;
     }
-    if (to.IsObject()) {
-        return AddLoadEdge(from, toObj, *srcRefSet);
+    if (toOffset.IsObject()) {
+        return AddLoadEdge(fromOffset, toObj, *srcRefSet);
     }
-    if (from.IsObject()) {
-        return AddStoreEdge(fromObj, to, *srcRefSet);
+    if (fromOffset.IsObject()) {
+        return AddStoreEdge(fromObj, toObj, toOffset, *srcRefSet);
     }
     // both are not objects
     UNREACHABLE();
 }
 
-bool ObjectTypePropagationVisitor::AddLoadEdge(const Pointer &from, const Inst *toObj,
+bool ObjectTypePropagationVisitor::AddLoadEdge(const PointerOffset &fromOffset, const Inst *toObj,
                                                const ArenaTypedRefSet &srcRefSet)
 {
     bool changed = false;
     COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << " LOAD";
     auto &destRefSet = GetOrCreateInstRefSet(toObj, changed);
-    if (from.GetType() == STATIC_FIELD || from.GetType() == POOL_CONSTANT) {
+    if (fromOffset.GetType() == STATIC_FIELD || fromOffset.GetType() == POOL_CONSTANT) {
         COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  STATIC FIELD -> " << toObj->GetId();
         changed |= destRefSet != srcRefSet;
         destRefSet = srcRefSet;
         return changed;
     }
-    COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  initial destRefSet: " << destRefSet;
-    srcRefSet.Visit([offset = from.GetOffset(), &destRefSet, &changed, this](Ref ref) {
+    COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  initial destRefSet: " << Printer(destRefSet);
+    srcRefSet.Visit([&fromOffset, &destRefSet, &changed, this](Ref ref) {
         COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  Visit " << ref;
-        auto &srcFieldSet = currentBlockState_->GetFieldRefSet(ref, offset);
-        COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  srcFieldSet: " << srcFieldSet;
+        auto &srcFieldSet = currentBlockState_->GetFieldRefSet(ref, fromOffset);
+        COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  srcFieldSet: " << Printer(srcFieldSet);
         if (!destRefSet.Includes(srcFieldSet)) {
             destRefSet |= srcFieldSet;
             changed = true;
@@ -743,7 +778,7 @@ bool ObjectTypePropagationVisitor::AddLoadEdge(const Pointer &from, const Inst *
     return changed;
 }
 
-bool ObjectTypePropagationVisitor::AddStoreEdge(const Inst *fromObj, const Pointer &to,
+bool ObjectTypePropagationVisitor::AddStoreEdge(const Inst *fromObj, const Inst *toObj, const PointerOffset &toOffset,
                                                 const ArenaTypedRefSet &srcRefSet)
 {
     COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << " STORE";
@@ -752,35 +787,34 @@ bool ObjectTypePropagationVisitor::AddStoreEdge(const Inst *fromObj, const Point
         // primitive ANY type or null as integer is stored
         return false;
     }
-    if (to.GetType() == STATIC_FIELD || to.GetType() == POOL_CONSTANT) {
+    if (toOffset.GetType() == STATIC_FIELD || toOffset.GetType() == POOL_CONSTANT) {
         return false;
     }
-    if (instRefSets_.find(to.GetBase()) == instRefSets_.end()) {
+    if (instRefSets_.find(toObj) == instRefSets_.end()) {
         ASSERT(inLoop_);
         return true;
     }
-    auto &destRefSet = instRefSets_.at(to.GetBase());
+    auto &destRefSet = instRefSets_.at(toObj);
     bool changed = false;
     bool escape = false;
-    destRefSet.Visit([&to, &srcRefSet, &changed, &escape, this](Ref ref) {
+    destRefSet.Visit([&toOffset, &srcRefSet, &changed, &escape, this](Ref ref) {
         if (currentBlockState_->IsEscaped(ref)) {
             escape = true;
         }
         if (ref == ALL_REF) {
             return;
         }
-        auto offset = to.GetOffset();
-        auto &dstFieldSet = currentBlockState_->CreateFieldRefSet(ref, offset, changed);
+        auto &dstFieldSet = currentBlockState_->CreateFieldRefSet(ref, toOffset, changed);
         COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  ref: " << ref;
-        COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  src: " << srcRefSet;
-        if (!inLoop_ && to.GetType() != UNKNOWN_OFFSET) {
+        COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  src: " << Printer(srcRefSet);
+        if (!inLoop_ && toOffset.GetType() != UNKNOWN_OFFSET) {
             changed |= dstFieldSet != srcRefSet;
             dstFieldSet = srcRefSet;
         } else if (!dstFieldSet.Includes(srcRefSet)) {
             dstFieldSet |= srcRefSet;
             changed = true;
         }
-        COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  dst: " << dstFieldSet;
+        COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "  dst: " << Printer(dstFieldSet);
     });
     if (escape) {
         srcRefSet.Visit([this](Ref ref) { currentBlockState_->TryEscape(ref); });
@@ -904,6 +938,9 @@ const ArenaTypedRefSet &BasicBlockState::GetFieldRefSet(Ref base, const PointerO
         return visitor_->GetAllSet();
     }
     COMPILER_LOG(DEBUG, TYPE_PROPAGATION) << "    GetFieldRefSet " << base << ' ' << offset;
+    if (offset.GetType() == UNKNOWN_OFFSET) {
+        return escaped_;
+    }
     auto it = fieldRefs_.find(base);
     if (it == fieldRefs_.end()) {
         return escaped_;
@@ -1177,18 +1214,18 @@ ArenaAllocator *BasicBlockState::GetLocalAllocator()
     auto *visitor = state.visitor_;
     os << "BB " << state.GetBlockId() << " state:\n";
     for (auto [ref, refInfo] : state.fieldRefs_) {
-        os << "  ref " << ref << " " << visitor->ToString(visitor->GetRefTypeInfo(ref)) << ":\n";
+        os << "  ref " << ref << " " << visitor->Printer(visitor->GetRefTypeInfo(ref)) << ":\n";
         for (auto [offset, refs] : *refInfo) {
-            os << "    " << offset << " -> " << refs << " " << visitor->ToString(refs.GetTypeInfo()) << "\n";
+            os << "    " << offset << " -> " << visitor->Printer(refs) << "\n";
         }
     }
-    os << "Escaped: " << state.escaped_ << "\n";
+    os << "Escaped: " << visitor->Printer(state.escaped_) << "\n";
     os << "Instructions RefSets (global):\n";
     for (auto &[inst, refs] : visitor->GetInstRefSets()) {
         // short inst dump without inputs/outputs
         os << "  " << inst->GetId() << "." << inst->GetType() << " ";
         inst->DumpOpcode(&os);
-        os << "-> " << refs << " " << visitor->ToString(refs.GetTypeInfo()) << "\n";
+        os << "-> " << visitor->Printer(refs) << "\n";
     }
     visitor->DumpRefInfos(os);
     return os;

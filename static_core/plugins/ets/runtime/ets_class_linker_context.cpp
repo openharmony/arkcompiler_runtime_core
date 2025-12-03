@@ -80,6 +80,7 @@ Class *LoadFromBootContext(const uint8_t *descriptor, DecoratorErrorHandler &err
     ASSERT(ctx->IsBootContext());
     auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetClass(descriptor, true, ctx, &errorHandler);
     if (errorHandler.HasError()) {
+        ASSERT(klass == nullptr);
         if (errorHandler.GetErrorCode() == ClassLinker::Error::CLASS_NOT_FOUND) {
             // Clear the error in order to delegate resolution.
             errorHandler.ClearError();
@@ -91,12 +92,6 @@ Class *LoadFromBootContext(const uint8_t *descriptor, DecoratorErrorHandler &err
     return klass;
 }
 
-EtsEscompatArray *GetSharedLibraryRuntimeLinkers(EtsClassLinkerContext *ctx)
-{
-    return EtsEscompatArray::FromEtsObject(
-        EtsAbcRuntimeLinker::FromEtsObject(ctx->GetRuntimeLinker())->GetSharedLibraryRuntimeLinkers());
-}
-
 bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &errorHandler, ClassLinkerContext *ctx,
                             Class **klass)
 {
@@ -104,6 +99,8 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
     ASSERT(klass != nullptr);
     ASSERT(*klass == nullptr);
 
+    // This lambda returns true if the class was found and either loaded correctly or failed to be loaded
+    const auto isClassFound = [&errorHandler](const Class *cls) { return cls != nullptr || errorHandler.HasError(); };
     if (ctx->IsBootContext()) {
         // No need to load by managed code, even if error occurred during loading.
         *klass = LoadFromBootContext(descriptor, errorHandler, ctx);
@@ -111,7 +108,7 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
     }
 
     // All non-boot contexts are represented by EtsClassLinkerContext.
-    auto *etsLinkerContext = reinterpret_cast<EtsClassLinkerContext *>(ctx);
+    auto *etsLinkerContext = EtsClassLinkerContext::FromCoreType(ctx);
     auto *runtimeLinker = etsLinkerContext->GetRuntimeLinker();
     ASSERT(runtimeLinker != nullptr);
     if (runtimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker &&
@@ -129,17 +126,21 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
         ASSERT(*klass == nullptr);
         return false;
     }
-    if (*klass != nullptr) {
-        // Load success by parent linker, return true
+    if (isClassFound(*klass)) {
+        // No need to load by managed code, even if error occurred during loading.
         return true;
     }
-    for (size_t i = 0, end = GetSharedLibraryRuntimeLinkers(etsLinkerContext)->GetActualLength(); i < end; ++i) {
-        EtsObject *sharedLibraryRuntimeLinkerObj = nullptr;
-        if (!GetSharedLibraryRuntimeLinkers(etsLinkerContext)->GetRef(i, &sharedLibraryRuntimeLinkerObj)) {
-            continue;
-        }
-        EtsAbcRuntimeLinker *sharedLibraryRuntimeLinker =
-            EtsAbcRuntimeLinker::FromEtsObject(sharedLibraryRuntimeLinkerObj);
+    // After class is not found in parent linkers, try to search it in shared libraries linkers.
+    // This code repeats logic which is written in managed implementation of `AbcRuntimeLinker::findAndLoadClass`.
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    auto *sharedLibraryLinkers = abcRuntimeLinker->GetSharedLibraryRuntimeLinkers();
+    for (size_t i = 0, end = sharedLibraryLinkers->GetLength(); i < end; ++i) {
+        auto *sharedLibraryRuntimeLinker = EtsAbcRuntimeLinker::FromEtsObject(sharedLibraryLinkers->Get(i));
+        // Formally need to check here that shared linker is not `undefined`,
+        // because `sharedLibraryLoaders` field is declared as `FixedArray<AbcRuntimeLinker | undefined>`.
+        // In fact, `sharedLibraryLoaders` is immutable, and constructor of `AbcRuntimeLinker`
+        // verifies that all shared linkers are not undefined
+        ASSERT(sharedLibraryRuntimeLinker != nullptr);
         if (sharedLibraryRuntimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker &&
             sharedLibraryRuntimeLinker->GetClass() != PlatformTypes()->coreMemoryRuntimeLinker) {
             // Must call managed implementation.
@@ -150,14 +151,14 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
             // Chain resolution failed, must call managed implementation.
             return false;
         }
-        if (*klass != nullptr) {
-            // Load success by shared linker, return true
+        if (isClassFound(*klass)) {
+            // No need to load by managed code, even if error occurred during loading.
             return true;
         }
     }
 
     // No need to load by managed code, even if error occurred during loading.
-    if (*klass == nullptr && !errorHandler.HasError()) {
+    if (!isClassFound(*klass)) {
         *klass = etsLinkerContext->FindAndLoadClass(descriptor, &errorHandler);
     }
     return true;
@@ -222,13 +223,17 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
 
     auto clsName = ClassHelper::GetName(descriptor);
     auto etsClsName = EtsString::CreateFromMUtf8(clsName.c_str());
+    if (UNLIKELY(etsClsName == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
     const auto *runtimeLinker = GetRuntimeLinker();
     ASSERT(runtimeLinker != nullptr);
-    ASSERT(etsClsName != nullptr);
-    std::array args {Value(runtimeLinker->GetCoreType()), Value(etsClsName->GetCoreType()), Value(ANI_TRUE)};
+    // `nullptr` for default value.
+    std::array args {Value(runtimeLinker->GetCoreType()), Value(etsClsName->GetCoreType()), Value(nullptr)};
 
-    auto *loadClass = runtimeLinker->GetClass()->GetInstanceMethod("loadClass", "Lstd/core/String;Z:Lstd/core/Class;");
-    ASSERT(loadClass != nullptr);
+    // Valid to use method from base class because `loadClass` is final.
+    auto *loadClass = PlatformTypes(coro)->coreRuntimeLinkerLoadClass;
     auto res = loadClass->GetPandaMethod()->Invoke(coro, args.data());
     if (!coro->HasPendingException()) {
         return Class::FromClassObject(res.GetAs<ObjectHeader *>());
@@ -301,6 +306,26 @@ bool EtsClassLinkerContext::TryLoadingClassFromNative(const uint8_t *descriptor,
         ReportClassNotFound(descriptor, errorHandler);
     }
     return succeeded;
+}
+
+EtsClassLinkerContext::~EtsClassLinkerContext()
+{
+    // Destruction of `ClassLinker` (and hence `EtsClassLinkerContext`) is guaranteed
+    // to happen before `PandaVM` is destroyed. Because of this, it is valid to use `PandaEtsVM` here.
+    auto *etsVm = PandaEtsVM::GetCurrent();
+    ASSERT(etsVm != nullptr);
+    auto *objectStorage = etsVm->GetGlobalObjectStorage();
+    ASSERT(objectStorage != nullptr);
+    objectStorage->Remove(refToLinker_);
+}
+
+/* static */
+EtsClassLinkerContext *EtsClassLinkerContext::FromCoreType(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx != nullptr);
+    ASSERT(ctx->GetSourceLang() == panda_file::SourceLang::ETS);
+    ASSERT(!ctx->IsBootContext());
+    return reinterpret_cast<EtsClassLinkerContext *>(ctx);
 }
 
 }  // namespace ark::ets

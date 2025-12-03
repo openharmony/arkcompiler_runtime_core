@@ -18,6 +18,7 @@ import {CoroutineExtras} from "std/debug/concurrency"
 import { launch } from "std/concurrency"
 
 type L = StdDebug.Logger
+type NullableType = Object | null
 
 async function async_chain_element(caller_wid: int, counter: int): Promise<int> {
     let id_worker: int = CoroutineExtras.getWorkerId();

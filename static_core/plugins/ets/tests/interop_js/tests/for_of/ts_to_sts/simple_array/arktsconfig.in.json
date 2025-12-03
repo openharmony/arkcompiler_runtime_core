@@ -12,6 +12,7 @@
         "dependencies": {
             "simple_array_js": {
                 "language": "js",
+                "path": "${CMAKE_CURRENT_SOURCE_DIR}/simple_array.d.ets",
                 "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/simple_array"
             }
         }

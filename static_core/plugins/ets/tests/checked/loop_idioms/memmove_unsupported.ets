@@ -13,6 +13,51 @@
  * limitations under the License.
  */
 
+//! CHECKER       JIT: memmove unsupported tests
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--compiler-regex='memmove_unsupported.TestUnsupported::.*'", entry: "memmove_unsupported.ETSGLOBAL::main"
+//!
+//! METHOD        "memmove_unsupported.TestUnsupported::noAlias_underIf"
+//! PASS_AFTER    "LoopIdioms"
+//! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+//!
+//! METHOD        "memmove_unsupported.TestUnsupported::patternMissmatch_boundscheck"
+//! PASS_AFTER    "LoopIdioms"
+//! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+//!
+//! METHOD        "memmove_unsupported.TestUnsupported::subIdx"
+//! PASS_AFTER    "LoopIdioms"
+//! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+//!
+//! METHOD        "memmove_unsupported.TestUnsupported::__noinline__noAlias_RefTypeCheck"
+//! PASS_AFTER    "LoopIdioms"
+//! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+//! INST          /RefTypeCheck/
+//!
+//! METHOD        "memmove_unsupported.TestUnsupported::noAlias_UpdateFirst_inLoop_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! IN_BLOCK      "head, loop .*, depth 1, bc: 0x00000024"
+//! INST_NOT      /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//! INST          /CallStatic.*__noinline__updateFirst/
+//! INST_NEXT     /LoadArray/
+//! INST_NEXT     /StoreArray/
+
+//! CHECKER       AOT: memmove unsupported tests
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_PAOC      options: "--compiler-regex='memmove_unsupported.TestUnsupported::.*'", entry: "memmove_unsupported.ETSGLOBAL::main"
+//!
+//! METHOD        "memmove_unsupported.TestUnsupported::__noinline__noAlias_RefTypeCheck"
+//! PASS_AFTER    "LoopIdioms"
+//! INST_NOT      /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//! INST          /RefTypeCheck/
+//!
+//! METHOD        "memmove_unsupported.TestUnsupported::noAlias_UpdateFirst_inLoop_ref"
+//! PASS_AFTER    "LoopIdioms"
+//! INST_NOT      /Intrinsic.*CompilerEtsMemmoveUnchecked_Ref/
+//! INST          /CallStatic.*__noinline__updateFirst/
+//! INST_NEXT     /LoadArray/
+//! INST_NEXT     /StoreArray/
+
 function check(arr1: Object, arr2: Object): int {
     if (arr1.toString() != arr2.toString()) {
         console.print("Expected " + arr2.toString() + " but got " + arr1.toString());
@@ -24,11 +69,6 @@ function check(arr1: Object, arr2: Object): int {
 let GLOBAL_OFFS: int = 1;
 
 class TestUnsupported {
-    //! CHECKER       TestUnsupported1
-    //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::noAlias_underIf"
-    //! METHOD        "memmove_unsupported.TestUnsupported::noAlias_underIf"
-    //! PASS_AFTER    "LoopIdioms"
-    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
     static noAlias_underIf(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -43,12 +83,7 @@ class TestUnsupported {
         }
         return dst;
     }
-
-    //! CHECKER       TestUnsupported2
-    //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::patternMissmatch_boundscheck"
-    //! METHOD        "memmove_unsupported.TestUnsupported::patternMissmatch_boundscheck"
-    //! PASS_AFTER    "LoopIdioms"
-    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+    
     static patternMissmatch_boundscheck(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -59,12 +94,7 @@ class TestUnsupported {
         }
         return check(dst, [1, 6, 7, 8, 5]);
     }
-
-    //! CHECKER       TestUnsupported3
-    //! RUN           force_jit: true, entry: "memmove_unsupported.TestUnsupported::subIdx"
-    //! METHOD        "memmove_unsupported.TestUnsupported::subIdx"
-    //! PASS_AFTER    "LoopIdioms"
-    //! INST_NOT      /Intrinsic.*CompilerMemmoveUnchecked/
+    
     static subIdx(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -75,5 +105,40 @@ class TestUnsupported {
         }
         return check(dst, [1, 2, 6, 7, 8]);
     }
+
+    static noAlias_RefTypeCheck(): int {
+        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        return check(TestUnsupported.__noinline__noAlias_RefTypeCheck(src), src);
+    }
+    static __noinline__noAlias_RefTypeCheck(src: FixedArray<string>): FixedArray<string> {
+        let dst: FixedArray<string> = new string[4];
+        for (let i: int = 0; i < src.length; i++) {
+            dst[i] = src[i];
+        }
+        return dst;
+    }
+    
+    static noAlias_UpdateFirst_inLoop_ref(): int {
+        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        let dst: FixedArray<string> = new string[4];
+        for (let i: int = 0; i < src.length; i++) {
+            TestUnsupported.__noinline__updateFirst(dst);
+            dst[i] = src[i];
+        }
+        return check(dst, ["", "2", "3", "4"]);
+    }
+    static __noinline__updateFirst(a: FixedArray<string>) {
+        a[0] = "";
+    }
 };
 
+function main(): int {
+    let res: int = 0
+    res += TestUnsupported.noAlias_underIf()
+    res += TestUnsupported.patternMissmatch_boundscheck()
+    res += TestUnsupported.subIdx()
+    res += TestUnsupported.noAlias_RefTypeCheck()
+    res += TestUnsupported.noAlias_UpdateFirst_inLoop_ref()
+    arktest.assertEQ(res, 0)
+    return res
+}

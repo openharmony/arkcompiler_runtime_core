@@ -15,3 +15,4 @@
 
 export type AstMode = 'auto' | 'manual';
 export interface IFeatures { astMode: AstMode; }
+export interface IFeaturesRaw { ast_mode: AstMode; }

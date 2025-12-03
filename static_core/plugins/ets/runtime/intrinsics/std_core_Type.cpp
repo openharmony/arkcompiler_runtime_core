@@ -18,18 +18,18 @@
 #include <string>
 #include <string_view>
 #include <utility>
-#include "class_data_accessor.h"
-#include "file.h"
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/file.h"
 #include "handle_scope.h"
 #include "include/coretypes/class.h"
 #include "include/mem/panda_string.h"
 #include "include/mtmanaged_thread.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "macros.h"
-#include "mem/mem.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/mem.h"
 #include "mem/vm_handle.h"
-#include "modifiers.h"
+#include "libarkfile/modifiers.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -488,7 +488,9 @@ EtsTypeAPIMethod *TypeAPIGetMethod(ObjectHeader *methodTypeObj, EtsTypeAPIType *
 
     auto *method = GetEtsMethod(methodTypeHandle.GetPtr());
     ASSERT(method != nullptr);
+    ASSERT(method->GetClass() != nullptr);
     ASSERT(ownerTypeHandle.GetPtr() != nullptr);
+    ASSERT(ownerTypeHandle.GetPtr()->GetRuntimeTypeDescriptor() != nullptr);
     ASSERT(ownerTypeHandle.GetPtr()->GetRuntimeTypeDescriptor()->GetMutf8() == method->GetClass()->GetDescriptor());
     return CreateMethodUnderHandleScope(methodTypeHandle, method, ownerTypeHandle);
 }

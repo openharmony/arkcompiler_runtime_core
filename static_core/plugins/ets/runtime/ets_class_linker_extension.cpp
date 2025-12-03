@@ -17,9 +17,10 @@
 #include "objects/string/base_string-inl.h"
 #include "include/method.h"
 #include "include/thread_scopes.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_annotation.h"
+#include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -133,6 +134,9 @@ void EtsClassLinkerExtension::InitializeClassRoots()
     InitializeArrayClassRoot(ClassRoot::ARRAY_TAGGED, ClassRoot::TAGGED, "[A");
     InitializeArrayClassRoot(ClassRoot::ARRAY_STRING, ClassRoot::STRING,
                              utf::Mutf8AsCString(langCtx_.GetStringArrayClassDescriptor()));
+
+    InitializeSyntheticClassRoot(ClassRoot::ANY, "Y");
+    InitializeSyntheticClassRoot(ClassRoot::NEVER, "N");
 }
 
 Class *EtsClassLinkerExtension::CreateStringSubClass(const uint8_t *descriptor, Class *stringClass, ClassRoot type)
@@ -351,6 +355,16 @@ void EtsClassLinkerExtension::InitializePrimitiveClass(Class *primitiveClass)
     primitiveClass->SetState(Class::State::INITIALIZED);
 }
 
+void EtsClassLinkerExtension::InitializeSyntheticClass(Class *synClass)
+{
+    ASSERT(IsInitialized());
+
+    ASSERT(!synClass->IsInitialized());
+
+    synClass->SetAccessFlags(ACC_PUBLIC | ACC_FINAL | ACC_ABSTRACT);
+    synClass->SetState(Class::State::INITIALIZED);
+}
+
 size_t EtsClassLinkerExtension::GetClassVTableSize(ClassRoot root)
 {
     ASSERT(IsInitialized());
@@ -369,6 +383,8 @@ size_t EtsClassLinkerExtension::GetClassVTableSize(ClassRoot root)
         case ClassRoot::F32:
         case ClassRoot::F64:
         case ClassRoot::TAGGED:
+        case ClassRoot::ANY:
+        case ClassRoot::NEVER:
             return 0;
         case ClassRoot::ARRAY_U1:
         case ClassRoot::ARRAY_I8:
@@ -420,6 +436,8 @@ size_t EtsClassLinkerExtension::GetClassIMTSize(ClassRoot root)
         case ClassRoot::F32:
         case ClassRoot::F64:
         case ClassRoot::TAGGED:
+        case ClassRoot::ANY:
+        case ClassRoot::NEVER:
             return 0;
         case ClassRoot::ARRAY_U1:
         case ClassRoot::ARRAY_I8:
@@ -469,6 +487,8 @@ size_t EtsClassLinkerExtension::GetClassSize(ClassRoot root)
         case ClassRoot::U64:
         case ClassRoot::F32:
         case ClassRoot::F64:
+        case ClassRoot::ANY:
+        case ClassRoot::NEVER:
         case ClassRoot::TAGGED:
             return Class::ComputeClassSize(GetClassVTableSize(root), GetClassIMTSize(root), 0, 0, 0, 0, 0, 0);
         case ClassRoot::ARRAY_U1:
@@ -601,9 +621,6 @@ EtsClassLinkerExtension::~EtsClassLinkerExtension()
     }
 
     FreeLoadedClasses();
-
-    // References from `EtsClassLinkerContext` are removed in their destructors, need to process only boot context.
-    RemoveRefToLinker(GetBootContext());
 }
 
 bool EtsClassLinkerExtension::IsMethodNativeApi(const Method *method) const
@@ -771,72 +788,6 @@ void EtsClassLinkerExtension::InitializeFinish()
     plaformTypes_->InitializeClasses(EtsCoroutine::GetCurrent());
 }
 
-static EtsRuntimeLinker *GetEtsRuntimeLinker(ClassLinkerContext *ctx)
-{
-    ASSERT(ctx != nullptr);
-    auto *ref = ctx->GetRefToLinker();
-    if (ref == nullptr) {
-        return nullptr;
-    }
-    return EtsRuntimeLinker::FromCoreType(PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()->Get(ref));
-}
-
-static EtsRuntimeLinker *CreateBootRuntimeLinker(ClassLinkerContext *ctx)
-{
-    ASSERT(ctx->IsBootContext());
-    ASSERT(ctx->GetRefToLinker() == nullptr);
-    auto *etsObject = EtsObject::Create(PlatformTypes()->coreBootRuntimeLinker);
-    if (UNLIKELY(etsObject == nullptr)) {
-        LOG(FATAL, CLASS_LINKER) << "Could not allocate BootRuntimeLinker";
-    }
-    auto *runtimeLinker = EtsRuntimeLinker::FromEtsObject(etsObject);
-    ASSERT(runtimeLinker != nullptr);
-    runtimeLinker->SetClassLinkerContext(ctx);
-    return runtimeLinker;
-}
-
-/* static */
-EtsRuntimeLinker *EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx)
-{
-    ASSERT(ctx != nullptr);
-
-    // CC-OFFNXT(G.CTL.03) false positive
-    while (true) {
-        auto *runtimeLinker = GetEtsRuntimeLinker(ctx);
-        if (runtimeLinker != nullptr) {
-            return runtimeLinker;
-        }
-        // Only BootRuntimeLinker is created after its corresponding context
-        ASSERT(ctx->IsBootContext());
-        runtimeLinker = CreateBootRuntimeLinker(ctx);
-        auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
-        auto *refToLinker = objectStorage->Add(runtimeLinker->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-        if (ctx->CompareAndSetRefToLinker(nullptr, refToLinker)) {
-            return runtimeLinker;
-        }
-        objectStorage->Remove(refToLinker);
-    }
-    UNREACHABLE();
-}
-
-/* static */
-void EtsClassLinkerExtension::RemoveRefToLinker(ClassLinkerContext *ctx)
-{
-    ASSERT(ctx != nullptr);
-    if (Thread::GetCurrent() == nullptr) {
-        // Do not remove references during runtime destruction
-        return;
-    }
-    auto *ref = ctx->GetRefToLinker();
-    if (ref != nullptr) {
-        auto *etsVm = PandaEtsVM::GetCurrent();
-        ASSERT(etsVm != nullptr);
-        auto *objectStorage = etsVm->GetGlobalObjectStorage();
-        ASSERT(objectStorage != nullptr);
-        objectStorage->Remove(ref);
-    }
-}
-
 ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path)
 {
     ClassLinkerContext *ctx = PandaEtsVM::GetCurrent()->CreateApplicationRuntimeLinker(path);
@@ -847,7 +798,15 @@ ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext
 /* static */
 ClassLinkerContext *EtsClassLinkerExtension::GetParentContext(ClassLinkerContext *ctx)
 {
-    auto *linker = GetOrCreateEtsRuntimeLinker(ctx);
+    // Boot context is the root, no need to get parent from it
+    if (ctx->IsBootContext()) {
+        return nullptr;
+    }
+    auto *etsLinkerContext = EtsClassLinkerContext::FromCoreType(ctx);
+    auto *linker = etsLinkerContext->GetRuntimeLinker();
+    ASSERT(linker != nullptr);
+    // NOTE(dslynko, #30466): remove this assertion after moving `parentLinker` to `RuntimeLinker`
+    ASSERT(linker->GetClass()->IsAssignableFrom(PlatformTypes()->coreAbcRuntimeLinker));
     auto *abcRuntimeLinker = EtsAbcRuntimeLinker::FromEtsObject(linker);
     auto *parentLinker = abcRuntimeLinker->GetParentLinker();
     return parentLinker->GetClassLinkerContext();
@@ -871,50 +830,6 @@ ClassLinkerContext *EtsClassLinkerExtension::GetCommonContext(Span<Class *> clas
         commonCtx = GetParentContext(commonCtx);
     }
     return commonCtx;
-}
-
-const uint8_t *EtsClassLinkerExtension::ComputeLUB(const ClassLinkerContext *ctx, const uint8_t *descriptor)
-{
-    // Union descriptor format: '{' 'U' TypeDescriptor+ '}'
-    RefTypeLink lub(ctx, nullptr);
-    auto idx = 2;
-    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    while (descriptor[idx] != '}') {
-        auto typeSp = ClassHelper::GetUnionComponent(&(descriptor[idx]));
-        if (ClassHelper::IsPrimitive(typeSp.begin()) || ClassHelper::IsArrayDescriptor(typeSp.begin())) {
-            // NOTE(aantipina): Process arrays:
-            // compute GetClosestCommonAncestor for component type, lub = GetClosestCommonAncestor[]
-            return langCtx_.GetObjectClassDescriptor();
-        }
-        idx += typeSp.Size();
-
-        PandaString typeDescCopy(utf::Mutf8AsCString(typeSp.Data()), typeSp.Size());
-        auto [typePf, typeClassId] = GetClassInfo(ctx, utf::CStringAsMutf8(typeDescCopy.c_str()));
-
-        if (lub.GetDescriptor() == nullptr) {
-            lub = RefTypeLink(ctx, typePf, typeClassId);
-            continue;
-        }
-
-        auto type = RefTypeLink(ctx, typePf, typeClassId);
-        if (RefTypeLink::AreEqual(lub, type)) {
-            continue;
-        }
-
-        if (ClassHelper::IsReference(type.GetDescriptor()) && ClassHelper::IsReference(lub.GetDescriptor())) {
-            auto lubDescOpt = GetClosestCommonAncestor(GetClassLinker(), ctx, lub, type);
-            if (!lubDescOpt.has_value()) {
-                return langCtx_.GetObjectClassDescriptor();
-            }
-            lub = lubDescOpt.value();
-            continue;
-        }
-
-        return langCtx_.GetObjectClassDescriptor();
-    }
-    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-    return lub.GetDescriptor();
 }
 
 }  // namespace ark::ets

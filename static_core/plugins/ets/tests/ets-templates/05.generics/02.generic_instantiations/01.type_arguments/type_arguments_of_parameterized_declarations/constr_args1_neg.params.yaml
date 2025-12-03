@@ -55,6 +55,10 @@ cases:
       let v: A = new <X[]|null> A(null)  // wrong bound
     bound: ' extends Object[][]|null'
 
+  - use: |-
+      let v: A<X[]|null> = new A<X[]|null> (new X[0])
+    bound: ' extends Object[]|null'
+
 # aliases
   - use: |-
       let v: A<B> = new A<B> (new Color[0])
@@ -76,6 +80,11 @@ cases:
   - use: |-
       let v: A = new <B|null> A(new X[0])  // out of bound
     bound: ' extends X[]'
+    decl: type B = X[]
+  
+  - use: |-
+      let v: A<B|null> = new A<B|null> (new Y[0])
+    bound: ' extends X[]|null'
     decl: type B = X[]
 
   # not a reference type

@@ -27,7 +27,7 @@ class A {
 function main(): int {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (new A(s{{loop.index}}).f.unboxed() != {{t.val}}) {
+    if (new A(s{{loop.index}}).f != {{t.val}}) {
         return 1
     }
 {%- endfor %}

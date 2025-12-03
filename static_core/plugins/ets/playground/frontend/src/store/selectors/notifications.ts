@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { INotification } from '../../models/notifications';
 import { RootState } from '../index';
 
-export const selectMessages = (state: RootState) => state.notifications.messages;
+export const selectMessages = (state: RootState): INotification[] => state.notifications.messages;

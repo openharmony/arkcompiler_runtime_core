@@ -226,9 +226,12 @@ Inst *CreateInstructionNewObjectsArray(Graph *graph, Inst *ctorCall, uint64_t si
         return nullptr;
     }
 
+    auto ctorCallMethod = ctorCall->GetSaveState()->GetMethod();
+    auto objectsArrayClassIdForCall = runtime->GetClassOffsetObjectsArray(ctorCallMethod);
     auto loadClassObjectsArray = graph->CreateInstLoadAndInitClass(
         DataType::REFERENCE, ctorCall->GetPc(), CopySaveState(graph, ctorCall->GetSaveState()),
-        TypeIdMixin {objectsArrayClassId, method}, runtime->ResolveType(method, objectsArrayClassId));
+        TypeIdMixin {objectsArrayClassIdForCall, ctorCallMethod},
+        runtime->ResolveType(ctorCallMethod, objectsArrayClassIdForCall));
     InsertBeforeWithSaveState(loadClassObjectsArray, ctorCall->GetSaveState());
 
     // Create Constant instruction for new Object[] array size

@@ -16,7 +16,7 @@
 #ifndef PANDA_PROFILING_DATA_H
 #define PANDA_PROFILING_DATA_H
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include <array>
 #include <atomic>
 #include <numeric>

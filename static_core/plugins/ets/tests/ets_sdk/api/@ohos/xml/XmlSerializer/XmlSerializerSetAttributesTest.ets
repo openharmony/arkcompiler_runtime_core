@@ -133,9 +133,12 @@ function testIllegalPositionForAttributes() {
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement("note");
     thatSer.endElement();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'Illegal position for attribute');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == "Illegal position for attribute";
+        }
+        return false;
     }
     arktest.expectThrow(() => {thatSer.setAttributes("a","b")}, exceptionCheck);
 }
@@ -144,9 +147,12 @@ function testEmptyAttributeName() {
     let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement("note");
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'Parameter error. Parameter cannot be empty');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == "Parameter error. Parameter cannot be empty";
+        }
+        return false;
     }
     arktest.expectThrow(() => {thatSer.setAttributes("","b")}, exceptionCheck);
 }
@@ -158,9 +164,12 @@ function testAttributeSettingWithOverflow() {
     thatSer.startElement("note");
     thatSer.endElement();
     thatSer.startElement("note1");
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'XmlSerializer:: SetAttributes memcpy_s failed');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == "XmlSerializer:: SetAttributes memcpy_s failed";
+        }
+        return false;
     }
     arktest.expectThrow(() => {thatSer.setAttributes("a", "b")}, exceptionCheck);
 }

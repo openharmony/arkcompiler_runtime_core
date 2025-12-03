@@ -12,62 +12,71 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { getArray, returnCustomArray, createStringRecord,createInt8Array, RecordObject,handler} from "indexed_type"
-import {createProxy} from "proxy"
 
-const arr: FixedArray<string> = ['A','B','C'];
+let module1 = ESValue.load('indexed_type');
+let getArray = module1.getProperty('getArray');
+let returnCustomArray = module1.getProperty('returnCustomArray');
+let createStringRecord = module1.getProperty('createStringRecord');
+let createInt8Array = module1.getProperty('createInt8Array');
+let handler = module1.getProperty('handler');
 
-function getArrValueByIndex():boolean{
-    const jsArray = getArray(arr) as FixedArray<string>;
-    return jsArray[0] == 'A';
+let module2 = ESValue.load('proxy');
+let createProxy = module2.getProperty('createProxy')
+
+const arr: FixedArray<string> = ['A', 'B', 'C'];
+
+function getArrValueByIndex(): boolean {
+    const jsArray = getArray.invoke(arr).unwrap() as Array<string>;
+    return jsArray[0] === 'A';
 }
 
-function changeArrValueByIndex():boolean{
-    let jsArray = getArray(arr) as FixedArray<string>;
+function changeArrValueByIndex(): boolean {
+    let jsArray = getArray.invoke(arr).unwrap() as Array<string>;
     jsArray[0] = 'D';
-    return jsArray[0] == 'D';
+    return jsArray[0] === 'D';
 }
 
-function checkLengthArr():boolean{
-    const jsArray:FixedArray<string> = getArray(arr) as FixedArray<string>;
-    return jsArray.length as number == arr.length.toDouble()
-}
-function checkAllArrValue():boolean{
-    const jsArray:FixedArray<string> = getArray(arr) as FixedArray<string>;
-    return jsArray[0] == 'A' && jsArray[1] == 'B' && jsArray[2] == 'C'
+function checkLengthArr(): boolean {
+    const jsArray: Array<string> = getArray.invoke(arr).unwrap() as Array<string>;
+    return jsArray.length as number === arr.length.toDouble();
 }
 
-
-function getCustomArrValueByIndex():boolean{
-    const jsArray = returnCustomArray(arr);
-    return jsArray[0] == 'A';
+function checkAllArrValue(): boolean {
+    const jsArray: Array<string> = getArray.invoke(arr).unwrap() as Array<string>;
+    return jsArray[0] === 'A' && jsArray[1] === 'B' && jsArray[2] === 'C';
 }
 
-function changeCustomArrValueByIndex():boolean{
-    let jsArray = returnCustomArray(arr) as FixedArray<string>;
+function getCustomArrValueByIndex(): boolean {
+    const jsArray = returnCustomArray.invoke(arr);
+    return jsArray.getProperty(0).toString() === 'A';
+}
+
+function changeCustomArrValueByIndex(): boolean {
+    let jsArray = returnCustomArray.invoke(arr).unwrap() as Array<string>;
     jsArray[0] = 'D';
-    return jsArray[0] == 'D';
-}
-function checkLengthCustomArr():boolean{
-    const jsArray:FixedArray<string> = returnCustomArray(arr);
-    return jsArray.length as number == arr.length.toDouble();
+    return jsArray[0] === 'D';
 }
 
-function checkAllCustomArrValue():boolean{
-    const jsArray:FixedArray<string> = returnCustomArray(arr);
-    return jsArray[0] == 'A' && jsArray[1] == 'B' && jsArray[2] == 'C';
+function checkLengthCustomArr(): boolean {
+    const jsArray: Array<string> = returnCustomArray.invoke(arr).unwrap() as Array<string>;
+    return jsArray.length as number === arr.length.toDouble();
 }
 
-function getRecordValue():boolean{
-   const recordObj = createStringRecord();
-   return recordObj.key1 == 'A';
+function checkAllCustomArrValue(): boolean {
+    const jsArray: Array<string> = returnCustomArray.invoke(arr).unwrap() as Array<string>;
+    return jsArray[0] === 'A' && jsArray[1] === 'B' && jsArray[2] === 'C';
 }
 
-function changeRecordValue():boolean{
-    let recordObj = createStringRecord();
-    recordObj.key1 = 'D';
-    return recordObj.key1 == 'D';
- }
+function getRecordValue(): boolean {
+    const recordObj = createStringRecord.invoke();
+    return recordObj.getProperty('key1').toString() === 'A';
+}
+
+function changeRecordValue(): boolean {
+    let recordObj = createStringRecord.invoke();
+    recordObj.setProperty('key1', 'D');
+    return recordObj.getProperty('key1').toString() === 'D';
+}
 // NOTE(andreypetukhov) enable after fixibng #17821
 //  function getRecordValueIndex():boolean{
 //     const recordObj:Record<string, string> = createStringRecord();
@@ -88,12 +97,12 @@ function changeRecordValue():boolean{
 // NOTE(andreypetukhov) enable after fixibng #17821
 //  function checkRecordValue():boolean{
 //   const recordObj:Record<string, string> = createStringRecord();
-//   return recordObj['key1'] === 'A' && recordObj['key2'] === 'B' && recordObj['key3'] === 'C'
+//   return recordObj['key1'] == 'A' && recordObj['key2'] == 'B' && recordObj['key3'] == 'C'
 // }
 
-function getTypedArrayValueByIndex():boolean{
-    const jsTypedArray = createInt8Array(3);
-    return jsTypedArray[0] as number == 0;
+function getTypedArrayValueByIndex(): boolean {
+    const jsTypedArray = createInt8Array.invoke(3);
+    return jsTypedArray.getProperty(0).toNumber() === 0;
 }
 // NOTE(andreypetukhov) enable after fixibng #18131
 // function changeTypedArrayValueByIndex():boolean{
@@ -102,32 +111,34 @@ function getTypedArrayValueByIndex():boolean{
 //     return jsTypedArray[1] as number == 99;
 // }
 
-function checkLengthTypedArray():boolean{
-    const jsTypedArray = createInt8Array(3) as Int8Array;
-    return jsTypedArray.length as number == 3 as number
+function checkLengthTypedArray(): boolean {
+    const jsTypedArray = createInt8Array.invoke(3).unwrap() as Int8Array;
+    return jsTypedArray.length as number === 3 as number;
 }
 
-function checkAllTypedArrayValue():boolean{
-    const jsTypedArray = createInt8Array(3) as Int8Array;
-    return jsTypedArray[0] as number == 0 && jsTypedArray[1] as number == 1 && jsTypedArray[2] as number == 2
- }
+function checkAllTypedArrayValue(): boolean {
+    const jsTypedArray = createInt8Array.invoke(3).unwrap() as Int8Array;
+    return jsTypedArray[0] as number === 0 &&
+        jsTypedArray[1] as number === 1 &&
+        jsTypedArray[2] as number === 2;
+}
 
- const testObj:RecordObject = {
-    'keyA':'A',
-    'keyB':'B'
- }
+type RecordObject = Record<string, string>;
+const testObj: RecordObject = {
+    'keyA': 'A',
+    'keyB': 'B',
+}
 
- function getValueFromProxyRecord():boolean{
-    const proxyRecord = createProxy(testObj,handler)
-    console.log(proxyRecord.keyA)
-    return proxyRecord.keyA == 'A'
- }
+function getValueFromProxyRecord(): boolean {
+    const proxyRecord = createProxy.invoke(testObj, handler);
+    return proxyRecord.getProperty('keyA').toString() === 'A';
+}
 
- function changeValueFromProxyRecord():boolean{
-    const proxyRecord = createProxy(testObj,handler)
-    proxyRecord.keyB = 'T'
-    return proxyRecord.keyB == 'T'
- }
+function changeValueFromProxyRecord(): boolean {
+    const proxyRecord = createProxy.invoke(testObj, handler);
+    proxyRecord.setProperty('keyB', 'T');
+    return proxyRecord.getProperty('keyB').toString() === 'T';
+}
 // NOTE(andreypetukhov) enable after fixibng #18238
 //  function getValueFromProxyByKeyRecord():boolean{
 //     const proxyRecord = createProxy(testObj,handler)

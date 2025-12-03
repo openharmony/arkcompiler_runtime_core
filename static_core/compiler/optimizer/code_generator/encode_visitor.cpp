@@ -16,7 +16,8 @@
 #include "encode_visitor.h"
 #include "optimizer/code_generator/operands.h"
 #include "optimizer/ir/datatype.h"
-#include "utils/regmask.h"
+#include "libarkbase/utils/regmask.h"
+#include "intrinsic_string_flat_check.inl"
 
 namespace ark::compiler {
 
@@ -486,8 +487,8 @@ void EncodeVisitor::VisitLoadConstArray(GraphVisitor *visitor, Inst *inst)
     auto method = inst->CastToLoadConstArray()->GetMethod();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto arrayType = inst->CastToLoadConstArray()->GetTypeId();
-    enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_LITERAL_ARRAY, dst,
-                                             TypedImm(arrayType));
+    auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, arrayType);
+    enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_LITERAL_ARRAY, dst, typeIdImm);
 }
 
 void EncodeVisitor::VisitFillConstArray(GraphVisitor *visitor, Inst *inst)
@@ -871,7 +872,8 @@ void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)
     auto isCctor = graph->GetRuntime()->IsMethodStaticConstructor(method);
     if (graph->IsAotMode() && g_options.IsCompilerAotLoadStringPlt() && !isCctor) {
         auto aotData = graph->GetAotData();
-        intptr_t slotOffset = aotData->GetStringSlotOffset(encoder->GetCursorOffset(), stringType);
+        intptr_t slotOffset = aotData->GetStringSlotOffset(
+            encoder->GetCursorOffset(), stringType, enc->GetCodegen()->GetAOTBinaryFileSnapshotIndexForInst(inst));
         ScopedTmpRegU64 addrReg(encoder);
         ScopedTmpRegU64 tmpDst(encoder);
         encoder->MakeLoadAotTableAddr(slotOffset, addrReg, tmpDst);
@@ -896,7 +898,8 @@ void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)
             return;
         }
     }
-    enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_STRING, dst, TypedImm(stringType));
+    auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, stringType);
+    enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_STRING, dst, typeIdImm);
 }
 
 void EncodeVisitor::VisitLoadObject(GraphVisitor *visitor, Inst *inst)
@@ -937,7 +940,8 @@ void EncodeVisitor::VisitResolveObjectField(GraphVisitor *visitor, Inst *inst)
     auto typeId = resolver->GetTypeId();
     auto method = resolver->GetMethod();
     if (graph->IsAotMode()) {
-        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::GET_FIELD_OFFSET, dst, TypedImm(typeId));
+        auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, typeId);
+        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::GET_FIELD_OFFSET, dst, typeIdImm);
     } else {
         auto skind = UnresolvedTypesInterface::SlotKind::FIELD;
         ASSERT(graph->GetRuntime()->GetUnresolvedTypes() != nullptr);
@@ -1128,7 +1132,8 @@ void EncodeVisitor::VisitInitClass(GraphVisitor *visitor, Inst *inst)
         ScopedTmpReg tmpReg(encoder);
         ScopedTmpReg classReg(encoder);
         auto aotData = graph->GetAotData();
-        intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
+        intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true,
+                                                      enc->GetCodegen()->GetAOTBinaryFileSnapshotIndexForInst(inst));
         encoder->MakeLoadAotTableAddr(offset, tmpReg, classReg);
         auto label = encoder->CreateLabel();
         encoder->EncodeJump(label, classReg, Condition::NE);
@@ -1264,7 +1269,8 @@ void EncodeVisitor::EncodeLoadAndInitClassInAot(EncodeVisitor *enc, Encoder *enc
     auto graph = enc->cg_->GetGraph();
     ScopedTmpReg tmpReg(encoder);
     auto aotData = graph->GetAotData();
-    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
+    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true,
+                                                  enc->GetCodegen()->GetAOTBinaryFileSnapshotIndexForInst(inst));
     encoder->MakeLoadAotTableAddr(offset, tmpReg, dst);
     auto label = encoder->CreateLabel();
     encoder->EncodeJump(label, dst, Condition::NE);
@@ -1378,7 +1384,8 @@ void EncodeVisitor::VisitResolveObjectFieldStatic(GraphVisitor *visitor, Inst *i
     EntrypointId entrypoint = EntrypointId::GET_UNKNOWN_STATIC_FIELD_MEMORY_ADDRESS;  // REFERENCE
     UnresolvedTypesInterface::SlotKind slotKind = UnresolvedTypesInterface::SlotKind::FIELD;
     if (graph->IsAotMode()) {
-        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, entrypoint, dst, TypedImm(typeId), TypedImm(0));
+        auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, typeId);
+        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, entrypoint, dst, TypedImm(typeIdImm), TypedImm(0));
     } else {
         ScopedTmpReg tmpReg(enc->GetEncoder());
         ASSERT(graph->GetRuntime()->GetUnresolvedTypes() != nullptr);
@@ -1474,7 +1481,8 @@ void EncodeVisitor::VisitUnresolvedStoreStatic(GraphVisitor *visitor, Inst *inst
     auto entrypoint = RuntimeInterface::EntrypointId::UNRESOLVED_STORE_STATIC_BARRIERED;
     auto method = storeStatic->GetMethod();
     ASSERT(method != nullptr);
-    enc->GetCodegen()->CallRuntimeWithMethod(storeStatic, method, entrypoint, Reg(), TypedImm(typeId), value);
+    auto typeIdImm = enc->GetCodegen()->GetTypeIdImm(inst, typeId);
+    enc->GetCodegen()->CallRuntimeWithMethod(storeStatic, method, entrypoint, Reg(), typeIdImm, value);
 }
 
 void EncodeVisitor::VisitStoreResolvedObjectFieldStatic(GraphVisitor *visitor, Inst *inst)
@@ -2037,6 +2045,13 @@ void EncodeVisitor::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
     auto id = intrinsic->GetIntrinsicId();
     auto arch = codegen->GetGraph()->GetArch();
     auto runtime = codegen->GetGraph()->GetRuntime();
+    if (codegen->GetGraph()->IsStringFlatCheckConstraint() && GetStringFlatCheckArgMask(id) > 0) {
+        // Tree strings are enabled and StringFlatCheck is disabled but IRTOC implementation requires flat string, so
+        // call CPP implementation
+        codegen->CreateCallIntrinsic(intrinsic);
+        return;
+    }
+
     if (EncodesBuiltin(runtime, id, arch) || IsIrtocIntrinsic(id)) {
         codegen->CreateBuiltinIntrinsic(intrinsic);
         return;
@@ -2283,36 +2298,81 @@ void EncodeVisitor::VisitSafePoint(GraphVisitor *visitor, Inst *inst)
     slowPath->BindBackLabel(encoder);
 }
 
+template <typename SelectInstType, typename = std::enable_if_t<!std::is_same_v<SelectInstType, Inst>>>
+static auto GetFourthOperandOfSelectInst(EncodeVisitor *enc, SelectInstType *inst)
+{
+    constexpr bool FOURTH_OPERAND_IS_IMM = std::is_base_of_v<ImmediateMixin, SelectInstType>;
+    if constexpr (FOURTH_OPERAND_IS_IMM) {
+        return Imm(inst->GetImm());
+    } else {
+        auto cmpType = inst->GetOperandsType();
+        return enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(3), cmpType);  // 3 : Index of 4th operand
+    }
+}
+
+template <typename SelectInstType, typename = std::enable_if_t<!std::is_same_v<SelectInstType, Inst>>>
+static auto DecomposeSelectInputs(EncodeVisitor *enc, SelectInstType *inst)
+{
+    constexpr int32_t IMM_2 = 2;
+    constexpr bool FOURTH_OPERAND_IS_IMM = std::is_base_of_v<ImmediateMixin, SelectInstType>;
+
+    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
+    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), inst->GetOperandsType());
+    auto src3OrImm = GetFourthOperandOfSelectInst(enc, inst);
+    auto cc = enc->GetCodegen()->ConvertCc(inst->GetCc());
+    if constexpr (std::is_same_v<SelectInstType, SelectTransformInst> ||
+                  std::is_same_v<SelectInstType, SelectImmTransformInst>) {
+        using ResultType =
+            std::conditional_t<FOURTH_OPERAND_IS_IMM, Encoder::ArgsSelectImmTransform, Encoder::ArgsSelectTransform>;
+        auto transform = inst->GetSelectTransformType();
+        return ResultType {dst, src0, src1, src2, src3OrImm, cc, transform};
+    } else {
+        using ResultType = std::conditional_t<FOURTH_OPERAND_IS_IMM, Encoder::ArgsSelectImm, Encoder::ArgsSelect>;
+        return ResultType {dst, src0, src1, src2, src3OrImm, cc};
+    }
+}
+
 void EncodeVisitor::VisitSelect(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto cmpType = inst->CastToSelect()->GetOperandsType();
-    constexpr int32_t IMM_2 = 2;
-    constexpr int32_t IMM_3 = 3;
-    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
-    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmpType);
-    auto src3 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_3), cmpType);
-    auto cc = enc->GetCodegen()->ConvertCc(inst->CastToSelect()->GetCc());
-    if (IsTestCc(cc)) {
-        enc->GetEncoder()->EncodeSelectTest({dst, src0, src1, src2, src3, cc});
+    auto encArgs = DecomposeSelectInputs(static_cast<EncodeVisitor *>(visitor), inst->CastToSelect());
+    if (IsTestCc(encArgs.cc)) {
+        enc->GetEncoder()->EncodeSelectTest(encArgs);
     } else {
-        enc->GetEncoder()->EncodeSelect({dst, src0, src1, src2, src3, cc});
+        enc->GetEncoder()->EncodeSelect(encArgs);
     }
 }
 
 void EncodeVisitor::VisitSelectImm(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto cmpType = inst->CastToSelectImm()->GetOperandsType();
-    constexpr int32_t IMM_2 = 2;
-    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
-    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmpType);
-    auto imm = Imm(inst->CastToSelectImm()->GetImm());
-    auto cc = enc->GetCodegen()->ConvertCc(inst->CastToSelectImm()->GetCc());
-    if (IsTestCc(cc)) {
-        enc->GetEncoder()->EncodeSelectTest({dst, src0, src1, src2, imm, cc});
+    auto encArgs = DecomposeSelectInputs(enc, inst->CastToSelectImm());
+    if (IsTestCc(encArgs.cc)) {
+        enc->GetEncoder()->EncodeSelectTest(encArgs);
     } else {
-        enc->GetEncoder()->EncodeSelect({dst, src0, src1, src2, imm, cc});
+        enc->GetEncoder()->EncodeSelect(encArgs);
+    }
+}
+
+void EncodeVisitor::VisitSelectTransform(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    auto encArgs = DecomposeSelectInputs(enc, inst->CastToSelectTransform());
+    if (IsTestCc(encArgs.cc)) {
+        enc->GetEncoder()->EncodeSelectTestTransform(encArgs);
+    } else {
+        enc->GetEncoder()->EncodeSelectTransform(encArgs);
+    }
+}
+
+void EncodeVisitor::VisitSelectImmTransform(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    auto encArgs = DecomposeSelectInputs(enc, inst->CastToSelectImmTransform());
+    if (IsTestCc(encArgs.cc)) {
+        enc->GetEncoder()->EncodeSelectTestTransform(encArgs);
+    } else {
+        enc->GetEncoder()->EncodeSelectTransform(encArgs);
     }
 }
 
@@ -2798,4 +2858,15 @@ void EncodeVisitor::VisitResolveByName(GraphVisitor *visitor, Inst *inst)
     enc->GetCodegen()->ResolveCallByName(inst->CastToResolveByName());
 }
 
+void EncodeVisitor::VisitStringFlatCheck(GraphVisitor *visitor, Inst *inst)
+{
+    auto *cg = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
+    auto dst = cg->ConvertRegister(inst->GetDstReg(), inst->GetType());
+    auto src = cg->ConvertRegister(inst->GetSrcReg(0), inst->GetInputType(0));
+    if (cg->GetArch() == Arch::AARCH32) {
+        cg->CallRuntime(inst, EntrypointId::STRING_FLAT_CHECK_ARM32, dst, RegMask::GetZeroMask(), src);
+    } else {
+        cg->CallFastPath(inst, EntrypointId::STRING_FLAT_CHECK, dst, {}, src);
+    }
+}
 }  // namespace ark::compiler

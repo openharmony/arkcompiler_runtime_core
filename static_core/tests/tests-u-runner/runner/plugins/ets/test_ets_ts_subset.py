@@ -149,7 +149,7 @@ class TestTSSubset(TestETS):
         return self.run_one_step(
             name="ts_node",
             params=params,
-            result_validator=lambda _, _2, rc: self._runtime_result_validator(rc)
+            result_validator=lambda _, _2, rc: self._ts_node_result_validator(rc)
         )
 
     def _run_node(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
@@ -167,7 +167,7 @@ class TestTSSubset(TestETS):
         self.passed, self.node_report, self.fail_kind = self.run_one_step(
             name="node",
             params=params,
-            result_validator=lambda _, _2, rc: self._runtime_result_validator(rc)
+            result_validator=self._runtime_result_validator
         )
 
         return self.passed, self.node_report, self.fail_kind

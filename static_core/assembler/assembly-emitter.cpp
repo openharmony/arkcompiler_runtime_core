@@ -14,13 +14,13 @@
  */
 
 #include "assembly-emitter.h"
-#include "file_items.h"
-#include "file_writer.h"
-#include "literal_data_accessor.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/file_writer.h"
+#include "libarkfile/literal_data_accessor.h"
 #include "mangling.h"
-#include "os/file.h"
+#include "libarkbase/os/file.h"
 #include "runtime/include/profiling_gen.h"
-#include "libpandafile/type_helper.h"
+#include "libarkfile/type_helper.h"
 
 #include <algorithm>
 #include <iostream>
@@ -478,6 +478,7 @@ ScalarValueItem *AsmEmitter::CreateScalarRecordValueItem(
         classItem = it->second;
     } else {
         classItem = container->GetOrCreateForeignClassItem(type.GetDescriptor());
+        ASSERT(classItem != nullptr);
     }
 
     if (out != nullptr) {
@@ -824,6 +825,7 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
                 AddBytecodeIndexDependencies(method, insn, entities.staticMethodItems, entities);
                 return;
             }
+            UNREACHABLE();
         }
         ASSERT_PRINT(it != items.cend(), "Symbol '" << id << "' not found");
 
@@ -1040,6 +1042,7 @@ void AsmEmitter::MakeArrayTypeItems(ItemContainer *items, const Program &program
 {
     for (const auto &t : program.arrayTypes) {
         auto *foreignRecord = items->GetOrCreateForeignClassItem(t.GetDescriptor());
+        ASSERT(foreignRecord != nullptr);
         entities.classItems.insert({t.GetName(), foreignRecord});
     }
 }
@@ -1053,6 +1056,10 @@ bool AsmEmitter::HandleRecordAsForeign(
 {
     Type recordType = Type::FromName(name);
     auto *foreignRecord = items->GetOrCreateForeignClassItem(recordType.GetDescriptor(rec.conflict));
+    if (foreignRecord == nullptr) {
+        SetLastError("'" + name + "' is already defined.");
+        return false;
+    }
     entities.classItems.insert({name, foreignRecord});
     for (const auto &f : rec.fieldList) {
         ASSERT(f.metadata->IsForeign());
@@ -1088,7 +1095,9 @@ bool AsmEmitter::HandleBaseRecord(ItemContainer *items, const Program &program, 
         auto &rec = it->second;
         Type baseType(baseName, 0);
         if (rec.metadata->IsForeign()) {
-            record->SetSuperClass(items->GetOrCreateForeignClassItem(baseType.GetDescriptor(rec.conflict)));
+            auto item = items->GetOrCreateForeignClassItem(baseType.GetDescriptor(rec.conflict));
+            ASSERT(item != nullptr);
+            record->SetSuperClass(item);
         } else {
             record->SetSuperClass(items->GetOrCreateClassItem(baseType.GetDescriptor(rec.conflict)));
         }
@@ -1112,7 +1121,9 @@ bool AsmEmitter::HandleInterfaces(ItemContainer *items, const Program &program, 
         auto &iface = it->second;
         Type ifaceType(item, 0);
         if (iface.metadata->IsForeign()) {
-            record->AddInterface(items->GetOrCreateForeignClassItem(ifaceType.GetDescriptor(iface.conflict)));
+            auto foreignItem = items->GetOrCreateForeignClassItem(ifaceType.GetDescriptor(iface.conflict));
+            ASSERT(foreignItem);
+            record->AddInterface(foreignItem);
         } else {
             record->AddInterface(items->GetOrCreateClassItem(ifaceType.GetDescriptor(iface.conflict)));
         }
@@ -1432,7 +1443,36 @@ bool AsmEmitter::MakeFunctionItems(
         return false;
     }
 
+    AddFakeIndexDependenciesForUnusedItems(entities);
+
     return true;
+}
+
+/// NOTE: (mivanov) Method below will be removed after #30937 implemented
+/*static*/
+void AsmEmitter::AddFakeIndexDependenciesForUnusedItems(AsmEmitter::AsmEntityCollections &entities)
+{
+    static std::vector<std::pair<std::string, std::vector<std::string>>> UNUSED_ITEM_KEYS_TO_EMIT = {
+        {
+            "std.core.String.%%get-length:i32;",
+            {"std.core.StringBuilder.%%get-stringLength:i32;"},
+        },
+    };
+
+    for (auto &[key, values] : UNUSED_ITEM_KEYS_TO_EMIT) {
+        auto dependant = entities.methodItems.find(key);
+        if (dependant == entities.methodItems.end()) {
+            continue;
+        }
+
+        for (auto &value : values) {
+            auto dependency = entities.methodItems.find(value);
+            if (dependency == entities.methodItems.end()) {
+                continue;
+            }
+            dependant->second->AddIndexDependency(dependency->second);
+        }
+    }
 }
 
 /* static */
@@ -1901,7 +1941,9 @@ TypeItem *AsmEmitter::GetTypeItem(
     }
 
     if (type.IsArray() || type.IsUnion()) {
-        return items->GetOrCreateForeignClassItem(type.GetDescriptor());
+        auto item = items->GetOrCreateForeignClassItem(type.GetDescriptor());
+        ASSERT(item != nullptr);
+        return item;
     }
 
     const auto &name = type.GetName();
@@ -1913,7 +1955,9 @@ TypeItem *AsmEmitter::GetTypeItem(
     auto &rec = iter->second;
 
     if (rec.metadata->IsForeign()) {
-        return items->GetOrCreateForeignClassItem(type.GetDescriptor());
+        auto item = items->GetOrCreateForeignClassItem(type.GetDescriptor());
+        ASSERT(item != nullptr);
+        return item;
     }
 
     return items->GetOrCreateClassItem(type.GetDescriptor());
@@ -1955,34 +1999,36 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
     return true;
 }
 
-void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, ItemContainer *container,
-                                 std::vector<uint8_t> *constantPool, uint32_t &pcInc, size_t instructionNumber) const
+static void TryEmitPc(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool, uint32_t &pcInc)
 {
-    auto tryEmitPc = [program, constantPool, &pcInc]() -> void {
-        if (pcInc != 0) {
-            program->EmitAdvancePc(constantPool, pcInc);
-            pcInc = 0;
+    if (pcInc != 0U) {
+        program->EmitAdvancePc(constantPool, pcInc);
+        pcInc = 0;
+    }
+}
+
+void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, ItemContainer *container,
+                                 std::vector<uint8_t> *constantPool, uint32_t &pcInc, size_t instructionNumber,
+                                 size_t variableIndex) const
+{
+    ASSERT(variableIndex < localVariableDebug.size());
+    const auto &v = localVariableDebug[variableIndex];
+    ASSERT(!IsParameter(v.reg));
+    if (instructionNumber == v.start) {
+        TryEmitPc(program, constantPool, pcInc);
+        StringItem *variableName = container->GetOrCreateStringItem(v.name);
+        StringItem *variableType = container->GetOrCreateStringItem(v.signature);
+        if (v.signatureType.empty()) {
+            program->EmitStartLocal(constantPool, v.reg, variableName, variableType);
+        } else {
+            StringItem *typeSignature = container->GetOrCreateStringItem(v.signatureType);
+            program->EmitStartLocalExtended(constantPool, v.reg, variableName, variableType, typeSignature);
         }
-    };
-    for (auto &v : localVariableDebug) {
-        if (IsParameter(v.reg)) {
-            continue;
-        }
-        if (instructionNumber == v.start) {
-            tryEmitPc();
-            StringItem *variableName = container->GetOrCreateStringItem(v.name);
-            StringItem *variableType = container->GetOrCreateStringItem(v.signature);
-            if (v.signatureType.empty()) {
-                program->EmitStartLocal(constantPool, v.reg, variableName, variableType);
-            } else {
-                StringItem *typeSignature = container->GetOrCreateStringItem(v.signatureType);
-                program->EmitStartLocalExtended(constantPool, v.reg, variableName, variableType, typeSignature);
-            }
-        }
-        if (instructionNumber == (v.start + v.length)) {
-            tryEmitPc();
-            program->EmitEndLocal(v.reg);
-        }
+    }
+
+    if (instructionNumber == (v.start + v.length)) {
+        TryEmitPc(program, constantPool, pcInc);
+        program->EmitEndLocal(v.reg);
     }
 }
 
@@ -2035,6 +2081,25 @@ void Function::EmitColumnNumber(panda_file::LineNumberProgramItem *program, std:
     }
 }
 
+void Function::CollectLocalVariable(std::vector<Function::LocalVariablePair> &localVariableInfo) const
+{
+    for (size_t i = 0; i < localVariableDebug.size(); i++) {
+        const auto &v = localVariableDebug[i];
+        if (IsParameter(v.reg)) {
+            continue;
+        }
+        localVariableInfo.emplace_back(v.start, i);
+        localVariableInfo.emplace_back(v.start + v.length, i);
+    }
+
+    // clang-format off
+    std::sort(localVariableInfo.begin(), localVariableInfo.end(),
+        [](const Function::LocalVariablePair &a, const Function::LocalVariablePair &b) {
+            return a.insnOrder < b.insnOrder;
+        });
+    // clang-format on
+}
+
 void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, const std::vector<uint8_t> &bytecode,
                                       ItemContainer *container, std::vector<uint8_t> *constantPool,
                                       bool emitDebugInfo) const
@@ -2052,25 +2117,41 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, cons
     BytecodeInstruction bi(bytecode.data());
     debugItem->SetLineNumber(prevLineNumber);
 
-    for (size_t i = 0; i < ins.size(); i++) {
-        if (emitDebugInfo) {
-            EmitLocalVariable(program, container, constantPool, pcInc, i);
-        }
-        if (ins[i].opcode == Opcode::INVALID) {
-            continue;
-        }
-
-        if (emitDebugInfo || ins[i].CanThrow()) {
-            EmitLineNumber(program, constantPool, prevLineNumber, pcInc, i);
-        }
-
-        if (ark::panda_file::IsDynamicLanguage(language) && emitDebugInfo) {
-            EmitColumnNumber(program, constantPool, prevColumnNumber, pcInc, i);
-        }
-
-        pcInc += bi.GetSize();
-        bi = bi.GetNext();
+    std::vector<Function::LocalVariablePair> localVariableInfo;
+    if (emitDebugInfo) {
+        CollectLocalVariable(localVariableInfo);
     }
+    const size_t numIns = ins.size();
+    size_t start = 0;
+    auto iter = localVariableInfo.begin();
+    do {
+        size_t end = emitDebugInfo && iter != localVariableInfo.end() ? iter->insnOrder : numIns;
+        for (size_t i = start; i < end && i < numIns; i++) {
+            /**
+             * If you change the continue condition of this loop, you need to synchronously modify the same condition
+             * of the BuildMapFromPcToIns method in the optimizer-bytecode.cpp.
+             */
+            if (ins[i].opcode == Opcode::INVALID) {
+                continue;
+            }
+            if (emitDebugInfo || ins[i].CanThrow()) {
+                EmitLineNumber(program, constantPool, prevLineNumber, pcInc, i);
+            }
+            if (ark::panda_file::IsDynamicLanguage(language) && emitDebugInfo) {
+                EmitColumnNumber(program, constantPool, prevColumnNumber, pcInc, i);
+            }
+            pcInc += bi.GetSize();
+            bi = bi.GetNext();
+        }
+        if (iter == localVariableInfo.end() || end >= numIns) {
+            break;
+        }
+        if (emitDebugInfo) {
+            EmitLocalVariable(program, container, constantPool, pcInc, end, iter->variableIndex);
+        }
+        start = end;
+        iter++;
+    } while (true);
 
     program->EmitEnd();
 }

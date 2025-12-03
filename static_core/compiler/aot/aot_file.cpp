@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 #include "aot_file.h"
 #include "compiler/optimizer/ir/inst.h"
 #include "optimizer/ir/runtime_interface.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "code_info/code_info.h"
 #include "mem/gc/gc_types.h"
-#include "trace/trace.h"
+#include "libarkbase/trace/trace.h"
 #include "entrypoints/entrypoints.h"
 
 // In some targets, runtime library is not linked, so linker will fail while searching CallStaticPltResolver symbol.

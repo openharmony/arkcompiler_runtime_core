@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,10 @@
 #include <llvm/IR/IntrinsicsAArch64.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
-using llvm::BasicBlock;
-using llvm::CallInst;
+#define DEBUG_TYPE "mem-barriers"
+
 using llvm::Function;
 using llvm::FunctionAnalysisManager;
-using llvm::Instruction;
 
 namespace ark::llvmbackend::passes {
 
@@ -43,7 +42,9 @@ MemBarriers::MemBarriers(LLVMArkInterface *arkInterface, bool optimize)
 llvm::PreservedAnalyses MemBarriers::run(Function &function, FunctionAnalysisManager & /*analysisManager*/)
 {
     bool changed = false;
-    for (BasicBlock &block : function) {
+    uint32_t dmbSunk = 0;
+
+    for (llvm::BasicBlock &block : function) {
         llvm::SmallVector<llvm::Instruction *> needsBarrier;
         llvm::SmallVector<llvm::Instruction *> mergeSet;
         for (auto &inst : block) {
@@ -57,13 +58,25 @@ llvm::PreservedAnalyses MemBarriers::run(Function &function, FunctionAnalysisMan
             }
         }
 
-        MergeBarriers(mergeSet, needsBarrier);
+        if (optimize_ && SinkBarriers(block, mergeSet)) {
+            changed = true;  // sank dmb to successor
+            dmbSunk++;
+        } else {
+            MergeBarriers(mergeSet, needsBarrier);  // not able to sink dmb
+        }
+
         for (auto inst : needsBarrier) {
             auto builder = llvm::IRBuilder<>(inst->getNextNode());
             builder.CreateFence(llvm::AtomicOrdering::Release);
             changed = true;
         }
     }
+
+    LLVM_DEBUG(llvm::dbgs() << "Number of dmb's sunk: " << dmbSunk << "\n");
+    if (dmbSunk != 0) {
+        LLVM_DEBUG(llvm::dbgs() << "Sunk function name: " << function.getName() << "\n");
+    }
+
     changed |= RelaxBarriers(function);
 
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
@@ -100,6 +113,90 @@ void MemBarriers::MergeBarriers(llvm::SmallVector<llvm::Instruction *> &mergeSet
         needsBarrier.append(mergeSet);
     }
     mergeSet.clear();
+}
+
+bool MemBarriers::SinkBarriers(llvm::BasicBlock &block, llvm::SmallVector<llvm::Instruction *> &mergeSet)
+{
+    if (mergeSet.empty()) {
+        return false;  // no dmb to sink
+    }
+
+    const uint32_t kExpectedSuccessors = 2;
+
+    auto *br = llvm::dyn_cast<llvm::BranchInst>(block.getTerminator());
+    if (br == nullptr || !br->isConditional() || br->getNumSuccessors() != kExpectedSuccessors) {
+        return false;  // Terminator is not br with 2 branches
+    }
+
+    // get two successor paths
+    llvm::BasicBlock *path0 = br->getSuccessor(0);
+    llvm::BasicBlock *path1 = br->getSuccessor(1);
+    if (path0 == nullptr || path1 == nullptr) {
+        return false;
+    }
+
+    // get if both paths are protected
+    bool pp0 = IsProtectedPath(*path0, mergeSet);
+    bool pp1 = IsProtectedPath(*path1, mergeSet);
+    if (!pp0 && !pp1) {
+        return false;  // both path are not protected, no need to sink
+    }
+    if (pp0 && pp1) {
+        LLVM_DEBUG(llvm::dbgs() << "both paths are protected!\n");
+        return true;  // both path are protected, don't need to add any dmb
+    }
+    if (!pp0) {
+        std::swap(path0, path1);  // so that path0 is always the protected path
+    }
+
+    // dmb sink to path1 if and only if path1 have exactly 1 predecessor
+    if (path1->getSinglePredecessor() == nullptr) {
+        return false;
+    }
+
+    // get the instruction that grabs protected object, or encounter deoptimization call
+    llvm::Instruction *instToInsert = &(path1->back());
+    for (auto &inst : *path1) {
+        if (inst.mayWriteToMemory() && GrabsGuarded(&inst, mergeSet)) {
+            instToInsert = &inst;
+            break;
+        }
+        auto call = llvm::dyn_cast<llvm::CallInst>(&inst);
+        if (call == nullptr) {
+            continue;
+        }
+        if (call->getIntrinsicID() == llvm::Intrinsic::experimental_deoptimize) {
+            instToInsert = &inst;
+            break;
+        }
+    }
+
+    auto builder = llvm::IRBuilder<>(instToInsert);
+    builder.CreateFence(llvm::AtomicOrdering::Release);
+    LLVM_DEBUG(llvm::dbgs() << "one path is protected, sinking to the other...\n");
+    return true;
+}
+
+bool MemBarriers::IsProtectedPath(llvm::BasicBlock &block, llvm::SmallVector<llvm::Instruction *> &mergeSet)
+{
+    llvm::SmallVector<llvm::Instruction *> curMergeSet;
+    for (auto &inst : block) {
+        auto callInst = llvm::dyn_cast<llvm::CallInst>(&inst);
+        // add to current merge set (for use to check if path would be protected)
+        if (callInst != nullptr && callInst->hasFnAttr("needs-mem-barrier")) {
+            curMergeSet.push_back(callInst);
+            continue;
+        }
+        // If the path is protected
+        if (inst.mayWriteToMemory() && GrabsGuarded(&inst, curMergeSet)) {
+            return true;
+        }
+        // If the path is not protected
+        if (inst.mayWriteToMemory() && GrabsGuarded(&inst, mergeSet)) {
+            return false;
+        }
+    }
+    return false;
 }
 
 bool MemBarriers::RelaxBarriers(llvm::Function &function)

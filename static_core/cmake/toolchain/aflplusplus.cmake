@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,7 +28,7 @@ set_cxx_compiler(afl-clang-fast++)
 set(AFL_NOOPT --afl_noopt)
 
 add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT=1)
-add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT_FOR="/libpandafile/,/libpandabase/")
+add_definitions(-DFUZZING_EXIT_ON_FAILED_ASSERT_FOR="/libarkfile/,/libarkbase/")
 
 set(FUZZER_LIB "/usr/lib/afl/libAFLDriver.a")
 set(PANDA_WITH_TESTS false CACHE STRING "" FORCE)

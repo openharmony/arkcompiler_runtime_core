@@ -18,7 +18,7 @@ package std.core;
 /**
  * @class Represents a boxed object value
  */
-export class Box<T> {
+export final class Box<T> {
     private value: T|null;
 
     public constructor() {
@@ -55,7 +55,7 @@ export class Box<T> {
     }
 }
 
-export class BooleanBox {
+export final class BooleanBox {
     private value: boolean;
 
     public constructor() {
@@ -92,7 +92,7 @@ export class BooleanBox {
     }
 }
 
-export class ByteBox {
+export final class ByteBox {
     private value: byte;
 
     public constructor() {
@@ -129,7 +129,7 @@ export class ByteBox {
     }
 }
 
-export class CharBox {
+export final class CharBox {
     private value: char;
 
     public constructor() {
@@ -166,7 +166,7 @@ export class CharBox {
     }
 }
 
-export class ShortBox {
+export final class ShortBox {
     private value: short;
 
     public constructor() {
@@ -203,7 +203,7 @@ export class ShortBox {
     }
 }
 
-export class IntBox {
+export final class IntBox {
     private value: int;
 
     public constructor() {
@@ -240,7 +240,7 @@ export class IntBox {
     }
 }
 
-export class LongBox {
+export final class LongBox {
     private value: long;
 
     public constructor() {
@@ -277,7 +277,7 @@ export class LongBox {
     }
 }
 
-export class FloatBox {
+export final class FloatBox {
     private value: float;
 
     public constructor() {
@@ -314,7 +314,7 @@ export class FloatBox {
     }
 }
 
-export class DoubleBox {
+export final class DoubleBox {
     private value: double;
 
     public constructor() {

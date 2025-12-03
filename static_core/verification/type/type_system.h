@@ -16,7 +16,7 @@
 #ifndef PANDA_TYPE_SYSTEM_HPP
 #define PANDA_TYPE_SYSTEM_HPP
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/class.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/method.h"
@@ -24,6 +24,8 @@
 
 #include "verification/type/type_type.h"
 #include "verification/value/variables.h"
+
+#include "include/class_linker.h"
 
 #include <memory>
 #include <variant>
@@ -150,6 +152,15 @@ private:
     void DisplayMethods(std::function<void(PandaString const &, PandaString const &)> const &handler) const;
     void DisplaySubtyping(std::function<void(PandaString const &, PandaString const &)> const &handler);
 };
+
+std::optional<Class *> GetClosestCommonAncestor(const ClassLinkerContext *ctx, Class *source, Class *target);
+
+Class *FindCommonAncestorForConstituentTypes(ClassLinker *linker, ClassLinkerContext *ctx,
+                                             const LanguageContext &langCtx, const Class *unionClass,
+                                             ClassLinkerErrorHandler *handler /* = nullptr */);
+
+Class *FindCommonAncestor(ClassLinker *linker, ClassLinkerContext *ctx, const LanguageContext &langCtx,
+                          const Class *klass, ClassLinkerErrorHandler *handler /* = nullptr */);
 
 }  // namespace ark::verifier
 

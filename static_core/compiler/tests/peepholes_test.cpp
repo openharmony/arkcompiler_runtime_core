@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "libpandabase/utils/utils.h"
-#include "macros.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkbase/macros.h"
 #include "unit_test.h"
 #include "optimizer/ir/graph_cloner.h"
 #include "optimizer/optimizations/peepholes.h"

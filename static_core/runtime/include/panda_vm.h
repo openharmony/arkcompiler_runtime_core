@@ -25,7 +25,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/gc/gc_phase.h"
 
-#include "libpandabase/utils/expected.h"
+#include "libarkbase/utils/expected.h"
 
 namespace ark {
 

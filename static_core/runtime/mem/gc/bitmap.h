@@ -22,11 +22,11 @@
 #include <cstring>
 #include <atomic>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/utils/bit_utils.h"
-#include "libpandabase/utils/math_helpers.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/math_helpers.h"
+#include "libarkbase/utils/span.h"
 
 namespace ark::mem {
 

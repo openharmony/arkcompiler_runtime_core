@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_COROUTINES_AFFINITY_MASK_H
 #define PANDA_RUNTIME_COROUTINES_AFFINITY_MASK_H
 
-#include "libpandabase/globals.h"
+#include "libarkbase/globals.h"
 
 #include "runtime/coroutines/coroutine_worker.h"
 

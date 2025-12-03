@@ -15,8 +15,8 @@
 #ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LOCATION_MASK_H
 #define COMPILER_OPTIMIZER_OPTIMIZATIONS_LOCATION_MASK_H
 
-#include "mem/arena_allocator.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkbase/utils/arena_containers.h"
 #include <algorithm>
 
 namespace ark::compiler {

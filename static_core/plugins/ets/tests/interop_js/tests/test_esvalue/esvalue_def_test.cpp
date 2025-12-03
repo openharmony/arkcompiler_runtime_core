@@ -215,6 +215,7 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_instanceOf)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceOfNumeric"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceOfStaticPrimitive"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceOfDynamic"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceOfNullOrUndefined"));
 }
 
 TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_instaniate)

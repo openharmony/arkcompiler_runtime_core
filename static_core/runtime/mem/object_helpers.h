@@ -17,8 +17,8 @@
 
 #include <functional>
 
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/mem/mem.h"
 
 #include "runtime/mem/gc/gc_root_type.h"
 #include "runtime/include/object_header.h"

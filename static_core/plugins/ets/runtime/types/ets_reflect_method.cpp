@@ -41,12 +41,13 @@ EtsReflectMethod *EtsReflectMethod::CreateFromEtsMethod(EtsCoroutine *coro, EtsM
     bool isStatic = method->IsStatic();
     bool isConstructor = method->IsConstructor();
 
+    [[maybe_unused]] EtsHandleScope scope(coro);
+
     auto reflectMethod = EtsHandle<EtsReflectMethod>(coro, EtsReflectMethod::Create(coro, isStatic, isConstructor));
     if (UNLIKELY(reflectMethod.GetPtr() == nullptr)) {
         ASSERT(coro->HasPendingException());
         return nullptr;
     }
-    ASSERT(reflectMethod.GetPtr() != nullptr);
 
     auto *ownerType = method->GetClass();
     reflectMethod->SetOwnerType(ownerType);

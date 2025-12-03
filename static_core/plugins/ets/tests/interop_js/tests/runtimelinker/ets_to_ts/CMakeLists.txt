@@ -19,5 +19,4 @@ panda_ets_interop_js_gtest(ets_interop_js_runtime_linker_ets_to_ts
                 ${CMAKE_CURRENT_SOURCE_DIR}/runtimelinker4.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_runtimelinker.ts
     PACKAGE_NAME "runtime_linker_ets_to_ts"
-    COMPILATION_WITH_RUNTIMELINKER
 )

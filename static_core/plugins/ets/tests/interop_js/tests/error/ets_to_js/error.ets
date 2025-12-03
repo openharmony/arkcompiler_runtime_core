@@ -20,7 +20,7 @@ let foo1 = module.getProperty('foo1');
 export function bar0(): void {
     try {
         foo0.invoke();
-    } catch (e: Error) {
+    } catch (e) {
         let errObj: ESValue = (e as ESError).getValue()
         console.log("e ets: " + errObj.toNumber())
         throw e

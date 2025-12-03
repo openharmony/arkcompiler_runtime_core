@@ -15,7 +15,7 @@
 
 #include <cstdint>
 
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/coretypes/native_pointer.h"
@@ -26,7 +26,8 @@
 #include "runtime/include/mtmanaged_thread.h"
 #include "runtime/jit/profiling_data.h"
 #include "runtime/mem/tlab.h"
-#include "utils/cframe_layout.h"
+#include "libarkbase/utils/cframe_layout.h"
+#include "runtime/include/flattened_string_cache.h"
 
 #include "plugins_defines.h"
 

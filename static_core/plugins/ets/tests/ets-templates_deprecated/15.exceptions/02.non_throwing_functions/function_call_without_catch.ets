@@ -20,7 +20,7 @@ tags: [compile-only, negative]
 ---*/
 
 function bar(): void throws {
-  throw new Exception();
+  throw new Error();
 }
 
 function main(): void {

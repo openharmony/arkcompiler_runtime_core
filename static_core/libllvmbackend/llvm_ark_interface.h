@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,7 +90,8 @@ public:
     const char *GetThreadRegister() const;
     const char *GetFramePointerRegister() const;
 
-    uintptr_t GetEntrypointTlsOffset(EntrypointId id) const;
+    uintptr_t GetEntrypointsTablePointerTlsOffset() const;
+    uintptr_t GetEntrypointOffset(EntrypointId id) const;
     size_t GetTlsFrameKindOffset() const;
     size_t GetTlsPreWrbEntrypointOffset() const;
 

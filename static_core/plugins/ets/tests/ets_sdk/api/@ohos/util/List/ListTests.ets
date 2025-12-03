@@ -106,13 +106,13 @@ function testBasicOperationsAndMethods() {
     arktest.assertEQ(list.getIndexOf(5), 5);
 
     list.removeByIndex(10);
-    testArray.splice(10.0, 1.0);
+    testArray.splice(10, 1);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
     }
 
     list.remove(9);
-    testArray.splice(9.0, 1.0);
+    testArray.splice(9, 1);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
         testArray[i] = testArray[i] * 2;
@@ -128,7 +128,7 @@ function testBasicOperationsAndMethods() {
     arktest.assertEQ(list.getFirst(), 0);
     arktest.assertEQ(list.getLast(), 16);
     list.insert(999, 3);
-    testArray.splice(3.0, 0.0, 999);
+    testArray.splice(3, 0, 999);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list[i], testArray[i]);
     }
@@ -160,7 +160,14 @@ function testBasicOperationsAndMethods() {
         arktest.assertEQ(d, testArray2[i.toInt()]);
     })
 
-    arktest.assertEQ(list1.get(200), undefined);
+    try {
+        let result = list1.get(200);
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.code, 10200001);
+    }
     arktest.assertEQ(list1.getLastIndexOf(3333), -1);
 
     arktest.expectThrow(() => {list1.removeByIndex(99)});
@@ -215,19 +222,25 @@ function testIndexAccess() {
 
 function testExceptionHandlingWithEmptyContainer() {
     let empty_l = new List<double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty";
+        }
+        return false;
     }
     arktest.expectThrow(() => {empty_l.set(0, 1)}, exceptionCheck);
-    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck1 = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty";
+        }
+        return false;
     }
     arktest.expectThrow(() => {empty_l.removeByIndex(0)}, exceptionCheck1);
-    let exceptionCheck2 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck2 = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty";
+        }
+        return false;
     }
     arktest.expectThrow(() => {empty_l.getSubList(0, 1)}, exceptionCheck2);
 }

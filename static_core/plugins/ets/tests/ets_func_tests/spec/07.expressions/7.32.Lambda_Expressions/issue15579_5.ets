@@ -19,7 +19,7 @@ name: issue15579_5.ets
 tags: [compile-only]
 ---*/
 
-const d = (y: long, m: long) => new Date(y, m, 0);
+const d = (y: int, m: int) => new Date(y, m, 0);
 
 function main(): void {
 }

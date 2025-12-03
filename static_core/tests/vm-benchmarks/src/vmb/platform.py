@@ -25,7 +25,7 @@ from vmb.target import Target
 from vmb.unit import BenchUnit, UNIT_PREFIX
 from vmb.helpers import get_plugins, get_plugin, die
 from vmb.cli import Args
-from vmb.shell import ShellUnix, ShellAdb, ShellHdc, ShellDevice
+from vmb.shell import ShellHost, ShellAdb, ShellHdc, ShellDevice
 from vmb.result import ExtInfo
 from vmb.x_shell import CrossShell
 from vmb.gensettings import GenSettings
@@ -39,7 +39,7 @@ class PlatformBase(CrossShell, ABC):
     """Platform Base."""
 
     def __init__(self, args: Args) -> None:
-        self.__sh = ShellUnix(args.timeout)
+        self.__sh = ShellHost(args.timeout)
         self.__andb = None
         self.__hdc = None
         self.__dev_dir = Path(args.get('device_dir', 'unknown'))
@@ -58,6 +58,8 @@ class PlatformBase(CrossShell, ABC):
         ToolBase.andb_ = self.andb
         ToolBase.hdc_ = self.hdc
         ToolBase.dev_dir = self.dev_dir
+        self.flags = args.get_opts_flags()
+        self.tools = {}
         # dir with shared libs (init before the suite)
         ToolBase.libs = Path(args.get_shared_path()).joinpath('libs').resolve()
         ToolBase.libs.mkdir(parents=True, exist_ok=True)
@@ -66,12 +68,11 @@ class PlatformBase(CrossShell, ABC):
             'tools',
             self.required_tools,
             extra=args.extra_plugins)
-        self.flags = args.get_opts_flags()
-        self.tools = {}
         for n, t in tool_plugins.items():
             tool: ToolBase = t.Tool(self.target,
                                     self.flags,
-                                    args.custom_opts.get(n, []))
+                                    args.custom_opts.get(n, []),
+                                    args.custom_paths.get(n, ''))
             self.tools[n] = tool
             log.info('%s %s', tool.name, tool.version)
 
@@ -109,8 +110,8 @@ class PlatformBase(CrossShell, ABC):
         return self.__dev_dir
 
     @property
-    def sh(self) -> ShellUnix:
-        """Posix shell."""
+    def sh(self) -> ShellHost:
+        """Host shell."""
         return self.__sh
 
     @property
@@ -176,6 +177,9 @@ class PlatformBase(CrossShell, ABC):
     def run_unit(self, bu: BenchUnit) -> None:
         pass
 
+    def lazy_setup(self) -> None:
+        """Override and put some actions after hooks but before suite."""
+
     def cleanup(self, bu: BenchUnit) -> None:
         """Do default cleanup."""
         for binary in bu.binaries:
@@ -189,7 +193,7 @@ class PlatformBase(CrossShell, ABC):
         if Target.HOST == self.target:
             return
         bu.device_path = self.dev_dir.joinpath(bu.path.name)
-        self.x_sh.run(f'mkdir -p {bu.device_path}')
+        self.x_sh.run(f'mkdir -p {bu.device_path.as_posix()}')
         for f in bu.path.glob('*'):
             # skip if suffix filter provided
             if ext and f.suffix not in ext:
@@ -198,11 +202,11 @@ class PlatformBase(CrossShell, ABC):
             self.x_sh.push(p, bu.device_path.joinpath(f.name))
         resources = bu.path.joinpath('resources')
         if resources.exists():
-            device_resources = bu.device_path.joinpath('resources')
+            device_resources = bu.device_path.joinpath('resources').as_posix()
             self.x_sh.run(f'mkdir -p {device_resources}')
             for f in resources.glob('*'):
                 p = f.resolve()
-                self.x_sh.push(p, device_resources.joinpath(f.name))
+                self.x_sh.push(p, bu.device_path.joinpath('resources').joinpath(f.name).as_posix())
 
     def push_libs(self) -> None:
         if Target.HOST == self.target:
@@ -213,7 +217,7 @@ class PlatformBase(CrossShell, ABC):
         if bu.device_path is None:
             return  # Bench Unit wasn't pused to device
         log.trace('Cleaning: %s', bu.device_path)
-        self.x_sh.run(f'rm -rf {bu.device_path}')
+        self.x_sh.run(f'rm -rf {bu.device_path.as_posix()}')
 
     def set_affinity(self, arg: str) -> None:
         self.x_sh.set_affinity(arg)

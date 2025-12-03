@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -243,6 +243,86 @@ TEST_F(AnalysisTest, FixBridgesInOptimizedGraph)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), bridgeExample));
 }
 
-// NOLINTEND(readability-magic-numbers)
+SRC_GRAPH(FixBridgesInGraphWithPhi, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
 
+        BASIC_BLOCK(2U, 3U) {}
+
+        BASIC_BLOCK(3U, 4U, 3U)
+        {
+            INST(10U, Opcode::Phi).Inputs({{2U, 0U}, {3U, 12U}}).ref();
+            INST(11U, Opcode::SaveState).Inputs(10U).SrcVregs({1U});
+            INST(12U, Opcode::Call)
+                .Inputs({{DataType::REFERENCE, 10U}, {DataType::NO_TYPE, 11U}})
+                .SetFlag(compiler::inst_flags::REQUIRE_STATE)
+                .ref();
+            INST(13U, Opcode::Compare).Inputs(1U, 12U).CC(ConditionCode::CC_NE).b();
+            INST(14U, Opcode::IfImm).Inputs(13U).Imm(0U).CC(ConditionCode::CC_NE);
+        }
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(20U, Opcode::SaveState).Inputs(10U).SrcVregs({2U});
+            INST(21U, Opcode::Call)
+                .Inputs({{DataType::REFERENCE, 10U}, {DataType::NO_TYPE, 20U}})
+                .SetFlag(compiler::inst_flags::REQUIRE_STATE)
+                .ref();
+            INST(30U, Opcode::Return).Inputs(21U).ref();
+        }
+    }
+}
+
+OUT_GRAPH(FixBridgesInGraphWithPhi, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).ref();
+
+        BASIC_BLOCK(2U, 3U) {}
+
+        BASIC_BLOCK(3U, 4U, 3U)
+        {
+            INST(10U, Opcode::Phi).Inputs({{2U, 0U}, {3U, 12U}}).ref();
+            INST(11U, Opcode::SaveState).Inputs(10U, 1U).SrcVregs({1U, VirtualRegister::BRIDGE});
+            INST(12U, Opcode::Call)
+                .Inputs({{DataType::REFERENCE, 10U}, {DataType::NO_TYPE, 11U}})
+                .SetFlag(compiler::inst_flags::REQUIRE_STATE)
+                .ref();
+            INST(13U, Opcode::Compare).Inputs(1U, 12U).CC(ConditionCode::CC_NE).b();
+            INST(14U, Opcode::IfImm).Inputs(13U).Imm(0U).CC(ConditionCode::CC_NE);
+        }
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(20U, Opcode::SaveState).Inputs(10U).SrcVregs({2U});
+            INST(21U, Opcode::Call)
+                .Inputs({{DataType::REFERENCE, 10U}, {DataType::NO_TYPE, 20U}})
+                .SetFlag(compiler::inst_flags::REQUIRE_STATE)
+                .ref();
+            INST(30U, Opcode::Return).Inputs(21U).ref();
+        }
+    }
+}
+
+TEST_F(AnalysisTest, FixBridgesInGraphWithPhi)
+{
+    src_graph::FixBridgesInGraphWithPhi::CREATE(GetGraph());
+    auto *param0 = GetGraph()->GetStartBlock()->GetFirstInst();
+    auto *param1 = param0->GetNext();
+
+    SaveStateBridgesBuilder ssb;
+    ssb.FixInstUsageInSS(GetGraph(), param0);
+    ssb.FixInstUsageInSS(GetGraph(), param1);
+
+    Graph *graph = CreateEmptyGraph();
+    out_graph::FixBridgesInGraphWithPhi::CREATE(graph);
+
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+// NOLINTEND(readability-magic-numbers)
 }  // namespace ark::compiler

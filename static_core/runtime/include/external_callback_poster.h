@@ -18,7 +18,7 @@
 
 #include <functional>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 
 namespace ark {
@@ -34,10 +34,10 @@ public:
     NO_MOVE_SEMANTIC(CallbackPoster);
 
     template <typename... Args>
-    void Post(Args... args)
+    void Post(int64_t delayMs, Args... args)
     {
         static_assert(sizeof...(args) == 0);
-        PostImpl();
+        PostImpl(delayMs);
     }
 
     template <class Callback, class... Args>
@@ -65,7 +65,7 @@ protected:
 
     virtual void PostImpl(WrappedCallback &&callback) = 0;
 
-    virtual void PostImpl() {}
+    virtual void PostImpl([[maybe_unused]] int64_t delayMs) {}
 
 private:
     bool destroyInPlace_ = false;

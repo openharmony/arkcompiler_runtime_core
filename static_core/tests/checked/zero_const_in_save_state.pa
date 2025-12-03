@@ -11,12 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# '--verification-mode=disabled' this option here is added to save test logic and remove verifier error
 #! CHECKER      Check that save state gracefully handle 0 when optimizations are disabled, test for 5372
-#! RUN          force_jit: true, options: "--compiler-non-optimizing=true", entry: "_GLOBAL::main0"
+#! RUN          force_jit: true, options: "--verification-mode=disabled --compiler-non-optimizing=true", entry: "_GLOBAL::main0"
 #! EVENT        /Compilation,_GLOBAL::main0,.*COMPILED/
 
 #! CHECKER      Check that save state correctly propogated in presense of null ref, test for 5372
-#! RUN          force_jit: true, options: "--compiler-lowering=false --gc-trigger-type=debug", entry: "_GLOBAL::main1"
+#! RUN          force_jit: true, options: "--verification-mode=disabled --compiler-lowering=false --gc-trigger-type=debug", entry: "_GLOBAL::main1"
 #! EVENT        /Compilation,_GLOBAL::main1,.*COMPILED/
 
 .record E {}

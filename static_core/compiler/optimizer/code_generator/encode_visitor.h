@@ -309,6 +309,10 @@ protected:
 
     static void VisitSelectImm(GraphVisitor *visitor, Inst *inst);
 
+    static void VisitSelectTransform(GraphVisitor *visitor, Inst *inst);
+
+    static void VisitSelectImmTransform(GraphVisitor *visitor, Inst *inst);
+
     static void VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst);
 
     static void VisitLoadArrayPairI(GraphVisitor *visitor, Inst *inst);
@@ -373,6 +377,7 @@ protected:
 
     static void VisitLoadObjectDynamic(GraphVisitor *visitor, Inst *inst);
     static void VisitStoreObjectDynamic(GraphVisitor *visitor, Inst *inst);
+    static void VisitStringFlatCheck(GraphVisitor *visitor, Inst *inst);
 
     void VisitDefault([[maybe_unused]] Inst *inst) override
     {

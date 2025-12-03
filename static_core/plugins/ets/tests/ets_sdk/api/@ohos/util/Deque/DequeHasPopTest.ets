@@ -14,6 +14,7 @@
  */
 
 import Deque from "@ohos.util.Deque";
+import { BusinessError } from "@ohos.base";
 
 class C1 {
     name: string = "";
@@ -82,17 +83,43 @@ function testPopFirstAndRetrieveNewFirst() {
 // Test cases ported from ArkTS 1.0: DEQUE_1300
 function testPopFirstFromEmptyDeque() {
     let deque = new Deque<double>();
-    deque.popFirst();
-    let result = deque.getFirst();
-    arktest.assertEQ(result, undefined);
+    try {
+        let first = deque.popFirst();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let first = deque.getFirst();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 // Test cases ported from ArkTS 1.0: DEQUE_1500
 function testGetFirstFromEmptyDeque() {
     let deque = new Deque<double>();
-    deque.popLast();
-    let result = deque.getFirst();
-    arktest.assertEQ(result, undefined);
+    try {
+        let first = deque.popLast();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+    try {
+        let first = deque.getFirst();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 // Test cases ported from ArkTS 1.0: DEQUE_1600
@@ -109,8 +136,14 @@ function testGetLastAfterMultipleInserts() {
 // Test cases ported from ArkTS 1.0: DEQUE_1700
 function testGetLastFromEmptyDeque() {
     let deque = new Deque<double>();
-    let result = deque.getLast();
-    arktest.assertEQ(result, undefined);
+    try {
+        let first = deque.getLast();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 // Test cases ported from ArkTS 1.0: DEQUE_1800

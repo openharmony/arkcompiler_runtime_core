@@ -89,16 +89,6 @@ AbckitCoreClass *GetAbckitCoreClass(AbckitFile *file, std::string moduleName, st
     return classFinder.klass;
 }
 
-void ClassRemoveFieldTransformSayHelloIr(AbckitGraph *graph)
-{
-    auto *call = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_LOADOBJECT);
-    g_implG->iRemove(call);
-    auto *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID);
-    auto preInst = g_implG->iGetPrev(ret);
-    g_implG->iRemove(preInst);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-}
-
 TEST_F(LibAbcKitModifyClassApiTests, ClassRemoveFieldTest0)
 {
     std::string input1 = ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/class_remove_field_static_delete.abc";
@@ -110,14 +100,23 @@ TEST_F(LibAbcKitModifyClassApiTests, ClassRemoveFieldTest0)
 
     auto outPutRst = helpers::ExecuteStaticAbc(input1, "class_remove_field_static_delete", "main");
     EXPECT_TRUE(helpers::Match(outPutRst, "yyy\n"));
-    helpers::TransformMethod(
-        input1, removeCallPath, "sayHello:class_remove_field_static_delete.Student;void;",
-        [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) { ClassRemoveFieldTransformSayHelloIr(graph); });
+    helpers::TransformMethod(input1, removeCallPath, "sayHello:class_remove_field_static_delete.Student;void;",
+                             [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
+                                 auto *call = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_LOADOBJECT);
+                                 g_implG->iRemove(call);
+                                 auto *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID);
+                                 auto preInst = g_implG->iGetPrev(ret);
+                                 g_implG->iRemove(preInst);
+                                 ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                             });
     helpers::TransformMethod(removeCallPath, removeCallPath1, "_ctor_:class_remove_field_static_delete.Student;void;",
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                                 auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_STOREOBJECT);
-                                 g_implG->iRemove(inst);
+                                 auto *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID);
+                                 auto preInst = g_implG->iGetPrev(ret);
+                                 g_implG->iRemove(preInst);
+                                 ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
                              });
+
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(removeCallPath1.c_str(), &file);
     auto klass = GetAbckitCoreClass(file, "class_remove_field_static_delete", "Student");

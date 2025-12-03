@@ -25,8 +25,10 @@ function stubt<T>(): T {
 function assert_stub(f: () => void) {
     try {
         f();
-    } catch (e: StubError) {
-        return;
+    } catch (e) {
+        if (e instanceof StubError) {
+            return;
+        }
     }
     arktest.assertTrue(false, "error expected");
 }

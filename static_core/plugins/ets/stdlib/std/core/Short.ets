@@ -38,15 +38,6 @@ export final class Short extends Integral implements Comparable<Short> {
     }
 
     /**
-     * Returns value of this instance as a primitive
-     *
-     * @returns value of this instance
-     */
-    public unboxed(): short {
-        return this.value;
-    }
-
-    /**
      * Returns boxed representation of the primitive
      *
      * @param value value to box
@@ -280,10 +271,27 @@ export final class Short extends Integral implements Comparable<Short> {
      *
      * @param other Short object to compare with
      *
-     * @returns result of the comparison
+     * @returns result of the comparison, -1 if this instance is less than provided object, 0 if equal, 1 if greater
      */
     public override compareTo(other: Short): int {
-        return this.toInt() - other.toInt();
+        if (this.value < other) {
+            return -1;
+        }
+        if (this.value == other) {
+            return 0;
+        }
+        return 1;
+    }
+
+    /**
+     * Converts the primitive to a string
+     *
+     * @param v value to be converted
+     *
+     * @returns result of the conversion
+     */
+    public static toString(v: short): string {
+        return StringBuilder.toString(v);
     }
 
     /**
@@ -312,7 +320,7 @@ export final class Short extends Integral implements Comparable<Short> {
     * @returns true if provided object and this instance have same value, false otherwise
     * Returns false if type of provided object is not the same as this type
     */
-    public equals(other: NullishType): boolean {
+    public equals(other: Any): boolean {
         if (this === other) {
             return true
         }
@@ -322,6 +330,15 @@ export final class Short extends Integral implements Comparable<Short> {
         }
 
         return this.value == (other as Short).value
+    }
+
+     /**
+     * Converts this object to a locale-specific string representation
+     *
+     * @returns result of the locale-specific conversion
+     */
+    public toLocaleString(): String {
+        return new Intl.NumberFormat().format(this.value)
     }
 
     /**

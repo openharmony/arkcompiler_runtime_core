@@ -35,7 +35,7 @@ export class Queue<T> implements Iterable<T> {
      * Retrieves the first element in the Queue without removing it.
      * @returns The first element in the Queue, or undefined if the Queue is empty.
      */
-    public getFirst(): T | undefined {
+    public getFirst(): T {
         return this.buffer.getFirst();
     }
 
@@ -43,7 +43,7 @@ export class Queue<T> implements Iterable<T> {
      * Removes and returns the first element in the Queue.
      * @returns The first element in the Queue, or undefined if the Queue is empty.
      */
-    public pop(): T | undefined {
+    public pop(): T {
         return this.buffer.popFirst();
     }
 

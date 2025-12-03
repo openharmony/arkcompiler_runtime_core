@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <array>
 #include <functional>
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/coroutines/utils.h"
 
 namespace ark {
@@ -72,11 +72,28 @@ public:
     }
 
     template <IndexType IDX, class T>
-    T Get()
+    T Get() const
     {
         static_assert((ToIndex(IDX) < NUM_ENTRIES), "idx should be correct");
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return reinterpret_cast<T>(entries_[ToIndex(IDX)].data.ptr);
+    }
+
+    template <IndexType IDX, class T>
+    T *GetPtr()
+    {
+        static_assert((ToIndex(IDX) < NUM_ENTRIES), "idx should be correct");
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        return reinterpret_cast<T *>(&(entries_[ToIndex(IDX)].data.ptr));
+    }
+
+    template <IndexType IDX, class T>
+    constexpr size_t GetOffset() const
+    {
+        static_assert((ToIndex(IDX) < NUM_ENTRIES), "idx should be correct");
+        // NOTE(konstanting): TO BE IMPLEMENTED!
+        UNREACHABLE();
+        return 0;
     }
 
 private:

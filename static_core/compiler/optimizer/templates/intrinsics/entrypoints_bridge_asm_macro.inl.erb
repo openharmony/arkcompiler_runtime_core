@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,9 +26,16 @@
 // Default intrinsic implementation with runtime_call which is called by Codegen::CallIntrinsic
 ENTRYPOINT <%= implementation %>Bridge, <%= implementation %>, <%= intrn.impl_signature.args.count.to_s %>, <%= intrn.general_return_type %>
 // Default implementation for virtually called intrinsics from compiled frame
+%   if intrn.respond_to?(:irtoc_impl) && intrn.codegen_arch.include?($selected_target)
+// intrinsics having irtoc implementation for the interpreter do not need
+// CompiledAbi wrapper as they handle the MethodPtr arg by themselves
+ENTRYPOINT <%= implementation %>CompiledAbiBridge, <%= intrn.irtoc_impl %>, <%= (intrn.impl_signature.args.count + 1).to_s %>, <%= intrn.general_return_type %>
+BRIDGE_SELECTOR <%= implementation %>BridgeSelectorEntryPoint, <%= intrn.irtoc_impl %>, <%= implementation %>CompiledAbiBridge
+%   else
 ENTRYPOINT <%= implementation %>CompiledAbiBridge, <%= implementation %>CompiledAbi, <%= (intrn.impl_signature.args.count + 1).to_s %>, <%= intrn.general_return_type %>
 // Depending on frame kind choose either CompiledAbiBridge (for compiled frame) or CompiledAbi (for interpreted frame) for virtual intrinsic
 BRIDGE_SELECTOR <%= implementation %>BridgeSelectorEntryPoint, <%= implementation %>CompiledAbi, <%= implementation %>CompiledAbiBridge
+%   end
 #ifndef NDEBUG
 %   implementation = intrn.fast_path if intrn.respond_to?(:fast_path)
 %   if intrn.respond_to?(:fast_path)

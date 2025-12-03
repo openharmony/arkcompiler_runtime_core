@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,12 +36,13 @@ FILE_BEGIN = %{
 #include "irtoc/backend/compilation.h"
 #include "compiler/optimizer/ir/ir_constructor.h"
 #include "compiler/optimizer/code_generator/relocations.h"
-#include "utils/expected.h"
+#include "libarkbase/utils/expected.h"
 #include "asm_defines.h"
 #include "cross_values.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/mem/gc/g1/g1-allocator.h"
+#include "libarkbase/mem/stack_like_allocator.h"
 
 #ifndef __clang_analyzer__
 

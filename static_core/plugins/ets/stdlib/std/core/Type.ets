@@ -93,11 +93,11 @@ class TypeAPI {
     private static NullTypeDescriptor: RuntimeTypeDescriptor = TypeAPI.getNullTypeDescriptor()
     private static UndefinedTypeDescriptor: RuntimeTypeDescriptor = TypeAPI.getUndefinedTypeDescriptor()
 
-    static getTypeDescriptor(o: NullishType): RuntimeTypeDescriptor {
+    static getTypeDescriptor(o: Any): RuntimeTypeDescriptor {
         if (o === null) {
             return TypeAPI.NullTypeDescriptor
         }
-        return (o === undefined) ? TypeAPI.UndefinedTypeDescriptor : TypeAPI.getClassDescriptor(Class.of(__narrowAny<object>(o)))
+        return (o === undefined) ? TypeAPI.UndefinedTypeDescriptor : TypeAPI.getClassDescriptor(Class.of(o as object))
     }
 
     static getTypeName(cls: Class): string {
@@ -172,8 +172,8 @@ export class Attributes {
     public static readonly FINAL: int       = 1 << 2  // Method, Class
     public static readonly ABSTRACT: int    = 1 << 3  // Method
     public static readonly CONSTRUCTOR: int = 1 << 4  // Method
-    public static readonly REST: int        = 1 << 5  // Parameter
-    public static readonly OPTIONAL: int    = 1 << 6  // Parameter
+    public static readonly REST: int        = 1 << 5  // TypeAPIParameter
+    public static readonly OPTIONAL: int    = 1 << 6  // TypeAPIParameter
     public static readonly NATIVE: int      = 1 << 7  // Method, Lambda
     public static readonly ASYNC: int       = 1 << 8  // Method, Lambda
     public static readonly GETTER: int      = 1 << 9  // Method
@@ -295,8 +295,8 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: char): Type {
-        return CharType.VAL
+    public static of(v: byte): Type {
+        return ByteType.VAL
     }
 
     /**
@@ -306,8 +306,8 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: byte): Type {
-        return ByteType.VAL
+    public static of(v: char): Type {
+        return CharType.VAL
     }
 
     /**
@@ -365,6 +365,8 @@ export abstract class Type extends Object {
         return DoubleType.VAL
     }
 
+    // -----
+
     /**
      * Returns Type of value
      *
@@ -375,8 +377,6 @@ export abstract class Type extends Object {
     public static of(v: string): Type {
         return StringType.REF
     }
-
-    // -----
 
     /**
      * Returns Type of value
@@ -396,8 +396,8 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: FixedArray<char>): Type {
-        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.CHAR)
+    public static of(v: FixedArray<byte>): Type {
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BYTE)
     }
 
     /**
@@ -407,8 +407,8 @@ export abstract class Type extends Object {
      *
      * @returns Type instance of this value
      */
-    public static of(v: FixedArray<byte>): Type {
-        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.BYTE)
+    public static of(v: FixedArray<char>): Type {
+        return ArrayType.getInstance(Class.of(v), ValueTypeDesc.CHAR)
     }
 
     /**
@@ -481,9 +481,9 @@ export abstract class Type extends Object {
 
     // -----
 
-    public static of(o: NullishType): Type {
+    public static of(o: Any): Type {
         const td = TypeAPI.getTypeDescriptor(o)
-        const contextClass = o == undefined ? Class.ofCaller() : Class.of(__narrowAny<object>(o))
+        const contextClass = o == undefined ? Class.ofCaller() : Class.of(o as object)
         const contextLinker = contextClass == undefined ? getBootRuntimeLinker() : contextClass.getLinker()
         return Type.resolve(td, contextLinker)!
     }
@@ -507,6 +507,10 @@ export abstract class Type extends Object {
 
     protected getContextLinker(): RuntimeLinker {
         return this.contextLinker
+    }
+
+    public getClass(): Class | undefined {
+        return TypeAPI.getClass(this.td, this.contextLinker)
     }
 
     // T.subTypeOf(U) means that `T extends U`
@@ -592,17 +596,11 @@ export abstract class Type extends Object {
             return FloatType.REF
         } else if (primitiveType instanceof DoubleType) {
             return DoubleType.REF
+        } else if (primitiveType instanceof VoidType) {
+            return VoidType.REF
         } else {
             throw new Error(`failed to convert primitive type ${primitiveType.getName()} to relevant reference type`)
         }
-    }
-}
-
-export final class Types {
-    private constructor() {}
-
-    public static identity_cast<T>(array: ArrayLike<T>): ArrayLike<T> {
-        return array
     }
 }
 
@@ -1895,7 +1893,7 @@ export final class ClassType extends Type {
     }
 
     // todo(kprokopenko): make varargs
-    public make(args: FixedArray<NullishType>): Object {
+    public make(args: FixedArray<Any>): Object {
         const argTypes = new Array<Type>(args.length)
         for (let i = 0; i < args.length; i++) {
             argTypes[i] = Type.of(args[i])
@@ -1947,7 +1945,7 @@ export final class ClassType extends Type {
         if (ctors.length != 1) {
             throw new Error("can't select consturctor: " + ctors.length + " left")
         }
-        return __narrowAny(ctors.at(0)!.invoke(undefined, args))!
+        return ctors.at(0)!.invoke(undefined, args) as Object
     }
 
     // class.subTypeOf(U) means that `class extends U` or `class implements U`
@@ -2473,9 +2471,9 @@ export abstract class FunctionType extends Type {
      *
      * @throws TypeError when i greater then number of parameters
      *
-     * @return Parameter, corresponding ith parameter in signature
+     * @return TypeAPIParameter, corresponding ith parameter in signature
      */
-    public getParameter(i: long): Parameter {
+    public getParameter(i: long): TypeAPIParameter {
         const paramDescriptor = this.getParameterDescriptor(i)
         if (paramDescriptor) {
             const paramType = Type.resolve(paramDescriptor, this.getContextLinker())!
@@ -2512,7 +2510,7 @@ export abstract class FunctionType extends Type {
 
     private native getParameterDescriptor(i: long): RuntimeTypeDescriptor | undefined
 
-    private native getParameter(i: long, paramType: Type): Parameter
+    private native getParameter(i: long, paramType: Type): TypeAPIParameter
 }
 
 

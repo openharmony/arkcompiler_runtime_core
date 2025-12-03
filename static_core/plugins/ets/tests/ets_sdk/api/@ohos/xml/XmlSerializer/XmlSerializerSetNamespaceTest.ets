@@ -60,9 +60,12 @@ function testEmptyPrefixForNamespace() {
     let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement("note");
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'Parameter error. Parameter cannot be empty');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == "Parameter error. Parameter cannot be empty";
+        }
+        return false;
     }
     arktest.expectThrow(() => {thatSer.setNamespace("","http://www.w3.org/TR/html4/")}, exceptionCheck);  // CC-OFF(G.OTH.05) test logic
 }
@@ -71,9 +74,12 @@ function testEmptyNamespaceValue() {
     let arrayBuffer = new ArrayBuffer(MaxBufferLength);
     let thatSer = new xml.XmlSerializer(arrayBuffer);
     thatSer.startElement("note");
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'Parameter error. The type of  must be string');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == "Parameter error. The type of  must be string";
+        }
+        return false;
     }
     arktest.expectThrow(() => {thatSer.setNamespace("h","")}, exceptionCheck);
 }
@@ -85,9 +91,12 @@ function testNamespaceSettingWithOverflow() {
     thatSer.startElement("note");
     thatSer.endElement();
     thatSer.startElement("note1");
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).code == TypeErrorCodeId) &&
-            ((e as BusinessError).message == 'XmlSerializer:: SetNamespace memcpy_s failed');
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == TypeErrorCodeId &&
+                e.message == "XmlSerializer:: SetNamespace memcpy_s failed";
+        }
+        return false;
     }
     arktest.expectThrow(() => {thatSer.setNamespace("b", "bbb")}, exceptionCheck);
 }

@@ -22,7 +22,7 @@ tags: [compile-only, negative]
 function {{s}}(): void {}
 
 function main(): void {
-  arktest.assertTrue( true )
+    arktest.assertTrue( false, 'unreachable code, CTE expected' )
 }
 
 {%- endfor %}

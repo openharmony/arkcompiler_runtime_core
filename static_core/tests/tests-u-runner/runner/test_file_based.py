@@ -19,6 +19,7 @@ import logging
 import subprocess
 from copy import deepcopy
 from os import path, remove, makedirs
+from traceback import format_exc
 from typing import List, Callable, Tuple, Optional
 from unittest import TestCase
 from pathlib import Path
@@ -46,6 +47,7 @@ class TestFileBased(Test):
         # It's supposed if the first step is failed then no step is executed further
         self.fail_kind: Optional[FailKind] = None
         self.main_entry_point = "_GLOBAL::func_main_0"
+        self.test_cli: List[str] = []
 
     @property
     def ark_extra_options(self) -> List[str]:
@@ -128,9 +130,10 @@ class TestFileBased(Test):
                 return_code = process.returncode
                 passed = result_validator(output, error, return_code)
                 if not passed:
-                    fail_kind = self.detect_segfault(return_code, params.fail_kind_fail)
+                    fail_kind = (self.detect_segfault(return_code, params.fail_kind_fail)
+                                 if self.fail_kind != FailKind.COMPARE_OUTPUT_FAIL
+                                 else self.fail_kind)
                     error = error.strip()
-                    error = f"{fail_kind.name}{f': {error}' if error else ''}"
             except subprocess.TimeoutExpired:
                 timeout_info = self.get_processes(process.pid, params.gdb_timeout)
                 self.log_cmd(f"Failed by timeout after {params.timeout} sec\n{timeout_info}")
@@ -138,8 +141,8 @@ class TestFileBased(Test):
                 error = fail_kind.name
                 return_code = process.returncode
                 process.kill()
-            except Exception as ex:  # pylint: disable=broad-except
-                self.log_cmd(f"Failed with {ex}")
+            except Exception:  # pylint: disable=broad-except
+                self.log_cmd(f"Failed with {format_exc()}")
                 fail_kind = params.fail_kind_other
                 error = fail_kind.name
                 return_code = -1
@@ -206,6 +209,9 @@ class TestFileBased(Test):
             ark_flags.append(f'{panda_files_opt_name}={test_abc}')
 
         ark_flags.extend([test_abc, self.main_entry_point])
+        if self.test_cli:
+            ark_flags.append('--')
+            ark_flags.extend(self.test_cli)
 
         params = Params(
             timeout=self.ark_timeout,

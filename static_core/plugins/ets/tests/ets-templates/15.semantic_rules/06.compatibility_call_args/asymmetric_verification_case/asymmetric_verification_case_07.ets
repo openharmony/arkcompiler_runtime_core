@@ -15,24 +15,16 @@
 
 /*---
 desc: Verifying asymmetric compatibility between number and string.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: number;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
-
-class A {
-  i: string;
-}
-
 function main(): void {
   const val1: number = 123;
   const val2: string = "123";
 
   const result1 = checkTypeIdentity(val1, val2);
-  const result2 = checkTypeIdentity(val2, val1);
 
   arktest.assertEQ(result1, false);
-  arktest.assertEQ(result2, false);
 }

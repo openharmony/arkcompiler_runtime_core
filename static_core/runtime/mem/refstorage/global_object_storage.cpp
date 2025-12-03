@@ -14,7 +14,7 @@
  */
 #include "global_object_storage.h"
 
-#include <libpandabase/os/mutex.h>
+#include <libarkbase/os/mutex.h>
 #include "runtime/include/runtime.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/object_header.h"
@@ -24,7 +24,7 @@
 #include "runtime/mem/gc/gc_phase.h"
 #include "runtime/include/class.h"
 #include "reference.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::mem {
 

@@ -15,11 +15,13 @@
 
 import { IServiceResponse } from './types';
 import { fetchGetEntity } from './common';
-import { IFeatures } from '../models/features';
+import { IFeatures, IFeaturesRaw } from '../models/features';
 
 export const featuresService = {
   fetchFeatures: async (): Promise<IServiceResponse<IFeatures>> => {
     // @ts-ignore
-    return fetchGetEntity('/features', null, (d) => d as IFeatures);
+    return fetchGetEntity('/features', null, (d: IFeaturesRaw) => {
+      return {astMode: d.ast_mode}
+    });
   },
 };

@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
+#if !defined(NDEBUG) || defined(FASTVERIFY)
+#define VERBOSE_THREAD_STATE_LOG true
+#endif
+
 #include "runtime/include/thread-inl.h"
-#include "libpandabase/os/stacktrace.h"
+#include "libarkbase/os/stacktrace.h"
 #include "runtime/handle_base-inl.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/object_header-inl.h"
@@ -23,6 +27,7 @@
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/include/thread_scopes.h"
+#include "runtime/include/safepoint_timer.h"
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/mem/object_helpers.h"
@@ -49,7 +54,7 @@ static mem::InternalAllocatorPtr GetInternalAllocator(Thread *thread)
     return Runtime::GetCurrent()->GetInternalAllocator();
 }
 
-MTManagedThread::ThreadId MTManagedThread::GetInternalId()
+ManagedThread::ThreadId ManagedThread::GetInternalId()
 {
     ASSERT(internalId_ != 0);
     return internalId_;
@@ -94,6 +99,8 @@ Thread::Thread(PandaVM *vm, ThreadType threadType) : ThreadProxy(vm->GetMutatorL
     signalStack_.ss_flags = 0;
     sigaltstack(&signalStack_, nullptr);
 #endif
+
+    entrypointsTable_ = Runtime::GetCurrent()->GetEntrypointsTable();
 }
 
 void Thread::InitThreadRandomState()
@@ -272,7 +279,9 @@ ManagedThread::~ManagedThread()
     allocator->Delete(stackFrameAllocator_);
     allocator->Delete(ptThreadInfo_.release());
 
+#if defined(VERBOSE_THREAD_STATE_LOG)
     ASSERT(threadFrameStates_.empty() && "stack should be empty");
+#endif
 }
 
 void ManagedThread::InitBuffers()
@@ -419,9 +428,12 @@ void ManagedThread::EnableStackOverflowCheck()
 
 void ManagedThread::NativeCodeBegin()
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(!(threadFrameStates_.empty() || threadFrameStates_.top() != NATIVE_CODE), FATAL, RUNTIME)
         << LogThreadStack(NATIVE_CODE) << " or stack should be empty";
     threadFrameStates_.push(NATIVE_CODE);
+#endif
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), true));
     UpdateStatus(ThreadStatus::NATIVE);
     isManagedScope_ = false;
 }
@@ -432,33 +444,45 @@ void ManagedThread::NativeCodeEnd()
     // If this was last frame, it should have been called from Destroy() and it should UpdateStatus to FINISHED
     // after this method
     UpdateStatus(ThreadStatus::RUNNING);
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), false));
     isManagedScope_ = true;
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(threadFrameStates_.empty(), FATAL, RUNTIME) << "stack should be not empty";
     LOG_IF(threadFrameStates_.top() != NATIVE_CODE, FATAL, RUNTIME) << LogThreadStack(NATIVE_CODE);
     threadFrameStates_.pop();
+#endif
 }
 
 bool ManagedThread::IsInNativeCode() const
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     return threadFrameStates_.top() == NATIVE_CODE;
+#endif
+    return GetStatus() == ThreadStatus::NATIVE;
 }
 
 void ManagedThread::ManagedCodeBegin()
 {
     // thread_frame_states_ should not be accessed without MutatorLock (as runtime could have been destroyed)
     UpdateStatus(ThreadStatus::RUNNING);
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), false));
     isManagedScope_ = true;
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     LOG_IF(threadFrameStates_.top() != NATIVE_CODE, FATAL, RUNTIME) << LogThreadStack(MANAGED_CODE);
     threadFrameStates_.push(MANAGED_CODE);
+#endif
 }
 
 void ManagedThread::ManagedCodeEnd()
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     LOG_IF(threadFrameStates_.top() != MANAGED_CODE, FATAL, RUNTIME) << LogThreadStack(MANAGED_CODE);
     threadFrameStates_.pop();
+#endif
+    SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(GetInternalId(), true));
     // Should be NATIVE_CODE
     UpdateStatus(ThreadStatus::NATIVE);
     isManagedScope_ = false;
@@ -466,14 +490,18 @@ void ManagedThread::ManagedCodeEnd()
 
 bool ManagedThread::IsManagedCode() const
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
     return threadFrameStates_.top() == MANAGED_CODE;
+#endif
+    return GetStatus() == ThreadStatus::RUNNING;
 }
 
 // Since we don't allow two consecutive NativeCode frames, there is no managed code on stack if
 // its size is 1 and last frame is Native
 bool ManagedThread::HasManagedCodeOnStack() const
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     if (HasClearStack()) {
         return false;
     }
@@ -481,6 +509,10 @@ bool ManagedThread::HasManagedCodeOnStack() const
         return false;
     }
     return true;
+#else
+    LOG(FATAL, RUNTIME) << "This method only supported in debug mode";
+    return !IsInNativeCode();
+#endif
 }
 
 bool ManagedThread::HasClearStack() const
@@ -653,8 +685,12 @@ void MTManagedThread::ProcessCreatedThread()
 
 void ManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
 {
-    if ((exception_ != nullptr)) {
+    if (exception_ != nullptr) {
         gcRootUpdater(&exception_);
+    }
+    if (flattenedStringCache_ != nullptr) {
+        // This is the cached pointer. We need to update it; visiting it as root is not required.
+        gcRootUpdater(&flattenedStringCache_);
     }
     for (auto **localObject : localObjects_) {
         gcRootUpdater(localObject);
@@ -824,6 +860,16 @@ bool ManagedThread::EraseCustomTLSData(const char *key)
     return customTlsCache_.erase(key) != 0;
 }
 
+void ManagedThread::SetFlattenedStringCache(ObjectHeader *cacheInstance)
+{
+    flattenedStringCache_ = cacheInstance;
+}
+
+ObjectHeader *ManagedThread::GetFlattenedStringCache() const
+{
+    return flattenedStringCache_;
+}
+
 LanguageContext ManagedThread::GetLanguageContext()
 {
     return Runtime::GetCurrent()->GetLanguageContext(threadLang_);
@@ -859,7 +905,9 @@ void ManagedThread::CleanupInternalResources()
 
 void ManagedThread::FreeInternalMemory()
 {
+#if defined(VERBOSE_THREAD_STATE_LOG)
     threadFrameStates_.~PandaStack<ThreadState>();
+#endif
     DestroyInternalResources();
 
     localObjects_.~PandaVector<ObjectHeader **>();
@@ -911,9 +959,11 @@ void ManagedThread::CleanUp()
     ClearException();
     ClearTLAB();
 
+#if defined(VERBOSE_THREAD_STATE_LOG)
     while (!threadFrameStates_.empty()) {
         threadFrameStates_.pop();
     }
+#endif
     localObjects_.clear();
     {
         os::memory::LockHolder lock(*Locks::customTlsLock_);

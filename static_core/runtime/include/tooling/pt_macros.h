@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_INCLUDE_TOOLING_PT_MACROS_H
 #define PANDA_RUNTIME_INCLUDE_TOOLING_PT_MACROS_H
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PT_DEPRECATED() LOG(ERROR, TOOLING) << "Method " << __PRETTY_FUNCTION__ << " is deprecated and will be removed"

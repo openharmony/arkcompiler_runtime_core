@@ -46,13 +46,13 @@ function testLinkedListBasicCRUD() {
 
     list.removeByIndex(9);
 
-    testArray.splice(9.0, 1.0);
+    testArray.splice(9, 1);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }
 
     const removeRes = list.remove(8);
-    testArray.splice(8.0, 1.0);
+    testArray.splice(8, 1);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }
@@ -61,7 +61,7 @@ function testLinkedListBasicCRUD() {
     arktest.assertEQ(list.getLast(), 7);
 
     list.insert(3, 999);
-    testArray.splice(3.0, 0.0, 999);
+    testArray.splice(3, 0, 999);
     for (let i: int = 0; i < testArray.length; i++) {
         arktest.assertEQ(list.get(i), testArray[i]);
     }
@@ -111,13 +111,23 @@ function testLinkedListBasicCRUD() {
     list1.forEach((d, i) => {
         arktest.assertEQ(d, testArray1[i]);
     });
-    arktest.assertEQ(list.get(1232), undefined);
+    try {
+        let result = list.get(1232);
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.code, 10200001);
+    }
     arktest.assertEQ(list.getLastIndexOf(3333), -1);
 
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            "The value of \"index\" is out of range. It must be >= 0 && <= 9. Received value is: 99") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message ==
+                "The value of \"index\" is out of range. It must be >= 0 && <= 9. Received value is: 99" &&
+                e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow(() => { list1.removeByIndex(99) }, exceptionCheck);
 
@@ -178,14 +188,18 @@ function testLinkedListIteration() {
 
 function testLinkedListExceptionHandling() {
     let empty_ll = new LinkedList<double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty";
+        }
+        return false;
     }
     arktest.expectThrow(() => { empty_ll.set(0, 1) }, exceptionCheck);
-    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == "Container is empty") &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck1 = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == "Container is empty";
+        }
+        return false;
     }
     arktest.expectThrow(() => { empty_ll.removeByIndex(0) }, exceptionCheck1);
 }

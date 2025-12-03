@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <limits>
 
@@ -23,9 +24,9 @@
 #include "objects/string/base_string-inl.h"
 
 #include "include/coretypes/line_string.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/utils/hash.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/utils/hash.h"
+#include "libarkbase/utils/span.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/runtime.h"
@@ -120,11 +121,11 @@ String *String::CreateFromString(String *str, const LanguageContext &ctx, PandaV
 {
     ASSERT(str != nullptr);
     // allocator may trig gc and move str, need to hold it
-    auto thread = ManagedThread::GetCurrent();
+    auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<String> strHandle(thread, str);
     ASSERT(strHandle.GetPtr() != nullptr);
-    auto string = String::AllocLineStringObject(strHandle->GetLength(), !strHandle->IsUtf16(), ctx, vm);
+    auto *string = String::AllocLineStringObject(thread, strHandle->GetLength(), !strHandle->IsUtf16(), ctx, vm);
     if (string == nullptr) {
         return nullptr;
     }
@@ -146,6 +147,7 @@ Array *String::GetChars(String *src, uint32_t start, uint32_t utf16Length, const
     // allocator may trig gc and move 'src', need to hold it
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    ASSERT(src != nullptr);
     VMHandle<String> strHandle(thread, src);
     auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_U16);
     Array *array = Array::Create(klass, utf16Length);
@@ -160,11 +162,10 @@ Array *String::GetChars(String *src, uint32_t start, uint32_t utf16Length, const
 }
 
 /* static */
-String *String::AllocLineStringObject(size_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm,
-                                      bool movable, bool pinned)
+String *String::AllocLineStringObject(ManagedThread *thread, size_t length, bool compressed, const LanguageContext &ctx,
+                                      PandaVM *vm, bool movable, bool pinned)
 {
     ASSERT(vm != nullptr);
-    auto *thread = ManagedThread::GetCurrent();
     auto *stringClass =
         Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::LINE_STRING);
     size_t size = compressed ? LineString::ComputeSizeMUtf8(length) : LineString::ComputeSizeUtf16(length);
@@ -195,14 +196,15 @@ String *String::AllocLineStringObject(size_t length, bool compressed, const Lang
 String *String::FastSubUtf8String(String *src, uint32_t start, uint32_t length, const LanguageContext &ctx)
 {
     PandaVM *vm = Runtime::GetCurrent()->GetPandaVM();
-    VMHandle<String> srcHandle(ManagedThread::GetCurrent(), src);
+    auto *thread = ManagedThread::GetCurrent();
+    VMHandle<String> srcHandle(thread, src);
 
     // 1. alloc dest line string
-    auto lineStr = String::AllocLineStringObject(length, true, ctx, vm);
+    auto *lineStr = String::AllocLineStringObject(thread, length, true, ctx, vm);
     if (lineStr == nullptr) {
         return nullptr;
     }
-    VMHandle<String> lineStrHandle(ManagedThread::GetCurrent(), lineStr);
+    VMHandle<String> lineStrHandle(thread, lineStr);
 
     // 2. flatten src string
     FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
@@ -219,18 +221,19 @@ String *String::FastSubUtf8String(String *src, uint32_t start, uint32_t length, 
 String *String::FastSubUtf16String(String *src, uint32_t start, uint32_t length, const LanguageContext &ctx)
 {
     // 1. judge can compressed or not
-    VMHandle<String> srcHandle(ManagedThread::GetCurrent(), src);
+    auto *thread = ManagedThread::GetCurrent();
+    VMHandle<String> srcHandle(thread, src);
     FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     bool canBeCompressed = common::BaseString::CanBeCompressed(srcFlat.GetDataUtf16() + start, length);
 
     // 2. alloc dest line string
     PandaVM *vm = Runtime::GetCurrent()->GetPandaVM();
-    auto lineStr = String::AllocLineStringObject(length, canBeCompressed, ctx, vm);
+    auto *lineStr = String::AllocLineStringObject(thread, length, canBeCompressed, ctx, vm);
     if (lineStr == nullptr) {
         return nullptr;
     }
-    VMHandle<String> lineStrHandle(ManagedThread::GetCurrent(), lineStr);
+    VMHandle<String> lineStrHandle(thread, lineStr);
 
     // maybe happen GC,so get srcFlat again
     srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
@@ -257,7 +260,8 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t length, cons
 
     ASSERT(src != nullptr);
     ASSERT((start + length) <= src->GetLength());
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(ManagedThread::GetCurrent());
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
 
     if (length == 0) {
         return reinterpret_cast<String *>(LineString::CreateEmptyLineString(ctx, vm));
@@ -275,18 +279,18 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t length, cons
         return FastSubUtf16String(src, start, length, ctx);
     }
 
-    VMHandle<String> srcHandle(ManagedThread::GetCurrent(), src);
+    VMHandle<String> srcHandle(thread, src);
     // src is utf16 , substr if all ASCII chars , no need to slice it
     if (src->IsUtf16()) {
         FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         bool canBeCompressed = common::BaseString::CanBeCompressed(srcFlat.GetDataUtf16() + start, length);
         if (canBeCompressed) {
-            auto lineStr = AllocLineStringObject(length, canBeCompressed, ctx, vm);
+            auto *lineStr = AllocLineStringObject(thread, length, canBeCompressed, ctx, vm);
             if (lineStr == nullptr) {
                 return nullptr;
             }
-            VMHandle<String> lineStrHandle(ManagedThread::GetCurrent(), lineStr);
+            VMHandle<String> lineStrHandle(thread, lineStr);
 
             // maybe happen gc , get srcFlat again
             srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
@@ -304,7 +308,7 @@ String *String::ConcatLineStringCompressed(VMHandle<String> &str1Handle, VMHandl
     uint32_t length1 = str1Handle->GetLength();
     uint32_t length2 = str2Handle->GetLength();
     uint32_t newLength = length1 + length2;
-    auto newString = String::AllocLineStringObject(newLength, true, ctx, vm);
+    auto newString = String::AllocLineStringObject(ManagedThread::GetCurrent(), newLength, true, ctx, vm);
     if (UNLIKELY(newString == nullptr)) {
         return nullptr;
     }
@@ -338,7 +342,7 @@ String *String::ConcatLineStringUnCompressed(VMHandle<String> &str1Handle, VMHan
     uint32_t length2 = str2Handle->GetLength();
     uint32_t newLength = length1 + length2;
 
-    auto newString = String::AllocLineStringObject(newLength, false, ctx, vm);
+    auto newString = String::AllocLineStringObject(ManagedThread::GetCurrent(), newLength, false, ctx, vm);
     if (UNLIKELY(newString == nullptr)) {
         return nullptr;
     }
@@ -393,7 +397,7 @@ String *String::Concat(String *str1, String *str2, const LanguageContext &ctx, P
     ASSERT(str1 != nullptr);
     ASSERT(str2 != nullptr);
     // allocator may trig gc and move src, need to hold it
-    auto thread = ManagedThread::GetCurrent();
+    auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<String> str1Handle(thread, str1);
     VMHandle<String> str2Handle(thread, str2);
@@ -414,7 +418,7 @@ String *String::Concat(String *str1, String *str2, const LanguageContext &ctx, P
     // concat with tree string if too long
     bool compressed = String::GetCompressedStringsEnabled() && (str1Handle->IsUtf8()) && (str2Handle->IsUtf8());
     if (newLength >= common::TreeString::MIN_TREE_STRING_LENGTH) {
-        return CreateTreeString(str1Handle.GetPtr(), str2Handle.GetPtr(), newLength, compressed, ctx, vm);
+        return CreateTreeString(thread, str1Handle, str2Handle, newLength, compressed, ctx, vm);
     }
 
     // concat with line string if short
@@ -475,10 +479,10 @@ String *String::AllocSlicedStringObject(const LanguageContext &ctx, PandaVM *vm,
  * @brief Alloc a TreeString
  * @return The TreeString created
  */
-String *String::AllocTreeStringObject(const LanguageContext &ctx, PandaVM *vm, bool movable, bool pinned)
+String *String::AllocTreeStringObject(ManagedThread *thread, const LanguageContext &ctx, PandaVM *vm, bool movable,
+                                      bool pinned)
 {
     ASSERT(vm != nullptr);
-    auto *thread = ManagedThread::GetCurrent();
     auto *treeStrCls = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::TREE_STRING);
     size_t size = common::TreeString::SIZE;
     common::BaseString *treeStr = nullptr;
@@ -494,19 +498,15 @@ String *String::AllocTreeStringObject(const LanguageContext &ctx, PandaVM *vm, b
     return String::Cast(treeStr);
 }
 
-String *String::CreateTreeString(String *left, String *right, uint32_t length, bool compressed,
-                                 const LanguageContext &ctx, PandaVM *vm, bool movable, bool pinned)
+String *String::CreateTreeString(ManagedThread *thread, VMHandle<String> &leftHandle, VMHandle<String> &rightHandle,
+                                 uint32_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm,
+                                 bool movable, bool pinned)
 {
-    auto thread = ManagedThread::GetCurrent();
-    VMHandle<String> leftHandle(thread, left);
-    VMHandle<String> rightHandle(thread, right);
-
-    auto baseStr = String::AllocTreeStringObject(ctx, vm, movable, pinned);
+    auto *baseStr = String::AllocTreeStringObject(thread, ctx, vm, movable, pinned);
     if (baseStr == nullptr) {
         return nullptr;
     }
-    VMHandle<String> baseStrHandle(thread, baseStr);
-    auto treeStr = common::TreeString::Cast(baseStrHandle->ToString());
+    auto *treeStr = common::TreeString::Cast(baseStr->ToString());
 
     // After copying we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
@@ -514,12 +514,12 @@ String *String::CreateTreeString(String *left, String *right, uint32_t length, b
     treeStr->InitLengthAndFlags(length, compressed);
     treeStr->SetMixHashcode(0);
 
-    auto writeBarrierLeft = [](void *obj, size_t offset, common::BaseObject *str) {
-        ObjectAccessor::SetObject(obj, offset, reinterpret_cast<ObjectHeader *>(str));
+    auto writeBarrierLeft = [thread](void *obj, size_t offset, common::BaseObject *str) {
+        ObjectAccessor::SetObject(thread, obj, offset, reinterpret_cast<ObjectHeader *>(str));
     };
     treeStr->SetLeftSubString(std::move(writeBarrierLeft), leftHandle->ToString());
-    auto writeBarrierRight = [](void *obj, size_t offset, common::BaseObject *str) {
-        ObjectAccessor::SetObject(obj, offset, reinterpret_cast<ObjectHeader *>(str));
+    auto writeBarrierRight = [thread](void *obj, size_t offset, common::BaseObject *str) {
+        ObjectAccessor::SetObject(thread, obj, offset, reinterpret_cast<ObjectHeader *>(str));
     };
     treeStr->SetRightSubString(std::move(writeBarrierRight), rightHandle->ToString());
 
@@ -756,12 +756,16 @@ String *String::DoReplace(String *src, uint16_t oldC, uint16_t newC, const Langu
     VMHandle<String> srcHandle(thread, src);
     FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
     if (srcFlat.IsUtf16()) {
-        canBeCompressed = canBeCompressed && CanBeCompressedUtf16(srcFlat.GetDataUtf16(), length, oldC);
+        const uint16_t *flatData16 = srcFlat.GetDataUtf16();
+        ASSERT(flatData16 != nullptr);
+        canBeCompressed = canBeCompressed && CanBeCompressedUtf16(flatData16, length, oldC);
     } else {
-        canBeCompressed = canBeCompressed && CanBeCompressedMUtf8(srcFlat.GetDataUtf8(), length, oldC);
+        const uint8_t *flatData8 = srcFlat.GetDataUtf8();
+        ASSERT(flatData8 != nullptr);
+        canBeCompressed = canBeCompressed && CanBeCompressedMUtf8(flatData8, length, oldC);
     }
 
-    auto string = String::AllocLineStringObject(length, canBeCompressed, ctx, vm);
+    auto *string = String::AllocLineStringObject(thread, length, canBeCompressed, ctx, vm);
     if (string == nullptr) {
         return nullptr;
     }

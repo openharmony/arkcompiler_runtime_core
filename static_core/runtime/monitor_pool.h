@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_MONITOR_POOL_H_
 #define PANDA_RUNTIME_MONITOR_POOL_H_
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/object_header.h"
 #include "runtime/mark_word.h"

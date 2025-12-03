@@ -78,11 +78,7 @@ TextDecoder::TextDecoder(std::string &buff, uint32_t flags) : encStr_(buff), tra
 ani_string TextDecoder::GetResultStr(ani_env *env, const UChar *arrDat, size_t length)
 {
     ani_string resultStr = nullptr;
-    ani_status status = env->String_NewUTF16(reinterpret_cast<const uint16_t *>(arrDat), length, &resultStr);
-    if (status != ANI_OK) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        LOG_ERROR_SDK("TextDecoder:: String creation failed");
-    }
+    ANI_FATAL_IF_ERROR(env->String_NewUTF16(reinterpret_cast<const uint16_t *>(arrDat), length, &resultStr));
     return resultStr;
 }
 

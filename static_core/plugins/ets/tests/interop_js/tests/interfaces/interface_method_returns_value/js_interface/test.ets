@@ -13,24 +13,22 @@
  * limitations under the License.
  */
 
-
-import {
-    BOOLEAN_VALUE,
-    ENUM_VALUE,
-    GenericInterface,
-    STRING_VALUE,
-    TFunctionReturnsAny,
-    TFunctionReturnsBigInt,
-    TFunctionReturnsBoolean,
-    TFunctionReturnsEnum,
-    TFunctionReturnsFunctionOfType,
-    TFunctionReturnsNull,
-    TFunctionReturnsNumber,
-    TFunctionReturnsString,
-    TFunctionReturnsUndefined,
-    UNDEFINED,
-    genericInterfaceImplementation
-} from "js_code";
+let module = ESValue.load('js_code');
+let BOOLEAN_VALUE = module.getProperty('BOOLEAN_VALUE');
+let ENUM_VALUE = module.getProperty('ENUM_VALUE');
+let GenericInterface = module.getProperty('GenericInterface');
+let STRING_VALUE = module.getProperty('STRING_VALUE');
+let TFunctionReturnsAny = module.getProperty('TFunctionReturnsAny');
+let TFunctionReturnsBigInt = module.getProperty('TFunctionReturnsBigInt');
+let TFunctionReturnsBoolean = module.getProperty('TFunctionReturnsBoolean');
+let TFunctionReturnsEnum = module.getProperty('TFunctionReturnsEnum');
+let TFunctionReturnsFunctionOfType = module.getProperty('TFunctionReturnsFunctionOfType');
+let TFunctionReturnsNull = module.getProperty('TFunctionReturnsNull');
+let TFunctionReturnsNumber = module.getProperty('TFunctionReturnsNumber');
+let TFunctionReturnsString = module.getProperty('TFunctionReturnsString');
+let TFunctionReturnsUndefined = module.getProperty('TFunctionReturnsUndefined ');
+let UNDEFINED = module.getProperty('UNDEFINED');
+let genericInterfaceImplementation = module.getProperty('genericInterfaceImplementation');
 
 
 /* Note: nullish \ undefish types here are workarounds for note 17745*/
@@ -48,96 +46,105 @@ function cleanup(): void {
 }
 
 function type_imported__returnAny(){
-    const anyGetter: TFunctionReturnsAny = genericInterfaceImplementation.getAny as TFunctionReturnsAny;
-    return typeof anyGetter() == 'object';
+    const anyGetter: ESValue = genericInterfaceImplementation.getProperty('getAny') as ESValue;
+    return anyGetter.invoke().typeOf() == 'object';
 }
 
 function type_imported__returnString(){
-    const getterFn: TFunctionReturnsString = genericInterfaceImplementation.getString as TFunctionReturnsString;
-    return typeof getterFn() == "object" && (getterFn() as string == 'Panda')
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getString') as ESValue;
+    console.log(getterFn.invoke().typeOf());
+    console.log(getterFn.invoke().toString());
+    return getterFn.invoke().typeOf() == 'string' && (getterFn.invoke().toString() == 'Panda')
 }
 
 function type_imported__returnBoolean(){
-    const getterFn: TFunctionReturnsBoolean = genericInterfaceImplementation.getBoolean;
-    return typeof getterFn() == "object" && (getterFn() as boolean) == true && (getterFn() as boolean) != false;
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getBoolean') as ESValue;
+    return getterFn.invoke().typeOf() == 'boolean' &&
+           (getterFn.invoke().toBoolean()) == true &&
+           (getterFn.invoke().toBoolean()) != false;
 }
 
 // NOTE: this test uses JS integer value which is longer than 32 bits
 function type_imported__returnInteger(){
-    const getterFn: TFunctionReturnsNumber = genericInterfaceImplementation.getInt as TFunctionReturnsNumber;
-    return typeof getterFn() == "object" && (getterFn() as int) > 0 && (getterFn() as int) / 2 == Double.toInt((getterFn() as int) * 0.5);
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getInt') as ESValue;
+    return getterFn.invoke().typeOf() == 'number' && (getterFn.invoke().toNumber().toInt()) > 0 &&
+           (getterFn.invoke().toNumber().toInt()) / 2 == Double.toInt((getterFn.invoke().toNumber().toInt()) * 0.5);
 }
 
 // NOTE: this test uses JS integer value which is longer than 32 bit
 function type_imported__returnNegativeInteger(){
-    const getterFn: TFunctionReturnsNumber = genericInterfaceImplementation.getNegativeInt;
-    return typeof getterFn() == "object" && (getterFn() as long) < 0 && (getterFn() as long) * -1 > 0;
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getNegativeInt') as ESValue;
+    return getterFn.invoke().typeOf() == 'number' && (getterFn.invoke().toNumber().toLong()) < 0 && (getterFn.invoke().toNumber().toLong()) * -1 > 0;
 }
 
 
 function type_imported__returnInfinity(){
-    const getterFn: TFunctionReturnsNumber = genericInterfaceImplementation.getInfinity;
-    const isValid: boolean = (typeof getterFn() == "object")
-            && ((getterFn() as number) > 0)
-            && ((getterFn() as number) - 1 == getterFn())
-            && !Number.isFinite(getterFn() as number);
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getInfinity');
+    console.log(getterFn.invoke().typeOf());
+    console.log(getterFn.invoke().toNumber());
+    console.log((getterFn.invoke().toNumber()) - 1 == getterFn.invoke());
+    console.log(!Number.isFinite(getterFn.invoke().toNumber()));
+    const isValid: boolean = (getterFn.invoke().typeOf() == 'number') &&
+        ((getterFn.invoke().toNumber()) > 0) &&
+        ((getterFn.invoke().toNumber()) - 1 == getterFn.invoke().toNumber()) &&
+        !Number.isFinite(getterFn.invoke().toNumber());
     cleanup();
     return isValid;
 }
 
 function type_imported__returnNegativeInfinity(){
-    const getterFn: TFunctionReturnsNumber = genericInterfaceImplementation.getNegativeInfinity;
-    const isValid: boolean = (typeof getterFn() == "object")
-            && ((getterFn() as number) < 0)
-            && ((getterFn() as number) + 1 == getterFn())
-            && !Number.isFinite(getterFn() as number);
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getNegativeInfinity');
+    const isValid: boolean = (getterFn.invoke().typeOf() == 'number') &&
+        ((getterFn.invoke().toNumber()) < 0) && 
+        ((getterFn.invoke().toNumber()) + 1 == getterFn.invoke().toNumber()) && 
+        !Number.isFinite(getterFn.invoke().toNumber());
     cleanup();
     return isValid;
 }
 
 
 function type_imported__returnNaN(){
-    const getterFn: TFunctionReturnsNumber = genericInterfaceImplementation.getNanAsNumber as TFunctionReturnsNumber;
-    const isValid: boolean = `${(getterFn() as number)}` == 'NaN' && (Number.isNaN(getterFn()));
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getNanAsNumber') as ESValue;
+    const isValid: boolean = `${(getterFn.invoke().toNumber())}` == 'NaN' && (Number.isNaN(getterFn.invoke().toNumber()));
     cleanup();
     return isValid;
 }
 
 function type_imported__returnBigint(){
-    const getterFn: TFunctionReturnsBigInt = genericInterfaceImplementation.getBigInt;
-    return typeof getterFn() == "object"
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getBigInt');
+    return getterFn.invoke().typeOf() == 'bigint';
 }
 
 function type_imported__returnEnum(){
-    const getterFn: TFunctionReturnsEnum = genericInterfaceImplementation.getEnum;
-    const returnValue = getterFn();
-    const isAbleToGetExistingProperties = ((returnValue.OPTION_ONE as int == 0)
-                                            && (returnValue.OPTION_TWO as number == 1)
-                                            && (returnValue.OPTION_THREE as number == 2));
-    const isReturningUndefForMissingProperties = returnValue.OPTION_FOUR as UndefishHelperType == undefined;
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getEnum');
+    const returnValue = getterFn.invoke();
+    const isAbleToGetExistingProperties = ((returnValue.getProperty('OPTION_ONE').toNumber().toInt() == 0) && 
+                                            (returnValue.getProperty('OPTION_TWO').toNumber() == 1) && 
+                                            (returnValue.getProperty('OPTION_THREE').toNumber() == 2));
+    const isReturningUndefForMissingProperties = returnValue.getProperty('OPTION_FOUR').unwrap() as UndefishHelperType == undefined;
     cleanup();
-    return typeof getterFn() == "object" && isAbleToGetExistingProperties && isReturningUndefForMissingProperties
+    return getterFn.invoke().typeOf() == "object" && isAbleToGetExistingProperties && isReturningUndefForMissingProperties
 }
 
 function type_imported__returnUndefined(){
-    const getterFn: TFunctionReturnsUndefined = genericInterfaceImplementation.getUndefined;
-    const returnValue = getterFn() as UndefishHelperType;
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getUndefined');
+    const returnValue = getterFn.invoke().unwrap() as UndefishHelperType;
     cleanup();
     return returnValue == undefined && returnValue != '';
 }
 
 function type_imported__returnNull(){
-    const getterFn: TFunctionReturnsNull = genericInterfaceImplementation.getNull;
-    const returnValue = getterFn() as NullishHelperType;
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getNull');
+    const returnValue = getterFn.invoke().unwrap() as NullishHelperType;
     return returnValue == null;
 }
 
 
 function type_imported__returnFunction(){
-    const getterFn: TFunctionReturnsFunctionOfType = genericInterfaceImplementation.getFunctionReturningType;
-    const returnStringValue = getterFn('panda');
-    const returnNumericValue = getterFn(1);
-    return returnStringValue() == 'pandaPANDA'
-            && (returnNumericValue() as float)> 3
-            && (returnNumericValue() as float) < 4;
+    const getterFn: ESValue = genericInterfaceImplementation.getProperty('getFunctionReturningType');
+    const returnStringValue = getterFn.invoke('panda');
+    const returnNumericValue = getterFn.invoke(1);
+    return returnStringValue.invoke().toString() == 'pandaPANDA' &&
+        (returnNumericValue.invoke().toNumber().toFloat())> 3 &&
+        (returnNumericValue.invoke().toNumber().toFloat()) < 4;
 }

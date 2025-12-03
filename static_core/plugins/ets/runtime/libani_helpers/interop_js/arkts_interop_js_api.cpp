@@ -14,7 +14,7 @@
  */
 
 #include "arkts_interop_js_api.h"
-#include "libpandabase/utils/expected.h"
+#include "libarkbase/utils/expected.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/interop_js/native_api/arkts_interop_js_api_impl.h"

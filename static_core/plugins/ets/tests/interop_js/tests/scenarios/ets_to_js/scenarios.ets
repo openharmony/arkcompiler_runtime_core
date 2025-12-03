@@ -134,15 +134,15 @@ class ClassToExtendEts {
     }
 }
 
-function functionArgTypeAnyEts(arg: JSValue): JSValue {
+function functionArgTypeAnyEts(arg: Any): Any {
     return arg;
 }
 
-function functionArgTypeUnknownEts(arg: JSValue): JSValue {
+function functionArgTypeUnknownEts(arg: Any): Any {
     return arg;
 }
 
-function functionArgTypeUndefinedEts(arg: JSValue): JSValue {
+function functionArgTypeUndefinedEts(arg: Any): Any {
     return arg;
 }
 
@@ -150,7 +150,7 @@ function functionArgTypeTupleEts(arg: [number, string]): number {
     return arg[0];
 }
 
-function functionArgTypeCallableEts(functionToCall: () => JSValue): JSValue {
+function functionArgTypeCallableEts(functionToCall: () => Any): Any {
     return functionToCall();
 }
 
@@ -173,12 +173,12 @@ class ClassWithDefaultParameterMethods {
     }
 
     // #22991
-    // public undefinedParameterMethod(arg: JSValue | undefined = undefined): JSValue | undefined {
+    // public undefinedParameterMethod(arg: Any | undefined = undefined): Any | undefined {
     //     return arg;
     // }
 
     // #22991
-    // public static undefinedParameterStaticMethod(arg: JSValue | undefined = undefined): JSValue | undefined {
+    // public static undefinedParameterStaticMethod(arg: Any | undefined = undefined): Any | undefined {
     //     return arg;
     // }
 
@@ -218,7 +218,7 @@ function defaultIntParameterFunction(arg: int = 1): int {
 }
 
 // #22991
-// function defaultUndefinedParameterFunction(arg: JSValue | undefined = undefined): JSValue | undefined {
+// function defaultUndefinedParameterFunction(arg: Any | undefined = undefined): Any | undefined {
 //     return arg;
 // }
 
@@ -400,11 +400,11 @@ function unpackValue<T>(arg: Unpackable<T>): T {
 }
 
 interface InterfaceWithUnionEts {
-    methodWithUnion(arg: string | int): string | int;
+    methodWithUnion(arg: string | double): string | double;
 }
 
 class ImplInterfaceWithUnionEts implements InterfaceWithUnionEts {
-    public override methodWithUnion(arg: string | int): string | int {
+    public override methodWithUnion(arg: string | double): string | double {
         return arg;
     }
 }
@@ -453,7 +453,7 @@ async function asyncFunctionLiteral(): Promise<int> {
     return 1;
 }
 
-async function asyncFunctionAny(arg: JSValue): Promise<JSValue> {
+async function asyncFunctionAny(arg: Any): Promise<Any> {
     return arg;
 }
 
@@ -461,7 +461,7 @@ async function asyncFunctionExtraSet(tuple: [number, string]): Promise<number> {
     return tuple[0];
 }
 
-async function asyncFunctionSubsetByRef(func: () => JSValue): Promise<JSValue> {
+async function asyncFunctionSubsetByRef(func: () => Any): Promise<Any> {
     return func;
 }
 
@@ -485,7 +485,7 @@ class ClassReturnThis {
   returnThis(): this {
     return this;
   }
-  returnThisAsJSValue(): JSValue {
+  returnThisAsAny(): Any {
     return this;
   }
 }
@@ -557,7 +557,7 @@ function functionArgStringLiteralTypeUnion(arg: TypeStringU): TypeStringU {
     return arg as TypeStringU;
 }
 
-function fnWithArgOfTypeSymbol(arg: JSValue): JSValue {
+function fnWithArgOfTypeSymbol(arg: Any): Any {
     return arg;
 }
 
@@ -576,7 +576,7 @@ class RefType2 {
     value: string = 'valuetwo'
 }
 
-function functionReturnsCompositeType(arg: JSValue): RefType1 | RefType2 {
+function functionReturnsCompositeType(arg: Any): RefType1 | RefType2 {
     const seed = arg as number;
     return seed > 1 ? new RefType2() : new RefType1();
 }

@@ -287,7 +287,7 @@ static Type Virtual(ani_env *env, ani_object that, ani_object i0, ani_byte i1, a
     } else {
         static_assert(std::is_same_v<Type, ani_object>);
         ani_method ctor;
-        CHECK_EQUAL(env->Class_FindMethod(intWrapper, "<ctor>", "I:V", &ctor), ANI_OK);
+        CHECK_EQUAL(env->Class_FindMethod(intWrapper, "<ctor>", "i:", &ctor), ANI_OK);
         ani_object newObj;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         CHECK_EQUAL(env->Object_New(intWrapper, ctor, &newObj, errorCount), ANI_OK);

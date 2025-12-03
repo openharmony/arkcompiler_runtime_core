@@ -35,14 +35,6 @@ function testLdByName(): void {
     arktest.assertEQ(baz, 'hello world');
 }
 
-function testLdByVal(): void {
-    let bar = fooInstance['bar'];
-    arktest.assertEQ(bar, 0xcafe);
-
-    let baz = fooInstance['baz'];
-    arktest.assertEQ(baz, 'hello world');
-}
-
 function testLdByIdx(): void {
     let babe = numberMapInstance[1];
     arktest.assertEQ(babe, 0xbabe);
@@ -59,16 +51,6 @@ function testStByName(): void {
     fooInstance.baz = 'updated';
     let baz = fooInstance.baz;
     arktest.assertEQ(baz, 'updated');
-}
-
-function testStByVal(): void {
-    fooInstance['bar'] = 0xf00d;
-    let bar = fooInstance['bar'];
-    arktest.assertEQ(bar, 0xf00d);
-
-    fooInstance['baz'] = 'testStByVal';
-    let baz = fooInstance['baz'];
-    arktest.assertEQ(baz, 'testStByVal');
 }
 
 function testCall0(): void {
@@ -126,16 +108,12 @@ function testCallWithUndefined() {
 
 function testArray(): void {
     let arr1: Array<Number> = arrNum.with(1, 8);
-    let arr2: Array<Number> = arrNum.with(1.0, 8.0);
     arktest.assertEQ(arr1.toString(), '1,8,3,4');
-    arktest.assertEQ(arr2.toString(), '1,8,3,4');
 }
 
 function testArrayFill(): void {
     let arr1: Array<Number> = arrFill.fill(8, 1, 3);
-    let arr2: Array<Number> = arrFill.fill(8.0, 1.0, 3.0);
     arktest.assertEQ(arr1.toString(), '1,8,8,4');
-    arktest.assertEQ(arr2.toString(), '1,8,8,4');
 }
 
 function testBigInt(): void {
@@ -149,19 +127,19 @@ function testSetter(): void {
     try {
         user.age = -11;
         res = false;
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Age cannot be negative';
     }
     try {
         user.username = 'jo';
         res = false;
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Username must be at least 3 characters long';
     }
     try {
         user.username = 'jo';
         res = false;
-    } catch (e: Error) {
+    } catch (e) {
         res = e.message === 'Username must be at least 3 characters long';
     }
     arktest.assertTrue(res);
@@ -170,10 +148,8 @@ function testSetter(): void {
 function testAll(): void {
     testIsInstance();
     testLdByName();
-    testLdByVal();
     testLdByIdx();
     testStByName();
-    testStByVal();
     testStByIdx();
     testCall0();
     testCallShort();

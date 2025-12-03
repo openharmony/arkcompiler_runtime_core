@@ -26,12 +26,8 @@ public:
 
     void GetMethod(ani_namespace *nsResult, ani_function *fnResult)
     {
-        ani_module module {};
-        ASSERT_EQ(env_->FindModule("@functionModule.function_call_short_test", &module), ANI_OK);
-        ASSERT_NE(module, nullptr);
-
         ani_namespace ns {};
-        ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+        ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_short_test.ops", &ns), ANI_OK);
         ASSERT_NE(ns, nullptr);
 
         ani_function fn {};
@@ -140,13 +136,9 @@ TEST_F(FunctionCallTest, function_call_short_v_invalid_result)
 
 TEST_F(FunctionCallTest, function_call_short_001)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_short_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_short_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "shortFunctionA", "ss:s", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -164,16 +156,12 @@ TEST_F(FunctionCallTest, function_call_short_001)
 
 TEST_F(FunctionCallTest, function_call_short_002)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_short_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_namespace nB {};
     ani_function fB {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_short_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A.B", &nB), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_short_test.A.B", &nB), ANI_OK);
     ASSERT_NE(nB, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nB, "shortFunctionB", "ss:s", &fB), ANI_OK);
     ASSERT_NE(fB, nullptr);
@@ -191,13 +179,9 @@ TEST_F(FunctionCallTest, function_call_short_002)
 
 TEST_F(FunctionCallTest, function_call_short_003)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_short_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_short_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "shortFunctionA", "sss:s", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -258,13 +242,9 @@ TEST_F(FunctionCallTest, function_call_short_005)
 
 TEST_F(FunctionCallTest, function_call_short_006)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_short_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_short_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "nestedFunction", "ss:s", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -282,13 +262,9 @@ TEST_F(FunctionCallTest, function_call_short_006)
 
 TEST_F(FunctionCallTest, function_call_short_007)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_short_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_short_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "recursiveFunction", "i:s", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -307,13 +283,9 @@ TEST_F(FunctionCallTest, function_call_short_007)
 
 TEST_F(FunctionCallTest, function_call_short_008)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_short_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_short_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "calculateSum", "sscd:s", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);
@@ -340,13 +312,9 @@ TEST_F(FunctionCallTest, function_call_short_008)
 
 TEST_F(FunctionCallTest, function_call_short_009)
 {
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule("@functionModule.function_call_short_test", &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
     ani_namespace nA {};
     ani_function fA {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "A", &nA), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@functionModule.function_call_short_test.A", &nA), ANI_OK);
     ASSERT_NE(nA, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(nA, "shortFunctionA", "ss:s", &fA), ANI_OK);
     ASSERT_NE(fA, nullptr);

@@ -22,8 +22,8 @@ desc: >-
 ---*/
 {{t.defs}}
 
-function main(): int {
+function main() {
     {{t.use|indent}}
-    return ok ? 0 : 1
+    arktest.assertTrue(ok)
 }
 {% endfor %}

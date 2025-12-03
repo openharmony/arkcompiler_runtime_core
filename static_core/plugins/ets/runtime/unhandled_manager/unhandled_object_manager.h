@@ -72,13 +72,17 @@ public:
     /// @brief Visits objects as GC roots
     void VisitObjects(const GCRootVisitor &visitor);
 
+    /// @brief Applies handler to the exception and exits the program
+    void InvokeErrorHandler(EtsCoroutine *coro, EtsHandle<EtsObject> exception);
+
 private:
-    PandaEtsVM *vm_;
-    mutable os::memory::Mutex mutex_;
     PandaUnorderedSet<EtsObject *> failedJobs_ GUARDED_BY(mutex_);
     PandaUnorderedMap<CoroutineWorker::Id, PandaUnorderedSet<EtsObject *>> rejectedPromises_ GUARDED_BY(mutex_);
     // NOTE: The current implementation doesn't handle the case where a promise is
     // rejected in one worker and handled in another. This is considered undefined behavior.
+
+    mutable os::memory::Mutex mutex_;
+    PandaEtsVM *vm_;
 };
 }  // namespace ark::ets
 

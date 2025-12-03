@@ -19,7 +19,7 @@ function fakeLambdaInvoke(a: string, b: string | undefined): string {
     return a + (b === undefined ? 'u' : b);
 }
 
-class FakeLambdaObject extends Lambda2 implements Function1<Any, Any> {
+class FakeLambdaObject extends Lambda2<Any, Any, Any> implements Function1<Any, Any> {
     public constructor() { }
 
     public invoke1(a: Any): Any {
@@ -51,8 +51,18 @@ function testF1(f: Function1<Any, Any>) {
     xassert(f.invokeR2('a', 'b', 'c'), 'ab')
     xassert(f.invokeR3('a', 'b', 'c'), 'ab')
     xassert(f.invokeR3('a', 'b', 'c', 'd'), 'ab')
+    xassert(f.unsafeCall('a'), 'au')
+    xassert(f.unsafeCall('a', 'b'), 'ab')
+    xassert(f.unsafeCall('a', 'b', 'c'), 'ab')
+}
+
+function testF2(f: Function2<Any, Any, Any>) {
+    xassert(f.unsafeCall('a'), 'au')
+    xassert(f.unsafeCall('a', 'b'), 'ab')
+    xassert(f.unsafeCall('a', 'b', 'c'), 'ab')
 }
 
 function main() {
     testF1(new FakeLambdaObject())
+    testF2(new FakeLambdaObject())
 }

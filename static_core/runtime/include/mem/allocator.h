@@ -17,11 +17,11 @@
 
 #include <functional>
 
-#include "libpandabase/mem/code_allocator.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/mem/pool_map.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/mem/code_allocator.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/pool_map.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/macros.h"
 #include "runtime/mem/bump-allocator.h"
 #include "runtime/mem/freelist_allocator.h"
 #include "runtime/mem/gc/bitmap.h"
@@ -390,6 +390,13 @@ public:
      */
     virtual bool IsObjectInNonMovableSpace(const ObjectHeader *obj) = 0;
 
+    /**
+     * Check GC will never move the object.
+     * @param obj - object to check
+     * @return true if GC will not move the object, else return false.
+     */
+    virtual bool IsNonMovable(const ObjectHeader *obj) = 0;
+
     /// @return true if allocator has an young space
     virtual bool HasYoungSpace() = 0;
 
@@ -690,6 +697,11 @@ public:
         return true;
     }
 
+    bool IsNonMovable([[maybe_unused]] const ObjectHeader *obj) override
+    {
+        return true;
+    }
+
     bool HasYoungSpace() final
     {
         return false;
@@ -879,6 +891,7 @@ public:
     bool IsIntersectedWithYoung(const MemRange &memRange) final;
 
     bool IsObjectInNonMovableSpace(const ObjectHeader *obj) final;
+    bool IsNonMovable(const ObjectHeader *obj) final;
 
     bool HasYoungSpace() final;
 

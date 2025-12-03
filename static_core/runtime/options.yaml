@@ -186,7 +186,7 @@ options:
     - events
     - scheduler
     - coroutines
-  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libarkbase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   delimiter: ":"
   deprecated: true
 
@@ -432,6 +432,11 @@ options:
   default: true
   description: Enable parallel references updating in GC if it is supported (now it is G1). If we don't have gc workers, this options will be ignored.
 
+- name: long-gc-threshold-ns
+  type: uint64_t
+  default: 40000000
+  description: Specify the threshold for the duration of Full GC before exceeding the execution time
+
 - name: g1-single-pass-compaction-enabled
   type: bool
   default: true
@@ -451,7 +456,7 @@ options:
   - warning
   - error
   - fatal
-  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libarkbase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   deprecated: true
 
 - name: log-stream
@@ -462,13 +467,13 @@ options:
   - file
   - fast-file
   - dummy
-  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libarkbase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   deprecated: true
 
 - name: log-file
   type: std::string
   default: ""
-  description: '[DEPRECATED] Option was moved to libpandabase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
+  description: '[DEPRECATED] Option was moved to libarkbase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   deprecated: true
 
 - name: gc-enable-tracing
@@ -566,7 +571,9 @@ options:
 
 - name: internal-memory-size-limit
   type: uint64_t
-  default: 2147483648
+  default_target_specific:
+    arm32: 2147483648
+    default: 8589934592
   description: Max internal memory used by the VM
 
 - name: frames-memory-size-limit
@@ -738,7 +745,7 @@ options:
 
 - name: verification-mode
   type: std::string
-  default: disabled
+  default: ahead-of-time
   possible_values:
     - disabled
     - on-the-fly
@@ -909,7 +916,9 @@ options:
 
 - name: coroutines-stack-mem-limit
   type: uint64_t
-  default: 536870912
+  default_target_specific:
+    arm32: 536870912
+    default: 4194304000
   description: defines the total amount of memory that can be used for stackful coroutine stacks allocation (in bytes)
 
 - name: coroutines-user-limit
@@ -972,3 +981,8 @@ options:
   type: std::string
   default: ""
   description: Specify the location the collected code coverage information.
+
+- name: use-boot-class-filter
+  type: bool
+  default: true
+  description: Whether to use boot class bloom filter to speedup app class lookup.

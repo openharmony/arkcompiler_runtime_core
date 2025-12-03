@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 #ifndef PANDA_MEM_HEAP_VERIFIER_H
 #define PANDA_MEM_HEAP_VERIFIER_H
 
-#include "libpandabase/utils/bit_utils.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/rendezvous.h"
 
@@ -31,7 +31,8 @@ class HeapReferenceVerifier {
 public:
     explicit HeapReferenceVerifier(HeapManager *heap, size_t *count) : heap_(heap), failCount_(count) {}
 
-    void operator()(ObjectHeader *objectHeader, ObjectHeader *referent);
+    bool operator()(ObjectHeader *objectHeader, ObjectHeader *referent, uint32_t offset,
+                    [[maybe_unused]] bool isVolatile);
 
     void operator()(const GCRoot &root);
 
@@ -114,6 +115,7 @@ private:
     struct ObjectCache {
         const ObjectHeader *heapObject;
         const ObjectHeader *referent;
+        const size_t offset;  // NOLINT(readability-identifier-naming)
     };
 
     size_t CheckHeap(const PandaUnorderedSet<const ObjectHeader *> &heapObjects,

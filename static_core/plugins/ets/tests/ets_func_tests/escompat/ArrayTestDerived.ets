@@ -17,16 +17,16 @@ const DERIVED_ACCESS_OFFSET = 1000;
 
 class Derived extends Array<Number> {
     public constructor(arrayLen: number) {
-        super(arrayLen);
+        super(arrayLen.toInt());
     }
 
     public override $_get(index: int): Number {
         return super.$_get(index) + DERIVED_ACCESS_OFFSET;
     }
 
-    public override at(index: int): Number | undefined {
+    public override at(index: int): Number {
         let superRes = super.at(index);
-        return superRes === undefined ? superRes : superRes + DERIVED_ACCESS_OFFSET;
+        return superRes + DERIVED_ACCESS_OFFSET;
     }
 }
 

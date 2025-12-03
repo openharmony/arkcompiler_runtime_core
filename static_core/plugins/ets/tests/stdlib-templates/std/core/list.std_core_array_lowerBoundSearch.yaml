@@ -382,56 +382,56 @@
       {
       test10:
         {
-        arr: "[0f,1f,2f,3f,4f,5f,6f,7f,8f,9f,10f,11f,12f,13f,14f,15f]",
+        arr: "[0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f,8.0f,9.0f,10.0f,11.0f,12.0f,13.0f,14.0f,15.0f]",
         key: 7,
         startIndex: 4,
         endIndex: 12,
         },
       test20:
         {
-        arr: "[0f,1f,2f,3f,4f,5f,6f,7f,7f,7f,7f,7f,12f,13f,14f,15f]",
+        arr: "[0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f,7.0f,7.0f,7.0f,7.0f,12.0f,13.0f,14.0f,15.0f]",
         key: 7,
         startIndex: 4,
         endIndex: 12,
         },
       test30:
         {
-        arr: "[7f,7f,7f,7f,7f,8f,9f,10f,11f,12f,13f,14f,15f,16f,17f,18f]",
+        arr: "[7.0f,7.0f,7.0f,7.0f,7.0f,8.0f,9.0f,10.0f,11.0f,12.0f,13.0f,14.0f,15.0f,16.0f,17.0f,18.0f]",
         key: 7,
         startIndex: 0,
         endIndex: 8,
         },
       test40:
         {
-        arr: "[0f,1f,2f,3f,4f,5f,6f,7f,7f,7f,7f,7f,7f,7f,7f,7f]",
+        arr: "[0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f,7.0f,7.0f,7.0f,7.0f,7.0f,7.0f,7.0f,7.0f]",
         key: 7,
         startIndex: 6,
         endIndex: 16,
         },
       test50:
         {
-        arr: "[0f,1f,2f,3f,4f,5f,6f,8f,9f,10f,11f,12f,13f,14f,15f,16f]",
+        arr: "[0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,8.0f,9.0f,10.0f,11.0f,12.0f,13.0f,14.0f,15.0f,16.0f]",
         key: 7,
         startIndex: 4,
         endIndex: 12,
         },
       test60:
         {
-        arr: "[8f,9f,10f,11f,12f,13f,14f,15f,16f,17f,18f,19f,20f,21f,22f,23f]",
+        arr: "[8.0f,9.0f,10.0f,11.0f,12.0f,13.0f,14.0f,15.0f,16.0f,17.0f,18.0f,19.0f,20.0f,21.0f,22.0f,23.0f]",
         key: 7,
         startIndex: 0,
         endIndex: 10,
         },
       test70:
         {
-        arr: "[0f,1f,2f,3f,4f,5f,6f,7f,8f,9f,10f,11f,12f,13f,14f,15f]",
+        arr: "[0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f,8.0f,9.0f,10.0f,11.0f,12.0f,13.0f,14.0f,15.0f]",
         key: 16,
         startIndex: 10,
         endIndex: 16,
         },
       test80:
         {
-        arr: "[0f,1f,2f,3f,4f,5f,6f,7f,7f,7f,7f,7f,12f,13f,14f]",
+        arr: "[0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f,7.0f,7.0f,7.0f,7.0f,12.0f,13.0f,14.0f]",
         key: 7,
         startIndex: 7,
         endIndex: 11,

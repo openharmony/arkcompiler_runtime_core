@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_MEM_GC_WORKERS_GC_WORKERS_TASK_QUEUE_H
 #define PANDA_RUNTIME_MEM_GC_WORKERS_GC_WORKERS_TASK_QUEUE_H
 
-#include "libpandabase/taskmanager/task.h"
+#include "libarkbase/taskmanager/task.h"
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 
 namespace ark::mem {

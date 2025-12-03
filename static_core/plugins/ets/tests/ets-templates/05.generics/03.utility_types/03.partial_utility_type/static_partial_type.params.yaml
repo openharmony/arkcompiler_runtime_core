@@ -19,28 +19,6 @@ cases:
         j: int = 0
       }
     check: |-
-      let a: Partial<A> = {i:1, j:2}
-      arktest.assertEQ(a.j, 2)
-    tags: compile-only, negative
-    doc: Static field is not a part of Partial<T>
-
-  - decl: |-
-      abstract class AC {
-        static i: int = 0
-        j: int = 0
-      }
-    check: |-
-      let a: Partial<AC> = {i:1, j:2}
-      arktest.assertEQ(a.j, 2)
-    tags: compile-only, negative
-    doc: Static field is not a part of Partial<T>
-
-  - decl: |-
-      class A {
-        static i: int = 0
-        j: int = 0
-      }
-    check: |-
       let a: Partial<A> = {j:2}
       arktest.assertEQ(a.j, 2)
 
@@ -90,25 +68,3 @@ cases:
       arktest.assertEQ(AC.i, 2)
     doc: |-
       Static field is a part of Partial<T> class. Field becomes optional and, thus, gets undefined value.
-
-  - decl: |-
-      class A {
-        static foo(){}
-        j: int = 0
-      }
-      type P = Partial<A>
-    check: |-
-      P.foo()
-    tags: compile-only, negative
-    doc: Static method is not a part of Partial<T>.
-
-  - decl: |-
-      abstract class AC {
-        static foo(){}
-        j: int = 0
-      }
-      type P = Partial<AC>
-    check: |-
-      P.foo()
-    tags: compile-only, negative
-    doc: Static method is not a part of Partial<T>.

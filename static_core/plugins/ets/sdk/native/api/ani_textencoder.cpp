@@ -291,8 +291,8 @@ ani_arraybuffer DoEncodeInto(ani_env *env, [[maybe_unused]] ani_object object, a
     return OtherEncodeToUint8Array(env, stringObj, cvt);
 }
 
-ani_array_int DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object object, ani_string inputStringObj,
-                                     ani_string encodingObj, ani_object destObj)
+ani_array DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object object, ani_string inputStringObj,
+                                 ani_string encodingObj, ani_object destObj)
 {
     std::string encoding = stdlib::ConvertFromAniString(env, encodingObj);
     ani_int byteLength;
@@ -303,21 +303,40 @@ ani_array_int DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object o
     ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(destObj, "buffer", &buffer));
     std::optional<ArrayBufferInfos> bufInfo = GetBufferInfo(env, static_cast<ani_arraybuffer>(buffer));
     if (!bufInfo) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_FATAL_SDK("TextEncoder:: Failure GetBufferInfo.");
         return nullptr;
     }
     std::optional<WriteEncodedDataResult> writeRes =
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         WriteEncodedData(env, inputStringObj, encoding, static_cast<char *>(bufInfo->data) + byteOffset, byteLength);
     if (!writeRes) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        LOG_FATAL_SDK("TextEncoder:: Failure WriteEncodedData.");
         return nullptr;
     }
-    ani_array_int pathsArray;
-    ANI_FATAL_IF_ERROR(env->Array_New_Int(2U, &pathsArray));
-    const ani_size offset = 0;
+
+    ani_ref undef {};
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undef));
+
+    ani_array pathsArray;
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    ANI_FATAL_IF_ERROR(env->Array_New(2U, undef, &pathsArray));
+
+    ani_class intClass {};
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Int", &intClass));
+
+    ani_method intCtor;
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(intClass, "<ctor>", "i:", &intCtor));
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     ani_int nativeParams[] = {static_cast<ani_int>(writeRes->nInputCharsConsumed),
                               static_cast<ani_int>(writeRes->resultSizeBytes)};
-    ANI_FATAL_IF_ERROR(env->Array_SetRegion_Int(pathsArray, offset, 2U, nativeParams));
+    for (size_t i = 0; i < 2U; ++i) {
+        ani_object boxedInt {};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        ANI_FATAL_IF_ERROR(env->Object_New(intClass, intCtor, &boxedInt, nativeParams[i]));
+        ANI_FATAL_IF_ERROR(env->Array_Set(pathsArray, i, boxedInt));
+    }
     return pathsArray;
 }
 }  // namespace ark::ets::sdk::util

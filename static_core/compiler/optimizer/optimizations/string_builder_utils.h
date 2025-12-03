@@ -31,6 +31,8 @@ bool IsMethodStringBuilderConstructorWithStringArg(const Inst *inst);
 bool IsMethodStringBuilderConstructorWithCharArrayArg(const Inst *inst);
 bool IsStringBuilderToString(const Inst *inst);
 bool IsMethodStringBuilderDefaultConstructor(const Inst *inst);
+bool IsMethodStringGetLength(const Inst *inst);
+bool IsStringLength(const Inst *inst);
 bool IsStringLengthAccessor(const Inst *inst);
 bool IsStringLengthAccessorChain(const Inst *inst);
 Inst *GetStringLengthCompressedShr(Inst *lenArrayCall);

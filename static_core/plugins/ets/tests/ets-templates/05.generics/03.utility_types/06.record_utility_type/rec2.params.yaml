@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -51,8 +51,8 @@ cases:
 
     - type: float
       values:
-          - { key: 0f, val: 0f }
-          - { key: 0f, val: 55f }
+          - { key: 0.0f, val: 0.0f }
+          - { key: 0.0f, val: 55.0f }
           - { key: Float.MIN_VALUE, val: Float.MIN_VALUE }
           - { key: Float.MIN_VALUE, val: Float.MAX_VALUE }
           - { key: Float.MAX_VALUE, val: Float.MAX_VALUE }
@@ -61,8 +61,8 @@ cases:
           - { key: Float.NEGATIVE_INFINITY, val: Float.POSITIVE_INFINITY }
           - { key: Float.POSITIVE_INFINITY, val: Float.POSITIVE_INFINITY }
           - { key: Float.POSITIVE_INFINITY, val: Float.NEGATIVE_INFINITY }
-          - { key: Float.NaN, val: 42f }
-          - { key: Float.NaN, val: 84f }
+          - { key: Float.NaN, val: 42.0f }
+          - { key: Float.NaN, val: 84.0f }
 
     - type: double
       values:
@@ -150,8 +150,8 @@ cases:
 
     - type: float|string
       values:
-          - { key: 0f, val: 0f }
-          - { key: 0f, val: 55f }
+          - { key: 0.0f, val: 0.0f }
+          - { key: 0.0f, val: 55.0f }
           - { key: Float.MIN_VALUE, val: Float.MIN_VALUE }
           - { key: Float.MIN_VALUE, val: Float.MAX_VALUE }
           - { key: Float.MAX_VALUE, val: Float.MAX_VALUE }
@@ -160,8 +160,8 @@ cases:
           - { key: Float.NEGATIVE_INFINITY, val: Float.POSITIVE_INFINITY }
           - { key: Float.POSITIVE_INFINITY, val: Float.POSITIVE_INFINITY }
           - { key: Float.POSITIVE_INFINITY, val: Float.NEGATIVE_INFINITY }
-          - { key: Float.NaN, val: 42f }
-          - { key: Float.NaN, val: 84f }
+          - { key: Float.NaN, val: 42.0f }
+          - { key: Float.NaN, val: 84.0f }
           - { key: '"a"', val: '""' }
           - { key: '"a"', val: '"\u0000"' }
           - { key: '"\u0000"', val: '""' }
@@ -189,3 +189,28 @@ cases:
           - { key: '"\u0000"', val: '"a"' }
           - { key: '" "', val: '" "' }
           - { key: '" "', val: '"  "' }
+
+    - type: Color
+      decl: enum Color { Red, Green, Blue }
+      values:
+        - { key: Color.Red, val: Color.Red }
+        - { key: Color.Green, val: Color.Green }
+        - { key: Color.Blue, val: Color.Blue }
+
+    - type: Commands
+      decl: enum Commands { Open = "fopen", Close = "fclose" }
+      values:
+        - { key: Commands.Open, val: Commands.Open }
+        - { key: Commands.Close, val: Commands.Close }
+
+    - type: CC
+      decl: |-
+            enum Commands { Open = "fopen", Close = "fclose" }
+            enum Color { Red, Green, Blue }
+            type CC = Color | Commands
+      values:
+        - { key: Commands.Open, val: Commands.Open }
+        - { key: Commands.Close, val: Commands.Close }
+        - { key: Color.Red, val: Color.Red }
+        - { key: Color.Green, val: Color.Green }
+        - { key: Color.Blue, val: Color.Blue }

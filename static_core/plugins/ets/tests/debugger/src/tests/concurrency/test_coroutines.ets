@@ -25,8 +25,8 @@ function delay(timeoutMs: number): void {
 }
 
 function func() {
-    console.log('hello');
-    console.log('world');
+    console.log("hello");
+    console.log("world");
 }
 
 function returnAbc(): string {
@@ -34,16 +34,16 @@ function returnAbc(): string {
     func(); // #BP{1}
     func();
     delay(5000)
-    return (() => 'a')() + (() => 'b')() + (() => 'c')();
+    return (() => "a")() + (() => "b")() + (() => "c")();
 }
 
 function returnDef(): string {
     delay(10000)
-    return (() => 'de')() + (() => 'f')();
+    return (() => "de")() + (() => "f")();
 }
 
 function main(): int {
-    let g2 = new taskpool.TaskGroup('g2');
+    let g2 = new taskpool.TaskGroup("g2");
     let t1 = new taskpool.Task(returnAbc);
     let t2 = new taskpool.Task(returnDef);
     g2.addTask(t1);

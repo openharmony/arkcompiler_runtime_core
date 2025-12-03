@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_PLATFORM_PLATFORM_H
 #define PANDA_RUNTIME_PLATFORM_PLATFORM_H
 
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 
 namespace ark {
 bool IsVerifySuccInAppInstall(const panda_file::File *file);

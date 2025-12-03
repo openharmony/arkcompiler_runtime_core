@@ -115,3 +115,9 @@ final class C extends B {
         return this.data.compareTo(value) > 0 ? value : this.data;
     }
 }
+
+class CheckWrongSignature {
+    public method(a: String): char {
+        return c'a';
+    }
+}

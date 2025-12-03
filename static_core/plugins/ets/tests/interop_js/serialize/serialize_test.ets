@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+// CC-OFFNXT(G.FMT.09) project code style
 export function testFunction() {
     return 'testFunction';
 }
@@ -21,26 +22,30 @@ export let testArray = ['testArrayElement'];
 export let testInstance = new TestClass();
 
 class TestClass {
+    // CC-OFFNXT(G.FMT.09) project code style
     static testStaticMethod() {
         return 'testStaticMethod';
     }
     public static staticProp: String = 'staticProp';
 
     public prop: String = 'prop';
+    // CC-OFFNXT(G.FMT.09) project code style
     testMethod() {
         return 'testMethod';
     }
 }
 
+// CC-OFFNXT(G.FMT.09) project code style
 export function checkAsync(ptr: bigint) {
     let w = new EAWorker(true);
     w.start();
     let cb = (): int => {
-        let module = new ESValue(JSRuntime.loadModule('./serialize_interop_tests_helpers_js'));
+        let ohmurlPath = './serialize_interop_tests_helpers_js';
+        let module = ESValue.load(ohmurlPath);
         let method = module.getProperty('checkResult');
         try {
             method.invoke(ESValue.wrap(ptr));
-        } catch (e: Error) {
+        } catch (e) {
             return 1;
         }
         return 0;

@@ -229,27 +229,27 @@ function test_10param1() {
         true, "123", arri8, mystruct, color);
 }
 
-//// 测试 10 param2
-//function test_10param2() {
-//    let instance: test_overload.OverloadInterface =
-//        test_overload.get_interface();
-//    let arri8: byte[] = [1, 2, 3];
-//    let arri16: short[] = [1, 2, 3, 4];
-//    let arri32: int[] = [1, 2, 3, 4, 5];
-//    let arrbool: boolean[] = [true, false];
-//    let arrf32: float[] = [1.1f, 2.2f];
-//    let arrf64: double[] = [1.11111, 2.22222];
-//    let arrstring: String[] = ["hello", "world"];
-//
-//    let mystruct: test_overload.Mystruct = {
-//        testNum: 2147483647,
-//        testStr: "path/to/source"
-//    };
-//    let color = test_overload.Color.red;
-//    instance.overloadFunc(
-//        (1).toByte(), mystruct, color, arrf32, arrf64, arrbool, arrstring,
-//        arri8, arri16, arri32);
-//}
+// 测试 10 param2
+function test_10param2() {
+    let instance: test_overload.OverloadInterface =
+        test_overload.get_interface();
+    let arri8: byte[] = [1, 2, 3];
+    let arri16: short[] = [1, 2, 3, 4];
+    let arri32: int[] = [1, 2, 3, 4, 5];
+    let arrbool: boolean[] = [true, false];
+    let arrf32: float[] = [1.1f, 2.2f];
+    let arrf64: double[] = [1.11111, 2.22222];
+    let arrstring: String[] = ["hello", "world"];
+
+    let mystruct: test_overload.Mystruct = {
+        testNum: 2147483647,
+        testStr: "path/to/source"
+    };
+    let color = test_overload.Color.red;
+    instance.overloadFunc(
+        (1).toByte(), mystruct, color, arrf32, arrf64, arrbool, arrstring,
+        arri8, arri16, arri32);
+}
 
 // 测试 10 param3
 function test_10param3() {
@@ -389,7 +389,7 @@ function main() {
 
     suite.addTest("testByte_10param", test_10param);
     suite.addTest("testByte_10param1", test_10param1);
-    // suite.addTest("testByte_10param2", test_10param2);
+    suite.addTest("testByte_10param2", test_10param2);
     suite.addTest("testByte_10param3", test_10param3);
     suite.addTest("testByte_10param4", test_10param4);
     exit(suite.run());

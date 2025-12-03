@@ -76,13 +76,13 @@ struct std::hash<taihe::data_holder> {
 
 namespace taihe {
 template <typename Impl>
-struct data_block_full : DataBlockHead {
+struct data_block : DataBlockHead {
     Impl impl;
 
     template <typename... Args>
-    data_block_full(TypeInfo const *rtti, Args &&...args) : impl(std::forward<Args>(args)...)
+    data_block(TypeInfo const *rtti_ptr, Args &&...args) : impl(std::forward<Args>(args)...)
     {
-        tobj_init(this, rtti);
+        tobj_init(this, rtti_ptr);
     }
 };
 
@@ -111,19 +111,19 @@ constexpr inline same_impl_t<Impl> same_impl;
 template <typename Impl>
 inline Impl *cast_data_ptr(struct DataBlockHead *data_ptr)
 {
-    return &static_cast<data_block_full<Impl> *>(data_ptr)->impl;
+    return &static_cast<data_block<Impl> *>(data_ptr)->impl;
 }
 
 template <typename Impl, typename... Args>
-inline DataBlockHead *make_data_ptr(TypeInfo const *rtti, Args &&...args)
+inline DataBlockHead *make_data_ptr(TypeInfo const *rtti_ptr, Args &&...args)
 {
-    return new data_block_full<Impl>(rtti, std::forward<Args>(args)...);
+    return new data_block<Impl>(rtti_ptr, std::forward<Args>(args)...);
 }
 
 template <typename Impl>
 inline void free_data_ptr(struct DataBlockHead *data_ptr)
 {
-    delete static_cast<data_block_full<Impl> *>(data_ptr);
+    delete static_cast<data_block<Impl> *>(data_ptr);
 }
 
 template <typename Impl>
@@ -189,9 +189,14 @@ public:
         return *cast_data_ptr<Impl>(this->data_ptr);
     }
 
+    template <typename... Args>
+    decltype(auto) operator()(Args &&...args) const
+    {
+        return cast_data_ptr<Impl>(this->data_ptr)->operator()(std::forward<Args>(args)...);
+    }
+
 public:
     static constexpr struct typeinfo_t {
-        uint64_t version = 0;
         free_func_t *free_fptr = &free_data_ptr<Impl>;
         hash_func_t *hash_fptr = &hash_data_ptr<Impl>;
         same_func_t *same_fptr = &same_data_ptr<Impl>;

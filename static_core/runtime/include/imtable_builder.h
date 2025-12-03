@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 #ifndef PANDA_RUNTIME_IMTABLE_BUILDER_H_
 #define PANDA_RUNTIME_IMTABLE_BUILDER_H_
 
-#include "libpandabase/macros.h"
-#include "libpandafile/class_data_accessor.h"
+#include "libarkbase/macros.h"
+#include "libarkfile/class_data_accessor.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 

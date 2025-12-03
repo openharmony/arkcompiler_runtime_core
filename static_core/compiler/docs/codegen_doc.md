@@ -11,7 +11,7 @@ It is needed Regalloc-pass and LinearOrder-analysis for codegen-work. First - be
 List of major codegen-dependency:
 1. Encoder library (calling convention, encoder, and register description).
 2. CodeBuilder - contain binary data and hold header with information for stack-walker.
-3. CFrameLayout - is responsible for stack-frame layout in runtime(class described in `libpandabase/utils`).
+3. CFrameLayout - is responsible for stack-frame layout in runtime(class described in `libarkbase/utils`).
 4. SlowPath - class, which is responsible for side exits.
 
 Codegen internal-implementation is responsibility for:

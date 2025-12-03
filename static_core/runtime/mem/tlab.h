@@ -15,10 +15,10 @@
 #ifndef PANDA_RUNTIME_MEM_TLAB_H
 #define PANDA_RUNTIME_MEM_TLAB_H
 
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/mem/pool_map.h"
-#include "libpandabase/mem/mem_range.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/pool_map.h"
+#include "libarkbase/mem/mem_range.h"
 
 namespace ark::mem {
 

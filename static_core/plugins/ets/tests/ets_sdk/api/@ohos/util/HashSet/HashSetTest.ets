@@ -48,7 +48,7 @@ function testBasicOperations() {
     let itemArr = ["aa", "bb", "cc"]
     let item: string;
     let i: int = 0;
-    for (item in hashSet) {
+    for (item of hashSet) {
         arktest.assertEQ(item, itemArr[i]);
         i++;
     }

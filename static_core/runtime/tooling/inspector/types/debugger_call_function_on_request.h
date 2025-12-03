@@ -16,8 +16,8 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_DEBUGGER_CALL_FUNCTION_ON_REQUEST_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_DEBUGGER_CALL_FUNCTION_ON_REQUEST_H
 
-#include "macros.h"
-#include "utils/expected.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/expected.h"
 
 namespace ark {
 class JsonObject;

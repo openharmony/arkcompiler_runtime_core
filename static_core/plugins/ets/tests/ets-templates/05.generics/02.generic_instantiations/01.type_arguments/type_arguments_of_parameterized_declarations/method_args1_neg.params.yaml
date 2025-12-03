@@ -67,6 +67,10 @@ cases:
       }
     bound: ' extends Object[]|null'
 
+  - use: |-
+      let v = new X[0]
+      arktest.assertEQ(a.meth<X[]>(v, new Y<X>[0]), v)
+
   # type argument is alias
   - use: |-
       let v = new X()
@@ -92,6 +96,12 @@ cases:
     decl: |-
       type B = X[]
     bound: ' extends Object[]'
+
+  - use: |-
+      let v = new X[0]
+      arktest.assertEQ(a.meth<B>(v, new Y<X>[0]), v)
+    decl: |-
+      type B = X[]|null
 
   # create array with interfaces
   - use: |-

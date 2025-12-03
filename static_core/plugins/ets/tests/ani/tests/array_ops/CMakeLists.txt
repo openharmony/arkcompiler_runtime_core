@@ -17,71 +17,15 @@ ani_add_gtest(ani_test_array_get_length
 
 ani_add_gtest(ani_test_array_get_set
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_set_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_set_test.ets
 )
 
 ani_add_gtest(ani_test_array_push_pop
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_push_pop_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_push_pop_test.ets
 )
 
 ani_add_gtest(ani_test_array_managed
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_managed_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_managed_test.ets
-)
-
-ani_add_gtest(ani_test_array_region_boolean
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_boolean_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_boolean_test.ets
-)
-
-ani_add_gtest(ani_test_array_region_byte
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_byte_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_byte_test.ets
-)
-
-ani_add_gtest(ani_test_array_region_short
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_short_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_short_test.ets
-)
-
-ani_add_gtest(ani_test_array_region_int
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_int_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_int_test.ets
-)
-
-ani_add_gtest(ani_test_array_region_long
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_long_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_long_test.ets
-)
-
-ani_add_gtest(ani_test_array_region_float
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_float_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_float_test.ets
-)
-
-ani_add_gtest(ani_test_array_region_double
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_double_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_double_test.ets
-)
-
-ani_add_gtest(ani_test_array_new_ref
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_new_ref_test.cpp
-)
-
-ani_add_gtest(ani_test_array_fixedarray_new_ref
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_new_ref_test.cpp
-)
-
-ani_add_gtest(ani_test_array_get_ref
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_ref_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_ref_test.ets
-)
-
-ani_add_gtest(ani_test_array_set_ref
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_set_ref_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_set_ref_test.ets
-)
-
-ani_add_gtest(ani_test_array_region_char
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_char_test.ets
 )

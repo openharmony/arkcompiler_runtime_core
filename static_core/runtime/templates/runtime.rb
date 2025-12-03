@@ -21,6 +21,15 @@ def yaml_union_type?(type)
   type[0,2] == 'U{'
 end
 
+def is_string_type(type)
+  if not Runtime::coretypes
+    return false
+  end
+  t = Runtime::coretypes.find { |t| t.managed_class == type }
+  return t.string_class if t.respond_to?(:string_class)
+  false
+end
+
 def get_object_type(type)
   if array_type?(type)
     type = "Array"

@@ -57,6 +57,7 @@ Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *
     ASSERT(manager_ != nullptr);
     SetEntrypointData(std::move(epInfo));
     coroutineId_ = GetManager()->AllocateCoroutineId();
+    internalId_ = coroutineId_;
 }
 
 Coroutine::~Coroutine()
@@ -238,6 +239,16 @@ void Coroutine::SetWorker(CoroutineWorker *w)
         GetManager()->OnCoroBecameActive(this);
     } else if ((oldWorker != nullptr) && (w == nullptr)) {
         GetManager()->OnCoroBecameNonActive(this);
+    }
+}
+
+void Coroutine::PrintCallStack() const
+{
+    for (auto stack = StackWalker::Create(this); stack.HasFrame(); stack.NextFrame()) {
+        Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
+        LOG(ERROR, COROUTINES) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
+                               << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
     }
 }
 

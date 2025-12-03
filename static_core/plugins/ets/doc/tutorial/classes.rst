@@ -95,11 +95,9 @@ An instance of the class is used to access an instance field:
 ``static`` Fields
 ~~~~~~~~~~~~~~~~~
 
-The keyword ``static`` is used to declare a field as static. The ``static``
-fields belong to the class itself, and all instances of the class share the
-same set of ``static`` fields.
-
-The class name is used to access ``static`` fields:
+The keyword ``static`` is used to declare a field as static. ``Static`` fields
+belong to the class itself, and all instances of the class share the
+same set of ``static`` fields. Class name is used to access a ``static`` field:
 
 .. code-block:: typescript
 
@@ -251,7 +249,7 @@ Methods
 A method is a function that belongs to a class.
 A class can define instance methods, static methods, or both.
 A ``static`` method belongs to the class itself. It can access
-only the ``static`` fields.
+only ``static`` fields.
 An instance method can access both ``static`` (class) fields
 and instance fields, including those private to its class.
 
@@ -291,10 +289,10 @@ a class:
 ~~~~~~~~~~~~~~~~~~
 
 The keyword ``static`` is used to declare a method as static. A ``static``
-method belongs to a class itself, and can access only the ``static`` fields.
+method belongs to a class itself, and can access ``static`` fields only.
 
 A ``static`` method defines the common behavior of its entire class.
-All instances can access the ``static`` methods.
+All instances can access ``static`` methods.
 
 Class name is used to call a ``static`` method:
 
@@ -505,7 +503,7 @@ to explicitly call a constructor of the direct superclass:
     }
 
 If a constructor body does not begin with such an explicit call of a
-superclass constructor, then it implicitly begins with a superclass
+superclass constructor, then it implicitly begins with the superclass
 constructor call ``super()``.
 
 |
@@ -540,7 +538,7 @@ Visibility Modifiers
 
 Both methods and properties of a class can have visibility modifiers.
 
-There are several visibility modifiers:
+Visibility modifiers are as follows:
 
 -  ``private``,
 -  ``protected``,
@@ -620,7 +618,7 @@ enclosed in '``{``' and '``}``':
     let c: C = {n: 42, s: "foo"}
 
 Due to the static typing of |LANG|, object literals can be used in a
-context where the class or the interface type of the object literal can be
+context where class or interface type of an object literal can be
 inferred as in the example above.
 
 Other valid cases are illustrated below:

@@ -117,7 +117,7 @@ function createMapAndGetMissed(): int {
     map.set(c'b', 1.0)
     try {
         map.get(c'a')
-    } catch(e: Error) {
+    } catch(e) {
         return success
     }
     return fail
@@ -140,7 +140,7 @@ function createMapAddReplaceAndGetMissed(): int {
 
     try {
         map.get(c'a')
-    } catch(e: Error) {
+    } catch(e) {
         return success
     }
     return fail

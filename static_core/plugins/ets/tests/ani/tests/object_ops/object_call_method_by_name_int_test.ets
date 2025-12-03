@@ -114,3 +114,9 @@ final class C extends B {
         return this.data1 + value as int;
     }
 }
+
+class CheckWrongSignature {
+    public method(a: String): int {
+        return 1;
+    }
+}

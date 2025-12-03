@@ -114,3 +114,9 @@ class G {
         return G.privateMethod(a0, a1);
     }
 }
+
+class CheckWrongSignature {
+    static method(a: String): double {
+        return 1.1;
+    }
+}

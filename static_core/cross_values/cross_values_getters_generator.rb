@@ -29,7 +29,7 @@ Dir.glob("#{ARGV[1]}/*values_gen.h").each do |values_h|
 end
 $header += "\n"
 $header += "#include <cstddef>\n"
-$header += "#include \"libpandabase/utils/arch.h\"\n"
+$header += "#include \"libarkbase/utils/arch.h\"\n"
 $header += "#include \"runtime/entrypoints/entrypoints.h\"\n\n"
 
 def generate(input_file, output_file)
@@ -59,9 +59,9 @@ def generate(input_file, output_file)
 
         file.puts %<
 // Specific getter for TLS entrypoints offsets:
-[[maybe_unused]] static constexpr ptrdiff_t GetManagedThreadEntrypointOffset(Arch arch, ark::EntrypointId id)
+[[maybe_unused]] static constexpr ptrdiff_t GetEntrypointOffset(Arch arch, ark::EntrypointId id)
 {
-    return GetManagedThreadEntrypointsOffset(arch) + static_cast<size_t>(id) * PointerSize(arch);
+    return static_cast<size_t>(id) * PointerSize(arch);
 }
 
 >

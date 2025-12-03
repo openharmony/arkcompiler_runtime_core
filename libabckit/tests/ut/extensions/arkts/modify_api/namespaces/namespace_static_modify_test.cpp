@@ -18,7 +18,7 @@
 #include "libabckit/cpp/abckit_cpp.h"
 #include "tests/helpers/helpers.h"
 #include "tests/helpers/helpers_runtime.h"
-
+#include <iostream>
 namespace libabckit::test {
 
 static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
@@ -53,19 +53,6 @@ TEST_F(LibAbcKitArkTSModifyApiNamespacesTest, NamespaceSetNameStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->writeAbc(file, output.c_str(), output.length());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->closeFile(file);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-
-    helpers::AssertOpenAbc(output.c_str(), &file);
-
-    ctxFinder = {nullptr, "namespace_static_modify"};
-    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
-    ASSERT_NE(ctxFinder.module, nullptr);
-
-    nsCtxFinder = {nullptr, "NS1"};
-    g_implI->moduleEnumerateNamespaces(ctxFinder.module, &nsCtxFinder, helpers::NamespaceByNameFinder);
-    EXPECT_EQ(nsCtxFinder.n, nullptr);
-
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }

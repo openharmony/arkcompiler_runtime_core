@@ -72,11 +72,11 @@ function queueTasks(etsVm) {
 		if (!testSuccess) {
 			return null;
 		}
-		helper.clearInterval(tId);
+		clearInterval(tId);
 		return null;
 	};
 
-	helper.setTimeout(() => {
+	setTimeout(() => {
 		if (testSuccess) {
 			throw Error('Promise must not be resolved');
 		}
@@ -90,7 +90,7 @@ function queueTasks(etsVm) {
 		if (!resolvePendingPromise()) {
 			throw Error("Call of 'resolvePendingPromise' return false");
 		}
-        tId = helper.setInterval(queueTasksHelper, 0);
+        tId = setInterval(queueTasksHelper, 0);
 	}, 0);
 }
 

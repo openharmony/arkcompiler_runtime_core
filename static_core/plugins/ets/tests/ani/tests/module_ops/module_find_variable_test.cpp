@@ -123,7 +123,7 @@ TEST_F(ModuleFindVariableTest, find_variable_B_in_namespace_A)
     ASSERT_EQ(env_->Module_FindVariable(module, "moduleT", &variable), ANI_NOT_FOUND);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@abcModule.module_find_variable_test.ops", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
     ASSERT_EQ(env_->Namespace_FindVariable(ns, "moduleT", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);

@@ -14,7 +14,7 @@
  */
 
 #include "plugins/ets/stdlib/native/core/IntlState.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::ets::stdlib::intl {
 

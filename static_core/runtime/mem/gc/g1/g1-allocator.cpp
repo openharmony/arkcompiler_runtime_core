@@ -424,6 +424,12 @@ bool ObjectAllocatorG1<MT_MODE>::IsObjectInNonMovableSpace(const ObjectHeader *o
 }
 
 template <MTModeT MT_MODE>
+bool ObjectAllocatorG1<MT_MODE>::IsNonMovable(const ObjectHeader *obj)
+{
+    return humongousObjectAllocator_->ContainObject(obj) || nonmovableAllocator_->ContainObject(obj);
+}
+
+template <MTModeT MT_MODE>
 void ObjectAllocatorG1<MT_MODE>::UpdateSpaceData()
 {
     ASSERT(GetYoungRanges().empty());

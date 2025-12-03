@@ -23,7 +23,7 @@
 % codegen_plugin_funcs = ['CreateMathCeil', 'CreateMathFloor', 'CreateCountLeadingZeroBits']
 % codegen_plugin_funcs += ['CreateStringBuilderBool', 'CreateStringBuilderChar','CreateStringBuilderString']
 % codegen_plugin_funcs += ['CreateStringFromStringTlab', 'CreateStringFromCharArrayTlab', 'CreateArrayCopyTo']
-% codegen_plugin_funcs += ['CreateStringSubstringTlab', 'CreateStringGetCharsTlab']
+% codegen_plugin_funcs += ['CreateStringGetCharsTlab']
 % codegen_plugin_funcs += ['CreateStringEquals', 'CreateStringHashCode', 'CreateStringCompareTo']
 % # generate corresponding virtual method decl.
 % codegen_vfuncs = Compiler::intrinsics.select {|i| (i.respond_to? 'codegen_func') && i.is_codegen_virtual? && (!i.skip_codegen_decl?)}.collect {|i| i.codegen_func}

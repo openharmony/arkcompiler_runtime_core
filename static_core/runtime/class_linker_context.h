@@ -16,10 +16,10 @@
 #define PANDA_RUNTIME_CLASS_LINKER_CONTEXT_H_
 
 #include <atomic>
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/object_pointer.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/object_pointer.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/bit_utils.h"
 #include "mem/refstorage/reference.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -32,6 +32,50 @@ namespace ark {
 class ClassLinker;
 class ClassLinkerErrorHandler;
 
+/// @brief Wrapper around a recursive mutex and a condition variable
+class ClassMutexHandler {  // NOLINT(cppcoreguidelines-special-member-functions)
+public:
+    ClassMutexHandler() = default;
+
+    void Lock() ACQUIRE(clsHandlerMtx_)
+    {
+        clsHandlerMtx_.Lock();
+    }
+
+    void Unlock() RELEASE(clsHandlerMtx_)
+    {
+        clsHandlerMtx_.Unlock();
+    }
+
+    void Wait()
+    {
+        clsHandlerCondVar_.Wait(&clsHandlerMtx_);
+    }
+
+    void Signal()
+    {
+        clsHandlerCondVar_.Signal();
+    }
+
+    void SignalAll()
+    {
+        clsHandlerCondVar_.SignalAll();
+    }
+
+    NO_COPY_SEMANTIC(ClassMutexHandler);
+    NO_MOVE_SEMANTIC(ClassMutexHandler);
+
+private:
+    os::memory::RecursiveMutex clsHandlerMtx_;
+    os::memory::ConditionVariable clsHandlerCondVar_;
+};
+
+/**
+ * @brief Base class implementing logic of load context for runtime classes.
+ * Plugins can extend this class in order to define language-specific class loading algorithms
+ * in method `LoadClass`.
+ * `ClassLinkerContext` instances are owned by `ClassLinkerExtension` in a one-to-many relationship.
+ */
 class ClassLinkerContext {
 public:
     explicit ClassLinkerContext(panda_file::SourceLang lang) : lang_(lang) {}
@@ -73,6 +117,8 @@ public:
 
         ASSERT(klass->GetSourceLang() == lang_);
         loadedClasses_.insert({klass->GetDescriptor(), klass});
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(mapLock_);
+        mutexTable_[klass];
         return nullptr;
     }
 
@@ -80,6 +126,8 @@ public:
     {
         os::memory::LockHolder lock(classesLock_);
         loadedClasses_.erase(klass->GetDescriptor());
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(mapLock_);
+        mutexTable_.erase(klass);
     }
 
     template <class Callback>
@@ -144,25 +192,6 @@ public:
         }
     }
 
-    mem::Reference *GetRefToLinker() const
-    {
-        // Atomic with relaxed order reason: read of field
-        return refToLinker_.load(std::memory_order_relaxed);
-    }
-
-    void SetRefToLinker(mem::Reference *ref)
-    {
-        // Atomic with release order reason: write to field, other threads should see correct value
-        refToLinker_.store(ref, std::memory_order_release);
-    }
-
-    bool CompareAndSetRefToLinker(mem::Reference *oldRef, mem::Reference *newRef)
-    {
-        // Atomic with release order reason: write to field, other threads should see correct value
-        return refToLinker_.compare_exchange_strong(oldRef, newRef, std::memory_order_release,
-                                                    std::memory_order_relaxed);
-    }
-
     virtual PandaVector<std::string_view> GetPandaFilePaths() const
     {
         return PandaVector<std::string_view>();
@@ -180,6 +209,12 @@ public:
         return false;
     }
 
+    ClassMutexHandler *GetClassMutexHandler(Class *cls)
+    {
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(mapLock_);
+        return &mutexTable_.at(cls);
+    }
+
     ClassLinkerContext() = default;
     virtual ~ClassLinkerContext() = default;
 
@@ -191,8 +226,9 @@ private:
     os::memory::RecursiveMutex classesLock_;
     PandaUnorderedMap<const uint8_t *, Class *, utf::Mutf8Hash, utf::Mutf8Equal> loadedClasses_
         GUARDED_BY(classesLock_);
+    os::memory::Mutex mapLock_;
+    PandaUnorderedMap<Class *, ClassMutexHandler> mutexTable_;
     PandaVector<ObjectHeader *> roots_;
-    std::atomic<mem::Reference *> refToLinker_ {nullptr};
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };
 

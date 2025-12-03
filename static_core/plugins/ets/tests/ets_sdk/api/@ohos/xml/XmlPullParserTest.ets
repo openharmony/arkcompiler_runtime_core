@@ -30,6 +30,7 @@ function main(): int {
     suite.addTest("Test XmlPullParser getNamespace", testGetNamespace)
     suite.addTest("Test XmlPullParser name:value tag pair", testTagValue)
     suite.addTest("Testing XML isWhitespace with valid whitespace.", testXmlIsWhitespace0001)
+    suite.addTest("Testing XmlPullParser startElement", testStartElement)
 
     return suite.run()
 }
@@ -77,7 +78,7 @@ function testWithTagValueCb() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tagValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: false, tagValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -114,7 +115,7 @@ function testWithTagValueCbWithIgnoreNS() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: false, ignoreNameSpace: true, tagValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -152,7 +153,7 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
         return true 
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tagValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -220,7 +221,7 @@ function testWithTokenValueCb() {
         return true
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": cb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: cb}
 
     parser.parseXml(options)
 
@@ -288,7 +289,7 @@ function testReplaceXmlSpecChars() {
     let strXml = str.join("")
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb, "attributeValueCallbackFunction": attrCb}
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: tokenCb, attributeValueCallbackFunction: attrCb}
     parser.parseXml(options)
 
     let expectedTextStr = 'Hello>World\'Wo"rk'
@@ -489,8 +490,8 @@ function testTagValue() {
     let strXml = str.join("")
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tagValueCallbackFunction": tagCb}
-    parser.parseXml(options);
+    let options: xml.ParseOptions = {supportDoctype: true, ignoreNameSpace: true, tagValueCallbackFunction: tagCb}
+    parser.parseXml(options)
 
     let expectedTextStr = '{  :  }; { note :  }; {  :      }; {  : function \n matchwo(a,6) }; ' +
         '{  :      }; {  : Hello, World! }; {  :      }; { company :  }; {  : John & Hans }; ' +
@@ -549,4 +550,19 @@ let testXml =
             arktest.assertTrue(false)
         }
     }
+
+function testStartElement() {
+    let thatSer = new xml.XmlDynamicSerializer();
+    let max = 100000;
+    let value = 10200062;
+    let result = 0;
+    for (let i = 0; i < max / 25; ++i) {
+        thatSer.setNamespace("h", "aaa");
+        thatSer.startElement("note");
+        thatSer.endElement();
+    }
+    arktest.expectError(() => {
+	    thatSer.startElement("note1");
+	}, 'The length has exceeded the upper limit');
+}
 

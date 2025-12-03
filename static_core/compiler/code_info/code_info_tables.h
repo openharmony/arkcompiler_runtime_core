@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #ifndef PANDA_CODE_INFO_TABLES_H
 #define PANDA_CODE_INFO_TABLES_H
 
-#include "utils/bit_field.h"
-#include "utils/bit_table.h"
-#include "utils/arch.h"
+#include "libarkbase/utils/bit_field.h"
+#include "libarkbase/utils/bit_table.h"
+#include "libarkbase/utils/arch.h"
 #include "vreg_info.h"
 
 namespace ark::compiler {
@@ -86,15 +86,16 @@ private:
     using FieldHasRegMap = FieldIsOsr::NextFlag;
 };
 
-class InlineInfo : public BitTableRow<6U, InlineInfo> {
+class InlineInfo : public BitTableRow<7U, InlineInfo> {
 public:
-    BIT_TABLE_HEADER(6, InlineInfo);
+    BIT_TABLE_HEADER(7, InlineInfo);
     BIT_TABLE_COLUMN(0, IsLast, IS_LAST)
     BIT_TABLE_COLUMN(1, BytecodePc, BYTECODE_PC)
     BIT_TABLE_COLUMN(2, MethodIdIndex, METHOD_ID_INDEX)
     BIT_TABLE_COLUMN(3, MethodHi, METHOD_HI)
     BIT_TABLE_COLUMN(4, MethodLow, METHOD_LOW)
     BIT_TABLE_COLUMN(5, VRegsCount, VREGS_COUNT)
+    BIT_TABLE_COLUMN(6, FileIndex, FILE_INDEX)
 
     DEFAULT_MOVE_SEMANTIC(InlineInfo);
     DEFAULT_COPY_SEMANTIC(InlineInfo);

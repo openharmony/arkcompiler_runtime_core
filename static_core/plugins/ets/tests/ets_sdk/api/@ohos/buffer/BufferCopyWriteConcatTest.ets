@@ -194,6 +194,14 @@ function testBufferFill0017() {
 	buf.fill('a', 0, 5, 'utf8');
 	arktest.assertEQ(buf.toString('utf8'), 'aaaaa');
 }
+
+function testBufferFill0018() {
+	const arr1 = new Uint8Array([97, 98, 99, 100, 101, 102, 103])
+  	let buf = buffer.from(arr1.buffer, 1);
+	buf.fill('0', 2, 4, 'utf8');
+	arktest.assertEQ(buf.toString('utf8'), 'bc00fg');
+}
+
 function testFill0091() {
 	const buf1 = buffer.alloc(10).fill('F1刘FG', 0, 10, 'hex');
 	let str = buf1.toString('hex');
@@ -254,6 +262,7 @@ function main(): int {
 	suite.addTest("testBufferFill0007", testBufferFill0007);
 	suite.addTest("testBufferFill0016", testBufferFill0016);
 	suite.addTest("testBufferFill0017", testBufferFill0017);
+	suite.addTest("testBufferFill0018", testBufferFill0018);
 	suite.addTest("testFill0091", testFill0091);
 	suite.addTest("testBufferTranscode0003", testBufferTranscode0003);
 

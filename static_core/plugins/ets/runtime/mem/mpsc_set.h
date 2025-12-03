@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 #define PLUGINS_ETS_RUNTIME_MEM_MPSC_SET_H
 
 #include <cstddef>
-#include <libpandabase/macros.h>
-#include <libpandabase/os/mutex.h>
-#include <libpandabase/os/thread.h>
+#include <libarkbase/macros.h>
+#include <libarkbase/os/mutex.h>
+#include <libarkbase/os/thread.h>
 #include <unordered_map>
 
 namespace ark::mem {

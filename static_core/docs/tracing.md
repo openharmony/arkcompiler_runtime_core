@@ -3,11 +3,11 @@
 This document describes **Panda trace** subsystem. The subsystem provides API for creating *tracepoints* to track key points in the runtime. The subsystem uses the `ftrace` ring buffer to record the trace.
 
 ## API
-Trace API is described in libpandabase/trace/trace.h file. It supports tracing a scope execution time and tracking a parameter value.
+Trace API is described in libarkbase/trace/trace.h file. It supports tracing a scope execution time and tracking a parameter value.
 ### Usage examples:
 ```cpp
 ...
-#include "trace/trace.h"
+#include "libarkbase/trace/trace.h"
 ...
 
 void FunctionA() {

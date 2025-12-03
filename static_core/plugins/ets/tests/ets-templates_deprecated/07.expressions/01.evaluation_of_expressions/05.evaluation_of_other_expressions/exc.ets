@@ -24,12 +24,12 @@ desc: >-
 interface I {}
 interface J {}
 interface K {}
-class A extends Exception implements I {}
+class A extends Error implements I {}
 class B extends A implements J {}
 class C extends B implements K {}
 
 function main(): int {
-    let v: Exception = {{t.init}};
+    let v: Error = {{t.init}};
     try {
       throw v;
     } catch (e: {{t.exc}}) {

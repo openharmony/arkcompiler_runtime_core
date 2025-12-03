@@ -24,7 +24,7 @@ desc: >-
 enum Size { S = "a", M = "b", L = "c", XL = "d" }
 let r: Color|Size|string = Color.Red
 let g: Size|Color = Color.Green
-let b: Size|Color|number = Color.Blue
+let b: Size|Color|int = Color.Blue
 
 function main() {
 {% for d in operands %}

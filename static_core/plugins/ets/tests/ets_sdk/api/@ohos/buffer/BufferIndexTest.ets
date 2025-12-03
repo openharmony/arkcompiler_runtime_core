@@ -63,10 +63,11 @@ function checkOutsideRangeError(buf: buffer.Buffer, index: int) {
     let errMsg = `The value of "length" is out of range. \
 It must be >= 0 and <= ${buf.length}. Received value is: ${index}`;
     const OutOfBoundsErrorCodeId: int = 10200001;
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') &&
-            ((e as BusinessError).message == errMsg) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == errMsg && e.code == OutOfBoundsErrorCodeId;
+        }
+        return false;
     }
     arktest.expectThrow((): void => { buf[index] }, exceptionCheck)
 }

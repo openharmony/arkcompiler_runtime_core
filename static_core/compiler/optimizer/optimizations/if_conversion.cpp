@@ -33,9 +33,7 @@ bool IfConversion::RunImpl()
             result |= TryTriangle(block) || TryDiamond(block);
         }
     }
-    if (GetGraph()->GetArch() == Arch::AARCH64) {
-        result |= TryReplaceSelectImmVariablesWithConstants();
-    }
+    result |= TryOptimizeSelectInsts();
     COMPILER_LOG(DEBUG, IFCONVERSION) << GetPassName() << " complete";
     return result;
 }
@@ -285,59 +283,236 @@ bool IfConversion::IsConditionChainPhi(Inst *phi)
     return true;
 }
 
-// It is optimized for special SelectImm insts, so that using ubfx replacing test and csel inst on arm64 target.
-// 2.i32  AddI v1, 0x1
-// 3.i32  SelectImm v1, v2, v0, 0x2, CC_TST_EQ
-// 4.i32  AddI v3, 0x1
-// 5.i32  SelectImm v3, v4, v0, 0x4, CC_TST_EQ
-// ====>
-// 2.i32  ExtractBitfield, v0, 1, 1 [ZeroExtension]
-// 3.i32  Add v1, v2
-// 4.i32  ExtractBitfield, v0, 2, 1 [ZeroExtension]
-// 5.i32  Add v3, v4
-bool IfConversion::TryReplaceSelectImmVariablesWithConstants()
+bool IfConversion::TryOptimizeSelectInsts()
 {
     bool result = false;
-    for (auto it : GetGraph()->GetBlocksRPO()) {
-        for (auto inst : it->AllInsts()) {
-            if (inst->GetOpcode() != Opcode::SelectImm) {
-                continue;
+    for (BasicBlock *bb : GetGraph()->GetBlocksRPO()) {
+        for (Inst *inst : bb->AllInsts()) {
+            if (inst->GetOpcode() == Opcode::Select || inst->GetOpcode() == Opcode::SelectImm) {
+                result |= TryOptimizeSelectInst(inst);
             }
-            auto selectImm = inst->CastToSelectImm();
-            auto cc = selectImm->GetCc();
-            auto imm = selectImm->GetImm();
-            // Optimized Conditions:
-            // (1) condition code is TST_CC_EQ
-            // (2) the imm of SelectImm inst is the power of 2
-            // (3) the input1 of SelectImm inst is an AddI inst, and the imm of AddI inst is 1
-            // (4) the input0 of SelectImm inst is equal to the input0 of the AddI inst in (3)
-            if (cc != CC_TST_EQ || static_cast<int64_t>(imm) <= 0 || !helpers::math::IsPowerOfTwo(imm)) {
-                continue;
-            }
-            auto operand0 = inst->GetInput(0).GetInst();
-            auto operand1 = inst->GetInput(1).GetInst();
-            if (operand1->GetOpcode() != Opcode::AddI) {
-                continue;
-            }
-            auto addImm = operand1->CastToAddI()->GetImm();
-            if (addImm != 1ULL) {
-                continue;
-            }
-            if (operand1->GetInput(0).GetInst() != operand0) {
-                continue;
-            }
-
-            auto operand2 = inst->GetInput(2).GetInst();
-            auto newUbfxInst =
-                GetGraph()->CreateInstExtractBitfield(inst, operand2, helpers::math::GetIntLog2(imm), 1U);
-            auto newAddInst = GetGraph()->CreateInstAdd(inst, operand0, newUbfxInst);
-            inst->InsertBefore(newUbfxInst);
-            inst->InsertBefore(newAddInst);
-            inst->ReplaceUsers(newAddInst);
-            result = true;
         }
     }
     return result;
+}
+
+bool IfConversion::TryOptimizeSelectInst(Inst *selectInst)
+{
+    Inst *v0 = selectInst->GetInput(0).GetInst();
+    Inst *v1 = selectInst->GetInput(1).GetInst();
+    return TryOptimizeSelectInstByMergingUnaryOperation(selectInst, v0, v1) ||
+           TryOptimizeSelectInstWithIncrement(selectInst, v0, v1) ||
+           TryOptimizeSelectInstWithBitwiseInversion(selectInst, v0, v1) ||
+           TryOptimizeSelectInstWithArithmeticNegation(selectInst, v0, v1);
+}
+
+static bool UnaryOperationsAreMergable(Inst *v0, Inst *v1, bool *hasImm, uint64_t *imm)
+{
+    if (v0->GetOpcode() != v1->GetOpcode() || v0->GetType() != v1->GetType()) {
+        return false;
+    }
+    switch (v0->GetOpcode()) {
+        case Opcode::Neg:
+        case Opcode::Abs:
+        case Opcode::Not:
+            *hasImm = false;
+            return true;
+        case Opcode::AddI:
+        case Opcode::SubI:
+        case Opcode::MulI:
+        case Opcode::DivI:
+        case Opcode::ModI:
+        case Opcode::ShlI:
+        case Opcode::ShrI:
+        case Opcode::AShrI:
+        case Opcode::AndI:
+        case Opcode::OrI:
+        case Opcode::XorI:
+            *hasImm = true;
+            *imm = static_cast<BinaryImmOperation *>(v0)->GetImm();
+            return (static_cast<BinaryImmOperation *>(v1)->GetImm() == *imm);
+        default:
+            return false;
+    }
+}
+
+// Case: (SomeUnaryOp see above)
+// 1. SomeUnaryOp vA
+// 2. SomeUnaryOp vB
+// 3. Select[Imm] v1, v2, vX, vY|Imm, CC
+// ===>
+// 1. Select[Imm] vA, vB, vX, vY|Imm, CC    <= Optimizations can be applied recursively
+// 2. SomeUnaryOp v1
+bool IfConversion::TryOptimizeSelectInstByMergingUnaryOperation(Inst *selectInst, Inst *v0, Inst *v1)
+{
+    bool hasImm = false;
+    uint64_t imm = 0;
+    if (!UnaryOperationsAreMergable(v0, v1, &hasImm, &imm)) {
+        return false;
+    }
+    ASSERT(v0->GetType() == selectInst->GetType());
+
+    selectInst->SetInput(0, v0->GetInput(0).GetInst());
+    selectInst->SetInput(1, v1->GetInput(0).GetInst());
+
+    Inst *delayedUnaryInst = GetGraph()->CreateInst(v0->GetOpcode());
+    selectInst->ReplaceUsers(delayedUnaryInst);
+    delayedUnaryInst->SetType(selectInst->GetType());
+    delayedUnaryInst->SetInput(0, selectInst);
+    if (hasImm) {
+        static_cast<BinaryImmOperation *>(delayedUnaryInst)->SetImm(imm);
+    }
+    selectInst->InsertAfter(delayedUnaryInst);
+    // Applies optimization recursively
+    TryOptimizeSelectInst(selectInst);
+    return true;
+}
+
+// Case 1.1: v1 and v2 share the same operand, v2 == v1 + 1
+//   1. AddI vA, n                                              or: SubI vA, n
+//   2. AddI vA, n+1                                            or: SubI vA, n-1
+//   3. Select[Imm] v1, v2, vX, vY|Imm, CC
+//   ====>
+//   1. AddI vA, n                                              or: SubI vA, n
+//   2. Select[Imm]Transform v1, v1, vX, vY|Imm, CC, INC
+// Case 1.2: v1 and v2 share the same operand, v1 == v2 + 1
+//   1. AddI vA, n                                              or: SubI vA, n
+//   2. AddI vA, n-1                                            or: SubI vA, n+1
+//   3. Select[Imm] v1, v2, vX, vY|Imm, CC
+//   ====>
+//   1. AddI vA, n-1
+//   2. Select[Imm]Transform v1, v1, vX, vY|Imm, inv(CC), INC   <= Condition code inversed
+// Case 2.1: Merges vB + 1 to Select[Imm]Transform INC
+//   1. AddI vB, 1
+//   2. Select[Imm] vA, v1, vX, vY|Imm, CC
+//   ====>
+//   1. Select[Imm]Transform vA, vB, vX, vY|Imm, CC, INC
+// Case 2.2: Merges vA + 1 to Select[Imm]Transform INC
+//   1. AddI vA, 1
+//   2. Select[Imm] v1, vB, vX, vY|Imm, CC
+//   ====>
+//   1. Select[Imm]Transform vB, vA, vX, vY|Imm, inv(CC), INC   <= Condition code inversed
+bool IfConversion::TryOptimizeSelectInstWithIncrement(Inst *selectInst, Inst *v0, Inst *v1)
+{
+    ASSERT(selectInst->GetOpcode() == Opcode::Select || selectInst->GetOpcode() == Opcode::SelectImm);
+    constexpr auto TRANSFORM = SelectTransformType::INC;
+    auto opc0 = v0->GetOpcode();
+    auto opc1 = v1->GetOpcode();
+    if ((opc0 == Opcode::AddI && opc1 == Opcode::AddI) || (opc0 == Opcode::SubI && opc1 == Opcode::SubI)) {
+        Inst *u0 = v0->GetInput(0).GetInst();
+        Inst *u1 = v1->GetInput(0).GetInst();
+        if (u0 == u1) {
+            uint64_t imm0 = static_cast<BinaryImmOperation *>(v0)->GetImm();
+            uint64_t imm1 = static_cast<BinaryImmOperation *>(v1)->GetImm();
+            bool v1IsGreaterByOne =
+                (opc0 == Opcode::AddI && imm1 == imm0 + 1) || (opc0 == Opcode::SubI && imm0 == imm1 + 1);
+            bool v0IsGreaterByOne =
+                (opc0 == Opcode::AddI && imm1 == imm0 - 1) || (opc0 == Opcode::SubI && imm0 == imm1 - 1);
+            // Case (1.1): inputsSwapped=false, secondInputIsIdentity=true
+            if (v1IsGreaterByOne && OptimizeSelectInstWithTransform(TRANSFORM, selectInst, v0, v0, false, true)) {
+                return true;
+            }
+            // Case (1.2): inputsSwapped=true, secondInputIsIdentity=true
+            if (v0IsGreaterByOne && OptimizeSelectInstWithTransform(TRANSFORM, selectInst, v1, v1, true, true)) {
+                return true;
+            }
+        }
+    }
+    if (v1->GetOpcode() == Opcode::AddI && v1->CastToAddI()->GetImm() == 1) {
+        if (OptimizeSelectInstWithTransform(TRANSFORM, selectInst, v0, v1, false)) {
+            return true;  // Case (2.1)
+        }
+    }
+    if (v0->GetOpcode() == Opcode::AddI && v0->CastToAddI()->GetImm() == 1) {
+        if (OptimizeSelectInstWithTransform(TRANSFORM, selectInst, v1, v0, true)) {
+            return true;  // Case (2.2)
+        }
+    }
+    return false;
+}
+
+// Case 1: Merges ~vB to Select[Imm]Transform INV
+//   1. Not vB
+//   2. Select[Imm] vA, v1, vX, vY|Imm, CC
+//   ====>
+//   1. Select[Imm]Transform vA, vB, vX, vY|Imm, CC, INV
+// Case 2: Merges ~vA to Select[Imm]Transform INV
+//   1. Not vA
+//   2. Select[Imm] v1, vB, vX, vY|Imm, CC
+//   ====>
+//   1. Select[Imm]Transform vB, vA, vX, vY|Imm, inv(CC), INV   <= Condition code inversed
+bool IfConversion::TryOptimizeSelectInstWithBitwiseInversion(Inst *selectInst, Inst *v0, Inst *v1)
+{
+    ASSERT(selectInst->GetOpcode() == Opcode::Select || selectInst->GetOpcode() == Opcode::SelectImm);
+    constexpr auto TRANSFORM = SelectTransformType::INV;
+    if (v1->GetOpcode() == Opcode::Not && OptimizeSelectInstWithTransform(TRANSFORM, selectInst, v0, v1, false)) {
+        return true;
+    }
+    if (v0->GetOpcode() == Opcode::Not && OptimizeSelectInstWithTransform(TRANSFORM, selectInst, v1, v0, true)) {
+        return true;
+    }
+    return false;
+}
+
+// Case 1: Merges -vB to Select[Imm]Transform NEG
+//   1. Neg vB
+//   2. Select[Imm] vA, v1, vX, vY|Imm, CC
+//   ====>
+//   1. Select[Imm]Transform vA, vB, vX, vY|Imm, CC, NEG
+// Case 2: Merges -vB to Select[Imm]Transform NEG
+//   1. Neg vA
+//   2. Select[Imm] v1, vB, vX, vY|Imm, CC
+//   ====>
+//   1. Select[Imm]Transform vB, vA, vX, vY|Imm, inv(CC), NEG   <= Condition code inversed
+bool IfConversion::TryOptimizeSelectInstWithArithmeticNegation(Inst *selectInst, Inst *v0, Inst *v1)
+{
+    ASSERT(selectInst->GetOpcode() == Opcode::Select || selectInst->GetOpcode() == Opcode::SelectImm);
+    constexpr auto TRANSFORM = SelectTransformType::NEG;
+    if (v1->GetOpcode() == Opcode::Neg && OptimizeSelectInstWithTransform(TRANSFORM, selectInst, v0, v1, false)) {
+        return true;
+    }
+    if (v0->GetOpcode() == Opcode::Neg && OptimizeSelectInstWithTransform(TRANSFORM, selectInst, v1, v0, true)) {
+        return true;
+    }
+    return false;
+}
+
+// Note: inputs (v0, v1) are expected to be swapped by the caller.
+// CC-OFFNXT(G.FUN.01-CPP) Internal helper function
+bool IfConversion::OptimizeSelectInstWithTransform(SelectTransformType transform, Inst *selectInst, Inst *v0, Inst *v1,
+                                                   bool inputsSwapped, bool secondInputIsIdentity)
+{
+    Encoder *enc = GetGraph()->GetEncoder();
+    auto t0 = v0->GetType();
+    auto t1 = v1->GetType();
+    if (t0 != t1 || !enc->CanEncodeSelectTransformFor(t0)) {
+        return false;
+    }
+    Inst *u1 = secondInputIsIdentity ? v1 : v1->GetInput(0).GetInst();
+    Inst *x0 = selectInst->GetInput(2).GetInst();
+    Inst *newSelectInst = nullptr;
+
+    if (selectInst->GetOpcode() == Opcode::Select) {
+        Inst *x1 = selectInst->GetInput(3).GetInst();
+        auto cc = selectInst->CastToSelect()->GetCc();
+        if (inputsSwapped) {
+            cc = GetInverseConditionCode(cc);
+        }
+        newSelectInst = GetGraph()->CreateInstSelectTransform(selectInst, std::array {v0, u1, x0, x1}, x0->GetType(),
+                                                              cc, transform);
+    } else {
+        ASSERT(selectInst->GetOpcode() == Opcode::SelectImm);
+        uint64_t x1Imm = selectInst->CastToSelectImm()->GetImm();
+        auto cc = selectInst->CastToSelectImm()->GetCc();
+        if (inputsSwapped) {
+            cc = GetInverseConditionCode(cc);
+        }
+        newSelectInst = GetGraph()->CreateInstSelectImmTransform(selectInst, std::array {v0, u1, x0}, x1Imm,
+                                                                 x0->GetType(), cc, transform);
+    }
+    selectInst->InsertBefore(newSelectInst);
+    selectInst->ReplaceUsers(newSelectInst);
+    return true;
 }
 
 void IfConversion::InvalidateAnalyses()

@@ -176,6 +176,7 @@ options:
     - bridges-ss
     - pm
     - pea
+    - pea_ext
     - interop-intrinsic-opt
     - native-call-opt
   description: Set log compiler components
@@ -460,6 +461,12 @@ options:
   type: bool
   default: true
   description: Enable inlining external methods in JIT mode
+  tags: [perf]
+
+- name: compiler-inline-external-methods-aot
+  type: bool
+  default: false
+  description: Enable inlining external methods in AOT mode
   tags: [perf]
 
 - name: compiler-inlining-blacklist
@@ -796,6 +803,11 @@ options:
   type: bool
   default: true
   description: Enable optimize-memory-barriers optimization
+
+- name: compiler-string-flat-check
+  type: bool
+  default: true
+  description: Enable StringFlatCheck instructions to ensure flat string is passed as input to specified intrinsics
 
 - name: compiler-profile
   type: std::string

@@ -23,11 +23,11 @@
 #include <array>
 #include "libabckit/src/macros.h"
 
-#include "libpandabase/utils/bit_helpers.h"
-#include "libpandabase/os/mem.h"
-#include "libpandabase/os/filesystem.h"
-#include "libpandabase/utils/span.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/bit_helpers.h"
+#include "libarkbase/os/mem.h"
+#include "libarkbase/os/filesystem.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/utf.h"
 
 #include <iostream>
 

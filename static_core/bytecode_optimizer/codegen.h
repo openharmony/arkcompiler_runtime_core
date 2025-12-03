@@ -24,7 +24,7 @@
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/ir/graph.h"
 #include "compiler/optimizer/ir/graph_visitor.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "common.h"
 
 namespace ark::bytecodeopt {

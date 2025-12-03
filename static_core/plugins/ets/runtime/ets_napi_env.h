@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_NAPI_ENV_H
 
 #include "plugins/ets/runtime/ani/ani.h"
+#include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 
 namespace ark::ets {
@@ -51,6 +52,17 @@ public:
         return static_cast<PandaEtsNapiEnv *>(env);
     }
 
+    bool IsVerifyANI() const
+    {
+        return envANIVerifier_.get() != nullptr;
+    }
+
+    ani::verify::EnvANIVerifier *GetEnvANIVerifier()
+    {
+        ASSERT(envANIVerifier_.get() != nullptr);
+        return envANIVerifier_.get();
+    }
+
     void SetException(EtsThrowable *thr);
     EtsThrowable *GetThrowable() const;
     bool HasPendingException() const;
@@ -63,6 +75,7 @@ public:
 private:
     EtsCoroutine *coroutine_;
     PandaUniquePtr<EtsReferenceStorage> referenceStorage_;
+    PandaUniquePtr<ani::verify::EnvANIVerifier> envANIVerifier_;
 };
 
 using PandaEnv = PandaEtsNapiEnv;

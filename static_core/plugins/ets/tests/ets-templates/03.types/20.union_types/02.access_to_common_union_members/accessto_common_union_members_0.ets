@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: Accetmp1tmp1itmpg commotmp fieldtmp1.
+desc: Access to Common Union Members.
 ---*/
 
 class A {
@@ -34,5 +34,5 @@ class B {
 function main(): void {
     let account: A | B = new A();
     let num = account.tmp; 
-    arktest.assertTrue(num === 1);
+    arktest.assertEQ(num, 1);
 }

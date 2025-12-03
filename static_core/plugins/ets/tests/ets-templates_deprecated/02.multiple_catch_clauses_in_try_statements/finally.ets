@@ -20,7 +20,7 @@ desc: >-
     executed regardless how try-catch was fulfilled normally or abruptly.
 ---*/
 
-class Ex extends Exception {}
+class Ex extends Error {}
 class Ex2 extends Ex {}
 
 class Er extends Error {}

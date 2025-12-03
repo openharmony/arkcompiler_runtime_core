@@ -39,7 +39,7 @@ ohos_executable("ark_bin") {
   configs += [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
 
   output_name = "ark"
-  install_enable = false
+  install_enable = true
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }

@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_MEM_GC_G1_G1_OBJECT_POINTER_HANDLER_H
 #define PANDA_RUNTIME_MEM_GC_G1_G1_OBJECT_POINTER_HANDLER_H
 
-#include "libpandabase/mem/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/object_accessor.h"
 #include "runtime/mem/region_allocator.h"
@@ -31,25 +31,29 @@ class G1GC;
 template <typename LanguageConfig>
 class G1EvacuateRegionsWorkerState;
 
-template <typename LanguageConfig>
+template <typename Handler, typename LanguageConfig>
 class RemsetObjectPointerHandler {
 public:
-    RemsetObjectPointerHandler(Region *fromRegion, size_t regionSizeBits, const std::atomic_bool &deferCards)
-        : fromRemset_(fromRegion->GetRemSet()), regionSizeBits_(regionSizeBits), deferCards_(deferCards)
+    RemsetObjectPointerHandler(Region *fromRegion, size_t regionSizeBits, const std::atomic_bool &deferCards,
+                               const Handler &handler)
+        : fromRemset_(fromRegion->GetRemSet()),
+          regionSizeBits_(regionSizeBits),
+          deferCards_(deferCards),
+          handler_(handler)
     {
     }
 
     template <typename T>
-    bool ProcessObjectPointer(T *ref) const
+    bool ProcessObjectPointer(ObjectHeader *fromObject, T *ref) const
     {
-        ProcessObjectPointerInternal(ref);
+        ProcessObjectPointerInternal(fromObject, ref);
         // Atomic with relaxed order reason: memory order is not required
         return !deferCards_.load(std::memory_order_relaxed);
     }
 
 private:
     template <typename T>
-    void ProcessObjectPointerInternal(T *ref) const
+    void ProcessObjectPointerInternal(ObjectHeader *fromObject, T *ref) const
     {
         // fromRemset_ is not changed while handling one card
         ASSERT(AddrToRegion(ref)->GetRemSet() == fromRemset_);
@@ -70,10 +74,12 @@ private:
         // don't need lock because only one thread changes remsets
         RemSet<>::AddRefWithAddr<false>(fromRemset_, ref, obj);
         LOG(DEBUG, GC) << "fill rem set " << ref << " -> " << obj;
+        handler_(fromObject, ToUintPtr(ref) - ToUintPtr(fromObject));
     }
     RemSetT *fromRemset_;
     size_t regionSizeBits_;
     const std::atomic_bool &deferCards_;
+    const Handler &handler_;
 };
 
 template <class LanguageConfig>
@@ -86,14 +92,14 @@ public:
     {
     }
 
-    bool ProcessObjectPointer(Ref ref) const
+    bool ProcessObjectPointer(ObjectHeader *fromObject, Ref ref) const
     {
-        ProcessObjectPointerHelper(ref);
+        ProcessObjectPointerHelper(fromObject, ref);
         return true;
     }
 
 private:
-    void ProcessObjectPointerHelper(Ref ref) const
+    void ProcessObjectPointerHelper([[maybe_unused]] ObjectHeader *fromObject, Ref ref) const
     {
         auto o = ObjectAccessor::Load(ref);
         if (!ObjectAccessor::IsHeapObject<LanguageConfig::LANG_TYPE>(o)) {
@@ -101,6 +107,8 @@ private:
         }
         auto *obj = ObjectAccessor::DecodeNotNull<LanguageConfig::LANG_TYPE>(o);
         if (gc_->InGCSweepRange(obj)) {
+            LOG(DEBUG, GC) << "Add object to stack: " << GetDebugInfoAboutObject(obj)
+                           << " accessed from object: " << fromObject;
             workerState_->PushToQueue(ref);
         } else if (!workerState_->IsSameRegion(ref, obj)) {
             workerState_->EnqueueCard(ref);

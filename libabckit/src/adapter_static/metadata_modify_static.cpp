@@ -57,6 +57,7 @@
 #include <vector>
 #include <algorithm>
 #include <cctype>
+#include <array>
 
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkI = AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
@@ -268,9 +269,9 @@ static AbckitArktsFunction *CreateFunctionImpl(AbckitFile *file, AbckitCoreModul
     return owningModule->functions.back()->GetArkTSImpl();
 }
 
-static constexpr std::string_view GET_FUNCTION_PATTERN = "<get>";
-static constexpr std::string_view SET_FUNCTION_PATTERN = "<set>";
-static constexpr std::string_view PROPERTY_FUNCTION_PATTERN = "<property>";
+static constexpr std::string_view GET_FUNCTION_PATTERN = "%%get-";
+static constexpr std::string_view SET_FUNCTION_PATTERN = "%%set-";
+static constexpr std::string_view PROPERTY_FUNCTION_PATTERN = "%%property-";
 // ========================================
 // Create / Update
 // ========================================
@@ -499,18 +500,175 @@ bool FunctionSetNameStatic(AbckitCoreFunction *function, const char *name)
     return true;
 }
 
-void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
+bool ModuleSetNameStatic(AbckitCoreModule *m, const char *newName)
 {
-    if (function->owningModule->file->needOptimize) {
-        std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap =
-            function->owningModule->file->functionsMap;
-        functionsMap[function]->writeBack = true;
-    } else {
-        FunctionSetGraphStaticSync(function, graph);
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::ModuleRefreshName(m, newName)) {
+        return false;
     }
+
+    InstModifier modifier(m->file);
+    modifier.Modify();
+
+    return true;
 }
 
-void FunctionSetGraphStaticSync(AbckitCoreFunction *function, AbckitGraph *graph)
+bool ModuleFieldSetNameStatic(AbckitCoreModuleField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool NamespaceSetNameStatic(AbckitCoreNamespace *ns, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::NamespaceRefreshName(ns, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(ns->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool NamespaceFieldSetNameStatic(AbckitCoreNamespaceField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool AnnotationInterfaceSetNameStatic(AbckitCoreAnnotationInterface *ai, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    return ModifyNameHelper::AnnotationInterfaceRefreshName(ai, newName);
+}
+
+bool AnnotationSetNameStatic(AbckitCoreAnnotation *anno, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    return ModifyNameHelper::AnnotationRefreshName(anno, newName);
+}
+
+bool ClassSetNameStatic(AbckitCoreClass *klass, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::ClassRefreshName(klass, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(klass->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool ClassFieldSetNameStatic(AbckitCoreClassField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool InterfaceSetNameStatic(AbckitCoreInterface *iface, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::InterfaceRefreshName(iface, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(iface->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool InterfaceFieldSetNameStatic(AbckitCoreInterfaceField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::InterfaceFieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool EnumSetNameStatic(AbckitCoreEnum *enm, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::EnumRefreshName(enm, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(enm->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool EnumFieldSetNameStatic(AbckitCoreEnumField *field, const char *newName)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FieldRefreshName(field, newName)) {
+        return false;
+    }
+
+    InstModifier modifier(field->owner->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+bool FunctionSetNameStatic(AbckitCoreFunction *function, const char *name)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    if (!ModifyNameHelper::FunctionRefreshName(function, name)) {
+        return false;
+    }
+
+    InstModifier modifier(function->owningModule->file);
+    modifier.Modify();
+
+    return true;
+}
+
+void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 {
     LIBABCKIT_LOG_FUNC;
 
@@ -828,7 +986,7 @@ AbckitArktsEnumField *EnumAddFieldStatic(AbckitCoreEnum *enm, const struct Abcki
     for (auto &tmpField : record->fieldList) {
         auto coreField = EnumCreateField(enm->owningModule->file, enm, tmpField);
         if (EnumFieldGetNameStatic(coreField.get())->impl == name) {
-            retPtr = coreField.get()->GetArkTSImpl();
+            retPtr = coreField->GetArkTSImpl();
         }
         enm->fields.emplace_back(std::move(coreField));
     }
@@ -876,14 +1034,25 @@ bool ClassFieldAddAnnotationStatic(AbckitArktsClassField *field, const AbckitArk
     auto annoName = AnnotationInterfaceGetNameStatic(ai->core);
     std::string annotationName(annoName->impl);
 
+    field->core->annotations.emplace_back(CreateAnnotation(ai, field->core->owner, annoName));
     field->core->annotationTable.emplace(annotationName, CreateAnnotation(ai, field->core->owner, annoName));
     return true;
 }
 
 bool ClassFieldRemoveAnnotationStatic(AbckitArktsClassField *field, AbckitArktsAnnotation *anno)
 {
-    auto annotationName = NameUtil::GetFullName(anno->core->ai);
-    auto it = field->core->annotationTable.find(annotationName);
+    auto name = anno->core->name->impl;
+    auto &annotations = field->core->annotations;
+    auto iter = std::find_if(annotations.begin(), annotations.end(),
+                             [&name](auto &annoIt) { return name == annoIt.get()->name->impl; });
+    if (iter == annotations.end()) {
+        LIBABCKIT_LOG(ERROR) << "Can not find the annotation in annotations to delete\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
+    }
+    annotations.erase(iter);
+
+    auto it = field->core->annotationTable.find(std::string(name));
     if (it == field->core->annotationTable.end()) {
         LIBABCKIT_LOG(ERROR) << "Can not find the annotation in annotationTable to delete\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
@@ -892,7 +1061,7 @@ bool ClassFieldRemoveAnnotationStatic(AbckitArktsClassField *field, AbckitArktsA
     field->core->annotationTable.erase(it);
 
     auto progFunc = field->GetStaticImpl();
-    progFunc->metadata->DeleteAnnotationByName(annotationName);
+    progFunc->metadata->DeleteAnnotationByName(name);
     return true;
 }
 
@@ -981,7 +1150,7 @@ AbckitArktsModuleField *ModuleAddFieldStatic(AbckitCoreModule *m, const struct A
     for (auto &tmpField : record->fieldList) {
         auto coreField = ModuleCreateField(m->file, m, tmpField);
         if (ModuleFieldGetNameStatic(coreField.get())->impl == name) {
-            retPtr = coreField.get()->GetArkTSImpl();
+            retPtr = coreField->GetArkTSImpl();
         }
         m->fields.emplace_back(std::move(coreField));
     }
@@ -1850,7 +2019,7 @@ AbckitArktsClassField *ClassAddFieldStatic(AbckitCoreClass *klass, const struct 
     for (auto &tmpField : record->fieldList) {
         auto classField = ClassCreateField(klass->owningModule->file, klass, tmpField);
         if (ClassFieldGetNameStatic(classField.get())->impl == name) {
-            retPtr = classField.get()->GetArkTSImpl();
+            retPtr = classField->GetArkTSImpl();
         }
         klass->fields.emplace_back(std::move(classField));
     }
@@ -1919,7 +2088,7 @@ template <typename TblType>
 static void RemoveFuncInTable(TblType &table, const std::string &interfaceName, const std::string &name)
 {
     std::string cleanFieldName = name;
-    const std::string propertyPrefix = "<property>";
+    const std::string propertyPrefix = "%%property-";
     if (cleanFieldName.find(propertyPrefix) == 0) {
         cleanFieldName = cleanFieldName.substr(propertyPrefix.length());
     }

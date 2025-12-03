@@ -17,7 +17,7 @@
 
 #include "breakpoint.h"
 #include "conditional_breakpoint.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 
 namespace ark::tooling::inspector {
 

@@ -26,8 +26,6 @@ extern "C" {
 struct __hybridgref;
 typedef __hybridgref *hybridgref;
 
-#define HYBRIDGREF_EXPORT __attribute__((visibility("default")))
-
 #ifdef __cplusplus
 }
 #endif

@@ -18,6 +18,7 @@ coretypes:
 
 - managed_class: panda.String
   mirror_class: coretypes::String
+  string_class: true
 
 - managed_class: panda.Class
   mirror_class: coretypes::Class

@@ -141,6 +141,17 @@ const Header = (): JSX.Element => {
             data-testid="header-component"
         >
             <span className={cx({[styles.title]: true})}>ArkTS playground</span>
+            <div className={styles.linksContainer}>
+                <a
+                    href="https://gitcode.com/igelhaus/arkcompiler_runtime_core/releases"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.link}
+                    data-testid="docs-link"
+                >
+                    Docs
+                </a>
+            </div>
             <Popover
                 content={exampleMenu(
                     theme,

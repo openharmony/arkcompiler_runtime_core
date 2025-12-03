@@ -17,6 +17,7 @@
 /dist/**
 /docs/**
 /node_modules/**
+/third_party/**
 /scripts/**
 /test/**
 **.json

@@ -19,20 +19,20 @@
 #include "runtime/include/locks.h"
 #include "runtime/include/method-inl.h"
 #include "runtime/include/class.h"
-#include "utils/pandargs.h"
+#include "libarkbase/utils/pandargs.h"
 #include "compiler/compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "compiler_events_gen.h"
 #include "mem/mem_stats.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/os/native_stack.h"
-#include "generated/logger_options.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/os/native_stack.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 
-#include "ark_version.h"
+#include "libarkbase/generated/ark_version.h"
 
-#include "utils/span.h"
+#include "libarkbase/utils/span.h"
 
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include <limits>
 #include <iostream>
@@ -59,15 +59,24 @@ const panda_file::File *GetPandaFile(const ClassLinker &classLinker, std::string
     return res;
 }
 
-static void PrintHelp(const ark::PandArgParser &paParser)
+static void PrintHelp(const ark::PandArgParser &paParser, bool showFlags = false)
 {
-    std::cerr << paParser.GetErrorString() << std::endl;
-    std::cerr << "Usage: "
-              << "panda"
-              << " [OPTIONS] [file] [entrypoint] -- [arguments]" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "optional arguments:" << std::endl;
-    std::cerr << paParser.GetHelpString() << std::endl;
+    if (!paParser.GetErrorString().empty()) {
+        std::cerr << paParser.GetErrorString();
+        std::cerr << "Use ark --help to get more information\n";
+        return;
+    }
+
+    std::cerr << "Usage: ark [OPTIONS] file entrypoint -- [arguments]\n\n";
+    if (showFlags) {
+        std::cerr << "optional arguments:" << std::endl;
+        std::cerr << paParser.GetHelpString() << std::endl;
+    }
+
+    std::cerr << paParser.GetTailArgs() << std::endl;
+    if (!showFlags) {
+        std::cerr << "Use ark --help to get more information\n";
+    }
 }
 
 static bool PrepareArguments(ark::PandArgParser *paParser, const RuntimeOptions &runtimeOptions,
@@ -80,7 +89,7 @@ static bool PrepareArguments(ark::PandArgParser *paParser, const RuntimeOptions 
     }
 
     if (file.GetValue().empty() || entrypoint.GetValue().empty() || help.GetValue()) {
-        PrintHelp(*paParser);
+        PrintHelp(*paParser, help.GetValue());
         return false;
     }
 

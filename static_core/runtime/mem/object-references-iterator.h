@@ -40,17 +40,18 @@ public:
     static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(Class *cls, ObjectHeader *obj, Handler *handler);
+    static bool Iterate(const Class *cls, ObjectHeader *obj, Handler *handler);
 
 private:
     template <bool INTERRUPTIBLE, typename Handler>
     static bool Iterate(Class *cls, ObjectHeader *obj, Handler *handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, Class *objClass, Handler *handler);
+    static bool IterateObjectReferences(ObjectHeader *object, const Class *objClass, Handler *handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, Class *cls, Handler *handler, void *begin, void *end);
+    static bool IterateObjectReferences(ObjectHeader *object, const Class *cls, Handler *handler, void *begin,
+                                        void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
     static bool IterateClassReferences(Class *cls, Handler *handler);
@@ -59,11 +60,12 @@ private:
     static bool IterateClassReferences(Class *cls, Handler *handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateRange(ObjectPointerType *refStart, const ObjectPointerType *refEnd, Handler *handler);
+    static bool IterateRange(ObjectHeader *fromObject, ObjectPointerType *refStart, const ObjectPointerType *refEnd,
+                             Handler *handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateRange(ObjectPointerType *refStart, ObjectPointerType *refEnd, Handler *handler, void *begin,
-                             void *end);
+    static bool IterateRange(ObjectHeader *fromObject, ObjectPointerType *refStart, ObjectPointerType *refEnd,
+                             Handler *handler, void *begin, void *end);
 };
 
 /// Provides functionality to iterate through references in object for dynamic languages

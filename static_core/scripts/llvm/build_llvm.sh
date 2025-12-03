@@ -17,6 +17,7 @@ set -euo pipefail
 # Required variables
 BUILD_DIR=${BUILD_DIR:-""}
 LLVM_SOURCES=${LLVM_SOURCES:-""}
+LLVM_EXTRA_CMAKE_FLAGS=${LLVM_EXTRA_CMAKE_FLAGS:-""}
 # Optional variables
 INSTALL_DIR=${INSTALL_DIR:-""}         # empty -- do not install
 VERSION=${VERSION:-"main"}             # Specifies build and install directory names:
@@ -167,6 +168,7 @@ if [[ "x${BUILD_X86_DEBUG}" == "xtrue" ]]; then
         -DLLVM_TARGETS_TO_BUILD="X86;AArch64" \
         -DLLVM_PARALLEL_COMPILE_JOBS="${NPROC}" \
         -DLLVM_PARALLEL_LINK_JOBS=1 \
+        "${LLVM_EXTRA_CMAKE_FLAGS}" \
         "${LLVM_SOURCES}"
 
     ninja distribution
@@ -210,6 +212,7 @@ if [[ "x${BUILD_X86_RELEASE}" == "xtrue" ]]; then
         -DLLVM_TARGETS_TO_BUILD="X86;AArch64" \
         -DLLVM_PARALLEL_COMPILE_JOBS="${NPROC}" \
         -DLLVM_PARALLEL_LINK_JOBS=1 \
+        "${LLVM_EXTRA_CMAKE_FLAGS}" \
         "${LLVM_SOURCES}"
 
     ninja distribution
@@ -263,6 +266,7 @@ if [[ "x${BUILD_AARCH64_DEBUG}" == "xtrue" ]]; then
         -DLLVM_PARALLEL_COMPILE_JOBS="${NPROC}" \
         -DLLVM_PARALLEL_LINK_JOBS=1 \
         "${LLVM_TABLEGEN}" \
+        "${LLVM_EXTRA_CMAKE_FLAGS}" \
         "${LLVM_SOURCES}"
 
     ninja distribution
@@ -310,6 +314,7 @@ if [[ "x${BUILD_AARCH64_RELEASE}" == "xtrue" ]]; then
         -DLLVM_PARALLEL_COMPILE_JOBS="${NPROC}" \
         -DLLVM_PARALLEL_LINK_JOBS=1 \
         "${LLVM_TABLEGEN}" \
+        "${LLVM_EXTRA_CMAKE_FLAGS}" \
         "${LLVM_SOURCES}"
 
     ninja distribution
@@ -351,6 +356,7 @@ if [[ "x${BUILD_OHOS_RELEASE}" == "xtrue" ]]; then
         -DLLVM_ENABLE_ZLIB=OFF \
         -DLLVM_PARALLEL_COMPILE_JOBS="${NPROC}" \
         -DLLVM_PARALLEL_LINK_JOBS=1 \
+        "${LLVM_EXTRA_CMAKE_FLAGS}" \
         "${LLVM_SOURCES}"
 
     ninja distribution
@@ -399,6 +405,7 @@ if [[ "x${BUILD_OHOS_RELEASE_GN}" == "xtrue" ]]; then
         -DLLVM_PARALLEL_COMPILE_JOBS="${NPROC}" \
         -DLLVM_PARALLEL_LINK_JOBS=1 \
         "${LLVM_TABLEGEN}" \
+        "${LLVM_EXTRA_CMAKE_FLAGS}" \
         "${LLVM_SOURCES}"
 
     ninja distribution

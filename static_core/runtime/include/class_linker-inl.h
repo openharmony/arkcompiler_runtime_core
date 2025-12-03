@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_CLASS_LINKER_INL_H_
 #define PANDA_RUNTIME_CLASS_LINKER_INL_H_
 
-#include "libpandafile/panda_cache.h"
+#include "libarkfile/panda_cache.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"

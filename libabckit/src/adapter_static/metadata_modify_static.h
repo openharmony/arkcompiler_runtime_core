@@ -136,6 +136,7 @@ bool ClassRemoveMethodStatic(AbckitCoreClass *klass, AbckitCoreFunction *method)
 bool ClassAddInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface);
 bool ClassRemoveInterfaceStatic(AbckitArktsClass *klass, AbckitArktsInterface *iface);
 bool ClassSetSuperClassStatic(AbckitArktsClass *klass, AbckitArktsClass *superClass);
+bool ClassAddMethod(AbckitArktsClass *klass, AbckitArktsFunction *method);
 bool ClassRemoveFieldStatic(AbckitArktsClass *klass, AbckitCoreClassField *field);
 AbckitArktsClassField *ClassAddFieldStatic(AbckitCoreClass *klass, const struct AbckitArktsFieldCreateParams *params);
 bool ClassSetOwningModuleStatic(AbckitCoreClass *klass, AbckitCoreModule *module);

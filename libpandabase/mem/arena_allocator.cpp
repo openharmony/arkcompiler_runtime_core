@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "mem/arena_allocator.h"
+#include "arena_allocator.h"
 
-#include "mem/pool_manager.h"
+#include "pool_manager.h"
 #include "trace/trace.h"
 
 namespace panda {
@@ -28,14 +28,7 @@ ArenaAllocatorT<use_oom_handler>::ArenaAllocatorT(SpaceType space_type, BaseMemS
     ASSERT(!use_oom_handler);
     if (!ON_STACK_ALLOCATION_ENABLED) {
         arenas_ = PoolManager::AllocArena(DEFAULT_ARENA_SIZE, space_type_, AllocatorType::ARENA_ALLOCATOR, this);
-        if (UNLIKELY(arenas_ == nullptr)) {
-            std::cerr << "CHECK FAILED: : arenas_ == nullptr IN: " << __FILE__ << ":" << __LINE__ <<
-                         " in " << __FUNCTION__ << std::endl <<
-                         "Solutions: > Free up system memory by closing unnecessary applications" <<
-                         "> Consider reducing memory usage or implementing memory cleanup" << std::endl;
-            panda::PrintStack(std::cerr);
-            std::abort();
-        }
+        CHECK_NOT_NULL(arenas_);
         AllocArenaMemStats(DEFAULT_ARENA_SIZE);
     }
 }

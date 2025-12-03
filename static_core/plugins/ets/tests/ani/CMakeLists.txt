@@ -15,3 +15,4 @@ include(cmake/ani_tests.cmake)
 
 add_subdirectory(ani_gtest)
 add_subdirectory(tests)
+add_subdirectory(app)

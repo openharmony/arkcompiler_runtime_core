@@ -30,6 +30,7 @@ EtsObject *JSRefConvertUnion::UnwrapImpl(InteropCtx *ctx, napi_value jsVal)
     }
 
     auto *objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+    ASSERT(objectConverter != nullptr);
     auto *ret = objectConverter->Unwrap(ctx, jsVal);
     if (!ret->IsInstanceOf(klass_)) {
         ThrowJSErrorNotAssignable(ctx->GetJSEnv(), ret->GetClass(), klass_);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//! CHECKER AOT IR Builder inlining Char.isUpperCase()
+//! CHECKER    AOT IR Builder inlining Char.isUpperCase()
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_AOT    options: "--compiler-regex='.*main.*'"
 //! METHOD     "ets_char_isuppercase.ETSGLOBAL::callIsUpperCase"
@@ -42,6 +42,7 @@
 //! INST_NEXT  /Add/
 
 //! CHECKER    Char.isUpperCase() in JIT
+//! SKIP_IF    @architecture == "arm32"
 //! RUN        force_jit: true, options: "", entry: "ets_char_isuppercase.ETSGLOBAL::main"
 //! METHOD     "ets_char_isuppercase.ETSGLOBAL::callIsUpperCase"
 //! PASS_AFTER "IrBuilder"

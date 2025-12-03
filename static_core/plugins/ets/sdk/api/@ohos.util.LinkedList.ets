@@ -17,7 +17,7 @@ import {BusinessError} from "@ohos.base";
 
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
-const EmptyContainerErrorCodeId: int = 10200010;
+const EmptyContainerId: int = 10200010;
 
 function createBusinessError(code: int, message: string) {
     let err = new BusinessError();
@@ -74,13 +74,13 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
     head?: ListNode<T>;
     private tail?: ListNode<T>;
 
-    public jsonReplacer(): Record<String, NullishType> {
-        let arrayObj: Record<String, NullishType> = {};
+    public jsonReplacer(): Record<String, Any> {
+        let arrayObj: Record<String, Any> = {};
         this.forEach((value, index) => {
             if (Array.isArray(value)) {
-                for (let i = 0; i < (value as Array<NullishType>).length; i++) {
-                    if ((value as Array<NullishType>)[i] === undefined) {
-                        (value as Array<NullishType>)[i] = null;
+                for (let i = 0; i < (value as Array<Any>).length; i++) {
+                    if ((value as Array<Any>)[i] === undefined) {
+                        (value as Array<Any>)[i] = null;
                     }
                 }
             }
@@ -166,7 +166,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
     /**
     * Iterates over each element in the linked list, executing the provided callback function for each element.
     *
-    * @param callbackfn - A function that accepts up to two arguments. 
+    * @param callbackfn - A function that accepts up to two arguments.
     * @param callbackfn.value - The current element being processed in the linked list.
     * @param callbackfn.index - The index of the current element being processed in the linked list.
     * @param callbackfn.linkedList - The linked list that forEach is being applied to.
@@ -185,26 +185,21 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @param index The index of the element to get.
      * @returns The element at the specified index, or undefined if the index is out of range.
      */
-    public get(index: int): T | undefined {
+    public get(index: int): T {
         this.checkIndexType(index);
-
-        if (index >= 0 && index < this.elementNum) {
-            let currentNode: ListNode<T> | undefined = this.getNode(index);
-            return currentNode!.element;
-        }
-        return undefined;
+        this.checkIndex(index, this.elementNum - 1);
+        let currentNode: ListNode<T> | undefined = this.getNode(index);
+        return currentNode!.element;
     }
 
     /**
      * Retrieves the first element in the linked list.
      *
-     * @returns The first element of type `T` if the list is not empty, otherwise `undefined`.
+     * @returns The first element of type `T`.
      */
-    public getFirst(): T | undefined {
-        if (this.head !== undefined) {
-            return this.head!.element;
-        }
-        return undefined;
+    public getFirst(): T {
+        this.checkEmptyContainer();
+        return this.head!.element;
     }
 
     /**
@@ -228,13 +223,11 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
     /**
      * Retrieves the last element in the linked list.
      *
-     * @returns The last element of type `T` if the list is not empty, otherwise `undefined`.
+     * @returns The last element of type `T`.
      */
-    public getLast(): T | undefined {
-        if (this.tail !== undefined) {
-            return this.tail!.element;
-        }
-        return undefined;
+    public getLast(): T {
+        this.checkEmptyContainer();
+        return this.tail!.element;
     }
 
     /**
@@ -349,7 +342,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      */
     public removeByIndex(index: int): T | undefined {
         this.checkIndexType(index);
-        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
         let removedNode: ListNode<T> | undefined;
@@ -377,7 +370,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @returns The removed element, or undefined if the list is empty.
      */
     public removeFirst(): T | undefined {
-        this.checkEmptyContainer(EmptyContainerErrorCodeId);
+        this.checkEmptyContainer();
         return this.removeByIndex(0);
     }
 
@@ -395,7 +388,7 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @returns The removed element, or undefined if the list is empty.
      */
     public removeLast(): T | undefined {
-        this.checkEmptyContainer(EmptyContainerErrorCodeId);
+        this.checkEmptyContainer();
         return this.removeByIndex(this.elementNum - 1);
     }
 
@@ -432,17 +425,14 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
      * @param element The new element.
      * @returns The replaced element, or undefined if the index is out of range.
      */
-    public set(index: int, element: T): T | undefined {
+    public set(index: int, element: T): T {
         this.checkIndexType(index);
-        this.checkEmptyContainer(OutOfBoundsErrorCodeId);
+        this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
         let currentNode: ListNode<T> | undefined = this.getNode(index);
-        if (currentNode !== undefined) {
-            currentNode!.element = element;
-            return currentNode!.element;
-        }
-        return undefined;
+        currentNode!.element = element;
+        return element;
     }
 
     /**
@@ -489,9 +479,9 @@ export class LinkedList<T> implements Iterable<T>, JsonReplacer {
         }
     }
 
-    private checkEmptyContainer(id: int): void {
+    private checkEmptyContainer(): void {
         if (this.elementNum == 0) {
-            throw createBusinessError(id, `Container is empty`);
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
         }
     }
 }

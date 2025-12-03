@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -243,7 +243,7 @@ llvm::Function *LoadClass(llvm::Module *module)
 
     auto type = llvm::FunctionType::get(
         llvm::PointerType::get(module->getContext(), 0),
-        {llvm::Type::getInt32Ty(module->getContext()), llvm::Type::getInt32Ty(module->getContext())}, false);
+        {llvm::Type::getInt64Ty(module->getContext()), llvm::Type::getInt32Ty(module->getContext())}, false);
     function = llvm::Function::Create(type, llvm::Function::ExternalLinkage, LOAD_CLASS_BUILTIN, module);
     function->setDoesNotThrow();
     function->setSectionPrefix(BUILTIN_SECTION);
@@ -259,7 +259,7 @@ llvm::Function *LoadInitClass(llvm::Module *module)
 
     auto type = llvm::FunctionType::get(
         llvm::PointerType::get(module->getContext(), 0),
-        {llvm::Type::getInt32Ty(module->getContext()), llvm::Type::getInt32Ty(module->getContext())}, false);
+        {llvm::Type::getInt64Ty(module->getContext()), llvm::Type::getInt32Ty(module->getContext())}, false);
     function = llvm::Function::Create(type, llvm::Function::ExternalLinkage, LOAD_INIT_CLASS_BUILTIN, module);
     function->setDoesNotThrow();
     function->setSectionPrefix(BUILTIN_SECTION);
@@ -316,7 +316,7 @@ llvm::Function *LoadString(llvm::Module *module)
 
     auto type = llvm::FunctionType::get(
         llvm::PointerType::get(module->getContext(), LLVMArkInterface::GC_ADDR_SPACE),
-        {llvm::Type::getInt32Ty(module->getContext()), llvm::Type::getInt32Ty(module->getContext())}, false);
+        {llvm::Type::getInt64Ty(module->getContext()), llvm::Type::getInt32Ty(module->getContext())}, false);
     function = llvm::Function::Create(type, llvm::Function::ExternalLinkage, LOAD_STRING_BUILTIN, module);
     function->setDoesNotThrow();
     function->setSectionPrefix(BUILTIN_SECTION);

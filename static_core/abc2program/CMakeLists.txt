@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,15 +43,15 @@ panda_isa_gen(
         "abc_inst_convert.cpp.erb"
     REQUIRES
         "${PANDA_ROOT}/assembler/asm_isapi.rb"
-        "${PANDA_ROOT}/libpandafile/pandafile_isapi.rb"
+        "${ARKFILE_ROOT}/pandafile_isapi.rb"
 )
 
 set(ABC_TYPE_CONVERT_CPP ${CMAKE_CURRENT_BINARY_DIR}/abc_type_convert.cpp)
 panda_gen_file(
-    DATA ${PANDA_ROOT}/libpandafile/types.yaml
+    DATA ${ARKFILE_ROOT}/types.yaml
     TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/abc_type_convert.cpp.erb
     OUTPUTFILE ${ABC_TYPE_CONVERT_CPP}
-    API ${PANDA_ROOT}/libpandafile/types.rb
+    API ${ARKFILE_ROOT}/types.rb
 )
 add_custom_target(abc_type_convert_cpp DEPENDS ${ABC_TYPE_CONVERT_CPP})
 add_dependencies(panda_gen_files abc_type_convert_cpp)
@@ -75,12 +75,7 @@ panda_target_link_libraries(abc2prog abc2program)
 panda_target_include_directories(abc2program PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_BINARY_DIR}/libpandabase
 )
 
 panda_add_sanitizers(TARGET abc2program SANITIZERS ${PANDA_SANITIZERS_LIST})
 panda_add_sanitizers(TARGET abc2prog SANITIZERS ${PANDA_SANITIZERS_LIST})
-
-if(PANDA_WITH_TESTS AND PANDA_WITH_ETS AND NOT CMAKE_CROSSCOMPILING)
-    add_subdirectory(tests)
-endif()

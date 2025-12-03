@@ -17,7 +17,7 @@
 void tobj_init(struct DataBlockHead *data_ptr, struct TypeInfo const *rtti_ptr)
 {
     data_ptr->rtti_ptr = rtti_ptr;
-    tref_set(&data_ptr->m_count, 1);
+    tref_init(&data_ptr->m_count, 1);
 }
 
 struct DataBlockHead *tobj_dup(struct DataBlockHead *data_ptr)

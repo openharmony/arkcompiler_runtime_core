@@ -17,7 +17,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H_
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_field_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_wrapper.h"

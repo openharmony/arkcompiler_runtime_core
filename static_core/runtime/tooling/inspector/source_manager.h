@@ -24,7 +24,7 @@
 #include <utility>
 
 #include "include/tooling/pt_thread.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 
 #include "types/numeric_id.h"
 

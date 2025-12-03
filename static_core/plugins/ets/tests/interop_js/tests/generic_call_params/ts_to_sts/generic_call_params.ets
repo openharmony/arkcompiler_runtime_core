@@ -13,134 +13,117 @@
  * limitations under the License.
  */
 
-import {
-    applyFunctionGeneric,
-    applyFunctionGenericTuple,
-    genericExtendsClass,
-    Vector,
-    genericExtendsClassCallFromTs,
-    applyFunctionGenericArray,
-    applyFunctionGenericArrayCallFromTs,
-    applyFunWithConstraints,
-    genericKeyof,
-    ClassSubset,
-    subsetClassCallFromTs,
-    applyFunctionGenericUnion,
-} from 'main_js';
+let module = ESObject.load('../../plugins/ets/tests/interop_js/tests/generic_call_params/ts_to_sts/generic_call_params');
 
-type Union = string | int;
+let applyFunctionGeneric = module.getProperty('applyFunctionGeneric');
+let applyFunctionGenericTuple = module.getProperty('applyFunctionGenericTuple');
+let genericExtendsClass = module.getProperty('genericExtendsClass');
+let Vector = module.getProperty('Vector');
+let genericExtendsClassCallFromTs = module.getProperty('genericExtendsClassCallFromTs');
+let applyFunctionGenericArray = module.getProperty('applyFunctionGenericArray');
+let applyFunctionGenericArrayCallFromTs = module.getProperty('applyFunctionGenericArrayCallFromTs');
+let applyFunWithConstraints = module.getProperty('applyFunWithConstraints');
+let genericKeyof = module.getProperty('genericKeyof');
+let ClassSubset = module.getProperty('ClassSubset');
+let subsetClassCallFromTs = module.getProperty('subsetClassCallFromTs');
+let applyFunctionGenericUnion = module.getProperty('applyFunctionGenericUnion');
+
 type TupleT = [string, int];
 const etsInt = 1;
-const etsUnion: Union = etsInt;
-const etsString = 'string';
-const arrForLoop: FixedArray<int> = [0, 1, 2]
-const etsTuple: TupleT = [etsString, etsInt];
+const etsUnion: int = etsInt;
+const etsString: string = 'string';
+const arrForLoop: Array<int> = [0, 1, 2]
+const etsTuple: Array<string|int> = [etsString, etsInt];
+
 class EtsUser {
     age = etsInt;
     data = etsString;
 }
-
 const etsUser = new EtsUser();
-
-const unionFoo = (a: Union, b: Union): FixedArray<Union> => [a, b];
+const unionFoo = (a: int, b: int): Array<int> => [a, b];
 const add = (a: int, b: int): int => a + b;
 const concat = (a: string, b: string): string => a + ' ' + b;
-const push = (a: string, b: int): TupleT => [a, b];
+const push = (a: string, b: int): Array<string|int> => [a, b];
 
 function checkApplyFunctionGenericString(): boolean {
-    return applyFunctionGeneric(etsString, etsString, concat) as string == etsString + ' ' + etsString as string;
+    return applyFunctionGeneric.invoke(etsString, etsString, concat).toString() == etsString + ' ' + etsString;
 }
 
 function checkApplyFunctionGenericInt(): boolean {
-    return applyFunctionGeneric(etsInt, etsInt, add) as int == etsInt + etsInt as int;
+    return applyFunctionGeneric.invoke(etsInt, etsInt, add).toNumber() == etsInt + etsInt;
 }
 
 function checkApplyFunctionGenericTuple(): boolean {
-    const res: TupleT = applyFunctionGenericTuple(etsTuple[0], etsTuple[1], push);
-
-    return res[0] as string == etsTuple[0] as string
-        && res[1] as int == etsTuple[1] as int;
+    const res = applyFunctionGenericTuple.invoke(etsTuple[0], etsTuple[1], push);
+    return res.getProperty(0).toString() == etsTuple[0]
+           && res.getProperty(1).toNumber() == etsTuple[1];
 }
 
 function checkGenericExtendsClass(): boolean {
-    const res = genericExtendsClass(new Vector(etsInt));
-
-    return res.get() as int > etsInt as int;
+    const res = genericExtendsClass.invoke(Vector.instantiate(etsInt));
+    return res.invokeMethod('get').toNumber() > etsInt;
 }
 
 function checkGenericExtendsClassCallFromTs(): boolean {
-    const res = genericExtendsClassCallFromTs(new Vector(etsInt));
-
-    return res.get() as int > etsInt as int;
+    const res = genericExtendsClassCallFromTs.invoke(Vector.instantiate(etsInt));
+    return res.invokeMethod('get').toNumber() > etsInt;
 }
 
 function checkApplyFunctionGenericArrayCallFromTs() {
     const res = arrSum(arrForLoop);
-
-    return applyFunctionGenericArrayCallFromTs(arrForLoop) as int == res as int;
+    return applyFunctionGenericArrayCallFromTs.invoke(arrForLoop).toNumber() == res;
 }
 
 function checkApplyFunctionGenericArray(): boolean {
     const res = arrSum(arrForLoop);
-
-    return applyFunctionGenericArray(arrForLoop, add) as int == res as int;
+    return applyFunctionGenericArray.invoke(arrForLoop, add).toNumber() == res;
 }
 
-function arrSum(arr: FixedArray<int>): int {
+function arrSum(arr: Array<int>): int {
     let res = 0
     for (let i = 0; i < arrForLoop.length; ++i) {
         res += arrForLoop[i];
     }
-
     return res;
 }
 
 const toStringArrowFu = (a: int, b: string): string => a + ' ' + b;
-
 function toStringFu(a: int, b: string): string {
     return a + ' ' + b;
 }
 
 //NOTE: issue (18005) fix function as param
 // function checkApplyFunWithConstraintsFun() {
-//     const res = applyFunWithConstraints(etsInt, etsString, toStringFu);
-
-//     return res as string == etsInt + ' ' + etsString as string;
+// const res = applyFunWithConstraints(etsInt, etsString, toStringFu);
+// return res as string == etsInt + ' ' + etsString as string;
 // }
 
 function checkApplyFunWithConstraintsArrowFun() {
-    const res = applyFunWithConstraints(etsInt, etsString, toStringArrowFu);
-
-    return res as string == etsInt + ' ' + etsString as string;
+    const res = applyFunWithConstraints.invoke(etsInt, etsString, toStringArrowFu);
+    return res.toString() == etsInt + ' ' + etsString;
 }
 
 function checkGenericKeyof(): boolean {
-    const keys: FixedArray<string> = ['age', 'data'];
-    const res = genericKeyof(etsUser, keys);
-
-    const checkKeys = res.keys as Array<string> instanceof Array
-        && res.keys[0] as string == keys[0] as string
-        && res.keys[1] as string == keys[1] as string;
-
-    const checkObj = res.obj.age as int == etsInt as int
-        && res.obj.data as string == etsString as string
-
+    const keys: Array<string> = ['age', 'data'];
+    const res = genericKeyof.invoke(etsUser, keys);
+    const checkKeys = res.getProperty('keys').getProperty(0).toString() == keys[0] &&
+                      res.getProperty('keys').getProperty(1).toString() == keys[1];
+    const checkObj = res.getProperty('obj').getProperty('age').toNumber() == etsInt && 
+                     res.getProperty('obj').getProperty('data').toString() == etsString
     return checkKeys && checkObj;
 }
 
 function checkClassSubset(): boolean {
-    const GClass = ClassSubset();
-
-    return GClass.get(etsInt, etsInt, add) as int > etsInt as int;
+    const GClass = ClassSubset.invoke();
+    return GClass.getProperty('get').invoke(etsInt, etsInt, add).toNumber() > etsInt;
 }
 
 function checkSubsetClassCallFromTs(): boolean {
-    return subsetClassCallFromTs() as int > etsInt as int;
+    return subsetClassCallFromTs.invoke().toNumber() > etsInt;
 }
 
 function checkApplyFunctionGenericUnion(): boolean {
-    const res = applyFunctionGenericUnion(etsUnion, etsUnion, unionFoo);
-    return res as Array<Union> instanceof Array
-        && res[0] as Union == etsUnion as Union
-        && res[0] as Union == etsUnion as Union;
+    const res = applyFunctionGenericUnion.invoke(etsUnion, etsUnion, unionFoo);
+    return res.getProperty(0).toNumber() == etsUnion &&
+           res.getProperty(1).toNumber() == etsUnion;
 }

@@ -24,17 +24,25 @@ class ClassBindStaticNativeMethodsTest : public AniTest {
         AniTest::SetUp();
         ASSERT_EQ(env_->FindClass("@defModule.class_bind_static_native_methods_test.SmallBox", &smallBoxCls_), ANI_OK);
         ASSERT_EQ(env_->FindClass("@defModule.class_bind_static_native_methods_test.BigBox", &bigBoxCls_), ANI_OK);
+        ASSERT_EQ(env_->FindClass("@defModule.class_bind_static_native_methods_test.CheckSignature", &checkSignCls_),
+                  ANI_OK);
     }
 
 protected:
-    ani_class smallBoxCls_ {};  // NOLINT(misc-non-private-member-variables-in-classes,-warnings-as-errors)
-    ani_class bigBoxCls_ {};    // NOLINT(misc-non-private-member-variables-in-classes,-warnings-as-errors)
+    ani_class smallBoxCls_ {};   // NOLINT(misc-non-private-member-variables-in-classes,-warnings-as-errors)
+    ani_class bigBoxCls_ {};     // NOLINT(misc-non-private-member-variables-in-classes,-warnings-as-errors)
+    ani_class checkSignCls_ {};  // NOLINT(misc-non-private-member-variables-in-classes,-warnings-as-errors)
 };
 
 static ani_int NativeMethod([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class cls)
 {
     const ani_int answer = 43U;
     return answer;
+}
+
+static void CheckSignature([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class cls,
+                           [[maybe_unused]] ani_string str)
+{
 }
 
 TEST_F(ClassBindStaticNativeMethodsTest, wrong_null_args)
@@ -103,6 +111,7 @@ TEST_F(ClassBindStaticNativeMethodsTest, success)
         ani_native_function {"foo", ":i", reinterpret_cast<void *>(NativeMethod)},
         ani_native_function {"foo1", ":i", reinterpret_cast<void *>(NativeMethod)},
     };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_OK);
 }
 
@@ -112,6 +121,7 @@ TEST_F(ClassBindStaticNativeMethodsTest, success_with_overload_methods)
         ani_native_function {"overload_fn_int", "i:", reinterpret_cast<void *>(NativeMethod)},
         ani_native_function {"overload_fn_long", "l:", reinterpret_cast<void *>(NativeMethod)},
     };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_OK);
 }
 
@@ -121,6 +131,7 @@ TEST_F(ClassBindStaticNativeMethodsTest, success_without_signature)
         ani_native_function {"foo", nullptr, reinterpret_cast<void *>(NativeMethod)},
         ani_native_function {"foo1", nullptr, reinterpret_cast<void *>(NativeMethod)},
     };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, smallBoxCls_, m.data(), m.size()), ANI_OK);
 }
 
@@ -129,7 +140,22 @@ TEST_F(ClassBindStaticNativeMethodsTest, success_for_child_class)
     std::array m = {
         ani_native_function {"bar", nullptr, reinterpret_cast<void *>(NativeMethod)},
     };
+    ASSERT_EQ(env_->c_api->Class_BindNativeMethods(env_, bigBoxCls_, m.data(), m.size()), ANI_NOT_FOUND);
     ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, bigBoxCls_, m.data(), m.size()), ANI_OK);
+}
+
+TEST_F(ClassBindStaticNativeMethodsTest, method_bind_bad_signature)
+{
+    std::array m = {
+        ani_native_function {"method", "C{std/core/String}:", reinterpret_cast<void *>(CheckSignature)},
+    };
+    ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, checkSignCls_, m.data(), m.size()),
+              ANI_INVALID_DESCRIPTOR);
+
+    m = {
+        ani_native_function {"method", "C{std.core.String}:", reinterpret_cast<void *>(CheckSignature)},
+    };
+    ASSERT_EQ(env_->c_api->Class_BindStaticNativeMethods(env_, checkSignCls_, m.data(), m.size()), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::testing

@@ -14,14 +14,14 @@
  */
 
 #include "intrinsics.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/include/class.h"
 #include "runtime/include/exceptions.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "plugins/ets/runtime/types/ets_array.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "runtime/arch/memory_helpers.h"
@@ -42,27 +42,6 @@ EtsString *GetNullString()
 
     return EtsString::FromCoreType(
         vm->GetStringTable()->GetOrInternString(nullBytes.data(), nullBytes.size() - 1, ctx));
-}
-
-EtsString *StdCoreStringBuilderConcatStrings(EtsString *lhs, EtsString *rhs)
-{
-    if (lhs == nullptr || rhs == nullptr) {
-        // GetNullString()-call below may trigger GC and move lhs/rhs args, need to hold them
-        auto thread = ManagedThread::GetCurrent();
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-        VMHandle<EtsString> lhsHandle(thread, lhs == nullptr ? nullptr : lhs->GetCoreType());
-        VMHandle<EtsString> rhsHandle(thread, rhs == nullptr ? nullptr : rhs->GetCoreType());
-
-        EtsString *nullString = GetNullString();
-
-        // Restore args from handles
-        lhs = lhsHandle.GetPtr();
-        rhs = rhsHandle.GetPtr();
-
-        lhs = lhs == nullptr ? nullString : lhs;
-        rhs = rhs == nullptr ? nullString : rhs;
-    }
-    return EtsString::Concat(lhs, rhs);
 }
 
 EtsString *StdCoreToStringBoolean(EtsBoolean i)

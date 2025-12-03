@@ -30,17 +30,13 @@ interface I {
 type t = keyof I
 
 function main() {
-    {% if "negative" in case.tags %}
-      let union: t = {{case.check[0]}}
-    {% else %}
-      let union1: {% for i in case.check %}{% if i != case.check[0] %}|{% endif %}{{i}}{% endfor %}{% if case.check[0] != "never" %} = {{case.check[0]}}{% endif %}
-      let union2: t = union1
-      {% if case.check[0] != "never" %}
-        {% for i in case.check %}{% if i != case.check[0] %}union2 = {{i}}{% endif %}
-        {% endfor %}
-        union1 = union2
-        arktest.assertEQ(typeof union2, "string")
-      {% endif %}
+    let union1: {% for i in case.check %}{% if i != case.check[0] %}|{% endif %}{{i}}{% endfor %}{% if case.check[0] != "never" %} = {{case.check[0]}}{% endif %}
+    let union2: t = union1
+    {% if case.check[0] != "never" %}
+      {% for i in case.check %}{% if i != case.check[0] %}union2 = {{i}}{% endif %}
+      {% endfor %}
+      union1 = union2
+      arktest.assertEQ(typeof union2, "string")
     {% endif %}
 }
 

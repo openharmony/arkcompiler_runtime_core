@@ -390,3 +390,41 @@ cases:
       use: |-
           let api: VulkanAPI = {}
           api.callMeOrDie()
+    - decl: |-
+          enum AB { A, B }
+      use: |-
+          const m: Record<AB, number> = {
+              AB.A: 1,
+              AB.B: 2
+          }
+          arktest.assertEQ(m[AB.A], 1)
+          arktest.assertEQ(m[AB.B], 2)
+    - decl: |-
+          enum DoubleEnum: double {a = 1.0, b = 2.0, c = 3.141592653589}
+      use: |-
+          const m: Record<DoubleEnum, string> = {
+              DoubleEnum.a: "a",
+              DoubleEnum.b: "b",
+              DoubleEnum.c: "c"
+          }
+          arktest.assertEQ(m[DoubleEnum.a], "a")
+          arktest.assertEQ(m[DoubleEnum.b], "b")
+          arktest.assertEQ(m[DoubleEnum.c], "c")
+    - decl: |-
+          enum StringEnum {a = "a", b = "b"}
+      use: |-
+          const m: Record<StringEnum, string> = {
+              StringEnum.a: "a",
+              StringEnum.b: "b"
+          }
+          arktest.assertEQ(m[StringEnum.a], "a")
+          arktest.assertEQ(m[StringEnum.b], "b")
+    - decl: |-
+          enum LongEnum { A = 0x7FFF_FFFF_1, B}
+      use: |-
+          const m: Record<LongEnum, number> = {
+              LongEnum.A: 1,
+              LongEnum.B: 2
+          }
+          arktest.assertEQ(m[LongEnum.A], 1)
+          arktest.assertEQ(m[LongEnum.B], 2)

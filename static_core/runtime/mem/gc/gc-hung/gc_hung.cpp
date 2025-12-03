@@ -26,8 +26,8 @@
 #include <cstdio>
 #include <csignal>
 #include <sys/time.h>
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/type_converter.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/type_converter.h"
 
 namespace ark::mem {
 

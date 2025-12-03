@@ -18,14 +18,16 @@ package std.containers;
 export namespace containers {
 
     final class MapNode<K, V> {
-        prev: MapNode<K, V> = this;
-        next: MapNode<K, V> = this;
+        prev: MapNode<K, V>;
+        next: MapNode<K, V>;
 
         key: K;
         val: V;
         isDeleted: boolean = false;
 
         constructor(key: K, val: V) {
+            this.prev = this
+            this.next = this
             this.key = key;
             this.val = val;
         }
@@ -143,7 +145,7 @@ export namespace containers {
 
         private static readonly MIN_BUCKETS_COUNT = 8;
 
-        private getBucketIndex(k: NullishType): int {
+        private getBucketIndex(k: Any): int {
             if (k === null) {
                 return 0;
             }
@@ -367,7 +369,7 @@ export namespace containers {
                 if (node === null) {
                     continue;
                 }
-                if (__runtimeSameValueZero(node.key, key)) {
+                if (Runtime.sameValueZero(node.key, key)) {
                     node.val = val;
                     this.setVal.decrease();
                     ConcurrencyHelpers.mutexUnlock(this.mutex);
@@ -418,7 +420,7 @@ export namespace containers {
                     if (node === null) {
                         continue;
                     }
-                    if (__runtimeSameValueZero(node.key, key)) {
+                    if (Runtime.sameValueZero(node.key, key)) {
                         node.val = newValue;
                         ConcurrencyHelpers.mutexUnlock(this.mutex);
                         return true;
@@ -449,7 +451,7 @@ export namespace containers {
                     if (node === null) {
                         continue;
                     }
-                    if (__runtimeSameValueZero(node.key, key)) {
+                    if (Runtime.sameValueZero(node.key, key)) {
                         return true;
                     }
                 }
@@ -510,7 +512,7 @@ export namespace containers {
                 if (node === null) {
                     continue;
                 }
-                if (!__runtimeSameValueZero(node.key, key)) {
+                if (!Runtime.sameValueZero(node.key, key)) {
                     continue;
                 }
 
@@ -592,7 +594,7 @@ export namespace containers {
                     if (node === null) {
                         continue;
                     }
-                    if (__runtimeSameValueZero(node.key, key)) {
+                    if (Runtime.sameValueZero(node.key, key)) {
                         return node.val;
                     }
                 }

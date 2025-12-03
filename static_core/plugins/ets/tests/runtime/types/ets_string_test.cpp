@@ -15,7 +15,7 @@
 
 #include "ets_coroutine.h"
 #include "include/mem/panda_string.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 #include "types/ets_array.h"
 #include "types/ets_string.h"
 #include <gtest/gtest.h>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "libpandabase/utils/time.h"
-#include "libpandabase/utils/type_converter.h"
+#include "libarkbase/utils/time.h"
+#include "libarkbase/utils/type_converter.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/gc_stats.h"
 #include "runtime/mem/mem_stats.h"
+#include "runtime/mem/gc/gc_settings.h"
 
 namespace ark::mem {
 
@@ -28,9 +29,16 @@ PandaString GCStats::GetStatistics()
     statistic << time::GetCurrentTimeString() << " ";
 
     statistic << GC_NAMES[ToIndex(gcType_)] << " ";
-    statistic << "freed " << objectsFreed_ << "(" << helpers::MemoryConverter(objectsFreedBytes_) << "), ";
-    statistic << largeObjectsFreed_ << "(" << helpers::MemoryConverter(largeObjectsFreedBytes_) << ") LOS objects, ";
-
+    auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
+    static bool g1TrackFreedObjects = gc->GetSettings()->G1TrackFreedObjects();
+    if (g1TrackFreedObjects) {
+        statistic << "freed " << objectsFreed_ << "(" << helpers::MemoryConverter(objectsFreedBytes_) << "), ";
+        statistic << largeObjectsFreed_ << "(" << helpers::MemoryConverter(largeObjectsFreedBytes_)
+                  << ") LOS objects, ";
+    } else {
+        statistic << "freed " << helpers::MemoryConverter(objectsFreedBytes_) << ", ";
+        statistic << helpers::MemoryConverter(largeObjectsFreedBytes_) << " LOS objects, ";
+    }
     constexpr uint16_t MAX_PERCENT = 100;
     size_t totalHeap = mem::MemConfig::GetHeapSizeLimit();
     ASSERT(totalHeap != 0);

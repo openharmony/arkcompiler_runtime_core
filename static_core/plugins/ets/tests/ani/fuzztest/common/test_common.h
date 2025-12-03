@@ -120,28 +120,10 @@ public:
     template <typename ArrayType>
     void AniGetArray(ArrayType *result, ani_size length = 5)
     {
-        if constexpr (std::is_same_v<ArrayType, ani_array_boolean>) {
-            env_->Array_New_Boolean(length, result);
-        } else if constexpr (std::is_same_v<ArrayType, ani_array_char>) {
-            env_->Array_New_Char(length, result);
-        } else if constexpr (std::is_same_v<ArrayType, ani_array_byte>) {
-            env_->Array_New_Byte(length, result);
-        } else if constexpr (std::is_same_v<ArrayType, ani_array_short>) {
-            env_->Array_New_Short(length, result);
-        } else if constexpr (std::is_same_v<ArrayType, ani_array_int>) {
-            env_->Array_New_Int(length, result);
-        } else if constexpr (std::is_same_v<ArrayType, ani_array_long>) {
-            env_->Array_New_Long(length, result);
-        } else if constexpr (std::is_same_v<ArrayType, ani_array_float>) {
-            env_->Array_New_Float(length, result);
-        } else if constexpr (std::is_same_v<ArrayType, ani_array_double>) {
-            env_->Array_New_Double(length, result);
-        } else if constexpr (std::is_same_v<ArrayType, ani_array_ref>) {
+        if constexpr (std::is_same_v<ArrayType, ani_array>) {
             ani_ref undef {};
-            ani_class strCls {};
-            env_->FindClass("std.core.String", &strCls);
             env_->GetUndefined(&undef);
-            env_->Array_New_Ref(strCls, length, undef, result);
+            env_->Array_New(length, undef, result);
         } else {
             static_assert(!std::is_same_v<ArrayType, ArrayType>, "Unsupported array type in AniGetArray");
         }

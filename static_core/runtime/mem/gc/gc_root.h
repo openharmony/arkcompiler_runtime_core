@@ -19,8 +19,8 @@
 #include <ostream>
 #include <vector>
 
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/mem/mem_range.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/mem_range.h"
 #include "runtime/include/class.h"
 #include "runtime/include/language_config.h"
 #include "runtime/include/mem/panda_containers.h"

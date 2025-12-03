@@ -20,7 +20,7 @@
 #include <string>
 #include <fstream>
 
-#include "libpandabase/os/thread.h"
+#include "libarkbase/os/thread.h"
 
 #include "runtime/tooling/sampler/sample_info.h"
 #include "runtime/tooling/sampler/samples_record.h"

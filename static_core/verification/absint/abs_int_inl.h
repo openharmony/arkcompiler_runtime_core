@@ -17,16 +17,16 @@
 #define PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H
 
 #include "abs_int_inl_compat_checks.h"
-#include "file_items.h"
+#include "libarkfile/file_items.h"
 #include "include/mem/panda_containers.h"
 #include "include/method.h"
 #include "include/runtime.h"
-#include "libpandafile/type_helper.h"
-#include "macros.h"
+#include "libarkfile/type_helper.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/class.h"
 #include "runtime/include/thread_scopes.h"
 #include "type/type_system.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "util/str.h"
 #include "verification/config/debug_breakpoint/breakpoint.h"
 #include "verification_context.h"
@@ -2532,7 +2532,7 @@ public:
         Field const *rawField = GetCachedField();
         Type objType;
 
-        // currently all union type named access sites are encoded as “$NamedAccessMeta” class fields
+        // currently all union type named access sites are encoded as “%%union_prop-” class fields
         // at bytecode level, thus we do not have accurate union type info to verify each variables
         // so the current temporary solution would be to skip verification for union types.This
         // actually introduce insecure possibilities here. Accurate verification for union types
@@ -3437,7 +3437,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3448,7 +3448,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3457,7 +3457,7 @@ public:
     bool HandleAnyCallShort()
     {
         // NOTE: handle properly
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3468,7 +3468,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3479,7 +3479,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3488,7 +3488,7 @@ public:
     bool HandleAnyCallThisShort()
     {
         // NOTE: handle properly
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3499,7 +3499,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3510,7 +3510,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3521,7 +3521,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3627,7 +3627,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3639,7 +3639,7 @@ public:
         DBGBRK();
         Sync();
         uint16_t vOut = inst_.GetVReg<FORMAT, 0x0>();
-        SetReg(vOut, refType_);
+        SetReg(vOut, objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3670,7 +3670,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3691,7 +3691,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3712,7 +3712,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        SetAcc(u1_);
+        SetAcc(i32_);
 
         MoveToNextInst<FORMAT>();
         return true;
@@ -4208,9 +4208,9 @@ private:
     void LogInnerMessage(const CheckResult &elt)
     {
         if (elt.IsError()) {
-            LOG(ERROR, VERIFIER) << "Error: " << elt.msg << ". ";
+            LOG(ERROR, VERIFIER) << "Error: " << elt.msg;
         } else if (elt.IsWarning()) {
-            LOG(WARNING, VERIFIER) << "Warning: " << elt.msg << ". ";
+            LOG(WARNING, VERIFIER) << "Warning: " << elt.msg;
         }
     }
 

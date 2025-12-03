@@ -15,8 +15,8 @@
 #ifndef PANDA_RUNTIME_MEM_REGION_ALLOCATOR_INL_H
 #define PANDA_RUNTIME_MEM_REGION_ALLOCATOR_INL_H
 
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/gc_task.h"
@@ -26,6 +26,7 @@
 #include "runtime/mem/freelist_allocator-inl.h"
 #include "runtime/mem/alloc_config.h"
 #include "runtime/arch/memory_helpers.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::mem {
 
@@ -358,10 +359,10 @@ TLAB *RegionAllocator<AllocConfigT, LockConfigT>::CreateTLABInRegion(Region *reg
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool INCLUDE_CURRENT_REGION>
-PandaVector<std::pair<uint32_t, Region *>> RegionAllocator<AllocConfigT, LockConfigT>::GetTopGarbageRegions(
-    double garbageThreshold)
+void RegionAllocator<AllocConfigT, LockConfigT>::GetTopGarbageRegions(double garbageThreshold,
+                                                                      GarbageRegions &garbageRegions,
+                                                                      PandaVector<Region *> &emptyRegions)
 {
-    PandaVector<std::pair<uint32_t, Region *>> topGarbageRegions;
     this->GetSpace()->IterateRegions([&](Region *region) {
         if (region->HasFlag(IS_EDEN) || region->HasFlag(RegionFlag::IS_RESERVED)) {
             return;
@@ -373,15 +374,11 @@ PandaVector<std::pair<uint32_t, Region *>> RegionAllocator<AllocConfigT, LockCon
         }
         auto garbageBytes = region->GetGarbageBytes();
         if (region->GetLiveBytes() == 0U) {
-            // Assign a huge value to garbage bytes for an empty region, to place it to the end of the array
-            garbageBytes = DEFAULT_REGION_SIZE;
-        }
-        if (static_cast<double>(garbageBytes) / region->GetAllocatedBytes() >= garbageThreshold) {
-            topGarbageRegions.emplace_back(std::make_pair(garbageBytes, region));
+            emptyRegions.push_back(region);
+        } else if (static_cast<double>(garbageBytes) / region->GetAllocatedBytes() >= garbageThreshold) {
+            garbageRegions.emplace_back(std::make_pair(garbageBytes, region));
         }
     });
-    std::sort(topGarbageRegions.begin(), topGarbageRegions.end());
-    return topGarbageRegions;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -501,7 +498,7 @@ void RegionAllocator<AllocConfigT, LockConfigT>::CompactSpecificRegion(Region *r
         }
         // Don't initialize memory for an object here because we will use memcpy anyway
         ASSERT(dst != nullptr);
-        memcpy_s(dst, objectSize, object, objectSize);
+        MemcpyUnsafe(dst, object, objectSize);
         // need to mark as alive moved object
         ASSERT(regionTo->GetLiveBitmap() != nullptr);
         regionTo->IncreaseAllocatedObjects();

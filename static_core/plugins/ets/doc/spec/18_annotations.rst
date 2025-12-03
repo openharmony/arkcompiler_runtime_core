@@ -21,7 +21,7 @@ Annotations
 *Annotation* is a special language element that changes the semantics of
 the declaration to which it is applied by adding metadata.
 
-The example below illustrates how an annotation is declared and used:
+Declaring and using an annotation is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -48,13 +48,16 @@ allowed between the character '``@``' and the name:
 .. index::
    annotation
    semantics
+   language element
    metadata
    declaration
    class declaration
    prefix
    space
+   white space
    line separator
    argument
+   name
 
 .. code-block::
    :linenos:
@@ -63,8 +66,8 @@ allowed between the character '``@``' and the name:
     @ ClassAuthor({authorName: "Bob"}) // compile-time error, space is forbidden
 
 A :index:`compile-time error` occurs if the annotation name is not accessible
-(see :ref:`Accessible`) at the place of usage. An annotation declaration can be
-exported and used in other compilation units.
+(see :ref:`Accessible`) at the place of use. An annotation declaration can be
+exported and used in other modules.
 
 Multiple annotations can be applied to a single declaration:
 
@@ -80,7 +83,7 @@ Multiple annotations can be applied to a single declaration:
    access
    accessibility
    annotation declaration
-   compilation unit
+   declaration
 
 |
 
@@ -120,14 +123,20 @@ occurs if the value of this expression cannot be evaluated at compile time.
 
 .. index::
    annotation
+   declaration
    interface
-   keyword interface
+   interface keyword
    prefix
-   keyword export
+   export keyword
+   syntax
+   annotation declaration
    annotation field
+   declared entity
    constant expression
    compile time
    initializer
+   expression
+   value
    type
 
 *Annotation* must be defined at the top level. Otherwise, a
@@ -162,6 +171,7 @@ the annotation or used as an interface:
    annotation declaration
    interface
    entity
+   type
 
 |
 
@@ -179,8 +189,8 @@ The choice of *types for annotation fields* is limited to the following:
 - Type ``boolean`` (see :ref:`Type boolean`);
 - :ref:`Type string`;
 - Enumeration types (see :ref:`Enumerations`);
-- Array of the above types (e.g., ``string[]``), including multidimensional
-  arrays (e.g., ``string[][]``).
+- Array of the above types (e.g., ``string[]``), including arrays of arrays
+  (e.g., ``string[][]``).
 
 A :index:`compile-time error` occurs if any other type is used as the type of
 an *annotation field*.
@@ -190,12 +200,9 @@ an *annotation field*.
    type for annotation field
    numeric type
    boolean type
-   type boolean
-   string
-   type string
+   string type
    enumeration type
    array
-   multidimensional array
 
 |
 
@@ -219,7 +226,7 @@ and to define the values of annotation fields:
         '(' (objectLiteral | constantExpression)? ')'
         ;
 
-An annotation declaration is presented in the example below:
+An annotation declaration is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -247,7 +254,7 @@ a :index:`compile-time error` occurs.
    value
    expression
 
-The usage of annotation is presented in the example below. The annotations in
+The use of annotation is presented in the example below. The annotations in
 this example are applied to class declarations:
 
 .. code-block:: typescript
@@ -284,24 +291,25 @@ Annotations can be applied to the following:
    class declaration
    top-level declaration
    class
+   type
    interface
    method
    parameter
+   optional parameter
    lambda expression
+   lambda expression with receiver
    function
+   local declaration
 
 Otherwise, a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
 
+    function foo () @MyAnno() {} // wrong target for annotation
 
-    function foo () {
-           @MyAnno() let local = 1 // compile-time error
-    }
-
-Repeatable annotations are not supported, i.e., an annotation cannot be applied
-to an entity more than once:
+Repeatable annotations are not supported, i.e., an annotation can be applied
+to an entity no more than once:
 
 .. code-block:: typescript
    :linenos:
@@ -330,6 +338,8 @@ Otherwise, a :index:`compile-time error` occurs:
 
 .. index::
    annotation
+   repeatable annotation
+   entity
    array literal
    array type
    value
@@ -366,8 +376,10 @@ omitted after the annotation name:
    field
    array type
    annotation
+   syntax
    array literal
    parenthesis
+   property
    annotation name
 
 |
@@ -441,19 +453,20 @@ annotation is accessed by its qualified name:
     @ns.MyAnno
     class C {/*body*/}
 
+Unqualified import is also allowed:
+
 .. index::
    export
    import
    annotation
    annotation declaration
-   keyword export
+   export keyword
    import directive
+   export directive
    imported module
    qualified name
    access
    unqualified import
-
-Unqualified import is also allowed:
 
 .. code-block:: typescript
    :linenos:
@@ -483,14 +496,19 @@ Annotations are forbidden in the following cases:
 - Rename in import.
 
 .. index::
+   annotation
    export type
    import type
+   import annotation
+   export annotation
    annotation
+   notation
    type
    notation
    import annotation
    export default
    import default
+   renaming
 
 .. code-block:: typescript
    :linenos:
@@ -524,12 +542,14 @@ An ambient annotation and the annotation that implements it must be exactly
 identical, including field initialization:
 
 .. index::
+   syntax
    ambient annotation
    declaration
    annotation
    type
    runtime error
    field initialization
+   initialization
 
 .. code-block:: typescript
    :linenos:
@@ -583,6 +603,7 @@ the declaration that implements the ambient declaration:
 
 .. index::
    annotation declaration
+   initialization
    import
    annotation
    ambient declaration
@@ -605,14 +626,16 @@ Standard Annotations
 *Standard annotation* is usually known to the compiler. It modifies the
 semantics of the declaration it is applied to.
 
-If an annotation is aimed to annotate declaration of other annotation,
-it is called *meta-annotation*.
+An annotation that annotates a declaration of another annotation is called
+*meta-annotation*.
 
 .. index::
    standard annotation
    annotation
+   standard annotation
    compiler
    built-in annotation
+   call
    semantics
    declaration
    meta-annotation
@@ -644,12 +667,14 @@ used as follows:
     class C {}
 
 .. index::
+   meta-annotation
    retention annotation
    standard annotation
    annotation
    declaration
    declaration annotation
    field
+   string type
 
 The value of this field determines at which point an annotation is used,
 and discarded after use.
@@ -710,16 +735,24 @@ Target Annotation
 
 
 ``@Target`` is a standard *meta-annotation* that is used to annotate
-a declaration of another annotation.
-A :index:`compile-time error` occurs if it is used in other places.
+a declaration of another annotation. A :index:`compile-time error` occurs
+if ``@Target`` is used elsewhere.
 
-``@Target`` specifies the set of contexts in the source code
-in which the declared annotation can be used
-via the set of values of ``AnnotationTargets`` enumeration defined
-in :ref:`Standard Library`.
+``@Target`` specifies the set of source code contexts in which the declared
+annotation can be used. The contexts are specified by using a set of values
+of an ``AnnotationTargets`` enumeration defined in :ref:`Standard Library`.
 
-The annotation has a single field ``targets`` of type ``AnnotationTargets[]``.
-It is typically used as follows:
+The annotation ``@Target`` has a single field ``targets`` of type
+``AnnotationTargets[]``. It is typically used as follows:
+
+.. index::
+   target annotation
+   annotation
+   meta-annotation
+   declaration
+   source code
+   context
+   value
 
 .. code-block:: typescript
    :linenos:
@@ -732,48 +765,84 @@ It is typically used as follows:
     @Target({targets: [AnnotationTargets.PARAMETER]})
     @interface SpecialParameter {/*some fields*/}
     
-If the annotation is present in the declaration of annotation ``X``,
-the compiler checks that ``X`` is used only in the specified contexts.
+If the annotation is present in the declaration of annotation ``X``, then
+the compiler checks that ``X`` is used in the specified contexts only.
 Otherwise, a :index:`compile-time error` occurs.
 
-If the annotation is not present in the declaration of annotation ``X``, then
-there is no restriction on ``X`` usage.
+If no annotation is present in the declaration of annotation ``X``, then
+the usage of ``X`` is not restricted.
 
-The ``AnnotationTargets`` enumeration contains constants
-for the following targets:
+An ``AnnotationTargets`` enumeration contains constants for the following
+targets:
 
--  targets for :ref:`Top-Level Declarations`:
+.. index::
+   annotation
+   declaration
+   compiler
+   compiler check
+   context
+   restriction
+   enumeration
+   constant
 
-    - CLASS
-    - ENUMERATION
-    - FUNCTION
-    - FUNCTION_WITH_RECEIVER
-    - INTERFACE
-    - NAMESPACE
-    - TYPE_ALIAS
-    - VARIABLE
+-  Targets for :ref:`Top-Level Declarations`:
+
+    - CLASS;
+    - ENUMERATION;
+    - FUNCTION;
+    - FUNCTION_WITH_RECEIVER;
+    - INTERFACE;
+    - NAMESPACE;
+    - TYPE_ALIAS;
+    - VARIABLE.
+
+-  Targets for :ref:`Class Members`:
+
+    - CLASS_FIELD;
+    - CLASS_METHOD;
+    - CLASS_GETTER;
+    - CLASS_SETTER.
+
+-  Targets for :ref:`Interface Members`:
+
+    - INTERFACE_PROPERTY;
+    - INTERFACE_METHOD;
+    - INTERFACE_GETTER;
+    - INTERFACE_SETTER.
+
+-  Other targets:
     
--  targets for :ref:`Class Members`:
+    - LAMBDA for :ref:`Lambda Expressions` and
+      :ref:`Lambda Expressions with Receiver`;
+    - PARAMETER for function, method, and lambda parameter;
+    - STRUCT (see :ref:`Keyword struct and ArkUI`);
+    - TYPE (see :ref:`Using Types`).
 
-    - CLASS_FIELD
-    - CLASS_METHOD
-    - CLASS_GETTER
-    - CLASS_SETTER
+.. index::
+   class
+   enumeration
+   function
+   interface
+   namespace
+   type alias
+   variable
+   class member
+   function with receiver
+   class field
+   class method
+   class getter
+   class setter
+   interface property
+   interface method
+   interface getter
+   interface setter
+   target
+   lambda
+   parameter
+   struct
+   type
+   annotation
 
--  targets for :ref:`Interface Members`:
-
-    - INTERFACE_PROPERTY
-    - INTERFACE_METHOD
-    - INTERFACE_GETTER
-    - INTERFACE_SETTER
-    
--  other targets:
-    
-    - LAMBDA - for :ref:`Lambda Expressions` and
-      :ref:`Lambda Expressions with Receiver`
-    - PARAMETER -  for function, method and lambda parameter
-    - STRUCT - see :ref:`Keyword struct and ArkUI`
-    
 A :index:`compile-time error` occurs if an enumeration constant is used more
 then once in an ``@Target`` annotation:
 
@@ -798,6 +867,16 @@ For an annotation with *retention policy* (see :ref:`Retention Annotation`)
 is implicitly declared. All fields of this class are ``readonly``.
 If a field is of an array type, the array type is also ``readonly``.
 
+.. index::
+   runtime
+   access
+   annotation
+   retention policy
+   retention annotation
+   bytecode
+   readonly field
+   array type
+ 
 For the following annotation:
 
 .. code-block:: typescript
@@ -809,7 +888,7 @@ For the following annotation:
         attrs: number[]
     }
 
-the abstract class is declared:
+--the abstract class is declared:
 
 .. code-block:: typescript
    :linenos:
@@ -819,7 +898,7 @@ the abstract class is declared:
         readonly attrs: readonly number[]
     }
 
-The following example shows the use of such class:
+The use of such a class is represented in following example:
 
 .. code-block:: typescript
    :linenos:
@@ -829,6 +908,12 @@ The following example shows the use of such class:
 
     let my: MyAnno = // call of reflection library to get instance of annotation for type A
     console.log(my.name) // output: someName
+
+.. index::
+   annotation
+   abstract class
+   declaration
+   readonly name
 
 .. raw:: pdf
 

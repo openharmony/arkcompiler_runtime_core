@@ -19,6 +19,7 @@
 #include "include/external_callback_poster.h"
 #include "runtime/include/runtime.h"
 #include "runtime/coroutines/local_storage.h"
+#include "runtime/coroutines/coroutine_worker_domain.h"
 
 namespace ark {
 
@@ -39,7 +40,7 @@ enum class CoroutinePriority {
 /// Represents a coroutine worker, which can host multiple coroutines and schedule them.
 class CoroutineWorker {
 public:
-    enum class DataIdx { INTEROP_CTX_PTR, EXTERNAL_IFACES, LAST_ID };
+    enum class DataIdx { INTEROP_CTX_PTR, EXTERNAL_IFACES, FLATTENED_STRING_CACHE, LAST_ID };
     using LocalStorage = StaticLocalStorage<DataIdx>;
     using Id = int32_t;
 
@@ -87,6 +88,11 @@ public:
         return isMainWorker_;
     }
 
+    virtual bool InExclusiveMode() const
+    {
+        return false;
+    }
+
     LocalStorage &GetLocalStorage()
     {
         return localStorage_;
@@ -108,7 +114,13 @@ public:
 
     void OnCoroBecameActive(Coroutine *co);
 
-    void TriggerSchedulerExternally(Coroutine *requester);
+    void TriggerSchedulerExternally(Coroutine *requester, int64_t delayMs = 0);
+
+    /// should be called once the VM is ready to create managed objects in the managed heap
+    void InitializeManagedStructures();
+
+    /// should be called from CoroutineManager after worker creation from the coroutine assigned to the worker
+    void OnWorkerStartup();
 
     /**
      * This method perform ready asynchronous work of the coroutine worker.
@@ -119,6 +131,10 @@ public:
     {
         return false;
     }
+
+private:
+    void CreateWorkerLocalObjects();
+    virtual void CacheLocalObjectsInCoroutines() {}
 
 private:
     Runtime *runtime_ = nullptr;

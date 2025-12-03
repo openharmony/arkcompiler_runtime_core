@@ -18,6 +18,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_LIBANI_HELPERS_INTEROP_JS_ARKTS_ESVALUE_H
 
 #include <ani.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,4 +40,5 @@ __attribute__((visibility("default"))) bool arkts_esvalue_unwrap(ani_env *env, a
 }
 #endif
 // NOLINTEND(readability-identifier-naming)
+
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_LIBANI_HELPERS_INTEROP_JS_ARKTS_ESVALUE_H

@@ -69,8 +69,8 @@
 
 #include <cstdint>
 
-#include "libpandabase/os/thread.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/monitor.h"
 #include "runtime/object_header_config.h"
 

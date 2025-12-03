@@ -52,6 +52,11 @@ options:
   default: true
   description: Enable BytecodeOptPeepholes Pass
 
+- name: bytecode-opt-call-devirtualize
+  type: bool
+  default: true
+  description: Enable CallDevirtualization Pass
+
 - name: const-array-resolver
   type: bool
   default: true

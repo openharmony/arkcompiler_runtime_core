@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_utils.h"
@@ -157,6 +157,62 @@ static bool EqualityResursionAllowed(EtsObject *obj)
     return !(obj->GetClass()->IsEtsEnum() || obj->GetClass()->IsFunctionReference());
 }
 
+Method *ResolveMethodIfVirtual(Class *recvRc, Method *decl)
+{
+    ASSERT(!decl->IsStatic());
+    if (decl->IsPrivate() || decl->IsConstructor() || decl->IsFinal()) {
+        return decl;
+    }
+
+    if (auto *m = recvRc->ResolveVirtualMethod(decl)) {
+        return m;
+    }
+
+    LOG(FATAL, RUNTIME) << "ResolveVirtualMethod failed for method" << decl->GetName().data;
+    UNREACHABLE();
+}
+
+template <class T>
+static inline bool EqPrim(EtsObject *o1, EtsField *f1, EtsObject *o2, EtsField *f2)
+{
+    return o1->GetFieldPrimitive<T>(f1) == o2->GetFieldPrimitive<T>(f2);
+}
+
+static bool PrimitiveFieldsExactEquality(EtsObject *o1, EtsField *f1, EtsObject *o2, EtsField *f2,
+                                         panda_file::Type::TypeId id)
+{
+    ASSERT(id != panda_file::Type::TypeId::REFERENCE);
+    ASSERT(id != panda_file::Type::TypeId::TAGGED);
+
+    switch (id) {
+        case panda_file::Type::TypeId::U1:
+            return EqPrim<EtsBoolean>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::I8:
+            return EqPrim<EtsByte>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::U16:
+            return EqPrim<EtsChar>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::I16:
+            return EqPrim<EtsShort>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::I32:
+            return EqPrim<EtsInt>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::I64:
+            return EqPrim<EtsLong>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::F32:
+            return EqPrim<EtsFloat>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::F64:
+            return EqPrim<EtsDouble>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::U8:
+            return EqPrim<EtsByte>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::U32:
+            return EqPrim<EtsInt>(o1, f1, o2, f2);
+        case panda_file::Type::TypeId::U64:
+            return EqPrim<EtsLong>(o1, f1, o2, f2);
+
+        default:
+            UNREACHABLE();
+    }
+}
+
 // CC-OFFNXT(huge_cca_cyclomatic_complexity[C++], huge_cyclomatic_complexity[C++], huge_method[C++]) big case
 bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
 {
@@ -202,26 +258,65 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
         }
         return EtsReferenceEquals(coro, value1, value2);
     }
-
     if (cls1->IsFunctionReference()) {
+        // Both sides must be FunctionReference, otherwise not equal
         if (UNLIKELY(!cls2->IsFunctionReference())) {
             return false;
         }
-        if (cls1->GetTypeMetaData() != cls2->GetTypeMetaData()) {
+
+        const auto fnum1 = cls1->GetFieldsNumber();
+        const auto fnum2 = cls2->GetFieldsNumber();
+        if (fnum1 != fnum2) {
             return false;
         }
         // function or static method
-        if (obj1->GetClass()->GetFieldsNumber() == 0) {
-            return true;
+        if (fnum1 == 0) {
+            // No receiver: directly compare the Method* stored in TypeMetaData
+            return cls1->GetTypeMetaData() == cls2->GetTypeMetaData();
         }
         // For instance method, always only have one field as guaranteed by class initialization
-        ASSERT((obj1->GetClass()->GetFieldsNumber() == 1) && (obj2->GetClass()->GetFieldsNumber() == 1));
-        auto instance1 = obj1->GetFieldObject(obj1->GetClass()->GetFieldByIndex(0));
-        auto instance2 = obj2->GetFieldObject(obj2->GetClass()->GetFieldByIndex(0));
-        if (!EqualityResursionAllowed(instance1) || !EqualityResursionAllowed(instance2)) {
+        ASSERT(fnum1 == 1);
+
+        // Retrieve the declaring method pointers stored in TypeMetaData
+        auto *decl1 = reinterpret_cast<Method *>(cls1->GetTypeMetaData());
+        auto *decl2 = reinterpret_cast<Method *>(cls2->GetTypeMetaData());
+        ASSERT(decl1 != nullptr && "Function-reference class missing Method* in TypeMetaData");
+        ASSERT(decl2 != nullptr && "Function-reference class missing Method* in TypeMetaData");
+
+        EtsField *f1 = cls1->GetFieldByIndex(0);
+        EtsField *f2 = cls2->GetFieldByIndex(0);
+        auto t1 = f1->GetRuntimeField()->GetType();
+        auto t2 = f2->GetRuntimeField()->GetType();
+
+        // Ensure the captured field types match, and reject TAGGED ("any") type
+        const auto id1 = t1.GetId();
+        const auto id2 = t2.GetId();
+        if (id1 != id2 || id1 == panda_file::Type::TypeId::TAGGED) {
             return false;
         }
-        return EtsReferenceEquals(coro, instance1, instance2);
+        if (!t1.IsReference()) {
+            // Receiver is a primitive type: compare field values directly
+            return PrimitiveFieldsExactEquality(obj1, f1, obj2, f2, id1);
+        }
+
+        // Receiver is a reference type
+        auto *recv1 = obj1->GetFieldObject(f1);
+        auto *recv2 = obj2->GetFieldObject(f2);
+        // Disallow recursion for enums and nested function references
+        if (!EqualityResursionAllowed(recv1) || !EqualityResursionAllowed(recv2)) {
+            return false;
+        }
+        auto *rc1 = recv1->GetClass()->GetRuntimeClass();
+        auto *rc2 = recv2->GetClass()->GetRuntimeClass();
+        // Resolve the actual implementation method (handles virtual dispatch)
+        Method *impl1 = ResolveMethodIfVirtual(rc1, decl1);
+        Method *impl2 = ResolveMethodIfVirtual(rc2, decl2);
+        if (impl1 != impl2) {
+            return false;
+        }
+
+        // Finally, check equality of the receiver objects themselves
+        return EtsReferenceEquals(coro, recv1, recv2);
     }
 
     if (cls1->GetRuntimeClass()->IsXRefClass()) {
@@ -235,11 +330,56 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
     UNREACHABLE();
 }
 
-[[maybe_unused]] static bool DbgIsBoxedNumericClass(EtsCoroutine *coro, EtsClass *cls)
+[[maybe_unused]] static bool DbgIsBoxedClass(EtsClass *cls)
 {
-    auto ptypes = PlatformTypes(coro);
-    return cls == ptypes->coreByte || cls == ptypes->coreChar || cls == ptypes->coreShort || cls == ptypes->coreInt ||
-           cls == ptypes->coreLong || cls == ptypes->coreFloat || cls == ptypes->coreDouble;
+    switch (cls->GetBoxedType()) {
+        case EtsClass::BoxedType::BOOLEAN:
+        case EtsClass::BoxedType::BYTE:
+        case EtsClass::BoxedType::CHAR:
+        case EtsClass::BoxedType::SHORT:
+        case EtsClass::BoxedType::INT:
+        case EtsClass::BoxedType::LONG:
+        case EtsClass::BoxedType::FLOAT:
+        case EtsClass::BoxedType::DOUBLE: {
+            return true;
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
+static EtsString *CreateStringFromBoxedClass(EtsClass *cls)
+{
+    switch (cls->GetBoxedType()) {
+        case EtsClass::BoxedType::BOOLEAN: {
+            return EtsString::CreateFromMUtf8("boolean");
+        }
+        case EtsClass::BoxedType::BYTE: {
+            return EtsString::CreateFromMUtf8("byte");
+        }
+        case EtsClass::BoxedType::CHAR: {
+            return EtsString::CreateFromMUtf8("char");
+        }
+        case EtsClass::BoxedType::SHORT: {
+            return EtsString::CreateFromMUtf8("short");
+        }
+        case EtsClass::BoxedType::INT: {
+            return EtsString::CreateFromMUtf8("int");
+        }
+        case EtsClass::BoxedType::LONG: {
+            return EtsString::CreateFromMUtf8("long");
+        }
+        case EtsClass::BoxedType::FLOAT: {
+            return EtsString::CreateFromMUtf8("float");
+        }
+        case EtsClass::BoxedType::DOUBLE: {
+            return EtsString::CreateFromMUtf8("number");
+        }
+        default: {
+            UNREACHABLE();
+        }
+    }
 }
 
 EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
@@ -284,13 +424,8 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
     }
 
     ASSERT(cls->IsBoxed());
-
-    if (cls == PlatformTypes(coro)->coreBoolean) {
-        return EtsString::CreateFromMUtf8("boolean");
-    }
-
-    ASSERT(DbgIsBoxedNumericClass(coro, cls));
-    return EtsString::CreateFromMUtf8("number");
+    ASSERT(DbgIsBoxedClass(cls));
+    return CreateStringFromBoxedClass(cls);
 }
 
 bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
@@ -329,7 +464,7 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
         return EtsBoxPrimitive<EtsBoolean>::FromCoreType(obj)->GetValue() != 0;
     }
 
-    ASSERT(DbgIsBoxedNumericClass(coro, cls) || cls->GetRuntimeClass()->IsXRefClass());
+    ASSERT(DbgIsBoxedClass(cls) || cls->GetRuntimeClass()->IsXRefClass());
     if (auto num = GetBoxedNumericValue<EtsDouble>(ptypes, obj); num.has_value()) {
         return num.value() != 0 && !std::isnan(num.value());
     }

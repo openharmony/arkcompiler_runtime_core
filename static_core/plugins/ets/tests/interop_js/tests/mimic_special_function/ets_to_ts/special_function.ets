@@ -29,12 +29,12 @@ const INSERT_BOOLEAN1: boolean = true;
 const INSERT_BOOLEAN2: boolean = false;
 
 function GetNumArr(idx: number): number {
-    return numArr[idx];
+    return numArr[idx.toInt()];
 }
 function GetStrArr(idx: number): string {
-    return strArr[idx];
+    return strArr[idx.toInt()];
 }
 function GetBooArr(idx: number): boolean {
-    return booArr[idx];
+    return booArr[idx.toInt()];
 }
 

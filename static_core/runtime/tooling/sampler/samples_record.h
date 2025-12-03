@@ -20,7 +20,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "sample_info.h"
 
 namespace ark::tooling::sampler {

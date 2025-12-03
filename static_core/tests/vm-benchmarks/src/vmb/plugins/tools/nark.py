@@ -48,7 +48,7 @@ class Tool(ToolBase):
                 arch = '--target=aarch64-linux-ohos '
             self.cmd = f'{self.cpp} -I{panda_src} ' + \
                        f'-rdynamic {arch}{self.custom} ' + \
-                       '{src} -shared -o {so} -fpic'
+                       '{src} -std=c++17 -shared -o {so} -fpic'
         except RuntimeError as e:
             # don't fail whole run if c++ is unavailable
             log.warning(str(e))

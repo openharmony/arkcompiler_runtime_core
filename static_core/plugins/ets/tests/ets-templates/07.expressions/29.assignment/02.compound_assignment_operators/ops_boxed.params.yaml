@@ -12,249 +12,388 @@
 # limitations under the License.
 
 ---
-cases:
-  - { type: Byte, v: 127, op: '+', q: 1 }
-  - { type: Byte, v: 127, op: '+', q: 127 }
-  - { type: Byte, v: -128, op: '+', q: -1 }
+operations:
+  - op: '+'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
+      - { type: Float, v: 3.4023235e+38f, q: 1.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 3.4023235e+38f }
+      - { type: Float, v: -3.4023235e+38f, q: -1.0f }
+      - { type: Float, v: Float.POSITIVE_INFINITY, q: Float.POSITIVE_INFINITY }
+      - { type: Float, v: Float.NEGATIVE_INFINITY, q: Float.NEGATIVE_INFINITY }
+      - { type: Float, v: 0.0f, q: -0.0f }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.7976931348623157e+308 }
+      - { type: Double, v: -1.7976931348623157e+308, q: -1.0 }
+      - { type: Double, v: Double.POSITIVE_INFINITY, q: Double.POSITIVE_INFINITY }
+      - { type: Double, v: Double.NEGATIVE_INFINITY, q: Double.NEGATIVE_INFINITY }
+      - { type: Double, v: 0.0, q: -0.0 }
+      - { type: String, v: '"xyz"', q: '"abc"' }
+      - { type: String, v: '"1"', q: '"2"' }
+      - { type: String, v: '"null"', q: '"null"' }
+  - op: '-'
+    cases:
+      - { type: Byte, v: 127, q: -1 }
+      - { type: Byte, v: -128, q: -128 }
+      - { type: Byte, v: -128, q: 1 }
+      - { type: Short, v: 32767, q: -1 }
+      - { type: Short, v: -32768, q: -32768 }
+      - { type: Short, v: -32768, q: 1 }
+      - { type: Int, v: 2147483647, q: -1 }
+      - { type: Int, v: -2147483648, q: -2147483648 }
+      - { type: Int, v: -2147483648, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: -1 }
+      - { type: Long, v: -9223372036854775808, q: -9223372036854775808 }
+      - { type: Long, v: -9223372036854775808, q: 1 }
+      - { type: Float, v: 3.4023235e+38f, q: 1.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 3.4023235e+38f }
+      - { type: Float, v: -3.4023235e+38f, q: -1.0f }
+      - { type: Float, v: Float.POSITIVE_INFINITY, q: Float.NEGATIVE_INFINITY }
+      - { type: Float, v: Float.NEGATIVE_INFINITY, q: Float.POSITIVE_INFINITY }
+      - { type: Float, v: -0.0f, q: 0.0f }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.7976931348623157e+308 }
+      - { type: Double, v: -1.7976931348623157e+308, q: -1.0 }
+      - { type: Double, v: Double.POSITIVE_INFINITY, q: Double.NEGATIVE_INFINITY }
+      - { type: Double, v: Double.NEGATIVE_INFINITY, q: Double.POSITIVE_INFINITY }
+      - { type: Double, v: -0.0, q: 0.0 }
+  - op: '*'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
 
-  - { type: Short, v: 32767, op: '+', q: 1 }
-  - { type: Short, v: 32767, op: '+', q: 32767 }
-  - { type: Short, v: -32768, op: '+', q: -1 }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
 
-  - { type: Int, v: 2147483647, op: '+', q: 1 }
-  - { type: Int, v: 2147483647, op: '+', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '+', q: -1 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
 
-  - { type: Long, v: 9223372036854775807, op: '+', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '+', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '+', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
 
-  - { type: Float, v: 3.4023235e+38f, op: '+', q: 1.0f }
-  - { type: Float, v: 3.4023235e+38f, op: '+', q: 3.4023235e+38f }
-  - { type: Float, v: -3.4023235e+38f, op: '+', q: -1.0f }
-  - { type: Float, v: Float.POSITIVE_INFINITY, op: '+', q: Float.POSITIVE_INFINITY }
-  - { type: Float, v: Float.NEGATIVE_INFINITY, op: '+', q: Float.NEGATIVE_INFINITY }
-  - { type: Float, v: 0.0f, op: '+', q: -0.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 1.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 3.4023235e+38f }
+      - { type: Float, v: -3.4023235e+38f, q: -1.0f }
+      - { type: Float, v: Float.POSITIVE_INFINITY, q: Float.POSITIVE_INFINITY }
+      - { type: Float, v: Float.NEGATIVE_INFINITY, q: Float.NEGATIVE_INFINITY }
+      - { type: Float, v: 0.0f, q: -0.0f }
 
-  - { type: Double, v: 1.7976931348623157e+308, op: '+', q: 1.0 }
-  - { type: Double, v: 1.7976931348623157e+308, op: '+', q: 1.7976931348623157e+308 }
-  - { type: Double, v: -1.7976931348623157e+308, op: '+', q: -1.0 }
-  - { type: Double, v: Double.POSITIVE_INFINITY, op: '+', q: Double.POSITIVE_INFINITY }
-  - { type: Double, v: Double.NEGATIVE_INFINITY, op: '+', q: Double.NEGATIVE_INFINITY }
-  - { type: Double, v: 0.0, op: '+', q: -0.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.7976931348623157e+308 }
+      - { type: Double, v: -1.7976931348623157e+308, q: -1.0 }
+      - { type: Double, v: Double.POSITIVE_INFINITY, q: Double.POSITIVE_INFINITY }
+      - { type: Double, v: Double.NEGATIVE_INFINITY, q: Double.NEGATIVE_INFINITY }
+      - { type: Double, v: 0.0, q: -0.0 }
+  - op: '/'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
 
-  - { type: Byte, v: 127, op: '-', q: -1 }
-  - { type: Byte, v: -128, op: '-', q: -128 }
-  - { type: Byte, v: -128, op: '-', q: 1 }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
 
-  - { type: Short, v: 32767, op: '-', q: -1 }
-  - { type: Short, v: -32768, op: '-', q: -32768 }
-  - { type: Short, v: -32768, op: '-', q: 1 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
 
-  - { type: Int, v: 2147483647, op: '-', q: -1 }
-  - { type: Int, v: -2147483648, op: '-', q: -2147483648 }
-  - { type: Int, v: -2147483648, op: '-', q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
+      - { type: Float, v: 3.4023235e+38f, q: 1.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 3.4023235e+38f }
+      - { type: Float, v: -3.4023235e+38f, q: -1.0f }
 
-  - { type: Long, v: 9223372036854775807, op: '-', q: -1 }
-  - { type: Long, v: -9223372036854775808, op: '-', q: -9223372036854775808 }
-  - { type: Long, v: -9223372036854775808, op: '-', q: 1 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.7976931348623157e+308 }
+      - { type: Double, v: -1.7976931348623157e+308, q: -1.0 }
+  - op: '%'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
 
-  - { type: Float, v: 3.4023235e+38f, op: '-', q: 1.0f }
-  - { type: Float, v: 3.4023235e+38f, op: '-', q: 3.4023235e+38f }
-  - { type: Float, v: -3.4023235e+38f, op: '-', q: -1.0f }
-  - { type: Float, v: Float.POSITIVE_INFINITY, op: '-', q: Float.NEGATIVE_INFINITY }
-  - { type: Float, v: Float.NEGATIVE_INFINITY, op: '-', q: Float.POSITIVE_INFINITY }
-  - { type: Float, v: -0.0f, op: '-', q: 0.0f }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
 
-  - { type: Double, v: 1.7976931348623157e+308, op: '-', q: 1.0 }
-  - { type: Double, v: 1.7976931348623157e+308, op: '-', q: 1.7976931348623157e+308 }
-  - { type: Double, v: -1.7976931348623157e+308, op: '-', q: -1.0 }
-  - { type: Double, v: Double.POSITIVE_INFINITY, op: '-', q: Double.NEGATIVE_INFINITY }
-  - { type: Double, v: Double.NEGATIVE_INFINITY, op: '-', q: Double.POSITIVE_INFINITY }
-  - { type: Double, v: -0.0, op: '-', q: 0.0 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
 
-  - { type: Byte, v: 127, op: '*', q: 1 }
-  - { type: Byte, v: 127, op: '*', q: 127 }
-  - { type: Byte, v: -128, op: '*', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
+      - { type: Float, v: 3.4023235e+38f, q: 1.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 3.4023235e+38f }
+      - { type: Float, v: -3.4023235e+38f, q: -1.0f }
 
-  - { type: Short, v: 32767, op: '*', q: 1 }
-  - { type: Short, v: 32767, op: '*', q: 32767 }
-  - { type: Short, v: -32768, op: '*', q: -1 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.7976931348623157e+308 }
+      - { type: Double, v: -1.7976931348623157e+308, q: -1.0 }
+  - op: '**'
+    cases:
+      - { type: Byte, v: 127, q: -1 }
+      - { type: Byte, v: -128, q: -128 }
+      - { type: Byte, v: -128, q: 1 }
 
-  - { type: Int, v: 2147483647, op: '*', q: 1 }
-  - { type: Int, v: 2147483647, op: '*', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '*', q: -1 }
+      - { type: Short, v: 32767, q: -1 }
+      - { type: Short, v: -32768, q: -32768 }
+      - { type: Short, v: -32768, q: 1 }
 
-  - { type: Long, v: 9223372036854775807, op: '*', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '*', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '*', q: -1 }
+      - { type: Int, v: 2147483647, q: -1 }
+      - { type: Int, v: -2147483648, q: -2147483648 }
+      - { type: Int, v: -2147483648, q: 1 }
 
-  - { type: Float, v: 3.4023235e+38f, op: '*', q: 1.0f }
-  - { type: Float, v: 3.4023235e+38f, op: '*', q: 3.4023235e+38f }
-  - { type: Float, v: -3.4023235e+38f, op: '*', q: -1.0f }
-  - { type: Float, v: Float.POSITIVE_INFINITY, op: '*', q: Float.POSITIVE_INFINITY }
-  - { type: Float, v: Float.NEGATIVE_INFINITY, op: '*', q: Float.NEGATIVE_INFINITY }
-  - { type: Float, v: 0.0f, op: '*', q: -0.0f }
+      - { type: Long, v: 9223372036854775807, q: -1 }
+      - { type: Long, v: -9223372036854775808, q: -9223372036854775808 }
+      - { type: Long, v: -9223372036854775808, q: 1 }
 
-  - { type: Double, v: 1.7976931348623157e+308, op: '*', q: 1.0 }
-  - { type: Double, v: 1.7976931348623157e+308, op: '*', q: 1.7976931348623157e+308 }
-  - { type: Double, v: -1.7976931348623157e+308, op: '*', q: -1.0 }
-  - { type: Double, v: Double.POSITIVE_INFINITY, op: '*', q: Double.POSITIVE_INFINITY }
-  - { type: Double, v: Double.NEGATIVE_INFINITY, op: '*', q: Double.NEGATIVE_INFINITY }
-  - { type: Double, v: 0.0, op: '*', q: -0.0 }
+      - { type: Float, v: 3.4023235e+38f, q: 1.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 3.4023235e+38f }
+      - { type: Float, v: -3.4023235e+38f, q: -1.0f }
+      - { type: Float, v: Float.POSITIVE_INFINITY, q: Float.NEGATIVE_INFINITY }
+      - { type: Float, v: Float.NEGATIVE_INFINITY, q: Float.POSITIVE_INFINITY }
+      - { type: Float, v: -0.0f, q: 0.0f }
 
-  - { type: Byte, v: 127, op: '/', q: 1 }
-  - { type: Byte, v: 127, op: '/', q: 127 }
-  - { type: Byte, v: -128, op: '/', q: -1 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.7976931348623157e+308 }
+      - { type: Double, v: -1.7976931348623157e+308, q: -1.0 }
+      - { type: Double, v: Double.POSITIVE_INFINITY, q: Double.NEGATIVE_INFINITY }
+      - { type: Double, v: Double.NEGATIVE_INFINITY, q: Double.POSITIVE_INFINITY }
+      - { type: Double, v: -0.0, q: 0.0 }
+  - op: '<<'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
 
-  - { type: Short, v: 32767, op: '/', q: 1 }
-  - { type: Short, v: 32767, op: '/', q: 32767 }
-  - { type: Short, v: -32768, op: '/', q: -1 }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
 
-  - { type: Int, v: 2147483647, op: '/', q: 1 }
-  - { type: Int, v: 2147483647, op: '/', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '/', q: -1 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
 
-  - { type: Long, v: 9223372036854775807, op: '/', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '/', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '/', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
+  - op: '>>'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
 
-  - { type: Float, v: 3.4023235e+38f, op: '/', q: 1.0f }
-  - { type: Float, v: 3.4023235e+38f, op: '/', q: 3.4023235e+38f }
-  - { type: Float, v: -3.4023235e+38f, op: '/', q: -1.0f }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
 
-  - { type: Double, v: 1.7976931348623157e+308, op: '/', q: 1.0 }
-  - { type: Double, v: 1.7976931348623157e+308, op: '/', q: 1.7976931348623157e+308 }
-  - { type: Double, v: -1.7976931348623157e+308, op: '/', q: -1.0 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
 
-  - { type: Byte, v: 127, op: '%', q: 1 }
-  - { type: Byte, v: 127, op: '%', q: 127 }
-  - { type: Byte, v: -128, op: '%', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
+  - op: '>>>'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
 
-  - { type: Short, v: 32767, op: '%', q: 1 }
-  - { type: Short, v: 32767, op: '%', q: 32767 }
-  - { type: Short, v: -32768, op: '%', q: -1 }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
 
-  - { type: Int, v: 2147483647, op: '%', q: 1 }
-  - { type: Int, v: 2147483647, op: '%', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '%', q: -1 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
 
-  - { type: Long, v: 9223372036854775807, op: '%', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '%', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '%', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
+  - op: '&'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
 
-  - { type: Float, v: 3.4023235e+38f, op: '%', q: 1.0f }
-  - { type: Float, v: 3.4023235e+38f, op: '%', q: 3.4023235e+38f }
-  - { type: Float, v: -3.4023235e+38f, op: '%', q: -1.0f }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
 
-  - { type: Double, v: 1.7976931348623157e+308, op: '%', q: 1.0 }
-  - { type: Double, v: 1.7976931348623157e+308, op: '%', q: 1.7976931348623157e+308 }
-  - { type: Double, v: -1.7976931348623157e+308, op: '%', q: -1.0 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
 
-  - { type: Byte, v: 127, op: '<<', q: 1 }
-  - { type: Byte, v: 127, op: '<<', q: 127 }
-  - { type: Byte, v: -128, op: '<<', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
 
-  - { type: Short, v: 32767, op: '<<', q: 1 }
-  - { type: Short, v: 32767, op: '<<', q: 32767 }
-  - { type: Short, v: -32768, op: '<<', q: -1 }
+      - { type: Boolean, v: 'true', q: 'true' }
+      - { type: Boolean, v: 'true', q: 'false' }
+      - { type: Boolean, v: 'false', q: 'true' }
+  - op: '|'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
 
-  - { type: Int, v: 2147483647, op: '<<', q: 1 }
-  - { type: Int, v: 2147483647, op: '<<', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '<<', q: -1 }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
 
-  - { type: Long, v: 9223372036854775807, op: '<<', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '<<', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '<<', q: -1 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
 
-  - { type: Byte, v: 127, op: '>>', q: 1 }
-  - { type: Byte, v: 127, op: '>>', q: 127 }
-  - { type: Byte, v: -128, op: '>>', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
 
-  - { type: Short, v: 32767, op: '>>', q: 1 }
-  - { type: Short, v: 32767, op: '>>', q: 32767 }
-  - { type: Short, v: -32768, op: '>>', q: -1 }
+      - { type: Boolean, v: 'false', q: 'false' }
+      - { type: Boolean, v: 'true', q: 'false' }
+      - { type: Boolean, v: 'false', q: 'true' }
+  - op: '^'
+    cases:
+      - { type: Byte, v: 127, q: 1 }
+      - { type: Byte, v: 127, q: 127 }
+      - { type: Byte, v: -128, q: -1 }
 
-  - { type: Int, v: 2147483647, op: '>>', q: 1 }
-  - { type: Int, v: 2147483647, op: '>>', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '>>', q: -1 }
+      - { type: Short, v: 32767, q: 1 }
+      - { type: Short, v: 32767, q: 32767 }
+      - { type: Short, v: -32768, q: -1 }
 
-  - { type: Long, v: 9223372036854775807, op: '>>', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '>>', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '>>', q: -1 }
+      - { type: Int, v: 2147483647, q: 1 }
+      - { type: Int, v: 2147483647, q: 2147483647 }
+      - { type: Int, v: -2147483648, q: -1 }
 
-  - { type: Byte, v: 127, op: '>>>', q: 1 }
-  - { type: Byte, v: 127, op: '>>>', q: 127 }
-  - { type: Byte, v: -128, op: '>>>', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: 1 }
+      - { type: Long, v: 9223372036854775807, q: 9223372036854775807 }
+      - { type: Long, v: -9223372036854775808, q: -1 }
 
-  - { type: Short, v: 32767, op: '>>>', q: 1 }
-  - { type: Short, v: 32767, op: '>>>', q: 32767 }
-  - { type: Short, v: -32768, op: '>>>', q: -1 }
+      - { type: Boolean, v: 'true', q: 'true' }
+      - { type: Boolean, v: 'true', q: 'false' }
+      - { type: Boolean, v: 'false', q: 'true' }
+  - op: '&&'
+    cases:
+      - { type: Byte, v: 127, q: -1 }
+      - { type: Byte, v: -128, q: -128 }
+      - { type: Byte, v: -128, q: 1 }
 
-  - { type: Int, v: 2147483647, op: '>>>', q: 1 }
-  - { type: Int, v: 2147483647, op: '>>>', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '>>>', q: -1 }
+      - { type: Short, v: 32767, q: -1 }
+      - { type: Short, v: -32768, q: -32768 }
+      - { type: Short, v: -32768, q: 1 }
 
-  - { type: Long, v: 9223372036854775807, op: '>>>', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '>>>', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '>>>', q: -1 }
+      - { type: Int, v: 2147483647, q: -1 }
+      - { type: Int, v: -2147483648, q: -2147483648 }
+      - { type: Int, v: -2147483648, q: 1 }
 
-  - { type: Byte, v: 127, op: '&', q: 1 }
-  - { type: Byte, v: 127, op: '&', q: 127 }
-  - { type: Byte, v: -128, op: '&', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: -1 }
+      - { type: Long, v: -9223372036854775808, q: -9223372036854775808 }
+      - { type: Long, v: -9223372036854775808, q: 1 }
 
-  - { type: Short, v: 32767, op: '&', q: 1 }
-  - { type: Short, v: 32767, op: '&', q: 32767 }
-  - { type: Short, v: -32768, op: '&', q: -1 }
+      - { type: Float, v: 3.4023235e+38f, q: 1.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 3.4023235e+38f }
+      - { type: Float, v: -3.4023235e+38f, q: -1.0f }
+      - { type: Float, v: Float.POSITIVE_INFINITY, q: Float.NEGATIVE_INFINITY }
+      - { type: Float, v: Float.NEGATIVE_INFINITY, q: Float.POSITIVE_INFINITY }
+      - { type: Float, v: -0.0f, q: 0.0f }
 
-  - { type: Int, v: 2147483647, op: '&', q: 1 }
-  - { type: Int, v: 2147483647, op: '&', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '&', q: -1 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.7976931348623157e+308 }
+      - { type: Double, v: -1.7976931348623157e+308, q: -1.0 }
+      - { type: Double, v: Double.POSITIVE_INFINITY, q: Double.NEGATIVE_INFINITY }
+      - { type: Double, v: Double.NEGATIVE_INFINITY, q: Double.POSITIVE_INFINITY }
+      - { type: Double, v: -0.0, q: 0.0 }
 
-  - { type: Long, v: 9223372036854775807, op: '&', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '&', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '&', q: -1 }
+      - { type: Boolean, v: 'true', q: 'true' }
+      - { type: Boolean, v: 'true', q: 'false' }
+      - { type: Boolean, v: 'false', q: 'true' }
+  - op: '||'
+    cases:
+      - { type: Byte, v: 127, q: -1 }
+      - { type: Byte, v: -128, q: -128 }
+      - { type: Byte, v: -128, q: 1 }
 
-  - { type: Boolean, v: 'true', op: '&', q: 'true' }
-  - { type: Boolean, v: 'true', op: '&', q: 'false' }
-  - { type: Boolean, v: 'false', op: '&', q: 'true' }
+      - { type: Short, v: 32767, q: -1 }
+      - { type: Short, v: -32768, q: -32768 }
+      - { type: Short, v: -32768, q: 1 }
 
-  - { type: Byte, v: 127, op: '|', q: 1 }
-  - { type: Byte, v: 127, op: '|', q: 127 }
-  - { type: Byte, v: -128, op: '|', q: -1 }
+      - { type: Int, v: 2147483647, q: -1 }
+      - { type: Int, v: -2147483648, q: -2147483648 }
+      - { type: Int, v: -2147483648, q: 1 }
 
-  - { type: Short, v: 32767, op: '|', q: 1 }
-  - { type: Short, v: 32767, op: '|', q: 32767 }
-  - { type: Short, v: -32768, op: '|', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: -1 }
+      - { type: Long, v: -9223372036854775808, q: -9223372036854775808 }
+      - { type: Long, v: -9223372036854775808, q: 1 }
 
-  - { type: Int, v: 2147483647, op: '|', q: 1 }
-  - { type: Int, v: 2147483647, op: '|', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '|', q: -1 }
+      - { type: Float, v: 3.4023235e+38f, q: 1.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 3.4023235e+38f }
+      - { type: Float, v: -3.4023235e+38f, q: -1.0f }
+      - { type: Float, v: Float.POSITIVE_INFINITY, q: Float.NEGATIVE_INFINITY }
+      - { type: Float, v: Float.NEGATIVE_INFINITY, q: Float.POSITIVE_INFINITY }
+      - { type: Float, v: -0.0f, q: 0.0f }
 
-  - { type: Long, v: 9223372036854775807, op: '|', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '|', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '|', q: -1 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.7976931348623157e+308 }
+      - { type: Double, v: -1.7976931348623157e+308, q: -1.0 }
+      - { type: Double, v: Double.POSITIVE_INFINITY, q: Double.NEGATIVE_INFINITY }
+      - { type: Double, v: Double.NEGATIVE_INFINITY, q: Double.POSITIVE_INFINITY }
+      - { type: Double, v: -0.0, q: 0.0 }
 
-  - { type: Boolean, v: 'false', op: '|', q: 'false' }
-  - { type: Boolean, v: 'true', op: '|', q: 'false' }
-  - { type: Boolean, v: 'false', op: '|', q: 'true' }
+      - { type: Boolean, v: 'true', q: 'true' }
+      - { type: Boolean, v: 'true', q: 'false' }
+      - { type: Boolean, v: 'false', q: 'true' }
+  - op: '??'
+    cases:
+      - { type: Byte, v: 127, q: -1 }
+      - { type: Byte, v: -128, q: -128 }
+      - { type: Byte, v: -128, q: 1 }
 
-  - { type: Byte, v: 127, op: '^', q: 1 }
-  - { type: Byte, v: 127, op: '^', q: 127 }
-  - { type: Byte, v: -128, op: '^', q: -1 }
+      - { type: Short, v: 32767, q: -1 }
+      - { type: Short, v: -32768, q: -32768 }
+      - { type: Short, v: -32768, q: 1 }
 
-  - { type: Short, v: 32767, op: '^', q: 1 }
-  - { type: Short, v: 32767, op: '^', q: 32767 }
-  - { type: Short, v: -32768, op: '^', q: -1 }
+      - { type: Int, v: 2147483647, q: -1 }
+      - { type: Int, v: -2147483648, q: -2147483648 }
+      - { type: Int, v: -2147483648, q: 1 }
 
-  - { type: Int, v: 2147483647, op: '^', q: 1 }
-  - { type: Int, v: 2147483647, op: '^', q: 2147483647 }
-  - { type: Int, v: -2147483648, op: '^', q: -1 }
+      - { type: Long, v: 9223372036854775807, q: -1 }
+      - { type: Long, v: -9223372036854775808, q: -9223372036854775808 }
+      - { type: Long, v: -9223372036854775808, q: 1 }
 
-  - { type: Long, v: 9223372036854775807, op: '^', q: 1 }
-  - { type: Long, v: 9223372036854775807, op: '^', q: 9223372036854775807 }
-  - { type: Long, v: -9223372036854775808, op: '^', q: -1 }
+      - { type: Float, v: 3.4023235e+38f, q: 1.0f }
+      - { type: Float, v: 3.4023235e+38f, q: 3.4023235e+38f }
+      - { type: Float, v: -3.4023235e+38f, q: -1.0f }
+      - { type: Float, v: Float.POSITIVE_INFINITY, q: Float.NEGATIVE_INFINITY }
+      - { type: Float, v: Float.NEGATIVE_INFINITY, q: Float.POSITIVE_INFINITY }
+      - { type: Float, v: -0.0f, q: 0.0f }
 
-  - { type: Boolean, v: 'true', op: '^', q: 'true' }
-  - { type: Boolean, v: 'true', op: '^', q: 'false' }
-  - { type: Boolean, v: 'false', op: '^', q: 'true' }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.0 }
+      - { type: Double, v: 1.7976931348623157e+308, q: 1.7976931348623157e+308 }
+      - { type: Double, v: -1.7976931348623157e+308, q: -1.0 }
+      - { type: Double, v: Double.POSITIVE_INFINITY, q: Double.NEGATIVE_INFINITY }
+      - { type: Double, v: Double.NEGATIVE_INFINITY, q: Double.POSITIVE_INFINITY }
+      - { type: Double, v: -0.0, q: 0.0 }
+
+      - { type: Boolean, v: 'true', q: 'true' }
+      - { type: Boolean, v: 'true', q: 'false' }
+      - { type: Boolean, v: 'false', q: 'true' }

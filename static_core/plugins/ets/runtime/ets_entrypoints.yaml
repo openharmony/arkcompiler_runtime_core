@@ -599,6 +599,16 @@
     - ark::ObjectHeader*  # prefix to check
     - int32_t             # index to start from
 
+- name: StringStartsWithBaseNativePlus
+  entrypoint: StringStartsWithBaseNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
 - name: StringEndsWith
   entrypoint: StringEndsWith
   bridge: none
@@ -611,6 +621,16 @@
 
 - name: StringEndsWithBase
   entrypoint: StringEndsWithBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # suffix to check
+    - int32_t             # index of char to stop at
+
+- name: StringEndsWithBaseNativePlus
+  entrypoint: StringEndsWithBaseNativePlus
   bridge: none
   properties: [irtoc]
   signature:
@@ -740,6 +760,103 @@
     - uint32_t            # string data size
     - uint16_t            # char to look up
 
+- name: StringIndexOfCompressedSmallNativePlus
+  entrypoint: StringIndexOfCompressedSmallNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # string data size
+    - uint8_t             # char to look up
+
+- name: StringIndexOfCompressedMediumNativePlus
+  entrypoint: StringIndexOfCompressedMediumNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # string data size
+    - uint8_t             # char to look up
+
+- name: StringIndexOfCompressedLargeNativePlus
+  entrypoint: StringIndexOfCompressedLargeNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # string data size
+    - uint8_t             # char to look up
+
+- name: StringIndexOfCompressedNativePlus
+  entrypoint: StringIndexOfCompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # string data size
+    - uint8_t             # char to look up
+
+- name: StringIndexOfUncompressedSmallNativePlus
+  entrypoint: StringIndexOfUncompressedSmallNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # string data size
+    - uint16_t            # char to look up
+
+- name: StringIndexOfUncompressedMediumNativePlus
+  entrypoint: StringIndexOfUncompressedMediumNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # string data size
+    - uint16_t            # char to look up
+
+- name: StringIndexOfUncompressedNativePlus
+  entrypoint: StringIndexOfUncompressedNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # string data size
+    - uint16_t            # char to look up
+
+- name: EtsStringEquals
+  entrypoint: EtsStringEquals
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: EtsStringEqualsUsual
+  entrypoint: EtsStringEqualsEntrypoint
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: EtsStringEqualsSlowPath
+  entrypoint: EtsStringEqualsEntrypoint
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint8_t
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
 - name: CreateStringFromCharCodeTlab
   entrypoint: CreateStringFromCharCodeTlab
   bridge: none
@@ -749,27 +866,18 @@
     - ark::ObjectHeader*  # array of numbers (f64)
     - ark::Class*         # string class pointer
 
-- name: CreateStringFromCharCodeTlabCompressed
-  entrypoint: CreateStringFromCharCodeTlabCompressed
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*  # string (result)
-    - ark::ObjectHeader*  # array of numbers (f64)
-    - ark::Class*         # string class pointer
-
 - name: CreateStringFromCharCodeSlowPath
-  entrypoint: CreateStringFromCharCodeEntrypoint
+  entrypoint: StdCoreStringFromCharCode
   bridge: slow_path
-  properties: []
+  properties: [intrinsic]
   signature:
     - ark::coretypes::String*  # resulting string
     - ark::ObjectHeader*       # array of numbers (f64)
 
 - name: CreateStringFromCharCode2Arg
-  entrypoint: CreateStringFromCharCodeEntrypoint
+  entrypoint: StdCoreStringFromCharCode
   bridge: odd_saved2
-  properties: []
+  properties: [intrinsic]
   signature:
     - ark::coretypes::String*  # resulting string
     - ark::ObjectHeader*       # array of numbers (f64)
@@ -780,11 +888,12 @@
   properties: [irtoc]
   signature:
     - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # cache
     - uint64_t                 # number (double after a bitcast to uin64_t), char code
     - ark::Class*              # string class pointer
 
-- name: CreateStringFromCharCodeSingleTlabCompressed
-  entrypoint: CreateStringFromCharCodeSingleTlabCompressed
+- name: CreateStringFromCharCodeSingleNoCacheTlab
+  entrypoint: CreateStringFromCharCodeSingleNoCacheTlab
   bridge: none
   properties: [irtoc]
   signature:
@@ -792,16 +901,24 @@
     - uint64_t                 # number (double after a bitcast to uin64_t), char code
     - ark::Class*              # string class pointer
 
-- name: CreateStringFromCharCodeSingleSlowPath
-  entrypoint: CreateStringFromCharCodeSingleEntrypoint
+- name: CreateStringFromCharCodeSingleNoCacheSlowPath
+  entrypoint: CreateStringFromCharCodeSingleNoCacheEntrypoint
   bridge: slow_path
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
     - uint64_t                 # number (double after a bitcast to uin64_t), char code
 
-- name: CreateStringFromCharCodeSingle2Arg
-  entrypoint: CreateStringFromCharCodeSingleEntrypoint
+- name: CreateStringFromCharCodeSingleNoCache3Arg
+  entrypoint: CreateStringFromCharCodeSingleNoCacheEntrypoint
+  bridge: odd_saved3
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+
+- name: CreateStringFromCharCodeSingleNoCache2Arg
+  entrypoint: CreateStringFromCharCodeSingleNoCacheEntrypoint
   bridge: odd_saved2
   properties: []
   signature:
@@ -834,6 +951,33 @@
     - ark::ObjectHeader*  # resulting array of uint8
     - ark::ObjectHeader*       # src string
     - int32_t                  # count
+
+- name: StringCharAt
+  entrypoint: StringCharAt
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint16_t
+    - ark::coretypes::String*
+    - int32_t
+
+- name: StringCharAtUsual
+  entrypoint: StdCoreStringCharAt
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - uint16_t
+    - ark::coretypes::String*
+    - int32_t
+
+- name: StringCharAtSlowPath
+  entrypoint: StdCoreStringCharAt
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - uint16_t
+    - ark::coretypes::String*
+    - int32_t
 
 - name: BeginGeneralNativeMethod
   entrypoint: BeginGeneralNativeMethod
@@ -889,8 +1033,8 @@
   - ark::ObjectHeader*
   - size_t
 
-- name: Int8ArrayFillInternalFastPath
-  entrypoint: Int8ArrayFillInternalFastPath
+- name: Int8ArrayFillInternal
+  entrypoint: Int8ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -911,8 +1055,8 @@
     - int32_t
     - int32_t
 
-- name: Int16ArrayFillInternalFastPath
-  entrypoint: Int16ArrayFillInternalFastPath
+- name: Int16ArrayFillInternal
+  entrypoint: Int16ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -933,8 +1077,8 @@
     - int32_t
     - int32_t
 
-- name: Int32ArrayFillInternalFastPath
-  entrypoint: Int32ArrayFillInternalFastPath
+- name: Int32ArrayFillInternal
+  entrypoint: Int32ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -955,8 +1099,8 @@
     - int32_t
     - int32_t
 
-- name: BigInt64ArrayFillInternalFastPath
-  entrypoint: BigInt64ArrayFillInternalFastPath
+- name: BigInt64ArrayFillInternal
+  entrypoint: BigInt64ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -977,8 +1121,8 @@
     - int32_t
     - int32_t
 
-- name: Float32ArrayFillInternalFastPath
-  entrypoint: Float32ArrayFillInternalFastPath
+- name: Float32ArrayFillInternal
+  entrypoint: Float32ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -999,8 +1143,8 @@
     - int32_t
     - int32_t
 
-- name: Float64ArrayFillInternalFastPath
-  entrypoint: Float64ArrayFillInternalFastPath
+- name: Float64ArrayFillInternal
+  entrypoint: Float64ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1021,8 +1165,8 @@
     - int32_t
     - int32_t
 
-- name: UInt8ClampedArrayFillInternalFastPath
-  entrypoint: UInt8ClampedArrayFillInternalFastPath
+- name: UInt8ClampedArrayFillInternal
+  entrypoint: UInt8ClampedArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1043,8 +1187,8 @@
     - int32_t
     - int32_t
 
-- name: UInt8ArrayFillInternalFastPath
-  entrypoint: UInt8ArrayFillInternalFastPath
+- name: UInt8ArrayFillInternal
+  entrypoint: UInt8ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1065,8 +1209,8 @@
     - int32_t
     - int32_t
 
-- name: UInt16ArrayFillInternalFastPath
-  entrypoint: UInt16ArrayFillInternalFastPath
+- name: UInt16ArrayFillInternal
+  entrypoint: UInt16ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1087,8 +1231,8 @@
     - int32_t
     - int32_t
 
-- name: UInt32ArrayFillInternalFastPath
-  entrypoint: UInt32ArrayFillInternalFastPath
+- name: UInt32ArrayFillInternal
+  entrypoint: UInt32ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1109,8 +1253,8 @@
     - int32_t
     - int32_t
 
-- name: BigUInt64ArrayFillInternalFastPath
-  entrypoint: BigUInt64ArrayFillInternalFastPath
+- name: BigUInt64ArrayFillInternal
+  entrypoint: BigUInt64ArrayFillInternal
   bridge: none
   properties: [irtoc]
   signature:
@@ -1455,96 +1599,65 @@
     - ark::ObjectHeader*       # src array
 
 # Map
-- name: MapGetFastPath
-  entrypoint: MapGetIrToc
+- name: GetHashCodeByValueFastPath
+  entrypoint: GetHashCodeByValue
   bridge: none
   properties: [irtoc]
   signature:
-    - ark::ObjectHeader*  # object pointer
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
+    - int64_t
+    - ark::ObjectHeader*
 
-- name: MapGetUsual
-  entrypoint: EtsEscompatMapGet
+- name: SameValueZeroFastPath
+  entrypoint: SameValueZero
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - bool
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+
+- name: SameValueZeroUsual
+  entrypoint: SameValueZeroEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+    - bool
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+
+- name: SameValueZeroSlowPath
+  entrypoint: SameValueZeroEntrypoint
   bridge: slow_path
+  properties: []
+  signature:
+    - bool
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+
+- name: GetHashCodeStringOddSaved
+  entrypoint: GetHashCodeString
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
-    - ark::ObjectHeader*  # object pointer
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
+    - int64_t
+    - ark::ObjectHeader*
 
-- name: MapHasFastPath
-  entrypoint: MapHasIrToc
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
-
-- name: MapHasUsual
-  entrypoint: EtsEscompatMapHas
-  bridge: slow_path
+- name: GetHashCodeBigintOddSaved
+  entrypoint: GetHashCodeBigint
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
+    - int64_t
+    - ark::ObjectHeader*
 
-- name: MapDelete
-  entrypoint: MapDeleteIrToc
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
-
-- name: MapDeleteUsual
-  entrypoint: EtsEscompatMapDelete
-  bridge: entrypoint
+- name: GetHashCodeObjectOddSaved
+  entrypoint: GetHashCodeObject
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src map
-    - ark::ObjectHeader*  # key
+    - int64_t
+    - ark::ObjectHeader*
 
-# Set
-- name: SetHas
-  entrypoint: SetHasIrToc
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src set
-    - ark::ObjectHeader*  # key
-
-- name: SetHasUsual
-  entrypoint: EtsEscompatSetHas
-  bridge: entrypoint
-  properties: [intrinsic]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src set
-    - ark::ObjectHeader*  # key
-
-- name: SetDelete
-  entrypoint: SetDeleteIrToc
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src set
-    - ark::ObjectHeader*  # key
-
-- name: SetDeleteUsual
-  entrypoint: EtsEscompatSetDelete
-  bridge: entrypoint
-  properties: [intrinsic]
-  signature:
-    - uint8_t             # boolean
-    - ark::ObjectHeader*  # src set
-    - ark::ObjectHeader*  # key
 
 - name: StringTrimSlowPath
   entrypoint: StdCoreStringTrim
@@ -1655,9 +1768,9 @@
     - ark::ObjectHeader*  # string
     - uint16_t            # char to look up
 
-- name: StringIndexOf3Arg
+- name: StringIndexOfOddSaved
   entrypoint: StdCoreStringIndexOf
-  bridge: odd_saved3
+  bridge: odd_saved
   properties: [intrinsic]
   signature:
     - int32_t             # index of char in the string if any (result)
@@ -1683,3 +1796,279 @@
     - ark::ObjectHeader*  # string
     - uint16_t            # char to look up
     - int32_t             # unused (always zero)
+
+- name: StringConcat2Tlab
+  entrypoint: StringConcat2Tlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat2TlabAllStrings
+  entrypoint: StringConcat2TlabAllStrings
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat3Tlab
+  entrypoint: StringConcat3Tlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat4Tlab
+  entrypoint: StringConcat4Tlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat2SlowPath
+  entrypoint: CoreStringConcat2
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat3SlowPath
+  entrypoint: CoreStringConcat3
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat4SlowPath
+  entrypoint: CoreStringConcat4
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat2Usual
+  entrypoint: CoreStringConcat2
+  bridge: entrypoint
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat3OddSaved
+  entrypoint: CoreStringConcat3
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat4Usual
+  entrypoint: CoreStringConcat4
+  bridge: entrypoint
+  properties: []
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: SubStringFromStringTlab
+  entrypoint: SubStringFromStringTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringTlabCompressed
+  entrypoint: SubStringFromStringTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringTlabAllStrings
+  entrypoint: SubStringFromStringTlabAllStrings
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringTlabAllStringsCompressed
+  entrypoint: SubStringFromStringTlabAllStringsCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringSlowPath
+  entrypoint: SubStringFromStringEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: SubStringFromStringOddSaved
+  entrypoint: SubStringFromStringEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: EscompatArrayIsPlatformArrayFast
+  entrypoint: EscompatArrayIsPlatformArrayFast
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean
+    - ark::ObjectHeader*
+
+- name: EscompatArrayReverse
+  entrypoint: EtsEscompatArrayReverse
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+
+- name: EscompatArrayReverseSync
+  entrypoint: EscompatArrayReverseSync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+
+- name: EscompatArrayReverseAsync
+  entrypoint: EscompatArrayReverseAsync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+
+- name: EscompatArrayReverseAsyncManual
+  entrypoint: EscompatArrayReverseAsyncManual
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+
+- name: EscompatArrayReverseHybrid
+  entrypoint: EscompatArrayReverseHybrid
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+
+- name: ArrayFastCopyToRefSync
+  entrypoint: ArrayFastCopyToRefSync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayFastCopyToRefAsync
+  entrypoint: ArrayFastCopyToRefAsync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayFastCopyToRefAsyncManual
+  entrypoint: ArrayFastCopyToRefAsyncManual
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayFastCopyToRefHybrid
+  entrypoint: ArrayFastCopyToRefHybrid
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayFastCopyToRefEntrypoint
+  entrypoint: EscompatObjectFastCopyToUnchecked
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t

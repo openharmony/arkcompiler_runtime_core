@@ -44,7 +44,7 @@ class C {
     }
 }
 
-function test(args: FixedArray<NullishType>, exp: int): int {
+function test(args: FixedArray<Any>, exp: int): int {
     called = -1
     CType.make(args)
     if (called != exp) {
@@ -57,24 +57,24 @@ function test(args: FixedArray<NullishType>, exp: int): int {
     return 0
 }
 
-function mk(num: int, fn: (idx: int) => NullishType): FixedArray<NullishType> {
-    const arr : FixedArray<NullishType> = new NullishType[num]
+function mk(num: int, fn: (idx: int) => Any): FixedArray<Any> {
+    const arr : FixedArray<Any> = new Any[num]
     for (let i = 0; i < num; i++) {
         arr[i] = fn(i)
     }
     return arr;
 }
 
-function from(x: NullishType): FixedArray<NullishType> {
-    const ret :FixedArray<NullishType> = new NullishType[1]
+function from(x: Any): FixedArray<Any> {
+    const ret :FixedArray<Any> = new Any[1]
     ret[0] = x
     return ret
 }
 
 function main(): int {
     let f = 0
-    f += test(new NullishType[0], 0)
-    f += test(mk(2, (idx: int): NullishType => { return idx as Int }), 2)
+    f += test(new Any[0], 0)
+    f += test(mk(2, (idx: int): Any => { return idx as Int }), 2)
     f += test(from(new B()), 12)
     f += test(from(new D()), 11)
 
