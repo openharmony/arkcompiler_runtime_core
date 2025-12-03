@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,6 +26,7 @@ from runner.plugins.ets.utils.constants import META_COPYRIGHT, META_START_STRING
     META_END_STRING, META_START_COMMENT, META_END_COMMENT
 from runner.plugins.ets.utils.exceptions import \
     InvalidFileFormatException, UnknownTemplateException, InvalidMetaException
+from runner.plugins.ets.ets_templates.yaml_extension import YamlExtension
 from runner.utils import read_file
 
 ROOT_PATH = Path(os.path.realpath(os.path.dirname(__file__)))
@@ -46,8 +47,10 @@ class Template:
         self.__params = params
         self.__jinja_env = Environment(
             loader=FileSystemLoader([str(test_path.parent), str(ets_templates_path)]),
-            autoescape=select_autoescape()
+            autoescape=select_autoescape(),
+            extensions=[YamlExtension]
         )
+        self.__jinja_env.__setattr__('current_test_path_dir', test_path.parent)
 
         if self.is_copyright:
             self.__copyright = read_file(COPYRIGHT_PATH)
