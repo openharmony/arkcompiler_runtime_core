@@ -428,4 +428,14 @@ export final class Short extends Integral implements Comparable<Short> {
     public isGreaterEqualThan(other: Short): boolean {
         return this.value >= other.toShort();
     }
+
+    /**
+     * parseInt(String, int) parses from String an integer of specified radix
+     *
+     * @param s the string to convert
+     * @param r the radix of conversion; should be [2, 36]; 0 assumed to be 10
+     *
+     * @returns the result of parsing
+    */
+    public static native parseInt(s: String, r: int): short;
 }

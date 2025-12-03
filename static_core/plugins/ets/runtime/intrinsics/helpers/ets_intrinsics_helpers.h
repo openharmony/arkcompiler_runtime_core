@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -307,6 +307,11 @@ FpType StrToFp(char *str, char **strEnd)
         return std::strtof(str, strEnd);
     }
 }
+
+int8_t StringToInt8(EtsString *str, uint8_t radix);
+int16_t StringToInt16(EtsString *str, uint8_t radix);
+int32_t StringToInt32(EtsString *str, uint8_t radix);
+int64_t StringToInt64(EtsString *str, uint8_t radix);
 
 double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, uint32_t flags);
 double StringToDoubleWithRadix(const uint8_t *start, const uint8_t *end, int radix);

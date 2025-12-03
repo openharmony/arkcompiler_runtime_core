@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include "intrinsics.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "types/ets_primitives.h"
 
 namespace ark::ets::intrinsics {
@@ -47,6 +48,11 @@ EtsDouble StdCoreShortToDouble(EtsShort val)
 EtsChar StdCoreShortToChar(EtsShort val)
 {
     return static_cast<uint16_t>(val);
+}
+
+EtsShort StdCoreShortParseInt(EtsString *str, int32_t radix)
+{
+    return helpers::StringToInt16(str, radix);
 }
 
 }  // namespace ark::ets::intrinsics

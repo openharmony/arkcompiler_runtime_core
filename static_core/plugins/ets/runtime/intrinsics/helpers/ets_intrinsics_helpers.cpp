@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,6 +94,123 @@ ParseResult<int32_t> ParseExponent(const uint8_t *start, const uint8_t *end, con
 }
 
 }  // namespace parse_helpers
+
+static Sign ReadSign(uint16_t ch)
+{
+    if (ch == '-') {
+        return Sign::NEG;
+    }
+    if (ch == '+') {
+        return Sign::POS;
+    }
+    return Sign::NONE;
+}
+
+static bool SkipHexPrefix(const PandaString &str, PandaString::size_type &index)
+{
+    namespace tags = panda_file_items::class_descriptors;
+
+    if (str[index] != '0') {
+        return true;
+    }
+    auto zeroPos = index;
+    ++index;
+    if (index >= str.size()) {
+        index = zeroPos;
+        return true;
+    }
+    auto ch = str[index];
+    if (ch != 'x' && ch != 'X') {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "Invalid hex prefix");
+        return false;
+    }
+    ++index;
+    return true;
+}
+
+template <typename T>
+T StringToInt(const PandaString &str, PandaString::size_type startIndex, uint8_t radix)
+{
+    namespace tags = panda_file_items::class_descriptors;
+
+    if (radix == 0) {
+        radix = DECIMAL;
+    }
+    if (radix < MIN_RADIX || radix > MAX_RADIX) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::ARGUMENT_OUT_OF_RANGE_ERROR, "Invalid radix");
+        return 0;
+    }
+    if (ToDigit(str[startIndex]) >= radix) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "String does not contain a valid number");
+        return 0;
+    }
+    T result = 0;
+    for (auto index = startIndex; index < str.size(); ++index) {
+        auto digit = static_cast<T>(ToDigit(str[index]));
+        if (digit >= radix) {
+            break;
+        }
+        if (result < (std::numeric_limits<T>::min() + digit) / radix) {
+            ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "Value exceeds integer limits");
+            return 0;
+        }
+        result = result * radix - digit;
+    }
+    return result;
+}
+
+template <typename T>
+T StringToInt(EtsString *str, uint8_t radix)
+{
+    namespace tags = panda_file_items::class_descriptors;
+
+    auto ps = str->TrimLeft()->GetMutf8();
+    PandaString::size_type index = 0;
+    if (index >= ps.size()) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "String does not contain a valid number");
+        return 0;
+    }
+    auto sign = ReadSign(ps[index]);
+    if (sign != Sign::NONE) {
+        ++index;
+    }
+    if (index >= ps.size()) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "String does not contain a valid number");
+        return 0;
+    }
+    if (radix == HEXADECIMAL && !SkipHexPrefix(ps, index)) {
+        return 0;
+    }
+    auto result = StringToInt<T>(ps, index, radix);
+    if (sign == Sign::NEG) {
+        return result;
+    }
+    if (result < -std::numeric_limits<T>::max()) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "Value exceeds integer limits");
+        return 0;
+    }
+    return -result;
+}
+
+int8_t StringToInt8(EtsString *str, uint8_t radix)
+{
+    return StringToInt<int8_t>(str, radix);
+}
+
+int16_t StringToInt16(EtsString *str, uint8_t radix)
+{
+    return StringToInt<int16_t>(str, radix);
+}
+
+int32_t StringToInt32(EtsString *str, uint8_t radix)
+{
+    return StringToInt<int32_t>(str, radix);
+}
+
+int64_t StringToInt64(EtsString *str, uint8_t radix)
+{
+    return StringToInt<int64_t>(str, radix);
+}
 
 // CC-OFFNXT(G.FUN.01-CPP,huge_cyclomatic_complexity[C++],huge_method[C++]) solid logic
 // CC-OFFNXT(huge_cca_cyclomatic_complexity[C++]) solid logic
