@@ -14,7 +14,17 @@
 [project]
 name = "arkts-playground"
 dynamic = ["version"]
-dependencies = ["fastapi[standard]", "PyYaml", "pydantic_settings", "aiofiles", "pydantic"]
+dependencies = [
+    "fastapi[standard]",
+    "PyYaml",
+    "pydantic_settings",
+    "aiofiles",
+    "pydantic",
+    "structlog>=25.5.0",
+    "asgi-correlation-id>=4.3.4",
+    "prometheus-client>=0.23.1",
+    "prometheus-fastapi-instrumentator>=7.1.0",
+]
 requires-python = ">=3.10"
 
 

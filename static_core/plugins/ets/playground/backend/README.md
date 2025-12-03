@@ -27,6 +27,27 @@ server:
   cors: true
 ```
 
+### Env
+
+The `env` parameter in the configuration file defines the execution environment of the server.
+Now it controls only the logging format.
+
+Available values:
+
+* `dev` - development mode
+  Logs are printed in a human-readable format for easier debugging during local development.
+
+* `production` - production mode
+  Structured logs are emitted, suitable for log aggregation systems and observability pipelines.
+
+Example:
+
+```yaml
+env: dev
+```
+
+Future versions may extend the environment configuration with additional runtime and logging parameters.
+
 ### Run server
 
 `arkts-playground -c /path/to/config.yaml`
