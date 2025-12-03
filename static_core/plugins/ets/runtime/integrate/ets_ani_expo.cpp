@@ -22,29 +22,26 @@
 #include "runtime/include/thread_scopes.h"
 
 namespace ark::ets {
-PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env)
+PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env, [[maybe_unused]] void *napienv)
 {
     PandaEtsVM *vm = PandaEnv::FromAniEnv(env)->GetEtsVM();
     ProcessTaskpoolWorker(true);
     vm->PreZygoteFork();
+#ifdef PANDA_ETS_INTEROP_JS
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    if (!interop::js::CreateMainInteropContext(coroutine, napienv)) {
+        LOG(ERROR, RUNTIME) << "Cannot create interop context";
+    }
+#endif
 }
 
 PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_option> &options, bool postZygoteFork)
 {
-    [[maybe_unused]] EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-
     bool loadAppAotFile = false;
     std::string appAotFileName;
     for (auto &opt : options) {
         std::string option(opt.option);
-        if (option == INTEROP_OPTION_PREFIX) {
-#ifdef PANDA_ETS_INTEROP_JS
-            if (!interop::js::CreateMainInteropContext(coroutine, opt.extra)) {
-                LOG(ERROR, RUNTIME) << "Cannot create interop context";
-            }
-#endif
-        } else if (option.rfind(AOT_FILE_OPTION_PREFIX, 0) == 0) {
+        if (option.rfind(AOT_FILE_OPTION_PREFIX, 0) == 0) {
             loadAppAotFile = true;
             appAotFileName = option.substr(AOT_FILE_OPTION_PREFIX.size());
         } else if (option == ENABLE_AN_OPTION) {
