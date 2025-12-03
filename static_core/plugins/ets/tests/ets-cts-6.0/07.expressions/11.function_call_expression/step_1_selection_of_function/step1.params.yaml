@@ -399,53 +399,6 @@ cases:
           arktest.assertEQ( foo(0.0, 0.0, undefined), 'ND3' )
           arktest.assertEQ( foo(0.0, undefined, undefined), 'ND3' )
 
-
-    - decl: |-
-          function foo(p: boolean): string {
-              return "b"
-          }
-          function foo(p: boolean, q?: boolean): string {
-              return "bD1"
-          }
-          function foo(p?: boolean): string {
-              return "b1"
-          }
-          function foo(...p: boolean[]): string {
-              return "bR"
-          }
-      use: |-
-          // value types
-          arktest.assertEQ( foo(), "b1" )
-          arktest.assertEQ( foo(undefined), "b1" )
-          arktest.assertEQ( foo(true), "b" )
-          arktest.assertEQ( foo(true, false), "bD1" )
-          arktest.assertEQ( foo(true, undefined), "bD1" )
-          arktest.assertEQ( foo(true, false, true), "bR" )
-
-
-    - decl: |-
-          function foo(p: boolean): string {
-              return "b"
-          }
-          function foo(p: boolean, q: boolean = false): string {
-              return "bD2"
-          }
-          function foo(p: boolean = true): string {
-              return "b2"
-          }
-          function foo(...p: boolean[]): string {
-              return "bR"
-          }
-      use: |-
-          // value types
-          arktest.assertEQ( foo(), "b1" )
-          arktest.assertEQ( foo(undefined), "b1" )
-          arktest.assertEQ( foo(true), "b" )
-          arktest.assertEQ( foo(true, false), "bD2" )
-          arktest.assertEQ( foo(true, undefined), "bD2" )
-          arktest.assertEQ( foo(true, false, true), "bR" )
-
-
     - decl: |-
           function foo(p: number): string {
               return 'N'

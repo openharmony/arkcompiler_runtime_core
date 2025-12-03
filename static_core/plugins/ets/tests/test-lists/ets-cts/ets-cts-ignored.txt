@@ -323,7 +323,7 @@
 07.expressions/06.spread_expression/spex_lmbd_33.ets
 07.expressions/06.spread_expression/spex_lmbd_35.ets
 
-#28326
+#28786
 07.expressions/09.field_access_expressions/field_access_to_override.ets
 
 #26730
@@ -1085,7 +1085,7 @@
 #31384
 14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
 
-#28326
+#28786
 15.semantic_rules/02.subtyping/02.subtyping_for_generic_classes_and_interfaces/generic_cast_to_generic_superclass.ets
 15.semantic_rules/02.subtyping/02.subtyping_for_generic_classes_and_interfaces/generic_cast_to_object_with_parameters.ets
 

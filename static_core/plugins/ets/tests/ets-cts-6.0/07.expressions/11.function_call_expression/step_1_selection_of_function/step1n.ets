@@ -17,7 +17,7 @@
 /*---
 desc: >-
     A compile-time error occurs if:
-    - There is no function to select
+    - There is no function to select {{c.desc}}
 tags: [negative, compile-only]
 ---*/
 
