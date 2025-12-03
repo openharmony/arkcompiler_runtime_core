@@ -716,8 +716,8 @@ std::pair<bool, uint64_t> StackfulCoroutineWorker::CalculateShortestTimerDelay()
         // Should retun WAITING_TIME_UNLIMITED based on method declaration
         return {true, WAITING_TIME_UNLIMITED};
     }
-    auto msDelay = minTimerDelay / 1000U;
-    return {true, msDelay};
+    // Returns time in ms that most close to correct one but is not less then it
+    return {true, (minTimerDelay - 1) / 1000U + 1};
 }
 
 }  // namespace ark
