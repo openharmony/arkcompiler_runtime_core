@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import fnmatch
 import os
 import re
 import shutil
@@ -282,11 +281,8 @@ class TestSuite:
         for collection in self.config.test_suite.collections:
             extension = self.config.test_suite.extension(collection)
             glob_expression = path.join(self.test_root, collection.name, f"**/*.{extension}")
-            tests.extend(fnmatch.filter(
-                glob(glob_expression, recursive=True),
-                path.join(self.test_root, self.config.test_suite.filter)
-            ))
-        return [Path(test) for test in set(tests)]
+            tests.extend(glob(glob_expression, recursive=True))
+        return self.__load_test_files([Path(test) for test in set(tests)])
 
     def __get_explicit_test_path(self, test_id: str) -> Path | None:
         for collection in self.config.test_suite.collections:
