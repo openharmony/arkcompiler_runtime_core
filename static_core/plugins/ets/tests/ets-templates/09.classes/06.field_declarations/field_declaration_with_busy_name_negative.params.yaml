@@ -18,8 +18,8 @@ cases:
         in the body of a class declaration is also used for a method
         of this class with the same static or non-static status.
     check_variants:
-      - {member1: "static x: int", member2: "x(): int { return 1 }"}
-      - {member1: "x: int", member2: "static x(): int { return 1 }"}
+      - {member1: "x: int", member2: "x(): int { return 1 }"}
+      - {member1: "static x: int", member2: "static x(): int { return 1 }"}
     decl_variants:
       - |-
         class A {
@@ -37,11 +37,9 @@ cases:
         A compile-time error occurs if name of a field declared
         in the body of a class declaration is also used for a method
         of this class with the same static or non-static status.
-        Static not counted in inheritance
+        Static classes not counted for inheritance
     check_variants:
-      - {member1: "static x: int", member2: "x(): int { return 1 }"}
-      - {member1: "x: int", member2: "static x(): int { return 1 }"}
-      - {member1: "static x: int", member2: "static x(): int { return 1 }"}
+      - {member1: "x: int", member2: "x(): int { return 1 }"}
     decl_variants:
       - |-
         class A {
@@ -55,5 +53,25 @@ cases:
           [member2]
         }
         class B extends A {
+          [member1]
+        }
+
+  - desc: |-
+      >-
+        A compile-time error occurs if name of a field declared
+        in the body of a class declaration is also used for another field
+        in the same declaration with the same static or non-static status.
+    check_variants:
+      - {member1: "x: int", member2: "x: number"}
+      - {member1: "static x: int", member2: "static x: number"}
+    decl_variants:
+      - |-
+        class A {
+          [member1]
+          [member2]
+        }
+      - |-
+        class A {
+          [member2]
           [member1]
         }
