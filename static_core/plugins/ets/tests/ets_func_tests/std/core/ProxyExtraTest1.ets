@@ -278,7 +278,7 @@ class BasicHandler implements reflect.InvocationHandler {
 }
 
 function exampleDispatchTest() {
-    let ifaces: FixedArray<Class> =  [ (Type.from<ProxyTest<Resource>>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<ProxyTest<Resource>>() ]
     let proxy1: ProxyTest<Resource> = createProxy(ifaces, new BasicHandler(new ProxyTestImpl<Resource>())) as ProxyTest<Resource>
     exampleDispatchTestBody(proxy1)
     LATEST_EVENT = Event.NONE

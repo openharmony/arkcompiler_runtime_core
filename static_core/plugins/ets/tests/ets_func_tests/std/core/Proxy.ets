@@ -87,24 +87,22 @@ function createProxy(ifaces: FixedArray<Class>, handle: reflect.InvocationHandle
 
 // Test proxyClass basic properties
 function createProxyBasicTest(){
-    let ifaces: FixedArray<Class> = [ (Type.from<I1>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> = [ Class.from<I1>() ]
+
     let proxy1 = createProxy(ifaces, new BasicHandler())
-    //arktest.assertFalse(Class.of(proxy1).isAbstract())
-    // ClassType can use isFinal
-    arktest.assertTrue((Type.of(proxy1) as ClassType).isFinal())
-    // use getSuper replace getSuperClass
-    arktest.assertEQ(Class.of(proxy1).getSuper()?.getName(),"std.core.reflect.Proxy")
+    arktest.assertFalse(Class.of(proxy1).isAbstract())
+    arktest.assertTrue(Class.of(proxy1).isFinal())
+    arktest.assertEQ(Class.of(proxy1).getSuper(), Class.from<reflect.Proxy>())
+
     let proxy2 = createProxy(ifaces, new BasicHandler())
-    //arktest.assertFalse(Class.of(proxy2).isAbstract())
-    // ClassType can use isFinal
-    arktest.assertTrue((Type.of(proxy2) as ClassType).isFinal())
-    // use getSuper replace getSuperClass
-    arktest.assertEQ(Class.of(proxy2).getSuper()?.getName(),"std.core.reflect.Proxy")
+    arktest.assertFalse(Class.of(proxy2).isAbstract())
+    arktest.assertTrue(Class.of(proxy2).isFinal())
+    arktest.assertEQ(Class.of(proxy2).getSuper(), Class.from<reflect.Proxy>())
 }
 
 // Test example
 function exampleDispatchTest() {
-    let ifaces: FixedArray<Class> =  [ (Type.from<I1>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<I1>() ]
     let proxy1: I1 = createProxy(ifaces, new BasicHandler()) as I1
     exampleDispatchTestBody(proxy1)
     LATEST_EVENT = Event.NONE
@@ -127,9 +125,9 @@ function exampleDispatchTestBody(proxy: I1) {
 /** The following section contains basic tests for dispatch */
 
 // init
-let i1 = (Type.from<I1>() as InterfaceType).getClass()
-let i2 = (Type.from<I2>() as InterfaceType).getClass()
-let i3 = (Type.from<I3>() as InterfaceType).getClass()
+let i1 = Class.from<I1>()
+let i2 = Class.from<I2>()
+let i3 = Class.from<I3>()
 
 let i1foo = i1.getInstanceMethod('foo')
 let i1goo = i1.getInstanceMethod('goo')
@@ -145,28 +143,28 @@ let i3fldSetter = i3.getInstanceMethod('%%set-fld')
 let i3fldGetter = i3.getInstanceMethod('%%get-fld')
 
 // get proxy
-let ifaces1: FixedArray<Class> =  [ (Type.from<I1>() as InterfaceType).getClass() ]
+let ifaces1: FixedArray<Class> =  [ Class.from<I1>() ]
 let proxyClass1: I1 = createProxy(ifaces1, new TestHandler1(new I1Impl())) as I1
 let proxy1: I1 = createProxy(ifaces1, new TestHandler1(new I1Impl())) as I1
 
 
-let ifaces2: FixedArray<Class> =  [ (Type.from<I1>() as InterfaceType).getClass() ]
+let ifaces2: FixedArray<Class> =  [ Class.from<I1>() ]
 let proxyClass2: I1 = createProxy(ifaces2, new TestHandler2(new I1Impl())) as I1
 let proxy2: I1 = createProxy(ifaces2, new TestHandler2(new I1Impl())) as I1
 
-let ifaces3: FixedArray<Class> =  [ (Type.from<I3>() as InterfaceType).getClass() ]
+let ifaces3: FixedArray<Class> =  [ Class.from<I3>() ]
 let proxyClass3: I3 = createProxy(ifaces3, new TestHandler3()) as I3
 let proxy3: I3 = createProxy(ifaces3, new TestHandler3()) as I3
 
 
 //dumplicate
-let ifaces4: FixedArray<Class> =  [ (Type.from<I3>() as InterfaceType).getClass()]
+let ifaces4: FixedArray<Class> =  [ Class.from<I3>() ]
 let proxyClass4: I1 = createProxy(ifaces4, new TestHandler4(new I3Impl())) as I1
 let proxy4: I1 = createProxy(ifaces4, new TestHandler4(new I3Impl())) as I1
 let proxyClass5: I3 = createProxy(ifaces4, new TestHandler5(new I3Impl())) as I3
 let proxy5: I3 = createProxy(ifaces4, new TestHandler5(new I3Impl())) as I3
 
-let ifaces5: FixedArray<Class> =  [ (Type.from<I2>() as InterfaceType).getClass() ]
+let ifaces5: FixedArray<Class> =  [ Class.from<I2>() ]
 let proxyClass6: I2 = createProxy(ifaces5, new TestHandler6(new I2Impl())) as I2
 let proxy6: I2 = createProxy(ifaces5, new TestHandler6(new I2Impl())) as I2
 let proxyClass7: I2 = createProxy(ifaces5, new TestHandler7(new I2Impl())) as I2
@@ -227,10 +225,9 @@ class TestHandler3 implements reflect.InvocationHandler {
     }
     set(proxy: reflect.Proxy, method: reflect.InstanceMethod, value: Any): void {
     }
-    //check proxy === p and method.equals(i3foo) and args.length === 0
+    //check proxy === p and args.length === 0
     invoke(proxy: reflect.Proxy, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
         arktest.assertTrue(proxy === proxyClass3 || proxy === proxy3)
-        arktest.assertTrue(method.equals(i3foo!))
         arktest.assertEQ(args.length, 0)
         return true
     }
@@ -247,10 +244,9 @@ class TestHandler4 implements reflect.InvocationHandler {
     set(proxy: reflect.Proxy, method: reflect.InstanceMethod, value: Any): void {
         method.invoke(this.instance, [value])
     }
-    //check proxy === p1 and method.equals(i1foo) and args.length === 0
+    //check proxy === p1 and args.length === 0
     invoke(proxy: reflect.Proxy, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
         arktest.assertTrue(proxy === proxyClass4 || proxy === proxy4)
-        arktest.assertTrue(method.equals(i3foo!))
         arktest.assertEQ(args.length, 0)
         return method.invoke(this.instance, args)
     }
@@ -267,10 +263,9 @@ class TestHandler5 implements reflect.InvocationHandler {
     set(proxy: reflect.Proxy, method: reflect.InstanceMethod, value: Any): void {
         method.invoke(this.instance, [value])
     }
-    //check proxy === p1 and method.equals(i3foo) and args.length === 0
+    //check proxy === p1 and args.length === 0
     invoke(proxy: reflect.Proxy, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
         arktest.assertTrue(proxy === proxyClass5 || proxy === proxy5)
-        arktest.assertTrue(method.equals(i3foo!))
         arktest.assertEQ(args.length, 0)
         return method.invoke(this.instance, args)
     }
@@ -402,7 +397,7 @@ interface D {
 }
 
 class dImpl implements D{
-
+    foo(): double { return 1.423}
 }
 
 interface AIface{
@@ -447,11 +442,11 @@ class FE implements F, E {
     }
 }
 
-let iA = (Type.from<A>() as InterfaceType).getClass()
-let iB = (Type.from<B>() as InterfaceType).getClass()
-let iC = (Type.from<C>() as InterfaceType).getClass()
-let iE = (Type.from<E>() as InterfaceType).getClass()
-let iF = (Type.from<F>() as InterfaceType).getClass()
+let iA = Class.from<A>()
+let iB = Class.from<B>()
+let iC = Class.from<C>()
+let iE = Class.from<E>()
+let iF = Class.from<F>()
 
 let fooA = iA.getInstanceMethod('foo')
 let goo = iA.getInstanceMethod('goo')
@@ -595,7 +590,7 @@ class ExtraHandler7 implements reflect.InvocationHandler {
 
 //Test different variant of interfaces three structure
 function extraDispatchTest1() {
-    let ifaces: FixedArray<Class> =  [ (Type.from<C>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<C>() ]
     let proxy1: C = createProxy(ifaces, new ExtraHandler1()) as C
     extraDispatchTestBody1(proxy1)
     LATEST_EVENT = Event.NONE
@@ -614,7 +609,7 @@ function extraDispatchTestBody1(proxy: C) {
 
 //Check behavoior of proxy change if order of passing interfaces to creating proxy changed
 function extraDispatchTest2() {
-    let ifaces: FixedArray<Class> =  [ (Type.from<C>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<C>() ]
     let proxy1: B = createProxy(ifaces, new ExtraHandler2()) as B
     extraDispatchTestBody2(proxy1)
 
@@ -627,7 +622,7 @@ function extraDispatchTestBody2(proxy: B) {
 }
 
 function extraDispatchTest3() {
-    let ifaces: FixedArray<Class> =  [ (Type.from<C>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<C>() ]
     let proxy1: A = createProxy(ifaces, new ExtraHandler3()) as A
     extraDispatchTestBody3(proxy1)
 
@@ -641,7 +636,7 @@ function extraDispatchTestBody3(proxy: A) {
 
 //Test that default methods in interface can be proxied successfully
 function extraDispatchTest4() {
-    let ifaces: FixedArray<Class> =  [ (Type.from<D>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<D>() ]
     let proxy1: D = createProxy(ifaces, new ExtraHandler4(new dImpl())) as D
     extraDispatchTestBody4(proxy1)
 
@@ -656,7 +651,7 @@ function extraDispatchTestBody4(proxy: D) {
 
 //Test for non-trivial handler that will obtain instance of interface and call method from it
 function extraDispatchTest5() {
-    let ifaces: FixedArray<Class> =  [ (Type.from<AIface>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<AIface>() ]
     let proxy1: AIface = createProxy(ifaces, new ExtraHandler5(new AI())) as AIface
     extraDispatchTestBody5(proxy1)
     LATEST_EVENT = Event.NONE
@@ -673,8 +668,7 @@ function extraDispatchTestBody5(proxy: AIface) {
 
 //Test a scenario involving multiple interfaces
 function extraDispatchTest6() {
-    let ifaces: FixedArray<Class> =  [ (Type.from<E>() as InterfaceType).getClass(),
-                                        (Type.from<F>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<E>(), Class.from<F>() ]
     let proxy1: E = createProxy(ifaces, new ExtraHandler6(new EF())) as E
     let proxy2: F = createProxy(ifaces, new ExtraHandler6(new EF())) as F
     extraDispatchTestBody6(proxy1)
@@ -695,8 +689,7 @@ function extraDispatchTestBody6(proxy: E) {
 
 //Test a scenario involving multiple interfaces
 function extraDispatchTest7() {
-    let ifaces: FixedArray<Class> =  [ (Type.from<F>() as InterfaceType).getClass(),
-                                        (Type.from<E>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<F>(), Class.from<E>() ]
     let proxy1: F = createProxy(ifaces, new ExtraHandler7(new EF())) as F
     extraDispatchTestBody7(proxy1)
     LATEST_EVENT = Event.NONE
@@ -721,8 +714,7 @@ function main() {
     suite.addTest('Test proxy changed', extraDispatchTest3)
     suite.addTest('Test default methods', extraDispatchTest4)
     suite.addTest('Test class proxy', extraDispatchTest5)
-    // Enable after 29358 is fixed.
-    // suite.addTest('Test multiple interfaces proxy', extraDispatchTest6)
-    // suite.addTest('Test multiple interfaces proxy', extraDispatchTest7)
+    suite.addTest('Test multiple interfaces proxy: part 1', extraDispatchTest6)
+    suite.addTest('Test multiple interfaces proxy: part 2', extraDispatchTest7)
     return suite.run()
 }

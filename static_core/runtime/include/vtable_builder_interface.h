@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,13 @@ public:
                                      ClassLinkerContext *ctx) = 0;
 
     [[nodiscard]] virtual bool Build(Span<Method> methods, Class *baseClass, ITable itable, bool isInterface) = 0;
+
+    [[nodiscard]] virtual bool FilterProxyClassMethods([[maybe_unused]] Span<Method *> input,
+                                                       [[maybe_unused]] PandaVector<Method *> *output,
+                                                       [[maybe_unused]] Class *baseClass)
+    {
+        UNREACHABLE();
+    }
 
     virtual void UpdateClass(Class *klass) const = 0;
 

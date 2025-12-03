@@ -9835,5 +9835,14 @@ intrinsics:
         - std.core.RuntimeLinker
         - std.core.String
         - std.core.Class[]
-        - std.core.Array
     impl: ark::ets::intrinsics::ReflectProxyGenerateProxy
+
+  - name: ReflectProxyHasProxyFlag
+    space: ets
+    class_name: std.core.reflect.Proxy
+    method_name: hasProxyFlag
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Class ]
+    impl: ark::ets::intrinsics::ReflectProxyHasProxyFlag

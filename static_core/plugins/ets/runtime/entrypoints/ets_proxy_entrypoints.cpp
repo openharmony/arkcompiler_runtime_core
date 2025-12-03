@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -192,8 +192,8 @@ static int64_t UnboxResult(EtsCoroutine *coroutine, EtsMethod *ifaceMethod, Valu
     Value unboxedResult;
     if (!UnboxValue(EtsObject::FromCoreType(boxedResult), effectiveReturnType, &unboxedResult, coroutine)) {
         PandaOStringStream msg;
-        msg << "result has type" << EtsTypeToString(effectiveReturnType) << ", but got "
-            << EtsObject::FromCoreType(boxedResult)->GetClass()->GetName();
+        msg << "result has type " << EtsTypeToString(effectiveReturnType) << ", but got "
+            << EtsObject::FromCoreType(boxedResult)->GetClass()->GetName()->GetMutf8();
         ark::ets::ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR,
                                     msg.str().c_str());
     }
@@ -294,7 +294,7 @@ extern "C" int64_t EtsProxyMethodInvoke(Method *method, uint8_t *args, uint8_t *
     ASSERT_MANAGED_CODE();
 
     // Proxy instance override some interface method, handler.invoke should accept interface method.
-    auto *ifaceMethod = EtsMethod::FromRuntimeMethod(method)->GetOverriddenMethod();
+    auto *ifaceMethod = EtsMethod::FromRuntimeMethod(method)->GetInterfaceMethodIfProxy();
     ASSERT(ifaceMethod != nullptr);
 
     auto *coroutine = EtsCoroutine::GetCurrent();

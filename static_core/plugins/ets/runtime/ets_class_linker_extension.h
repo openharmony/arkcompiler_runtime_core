@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,6 +126,10 @@ public:
 
     ClassLinkerContext *GetCommonContext(Span<Class *> classes) override;
     static ClassLinkerContext *GetParentContext(ClassLinkerContext *ctx);
+
+    std::optional<Span<Method>> GenerateProxyClassMethods(Class *proxyKlass, Span<Method *> rawMethods) override;
+
+    std::optional<PandaVector<Method *>> BuildProxyClassMethodsSpan(ITable itable) override;
 
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);

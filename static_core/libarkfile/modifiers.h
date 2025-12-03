@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,9 +61,9 @@ constexpr uint32_t INTRINSIC_SHIFT = MinimumBitsToStore(ACC_INTRINSIC);
 constexpr uint32_t MAX_INTRINSIC_NUMBER = std::numeric_limits<uint32_t>::max();
 
 // Runtime internal language specific modifiers
-constexpr uint32_t ACC_PROXY = 0x00020000;            // class (java runtime)
-constexpr uint32_t ACC_FAST_NATIVE = 0x00080000;      // method (java runtime)
-constexpr uint32_t ACC_CRITICAL_NATIVE = 0x00100000;  // method (java runtime)
+constexpr uint32_t ACC_PROXY = 0x00020000;            // class (runtime)
+constexpr uint32_t ACC_FAST_NATIVE = 0x00080000;      // method (runtime)
+constexpr uint32_t ACC_CRITICAL_NATIVE = 0x00100000;  // method (runtime)
 
 constexpr uint32_t ACC_VERIFICATION_STATUS = 0x00400000;  // method (runtime)
 constexpr uint32_t VERIFICATION_STATUS_SHIFT = MinimumBitsToStore(ACC_VERIFICATION_STATUS);

@@ -137,7 +137,7 @@ class BHandler implements reflect.InvocationHandler {
 
 // Test Array
 function createAProxyTest(){
-    let ifaces: FixedArray<Class> =  [ (Type.from<A>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<A>() ]
     let proxy1: A = createProxy(ifaces, new AHandler(new AImpl())) as A
     createAProxyTestBody(proxy1)
 
@@ -180,7 +180,7 @@ function createAProxyTestBody(proxy: A) {
 }
 
 function createBProxyTest(){
-    let ifaces: FixedArray<Class> =  [ (Type.from<B>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<B>() ]
     let proxy1: B = createProxy(ifaces, new BHandler(new BImpl())) as B
     createBProxyTestBody(proxy1)
 
