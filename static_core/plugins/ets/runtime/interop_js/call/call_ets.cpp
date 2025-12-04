@@ -77,6 +77,7 @@ template <bool IS_STATIC>
 // CC-OFFNXT(huge_method) solid logic
 ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 {
+    INTEROP_TRACE();
     HandleScope<ObjectHeader *> etsHandleScope(coro_);
     auto const createRoot = [coro = coro_](ObjectHeader *val) {
         return reinterpret_cast<ObjectHeader **>(VMHandle<ObjectHeader>(coro, val).GetAddress());
@@ -176,6 +177,7 @@ bool CallETSHandler::CheckNumArgs(size_t numArgs) const
 template <bool IS_STATIC>
 napi_value CallETSHandler::HandleImpl()
 {
+    INTEROP_TRACE();
     ASSERT_MANAGED_CODE();
     auto method = protoReader_.GetMethod();
 

@@ -76,6 +76,7 @@ public:
     template <bool IS_NEWCALL, typename ArgSetup>
     static ALWAYS_INLINE uint64_t HandleImpl(Method *method, uint8_t *args, uint8_t *inStackArgs)
     {
+        INTEROP_TRACE();
         CallJSHandler st(EtsCoroutine::GetCurrent(), method, args, inStackArgs);
         return st.Handle<IS_NEWCALL, ArgSetup>();
     }
@@ -130,6 +131,7 @@ private:
 template <bool IS_NEWCALL, typename ArgSetup>
 ALWAYS_INLINE inline uint64_t CallJSHandler::Handle()
 {
+    INTEROP_TRACE();
     [[maybe_unused]] InteropETSToJSCodeScope codeScope(coro_, __PRETTY_FUNCTION__);
     napi_env env = ctx_->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -153,6 +155,7 @@ template <bool IS_NEWCALL, typename FRead>
 ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndCall(FRead &readVal,
                                                                                     Span<napi_value> jsargs)
 {
+    INTEROP_TRACE();
     auto *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
     auto *klass = ref->template ClassAddr<Class>();
     if (!klass->IsArrayClass()) {
@@ -191,6 +194,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndC
 template <bool IS_NEWCALL>
 ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall()
 {
+    INTEROP_TRACE();
     bool isVarArgs = UNLIKELY(protoReader_.GetMethod()->HasVarArgs());
     auto readVal = [this](auto typeTag) { return argReader_.template Read<typename decltype(typeTag)::type>(); };
     auto const numNonRest = numArgs_ - (isVarArgs ? 1 : 0);
@@ -224,6 +228,7 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall
 
 napi_value CallJSHandler::HandleSpecialMethod(Span<napi_value> jsargs)
 {
+    INTEROP_TRACE();
     napi_value handlerResult {};
     napi_env env = ctx_->GetJSEnv();
     ScopedNativeCodeThread nativeScope(coro_);
@@ -268,6 +273,7 @@ napi_value CallJSHandler::HandleSpecialMethod(Span<napi_value> jsargs)
 template <bool IS_NEWCALL>
 ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::CallConverted(Span<napi_value> jsargs)
 {
+    INTEROP_TRACE();
     napi_env env = ctx_->GetJSEnv();
     napi_value jsRetval;
     napi_status jsStatus;
@@ -289,11 +295,13 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::CallConverted(Span
 template <bool IS_NEWCALL>
 ALWAYS_INLINE inline std::optional<Value> CallJSHandler::ConvertRetval(napi_value jsRet)
 {
+    INTEROP_TRACE();
     [[maybe_unused]] napi_env env = ctx_->GetJSEnv();
     Value etsRet;
     protoReader_.Reset();
 
     if constexpr (IS_NEWCALL) {
+        INTEROP_TRACE();
         ASSERT(protoReader_.GetClass() == ctx_->GetJSValueClass());
         auto res = JSConvertJSValue::Unwrap(ctx_, env, jsRet);
         if (UNLIKELY(!res.has_value())) {

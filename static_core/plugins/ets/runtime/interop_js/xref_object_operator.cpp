@@ -39,6 +39,7 @@ XRefObjectOperator XRefObjectOperator::FromEtsObject(EtsHandle<EtsObject> &etsOb
 
 EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const std::string &name) const
 {
+    INTEROP_TRACE();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
@@ -59,6 +60,7 @@ EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const std::string
 
 EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject) const
 {
+    INTEROP_TRACE();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
@@ -81,6 +83,7 @@ EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, EtsHandle<EtsObje
 
 EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const uint32_t index) const
 {
+    INTEROP_TRACE();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
@@ -103,6 +106,7 @@ EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const uint32_t in
 bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, const std::string &name,
                                      EtsHandle<EtsObject> &valueObject) const
 {
+    INTEROP_TRACE();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
@@ -127,6 +131,7 @@ bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, const std::string &name
 bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject,
                                      EtsHandle<EtsObject> &valueObject) const
 {
+    INTEROP_TRACE();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
@@ -150,6 +155,7 @@ bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &k
 
 bool XRefObjectOperator::SetProperty(EtsCoroutine *coro, uint32_t index, EtsHandle<EtsObject> &valueObject) const
 {
+    INTEROP_TRACE();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
@@ -537,6 +543,7 @@ bool XRefObjectOperator::StrictEquals(EtsCoroutine *coro, EtsObject *obj1, EtsOb
 
 napi_value XRefObjectOperator::ConvertStaticObjectToDynamic(EtsCoroutine *coro, EtsHandle<EtsObject> &object)
 {
+    INTEROP_TRACE();
     auto ctx = interop::js::InteropCtx::Current(coro);
 
     // static undefined is nullptr in runtime
