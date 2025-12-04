@@ -21,12 +21,12 @@ cases:
 
     - decl: |-
           function test<T>(p: Object) {
-              return p instanceof Array<T>
+              return p instanceof Array
           }
 
     - decl: |-
           function test<T>(p: Object) {
-              return p instanceof Array<string>
+              return p instanceof Array
           }
 
     - decl: |-
@@ -36,12 +36,12 @@ cases:
 
     - decl: |-
           function test<T extends Error>(p: Object) {
-              return p instanceof Array<T>
+              return p instanceof Array
           }
 
     - decl: |-
           function test<T extends string>(p: Object) {
-              return p instanceof Array<string>
+              return p instanceof Array
           }
 
     # generic class
@@ -55,14 +55,14 @@ cases:
     - decl: |-
           class A<T> {
               test(p: Object) {
-                  return p instanceof A<T>
+                  return p instanceof A
               }
           }
 
     - decl: |-
           class A<T> {
               test(p: Object) {
-                  return p instanceof Array<number>
+                  return p instanceof Array
               }
           }
 
@@ -76,14 +76,14 @@ cases:
     - decl: |-
           class A<T extends Error> {
               test(p: Object) {
-                  return p instanceof Array<T>
+                  return p instanceof Array
               }
           }
 
     - decl: |-
           class A<T extends number> {
               test(p: Object) {
-                  return p instanceof A<number>
+                  return p instanceof A
               }
           }
 
@@ -105,7 +105,7 @@ cases:
     - decl: |-
           class A {
               test<T>(p: Object) {
-                  return p instanceof Array<number>
+                  return p instanceof Array
               }
           }
 
@@ -119,7 +119,7 @@ cases:
     - decl: |-
           class A {
               test<T extends Error>(p: Object) {
-                  return p instanceof Array<T>
+                  return p instanceof Array
               }
           }
 
@@ -141,14 +141,14 @@ cases:
     - decl: |-
           interface I<T> {
               test(p: Object) {
-                  return p instanceof I<T>
+                  return p instanceof I
               }
           }
 
     - decl: |-
           interface I<T> {
               test(p: Object) {
-                  return p instanceof I<number>
+                  return p instanceof I
               }
           }
 
@@ -162,14 +162,14 @@ cases:
     - decl: |-
           interface I<T extends Error> {
               test(p: Object) {
-                  return p instanceof I<T>
+                  return p instanceof I
               }
           }
 
     - decl: |-
           interface I<T extends string> {
               test(p: Object) {
-                  return p instanceof I<string>
+                  return p instanceof I
               }
           }
 
@@ -220,14 +220,14 @@ cases:
     - decl: |-
           class A<out T> {
               test(p: Object) {
-                  return p instanceof A<T>
+                  return p instanceof A
               }
           }
 
     - decl: |-
           class A<out T> {
               test(p: Object) {
-                  return p instanceof Array<Any>
+                  return p instanceof Array
               }
           }
 
@@ -241,13 +241,13 @@ cases:
     - decl: |-
           class A<out T extends Error> {
               test(p: Object) {
-                  return p instanceof Array<T>
+                  return p instanceof Array
               }
           }
 
     - decl: |-
           class A<out T extends number> {
               test(p: Object) {
-                  return p instanceof A<number>
+                  return p instanceof A
               }
           }

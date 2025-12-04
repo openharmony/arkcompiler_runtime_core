@@ -77,7 +77,10 @@ function_decls:
           }
       call: |-
           let v = foo();
-          arktest.assertTrue(v instanceof number[] && v.length == 3)
+          arktest.assertTrue(v instanceof Array && v.length == 3)
+          arktest.assertTrue(v[0] instanceof number)
+          arktest.assertTrue(v[1] instanceof number)
+          arktest.assertTrue(v[2] instanceof number)
 
     - decl: |-
           let s: Boolean[] = new Boolean[0]
@@ -86,7 +89,7 @@ function_decls:
           }
       call: |-
           let v = foo();
-          arktest.assertTrue(v instanceof Boolean[] && v.length == 0)
+          arktest.assertTrue(v instanceof Array && v.length == 0)
 
     - decl: |-
           let s: Long[][] = new Long[1][1]
@@ -98,7 +101,9 @@ function_decls:
           }
       call: |-
           let v: Long[][] = foo();
-          arktest.assertTrue(foo() instanceof Long[][])
+          arktest.assertTrue(foo() instanceof Array)
+          arktest.assertTrue(v[0] instanceof Array)
+          arktest.assertTrue(v[0][0] instanceof Long)
 
     - decl: |-
           let s: long[][] = new long[1][1]
