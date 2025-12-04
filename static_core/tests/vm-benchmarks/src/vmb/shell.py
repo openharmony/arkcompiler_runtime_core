@@ -111,8 +111,9 @@ class ShellResult:
 
 class ShellBase(metaclass=Singleton):
 
-    def __init__(self, timeout: Optional[float] = None) -> None:
+    def __init__(self, timeout: Optional[float] = None, no_run: bool = False) -> None:
         self._timeout = timeout
+        self.no_run = no_run
         self.taskset = ''
 
     @staticmethod
@@ -177,8 +178,8 @@ class ShellBase(metaclass=Singleton):
 
 class ShellHost(ShellBase):
 
-    def __init__(self, timeout: Optional[float] = None) -> None:
-        super().__init__(timeout=timeout)
+    def __init__(self, timeout: Optional[float] = None, no_run: bool = False) -> None:
+        super().__init__(timeout=timeout, no_run=no_run)
         self.is_win = 'nt' == os.name
 
     def run(self,
@@ -186,6 +187,9 @@ class ShellHost(ShellBase):
             measure_time: bool = False,
             timeout: Optional[float] = None,
             cwd: str = '') -> ShellResult:
+        if self.no_run:
+            log.info('\n%s\n', cmd)
+            return ShellResult(ret=0, out='OK\n__RET_VAL__=0\n')
         return self.__run(
             cmd, measure_time=measure_time, timeout=timeout, cwd=cwd)
 
@@ -209,6 +213,10 @@ class ShellHost(ShellBase):
         raise NotImplementedError
 
     def run_async(self, cmd: str) -> None:
+        if self.no_run:
+            log.info('\n%s\n', cmd)
+            return
+
         def run_shell():
             # pylint: disable-next=all
             return Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)  # NOQA
@@ -223,6 +231,9 @@ class ShellHost(ShellBase):
               measure_time: bool = False,
               timeout: Optional[float] = None,
               cwd: str = '') -> ShellResult:
+        if self.no_run:
+            log.info('\n%s\n', cmd)
+            return ShellResult(ret=0, out='OK\n__RET_VAL__=0\n')
         if measure_time and not self.is_win:
             cmd = self.timed_cmd(cmd)
         exec_fn = self.__exec_process_win if self.is_win else self.__exec_process
@@ -280,9 +291,10 @@ class ShellDevice(ShellBase):
     def __init__(self,
                  dev_sh: str,
                  timeout: Optional[float] = None,
-                 tmp_dir: str = '/data/local/tmp/vmb',) -> None:
-        super().__init__(timeout=timeout)
-        self._sh = ShellHost()
+                 tmp_dir: str = '/data/local/tmp/vmb',
+                 no_run: bool = False) -> None:
+        super().__init__(timeout=timeout, no_run=no_run)
+        self._sh = ShellHost(no_run=no_run)
         self._devsh = dev_sh
         self.tmp_dir = tmp_dir
         self.stderr_out = tmp_dir + '/vmb-stderr.out'
@@ -291,6 +303,9 @@ class ShellDevice(ShellBase):
             measure_time: bool = False,
             timeout: Optional[float] = None,
             cwd: str = '') -> ShellResult:
+        if self.no_run:
+            log.info('\n%s\n', cmd)
+            return ShellResult(ret=0, out='OK\n__RET_VAL__=0\n')
         redir = ''
         if measure_time:
             cmd = f"\\time -v {self.taskset} env {cmd}"
@@ -368,11 +383,13 @@ class ShellAdb(ShellDevice):
     def __init__(self,
                  dev_serial: str = '',
                  timeout: Optional[float] = None,
-                 tmp_dir: str = '/data/local/tmp/vmb') -> None:
+                 tmp_dir: str = '/data/local/tmp/vmb',
+                 no_run: bool = False) -> None:
         super().__init__(
             f"{os.environ.get(self.binname.upper(), self.binname)}",
             timeout=timeout,
-            tmp_dir=tmp_dir)
+            tmp_dir=tmp_dir,
+            no_run=no_run)
         if dev_serial:
             self._devsh = f'{self._devsh} -s {dev_serial}'
         self.mk_tmp_dir()
@@ -401,12 +418,14 @@ class ShellHdc(ShellDevice):
                  dev_serial: str = '',
                  dev_host: str = '',
                  timeout: Optional[float] = None,
-                 tmp_dir: str = '/data/local/tmp/vmb') -> None:
+                 tmp_dir: str = '/data/local/tmp/vmb',
+                 no_run: bool = False) -> None:
         # -l0 because of HDC mutex file permission messages
         # -p (undocumented) due to poor hdc performance
         super().__init__(f"{os.environ.get('HDC', 'hdc')} -p -l0",
                          timeout=timeout,
-                         tmp_dir=tmp_dir)
+                         tmp_dir=tmp_dir,
+                         no_run=no_run)
         if dev_serial:
             self._devsh = f'{self._devsh} -t {dev_serial}'
         if dev_host:

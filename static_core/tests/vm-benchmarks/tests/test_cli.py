@@ -19,14 +19,17 @@
 # pylint: skip-file
 
 import sys
+import os
 import pytest  # type: ignore
-
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 from vmb.cli import Args, Command
 from vmb.target import Target
 from vmb.tool import OptFlags, ToolBase
 from vmb.unit import BenchUnit
+from vmb.run import VmbRunner
+from vmb.platform import PlatformBase
 
 
 class FakeTool(ToolBase):
@@ -136,3 +139,17 @@ def test_custom_paths():
         test.assertDictEqual(expected, actual)
         test.assertEqual('''"--a=b" --c=d''', tool.custom)
         test.assertEqual("/some/custom/path/to/node", tool.custom_path)
+
+
+def test_no_run_option():
+    """Assert no exception is thrown."""
+    test = TestCase()
+    examples = Path(os.path.dirname(__file__)).resolve().parent
+    with (cmdline(f'all -p arkts_device -N {examples}')):
+        # Note that PANDA_BUILD not need to be set
+        arg = Args()
+        test.assertTrue(arg.command == Command.ALL)
+        test.assertTrue(arg.no_run)
+        runner = VmbRunner(arg)
+        bus = PlatformBase.search_units(arg.paths)
+        runner.run(bus)

@@ -19,7 +19,7 @@ import logging
 from pathlib import Path
 from vmb.target import Target
 from vmb.tool import ToolBase, OptFlags
-from vmb.unit import BenchUnit
+from vmb.unit import BenchUnit, BUStatus
 from vmb.result import JITStat
 
 log = logging.getLogger('vmb')
@@ -114,6 +114,9 @@ class Tool(ToolBase):
         arkts_cmd = self.get_cmd(
             name=bu.name, abc=str(abc), options=options, gclog=gclog, an=an)
         res = self.x_run(arkts_cmd)
+        if self.no_run:
+            bu.status = BUStatus.NOT_RUN
+            return
         if profile:
             return  # profiling run should not affect bu.result
         bu.parse_run_output(res)
