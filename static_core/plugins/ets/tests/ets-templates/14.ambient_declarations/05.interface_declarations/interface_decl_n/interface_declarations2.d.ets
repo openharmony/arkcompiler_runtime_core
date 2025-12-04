@@ -13,13 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for d in declarations %}
 /*---
-desc: Call signature negative
-tags: [compile-only, negative]
-expected_out: {{d.stdout}}
+desc: Ambient Interface declarations
+tags: [compile-only, not-a-test]
 ---*/
+  
 
-{{d.decl}}
-
-{% endfor %}
+export declare interface A { a: string }

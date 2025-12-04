@@ -16,6 +16,7 @@ cases:
       x
     use: |-
       arktest.assertEQ(x, '1')
+
   - decl: |-
       a1, b1, c1, d1, e1
     use: |-
@@ -24,6 +25,7 @@ cases:
       arktest.assertEQ(c1, c'a')
       arktest.assertEQ(d1[0], 0.0f)
       arktest.assertEQ(e1[0], 1)
+      
   - decl: |-
       a2, b2, c2
     use: |-
