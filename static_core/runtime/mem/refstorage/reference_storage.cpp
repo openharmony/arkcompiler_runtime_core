@@ -71,6 +71,34 @@ bool ReferenceStorage::Init()
     return true;
 }
 
+void ReferenceStorage::CleanUp()
+{
+    if (cachedBlock_ != nullptr) {
+        RemoveBlock(std::exchange(cachedBlock_, nullptr));
+    }
+    for (auto *refBlockHead : *localStorage_) {
+        while (refBlockHead != nullptr) {
+            RemoveBlock(std::exchange(refBlockHead, refBlockHead->GetPrev()));
+        }
+    }
+    localStorage_->clear();
+    ASSERT(blocksCount_ == 0);
+}
+
+void ReferenceStorage::ReInitialize()
+{
+    ASSERT(localStorage_ != nullptr);
+    ASSERT(frameAllocator_ != nullptr);
+    ASSERT(blocksCount_ == 0);
+
+    auto *firstBlock = CreateBlock();
+    ASSERT(firstBlock != nullptr);
+    ASSERT(blocksCount_ == 1);
+
+    firstBlock->Reset();
+    localStorage_->push_back(firstBlock);
+}
+
 bool ReferenceStorage::IsValidRef(const Reference *ref)
 {
     ASSERT(ref != nullptr);
