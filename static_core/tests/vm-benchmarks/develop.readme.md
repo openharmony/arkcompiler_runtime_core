@@ -8,7 +8,7 @@ VMB code is assumed to be compatible with `python3.7` and higher,
 although usually 3.8 and 3.10 is used.
 Please make sure to not add 3.8+ features,
 (f.e. using built-in type annotations as `list` instead `typing.List`).
-If such a feature addition could be justificated, please add it with usage of `__future__`
+If such a feature addition could be justified, please add it with usage of `__future__`
 and checks that code actually works on `python3.7`
 
 For the reason of compatibility with internal code checkers maximum line width is set to 120,
@@ -18,7 +18,7 @@ To quick-check your changes, please do `make tox` - this will run linters, and u
 
 `pytest` is used as a unit test framework,
 though its features have not been used fully due to internal code checkers limitations.
-F.e. powerfull rewritten `assert` is banned in favor of `unittest.TestCase.assert*`
+F.e. powerful rewritten `assert` is banned in favor of `unittest.TestCase.assert*`
 
 ### Versioning
 There is neither rules on module version update nor automatic CI-based version incrementation.
@@ -88,8 +88,8 @@ additional actions before/after suite/test.
 ### Bench Unit
 
 `BU` (bench unit) is an entity for holding info on particular test:
-its pathes, sources, generated sources, compiled binaries etc.
-It alsi acumulates results of tests.
+its paths, sources, generated sources, compiled binaries etc.
+It also accumulates results of tests.
 
 ## Report Structure
 TODO
@@ -101,7 +101,11 @@ this `shell=True` is needed to use unix **shell builtin** command `time`
 in **predictable cross-platform** manner. Unfortunately implementations
 of `/bin/time` differ between devices significantly.
 
-## FAQ: Is there strict one-to-one correspondance b/w language and file extension?
+Also note that on Ubuntu `time` builtin still depends on `/usr/bin/time`
+(not on `/bin/time`) so corresponding package should be installed
+to measure host command's times and RSS.
+
+## FAQ: Is there strict one-to-one correspondence b/w language and file extension?
 No. Generally `*.ets` file means `ets` language, but `*.ts` file could be treated
 as `ts` or `ets` depending on `--langs` `--src-langs` options.
 (This was a requested feature of _Using same sources for TS and ArkTS_)
@@ -117,6 +121,17 @@ cd $vmb_src
 PATH=$PATH:$HOME/bin/py313/bin:$HOME/bin/py38/bin:$HOME/bin/py37/bin make tox
 ```
 
+## FAQ: Why paths is not fully cross-platform?
+
+`pathlib::Path` is cross-platform, but running device platforms (which is unix)
+from Windows host we need to make sure paths on device will be
+expanded using `/` (unix separators).
+Optimal solution would be make such fields/variables of `pathlib::PosixPath` type,
+but by some reason it could not be instantiated on Windows,
+so `as_posix()` is massively used throughout code.
+
+This should be refactored and generalized.
+
 ## FAQ: How to explore module structure without source repo?
 
 After module installed locally it can be explored f.e. in python interactive shell:
@@ -128,9 +143,9 @@ After module installed locally it can be explored f.e. in python interactive she
 
 >>> print(vmb.gensettings.GenSettings.__doc__)
 # Template overrides class.
-#    In most cases template name, source and bench file extentions
+#    In most cases template name, source and bench file extensions
 #    are set by selected lang,
-#    but for some platforms these defaults needs to be overriden.
+#    but for some platforms these defaults needs to be overridden.
 
 >>> vmb.x_shell.ShellBase.__annotations__
 # {'_Singleton__instances': typing.Dict[typing.Any, typing.Any]}
