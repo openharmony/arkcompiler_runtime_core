@@ -12,18 +12,24 @@
 # limitations under the License.
 
 declarations:
-  - >
-    declare class CallSignatureDeclaration {
-      (a: string, b: number): void
-      (a: string, b: number): boolean
-    }
-  - >
-    declare class CallSignatureDeclaration {
-      (a: number): boolean
-      (a: number): string
-    }
-  - >
-    declare class CallSignatureDeclaration {
-      (): boolean
-      (a: number): string
-    }
+  - decl: |-
+      declare class CallSignatureDeclaration {
+        (a: string, b: number): void
+        (a: string, b: number): boolean
+      }
+    stdout: |-
+      "Semantic error ESE0130: Function $_invoke is already declared."
+  - decl: |-
+      declare class CallSignatureDeclaration {
+        (a: number): boolean
+        (a: number): string
+      }
+    stdout: |-
+      "Semantic error ESE0130: Function $_invoke is already declared."
+  - decl: |-
+      declare class CallSignatureDeclaration {
+        (): boolean
+        (a: number): string
+      }
+    stdout: |-
+      "Semantic error ESE0130: Function $_invoke is already declared."

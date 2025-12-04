@@ -13,16 +13,20 @@
 
 declarations:
   # Only one ambient indexer declaration is allowed in an ambient class declaration
-  - >
-    declare class MyIndexable {
-      [index: int]: MyIndexable
-      [index: string]: string
-    }
+  - decl: |-
+      declare class MyIndexable {
+        [index: int]: MyIndexable
+        [index: string]: string
+      }
+    stdout: |-
+      "Syntax error ESY0228: Unexpected token, expected ']'."
   # Ambient indexer declaration is supported in ambient contexts only.
-  - >
-    class MyIndexable {
-      [index: int]: MyIndexable
-    }
+  - decl: |-
+      class MyIndexable {
+        [index: int]: MyIndexable
+      }
+    stdout: |-
+      "Semantic error ESE0343: Indexed signatures are not allowed. Use arrays instead!"
 
 
 

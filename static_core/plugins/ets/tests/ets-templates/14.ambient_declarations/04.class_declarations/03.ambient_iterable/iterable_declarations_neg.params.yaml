@@ -13,30 +13,34 @@
 
 declarations:
   # classes with no body
-  - >
-    class NotAnIterator{}
+  - decl: |-
+      class NotAnIterator{}
 
-    declare class IterableClass {
-      [Symbol.iterator](): NotAnIterator
-      data: string[]
-    }
-  - >
-    class MyIterator implements Iterator<string> {
-      index: int
-      base: IterableClass
-      constructor(base: IterableClass) {
-        this.base = base
+      declare class IterableClass {
+        [Symbol.iterator](): NotAnIterator
+        data: string[]
       }
-      next(): IteratorResult<String> {
-        return {
-          done: this.index >= this.base.data.length,
-          value: this.base.data.length > this.index ? this.base.data[this.index++] : undefined
+    stdout: |-
+      "Semantic error ESE0096: The return type of '$_iterator' must be a type that implements Iterator interface."
+  - decl: |-
+      class MyIterator implements Iterator<string> {
+        index: int
+        base: IterableClass
+        constructor(base: IterableClass) {
+          this.base = base
+        }
+        next(): IteratorResult<String> {
+          return {
+            done: this.index >= this.base.data.length,
+            value: this.base.data.length > this.index ? this.base.data[this.index++] : undefined
+          }
         }
       }
 
-    declare class IterableClass {
-      [Symbol.iterator](): MyIterator
-      [Symbol.iterator](): MyIterator
-      data: string[]
-    }
-
+      declare class IterableClass {
+        [Symbol.iterator](): MyIterator
+        [Symbol.iterator](): MyIterator
+        data: string[]
+      }
+    stdout: |-
+      "Semantic error ESE0096: The return type of '$_iterator' must be a type that implements Iterator interface."
