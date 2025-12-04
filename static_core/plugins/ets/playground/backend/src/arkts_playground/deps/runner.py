@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,6 +28,7 @@ from typing_extensions import Unpack
 from ..config import get_settings
 from ..metrics import (AST_FAILURES, COMPILER_FAILURES, DISASM_FAILURES,
                        RUNTIME_FAILURES)
+from ..models.common import VerificationMode
 
 logger = structlog.stdlib.get_logger(__name__)
 
@@ -73,7 +74,7 @@ class CompileRunResult(TypedDict):
 
 
 class CompileRunParams(TypedDict, total=False):
-    runtime_verify: bool
+    verification_mode: VerificationMode
     verifier: bool
 
 
@@ -186,10 +187,10 @@ class Runner:
             if compile_result["exit_code"] != 0:
                 log.error("Compilation failed with nonzero exit code")
                 return res
-
-            runtime_verify: bool = kwargs.get("runtime_verify", False)
-            log = log.bind(runtime_verify=runtime_verify)
-            run_result = await self._run(abcfile_name, runtime_verify=runtime_verify)
+            verification_mode: VerificationMode = kwargs.get(
+                "verification_mode", VerificationMode.AHEAD_OF_TIME
+            )
+            run_result = await self._run(abcfile_name, verification_mode=verification_mode)
             res["run"] = run_result
             log = log.bind(compile_ret=compile_result['exit_code'])
             log.info("Program run completed")
@@ -328,15 +329,19 @@ class Runner:
         except PackageNotFoundError:
             self._version["playground"] = "not installed"
 
-    async def _run(self, abcfile_name: str, runtime_verify: bool = False) -> SubprocessExecResult:
+    async def _run(
+        self,
+        abcfile_name: str,
+        verification_mode: VerificationMode = VerificationMode.AHEAD_OF_TIME
+    ) -> SubprocessExecResult:
         """Runs abc file
         :rtype: Dict[str, Any]
         """
         log = logger.bind(stage="run")
         entry_point = f"{Path(abcfile_name).stem[:-4]}.ETSGLOBAL::main"
         run_cmd = [f"--boot-panda-files={self.stdlib_abc}", "--load-runtimes=ets"]
-        if runtime_verify:
-            run_cmd += ["--verification-mode=ahead-of-time"]
+        if verification_mode != VerificationMode.DISABLED:
+            run_cmd += [f"--verification-mode={verification_mode.value}"]
         if self._icu_data:
             run_cmd.append(f"--icu-data-path={self._icu_data}")
         run_cmd.append(abcfile_name)
@@ -346,7 +351,7 @@ class Runner:
         if retcode == -11:
             stderr += "run: Segmentation fault"
             log.error("Program run failed: segmentation fault",
-                      runtime_verify=runtime_verify,
+                      verification_mode=verification_mode,
                       abcfile_name=abcfile_name)
             RUNTIME_FAILURES.labels("segfault").inc()
         elif retcode != 0:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,6 +21,7 @@ from structlog.testing import capture_logs
 from structlog.typing import EventDict
 
 from src.arkts_playground.deps.runner import Runner
+from src.arkts_playground.models.common import VerificationMode
 from tests.fixtures.mock_subprocess import FakeCommand, MockAsyncSubprocess
 
 
@@ -336,7 +337,14 @@ async def test_compile_failed_with_disasm(monkeypatch, ark_build):
     assert res == expected
 
 
-async def test_run_with_verify_on_the_fly(monkeypatch, ark_build, ):
+@pytest.mark.asyncio
+@pytest.mark.parametrize("verification_mode,expected_opts", [
+    (VerificationMode.DISABLED, []),
+    (VerificationMode.AHEAD_OF_TIME, ["--verification-mode=ahead-of-time"]),
+    (VerificationMode.ON_THE_FLY, ["--verification-mode=on-the-fly"]),
+])
+async def test_run_with_verification_modes(monkeypatch, ark_build, verification_mode, expected_opts):
+    run_opts = [f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets"] + expected_opts + ["ETSGLOBAL::main"]
     mocker = MockAsyncSubprocess(
         [
             FakeCommand(opts=["--extension=ets"],
@@ -344,17 +352,15 @@ async def test_run_with_verify_on_the_fly(monkeypatch, ark_build, ):
                         stdout=b"executed",
                         return_code=0),
             FakeCommand(expected=str(ark_build[3]),
-                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets",
-                              "--verification-mode=ahead-of-time", "ETSGLOBAL::main"],
-                        stderr=b"runtime verify error",
-                        return_code=1),
-
+                        opts=run_opts,
+                        stdout=b"run output",
+                        return_code=0),
         ]
     )
     monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
 
     r = Runner(ark_build[0])
-    res = await r.compile_run_arkts("code", [], False, runtime_verify=True)
+    res = await r.compile_run_arkts("code", [], False, verification_mode=verification_mode)
     expected = {
         "compile": {
             "error": "",
@@ -362,9 +368,9 @@ async def test_run_with_verify_on_the_fly(monkeypatch, ark_build, ):
             "output": "executed"
         },
         "run": {
-            "error": "runtime verify error",
-            "exit_code": 1,
-            "output": ""
+            "error": "",
+            "exit_code": 0,
+            "output": "run output"
         },
         "disassembly": None,
         "verifier": None
