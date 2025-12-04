@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -350,7 +350,7 @@ class BigInt64ArrayElement {
 public:
     using Type = typename ArrayType::ElementType;
 
-    BigInt64ArrayElement() : stdCoreBigIntClass_(PlatformTypes(EtsCoroutine::GetCurrent())->coreBigint) {}
+    BigInt64ArrayElement() : stdCoreBigIntClass_(PlatformTypes(EtsCoroutine::GetCurrent())->coreBigInt) {}
 
     std::optional<Type> GetTyped(EtsObject *object) const
     {

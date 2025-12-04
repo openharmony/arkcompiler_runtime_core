@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -724,43 +724,39 @@ Class *EtsClassLinkerExtension::CacheClass(std::string_view descriptor, F const 
 
 void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
 {
-    // CC-OFFNXT(WordsTool.95) false positive
-    // NOLINTNEXTLINE(google-build-using-namespace)
-    using namespace panda_file_items::class_descriptors;
-
-    CacheClass(STRING, [](auto *c) { c->SetValueTyped(); });
-    CacheClass(LINE_STRING, [](auto *c) { c->SetValueTyped(); });
-    CacheClass(SLICED_STRING, [](auto *c) { c->SetValueTyped(); });
-    CacheClass(TREE_STRING, [](auto *c) { c->SetValueTyped(); });
-    CacheClass(NULL_VALUE, [](auto *c) {
+    CacheClass("Lstd/core/String;", [](auto *c) { c->SetValueTyped(); });
+    CacheClass("Lstd/core/LineString;", [](auto *c) { c->SetValueTyped(); });
+    CacheClass("Lstd/core/SlicedString;", [](auto *c) { c->SetValueTyped(); });
+    CacheClass("Lstd/core/TreeString;", [](auto *c) { c->SetValueTyped(); });
+    CacheClass("Lstd/core/Null;", [](auto *c) {
         c->SetNullValue();
         c->SetValueTyped();
     });
 
-    CacheClass(BOX_BOOLEAN, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BOOLEAN); });
-    CacheClass(BOX_BYTE, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BYTE); });
-    CacheClass(BOX_CHAR, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::CHAR); });
-    CacheClass(BOX_SHORT, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::SHORT); });
-    CacheClass(BOX_INT, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::INT); });
-    CacheClass(BOX_LONG, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::LONG); });
-    CacheClass(BOX_FLOAT, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::FLOAT); });
-    CacheClass(BOX_DOUBLE, [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::DOUBLE); });
+    CacheClass("Lstd/core/Boolean;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BOOLEAN); });
+    CacheClass("Lstd/core/Byte;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::BYTE); });
+    CacheClass("Lstd/core/Char;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::CHAR); });
+    CacheClass("Lstd/core/Short;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::SHORT); });
+    CacheClass("Lstd/core/Int;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::INT); });
+    CacheClass("Lstd/core/Long;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::LONG); });
+    CacheClass("Lstd/core/Float;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::FLOAT); });
+    CacheClass("Lstd/core/Double;", [](auto *c) { c->SetBoxedKind(EtsClass::BoxedType::DOUBLE); });
 
-    CacheClass(BIG_INT, [](auto *c) {
+    CacheClass("Lstd/core/BigInt;", [](auto *c) {
         c->SetBigInt();
         c->SetValueTyped();
     });
-    CacheClass(FUNCTION, [](auto *c) { c->SetFunction(); });
-    CacheClass(BASE_ENUM, [](auto *c) {
+    CacheClass("Lstd/core/Function;", [](auto *c) { c->SetFunction(); });
+    CacheClass("Lstd/core/BaseEnum;", [](auto *c) {
         c->SetEtsEnum();
         c->SetValueTyped();
     });
 
-    CacheClass(FINALIZABLE_WEAK_REF, [](auto *c) {
+    CacheClass("Lstd/core/FinalizableWeakRef;", [](auto *c) {
         c->SetFinalizeReference();
         c->SetWeakReference();
     });
-    CacheClass(BASE_WEAK_REF, [](auto *c) { c->SetWeakReference(); });
+    CacheClass("Lstd/core/BaseWeakRef;", [](auto *c) { c->SetWeakReference(); });
 }
 
 void EtsClassLinkerExtension::InitializeBuiltinClasses()

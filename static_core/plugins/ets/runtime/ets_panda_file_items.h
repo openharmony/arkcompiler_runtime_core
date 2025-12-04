@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,19 +25,10 @@ namespace class_descriptors {
 
 // Base classes
 static constexpr std::string_view ERROR                                = "Lescompat/Error;";
-static constexpr std::string_view ARRAY_BUFFER                         = "Lstd/core/ArrayBuffer;";
 static constexpr std::string_view BIG_INT                              = "Lstd/core/BigInt;";
 static constexpr std::string_view ASYNC                                = "Lets/coroutine/Async;";
 static constexpr std::string_view OBJECT                               = "Lstd/core/Object;";
 static constexpr std::string_view PROMISE                              = "Lstd/core/Promise;";
-static constexpr std::string_view JOB                                  = "Lstd/core/Job;";
-static constexpr std::string_view PROMISE_REF                          = "Lstd/core/PromiseRef;";
-static constexpr std::string_view WAITERS_LIST                         = "Lstd/core/WaitersList;";
-static constexpr std::string_view MUTEX                                = "Lstd/core/Mutex;";
-static constexpr std::string_view EVENT                                = "Lstd/core/Event;";
-static constexpr std::string_view COND_VAR                             = "Lstd/core/CondVar;";
-static constexpr std::string_view QUEUE_SPINLOCK                       = "Lstd/core/QueueSpinlock;";
-static constexpr std::string_view RW_LOCK                              = "Lstd/core/RWLock;";
 static constexpr std::string_view NULL_VALUE                           = "Lstd/core/Null;";
 static constexpr std::string_view STRING                               = "Lstd/core/String;";
 static constexpr std::string_view LINE_STRING                          = "Lstd/core/LineString;";
@@ -45,50 +36,25 @@ static constexpr std::string_view SLICED_STRING                        = "Lstd/c
 static constexpr std::string_view TREE_STRING                          = "Lstd/core/TreeString;";
 static constexpr std::string_view BASE_WEAK_REF                        = "Lstd/core/BaseWeakRef;";
 static constexpr std::string_view FINALIZABLE_WEAK_REF                 = "Lstd/core/FinalizableWeakRef;";
-static constexpr std::string_view FINALIZATION_REGISTRY                = "Lstd/core/FinalizationRegistry;";
-static constexpr std::string_view FINREG_NODE                          = "Lstd/core/FinRegNode;";
 static constexpr std::string_view TYPE                                 = "Lstd/core/Type;";
-static constexpr std::string_view FIELD                                = "Lstd/core/Field;";
-static constexpr std::string_view METHOD                               = "Lstd/core/Method;";
-static constexpr std::string_view PARAMETER                            = "Lstd/core/TypeAPIParameter;";
 static constexpr std::string_view STRING_BUILDER                       = "Lstd/core/StringBuilder;";
-
-// TypeAPI classes
-static constexpr std::string_view CLASS_TYPE                           = "Lstd/core/ClassType;";
-static constexpr std::string_view REFLECT_INSTANCE_FIELD               = "Lstd/core/reflect/InstanceField;";
-static constexpr std::string_view REFLECT_INSTANCE_METHOD              = "Lstd/core/reflect/InstanceMethod;";
-static constexpr std::string_view REFLECT_STATIC_FIELD                 = "Lstd/core/reflect/StaticField;";
-static constexpr std::string_view REFLECT_STATIC_METHOD                = "Lstd/core/reflect/StaticMethod;";
-static constexpr std::string_view REFLECT_CONSTRUCTOR                  = "Lstd/core/reflect/Constructor;";
 
 // Proxy
 static constexpr std::string_view PROXY                                = "Lstd/core/reflect/Proxy;";
 
 // Runtime classes
 static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";
-static constexpr std::string_view ABC_FILE                             = "Lstd/core/AbcFile;";
-static constexpr std::string_view ABC_RUNTIME_LINKER                   = "Lstd/core/AbcRuntimeLinker;";
-static constexpr std::string_view MEMORY_RUNTIME_LINKER                = "Lstd/core/MemoryRuntimeLinker;";
-static constexpr std::string_view BOOT_RUNTIME_LINKER                  = "Lstd/core/BootRuntimeLinker;";
 static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
-static constexpr std::string_view RUNTIME_LINKER                       = "Lstd/core/RuntimeLinker;";
 
 // Box classes
-static constexpr std::string_view BOX_BOOLEAN                          = "Lstd/core/Boolean;";
-static constexpr std::string_view BOX_BYTE                             = "Lstd/core/Byte;";
-static constexpr std::string_view BOX_CHAR                             = "Lstd/core/Char;";
-static constexpr std::string_view BOX_SHORT                            = "Lstd/core/Short;";
 static constexpr std::string_view BOX_INT                              = "Lstd/core/Int;";
 static constexpr std::string_view BOX_LONG                             = "Lstd/core/Long;";
-static constexpr std::string_view BOX_FLOAT                            = "Lstd/core/Float;";
-static constexpr std::string_view BOX_DOUBLE                           = "Lstd/core/Double;";
 
 // Arrays of base classes
 static constexpr std::string_view CLASS_ARRAY                          = "[Lstd/core/Class;";
 static constexpr std::string_view STRING_ARRAY                         = "[Lstd/core/String;";
 
 // Functional interfaces
-static constexpr std::string_view FUNCTION                             = "Lstd/core/Function;";
 static constexpr std::string_view FUNCTION0                            = "Lstd/core/Function0;";
 static constexpr std::string_view FUNCTION1                            = "Lstd/core/Function1;";
 static constexpr std::string_view FUNCTION2                            = "Lstd/core/Function2;";
@@ -222,10 +188,6 @@ static constexpr std::string_view INTEROP_DYNAMIC_FUNCTION             = "Lstd/i
 static constexpr std::string_view ARRAY                                = "Lstd/core/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/containers/ArrayAsListInt;";
 
-static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lstd/core/RegExpExecArray;";
-static constexpr std::string_view JSON_REPLACER                        = "Lstd/core/JsonReplacer;";
-static constexpr std::string_view JSON_ELEMENT_SERIALIZABLE            = "Lstd/core/jsonx/JsonElementSerializable;";
-
 // ANI annotation classes
 static constexpr std::string_view ANI_UNSAFE_QUICK                     = "Lstd/annotations/ani/unsafe/Quick;";
 static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/annotations/ani/unsafe/Direct;";
@@ -249,18 +211,6 @@ static constexpr std::string_view SETITERATOR                          = "Lstd/c
 static constexpr std::string_view EMPTYMAPITERATOR                     = "Lstd/core/EmptyMapIteratorImpl;";
 static constexpr std::string_view SET                                  = "Lstd/core/Set;";
 static constexpr std::string_view RECORD                               = "Lstd/core/Record;";
-static constexpr std::string_view PROCESS                              = "Lstd/core/StdProcess;";
-static constexpr std::string_view INT8_ARRAY                           = "Lescompat/Int8Array;";
-static constexpr std::string_view UINT8_ARRAY                          = "Lescompat/Uint8Array;";
-static constexpr std::string_view UINT8_CLAMPED_ARRAY                  = "Lescompat/Uint8ClampedArray;";
-static constexpr std::string_view INT16_ARRAY                          = "Lescompat/Int16Array;";
-static constexpr std::string_view UINT16_ARRAY                         = "Lescompat/Uint16Array;";
-static constexpr std::string_view INT32_ARRAY                          = "Lescompat/Int32Array;";
-static constexpr std::string_view UINT32_ARRAY                         = "Lescompat/Uint32Array;";
-static constexpr std::string_view FLOAT32_ARRAY                        = "Lescompat/Float32Array;";
-static constexpr std::string_view FLOAT64_ARRAY                        = "Lescompat/Float64Array;";
-static constexpr std::string_view BIG_INT64_ARRAY                      = "Lescompat/BigInt64Array;";
-static constexpr std::string_view BIG_UINT64_ARRAY                     = "Lescompat/BigUint64Array;";
 
 // Json Annotations
 static constexpr std::string_view JSON_STRINGIFY_IGNORE                = "Lstd/core/JSONStringifyIgnore;";

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -147,10 +147,10 @@ static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsCoroutine
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
     Method *method {};
     if constexpr (std::is_same_v<T, EtsJob>) {
-        method = platformTypes->coreProcessListUnhandledJobs->GetPandaMethod();
+        method = platformTypes->coreStdProcessListUnhandledJobs->GetPandaMethod();
         LOG(DEBUG, COROUTINES) << "List unhandled failed jobs";
     } else if (std::is_same_v<T, EtsPromise>) {
-        method = platformTypes->coreProcessListUnhandledPromises->GetPandaMethod();
+        method = platformTypes->coreStdProcessListUnhandledPromises->GetPandaMethod();
         LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
     }
     ASSERT(method != nullptr);
@@ -298,7 +298,7 @@ static void InvokeErrorHandlerImpl(EtsClassLinker *etsClassLinker, EtsCoroutine 
     }
     coro->ClearException();
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
-    auto *method = platformTypes->coreProcessHandleUncaughtError->GetPandaMethod();
+    auto *method = platformTypes->coreStdProcessHandleUncaughtError->GetPandaMethod();
     ASSERT(method != nullptr);
     std::array args = {Value(exception->GetCoreType())};
     LOG(DEBUG, COROUTINES) << "Invoking error handler";

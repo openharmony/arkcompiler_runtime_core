@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,9 +68,9 @@ common::BoxedValue StaticTypeConverter::WrapBoxed(common::BaseType value)
                 for (uint32_t i = 0; i < len; i++) {
                     etsIntArray->Set(i, static_cast<int32_t>(arg.data[i]));
                 }
-                ASSERT(ptypes->coreBigint != nullptr);
+                ASSERT(ptypes->coreBigInt != nullptr);
                 VMHandle<EtsIntArray> arrHandle(coro, etsIntArray->GetCoreType());
-                auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(ptypes->coreBigint));
+                auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(ptypes->coreBigInt));
                 bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(arrHandle.GetPtr()));
                 bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), arg.data.empty() ? 0 : sign == 0 ? 1 : -1);
                 etsObject = reinterpret_cast<EtsObject *>(bigInt);
@@ -113,7 +113,7 @@ common::BaseType StaticTypeConverter::UnwrapBoxed(common::BoxedValue value)
         return EtsBoxPrimitive<EtsFloat>::Unbox(etsObj);
     } else if (cls == ptypes->coreChar) {
         return EtsBoxPrimitive<EtsChar>::Unbox(etsObj);
-    } else if (cls == ptypes->coreBigint) {
+    } else if (cls == ptypes->coreBigInt) {
         common::BaseBigInt baseBigInt;
         auto bigInt = EtsBigInt::FromEtsObject(etsObj);
         auto etsValue = bigInt->GetBytes();
