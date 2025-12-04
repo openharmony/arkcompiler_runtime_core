@@ -27,7 +27,7 @@ function foo(p: number | number[] | undefined): number {
     if (p instanceof Number) {
         num = p * 2 // numeric operation without cast
         return 1
-    } else if (p instanceof number[]) {
+    } else if (p instanceof Array) {
         num = p.length // field access without cast
         return 2
     }

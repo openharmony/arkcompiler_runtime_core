@@ -97,7 +97,10 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v instanceof number[] && v.length == 3)
+          arktest.assertTrue(v instanceof Array && v.length == 3)
+          arktest.assertTrue(v[0] instanceof number)
+          arktest.assertTrue(v[1] instanceof number)
+          arktest.assertTrue(v[2] instanceof number)
 
     - decl: |-
           interface I {
@@ -108,7 +111,7 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v instanceof Boolean[] && v.length == 0)
+          arktest.assertTrue(v instanceof Array && v.length == 0)
 
     - decl: |-
           interface I {
@@ -124,7 +127,9 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo([[1]] as long[][])
-          arktest.assertTrue(v instanceof Long[][])
+          arktest.assertTrue(v instanceof Array)
+          arktest.assertTrue(v[0] instanceof Array)
+          arktest.assertTrue(v[0][0] instanceof Long)
 
     - decl: |-
           interface I {
@@ -189,4 +194,4 @@ function_decls:
           }
       call: |-
         let v = new A().foo(new Object())
-        arktest.assertTrue(v instanceof boolean|boolean[])
+        arktest.assertTrue(v instanceof boolean|Array)
