@@ -46,7 +46,7 @@ class ExpectedMetadataTest(unittest.TestCase):
         expected_error = None
         report_stdout = "default: 1\n       default: 2\n       default: 3\nuserClick: 1\n userClick: 2\nuserClick: 3"
         test_result = get_test_instance(report_stdout, "", expected_out, expected_error)
-        passed = test_result.compare_output_with_expected(report_stdout, "")
+        passed = test_result.compare_with_stdout(report_stdout)
 
         self.assertTrue(passed)
 
@@ -55,7 +55,7 @@ class ExpectedMetadataTest(unittest.TestCase):
         expected_error = None
         report_stdout = "default: 1\n       default: 2\n       default: 3\nuserClick: 1\n userClick: 2\nuserClick: 3"
         test_result = get_test_instance(report_stdout, "", expected_out, expected_error)
-        passed = test_result.compare_output_with_expected(report_stdout, "")
+        passed = test_result.compare_with_stdout(report_stdout)
 
         self.assertTrue(passed)
 
@@ -65,7 +65,7 @@ class ExpectedMetadataTest(unittest.TestCase):
         report_stdout = "default: 2\n   default: 2\n default: 3\nuserClick: 1\n    userClick: 2\nuserClick: 3"
         test_result = get_test_instance(report_stdout, "",
                                         expected_out, expected_error, fail_kind="Other")
-        passed = test_result.compare_output_with_expected(report_stdout, "")
+        passed = test_result.compare_with_stdout(report_stdout)
 
         self.assertFalse(passed)
 
@@ -75,7 +75,7 @@ class ExpectedMetadataTest(unittest.TestCase):
         report_stdout = "default: 2\n   default: 2\nuserClick: 1\n    userClick: 2\nuserClick: 3"
         test_result = get_test_instance(report_stdout, "",
                                         expected_out, expected_error, fail_kind="Other")
-        passed = test_result.compare_output_with_expected(report_stdout, "")
+        passed = test_result.compare_with_stdout(report_stdout)
 
         self.assertFalse(passed)
 
@@ -84,7 +84,7 @@ class ExpectedMetadataTest(unittest.TestCase):
         expected_error = "default: 1\n    default: 2\n    default: 3\nuserClick: 1\nuserClick: 2\n    userClick: 3"
         report_stderr = "default: 1\n  default: 2\ndefault: 3\n     userClick: 1\nuserClick: 2\nuserClick: 3"
         test_result = get_test_instance("report_stdout", report_stderr, expected_out, expected_error)
-        passed = test_result.compare_output_with_expected("", report_stderr)
+        passed = test_result.compare_with_stderr(report_stderr)
 
         self.assertTrue(passed)
 
@@ -93,7 +93,7 @@ class ExpectedMetadataTest(unittest.TestCase):
         expected_error = "default: 1\n    default: 2\n    default: 3\nuserClick: 1\nuserClick: 2\n    userClick: 3"
         report_stderr = "default: 1\n  default: 2\ndefault: 3\n     userClick: 1\nuserClick: 2\nuserClick: 3"
         test_result = get_test_instance("report_stdout", report_stderr, expected_out, expected_error)
-        passed = test_result.compare_output_with_expected("", report_stderr)
+        passed = test_result.compare_with_stderr(report_stderr)
 
         self.assertTrue(passed)
 
@@ -103,7 +103,7 @@ class ExpectedMetadataTest(unittest.TestCase):
         report_stderr = "default: 2\ndefault: 2\n   default: 3\nuserClick: 1\nuserClick: 2\n  userClick: 3"
         test_result = get_test_instance("", report_stderr,
                                         expected_out, expected_error, fail_kind="Other")
-        passed = test_result.compare_output_with_expected("", report_stderr)
+        passed = test_result.compare_with_stderr(report_stderr)
 
         self.assertFalse(passed)
 
@@ -113,7 +113,7 @@ class ExpectedMetadataTest(unittest.TestCase):
         report_stderr = "default: 2\ndefault: 2\n   default: 3\nuserClick: 1\n  userClick: 3"
         test_result = get_test_instance("", report_stderr,
                                         expected_out, expected_error, fail_kind="Other")
-        passed = test_result.compare_output_with_expected("", report_stderr)
+        passed = test_result.compare_with_stderr(report_stderr)
 
         self.assertFalse(passed)
 
@@ -123,9 +123,11 @@ class ExpectedMetadataTest(unittest.TestCase):
         report_stdout = "default: 1\ndefault: 2\n default: 3\nuserClick: 1\n     userClick: 2\n      userClick: 3"
         report_stderr = "default: 4\ndefault: 2\ndefault: 3\n userClick: 1\nuserClick: 2\nuserClick: 3"
         test_result = get_test_instance(report_stdout, report_stderr, expected_out, expected_error)
-        passed = test_result.compare_output_with_expected(report_stdout, report_stderr)
+        passed_output = test_result.compare_with_stdout(report_stdout)
+        passed_error = test_result.compare_with_stderr(report_stderr)
 
-        self.assertTrue(passed)
+        self.assertTrue(passed_output)
+        self.assertTrue(passed_error)
 
     def test_compare_both_some_lines_metadata(self) -> None:
         expected_out = "[TID 005030] default: 1\n    userClick: 2\n  userClick: 3"
@@ -136,15 +138,18 @@ class ExpectedMetadataTest(unittest.TestCase):
         report_stderr = ("    userClick: 3\n[TID 005030] default: 4\n[TID 005030] default: 2\n"
                         "    userClick: 2\ndefault: 2\ndefault: 3\n userClick: 1")
         test_result = get_test_instance(report_stdout, report_stderr, expected_out, expected_error)
-        passed = test_result.compare_output_with_expected(report_stdout, report_stderr)
-        self.assertTrue(passed)
+        passed_output = test_result.compare_with_stdout(report_stdout)
+        passed_error = test_result.compare_with_stderr(report_stderr)
+
+        self.assertTrue(passed_output)
+        self.assertTrue(passed_error)
 
     def test_expected_empty_string_vs_none(self) -> None:
         expected_out = ""
         expected_error = None
         report_stdout = "default: 1\ndefault: 2"
         test_result = get_test_instance(report_stdout, "", expected_out, expected_error)
-        passed = test_result.compare_output_with_expected(report_stdout, "")
+        passed = test_result.compare_with_stdout(report_stdout)
 
         self.assertFalse(passed)
 
@@ -153,25 +158,16 @@ class ExpectedMetadataTest(unittest.TestCase):
         expected_error = None
         report_stdout = ""
         test_result = get_test_instance(report_stdout, "", expected_out, expected_error)
-        passed = test_result.compare_output_with_expected(report_stdout, "")
+        passed = test_result.compare_with_stdout(report_stdout)
 
         self.assertFalse(passed)
-
-    def test_expected_none_with_non_empty_output(self) -> None:
-        expected_out = None
-        expected_error = None
-        report_stdout = "default: 1\ndefault: 2"
-        test_result = get_test_instance(report_stdout, "", expected_out, expected_error)
-        passed = test_result.compare_output_with_expected(report_stdout, "")
-
-        self.assertTrue(passed)
 
     def test_expected_none_with_non_empty_error(self) -> None:
         expected_out = None
         expected_error = None
         report_stderr = "error: something went wrong"
         test_result = get_test_instance("", report_stderr, expected_out, expected_error)
-        passed = test_result.compare_output_with_expected("", report_stderr)
+        passed = test_result.compare_with_stderr(report_stderr)
 
         self.assertFalse(passed)
 
@@ -179,9 +175,11 @@ class ExpectedMetadataTest(unittest.TestCase):
         expected_out = None
         expected_error = None
         test_result = get_test_instance("", "", expected_out, expected_error)
-        passed = test_result.compare_output_with_expected("", "")
+        passed_output = test_result.compare_with_stdout("")
+        passed_error = test_result.compare_with_stderr("")
 
-        self.assertTrue(passed)
+        self.assertTrue(passed_output)
+        self.assertTrue(passed_error)
 
     def test_compare_both_fail(self) -> None:
         expected_out = "default: 1\ndefault: 2"
@@ -190,17 +188,8 @@ class ExpectedMetadataTest(unittest.TestCase):
         report_stderr = "error: actual"
         test_result = get_test_instance(report_stdout, report_stderr, expected_out, expected_error,
                                         fail_kind="Other")
-        passed = test_result.compare_output_with_expected(report_stdout, report_stderr)
+        passed_output = test_result.compare_with_stdout(report_stdout)
+        passed_error = test_result.compare_with_stderr(report_stderr)
 
-        self.assertFalse(passed)
-
-    def test_compare_both_one_fail(self) -> None:
-        expected_out = "default: 1\ndefault: 2"
-        expected_error = "error: expected"
-        report_stdout = "default: 1\ndefault: 2"
-        report_stderr = "error: actual"
-        test_result = get_test_instance(report_stdout, report_stderr, expected_out, expected_error,
-                                        fail_kind="Other")
-        passed = test_result.compare_output_with_expected(report_stdout, report_stderr)
-
-        self.assertFalse(passed)
+        self.assertFalse(passed_output)
+        self.assertFalse(passed_error)

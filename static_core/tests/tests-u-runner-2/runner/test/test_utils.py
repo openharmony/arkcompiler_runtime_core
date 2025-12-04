@@ -19,6 +19,7 @@ import unittest
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, TypeVar
+from unittest.mock import MagicMock
 
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
@@ -132,3 +133,11 @@ def parametrized_test_cases(test_cases: list[tuple[list[str]]]) -> Callable:
                     func(self, *test_case)
         return wrapper
     return decorator
+
+
+def set_process_mock(mock_popen: MagicMock, return_code: int, output: str = "", error_out: str = "") -> None:
+    proc = MagicMock()
+    proc.__enter__.return_value = proc
+    proc.communicate.return_value = (output, error_out)
+    proc.returncode = return_code
+    mock_popen.return_value = proc

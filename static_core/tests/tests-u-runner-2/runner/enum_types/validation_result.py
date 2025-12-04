@@ -32,3 +32,4 @@ class ValidationResult:
     passed: bool
     kind: ValidatorFailKind = ValidatorFailKind.NONE
     description: str = ""
+    stop_runtime_validation: bool = False

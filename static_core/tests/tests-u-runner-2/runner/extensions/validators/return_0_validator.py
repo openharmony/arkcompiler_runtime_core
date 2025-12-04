@@ -29,6 +29,7 @@ _LOGGER = Log.get_logger(__file__)
 
 class Return0Validator(IValidator):
     def __init__(self) -> None:
+        super().__init__()
         for value in StepKind.values():
             self.add(value, Return0Validator.check_return_code_0)
 

@@ -97,6 +97,7 @@ fi
 
 function run_linter() {
     local filename="$1"
+    [ -f "${filename}" ] || return 0
     pylint -s false --timeout-methods subprocess.Popen.communicate --disable=all -e "${PYLINT_RULES}" "${filename}"
     save_exit_code ${EXIT_CODE} $?
     EXIT_CODE=$?
