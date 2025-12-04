@@ -7,8 +7,5 @@ escompat/JsonParseTest.ets
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
-#29144
-std/core/json/JsonStringifyBigIntTest.ets
-
 #29146
 algorithms/SortingTest.ets
