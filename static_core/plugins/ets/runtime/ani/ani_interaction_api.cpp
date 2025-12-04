@@ -458,7 +458,8 @@ static bool CheckUniqueMethod(EtsClass *klass, const char *name)
 }
 
 template <bool IS_STATIC_METHOD>
-static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char *signature, EtsMethod **result)
+static ani_status DoGetClassMethodUnderManagedScope(EtsClass *klass, const char *name, const char *signature,
+                                                    EtsMethod **result)
 {
     ASSERT_MANAGED_CODE();
     ASSERT(klass != nullptr);
@@ -474,7 +475,7 @@ static ani_status DoGetClassMethod(EtsClass *klass, const char *name, const char
     }
 
     // CC-OFFNXT(G.FMT.14-CPP) project code style
-    auto *method = [klass, name, &methodSignature]() -> EtsMethod * {
+    EtsMethod *method = [klass, name, &methodSignature]() {
         if constexpr (IS_STATIC_METHOD) {
             return klass->GetStaticMethod(name, methodSignature);
         } else {
@@ -510,7 +511,7 @@ static ani_status GetClassMethod(ani_env *env, ani_class cls, const char *name, 
 {
     ScopedManagedCodeFix s(env);
     EtsClass *klass = s.ToInternalType(cls);
-    return DoGetClassMethod<IS_STATIC_METHOD>(klass, name, signature, result);
+    return DoGetClassMethodUnderManagedScope<IS_STATIC_METHOD>(klass, name, signature, result);
 }
 
 template <typename ReturnType, EtsType EXPECT_TYPE, typename Args>
@@ -528,7 +529,7 @@ static ani_status ObjectCallMethodByName(ani_env *env, ani_object object, const 
     ASSERT(etsObject != nullptr);
     EtsClass *cls = etsObject->GetClass();
     EtsMethod *method = nullptr;
-    ani_status status = DoGetClassMethod<false>(cls, name, signature, &method);
+    ani_status status = DoGetClassMethodUnderManagedScope<false>(cls, name, signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ASSERT(method != nullptr);
     ani_method aniMethod = ToAniMethod(method);
@@ -541,7 +542,7 @@ static ani_status GetNamespaceFunction(ani_env *env, ani_namespace ns, const cha
 {
     ScopedManagedCodeFix s(env);
     EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
-    return DoGetClassMethod<true>(etsNs->AsClass(), name, signature, result);
+    return DoGetClassMethodUnderManagedScope<true>(etsNs->AsClass(), name, signature, result);
 }
 
 static ani_status GetModuleFunction(ani_env *env, ani_module ns, const char *name, const char *signature,
@@ -549,7 +550,7 @@ static ani_status GetModuleFunction(ani_env *env, ani_module ns, const char *nam
 {
     ScopedManagedCodeFix s(env);
     EtsModule *etsModule = EtsModule::FromClass(s.ToInternalType(ns)->AsClass());
-    return DoGetClassMethod<true>(etsModule->AsClass(), name, signature, result);
+    return DoGetClassMethodUnderManagedScope<true>(etsModule->AsClass(), name, signature, result);
 }
 
 template <typename ReturnType, EtsType EXPECT_TYPE, typename Args>
@@ -1567,38 +1568,32 @@ NO_UB_SANITIZE static ani_status FunctionalObject_Call(ani_env *env, ani_fn_obje
     }
     CHECK_PTR_ARG(result);
 
-    // API should migrate to a correct threshold
-    static constexpr size_t STD_CORE_FUNCTION_MAX_ARITY = EtsPlatformTypes::CORE_FUNCTION_ARITY_THRESHOLD - 2U;
-    ANI_CHECK_RETURN_IF_GT(argc, STD_CORE_FUNCTION_MAX_ARITY, ANI_INVALID_ARGS);
-
-    ani_status status = ANI_OK;
     ScopedManagedCodeFix s(env);
-    EtsObject *etsFn = s.ToInternalType(fn);
+    auto *coro = s.GetCoroutine();
+    EtsHandleScope h(coro);
+    EtsHandle etsFn(coro, s.ToInternalType(fn));
+
     EtsClass *etsCls = etsFn->GetClass();
-
     ANI_CHECK_RETURN_IF_EQ(etsCls->IsFunction(), false, ANI_INVALID_TYPE);
+    EtsMethod *method = etsCls->GetInstanceMethod("unsafeCall", "[Lstd/core/Object;:Lstd/core/Object;");
+    // `unsafeCall` must always present for classes marked with `IS_FUNCTION` flag
+    ASSERT(method != nullptr);
 
-    EtsMethod *method = nullptr;
-    PandaStringStream methodName;
-    methodName << STD_CORE_FUNCTION_INVOKE_PREFIX << argc;
-    status = DoGetClassMethod<false>(etsCls, methodName.str().c_str(), nullptr, &method);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-
-    ArgVector<Value> args = {};
-    args.reserve(argc + 1);
-    args.emplace_back(s.ToInternalType(fn)->GetCoreType());
+    EtsObjectArray *callArgs = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, argc);
+    ANI_CHECK_RETURN_IF_EQ(callArgs, nullptr, ANI_OUT_OF_MEMORY);
     for (ani_size i = 0; i < argc; ++i) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto *internalType = s.ToInternalType(argv[i]);
-        args.emplace_back(internalType != nullptr ? internalType->GetCoreType() : nullptr);
+        callArgs->Set(i, internalType);
     }
 
+    std::array args = {Value(etsFn->GetCoreType()), Value(callArgs->GetCoreType())};
     EtsValue res {};
-    status = method->Invoke(s, args.data(), &res);
+    auto status = method->Invoke(s, args.data(), &res);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     *result = res.GetAs<ani_ref>();
-    return status;
+    return ANI_OK;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
