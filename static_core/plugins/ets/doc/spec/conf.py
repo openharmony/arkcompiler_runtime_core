@@ -24,7 +24,10 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
+from sphinx.directives.code import CodeBlock
+from docutils import nodes
 import sphinx_common_conf
+from docutils.parsers.rst import directives
 
 # -- Project information -----------------------------------------------------
 
@@ -81,3 +84,27 @@ htmlhelp_basename = 'Documentationdoc'
 latex_elements = {
     'passoptionstopackages': r'\PassOptionsToPackage{bookmarksdepth=2}{hyperref}',
 }
+
+# -- Directive options extension ---------------------------------------------
+
+
+class CustomCodeBlock(CodeBlock):
+    option_spec = CodeBlock.option_spec.copy()
+    option_spec["language-to-compile"] = lambda arg: arg
+    option_spec["donotcompile"] = directives.flag
+
+    def run(self):
+        language_value = self.options.get("language-to-compile")
+        no_compile = "donotcompile" in self.options
+        result = super().run()
+
+        for node in result:
+            if isinstance(node, nodes.literal_block):
+                node["language-to-compile"] = language_value
+                node["donotcompile"] = no_compile
+
+        return result
+
+
+def setup(app):
+    app.add_directive("code-block", CustomCodeBlock, override=True)

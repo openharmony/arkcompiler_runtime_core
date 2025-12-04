@@ -13,11 +13,11 @@
 
 @echo off
 md __build
-cd runtime
+cd concurrency
 sphinx-build -n -W --keep-going -b latex . ..\__build
 cd ..\__build
 latexmk -f -silent -pdf -dvi- -ps- *.tex
-md ..\runtime\build
-move *.pdf ..\runtime\build
+md ..\concurrency\build
+move *.pdf ..\concurrency\build
 cd ..
 rmdir /S /Q __build

@@ -10,14 +10,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-########
-Glossary
-########
+.. _Concurrency Requirements for Interop:
 
-.. glossary::
+Concurrency Requirements for Interop
+************************************
 
-   AsyncLock
-     A class that implements an asynchronous lock and allows asynchronous operations to be performed under a lock.
-
-   Coroutine
-     Part of computer program which execution can be suspended and resumed. 
+Any coroutine which trying to call JS can have CTE or RTE if it is executed not on the Main or EA domains.

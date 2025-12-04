@@ -10,9 +10,22 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Introduction:
+.. _Overview:
 
-Introduction
-############
+Overview
+********
 
-TBD
+Runtime specification presents complete information on the structure of the |LANG|
+runtime system with the detailed description of runtime data structures used
+and approaches followed. The runtime system is designed to run multi-language
+module-based applications on microcontrollers and mobile devices.
+
+The Design Principles
+=====================
+
+-  Simple and portable design
+-  Minimalistic and lightweight implementation
+-  Documented design, rationales, and public API
+-  Buildable and tested master
+-  Explicit maintenance and development process
+

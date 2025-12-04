@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -10,21 +10,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-============================
-|LANG| Runtime Specification
-============================
+.. Concurrency Glossary::
 
-.. toctree::
-    :numbered:
-    :maxdepth: 3
+Concurrency Glossary
+********************
 
-    /01_intro
-    /02_bytecode
-    /03_file_format
-    /04_names
-    /05_imports
-    /06_runtime_class
-    /07_verifier
+   ``AsyncLock``
+     A class that implements an asynchronous lock and allows asynchronous operations to be performed under a lock.
 
-
-
+   Coroutine
+     Part of computer program which execution can be suspended and resumed.

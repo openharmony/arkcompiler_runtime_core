@@ -25,6 +25,7 @@ import sys
 
 from sphinx.directives.code import CodeBlock
 from docutils import nodes
+from docutils.parsers.rst import directives
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -90,7 +91,7 @@ todo_include_todos = True
 class CustomCodeBlock(CodeBlock):
     option_spec = CodeBlock.option_spec.copy()
     option_spec["language-to-compile"] = lambda arg: arg
-    option_spec["donotcompile"] = lambda arg: True
+    option_spec["donotcompile"] = directives.flag
 
     def run(self):
         language_value = self.options.get("language-to-compile")
