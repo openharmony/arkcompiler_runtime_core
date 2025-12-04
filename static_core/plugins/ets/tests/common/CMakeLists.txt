@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,5 +19,6 @@ add_subdirectory(bouncing_pandas)
 # NOTE(@srokashevich, #29065): enable with asan after fix
 if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
     add_subdirectory(import_from_abc_simple)
+    add_subdirectory(import_from_abc_package)
     add_subdirectory(import_from_declaration_cache)
 endif()
