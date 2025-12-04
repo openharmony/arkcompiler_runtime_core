@@ -386,7 +386,6 @@ std/core/std_core_string_String_codePointCount_number_number.ets
 std/core/std_core_string_String_repeat_int.ets
 std/core/std_core_string_String_repeat_number.ets
 std/core/JsonReplacerTest.ets
-std/core/regexp/JsonStringifyRegExpExecArrayTest.ets
 regression/15278_0.ets
 
 #30585
@@ -395,7 +394,6 @@ std/core/EAWorker_out_of_coro_creation.ets
 #31475
 escompat/DateTest.ets
 std/core/IntlPluralRulesSupportedLocalesOfTest.ets
-std/core/ReflectFieldTest.ets
 std/concurrency/messageHandler_basic_interface.ets
 std/concurrency/message_basic_interface.ets
 std/concurrency/AsyncLockTimeoutTest.ets

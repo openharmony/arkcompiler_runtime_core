@@ -30,8 +30,6 @@ ets-common-tests/atomics/base_operation_store.ets
 ets-common-tests/atomics/base_operation_xor.ets
 
 #31210
-ets-common-tests/atomics/base_operation_load.ets
-ets-common-tests/atomics/base_operation_compare_exchange.ets
 ets-common-tests/taskpool/long_task.ets
 
 # 24986
@@ -41,6 +39,3 @@ ets-common-tests/intrinsics/uint32array_sort.ets
 
 #30894
 ets-common-tests/taskpool/common_tasks.ets
-
-#29592
-ets-common-tests/atomics/base_operation_exchange.ets
