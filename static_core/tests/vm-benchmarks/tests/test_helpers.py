@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from collections import namedtuple
 from vmb.helpers import Singleton, remove_prefix, Jsonable, get_plugin
 from vmb.helpers_numbers import auto_str, nano_str
-from vmb.plugins.hooks.cpumask import parse_bitmask
+from vmb.plugins.hooks.cpumask import parse_cpumask
 
 NameVal = namedtuple("NameVal", "name value")
 
@@ -101,10 +101,26 @@ def test_json_loads() -> None:
 
 def test_bitmask():
     test = TestCase()
-    test.assertTrue(parse_bitmask('0x03')[1] == [True] * 2 + [False] * 6)
-    test.assertTrue(parse_bitmask('0xF0')[1] == [False] * 4 + [True] * 4)
-    test.assertTrue(
-        parse_bitmask('0x100')[1] == [False] * 8 + [True] + [False] * 3)
+    # Hex numbers with prefix 0x
+    test.assertEqual(parse_cpumask('0x1BF'), '1BF')
+    test.assertEqual(parse_cpumask('0X10'), '10')
+    test.assertEqual(parse_cpumask('0xff'), 'FF')
+    test.assertEqual(parse_cpumask('0xabcd'), 'ABCD')
+    # Binary numbers with prefix 0b
+    test.assertEqual(parse_cpumask('0b1011'), 'B')
+    test.assertEqual(parse_cpumask('0B1000'), '8')
+    test.assertEqual(parse_cpumask('0b11111111'), 'FF')
+    test.assertEqual(parse_cpumask('0B1010'), 'A')
+    # Expected exceptions
+    test.assertRaisesRegex(ValueError, 'Invalid cpumask: "None". Must be non-empty', parse_cpumask, None)
+    test.assertRaisesRegex(ValueError, 'Invalid cpumask: "". Must be non-empty', parse_cpumask, '')
+    test.assertRaisesRegex(ValueError, 'Invalid cpumask format: "123". Must be hexidecimal or binary number', parse_cpumask, '123')
+    test.assertRaisesRegex(ValueError, 'Invalid cpumask format: "0o777". Must be hexidecimal or binary number', parse_cpumask, '0o777')
+    test.assertRaisesRegex(ValueError, 'Invalid cpumask format: "0x2k". Must be hexidecimal or binary number', parse_cpumask, '0x2k')
+    test.assertRaisesRegex(ValueError, 'Invalid cpumask format: "0b21". Must be hexidecimal or binary number', parse_cpumask, '0b21')
+    test.assertRaisesRegex(ValueError, 'Invalid cpumask format: "invalid". Must be hexidecimal or binary number', parse_cpumask, 'invalid')
+    test.assertRaisesRegex(ValueError, 'Invalid cpumask: "0x0". Must be non-zero', parse_cpumask, '0x0')
+    test.assertRaisesRegex(ValueError, 'Invalid cpumask: "0b0". Must be non-zero', parse_cpumask, '0b0')
 
 
 def test_numbers():

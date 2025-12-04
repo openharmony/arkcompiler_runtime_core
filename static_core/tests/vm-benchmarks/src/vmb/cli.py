@@ -144,6 +144,9 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--cpumask', default='', type=str,
                         help='Use cores mask in hex or bin format. '
                              'E.g., 0x38 or 0b111000 = high cores')
+    parser.add_argument('--cpufreq', default='', type=str,
+                        help='Set cpu frequency or ratio (integer percents with %% sign). '
+                             'E.g., 85%% or 4220000. Default value is 100%%')
     parser.add_argument('--aot-stats', action='store_true',
                         help='Collect aot compilation data')
     parser.add_argument('--jit-stats', action='store_true',

@@ -108,6 +108,50 @@ class ShellResult:
             if self.out:
                 log.debug(self.out)
 
+    def log_output_with_levels(self) -> None:
+        """Log output using prefix to determine log level.
+
+        Uses 'Error:', 'Warning:' and 'Info:' prefixes to determine log level.
+        Lines without prefix are logged to DEBUG.
+        Throw RuntimeException if non-zero value returned.
+        """
+        runtime_error = 'Unknown error'
+        log_level = logging.DEBUG
+        lines = f"{self.out}\n{self.err}".split("\n")
+
+        for line in lines:
+            sline = line.strip()
+            if sline:
+                log_level, message = self.prepare_log_level_message(sline)
+                if message:
+                    log.log(log_level, message)
+                    if log_level == logging.ERROR:
+                        runtime_error = message
+
+        if self.ret != 0:
+            raise RuntimeError(runtime_error)
+
+    def prepare_log_level_message(self, line: str):
+        error = 'error:'
+        warning = 'warning:'
+        info = 'info:'
+
+        line_lower = line.lower()
+        if line_lower.startswith(error):
+            log_level = logging.ERROR
+            message = line[len(error):]
+        elif line_lower.startswith(warning):
+            log_level = logging.WARNING
+            message = line[len(warning):]
+        elif line_lower.startswith(info):
+            log_level = logging.INFO
+            message = line[len(info):]
+        else:
+            log_level = logging.DEBUG
+            message = line
+
+        return (log_level, message.strip())
+
 
 class ShellBase(metaclass=Singleton):
 

@@ -181,6 +181,21 @@ Note: options `--tests` and `--test-list` could be combined (by OR condition) in
 * `-c` (`--concurrency-level`) reserved for some internal plugins related to concurrency lvl, e.g.
   for jvm benches
 
+## Device-specific options
+
+- `--cpumask` selects which CPU cores are online for benchmarking on OHOS devices.
+  The mask is specified in hexadecimal (prefix `0x`) or binary (prefix `0b`) format.
+  Each bit corresponds to a CPU core, where bit 0 is CPU0, bit 1 is CPU1, etc.
+  For example, `0x38` (binary `0b111000`) enables CPUs 3,4,5 and disables others.
+  This option is only applied for OHOS device platforms.
+
+- `--cpufreq` sets CPU frequency or ratio for the selected cores.
+  The value can be an absolute frequency in kHz (e.g., `4220000`) or a percentage
+  of the maximum available frequency (e.g., `85%`). Default is `100%`. In all cases
+  the nearest available CPU frequency will be applied.
+  **Note:** `--cpufreq` requires `--cpumask` to be specified; it cannot be used alone.
+  This option is only applied for OHOS device platforms.
+
 ## No run option
 `--no-run` (or `-N`) option disables all command's execution.
 Instead they will be just printed to console.
@@ -442,7 +457,7 @@ This platform allows to run `arkts/ets` benchmarks as application ability
 - `OHOS_BASE_SDK_HOME` env var should point to unpacked OHOS SDK
 - `hvigorw` should be in PATH or `HVIGORW` env var should point to hvigor script or binary
 - `hdc` should be in PATH or `HDC` env var should point to hdc script or binary
-- For signing package `HAP_SIGNING_CONFIG` env var should point to json config 
+- For signing package `HAP_SIGNING_CONFIG` env var should point to json config
     as in `app/signingConfigs/material` section of `build-profile.json5`
 
 ##### Run
