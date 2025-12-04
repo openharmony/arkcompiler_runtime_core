@@ -62,6 +62,7 @@
     X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
     X(VERIFY_UTF8_STRING,                   VerifyUTF8String)                     \
     X(VERIFY_SIZE,                          VerifySize)                           \
+    X(VERIFY_RESOLVER,                      VerifyResolver)                       \
     X(VERIFY_ERROR_STORAGE,                 VerifyErrorStorage)                   \
     X(VERIFY_FIXED_ARRAY_BOOLEAN_STORAGE,   VerifyFixedArrayBooleanStorage)       \
     X(VERIFY_FIXED_ARRAY_CHAR_STORAGE,      VerifyFixedArrayCharStorage)          \
@@ -71,6 +72,7 @@
     X(VERIFY_FIXED_ARRAY_LONG_STORAGE,      VerifyFixedArrayLongStorage)          \
     X(VERIFY_FIXED_ARRAY_FLOAT_STORAGE,     VerifyFixedArrayFloatStorage)         \
     X(VERIFY_FIXED_ARRAY_DOUBLE_STORAGE,    VerifyFixedArrayDoubleStorage)        \
+    X(VERIFY_RESOLVER_STORAGE,              VerifyResolverStorage)                \
 
 // CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
 #define ANI_ARG_TYPES_MAP                                                                    \
@@ -115,7 +117,6 @@
     X(ANI_UTF16_STRING,                 UTF16String,               const uint16_t *)         \
     X(ANI_ERROR_STORAGE,                ErrorStorage,              VError **)                \
     X(UINT32,                           U32,                       uint32_t)                 \
-    X(UINT32x,                          U32x,                      uint32_t)                 \
     X(METHOD_ARGS,                      MethodArgs,                AniMethodArgs *)          \
     X(ANI_FIXED_ARRAY_BOOLEAN_STORAGE,  FixedArrayBooleanStorage,  VFixedArrayBoolean **)    \
     X(ANI_FIXED_ARRAY_CHAR_STORAGE,     FixedArrayCharStorage,     VFixedArrayChar **)       \
@@ -125,8 +126,11 @@
     X(ANI_FIXED_ARRAY_LONG_STORAGE,     FixedArrayLongStorage,     VFixedArrayLong **)       \
     X(ANI_FIXED_ARRAY_FLOAT_STORAGE,    FixedArrayFloatStorage,    VFixedArrayFloat **)      \
     X(ANI_FIXED_ARRAY_DOUBLE_STORAGE,   FixedArrayDoubleStorage,   VFixedArrayDouble **)     \
+    X(ANI_RESOLVER,                     Resolver,                  VResolver *)              \
+    X(ANI_RESOLVER_STORAGE,             ResolverStorage,           VResolver **)             \
+
 // NOLINTEND(cppcoreguidelines-macro-usage)
-    // clang-format on
+// clang-format on
 
 namespace ark::ets {
 class EtsMethod;
@@ -153,6 +157,7 @@ class VFixedArrayInt;
 class VFixedArrayLong;
 class VFixedArrayFloat;
 class VFixedArrayDouble;
+class VResolver;
 
 class ANIArg {
 public:
@@ -402,6 +407,21 @@ public:
     static ANIArg MakeForArrayDoubleStorage(VFixedArrayDouble **arrStorage, std::string_view name)
     {
         return ANIArg(ArgValueByFixedArrayDoubleStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_DOUBLE_STORAGE);
+    }
+
+    static ANIArg MakeForResolver(VResolver *valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByResolver(valueStorage), name, Action::VERIFY_RESOLVER);
+    }
+
+    static ANIArg MakeForResolverStorage(VResolver **valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByResolverStorage(valueStorage), name, Action::VERIFY_RESOLVER_STORAGE);
+    }
+
+    static ANIArg MakeForPromiseStorage(VObject **valueStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByObjectStorage(valueStorage), name, Action::VERIFY_OBJECT_STORAGE);
     }
 
     Action GetAction() const

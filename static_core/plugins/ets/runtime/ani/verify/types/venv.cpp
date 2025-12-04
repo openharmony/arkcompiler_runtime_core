@@ -73,6 +73,21 @@ bool VEnv::IsValidGlobalVerifiedRef(VRef *vgref)
     return GetEnvANIVerifier()->IsValidGlobalVerifiedRef(vgref);
 }
 
+VResolver *VEnv::AddGlobalVerifiedResolver(ani_resolver resolver)
+{
+    return GetEnvANIVerifier()->AddGlobalVerifiedResolver(resolver);
+}
+
+void VEnv::DeleteGlobalVerifiedResolver(VResolver *vresolver)
+{
+    GetEnvANIVerifier()->DeleteGlobalVerifiedResolver(vresolver);
+}
+
+bool VEnv::IsValidGlobalVerifiedResolver(VResolver *vresolver)
+{
+    return GetEnvANIVerifier()->IsValidGlobalVerifiedResolver(vresolver);
+}
+
 EnvANIVerifier *VEnv::GetEnvANIVerifier()
 {
     return PandaEnv::FromAniEnv(GetEnv())->GetEnvANIVerifier();

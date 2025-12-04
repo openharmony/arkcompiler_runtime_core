@@ -212,4 +212,19 @@ bool EnvANIVerifier::IsValidStackRef(VRef *vref)
     return verifier_->IsValidStackRef(vref);
 }
 
+VResolver *EnvANIVerifier::AddGlobalVerifiedResolver(ani_resolver resolver)
+{
+    return verifier_->AddGlobalVerifiedResolver(resolver);
+}
+
+void EnvANIVerifier::DeleteGlobalVerifiedResolver(VResolver *vresolver)
+{
+    return verifier_->DeleteGlobalVerifiedResolver(vresolver);
+}
+
+bool EnvANIVerifier::IsValidGlobalVerifiedResolver(VResolver *vresolver)
+{
+    return verifier_->IsValidGlobalVerifiedResolver(vresolver);
+}
+
 }  // namespace ark::ets::ani::verify
