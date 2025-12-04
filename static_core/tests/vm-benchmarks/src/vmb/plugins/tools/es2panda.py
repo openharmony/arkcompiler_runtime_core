@@ -188,6 +188,9 @@ class Tool(ToolBase):
             f'--arktsconfig={arktsconfig} '
             f'--output={abc} {src}',
             measure_time=True)
+        if self.no_run:
+            bu.status = BUStatus.NOT_RUN
+            return res
         if res.ret != 0 or not abc.is_file():
             bu.status = BUStatus.COMPILATION_FAILED
             raise VmbToolExecError(f'{self.name} failed: {src}', res)

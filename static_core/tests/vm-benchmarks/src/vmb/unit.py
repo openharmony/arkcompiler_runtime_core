@@ -155,8 +155,9 @@ class BenchUnit:
             return files[0]
         if die_on_zero_matches:
             raise RuntimeError(f'Files {self.path}/{BENCH_PREFIX}{self.name}*[{",".join(ext)}] not found!')
-        # fallback: return unexistent
-        return self.path.joinpath(f'{BENCH_PREFIX}{self.name}')
+        # fallback: return nonexistent (needed for no-run mode)
+        suffix = '.*' if len(ext) < 1 else ext[0]
+        return self.path.joinpath(f'{BENCH_PREFIX}{self.name}{suffix}')
 
     def libs(self, *ext) -> Iterable[Path]:
         if self.__libs:

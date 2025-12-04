@@ -17,7 +17,7 @@
 
 from vmb.tool import ToolBase, OptFlags, VmbToolExecError
 from vmb.target import Target
-from vmb.unit import BenchUnit
+from vmb.unit import BenchUnit, BUStatus
 
 
 class Tool(ToolBase):
@@ -51,6 +51,9 @@ class Tool(ToolBase):
             f'--open-ark-tools=true '
             f'{aot}{jit}{self.custom} {name}.abc',
             cwd=str(bu_path))
+        if self.no_run:
+            bu.status = BUStatus.NOT_RUN
+            return
         bu.parse_run_output(res)
 
     def profile(self, bu: BenchUnit, with_aot: bool = False) -> None:

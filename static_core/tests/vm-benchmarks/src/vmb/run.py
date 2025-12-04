@@ -59,6 +59,7 @@ class VmbRunner:
             sys.exit(1)
         self.abort_on_fail = args.abort_on_fail
         self.dry_run = args.dry_run
+        self.no_run = args.no_run
         self.skip_cleanup = args.skip_cleanup
         self.exclude_list = args.exclude_list
         self.fail_logs = args.fail_logs
@@ -112,9 +113,9 @@ class VmbRunner:
             elif BUStatus.COMPILATION_FAILED == bu.status:
                 bu.result.compile_status = 1
                 log.error('%s: compilation failed', bu.name)
-            elif len(bu.result.execution_forks) == 0 and not self.dry_run:
+            elif len(bu.result.execution_forks) == 0 and not (self.dry_run or self.no_run):
                 raise VmbToolExecError('No benchmark iterations!')
-            elif not self.dry_run:
+            elif not (self.dry_run or self.no_run):
                 log.error('%s: failed', bu.name)
         except (VmbToolExecError, TimeoutExpired, RuntimeError) as e:
             self.process_error(bu, e)
@@ -177,6 +178,8 @@ class VmbRunner:
 
     def run(self, bench_units: List[BenchUnit]) -> Tuple[List[BenchUnit], ExtInfo, Timer]:
         log.info("Starting RUN phase...")
+        if self.no_run:
+            log.warning('%s\nDummy run! No command actually executed!\n%s', '=' * 40, '=' * 40)
         timer_suite = Timer()
         self.hooks.run_before_suite(self.platform)
         # the point is to run platform init (if any) after hooks

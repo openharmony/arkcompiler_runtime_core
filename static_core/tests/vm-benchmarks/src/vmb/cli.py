@@ -159,6 +159,8 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         help='Do not remove compiled files after test')
     parser.add_argument('--skip-compilation', action='store_true',
                         help='Do not compile tests. Reuse existing binaries.')
+    parser.add_argument('-N', '--no-run', action='store_true',
+                        help='Do not execute commands, just print them.')
 
 
 def add_report_opts(parser: argparse.ArgumentParser) -> None:
@@ -374,6 +376,8 @@ class Args(argparse.Namespace):
             flags |= OptFlags.JIT
         if self.get('dry_run', False):
             flags |= OptFlags.DRY_RUN
+        if self.get('no_run', False):
+            flags |= OptFlags.NO_RUN
         if self.get('aot_skip_libs', False):
             flags |= OptFlags.AOT_SKIP_LIBS
         if self.get('enable_gc_logs', False):

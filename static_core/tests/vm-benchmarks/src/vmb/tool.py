@@ -63,6 +63,7 @@ class OptFlags(Flag):
     AOT_STATS = auto()
     AOT_SKIP_LIBS = auto()
     DRY_RUN = auto()
+    NO_RUN = auto()
     SKIP_COMPILATION = auto()
     DISABLE_INLINING = auto()
     AOT = auto()
@@ -83,6 +84,7 @@ class ToolBase(CrossShell, ABC):
     hdc_: ShellDevice
     dev_dir: Path
     libs: Path
+    is_no_run: bool
 
     def __init__(self,
                  target: Target = Target.HOST,
@@ -91,6 +93,8 @@ class ToolBase(CrossShell, ABC):
                  custom_path: str = ''):
         self._target = target
         self.flags = flags
+        self.no_run = OptFlags.NO_RUN in self.flags
+        ToolBase.is_no_run = self.no_run
         self.custom_opts = custom_opts if custom_opts else []
         self.custom_path = custom_path
 
@@ -127,6 +131,10 @@ class ToolBase(CrossShell, ABC):
         return ' '.join(self.custom_opts)
 
     @staticmethod
+    def cmd_template() -> str:
+        return ''
+
+    @staticmethod
     def rename_suffix(old: Path, new_suffix: str) -> Path:
         if new_suffix == old.suffix:
             return old
@@ -151,14 +159,14 @@ class ToolBase(CrossShell, ABC):
     @staticmethod
     def ensure_file(*args, err: str = '') -> str:
         f = os.path.join(*args)
-        if not os.path.isfile(f):
+        if not os.path.isfile(f) and not ToolBase.is_no_run:
             raise RuntimeError(f'File "{f}" not found! {err}')
         return str(f)
 
     @staticmethod
     def ensure_dir(*args, err: str = '') -> str:
         d = os.path.join(*args)
-        if not os.path.isdir(d):
+        if not os.path.isdir(d) and not ToolBase.is_no_run:
             raise RuntimeError(f'Dir "{d}" not found! {err}')
         return str(d)
 
