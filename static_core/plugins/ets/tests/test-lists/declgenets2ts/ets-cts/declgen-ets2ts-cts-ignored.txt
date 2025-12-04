@@ -2856,3 +2856,6 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_10.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_11.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_12.ets
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_generic_array_tuple_n_0.ets
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_generic_array_tuple_n_1.ets
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_generic_array_tuple_n_2.ets
