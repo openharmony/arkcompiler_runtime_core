@@ -17,8 +17,8 @@ limitations under the License.
 
 /*---
 desc: Predefined type declaration.
-test-suffix: "{{i.file_name}}"
-file-name: "different_file_name"
+test_suffix: "{{i.file_name}}"
+file_name: "different_file_name"
 ---*/
 
 class A {

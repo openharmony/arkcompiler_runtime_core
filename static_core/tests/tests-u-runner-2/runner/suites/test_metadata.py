@@ -88,6 +88,8 @@ class Tags:
 class TestMetadata:     # type: ignore[explicit-any]
     tags: Tags = field(default_factory=Tags)
     desc: str | None = None
+    test_suffix: str | None = None
+    file_name: str | None = None
     files: list[str] | None = None
     assertion: str | None = None
     params: Any | None = None   # type: ignore[explicit-any]
