@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//! CHECKER       AOT: Set<boolean> overrided no inline Map
+//! CHECKER       AOT: don't inline external Set<boolean>
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*(test_set|SetHas|SetDelete)_.*'", entry: "ets_escompat_set_inlining.ETSGLOBAL::test_set_bool_double_overrided1"
 //! EVENT_NOT     /Inline,ets_escompat_set_inlining\.ETSGLOBAL::__noinline__SetHas_bool,std\.core\.Set::has,.*,SUCCESS/
@@ -25,10 +25,10 @@
 //! PASS_AFTER    "Inline"
 //! INST          /CallVirtual.*std\.core\.Set::delete/
 
-//! CHECKER       AOT PGO: Set<boolean> overrided no inline Map
+//! CHECKER       AOT PGO: don't inline external Set<boolean>
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PGO_PROF entry: "ets_escompat_set_inlining.ETSGLOBAL::test_set_bool_double_overrided1"
-//! RUN_PGO_PAOC options: "--compiler-regex='.*(test_set|SetHas|SetDelete)_.*'"
+//! RUN_PGO_PAOC options: "--compiler-regex='.*(test_set|SetHas|SetDelete)_.*' --compiler-inline-external-methods-aot=false"
 //! EVENT_NOT     /Inline,ets_escompat_set_inlining\.ETSGLOBAL::__noinline__SetHas_bool,std\.core\.Set::has,.*,SUCCESS/
 //! EVENT_NOT     /Inline,ets_escompat_set_inlining\.ETSGLOBAL::__noinline__SetDelete_bool,std\.core\.Set::delete,.*,SUCCESS/
 //! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::__noinline__SetHas_bool"
@@ -38,7 +38,7 @@
 //! PASS_AFTER    "Inline"
 //! INST          /CallVirtual.*std\.core\.Set::delete/
 
-//! CHECKER       JIT: Set<boolean> overrided inline Map
+//! CHECKER       JIT: inline Map methods inside Set<boolean>
 //! RUN           force_jit: true, options: "--compiler-regex='.*(test_set|SetHas|SetDelete)_.*'", entry: "ets_escompat_set_inlining.ETSGLOBAL::test_set_bool_double_overrided1"
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::__noinline__SetHas_bool,std\.core\.Set::has,.*,SUCCESS/
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::__noinline__SetDelete_bool,std\.core\.Set::delete,.*,SUCCESS/
@@ -66,7 +66,7 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 }
 
 
-//! CHECKER       AOT + external inlining: Set inline Map
+//! CHECKER       AOT + external inlining: inline Map methods inside Set
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*test_set_.*' --compiler-inline-external-methods-aot=true", entry: "ets_escompat_set_inlining.ETSGLOBAL::main"
 //!
@@ -178,7 +178,7 @@ function __noinline__SetDelete_bool(set: Set<boolean>): boolean {
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 
-//! CHECKER       JIT: Set intrinsics
+//! CHECKER       JIT: inline Map methods inside Set
 //! RUN           force_jit: true, options: "--compiler-regex='.*test_set_.*'", entry: "ets_escompat_set_inlining.ETSGLOBAL::main"
 //!
 //! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::has,.*,STATIC,SUCCESS/

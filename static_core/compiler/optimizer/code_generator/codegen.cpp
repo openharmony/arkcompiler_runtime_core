@@ -865,9 +865,6 @@ void Codegen::EmitSlowPaths()
 
 uint32_t Codegen::GetAOTBinaryFileSnapshotIndexForInst([[maybe_unused]] const Inst *inst) const
 {
-#ifdef PANDA_TARGET_OHOS  // NOTE(compiler): remove #29517
-    return panda_file::File::INVALID_FILE_INDEX;
-#else
     ASSERT(GetGraph()->IsAotMode());
     // If external methods are not inlined we always use original logic (current method's file)
     if (!g_options.IsCompilerInlineExternalMethods() || !g_options.IsCompilerInlineExternalMethodsAot()) {
@@ -891,7 +888,6 @@ uint32_t Codegen::GetAOTBinaryFileSnapshotIndexForInst([[maybe_unused]] const In
     }
 
     return index;
-#endif
 }
 
 TypedImm Codegen::GetTypeIdImm(const Inst *inst, uint32_t typeId) const
