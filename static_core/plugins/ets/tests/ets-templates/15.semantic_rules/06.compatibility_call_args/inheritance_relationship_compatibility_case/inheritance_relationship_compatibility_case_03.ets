@@ -25,17 +25,12 @@ class MyClass implements MyInterface {
   method(): void {}
 }
 
-function checkTypeIdentity(a: Any, b: Any): boolean {
-    return a instanceof b; // return Class.of(a as Object) === Class.of(b as Object);
-}
-
 function main(): void {
   const val1: MyClass = new MyClass();
   const val2: MyInterface = { method(): void {} };
 
-  const result1 = checkTypeIdentity(val1, val2);
-  const result2 = checkTypeIdentity(val2, val1);
-
-  arktest.assertEQ(result1, true);
-  arktest.assertEQ(result2, false);
+  arktest.assertTrue(val1 instanceof MyClass);
+  arktest.assertTrue(val1 instanceof MyInterface);
+  arktest.assertFalse(val2 instanceof MyClass);
+  arktest.assertTrue(val2 instanceof MyInterface);
 }

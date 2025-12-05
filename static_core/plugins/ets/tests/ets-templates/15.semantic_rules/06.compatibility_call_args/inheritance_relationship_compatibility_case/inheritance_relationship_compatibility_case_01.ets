@@ -20,15 +20,12 @@ desc: Verifying compatibility between child class and parent class.
 class Parent {}
 class Child extends Parent {}
 
-function checkTypeIdentity(a: Any, b: Any): boolean {
-    return Class.of(a as Object) === Class.of(b as Object);
-}
-
 function main(): void {
   const val1: Child = new Child();
   const val2: Parent = new Parent();
 
-  const result1 = checkTypeIdentity(val1, val2);
-
-  arktest.assertEQ(result1, false);
+  arktest.assertTrue(val1 instanceof Child);
+  arktest.assertTrue(val1 instanceof Parent);
+  arktest.assertFalse(val2 instanceof Child);
+  arktest.assertTrue(val2 instanceof Parent);
 }
