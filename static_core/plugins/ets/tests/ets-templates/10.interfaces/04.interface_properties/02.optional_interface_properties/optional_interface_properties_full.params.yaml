@@ -32,8 +32,8 @@ cases:
   - "null"
   - undefined
   - never
-  - "(n: number) => string"
-  - "(n: number, ...ns: number[]) => string"
+  - "((n: number) => string)"
+  - "((n: number, ...ns: number[]) => string)"
   - '"a" | "b"'
   - "[number, string]"
   - Color

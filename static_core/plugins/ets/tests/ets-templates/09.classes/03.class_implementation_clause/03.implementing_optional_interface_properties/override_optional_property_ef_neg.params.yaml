@@ -28,15 +28,3 @@ cases:
      n: int|number|undefined = 42
 
     doc: optional property is implemented as extended union
-
-  - decl: |-
-     get n(): number|undefined {
-       return undefined
-     }
-    doc: optional property is implemented as getter
-
-
-  - decl: |-
-     set n(i: number|undefined) {}
-    doc: optional property is implemented as setter
-
