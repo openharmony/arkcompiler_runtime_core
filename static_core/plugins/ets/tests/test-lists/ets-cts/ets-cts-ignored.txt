@@ -213,7 +213,7 @@
 #30653
 07.expressions/03.named_reference/01.function_reference/static_field_as_ref.ets
 
-#31926 No CTE when array type cannot be determined in function call (was 23363)
+#31926 No CTE when array type cannot be determined in function call
 07.expressions/04.array_literal/arr_n_2.ets
 07.expressions/04.array_literal/arr_n_3.ets
 
@@ -1868,10 +1868,6 @@
 
 #31150 cannot create array of enums
 17.experimental_features/03.resizable_array_creation_expressions/expr_8.ets
-
-#31705
-17.experimental_features/03.resizable_array_creation_expressions/expr_n_20.ets
-17.experimental_features/03.resizable_array_creation_expressions/expr_n_21.ets
 
 #29160
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_export_decl_4.ets
