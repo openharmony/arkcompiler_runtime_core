@@ -66,7 +66,7 @@ function_decls:
         function foo(): Long[] { return new Long[0]; }
       call: |-
         let f: Long[] = foo();
-        arktest.assertTrue( f instanceof Long[] && f.length == 0 )
+        arktest.assertTrue( f instanceof Array && f.length == 0 )
 
     - decl: |-
         function foo(): (Object|undefined)[] {

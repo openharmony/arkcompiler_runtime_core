@@ -153,7 +153,7 @@ cases:
           v = new Float(3.5f)
           arktest.assertEQ(v, 3.5f)
           v = [['a', 'b'], ['A', 'B']]
-          arktest.assertTrue(v instanceof String[][] && v[0][0] == 'a' && v[1][1] == 'B')
+          arktest.assertTrue(v instanceof Array && v[0][0] == 'a' && v[1][1] == 'B')
 
     - decl: |-
           type UT = int[] | short[] | byte[] | Int[] | Short[] | Byte[]
@@ -185,9 +185,9 @@ cases:
           v = c'\u0001'
           arktest.assertTrue(v instanceof Char && v == c'\u0001')
           v = ['a', 'b', '\u0000']
-          arktest.assertTrue(v instanceof string[] && v[0] == 'a' && v[2] == '\u0000')
+          arktest.assertTrue(v instanceof Array && v[0] == 'a' && v[2] == '\u0000')
           v = [c'\u0001', c'\u0002', c'A']
-          arktest.assertTrue(v instanceof char[] && v[0] == c'\u0001' && v[2] == c'A')
+          arktest.assertTrue(v instanceof Array && v[0] == c'\u0001' && v[2] == c'A')
 
     # Boxed types
     - decl: |-
@@ -254,9 +254,9 @@ cases:
           type UT = B[] | C[]
       use: |-
           let v: UT = new B[1]
-          arktest.assertTrue(v instanceof B[])
+          arktest.assertTrue(v instanceof Array)
           v = new C[1]
-          arktest.assertTrue(v instanceof C[])
+          arktest.assertTrue(v instanceof Array)
 
     - decl: |-
           class A {}
@@ -346,7 +346,7 @@ cases:
           v = Color.Blue
           arktest.assertEQ(v, Color.Blue)
           v = [Size.S, Size.M, Size.L, Size.XL]
-          arktest.assertTrue(v instanceof Size[] && v[3] == Size.XL)
+          arktest.assertTrue(v instanceof Array && v[3] == Size.XL)
 
     - decl: |-
           enum Color { Red = 'r', Green = 'g', Blue = 'b' }
@@ -462,7 +462,7 @@ cases:
           type UT = [boolean, boolean, string] | boolean[]
       use: |-
           let v: UT = [true, true, false]
-          arktest.assertTrue(v instanceof boolean[] && !v[2])
+          arktest.assertTrue(v instanceof Array && !v[2])
           v = [true, true, 'false'] as [boolean, boolean, string]
           arktest.assertTrue(v[2] == 'false')
 
@@ -531,9 +531,9 @@ cases:
           let v: UT = null
           arktest.assertTrue(v === null)
           v = [11.0, 12.0, 13.0]
-          arktest.assertTrue(v instanceof number[] && v[0] == 11.0)
+          arktest.assertTrue(v instanceof Array && v[0] == 11.0)
           v = [new Error('Msg1'), new Error('Msg2')]
-          arktest.assertTrue(v instanceof Error[] && v[1].message == 'Msg2')
+          arktest.assertTrue(v instanceof Array && v[1].message == 'Msg2')
 
     - decl: |-
           type UT = string | number | undefined

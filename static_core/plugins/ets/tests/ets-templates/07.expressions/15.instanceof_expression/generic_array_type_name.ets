@@ -13,13 +13,27 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+{% for s in syntax %}
 /*---
-desc: Generic named type
+desc: |-
+    T[] and Array<T> specify identical, i.e., indistinguishable types... Generic type in the form of type name can be
+    used as T operand of an instanceof expression. In this case, the check is performed against the type name, and
+    type parameters are ignored.
 ---*/
 
-class A<T> {}
+{{c.top_decl}}
 
-type myType<T> = A<T>[]
-let x: myType<number> = [new A<number>(), new A<number>()]
-arktest.assertTrue(x instanceof Array)
-arktest.assertTrue(x[0] instanceof A)
+{%- if s.syntax == 'square' %}
+type my_type = {{c.type}}[]
+{%- else %}
+type my_type = Array<{{c.type}}>
+{%- endif %}
+
+function main() {
+    {{c.decl}}
+    let v: my_type = {{c.init}}
+    arktest.assertTrue(v instanceof Array)
+}
+{% endfor %}
+{% endfor %}

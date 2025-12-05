@@ -26,7 +26,7 @@ cases:
   - {type: 'bigint', val: '100n'}
   - {type: 'number', val: 'NaN'}
   - {type: 'object', val: 'Array<number>(3)'}
-  - {type: 'boolean', val: '[1] instanceof number[]'}
+  - {type: 'boolean', val: '[1] instanceof Array'}
   - {type: 'string', val:  '(typeof x == "string") ? x:""'}
   - {type: 'boolean', val: 'true && false'}
   - {type: 'int', val: '10 + 5'}
