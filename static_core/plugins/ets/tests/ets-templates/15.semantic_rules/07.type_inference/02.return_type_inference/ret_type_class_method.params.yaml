@@ -101,7 +101,10 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v instanceof number[] && v.length == 3)
+          arktest.assertTrue(v instanceof Array && v.length == 3)
+          arktest.assertTrue(v[0] instanceof number)
+          arktest.assertTrue(v[1] instanceof number)
+          arktest.assertTrue(v[2] instanceof number)
 
     - decl: |-
           class A {
@@ -113,7 +116,7 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(v instanceof Boolean[] && v.length == 0)
+          arktest.assertTrue(v instanceof Array && v.length == 0)
 
     - decl: |-
           class A {
@@ -128,7 +131,10 @@ function_decls:
       call: |-
           let a = new A()
           let v = a.foo()
-          arktest.assertTrue(new A().foo() instanceof Long[][])
+          arktest.assertTrue(new A().foo() instanceof Array)
+          arktest.assertTrue(v instanceof Array)
+          arktest.assertTrue(v[0] instanceof Array)
+          arktest.assertTrue(v[0][0] instanceof Long)
 
     - decl: |-
           class A {
@@ -245,7 +251,7 @@ function_decls:
           }
       call: |-
           let v = new A().foo()
-          arktest.assertTrue(v instanceof boolean|boolean[])
+          arktest.assertTrue(v instanceof boolean|Array)
 
     - decl: |-
           class B<T, U> {}
@@ -260,7 +266,7 @@ function_decls:
           }
       call: |-
           let v = new A().foo<Boolean>()
-          arktest.assertTrue(v instanceof B<Boolean, Error>)
+          arktest.assertTrue(v instanceof B)
 
     - decl: |-
           class A {
@@ -335,7 +341,10 @@ function_decls:
           }
       call: |-
           let v = A.foo()
-          arktest.assertTrue(v instanceof number[] && v.length == 3)
+          arktest.assertTrue(v instanceof Array && v.length == 3)
+          arktest.assertTrue(v[0] instanceof number)
+          arktest.assertTrue(v[1] instanceof number)
+          arktest.assertTrue(v[2] instanceof number)
 
     - decl: |-
           class A {
@@ -346,7 +355,7 @@ function_decls:
           }
       call: |-
           let v = A.foo()
-          arktest.assertTrue(v instanceof Boolean[] && v.length == 0)
+          arktest.assertTrue(v instanceof Array && v.length == 0)
 
     - decl: |-
           class A {
@@ -359,7 +368,10 @@ function_decls:
             }
           }
       call: |-
-          arktest.assertTrue(A.foo() instanceof Long[][])
+          let v = A.foo()
+          arktest.assertTrue(v instanceof Array)
+          arktest.assertTrue(v[0] instanceof Array)
+          arktest.assertTrue(v[0][0] instanceof Long)
 
     - decl: |-
           class A {
@@ -456,7 +468,7 @@ function_decls:
           }
       call: |-
           let v = A.foo()
-          arktest.assertTrue(v instanceof boolean|boolean[])
+          arktest.assertTrue(v instanceof boolean|Array)
 
     - decl: |-
           class B<T, U> {}
@@ -471,4 +483,4 @@ function_decls:
           }
       call: |-
           let v = A.foo<Boolean>()
-          arktest.assertTrue(v instanceof B<Boolean, Error>)
+          arktest.assertTrue(v instanceof B)
