@@ -547,7 +547,7 @@ static Class *GetClass(const Method *caller, FileEntityId fileEntityId, ClassLin
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
-    Class *klass = caller->GetPandaFile()->GetPandaCache()->GetClassFromCache(entityId);
+    Class *klass = pf->GetPandaCache()->GetClassFromCache(entityId);
     if (klass != nullptr) {
         return klass;
     }
@@ -557,7 +557,7 @@ static Class *GetClass(const Method *caller, FileEntityId fileEntityId, ClassLin
     klass = ext->GetClass(*pf, entityId, caller->GetClass()->GetLoadContext(),
                           (errorHandler == nullptr) ? ext->GetErrorHandler() : errorHandler);
     if (LIKELY(klass != nullptr)) {
-        caller->GetPandaFile()->GetPandaCache()->SetClassCache(entityId, klass);
+        pf->GetPandaCache()->SetClassCache(entityId, klass);
     }
     return klass;
 }

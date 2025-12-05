@@ -211,8 +211,9 @@ private:
     bool hasYoungAotStringRefs_ {false};
     PandaVector<BitSetElement> aotStringYoungSet_;
 
-    PandaVector<std::pair<std::string_view, PandaFileLoadData>> pandaFilesSnapshot_;
-    PandaUnorderedMap<std::string_view, PandaFileLoadData> pandaFilesLoaded_;
+    mutable os::memory::Mutex snapshotFilesLock_;
+    PandaVector<std::pair<std::string_view, PandaFileLoadData>> pandaFilesSnapshot_ GUARDED_BY(snapshotFilesLock_);
+    PandaUnorderedMap<std::string_view, PandaFileLoadData> pandaFilesLoaded_ GUARDED_BY(snapshotFilesLock_);
 
     void UpdatePandaFilesSnapshot(bool isArkAot, bool bootContext, bool appContext);
 };
