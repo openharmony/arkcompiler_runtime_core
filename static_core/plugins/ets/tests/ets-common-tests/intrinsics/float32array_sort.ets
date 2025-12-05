@@ -36,7 +36,7 @@ const SORTED_WITH_NAN: double[] = [
     Float.NEGATIVE_INFINITY.toDouble(), -1.125, 0.0, 100.5,
     Float.MAX_VALUE.toDouble(), Float.NaN.toDouble(), Float.MIN_VALUE.toDouble(),
     1.125, 1.375, 7.375, 10.5, 36.625, 45.125, 123.375, Float.POSITIVE_INFINITY.toDouble()];
-const SINGLE = [88.0];
+const SINGLE: number[] = [88.0];
 
 function fillBuffer(buf: ArrayBuffer): void {
     arktest.assertEQ(Float.BYTE_SIZE, Float32Array.BYTES_PER_ELEMENT);

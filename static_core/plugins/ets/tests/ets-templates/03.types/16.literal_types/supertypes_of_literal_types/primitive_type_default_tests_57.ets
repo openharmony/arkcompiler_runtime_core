@@ -26,7 +26,7 @@ function sumArrayElements(arr: number[]) {
 }
 
 function main(): void {
-    const input = [2, 4, 6];
+    const input: number[] = [2, 4, 6];
     const result = sumArrayElements(input);
     arktest.assertEQ(result, 12);
 }

@@ -28,9 +28,9 @@ cases:
     - use: |-
           let c = [1, 2, 3]
           arktest.assertTrue( c instanceof Array )
-          arktest.assertTrue( c[0] instanceof number )
-          arktest.assertTrue( c[1] instanceof number )
-          arktest.assertTrue( c[2] instanceof number )
+          arktest.assertTrue( c[0] instanceof int )
+          arktest.assertTrue( c[1] instanceof int )
+          arktest.assertTrue( c[2] instanceof int )
 
     - use: |-
           let x = ["a", 1, 3.14]

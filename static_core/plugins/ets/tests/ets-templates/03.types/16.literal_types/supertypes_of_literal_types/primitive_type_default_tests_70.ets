@@ -22,7 +22,7 @@ function findMinimumValue(arr: double[]) {
 }
 
 function main(): void {
-    const input = [5, 3, 7];
+    const input: number[] = [5, 3, 7];
     const result = findMinimumValue(input);
     arktest.assertEQ(result, 3);
 }

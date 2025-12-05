@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const SINGLE = [1];
+const SINGLE: number[] = [1];
 const ARRAY: Array<Double> = [0,1,2,3,4,5,6,7,8,9,4294967295 as long];
 const EMPTY_JOINED = "01234567894294967295";
 const COMMA_JOINED = "0,1,2,3,4,5,6,7,8,9,4294967295";

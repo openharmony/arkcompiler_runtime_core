@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const SINGLE = [1];
+const SINGLE: number[] = [1];
 const ARRAY: Array<Double> = [Long.MIN_VALUE, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, Long.MAX_VALUE];
 const EMPTY_JOINED = '-922337203685477580801234567899223372036854775807';
 const COMMA_JOINED = '-9223372036854775808,0,1,2,3,4,5,6,7,8,9,9223372036854775807';
