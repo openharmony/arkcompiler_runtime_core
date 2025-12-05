@@ -2869,3 +2869,5 @@
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_generic_array_tuple_n_0.ets
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_generic_array_tuple_n_1.ets
 04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_generic_array_tuple_n_2.ets
+#FailKind.TSC_FAIL
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_extend_n.ets

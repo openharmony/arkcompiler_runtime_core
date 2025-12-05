@@ -12,14 +12,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
-
-{% for d in declarations %}
 /*---
-desc: Call signature negative
-tags: [compile-only, negative]
-expected_out: {{d.stdout}}
+desc: Ambient Interface implementations
+files:
+- ./interface_declarations.ets
+name: interface_usage_n_1
+tags: [negative, compile-only]
+expected_out: 'Semantic error ESE0141: a(): String|undefined in Extended cannot override a(): String in A because overriding return type is not compatible with the other return type.'
 ---*/
 
-{{d.decl}}
+import { A } from './interface_declarations2.d'
 
-{% endfor %}
+interface Extended extends A {
+  a?: string; //Error string|undefined to type string
+}
+
+class B implements A {
+    a: string = 'b'
+}
+
+function main() {
+    const c: B  = new B()
+}

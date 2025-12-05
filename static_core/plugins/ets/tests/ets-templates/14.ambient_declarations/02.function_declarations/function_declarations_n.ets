@@ -13,12 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for decl in declarations %}
+{% for d in declarations %}
 /*---
 desc: Ambient Function declarations
 tags: [compile-only, negative]
+expected_out: {{d.stdout}}
 ---*/
 
-declare {{decl}}
+declare {{d.decl}}
 
 {% endfor %}
