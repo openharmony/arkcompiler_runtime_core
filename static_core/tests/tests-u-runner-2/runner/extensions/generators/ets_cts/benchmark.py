@@ -26,8 +26,8 @@ from runner.utils import write_2_file
 
 _LOGGER = Log.get_logger(__file__)
 
-FILE_NAME = "file-name"
-FILE_SUFFIX = "test-suffix"
+FILE_NAME = "file_name"
+FILE_SUFFIX = "test_suffix"
 
 
 class Benchmark:
