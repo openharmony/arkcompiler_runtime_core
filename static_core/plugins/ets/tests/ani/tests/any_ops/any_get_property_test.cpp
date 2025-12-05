@@ -65,6 +65,34 @@ TEST_F(AnyGetPropertyTest, AnyGetProperty_Valid)
     CheckANIStr(static_cast<ani_string>(nameRef), "Leechy");
 }
 
+TEST_F(AnyGetPropertyTest, AnyGetPropertyUTF16_Valid)
+{
+    const char *clsName = "any_get_property_test.Client";
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass(clsName, &cls), ANI_OK);
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &ctor), ANI_OK);
+    std::u16string_view nameStr = u"中國";
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF16(reinterpret_cast<const uint16_t *>(nameStr.data()), nameStr.size(), &strRef),
+              ANI_OK);
+    ani_object res {};
+    ASSERT_EQ(env_->Object_New(cls, ctor, &res, strRef), ANI_OK);
+
+    ani_ref nameRef {};
+    ASSERT_EQ(env_->Any_GetProperty(static_cast<ani_ref>(res), "原產地", &nameRef), ANI_OK);
+    const ani_size bufferSize = 3U;
+    uint16_t utf16Buffer[bufferSize] = {0U};
+    ani_size substrOffset = 0U;
+    ani_size substrSize = 2U;
+    ani_size result = 0U;
+    ASSERT_EQ(env_->String_GetUTF16SubString(static_cast<ani_string>(nameRef), substrOffset, substrSize, utf16Buffer,
+                                             bufferSize, &result),
+              ANI_OK);
+    ASSERT_EQ(result, substrSize);
+    ASSERT_EQ(std::u16string_view(reinterpret_cast<const char16_t *>(utf16Buffer), bufferSize - 1), nameStr);
+}
+
 TEST_F(AnyGetPropertyTest, AnyGetByIndex_Valid)
 {
     ani_module md {};

@@ -6142,15 +6142,15 @@ static ani_status DoSetAnyProperty(ani_env *env, ani_ref ref, T key, ani_ref val
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Any_GetProperty(ani_env *env, ani_ref ref, const char *name, ani_ref *result)
+NO_UB_SANITIZE static ani_status Any_GetProperty(ani_env *env, ani_ref ref, const char *utf8Name, ani_ref *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(ref);
-    CHECK_PTR_ARG(name);
+    CHECK_PTR_ARG(utf8Name);
     CHECK_PTR_ARG(result);
 
-    return DoGetAnyProperty(env, ref, name, result);
+    return DoGetAnyProperty(env, ref, utf8Name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
