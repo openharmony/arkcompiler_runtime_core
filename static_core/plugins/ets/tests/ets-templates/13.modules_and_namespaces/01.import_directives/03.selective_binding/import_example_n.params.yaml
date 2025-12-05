@@ -13,22 +13,27 @@
 
 ---
 cases:
- - doc: Import overloaded method.
+ - doc: Import overloaded method. Original methods are not available.
    import: import {foo}
    use: |-
-     arktest.assertEQ(foo(5), 7)
-     arktest.assertEQ(foo("a string"), "a string str")
+     f1(5)
 
- - doc: Import original methods.
+ - doc: Import overloaded method. Original methods are not available.
+   import: import {foo}
+   use: |-
+     f2("str")
+
+ - doc: Import original methods. Overloaded method is not available.
    import: import {f1, f2}
    use: |-
-     arktest.assertEQ(f1(5), 7)
-     arktest.assertEQ(f2("a string"), "a string str")
+     foo(5)
 
- - doc: Import both overloaded and original methods.
-   import: import {foo, f1, f2}
+ - doc: Import original methods. Overloaded method is not available.
+   import: import {f1, f2}
    use: |-
-     arktest.assertEQ(foo(5), 7)
-     arktest.assertEQ(f1(5), 7)
-     arktest.assertEQ(foo("a string"), "a string str")
-     arktest.assertEQ(f2("a string"), "a string str")
+     foo("a string")
+
+ - doc: Import both overloaded and original methods. Not imported original method is still unavailable
+   import: import {foo, f2}
+   use: |-
+     f1(5)

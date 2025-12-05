@@ -13,22 +13,28 @@
 
 ---
 cases:
- - doc: Import overloaded method.
-   import: import {foo}
-   use: |-
-     arktest.assertEQ(foo(5), 7)
-     arktest.assertEQ(foo("a string"), "a string str")
+  - decl: |-
+        namespace X {
+          static {}
+        }
+        namespace X {
+          static {}
+        }
 
- - doc: Import original methods.
-   import: import {f1, f2}
-   use: |-
-     arktest.assertEQ(f1(5), 7)
-     arktest.assertEQ(f2("a string"), "a string str")
+  - decl: |-
+        namespace A.B {
+          static {}
+        }
+        namespace A.B {
+          static {}
+        }
 
- - doc: Import both overloaded and original methods.
-   import: import {foo, f1, f2}
-   use: |-
-     arktest.assertEQ(foo(5), 7)
-     arktest.assertEQ(f1(5), 7)
-     arktest.assertEQ(foo("a string"), "a string str")
-     arktest.assertEQ(f2("a string"), "a string str")
+  - decl: |-
+        namespace A {
+          namespace B {
+            static {}
+          }
+        }
+        namespace A.B {
+          static {}
+        }    

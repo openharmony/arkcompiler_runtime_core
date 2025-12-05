@@ -13,22 +13,23 @@
 
 ---
 cases:
- - doc: Import overloaded method.
-   import: import {foo}
-   use: |-
-     arktest.assertEQ(foo(5), 7)
-     arktest.assertEQ(foo("a string"), "a string str")
+  - doc: Compile-time error as function has already been defined
+    decl: |-
+        namespace A {
+          export function foo(): int { return 1 }
+          export function bar(): int { return 2 }
+        }
+        namespace A {
+          export function foo(): int { return (bar()+1) }
+        }
 
- - doc: Import original methods.
-   import: import {f1, f2}
-   use: |-
-     arktest.assertEQ(f1(5), 7)
-     arktest.assertEQ(f2("a string"), "a string str")
-
- - doc: Import both overloaded and original methods.
-   import: import {foo, f1, f2}
-   use: |-
-     arktest.assertEQ(foo(5), 7)
-     arktest.assertEQ(f1(5), 7)
-     arktest.assertEQ(foo("a string"), "a string str")
-     arktest.assertEQ(f2("a string"), "a string str")
+  - doc: A namespace name can be a qualified name. Still cannot access to non-exported namespace field.
+    decl: |-
+        namespace A {
+          export namespace B {
+            let i: int = 7
+          }
+        }
+        function main() {
+          A.B.i = 8
+        }

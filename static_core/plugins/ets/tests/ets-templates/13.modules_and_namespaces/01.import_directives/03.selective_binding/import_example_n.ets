@@ -21,11 +21,12 @@ desc: >-
       then all its accessible overloaded functions, either imported or not, are considered
       in the process of Overload Resolution for Overload Declarations for call validity.
       {{c.doc}}
+tags: [negative,compile-only]
 files:
 - ./modules/example.ets
 ---*/
 
-{{c.import}} from "./modules/example.ets"
+import foo from "modules/example.ets"
 
 function main() {
 {{c.use|indent}}
