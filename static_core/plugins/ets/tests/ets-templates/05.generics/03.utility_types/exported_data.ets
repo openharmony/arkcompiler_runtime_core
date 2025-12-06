@@ -67,9 +67,9 @@ export interface IOPT {
 export class CIOPT implements IOPT {
     _i?: number = 0
     _j?: string = ""
-    set i(i?: number) {gs+=1; this._i = i }
+    set i(i: number|undefined) {gs+=1; this._i = i }
     get i(): number|undefined {gs+=2; return this._i }
-    set j(j?: string) {gs+=4; this._j = j }
+    set j(j: string|undefined) {gs+=4; this._j = j }
     get j(): string|undefined {gs+=8; return this._j }
 }
 
