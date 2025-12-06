@@ -109,6 +109,7 @@ if (is_mingw) {
     "$ark_root/libpandabase/os/filesystem.cpp",
     "$ark_root/libpandabase/os/mutex.cpp",
     "$ark_root/libpandabase/os/native_stack.cpp",
+    "$ark_root/libpandabase/os/stackGuard.cpp",
     "$ark_root/libpandabase/os/stacktrace_stub.cpp",
     "$ark_root/libpandabase/os/time.cpp",
     "$ark_root/libpandabase/utils/json_builder.cpp",
@@ -137,6 +138,7 @@ if (is_mingw) {
     "$ark_root/libpandabase/mem/pool_map.cpp",
     "$ark_root/libpandabase/os/native_stack.cpp",
     "$ark_root/libpandabase/os/property.cpp",
+    "$ark_root/libpandabase/os/stackGuard.cpp",
 
     # product build
     "$ark_root/libpandabase/os/stacktrace_stub.cpp",
