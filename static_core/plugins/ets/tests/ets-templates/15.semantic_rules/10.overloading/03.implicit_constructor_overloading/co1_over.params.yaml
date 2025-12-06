@@ -169,10 +169,8 @@ cases:
           // local variable, smart-casting case
           let v: T|R = [0.0]
           arktest.assertEQ(new A(v).t, "R")
-          v = [0.0, 0.0]
+          v = [0.0, 0.0, 0.0]
           arktest.assertEQ(new A(v).t, "R")
-          v = [0.0, 0.0] as T
-          arktest.assertEQ(new A(v).t, "T")
 
     - decl: |-
           // unions

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,12 +92,12 @@ function nestTest() {
     compareArray<String>(strFlat3, targetStrFlat3)
 
     const arrUnion =
-        new Array<String | Number | Array<Array<String | Number> | Array<Number>>>("1", 2, [[3, 4], ["5", "6", 7]])
+        new Array<String | Number | Array<Array<String | Number> | Array<Number>>>("1", 2, [[3, 4] as Array<Number>, ["5", "6", 7]])
     const unionFlat1: Array<String | Number | Array<String | Number> | Array<Number>> =
         arrUnion.flat<String | Number | Array<String | Number> | Array<Number>>(1)
     const unionFlat2: Array<String | Number> = arrUnion.flat<String | Number>(2)
     const targetUnionFlat1 =
-        Array<String | Number | Array<String | Number> | Array<Number>>("1", 2, [3, 4], ["5", "6", 7])
+        Array<String | Number | Array<String | Number> | Array<Number>>("1", 2, [3, 4] as Array<Number>, ["5", "6", 7])
     const targetUnionFlat2 = new Array<String | Number>("1", 2, 3, 4, "5", "6", 7)
     compareArray<String | Number | Array<String | Number> | Array<Number>>(unionFlat1, targetUnionFlat1)
     compareArray<String | Number>(unionFlat2, targetUnionFlat2)

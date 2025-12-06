@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -487,7 +487,7 @@ function testUnionParameter() {
     let paramType1 = methodInfo1!.getParameterType(0)
     arktest.assertTrue(paramType1!.isUnion())
     let uniTypes1 = paramType1!.getUnionConstituentTypes()
-    let expectedTypeSet1: Set<string> = new Set<string>([ 'ReflectTypeTest.A', 'std.core.Double', 'std.core.String' ]);
+      let expectedTypeSet1: Set<string> = new Set<string>([ 'ReflectTypeTest.A', 'std.core.Double', 'std.core.String' ]);
 
     arktest.assertEQ(uniTypes1!.length, expectedTypeSet1.size)
     for (let i = 0; i < uniTypes1!.length; ++i) {

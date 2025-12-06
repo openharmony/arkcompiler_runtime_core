@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -20,7 +20,6 @@ desc: >-
     are same as the names of their values, i.e., literals. Only three literal types
     are supported - string, null and undefined.
     {{c.doc}}
-tags: [negative, compile-only]
 ---*/
 
 type number_tuple = [int, double]
