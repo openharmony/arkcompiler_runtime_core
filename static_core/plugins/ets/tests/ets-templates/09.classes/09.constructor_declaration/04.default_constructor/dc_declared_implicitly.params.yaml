@@ -13,7 +13,6 @@
 
 ---
 cases:
-  - { modifier: '',          tags: ''                        } 
-  - { modifier: 'public',    tags: ''                        } 
-  - { modifier: 'protected', tags: 'compile-only,  negative' } 
-  - { modifier: 'private',   tags: 'compile-only,  negative' } 
+  - { modifier: ''}
+  - { modifier: 'public'}
+

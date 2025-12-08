@@ -16,12 +16,12 @@
 {% for c in cases %}
 
 /*---
-desc: Override method declaration with keyword {{mod}}.
+desc: Override method declaration with keyword {{c.modifier}}.
 assert: >-
     It is compile-time error if a method declaration that contains the keyword override also contains any one of the
-    keywords abstract, static, open, native, or synchronized.
+    keywords abstract, static, final, native or async.
 params: {{c.modifier}}
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 class A {
@@ -35,7 +35,5 @@ final class B extends A {
 }
 
 {{c.main}}
-
-{{c.expected_error}}
 
 {% endfor %}

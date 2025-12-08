@@ -93,3 +93,7 @@ extension_negative:
       ND
   - use: |-
       B
+  - decl: |-
+      final class Final {}
+    use: |-
+      Final

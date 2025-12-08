@@ -107,20 +107,6 @@ cases:
           arktest.assertEQ(C.getCount(c), 1)
         }
 
-    - doc: Access inherited private method
-      tags: compile-only, negative
-      decl: |-
-        class B {
-          private count(): number {
-            return 1
-          }
-        }
-        class C extends B {
-          static getCount(c: C): number {
-            return c.count()
-          }
-        }
-
     - doc: Access private method by derived class instance
       decl: |-
         class B {

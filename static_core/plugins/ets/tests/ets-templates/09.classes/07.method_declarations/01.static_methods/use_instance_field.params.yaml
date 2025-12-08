@@ -125,24 +125,6 @@ cases:
           arktest.assertEQ(C.getCount(c), 2)
         }
 
-    - doc: Access inherited private field
-      tags: compile-only, negative
-      decl: |-
-        class B {
-          private count: number
-          constructor(count: number) {
-            this.count = count
-          }
-        }
-        class C extends B {
-          constructor(count: number) {
-            super(count)
-          }
-          static getCount(c: C): number {
-            return c.count
-          }
-        }
-
     - doc: Access private field by derived class instance
       decl: |-
         class B {

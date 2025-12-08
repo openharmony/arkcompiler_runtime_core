@@ -20,7 +20,7 @@ desc: >-
       that can be defined in a form of a field or as a getter, a setter, or both. In any case implementation
       may be provided in a form of field or accessors.
 assert: {{c.doc}}
-tags: [{{c.tags}}]
+tags: [compile-only]
 ---*/
 
 {{c.decl}}
