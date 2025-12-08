@@ -19,6 +19,7 @@ import os
 import re
 from collections.abc import Sequence
 from copy import deepcopy
+from fnmatch import translate
 from pathlib import Path
 
 from runner import utils
@@ -296,6 +297,9 @@ class TestStandardFlow(Test):
                  if step.executable_path is not None and
                  ((compile_only_test and step.step_kind in allowed_steps) or not compile_only_test)]
         for step in steps:
+            pattern = re.compile(translate(step.step_filter))
+            if not pattern.search(str(self.path)):
+                continue
             self.passed, self.report, self.fail_kind = self.__do_run_one_step(step)
             if step.step_kind in allowed_steps:
                 allowed_steps.remove(step.step_kind)

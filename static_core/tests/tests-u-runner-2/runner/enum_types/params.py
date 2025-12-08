@@ -44,6 +44,7 @@ class BinaryParams:
     executor: Path
     flags: list[str]
     env: dict[str, str]
+    step_filter: str = "*"
     use_qemu: bool = False
 
     @property
