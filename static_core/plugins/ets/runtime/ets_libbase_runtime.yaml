@@ -219,6 +219,39 @@ intrinsics:
     impl: ark::intrinsics::AbsF64
     safe_intrinsic: true
 
+  - name: StdMathAbsFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: abs
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::intrinsics::AbsF32
+    safe_intrinsic: true
+
+  - name: StdMathAbsLong
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: abs
+    static: true
+    signature:
+      ret: i64
+      args: [ i64 ]
+    impl: ark::intrinsics::AbsI64
+    safe_intrinsic: true
+
+  - name: StdMathAbsInt
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: abs
+    static: true
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::intrinsics::AbsI32
+    safe_intrinsic: true
+
   - name: StdMathMaxI32
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -328,6 +361,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathAcos
     safe_intrinsic: true
 
+  - name: StdMathAcosFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: acos
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathAcosFloat
+    safe_intrinsic: true
+
   - name: StdMathAcosh
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -337,6 +381,17 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathAcosh
+    safe_intrinsic: true
+
+  - name: StdMathAcoshFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: acosh
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathAcoshFloat
     safe_intrinsic: true
 
   - name: StdMathAsin
@@ -350,6 +405,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathAsin
     safe_intrinsic: true
 
+  - name: StdMathAsinFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: asin
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathAsinFloat
+    safe_intrinsic: true
+
   - name: StdMathAsinh
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -359,6 +425,17 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathAsinh
+    safe_intrinsic: true
+
+  - name: StdMathAsinhFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: asinh
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathAsinhFloat
     safe_intrinsic: true
 
   - name: StdMathAtan2
@@ -372,6 +449,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathAtan2
     safe_intrinsic: true
 
+  - name: StdMathAtan2Float
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: atan2
+    static: true
+    signature:
+      ret: f32
+      args: [ f32, f32 ]
+    impl: ark::ets::intrinsics::StdMathAtan2Float
+    safe_intrinsic: true
+
   - name: StdMathAtanh
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -381,6 +469,17 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathAtanh
+    safe_intrinsic: true
+
+  - name: StdMathAtanhFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: atanh
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathAtanhFloat
     safe_intrinsic: true
 
   - name: StdMathAtan
@@ -394,6 +493,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathAtan
     safe_intrinsic: true
 
+  - name: StdMathAtanFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: atan
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathAtanFloat
+    safe_intrinsic: true
+
   - name: StdMathSinh
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -405,6 +515,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathSinh
     safe_intrinsic: true
 
+  - name: StdMathSinhFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: sinh
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathSinhFloat
+    safe_intrinsic: true
+
   - name: StdMathCosh
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -414,6 +535,17 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathCosh
+    safe_intrinsic: true
+
+  - name: StdMathCoshFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: cosh
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathCoshFloat
     safe_intrinsic: true
 
   - name: StdMathFloor
@@ -469,6 +601,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathCbrt
     safe_intrinsic: true
 
+  - name: StdMathCbrtFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: cbrt
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathCbrtFloat
+    safe_intrinsic: true
+
   - name: StdMathTan
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -478,6 +621,17 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathTan
+    safe_intrinsic: true
+
+  - name: StdMathTanFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: tan
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathTanFloat
     safe_intrinsic: true
 
   - name: StdMathTanh
@@ -491,6 +645,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathTanh
     safe_intrinsic: true
 
+  - name: StdMathTanhFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: tanh
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathTanhFloat
+    safe_intrinsic: true
+
   - name: StdMathExp
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -500,6 +665,17 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathExp
+    safe_intrinsic: true
+
+  - name: StdMathExpFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: exp
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathExpFloat
     safe_intrinsic: true
 
   - name: StdMathLog10
@@ -513,6 +689,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathLog10
     safe_intrinsic: true
 
+  - name: StdMathLog10Float
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: log10
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathLog10Float
+    safe_intrinsic: true
+
   - name: StdMathExpm1
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -522,6 +709,17 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathExpm1
+    safe_intrinsic: true
+
+  - name: StdMathExpm1Float
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: expm1
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathExpm1Float
     safe_intrinsic: true
 
   - name: StdMathCeil
@@ -548,6 +746,17 @@ intrinsics:
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathLog
     llvm_impl: log
+    safe_intrinsic: true
+
+  - name: StdMathLogFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: log
+    static: true
+    signature:
+      ret: f32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdMathLogFloat
     safe_intrinsic: true
 
   - name: StdMathRem
@@ -653,6 +862,17 @@ intrinsics:
       ret: f64
       args: [ f64, f64 ]
     impl: ark::ets::intrinsics::StdMathHypot
+    safe_intrinsic: true
+
+  - name: StdMathHypotFloat
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: hypot
+    static: true
+    signature:
+      ret: f32
+      args: [ f32, f32 ]
+    impl: ark::ets::intrinsics::StdMathHypotFloat
     safe_intrinsic: true
 
 ####################

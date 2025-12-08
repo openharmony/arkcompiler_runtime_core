@@ -316,9 +316,9 @@ export final class Long extends Integral implements Comparable<Long> {
             return '0';
         }
         const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-        let val = this.value;
+        let val: long = this.value;
         let negative: boolean = (val < 0);
-        let digitsNum = (log(abs(val)) / log(radix.toInt()) + 1).toInt();
+        let digitsNum: int = (log(abs(val.toDouble())) / log(radix) + 1).toInt();
         if (negative) {
             ++digitsNum;
         }
@@ -365,6 +365,7 @@ export final class Long extends Integral implements Comparable<Long> {
      * @returns result of the locale-specific conversion
      */
     public toLocaleString(): String {
+
         return new Intl.NumberFormat().format(this.value)
     }
 

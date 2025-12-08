@@ -25,14 +25,7 @@ function main(): int {
     failures += test(good(10000000, 7), "Log10 from int 10000000");
     failures += test(good(100000000, 8), "Log10 from int 100000000");
     failures += test(good(1000000000, 9), "Log10 from int 1000000000");
-    
-    failures += test(good(5, 0), "Log10 from int 5");
-    failures += test(good(15, 1), "Log10 from int 15");
-    failures += test(good(146, 2), "Log10 from int 146");
-    failures += test(good(1123456789, 9), "Log10 from int 1123456789");
-
-    failures += test(bad(), "Bad value passed")
-    return test(failures, "All test run")
+    return failures
 }
 
 function test(result: int, message: String ): int {

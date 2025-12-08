@@ -51,6 +51,103 @@
       },
   }
 - {
+    method_name: Math.abs,
+    func_name: abs,
+    method_nature: function,
+    result_type: byte,
+    method_signature: {v: "byte"},
+
+    method_test_index_data:
+      {
+        test1:  {v: 0,},
+        test2:  {v: 123, },
+        test3:  {v: -123,},
+        test4:  {v: Byte.MAX_VALUE, },
+        test5:  {v: Byte.MIN_VALUE, },
+      },
+    method_expected_data:
+      {
+        test1:  0,
+        test2:  123,
+        test3:  123,
+        test4:  Byte.MAX_VALUE,
+        test5:  Byte.MIN_VALUE,
+      },
+  }
+- {
+    method_name: Math.abs,
+    func_name: abs,
+    method_nature: function,
+    result_type: short,
+    method_signature: {v: "short"},
+
+    method_test_index_data:
+      {
+        test1:  {v: 0,},
+        test2:  {v: 123, },
+        test3:  {v: -123,},
+        test4:  {v: Short.MAX_VALUE, },
+        test5:  {v: Short.MIN_VALUE, },
+      },
+    method_expected_data:
+      {
+        test1:  0,
+        test2:  123,
+        test3:  123,
+        test4:  Short.MAX_VALUE,
+        test5:  Short.MIN_VALUE,
+      },
+  }
+- {
+    method_name: Math.abs,
+    func_name: abs,
+    method_nature: function,
+    result_type: int,
+    method_signature: {v: "int"},
+
+    method_test_index_data:
+      {
+        test1:  {v: 0,},
+        test2:  {v: 123, },
+        test3:  {v: -123,},
+        test4:  {v: Int.MAX_VALUE, },
+        test5:  {v: Int.MIN_VALUE, },
+
+      },
+    method_expected_data:
+      {
+        test1:  0,
+        test2:  123,
+        test3:  123,
+        test4:  Int.MAX_VALUE,
+        test5:  Int.MIN_VALUE,
+      },
+  }
+- {
+    method_name: Math.abs,
+    func_name: abs,
+    method_nature: function,
+    result_type: float,
+    method_signature: {v: "float"},
+
+    method_test_index_data:
+      {
+        test1:  {v: 0,},
+        test2:  {v: 123, },
+        test3:  {v: -123,},
+        test4:  {v: Float.MAX_VALUE, },
+        test5:  {v: Float.MIN_VALUE, },
+      },
+    method_expected_data:
+      {
+        test1:  0,
+        test2:  123,
+        test3:  123,
+        test4:  Float.MAX_VALUE,
+        test5:  Float.MIN_VALUE,
+      },
+  }
+- {
     method_name: Math.trunc,
     func_name: trunc,
     method_nature: function,

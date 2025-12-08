@@ -19,6 +19,9 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_DOUBLE_IS_NAN:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_FLOAT_IS_NAN:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_DOUBLE_IS_FINITE:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_FLOAT_IS_FINITE:
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ABS_INT:
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ABS_LONG:
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ABS_FLOAT:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ABS:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MOD:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_I32:
