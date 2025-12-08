@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -294,7 +294,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         }
         return counter;
     }
-    
+
     /**
      * Returns the amount of full codepoints between begin and end
      * indexes. Characters outside the range are not counted, even if
@@ -1839,13 +1839,13 @@ export final class String extends Object implements Comparable<String>, Iterable
         return reg.matchAll(this)
     }
 
-    public native normalizeNFC(): String;
+    private native normalizeNFC(): String;
 
-    public native normalizeNFD(): String;
+    private native normalizeNFD(): String;
 
-    public native normalizeNFKC(): String;
+    private native normalizeNFKC(): String;
 
-    public native normalizeNFKD(): String;
+    private native normalizeNFKD(): String;
 
     /**
      * The normalize() method of String values returns the Unicode Normalization Form of this string
