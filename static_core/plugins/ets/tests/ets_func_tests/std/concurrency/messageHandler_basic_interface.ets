@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -257,48 +257,71 @@ function testMessageCallback() {
 
 
 function testRemoveMultipleMessages() {
-    let eaw = new EAWorker();
-    eaw.start();
-    let waiter1 = new AtomicFlag(false);
+    let eaw1 = new EAWorker();
+    let eaw2 = new EAWorker();
+    eaw1.start();
+    eaw2.start();
+    let waiter1 = new Event();
     let waiter2 = new Event();
     let executeCount = 0;
-    let handler: concurrency.MessageHandler;
-    
-    handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
-        executeCount++;
-        
+    let expectedExecuteCount = 3;
+    let handler1: concurrency.MessageHandler;
+    let handler2: concurrency.MessageHandler;
+
+    handler1 = new concurrency.MessageHandler((msg: concurrency.Message) => {
+        ++executeCount;
         if (msg.getCallback() != undefined) {
             let cb = msg.getCallback() as Callback;
             cb();
         }
-    }, eaw);
+    }, eaw1);
+
+    handler2 = new concurrency.MessageHandler((msg: concurrency.Message) => {
+        if (msg.getCallback() != undefined) {
+            let cb = msg.getCallback() as Callback;
+            cb();
+        }
+    }, eaw2);
     
     let callback = () => {
-        while (waiter1.get() != true) {}
-        arktest.assertEQ(handler.removeMessages(MessageType.STRING, "test"), true);
-        arktest.assertEQ(handler.removeMessages(MessageType.NUMBER, 100), true);
-        arktest.assertEQ(handler.removeMessages(MessageType.BOOLEAN, true), true);
-        
-        arktest.assertEQ(handler.hasMessages(MessageType.STRING, "test"), false);
-        arktest.assertEQ(handler.hasMessages(MessageType.NUMBER, 100), false);
-        arktest.assertEQ(handler.hasMessages(MessageType.BOOLEAN, true), false);
-    };
+        waiter1.wait();
 
-    handler.sendMessage(new concurrency.Message(callback, handler));
-    handler.sendMessage(new concurrency.Message(MessageType.STRING, "test", handler));
-    handler.sendMessage(new concurrency.Message(MessageType.NUMBER, 100, handler));
-    handler.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler));
-
-    let countCallback = () => {
-        arktest.assertEQ(executeCount, 2);//only callback and countCallback are executed
+        let isMsg1 = handler1.removeMessages(MessageType.STRING, 'test');
+        let isMsg2 = handler1.removeMessages(MessageType.NUMBER, 100);
+        let isMsg3 = handler1.removeMessages(MessageType.BOOLEAN, true);
+    
+        if (isMsg1){
+            arktest.assertEQ(handler1.hasMessages(MessageType.STRING, 'test'), false);
+            --expectedExecuteCount;
+        } else {
+            arktest.assertEQ(handler1.hasMessages(MessageType.STRING, 'test'), true);
+        }
+        if (isMsg2){
+           arktest.assertEQ(handler1.hasMessages(MessageType.NUMBER, 100), false);
+           --expectedExecuteCount;
+        } else {
+            arktest.assertEQ(handler1.hasMessages(MessageType.NUMBER, 100), true);
+        }
+        if (isMsg3){
+           arktest.assertEQ(handler1.hasMessages(MessageType.BOOLEAN, true), false);
+           --expectedExecuteCount;
+        } else {
+            arktest.assertEQ(handler1.hasMessages(MessageType.BOOLEAN, true), true);
+        }
         waiter2.fire();
     };
+
+    handler2.sendMessage(new concurrency.Message(callback, handler2));
+    handler1.sendMessage(new concurrency.Message(MessageType.STRING, 'test', handler1));
+    handler1.sendMessage(new concurrency.Message(MessageType.NUMBER, 100, handler1));
+    handler1.sendMessage(new concurrency.Message(MessageType.BOOLEAN, true, handler1));
     
-    handler.sendMessage(new concurrency.Message(countCallback, handler));
-    waiter1.set(true);
+    waiter1.fire();
     waiter2.wait();
-    eaw.quit();
-    arktest.assertEQ(executeCount, 2);
+
+    eaw1.quit();
+    eaw2.quit();
+    arktest.assertEQ(executeCount, expectedExecuteCount);
 }
 
 function testHasMessage2() {
@@ -359,14 +382,15 @@ function testDoubleRemoveMessage() {
     let awake_waiter: (val: int)=>void = ()=>{};
     let waiter = new Promise<int>((res, rej)=>{awake_waiter = res;})
 
-    let handler = new concurrency.MessageHandler(async (msg: concurrency.Message) => {
+    let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         await waiter;
     }, worker);
 
     let message = new concurrency.Message(1, handler);
     handler.sendMessage(message);
-    arktest.assertEQ(handler.removeMessages(1), true);
-    arktest.assertEQ(handler.removeMessages(1), false);
+    if (handler.removeMessages(1)){
+        arktest.assertEQ(handler.removeMessages(1), false);
+    }
     awake_waiter(0);
     worker.quit();
 }

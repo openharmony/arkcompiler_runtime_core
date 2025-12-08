@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,8 @@ type Task = () => void;
 enum MessageStatus {
     NOT_EXECUTED = 0,
     EXECUTED = 1,
-    CANCELLED = 2
+    CANCELLED = 2,
+    IN_EXECUTION = 3
 }
 
 export namespace concurrency {
@@ -37,8 +38,8 @@ export namespace concurrency {
     export class MessageHandler {
         private handler: Handler;
         private worker: EAWorker;
-        // TODO: using managed mutex instead of concurrent hash map
-        private messages: containers.ConcurrentHashMap<Message, MessageStatus>;
+        private messageMutex: Mutex;
+        private messages: Map<Message, MessageStatus>;
 
         /**
          * Create a MessageHandler instance
@@ -54,7 +55,8 @@ export namespace concurrency {
             }
             this.handler = handler;
             this.worker = worker as EAWorker;
-            this.messages = new containers.ConcurrentHashMap<Message, MessageStatus>();
+            this.messageMutex = new Mutex();
+            this.messages = new Map<Message, MessageStatus>();
         }
 
         /**
@@ -124,7 +126,7 @@ export namespace concurrency {
                 return false;
             }
             return this.removeMessages((value: MessageStatus, key: Message) => {
-                return key.getCallback() == callback && value != MessageStatus.CANCELLED;
+                return key.getCallback() == callback && value == MessageStatus.NOT_EXECUTED;
             });
         }
 
@@ -138,7 +140,7 @@ export namespace concurrency {
                 return false;
             }
             return this.removeMessages((value: MessageStatus, key: Message) => {
-                return key.getWhat() == what && value != MessageStatus.CANCELLED && key.getCallback() === undefined;
+                return key.getWhat() == what && value == MessageStatus.NOT_EXECUTED && key.getCallback() === undefined;
             });
         }
 
@@ -153,7 +155,7 @@ export namespace concurrency {
                 return false;
             }
             return this.removeMessages((value: MessageStatus, key: Message) => {
-                return key.getWhat() == what && key.getObject() == obj && value != MessageStatus.CANCELLED && key.getCallback() === undefined;
+                return key.getWhat() == what && key.getObject() == obj && value == MessageStatus.NOT_EXECUTED && key.getCallback() === undefined;
             });
         }
 
@@ -176,14 +178,22 @@ export namespace concurrency {
                 if (message.getTarget() != this || !this.worker.isAlive()) {
                     return false;
                 }
+                this.messageMutex.lock();
                 this.messages.set(message, MessageStatus.NOT_EXECUTED);
+                this.messageMutex.unlock();
                 let msgHandler = (msg: Message) => {
+                    this.messageMutex.lock();
                     if (this.messages.get(msg) == MessageStatus.CANCELLED) {
                         this.messages.delete(msg);
+                        this.messageMutex.unlock();
                         return;
                     }
+                    this.messages.set(msg, MessageStatus.IN_EXECUTION);
+                    this.messageMutex.unlock();
                     this.handler(msg);
+                    this.messageMutex.lock();
                     this.messages.set(msg, MessageStatus.EXECUTED);
+                    this.messageMutex.unlock();
                 };
                 this.worker.run<void>(msgHandler, message);
                 return true;
@@ -206,22 +216,26 @@ export namespace concurrency {
 
         private hasMessage(pred: (value: MessageStatus, key: Message) => boolean): boolean {
             let res = false;
+            this.messageMutex.lock();
             this.messages.forEach((value: MessageStatus, key: Message) => {
                 if (!res && pred(value, key)) {
                     res = true;
                 }
             });
+            this.messageMutex.unlock();
             return res;
         }
 
         private removeMessages(pred: (value: MessageStatus, key: Message) => boolean): boolean {
             let res = false;
+            this.messageMutex.lock();
             this.messages.forEach((value: MessageStatus, key: Message) => {
                 if (pred(value, key)) {
                     this.messages.set(key, MessageStatus.CANCELLED);
                     res = true;
                 }
             });
+            this.messageMutex.unlock();
             return res;
         }
     }
