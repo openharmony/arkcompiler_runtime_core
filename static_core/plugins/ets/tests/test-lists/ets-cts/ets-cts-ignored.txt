@@ -1773,6 +1773,22 @@
 15.semantic_rules/10.overloading/overload_method_negative_10.ets
 15.semantic_rules/10.overloading/overload_method_negative_11.ets
 
+#31231 ClassCastError on method call that overloads method in generic parent class
+15.semantic_rules/10.overloading/first_match/first_match_generics_5.ets
+
+#31167 RTE if class overrides overloaded method in superinterface
+15.semantic_rules/10.overloading/first_match/first_match_1c_1i_7.ets
+15.semantic_rules/10.overloading/first_match/first_match_1c_1i_8.ets
+15.semantic_rules/10.overloading/first_match/first_match_1c_2i_8.ets
+15.semantic_rules/10.overloading/first_match/first_match_1c_2i_9.ets
+15.semantic_rules/10.overloading/first_match/first_match_1c_3i_5.ets
+15.semantic_rules/10.overloading/first_match/first_match_1c_3i_7.ets
+15.semantic_rules/10.overloading/first_match/first_match_1c_3i_8.ets
+15.semantic_rules/10.overloading/first_match/first_match_1c_ii_8.ets
+15.semantic_rules/10.overloading/first_match/first_match_1c_ii_9.ets
+15.semantic_rules/10.overloading/first_match/first_match_2c_2i_7.ets
+15.semantic_rules/10.overloading/first_match/first_match_2c_2i_8.ets
+
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
 15.semantic_rules/11.type_erasure/instanceof_negative_0.ets
 15.semantic_rules/11.type_erasure/instanceof_negative_1.ets
