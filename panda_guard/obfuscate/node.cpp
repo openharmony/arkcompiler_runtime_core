@@ -579,7 +579,8 @@ void panda::guard::Node::CreateUiDecorator(const InstructionInfo &info, Scope sc
 void panda::guard::Node::CreateFilePath()
 {
     const auto &options = GuardContext::GetInstance()->GetGuardOptions();
-    if (!options->IsFileNameObfEnabled() || options->IsReservedRemoteHarPkgNames(this->pkgName_)) {
+    if (!options->IsFileNameObfEnabled() || options->IsReservedRemoteHarPkgNames(this->pkgName_) ||
+        options->IsInRecordNameWhiteList(this->name_)) {
         this->filepath_.name = this->name_;
         return;
     }
