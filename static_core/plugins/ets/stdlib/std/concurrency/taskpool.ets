@@ -395,11 +395,18 @@ export namespace taskpool {
             }
             this.callUserCallback(this.onStartCallback);
             let result: Any = null;
+            let executionSucceeded: boolean = false;
             this.startTime = Chrono.nanoNow();
             const startCpuTime: long = Chrono.getCpuTime();
             try {
                 result = this.task.taskFunction();
-                this.callUserCallback(this.onSuccessCallback);
+                if (result instanceof Promise) {
+                    result.then(() => {
+                        executionSucceeded = true;
+                    });
+                } else {
+                    executionSucceeded = true;
+                }
             } catch (e) {
                 try {
                     // NOTE(csaba.osztrogonac): remove as cast once e has Error type
@@ -427,6 +434,8 @@ export namespace taskpool {
                     try {
                         if (!notCanceled) {
                             this.throwCancelTaskError();
+                        } else if (executionSucceeded) {
+                            this.callUserCallback(this.onSuccessCallback);
                         }
                     } catch (e) {
                         try {
