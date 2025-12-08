@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,10 @@
 
 namespace ark::compiler {
 
+// CC-OFFNXT(G.PRE.02) should be with define
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define PEEPHOLE_IS_APPLIED(visitor, inst) (visitor)->SetIsApplied((inst), true, __FILE__, __LINE__)
+#define PEEPHOLE_IS_APPLIED(visitor, inst) \
+    (visitor)->SetIsApplied((inst), ((inst)->GetBasicBlock() != nullptr), __FILE__, __LINE__)
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API Peepholes : public Optimization, public GraphVisitor {
@@ -125,7 +127,7 @@ private:
         if (altFormat) {
             COMPILER_LOG(DEBUG, PEEPHOLE) << "Peephole (" << file << ":" << line << ") is applied for " << *inst;
         } else {
-            COMPILER_LOG(DEBUG, PEEPHOLE) << "Peephole is applied for " << GetOpcodeString(inst->GetOpcode());
+            COMPILER_LOG(DEBUG, PEEPHOLE) << "Peephole is applied for [removed] " << GetOpcodeString(inst->GetOpcode());
         }
         GetGraph()->GetEventWriter().EventPeephole(GetOpcodeString(inst->GetOpcode()), inst->GetId(), inst->GetPc());
         if (g_options.IsCompilerDumpPeepholes()) {

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,14 @@ public:
 
     NO_COPY_SEMANTIC(PeepholesTest);
     NO_MOVE_SEMANTIC(PeepholesTest);
+
+    // Overriden because PeepholeDoubleToString doesn't apply if IsStringCachesUsed returns false
+    struct RuntimeInterfaceNotStringCachesUsed : public compiler::RuntimeInterface {
+        bool IsStringCachesUsed() const override
+        {
+            return true;
+        }
+    };
 
     Graph *GetGraph()
     {
@@ -7044,6 +7052,52 @@ TEST_F(PeepholesTest, RemoveDoubleXorNeg4)
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
+
+// peephole PeepholeDoubleToString does not apply if AARCH32
+// INTRINSIC_STD_DOUBLE_TO_STRING is only present in ets plugin
+#if !defined(PANDA_TARGET_ARM32) && defined(PANDA_WITH_ETS)
+TEST_F(PeepholesTest, PeepholeLoggingTest)
+{
+    ark::Logger::InitializeStdLogging(ark::Logger::Level::DEBUG,
+                                      ark::Logger::ComponentMask().set(ark::Logger::Component::COMPILER));
+    ark::compiler::CompilerLogger::EnableComponent(ark::compiler::CompilerLoggerComponents::PEEPHOLE);
+    ark::Logger::SetLevel(ark::Logger::Level::DEBUG);
+
+    auto graph = CreateEmptyGraph();
+    RuntimeInterfaceNotStringCachesUsed runtime;
+    graph->SetRuntime(&runtime);
+
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 10.5_D).f64();  // double value to convert
+        CONSTANT(1U, 10U).i32();     // radix = 10 (decimal)
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(20U, Opcode::SaveState).NoVregs();
+            // Create intrinsic for double to string conversion
+            INST(3U, Opcode::Intrinsic)
+                .ref()
+                .InputsAutoType(0U, 1U, 20U)
+                .IntrinsicId(RuntimeInterface::IntrinsicId::INTRINSIC_STD_DOUBLE_TO_STRING);
+            INST(4U, Opcode::Return).ref().Inputs(3U);
+        }
+    }
+
+    bool applied = graph->RunPass<Peepholes>();
+    ASSERT_TRUE(applied);
+    applied = graph->RunPass<Cleanup>();
+    ASSERT_TRUE(applied);
+
+    for (const auto *bb : graph->GetBlocksLinearOrder()) {
+        for (const auto *inst : bb->Insts()) {
+            if (inst->IsIntrinsic() && inst->CastToIntrinsic()->GetIntrinsicId() ==
+                                           RuntimeInterface::IntrinsicId::INTRINSIC_STD_DOUBLE_TO_STRING) {
+                UNREACHABLE();
+            }
+        }
+    }
+}
+#endif
 
 // NOLINTEND(readability-magic-numbers)
 

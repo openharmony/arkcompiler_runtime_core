@@ -1668,6 +1668,7 @@ public:
     PANDA_PUBLIC_API virtual bool DumpInputs(std::ostream *out) const;
     PANDA_PUBLIC_API virtual void DumpOpcode(std::ostream *out) const;
     void DumpBytecode(std::ostream *out) const;
+    void DumpId(std::ostream *out) const;
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
     void DumpSourceLine(std::ostream *out) const;
