@@ -201,7 +201,7 @@ export final class ESValue {
             return thisVal.toDouble()
         }
 
-        throw new TypeError("Invalid number: " + Type.of(thisVal))
+        throw new TypeError("Invalid number: " + Class.ofAny(thisVal)?.getName())
     }
 
     public toBigInt(): bigint {
