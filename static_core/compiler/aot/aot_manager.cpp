@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ void AotManager::UpdatePandaFilesSnapshot(bool isArkAot, [[maybe_unused]] bool b
         return;
     }
 
-    auto parseClassContext = [](std::string_view context, const auto &loaded, auto &snapshot) {
+    auto parseClassContext = [](std::string_view context, const auto &loadedFiles, auto &snapshotFiles) {
         size_t start = 0;
         size_t end;
         size_t pathEnd;
@@ -117,10 +117,10 @@ void AotManager::UpdatePandaFilesSnapshot(bool isArkAot, [[maybe_unused]] bool b
                                   loadedFile != loaded.end() ? loadedFile->second : std::make_pair(nullptr, nullptr));
         };
         while ((end = context.find(AotClassContextCollector::DELIMETER, start)) != std::string_view::npos) {
-            parseAndAddFile(loaded, snapshot);
+            parseAndAddFile(loadedFiles, snapshotFiles);
             start = end + 1;
         }
-        parseAndAddFile(loaded, snapshot);
+        parseAndAddFile(loadedFiles, snapshotFiles);
     };
 
     // NOTE: Possibly not optimal #31915
