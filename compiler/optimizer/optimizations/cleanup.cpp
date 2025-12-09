@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,7 +84,8 @@ bool Cleanup::RunImpl()
         }
 
         while (bb->GetSuccsBlocks().size() == 1 && bb->GetSuccessor(0)->GetPredsBlocks().size() == 1 &&
-               !bb->GetSuccessor(0)->IsPseudoControlFlowBlock() && bb->IsTry() == bb->GetSuccessor(0)->IsTry()) {
+               !bb->GetSuccessor(0)->IsPseudoControlFlowBlock() && bb->IsTry() == bb->GetSuccessor(0)->IsTry() &&
+               bb->GetTryId() == bb->GetSuccessor(0)->GetTryId()) {
             ASSERT(!bb->GetSuccessor(0)->HasPhi());
             COMPILER_LOG(DEBUG, CLEANUP) << "Merged block " << bb->GetSuccessor(0)->GetId() << " into " << bb->GetId();
             bb->JoinSuccessorBlock();
