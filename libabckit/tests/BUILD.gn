@@ -985,7 +985,7 @@ libabckit_host_unittest_action("abckit_gtests") {
     "$abckit_root/src:libabckit",
     "$ark_root_static/assembler:libarktsassembler",
     "$ark_root_static/compiler:libarktscompiler",
-    "$ark_root_static/libpandafile:libarktsfile",
+    "$ark_root_static/libarkfile:libarktsfile",
     "$ark_root_static/libpandabase:libarktsbase",
   ]
 
@@ -1068,7 +1068,7 @@ libabckit_host_unittest_action("arklink_strip_unused_code_gtests") {
     "$abckit_root/src:libabckit",
     "$ark_root_static/assembler:libarktsassembler",
     "$ark_root_static/compiler:libarktscompiler",
-    "$ark_root_static/libpandafile:libarktsfile",
+    "$ark_root_static/libarkfile:libarktsfile",
     "$ark_root_static/libpandabase:libarktsbase",
   ]
 
