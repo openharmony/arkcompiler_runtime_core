@@ -96,8 +96,11 @@ cases:
           let a1: Object[]|null = null
       use: |-
           // ensure-not-nullish expression
-          arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!), 7)  // NPE expected
-      tags: 'negative'
+          try {
+            arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!), 7)  // NPE expected
+          } catch (e: Error) {
+            arktest.assertTrue(e instanceof NullPointerError)
+          }
 
     - decl: |-
           let a1: Object[]|null = [new Object, new Object]
