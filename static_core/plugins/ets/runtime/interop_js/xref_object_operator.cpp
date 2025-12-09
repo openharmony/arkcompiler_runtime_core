@@ -37,7 +37,7 @@ XRefObjectOperator XRefObjectOperator::FromEtsObject(EtsHandle<EtsObject> &etsOb
     return XRefObjectOperator(etsObject);
 }
 
-EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const std::string &name) const
+EtsObject *XRefObjectOperator::GetProperty(EtsCoroutine *coro, const PandaString &name) const
 {
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);

@@ -973,10 +973,9 @@ void ESValueAnyNamedSetter(EtsObject *etsObject, EtsString *etsPropName, EtsObje
         return;
     }
     PandaVector<uint8_t> tree8Buf;
-    auto nameChar = utf::Mutf8AsCString(etsPropName->IsTreeString() ? etsPropName->GetTreeStringDataMUtf8(tree8Buf)
-                                                                    : etsPropName->GetDataMUtf8());
-    panda_file::File::StringData propName = {
-        static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(nameChar))), utf::CStringAsMutf8(nameChar)};
+    auto name = etsPropName->ConvertToStringView(&tree8Buf);
+    PandaString str(name);
+    panda_file::File::StringData propName = {etsPropName->GetUtf16Length(), utf::CStringAsMutf8(str.c_str())};
     EtsStbyname(coro, etsObject, propName, value);
 }
 
@@ -996,10 +995,9 @@ EtsObject *ESValueAnyNamedGetter(EtsObject *etsObject, EtsString *etsPropName)
         return nullptr;
     }
     PandaVector<uint8_t> tree8Buf;
-    auto nameChar = utf::Mutf8AsCString(etsPropName->IsTreeString() ? etsPropName->GetTreeStringDataMUtf8(tree8Buf)
-                                                                    : etsPropName->GetDataMUtf8());
-    panda_file::File::StringData propName = {
-        static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(nameChar))), utf::CStringAsMutf8(nameChar)};
+    auto name = etsPropName->ConvertToStringView(&tree8Buf);
+    PandaString str(name);
+    panda_file::File::StringData propName = {etsPropName->GetUtf16Length(), utf::CStringAsMutf8(str.c_str())};
     return EtsLdbyname(coro, etsObject, propName);
 }
 

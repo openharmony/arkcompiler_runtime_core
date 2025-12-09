@@ -28,7 +28,7 @@ class XRefObjectOperator {
 public:
     static XRefObjectOperator FromEtsObject(EtsHandle<EtsObject> &etsObject);
 
-    EtsObject *GetProperty(EtsCoroutine *coro, const std::string &name) const;
+    EtsObject *GetProperty(EtsCoroutine *coro, const PandaString &name) const;
 
     EtsObject *GetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject) const;
 

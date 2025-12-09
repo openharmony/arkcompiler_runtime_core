@@ -522,6 +522,15 @@ inline Field *Class::GetDeclaredFieldByName(const uint8_t *mutf8Name) const
     return FindDeclaredField([sd](const Field &field) { return field.GetName() == sd; });
 }
 
+inline Field *Class::GetDeclaredInstanceFieldByName(std::string_view name) const
+{
+    return FindDeclaredField<FindFilter::INSTANCE>([name](const Field &field) {
+        auto fieldNameData = field.GetName().data;
+        std::string_view fieldName(utf::Mutf8AsCString(fieldNameData));
+        return fieldName == name;
+    });
+}
+
 inline Field *Class::GetDeclaredInstanceFieldByName(const uint8_t *mutf8Name) const
 {
     panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
@@ -532,6 +541,15 @@ inline Field *Class::GetDeclaredInstanceFieldByName(const uint8_t *mutf8Name, ui
 {
     panda_file::File::StringData sd = {mutf16Length, mutf8Name};
     return FindDeclaredField<FindFilter::INSTANCE>([sd](const Field &field) { return field.GetName() == sd; });
+}
+
+inline Field *Class::GetDeclaredStaticFieldByName(std::string_view name) const
+{
+    return FindDeclaredField<FindFilter::STATIC>([name](const Field &field) {
+        auto fieldNameData = field.GetName().data;
+        std::string_view fieldName(utf::Mutf8AsCString(fieldNameData));
+        return fieldName == name;
+    });
 }
 
 inline Field *Class::GetDeclaredStaticFieldByName(const uint8_t *mutf8Name) const

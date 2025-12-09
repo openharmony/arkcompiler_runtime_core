@@ -783,13 +783,8 @@ static void SetAttachCallbackForClass(napi_env env, napi_value jsCtor, std::vect
 
 static void SortMethodByName(PandaVector<Method *> &methods)
 {
-    std::sort(methods.begin(), methods.end(), [](const Method *lhs, const Method *rhs) {
-        panda_file::File::StringData lhsName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(lhs->GetName().data)),
-                                                lhs->GetName().data};
-        panda_file::File::StringData rhsName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(rhs->GetName().data)),
-                                                rhs->GetName().data};
-        return lhsName < rhsName;
-    });
+    std::sort(methods.begin(), methods.end(),
+              [](const Method *lhs, const Method *rhs) { return lhs->GetName() < rhs->GetName(); });
 }
 
 /*static*/
