@@ -2898,20 +2898,6 @@ body of a *function with receiver*. Only ``public`` members can be accessed:
       a.foo() // Ordinary class method is called
       a.bar() // Function with receiver is called
 
-A :index:`compile-time error` occurs if the name of a *function with receiver*
-is the same as the name of an accessible (see :ref:`Accessible`) instance
-method or field of the receiver type:
-
-.. code-block:: typescript
-   :linenos:
-
-      class A {
-          foo () { ... }
-      }
-      function foo(this: A) { ... } // Compile-time error to prevent ambiguity below
-      (new A).foo()
-
-
 *Function with receiver* cannot have the same name as a global function.
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -2946,6 +2932,28 @@ Otherwise, a :index:`compile-time error` occurs.
          p2.foo<BaseClass>(new DerivedClass())
           // Explicit instantiation
      }
+
+A :index:`compile-time error` occurs if the name of a *function with receiver*
+(including generic functions) is the same as the name of an accessible
+(see :ref:`Accessible`) instance method or field of the receiver type:
+
+.. code-block:: typescript
+   :linenos:
+
+      class A {
+          foo () { ... }
+          bar(): A { return this; }
+      }
+
+      // Compile-time error to prevent ambiguity below
+      function foo(this: A) { ... }
+
+      // Compile-time error to prevent ambiguity below
+      function bar<T extends Object>(this : T) : T { return this }
+
+      (new A).foo()
+      (new A).bar()
+
 
 *Functions with receiver* are dispatched statically. What function is being
 called is known at compile time based on the receiver type specified in the
