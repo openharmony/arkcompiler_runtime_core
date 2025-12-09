@@ -368,38 +368,34 @@ export default namespace buffer {
         }
         // NOTE (templin.konstantin): Can't completely use smart casts due internal issue #21021
         //  now is used temporarily solution with reflection
-        const objType = Type.of(doc);
-        const parts: String[] = (objType as ClassType).getName().split('.');
-        const klass = parts[parts.length - 1];
-        switch (klass) {
-            case "Buffer":
-                return (doc as Buffer).length;
-            case "Int8Array":
-                return (doc as Int8Array).byteLength.toInt();
-            case "Uint8Array":
-                return (doc as Uint8Array).byteLength.toInt();
-            case "Uint8ClampedArray":
-                return (doc as Uint8ClampedArray).byteLength.toInt();
-            case "Int16Array":
-                return (doc as Int16Array).byteLength.toInt();
-            case "Uint16Array":
-                return (doc as Uint16Array).byteLength.toInt();
-            case "Int32Array":
-                return (doc as Int32Array).byteLength.toInt();
-            case "Uint32Array":
-                return (doc as Uint32Array).byteLength.toInt();
-            case "Float32Array":
-                return (doc as Float32Array).byteLength.toInt();
-            case "Float64Array":
-                return (doc as Float64Array).byteLength.toInt();
-            case "BigInt64Array":
-                return (doc as BigInt64Array).byteLength.toInt();
-            case "BigUint64Array":
-                return (doc as BigUint64Array).byteLength.toInt();
-            case "DataView":
-                return (doc as DataView).byteLength.toInt();
-            case "ArrayBuffer":
-                return (doc as ArrayBuffer).getByteLength();
+        if (doc instanceof Buffer) {
+            return (doc as Buffer).length;
+        } else if (doc instanceof Int8Array) {
+            return (doc as Int8Array).byteLength.toInt();
+        } else if (doc instanceof Uint8Array) {
+            return (doc as Uint8Array).byteLength.toInt();
+        } else if (doc instanceof Uint8ClampedArray) {
+            return (doc as Uint8ClampedArray).byteLength.toInt();
+        } else if (doc instanceof Int16Array) {
+            return (doc as Int16Array).byteLength.toInt();
+        } else if (doc instanceof Uint16Array) {
+            return (doc as Uint16Array).byteLength.toInt();
+        } else if (doc instanceof Int32Array) {
+            return (doc as Int32Array).byteLength.toInt();
+        } else if (doc instanceof Uint32Array) {
+            return (doc as Uint32Array).byteLength.toInt();
+        } else if (doc instanceof Float32Array) {
+            return (doc as Float32Array).byteLength.toInt();
+        } else if (doc instanceof Float64Array) {
+            return (doc as Float64Array).byteLength.toInt();
+        } else if (doc instanceof BigInt64Array) {
+            return (doc as BigInt64Array).byteLength.toInt();
+        } else if (doc instanceof BigUint64Array) {
+            return (doc as BigUint64Array).byteLength.toInt();
+        } else if (doc instanceof DataView) {
+            return (doc as DataView).byteLength.toInt();
+        } else if (doc instanceof ArrayBuffer) {
+            return (doc as ArrayBuffer).getByteLength();
         }
         throw createBusinessError(TypeErrorCodeId, "Invalid type")
     }
@@ -1021,104 +1017,87 @@ export default namespace buffer {
                     `It must be >= 0 and <= ${this.length}. Received value is: ${resolvedEnd}`)
             }
 
-            let klass: string = "string";
-            if (value instanceof string) {
-                if (value as string == "") {
-                    return this.fill(0 as long, offset, end, encoding);
-                }
-                klass = "string";
-            } else if (value instanceof int) {
-                klass = "int";
-            } else if (value instanceof long) {
-                klass = "long";
-            } else if (value instanceof double) {
-                klass = "double";
-            } else {
-                // NOTE (templin.konstantin): Can't completely use smart casts due internal issue #21021
-                //  now is used temporarily solution with reflection
-                const objType = Type.of(value as (Buffer | Uint8Array));
-                const parts: String[] = (objType as ClassType).getName().split('.');
-                klass = parts[parts.length - 1];
+            if (value instanceof string && value as string == "") {
+                return this.fill(0 as long, offset, end, encoding);
             }
 
             const offsetInt = offset + this.byteOffset;
             const resolvedEndInt = resolvedEnd + this.byteOffset;
             const resolvedEncoding: BufferEncoding = encoding ?? "utf-8";
 
-            switch (klass) {
-                case "string":
-                    let strValue = value as string;
-                    if (resolvedEncoding == 'ascii') {
-                        strValue = sanitizeAscii(strValue);
-                    } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
-                        if (strValue.length == 0) {
-                            return this;
-                        }
-                        strValue = sanitizeUtf8(strValue);
-                    } else if (resolvedEncoding == 'latin1' || resolvedEncoding == 'binary') {
-                        strValue = sanitizeLatin1(strValue);
-                    } else if (resolvedEncoding == 'hex') {
-                        strValue = takeValidHexPrefix(strValue);
-                        if (strValue.length == 0) {
-                            return this;
-                        }
-                    } else if (resolvedEncoding == 'base64' || resolvedEncoding == 'base64url') {
-                        strValue = fillInPaddingBase64(strValue);
+            if (value instanceof string) {
+                let strValue = value as string;
+                if (resolvedEncoding == 'ascii') {
+                    strValue = sanitizeAscii(strValue);
+                } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
+                    if (strValue.length == 0) {
+                        return this;
                     }
-                    let buff: Uint8Array;
+                    strValue = sanitizeUtf8(strValue);
+                } else if (resolvedEncoding == 'latin1' || resolvedEncoding == 'binary') {
+                    strValue = sanitizeLatin1(strValue);
+                } else if (resolvedEncoding == 'hex') {
+                    strValue = takeValidHexPrefix(strValue);
+                    if (strValue.length == 0) {
+                        return this;
+                    }
+                } else if (resolvedEncoding == 'base64' || resolvedEncoding == 'base64url') {
+                    strValue = fillInPaddingBase64(strValue);
+                }
 
-                    if (resolvedEncoding === 'ucs2' || resolvedEncoding === 'ucs-2' || resolvedEncoding === 'utf16le') {
-                        const u16 = new Uint16Array(strValue.length);
-                        for (let i = 0; i < strValue.length; i++) {
-                            u16[i] = strValue.charCodeAt(i);
-                        }
-                        buff = new Uint8Array(u16.buffer);
-                    } else {
-                        buff = new Uint8Array(ArrayBuffer.from(strValue, resolvedEncoding as string));
+                let buff: Uint8Array;
+                if (resolvedEncoding === 'ucs2' || resolvedEncoding === 'ucs-2' || resolvedEncoding === 'utf16le') {
+                    const u16 = new Uint16Array(strValue.length);
+                    for (let i = 0; i < strValue.length; i++) {
+                        u16[i] = strValue.charCodeAt(i);
                     }
+                    buff = new Uint8Array(u16.buffer);
+                } else {
+                    buff = new Uint8Array(ArrayBuffer.from(strValue, resolvedEncoding as string));
+                }
 
-                    let pos = offsetInt;
-                    while (buff.byteLength > 0 && pos + buff.byteLength <= resolvedEndInt) {
-                        for (let j: int = 0; j < buff.byteLength; j++) {
-                            this.buffer.set(pos++, buff[j].toByte());
-                        }
+                let pos = offsetInt;
+                while (buff.byteLength > 0 && pos + buff.byteLength <= resolvedEndInt) {
+                    for (let j: int = 0; j < buff.byteLength; j++) {
+                        this.buffer.set(pos++, buff[j].toByte());
                     }
+                }
 
-                    for (let j: int = 0; pos < resolvedEndInt && buff.byteLength > 0; j++, pos++) {
-                        this.buffer.set(pos, buff[j].toByte());
-                    }
-                    return this;
-                case "int":
-                    let asInt: int = value as int;
-                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asInt.toByte());
-                    }
-                    return this;
-                case "long":
-                    let asLong: long = value as long;
-                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asLong.toByte());
-                    }
-                    return this;
-                case "double":
-                    let asDouble: double = value as double;
-                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asDouble.toByte());
-                    }
-                    return this;
-                case "Buffer":
-                    let asBuf = value as Buffer;
-                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asBuf.at((i % asBuf.length)).toByte());
-                    }
-                    return this;
-                case "Uint8Array":
-                    let asU8a = value as Uint8Array;
-                    for (let i: int = offsetInt; i < resolvedEndInt; i++) {
-                        this.buffer.set(i, asU8a.at(i % asU8a.length)!.toByte());
-                    }
-                    return this;
-                default:
+                for (let j: int = 0; pos < resolvedEndInt && buff.byteLength > 0; j++, pos++) {
+                    this.buffer.set(pos, buff[j].toByte());
+                }
+                return this;
+            } else if (value instanceof int) {
+                let asInt: int = value as int;
+                for (let i: int = offsetInt; i < resolvedEndInt; i++) {
+                    this.buffer.set(i, asInt.toByte());
+                }
+                return this;
+            } else if (value instanceof long) {
+                let asLong: long = value as long;
+                for (let i: int = offsetInt; i < resolvedEndInt; i++) {
+                    this.buffer.set(i, asLong.toByte());
+                }
+                return this;
+            } else if (value instanceof double) {
+                let asDouble: double = value as double;
+                for (let i: int = offsetInt; i < resolvedEndInt; i++) {
+                    this.buffer.set(i, asDouble.toByte());
+                }
+                return this;
+            } else if (value instanceof Buffer) {
+                let asBuf = value as Buffer;
+                for (let i: int = offsetInt; i < resolvedEndInt; i++) {
+                    this.buffer.set(i, asBuf.at((i % asBuf.length)).toByte());
+                }
+                return this;
+            } else if (value instanceof Uint8Array) {
+                let asU8a = value as Uint8Array;
+                for (let i: int = offsetInt; i < resolvedEndInt; i++) {
+                    this.buffer.set(i, asU8a.at(i % asU8a.length)!.toByte());
+                }
+                return this;
+            } else {
                     throw createBusinessError(TypeErrorCodeId, `Parameter error: value must be a string, Buffer, Uint8Array, or int. \
 Received value is: ${value}`)
             }
