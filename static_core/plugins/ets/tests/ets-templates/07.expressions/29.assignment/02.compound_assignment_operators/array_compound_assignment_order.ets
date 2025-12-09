@@ -74,7 +74,7 @@ function getValue(val: long): long {
 
 function main() {
     result = "";  // reset due to jit mode warmup
-
+    test_array = [1, 2]
     {{c.main|indent}}
 
     arktest.assertEQ(result, {{c.assert_result}})

@@ -54,7 +54,7 @@ function getValue(): int {
 
 function main() {
     result = "";  // reset due to jit mode warmup
-
+    test_object = new A()
     {{c.main|indent}}
 
     arktest.assertEQ(result, {{c.assert_result}})
