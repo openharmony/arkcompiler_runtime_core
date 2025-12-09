@@ -29,8 +29,8 @@
 
 # ARK common:
 googletest,https://github.com/google/googletest,tag,release-1.11.0,no_patches,no_submodules
-utils_native,https://gitee.com/openharmony/utils_native,branch,master,no_patches,no_submodules
-zlib,https://gitee.com/openharmony/third_party_zlib,branch,master,no_patches,no_submodules
+utils_native,https://gitcode.com/openharmony/commonlibrary_c_utils,branch,master,no_patches,no_submodules
+zlib,https://gitcode.com/openharmony/third_party_zlib,branch,master,no_patches,no_submodules
 
 # ARK compiler:
 asmjit,https://github.com/asmjit/asmjit,commit,8474400e82c3ea65bd828761539e5d9b25f6bd83,with_patches,no_submodules
@@ -46,4 +46,4 @@ asio,https://github.com/chriskohlhoff/asio,tag,asio-1-18-1,no_patches,no_submodu
 websocketpp,https://github.com/zaphoyd/websocketpp,tag,0.8.2,no_patches,no_submodules
 
 # ARK plugins:
-icu,https://gitee.com/openharmony/third_party_icu,branch,master,no_patches,no_submodules
+icu,https://gitcode.com/openharmony/third_party_icu,branch,master,no_patches,no_submodules
