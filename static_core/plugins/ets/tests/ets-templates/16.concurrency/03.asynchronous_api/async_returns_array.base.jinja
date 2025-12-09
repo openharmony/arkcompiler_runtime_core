@@ -52,10 +52,12 @@ async function startTest(){
     let result = {{ call_async(declaration_type, params) }}
     arktest.assertTrue(result instanceof Promise)
     let awaited_result = await result
+    {% if not arr_type == 'FixedArray' -%}
     arktest.assertTrue(Array.isArray(awaited_result))
+    {% endif %}
     arktest.assertTrue(awaited_result[0] {{assert}})
-    {%- if array_type == 'FixedArray' -%}
-    arktest.assertTrue(awaited_result instanceof FixedArray)
+    {% if arr_type == 'FixedArray' -%}
+    arktest.assertTrue(awaited_result instanceof {{type_name}})
     {% endif %}
 }
 

@@ -741,10 +741,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns true is arr is a non-nullish array, false otherwise
      */
     public static isArray(o: Any): boolean {
-        if (o instanceof Array) {
-            return true
-        }
-        return (Type.of(o) instanceof ArrayType)
+        return o instanceof Array
     }
 
     /**
