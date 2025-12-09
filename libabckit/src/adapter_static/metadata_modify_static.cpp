@@ -37,7 +37,7 @@
 #include "static_core/assembler/mangling.h"
 #include "static_core/assembler/assembly-record.h"
 #include "static_core/assembler/meta.h"
-#include "static_core/libpandafile/modifiers.h"
+#include "static_core/libarkfile/modifiers.h"
 
 #include "static_core/compiler/optimizer/ir/graph_checker.h"
 #include "static_core/compiler/optimizer/ir/graph_cloner.h"
