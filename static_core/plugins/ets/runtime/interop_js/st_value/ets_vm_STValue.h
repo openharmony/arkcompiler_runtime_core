@@ -171,7 +171,6 @@ enum class SType : int32_t { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBL
 
 PANDA_PUBLIC_API napi_value GetSTValueClass(napi_env env);
 PANDA_PUBLIC_API napi_value CreateSTypeObject(napi_env env);
-ani_env *GetAniEnv();
 uintptr_t GetSTValueDataPtr(napi_env env, napi_value jsSTValue);
 bool AniCheckAndThrowToDynamic(napi_env env, ani_status status);
 bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::string &errorMsg);
@@ -197,6 +196,24 @@ void ThrowJSNonDoubleError(napi_env env, const std::string &name);
 void ThrowJSNonObjectError(napi_env env, const std::string &name);
 void ThrowJSThisNonObjectError(napi_env env);
 void ThrowJSOtherNonObjectError(napi_env env);
+
+template <bool IS_NOT_DESTRUCT = true>
+ani_env *GetAniEnv()
+{
+    ani_vm *vm {};
+    ani_env *aniEnv {};
+    ani_size size = 0;
+    ani_size bufferSize = 1;
+    AniExpectOK(ANI_GetCreatedVMs(&vm, bufferSize, &size));
+    if constexpr (IS_NOT_DESTRUCT) {
+        ASSERT(size == bufferSize);
+    } else if (size == 0) {
+        return nullptr;
+    }
+    AniExpectOK(vm->GetEnv(ANI_VERSION_1, &aniEnv));
+
+    return aniEnv;
+}
 
 #define NAPI_TO_ANI_SCOPE                                       \
     do {                                                        \

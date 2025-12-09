@@ -50,6 +50,19 @@ inline bool Class::RemoveField(arkts::ClassField field) const
     return ret;
 }
 
+inline arkts::ClassField Class::AddField(const std::string_view name, const Type &type, const Value &value,
+                                         bool isStatic, AbckitArktsFieldVisibility fieldVisibility)
+{
+    const struct AbckitArktsFieldCreateParams params {
+        name.data(), type.GetView(), value.GetView(), isStatic, fieldVisibility
+    };
+    auto *arkClassField = GetApiConfig()->cArktsMapi_->classAddField(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto *coreClassField = GetApiConfig()->cArktsIapi_->arktsClassFieldToCoreClassField(arkClassField);
+    CheckError(GetApiConfig());
+    return arkts::ClassField(core::ClassField(coreClassField, GetApiConfig(), GetResource()));
+}
+
 inline arkts::ClassField Class::AddField(const std::string_view name, const Type &type, bool isStatic,
                                          AbckitArktsFieldVisibility fieldVisibility)
 {
@@ -117,19 +130,6 @@ inline bool Class::RemoveMethod(arkts::Function method)
     const auto ret = GetApiConfig()->cArktsMapi_->classRemoveMethod(TargetCast(), method.TargetCast());
     CheckError(GetApiConfig());
     return ret;
-}
-
-inline arkts::Function Class::AddMethod(const std::string &name, const Type &returnType, bool isStatic, bool isAsync,
-                                        enum ArktsMethodVisibility methodVisibility)
-{
-    struct ArktsMethodCreateParams methodParams {
-        name.c_str(), nullptr, returnType.GetView(), isStatic, isAsync, methodVisibility
-    };
-    auto *arktsFunction = GetApiConfig()->cArktsMapi_->classAddMethod(TargetCast(), &methodParams);
-    CheckError(GetApiConfig());
-    auto *coreFunction = GetApiConfig()->cArktsIapi_->arktsFunctionToCoreFunction(arktsFunction);
-    CheckError(GetApiConfig());
-    return arkts::Function(core::Function(coreFunction, GetApiConfig(), GetResource()));
 }
 
 inline Class Class::CreateClass(Module m, const std::string &name)

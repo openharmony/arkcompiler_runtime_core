@@ -15,8 +15,8 @@
 
 #include "mem_manager.h"
 
-#include "libarkbase/mem/arena_allocator.h"
-#include "libarkbase/mem/pool_manager.h"
+#include "libpandabase/mem/arena_allocator.h"
+#include "libpandabase/mem/pool_manager.h"
 
 namespace libabckit {
 

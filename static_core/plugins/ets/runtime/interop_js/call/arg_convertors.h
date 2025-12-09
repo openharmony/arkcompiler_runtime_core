@@ -43,6 +43,7 @@ template <typename FStore>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertRefArgToEts(InteropCtx *ctx, Class *klass, FStore &storeRes,
                                                                   napi_value jsVal)
 {
+    INTEROP_TRACE();
     auto env = ctx->GetJSEnv();
 
     // start fastpath
@@ -76,6 +77,7 @@ template <typename FStore>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertPrimArgToEts(InteropCtx *ctx, panda_file::Type::TypeId id,
                                                                    FStore &storeRes, napi_value jsVal)
 {
+    INTEROP_TRACE();
     auto env = ctx->GetJSEnv();
 
     auto unwrapVal = [&ctx, &env, &jsVal, &storeRes](auto convTag) {
@@ -117,6 +119,7 @@ template <typename FStore, typename GetClass>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertArgToEts(InteropCtx *ctx, panda_file::Type type, FStore &storeRes,
                                                                const GetClass &getClass, napi_value jsVal)
 {
+    INTEROP_TRACE();
     auto id = type.GetId();
     if (id == panda_file::Type::TypeId::REFERENCE) {
         return ConvertRefArgToEts(ctx, getClass(), storeRes, jsVal);
@@ -187,6 +190,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
 [[maybe_unused]] static ObjectHeader **PackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, ProtoReader &protoReader,
                                                           Span<napi_value> jsargv)
 {
+    INTEROP_TRACE();
     if (!protoReader.GetClass()->IsArrayClass()) {
         ASSERT(protoReader.GetClass() == ctx->GetArrayClass());
         const size_t numRestParams = jsargv.size();
@@ -240,6 +244,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
 template <typename FRead>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertRefArgToJS(InteropCtx *ctx, napi_value *resSlot, FRead &readVal)
 {
+    INTEROP_TRACE();
     ASSERT(ctx != nullptr);
     auto env = ctx->GetJSEnv();
     auto setResult = [resSlot](napi_value res) {
@@ -284,9 +289,11 @@ template <typename FRead>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertArgToJS(InteropCtx *ctx, ProtoReader &protoReader,
                                                               napi_value *resSlot, FRead &readVal)
 {
+    INTEROP_TRACE();
     auto env = ctx->GetJSEnv();
 
     auto wrapPrim = [&env, &readVal, resSlot](auto convTag) -> bool {
+        INTEROP_TRACE();
         using Convertor = typename decltype(convTag)::type;  // convTag acts as lambda template parameter
         using cpptype = typename Convertor::cpptype;         // NOLINT(readability-identifier-naming)
         napi_value res = Convertor::Wrap(env, readVal(helpers::TypeIdentity<cpptype>()));

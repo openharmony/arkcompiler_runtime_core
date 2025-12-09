@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-const moduleField1: string = 'ModuleFieldOne';
-const moduleField2: string = 'ModuleFieldTwo';
+const moduleField1: string = "ModuleFieldOne";
+const moduleField2: string = "ModuleFieldTwo";
 const moduleField3: number = 5.5;
 
 namespace NS1 {
     export const nS1F1: string[] = ['NamespaceFieldOne'];
 }
 
-class C1 {
-    public c1F1: string = 'Anno1';
-    public c1F2: number = 999;
+class c1 {
+    c1F1: string = "Anno1";
+    c1F2: number = 999;
 }
 
-class C2 {
-    public c2F1: string = 'Anno1';
+class c2 {
+    c2F1: string = "Anno1";
 }
 
-class C3 {
-    public c3F1: number = 999;
+class c3 {
+    c3F1: number = 999;
 }
 
 interface I1 {
@@ -42,12 +42,12 @@ interface I2 {
     i2F1: number;
 }
 
-class C4 implements I1 {
-    public i1F1: string = 'ABC';
+class c4 implements I1 {
+    i1F1: string = 'ABC';
 }
 
-class C5 implements I2 {
-    public i2F1: number = 3;
+class c5 implements I2 {
+    i2F1: number = 3;
 }
 
 enum E1 {
@@ -60,17 +60,17 @@ function enumFieldSetName() {
 }
 
 function interfaceFieldSetType() {
-    let inst: C5 = new C5();
+    let inst: c5 = new c5();
     console.log(inst)
 }
 
 function interfaceFieldSetName() {
-    let inst: C4 = new C4();
+    let inst: c4 = new c4();
     console.log(inst)
 }
 
 function classFieldSetName() {
-    let class1: C1 = new C1();
+    let class1: c1 = new c1();
     console.log(class1);
 }
 
@@ -99,11 +99,11 @@ function moduleFieldSetType() {
 }
 
 function classSetType() {
-    let class3: C3 = new C3();
+    let class3: c3 = new c3();
     console.log(class3)
 }
 
 function classSetValueString() {
-    let class2: C2 = new C2();
+    let class2: c2 = new c2();
     console.log(class2.c2F1)
 }

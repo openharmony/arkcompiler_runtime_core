@@ -36,7 +36,7 @@ ark_gen("abckit_ark_gen") {
     "../dyn_intrinsics:abckit_isa_gen_dyn_intrinsics_opcodes_inc",
     ":abckit_ark_gen_abckit_intrinsics_inl",
   ]
-  requires = [ "$ark_root_static/libarkbase/utils.rb" ]
+  requires = [ "$ark_root_static/libpandabase/utils.rb" ]
   destination = "$intrinsics_compiler_gen_dir/generated"
 }
 
@@ -56,7 +56,7 @@ ark_gen("abckit_ark_gen") {
     "$ark_root_static/runtime:arkruntime_gen_intrinsics_yaml",
     "../dyn_intrinsics/:abckit_isa_gen_dyn_intrinsics_opcodes_inc",
   ]
-  requires = [ "$ark_root_static/libarkbase/utils.rb" ]
+  requires = [ "$ark_root_static/libpandabase/utils.rb" ]
   destination = "$intrinsics_compiler_gen_dir/generated"
 }
 
@@ -82,6 +82,6 @@ ark_gen("abckit_ark_gen") {
     "$ark_root_static/runtime:arkruntime_gen_intrinsics_yaml",
     "../dyn_intrinsics:abckit_isa_gen_dyn_intrinsics_cases_inc",
   ]
-  requires = [ "$ark_root_static/libarkbase/utils.rb" ]
+  requires = [ "$ark_root_static/libpandabase/utils.rb" ]
   destination = "$bco_gen_dir/generated"
 }

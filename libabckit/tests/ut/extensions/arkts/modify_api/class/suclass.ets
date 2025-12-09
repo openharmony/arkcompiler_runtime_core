@@ -14,15 +14,15 @@
  */
 
 class SuClass {
-    public suKey: string;
-    public suValue: number;
+    suKey: string;
+    suValue: number;
 
     constructor() {
-        this.suKey = 'sukey';
+        this.suKey = "sukey";
         this.suValue = 1;
     }
 
     suHandle(): void {
-        console.log('key: ' + this.suKey + ' value: ' + this.suValue);
+        console.log("key: " + this.suKey + " value: " + this.suValue);
     }
 }

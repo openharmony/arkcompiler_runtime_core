@@ -930,6 +930,7 @@ napi_value EtsClassWrapper::CreateProxy(napi_env env, napi_value jsCtor, EtsClas
 /*static*/
 napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -971,6 +972,7 @@ napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info inf
 /*static*/
 napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);

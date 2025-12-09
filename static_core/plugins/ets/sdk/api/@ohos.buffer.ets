@@ -732,7 +732,7 @@ export default namespace buffer {
          * @param {int} [end=buffer.length] - Where to stop decoding
          * @returns {string} The decoded string
          */
-        public toString(encoding?: BufferEncoding, start?: double, end?: double): string {
+        public toString(encoding?: BufferEncoding, start?: int, end?: int): string {
             let resolvedEncoding: string = encoding ?? "utf8";
             let resolvedStart: int = start ?? 0;
             let resolvedEnd: int = end ?? this.length;

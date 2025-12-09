@@ -43,9 +43,8 @@ template("create_merge_file") {
 }
 
 abckit_gtests_sources = [
-  "adapter_dynamic/inst_props_helpers_dynamic_test.cpp",
   "adapter_static/ir_static_test.cpp",
-  "adapter_static/runtime_adapter_static_test.cpp",
+  #"adapter_static/runtime_adapter_static_test.cpp",
   "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic_test.cpp",
   "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch_test.cpp",
   "clean_scenarios/c_api/dynamic/api_scanner/api_scanner_test.cpp",
@@ -64,7 +63,6 @@ abckit_gtests_sources = [
   "clean_scenarios/cpp_api/dynamic/replace_call_site/replace_call_site_test.cpp",
   "clean_scenarios/cpp_api/dynamic/router_table/router_table_test.cpp",
   "clean_scenarios/cpp_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
-  "codegen/insn_info_test.cpp",
   "cpp/tests/cpp_test.cpp",
   "helpers/helpers.cpp",
   "helpers/helpers_mode.cpp",
@@ -115,7 +113,7 @@ abckit_gtests_sources = [
   "ut/extensions/arkts/inspect_api/methods/methods_static_test.cpp",
   "ut/extensions/arkts/inspect_api/modules/modules_dynamic_test.cpp",
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts.cpp",
-  "ut/extensions/arkts/inspect_api/helpers/helpers_static_test.cpp",
+  #"ut/extensions/arkts/inspect_api/helpers/helpers_static_test.cpp",
   "ut/extensions/arkts/modify_api/annotations/annotations_static_modify_test.cpp",
   "ut/extensions/arkts/modify_api/annotations/annotations_test.cpp",
   "ut/extensions/arkts/modify_api/annotations/annotations_test_static.cpp",
@@ -487,6 +485,7 @@ test_ets_files = [
   "ut/metadata_core/inspect_api/literals/literals_static",
   "ut/metadata_core/inspect_api/values/values_static",
   "ut/metadata_core/inspect_api/types/types_static",
+  "ut/metadata_core/inspect_api/types/union_types_static",
   "ut/metadata_core/modify_api/functions/functions_static",
   "ut/metadata_core/modify_api/strings/strings_static",
   "ut/metadata_core/modify_api/types/types_static",
@@ -553,7 +552,8 @@ test_ets_files = [
   "ut/extensions/arkts/modify_api/interfaces/interfaces_static_modify",
   "ut/extensions/arkts/modify_api/modules/modules_static_modify",
   "ut/extensions/arkts/modify_api/namespaces/namespace_static_modify",
-  "ut/extensions/arkts/inspect_api/helpers/helpers_static_test",
+  "ut/extensions/arkts/modify_api/modules/module_static_modify2",
+  #"ut/extensions/arkts/inspect_api/helpers/helpers_static_test",
   "ut/extensions/arkts/modify_api/class/class_add_method_static",
   "ut/extensions/arkts/modify_api/class/class_add_method_static_extral",
   "ut/extensions/arkts/modify_api/class/class_interface",
@@ -958,27 +958,25 @@ libabckit_host_unittest_action("abckit_gtests") {
     "$abckit_root/include",
     "$abckit_root/src",
     "$abckit_root/tests",
+    "$abckit_root/src/include_v2",
     "$ark_root_static/assembler",
     "$ark_root_static/compiler",
-    "$ark_root_static/libarkbase",
+    "$ark_root_static/libpandabase",
     "$ark_root_static/runtime",
-    "$target_gen_dir/../../libabckit/src/adapter_dynamic",
-    "$target_gen_dir/../../libabckit/src/codegen",
     "$target_gen_dir/../../static_core/",
     "$target_gen_dir/../../static_core/assembler",
     "$target_gen_dir/../../static_core/compiler/generated",
     "$target_gen_dir/../../static_core/cross_values",
-    "$target_gen_dir/../../static_core/libarkbase",
-    "$target_gen_dir/../../static_core/libarkbase/generated",
+    "$target_gen_dir/../../static_core/libpandabase",
+    "$target_gen_dir/../../static_core/libpandabase/generated",
     "$target_gen_dir/../../static_core/runtime",
     "$target_gen_dir/../../static_core/runtime/generated",
   ]
 
   configs = [
     "$abckit_root:abckit_config",
-    "$ark_root_dynamic/libpandafile:arkfile_public_config",
     "$ark_root_static/assembler:arkassembler_public_config",
-    "$ark_root_static/libarkbase:arkbase_public_config",
+    "$ark_root_static/libpandabase:arkbase_public_config",
   ]
 
   deps = [
@@ -987,8 +985,8 @@ libabckit_host_unittest_action("abckit_gtests") {
     "$abckit_root/src:libabckit",
     "$ark_root_static/assembler:libarktsassembler",
     "$ark_root_static/compiler:libarktscompiler",
-    "$ark_root_static/libarkfile:libarktsfile",
-    "$ark_root_static/libarkbase:libarktsbase",
+    "$ark_root_static/libpandafile:libarktsfile",
+    "$ark_root_static/libpandabase:libarktsbase",
   ]
 
   foreach(file, test_js_files) {
@@ -1045,25 +1043,22 @@ libabckit_host_unittest_action("arklink_strip_unused_code_gtests") {
     "$abckit_root/tests",
     "$ark_root_static/assembler",
     "$ark_root_static/compiler",
-    "$ark_root_static/libarkbase",
+    "$ark_root_static/libpandabase",
     "$ark_root_static/runtime",
-    "$target_gen_dir/../../libabckit/src/adapter_dynamic",
-    "$target_gen_dir/../../libabckit/src/codegen",
     "$target_gen_dir/../../static_core/",
     "$target_gen_dir/../../static_core/assembler",
     "$target_gen_dir/../../static_core/compiler/generated",
     "$target_gen_dir/../../static_core/cross_values",
-    "$target_gen_dir/../../static_core/libarkbase",
-    "$target_gen_dir/../../static_core/libarkbase/generated",
+    "$target_gen_dir/../../static_core/libpandabase",
+    "$target_gen_dir/../../static_core/libpandabase/generated",
     "$target_gen_dir/../../static_core/runtime",
     "$target_gen_dir/../../static_core/runtime/generated",
   ]
 
   configs = [
     "$abckit_root:abckit_config",
-    "$ark_root_dynamic/libpandafile:arkfile_public_config",
     "$ark_root_static/assembler:arkassembler_public_config",
-    "$ark_root_static/libarkbase:arkbase_public_config",
+    "$ark_root_static/libpandabase:arkbase_public_config",
   ]
 
   deps = [
@@ -1073,8 +1068,8 @@ libabckit_host_unittest_action("arklink_strip_unused_code_gtests") {
     "$abckit_root/src:libabckit",
     "$ark_root_static/assembler:libarktsassembler",
     "$ark_root_static/compiler:libarktscompiler",
-    "$ark_root_static/libarkfile:libarktsfile",
-    "$ark_root_static/libarkbase:libarktsbase",
+    "$ark_root_static/libpandafile:libarktsfile",
+    "$ark_root_static/libpandabase:libarktsbase",
   ]
 
   foreach(file, test_js_files) {

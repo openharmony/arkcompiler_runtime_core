@@ -24,8 +24,8 @@ interface ExtendedStyle {
 }
 
 class RectangleSize implements ExtendedStyle {
-  public width: number;
-  public height: number;
+  width: number;
+  height: number;
   constructor(w: number, h:number) {
     this.width = w;
     this.height = h;

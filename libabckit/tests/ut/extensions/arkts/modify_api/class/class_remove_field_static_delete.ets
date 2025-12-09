@@ -14,7 +14,7 @@
  */
 
 class Student {
-  addr: string = 'yyy';
+  addr: string = "yyy";
   sayHello(): void {
     console.log(this.addr);
   }

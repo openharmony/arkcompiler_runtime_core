@@ -121,23 +121,6 @@ extern "C" bool ModuleSetName(AbckitArktsModule *m, const char *name)
     return ModuleSetNameStatic(m->core, name);
 }
 
-extern "C" bool ModuleSetName(AbckitArktsModule *m, const char *name)
-{
-    LIBABCKIT_CLEAR_LAST_ERROR;
-    LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_TIME_EXEC;
-
-    LIBABCKIT_BAD_ARGUMENT(m, false);
-    LIBABCKIT_BAD_ARGUMENT(name, false);
-
-    if (IsDynamic(m->core->target)) {
-        statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-        return false;
-    }
-
-    return ModuleSetNameStatic(m->core, name);
-}
-
 extern "C" AbckitArktsImportDescriptor *ModuleAddImportFromArktsV1ToArktsV1(
     AbckitArktsModule *importing, AbckitArktsModule *imported,
     const AbckitArktsImportFromDynamicModuleCreateParams *params)
@@ -980,22 +963,6 @@ extern "C" AbckitArktsEnumField *EnumAddField(AbckitArktsEnum *enm, const struct
 // Module Field
 // ========================================
 
-extern "C" bool ModuleFieldAddAnnotation(AbckitArktsModuleField *field, const AbckitArktsAnnotationCreateParams *params)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)params;
-    return false;
-}
-
-extern "C" bool ModuleFieldRemoveAnnotation(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno)
-{
-    LIBABCKIT_UNIMPLEMENTED;
-    (void)field;
-    (void)anno;
-    return false;
-}
-
 extern "C" bool ModuleFieldSetName(AbckitArktsModuleField *field, const char *name)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -1708,7 +1675,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Module Field
     // ========================================
 
-    ModuleFieldAddAnnotation, ModuleFieldRemoveAnnotation, ModuleFieldSetName, ModuleFieldSetType, ModuleFieldSetValue,
+    ModuleFieldSetName, ModuleFieldSetType, ModuleFieldSetValue,
 
     // ========================================
     // Namespace Field

@@ -24,21 +24,21 @@ interface MyInterface2 {
 }
 
 class MyClass implements MyInterface {
-    public key: string = 'test';
-    public value: number = 42;
+    key: string = "test";
+    value: number = 42;
     
     printKey(): void {
-        console.log('Key: ' + this.key);
+        console.log("Key: " + this.key);
     }
 }
 
 function useInterfaceField(obj: MyClass): void {
-    console.log('Accessing key: ' + obj.key);
+    console.log("Accessing key: " + obj.key);
 }
 
 function main(): void {
     const obj = new MyClass();
     obj.printKey();
     useInterfaceField(obj);
-    console.log('Value: ' + obj.value);
+    console.log("Value: " + obj.value);
 }

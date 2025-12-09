@@ -126,13 +126,12 @@ TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString2)
                   {2},
                   {
                       {0, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING, {}},
-                      {1, ABCKIT_ISA_API_STATIC_OPCODE_CHECKCAST, {0}},
-                      {2, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC, {0}},
-                      {3, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING, {}},
-                      {4, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC, {3}},
-                      {5, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING, {}},
-                      {6, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC, {5}},
-                      {7, ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID, {}},
+                      {1, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC, {0}},
+                      {2, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING, {}},
+                      {3, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC, {2}},
+                      {4, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING, {}},
+                      {5, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC, {4}},
+                      {6, ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID, {}},
                   }},
                  {{1}, {}, {}}});
             helpers::VerifyGraph(graph, bbSchemas);

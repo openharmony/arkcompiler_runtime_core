@@ -39,9 +39,7 @@ const OpcodeList FIELD_INST_LIST = {
 /**
  * opcodes of using type_id ins
  */
-const OpcodeList CLASS_INST_LIST = {
-    Opcode::NEWOBJ, Opcode::NEWARR, Opcode::ISINSTANCE, Opcode::CHECKCAST, Opcode::LDA_TYPE,
-};
+const OpcodeList CLASS_INST_LIST = {Opcode::NEWOBJ, Opcode::NEWARR, Opcode::ISINSTANCE, Opcode::CHECKCAST};
 
 /**
  * opcodes of using method_id ins

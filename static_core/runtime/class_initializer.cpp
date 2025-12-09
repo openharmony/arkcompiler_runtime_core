@@ -340,6 +340,9 @@ bool ClassInitializer<MODE>::InitializeClass(ClassLinker *classLinker, ManagedTh
         ObjectLockT lock(managedClassObjHandle.GetPtr());
 
         if (thread->HasPendingException()) {
+            LOG(WARNING, CLASS_LINKER) << "There was an exception "
+                                       << thread->GetException()->ClassAddr<Class>()->GetName()
+                                       << " when initializing class '" << klass->GetName() << "'";
             WrapException(classLinker, thread);
             klass->SetState(Class::State::ERRONEOUS);
             lock.NotifyAll();

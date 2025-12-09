@@ -20,11 +20,11 @@ interface User {
 }
 
 class Persion implements User {
-  public id: number = 0;
-  public name: string = 'aaa';
-  public age?: number = 1;
+  id: number = 0;
+  name: string = "aaa";
+  age?: number = 1;
   show(): void {
-    console.log('b');
+    console.log("b");
   }
 }
 
@@ -32,7 +32,8 @@ function printUser(user: User) {
   console.log(`ID: ${user.id}, NAME: ${user.name}`);
 }
 
-function main() {
+function main()
+{
   let p = new Persion();
   p.show();
 }

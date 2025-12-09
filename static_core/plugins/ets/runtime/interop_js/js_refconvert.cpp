@@ -89,6 +89,7 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
 template <bool ALLOW_INIT>
 JSRefConvert *JSRefConvertCreate(InteropCtx *ctx, Class *klass)
 {
+    INTEROP_TRACE();
     if (!CheckClassInitialized<ALLOW_INIT>(klass)) {
         ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
         return nullptr;

@@ -87,14 +87,17 @@ bool NapiGetNamedProperty(napi_env env, napi_value object, const char *utf8name,
         }                       \
     } while (0)
 
-#ifndef NDEBUG
-void InteropTrace(const char *func, const char *file, int line);
+#if defined(OHOS_PANDA_TRACE_ENABLE)
+constexpr static const char *const INTEROP_TRACE_ENABLE = "ark.interop.trace.enable";
+ALWAYS_INLINE void InteropTrace(const char *func, const char *file, int line);
 #define INTEROP_TRACE()                             \
     do {                                            \
         InteropTrace(__func__, __FILE__, __LINE__); \
     } while (0)
 #else
-#define INTEROP_TRACE()
+#define INTEROP_TRACE() \
+    do {                \
+    } while (0)
 #endif
 
 #if !defined(NDEBUG)

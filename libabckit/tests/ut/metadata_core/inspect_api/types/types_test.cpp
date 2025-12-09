@@ -88,6 +88,20 @@ TEST_F(LibAbcKitModifyApiTypesTest, TypeGetNameStatic)
     g_impl->closeFile(file);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::typeGetRank, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiTypesTest, TypeGetRankStatic)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/types/types_static.abc", &file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::InspectMethod(file, "bar", [](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *) {
+        AbckitType *type = g_implM->createType(file, ABCKIT_TYPE_ID_I32);
+        g_implM->typeSetRank(type, 1);
+        ASSERT_EQ(g_implI->typeGetRank(type), 1);
+    });
+    g_impl->closeFile(file);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::typeGetReferenceClass, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiTypesTest, TypeGetReferenceClassStatic)
 {

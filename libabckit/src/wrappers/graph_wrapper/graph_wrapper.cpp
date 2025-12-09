@@ -37,7 +37,7 @@
 #include "static_core/compiler/optimizer/optimizations/move_constants.h"
 #include "static_core/compiler/optimizer/optimizations/cleanup.h"
 #include "static_core/compiler/optimizer/optimizations/try_catch_resolving.h"
-#include "libarkbase/utils/arch.h"
+#include "libpandabase/utils/arch.h"
 
 #include <cstdint>
 #include <iostream>

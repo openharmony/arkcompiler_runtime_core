@@ -518,7 +518,7 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
     }
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
+    NapiEscapableScope jsHandleScope(env);
 
     PandaString moduleName = module->GetMutf8();
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)

@@ -30,8 +30,6 @@
 
 #include "field.h"
 
-#include "field.h"
-
 // NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
 

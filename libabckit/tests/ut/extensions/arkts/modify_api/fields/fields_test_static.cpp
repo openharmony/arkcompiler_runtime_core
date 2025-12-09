@@ -159,6 +159,8 @@ static void TransformMethodModuleFieldSetType(AbckitFile *file, AbckitCoreFuncti
 
     AbckitType *type = g_implM->createType(file, AbckitTypeId::ABCKIT_TYPE_ID_STRING);
     auto arkModuleField = g_implArkI->coreModuleFieldToArktsModuleField(cmf);
+    auto coreModuleField = g_implArkI->arktsModuleFieldToCoreModuleField(arkModuleField);
+    ASSERT_NE(coreModuleField, nullptr);
     bool ret = g_implArkM->moduleFieldSetType(arkModuleField, type);
     ASSERT_EQ(ret, true);
     ASSERT_EQ(g_implI->typeGetTypeId(g_implI->moduleFieldGetType(cmf)), AbckitTypeId::ABCKIT_TYPE_ID_STRING);
@@ -361,7 +363,7 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, ModuleFieldSetValue)
 static void TransformMethodClassFieldSetType(AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph)
 {
     std::string moduleName = "fields_static";
-    std::string className("C3");
+    std::string className("c3");
     std::string paramName("c3F1");
     auto ccf = GetAbckitCoreClassField(file, moduleName, className, paramName);
     ASSERT_NE(ccf, nullptr);
@@ -394,7 +396,7 @@ static void TransformMethodClassFieldSetType(AbckitFile *file, AbckitCoreFunctio
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
     callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_PARAMETER);
 
-    AbckitInst *newStOwn = g_statG->iCreateStobjObj(graph, loadStr, callOp, newKeyString);
+    auto *newStOwn = g_statG->iCreateStoreObject(graph, callOp, newKeyString, loadStr, ABCKIT_TYPE_ID_REFERENCE);
     g_implG->iInsertBefore(newStOwn, originalRet);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implG->iInsertBefore(loadStr, newStOwn);
@@ -410,13 +412,13 @@ static void TransformMethodClassFieldSetType(AbckitFile *file, AbckitCoreFunctio
 TEST_F(LibAbcKitModifyApiFieldsStaticTests, ClassFieldSetType)
 {
     auto result = helpers::ExecuteStaticAbc(TEST_ABC_PATH, "fields_static", "classSetType");
-    EXPECT_TRUE(helpers::Match(result, "fields_static\\.C3 \\{c3F1: 999\\}\n"));
+    EXPECT_TRUE(helpers::Match(result, "fields_static\\.c3 \\{c3F1: 999\\}\n"));
 
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
 
     std::string moduleName = "fields_static";
-    std::string className("C3");
+    std::string className("c3");
     std::string paramName("c3F1");
     auto ccf = GetAbckitCoreClassField(file, moduleName, className, paramName);
     ASSERT_NE(ccf, nullptr);
@@ -443,13 +445,13 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, ClassFieldSetType)
     g_impl->closeFile(file);
 
     result = helpers::ExecuteStaticAbc(outputPath, "fields_static", "classSetType");
-    EXPECT_TRUE(helpers::Match(result, "fields_static\\.C3 \\{c3F1: hello\\}\n"));
+    EXPECT_TRUE(helpers::Match(result, "fields_static\\.c3 \\{c3F1: hello\\}\n"));
 }
 
 static void TransformMethodClassFieldSetValue(AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph)
 {
     std::string moduleName = "fields_static";
-    std::string className("C2");
+    std::string className("c2");
     std::string paramName("c2F1");
     auto ccf = GetAbckitCoreClassField(file, moduleName, className, paramName);
     ASSERT_NE(ccf, nullptr);
@@ -485,7 +487,7 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, ClassFieldSetValue)
     helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
 
     std::string moduleName = "fields_static";
-    std::string className("C2");
+    std::string className("c2");
     std::string paramName("c2F1");
     auto ccf = GetAbckitCoreClassField(file, moduleName, className, paramName);
     ASSERT_NE(ccf, nullptr);
@@ -536,13 +538,13 @@ static void TransformMethodClassFieldCtorModify(AbckitFile *file, AbckitCoreFunc
     ASSERT_NE(loadStr, nullptr);
 
     std::string moduleName = "fields_static";
-    std::string className("C5");
-    std::string paramName("%%property-i2F1");
+    std::string className("c5");
+    std::string paramName("<property>i2F1");
     std::string fieldFullName = moduleName + "." + className + "." + paramName;
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
     callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_PARAMETER);
 
-    AbckitInst *newStOwn = g_statG->iCreateStobjObj(graph, loadStr, callOp, newKeyString);
+    auto *newStOwn = g_statG->iCreateStoreObject(graph, callOp, newKeyString, loadStr, ABCKIT_TYPE_ID_REFERENCE);
     g_implG->iInsertBefore(newStOwn, originalRet);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implG->iInsertBefore(loadStr, newStOwn);
@@ -558,11 +560,11 @@ static void TransformMethodClassFieldGetModify(AbckitFile *file, AbckitCoreFunct
     ASSERT_NE(param, nullptr);
 
     std::string moduleName = "fields_static";
-    std::string className("C5");
-    std::string paramName("%%property-i2F1");
+    std::string className("c5");
+    std::string paramName("<property>i2F1");
     std::string fieldFullName = moduleName + "." + className + "." + paramName;
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
-    AbckitInst *newLdOwn = g_statG->iCreateLdobjObj(graph, param, newKeyString);
+    auto *newLdOwn = g_statG->iCreateLoadObject(graph, param, newKeyString, ABCKIT_TYPE_ID_F64);
     helpers::ReplaceInst(callOp, newLdOwn);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -593,12 +595,12 @@ static void TransformMethodClassFieldSetModify(AbckitFile *file, AbckitCoreFunct
     ASSERT_NE(loadStr, nullptr);
 
     std::string moduleName = "fields_static";
-    std::string className("C5");
-    std::string paramName("%%property-i2F1");
+    std::string className("c5");
+    std::string paramName("<property>i2F1");
     std::string fieldFullName = moduleName + "." + className + "." + paramName;
     AbckitString *newKeyString = g_implM->createString(file, fieldFullName.c_str(), fieldFullName.size());
 
-    AbckitInst *newStOwn = g_statG->iCreateStobjObj(graph, loadStr, param1, newKeyString);
+    auto *newStOwn = g_statG->iCreateStoreObject(graph, param1, newKeyString, loadStr, ABCKIT_TYPE_ID_REFERENCE);
     g_implG->iInsertBefore(newStOwn, originalRet);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implG->iInsertBefore(loadStr, newStOwn);
@@ -613,13 +615,13 @@ static void InterfaceFieldSetTypeForClassModify(AbckitFile *file, AbckitCoreClas
     EXPECT_NE(ctxMethodFinder.method, nullptr);
     helpers::TransformMethod(ctxMethodFinder.method, TransformMethodClassFieldCtorModify);
 
-    helpers::MethodByNameContext getMethodFinder = {nullptr, "%%get-i2F1"};
+    helpers::MethodByNameContext getMethodFinder = {nullptr, "<get>i2F1"};
     g_implI->classEnumerateMethods(kclass, &getMethodFinder, helpers::MethodByNameFinder);
     EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     EXPECT_NE(getMethodFinder.method, nullptr);
     helpers::TransformMethod(getMethodFinder.method, TransformMethodClassFieldGetModify);
 
-    helpers::MethodByNameContext setMethodFinder = {nullptr, "%%set-i2F1"};
+    helpers::MethodByNameContext setMethodFinder = {nullptr, "<set>i2F1"};
     g_implI->classEnumerateMethods(kclass, &setMethodFinder, helpers::MethodByNameFinder);
     EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     EXPECT_NE(setMethodFinder.method, nullptr);
@@ -635,19 +637,19 @@ static void InterfaceFieldSetTypeForClassModify(AbckitFile *file, AbckitCoreClas
 TEST_F(LibAbcKitModifyApiFieldsStaticTests, InterfaceFieldSetType)
 {
     auto output = helpers::ExecuteStaticAbc(TEST_ABC_PATH, "fields_static", "interfaceFieldSetType");
-    EXPECT_TRUE(helpers::Match(output, "fields_static\\.C5 \\{i2F1: 3\\}\n"));
+    EXPECT_TRUE(helpers::Match(output, "fields_static\\.c5 \\{i2F1: 3\\}\n"));
 
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
 
     std::string moduleName = "fields_static";
     std::string interfaceNames("I2");
-    std::string paramNames("%%property-i2F1");
+    std::string paramNames("<property>i2F1");
     auto cif = GetAbckitCoreInterfaceField(file, moduleName, interfaceNames, paramNames);
     ASSERT_NE(cif, nullptr);
     ASSERT_EQ(g_implI->typeGetTypeId(g_implI->interfaceFieldGetType(cif)), AbckitTypeId::ABCKIT_TYPE_ID_F64);
 
-    std::string className("C5");  // implement class
+    std::string className("c5");  // implement class
     auto ccf = GetAbckitCoreClassField(file, moduleName, className, paramNames);
     ASSERT_NE(ccf, nullptr);
 
@@ -671,7 +673,7 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, InterfaceFieldSetType)
     g_impl->closeFile(file);
 
     output = helpers::ExecuteStaticAbc(MODIFY_TEST_ABC_PATH, "fields_static", "interfaceFieldSetType");
-    EXPECT_TRUE(helpers::Match(output, "fields_static\\.C5 \\{i2F1: hello\\}\n"));
+    EXPECT_TRUE(helpers::Match(output, "fields_static\\.c5 \\{i2F1: hello\\}\n"));
 }
 
 /**
@@ -728,25 +730,25 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, ModuleFieldSetName)
 TEST_F(LibAbcKitModifyApiFieldsStaticTests, InterfaceFieldSetName)
 {
     auto output = helpers::ExecuteStaticAbc(TEST_ABC_PATH, "fields_static", "interfaceFieldSetName");
-    EXPECT_TRUE(helpers::Match(output, "fields_static\\.C4 \\{i1F1: ABC\\}\n"));
+    EXPECT_TRUE(helpers::Match(output, "fields_static\\.c4 \\{i1F1: ABC\\}\n"));
 
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
     std::string moduleName = "fields_static";
     std::string interfaceNames("I1");
-    std::string paramNames("%%property-i1F1");
+    std::string paramNames("<property>i1F1");
     auto cif = GetAbckitCoreInterfaceField(file, moduleName, interfaceNames, paramNames);
     ASSERT_NE(cif, nullptr);
     ASSERT_STREQ(g_implI->abckitStringToString(g_implI->interfaceFieldGetName(cif)), paramNames.c_str());
 
-    std::string newParamNames("%%property-i1NewField");
+    std::string newParamNames("<property>i1NewField");
     std::string cropNewParamNames("i1NewField");
     auto arkInterfaceField = g_implArkI->coreInterfaceFieldToArktsInterfaceField(cif);
     bool ret = g_implArkM->interfaceFieldSetName(arkInterfaceField, cropNewParamNames.c_str());
     ASSERT_EQ(ret, true);
     ASSERT_EQ(helpers::AbckitStringToString(g_implI->interfaceFieldGetName(cif)), newParamNames.c_str());
 
-    std::string implementClassName("C4");
+    std::string implementClassName("c4");
     auto ccf = GetAbckitCoreClassField(file, moduleName, implementClassName, paramNames);
     ASSERT_NE(ccf, nullptr);
     ASSERT_NE(g_implI->classFieldGetName(ccf), nullptr);
@@ -773,7 +775,7 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, InterfaceFieldSetName)
     g_impl->closeFile(file);
 
     output = helpers::ExecuteStaticAbc(MODIFY_TEST_ABC_PATH, "fields_static", "interfaceFieldSetName");
-    EXPECT_TRUE(helpers::Match(output, "fields_static\\.C4 \\{i1NewField: ABC\\}\n"));
+    EXPECT_TRUE(helpers::Match(output, "fields_static\\.c4 \\{i1NewField: ABC\\}\n"));
 }
 
 /**
@@ -829,13 +831,13 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, EnumFieldSetName)
 TEST_F(LibAbcKitModifyApiFieldsStaticTests, ClassFieldSetName)
 {
     auto output = helpers::ExecuteStaticAbc(TEST_ABC_PATH, "fields_static", "classFieldSetName");
-    EXPECT_TRUE(helpers::Match(output, "fields_static\\.C1 \\{c1F1: Anno1, c1F2: 999\\}\n"));
+    EXPECT_TRUE(helpers::Match(output, "fields_static\\.c1 \\{c1F1: Anno1, c1F2: 999\\}\n"));
 
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(TEST_ABC_PATH.c_str(), &file);
 
     std::string moduleName = "fields_static";
-    std::string className("C1");
+    std::string className("c1");
     std::string paramName("c1F1");
     auto ccf = GetAbckitCoreClassField(file, moduleName, className, paramName);
     ASSERT_NE(ccf, nullptr);
@@ -864,7 +866,7 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, ClassFieldSetName)
     g_impl->closeFile(file);
 
     output = helpers::ExecuteStaticAbc(MODIFY_TEST_ABC_PATH, "fields_static", "classFieldSetName");
-    EXPECT_TRUE(helpers::Match(output, "fields_static\\.C1 \\{newParam: Anno1, c1F2: 999\\}\n"));
+    EXPECT_TRUE(helpers::Match(output, "fields_static\\.c1 \\{newParam: Anno1, c1F2: 999\\}\n"));
 }
 
 /**
@@ -898,8 +900,17 @@ TEST_F(LibAbcKitModifyApiFieldsStaticTests, NamespaceFieldSetName)
     g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::AssertOpenAbc(outputPath.c_str(), &file);
+    auto nsFieldModify = GetAbckitCoreNamespaceField(file, moduleName, nsName, newNsFieldName);
+    ASSERT_NE(nsFieldModify, nullptr);
+    ASSERT_STREQ(g_implI->abckitStringToString(g_implI->namespaceFieldGetName(nsFieldModify)), newNsFieldName.c_str());
+
+    auto nsFieldModifyFindOldName = GetAbckitCoreNamespaceField(file, moduleName, nsName, nsFieldName);
+    ASSERT_EQ(nsFieldModifyFindOldName, nullptr);
+    g_impl->closeFile(file);
 
     output = helpers::ExecuteStaticAbc(MODIFY_TEST_ABC_PATH, "fields_static", "namespaceFieldSetName");
     EXPECT_TRUE(helpers::Match(output, "NamespaceFieldOne\n"));
 }
+
 }  // namespace libabckit::test

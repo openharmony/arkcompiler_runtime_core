@@ -14,16 +14,16 @@
  */
 
 class MyClass {
-    public key: string;
-    public value: number;
+    key: string;
+    value: number;
 
     constructor() {
-        this.key = 'key';
+        this.key = "key";
         this.value = 0;
     }
 
     handle(): void {
-        console.log('key: ' + this.key + ' value: ' + this.value);
+        console.log("key: " + this.key + " value: " + this.value);
     }
 }
 

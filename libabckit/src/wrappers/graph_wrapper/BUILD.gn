@@ -43,6 +43,7 @@ ohos_source_set("libabckit_graph_wrapper_source_set") {
           "$abckit_root/src/wrappers:abckit_isa_gen_ins_create_wrapper_api_inc",
           "target_gen_dir")
   include_dirs = [
+    "$ark_root_static/runtime/libpandabase",
     "$ark_root_static/runtime",
     "$entrypoints_compiler_gen_dir/generated",
     "$bytecode_inst_enum_gen_dir/..",

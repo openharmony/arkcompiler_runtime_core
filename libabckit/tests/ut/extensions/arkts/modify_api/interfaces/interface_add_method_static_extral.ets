@@ -15,7 +15,7 @@
 
 class TestInterfaceClass {
   sayHello(): void {
-    console.log('bbb');
+    console.log("bbb");
   }
 }
 
@@ -29,7 +29,7 @@ interface MyInterface {
 
 class NewClass implements MyInterface {
   showName(): void {
-    console.log('aaa');
+    console.log("aaa");
   }
 }
 

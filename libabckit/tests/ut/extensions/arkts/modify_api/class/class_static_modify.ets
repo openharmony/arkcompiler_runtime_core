@@ -14,16 +14,19 @@
  */
 
 class Test {
-  handleUseRm() {
-    console.log('handleUseRm')
+  handleUseRm()
+  {
+    console.log("handleUseRm")
   }
 
-  handleNoUseRm() {
-    console.log('handleNoUseRm')
+  handleNoUseRm()
+  {
+    console.log("handleNoUseRm")
   }
 
-  test() {
-    console.log('test')
+  test()
+  {
+    console.log("test")
   }
 }
 

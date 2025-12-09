@@ -14,30 +14,30 @@
  */
 
 class SuClass {
-    public suKey: string;
-    public suValue: number;
+    suKey: string;
+    suValue: number;
 
     constructor() {
-        this.suKey = 'sukey';
+        this.suKey = "sukey";
         this.suValue = 1;
     }
 
     suHandle(): void {
-        console.log('key: ' + this.suKey + ' value: ' + this.suValue);
+        console.log("key: " + this.suKey + " value: " + this.suValue);
     }
 }
 
 class MyClass {
-    public key: string;
-    public value: number;
+    key: string;
+    value: number;
 
     constructor() {
-        this.key = 'key';
+        this.key = "key";
         this.value = 0;
     }
 
     handle(): void {
-        console.log('key: ' + this.key + ' value: ' + this.value);
+        console.log("key: " + this.key + " value: " + this.value);
     }
 }
 

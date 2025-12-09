@@ -14,8 +14,8 @@
  */
 
 class Anm {
-  public name: string;
-  public age: number;
+  name: string;
+  age: number;
   private _id: number;
 
   constructor(name: string) {

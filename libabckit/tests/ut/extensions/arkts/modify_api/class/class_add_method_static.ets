@@ -18,7 +18,7 @@ function sayHello(num: number): void {
 }
 
 class Person {
-  public age: number;
+  age: number;
   private _id: number;
 
   constructor(age: number) {
