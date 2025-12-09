@@ -123,6 +123,33 @@ function testObjectInvokeMethod(): void {
         res = res && e.message.includes('param array element are not STValue type');
     }
     ASSERT_TRUE(res);
+
+    res = false;
+    try {
+        subClsObj.objectInvokeMethod('setStudentAge', ':', [STValue.wrapInt(32)]);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Argument count mismatch with function signature.');
+    }
+    ASSERT_TRUE(res);
+
+    res = false;
+    try {
+        subClsObj.objectInvokeMethod('setStudentAge', 'ii:', [STValue.wrapInt(32)]);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Argument count mismatch with function signature.');
+    }
+    ASSERT_TRUE(res);
+
+    res = false;
+    try {
+        subClsObj.objectInvokeMethod('setStudentAge', 'iC{std.core.String}:', [STValue.wrapInt(32)]);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Argument count mismatch with function signature.');
+    }
+    ASSERT_TRUE(res);
 }
 
 // ClassInvokeStaticMethod(name: string, signature: string, args: Array<STValue>): STValue
@@ -145,8 +172,7 @@ function testClassInvokeStaticMethod(): void {
         subStudentCls.classInvokeStaticMethod('setUId', 's:', []);
     } catch (e: Error) {
         res = true;
-        res = res && e.message.includes('ANI error occurred');
-        res = res && e.message.includes('status: 7');
+        res = res && e.message.includes('Argument count mismatch with function signature.');
     }
     ASSERT_TRUE(res);
 
@@ -165,6 +191,33 @@ function testClassInvokeStaticMethod(): void {
     } catch (e: Error) {
         res = true;
         res = res && e.message.includes('Unknown ANI error occurred');
+    }
+    ASSERT_TRUE(res);
+
+    res = false;
+    try {
+        studentCls.classInvokeStaticMethod('setStudentId', ':', [STValue.wrapInt(888)]);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Argument count mismatch with function signature.');
+    }
+    ASSERT_TRUE(res);
+
+    res = false;
+    try {
+        studentCls.classInvokeStaticMethod('setStudentId', 'ii:', [STValue.wrapInt(888)]);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Argument count mismatch with function signature.');
+    }
+    ASSERT_TRUE(res);
+
+    res = false;
+    try {
+        studentCls.classInvokeStaticMethod('setStudentId', 'iC{std.core.String}:', [STValue.wrapInt(888)]);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Argument count mismatch with function signature.');
     }
     ASSERT_TRUE(res);
 }
@@ -250,7 +303,23 @@ function testNspFunctionInvalidParamType(): void {
 
     // 3. args is not array type
     try {
+        b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z');
+        ASSERT_TRUE(b.unwrapToBoolean() === false);
+    } catch (e) {
+        print('Error code: ', e.code);
+        print('Error message: ', e.message);
+    }
+
+    try {
         b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z', b1);
+        ASSERT_TRUE(b.unwrapToBoolean() === false);
+    } catch (e) {
+        print('Error code: ', e.code);
+        print('Error message: ', e.message);
+    }
+
+    try {
+        b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zzC{std.core.Boolean}:z', [b1, b2]);
         ASSERT_TRUE(b.unwrapToBoolean() === false);
     } catch (e) {
         print('Error code: ', e.code);

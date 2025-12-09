@@ -27,7 +27,7 @@
 namespace ark::ets::interop::js {
 bool GetString(napi_env env, napi_value jsVal, const std::string &paramName, std::string &paramValue);
 bool GetArray(napi_env env, napi_value jsVal, const std::string &arrayName, std::vector<ani_value> &arrayValue);
-bool GetReturnType(napi_env env, const std::string &signature, SType &type);
+bool CheckArgsAndGetReturnType(napi_env env, const std::string &signature, size_t argsLength, SType &returnType);
 }  // namespace ark::ets::interop::js
 
 #endif

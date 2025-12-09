@@ -114,7 +114,7 @@ function testWrapLongWithBigIntInput(): void {
     const MAX_LONG = (1n << 63n) - 1n;
     stvalueWrap = STValue.wrapLong(MAX_LONG);
     let value = longKlass.classInstantiate('l:', [stvalueWrap]);
-    let res = value.objectInvokeMethod('toString', ':C{std.core.String}', [value]);
+    let res = value.objectInvokeMethod('toString', ':C{std.core.String}', []);
     print("res.unwrapToString() = " + res.unwrapToString());
     print("MAX_LONG.toString() = " + MAX_LONG.toString());
     ASSERT_TRUE(res.unwrapToString() === MAX_LONG.toString());
@@ -122,7 +122,7 @@ function testWrapLongWithBigIntInput(): void {
     const MIN_LONG = -(1n << 63n);
     stvalueWrap = STValue.wrapLong(MIN_LONG);
     value = longKlass.classInstantiate('l:', [stvalueWrap]);
-    res = value.objectInvokeMethod('toString', ':C{std.core.String}', [value]);
+    res = value.objectInvokeMethod('toString', ':C{std.core.String}', []);
     ASSERT_TRUE(res.unwrapToString() === MIN_LONG.toString());
 
     const OVER_MAX_LONG = MAX_LONG + 1n;
