@@ -73,13 +73,13 @@ function testUint8ClampedArrayOfNumber() {
 
 function testUint8ClampedArrayOfInt() {
     let expected: FixedArray<number> = [12, 0, 255, 42, 33]
-    let arr = Uint8ClampedArray.of(12, -6, 332, 42, 33)
+    let arr = Uint8ClampedArray.of((12).toInt(), (-6).toInt(), (332).toInt(), (42).toInt(), (33).toInt())
     checkArray(arr, expected)
 }
 
 function testUint8ClampedArrayOfShort() {
     let expected: FixedArray<number> = [12, 0, 255, 42, 33]
-    let arr = Uint8ClampedArray.of((12).toShort(), (-6).toShort(), (332).toShort(), (42).toShort(), (33).toShort())
+    let arr = Uint8ClampedArray.of(12, -6, 332, 42, 33)
     checkArray(arr, expected)
 }
 
@@ -91,13 +91,13 @@ function testUint8ArrayOfNumber() {
 
 function testUint8ArrayOfInt() {
     let expected: FixedArray<number> = [12, 6, 76, 42, 33]
-    let arr = Uint8Array.of(12, 6, 76, 42, 33)
+    let arr = Uint8Array.of((12).toInt(), (6).toInt(), (76).toInt(), (42).toInt(), (33).toInt())
     checkArray(arr, expected)
 }
 
 function testUint8ArrayOfShort() {
     let expected: FixedArray<number> = [12, 6, 76, 42, 33]
-    let arr = Uint8Array.of((12).toShort(), (6).toShort(), (76).toShort(), (42).toShort(), (33).toShort())
+    let arr = Uint8Array.of(12, 6, 76, 42, 33)
     checkArray(arr, expected)
 }
 

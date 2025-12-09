@@ -614,3 +614,16 @@ cases:
         arktest.assertEQ(b.p3, undefined)
         arktest.assertEQ(b.p4[''], 0)
         arktest.assertEQ(b.p5!.reduce((acc: string, curr: string) => acc + curr, ''), 'abcd')
+
+    - decl: |-
+          class A {
+              s: string[]
+              constructor(...s: string[]) {
+                  this.s = s
+              }
+          }
+          class B extends A {
+              constructor(p1: string, ...p2: string[]) {
+                  super(p1 + p1, ...p2)
+              }
+          }

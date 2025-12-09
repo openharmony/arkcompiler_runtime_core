@@ -249,82 +249,6 @@
 07.expressions/06.spread_expression/spex_func_77.ets
 07.expressions/06.spread_expression/spex_func_78.ets
 
-#30372 Spread of union doesn't work
-07.expressions/06.spread_expression/spex_52.ets
-07.expressions/06.spread_expression/spex_53.ets
-07.expressions/06.spread_expression/spex_54.ets
-07.expressions/06.spread_expression/spex_55.ets
-07.expressions/06.spread_expression/spex_56.ets
-07.expressions/06.spread_expression/spex_57.ets
-07.expressions/06.spread_expression/spex_58.ets
-07.expressions/06.spread_expression/spex_59.ets
-07.expressions/06.spread_expression/spex_60.ets
-07.expressions/06.spread_expression/spex_61.ets
-07.expressions/06.spread_expression/spex_62.ets
-07.expressions/06.spread_expression/spex_63.ets
-07.expressions/06.spread_expression/spex_64.ets
-07.expressions/06.spread_expression/spex_65.ets
-07.expressions/06.spread_expression/spex_func_79.ets
-07.expressions/06.spread_expression/spex_func_80.ets
-07.expressions/06.spread_expression/spex_func_81.ets
-07.expressions/06.spread_expression/spex_func_82.ets
-07.expressions/06.spread_expression/spex_func_83.ets
-07.expressions/06.spread_expression/spex_func_84.ets
-07.expressions/06.spread_expression/spex_func_85.ets
-07.expressions/06.spread_expression/spex_func_86.ets
-07.expressions/06.spread_expression/spex_func_87.ets
-07.expressions/06.spread_expression/spex_func_88.ets
-07.expressions/06.spread_expression/spex_func_89.ets
-07.expressions/06.spread_expression/spex_func_90.ets
-07.expressions/06.spread_expression/spex_func_91.ets
-07.expressions/06.spread_expression/spex_func_92.ets
-
-#30371 Cannot spread into array with supertype elements
-07.expressions/06.spread_expression/spex_func_12.ets
-07.expressions/06.spread_expression/spex_func_25.ets
-07.expressions/06.spread_expression/spex_func_49.ets
-07.expressions/06.spread_expression/spex_func_53.ets
-07.expressions/06.spread_expression/spex_func_55.ets
-07.expressions/06.spread_expression/spex_func_56.ets
-07.expressions/06.spread_expression/spex_func_64.ets
-07.expressions/06.spread_expression/spex_func_65.ets
-
-#30368  Cannot spread tuple of strings to FixedArray of strings
-07.expressions/06.spread_expression/spex_71.ets
-
-#20371 Unexpected Type Error on string array
-07.expressions/06.spread_expression/spex_lmbd_28.ets
-
-#20376 No support for spread arguments in lambda
-07.expressions/06.spread_expression/spex_lmbd_0.ets
-07.expressions/06.spread_expression/spex_lmbd_1.ets
-07.expressions/06.spread_expression/spex_lmbd_2.ets
-07.expressions/06.spread_expression/spex_lmbd_3.ets
-07.expressions/06.spread_expression/spex_lmbd_4.ets
-07.expressions/06.spread_expression/spex_lmbd_5.ets
-07.expressions/06.spread_expression/spex_lmbd_6.ets
-07.expressions/06.spread_expression/spex_lmbd_7.ets
-07.expressions/06.spread_expression/spex_lmbd_8.ets
-07.expressions/06.spread_expression/spex_lmbd_9.ets
-07.expressions/06.spread_expression/spex_lmbd_10.ets
-07.expressions/06.spread_expression/spex_lmbd_11.ets
-07.expressions/06.spread_expression/spex_lmbd_13.ets
-07.expressions/06.spread_expression/spex_lmbd_12.ets
-07.expressions/06.spread_expression/spex_lmbd_14.ets
-07.expressions/06.spread_expression/spex_lmbd_15.ets
-07.expressions/06.spread_expression/spex_lmbd_16.ets
-07.expressions/06.spread_expression/spex_lmbd_17.ets
-07.expressions/06.spread_expression/spex_lmbd_18.ets
-07.expressions/06.spread_expression/spex_lmbd_19.ets
-07.expressions/06.spread_expression/spex_lmbd_20.ets
-07.expressions/06.spread_expression/spex_lmbd_21.ets
-07.expressions/06.spread_expression/spex_lmbd_22.ets
-07.expressions/06.spread_expression/spex_lmbd_23.ets
-07.expressions/06.spread_expression/spex_lmbd_24.ets
-07.expressions/06.spread_expression/spex_lmbd_25.ets
-07.expressions/06.spread_expression/spex_lmbd_26.ets
-07.expressions/06.spread_expression/spex_lmbd_27.ets
-
 #31617 Catch NPE (tests should be updated)
 07.expressions/06.spread_expression/spex_lmbd_33.ets
 07.expressions/06.spread_expression/spex_lmbd_35.ets
@@ -1381,13 +1305,8 @@
 #26512 regex literals not implemented
 15.semantic_rules/06.compatibility_call_args/same_type_compat_no_implicit_case/same_type_compat_no_implicit_case_13.ets
 
-#28527
-15.semantic_rules/06.compatibility_call_args/spec_examples_13.ets
-
 #30451
-15.semantic_rules/06.compatibility_call_args/spec_examples2_0.ets
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
-15.semantic_rules/06.compatibility_call_args/spec_examples2_2.ets
 15.semantic_rules/06.compatibility_call_args/spec_examples2_3.ets
 
 #32543

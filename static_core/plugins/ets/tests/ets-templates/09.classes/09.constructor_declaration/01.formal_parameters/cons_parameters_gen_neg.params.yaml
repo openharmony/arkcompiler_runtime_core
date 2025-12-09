@@ -159,18 +159,6 @@ cases:
       use: |-
           let a = new A<string>(...arr) // CTE: wrong type array
 
-    # FixedArray spread to rest
-    - decl: |-
-          class A<T> {
-              fld: FixedArray<T>
-              constructor(...p: FixedArray<T>) {
-                  this.fld = p
-              }
-          }
-      use: |-
-          // CTE: spread argument must correspond to rest parameter
-          let a = new A<number>(12.0, ...([ 13.0, 14.0 ] as FixedArray<number>))
-
     - decl: |-
           class A<T, U, V> {
               tup: readonly [T, U, V|undefined]

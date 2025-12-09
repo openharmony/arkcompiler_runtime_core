@@ -23,15 +23,6 @@ cases:
           arktest.assertEQ( foo(1.0, ...arr), "A" )
 
     - decl: |-
-          function foo(...a: number[]): string {
-              return "N"
-          }
-      use: |-
-          // cannot use multiple spread operators
-          let arr: number[] = [1.0, 2.0]
-          arktest.assertEQ( foo(...arr, ...arr), "N" )
-
-    - decl: |-
           class A {}
           function foo(p1: A, p2: A): string {
               return "A"

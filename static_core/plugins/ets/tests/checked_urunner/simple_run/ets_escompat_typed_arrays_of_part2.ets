@@ -127,13 +127,13 @@ function testFloat32ArrayOfInt() {
 
 function testFloat32ArrayOfFloat() {
     let expected: FixedArray<number> = [12., 22., 32., 42., 33.]
-    let arr = Float32Array.of((12).toFloat(), (22).toFloat(), (32).toFloat(), (42).toFloat(), (33).toFloat())
+    let arr = Float32Array.of(12., 22., 32., 42., 33.)
     checkArray(arr, expected)
 }
 
 function testFloat32ArrayOfNumber() {
     let expected: FixedArray<number> = [12., 22., 32., 42., 33.]
-    let arr = Float32Array.of(12., 22., 32., 42., 33.)
+    let arr = Float32Array.of((12).toDouble(), (22).toDouble(), (32).toDouble(), (42).toDouble(), (33).toDouble())
     checkArray(arr, expected)
 }
 

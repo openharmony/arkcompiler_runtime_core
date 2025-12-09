@@ -390,3 +390,16 @@ cases:
           b = new B()
           arktest.assertEQ(b.p1.length, 0)
           arktest.assertEQ(b.p2.length, 0)
+
+    - decl: |-
+          class A {
+              s: string[]
+              constructor(...s: string[]) {
+                  this.s = s
+              }
+          }
+          class B extends A {
+              constructor(p1: string, ...p2: string[]) {
+                  super(p1 + p1, ...p2)
+              }
+          }

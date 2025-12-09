@@ -34,7 +34,7 @@ cases:
   - decl_args: |-
       (...p: Any[])
     use_args: |-
-      (...[1, "str", true], ...[ ...123])
+      (...[1, "str", true], ...[123])
     verify_args: |-
       arktest.assertEQ(p[0], 1)
       arktest.assertEQ(p[1], "str")

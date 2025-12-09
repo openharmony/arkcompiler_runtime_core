@@ -408,3 +408,13 @@ cases:
           arktest.assertEQ(a.tup[0](), true)
           arktest.assertEQ(a.tup[1](), 'abc')
           arktest.assertEQ(a.tup[2](), 42.0)
+    # FixedArray spread to rest
+    - decl: |-
+          class A<T> {
+              fld: FixedArray<T>
+              constructor(...p: FixedArray<T>) {
+                  this.fld = p
+              }
+          }
+      use: |-
+          let a = new A<number>(12.0, ...([ 13.0, 14.0 ] as FixedArray<number>))
