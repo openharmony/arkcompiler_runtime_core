@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #
 
 from vmb.tool import ToolBase
-from vmb.unit import BenchUnit
+from vmb.unit import BenchUnit, BUStatus
 
 
 class Tool(ToolBase):
@@ -39,4 +39,7 @@ class Tool(ToolBase):
         res = self.x_run(
             f'{self.node} {self.custom} {mjs}',
             measure_time=True)
+        if self.no_run:
+            bu.status = BUStatus.NOT_RUN
+            return
         bu.parse_run_output(res)

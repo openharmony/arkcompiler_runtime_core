@@ -174,6 +174,13 @@ Note: options `--tests` and `--test-list` could be combined (by OR condition) in
   (no warmup, no tuning cycles).
   Benchmark will run this number of iterations, regardless of time elapsed.
 
+## No run option
+`--no-run` (or `-N`) option disables all command's execution.
+Instead they will be just printed to console.
+This could be used for debug/troubleshooting,
+f.e. commands on device could be examined without any device connected
+and/or without vm binaries actually installed on host.
+
 ## Dry run
 `--dry-run` option will cause run to stop after generate and compile steps,
 so produced test sources and binaries could be used for debug and analysis.

@@ -17,7 +17,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 from vmb.cli import Args
 from vmb.unit import BenchUnit, BENCH_PREFIX
 from vmb.hook import HookBase
@@ -61,7 +61,7 @@ class Hook(HookBase):
         else:
             log.warning('Safepoint checker log is missed "%s"', file_name)
 
-    def parse_file_to_dict(self, file_path: Path) -> dict[str, int]:
+    def parse_file_to_dict(self, file_path: Path) -> Dict[str, int]:
         result = {}
         with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
