@@ -477,3 +477,8 @@ group("ark_guard_host_unittest") {
     "$ark_root/ark_guard/tests:host_unittest",
   ]
 }
+
+# NOTE(ipetrov): Temporary target common runtime
+group("common_runtime_package") {
+  deps = [ "//arkcompiler/runtime_core/common_runtime:libcommon_runtime" ]
+}
