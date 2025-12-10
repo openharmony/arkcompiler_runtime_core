@@ -1724,6 +1724,28 @@ but an overloaded function is not:
 
 |
 
+A :index:`compile-time error` occurs, if an *explicit overload* is called
+like a function with receiver, that is, using syntax of method call
+(see ref:`Functions with Receiver`):
+
+.. code-block:: typescript
+   :linenos:
+
+    function bar1(this: string) {}
+    function bar2(this: number) {}
+
+    overload bar { bar1, bar2 }
+
+    let s: string = "";
+    let n: number = 1;
+
+    bar(s) // OK
+    bar(n) // OK
+    s.bar()  // compile-time error
+    n.bar()  // compile-time error
+
+|
+
 .. _Explicit Class Method Overload:
 
 Explicit Class Method Overload
@@ -3026,6 +3048,11 @@ This situation is represented in the following example:
     i.NS.foo() // compile-time error: 'NS' is not defined for 'int'
 
 |
+
+.. note::
+    While a function with receiver can be used in the explicit overload list,
+    such an overload cannot be called using syntax of method access
+    (see axemple in :ref:`Explicit Function Overload`)
 
 .. _Receiver Type:
 
