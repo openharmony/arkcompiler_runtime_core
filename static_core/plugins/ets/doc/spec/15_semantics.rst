@@ -2771,6 +2771,7 @@ the superinterface, then the following semantic rules apply:
    }
 
 
+
 If more than one method of the subinterface overrides the same method of the
 superinterface a :index:`compile-time error` occurs.
 
@@ -3828,7 +3829,7 @@ Overload Set at Method Call
 ===========================
 
 Additional processing of an *overload set* is used at
-:ref:`Method Call Expression` because an identifer at the call site can denote
+:ref:`Method Call Expression` because an identifier at the call site can denote
 both *instance methods* and :ref:`Functions with Receiver`.
 
 If the identifier at the call expression denotes *functions with receiver*

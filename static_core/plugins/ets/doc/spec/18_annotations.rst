@@ -289,7 +289,7 @@ Annotations can be applied to the following:
 
 - :ref:`Top-Level Declarations`;
 
-- Class members (see :ref:`Class Members`) except overriden fields
+- Class members (see :ref:`Class Members`) except overridden fields
   (see :ref:`Override Fields and Implement Properties`);
 
 - Interface members (see :ref:`Interface Members`);

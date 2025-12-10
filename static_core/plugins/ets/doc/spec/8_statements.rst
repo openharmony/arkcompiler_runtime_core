@@ -45,7 +45,7 @@ Some statements are simple like a single *expressionStatement*
 
    A statement can consist of one or more expressions, or contain no expression
    at all. For example, the statement ``i = 1`` consists of an assignment
-   expresssion that has the inferred type ``int``, and the evaluated value
+   expression that has the inferred type ``int``, and the evaluated value
    ``'1'``.
 
 The syntax of *statements* is presented below:
@@ -262,7 +262,7 @@ surrounding scope.
     function foo (item: boolean) {
        // Here 'item' is of type 'number'
        let item: number[] = [] // Compile-time error as parameter 'item' and
-                               // local variable 'item' lead to duplciation as
+                               // local variable 'item' lead to duplication as
                                // they are in the same scope
     }
 
@@ -400,7 +400,7 @@ Loop Statements
 .. meta:
     frontend_status: Done
 
-|LANG| has four kinds of loops. A loop of each kind can be optionally labelled
+|LANG| has four kinds of loops. A loop of each kind can be optionally labeled
 with an *identifier*. The *identifier* can be used only by the
 :ref:`Break Statements` and :ref:`Continue Statements` contained in the loop body.
 

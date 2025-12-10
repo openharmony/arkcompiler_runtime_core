@@ -1663,7 +1663,7 @@ object literal. Otherwise, a :index:`compile-time error` occurs:
    setter
    object literal
 
-If a class is an abstract one it can be also used with *object lietrals*:
+If a class is an abstract one it can be also used with *object literals*:
 
 .. code-block:: typescript
    :linenos:
@@ -1672,7 +1672,7 @@ If a class is an abstract one it can be also used with *object lietrals*:
         foo () : void
     }
     const a1: A = { foo() {} } // OK, foo() is properly defined
-    const a2: A = {} // compile-time error as foo() implemention is not defined
+    const a2: A = {} // compile-time error as foo() implementation is not defined
 
 *Object literal* may provide a method with override-compatible (see
 :ref:`Override-Compatible Signatures`) signature:
@@ -1689,7 +1689,7 @@ If a class is an abstract one it can be also used with *object lietrals*:
         foo (p: Drv2) {}
     }
     const a1: A = { foo(p: Base) {} } // OK, foo(p: Base) overrides both foo (p: Drv1) and foo (p: Drv2)
-    const a2: A = { foo (p: number) {} } // compile-time error as foo(p: numebr) is a new method declaration
+    const a2: A = { foo (p: number) {} } // compile-time error as foo(p: number) is a new method declaration
     const a3: A = { foo(p: Drv2) {} } // OK, foo(p: Drv2) overrides only foo (p: Drv2) but not foo (p: Drv1)
 
 
@@ -1777,7 +1777,7 @@ interface type are public.
     p.print_name ("Alice")
 
 Any reference to ``this`` in an object literal method is a reference to
-an anonymous class (which is a subtype of the interafce) created for the
+an anonymous class (which is a subtype of the interface) created for the
 inferred interface type:
 
 .. index::

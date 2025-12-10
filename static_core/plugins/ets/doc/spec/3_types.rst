@@ -540,7 +540,7 @@ Each numeric type has its own set of values.
 :ref:`Widening Numeric Conversions` are used in expressions
 to convert a value of a smaller type to a value of a larger type.
 
-Numeric type hierachy is defined in the following way, where the smallest type
+Numeric type hierarchy is defined in the following way, where the smallest type
 is ``byte``, and the largest type is ``double``:
 
 - ``byte`` < ``short`` < ``int`` < ``long`` < ``float`` < ``double``
@@ -926,7 +926,6 @@ significant bit zero out of any two equally near representable values.
    flush to zero
    round to nearest
    rounding mode
-   denormalizaton
    denormalized number
    nearest value
    IEEE 754

@@ -2058,7 +2058,7 @@ The syntax is presented below:
         'overload' identifier overloadList
         ;
 
-Thse use of an *explicit interface method overload* is represented in the
+The use of an *explicit interface method overload* is represented in the
 example below:
 
 .. code-block:: typescript

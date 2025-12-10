@@ -374,7 +374,7 @@ The usage of namespaces is represented in the example below:
            }
        }
 
-   This code is illustratative of the use of declarations in the case below:
+   This code is illustrative of the use of declarations in the case below:
 
    .. code-block:: typescript
       :linenos:
@@ -865,7 +865,7 @@ module is to be searched for.
 
 - Initial dot  ``'.'`` or two dots ``'..'`` followed by the slash character ``'/'``.
 - One or more path components (the subset of characters and case sensitivity of
-  path components must follow the path rules of a host filesystem).
+  path components must follow the path rules of a host file system).
 - Slash characters separating components of the path.
 
 The slash character ``'/'`` is used in import paths irrespective of the host
@@ -884,7 +884,7 @@ the import path to a file path of the host system.
    compilation
    import path
    context
-   filesystem
+   file system
    relative import path
    non-relative import path
    resolution
@@ -954,7 +954,7 @@ and ``std/components/treemap`` to ``/arkts/stdlib/components/treemap``.
 File name, placement, and format are implementation-specific.
 
 If the above configuration is in effect, the first path maps directly to
-filesystem after applying ``baseUrl``, while ``std`` in the second path is
+file system after applying ``baseUrl``, while ``std`` in the second path is
 replaced for ``/arkts/stdlib``. Examples of non-relative paths are presented
 below.
 
@@ -981,7 +981,7 @@ below.
    resolution
    implementation
    treemap
-   filesystem
+   file system
 
 
 |

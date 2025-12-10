@@ -1059,7 +1059,7 @@ If the type of the initializer expression cannot be inferred, then a
 .. code-block:: typescript
    :linenos:
 
-    // Get boolean value unknown at compiletime
+    // Get boolean value unknown at compile time
     function cond(): boolean { return Math.random() < 0.5 ? true : false; }
 
     let a = null                // type of 'a' is null

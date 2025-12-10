@@ -710,6 +710,7 @@ superinterface of *I*.
    private method
    signature
 
+
 The same scheme applies to properties and accessors:
 
 .. code-block:: typescript
