@@ -165,6 +165,7 @@ options:
     - peephole
     - rle-opt
     - regalloc
+    - select-opt
     - split-resolver
     - scheduler
     - simplify-sb
@@ -689,6 +690,12 @@ options:
   default: true
   description: Verify register allocation results in debug mode.
   tags: [debug]
+
+- name: compiler-select-optimization
+  type: bool
+  default: true
+  description: Enable Select instructions optimization pass
+  tags: [perf]
 
 - name: compiler-move-constants
   type: bool

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@
 #include "optimizer/optimizations/reserve_string_builder_buffer.h"
 #include "optimizer/optimizations/savestate_optimization.h"
 #include "optimizer/optimizations/scheduler.h"
+#include "optimizer/optimizations/select_optimization.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "optimizer/optimizations/try_catch_resolving.h"
 #include "optimizer/optimizations/inline_intrinsics.h"
@@ -264,6 +265,11 @@ bool Pipeline::RunOptimizations()
     graph->RunPass<CodeSink>();
     graph->RunPass<MemoryCoalescing>(g_options.IsCompilerMemoryCoalescingAligned());
     if (graph->RunPass<IfConversion>(g_options.GetCompilerIfConversionLimit())) {
+        graph->RunPass<Cleanup>();
+    }
+    if (g_options.IsCompilerSelectOptimization()) {
+        graph->RunPass<ValNum>();
+        graph->RunPass<SelectOptimization>();
         graph->RunPass<Cleanup>();
     }
     graph->RunPass<Scheduler>();
