@@ -3302,8 +3302,8 @@ The usual rule of function type compatibility (see
       f1 = f2 // ok
 
 The sole difference is that only an entity of *function type with receiver* can
-be used in :ref:`Method Call Expression`. The declarations from the previous
-example are reused in the example below:
+be used in :ref:`Method Call Expression` but not an entity of compatible
+*function type*.
 
 .. code-block:: typescript
    :linenos:
@@ -3321,6 +3321,63 @@ example are reused in the example below:
    method call
    expression
    compile-time error
+
+|
+
+.. note::
+    The limitation with method call syntax can be easily bypassed by assigning
+    ordinary function to a compatible *function type with receiver*. See,
+    for example, a code snippet with parameter type with receiver below.
+
+The function type with receiver can be used as a parameter type.
+The example illustrates usage of parameter type with receiver:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(p: number, f: (this: number)=> number) {
+        console.log(p.f(), f(p))
+    }
+
+    function goo(this: number) { return this - 1 }
+    function bar(this: number) { return this + 1 }
+    function compat(n: number) { return n }
+
+    let n: number = 1
+    foo(n, goo)  // prints `0 0`
+    foo(n, bar)  // prints `2 2`
+    foo(n, compat)  // prints `1 1`
+
+|
+
+The method call syntax can not be used when assigning the actual entity to a
+variable of *function type with receiver*. An attempt to do so causes a
+compile-time error:
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo<T extends Object>(this: T, functor: (this: T)=> void): void {
+      // following two calls are equivalent
+      functor(this)
+      this.functor()
+   }
+
+   function bar<T>(this: T): void {
+      console.log(this)
+   }
+
+   let x = 5
+   x.foo(bar<int>) // OK
+   let y = bar<int> // ok
+   x.foo(y) // ok
+
+   // compile time error - can not assign entity with method call syntax
+   // to a functon type
+   x.foo(x.bar)
+   x.foo(x.bar<int>)
+   let z = x.bar
+   let y = x.bar<int>
 
 |
 
