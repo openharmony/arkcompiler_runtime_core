@@ -50,7 +50,11 @@ void InteropTrace(const char *func, const char *file, int line)
                    []() { isInteropTraceEnabled = OHOS::system::GetBoolParameter(INTEROP_TRACE_ENABLE, false); });
 
     if (isInteropTraceEnabled) {
-        INTEROP_LOG(INFO) << "trace: " << func << ":" << file << ":" << line;
+#ifndef NDEBUG
+        INTEROP_LOG(INFO) << "interoptrace: " << func << ":" << file << ":" << line;
+#else
+        INTEROP_LOG(INFO) << "interoptrace: " << func;
+#endif
     }
 }
 #endif
