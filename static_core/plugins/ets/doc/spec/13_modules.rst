@@ -618,8 +618,9 @@ There are two forms of *default import binding*:
 .. code-block:: typescript
    :linenos:
 
-    import DefaultExportedItemBindedName from ".../someFile"
-    import {default as DefaultExportedItemNewName} from  ".../someFile"
+    // Module 1
+    import DefaultExportedItemBindedName from "Module 2"
+    import {default as DefaultExportedItemNewName} from "Module 2"
     function foo () {
       let v1 = new DefaultExportedItemBindedName()
       // instance of class 'SomeClass' to be created here
@@ -627,12 +628,18 @@ There are two forms of *default import binding*:
       // instance of class 'SomeClass' to be created here
     }
 
-    // SomeFile
+    // Module 2
     export default class SomeClass {}
 
-    // Or
+    // Module 3 - the same semantocs as in Module 2
     class SomeClass {}
     export default SomeClass
+
+   // Module 4
+   export default from "Module 2" // Module 4 re-exports default export of Modue 2
+   export {default as SomeClassNewName} from "Module 2" 
+      // Module 4 re-exports default export of Modue 2 as a new exprted name
+
 
 .. index::
    import binding
