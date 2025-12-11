@@ -2363,7 +2363,7 @@ classes to achieve that same behavior.
 .. code-block:: typescript
 
     with (Math) { // Compile-time error, but JavaScript code still can be
-                  // emitted (depends on TS strict type checking serttings)
+                  // emitted (depends on TS strict type check settings)
         let r: number = 42
         console.log("Area: ", PI * r * r)
     }
@@ -2494,9 +2494,8 @@ explicitly.
 
 |CB_ERROR|
 
-|LANG| Does not support destructuring in parameters.
-Parameters must be passed to the function directly, and local names must be
-assigned manually.
+|LANG| does not support parameter destructuring. Parameters must be passed to
+the function directly, and local names must be assigned manually.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3587,9 +3586,9 @@ they are considered an excessive compiler hint.
 Use declaration with initialization instead.
 
 .. note::
-    |LANG| uses ``!:`` for requesting class fields late initialization,
-    the check that entity was initialized is performed at runtime on read
-    operation.
+   |LANG| uses ``!:`` to request late initialization of class fields.
+   A check of an entity initialization is performed on a ``read`` operation
+   at runtime.
 
 |CB_BAD|
 ~~~~~~~~

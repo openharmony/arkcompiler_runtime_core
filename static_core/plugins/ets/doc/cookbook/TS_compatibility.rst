@@ -579,7 +579,7 @@ Both the |TS| and |LANG| give correct results for statements added in *IEEE
 - *pow(-Infinity, y)* is *+Infinity* for finite *y > 0* and not an odd integer
 
 
-The difference in behaviour is summarized as follows:
+The difference in behavior is summarized as follows:
 
 .. list-table::
    :widths: 40 20 40
@@ -788,7 +788,7 @@ Differences in Export
 ---------------------
 
 |LANG| enforces export consistency, i.e., all types used in the signature of
-an exported declaration, public class, or interace members are also exported.
+an exported declaration, public class, or interface members are also exported.
 |TS| allows such declarations.
 
 .. code-block:: typescript
@@ -953,7 +953,7 @@ The code pattern causes a compile-time error in |LANG|:
     frontend_status: Done
 
 |TS| supports using ``enum`` type as a set of keys for a record in a variety
-of formats. |LANG| does not support record keys of ``enum`` type. The followig
+of formats. |LANG| does not support record keys of ``enum`` type. The following
 code sample legal in |TS| causes a compile-time error in |LANG|:
 
 .. code-block:: typescript
