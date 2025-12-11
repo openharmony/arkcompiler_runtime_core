@@ -540,10 +540,10 @@ Each numeric type has its own set of values.
 :ref:`Widening Numeric Conversions` are used in expressions
 to convert a value of a smaller type to a value of a larger type.
 
-Numeric type hierarchy is defined in the following way, where the smallest type
-is ``byte``, and the largest type is ``double``:
+Numeric type hierarchy is defined in the following way:
 
-- ``byte`` < ``short`` < ``int`` < ``long`` < ``float`` < ``double``
+- ``byte`` < ``short`` < ``int`` < ``long`` < ``float`` < ``double``, where
+  the smallest type is ``byte``, and the largest type is ``double``.
 
 Type ``bigint`` does not belong to this hierarchy. No implicit conversion from
 numeric types to ``bigint`` occurs. The methods of class ``BigInt``

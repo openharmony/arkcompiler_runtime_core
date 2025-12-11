@@ -104,7 +104,7 @@ New error situations can be created and raised by ``throw`` statements (see
 Errors are handled by using ``try`` statements (see :ref:`Try Statements`).
 
 .. note::
-   Not any error can be recovered.
+   Some errors cannot be recovered.
 
 .. index::
    runtime system
