@@ -26,7 +26,7 @@ class IsIntegerDoubleTest {
 function main(): int {
     let ft = new IsIntegerFloatTest();
     ft.rightInteger = 1.0f;
-    ft.wrongInteger = 1.0 as float + Float.DELTA + Float.DELTA;
+    ft.wrongInteger = 1.0f + Float.DELTA + Float.DELTA;
 
     if (Float.isInteger(Float.NaN) != false) {
       return 1;

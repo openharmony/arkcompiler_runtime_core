@@ -25,10 +25,10 @@ types:
 
 cases:
     - type: byte
-      vals: '0x80.toByte(), 0x7f.toByte()'
+      vals: '(0x80).toByte(), (0x7f).toByte()'
 
     - type: short
-      vals: '0x8000.toShort(), 0x7fff.toShort()'
+      vals: '(0x8000).toShort(), (0x7fff).toShort()'
 
     - type: int
       vals: '0x80000000, 0x7fffffff'

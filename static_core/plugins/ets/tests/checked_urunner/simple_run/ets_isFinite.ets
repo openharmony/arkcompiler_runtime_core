@@ -75,7 +75,7 @@ function check_isfinite_f32() : int {
     if (Float.isFinite(Float.NEGATIVE_INFINITY)) return 3;
     if (!Float.isFinite(Float.MAX_VALUE)) return 4;
     if (!Float.isFinite(Float.MIN_VALUE)) return 5;
-    if (!Float.isFinite(1.2345 as float)) return 6;
+    if (!Float.isFinite(1.2345f)) return 6;
 
     return 0;
 }

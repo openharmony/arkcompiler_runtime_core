@@ -155,10 +155,10 @@ class TestResult {
             return 16;
         }
 
-        if (this.f0.value != 0.0 as float) {
+        if (this.f0.value != 0.0f) {
             return 17;
         }
-        if (this.f1 != 1.0 as float) {
+        if (this.f1 != 1.0f) {
             return 18;
         }
         if (this.f2.value != 2.0 as double) {
@@ -167,10 +167,10 @@ class TestResult {
         if (this.f3 != 3.0 as double) {
             return 20;
         }
-        if (this.f4.value != 4.0 as float) {
+        if (this.f4.value != 4.0f) {
             return 21;
         }
-        if (this.f5 != 5.0 as float) {
+        if (this.f5 != 5.0f) {
             return 22;
         }
         if (this.f6.value != 6.0 as double) {
@@ -179,10 +179,10 @@ class TestResult {
         if (this.f7 != 7.0 as double) {
             return 24;
         }
-        if (this.f8.value != 8.0 as float) {
+        if (this.f8.value != 8.0f) {
             return 25;
         }
-        if (this.f9 != 9.0 as float) {
+        if (this.f9 != 9.0f) {
             return 26;
         }
         if (this.f10.value != 10.0 as double) {
@@ -191,10 +191,10 @@ class TestResult {
         if (this.f11 != 11.0 as double) {
             return 28;
         }
-        if (this.f12.value != 12.0 as float) {
+        if (this.f12.value != 12.0f) {
             return 29;
         }
-        if (this.f13 != 13.0 as float) {
+        if (this.f13 != 13.0f) {
             return 30;
         }
         if (this.f14.value != 14.0 as double) {
@@ -302,8 +302,8 @@ export class NativeModule {
 function testGeneralStaticPrim(): TestResult {
     let tr = new TestResult(new ByteWrapper(0 as byte), 1 as byte, new ShortWrapper(2 as short), 3 as short, new IntWrapper(4 as int), 5 as int, new LongWrapper(6 as long), 7 as long,
                             new ByteWrapper(8 as byte), 9 as byte, new ShortWrapper(10 as short), 11 as short, new IntWrapper(12 as int), 13 as int, new LongWrapper(14 as long), 15 as long,
-                            new FloatWrapper(0.0 as float), 1.0 as float, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0 as float), 5.0 as float, new DoubleWrapper(6.0 as double), 7.0 as double,
-                            new FloatWrapper(8.0 as float), 9.0 as float, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0 as float), 13.0 as float, new DoubleWrapper(14.0 as double), 15.0 as double);
+                            new FloatWrapper(0.0f), 1.0f, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0f), 5.0f, new DoubleWrapper(6.0 as double), 7.0 as double,
+                            new FloatWrapper(8.0f), 9.0f, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0f), 13.0f, new DoubleWrapper(14.0 as double), 15.0 as double);
     let res = NativeModule.generalStaticPrim(tr.i0, tr.i1, tr.i2, tr.i3, tr.i4, tr.i5, tr.i6, tr.i7, tr.i8, tr.i9, tr.i10, tr.i11, tr.i12, tr.i13, tr.i14, tr.i15,
                                           tr.f0, tr.f1, tr.f2, tr.f3, tr.f4, tr.f5, tr.f6, tr.f7, tr.f8, tr.f9, tr.f10, tr.f11, tr.f12, tr.f13, tr.f14, tr.f15);
     tr.res = new IntWrapper(res);
@@ -313,8 +313,8 @@ function testGeneralStaticPrim(): TestResult {
 function testQuickStaticPrim(): TestResult {
     let tr = new TestResult(new ByteWrapper(0 as byte), 1 as byte, new ShortWrapper(2 as short), 3 as short, new IntWrapper(4 as int), 5 as int, new LongWrapper(6 as long), 7 as long,
                             new ByteWrapper(8 as byte), 9 as byte, new ShortWrapper(10 as short), 11 as short, new IntWrapper(12 as int), 13 as int, new LongWrapper(14 as long), 15 as long,
-                            new FloatWrapper(0.0 as float), 1.0 as float, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0 as float), 5.0 as float, new DoubleWrapper(6.0 as double), 7.0 as double,
-                            new FloatWrapper(8.0 as float), 9.0 as float, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0 as float), 13.0 as float, new DoubleWrapper(14.0 as double), 15.0 as double);
+                            new FloatWrapper(0.0f), 1.0f, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0f), 5.0f, new DoubleWrapper(6.0 as double), 7.0 as double,
+                            new FloatWrapper(8.0f), 9.0f, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0f), 13.0f, new DoubleWrapper(14.0 as double), 15.0 as double);
     let res = NativeModule.quickStaticPrim(tr.i0, tr.i1, tr.i2, tr.i3, tr.i4, tr.i5, tr.i6, tr.i7, tr.i8, tr.i9, tr.i10, tr.i11, tr.i12, tr.i13, tr.i14, tr.i15,
                                           tr.f0, tr.f1, tr.f2, tr.f3, tr.f4, tr.f5, tr.f6, tr.f7, tr.f8, tr.f9, tr.f10, tr.f11, tr.f12, tr.f13, tr.f14, tr.f15);
     tr.res = new IntWrapper(res);
@@ -324,8 +324,8 @@ function testQuickStaticPrim(): TestResult {
 function testGeneralStaticObj(): TestResult {
     let tr = new TestResult(new ByteWrapper(0 as byte), 1 as byte, new ShortWrapper(2 as short), 3 as short, new IntWrapper(4 as int), 5 as int, new LongWrapper(6 as long), 7 as long,
                             new ByteWrapper(8 as byte), 9 as byte, new ShortWrapper(10 as short), 11 as short, new IntWrapper(12 as int), 13 as int, new LongWrapper(14 as long), 15 as long,
-                            new FloatWrapper(0.0 as float), 1.0 as float, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0 as float), 5.0 as float, new DoubleWrapper(6.0 as double), 7.0 as double,
-                            new FloatWrapper(8.0 as float), 9.0 as float, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0 as float), 13.0 as float, new DoubleWrapper(14.0 as double), 15.0 as double);
+                            new FloatWrapper(0.0f), 1.0f, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0f), 5.0f, new DoubleWrapper(6.0 as double), 7.0 as double,
+                            new FloatWrapper(8.0f), 9.0f, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0f), 13.0f, new DoubleWrapper(14.0 as double), 15.0 as double);
     let res = NativeModule.generalStaticObj(tr.i0, tr.i1, tr.i2, tr.i3, tr.i4, tr.i5, tr.i6, tr.i7, tr.i8, tr.i9, tr.i10, tr.i11, tr.i12, tr.i13, tr.i14, tr.i15,
                                           tr.f0, tr.f1, tr.f2, tr.f3, tr.f4, tr.f5, tr.f6, tr.f7, tr.f8, tr.f9, tr.f10, tr.f11, tr.f12, tr.f13, tr.f14, tr.f15);
     tr.res = res;
@@ -335,8 +335,8 @@ function testGeneralStaticObj(): TestResult {
 function testQuickStaticObj(): TestResult {
     let tr = new TestResult(new ByteWrapper(0 as byte), 1 as byte, new ShortWrapper(2 as short), 3 as short, new IntWrapper(4 as int), 5 as int, new LongWrapper(6 as long), 7 as long,
                             new ByteWrapper(8 as byte), 9 as byte, new ShortWrapper(10 as short), 11 as short, new IntWrapper(12 as int), 13 as int, new LongWrapper(14 as long), 15 as long,
-                            new FloatWrapper(0.0 as float), 1.0 as float, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0 as float), 5.0 as float, new DoubleWrapper(6.0 as double), 7.0 as double,
-                            new FloatWrapper(8.0 as float), 9.0 as float, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0 as float), 13.0 as float, new DoubleWrapper(14.0 as double), 15.0 as double);
+                            new FloatWrapper(0.0f), 1.0f, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0f), 5.0f, new DoubleWrapper(6.0 as double), 7.0 as double,
+                            new FloatWrapper(8.0f), 9.0f, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0f), 13.0f, new DoubleWrapper(14.0 as double), 15.0 as double);
     let res = NativeModule.quickStaticObj(tr.i0, tr.i1, tr.i2, tr.i3, tr.i4, tr.i5, tr.i6, tr.i7, tr.i8, tr.i9, tr.i10, tr.i11, tr.i12, tr.i13, tr.i14, tr.i15,
                                           tr.f0, tr.f1, tr.f2, tr.f3, tr.f4, tr.f5, tr.f6, tr.f7, tr.f8, tr.f9, tr.f10, tr.f11, tr.f12, tr.f13, tr.f14, tr.f15);
     tr.res = res;
@@ -346,8 +346,8 @@ function testQuickStaticObj(): TestResult {
 function testGeneralVirtualFinalPrim(): TestResult {
     let tr = new TestResult(new ByteWrapper(0 as byte), 1 as byte, new ShortWrapper(2 as short), 3 as short, new IntWrapper(4 as int), 5 as int, new LongWrapper(6 as long), 7 as long,
                             new ByteWrapper(8 as byte), 9 as byte, new ShortWrapper(10 as short), 11 as short, new IntWrapper(12 as int), 13 as int, new LongWrapper(14 as long), 15 as long,
-                            new FloatWrapper(0.0 as float), 1.0 as float, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0 as float), 5.0 as float, new DoubleWrapper(6.0 as double), 7.0 as double,
-                            new FloatWrapper(8.0 as float), 9.0 as float, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0 as float), 13.0 as float, new DoubleWrapper(14.0 as double), 15.0 as double);
+                            new FloatWrapper(0.0f), 1.0f, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0f), 5.0f, new DoubleWrapper(6.0 as double), 7.0 as double,
+                            new FloatWrapper(8.0f), 9.0f, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0f), 13.0f, new DoubleWrapper(14.0 as double), 15.0 as double);
     let res = (new NativeModule).generalVirtualFinalPrim(tr.i0, tr.i1, tr.i2, tr.i3, tr.i4, tr.i5, tr.i6, tr.i7, tr.i8, tr.i9, tr.i10, tr.i11, tr.i12, tr.i13, tr.i14, tr.i15,
                                           tr.f0, tr.f1, tr.f2, tr.f3, tr.f4, tr.f5, tr.f6, tr.f7, tr.f8, tr.f9, tr.f10, tr.f11, tr.f12, tr.f13, tr.f14, tr.f15);
     tr.res = new IntWrapper(res);
@@ -357,8 +357,8 @@ function testGeneralVirtualFinalPrim(): TestResult {
 function testQuickVirtualFinalPrim(): TestResult {
     let tr = new TestResult(new ByteWrapper(0 as byte), 1 as byte, new ShortWrapper(2 as short), 3 as short, new IntWrapper(4 as int), 5 as int, new LongWrapper(6 as long), 7 as long,
                             new ByteWrapper(8 as byte), 9 as byte, new ShortWrapper(10 as short), 11 as short, new IntWrapper(12 as int), 13 as int, new LongWrapper(14 as long), 15 as long,
-                            new FloatWrapper(0.0 as float), 1.0 as float, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0 as float), 5.0 as float, new DoubleWrapper(6.0 as double), 7.0 as double,
-                            new FloatWrapper(8.0 as float), 9.0 as float, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0 as float), 13.0 as float, new DoubleWrapper(14.0 as double), 15.0 as double);
+                            new FloatWrapper(0.0f), 1.0f, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0f), 5.0f, new DoubleWrapper(6.0 as double), 7.0 as double,
+                            new FloatWrapper(8.0f), 9.0f, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0f), 13.0f, new DoubleWrapper(14.0 as double), 15.0 as double);
     let res = (new NativeModule).quickVirtualFinalPrim(tr.i0, tr.i1, tr.i2, tr.i3, tr.i4, tr.i5, tr.i6, tr.i7, tr.i8, tr.i9, tr.i10, tr.i11, tr.i12, tr.i13, tr.i14, tr.i15,
                                           tr.f0, tr.f1, tr.f2, tr.f3, tr.f4, tr.f5, tr.f6, tr.f7, tr.f8, tr.f9, tr.f10, tr.f11, tr.f12, tr.f13, tr.f14, tr.f15);
     tr.res = new IntWrapper(res);
@@ -368,8 +368,8 @@ function testQuickVirtualFinalPrim(): TestResult {
 function testGeneralVirtualFinalObj(): TestResult {
     let tr = new TestResult(new ByteWrapper(0 as byte), 1 as byte, new ShortWrapper(2 as short), 3 as short, new IntWrapper(4 as int), 5 as int, new LongWrapper(6 as long), 7 as long,
                             new ByteWrapper(8 as byte), 9 as byte, new ShortWrapper(10 as short), 11 as short, new IntWrapper(12 as int), 13 as int, new LongWrapper(14 as long), 15 as long,
-                            new FloatWrapper(0.0 as float), 1.0 as float, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0 as float), 5.0 as float, new DoubleWrapper(6.0 as double), 7.0 as double,
-                            new FloatWrapper(8.0 as float), 9.0 as float, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0 as float), 13.0 as float, new DoubleWrapper(14.0 as double), 15.0 as double);
+                            new FloatWrapper(0.0f), 1.0f, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0f), 5.0f, new DoubleWrapper(6.0 as double), 7.0 as double,
+                            new FloatWrapper(8.0f), 9.0f, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0f), 13.0f, new DoubleWrapper(14.0 as double), 15.0 as double);
     let res = (new NativeModule).generalVirtualFinalObj(tr.i0, tr.i1, tr.i2, tr.i3, tr.i4, tr.i5, tr.i6, tr.i7, tr.i8, tr.i9, tr.i10, tr.i11, tr.i12, tr.i13, tr.i14, tr.i15,
                                           tr.f0, tr.f1, tr.f2, tr.f3, tr.f4, tr.f5, tr.f6, tr.f7, tr.f8, tr.f9, tr.f10, tr.f11, tr.f12, tr.f13, tr.f14, tr.f15);
     tr.res = res;
@@ -379,8 +379,8 @@ function testGeneralVirtualFinalObj(): TestResult {
 function testQuickVirtualFinalObj(): TestResult {
     let tr = new TestResult(new ByteWrapper(0 as byte), 1 as byte, new ShortWrapper(2 as short), 3 as short, new IntWrapper(4 as int), 5 as int, new LongWrapper(6 as long), 7 as long,
                             new ByteWrapper(8 as byte), 9 as byte, new ShortWrapper(10 as short), 11 as short, new IntWrapper(12 as int), 13 as int, new LongWrapper(14 as long), 15 as long,
-                            new FloatWrapper(0.0 as float), 1.0 as float, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0 as float), 5.0 as float, new DoubleWrapper(6.0 as double), 7.0 as double,
-                            new FloatWrapper(8.0 as float), 9.0 as float, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0 as float), 13.0 as float, new DoubleWrapper(14.0 as double), 15.0 as double);
+                            new FloatWrapper(0.0f), 1.0f, new DoubleWrapper(2.0 as double), 3.0 as double, new FloatWrapper(4.0f), 5.0f, new DoubleWrapper(6.0 as double), 7.0 as double,
+                            new FloatWrapper(8.0f), 9.0f, new DoubleWrapper(10.0 as double), 11.0 as double, new FloatWrapper(12.0f), 13.0f, new DoubleWrapper(14.0 as double), 15.0 as double);
     let res = (new NativeModule).quickVirtualFinalObj(tr.i0, tr.i1, tr.i2, tr.i3, tr.i4, tr.i5, tr.i6, tr.i7, tr.i8, tr.i9, tr.i10, tr.i11, tr.i12, tr.i13, tr.i14, tr.i15,
                                           tr.f0, tr.f1, tr.f2, tr.f3, tr.f4, tr.f5, tr.f6, tr.f7, tr.f8, tr.f9, tr.f10, tr.f11, tr.f12, tr.f13, tr.f14, tr.f15);
     tr.res = res;

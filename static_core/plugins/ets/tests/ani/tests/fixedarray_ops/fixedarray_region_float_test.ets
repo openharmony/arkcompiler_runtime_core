@@ -17,8 +17,8 @@ class ArrayClass {
     public static array: FixedArray<float> = [1.0f, 2.0f, 3.0f, 4.0f, 5.0f]
 
     public static changeStaticArray() {
-        ArrayClass.array[2] = 22.0 as float
-        ArrayClass.array[4] = 44.0 as float
+        ArrayClass.array[2] = 22.0f
+        ArrayClass.array[4] = 44.0f
     }
 
     public static checkStaticArray(): boolean {

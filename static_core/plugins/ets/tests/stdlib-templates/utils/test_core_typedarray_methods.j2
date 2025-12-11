@@ -1690,7 +1690,7 @@ const testTypedArrayLastIndexOf = parametrize<ObjectTypeAndExpectations<number[]
 function testEntries(count: number): number {
     let arr = new {{.item.objectType}}(count);
     for (let i = 0; i < count; i++) {
-        arr[i] = (i + 1) as {{.item.primitiveType}};
+        arr[i] = (i + 1).to{{.item.primitiveType.capitalize()}}();
     }
     let fails: number = 0;
     let current: number = 0;

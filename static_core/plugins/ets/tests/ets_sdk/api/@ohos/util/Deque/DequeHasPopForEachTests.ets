@@ -160,7 +160,7 @@ function testDequeForEachWithValue() {
     let forEachFlag: double = 0;
     deque.forEach((value: double) => {
         if (value != deque.popFirst()) {
-            forEachFlag = TestData.testNumber1;
+            forEachFlag = TestData.testNumber1.toDouble();
         }
         forEachCount++;
     });
@@ -175,7 +175,7 @@ function testDequeForEachWithValueAndIndex() {
     let forEachFlag: double = 0;
     deque.forEach((value: double, index: int) => {
         if (value != deque.popFirst() || index != forEachCount) {
-            forEachFlag = TestData.testNumber1;
+            forEachFlag = TestData.testNumber1.toDouble();
         }
         forEachCount++;
     });
@@ -193,7 +193,7 @@ function testDequeForEachWithValueIndexAndTempArrayList() {
         let elem1 = tempDeque.getFirst();
         let elem2 = deque.popFirst();
         if (value != elem2 || index != forEachCount || elem1 != elem2) {
-            forEachFlag = TestData.testNumber1;
+            forEachFlag = TestData.testNumber1.toDouble();
         }
         forEachCount++;
     });

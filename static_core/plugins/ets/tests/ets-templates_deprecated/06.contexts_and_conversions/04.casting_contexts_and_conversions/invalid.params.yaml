@@ -64,8 +64,8 @@ cases:
   - { stype: Long, sval: new Long(0 as long), dtype: boolean }
   - { stype: Long, sval: new Long(0 as long), dtype: Boolean }
 
-  - { stype: Float, sval: new Float(0 as float), dtype: boolean }
-  - { stype: Float, sval: new Float(0 as float), dtype: Boolean }
+  - { stype: Float, sval: new Float(0), dtype: boolean }
+  - { stype: Float, sval: new Float(0), dtype: Boolean }
 
   - { stype: Double, sval: new Double(0 as double), dtype: boolean }
   - { stype: Double, sval: new Double(0 as double), dtype: Boolean }

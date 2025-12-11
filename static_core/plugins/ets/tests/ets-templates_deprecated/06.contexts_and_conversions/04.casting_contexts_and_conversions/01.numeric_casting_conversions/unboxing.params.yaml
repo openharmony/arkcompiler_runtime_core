@@ -19,5 +19,5 @@ cases:
       - { type: Short, val: 0x5555 as short }
       - { type: Int, val: 0x12121212 as int }
       - { type: Long, val: 0x3434343456565656 as long }
-      - { type: Float, val: 0.00001 as float }
+      - { type: Float, val: 0.00001f }
       - { type: Double, val: 0.00000000001 as double }

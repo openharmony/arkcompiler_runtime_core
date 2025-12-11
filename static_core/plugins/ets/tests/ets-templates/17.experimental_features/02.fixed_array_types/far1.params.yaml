@@ -16,7 +16,7 @@ cases:
     - decl: |-
           let x: FixedArray<byte>
       use: |-
-          x = [0x80.toByte(), 0x7f.toByte()]
+          x = [(0x80).toByte(), (0x7f).toByte()]
           let obj: Object = toObj(x)
           let arr = obj as FixedArray<byte>
           let v: byte = arr[0]
@@ -26,7 +26,7 @@ cases:
     - decl: |-
           let x: FixedArray<short>
       use: |-
-          x = [0x8000.toShort(), 0x7fff.toShort()]
+          x = [(0x8000).toShort(), (0x7fff).toShort()]
           let obj: Object = toObj(x)
           let arr = obj as FixedArray<short>
           let v: short = arr[0]

@@ -19,5 +19,5 @@ import { tsNumber } from 'main_js';
 function checkImportType(): boolean {
   const user: User = { id: tsNumber }
   
-  return user.id as int == tsNumber as int;
+  return user.id.toInt() == tsNumber.toInt();
 }

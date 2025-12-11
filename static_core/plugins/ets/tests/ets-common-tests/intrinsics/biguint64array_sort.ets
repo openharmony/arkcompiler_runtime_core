@@ -20,7 +20,7 @@ const SINGLE = [88];
 
 function checkSorted(a: BigUint64Array): void {
     for (let i = 0; i < ARRAY_SIZE; ++i) {
-        arktest.assertEQ(a[i].getLong(), SORTED[i] as long);
+        arktest.assertEQ(a[i].getLong(), SORTED[i].toLong());
     }
 }
 
@@ -32,7 +32,7 @@ function sortEmpty(): void {
 function sortSingle(): void {
     let single: BigUint64Array = new BigUint64Array(SINGLE);
     single.sort();
-    arktest.assertEQ(single[0].getLong(), SINGLE[0] as long);
+    arktest.assertEQ(single[0].getLong(), SINGLE[0].toLong());
 }
 
 function sortNormal(): void {

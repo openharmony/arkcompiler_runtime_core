@@ -49,7 +49,7 @@
   }
 - {
     name: float,
-    init_values: {"0.0f", "1.0 as float", "-1.0 as float", "Float.MIN_VALUE as float", "Float.MAX_VALUE as float"},
+    init_values: {"0.0f", "1.0f", "-1.0f", "Float.MIN_VALUE", "Float.MAX_VALUE"},
     value_name: Float,
     primitive: true
   }
@@ -97,7 +97,7 @@
   }
 - {
     name: Float,
-    init_values: {"Float.valueOf(0.0 as float)", "Float.valueOf(1.0 as float)", "Float.valueOf(-1.0 as float)", "Float.valueOf(Float.MIN_VALUE as float)", "Float.valueOf(Float.MAX_VALUE as float)"},
+    init_values: {"Float.valueOf(0.0f)", "Float.valueOf(1.0f)", "Float.valueOf(-1.0f)", "Float.valueOf(Float.MIN_VALUE)", "Float.valueOf(Float.MAX_VALUE)"},
     value_name: Float,
     primitive: false
   }
@@ -199,7 +199,7 @@
   }
 - {
     name: "FixedArray<Float>",
-    init_values: {"[Float.valueOf(0.0 as float)] as FixedArray<Float>", "[Float.valueOf(0.0 as float), Float.valueOf(1.0 as float), Float.valueOf(-1.0 as float), Float.valueOf(Float.MIN_VALUE as float), Float.valueOf(Float.MAX_VALUE as float)] as FixedArray<Float>"},
+    init_values: {"[Float.valueOf(0.0f)] as FixedArray<Float>", "[Float.valueOf(0.0f), Float.valueOf(1.0f), Float.valueOf(-1.0f), Float.valueOf(Float.MIN_VALUE), Float.valueOf(Float.MAX_VALUE)] as FixedArray<Float>"},
     value_name: Array,
     primitive: false
   }

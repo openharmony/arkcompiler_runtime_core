@@ -21,8 +21,8 @@ cases:
 
       - { dtype: Byte, stype: Object, pval: 0x55 as byte }
       - { dtype: Byte, stype: Numeric, pval: 0x7F as byte }
-      - { dtype: Byte, stype: Integral, pval: 0x80 as byte }
-      - { dtype: Byte, stype: Comparable<Byte>, pval: 0x80 as byte }
+      - { dtype: Byte, stype: Integral, pval: Int.toByte(0x80) }
+      - { dtype: Byte, stype: Comparable<Byte>, pval: Int.toByte(0x80) }
 
       - { dtype: Char, stype: Object, pval: "c'W'" }
       - { dtype: Char, stype: Comparable<Char>, pval: "c'Z'" }
@@ -49,7 +49,7 @@ cases:
 
       - { dtype: Double, stype: Object, pval: '0.00000000001' }
       - { dtype: Double, stype: Numeric, pval: '0.00000000001' }
-      - { dtype: Double, stype: Floating, pval: '0.00000000001' }
+      - { dtype: Double, stype: Floating, pval: '0.00000000001f' }
       - { dtype: Double, stype: Comparable<Double>, pval: '0.00000000001' }
 
       - { dtype: String, stype: Object, pval: '"ABC"' }

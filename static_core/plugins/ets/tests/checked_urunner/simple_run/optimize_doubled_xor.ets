@@ -292,7 +292,7 @@ function test_xor_chain_byte(param: byte): byte {
         let t: Int = __noinline__dummyReturn()
     }
 
-    return result as byte;
+    return result.toByte();
 }
 
 function test_xor_chain_short(param: short): short {
@@ -304,7 +304,7 @@ function test_xor_chain_short(param: short): short {
         let t: Int = __noinline__dummyReturn()
     }
 
-    return result as short;
+    return result.toShort();
 }
 
 function test_xor_chain_int(param: int): int {

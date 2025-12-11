@@ -99,7 +99,7 @@ cases:
         - new BigInt(9007199254.740991e6)
     - values:
         - new BigInt(9007199254.740991e6)
-        - new BigInt(9007199254740991 as long)
+        - new BigInt((9007199254740991).toLong())
     - values:
         - 9007199254740990n  # max safe integer in double - 1
         - new BigInt(new BigInt(9007199254740990.0))
@@ -117,7 +117,7 @@ cases:
         - new BigInt(-0.9007199254740989e16)
     - values:
         - new BigInt(-0.9007199254740989e16)
-        - new BigInt(-9007199254740989 as long)
+        - new BigInt((-9007199254740989).toLong())
     # from bigint
     - values:
         - 94876543875610289630n

@@ -20,7 +20,7 @@ function checkAlias(): boolean {
   const oldValue = js.tsNumber;
   js.increment();
   
-  return oldValue as int < js.tsNumber as int;
+  return oldValue.toInt() < js.tsNumber.toInt();
 }
 
 function checkDestructuredImportWithAlias(): boolean {

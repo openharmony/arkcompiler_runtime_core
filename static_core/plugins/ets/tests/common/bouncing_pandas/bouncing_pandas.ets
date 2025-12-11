@@ -133,10 +133,10 @@ function simProcessCollision(a: SBody, b: SBody): void {
     let shift: float = a.rad + b.rad - rlen as float;
     if (shift < 0)
         return; // too far
-    let n = v2scale(1.0 as float / rlen as float, r);
+    let n = v2scale(1.0f / rlen as float, r);
     let mratio: float = b.m / a.m;
-    let msum: float = 1.0 as float + mratio;
-    let dvlen: float = (2.0 as float * v2dot(n, v2sub(a.v, b.v)) as float / msum) as float;
+    let msum: float = 1.0f + mratio;
+    let dvlen: float = (2.0f * v2dot(n, v2sub(a.v, b.v)) as float / msum) as float;
     a.v = v2add(a.v, v2scale(-mratio as float * dvlen as float, n));
     b.v = v2add(b.v, v2scale(dvlen, n));
     a.r = v2add(a.r, v2scale((-mratio * shift) as float / msum as float, n));

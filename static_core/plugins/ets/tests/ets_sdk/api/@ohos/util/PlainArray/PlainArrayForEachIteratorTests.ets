@@ -68,7 +68,7 @@ function testForEachWithOneParameter() {
 function testForEachWithTwoParameters() {
     let plainArray = new PlainArray<double>();
     for (let i: int = 0; i < TestData.forNumber2.length; i++) {
-        plainArray.add(TestData.forNumber2[i] as int, TestData.forNumber2[i]);
+        plainArray.add(TestData.forNumber2[i].toInt(), TestData.forNumber2[i]);
     }
     let forEachCount: int = 0;
     plainArray.forEach((value: double, index: int) => {

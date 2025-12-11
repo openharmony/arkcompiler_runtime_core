@@ -24,7 +24,7 @@ cases:
     - { stype: Int, expr: new Int(0x12121212 as int), dtype: Integral }
     - { stype: Long, expr: new Long(0x3434343456565656 as long), dtype: Object }
     - { stype: Long, expr: new Long(0x3434343456565656 as long), dtype: Integral }
-    - { stype: Float, expr: new Float(0.00001 as float), dtype: Object }
-    - { stype: Float, expr: new Float(0.00001 as float), dtype: Floating }
+    - { stype: Float, expr: new Float(0.00001), dtype: Object }
+    - { stype: Float, expr: new Float(0.00001), dtype: Floating }
     - { stype: Double, expr: new Double(0.00000000001 as double), dtype: Object }
     - { stype: Double, expr: new Double(0.00000000001 as double), dtype: Floating }

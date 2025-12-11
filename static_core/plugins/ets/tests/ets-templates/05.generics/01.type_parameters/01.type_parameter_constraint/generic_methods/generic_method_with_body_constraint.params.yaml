@@ -50,8 +50,8 @@ constraints:
     expected: 1 as long
   - type: float
     use: float
-    p: 1.1.toFloat()
-    expected: 1.1.toFloat()
+    p: 1.1f
+    expected: 1.1f
   - type: double
     use: double
     p: 1.2 as double

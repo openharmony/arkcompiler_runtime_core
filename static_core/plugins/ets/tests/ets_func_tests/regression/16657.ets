@@ -29,9 +29,9 @@ class TimeAnimationImpl<Value> {
     }
 }
 
-function smoothAnimation(period: int, from: float = 0.0 as float, to: float = 0.0 as float): TimeAnimationImpl<float> {
+function smoothAnimation(period: int, from: float = 0.0f, to: float = 0.0f): TimeAnimationImpl<float> {
     if (!isFinite(period) || (period < 1)) throw new Error("illegal period: " + period)
-    return new TimeAnimationImpl<float>((time:long): float => (1 - Math.cos(time / period * Math.PI) as float) / 2 * (to - from) + from)
+    return new TimeAnimationImpl<float>((time:long): float => (1 - Math.cos(time / period * Math.PI).toFloat()) / 2 * (to - from) + from)
 }
 
 

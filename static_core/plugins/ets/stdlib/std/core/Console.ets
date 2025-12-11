@@ -876,8 +876,8 @@ export final class Console {
                 let stringVal = Rows[j * indexNum + i];
                 let stringLen = Console.getStringLen(stringVal);
                 if (stringLen > 0) {
-                    let left:int = ((columnWidths[j] - stringLen) / 2) as int;
-                    let right:int = (columnWidths[j] - stringLen - left) as int;
+                    let left:int = ((columnWidths[j] - stringLen) / 2).toInt();
+                    let right:int = (columnWidths[j] - stringLen - left).toInt();
                     result += Console.stringRepeat(left, " ") + stringVal + Console.stringRepeat(right, " ");
                 } else {
                     result += Console.stringRepeat(columnWidths[j], " ");

@@ -529,35 +529,35 @@ function testWrite0009() {
 
 function testfrom0792() {
     let ab = new ArrayBuffer(100);
-    let buf = buffer.from(ab, 1.2 as int, 1.2 as int);
+    let buf = buffer.from(ab, (1.2).toInt(), (1.2).toInt());
     let res = buf.toString('hex');
     arktest.assertEQ(res, '00');
 }
 
 function testfrom0793() {
     let ab = new ArrayBuffer(100);
-    let buf = buffer.from(ab, 1, 1.2 as int);
+    let buf = buffer.from(ab, 1, (1.2).toInt());
     let res = buf.toString('hex');
     arktest.assertEQ(res, '00');
 }
 
 function testfrom0794() {
     let ab = new ArrayBuffer(100);
-    let buf = buffer.from(ab, 1.2 as int, 1);
+    let buf = buffer.from(ab, (1.2).toInt(), 1);
     let res = buf.toString('hex');
     arktest.assertEQ(res, '00');
 }
 
 function testfrom0795() {
     let ab = new ArrayBuffer(100);
-    let buf = buffer.from(ab, 9.9 as int, 9.9 as int);
+    let buf = buffer.from(ab, (9.9).toInt(), (9.9).toInt());
     let res = buf.toString('hex');
     arktest.assertEQ(res, '000000000000000000');
 }
 
 function testfrom0796() {
     let ab = new ArrayBuffer(100);
-    let buf = buffer.from(ab, 2.9 as int , 2.9 as int);
+    let buf = buffer.from(ab, (2.9).toInt() , (2.9).toInt());
     let res = buf.toString('hex');
     arktest.assertEQ(res, '0000');
 }

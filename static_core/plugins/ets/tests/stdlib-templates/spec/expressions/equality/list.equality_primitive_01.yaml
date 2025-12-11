@@ -13,45 +13,45 @@
 
 # Compare floats
 - {
-    type1: "float", value1: "10.0",
-    type2: "float", value2: "2.3",
+    type1: "Float", value1: "10.0",
+    type2: "Float", value2: "2.3",
     result: "false"
   }
 - {
-    type1: "float", value1: "10.0",
-    type2: "float", value2: "10.0",
+    type1: "Float", value1: "10.0",
+    type2: "Float", value2: "10.0",
     result: "true"
   }
 - {
-    type1: "float", value1: "3.14157",
-    type2: "float", value2: "3.14157",
+    type1: "Float", value1: "3.14157",
+    type2: "Float", value2: "3.14157",
     result: "true"
   }
 - {
-    type1: "float", value1: "3.14157",
-    type2: "float", value2: "3.14158",
+    type1: "Float", value1: "3.14157",
+    type2: "Float", value2: "3.14158",
     result: "false"
   }
 
 # Compare doubles
 - {
-    type1: "double", value1: "10.0",
-    type2: "double", value2: "2.3",
+    type1: "Double", value1: "10.0",
+    type2: "Double", value2: "2.3",
     result: "false"
   }
 - {
-    type1: "double", value1: "10.0",
-    type2: "double", value2: "10.0",
+    type1: "Double", value1: "10.0",
+    type2: "Double", value2: "10.0",
     result: "true"
   }
 - {
-    type1: "double", value1: "3.14157",
-    type2: "double", value2: "3.14157",
+    type1: "Double", value1: "3.14157",
+    type2: "Double", value2: "3.14157",
     result: "true"
   }
 - {
-    type1: "double", value1: "3.14157",
-    type2: "double", value2: "3.14158",
+    type1: "Double", value1: "3.14157",
+    type2: "Double", value2: "3.14158",
     result: "false"
   }
 
@@ -94,48 +94,48 @@
 
 # Compare longs
 - {
-    type1: "long", value1: "1234567890",
-    type2: "long", value2: "1234567891",
+    type1: "Long", value1: "1234567890",
+    type2: "Long", value2: "1234567891",
     result: "false"
   }
 - {
-    type1: "long", value1: "1234567890",
-    type2: "long", value2: "1234567890",
+    type1: "Long", value1: "1234567890",
+    type2: "Long", value2: "1234567890",
     result: "true"
   }
 
 # Compare ints
 - {
-    type1: "int", value1: "65535",
-    type2: "int", value2: "65534",
+    type1: "Int", value1: "65535",
+    type2: "Int", value2: "65534",
     result: "false"
   }
 - {
-    type1: "int", value1: "65535",
-    type2: "int", value2: "65535",
+    type1: "Int", value1: "65535",
+    type2: "Int", value2: "65535",
     result: "true"
   }
 
 # Compare shorts
 - {
-    type1: "short", value1: "1024",
-    type2: "short", value2: "1025",
+    type1: "Short", value1: "1024",
+    type2: "Short", value2: "1025",
     result: "false"
   }
 - {
-    type1: "short", value1: "1024",
-    type2: "short", value2: "1024",
+    type1: "Short", value1: "1024",
+    type2: "Short", value2: "1024",
     result: "true"
   }
 
 # Compare bytes
 - {
-    type1: "byte", value1: "255",
-    type2: "byte", value2: "254",
+    type1: "Byte", value1: "255",
+    type2: "Byte", value2: "254",
     result: "false"
   }
 - {
-    type1: "byte", value1: "255",
-    type2: "byte", value2: "255",
+    type1: "Byte", value1: "255",
+    type2: "Byte", value2: "255",
     result: "true"
   }

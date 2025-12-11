@@ -20,7 +20,7 @@ tags: []
 
 
 function main() : int {
-    let epsilon: float = (0.0 as float) + Float.EPSILON;
+    let epsilon: float = (0.0f) + Float.EPSILON;
     if (epsilon) {
         return 0
     } else {

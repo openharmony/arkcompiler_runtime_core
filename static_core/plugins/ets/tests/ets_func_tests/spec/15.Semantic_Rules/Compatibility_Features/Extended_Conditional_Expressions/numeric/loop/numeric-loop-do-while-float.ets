@@ -20,7 +20,7 @@ tags: []
 
 
 function main(): int {
-    let zeroNumber: float = 0.0 as float;
+    let zeroNumber: float = 0.0f;
     let counter : int = 0;
     do {
         counter = counter + 1;

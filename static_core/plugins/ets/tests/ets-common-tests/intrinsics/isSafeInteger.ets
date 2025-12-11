@@ -26,7 +26,7 @@ class IsIntegerDoubleTest {
 function main(): int {
     let ft = new IsIntegerFloatTest();
     ft.safeInteger = 1.0f;
-    ft.unsafeInteger = 1.0 as float + Float.MAX_SAFE_INTEGER;
+    ft.unsafeInteger = 1.0f + Float.MAX_SAFE_INTEGER;
 
     if (Float.isSafeInteger(Float.NaN) != false) {
       return 1;

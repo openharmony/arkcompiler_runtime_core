@@ -19,5 +19,5 @@ unboxing_conversions:
     - { origin: Char, dest: char, value: "c'a'" }
     - { origin: Int, dest: int, value: 1 }
     - { origin: Long, dest: long, value: new Long(1 as long) }
-    - { origin: Float, dest: float, value: new Float(1.0 as float) }
+    - { origin: Float, dest: float, value: new Float(1.0) }
     - { origin: Double, dest: double, value: 1.0 }

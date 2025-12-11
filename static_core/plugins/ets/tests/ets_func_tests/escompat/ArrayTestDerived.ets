@@ -41,14 +41,14 @@ function __noinline__atOutside(a: Array<Number>) {
 function main(): int {
     let a = new Derived(10);
     for (let i = 0; i < 10; i++) {
-        a[i] = i as number;
+        a[i] = i.toDouble();
     }
     arktest.assertEQ(__noinline__getOutside(a), DERIVED_ACCESS_OFFSET);
     arktest.assertEQ(__noinline__atOutside(a), DERIVED_ACCESS_OFFSET);
 
     let b = new Array<Number>(10);
     for (let i = 0; i < 10; i++) {
-        b[i] = i as number;
+        b[i] = i.toDouble();
     }
     arktest.assertEQ(__noinline__getOutside(b), 0);
     arktest.assertEQ(__noinline__atOutside(b), 0);

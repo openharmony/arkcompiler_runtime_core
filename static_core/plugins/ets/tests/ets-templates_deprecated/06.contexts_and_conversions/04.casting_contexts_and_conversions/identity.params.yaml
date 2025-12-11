@@ -19,7 +19,7 @@ cases:
       - { type: short, expr: 0x5555 as short, op: '!=' }
       - { type: int, expr: 0x12121212 as int, op: '!=' }
       - { type: long, expr: 0x3434343456565656 as long, op: '!=' }
-      - { type: float, expr: 0.00001 as float, op: '!=' }
+      - { type: float, expr: 0.00001f, op: '!=' }
       - { type: double, expr: 0.00000000001 as double, op: '!=' }
       - { type: Boolean, expr: new Boolean(true), op: '!==' }
       - { type: Byte, expr: new Byte(new Int(1).toByte()), op: '!==' }

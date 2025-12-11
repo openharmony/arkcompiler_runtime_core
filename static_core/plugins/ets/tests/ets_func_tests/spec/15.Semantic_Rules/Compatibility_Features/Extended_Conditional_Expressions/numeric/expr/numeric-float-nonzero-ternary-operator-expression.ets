@@ -20,7 +20,7 @@ tags: []
 
 
 function main(): int {
-    let nonZero: float = 1.0 as float;
+    let nonZero: float = 1.0f;
     let result = nonZero ? 0 : 1;
     return result;
 }
