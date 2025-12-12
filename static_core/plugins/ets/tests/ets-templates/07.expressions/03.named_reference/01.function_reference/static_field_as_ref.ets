@@ -17,7 +17,7 @@
  /*---
  desc: A function reference refers to a declared or imported function.
        A compile-time error occurs if an overload alias is used in a named reference
-
+ tags: [compile-only, negative]
  ---*/
 
 function fooE(): void { console.log('I am fooE') }

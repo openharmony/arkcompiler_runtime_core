@@ -64,9 +64,6 @@
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
 
-#30653
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_37.ets
-
 #30697
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_39.ets
 
@@ -211,9 +208,6 @@
 
 #30896
 07.expressions/03.named_reference/02.method_reference/method_ref_neg_2.ets
-
-#30653
-07.expressions/03.named_reference/01.function_reference/static_field_as_ref.ets
 
 #23363 No CTE when array type cannot be determined
 07.expressions/04.array_literal/arr_n_2.ets
