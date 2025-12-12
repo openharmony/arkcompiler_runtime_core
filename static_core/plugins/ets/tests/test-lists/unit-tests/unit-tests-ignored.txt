@@ -37,7 +37,7 @@ ets-common-tests/generics/generics_methods.ets
 ets-common-tests/intrinsics/bigint64array_sort.ets
 ets-common-tests/intrinsics/uint32array_sort.ets
 
-#30894
+# 32442
 ets-common-tests/taskpool/common_tasks.ets
 
 #29592
