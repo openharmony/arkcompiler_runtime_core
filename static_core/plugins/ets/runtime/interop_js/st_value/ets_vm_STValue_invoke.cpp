@@ -82,9 +82,9 @@ static napi_value STValueTemplateInvokeFunction(
         return nullptr;
     }
 
-    // 3. extract returnType
+    // 3. check args num and extract returnType
     SType returnType;
-    if (!GetReturnType(env, signatureName, returnType)) {
+    if (!CheckArgsAndGetReturnType(env, signatureName, args.size(), returnType)) {
         return nullptr;
     }
 
@@ -422,7 +422,7 @@ napi_value STValueObjectInvokeMethodImpl(napi_env env, [[maybe_unused]] napi_cal
     ani_object invokeObj = reinterpret_cast<ani_object>(objData->GetAniRef());
 
     SType returnType;
-    if (!GetReturnType(env, signatureString, returnType)) {
+    if (!CheckArgsAndGetReturnType(env, signatureString, argArray.size(), returnType)) {
         return nullptr;
     }
     if (argArray.empty()) {
@@ -618,7 +618,7 @@ napi_value STValueClassInvokeStaticMethodImpl(napi_env env, [[maybe_unused]] nap
     ani_class clsClass = reinterpret_cast<ani_class>(clsData->GetAniRef());
 
     SType returnType;
-    if (!GetReturnType(env, signatureString, returnType)) {
+    if (!CheckArgsAndGetReturnType(env, signatureString, argArray.size(), returnType)) {
         return nullptr;
     }
     if (argArray.empty()) {
