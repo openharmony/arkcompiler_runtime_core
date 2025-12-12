@@ -17,8 +17,8 @@
   tags: [not-a-test]
 ---*/
 
-import { compute } from "./ext_funcs_4_1.ets";
-import { compute2 } from "./ext_funcs_4_1.ets";
+import { compute } from './ext_funcs_4_1.ets';
+import { compute2 } from './ext_funcs_4_1.ets';
 
 export function top(x: int): int {
     let acc = 0;

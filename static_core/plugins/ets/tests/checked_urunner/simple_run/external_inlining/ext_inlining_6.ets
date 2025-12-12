@@ -17,16 +17,16 @@
   files: [ext_funcs_4.ets, ext_funcs_4_1.ets, ext_funcs_5.ets]
 ---*/
 
-import { top } from "./ext_funcs_5.ets";
-import { top2 } from "./ext_funcs_5.ets";
+import { top } from './ext_funcs_5.ets';
+import { top2 } from './ext_funcs_5.ets';
 
 //! CHECKER    Check external inlining with 3 files
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_6.ETSGLOBAL::main_1"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_funcs_5.ETSGLOBAL::top,ext_funcs_4_1.ETSGLOBAL::compute,.*,STATIC,SUCCESS/
-//! EVENT      /Inline,ext_inlining_6.ETSGLOBAL::main_1,ext_funcs_5.ETSGLOBAL::top,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main_1"
+//! EVENT      /Inline,ext_inlining_6.ETSGLOBAL::main1,ext_funcs_5.ETSGLOBAL::top,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
 
-function main_1(): int {
+function main1(): int {
     let total = top(3); // inlining: main → top → compute
     if (total == 8) {
         return 0;
@@ -36,12 +36,12 @@ function main_1(): int {
 }
 
 //! CHECKER    Check external inlining with 3 files 2
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_6.ETSGLOBAL::main_2"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_funcs_5.ETSGLOBAL::top2,ext_funcs_4_1.ETSGLOBAL::compute2,.*,STATIC,SUCCESS/
-//! EVENT      /Inline,ext_inlining_6.ETSGLOBAL::main_2,ext_funcs_5.ETSGLOBAL::top2,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main_2"
+//! EVENT      /Inline,ext_inlining_6.ETSGLOBAL::main2,ext_funcs_5.ETSGLOBAL::top2,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
 
-function main_2(): int {
+function main2(): int {
     let total = top2(3); // Expect: 0²+1 + 1²+1 + 2²+1 = 1 + 2 + 5 = 8
     if (total == 8) {
         return 0;

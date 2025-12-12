@@ -17,7 +17,7 @@
   tags: [not-a-test]
 ---*/
 
-import { risky_array } from "./ext_funcs_4.ets";
+import { risky_array } from './ext_funcs_4.ets';
 
 export function middle(arr: int[]): int {
     return risky_array(arr); // inline will be here
@@ -30,7 +30,7 @@ export function compute(x: int): int {
 // potential deoptimization
 export function compute2(x: int): int {
     if (false) { // SaveState will be created
-        throw new Error("Unreachable!");
+        throw new Error('Unreachable!');
     }
     return x * x + 1;
 }

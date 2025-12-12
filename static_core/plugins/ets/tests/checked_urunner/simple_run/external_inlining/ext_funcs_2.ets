@@ -24,7 +24,7 @@ export function add(x: int, y: int): int {
 
 // functions with unpredictable side effects
 export function add_with_log(x: int, y: int): int {
-    console.log("Adding..");
+    console.log('Adding..');
     return x + y;
 }
 

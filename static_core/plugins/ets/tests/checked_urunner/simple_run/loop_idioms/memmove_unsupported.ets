@@ -44,7 +44,7 @@
 
 //! CHECKER       AOT: memmove unsupported tests if there is not-inlined method (local or external)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='memmove_unsupported.TestUnsupported::.*' --compiler-inlining-blacklist='std.core.Array::<ctor>'", entry: "memmove_unsupported.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex='memmove_unsupported.TestUnsupported::.*' --compiler-inlining-blacklist='std.core.Array::<ctor>'", entry: "memmove_unsupported.ETSGLOBAL::main" # CC-OFF(G.FMT.02) special comment for testing
 //!
 //! METHOD        "memmove_unsupported.TestUnsupported::__noinline__noAlias_RefTypeCheck"
 //! PASS_AFTER    "LoopIdioms"

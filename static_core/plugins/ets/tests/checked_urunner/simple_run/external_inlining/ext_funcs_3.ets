@@ -31,7 +31,7 @@ export function risky(arr: int[], i: int): int {
 // deopt
 export function maybe_throw(x: int): int {
     if (x == 0) {
-        throw new Error("Error message");
+        throw new Error('Error message');
     }
     return 100 / x;
 }
