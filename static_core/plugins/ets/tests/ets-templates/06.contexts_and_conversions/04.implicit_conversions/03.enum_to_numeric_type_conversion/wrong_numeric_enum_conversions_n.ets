@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,24 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% for c in cases %}
+{% for type in non_numeric_types %}
+
 /*---
 desc: >-
-    A value of an enumeration type is converted to type long
-    if enumeration constants of this type are of type long.
+    A value of the numeric enumeration type is converted to one of the following:
+    - Numeric type equal to or larger than the enumeration base type
+    - Union type considering the value type of the enumeration base type
+tags: [negative, compile-only]
+expected_out: "Semantic error ESE0318: Type 'Enm' cannot be assigned to type '{{type}}'"
 ---*/
-enum Color { Red, Green = 0x3434343456565656, Blue }
-
-{{c.decl}}
+enum Enm {{c.enum_values}}
 
 function main() {
-    {{c.use|indent}}
+    
+    let x: {{type}} = Enm.Third
+    
 }
+
+{% endfor %}
 {%- endfor %}

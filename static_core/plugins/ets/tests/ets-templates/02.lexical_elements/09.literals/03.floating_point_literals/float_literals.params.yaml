@@ -105,3 +105,8 @@ float_literals:
     - '-1_123_456.789_123e11f'
     - '-1_123.7e1_1f'
     - '1_2_3.4_5_6_7_8_9_0e1_2f'
+    
+    # floating-point literal with integer literal
+    - '123f'
+    - '-123f'
+    - '0f'

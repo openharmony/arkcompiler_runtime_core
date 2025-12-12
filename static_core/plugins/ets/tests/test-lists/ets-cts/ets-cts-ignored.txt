@@ -84,6 +84,9 @@
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_ternary_0.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_ternary_1.ets
 
+#32341
+04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_40.ets
+
 #2236
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
 
@@ -173,6 +176,9 @@
 
 #31755
 06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/explicit_type_conversion_6.ets
+
+#31755
+17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/explicit_type_conversion_6.ets
 
 #30469
 07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets

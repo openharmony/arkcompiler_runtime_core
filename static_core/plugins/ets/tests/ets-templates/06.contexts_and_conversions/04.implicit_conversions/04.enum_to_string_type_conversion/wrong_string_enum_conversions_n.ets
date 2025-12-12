@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-/*---
-desc: >-
-    A value of an enumeration type is converted to type double
-    if enumeration constants of this type are of type double.
----*/
-enum Color: double { Red = 0.0, Green = 100.0, Blue = 101.0 }
+{% for type in non_string_types %}
 
-{{c.decl}}
+/*---
+desc: A value of enumeration type with string constants is converted to type string or to a union type that contains type string
+tags: [negative, compile-only]
+expected_out: "Semantic error ESE0318: Type 'Enm' cannot be assigned to type '{{type}}'"
+---*/
+enum Enm { First = "a", Second = "b", Third = "c" }
 
 function main() {
-    {{c.use|indent}}
+    
+    let x: {{type}} = Enm.Third
+    
 }
+
 {%- endfor %}

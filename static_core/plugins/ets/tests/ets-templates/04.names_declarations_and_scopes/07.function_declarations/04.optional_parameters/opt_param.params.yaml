@@ -390,3 +390,38 @@ cases:
         arktest.assertEQ(foo([5], undefined), '51')
         arktest.assertEQ(foo(undefined, ['6']), '16')
         arktest.assertEQ(foo(undefined, undefined), '11')
+
+    # allowed call method with undefined for optional parameters
+    - decl: |-
+        class C {
+            private private_field: number = 1
+            foo(a: number = 1, b: number = this.private_field) {
+                return '' + a + b
+            }
+        }
+      call: |-
+        const c = new C
+        arktest.assertEQ(c.foo(5, undefined), '51')
+        arktest.assertEQ(c.foo(undefined, 6), '16')
+        arktest.assertEQ(c.foo(undefined, undefined), '11')
+
+    # allowed call lambda with undefined for optional parameters
+    - decl: |-
+        let fn = (a: number = 1, b: number = 1) => {return '' + a + b}
+      call: |-
+        arktest.assertEQ(fn(5, undefined), '51')
+        arktest.assertEQ(fn(undefined, 6), '16')
+        arktest.assertEQ(fn(undefined, undefined), '11')
+
+    # allowed call constructor with undefined for optional parameters
+    - decl: |-
+        class C {
+            field: string
+            constructor(a: number = 1, b: number = 1) {
+                this.field = '' + a + b
+            }
+        }
+      call: |-
+        arktest.assertEQ(new C(5, undefined).field, '51')
+        arktest.assertEQ(new C(undefined, 6).field, '16')
+        arktest.assertEQ(new C(undefined, undefined).field, '11')

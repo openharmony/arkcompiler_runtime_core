@@ -151,3 +151,22 @@ cases:
           v = [ Color.Green + Color.Blue, Color.Blue + s ]
           arktest.assertEQ(v[0], 201.0)
           arktest.assertEQ(v[1], 143.0)
+
+    - decl: |-
+          let s: int = 42
+          let union1: string | int
+          let union2: float | object
+          let union3: Array<string> | Any | double
+      use: |-
+          // conversion to union type considering the value type of the enum base type
+          union1 = Color.Blue
+          arktest.assertEQ(union1, 101)
+          arktest.assertTrue(union1 instanceof int)
+
+          union2 = Color.Red + Color.Green
+          arktest.assertEQ(union2, 100)
+          arktest.assertTrue(union2 instanceof int)
+
+          union3 = Color.Red + Color.Blue + s
+          arktest.assertEQ(union3, 143)
+          arktest.assertTrue(union3 instanceof int)
