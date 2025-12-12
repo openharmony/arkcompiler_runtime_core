@@ -87,7 +87,7 @@ function testString03(): int {
         test(JSON.parse<Object>(s1, stringType) as String == s, msg)
 }
 
-function equalObjectArrays(a: FixedArray<Object>, b: FixedArray<Object>): boolean {
+function fixedArrayEquals<E>(a: FixedArray<E>, b: FixedArray<E>): boolean {
     if (a.length != b.length) {
         return false
     }
@@ -99,12 +99,17 @@ function equalObjectArrays(a: FixedArray<Object>, b: FixedArray<Object>): boolea
     return true
 }
 
+type OptBool = Boolean | undefined
+
 function testArrayBooleanParse(): int {
-    let booleanType = Type.of([true] as FixedArray<Boolean>)
-    let emptyArray : FixedArray<Boolean> = []
-    return test(equalObjectArrays(JSON.parse<FixedArray<Boolean>>("[false, true]", booleanType) as FixedArray<Boolean>,
-            [Boolean.valueOf(false), Boolean.valueOf(true)]), "[false, true]") +
-        test(equalObjectArrays(JSON.parse<FixedArray<Boolean>>("[]", booleanType) as FixedArray<Boolean>, emptyArray), "[]")
+    let failures = 0
+    const emptyArray: FixedArray<OptBool> = []
+    const expectedArray: FixedArray<OptBool> = [false, true]
+    const booleanType = Class.of(emptyArray)
+    const parsedArray = JSON.parse<FixedArray<OptBool>>("[false, true]", booleanType)!
+    failures += test(fixedArrayEquals(parsedArray, expectedArray), "[false, true]")
+    failures += test(fixedArrayEquals(JSON.parse<FixedArray<OptBool>>("[]", booleanType)!, emptyArray), "[]")
+    return failures
 }
 
 function testArrayBooleanStringify(): int {
@@ -114,20 +119,28 @@ function testArrayBooleanStringify(): int {
     return test(JSON.stringify(boxedBools) == JSON.stringify(bools), "[new Boolean(true), new Boolean(false)]")
 }
 
+type OptDouble = Double | undefined
+
 function testArrayDouble(): int {
-    let doubleType = Type.of([1.0] as FixedArray<Double>)
-    let emptyArray : FixedArray<Double> = []
-    return test(equalObjectArrays(JSON.parse<FixedArray<Double>>("[0, -1, 1, 2.72182, -2.72182]", doubleType) as FixedArray<Double>,
-            [Double.valueOf(0), Double.valueOf(-1), Double.valueOf(1), Double.valueOf(2.72182), Double.valueOf(-2.72182)]), "[0, -1, 1, 2.72182, -2.72182]") +
-        test(equalObjectArrays(JSON.parse<FixedArray<Double>>("[]", doubleType) as FixedArray<Double>, emptyArray), "[]")
+    let failures = 0
+    const emptyArray: FixedArray<OptDouble> = []
+    const testArray: FixedArray<OptDouble> = [0, -1, 1, 2.72182, -2.72182]
+    const doubleType = Class.of(emptyArray)
+    const parsedArray = JSON.parse<FixedArray<OptDouble>>("[0, -1, 1, 2.72182, -2.72182]", doubleType)!
+    failures += test(fixedArrayEquals(parsedArray, testArray), "[0, -1, 1, 2.72182, -2.72182]")
+    failures += test(fixedArrayEquals(JSON.parse<FixedArray<OptDouble>>("[]", doubleType)!, emptyArray), "[]")
+    return failures
 }
 
 function testArrayString(): int {
-    let stringType = Type.of([""] as FixedArray<String>)
-    let emptyArray : FixedArray<String> = []
-    return test(equalObjectArrays(JSON.parse<FixedArray<String>>("[\"White\", \"Rabbit\", \"was running away\", \"from Alice\"]", stringType) as FixedArray<String>,
-            ["White", "Rabbit", "was running away", "from Alice"]), "[\"White\", \"Rabbit\", \"was running away\", \"from Alice\"]") +
-        test(equalObjectArrays(JSON.parse<FixedArray<String>>("[]", stringType) as FixedArray<String>, emptyArray), "[]")
+    let failures = 0
+    const emptyArray: FixedArray<String> = []
+    const stringType = Class.of(emptyArray)
+    const strArrayJson = '["White", "Rabbit", "was running away", "from Alice"]'
+    const testArray: FixedArray<String> = ["White", "Rabbit", "was running away", "from Alice"]
+    failures += test(fixedArrayEquals(JSON.parse<FixedArray<String>>(strArrayJson, stringType)!, testArray), strArrayJson)
+    failures += test(fixedArrayEquals(JSON.parse<FixedArray<String>>("[]", stringType)!, emptyArray), "[]")
+    return failures
 }
 
 function testObject(): int {
@@ -176,8 +189,8 @@ class CycleB {
 
 function testCheckParse(): int {
     let errors = 0
-    errors += test(!JSON.isCorrectForParsing(Type.of(new NoConstructor(10.0) as Object)), "No constructor")
-    errors += test(JSON.isCorrectForParsing(Type.of(new ForbiddenPrimitives() as Object)), "Forbidden primitives")
+    errors += test(!JSON.isCorrectForParsing(Class.from<NoConstructor>()), "No constructor")
+    errors += test(JSON.isCorrectForParsing(Class.from<ForbiddenPrimitives>()), "Forbidden primitives")
     // #21831: CycleA is nullable
     // errors += test(!JSON.isCorrectForParsing(Type.of(new CycleA() as Object)), "Cycle") // NOTE(pantos) StackOverflowError
     return errors
@@ -362,38 +375,38 @@ function testStringifyFunction(): int {
 
 type Option<T> = T | undefined
 
+class WithOption {
+    opt: Option<string> = "hello"
+}
+
 function testStringifyUnion(): int {
     const option: Option<string> = "hello"
 
     let testResult = test('"hello"' == JSON.stringify(option), "standalone union")
     testResult += test('["hello"]' == JSON.stringify([option]), "array of unions")
 
-    class WithOption {
-        opt: Option<string> = "hello"
-    }
-
     testResult += test('{"opt":"hello"}' == JSON.stringify(new WithOption()), "class with union typed field")
 
     return testResult
 }
 
+interface Fn<A, R> {
+    apply(a: A): R
+}
+
+class IdentityFn<A> implements Fn<A, A> {
+    apply(a: A): A {
+        return a
+    }
+}
+
+class WithFn {
+    fn: Fn<number, number> = new IdentityFn<number>()
+}
+
 function testStringifyInterface(): int {
-    interface Fn<A, R> {
-        apply(a: A): R 
-    }
-
-    class IdentityFn<A> implements Fn<A, A> {
-        apply(a: A): A {
-            return a
-        }
-    }
-
     const identityNumber: Fn<number, number> = new IdentityFn<number>()
     let testResult = test("{}" == JSON.stringify(identityNumber), "standalone interface")
-
-    class WithFn {
-        fn: Fn<number, number> = new IdentityFn<number>()
-    }
 
     testResult += test('{"fn":{}}' == JSON.stringify(new WithFn()), "class with interface typed field")
 

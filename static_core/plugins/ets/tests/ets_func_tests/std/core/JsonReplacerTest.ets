@@ -59,9 +59,9 @@ class C {
 
 class O<T> implements JsonReplacer {
     private buffer: Array<T>
-    private capacity: number = 20
+    private capacity: int = 20
 
-    constructor(capacity: number) {
+    constructor(capacity: int) {
         this.capacity = capacity;
         this.buffer = new Array<T>(this.capacity)
         this.buffer.length = 0
@@ -83,10 +83,10 @@ class O<T> implements JsonReplacer {
 }
 
 class D<T> {
-    private value: O<T>
-    private capacity: number
+    value: O<T>
+    capacity: int
 
-    constructor(capacity: number) {
+    constructor(capacity: int) {
         this.capacity = capacity
         this.value = new O<T>(capacity)
     }
@@ -109,6 +109,19 @@ function jsonStringifyRecordWithFunctionReplacer(): void {
     const record: Record<string, Any> = { "id": 1, "name": "R" }
     arktest.assertEQ(JSON.stringify(record, dummyReplacer), `{"id":1,"name":"R"}`)
     arktest.assertEQ(JSON.stringify(record, toFnReplacer), `{"name":"R"}`)
+}
+
+function arrayReverser(key: string, value: Any): Any {
+    if (Array.isArray(value)) {
+        return (value as Array<Any>).reverse()
+    }
+
+    const valueType = Class.ofAny(value)
+    if (valueType !== undefined && valueType.isFixedArray()) {
+        return Array.from<Any>(value as FixedArray<Any>).reverse()
+    }
+
+    return value
 }
 
 function jsonStringifyArrayWithFunctionReplacer(): void {
@@ -134,10 +147,8 @@ function jsonStringifyArrayWithFunctionReplacer(): void {
     arktest.assertEQ(JSON.stringify(ar, toStringReplacer, 1), '[\n "A(1)",\n "A(1)"\n]')
     arktest.assertEQ(JSON.stringify(ar, replacer), '[{},null]')
 
-    const reverser = (key: string, value: Any): Any =>
-            Array.isArray(value) ? Array.from(value as FixedArray<Object>).reverse() : value
-
-    arktest.assertEQ(JSON.stringify([new A(1), new A(2)] as FixedArray<A>, reverser), '[{"id":2,"name":"A"},{"id":1,"name":"A"}]')
+    const testArr: FixedArray<A> = [new A(1), new A(2)]
+    arktest.assertEQ(JSON.stringify(testArr, arrayReverser), '[{"id":2,"name":"A"},{"id":1,"name":"A"}]')
 
     const numbers: FixedArray<number> = [1, 2, 3]
     arktest.assertEQ(JSON.stringify(numbers, dummyReplacer), '[1,2,3]')
@@ -291,7 +302,7 @@ function parseJsonString(jsonStr: string): Array<TestClass1>  {
   let content: string = jsonStr.slice(1, -1)
   let objStrs: string[] = content.split('},{')
   let result: Array<TestClass1> = []
-  objStrs.forEach((str: string, index: number, array: string[]) => {
+  objStrs.forEach((str: string, index: int, array: string[]) => {
     let objStr: string = str
     if (index === 0) {
       objStr = objStr + '}'

@@ -342,14 +342,9 @@ std/core/IntlPluralRulesTest.ets
 std/core/TypeAssignableFromTest.ets
 std/core/std_core_char_instance_Char_toLowerCase.ets
 std/core/std_core_type_numeric_type_numeric_type.ets
-std/core/JsonTest.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 std/core/NumberTest.ets
 std/core/json/JsonStringifyTest1.ets
-
-#29995
-escompat/JsonAnnotationTest.ets
-ets_func_tests/escompat/JsonAnnotationTest.ets
 
 ############
 # temporary place for the tests related to primitive types refactoring
@@ -365,7 +360,6 @@ std/core/TypeCreateErasedBodyTest.ets
 
 # 6.
 # verifier failures:
-std/core/JsonTest.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 
 # 7.
@@ -403,7 +397,6 @@ std/core/TypeMethodInvoke.ets
 std/core/std_core_string_String_codePointCount_number_number.ets
 std/core/std_core_string_String_repeat_int.ets
 std/core/std_core_string_String_repeat_number.ets
-std/core/JsonReplacerTest.ets
 std/core/regexp/JsonStringifyRegExpExecArrayTest.ets
 regression/15278_0.ets
 
