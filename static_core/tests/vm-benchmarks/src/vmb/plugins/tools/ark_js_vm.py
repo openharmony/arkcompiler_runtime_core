@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,7 +32,8 @@ class Tool(ToolBase):
                     self.ensure_dir_env('OHOS_SDK'),
                     'out/x64.release/arkcompiler/ets_runtime/ark_js_vm')
         elif Target.OHOS == self.target:
-            self.ark_js_vm = f'{self.dev_dir.as_posix()}/ark_js_vm'
+            self.ark_js_vm = self.custom_path if self.custom_path \
+                else f'{self.dev_dir.as_posix()}/ark_js_vm'
         else:
             raise RuntimeError(f'Wrong target: {self.target} for ark_js_vm!')
 

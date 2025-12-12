@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,12 +31,14 @@ class Tool(ToolBase):
         super().__init__(*args)
         if Target.HOST == self.target:
             panda_root = self.ensure_dir_env('PANDA_BUILD')
-            self.ark = self.ensure_file(panda_root, 'bin', 'ark')
+            self.ark = self.ensure_file(self.custom_path) if self.custom_path \
+                else self.ensure_file(panda_root, 'bin', 'ark')
             self.ark_lib = self.ensure_dir(panda_root, 'lib')
             self.etsstdlib = self.ensure_file(
                 panda_root, 'plugins', 'ets', 'etsstdlib.abc')
         elif self.target in (Target.DEVICE, Target.OHOS):
-            self.ark = f'{self.dev_dir.as_posix()}/ark'
+            self.ark = self.custom_path if self.custom_path \
+                else f'{self.dev_dir.as_posix()}/ark'
             self.ark_lib = f'{self.dev_dir.as_posix()}/lib'
             self.etsstdlib = f'{self.dev_dir.as_posix()}/etsstdlib.abc'
         else:
@@ -98,21 +100,21 @@ class Tool(ToolBase):
                 else bu.device_path
             options += f'--ets.native-library-path={natives} '
         abc = self.x_src(bu, '.abc')
-        an_files = [str(f) for f in self.x_libs(bu, '.an')]
+        an_files = [str(f.as_posix()) for f in self.x_libs(bu, '.an')]
         if not profile:
-            an_files.append(str(abc.with_suffix('.an')))
+            an_files.append(str(abc.with_suffix('.an').as_posix()))
         an = ':'.join(an_files) if an_files else ''
         if OptFlags.DISABLE_INLINING in bu_flags:
             options += '--compiler-inlining=false '
         if OptFlags.GC_STATS in bu_flags:
-            gclog = str(abc.with_suffix('.gclog.txt'))
+            gclog = str(abc.with_suffix('.gclog.txt').as_posix())
         if profile:
             options += ('--compiler-profiling-threshold=0 '
                         '--profilesaver-enabled=true '
                         '--compiler-enable-jit=false '
-                        f'--profile-output={abc}.profdata ')
+                        f'--profile-output={abc.as_posix()}.profdata ')
         arkts_cmd = self.get_cmd(
-            name=bu.name, abc=abc.as_posix(), options=options, gclog=gclog, an=an)
+            name=bu.name, abc=str(abc.as_posix()), options=options, gclog=gclog, an=an)
         res = self.x_run(arkts_cmd)
         if self.no_run:
             bu.status = BUStatus.NOT_RUN

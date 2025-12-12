@@ -40,7 +40,7 @@ class Consumer {
     public static doubleb: double = 53.0;
     public static localObj = new Object();
     public static localObjs: Object[] = [new Object()];
-    public static pseudorand: long = Double.toLong(Date.now());
+    public static pseudorand: long = Date.now();
 
     public static consumeBool(boolc: boolean): void {
         if (boolc == Consumer.boola && boolc == Consumer.boolb) {

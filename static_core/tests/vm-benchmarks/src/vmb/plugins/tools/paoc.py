@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,12 +36,14 @@ class Tool(ToolBase):
         super().__init__(*args)
         if Target.HOST == self.target:
             panda_root = self.ensure_dir_env('PANDA_BUILD')
-            self.paoc = self.ensure_file(panda_root, 'bin', self.bin_name)
+            self.paoc = self.custom_path if self.custom_path \
+                else self.ensure_file(panda_root, 'bin', self.bin_name)
             self.ark_lib = self.ensure_dir(panda_root, 'lib')
             self.etsstdlib = self.ensure_file(
                 panda_root, 'plugins', 'ets', 'etsstdlib.abc')
         elif self.target in (Target.DEVICE, Target.OHOS):
-            self.paoc = f'{self.dev_dir.as_posix()}/{self.bin_name}'
+            self.paoc = self.custom_path if self.custom_path \
+                else f'{self.dev_dir.as_posix()}/{self.bin_name}'
             self.ark_lib = f'{self.dev_dir.as_posix()}/lib'
             self.etsstdlib = f'{self.dev_dir.as_posix()}/etsstdlib.abc'
         else:
@@ -54,8 +56,8 @@ class Tool(ToolBase):
             aot_mode = '--paoc-mode=llvm '
         else:
             aot_mode = '--paoc-mode=aot '
-
-        self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.paoc} ' \
+        ld_path = '' if self.custom_path else f'LD_LIBRARY_PATH={self.ark_lib} '
+        self.cmd = f'{ld_path}{self.paoc} ' \
                    f'--boot-panda-files={self.etsstdlib} {aot_mode} ' \
                    '--load-runtimes=ets {opts} ' \
                    f'{self.custom} {aot_stats}' \
