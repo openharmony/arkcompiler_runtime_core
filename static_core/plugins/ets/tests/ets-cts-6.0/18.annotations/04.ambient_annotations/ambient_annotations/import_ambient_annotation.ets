@@ -18,10 +18,10 @@
 /*---
 desc: Ambient declaration does not introduce a new annotation but provides type information
       to use an annotation that must be defined elsewhere
-files: ['./ambient_annotations.d.ets', './ambient_annotations.ets']
+files: ['./ambient_annotations.ets']
 ---*/
 
-import { SomeAnnotation{{ idx }} } from "./ambient_annotations"
+import { SomeAnnotation{{ idx }} } from "./ambient_annotations.d"
 
 @SomeAnnotation{{ idx }}
 class SomeClass{{ idx }} {}

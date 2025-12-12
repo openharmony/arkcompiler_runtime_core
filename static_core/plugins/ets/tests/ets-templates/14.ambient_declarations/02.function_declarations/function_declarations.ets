@@ -16,7 +16,6 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Function declarations
-files: ['./function_declarations.d.ets']
 ---*/
 
 {{c.decl}}

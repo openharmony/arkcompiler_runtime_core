@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient declarations
-files: ['./declarations_n.d.ets']
+files: ['./declarations_n.ets']
 tags: [negative]
 ---*/
 

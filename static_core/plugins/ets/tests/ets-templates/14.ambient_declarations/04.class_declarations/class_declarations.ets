@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Class declarations
-files: ['./class_decl_d/class_decl_{{loop.index0}}.d.ets']
+files: ['./class_decl_{{loop.index0}}.ets']
 ---*/
 
 import { {{c.import}} } from './class_decl_d/class_decl_{{loop.index0}}.d'

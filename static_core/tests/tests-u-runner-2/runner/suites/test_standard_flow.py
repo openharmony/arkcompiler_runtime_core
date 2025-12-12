@@ -91,6 +91,9 @@ class TestStandardFlow(Test):
     def direct_dependent_tests(self) -> list['TestStandardFlow']:
         if not self.metadata.files:
             return []
+        for file in self.metadata.files:
+            if file.endswith(".d.ets"):
+                raise InvalidConfiguration(f"Test {self.test_id} has a dependent .d.ets file")
         id_pos: int = str(self.path).find(self.test_id)
         test_root: str = str(self.path)[:id_pos]
 
