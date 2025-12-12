@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,12 +29,8 @@ function(:MemmoveInterposer,
 #end
 # inputs:
 # src_start is len in bytes
-function(:TryBigCopy,
-          params: {dst_data: 'ptr', src_data: 'ptr', len: 'u32'},
-          regalloc_set: $regmask,
-          regmap: $full_regmap,
-          mode: [:FastPath]) {
-
+#
+scoped_macro(:do_big_copy) do |dst_data, src_data, len|
     # Arm32 is not supported
     if Options.arch == :arm32
         Intrinsic(:UNREACHABLE).void.Terminator
@@ -47,12 +43,12 @@ function(:TryBigCopy,
     # if bytes size > 4096 bytes, copy via system routine
     compare := Compare(len_bytes, 4096).GT.b
     IfImm(compare).Imm(0).NE.Unlikely.b {
-        LiveOut(dst_data).DstReg(regmap[:arg0]).ptr
-        LiveOut(src_data).DstReg(regmap[:arg1]).ptr
-        LiveOut(len_bytes).DstReg(regmap[:arg2]).u32
-        ep_offset = get_entrypoint_offset("MEMMOVE_INTERPOSER")
-        Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("MemmoveInterposer").Terminator.void
-        Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+      LiveOut(dst_data).DstReg(regmap[:arg0]).ptr
+      LiveOut(src_data).DstReg(regmap[:arg1]).ptr
+      LiveOut(len_bytes).DstReg(regmap[:arg2]).u32
+      ep_offset = get_entrypoint_offset("MEMMOVE_INTERPOSER")
+      Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("MemmoveInterposer").Terminator.void
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
     }
 
     If(src_data, dst_data).CC(:CC_A).b {
@@ -219,6 +215,14 @@ Label(:ForwardCopyTail64)
     ### End copy
 
 Label(:End)
+end
+
+function(:TryBigCopyVoid,
+          params: {dst_data: 'ptr', src_data: 'ptr', len: 'u32'},
+          regalloc_set: $regmask,
+          regmap: $full_regmap,
+          mode: [:FastPath]) {
+
+    do_big_copy(dst_data, src_data, len)
     ReturnVoid().void
 }
-

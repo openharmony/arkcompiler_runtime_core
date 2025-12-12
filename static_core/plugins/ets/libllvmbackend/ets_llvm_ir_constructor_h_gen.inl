@@ -14,6 +14,7 @@
  */
 
 bool EmitArrayCopyTo(Inst *inst);
+bool EmitArrayCopyWithin(Inst *inst);
 bool EmitStdStringSubstring(Inst *inst);
 bool EmitStringBuilderAppendBool(Inst *inst);
 bool EmitStringBuilderAppendChar(Inst *inst);

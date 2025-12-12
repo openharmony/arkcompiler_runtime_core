@@ -3477,9 +3477,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.Int8Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: Int16ArrayCopyWithinImpl
     space: ets
@@ -3487,9 +3490,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.Int16Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: Int32ArrayCopyWithinImpl
     space: ets
@@ -3497,9 +3503,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.Int32Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: BigInt64ArrayCopyWithinImpl
     space: ets
@@ -3507,9 +3516,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.BigInt64Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: Float32ArrayCopyWithinImpl
     space: ets
@@ -3517,9 +3529,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.Float32Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: Float64ArrayCopyWithinImpl
     space: ets
@@ -3527,9 +3542,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.Float64Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: UInt8ArrayCopyWithinImpl
     space: ets
@@ -3537,9 +3555,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.Uint8Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: UInt16ArrayCopyWithinImpl
     space: ets
@@ -3547,9 +3568,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.Uint16Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: UInt32ArrayCopyWithinImpl
     space: ets
@@ -3557,9 +3581,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.Uint32Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: BigUInt64ArrayCopyWithinImpl
     space: ets
@@ -3567,9 +3594,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.BigUint64Array
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: UInt8ClampedArrayCopyWithinImpl
     space: ets
@@ -3577,9 +3607,12 @@ intrinsics:
     method_name: copyWithinImpl
     static: false
     signature:
-      ret: escompat.Uint8ClampedArray
+      ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayCopyWithinImpl
+    codegen_func: CreateArrayCopyWithin
+    llvm_codegen_func: EmitArrayCopyWithin
+    codegen_arch: [arm64, amd64]
 
   - name: Int8ArrayIndexOfNumber
     space: ets

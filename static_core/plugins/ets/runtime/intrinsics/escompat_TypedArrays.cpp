@@ -1126,11 +1126,11 @@ static inline int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
 }
 
 template <typename T>
-T *EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start, EtsInt end)
+void EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start, EtsInt count)
 {
     auto *data = GetNativeData(thisArray);
     if (UNLIKELY(data == nullptr)) {
-        return nullptr;
+        return;
     }
 
     /**
@@ -1141,20 +1141,6 @@ T *EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start
      */
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto arrayLength = thisArray->GetLengthInt();
-    target = NormalizeIndex(target, arrayLength);
-    start = NormalizeIndex(start, arrayLength);
-    end = NormalizeIndex(end, arrayLength);
-
-    int32_t count = end - start;
-    if (count > (arrayLength - target)) {
-        count = arrayLength - target;
-    }
-    if (count <= 0) {
-        // See (GetNativeData) reason
-        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-        return thisArray;
-    }
-
     using ElementType = typename T::ElementType;
     // See (GetNativeData) reason
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -1167,17 +1153,16 @@ T *EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start
     ASSERT(error == EOK);
     // See (GetNativeData) reason
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    return thisArray;
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ETS_ESCOMPAT_COPY_WITHIN(Type)                                                          \
-    /* CC-OFFNXT(G.PRE.02) name part */                                                         \
-    extern "C" ark::ets::EtsEscompat##Type##Array *EtsEscompat##Type##ArrayCopyWithinImpl(      \
-        ark::ets::EtsEscompat##Type##Array *thisArray, EtsInt target, EtsInt start, EtsInt end) \
-    {                                                                                           \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                  \
-        return EtsEscompatTypedArrayCopyWithinImpl(thisArray, target, start, end);              \
+#define ETS_ESCOMPAT_COPY_WITHIN(Type)                                                                    \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                   \
+    extern "C" void EtsEscompat##Type##ArrayCopyWithinImpl(ark::ets::EtsEscompat##Type##Array *thisArray, \
+                                                           EtsInt target, EtsInt start, EtsInt end)       \
+    {                                                                                                     \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                            \
+        EtsEscompatTypedArrayCopyWithinImpl(thisArray, target, start, end);                               \
     }  // namespace ark::ets::intrinsics
 
 ETS_ESCOMPAT_COPY_WITHIN(Int8)

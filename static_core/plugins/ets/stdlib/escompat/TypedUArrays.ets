@@ -361,7 +361,20 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: int): Uint8ClampedArray {
-        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
+        let arrayLength: int = this.lengthInt;
+        target = normalizeIndex(target, arrayLength);
+        start = normalizeIndex(start, arrayLength);
+        end = normalizeIndex(asIntOrDefault(end, arrayLength), arrayLength);
+        let count: int = end - start;
+        if (count > (arrayLength - target)) {
+            count = arrayLength - target;
+        }
+        if (count <= 0) {
+            return this;
+        }
+
+        this.copyWithinImpl(target, start, count)
+        return this
     }
 
     /**
@@ -375,7 +388,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    private native copyWithinImpl(target: int, start: int, end: int): Uint8ClampedArray
+    private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint8ClampedArray.
@@ -386,7 +399,8 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): Uint8ClampedArray {
-        return this.copyWithinImpl(target, 0, this.lengthInt)
+        this.copyWithinImpl(target, 0, this.lengthInt)
+        return this
     }
 
     /**
@@ -1842,7 +1856,20 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: int): Uint8Array {
-        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
+        let arrayLength: int = this.lengthInt;
+        target = normalizeIndex(target, arrayLength);
+        start = normalizeIndex(start, arrayLength);
+        end = normalizeIndex(asIntOrDefault(end, arrayLength), arrayLength);
+        let count: int = end - start;
+        if (count > (arrayLength - target)) {
+            count = arrayLength - target;
+        }
+        if (count <= 0) {
+            return this;
+        }
+
+        this.copyWithinImpl(target, start, count)
+        return this
     }
 
     /**
@@ -1856,7 +1883,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    private native copyWithinImpl(target: int, start: int, end: int): Uint8Array
+    private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint8Array.
@@ -1867,7 +1894,8 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): Uint8Array {
-        return this.copyWithinImpl(target, 0, this.lengthInt)
+        this.copyWithinImpl(target, 0, this.lengthInt)
+        return this
     }
 
     /**
@@ -3331,7 +3359,20 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: int): Uint16Array {
-        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
+        let arrayLength: int = this.lengthInt;
+        target = normalizeIndex(target, arrayLength);
+        start = normalizeIndex(start, arrayLength);
+        end = normalizeIndex(asIntOrDefault(end, arrayLength), arrayLength);
+        let count: int = end - start;
+        if (count > (arrayLength - target)) {
+            count = arrayLength - target;
+        }
+        if (count <= 0) {
+            return this;
+        }
+
+        this.copyWithinImpl(target, start, count)
+        return this
     }
 
     /**
@@ -3345,7 +3386,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    private native copyWithinImpl(target: int, start: int, end: int): Uint16Array
+    private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint16Array.
@@ -3356,7 +3397,8 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): Uint16Array {
-        return this.copyWithinImpl(target, 0, this.lengthInt)
+        this.copyWithinImpl(target, 0, this.lengthInt)
+        return this
     }
 
     /**
@@ -4826,7 +4868,20 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: int): Uint32Array {
-        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
+        let arrayLength: int = this.lengthInt;
+        target = normalizeIndex(target, arrayLength);
+        start = normalizeIndex(start, arrayLength);
+        end = normalizeIndex(asIntOrDefault(end, arrayLength), arrayLength);
+        let count: int = end - start;
+        if (count > (arrayLength - target)) {
+            count = arrayLength - target;
+        }
+        if (count <= 0) {
+            return this;
+        }
+
+        this.copyWithinImpl(target, start, count)
+        return this
     }
 
     /**
@@ -4840,7 +4895,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    private native copyWithinImpl(target: int, start: int, end: int): Uint32Array
+    private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint32Array.
@@ -4851,7 +4906,8 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): Uint32Array {
-        return this.copyWithinImpl(target, 0, this.lengthInt)
+        this.copyWithinImpl(target, 0, this.lengthInt)
+        return this
     }
 
     /**
@@ -6348,7 +6404,20 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: int): BigUint64Array {
-        return this.copyWithinImpl(target, start, asIntOrDefault(end, this.lengthInt))
+        let arrayLength: int = this.lengthInt;
+        target = normalizeIndex(target, arrayLength);
+        start = normalizeIndex(start, arrayLength);
+        end = normalizeIndex(asIntOrDefault(end, arrayLength), arrayLength);
+        let count: int = end - start;
+        if (count > (arrayLength - target)) {
+            count = arrayLength - target;
+        }
+        if (count <= 0) {
+            return this;
+        }
+
+        this.copyWithinImpl(target, start, count)
+        return this
     }
 
     /**
@@ -6362,7 +6431,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    private native copyWithinImpl(target: int, start: int, end: int): BigUint64Array
+    private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of BigUint64Array.
@@ -6373,7 +6442,8 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): BigUint64Array {
-        return this.copyWithinImpl(target, 0, this.lengthInt)
+        this.copyWithinImpl(target, 0, this.lengthInt)
+        return this
     }
 
     /**
