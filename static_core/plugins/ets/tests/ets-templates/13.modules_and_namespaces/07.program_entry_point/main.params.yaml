@@ -154,13 +154,6 @@ cases:
           export overload main { main, main2 }
 
     - use: |-
-          // implicit main function is called
-          export function main2(args: string[]) {
-              arktest.assertTrue(false)
-          }
-          export overload main { main, main2 }
-
-    - use: |-
           //  The top-level exported function serves as the entry point.
           export function entry(): number {
               return 10;

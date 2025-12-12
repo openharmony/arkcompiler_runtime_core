@@ -74,3 +74,14 @@ cases:
               arktest.assertEQ(args[1], 'Y')
               return 0
           }
+    
+    # entry point function cannot have overloading, void return type
+    - entry_point: main
+      tags: 'compile-only, negative'
+      cmd_line_args: X, Y
+      use: |-
+          export overload main { foo1, main }
+
+          export function foo1(args: string[]) {
+              arktest.assertTrue(false)
+          }

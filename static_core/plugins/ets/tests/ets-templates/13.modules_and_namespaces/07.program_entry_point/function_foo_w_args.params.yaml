@@ -71,16 +71,6 @@ cases:
               return 1
           }
 
-    # entry point function cannot have overloading, void return type
-    - entry_point: main
-      cmd_line_args: X, Y
-      use: |-
-          export overload main { foo1, main }
-
-          export function foo1(args: string[]) {
-              arktest.assertTrue(false)
-          }
-
     # call main from another entry point
     - entry_point: foo
       cmd_line_args: X, Y

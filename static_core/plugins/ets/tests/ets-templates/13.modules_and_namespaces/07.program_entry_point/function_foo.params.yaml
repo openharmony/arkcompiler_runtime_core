@@ -112,15 +112,6 @@ cases:
 
           export { main, foo, foo1 }
 
-    # entry point function cannot have overloading, void return type
-    - entry_point: main
-      use: |-
-          export overload main { foo1, main }
-
-          export function foo1() { // should not be called
-              arktest.assertTrue(false)
-          }
-
     # call main from another entry point
     - entry_point: foo
       use: |-
