@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ export class Waiter {
     public static notEqualStatus: string = "not-equal";
     public static timeOutStatus: string = "timed-out";
 
-    public wait(val: long, getCurrentValue: () => long, timeout?: number): string {
+    public wait(val: long, getCurrentValue: () => long, timeout?: int): string {
         ConcurrencyHelpers.mutexLock(this.mutex);
         let check = getCurrentValue();
         if (val != check) {
@@ -27,13 +27,13 @@ export class Waiter {
             return Waiter.notEqualStatus;
         }
         if(!(timeout instanceof undefined)) {
-            if ((timeout as number) <= 0) {
+            if (timeout <= 0) {
                 ConcurrencyHelpers.mutexUnlock(this.mutex);
                 return Waiter.timeOutStatus;
             }
             setTimeout((waiter: Waiter) => {
                 waiter.notify(Waiter.timeOutStatus);
-            }, (timeout as number).toInt(), this);
+            }, timeout, this);
         }
         let job = new CompletableJob<string>();
         this.promiseQueue.push(job);
@@ -96,29 +96,28 @@ export namespace Atomics {
      * Atomically adds value to current value and replaces it with the result
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
-     * @param { number } value value to add to current value
-     * @returns { number } current value before the operation
+     * @param  { int } index index of current value in the typedArray
+     * @param { long } value value to add to current value
+     * @returns { long } current value before the operation
      */
-    export function add(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function add(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt();
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicAddI8(iindex, byteOffset, value.toByte())
+            return buffer.atomicAddI8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicAddI16(iindex, byteOffset, value.toShort())
+            return buffer.atomicAddI16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicAddI32(iindex, byteOffset, value.toInt())
+            return buffer.atomicAddI32(index, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicAddU8(iindex, byteOffset, value.toByte())
+            return buffer.atomicAddU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicAddU16(iindex, byteOffset, value.toShort())
+            return buffer.atomicAddU16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicAddU32(iindex, byteOffset, value.toInt())
+            return buffer.atomicAddU32(index, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -128,21 +127,20 @@ export namespace Atomics {
      * Atomically adds value to current value and replaces it with the result
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @param { bigint } value value to add to current value
      * @returns { bigint } current value before the operation
      */
-    export function add(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function add(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicAddU64(iindex, byteOffset, value.getULong()))
+            return new BigInt(buffer.atomicAddU64(index, byteOffset, value.getULong()))
         } else if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicAddI64(iindex, byteOffset, value.getLong()))
+            return new BigInt(buffer.atomicAddI64(index, byteOffset, value.getLong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -152,29 +150,28 @@ export namespace Atomics {
      * Atomically replaces current value it with the result of bitwise AND with value
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
-     * @param { number } value value to perform bitwise AND with current value
-     * @returns { number } current value before the operation
+     * @param  { int } index index of current value in the typedArray
+     * @param { long } value value to perform bitwise AND with current value
+     * @returns { long } current value before the operation
      */
-    export function and(typedArray: Int8Array | Int16Array | Int32Array| Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function and(typedArray: Int8Array | Int16Array | Int32Array| Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicAndI8(iindex, byteOffset, value.toByte())
+            return buffer.atomicAndI8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicAndI16(iindex, byteOffset, value.toShort())
+            return buffer.atomicAndI16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicAndI32(iindex, byteOffset, value.toInt())
+            return buffer.atomicAndI32(index, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicAndU8(iindex, byteOffset, value.toByte())
+            return buffer.atomicAndU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicAndU16(iindex, byteOffset, value.toShort())
+            return buffer.atomicAndU16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicAndU32(iindex, byteOffset, value.toInt())
+            return buffer.atomicAndU32(index, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -184,21 +181,20 @@ export namespace Atomics {
      * Atomically replaces current value it with the result of bitwise AND with value
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @param { bigint } value value to perform bitwise AND with current value
      * @returns { bigint } current value before the operation
      */
-    export function and(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function and(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicAndU64(iindex, byteOffset, value.getLong()))
+            return new BigInt(buffer.atomicAndU64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicAndI64(iindex, byteOffset, value.getULong()))
+            return new BigInt(buffer.atomicAndI64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -210,30 +206,29 @@ export namespace Atomics {
      * current value with the new value, else does nothing
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
-     * @param { number } expectedValue expected value for the current value
-     * @param { number } replacementValue value to replace current value with in case of success
-     * @returns { number } current value before the operation
+     * @param  { int } index index of current value in the typedArray
+     * @param { long } expectedValue expected value for the current value
+     * @param { long } replacementValue value to replace current value with in case of success
+     * @returns { long } current value before the operation
      */
-    export function compareExchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, expectedValue: number, replacementValue: number): number {
+    export function compareExchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, expectedValue: long, replacementValue: long): long {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicCompareExchangeI8(iindex, byteOffset, expectedValue.toByte(), replacementValue.toByte())
+            return buffer.atomicCompareExchangeI8(index, byteOffset, expectedValue.toByte(), replacementValue.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicCompareExchangeI16(iindex, byteOffset, expectedValue.toShort(), replacementValue.toShort())
+            return buffer.atomicCompareExchangeI16(index, byteOffset, expectedValue.toShort(), replacementValue.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicCompareExchangeI32(iindex, byteOffset, expectedValue.toInt(), replacementValue.toInt())
+            return buffer.atomicCompareExchangeI32(index, byteOffset, expectedValue.toInt(), replacementValue.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicCompareExchangeU8(iindex, byteOffset, expectedValue.toByte(), replacementValue.toByte())
+            return buffer.atomicCompareExchangeU8(index, byteOffset, expectedValue.toByte(), replacementValue.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicCompareExchangeU16(iindex, byteOffset, expectedValue.toShort(), replacementValue.toShort())
+            return buffer.atomicCompareExchangeU16(index, byteOffset, expectedValue.toShort(), replacementValue.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicCompareExchangeU32(iindex, byteOffset, expectedValue.toInt(), replacementValue.toInt())
+            return buffer.atomicCompareExchangeU32(index, byteOffset, expectedValue.toInt(), replacementValue.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -245,22 +240,21 @@ export namespace Atomics {
      * If they're equal, replaces current value with the new value
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @param { bigint } expectedValue expected value for the current value
      * @param { bigint } replacementValue value to replace current value with in case of success
      * @returns { bigint } current value before the operation
      */
-    export function compareExchange(typedArray: BigInt64Array | BigUint64Array, index: number, expectedValue: bigint, replacementValue: bigint): bigint {
+    export function compareExchange(typedArray: BigInt64Array | BigUint64Array, index: int, expectedValue: bigint, replacementValue: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicCompareExchangeU64(iindex, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
+            return new BigInt(buffer.atomicCompareExchangeU64(index, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
         } else if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicCompareExchangeI64(iindex, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
+            return new BigInt(buffer.atomicCompareExchangeI64(index, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -272,29 +266,28 @@ export namespace Atomics {
      * If they're equal, replaces current value with the new value
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
-     * @param { number } value value to replace current value with
-     * @returns { number } current value before the operation
+     * @param  { int } index index of current value in the typedArray
+     * @param { long } value value to replace current value with
+     * @returns { long } current value before the operation
      */
-    export function exchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function exchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicExchangeI8(iindex, byteOffset, value.toByte())
+            return buffer.atomicExchangeI8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicExchangeI16(iindex, byteOffset, value.toShort())
+            return buffer.atomicExchangeI16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicExchangeI32(iindex, byteOffset, value.toInt())
+            return buffer.atomicExchangeI32(index, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicExchangeU8(iindex, byteOffset, value.toByte())
+            return buffer.atomicExchangeU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicExchangeU16(iindex, byteOffset, value.toShort())
+            return buffer.atomicExchangeU16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicExchangeU32(iindex, byteOffset, value.toInt())
+            return buffer.atomicExchangeU32(index, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -305,21 +298,20 @@ export namespace Atomics {
      * Atomically replaces current value with the new value
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @param { bigint } value value to replace current value with
      * @returns { bigint } current value before the operation
      */
-    export function exchange(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function exchange(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicExchangeI64(iindex, byteOffset, value.getLong()))
+            return new BigInt(buffer.atomicExchangeI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicExchangeU64(iindex, byteOffset, value.getULong()))
+            return new BigInt(buffer.atomicExchangeU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -329,28 +321,27 @@ export namespace Atomics {
      * Atomically reads value from the typed array
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
-     * @returns { number } current value
+     * @param  { int } index index of current value in the typedArray
+     * @returns { long } current value
      */
-    export function load(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number): number {
+    export function load(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int): long {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicLoadI8(iindex, byteOffset)
+            return buffer.atomicLoadI8(index, byteOffset)
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicLoadI16(iindex, byteOffset)
+            return buffer.atomicLoadI16(index, byteOffset)
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicLoadI32(iindex, byteOffset)
+            return buffer.atomicLoadI32(index, byteOffset)
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicLoadU8(iindex, byteOffset)
+            return buffer.atomicLoadU8(index, byteOffset)
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicLoadU16(iindex, byteOffset)
+            return buffer.atomicLoadU16(index, byteOffset)
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicLoadU32(iindex, byteOffset)
+            return buffer.atomicLoadU32(index, byteOffset)
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -360,63 +351,60 @@ export namespace Atomics {
      * Atomically reads value from the typed array
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @returns { bigint } current value
      */
-    export function load(typedArray: BigInt64Array, index: number): bigint {
+    export function load(typedArray: BigInt64Array, index: int): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
-        return new BigInt(buffer.atomicLoadI64(iindex, byteOffset))
+        return new BigInt(buffer.atomicLoadI64(index, byteOffset))
     }
 
     /**
      * Atomically reads value from the typed array
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @returns { bigint } current value
      */
-    export function load(typedArray: BigUint64Array, index: number): bigint {
+    export function load(typedArray: BigUint64Array, index: int): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
-        return new BigInt(buffer.atomicLoadU64(iindex, byteOffset))
+        return new BigInt(buffer.atomicLoadU64(index, byteOffset))
     }
 
     /**
      * Atomically replaces current value it with the result of bitwise OR with value
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
-     * @param { number } value value to perform bitwise OR with current value
-     * @returns { number } current value before the operation
+     * @param  { int } index index of current value in the typedArray
+     * @param { long } value value to perform bitwise OR with current value
+     * @returns { long } current value before the operation
      */
-    export function or(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function or(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicOrI8(iindex, byteOffset, value.toByte())
+            return buffer.atomicOrI8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicOrI16(iindex, byteOffset, value.toShort())
+            return buffer.atomicOrI16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicOrI32(iindex, byteOffset, value.toInt())
+            return buffer.atomicOrI32(index, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicOrU8(iindex, byteOffset, value.toByte())
+            return buffer.atomicOrU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicOrU16(iindex, byteOffset, value.toShort())
+            return buffer.atomicOrU16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicOrU32(iindex, byteOffset, value.toInt())
+            return buffer.atomicOrU32(index, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -426,21 +414,20 @@ export namespace Atomics {
      * Atomically replaces current value it with the result of bitwise OR with value
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @param { bigint } value value to perform bitwise OR with current value
      * @returns { bigint } current value before the operation
      */
-    export function or(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function or(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicOrI64(iindex, byteOffset, value.getLong()))
+            return new BigInt(buffer.atomicOrI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicOrU64(iindex, byteOffset, value.getULong()))
+            return new BigInt(buffer.atomicOrU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -450,29 +437,28 @@ export namespace Atomics {
      * Atomically writes new value into the typed array
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
-     * @param { number } value new value
-     * @returns { number } new value
+     * @param  { int } index index of current value in the typedArray
+     * @param { long } value new value
+     * @returns { long } new value
      */
-    export function store(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function store(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicStoreI8(iindex, byteOffset, value.toByte())
+            return buffer.atomicStoreI8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicStoreI16(iindex, byteOffset, value.toShort())
+            return buffer.atomicStoreI16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicStoreI32(iindex, byteOffset, value.toInt())
+            return buffer.atomicStoreI32(index, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicStoreU8(iindex, byteOffset, value.toByte())
+            return buffer.atomicStoreU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicStoreU16(iindex, byteOffset, value.toShort())
+            return buffer.atomicStoreU16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicStoreU32(iindex, byteOffset, value.toInt())
+            return buffer.atomicStoreU32(index, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -482,21 +468,20 @@ export namespace Atomics {
      * Atomically writes new value into the typed array
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @param { bigint } value new value
      * @returns { bigint } new value
      */
-    export function store(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function store(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicStoreI64(iindex, byteOffset, value.getLong()))
+            return new BigInt(buffer.atomicStoreI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicStoreU64(iindex, byteOffset, value.getULong()))
+            return new BigInt(buffer.atomicStoreU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -506,29 +491,28 @@ export namespace Atomics {
      * Atomically subtracts value from current value and replaces it with the result
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
-     * @param { number } value value to subtract from current value
-     * @returns { number } current value before the operation
+     * @param  { int } index index of current value in the typedArray
+     * @param { long } value value to subtract from current value
+     * @returns { long } current value before the operation
      */
-    export function sub(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function sub(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicSubI8(iindex, byteOffset, value.toByte())
+            return buffer.atomicSubI8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicSubI16(iindex, byteOffset, value.toShort())
+            return buffer.atomicSubI16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicSubI32(iindex, byteOffset, value.toInt())
+            return buffer.atomicSubI32(index, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicSubU8(iindex, byteOffset, value.toByte())
+            return buffer.atomicSubU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicSubU16(iindex, byteOffset, value.toShort())
+            return buffer.atomicSubU16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicSubU32(iindex, byteOffset, value.toInt())
+            return buffer.atomicSubU32(index, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -538,21 +522,20 @@ export namespace Atomics {
      * Atomically subtracts value from current value and replaces it with the result
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @param { bigint } value value to subtract from current value
      * @returns { bigint } current value before the operation
      */
-    export function sub(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function sub(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicSubI64(iindex, byteOffset, value.getLong()))
+            return new BigInt(buffer.atomicSubI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicSubU64(iindex, byteOffset, value.getULong()))
+            return new BigInt(buffer.atomicSubU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -562,29 +545,28 @@ export namespace Atomics {
      * Atomically replaces current value it with the result of bitwise XOR with value
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
-     * @param { number } value value to perform bitwise XOR with current value
-     * @returns { number } current value before the operation
+     * @param  { int } index index of current value in the typedArray
+     * @param { long } value value to perform bitwise XOR with current value
+     * @returns { long } current value before the operation
      */
-    export function xor(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: number, value: number): number {
+    export function xor(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int8Array) {
-            return buffer.atomicXorI8(iindex, byteOffset, value.toByte())
+            return buffer.atomicXorI8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Int16Array) {
-            return buffer.atomicXorI16(iindex, byteOffset, value.toShort())
+            return buffer.atomicXorI16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Int32Array) {
-            return buffer.atomicXorI32(iindex, byteOffset, value.toInt())
+            return buffer.atomicXorI32(index, byteOffset, value.toInt())
         } else if (typedArray instanceof Uint8Array) {
-            return buffer.atomicXorU8(iindex, byteOffset, value.toByte())
+            return buffer.atomicXorU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
-            return buffer.atomicXorU16(iindex, byteOffset, value.toShort())
+            return buffer.atomicXorU16(index, byteOffset, value.toShort())
         } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicXorU32(iindex, byteOffset, value.toInt())
+            return buffer.atomicXorU32(index, byteOffset, value.toInt())
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -594,21 +576,20 @@ export namespace Atomics {
      * Atomically replaces current value it with the result of bitwise XOR with value
      *
      * @param typedArray typed array of values
-     * @param  { number } index index of current value in the typedArray
+     * @param  { int } index index of current value in the typedArray
      * @param { bigint } value value to perform bitwise XOR with current value
      * @returns { bigint } current value before the operation
      */
-    export function xor(typedArray: BigInt64Array | BigUint64Array, index: number, value: bigint): bigint {
+    export function xor(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         let buffer = typedArray.buffer
-        let iindex = index.toInt();
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicXorI64(iindex, byteOffset, value.getLong()))
+            return new BigInt(buffer.atomicXorI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicXorU64(iindex, byteOffset, value.getULong()))
+            return new BigInt(buffer.atomicXorU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -620,11 +601,11 @@ export namespace Atomics {
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      *
      * @param typedArray typed array of values
-     * @param { number } index index of current value in the typedArray
-     * @param { number } value value to compare current value with
+     * @param { int } index index of current value in the typedArray
+     * @param { long } value value to compare current value with
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
-    export function wait(typedArray: Int32Array, index: number, value: number): string {
+    export function wait(typedArray: Int32Array, index: int, value: long): string {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
@@ -638,12 +619,12 @@ export namespace Atomics {
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      *
      * @param typedArray typed array of values
-     * @param { number } index index of current value in the typedArray
-     * @param { number } value value to compare current value with
-     * @param { number } timeout timeout in ms
+     * @param { int } index index of current value in the typedArray
+     * @param { long } value value to compare current value with
+     * @param { int } timeout timeout in ms
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
-    export function wait(typedArray: Int32Array, index: number, value: number, timeout: number): string {
+    export function wait(typedArray: Int32Array, index: int, value: long, timeout: int): string {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
@@ -656,11 +637,11 @@ export namespace Atomics {
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      *
      * @param typedArray typed array of values
-     * @param { number } index index of current value in the typedArray
+     * @param { int } index index of current value in the typedArray
      * @param { bigint } value value to compare current value with
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
-    export function wait(typedArray: BigInt64Array, index: number, value: bigint): string {
+    export function wait(typedArray: BigInt64Array, index: int, value: bigint): string {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
@@ -674,12 +655,12 @@ export namespace Atomics {
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      *
      * @param typedArray typed array of values
-     * @param { number } index index of current value in the typedArray
+     * @param { int } index index of current value in the typedArray
      * @param { bigint } value value to compare current value with
-     * @param { number } timeout timeout in ms
+     * @param { int } timeout timeout in ms
      * @returns { string } status "ok", "not-equal" or "timed-out"
      */
-    export function wait(typedArray: BigInt64Array, index: number, value: bigint, timeout: number): string {
+    export function wait(typedArray: BigInt64Array, index: int, value: bigint, timeout: int): string {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
@@ -692,12 +673,12 @@ export namespace Atomics {
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      *
      * @param typedArray typed array of values
-     * @param { number } index index of current value in the typedArray
+     * @param { int } index index of current value in the typedArray
      * @param { bigint } value value to compare current value with
      * @returns { Promise<string> } that will be resolved after the coroutine get notified
      *    or rejected if exception were thrown
      */
-    export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint): Promise<string> {
+    export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: int, value: bigint): Promise<string> {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
@@ -711,13 +692,13 @@ export namespace Atomics {
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      *
      * @param typedArray typed array of values
-     * @param { number } index index of current value in the typedArray
+     * @param { int } index index of current value in the typedArray
      * @param { bigint } value value to compare current value with
-     * @param { number } timeout timeout in ms
+     * @param { int } timeout timeout in ms
      * @returns { Promise<string> } that will be resolved after the coroutine get notified
      *    or rejected if exception were thrown
      */
-    export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint, timeout: number): Promise<string> {
+    export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: int, value: bigint, timeout: int): Promise<string> {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
@@ -729,10 +710,10 @@ export namespace Atomics {
      * (index = typedArray.byteOffset + offset * sizeof(arrayElement))
      *
      * @param typedArray typed array of values
-     * @param { number } index index in the typed array to read current value from
-     * @returns { number } number of notified threads
+     * @param { int } index index in the typed array to read current value from
+     * @returns { int } number of notified threads
      */
-    export function notify(typedArray: Int32Array | BigInt64Array, index: number): number {
+    export function notify(typedArray: Int32Array | BigInt64Array, index: int): int {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
@@ -743,33 +724,33 @@ export namespace Atomics {
      * Operates exactly like Atomics.notify(Int32Array | BigInt64Array, int) but specifies the maximum number of threads to notify using 'count'.
      *
      * @param typedArray typed array of values
-     * @param { number } index index in the typed array to read current value from
-     * @param { number } count maximum number of threads to notify
-     * @returns { number } number of notified threads
+     * @param { int } index index in the typed array to read current value from
+     * @param { int } count maximum number of threads to notify
+     * @returns { int } number of notified threads
      */
-    export function notify(typedArray: Int32Array | BigInt64Array, index: number, count: number): number {
+    export function notify(typedArray: Int32Array | BigInt64Array, index: int, count: int): int {
         if (index < 0 || index >= typedArray.length) {
             throw new RangeError("Index out of bounds")
         }
         return notifyImpl(typedArray, index, count)
     }
 
-    function waitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): string {
+    function waitImpl(typedArray: Int32Array | BigInt64Array, index: int, value: long, timeout?: int): string {
         // Getting correct waiter
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof Int32Array) {
             let offset = index2byteOffset(byteOffset, Int32Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
             let waiter = getWaiter(buffer, offset);
-            return waiter!.wait(value, () => { return buffer.atomicLoadI32(index.toInt(), typedArray.byteOffset.toInt()).toLong(); }, timeout)
+            return waiter!.wait(value, () => { return buffer.atomicLoadI32(index, typedArray.byteOffset.toInt()).toLong(); }, timeout)
         } else {
             let offset = index2byteOffset(byteOffset, BigInt64Array.BYTES_PER_ELEMENT.toInt(), typedArray.length.toInt(), index)
             let waiter = getWaiter(buffer, offset);
-            return waiter!.wait(value, () => { return buffer.atomicLoadI64(index.toInt(), typedArray.byteOffset.toInt()).toLong(); }, timeout)
+            return waiter!.wait(value, () => { return buffer.atomicLoadI64(index, typedArray.byteOffset.toInt()).toLong(); }, timeout)
         }
     }
 
-    function asyncWaitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): Promise<string> {
+    function asyncWaitImpl(typedArray: Int32Array | BigInt64Array, index: int, value: long, timeout?: int): Promise<string> {
         let resolver: (((v: String) => void) | undefined) = undefined;
         let rejecter: (((error: Error) => void) | undefined) = undefined;
         let p = new Promise<String>((res, rej) => {
@@ -789,7 +770,7 @@ export namespace Atomics {
         return p;
     }
 
-    function notifyImpl(typedArray: Int32Array | BigInt64Array, index: number, count?: number): int {
+    function notifyImpl(typedArray: Int32Array | BigInt64Array, index: int, count?: int): int {
         let buffer = typedArray.buffer
         let offset = 0;
         let byteOffset = typedArray.byteOffset.toInt()
@@ -841,10 +822,10 @@ export namespace Atomics {
     }
 
     // https://tc39.es/ecma262/multipage/structured-data.html#sec-validateatomicaccess
-    function index2byteOffset(startByteOffset: int, elementSize: int, length: int, index: number): int {
+    function index2byteOffset(startByteOffset: int, elementSize: int, length: int, index: int): int {
         if (index < 0 || index >= length) {
             throw new RangeError("Index out of bounds")
         }
-        return startByteOffset + (index.toInt() * elementSize)
+        return startByteOffset + (index * elementSize)
     }
 }

@@ -32,6 +32,9 @@ ets-common-tests/atomics/base_operation_store.ets
 #31166
 ets-common-tests/atomics/base_operation_xor.ets
 
+#32070
+ets-common-tests/atomics/base_operation_biguint.ets
+
 #31210
 ets-common-tests/taskpool/long_task.ets
 
