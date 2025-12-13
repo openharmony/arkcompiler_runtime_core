@@ -263,6 +263,9 @@ spec/17.Experimental_Features/Iterable_Types/for_of_10.ets
 spec/17.Experimental_Features/Iterable_Types/for_of_11.ets
 spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 
+#30708
+std/concurrency/eaworker_message.ets
+
 #29357
 std/concurrency/messageHandler_basic_interface.ets
 
