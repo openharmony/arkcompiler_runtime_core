@@ -165,8 +165,8 @@ interface OverloadInterface {
     @overload("overloadFunc")
     OverloadFunc10param4(p0: i8, p1: i16, p2: i32, p3: f32, p4: f64, p5: bool, p6: String, p7: Array<i8>, p8:@arraybuffer Array<u8>, p9:Color): void;
 
-    // @overload("overloadFunc")
-    // OverloadFuncEnumRecord(p1:Color, p2:@record Map<String, i16>): void;
+    @overload("overloadFunc")
+    OverloadFuncEnumRecord(p1:Color, p2:@record Map<String, i16>): void;
 
     @overload("overloadFunc")
     OverloadFuncArrayRecord(p1:Array<i32>, p2:@record Map<String, i16>): void;

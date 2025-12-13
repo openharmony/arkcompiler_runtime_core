@@ -362,17 +362,17 @@ ANI_NAMESPACE = AniScope("namespace", ANI_FUNCTION)
 
 
 @dataclass
-class ArkTsPath:
-    module_prefix: str | None = None
-    path_prefix: str | None = None
+class ArkTsOutDir:
+    bundle_str: str | None = None
+    prefix_str: str | None = None
 
     @property
-    def module_prefix_parts(self) -> list[str]:
-        return [] if self.module_prefix is None else self.module_prefix.split("/")
+    def bundle_parts(self) -> list[str]:
+        return [self.bundle_str] if self.bundle_str else []
 
     @property
-    def path_prefix_parts(self) -> list[str]:
-        return [] if self.path_prefix is None else self.path_prefix.split("/")
+    def prefix_parts(self) -> list[str]:
+        return [] if self.prefix_str is None else self.prefix_str.split("/")
 
 
 @dataclass
@@ -387,17 +387,13 @@ class ArkTsModuleOrNamespace(ABC):
 
     @property
     @abstractmethod
-    def name_parts(self) -> list[str]:
-        pass
-
-    @property
-    @abstractmethod
     def mod(self) -> "ArkTsModule":
         pass
 
     @property
+    @abstractmethod
     def impl_desc(self) -> str:
-        return ".".join(self.name_parts)
+        pass
 
     @abstractmethod
     def get_member(self, name: str, is_default: bool, target: StsWriter) -> str:
@@ -414,12 +410,17 @@ class ArkTsModuleOrNamespace(ABC):
             self.is_default |= is_default
             return self
         head, *tail = ns_parts
-        child = self.children.setdefault(head, ArkTsNamespace(head, self))
+        child = self.children.setdefault(head, ArkTsNamespace(self, head))
         return child.add_path(tail, pkg, is_default)
 
 
 @dataclass
 class ArkTsModule(ArkTsModuleOrNamespace):
+    parent: ArkTsOutDir
+    module_name: str
+
+    scope: ClassVar[AniScope] = ANI_MODULE
+
     obj_drop = "_taihe_objDrop"
     obj_dup = "_taihe_objDup"
     registry = "_taihe_registry"
@@ -430,47 +431,43 @@ class ArkTsModule(ArkTsModuleOrNamespace):
     BEType = "_taihe_BusinessError"
     ACType = "_taihe_AsyncCallback"
 
-    scope: ClassVar[AniScope] = ANI_MODULE
-
-    mod_name: str
-    parent: ArkTsPath
-
-    @property
-    def name_parts(self) -> list[str]:
-        return [
-            *self.parent.module_prefix_parts,
-            *self.parent.path_prefix_parts,
-            *self.mod_name.split("."),
-        ]
-
     @property
     def mod(self) -> "ArkTsModule":
         return self
 
+    @property
+    def impl_desc(self) -> str:
+        impl_desc_parts = [
+            *self.parent.bundle_parts,
+            *self.parent.prefix_parts,
+            self.module_name,
+        ]
+        return ".".join(impl_desc_parts)
+
     def get_member(self, name: str, is_default: bool, target: StsWriter) -> str:
-        filtered_name = "".join(c if c.isalnum() else "_" for c in self.mod_name)
+        filtered_name = "".join(c if c.isalnum() else "_" for c in self.module_name)
         import_name = f"_taihe_{filtered_name}_{name}"
         if is_default:
-            target.add_import_default(f"./{self.mod_name}", import_name)
+            target.add_import_default(f"./{self.module_name}.ets", import_name)
         else:
-            target.add_import_decl(f"./{self.mod_name}", name, import_name)
+            target.add_import_decl(f"./{self.module_name}.ets", name, import_name)
         return import_name
 
 
 @dataclass
 class ArkTsNamespace(ArkTsModuleOrNamespace):
-    scope: ClassVar[AniScope] = ANI_NAMESPACE
-
-    ns_name: str
     parent: ArkTsModuleOrNamespace
+    ns_name: str
 
-    @property
-    def name_parts(self) -> list[str]:
-        return [*self.parent.name_parts, self.ns_name]
+    scope: ClassVar[AniScope] = ANI_NAMESPACE
 
     @property
     def mod(self) -> "ArkTsModule":
         return self.parent.mod
+
+    @property
+    def impl_desc(self) -> str:
+        return f"{self.parent.impl_desc}.{self.ns_name}"
 
     def get_member(self, name: str, is_default: bool, target: StsWriter) -> str:
         return f"{self.parent.get_member(self.ns_name, self.is_default, target)}.{name}"
@@ -487,23 +484,23 @@ class PackageGroupAniInfo(AbstractAnalysis[PackageGroup]):
         self.mods: dict[str, ArkTsModule] = {}
         self.pkg_map: dict[PackageDecl, ArkTsModuleOrNamespace] = {}
 
-        self.path = ArkTsPath(
-            self.am.config.arkts_module_prefix,
-            self.am.config.arkts_path_prefix,
+        self.path = ArkTsOutDir(
+            bundle_str=self.am.config.arkts_module_prefix,
+            prefix_str=self.am.config.arkts_path_prefix,
         )
 
         for pkg in pg.packages:
             ns_parts = []
             if attr := NamespaceAttr.get(pkg):
-                mod_name = attr.module
+                module_str = attr.module
                 if ns_name := attr.namespace:
                     ns_parts = ns_name.split(".")
             else:
-                mod_name = pkg.name
+                module_str = pkg.name
 
             is_default = ExportDefaultAttr.get(pkg) is not None
 
-            mod = self.mods.setdefault(mod_name, ArkTsModule(mod_name, self.path))
+            mod = self.mods.setdefault(module_str, ArkTsModule(self.path, module_str))
             ns_name = self.pkg_map[pkg] = mod.add_path(ns_parts, pkg, is_default)
 
             for attr in StsInjectIntoModuleAttr.get_all(pkg):
@@ -810,7 +807,7 @@ class EnumAniInfo(AbstractAnalysis[EnumDecl]):
     def __init__(self, am: AnalysisManager, d: EnumDecl) -> None:
         self.parent_ns = PackageAniInfo.get(am, d.parent_pkg).ns
         self.sts_type_name = d.name
-        self.type_desc = ".".join([*self.parent_ns.name_parts, self.sts_type_name])
+        self.type_desc = f"{self.parent_ns.impl_desc}.{self.sts_type_name}"
 
         self.is_default = ExportDefaultAttr.get(d) is not None
 
@@ -864,8 +861,8 @@ class StructAniInfo(AbstractAnalysis[StructDecl]):
         else:
             self.sts_impl_name = f"_taihe_{d.name}_inner"
         self.sts_ctor_name = f"_taihe_{d.name}_ctor"
-        self.type_desc = ".".join([*self.parent_ns.name_parts, self.sts_type_name])
-        self.impl_desc = ".".join([*self.parent_ns.name_parts, self.sts_impl_name])
+        self.type_desc = f"{self.parent_ns.impl_desc}.{self.sts_type_name}"
+        self.impl_desc = f"{self.parent_ns.impl_desc}.{self.sts_impl_name}"
 
         self.interface_injected_codes: list[str] = []
         for iface_injected in StsInjectIntoIfaceAttr.get_all(d):
@@ -925,11 +922,11 @@ class StructAniInfo(AbstractAnalysis[StructDecl]):
 
 
 class IfaceAniInfo(AbstractAnalysis[IfaceDecl]):
+    scope: ClassVar[AniScope] = ANI_CLASS
+
     data_ptr = "_taihe_dataPtr"
     vtbl_ptr = "_taihe_vtblPtr"
     register = "_taihe_register"
-
-    scope: ClassVar[AniScope] = ANI_CLASS
 
     def __init__(self, am: AnalysisManager, d: IfaceDecl) -> None:
         self.decl_header = f"{d.parent_pkg.name}.{d.name}.ani.0.hpp"
@@ -942,8 +939,8 @@ class IfaceAniInfo(AbstractAnalysis[IfaceDecl]):
         else:
             self.sts_impl_name = f"_taihe_{d.name}_inner"
         self.sts_ctor_name = f"_taihe_{d.name}_ctor"
-        self.type_desc = ".".join([*self.parent_ns.name_parts, self.sts_type_name])
-        self.impl_desc = ".".join([*self.parent_ns.name_parts, self.sts_impl_name])
+        self.type_desc = f"{self.parent_ns.impl_desc}.{self.sts_type_name}"
+        self.impl_desc = f"{self.parent_ns.impl_desc}.{self.sts_impl_name}"
 
         self.interface_injected_codes: list[str] = []
         for iface_injected in StsInjectIntoIfaceAttr.get_all(d):
@@ -1898,7 +1895,7 @@ class ArrayBufferTypeAniInfo(TypeAniInfo):
         self.t = t
         self.arraybuffer_attr = arraybuffer_attr
         self.ani_type = ANI_ARRAYBUFFER
-        self.sig_type = AniRuntimeClassType("escompat.ArrayBuffer")
+        self.sig_type = AniRuntimeClassType("std.core.ArrayBuffer")
 
     @override
     def sts_type_in(self, target: StsWriter) -> str:
@@ -1976,9 +1973,20 @@ class TypedArrayTypeAniInfo(TypeAniInfo):
             f"ani_int {ani_byte_length} = {{}};",
             f"ani_int {ani_byte_offset} = {{}};",
             f"ani_arraybuffer {ani_arrbuf} = {{}};",
-            f'{env}->Object_GetPropertyByName_Int({ani_value}, "byteLength", &{ani_byte_length});',
-            f'{env}->Object_GetPropertyByName_Int({ani_value}, "byteOffset", &{ani_byte_offset});',
-            f'{env}->Object_GetPropertyByName_Ref({ani_value}, "buffer", reinterpret_cast<ani_ref*>(&{ani_arrbuf}));',
+        )
+        pass
+        if self.t.item_ty.kind.is_signed:
+            target.writelns(
+                f'{env}->Object_GetField_Int({ani_value}, TH_ANI_FIND_CLASS_FIELD({env}, "{self.type_desc}", "byteLength"), &{ani_byte_length});',
+                f'{env}->Object_GetField_Int({ani_value}, TH_ANI_FIND_CLASS_FIELD({env}, "{self.type_desc}", "byteOffset"), &{ani_byte_offset});',
+            )
+        else:
+            target.writelns(
+                f'{env}->Object_CallMethod_Int({ani_value}, TH_ANI_FIND_CLASS_METHOD({env}, "{self.type_desc}", "%%get-byteLength", ":i"), &{ani_byte_length});',
+                f'{env}->Object_CallMethod_Int({ani_value}, TH_ANI_FIND_CLASS_METHOD({env}, "{self.type_desc}", "%%get-byteOffset", ":i"), &{ani_byte_offset});',
+            )
+        target.writelns(
+            f'{env}->Object_GetField_Ref({ani_value}, TH_ANI_FIND_CLASS_FIELD({env}, "{self.type_desc}", "buffer"), reinterpret_cast<ani_ref*>(&{ani_arrbuf}));',
             f"void* {ani_data} = {{}};",
             f"ani_size {ani_length} = {{}};",
             f"{env}->ArrayBuffer_GetInfo({ani_arrbuf}, &{ani_data}, &{ani_length});",
@@ -2008,7 +2016,7 @@ class TypedArrayTypeAniInfo(TypeAniInfo):
             f"ani_ref {ani_byte_offset} = {{}};",
             f"{env}->GetUndefined(&{ani_byte_offset});",
             f"ani_object {ani_after} = {{}};",
-            f'{env}->Object_New(TH_ANI_FIND_CLASS({env}, "{self.type_desc}"), TH_ANI_FIND_CLASS_METHOD({env}, "{self.type_desc}", "<ctor>", "C{{escompat.ArrayBuffer}}C{{std.core.Double}}C{{std.core.Double}}:"), &{ani_after}, {ani_arrbuf}, {ani_byte_length}, {ani_byte_offset});',
+            f'{env}->Object_New(TH_ANI_FIND_CLASS({env}, "{self.type_desc}"), TH_ANI_FIND_CLASS_METHOD({env}, "{self.type_desc}", "<ctor>", "C{{std.core.ArrayBuffer}}C{{std.core.Double}}C{{std.core.Double}}:"), &{ani_after}, {ani_arrbuf}, {ani_byte_length}, {ani_byte_offset});',
         )
 
 
@@ -2024,7 +2032,7 @@ class BigIntTypeAniInfo(TypeAniInfo):
         self.t = t
         self.bigint_attr = bigint_attr
         self.ani_type = ANI_OBJECT
-        self.sig_type = AniRuntimeClassType("escompat.BigInt")
+        self.sig_type = AniRuntimeClassType("std.core.BigInt")
 
     @override
     def sts_type_in(self, target: StsWriter) -> str:
@@ -2045,7 +2053,7 @@ class BigIntTypeAniInfo(TypeAniInfo):
         ani_length = f"{cpp_after}_ani_length"
         target.writelns(
             f"ani_arraybuffer {ani_arrbuf} = {{}};",
-            f'{env}->Function_Call_Ref(TH_ANI_FIND_MODULE_FUNCTION({env}, "{pkg_ani_info.ns.mod.impl_desc}", "{pkg_ani_info.ns.mod.bigint_to_arrbuf}", "C{{escompat.BigInt}}i:C{{escompat.ArrayBuffer}}"), reinterpret_cast<ani_ref*>(&{ani_arrbuf}), {ani_value}, static_cast<ani_int>(sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));'
+            f'{env}->Function_Call_Ref(TH_ANI_FIND_MODULE_FUNCTION({env}, "{pkg_ani_info.ns.mod.impl_desc}", "{pkg_ani_info.ns.mod.bigint_to_arrbuf}", "C{{std.core.BigInt}}i:C{{std.core.ArrayBuffer}}"), reinterpret_cast<ani_ref*>(&{ani_arrbuf}), {ani_value}, static_cast<ani_int>(sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));'
             f"void* {ani_data} = {{}};",
             f"ani_size {ani_length} = {{}};",
             f"{env}->ArrayBuffer_GetInfo({ani_arrbuf}, &{ani_data}, &{ani_length});",
@@ -2070,7 +2078,7 @@ class BigIntTypeAniInfo(TypeAniInfo):
             f"{env}->CreateArrayBuffer({cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)), &{ani_data}, &{ani_arrbuf});",
             f"std::copy({cpp_value}.begin(), {cpp_value}.end(), reinterpret_cast<{item_ty_cpp_info.as_owner}*>({ani_data}));",
             f"ani_object {ani_after} = {{}};",
-            f'{env}->Function_Call_Ref(TH_ANI_FIND_MODULE_FUNCTION({env}, "{pkg_ani_info.ns.mod.impl_desc}", "{pkg_ani_info.ns.mod.arrbuf_to_bigint}", "C{{escompat.ArrayBuffer}}:C{{escompat.BigInt}}"), reinterpret_cast<ani_ref*>(&{ani_after}), {ani_arrbuf});',
+            f'{env}->Function_Call_Ref(TH_ANI_FIND_MODULE_FUNCTION({env}, "{pkg_ani_info.ns.mod.impl_desc}", "{pkg_ani_info.ns.mod.arrbuf_to_bigint}", "C{{std.core.ArrayBuffer}}:C{{std.core.BigInt}}"), reinterpret_cast<ani_ref*>(&{ani_after}), {ani_arrbuf});',
         )
 
 
@@ -2086,7 +2094,7 @@ class RecordTypeAniInfo(TypeAniInfo):
         self.t = t
         self.record_attr = record_attr
         self.ani_type = ANI_OBJECT
-        self.sig_type = AniRuntimeClassType("escompat.Record")
+        self.sig_type = AniRuntimeClassType("std.core.Record")
 
     @override
     def sts_type_in(self, target: StsWriter) -> str:
@@ -2116,7 +2124,7 @@ class RecordTypeAniInfo(TypeAniInfo):
         val_ty_ani_info = TypeAniInfo.get(self.am, self.t.val_ty)
         target.writelns(
             f"ani_object {ani_iter} = {{}};",
-            f'{env}->Object_CallMethod_Ref({ani_value}, TH_ANI_FIND_CLASS_METHOD({env}, "escompat.Record", "$_iterator", nullptr), reinterpret_cast<ani_ref*>(&{ani_iter}));',
+            f'{env}->Object_CallMethod_Ref({ani_value}, TH_ANI_FIND_CLASS_METHOD({env}, "std.core.Record", "entries", ":C{{std.core.IterableIterator}}"), reinterpret_cast<ani_ref*>(&{ani_iter}));',
             f"{self.cpp_info.as_owner} {cpp_after};",
         )
         with target.indented(
@@ -2140,9 +2148,9 @@ class RecordTypeAniInfo(TypeAniInfo):
                 f"ani_tuple_value {ani_item} = {{}};",
                 f'{env}->Object_GetField_Ref({ani_next},  TH_ANI_FIND_CLASS_FIELD({env}, "std.core.IteratorResult", "value"), reinterpret_cast<ani_ref*>(&{ani_item}));',
                 f"ani_ref {ani_key} = {{}};",
-                f"{env}->TupleValue_GetItem_Ref({ani_item}, 0, &{ani_key});",
+                f'{env}->Object_GetField_Ref({ani_item}, TH_ANI_FIND_CLASS_FIELD({env}, "std.core.Tuple2", "$0"), &{ani_key});',
                 f"ani_ref {ani_val} = {{}};",
-                f"{env}->TupleValue_GetItem_Ref({ani_item}, 1, &{ani_val});",
+                f'{env}->Object_GetField_Ref({ani_item}, TH_ANI_FIND_CLASS_FIELD({env}, "std.core.Tuple2", "$1"), &{ani_val});',
             )
             key_ty_ani_info.from_ani_boxed(target, env, ani_key, cpp_key)
             val_ty_ani_info.from_ani_boxed(target, env, ani_val, cpp_val)
@@ -2166,7 +2174,7 @@ class RecordTypeAniInfo(TypeAniInfo):
         ani_val = f"{ani_after}_ani_val"
         target.writelns(
             f"ani_object {ani_after} = {{}};",
-            f'{env}->Object_New(TH_ANI_FIND_CLASS({env}, "escompat.Record"), TH_ANI_FIND_CLASS_METHOD({env}, "escompat.Record", "<ctor>", ":"), &{ani_after});',
+            f'{env}->Object_New(TH_ANI_FIND_CLASS({env}, "std.core.Record"), TH_ANI_FIND_CLASS_METHOD({env}, "std.core.Record", "<ctor>", ":"), &{ani_after});',
         )
         with target.indented(
             f"for (const auto& [{cpp_key}, {cpp_val}] : {cpp_value}) {{",
@@ -2175,7 +2183,7 @@ class RecordTypeAniInfo(TypeAniInfo):
             key_ty_ani_info.into_ani_boxed(target, env, cpp_key, ani_key)
             val_ty_ani_info.into_ani_boxed(target, env, cpp_val, ani_val)
             target.writelns(
-                f'{env}->Object_CallMethod_Void({ani_after}, TH_ANI_FIND_CLASS_METHOD({env}, "escompat.Record", "$_set", "X{{C{{std.core.BaseEnum}}C{{std.core.Numeric}}C{{std.core.String}}}}C{{std.core.Object}}:"), {ani_key}, {ani_val});',
+                f'{env}->Object_CallMethod_Void({ani_after}, TH_ANI_FIND_CLASS_METHOD({env}, "std.core.Record", "$_set", "X{{C{{std.core.BaseEnum}}C{{std.core.Numeric}}C{{std.core.String}}}}Y:"), {ani_key}, {ani_val});',
             )
 
 

@@ -53,12 +53,10 @@ class CppImplHeadersGenerator:
 
     def generate(self, pg: PackageGroup):
         for pkg in pg.packages:
-            CppImplPackageGenerator(self.om, self.am, pkg).gen_package_file()
-            for iface in pkg.interfaces:
-                CppImplIfaceGenerator(self.om, self.am, iface).gen_iface_file()
+            CppMacroPackageGenerator(self.om, self.am, pkg).gen_package_file()
 
 
-class CppImplPackageGenerator:
+class CppMacroPackageGenerator:
     def __init__(self, om: OutputManager, am: AnalysisManager, pkg: PackageDecl):
         self.om = om
         self.am = am
@@ -114,7 +112,7 @@ class CppImplPackageGenerator:
         )
 
 
-class CppImplIfaceGenerator:
+class CppMacroIfaceGenerator:
     def __init__(self, om: OutputManager, am: AnalysisManager, iface: IfaceDecl):
         self.om = om
         self.am = am
@@ -183,12 +181,10 @@ class CppImplSourcesGenerator:
     def generate(self, pg: PackageGroup):
         for pkg in pg.packages:
             CppTemplatePackageGenerator(self.om, self.am, pkg).gen_package_file()
-            for iface in pkg.interfaces:
-                CppTemplateIfaceGenerator(self.om, self.am, iface).gen_iface_file()
         for pkg in pg.packages:
             for iface in pkg.interfaces:
-                CppClassHeaderGenerator(self.om, self.am, iface).gen_class_header()
-                CppClassSourceGenerator(self.om, self.am, iface).gen_class_source()
+                CppTemplateClassHeaderGenerator(self.om, self.am, iface).gen_file()
+                CppTemplateClassSourceGenerator(self.om, self.am, iface).gen_file()
 
 
 class CppTemplateBaseWriterGenerator:
@@ -383,7 +379,7 @@ class CppTemplateIfaceGenerator(CppTemplateBaseWriterGenerator):
         )
 
 
-class CppClassHeaderGenerator:
+class CppTemplateClassHeaderGenerator:
     def __init__(self, om: OutputManager, am: AnalysisManager, iface: IfaceDecl):
         self.om = om
         self.am = am
@@ -395,9 +391,10 @@ class CppClassHeaderGenerator:
             FileKind.TEMPLATE,
         )
 
-    def gen_class_header(self):
+    def gen_file(self):
         iface_abi_info = IfaceAbiInfo.get(self.am, self.iface)
         with self.target:
+            self.target.add_include("taihe/common.hpp")
             for ancestor in iface_abi_info.ancestor_dict:
                 for method in ancestor.methods:
                     for param in method.params:
@@ -441,7 +438,7 @@ class CppClassHeaderGenerator:
         )
 
 
-class CppClassSourceGenerator(CppTemplateBaseWriterGenerator):
+class CppTemplateClassSourceGenerator(CppTemplateBaseWriterGenerator):
     def __init__(self, om: OutputManager, am: AnalysisManager, iface: IfaceDecl):
         self.iface = iface
         iface_cpp_impl_info = IfaceCppImplInfo.get(am, iface)
@@ -452,11 +449,12 @@ class CppClassSourceGenerator(CppTemplateBaseWriterGenerator):
         )
         super().__init__(om, am, target, [])
 
-    def gen_class_source(self):
+    def gen_file(self):
         iface_abi_info = IfaceAbiInfo.get(self.am, self.iface)
         iface_cpp_impl_info = IfaceCppImplInfo.get(self.am, self.iface)
         with self.target:
             self.target.add_include(iface_cpp_impl_info.template_header)
+            self.target.add_include("stdexcept")
             self.target.newline()
             self.gen_using_namespaces()
             for ancestor in iface_abi_info.ancestor_dict:

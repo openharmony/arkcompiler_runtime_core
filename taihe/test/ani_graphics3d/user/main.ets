@@ -449,15 +449,15 @@ function main() {
     suite.addTest(
         "test_ani_graphics3d_scene_createMaterial_sync",
         test_ani_graphics3d_scene_createMaterial_sync)
-    // suite.addTest(
-    //     "test_ani_graphics3d_scene_createShader",
-    //     test_ani_graphics3d_scene_createShader)
-    // suite.addTest(
-    //     "test_ani_graphics3d_scene_createShader_promise",
-    //     test_ani_graphics3d_scene_createShader_promise)
-    // suite.addTest(
-    //     "test_ani_graphics3d_scene_createShader_promise",
-    //     test_ani_graphics3d_scene_createShader_sync)
+    suite.addTest(
+        "test_ani_graphics3d_scene_createShader",
+        test_ani_graphics3d_scene_createShader)
+    suite.addTest(
+        "test_ani_graphics3d_scene_createShader_promise",
+        test_ani_graphics3d_scene_createShader_promise)
+    suite.addTest(
+        "test_ani_graphics3d_scene_createShader_promise",
+        test_ani_graphics3d_scene_createShader_sync)
     suite.addTest(
         "test_ani_graphics3d_scene_createImage",
         test_ani_graphics3d_scene_createImage)
