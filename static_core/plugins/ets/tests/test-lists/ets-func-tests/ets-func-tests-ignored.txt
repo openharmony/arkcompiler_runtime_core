@@ -321,13 +321,11 @@ escompat/ArrayTest4.ets
 escompat/ArrayTest5.ets
 escompat/ArrayTest6.ets
 escompat/ArrayProxyTest.ets
-std/core/std_core_typedarrays_function2_Int8Array.ets
 
 #21382 - instance method on primitive
 std/core/std_core_char_instance_Char_toUpperCase.ets
 
 #29995
-escompat/JsonAnnotationTest.ets
 ets_func_tests/escompat/JsonAnnotationTest.ets
 
 ############
@@ -349,16 +347,10 @@ spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 
 # 7.
 # runtime failures:
-std/core/std_core_value_array_value_all_006.ets
 std/serialization/std_serialization_json_stringify_float_array.ets
-
-# 8.
-# abort
-std/core/NumberTest.ets
 
 # 9.
 # other fails
-std/core/json/JsonStringifyTest1.ets
 std/core/std_core_BigInt_instance_BigInt_toString_011.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-12.ets
@@ -375,22 +367,19 @@ spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-1.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-2.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-inc.ets
-std/containers/concurrent_hash_map/ConcurrentHashMap_ForEachTest.ets
-std/containers/concurrent_hash_map/ConcurrentHashMap_PressureTest_Remove.ets
 std/core/TypeCreateErasedBodyTest.ets
-std/core/TypeMethodInvoke.ets
-std/core/std_core_string_String_codePointCount_number_number.ets
-std/core/std_core_string_String_repeat_int.ets
-std/core/std_core_string_String_repeat_number.ets
 std/core/JsonReplacerTest.ets
+std/core/NumberTest.ets
 regression/15278_0.ets
 
 #30585
 std/core/EAWorker_out_of_coro_creation.ets
+std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_fails.ets
 
 #31475
 escompat/DateTest.ets
 std/core/IntlPluralRulesSupportedLocalesOfTest.ets
+std/core/ReflectFieldTest.ets
 std/concurrency/messageHandler_basic_interface.ets
 std/concurrency/message_basic_interface.ets
 std/concurrency/AsyncLockTimeoutTest.ets
