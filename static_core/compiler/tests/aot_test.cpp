@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 #include "aot/compiled_method.h"
 #include "compiler/code_info/code_info_builder.h"
 #include "libarkbase/os/exec.h"
+#include "libarkbase/os/filesystem.h"
 #include "assembly-parser.h"
 #include <elf.h>
 #include "libarkbase/utils/string_helpers.h"
@@ -984,6 +985,156 @@ TEST_F(AotTest, PandaZipFile)
                                   "--paoc-location", "./");
         ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
         ASSERT_EQ(res.Value(), 0U);
+    }
+}
+
+static void EmitAndLoadPandaFile(ClassLinker *classLinker, const char *source, const TmpFile *pandaFname)
+{
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    std::unique_ptr<const panda_file::File> pf = nullptr;
+    if (pandaFname) {
+        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname->GetFileName(), res.Value()));
+        pf = panda_file::File::Open(pandaFname->GetFileName());
+    } else {
+        pf = pandasm::AsmEmitter::Emit(res.Value());
+    }
+    ASSERT_TRUE(pf);
+    classLinker->AddPandaFile(std::move(pf), nullptr);
+}
+
+static void UpdateClassContext()
+{
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    // Build full context string from all files (like runtime does)
+    auto fullContextStr = classLinker->GetClassContextForAot(true);
+
+    // Split context like runtime does - find last delimiter, everything after is app context
+    auto aotManager = classLinker->GetAotManager();
+    auto lastDelimIdx = fullContextStr.find_last_of(compiler::AotClassContextCollector::DELIMETER);
+    if (lastDelimIdx == std::string::npos) {
+        // Only one file - treat as app context
+        aotManager->SetAppClassContext(fullContextStr, true);
+        aotManager->SetBootClassContext("", true);
+    } else {
+        // Split: everything after last delimiter is app context
+        aotManager->SetAppClassContext(fullContextStr.substr(lastDelimIdx + 1), true);
+        aotManager->SetBootClassContext(fullContextStr.substr(0, lastDelimIdx), true);
+    }
+}
+
+static void CreateFilesForTestWithInMemoryFile(const TmpFile &pandaFname1, const TmpFile &pandaFname2)
+{
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+
+    {
+        auto source = R"(
+            .record B {}
+
+            .function i32 B.f1() {
+                ldai 20
+                return
+            }
+        )";
+        EmitAndLoadPandaFile(classLinker, source, &pandaFname1);
+    }
+
+    // Add the in-memory file, it shall not change indices
+    {
+        auto source = R"(
+            .record M {}
+
+            .function i32 M.f1() {
+                ldai 10
+                return
+            }
+        )";
+        EmitAndLoadPandaFile(classLinker, source, nullptr);
+    }
+
+    {
+        auto source = R"(
+            .record A {}
+
+            .function i32 A.f1() {
+                ldai 10
+                return
+            }
+        )";
+        EmitAndLoadPandaFile(classLinker, source, &pandaFname2);
+    }
+}
+
+class AotCompilerTest : public ::testing::Test {
+public:
+    AotCompilerTest()
+    {
+        RuntimeOptions options;
+        auto execPath = ark::os::file::File::GetExecutablePath();
+        pandaStdLib_ = ark::os::GetAbsolutePath(execPath.Value() + "/../pandastdlib/arkstdlib.abc");
+        options.SetBootPandaFiles({pandaStdLib_});
+        options.SetLoadRuntimes({"core"});
+        options.SetArkAot(true);
+        options.SetHeapSizeLimit(50_MB);  // NOLINT(readability-magic-numbers)
+        options.SetGcType("epsilon");
+        Runtime::Create(options);
+    }
+
+    ~AotCompilerTest() override
+    {
+        Runtime::Destroy();
+    }
+
+    auto GetStdLibPath()
+    {
+        return pandaStdLib_;
+    }
+
+private:
+    std::string pandaStdLib_;
+};
+
+TEST_F(AotCompilerTest, NoMemoryFilesInAnFile)
+{
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        GTEST_SKIP();
+    }
+
+    TmpFile pandaFname1("test1.abc");
+    TmpFile pandaFname2("test2.abc");
+
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto aotManager = classLinker->GetAotManager();
+
+    // Fisrt file is stdlib (index 0)
+    int index = 0;
+    ASSERT_EQ(aotManager->GetPandaFileSnapshotIndex(GetStdLibPath()), index++);
+
+    CreateFilesForTestWithInMemoryFile(pandaFname1, pandaFname2);
+
+    ASSERT_EQ(aotManager->GetPandaFileSnapshotIndex(ark::os::GetAbsolutePath(pandaFname1.GetFileName())), index++);
+    ASSERT_EQ(aotManager->GetPandaFileSnapshotIndex(ark::os::GetAbsolutePath(pandaFname2.GetFileName())), index++);
+
+    UpdateClassContext();
+
+    // Verify that the in-memory file does not appear in the class context strings
+    auto finalContext = aotManager->GetBootClassContext() + ":" + aotManager->GetAppClassContext();
+    size_t start = 0;
+    size_t end;
+    while ((end = finalContext.find(':', start)) != std::string::npos) {
+        size_t hashPos = finalContext.find('*', start);
+        if (hashPos != std::string::npos && hashPos < end) {
+            auto filename = finalContext.substr(start, hashPos - start);
+            ASSERT_FALSE(filename.empty()) << "Empty filename found in final context string";
+        }
+        start = end + 1;
+    }
+    // Check the last entry
+    size_t hashPos = finalContext.find('*', start);
+    if (hashPos != std::string::npos) {
+        auto filename = finalContext.substr(start, hashPos - start);
+        ASSERT_FALSE(filename.empty()) << "Empty filename found in final context string";
     }
 }
 // NOLINTEND(readability-magic-numbers)

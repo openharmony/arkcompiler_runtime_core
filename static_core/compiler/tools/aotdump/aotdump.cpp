@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,11 +83,6 @@ public:
             return "-";
         }
         auto fileId = panda_file::File::EntityId(id);
-        // NOTE(igozman): Temporary fix for case when file's index from AOT context do not know about "in-memory" files
-        //                which were counted during compilation so fileId  is not from this file #27916
-        if (fileId.GetOffset() >= file_->GetHeader()->fileSize) {
-            return "-";
-        }
 
         panda_file::MethodDataAccessor mda(*file_, fileId);
         panda_file::ProtoDataAccessor pda(*file_, panda_file::MethodDataAccessor::GetProtoId(*file_, fileId));
