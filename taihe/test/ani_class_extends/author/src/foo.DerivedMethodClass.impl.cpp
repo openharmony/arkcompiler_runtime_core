@@ -12,17 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TEST_ANI_CLASS_EXTENDS_AUTHOR_INCLUDE_FOO_DERIVEDMETHODCLASS_TEMPLATE_HPP_
-#define TEST_ANI_CLASS_EXTENDS_AUTHOR_INCLUDE_FOO_DERIVEDMETHODCLASS_TEMPLATE_HPP_
-// NOLINTBEGIN
+#include "foo.DerivedMethodClass.impl.h"
 
-class DerivedMethodClassImpl {
-public:
-    // You can add member variables and constructor here.
-    void Derived();
-    void Base();
-    void Foo();
-    void Bar();
-};
-// NOLINTEND
-#endif  // TEST_ANI_CLASS_EXTENDS_AUTHOR_INCLUDE_FOO_DERIVEDMETHODCLASS_TEMPLATE_HPP_
+
+taihe::string DerivedMethodClassImpl::Derived()
+{
+    return "derived";
+}
+
+taihe::string DerivedMethodClassImpl::Base()
+{
+    return "base";
+}
+
+taihe::string DerivedMethodClassImpl::Foo()
+{
+    return "foo";
+}
+
+taihe::string DerivedMethodClassImpl::Bar()
+{
+    return "bar";
+}
