@@ -75,11 +75,23 @@ export class Student extends Child {
 export namespace testNameSpace {
   export let student: Student = new Student();
   // fixedArrayGetLength
-  export let zeroArray: FixedArray<int> = [];
-  export let intArray: FixedArray<int> = [1, 2, 3, 4, 5];
-  export let boolArray: FixedArray<boolean> = [true, false, true, false];
-  export let strArray: FixedArray<string> = ['ab', 'cd', 'ef'];
-  export let stuArray: FixedArray<Student> = [student];
+  export let zeroFixedArray: FixedArray<int> = [];
+  export let intFixedArray: FixedArray<int> = [1, 2, 3, 4, 5];
+  export let boolFixedArray: FixedArray<boolean> = [true, false, true, false];
+  export let strFixedArray: FixedArray<string> = ['ab', 'cd', 'ef'];
+  export let stuFixedArray: FixedArray<Student> = [student];
+  // ArrayGet/SetElement
+  export let zeroArray: Array<int> = [];
+  export let intArray: Array<int> = [1, 2, 3, 4, 5];
+  export let boolArray: Array<boolean> = [true, false, true, false];
+  export let byteArray: Array<byte> = [0x01, 0x02, 0x03];
+  export let charArray: Array<char> = [c'a', c'b', c'c'];
+  export let shortArray: Array<short> = [100, 200];
+  export let longArray: Array<long> = [1000000000, 2000000000];
+  export let floatArray: Array<float> = [3.14f, 2.718f];
+  export let doubleArray: Array<double> = [3.141592, 2.718281];
+  export let strArray: Array<string> = ['ab', 'cd', 'ef'];
+  export let stuArray: Array<Student> = [student];
 }
 
 // enumGetIndexByName, enumGetNameByIndex, enumGetValueByIndex, enumGetIndexByValue

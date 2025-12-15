@@ -124,6 +124,39 @@ napi_value FixedArrayGetLengthImpl(napi_env env, napi_callback_info info)
     return jsLength;
 }
 
+// arrayGetLength(): number
+napi_value ArrayGetLengthImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    NAPI_TO_ANI_SCOPE;
+
+    size_t jsArgc = 0;
+    napi_value jsThis;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
+
+    if (jsArgc != 0) {
+        ThrowJSBadArgCountError(env, jsArgc, 0);
+        return nullptr;
+    }
+
+    auto *aniEnv = GetAniEnv();
+
+    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
+        ThrowJSThisNonObjectError(env);
+        return nullptr;
+    }
+    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+
+    ani_size length = 0;
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Array_GetLength(currentArray, &length));
+
+    napi_value jsLength;
+    NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(length), &jsLength));
+
+    return jsLength;
+}
+
 // enumGetIndexByName(name: string): number
 napi_value EnumGetIndexByNameImpl(napi_env env, napi_callback_info info)
 {
@@ -890,6 +923,169 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
     napi_value undefined;
     NAPI_CHECK_FATAL(napi_get_undefined(env, &undefined));
     return undefined;
+}
+
+// arrayGet(idx: number): STValue
+napi_value ArrayGetImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    NAPI_TO_ANI_SCOPE;
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+
+    if (jsArgc != 1U) {
+        ThrowJSBadArgCountError(env, jsArgc, 1U);
+        return nullptr;
+    }
+
+    napi_value jsThis;
+    napi_value jsArgv[1];
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
+
+    uint32_t index = 0;
+    NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &index));
+
+    auto *aniEnv = GetAniEnv();
+    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
+        ThrowJSThisNonObjectError(env);
+        return nullptr;
+    }
+    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+
+    ani_ref value {};
+    ani_status status = aniEnv->Array_Get(currentArray, index, &value);
+    ANI_CHECK_ERROR_RETURN(env, status);
+    if (value == nullptr) {
+        napi_value jsNull = nullptr;
+        NAPI_CHECK_FATAL(napi_get_null(env, &jsNull));
+        return jsNull;
+    }
+    return CreateSTValueInstance(env, value);
+}
+
+// arraySet(idx: number, val: STValue): void
+napi_value ArraySetImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    NAPI_TO_ANI_SCOPE;
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+
+    if (jsArgc != 2U) {
+        ThrowJSBadArgCountError(env, jsArgc, 2U);
+        return nullptr;
+    }
+
+    napi_value jsThis;
+    napi_value jsArgv[2];
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
+
+    uint32_t index = 0;
+    NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &index));
+    napi_value jsElement = jsArgv[1];
+
+    auto *aniEnv = GetAniEnv();
+
+    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
+        ThrowJSThisNonObjectError(env);
+        return nullptr;
+    }
+    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+
+    STValueData *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
+    if (!valueData->IsAniRef()) {
+        ThrowJSNonObjectError(env, "value");
+        return nullptr;
+    }
+    ani_ref element = valueData->GetAniRef();
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Array_Set(currentArray, index, element));
+
+    napi_value undefined;
+    NAPI_CHECK_FATAL(napi_get_undefined(env, &undefined));
+    return undefined;
+}
+
+// arrayPush(val: STValue): void
+napi_value ArrayPushImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    NAPI_TO_ANI_SCOPE;
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+
+    if (jsArgc != 1U) {
+        ThrowJSBadArgCountError(env, jsArgc, 1U);
+        return nullptr;
+    }
+
+    napi_value jsThis;
+    napi_value jsArgv[1];
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
+
+    napi_value jsElement = jsArgv[0];
+
+    auto *aniEnv = GetAniEnv();
+
+    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
+        ThrowJSThisNonObjectError(env);
+        return nullptr;
+    }
+    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+
+    STValueData *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
+    if (!valueData->IsAniRef()) {
+        ThrowJSNonObjectError(env, "value");
+        return nullptr;
+    }
+    ani_ref element = valueData->GetAniRef();
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Array_Push(currentArray, element));
+
+    napi_value undefined;
+    NAPI_CHECK_FATAL(napi_get_undefined(env, &undefined));
+    return undefined;
+}
+
+// arrayPop(): STValue
+napi_value ArrayPopImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    NAPI_TO_ANI_SCOPE;
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+
+    if (jsArgc != 0) {
+        ThrowJSBadArgCountError(env, jsArgc, 0);
+        return nullptr;
+    }
+
+    napi_value jsThis;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
+
+    auto *aniEnv = GetAniEnv();
+
+    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
+        ThrowJSThisNonObjectError(env);
+        return nullptr;
+    }
+    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+
+    ani_ref value;
+    ani_status status = aniEnv->Array_Pop(currentArray, &value);
+    ANI_CHECK_ERROR_RETURN(env, status);
+    if (value == nullptr) {
+        napi_value jsNull = nullptr;
+        NAPI_CHECK_FATAL(napi_get_null(env, &jsNull));
+        return jsNull;
+    }
+    return CreateSTValueInstance(env, value);
 }
 
 // NamespaceGetVariableByName(name: string, val: STValue, variableType: SType)

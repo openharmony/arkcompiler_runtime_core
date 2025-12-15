@@ -68,6 +68,7 @@ napi_value STValueObjectInstanceOfImpl(napi_env env, napi_callback_info info);
 
 napi_value ClassGetSuperClassImpl(napi_env env, napi_callback_info info);
 napi_value FixedArrayGetLengthImpl(napi_env env, napi_callback_info info);
+napi_value ArrayGetLengthImpl(napi_env env, napi_callback_info info);
 napi_value EnumGetIndexByNameImpl(napi_env env, napi_callback_info info);
 napi_value EnumGetValueByNameImpl(napi_env env, napi_callback_info info);
 napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info);
@@ -77,6 +78,10 @@ napi_value ObjectSetPropertyImpl(napi_env env, napi_callback_info info);
 napi_value STValueObjectGetTypeImpl(napi_env env, napi_callback_info info);
 napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info);
 napi_value FixedArraySetImpl(napi_env env, napi_callback_info info);
+napi_value ArrayGetImpl(napi_env env, napi_callback_info info);
+napi_value ArraySetImpl(napi_env env, napi_callback_info info);
+napi_value ArrayPushImpl(napi_env env, napi_callback_info info);
+napi_value ArrayPopImpl(napi_env env, napi_callback_info info);
 napi_value STValueNamespaceGetVariableImpl(napi_env env, napi_callback_info info);
 napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info);
 napi_value STValueFindClassImpl(napi_env env, napi_callback_info info);
@@ -86,6 +91,7 @@ napi_value STValueFindEnumImpl(napi_env env, napi_callback_info info);
 napi_value STValueClassInstantiateImpl(napi_env env, napi_callback_info info);
 napi_value STValueNewFixedArrayPrimitiveImpl(napi_env env, napi_callback_info info);
 napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info info);
+napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info);
 
 }  // namespace ark::ets::interop::js
 

@@ -221,4 +221,46 @@ napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info in
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Ref(arrayType, arrLength, initValue, &fixRefArray));
     return CreateSTValueInstance(env, fixRefArray);
 }
+
+// static newArray(len: number, initialElement: STValue): STValue
+napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    NAPI_TO_ANI_SCOPE;
+    auto *aniEnv = GetAniEnv();
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+
+    if (jsArgc != 2U) {
+        ThrowJSBadArgCountError(env, jsArgc, 2U);
+        return nullptr;
+    }
+
+    napi_value jsArgv[2];
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, nullptr, nullptr));
+
+    napi_valuetype lengthType {};
+    napi_typeof(env, jsArgv[0], &lengthType);
+    if (lengthType != napi_number) {
+        STValueThrowJSError(env, "length type is not number type;");
+        return nullptr;
+    }
+    uint32_t arrLength;
+    NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &arrLength));
+
+    napi_value jsElement = jsArgv[1];
+    STValueData *elementData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
+
+    if (elementData == nullptr || !elementData->IsAniRef()) {
+        ThrowJSNonObjectError(env, "initialElement");
+        return nullptr;
+    }
+
+    ani_ref initValue = static_cast<ani_ref>(elementData->GetAniRef());
+    ani_array newArray {};
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Array_New(arrLength, initValue, &newArray));
+
+    return CreateSTValueInstance(env, newArray);
+}
 }  // namespace ark::ets::interop::js
