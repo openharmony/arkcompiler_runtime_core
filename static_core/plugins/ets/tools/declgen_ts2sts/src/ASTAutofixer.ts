@@ -141,6 +141,7 @@ export class Autofixer {
     [
       ts.SyntaxKind.ClassDeclaration,
       [
+        this[FaultID.MergeOverloadedConstructors].bind(this),
         this[FaultID.MergeOverloadedMethods].bind(this),
         this[FaultID.NoPrivateMember].bind(this),
         this[FaultID.AddDeclareToClass].bind(this),
@@ -1699,6 +1700,36 @@ export class Autofixer {
     }
     return node;
   }
+
+  /**
+   * Rule: `Merge overloaded constructors classes`
+   */
+  private [FaultID.MergeOverloadedConstructors](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isClassDeclaration(node)) {
+      const constructors = node.members.filter(ts.isConstructorDeclaration);
+      const nonConstructors = node.members.filter((member) => !ts.isConstructorDeclaration(member));
+      if (constructors.length <= 1) {
+        return node;
+      }
+
+      const mergedConstructor = mergeSignatures(constructors, this.context) as ts.ConstructorDeclaration
+
+      return this.context.factory.updateClassDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        this.context.factory.createNodeArray<ts.ClassElement>([
+          mergedConstructor,
+          ...nonConstructors
+        ])
+      );
+
+    }
+    return node
+  }
+
 }
 
 /**
@@ -2846,9 +2877,9 @@ function mergeOverloadedMembers(
 }
 
 function mergeSignatures(
-  signatures: ts.SignatureDeclarationBase[],
+  signatures: ts.SignatureDeclarationBase[] | ts.ConstructorDeclaration[],
   context: ts.TransformationContext
-): ts.MethodSignature | ts.MethodDeclaration {
+): ts.MethodSignature | ts.MethodDeclaration | ts.ConstructorDeclaration {
   const firstSignature = signatures[0];
   const parameters = mergeParameters(signatures, context);
   const returnType = mergeReturnTypes(signatures, context);
@@ -2879,12 +2910,24 @@ function mergeSignatures(
       undefined
     );
   }
+  else if (ts.isConstructorDeclaration(firstSignature)) {
+    return context.factory.createMethodDeclaration(
+      firstSignature.modifiers,
+      undefined,
+      'constructor',
+      undefined,
+      undefined,
+      parameters,
+      undefined,
+      undefined
+    )
+  }
 
   throw new Error('Unsupported signature type');
 }
 
 function mergeParameters(
-  signatures: ts.SignatureDeclarationBase[],
+  signatures: ts.SignatureDeclarationBase[] | ts.ConstructorDeclaration[],
   context: ts.TransformationContext
 ): ts.ParameterDeclaration[] {
   const mergedParameters: ts.ParameterDeclaration[] = [];

@@ -152,6 +152,7 @@ export enum FaultID {
   AddDeclareToClass,
   FunctionType,
   MergeOverloadedMethods,
+  MergeOverloadedConstructors,
   BooleanLiteral,
   // this should always be last enum
   LAST_ID
