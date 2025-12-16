@@ -76,6 +76,8 @@ public:
         return &errorHandler_;
     };
 
+    ClassLinkerContext *GetCommonContext(Span<Class *> classes) override;
+
     NO_COPY_SEMANTIC(CoreClassLinkerExtension);
     NO_MOVE_SEMANTIC(CoreClassLinkerExtension);
 

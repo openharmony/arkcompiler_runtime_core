@@ -201,7 +201,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        bool isArrayConstructorCall = false;
 %        if (calledMethod == nullptr) {
 %            panda_file::MethodDataAccessor const mda(*pf, methodId);
-%            Class *cls = GetClass(panda_file::MethodDataAccessor(*method_->GetPandaFile(), methodId).GetClassId(), &errorHandler);
+%            Class *cls = classLinker_->GetClass(*method_, mda.GetClassId(), &errorHandler);
 %
 %            auto opcode = inst.GetOpcode();
 %            if (UNLIKELY((opcode == BytecodeInstructionSafe::Opcode::INITOBJ_SHORT_V4_V4_ID16 ||
@@ -227,7 +227,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %    "StaticFieldID_" => %({
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
-%        auto *cachedField = GetField(fieldIdx, true, &errorHandler);
+%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, true, &errorHandler);
 %        if (cachedField != nullptr) {
 %            AddField(inst.GetOffset(), cachedField);
 %            auto classType = Type {cachedField->GetClass()};
@@ -240,7 +240,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %    "FieldId_" => %({
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
-%        auto *cachedField = GetField(fieldIdx, false, &errorHandler);
+%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, false, &errorHandler);
 %        if (cachedField != nullptr) {
 %            AddField(inst.GetOffset(), cachedField);
 %            auto classType = Type {cachedField->GetClass()};
@@ -253,7 +253,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %    "TypeId_" => %({
 %        auto classIdx = method_->GetClass()->ResolveClassIndex(id.AsIndex());
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
-%        auto *cachedClass = GetClass(classIdx, &errorHandler);
+%        auto *cachedClass = classLinker_->GetClass(*method_, classIdx, &errorHandler);
 %        if (cachedClass != nullptr) {
 %            auto classType = Type {cachedClass};
 %            AddType(inst.GetOffset(), &classType);

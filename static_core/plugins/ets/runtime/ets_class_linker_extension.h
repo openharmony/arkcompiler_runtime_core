@@ -124,7 +124,7 @@ public:
 
     void InitializeFinish();
 
-    ClassLinkerContext *GetCommonContext(Span<Class *> classes) const override;
+    ClassLinkerContext *GetCommonContext(Span<Class *> classes) override;
     static ClassLinkerContext *GetParentContext(ClassLinkerContext *ctx);
 
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);

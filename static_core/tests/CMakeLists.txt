@@ -1269,6 +1269,7 @@ add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_6434.pa" 
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/initobj-bad-03.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Initobj calls not constructor")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/access_field_nomodifier_core.pa")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/exception_type.pa")
+add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/union_signatures.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad call incompatible parameter")
 # Test for verification fail during runtime
 add_test_file(FILE
   "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/fail_in_runtime_ahead_of_time.pa"

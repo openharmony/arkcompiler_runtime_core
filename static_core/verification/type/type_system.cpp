@@ -40,94 +40,6 @@ static PandaString ClassNameToDescriptorString(char const *name)
     return str;
 }
 
-std::optional<Class *> GetClosestCommonAncestor(const ClassLinkerContext *ctx, Class *source, Class *target)
-{
-    // remove IsObject() as base oh type hierarchy can change
-    if (target->IsInterface() || target->IsObjectClass()) {
-        return std::nullopt;
-    }
-
-    auto targetBase = target->GetBase();
-    if (source == targetBase) {
-        return targetBase;
-    }
-
-    if (targetBase->IsAssignableFrom(source)) {
-        return targetBase;
-    }
-    return GetClosestCommonAncestor(ctx, source, targetBase);
-}
-
-Class *FindCommonAncestorForConstituentTypes(ClassLinker *linker, ClassLinkerContext *ctx,
-                                             const LanguageContext &langCtx, const Class *unionClass,
-                                             ClassLinkerErrorHandler *handler /* = nullptr */)
-{
-    Class *bestAnces {nullptr};
-    auto unionConstituentTypes = unionClass->GetConstituentTypes();
-    for (const auto unionType : unionConstituentTypes) {
-        if (unionType->IsPrimitive() || unionType->IsArrayClass()) {
-            return linker->GetClass(langCtx.GetObjectClassDescriptor(), true, ctx, handler);
-        }
-
-        if (bestAnces == nullptr || bestAnces == unionType) {
-            bestAnces = unionType;
-            continue;
-        }
-        if (ClassHelper::IsReference(bestAnces->GetDescriptor()) &&
-            ClassHelper::IsReference(unionType->GetDescriptor())) {
-            auto lubDescOpt = GetClosestCommonAncestor(ctx, bestAnces, unionType);
-            if (!lubDescOpt.has_value()) {
-                return linker->GetClass(langCtx.GetObjectClassDescriptor(), true, ctx, handler);
-            }
-            bestAnces = lubDescOpt.value();
-            continue;
-        }
-
-        return linker->GetClass(langCtx.GetObjectClassDescriptor(), true, ctx, handler);
-    }
-    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-    return bestAnces;
-}
-
-Class *FindCommonAncestor(ClassLinker *linker, ClassLinkerContext *ctx, const LanguageContext &langCtx,
-                          const Class *klass, ClassLinkerErrorHandler *handler /* = nullptr */)
-{
-    if (klass->IsArrayClass()) {
-        const auto *handledComponent = FindCommonAncestor(linker, ctx, langCtx, klass->GetComponentType(), handler);
-        ASSERT(handledComponent != nullptr);
-        auto descrCopy = PandaString("[") + utf::Mutf8AsCString(handledComponent->GetDescriptor());
-        return linker->GetClass(utf::CStringAsMutf8(descrCopy.c_str()), true, ctx, handler);
-    }
-    return FindCommonAncestorForConstituentTypes(linker, ctx, langCtx, klass, handler);
-}
-
-static Type DescriptorToType(ClassLinker *linker, ClassLinkerContext *ctx,
-                             [[maybe_unused]] const LanguageContext &langCtx, uint8_t const *descr)
-{
-    ark::Class *klass {nullptr};
-    Job::ErrorHandler handler;
-    if (ClassHelper::IsUnionOrArrayUnionDescriptor(descr)) {
-        PandaString strDesc = utf::Mutf8AsCString(descr);
-        auto canonDesc = pandasm::Type::FromDescriptor(strDesc).GetDescriptor();
-        if (canonDesc != std::string(strDesc)) {
-            LOG_VERIFIER_NOT_CANONICALIZED_UNION_TYPE(strDesc, canonDesc);
-        }
-        klass = linker->GetClass(descr, true, ctx, &handler);
-        if (klass == nullptr) {
-            return Type {};
-        }
-        klass = FindCommonAncestor(linker, ctx, langCtx, klass, &handler);
-    } else {
-        klass = linker->GetClass(descr, true, ctx, &handler);
-    }
-
-    if (klass != nullptr) {
-        return Type {klass};
-    }
-    return Type {};
-}
-
 TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
     : service_ {service},
       plugin_ {plugin::GetLanguagePlugin(lang)},
@@ -153,9 +65,19 @@ TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
     plugin_->TypeSystemSetup(this);
 }
 
+static Type DescriptorToType(ClassLinker *linker, ClassLinkerContext *ctx, uint8_t const *descr)
+{
+    Job::ErrorHandler handler;
+    auto klass = linker->GetClass(descr, true, ctx, &handler);
+    if (klass != nullptr) {
+        return Type {klass};
+    }
+    return Type {};
+}
+
 Type TypeSystem::BootDescriptorToType(uint8_t const *descr)
 {
-    return DescriptorToType(service_->GetClassLinker(), bootLinkerCtx_, langCtx_, descr);
+    return DescriptorToType(service_->GetClassLinker(), bootLinkerCtx_, descr);
 }
 
 void TypeSystem::ExtendBySupers(PandaUnorderedSet<Type> *set, Class const *klass)
@@ -204,7 +126,7 @@ MethodSignature const *TypeSystem::GetMethodSignature(Method const *method)
     methodOfId_[methodId] = method;
 
     auto const resolveType = [this, method](const uint8_t *descr) {
-        return DescriptorToType(service_->GetClassLinker(), method->GetClass()->GetLoadContext(), langCtx_, descr);
+        return DescriptorToType(service_->GetClassLinker(), method->GetClass()->GetLoadContext(), descr);
     };
 
     MethodSignature sig;

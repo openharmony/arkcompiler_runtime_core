@@ -153,15 +153,6 @@ private:
     void DisplaySubtyping(std::function<void(PandaString const &, PandaString const &)> const &handler);
 };
 
-std::optional<Class *> GetClosestCommonAncestor(const ClassLinkerContext *ctx, Class *source, Class *target);
-
-Class *FindCommonAncestorForConstituentTypes(ClassLinker *linker, ClassLinkerContext *ctx,
-                                             const LanguageContext &langCtx, const Class *unionClass,
-                                             ClassLinkerErrorHandler *handler /* = nullptr */);
-
-Class *FindCommonAncestor(ClassLinker *linker, ClassLinkerContext *ctx, const LanguageContext &langCtx,
-                          const Class *klass, ClassLinkerErrorHandler *handler /* = nullptr */);
-
 }  // namespace ark::verifier
 
 #endif  // !PANDA_TYPE_SYSTEM_HPP

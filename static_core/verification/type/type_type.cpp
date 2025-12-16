@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -242,6 +242,11 @@ Span<Type const> Type::GetIntersectionMembers(TypeSystem const *tsys) const
 Span<Type const> Type::GetUnionMembers(TypeSystem const *tsys) const
 {
     ASSERT(IsUnion());
+    if (IsRTClass() && GetRTClass()->IsUnionClass()) {
+        auto span = GetRTClass()->GetConstituentTypes();
+        return {reinterpret_cast<Type const *>(span.data()), span.size()};
+    }
+
     uintptr_t payload = GetPayload(content_);
     return tsys->GetTypeSpan(SpanIndex(payload), SpanSize(payload));
 }
@@ -440,6 +445,8 @@ Type Type::Union(Span<Type> span, TypeSystem *tsys)
     return Type {ConstructWithTag(UNION_TAG, ConstructPayload(rspan.size(), tsys->GetSpanIndex(rspan)))};
 }
 
+bool IsSubtypeImpl(Type lhs, Type rhs, TypeSystem *tsys);
+
 static bool IsClassSubtypeOfType(Class const *lhsClass, Type rhs, TypeSystem *tsys)
 {
     // Deal with arrays; those are covariant
@@ -451,8 +458,7 @@ static bool IsClassSubtypeOfType(Class const *lhsClass, Type rhs, TypeSystem *ts
                 return supertypeOfArray.IsConsistent() && IsSubtype(supertypeOfArray, rhs, tsys);
             }
             auto *rhsComponent = rhs.GetClass()->GetComponentType();
-            auto rhsComponentType = Type {rhsComponent};
-            return IsClassSubtypeOfType(lhsComponent, rhsComponentType, tsys);
+            return IsSubtypeImpl(Type {lhsComponent}, Type {rhsComponent}, tsys);
         }
     }
 
@@ -757,7 +763,8 @@ Type Type::GetArrayElementType(TypeSystem *tsys) const
         return Top();
     }
     if (IsIntersection()) {
-        auto members = GetIntersectionMembers(tsys);
+        auto membersSpan = GetIntersectionMembers(tsys);
+        PandaVector<Type> members {membersSpan.begin(), membersSpan.end()};
         PandaVector<Type> vec;
         for (auto m : members) {
             vec.push_back(m.GetArrayElementType(tsys));

@@ -127,8 +127,6 @@ TEST_F(EtsUnionTest, CreateUnionClass)
         {"{ULA;Lstd/core/String;[LC;}", {true, "Lstd/core/Object;", {"LA;", "Lstd/core/String;", "[LC;"}}},
         {"{ULA;LD;[{ULB;LC;}}", {true, "Lstd/core/Object;", {"LA;", "LD;", "[{ULB;LC;}"}}}};
 
-    auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
-        ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
     for (const auto &[desc, infoList] : descMap) {
         EtsClass *klass = vm_->GetClassLinker()->GetClass(desc.c_str());
         ASSERT_NE(klass, nullptr);
@@ -144,10 +142,6 @@ TEST_F(EtsUnionTest, CreateUnionClass)
         }
         ASSERT_TRUE(klass->IsInitialized());
 
-        auto rtKlass =
-            verifier::FindCommonAncestor(ark::Runtime::GetCurrent()->GetClassLinker(), klass->GetLoadContext(),
-                                         ext->GetLanguageContext(), klass->GetRuntimeClass(), nullptr);
-        EXPECT_EQ(PandaString(utf::Mutf8AsCString(rtKlass->GetDescriptor())), classLUB);
         ASSERT_TRUE(CheckConstituentClasses(klass, consClassesList));
     }
 }
