@@ -58,6 +58,7 @@ namespace ark::ets::interop::js {
 // classGetSuperClass(): STValue
 napi_value ClassGetSuperClassImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     size_t jsArgc = 0;
@@ -93,6 +94,7 @@ napi_value ClassGetSuperClassImpl(napi_env env, napi_callback_info info)
 // fixedArrayGetLength(): number
 napi_value FixedArrayGetLengthImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -126,6 +128,7 @@ napi_value FixedArrayGetLengthImpl(napi_env env, napi_callback_info info)
 // arrayGetLength(): number
 napi_value ArrayGetLengthImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -159,6 +162,7 @@ napi_value ArrayGetLengthImpl(napi_env env, napi_callback_info info)
 // enumGetIndexByName(name: string): number
 napi_value EnumGetIndexByNameImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -202,6 +206,7 @@ napi_value EnumGetIndexByNameImpl(napi_env env, napi_callback_info info)
 // enumGetValueByName(name: string, valueType: SType): STValue
 napi_value EnumGetValueByNameImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -256,6 +261,7 @@ napi_value EnumGetValueByNameImpl(napi_env env, napi_callback_info info)
 // classGetStaticField(name: string, fieldType: SType): STValue
 napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -359,6 +365,7 @@ napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info)
 // classSetStaticField(name: string, val: STValue, fieldType: SType): void
 napi_value ClassSetStaticFieldImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -484,6 +491,7 @@ napi_value ClassSetStaticFieldImpl(napi_env env, napi_callback_info info)
 // objectGetProperty(name: string, propType: SType): STValue
 napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -578,6 +586,7 @@ napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info)
 // objectSetProperty(name: string, val: STValue, propType: SType): void
 napi_value ObjectSetPropertyImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -703,6 +712,7 @@ napi_value ObjectSetPropertyImpl(napi_env env, napi_callback_info info)
 // fixedArrayGet(idx: number, elementType: SType): STValue
 napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -807,6 +817,7 @@ napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info)
 // fixedArraySet(idx: number, val: STValue, elementType: SType): void
 napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -927,6 +938,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
 // arrayGet(idx: number): STValue
 napi_value ArrayGetImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -967,6 +979,7 @@ napi_value ArrayGetImpl(napi_env env, napi_callback_info info)
 // arraySet(idx: number, val: STValue): void
 napi_value ArraySetImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -1011,6 +1024,7 @@ napi_value ArraySetImpl(napi_env env, napi_callback_info info)
 // arrayPush(val: STValue): void
 napi_value ArrayPushImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -1053,6 +1067,7 @@ napi_value ArrayPushImpl(napi_env env, napi_callback_info info)
 // arrayPop(): STValue
 napi_value ArrayPopImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -1090,6 +1105,7 @@ napi_value ArrayPopImpl(napi_env env, napi_callback_info info)
 // NamespaceGetVariableByName(name: string, val: STValue, variableType: SType)
 napi_value STValueNamespaceGetVariableImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -1188,6 +1204,7 @@ napi_value STValueNamespaceGetVariableImpl(napi_env env, napi_callback_info info
 // NamespaceSetVariableByName(name: string, val: STValue, variableType: SType)
 napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -1323,6 +1340,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
 // objectGetType(): STValue
 napi_value STValueObjectGetTypeImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     auto *aniEnv = GetAniEnv();
@@ -1351,6 +1369,7 @@ napi_value STValueObjectGetTypeImpl(napi_env env, napi_callback_info info)
 static napi_value STValueTemplateFindElement(napi_env env, napi_callback_info info,
                                              const std::function<ani_ref(const std::string &)> &findElement)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -1395,6 +1414,7 @@ ani_object CreateBoolean(ani_env *env, ani_boolean boo)
 ani_status GetClassFromInteropDefaultLinker([[maybe_unused]] napi_env napiEnv, ani_env *env,
                                             const std::string &elementName, ani_ref *ref)
 {
+    INTEROP_TRACE();
     ani_string elementStr = nullptr;
     AniExpectOK(env->String_NewUTF8(elementName.c_str(), elementName.size(), &elementStr));
 
@@ -1428,6 +1448,7 @@ ani_status GetClassFromInteropDefaultLinker([[maybe_unused]] napi_env napiEnv, a
 
 napi_value STValueFindClassImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     auto findClass = [env](const std::string &className) -> ani_ref {
         auto aniEnv = GetAniEnv();
 
@@ -1470,6 +1491,7 @@ napi_value STValueFindClassImpl(napi_env env, napi_callback_info info)
 
 napi_value STValueFindNamespaceImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     auto findNamespace = [env](const std::string &namespaceName) -> ani_ref {
         // 1. find it by default classlinker
         auto aniEnv = GetAniEnv();
@@ -1512,6 +1534,7 @@ napi_value STValueFindNamespaceImpl(napi_env env, napi_callback_info info)
 
 napi_value STValueFindEnumImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     auto findEnum = [env](const std::string &enumName) -> ani_ref {
         // 1. find it by default classlinker
         auto aniEnv = GetAniEnv();

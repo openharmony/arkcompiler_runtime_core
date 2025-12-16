@@ -201,6 +201,7 @@ bool XRefObjectOperator::IsInstanceOf(EtsCoroutine *coro, const XRefObjectOperat
 
 EtsObject *XRefObjectOperator::Invoke(EtsCoroutine *coro, Span<VMHandle<ObjectHeader>> args) const
 {
+    INTEROP_TRACE();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
@@ -238,6 +239,7 @@ EtsObject *XRefObjectOperator::Invoke(EtsCoroutine *coro, Span<VMHandle<ObjectHe
 EtsObject *XRefObjectOperator::InvokeMethod(EtsCoroutine *coro, const std::string &name,
                                             Span<VMHandle<ObjectHeader>> args) const
 {
+    INTEROP_TRACE();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();
@@ -279,6 +281,7 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsCoroutine *coro, const std::strin
 EtsObject *XRefObjectOperator::InvokeMethod(EtsCoroutine *coro, EtsHandle<EtsObject> &methodObject,
                                             Span<VMHandle<ObjectHeader>> args) const
 {
+    INTEROP_TRACE();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     auto env = ctx->GetJSEnv();

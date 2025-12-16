@@ -249,6 +249,7 @@ ani_env *GetAniEnv()
 template <typename T>
 napi_value CreateSTValueInstance(napi_env env, T &&arg)
 {
+    INTEROP_TRACE();
     STValueData *data = new STValueData(env, std::forward<T>(arg));
     napi_value stvalueCtor = GetSTValueClass(env);
     uint64_t ptr = reinterpret_cast<uintptr_t>(data);

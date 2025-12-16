@@ -224,6 +224,7 @@ napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info in
 // static newArray(len: number, initialElement: STValue): STValue
 napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     auto *aniEnv = GetAniEnv();
