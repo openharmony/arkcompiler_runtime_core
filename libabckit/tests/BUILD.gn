@@ -887,6 +887,10 @@ template("libabckit_host_unittest_action") {
 libabckit_host_unittest_action("abckit_mock_gtests") {
   module_out_path = module_output_path
 
+  if (is_linux) {
+    ldflags = [ "-Wl,--allow-multiple-definition" ]
+  }
+
   sources = [
     # mock infrastructure
     "mock/abckit_api_mock.cpp",

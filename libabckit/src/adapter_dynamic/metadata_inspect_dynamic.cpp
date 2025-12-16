@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "libabckit/c/statuses.h"
 #include "libabckit/c/metadata_core.h"
+#include "libabckit/src/adapter_dynamic/abckit_dynamic.h"
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/adapter_dynamic/helpers_dynamic.h"
@@ -25,6 +26,7 @@
 #include "libabckit/src/wrappers/graph_wrapper/graph_wrapper.h"
 #include "libabckit/src/wrappers/abcfile_wrapper.h"
 #include "libabckit/src/adapter_static/ir_static.h"
+#include "libabckit/src/mem_manager/mem_manager.h"
 
 #include "assembler/assembly-emitter.h"
 #include "assembler/annotation.h"
@@ -119,6 +121,25 @@ AbckitString *FunctionGetNameDynamic(AbckitCoreFunction *function)
     return CreateStringDynamic(function->owningModule->file, name.data(), name.size());
 }
 
+void checkMemThresholdDynamic(AbckitFile *file)
+{
+    if (MemManager::IsBelowThreshold(GRAPH_CACHE_MAX_SIZE, GRAPH_CACHE_MAX_PERCENT)) {
+        return;
+    }
+    std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap = file->functionsMap;
+    for (auto &[func, status] : functionsMap) {
+        if (status->graph) {
+            if (status->writeBack) {
+                FunctionSetGraphDynamicSync(func, status->graph);
+            }
+            DestroyGraphDynamicSync(status->graph);
+        }
+        delete status;
+    }
+    functionsMap.clear();
+    file->generateStatus.generated = false;
+}
+
 AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
 {
     LIBABCKIT_LOG_FUNC;
@@ -128,23 +149,22 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
 
     auto *file = function->owningModule->file;
+    checkMemThresholdDynamic(file);
+
     auto program = function->owningModule->file->GetDynamicProgram();
 
-    pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps;
     panda_file::File *pf = nullptr;
+    AbckitIrInterface *irInterface = nullptr;
     if (function->owningModule->file->needOptimize && file->generateStatus.generated) {
-        maps = static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
-        pf = static_cast<panda_file::File *>(file->generateStatus.pf);
+        pf = file->generateStatus.getFile<panda_file::File>();
+        irInterface = file->generateStatus.getIrInterface<AbckitIrInterface>();
     } else {
-        if (file->generateStatus.pf != nullptr) {
-            delete static_cast<panda_file::File *>(file->generateStatus.pf);
-        }
-        if (file->generateStatus.maps != nullptr) {
-            delete static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
-        }
+        file->generateStatus.clear<panda_file::File, AbckitIrInterface>();
 
-        maps = new pandasm::AsmEmitter::PandaFileToPandaAsmMaps();
-        pf = const_cast<panda_file::File *>(EmitDynamicProgram(file, program, maps, true));
+        pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps = pandasm::AsmEmitter::PandaFileToPandaAsmMaps();
+        pf = const_cast<panda_file::File *>(EmitDynamicProgram(file, program, &maps, true));
+        irInterface = new AbckitIrInterface(std::move(maps.methods), std::move(maps.fields), std::move(maps.classes),
+                                            std::move(maps.strings), std::move(maps.literalarrays));
     }
 
     if (pf == nullptr) {
@@ -152,11 +172,11 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
     }
 
     if (function->owningModule->file->needOptimize) {
-        file->generateStatus = {true, pf, maps};
+        file->generateStatus = {true, pf, irInterface};
     }
 
     uint32_t functionOffset = 0;
-    for (auto &[id, s] : maps->methods) {
+    for (auto &[id, s] : irInterface->methods) {
         if (s == func->name) {
             functionOffset = id;
         }
@@ -166,20 +186,17 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
         LIBABCKIT_LOG(DEBUG) << "functionOffset == 0\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         if (!function->owningModule->file->needOptimize) {
-            delete maps;
+            delete irInterface;
         }
         return nullptr;
     }
 
-    auto *irInterface =
-        new AbckitIrInterface(maps->methods, maps->fields, maps->classes, maps->strings, maps->literalarrays);
-
     auto *wpf = new FileWrapper(reinterpret_cast<const void *>(pf));
     auto graph = GraphWrapper::BuildGraphDynamic(wpf, irInterface, file, functionOffset);
-    if (!function->owningModule->file->needOptimize) {
-        delete maps;
-    }
     if (statuses::GetLastError() != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
+        if (!function->owningModule->file->needOptimize) {
+            delete irInterface;
+        }
         return nullptr;
     }
     LIBABCKIT_LOG_DUMP(GdumpStatic(graph, STDERR_FILENO), DEBUG);

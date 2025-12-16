@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,39 @@ void MemManager::Finalize()
         ark::mem::MemConfig::Finalize();
         MemManager::isInitialized_ = false;
     }
+}
+
+size_t MemManager::GetCompilerSpaceCurrentSize()
+{
+    ASSERT(isInitialized_);
+    return ark::PoolManager::GetMmapMemPool()->GetCompilerSpaceCurrentSize();
+}
+
+size_t MemManager::GetCompilerSpaceMaxSize()
+{
+    ASSERT(isInitialized_);
+    return ark::PoolManager::GetMmapMemPool()->GetCompilerSpaceMaxSize();
+}
+
+bool MemManager::IsBelowThreshold(size_t maxMemSize, size_t maxMemPercent)
+{
+    if (maxMemSize > 0) {
+        size_t compilerSpaceCurrentSize = MemManager::GetCompilerSpaceCurrentSize();
+        if (compilerSpaceCurrentSize > maxMemSize) {
+            return false;
+        }
+    }
+    if (maxMemPercent > 0) {
+        size_t compilerSpaceCurrentSize = MemManager::GetCompilerSpaceCurrentSize();
+        size_t compilerSpaceMaxSize = MemManager::GetCompilerSpaceMaxSize();
+        size_t percent = (compilerSpaceMaxSize > 0 && compilerSpaceCurrentSize > 0)
+                             ? ((compilerSpaceCurrentSize * 100) / compilerSpaceMaxSize)
+                             : 0;
+        if (percent > maxMemPercent) {
+            return false;
+        }
+    }
+    return true;
 }
 
 }  // namespace libabckit

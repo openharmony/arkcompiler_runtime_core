@@ -1330,12 +1330,7 @@ void CloseFileDynamic(AbckitFile *file)
         }
         functionsMap.clear();
 
-        if (file->generateStatus.pf != nullptr) {
-            delete static_cast<panda_file::File *>(file->generateStatus.pf);
-        }
-        if (file->generateStatus.maps != nullptr) {
-            delete static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
-        }
+        file->generateStatus.clear<panda_file::File, AbckitIrInterface>();
     }
 
     auto *ctxIInternal = reinterpret_cast<struct CtxIInternal *>(file->internal);

@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "assembly-function.h"
+#include "assembly-ins.h"
+
+namespace ark::pandasm {
+
+std::set<std::string> ark::pandasm::Function::CollectStringsFromFunctionInsns() const {
+    std::set<std::string> function_strings {};
+    for (const auto &panda_insn : this->ins) {
+        switch (panda_insn.opcode) {
+% Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
+% insn = group[index_of_max(group.map(&:format).map(&:size))]
+%       if (insn.properties.include?('string_id') || insn.properties.include?('method_id') || insn.properties.include?('static_method_id'))
+            case Opcode::<%= insn.asm_token %>: {
+%               num_id = 0
+%               property_idx_start = 0
+%               collect_properties = ['string_id']
+%               id_property_types = ['string_id', 'method_id', 'static_method_id', 'literalarray_id']
+%               insn.operands.each do |op|
+%                   if op.id?
+%                       id_properties = insn.properties.slice(property_idx_start, insn.properties.length - property_idx_start)
+%                       id_properties.each_with_index do |prop, prop_idx|
+%                           if collect_properties.include?(prop)
+                function_strings.insert(panda_insn.GetID(<%= num_id %>));
+%                           end
+%                           if id_property_types.include?(prop)
+%                               property_idx_start += prop_idx + 1
+%                               num_id += 1
+%                               break
+%                           else
+%                               next
+%                           end
+%                       end
+%                   end
+%               end
+                break;
+            }
+%       else
+%           next
+%       end
+% end
+            default:
+                break;
+        }
+    }
+    return function_strings;
+}
+
+} // namespace ark::pandasm
+

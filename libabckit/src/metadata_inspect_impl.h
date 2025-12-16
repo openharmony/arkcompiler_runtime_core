@@ -887,10 +887,35 @@ struct AbckitType {
     }
 };
 
+const static size_t GRAPH_CACHE_MAX_SIZE = 4294967296;  // 4G
+const static size_t GRAPH_CACHE_MAX_PERCENT = 80;       // percent threshould
+
 struct AbckitFileGenerateStatus {
     bool generated = false;
     void *pf = nullptr;
-    void *maps = nullptr;
+    void *irInterface = nullptr;
+    template <typename PF>
+    PF *getFile()
+    {
+        return static_cast<PF *>(this->pf);
+    }
+    template <typename IF>
+    IF *getIrInterface()
+    {
+        return static_cast<IF *>(this->irInterface);
+    }
+    template <typename PF, typename IF>
+    void clear()
+    {
+        if (this->pf != nullptr) {
+            delete static_cast<PF *>(this->pf);
+            this->pf = nullptr;
+        }
+        if (this->irInterface != nullptr) {
+            delete static_cast<IF *>(this->irInterface);
+            this->irInterface = nullptr;
+        }
+    }
 };
 
 struct FunctionStatus {

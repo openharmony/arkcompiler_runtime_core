@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -239,9 +239,9 @@ void GraphWrapper::DestroyGraphDynamic(AbckitGraph *graph)
         auto *fileWrapper =
             reinterpret_cast<FileWrapper *>(ctxGInternal->runtimeAdapter->GetBinaryFileForMethod(nullptr));
         delete fileWrapper;
+        delete ctxGInternal->irInterface;
     }
     delete ctxGInternal->runtimeAdapter;
-    delete ctxGInternal->irInterface;
     delete ctxGInternal->localAllocator;
     delete ctxGInternal->allocator;
     delete ctxGInternal;

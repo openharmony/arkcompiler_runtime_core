@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -265,6 +265,16 @@ public:
 
     /// @return used bytes count in object space (so exclude bytes in free pools)
     size_t GetObjectUsedBytes() const;
+
+    size_t GetCompilerSpaceCurrentSize() const
+    {
+        return nonObjectSpacesCurrentSize_[SpaceTypeToIndex(SpaceType::SPACE_TYPE_COMPILER)];
+    }
+
+    size_t GetCompilerSpaceMaxSize() const
+    {
+        return nonObjectSpacesMaxSize_[SpaceTypeToIndex(SpaceType::SPACE_TYPE_COMPILER)];
+    }
 
 private:
     template <class ArenaT = Arena, OSPagesAllocPolicy OS_ALLOC_POLICY>
