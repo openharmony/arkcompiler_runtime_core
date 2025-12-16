@@ -15,7 +15,7 @@
 
 //! CHECKER       AOT IR Builder, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_BCO       options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC      options: "--compiler-regex='.*chain_concat[0-9]*' --compiler-inlining=false"
 //!
 //! METHOD        "ets_string_builder_merge_uber_export.ETSGLOBAL::uber_chain_concat4"
@@ -213,7 +213,7 @@ function main() {
 
 //! CHECKER       BCO, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
+//! RUN_BCO       options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
 //!
 //! METHOD        "ets_string_builder_merge_uber_export.ETSGLOBAL::uber_chain_concat4"
 //! PASS_AFTER    "BranchElimination"

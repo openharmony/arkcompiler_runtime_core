@@ -15,7 +15,7 @@
 
 //! CHECKER     StringBuilder length field access AOT unoptimized
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_BCO     output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
@@ -56,7 +56,7 @@
 
 //! CHECKER     BCO, StringBuilder length field access BCO optimized
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_BCO     output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true --bco-compiler --compiler-optimize-string-concat=true"
+//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true --bco-compiler --compiler-optimize-string-concat=true"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
 //! PASS_AFTER  "BranchElimination"

@@ -15,7 +15,7 @@
 // NOTE: next RUN_BCO recompiles input abc with options required for this test for all AOT/JIT checkers below
 //! CHECKER       AOT IR Builder, check String concatenation loop
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_BCO       options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC      options: "--compiler-regex='.*concat_loop[0-9]*' --compiler-inlining=false"
 //!
 //! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop0"
@@ -1069,7 +1069,7 @@
 // NOTE: next RUN_BCO recompiles input abc with SimplifyStringBuilder BCO pass for all INT checkers below
 //! CHECKER       BCO, check String concatenation loop
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
+//! RUN_BCO       options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
 //!
 //! METHOD        "ets_string_concat_loop.ETSGLOBAL::concat_loop0"
 //! PASS_AFTER    "BranchElimination"

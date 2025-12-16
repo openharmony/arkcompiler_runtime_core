@@ -94,6 +94,7 @@ OptionParser.new do |opts|
 end.parse!(into: options)
 $LOG_LEVEL = options.verbose ? Logger::DEBUG : Logger::ERROR
 $curr_cmd = nil
+$frontend_idx = 0
 
 def log
   @log ||= Logger.new($stdout, level: $LOG_LEVEL)
@@ -481,8 +482,9 @@ class Checker
   end
 
   def RUN_BCO(**args)
-    inputs = @options.test_file
-    output = "#{@cwd}/#{File.basename(@options.test_file, '.*')}.abc"
+    inputs = @options.source
+    output = prepare_frontend_out
+    @options.test_file = output
     @args = ''
     # handles evaluation of expressions in arguments such as #{@options.test_file}
     # specifically to use them in ets test annotations
@@ -501,7 +503,7 @@ class Checker
 
     clear_data
     $curr_cmd = "#{@options.frontend} --opt-level=2 --dump-assembly --bco-compiler --compiler-dump \
-            #{@options.frontend_options} #{@args} --output=#{output} #{@options.source}"
+            #{@options.frontend_options} #{@args} --output=#{output} #{inputs}"
     log.debug "Frontend command: #{$curr_cmd}"
 
     # See note on exec in RUN_PAOC
@@ -822,6 +824,12 @@ class Checker
     clear_data
   end
 
+  def prepare_frontend_out
+   output = File.join(@options.test_dir,"#{File.basename(@options.test_file).split('.')[0]}.#{$frontend_idx}.abc")
+   $frontend_idx += 1
+   output
+  end
+
   def clear_data
    $current_method = nil
    $current_pass = nil
@@ -912,7 +920,6 @@ end
 
 def main(options)
   if options.test_dir
-    require 'fileutils'
     FileUtils.mkdir_p options.test_dir
     Dir.chdir options.test_dir
   end

@@ -15,7 +15,7 @@
 
 //! CHECKER            Check that LSE and AA work correctly with global variables
 //! SKIP_IF            @architecture == "arm32"
-//! RUN_BCO            output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_BCO            options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC           options: "--compiler-regex='.*main.*'"
 //!
 //! METHOD             "lse_load_global_var.ETSGLOBAL::main"

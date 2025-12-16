@@ -73,7 +73,7 @@
 
 //! CHECKER      AOT, StringBuilder getStringLength calls optimized
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_BCO      output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_BCO      options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC     options: "--compiler-inlining=false --compiler-optimize-string-concat=false  --compiler-simplify-string-builder=true --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCount31"
@@ -110,7 +110,7 @@
 
 //! CHECKER      JIT, StringBuilder getStringLength calls BCO optimized
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_BCO      output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_BCO      options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN          force_jit: true, options: "", entry: "ets_stringbuilder_length_part3.ETSGLOBAL::main", result: 0
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCount31"

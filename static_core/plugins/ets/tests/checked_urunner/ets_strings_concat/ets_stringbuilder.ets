@@ -15,7 +15,7 @@
 
 //! CHECKER       AOT IR Builder, check StringBuilder::toString replacement
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_BCO       options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC      options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false"
 //!
 //! METHOD        "ets_stringbuilder.ETSGLOBAL::toString0"
@@ -483,7 +483,7 @@ function encodePercentEncoding(str: string) {
 
 //! CHECKER       BCO, check StringBuilder::toString replacement
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
+//! RUN_BCO       options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
 //!
 //! METHOD        "ets_stringbuilder.ETSGLOBAL::toString0"
 //! PASS_AFTER    "BranchElimination"
