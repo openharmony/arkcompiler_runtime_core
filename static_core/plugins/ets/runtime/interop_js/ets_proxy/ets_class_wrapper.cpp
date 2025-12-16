@@ -418,6 +418,7 @@ EtsClassWrapper *EtsClassWrapper::Get(InteropCtx *ctx, EtsClass *etsClass)
 
     std::unique_ptr<EtsClassWrapper> wrapper = EtsClassWrapper::Create(ctx, etsClass);
     if (UNLIKELY(wrapper == nullptr)) {
+        ctx->ForwardEtsException(EtsCoroutine::GetCurrent());
         return nullptr;
     }
     return cache->Insert(etsClass, std::move(wrapper));
@@ -852,8 +853,12 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
         _this->jsproxyWrapper_ = ctx->GetJsProxyInstance(etsClass);
         if (_this->jsproxyWrapper_ == nullptr) {
             // NOTE(konstanting): we assume that the method list stays the same for every proxied class
-            _this->jsproxyWrapper_ =
+            auto *proxyWrapper =
                 js_proxy::JSProxy::CreateBuiltinProxy(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
+            if (proxyWrapper == nullptr) {
+                return nullptr;
+            }
+            _this->jsproxyWrapper_ = proxyWrapper;
             ctx->SetJsProxyInstance(etsClass, _this->jsproxyWrapper_);
         }
     }

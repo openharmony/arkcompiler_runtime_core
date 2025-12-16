@@ -218,7 +218,12 @@ JSProxy *JSProxy::CreateProxy(const uint8_t *descriptor, Class *baseClass, Span<
 
     Class *proxyCls = classLinker->BuildClass(descriptor, true, accessFlags, proxyMethods, fields, baseClass,
                                               interfacesSpan, context, false);
-    ASSERT(proxyCls != nullptr);
+    if (UNLIKELY(proxyCls == nullptr)) {
+        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        classLinker->GetAllocator()->Delete<Method>(proxyMethods.Data());
+        classLinker->GetAllocator()->Delete<Class *>(interfacesSpan.Data());
+        return nullptr;
+    }
     proxyCls->SetState(Class::State::INITIALIZING);
     proxyCls->SetState(Class::State::INITIALIZED);
 

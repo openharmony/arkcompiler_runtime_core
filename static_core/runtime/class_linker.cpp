@@ -1131,7 +1131,7 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescripto
     ASSERT(ext != nullptr);
 
     ClassInfo classInfo {};
-    if (!SetupClassInfo(classInfo, methods, fields, baseClass, interfaces, isInterface, nullptr)) {
+    if (!SetupClassInfo(classInfo, methods, fields, baseClass, interfaces, isInterface, ext->GetErrorHandler())) {
         return nullptr;
     }
 
