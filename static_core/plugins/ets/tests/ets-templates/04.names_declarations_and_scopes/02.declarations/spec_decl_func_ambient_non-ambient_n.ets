@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 /*---
 desc: Declarations must be distinguishable in a declaration space.
 tags: [compile-only, negative]
-expected_out: 'Syntax error ESY0295: Object is a predefined type, cannot be used as an identifier'
+expected_out: "Semantic error ESE0399: Method declaration `foo` must all ambient or non-ambient"
 ---*/
 
-// CTE: Name of the declaration clashes with the predefined type or standard library entity name.
+// CTE: ambient and non-ambient declarations refer to the same entity in a single module
 
-interface Object {}
-
+declare function foo()
+function foo() {}

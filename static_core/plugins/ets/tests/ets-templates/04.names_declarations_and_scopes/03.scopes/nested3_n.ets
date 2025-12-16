@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,6 +19,7 @@ desc: >-
   in this case access to the outer name is not accessible because the
   name with the innermost declaration takes precedence.
 tags: [compile-only, negative]
+expected_out: 'Semantic error ESE0143: Unresolved reference x'
 ---*/
 
 function main() {
