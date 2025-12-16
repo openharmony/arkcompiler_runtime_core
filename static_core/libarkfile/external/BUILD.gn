@@ -19,9 +19,7 @@ if (ark_standalone_build) {
 }
 
 config("libarkfileExt_config") {
-  include_dirs = [
-    "$ark_root"
-  ]
+  include_dirs = [ "$ark_root" ]
 }
 
 ohos_shared_library("libarkfileExt") {
@@ -47,9 +45,7 @@ ohos_shared_library("libarkfileExt") {
 }
 
 config("libarksupport_config") {
-  include_dirs = [
-    "$ark_root"
-  ]
+  include_dirs = [ "$ark_root" ]
 }
 
 ohos_shared_library("libarksupport") {

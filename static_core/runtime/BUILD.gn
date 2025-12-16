@@ -20,16 +20,16 @@ if (ark_standalone_build) {
 } else {
   import("//build/ohos.gni")
   ohos_prebuilt_etc("runtime.para") {
-      source = "//arkcompiler/runtime_core/static_core/runtime/runtime.para"
-      part_name = "runtime_core"
-      subsystem_name = "arkcompiler"
-      module_install_dir = "etc/param"
+    source = "//arkcompiler/runtime_core/static_core/runtime/runtime.para"
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+    module_install_dir = "etc/param"
   }
   ohos_prebuilt_etc("runtime.para.dac") {
-      source = "//arkcompiler/runtime_core/static_core/runtime/runtime.para.dac"
-      part_name = "runtime_core"
-      subsystem_name = "arkcompiler"
-      module_install_dir = "etc/param"
+    source = "//arkcompiler/runtime_core/static_core/runtime/runtime.para.dac"
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+    module_install_dir = "etc/param"
   }
 }
 
@@ -178,6 +178,7 @@ _libarkruntime_calculated_sources = [
   "class_initializer.cpp",
   "class_linker.cpp",
   "class_linker_extension.cpp",
+  "class_lock.cpp",
   "compiler.cpp",
   "compiler_task_manager_worker.cpp",
   "compiler_thread_pool_worker.cpp",
@@ -195,8 +196,8 @@ _libarkruntime_calculated_sources = [
   "coroutines/priority_queue.cpp",
   "coroutines/stackful_coroutine.cpp",
   "coroutines/stackful_coroutine_manager.cpp",
-  "coroutines/stackful_coroutine_worker.cpp",
   "coroutines/stackful_coroutine_state_info.cpp",
+  "coroutines/stackful_coroutine_worker.cpp",
   "coroutines/threaded_coroutine.cpp",
   "coroutines/threaded_coroutine_manager.cpp",
   "default_debugger_agent.cpp",
@@ -208,7 +209,6 @@ _libarkruntime_calculated_sources = [
   "file_manager.cpp",
   "gc_task.cpp",
   "global_object_lock.cpp",
-  "class_lock.cpp",
   "handle_scope.cpp",
   "hotreload/hotreload.cpp",
   "imtable_builder.cpp",
@@ -216,9 +216,9 @@ _libarkruntime_calculated_sources = [
   "interpreter/interpreter.cpp",
   "intrinsics.cpp",
   "jit/libprofile/pgo_file_builder.cpp",
+  "jit/profile_saver_worker.cpp",
   "jit/profiling_loader.cpp",
   "jit/profiling_saver.cpp",
-  "jit/profile_saver_worker.cpp",
   "language_context.cpp",
   "loadable_agent.cpp",
   "lock_order_graph.cpp",
@@ -529,9 +529,9 @@ if (is_ohos && is_standard_system) {
     "PANDA_USE_ETS_UTILS",
   ]
   _libarkruntime_calculated_external_deps += [
+    "ets_utils:console",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
-    "ets_utils:console",
     "libuv:uv",
     "qos_manager:qos",
   ]
@@ -541,9 +541,7 @@ if (is_ohos && is_standard_system) {
       "OHOS_PANDA_TRACE_ENABLE",
       "PANDA_OHOS_GET_PARAMETER",
     ]
-    _libarkruntime_calculated_external_deps += [
-      "init:libbegetutil",
-    ]
+    _libarkruntime_calculated_external_deps += [ "init:libbegetutil" ]
     _libarkruntime_calculated_deps += [
       "$ark_root/etc/para:code_coverage.para",
       "$ark_root/etc/para:code_coverage.para.dac",
@@ -559,10 +557,9 @@ if (is_safepoint_checkers_build) {
   _libarkruntime_calculated_defines += [ "SAFEPOINT_TIME_CHECKER_ENABLED" ]
   _libarkruntime_calculated_sources += [
     "safepoint_timer.cpp",
-    "timer_table.cpp"
+    "timer_table.cpp",
   ]
 }
-
 
 ohos_source_set("libarkruntime_set_static") {
   cflags_cc = [ "-fno-emulated-tls" ]
@@ -614,7 +611,6 @@ ohos_source_set("libarkruntime_set_static_host") {
   defines = _libarkruntime_calculated_defines
   include_dirs = _libarkruntime_calculated_include_dirs
 
-
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name
 }
@@ -645,7 +641,8 @@ ohos_shared_library("libarkruntime") {
   }
 
   if ((current_cpu == "amd64" || current_cpu == "x64" ||
-      current_cpu == "x86_64") && (ark_standalone_build || ark_static_standalone_build)) {
+       current_cpu == "x86_64") &&
+      (ark_standalone_build || ark_static_standalone_build)) {
     ldflags += [ "-latomic" ]
   }
 
@@ -669,7 +666,8 @@ ohos_shared_library("libarkruntime_host") {
   }
 
   if ((current_cpu == "amd64" || current_cpu == "x64" ||
-      current_cpu == "x86_64") && (ark_standalone_build || ark_static_standalone_build)) {
+       current_cpu == "x86_64") &&
+      (ark_standalone_build || ark_static_standalone_build)) {
     ldflags = [ "-latomic" ]
   }
 

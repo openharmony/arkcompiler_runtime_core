@@ -49,8 +49,8 @@ ohos_source_set("abckit_adapter_static_source_set") {
     "modify_name_helper.cpp",
     "name_util.cpp",
     "runtime_adapter_static.cpp",
-    "utils/function_util.cpp",
     "string_util.cpp",
+    "utils/function_util.cpp",
   ]
 
   ins_create_wrapper_dyn_dir =

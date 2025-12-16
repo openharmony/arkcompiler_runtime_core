@@ -79,9 +79,7 @@ foreach(file, abc2prog_test_release_column_number_files) {
   }
 }
 
-abc2prog_test_debug_line_number_files = [
-  "TsCommonSyntax",
-]
+abc2prog_test_debug_line_number_files = [ "TsCommonSyntax" ]
 
 foreach(file, abc2prog_test_debug_line_number_files) {
   es2abc_gen_abc("gen_${file}_abc") {
@@ -92,14 +90,14 @@ foreach(file, abc2prog_test_debug_line_number_files) {
     dst_file = rebase_path(test_abc)
     extra_args = [
       "--debug",
-      "--module"
+      "--module",
     ]
     in_puts = [ test_ts ]
     out_puts = [ test_abc ]
   }
 }
 
-abc2prog_test_js_files = [ "JsCommonSyntax"]
+abc2prog_test_js_files = [ "JsCommonSyntax" ]
 
 foreach(file, abc2prog_test_js_files) {
   es2abc_gen_abc("gen_${file}_abc") {
@@ -202,12 +200,12 @@ abc2prog_include_dirs = [
 
 script_sources = [
   "cpp_sources/abc2program_test_utils.cpp",
+  "cpp_sources/debug_line_number.cpp",
   "cpp_sources/etsImplements_test.cpp",
   "cpp_sources/hello_world_test.cpp",
+  "cpp_sources/js_common_syntax_test.cpp",
   "cpp_sources/release_column_number.cpp",
   "cpp_sources/release_line_number.cpp",
-  "cpp_sources/js_common_syntax_test.cpp",
-  "cpp_sources/debug_line_number.cpp",
 ]
 
 host_unittest_action("Abc2ProgScriptTest") {

@@ -62,12 +62,15 @@ _ark_aot_deps = [
 ]
 
 if (enable_codegen) {
-  _ark_aot_configs += [ "$ark_root/compiler/optimizer/code_generator:arkencoder_config" ]
-  _ark_aot_deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
+  _ark_aot_configs +=
+      [ "$ark_root/compiler/optimizer/code_generator:arkencoder_config" ]
+  _ark_aot_deps +=
+      [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
 }
 
 if (is_llvm_aot) {
-  _ark_aot_configs += [ "$ark_root/libllvmbackend:libllvmbackend_public_config" ]
+  _ark_aot_configs +=
+      [ "$ark_root/libllvmbackend:libllvmbackend_public_config" ]
   _ark_aot_sources += [ "paoc_llvm.cpp" ]
   _ark_aot_deps += [ "$ark_root/libllvmbackend:libllvmbackend" ]
 }
@@ -81,8 +84,8 @@ ohos_executable("ark_aot") {
 
   deps = _ark_aot_deps
   deps += [
-    "$ark_root/runtime:libarkruntime",
     "$ark_root/compiler:libarktscompiler",
+    "$ark_root/runtime:libarkruntime",
   ]
 
   external_deps = _ark_aot_external_deps
@@ -100,8 +103,8 @@ ohos_executable("ark_aot_host") {
 
   deps = _ark_aot_deps
   deps += [
-    "$ark_root/runtime:libarkruntime_host",
     "$ark_root/compiler:libarktscompiler_host",
+    "$ark_root/runtime:libarkruntime_host",
   ]
 
   external_deps = _ark_aot_external_deps

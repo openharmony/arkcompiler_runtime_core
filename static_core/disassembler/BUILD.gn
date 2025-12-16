@@ -136,9 +136,7 @@ ohos_executable("arkts_disasm") {
   output_name = "ark_disasm_static"
   sources = [ "disasm.cpp" ]
 
-  include_dirs = [
-    "$target_gen_dir",
-  ]
+  include_dirs = [ "$target_gen_dir" ]
 
   configs = [
     "$ark_root:ark_config",

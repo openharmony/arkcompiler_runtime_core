@@ -21,8 +21,7 @@ if (ark_standalone_build) {
 }
 
 config("arklinker_public_config") {
-  include_dirs = [
-  ]
+  include_dirs = []
 }
 
 arklinker_sources = [
@@ -41,9 +40,7 @@ arklinker_configs = [
 ohos_shared_library("arklinker") {
   sources = arklinker_sources
 
-  include_dirs = [
-    "$target_gen_dir",
-  ]
+  include_dirs = [ "$target_gen_dir" ]
 
   configs = arklinker_configs
 
@@ -79,9 +76,7 @@ ark_gen_file("link_options_h") {
 ohos_static_library("arklinker_static") {
   sources = arklinker_sources
 
-  include_dirs = [
-    "$target_gen_dir",
-  ]
+  include_dirs = [ "$target_gen_dir" ]
 
   configs = arklinker_configs
 

@@ -21,9 +21,7 @@ if (ark_standalone_build) {
 ohos_executable("verifier_bin") {
   sources = [ "verifier.cpp" ]
 
-  include_dirs = [
-    "$target_gen_dir",
-  ]
+  include_dirs = [ "$target_gen_dir" ]
 
   configs = [
     "$ark_root:ark_config",

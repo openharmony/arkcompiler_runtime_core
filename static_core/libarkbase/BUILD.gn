@@ -162,23 +162,19 @@ if (is_debug) {
 }
 
 if (current_cpu == "arm64" && !is_mac && target_os != "ios") {
-  libarkbase_sources +=
-      [ "$ark_root/libarkbase/arch/aarch64/cpu_features.cpp" ]
+  libarkbase_sources += [ "$ark_root/libarkbase/arch/aarch64/cpu_features.cpp" ]
 } else {
-  libarkbase_sources +=
-      [ "$ark_root/libarkbase/arch/default/cpu_features.cpp" ]
+  libarkbase_sources += [ "$ark_root/libarkbase/arch/default/cpu_features.cpp" ]
 }
 
 if (is_mob) {
   copy("coherency_line_size_h") {
-    sources =
-        [ "$ark_root/platforms/mobile/libarkbase/coherency_line_size.h" ]
+    sources = [ "$ark_root/platforms/mobile/libarkbase/coherency_line_size.h" ]
     outputs = [ "$target_gen_dir/generated/coherency_line_size.h" ]
   }
 } else {
   copy("coherency_line_size_h") {
-    sources =
-        [ "$ark_root/platforms/common/libarkbase/coherency_line_size.h" ]
+    sources = [ "$ark_root/platforms/common/libarkbase/coherency_line_size.h" ]
     outputs = [ "$target_gen_dir/generated/coherency_line_size.h" ]
   }
 }
@@ -205,7 +201,7 @@ config("arkbase_public_config") {
     ldflags = [ "-ldl" ]
   }
 
-#  configs = [ sdk_libc_secshared_config ]
+  #  configs = [ sdk_libc_secshared_config ]
 }
 
 if (!ark_static_standalone_build) {
@@ -253,9 +249,11 @@ ohos_source_set("libarktsbase_static") {
 
   external_deps = [ sdk_libc_secshared_dep ]
 
-  if (is_ohos && is_standard_system && (current_cpu == "arm" || current_cpu == "arm64") && runtime_core_enable_ffrt) {
+  if (is_ohos && is_standard_system &&
+      (current_cpu == "arm" || current_cpu == "arm64") &&
+      runtime_core_enable_ffrt) {
     external_deps += [ "ffrt:libffrt" ]
-    defines = ["PANDA_USE_FFRT"]
+    defines = [ "PANDA_USE_FFRT" ]
   }
 
   part_name = ark_part_name

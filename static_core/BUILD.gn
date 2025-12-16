@@ -372,18 +372,16 @@ config("ark_common_config") {
   }
 
   if (is_gcov_tools) {
-      cflags = [
-          "-fprofile-instr-generate",
-          "-fcoverage-mapping",
-      ]
+    cflags = [
+      "-fprofile-instr-generate",
+      "-fcoverage-mapping",
+    ]
   }
 }
 
 config("ark_config") {
   defines = []
-  configs = [
-    ":ark_common_config",
-  ]
+  configs = [ ":ark_common_config" ]
   if (is_linux) {
     if (enable_irtoc) {
       defines += [ "PANDA_WITH_IRTOC" ]
@@ -402,9 +400,8 @@ config("ark_config") {
 
 config("ark_host_config") {
   defines = []
-  configs = [
-    ":ark_common_config",
-  ]
+  configs = [ ":ark_common_config" ]
+
   # For host tools, IRTOC requires both conditions to avoid link errors
   if (is_linux) {
     if (enable_irtoc && (ark_static_standalone_build || ark_standalone_build)) {

@@ -189,9 +189,9 @@ libarkcompiler_sources = [
   "optimizer/optimizations/scheduler.cpp",
   "optimizer/optimizations/simplify_string_builder.cpp",
   "optimizer/optimizations/string_builder_utils.cpp",
+  "optimizer/optimizations/string_flat_check.cpp",
   "optimizer/optimizations/try_catch_resolving.cpp",
   "optimizer/optimizations/vn.cpp",
-  "optimizer/optimizations/string_flat_check.cpp",
   "optimizer/pass.cpp",
   "optimizer/pass_manager.cpp",
   "optimizer/pass_manager_statistics.cpp",
@@ -264,6 +264,7 @@ group("arktscompiler_header_deps") {
     ":libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsic_codegen_test_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsic_flags_test_inl",
+    ":libarkcompiler_intrinsics_gen_inl_intrinsic_string_flat_check_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_codegen_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_codegen_inl_h",
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
@@ -271,7 +272,6 @@ group("arktscompiler_header_deps") {
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_inline_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
     ":libarkcompiler_intrinsics_gen_inl_intrinsics_peephole_inl",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsic_string_flat_check_inl",
     ":libarkcompiler_opcodes_h_IR-instructions_md",
     ":libarkcompiler_opcodes_h_arch_info_gen_h",
     ":libarkcompiler_opcodes_h_codegen_arm64_gen_inc",
@@ -339,7 +339,7 @@ ohos_shared_library("libarktscompiler") {
   sources = libarkcompiler_sources
 
   public_configs = _libarktscompiler_calculated_configs
-  public_configs += ["$ark_root:ark_config"]
+  public_configs += [ "$ark_root:ark_config" ]
 
   deps = _libarktscompiler_calculated_deps
 
@@ -367,9 +367,9 @@ ohos_shared_library("libarktscompiler") {
 
 ohos_shared_library("libarktscompiler_host") {
   public_configs = _libarktscompiler_calculated_configs
-  public_configs += ["$ark_root:ark_host_config"]
+  public_configs += [ "$ark_root:ark_host_config" ]
 
-  if (current_toolchain == host_toolchain){
+  if (current_toolchain == host_toolchain) {
     sources = libarkcompiler_sources
     deps = _libarktscompiler_calculated_deps
     external_deps = _libarktscompiler_calculated_external_deps
@@ -390,7 +390,7 @@ ohos_source_set("libarktscompiler_frontend_static") {
   sources = libarkcompiler_sources
 
   configs = libarkcompiler_configs
-  configs += ["$ark_root:ark_config"]
+  configs += [ "$ark_root:ark_config" ]
 
   deps = [
     ":arktscompiler_header_deps",
