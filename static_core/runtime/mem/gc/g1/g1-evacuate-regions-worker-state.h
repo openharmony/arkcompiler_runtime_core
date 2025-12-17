@@ -140,6 +140,7 @@ private:
     size_t regionSizeBits_;
     GCAdaptiveStack<Ref> *refStack_;
     EvacuationObjectPointerHandler<LanguageConfig> evacuationObjectPointerHandler_;
+    EvacuationObjectPointerHandler<LanguageConfig, true> evacuationObjectPointerWithUpdRemsetHandler_;
 
     PandaSet<CardTable::CardPtr> cardQueue_;
     CardTable::CardPtr latestCard_ {nullptr};

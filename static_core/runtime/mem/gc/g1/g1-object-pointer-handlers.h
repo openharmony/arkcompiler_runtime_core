@@ -82,7 +82,7 @@ private:
     const Handler &handler_;
 };
 
-template <class LanguageConfig>
+template <class LanguageConfig, bool NEED_UPDATE_REMSET = false>
 class EvacuationObjectPointerHandler {
 public:
     using Ref = typename ObjectReference<LanguageConfig::LANG_TYPE>::Type;
@@ -111,7 +111,13 @@ private:
                            << " accessed from object: " << fromObject;
             workerState_->PushToQueue(ref);
         } else if (!workerState_->IsSameRegion(ref, obj)) {
-            workerState_->EnqueueCard(ref);
+            if constexpr (NEED_UPDATE_REMSET) {
+                // Need to update Remset by current thread
+                RemSet<>::AddRefWithAddr<false>(fromObject, ToUintPtr(ref) - ToUintPtr(fromObject), obj);
+            } else {
+                // Add a card so that UpdateRemsetWorker thread updates Remset in the future.
+                workerState_->EnqueueCard(ref);
+            }
         }
     }
 
