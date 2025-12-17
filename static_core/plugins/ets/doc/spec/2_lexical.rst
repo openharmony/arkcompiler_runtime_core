@@ -203,7 +203,7 @@ specified by the Unicode Standard.
 
 The first character in an identifier must be ``'$'``, ``'_'``, or any Unicode
 code point with the Unicode property 'ID_Start'[2]_. Other characters
-must be Unicode code points with the Unicode property, or one of the following
+must be Unicode code points with the Unicode property or one of the following
 characters:
 
 -  ``'$'`` (\\U+0024),
@@ -290,7 +290,7 @@ Keywords
 
 *Keywords* are reserved words with meanings permanently predefined in |LANG|.
 Keywords are case-sensitive, and their exact spelling is presented in the
-following four tables. The kinds of keywords are discussed below.
+four tables below. The kinds of keywords are discussed below.
 
 1. The following *hard keywords* are reserved in any context, and
 cannot be used as identifiers:
@@ -315,9 +315,9 @@ cannot be used as identifiers:
 |   ``await``        |   ``false``       |   ``null``       |   ``try``        |
 +--------------------+-------------------+------------------+------------------+
 |   ``break``        |   ``final``       |   ``overload``   |   ``typeof``     |
-+--------------------+-------------------+-------------+----+------------------+
++--------------------+-------------------+------------------+------------------+
 |   ``case``         |   ``for``         |   ``override``   |   ``undefined``  |
-+--------------------+----+--------------+------------------+------------------+
++--------------------+-------------------+------------------+------------------+
 |   ``class``        |   ``function``    |   ``private``    |   ``while``      |
 +--------------------+-------------------+------------------+------------------+
 |   ``const``        |   ``if``          |   ``protected``  |                  |
@@ -346,9 +346,9 @@ cannot be used as identifiers:
    |   ``await``        |   ``false``       |   ``null``       |   ``true``       |
    +--------------------+-------------------+------------------+------------------+
    |   ``break``        |   ``final``       |   ``overload``   |   ``try``        |
-   +--------------------+-------------------+-------------+----+------------------+
+   +--------------------+-------------------+------------------+------------------+
    |   ``case``         |   ``for``         |   ``override``   |   ``typeof``     |
-   +--------------------+----+--------------+------------------+------------------+
+   +--------------------+-------------------+------------------+------------------+
    |   ``class``        |   ``function``    |   ``private``    |   ``undefined``  |
    +--------------------+-------------------+------------------+------------------+
    |   ``const``        |   ``if``          |   ``protected``  |   ``while``      |
@@ -365,14 +365,13 @@ cannot be used as identifiers:
    +--------------------+-------------------+------------------+------------------+
 
 
-
 |
 
-2. Names and aliases of predefined types are *hard keywords*, and cannot be
+2. Names and aliases of predefined types are *hard keywords*. They cannot be
 used as identifiers:
 
 +---------------+---------------+
-| Primary name  | Alias         |
+| Primary Name  | Alias         |
 +===============+===============+
 | ``Any``       |               |
 +---------------+---------------+
@@ -428,7 +427,7 @@ are valid identifiers elsewhere:
 +--------------------+--------------------+
 
 4. The following identifiers are also treated as *soft keywords* reserved for
-the future use, or currently used in |TS|:
+the future use or currently used in |TS|:
 
 .. index::
    identifier
@@ -439,6 +438,7 @@ the future use, or currently used in |TS|:
 +===============+===============+===============+===============+================+
 |    ``is``     |   ``memo``    |   ``struct``  |    ``var``    |  ``yield``     |
 +---------------+---------------+---------------+---------------+----------------+
+
 
 |
 
@@ -520,9 +520,8 @@ Literals
       | CharLiteral
       ;
 
-See :ref:`Character Literals` for the experimental ``char literal``.
-
-Each literal is described in detail below.
+Each literal is described in detail below. The experimental ``char literal``
+is discussed in :ref:`Character Literals`.
 
 .. index::
    literal
@@ -791,10 +790,9 @@ The concept is represented by the examples below:
     0xBAD_3n // bigint literal in hexadecimal notation
 
 The underscore character ``'_'`` between successive digits can be used to
-improve readability. Underscore characters in
-such positions do not change the values of literals. However, the underscore
-character must be neither the very first nor the very last symbol of a ``bigint``
-literal.
+improve readability. Underscore characters in such positions do not change
+the values of literals. However, the underscore character must be neither
+the very first nor the very last symbol of a ``bigint`` literal.
 
 Strings that represent numbers or any integer value can be converted to
 ``bigint`` by using built-in functions as follows:
@@ -828,6 +826,8 @@ follows:
 .. index::
    decimal
    radix
+
+|
 
 .. _Boolean Literals:
 
@@ -865,9 +865,9 @@ String Literals
     frontend_status: Done
     todo: "" sample is invalid: SyntaxError: Newline is not allowed in strings
 
-*String literals* consist of zero or more characters enclosed between
-single or double quotes. A special form of string literals is
-*multiline string* literal (see :ref:`Multiline String Literal`).
+*String literals* comprizes of zero or more characters enclosed between
+single or double quotes. A *multiline string* literal (see
+:ref:`Multiline String Literal`) is а special form of a string literal.
 
 *String literals* are of the literal type that corresponds to the literal.
 If an operator is applied to the literal, then the literal type is replaced
@@ -909,7 +909,7 @@ or Unicode codes. Such constructs are called *escape sequences*.
 
 Escape sequences can represent graphic characters within a *string literal*,
 e.g., single quotes (``'``), double quotes (``"``), backslashes (``\``),
-and some others. An escape sequence always starts with the backslash character
+and more. An escape sequence always starts with the backslash character
 ``'\'``, followed by one of the following characters:
 
 .. index::
@@ -986,9 +986,9 @@ Multiline String Literal
 .. meta:
     frontend_status: Done
 
-*Multiline strings* can contain arbitrary text delimited by backtick characters
-``'`` \` ``'``. Multiline strings can contain any character, except the backlash
-character ``'\'``. Multiline strings can contain newline characters:
+*Multiline strings* can contain arbitrary text enclosed between backtick
+characters ``'`` \` ``'``. Multiline strings can contain any character but
+the backlash ``'\'``. Multiline strings can contain newline characters:
 
 .. index::
    string literal
@@ -997,7 +997,9 @@ character ``'\'``. Multiline strings can contain newline characters:
    string interpolation
    multiline string
    backtick
-   escape character
+   escape
+   newline
+   character
 
 .. code-block:: abnf
 
@@ -1018,7 +1020,7 @@ character ``'\'``. Multiline strings can contain newline characters:
 The grammar of *embeddedExpression* is described in
 :ref:`String Interpolation Expressions`.
 
-An example of a multiline string is provided below:
+A multiline string is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1028,7 +1030,7 @@ An example of a multiline string is provided below:
                     which should be enclosed in
                     backticks`
 
-*MultilineString* literals are of the literal type that corresponds to a literal.
+*MultilineString* literals are of literal types corresponding to the literals.
 If an operator is applied to a literal, then the literal type is replaced for
 ``string`` (see :ref:`Type String`).
 
@@ -1098,10 +1100,10 @@ Regex Literal
         'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'? 
         ;
 
-Regex flags can be put in any order. However, a duplication of the regex flag
+Regex flags can be put in any order. However, a duplication of a regex flag
 causes a :index:`compile-time error`.
 
-An example of regex literals is provided below:
+*Regex literals* are represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1118,8 +1120,8 @@ An example of regex literals is provided below:
     let regex1 = /abc/ 
     let regex2 = new RegExp ("abc")
 
-The semantics of *regex literals* supported by |LANG| and the semantics of
-regular expressions in |JS| are the same.
+The semantics of *regex literals* supported by |LANG| and of regular expressions
+in |JS| are the same.
 
 |
 
@@ -1230,7 +1232,7 @@ Semicolons
 
 Declarations and statements are usually terminated by a line separator (see
 :ref:`Line Separators`). A semicolon must be used in some cases to separate
-syntax productions written in one line or to avoid ambiguity.
+syntax productions written in one line, or to avoid ambiguity.
 
 .. index::
    declaration
