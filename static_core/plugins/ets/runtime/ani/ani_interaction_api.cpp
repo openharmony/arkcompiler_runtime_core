@@ -537,7 +537,7 @@ static ani_status ObjectCallMethodByName(ani_env *env, ani_object object, const 
     } else if (methodName.rfind("<set>", 0) == 0) {
         methodName.replace(0, oldGetSetPrefixLength, "%%set-");
     }
-    ani_status status = DoGetClassMethodUnderManagedScope<false>(cls, methodName.c_str(), signature, &method);
+    ani_status status = DoGetClassMethod<false>(cls, methodName.c_str(), signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ASSERT(method != nullptr);
     ani_method aniMethod = ToAniMethod(method);
