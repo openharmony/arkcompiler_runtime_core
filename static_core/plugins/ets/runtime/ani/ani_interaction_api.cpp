@@ -529,7 +529,15 @@ static ani_status ObjectCallMethodByName(ani_env *env, ani_object object, const 
     ASSERT(etsObject != nullptr);
     EtsClass *cls = etsObject->GetClass();
     EtsMethod *method = nullptr;
-    ani_status status = DoGetClassMethod<false>(cls, name, signature, &method);
+    // Note: remove this code as soon as new mangler rules have merged.
+    constexpr std::size_t oldGetSetPrefixLength = 5;
+    std::string methodName(name);
+    if (methodName.rfind("<get>", 0) == 0) {
+        methodName.replace(0, oldGetSetPrefixLength, "%%get-");
+    } else if (methodName.rfind("<set>", 0) == 0) {
+        methodName.replace(0, oldGetSetPrefixLength, "%%set-");
+    }
+    ani_status status = DoGetClassMethodUnderManagedScope<false>(cls, methodName.c_str(), signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ASSERT(method != nullptr);
     ani_method aniMethod = ToAniMethod(method);
@@ -1755,10 +1763,12 @@ NO_UB_SANITIZE static ani_status Class_FindMethod(ani_env *env, ani_class cls, c
     ani_status status;
 
     // Note: remove this code as soon as new mangler rules have merged.
-    constexpr std::size_t oldGetPrefixLength = 5;
+    constexpr std::size_t oldGetSetPrefixLength = 5;
     std::string methodName(name);
     if (methodName.rfind("<get>", 0) == 0) {
-        methodName.replace(0, oldGetPrefixLength, "%%get-");
+        methodName.replace(0, oldGetSetPrefixLength, "%%get-");
+    } else if (methodName.rfind("<set>", 0) == 0) {
+        methodName.replace(0, oldGetSetPrefixLength, "%%set-");
     }
     status = GetClassMethod<false>(env, cls, methodName.c_str(), signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
