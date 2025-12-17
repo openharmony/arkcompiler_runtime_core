@@ -64,7 +64,7 @@ export class RegExpResultArray extends Array<String | undefined> {
         return this
     }
 
-    public postExecProcessing(res: RegExpResultArray, input: String, index: int, hasIndices: boolean, 
+    public postExecProcessing(res: RegExpResultArray, input: String, index: int, hasIndices: boolean,
                               indecesUpdater: (length: int, index: int, str: String) => void): void {
         // NOTE(ekaterinazaytseva): temp solution - will be fixed in #20259
         this.updateGroups()
@@ -131,7 +131,7 @@ export class RegExpResultArray extends Array<String | undefined> {
         return this.wasProcessed
     }
 
-    private updateIndicesAndResult(hasIndices: boolean, 
+    private updateIndicesAndResult(hasIndices: boolean,
                                    indecesUpdater: (length: int, index: int, str: String) => void): void {
         const data = this.resultRaw_.split(',')
         const n: int = (data.length / 2)
@@ -954,7 +954,7 @@ export class RegExp extends Object {
     public static $_invoke(pattern: String, flags?: String) : RegExp {
         return new RegExp(pattern, flags)
     }
-    
+
     public static $_invoke(pattern: RegExp | String, flags?: String) : RegExp {
         return new RegExp(pattern, flags)
     }
@@ -990,7 +990,7 @@ export class RegExp extends Object {
         if (index == length - 1) {
             RegExp.lastParen_ = value
         }
-        
+
         if (index > 9 || index <= 0) {
             return
         }
@@ -1023,6 +1023,9 @@ export class RegExp extends Object {
     private init(pattern: String, flags?: String) {
         this.pattern_ = pattern
         this.flags_ = flags === undefined ? "" : flags!
+        if (!this.pattern_.isWellFormed()) {
+            this.flags_ = this.flags_.replaceAll('u', '');
+        }
         this.source_ = RegExp.escapePattern(pattern)
         this.flags_ = Array.from(this.flags_.split("")).sort().join("")
         RegExp.parse(pattern, this.flags_)
