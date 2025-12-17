@@ -374,7 +374,7 @@ The usage of namespaces is represented in the example below:
            }
        }
 
-   This code is illustratative of the use of declarations in the case below:
+   This code is illustrative of the use of declarations in the case below:
 
    .. code-block:: typescript
       :linenos:
@@ -529,6 +529,8 @@ Import with ``type`` modifier is discussed in :ref:`Import Type Directive`.
 
 A :index:`compile-time error` occurs if:
 
+-  ``import`` directive is preceded by any non-import directive,
+   declaration or statement.
 -  Entity added to the scope of a module by a binding is not
    distinguishable;
 -  Module imports itself directly: ``importPath`` refers to the
@@ -616,8 +618,9 @@ There are two forms of *default import binding*:
 .. code-block:: typescript
    :linenos:
 
-    import DefaultExportedItemBindedName from ".../someFile"
-    import {default as DefaultExportedItemNewName} from  ".../someFile"
+    // Module 1
+    import DefaultExportedItemBindedName from "Module 2"
+    import {default as DefaultExportedItemNewName} from "Module 2"
     function foo () {
       let v1 = new DefaultExportedItemBindedName()
       // instance of class 'SomeClass' to be created here
@@ -625,12 +628,18 @@ There are two forms of *default import binding*:
       // instance of class 'SomeClass' to be created here
     }
 
-    // SomeFile
+    // Module 2
     export default class SomeClass {}
 
-    // Or
+    // Module 3 - the same semantocs as in Module 2
     class SomeClass {}
     export default SomeClass
+
+   // Module 4
+   export default from "Module 2" // Module 4 re-exports default export of Modue 2
+   export {default as SomeClassNewName} from "Module 2" 
+      // Module 4 re-exports default export of Modue 2 as a new exprted name
+
 
 .. index::
    import binding
@@ -856,7 +865,7 @@ module is to be searched for.
 
 - Initial dot  ``'.'`` or two dots ``'..'`` followed by the slash character ``'/'``.
 - One or more path components (the subset of characters and case sensitivity of
-  path components must follow the path rules of a host filesystem).
+  path components must follow the path rules of a host file system).
 - Slash characters separating components of the path.
 
 The slash character ``'/'`` is used in import paths irrespective of the host
@@ -875,7 +884,7 @@ the import path to a file path of the host system.
    compilation
    import path
    context
-   filesystem
+   file system
    relative import path
    non-relative import path
    resolution
@@ -945,7 +954,7 @@ and ``std/components/treemap`` to ``/arkts/stdlib/components/treemap``.
 File name, placement, and format are implementation-specific.
 
 If the above configuration is in effect, the first path maps directly to
-filesystem after applying ``baseUrl``, while ``std`` in the second path is
+file system after applying ``baseUrl``, while ``std`` in the second path is
 replaced for ``/arkts/stdlib``. Examples of non-relative paths are presented
 below.
 
@@ -972,7 +981,7 @@ below.
    resolution
    implementation
    treemap
-   filesystem
+   file system
 
 
 |
@@ -1823,8 +1832,8 @@ Entry point functions have the following features:
 - Entry point function must either have no parameters, or have one parameter of
   type ``string[]`` that provides access to the arguments of a program command
   line;
-- Entry point function return type is either ``void`` (see :ref:`Type void`) or
-  ``int``;
+- Entry point function return type is either ``void`` (see
+  :ref:`Types void or undefined`) or ``int``;
 - Entry point function cannot be overloaded;
 - Entry point function is called ``main`` by default.
 

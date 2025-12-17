@@ -52,7 +52,7 @@ The *laziness* of |LANG| 2.0 source code imported by |LANG| 1.0 is regulated
 with the |LANG| 1.0 import code itself because |LANG| 2.0 simply builds a
 module object when the module object is requested for the first time.
 
-The exisitng mainline already limits the usage of side effects in top-level
+The existing mainline already limits the usage of side effects in top-level
 scopes. Binding the initialization of nested scopes to a trigger initialization
 of import can be considered optionally to debug an application.
 
@@ -87,22 +87,22 @@ If source code in ``appsrc/mod.ets`` is as follows:
         static x3 = foo()
     }
 
---then the intialization is performed as represented below:
+--then the initialization is performed as represented below:
 
 .. code-block:: typescript
     :linenos:
 
     import {A, foo} from "module1" // no side effects
 
-    foo()  // call to function "foo" from "module1" toplevel triggers "module1.GLOBAL"
+    foo()  // call to function "foo" from "module1" top-level triggers "module1.GLOBAL"
            // at this point "module1.A" is not affected
     A.prop // access to static property of A triggers "module1.A"
 
-    // call to this function triggers the surrounding toplevel scope intializer
+    // call to this function triggers the surrounding top-level scope initializer
     export function bar() {}
 
     // instantiation "new A()" DOES NOT trigger
-    // the surrounding toplevel scope initializer
+    // the surrounding top-level scope initializer
     export class A { }
 
 |
@@ -126,7 +126,7 @@ The following rules apply:
   qualified names that are not modified by runtime onload events, i.e., an
   executable binary file is *flat* in terms of runtime names.
 
-- Executable binary file by itself has no associated name or entrypoint,
+- Executable binary file by itself has no associated name or entry point,
   and is not associated with any source file.
 
 - Executable binary file can be moved within a file system, and runtime is not
@@ -204,7 +204,7 @@ the core runtime side.
 
     /*
      * appspawn code, post-fork, create a new 'app' context RuntimeLinker
-     * specifing all the files that are in intial ability har
+     * specifying all the files that are in initial ability HAR
      */
     let app = new AbcRuntimeLinker(boot, ["app.abc"])
 
@@ -233,7 +233,7 @@ Runtime resolution request has two inputs:
 Load Contexts
 =============
 
-Each class is assoiated with the context it is loaded into. A context can list
+Each class is associated with the context it is loaded into. A context can list
 classes, and a class has a link back to the context it is loaded into.
 
 All references from bytecode to classes and methods are lazily resolved by
@@ -244,7 +244,7 @@ the following rules:
 #. Obtain a context of the class, and perform fast lookup to check if the class
    is already available in the context.
 
-#. Obtain an associated loader, and perform the resoltuion specified by the
+#. Obtain an associated loader, and perform the resolution specified by the
    custom loader code.
 
 #. Loader can delegate the request to its *parent* loader.

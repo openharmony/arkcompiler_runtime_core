@@ -660,7 +660,10 @@ Implicit Generic Instantiations
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
 Such type arguments are inferred (see :ref:`Type Inference`) from the context
-in which a generic is referred. It is represented in the example below:
+in which a generic is referred. If type arguments can not be inferred then
+a :index:`compile-time error` occurs.
+
+Different cases type argument inference are represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -669,7 +672,6 @@ in which a generic is referred. It is represented in the example below:
     foo (new Object, new Object)     // Implicit generic function instantiation
       // based on argument types: the type argument is inferred
 
-
     function process <P, R> (arg: P, cb?: (p: P) => R): P | R {
        // return the data itself or if the processing function provided the
        // result of processing
@@ -677,9 +679,43 @@ in which a generic is referred. It is represented in the example below:
     }
     process (123, () => {}) // P is inferred as 'int', while R is 'void'
 
+    function bar <T> (p: number) {}
+    bar (1) // Compile-time error: type argument can not be inferred
 
 
 Implicit instantiation is only possible for generic functions and methods.
+
+In case when the generic class or interface method has its own type parameter
+with the its type parameter default (see :ref:`Type Parameter Default`) equal
+to the class or interface type parameter, the implicit generic instantiation of
+such method will use the argument types for the method type argument inference
+and class or interface type argument when the context, defined by parameter
+types, has no information how to infer the type argument.
+
+Example below illustartes that:
+
+.. code-block:: typescript
+   :linenos:
+
+    class A <T> {  // T is the class type parameter
+        foo<U = T> (p: U) {} /* Method 'foo' has its own type parameter with
+                                   the default type parameter */
+        bar<U = T> () { // No parameters - no context
+           let l: U = this.field
+        } 
+        
+    }
+
+    // T1 and T2  are two distinct types
+
+    (new A<T1>).foo (new T2) // implicit instantiation of 'foo', type of argument is used
+    // The same as explicit instantiation
+    (new A<T1>).foo<T2> (new T2)
+
+
+    (new A<T1>).bar()  // bar is instantiated as bar<T1>, type of class type argument is used
+    (new A<T1>).bar<T2> () // explicit instantiation
+
 
 .. index::
    instantiation
@@ -706,7 +742,7 @@ Utility Types
 |LANG| supports several embedded types, called *utility* types. Utility types
 allow constructing new types by adjusting properties of initial types, for
 which purpose notations identical to generics are used. If the initial types
-are class or interface, then the resultant utility types are also handled as
+are class or interface, then the resultant utility types are also handled as 
 class or interface types.
 All utility type names are accessible as simple names (see :ref:`Accessible`)
 in any module across all its scopes. Using these names as user-defined entities

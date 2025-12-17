@@ -121,7 +121,6 @@ is an implicit coroutine that can be called as a regular method.
 The syntax of *await expression* is presented below:
 
 .. code-block:: abnf
-    :donotcompile:
 
     awaitExpression:
         'await' expression
@@ -222,7 +221,6 @@ The methods are used as follows:
         Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<U|E>
 
 .. code-block:: typescript
-    :donotcompile:
 
         Promise<U>::then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined, onRejected: ((error: Any) => E|PromiseLike<E> throws)|undefined): Promise<Awaited<U|E>>
 
@@ -231,7 +229,6 @@ The methods are used as follows:
 .. code-block-meta:
 
 .. code-block:: typescript
-    :donotcompile:
 
         Promise<U>::catch<U = never>(onRejected?: (error: Any) => U|PromiseLike<U> throws): Promise<Awaited<T | U>>
 
@@ -240,7 +237,6 @@ The methods are used as follows:
 
 
 .. code-block:: typescript
-    :donotcompile:
 
         finally(onFinally?: () => void throws): Promise<Awaited<T>>
 
