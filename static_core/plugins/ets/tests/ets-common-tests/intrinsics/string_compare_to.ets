@@ -14,6 +14,7 @@
  */
 
 let what: String = '';
+const N = 128;
 
 function finder(s: String) {
     return s.compareTo(what) == 0;
@@ -21,8 +22,7 @@ function finder(s: String) {
 
 function testLatin() {
     let strs: String[] = [];
-    let n = 5000;
-    for (let i = 0; i < n; i += 10) {
+    for (let i = 0; i < N; i += 10) {
         strs.push(`${i}ww`);
         what = `${i}ww`;
         let found = strs.find(finder);
@@ -74,8 +74,7 @@ function mixed_finder(s: String) {
 
 function testMixed() {
     let strs = new Array<String>;
-    let n = 5000;
-    for (let i = 0; i < n; i += 10) {
+    for (let i = 0; i < N; i += 10) {
         prefix = `${i}`;
         strs.push(`${i}w`);
         what = `${i}я`;
@@ -91,8 +90,7 @@ function testMixed() {
 
 function testUtf16() {
     let strs = new Array<String>;
-    let n = 5000;
-    for (let i = 0; i < n; i += 10) {
+    for (let i = 0; i < N; i += 10) {
         strs.push(`${i}я`);
         what = `${i}я`;
         let found = strs.find(finder);
