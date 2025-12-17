@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,7 +173,8 @@ inline MmapMemPool::MmapMemPool() : MemPool("MmapMemPool"), nonObjectSpacesCurre
         LOG_MMAP_MEM_POOL(FATAL) << "The memory limits is too high. We can't allocate so much memory from the system";
     }
     ASSERT(objectSpaceSize <= PANDA_MAX_HEAP_SIZE);
-#if defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64) && !defined(PANDA_TARGET_WINDOWS)
+#if defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64) && !defined(PANDA_TARGET_WINDOWS) && \
+    !defined(PANDA_TARGET_MACOS)
     void *mem = ark::os::mem::MapRWAnonymousInFirst4GB(ToVoidPtr(PANDA_32BITS_HEAP_START_ADDRESS), objectSpaceSize,
                                                        // Object space must be aligned to PANDA_POOL_ALIGNMENT_IN_BYTES
                                                        PANDA_POOL_ALIGNMENT_IN_BYTES);
