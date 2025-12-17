@@ -34,7 +34,8 @@ interface Test {
   suite: string;
   name: string;
   outDir: string;
-  testSource: string;
+  rootDir?: string;
+  testSource: Array<string>;
   expectedReport: string;
   expectedOutput: string;
 }
@@ -55,20 +56,20 @@ interface TestReport {
   nodes: TestNodeInfo[];
 }
 
-const copyright = `/*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */\n`;
+function openFileWithoutComments(fileName: string): string {
+  const code = fs.readFileSync(fileName).toString();
+  const sf = ts.createSourceFile(
+    fileName,
+    code,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS
+  );
+  const printer = ts.createPrinter({ removeComments: true, newLine: ts.NewLineKind.LineFeed });
+  const result = printer.printFile(sf);
+
+  return result;
+}
 
 function main(): void {
   Logger.init(new ConsoleLogger());
@@ -98,6 +99,28 @@ function main(): void {
   }
 }
 
+function readDirRecursive(dir: string): string[] {
+  const result: string[] = [];
+
+  function walk(current: string) {
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(current, entry.name);
+
+      if (entry.isDirectory()) {
+        walk(fullPath);
+      } else {
+        result.push(fullPath);
+      }
+    }
+  }
+  walk(dir);
+  return result;
+}
+
+
+
 function serializeTestResult(failedTest: TestResult): void {
   Logger.info('');
   Logger.info(`Suite: ${failedTest.test.suite}`);
@@ -125,7 +148,7 @@ function runTestSuite(testSuite: string, opts: TestRunnerCLIOptions): TestResult
 function runTest(test: Test): TestResult {
   Logger.info(`Running test ${test.name}`);
 
-  const declgen = new Declgen({ outDir: test.outDir, inputFiles: [test.testSource], inputDirs: [] });
+  const declgen = new Declgen({ outDir: test.outDir, rootDir: test.rootDir, inputFiles: test.testSource, inputDirs: [] });
 
   const { emitResult, checkResult } = declgen.run();
 
@@ -159,13 +182,13 @@ function saveTestReport(actualReport: TestReport, test: Test): void {
 function compareExpectedAndActualOutputs(test: Test, emitResult: ts.EmitResult): boolean {
   void emitResult;
 
-  const expected = fs.readFileSync(test.expectedOutput).toString().replace(copyright, '');
-  const actualPath = path.join(test.outDir, `${test.name}${Extension.DETS}`);
-  const actual = fs.readFileSync(actualPath).toString().replace(copyright, '');
-
-  if (expected !== actual) {
-    Logger.error(
-      `Outputs for ${test.name} differ!
+  function compareSingleFile(expectedPath: string, actualPath: string): boolean {
+    const expected = openFileWithoutComments(expectedPath);
+    const actual = openFileWithoutComments(actualPath);
+    
+    if (expected !== actual) {
+      Logger.error(
+        `Outputs for ${test.name} differ!
 Expected (${test.expectedOutput}):
 '''
 ${expected}
@@ -174,11 +197,53 @@ Actual (${actualPath}):
 '''
 ${actual}
 '''`
-    );
-    return false;
+  );
+  return false;
   }
 
   return true;
+  }
+
+  if (test.suite !== 'package_source') {
+    const actualPath = path.join(test.outDir, `${test.name}${Extension.DETS}`);
+    return compareSingleFile(test.expectedOutput, actualPath);
+  }
+  else {
+    const expectedFiles = new Set(readDirRecursive(test.expectedOutput).map((f) => {
+      const relativePath = path.relative(test.expectedOutput, f);
+      return relativePath;
+    }))
+    const actualFiles = new Set(readDirRecursive(test.outDir).map((f) => {
+      const relativePath = path.relative(test.outDir, f);
+      return relativePath;
+    }).filter((f) => f.endsWith('.d.ets')));
+
+    if (expectedFiles.size !== actualFiles.size) {
+      for (const expectedFile of expectedFiles) {
+        if (!actualFiles.has(expectedFile)) {
+          Logger.error(`Missing generated file: ${expectedFile}`);
+        }
+      }
+      for (const actualFile of actualFiles) {
+        if (!expectedFiles.has(actualFile)) {
+          Logger.error(`Unexpected generated file: ${actualFile}`);
+        }
+      }
+      return false;
+    }
+
+    let allMatch = true;
+
+    for (const expectedFile of expectedFiles) {
+      const expectedFilePath = path.join(test.expectedOutput, expectedFile);
+      const actualFilePath = path.join(test.outDir, expectedFile);
+      const match = compareSingleFile(expectedFilePath, actualFilePath);
+      if (!match) {
+        allMatch = false;
+      }
+    }
+    return allMatch;
+  }
 }
 
 function compareExpectedAndActualReports(test: Test, actualReport: TestReport): boolean {
@@ -248,9 +313,9 @@ function validateTestNodeInfo(node: TestNodeInfo): boolean {
 function collectTests(testSuite: string, opts: TestRunnerCLIOptions): Test[] {
   const testSuitePath = path.join(opts.testDirPath, testSuite);
   const testSuiteOutPath = path.join(opts.testOutPath, testSuite);
-
   const dirContents = fs.readdirSync(testSuitePath).filter((e) => {
-    return fs.statSync(path.join(testSuitePath, e)).isFile();
+    const dir = path.join(testSuitePath, e)
+    return fs.statSync(dir).isFile() || (path.basename(dir).startsWith('arkts') && fs.statSync(dir).isDirectory());
   });
   const jsonDir = path.join(opts.testDirPath, 'json_storage');
   const detsDir = path.join(opts.testDirPath, 'dets_output');
@@ -263,10 +328,18 @@ function collectTests(testSuite: string, opts: TestRunnerCLIOptions): Test[] {
   const tests: Test[] = [];
 
   for (const name of basenames) {
-    const testSourceExtension = testSuite === 'ts_source' ? ts.Extension.Ts : ts.Extension.Dts;
+    let testSourceExtension = ''
+    let inputFiles: Array<string> = []
+    if (testSuite === 'ts_source') {
+      testSourceExtension = ts.Extension.Ts;
+    }
+    else if (testSuite === 'dts_declarations') {
+      testSourceExtension = ts.Extension.Dts;
+    }
+    let rootDir: string | undefined = testSuite === 'package_source' ? path.join(testSuitePath, name) : undefined;
     const testSource = `${name}${testSourceExtension}`;
     const expectedReport = path.join(jsonDir, name + ts.Extension.Json);
-    const expectedOutput = path.join(detsDir, name + Extension.DETS);
+    const expectedOutput = testSuite === 'package_source' ? path.join(detsDir, name) : path.join(detsDir, name + Extension.DETS);
 
     if (!dirContents.includes(testSource)) {
       throw new Error(`Test ${name} is missing it's source file <${testSource}>!`);
@@ -278,11 +351,21 @@ function collectTests(testSuite: string, opts: TestRunnerCLIOptions): Test[] {
       throw new Error(`Test ${name} is missing expected output file <${expectedOutput}>!`);
     }
 
+    if (testSuite !== 'package_source') {
+      inputFiles.push(path.join(testSuitePath, testSource));
+    }
+    else {
+      const inputJsonPath = path.join(testSuitePath, testSource, 'input.json');
+      const inputJson = JSON.parse(fs.readFileSync(inputJsonPath).toString()) as Array<string>;
+      inputFiles = inputJson.map((f) => path.join(testSuitePath, testSource, f));
+    }
+
     tests.push({
       suite: testSuite,
       name: name,
       outDir: path.join(testSuiteOutPath, name),
-      testSource: path.join(testSuitePath, testSource),
+      rootDir: rootDir,
+      testSource: inputFiles,
       expectedOutput,
       expectedReport
     });
