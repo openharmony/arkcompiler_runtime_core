@@ -2200,6 +2200,10 @@ from.
 A :index:`compile-time error` occurs if the type in the right-hand side of a
 union type declaration leads to a circular reference.
 
+A :index:`compile-time error` occurs if the *type* is a function type (see
+:ref:`Function Types`) and is used without parenthesis around.
+
+
 .. index::
    union type
    reference type
@@ -2243,6 +2247,11 @@ Typical usage examples of *union* types are represented below:
     enum StringEnum {One = "One", Two = "Two"}
 
     type Union1 = string | StringEnum // OK, will be reduced during normalization
+
+    type Invalid = string | () => string | number // Compile-time error - function type with no parenthesis around
+    type Valid1 = string | (() => string) | number // OK
+    type Valid21 = string | (() => string | number) // OK
+
 
 .. index::
    union type
