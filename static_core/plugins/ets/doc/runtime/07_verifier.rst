@@ -24,7 +24,7 @@ Checks performed on abstract interpretation stage
 Physical compatibility of arguments to instructions and actual parameters to methods
 ------------------------------------------------------------------------------------
 
-This type of checks eliminate rutime problems with undefined bits in
+This type of checks eliminate runtime problems with undefined bits in
 integers, truncation issues, etc.
 
 From security point of view, this checks guarantee expected ranges of
@@ -59,7 +59,7 @@ in exception handlers.
 Checks of exceptions, that can be thrown in runtime
 ---------------------------------------------------
 
-Some code may exibit behavior of permanently throwing of exceptions,
+Some code may exhibit behavior of permanently throwing of exceptions,
 like always throwing NPE.
 
 This is definitely not normal mode of control-flow in code, so verifier
@@ -195,7 +195,7 @@ prohibited.
    =========   |
           <----/
 
-Conditional jumps are in grey zone, if they may be proven as always jump
+Conditional jumps are in gray zone, if they may be proven as always jump
 into code, then they will be considered ok. Currently, due to
 imprecision of verifier, conditional jumps at the end of the method are
 prohibited.
@@ -421,7 +421,7 @@ Type system implementation
 Type system is simple: there are only parametric type families, named as
 ``Sort``\ s, and their instances, named as ``Type``\ s.
 
-For simplicity, all literals without parens are Sorts, with parens -
+For simplicity, all literals without parents are Sorts, with parents -
 Types.
 
 Special types
@@ -436,7 +436,7 @@ Sorts
 
 Internally they denoted by indices (just numbers), and there is separate
 class to hold their names. For type_system description technical details
-can be ommited and Sorts will be understood in this text just as
+can be omitted and Sorts will be understood in this text just as
 literals.
 
 Types
@@ -444,7 +444,7 @@ Types
 
 Internally they are just indices.
 
-A sort, acompanied with a list of parameters, becomes a type.
+A sort, accompanied with a list of parameters, becomes a type.
 
 Each parameter consists of: a sign of variance for calculating subtyping
 relation and a type.
@@ -453,7 +453,7 @@ Variances are: - ``~`` invariant, means that corresponding parameter in
 subtyping relation must be in subtype and supertype relation
 simultaneously - ``+`` covariant, means that suptyping relation of
 parameter is in direction of subtyping relation of type. - ``-``
-contrvariant, direction of suptyping of parameter is in opposite to such
+contravariant, direction of suptyping of parameter is in opposite to such
 of type.
 
 Examples
@@ -486,11 +486,11 @@ Subtyping relations (``subtype <: supertype``):
 Closure
 -------
 
-After defining base types and initial subtyping realtion, a closure of
+After defining base types and initial subtyping relation, a closure of
 subtyping relation is computed. This helps to speed up subtyping
 checking during verification.
 
-Loops in subtyping relation are threated as classes of equivalence, for
+Loops in subtyping relation are treated as classes of equivalence, for
 instance: ``a() <: b() <: c() <: a()`` leads to indistinguishability of
 a(), b() and c() in type system.
 
@@ -502,41 +502,41 @@ Types
 Types are divided into next kinds:
 
 1. Semantic (abstract) types. They used only for values classification
-   without taking into consideration any ohter information like storage
+   without taking into consideration any other information like storage
    size, bit width, etc.
 2. Storage types
-3. Physycal (concrete) types. They are parameterized types by abstract
+3. Physical (concrete) types. They are parameterized types by abstract
    and storage types.
 
 Type structure
 ==============
 
-Types are formed by some ``Sort``, an uniq identifier of the type
+Types are formed by some ``Sort``, an unique identifier of the type
 family, and particular parameters.
 
 ``Sort`` + ``parameters`` = ``Type``.
 
 Each parameter is a some type accompanied with a variance flag.
 
-Variance of the parameter is classic: covariant, contrvariant,
+Variance of the parameter is classic: covariant, contravariant,
 invariant. It defines subtyping relation of types in parameters in
 subtyping relation of parameterized types.
 
 Some conventions about notation:
 
 - Sorts are denoted by some ``Literals``. Where ``Literal`` is a word
-  composed of characters from set ``[0-9a-zA-Z_]``. Examples: ``Array``,
-  ``Function``, ``ref``
+  composed of characters from set ``[0-9a-zA-Z_]``. For example: ``Array``,
+  ``Function``, ``ref``.
 - Types are denoted by sort literal and parameters in parenthesis. For
-  instance: ``Array(~i8())``.
-- Type parameters are just types prepended by variance sign, ``-`` -
-  contrvariant, ``+`` - variant, ``~`` - invariant. Examples: ``+i8()``,
-  ``+Function(-i8(), +i16())``, etc.
+  example: ``Array(~i8())``.
+- Type parameters are types prefixed by the variance sign ``-`` for a
+  contravariant, ``+`` for a variant, and ``~`` for an invariant. For example:
+  ``+i8()``, ``+Function(-i8(), +i16())``, etc.
 
 Subtyping relation
 ==================
 
-Subtyping relation is denoted by ``<:``. Subtyping is a realtion on
+Subtyping relation is denoted by ``<:``. Subtyping is a relation on
 types which is used to determine if the particular value of the
 particular type may be used in the place where other type is expected.
 
@@ -559,7 +559,7 @@ Useful short notations for subtyping relation:
   ``A() <: D()`` and ``B() <: D()``
 
 In short ``|`` means composition of types (syntactically) in set, and
-``<:`` is distriuted over ``|``.
+``<:`` is distributed over ``|``.
 
 
 .. How to read notation of type parameters and to determine subtyping relation?
@@ -585,7 +585,7 @@ Type universe
 All kinds of types live in the same type universe under the same subtyping
 relation.
 
-It seems to me, that single univerce of parameterized types with properly
+It seems to me, that single universe of parameterized types with properly
 defined subtyping relation is enough to deal with all cases of types usage in
 VM.
 
@@ -603,8 +603,8 @@ Types which are in circular subtyping relation, like ``A <: B <: C <: A``, are
 indistinguishable in the type system. They form a single class of equivalence.
 
 
-Type hieararchy
-===============
+Type hierarchy
+==============
 
 Here is a basic type hierarchy of Panda VM.
 
