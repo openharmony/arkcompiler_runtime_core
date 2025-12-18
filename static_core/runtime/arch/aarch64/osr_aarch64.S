@@ -21,10 +21,10 @@
 #define REGS_BUFFER_SIZE (REGS_COUNT * 8)
 #define FP_REGS_BUFFER_SIZE (FP_REGS_COUNT * 8)
 
-.extern ConvertIFrameToCFrame
-.extern PrepareOsrEntry
-.extern SetResult
-.extern GetCurrentManagedThread
+.extern MAKE_ASM_NAME(ConvertIFrameToCFrame)
+.extern MAKE_ASM_NAME(PrepareOsrEntry)
+.extern MAKE_ASM_NAME(SetResult)
+.extern MAKE_ASM_NAME(GetCurrentManagedThread)
 
 .macro OSR_ENTRY
     // Prepare buffer for scalar registers
@@ -40,13 +40,13 @@
     // x3 - pointer to cframe
     // x4 - buffer for scalar registers
     // x5 - buffer for vector registers
-    bl PrepareOsrEntry
+    bl MAKE_ASM_NAME(PrepareOsrEntry)
     mov x17, x0
 
     mov x16, sp
     stp x16, x17, [sp, #-16]!
 
-    bl GetCurrentManagedThread
+    bl MAKE_ASM_NAME(GetCurrentManagedThread)
     mov THREAD_REG, x0
 
     ldp x16, x17, [sp], #16
@@ -89,9 +89,9 @@
     blr x17
 .endm
 
-.global OsrEntryAfterCFrame
-.type OsrEntryAfterCFrame, %function
-OsrEntryAfterCFrame:
+.global MAKE_ASM_NAME(OsrEntryAfterCFrame)
+TYPE_FUNCTION(OsrEntryAfterCFrame)
+MAKE_ASM_NAME(OsrEntryAfterCFrame):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 #ifdef PANDA_COMPILER_DEBUG_INFO
@@ -181,7 +181,7 @@ OsrEntryAfterCFrame:
 
     // Restore THREAD REG
     str x0, [sp, #-16]!
-    bl GetCurrentManagedThread
+    bl MAKE_ASM_NAME(GetCurrentManagedThread)
     mov THREAD_REG, x0
     ldr x0, [sp], #16
 
@@ -193,9 +193,9 @@ OsrEntryAfterCFrame:
     ret
     CFI_ENDPROC
 
-.global OsrEntryAfterIFrame
-.type OsrEntryAfterIFrame, %function
-OsrEntryAfterIFrame:
+.global MAKE_ASM_NAME(OsrEntryAfterIFrame)
+TYPE_FUNCTION(OsrEntryAfterIFrame)
+MAKE_ASM_NAME(OsrEntryAfterIFrame):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -273,7 +273,7 @@ OsrEntryAfterIFrame:
 
     // Set frame kind in the TLS
     stp x0, xzr, [sp, #-16]!
-    bl GetCurrentManagedThread
+    bl MAKE_ASM_NAME(GetCurrentManagedThread)
     strb wzr, [x0, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     ldp x0, xzr, [sp], #16
 
@@ -289,7 +289,7 @@ OsrEntryAfterIFrame:
     // Call SetOsrResult for writing the result to the interpreter frame's accumulator
     mov x1, x0
     mov x0, x16
-    bl SetOsrResult
+    bl MAKE_ASM_NAME(SetOsrResult)
 
     // Restore original lr and fp
     ldp fp, lr, [sp], #16
@@ -299,9 +299,9 @@ OsrEntryAfterIFrame:
     ret
     CFI_ENDPROC
 
-.global OsrEntryTopFrame
-.type OsrEntryTopFrame, %function
-OsrEntryTopFrame:
+.global MAKE_ASM_NAME(OsrEntryTopFrame)
+TYPE_FUNCTION(OsrEntryTopFrame)
+MAKE_ASM_NAME(OsrEntryTopFrame):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -373,7 +373,7 @@ OsrEntryTopFrame:
 
     // Set frame kind in the TLS
     stp x0, xzr, [sp, #-16]!
-    bl GetCurrentManagedThread
+    bl MAKE_ASM_NAME(GetCurrentManagedThread)
     strb wzr, [x0, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     ldp x0, xzr, [sp], #16
 
@@ -383,7 +383,7 @@ OsrEntryTopFrame:
     // Call SetOsrResult to write result to the interpreter frame's accumulator
     mov x1, x0
     mov x0, x16
-    bl SetOsrResult
+    bl MAKE_ASM_NAME(SetOsrResult)
 
     // Restore original lr and fp
     ldp fp, lr, [sp], #16

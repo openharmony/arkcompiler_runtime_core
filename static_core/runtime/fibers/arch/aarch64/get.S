@@ -24,7 +24,12 @@
  * arguments:
  * x0: uint8_t* ctx_memory
  */
-FUNCTION_START(GetCurrentContext)
+// NOTE(korobeinikovevgeny, #314 (new)): the macro body has been manually expanded here to speed up
+// the MacOS target support. Should be optimized in future.)
+.globl MAKE_ASM_NAME(GetCurrentContext)
+TYPE_FUNCTION(GetCurrentContext)
+.balign FUNC_ALIGNMENT_BYTES
+MAKE_ASM_NAME(GetCurrentContext):
     STORE_CONTEXT ctx_baseaddr_regid=0, tmp_regid=8
 
     // return success
@@ -36,4 +41,6 @@ FUNCTION_END(GetCurrentContext)
 #undef FP_O
 
 // we don't need executable stack.
+#ifndef PANDA_TARGET_MACOS
 .section .note.GNU-stack,"",%progbits
+#endif

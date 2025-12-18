@@ -17,17 +17,17 @@
 #include "arch/aarch64/helpers_aarch64.S"
 
 // Frame* CreateFrameForMethodWithActualArgsDyn(uint32_t num_actual_args, Method* method, Frame* prev);
-.extern CreateFrameForMethodWithActualArgsDyn
+.extern MAKE_ASM_NAME(CreateFrameForMethodWithActualArgsDyn)
 // void FreeFrame(Frame* frame)
-.extern FreeFrame
+.extern MAKE_ASM_NAME(FreeFrame)
 // void InterpreterEntryPoint(Method *method, Frame* frame);
-.extern InterpreterEntryPoint
+.extern MAKE_ASM_NAME(InterpreterEntryPoint)
 // bool DecrementHotnessCounterDyn(Method*, TaggedValue func_obj)
-.extern DecrementHotnessCounterDyn
+.extern MAKE_ASM_NAME(DecrementHotnessCounterDyn)
 
-.global CompiledCodeToInterpreterBridgeDyn
-.type CompiledCodeToInterpreterBridgeDyn, %function
-CompiledCodeToInterpreterBridgeDyn:
+.global MAKE_ASM_NAME(CompiledCodeToInterpreterBridgeDyn)
+TYPE_FUNCTION(CompiledCodeToInterpreterBridgeDyn)
+MAKE_ASM_NAME(CompiledCodeToInterpreterBridgeDyn):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -83,7 +83,7 @@ CompiledCodeToInterpreterBridgeDyn:
     // Pass this function as second arg
     ldr x1, [fp, #24]
     mov x2, THREAD_REG
-    bl DecrementHotnessCounterDyn
+    bl MAKE_ASM_NAME(DecrementHotnessCounterDyn)
 
     // Compilation finished, so recover caller's frame in the TLS.
     ldr lr, [fp]
@@ -124,7 +124,7 @@ CompiledCodeToInterpreterBridgeDyn:
     mov w0, w1
     mov x1, x19
     mov x2, fp
-    bl CreateFrameForMethodWithActualArgsDyn
+    bl MAKE_ASM_NAME(CreateFrameForMethodWithActualArgsDyn)
     mov x21, x0
 
     // setup regs as follows
@@ -196,7 +196,7 @@ CompiledCodeToInterpreterBridgeDyn:
     // call InterpreterEntryPoint
     mov x0, x19
     mov x1, x21
-    bl InterpreterEntryPoint
+    bl MAKE_ASM_NAME(InterpreterEntryPoint)
 
     // handle the result
     // setup regs as follows
@@ -206,7 +206,7 @@ CompiledCodeToInterpreterBridgeDyn:
     ldp x19, x20, [x20]
 
     mov x0, x21
-    bl FreeFrame
+    bl MAKE_ASM_NAME(FreeFrame)
 
     mov x0, x19
     mov x1, x20

@@ -14,6 +14,7 @@
  */
 
  #include "asm_defines.h"
+ #include "arch/asm_support.h"
 
 .macro SAVE_CALLEE_GP_REGS base_reg, offset
     stp x27, x28, [\base_reg, #(\offset - CALLEE_REG0_OFFSET + 8*8)]
@@ -212,7 +213,7 @@
     add sp, sp, #BRIDGE_FRAME_SIZE
     CFI_ADJUST_CFA_OFFSET(-BRIDGE_FRAME_SIZE)
 
-    b ThrowNativeExceptionBridge
+    b MAKE_ASM_NAME(ThrowNativeExceptionBridge)
     CFI_RESTORE_STATE
 
 1:
@@ -252,8 +253,12 @@
     SAVE_CALLER_FP_REGS fp, lr, \ret_type
 
 2:
-    // The call
+// The call
+#ifdef PANDA_TARGET_MACOS
+    bl _\entry
+#else
     bl \entry
+#endif
 
     // Restore previous state
     str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]

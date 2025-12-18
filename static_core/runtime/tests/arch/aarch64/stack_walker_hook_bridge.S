@@ -16,9 +16,9 @@
 #include "arch/asm_support.h"
 #include "arch/aarch64/call_runtime.S"
 
-.global StackWalkerHookBridge
+.global MAKE_ASM_NAME(StackWalkerHookBridge)
 .type StackWalkerHookBridge, %function
-StackWalkerHookBridge:
+MAKE_ASM_NAME(StackWalkerHookBridge):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
     CALL_RUNTIME RUNTIME_MODE_DEFAULT, PandaRunnerHookAArch64, 0, INTEGER

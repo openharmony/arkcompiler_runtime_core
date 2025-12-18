@@ -20,9 +20,9 @@
 //       const Frame *iframe,                   x1
 //       const Method*,                         x2
 //       ManagedThread* thread)                 x3
-.global InterpreterToCompiledCodeBridgeDyn
-.type InterpreterToCompiledCodeBridgeDyn, %function
-InterpreterToCompiledCodeBridgeDyn:
+.global MAKE_ASM_NAME(InterpreterToCompiledCodeBridgeDyn)
+TYPE_FUNCTION(InterpreterToCompiledCodeBridgeDyn)
+MAKE_ASM_NAME(InterpreterToCompiledCodeBridgeDyn):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -111,9 +111,9 @@ InterpreterToCompiledCodeBridgeDyn:
 //       const Frame *iframe,                   x2
 //       const Method*,                         x3
 //       ManagedThread* thread)                 x4
-.global InvokeCompiledCodeWithArgArrayDyn
-.type InvokeCompiledCodeWithArgArrayDyn, %function
-InvokeCompiledCodeWithArgArrayDyn:
+.global MAKE_ASM_NAME(InvokeCompiledCodeWithArgArrayDyn)
+TYPE_FUNCTION(InvokeCompiledCodeWithArgArrayDyn)
+MAKE_ASM_NAME(InvokeCompiledCodeWithArgArrayDyn):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 

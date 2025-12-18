@@ -25,7 +25,12 @@
  * x0: uint8_t* ctx_memory_from
  * x1: uint8_t* ctx_memory_to
  */
-FUNCTION_START(SwitchContext)
+// NOTE(korobeinikovevgeny, #314 (new)): the macro body has been manually expanded here to speed up
+// the MacOS target support. Should be optimized in future.)
+.globl MAKE_ASM_NAME(SwitchContext)
+TYPE_FUNCTION(SwitchContext)
+.balign FUNC_ALIGNMENT_BYTES
+MAKE_ASM_NAME(SwitchContext):
     /*** save current context ***/
     STORE_CONTEXT ctx_baseaddr_regid=0, tmp_regid=8
 
@@ -69,4 +74,6 @@ FUNCTION_END(SwitchContext)
 #undef FP_O
 
 // we don't need executable stack.
+#ifndef PANDA_TARGET_MACOS
 .section .note.GNU-stack,"",%progbits
+#endif

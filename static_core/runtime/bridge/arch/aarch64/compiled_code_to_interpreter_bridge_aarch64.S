@@ -23,15 +23,15 @@
 #include "arch/aarch64/helpers_aarch64.S"
 
 // Frame* CreateFrameForMethod(Method* method, Frame* prev);
-.extern CreateFrameForMethod
+.extern MAKE_ASM_NAME(CreateFrameForMethod)
 // void InterpreterEntryPoint(Method *method, Frame* frame);
-.extern InterpreterEntryPoint
+.extern MAKE_ASM_NAME(InterpreterEntryPoint)
 
-.extern DecrementHotnessCounter
+.extern MAKE_ASM_NAME(DecrementHotnessCounter)
 
-.global CompiledCodeToInterpreterBridge
-.type CompiledCodeToInterpreterBridge, %function
-CompiledCodeToInterpreterBridge:
+.global MAKE_ASM_NAME(CompiledCodeToInterpreterBridge)
+TYPE_FUNCTION(CompiledCodeToInterpreterBridge)
+MAKE_ASM_NAME(CompiledCodeToInterpreterBridge):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -81,7 +81,7 @@ CompiledCodeToInterpreterBridge:
     PUSH_CALLER_REGS
     PUSH_ARGS_VREGS
     mov x1, THREAD_REG
-    bl DecrementHotnessCounter
+    bl MAKE_ASM_NAME(DecrementHotnessCounter)
 
     uxtb x0, w0
     cbz x0, .Lnot_compiled
@@ -131,7 +131,7 @@ CompiledCodeToInterpreterBridge:
 
     // create an interpreter frame
     mov x1, fp
-    bl CreateFrameForMethod
+    bl MAKE_ASM_NAME(CreateFrameForMethod)
 
     // setup regs as follow
     // x0 - SHORTY_PTR_REG, x1 - SHORTY_REG, x2 - iframe.vregs_ + num_vregs_,
@@ -205,7 +205,7 @@ CompiledCodeToInterpreterBridge:
     // call InterpreterEntryPoint
     mov x0, x20
     mov x1, x19
-    bl InterpreterEntryPoint
+    bl MAKE_ASM_NAME(InterpreterEntryPoint)
 
     // handle the result
     // setup regs as follow
@@ -219,14 +219,14 @@ CompiledCodeToInterpreterBridge:
     cmp w1, #SHORTY_VOID
     bne 1f
     // void method
-    bl FreeFrame
+    bl MAKE_ASM_NAME(FreeFrame)
     b 4f
 1:
     ldp x19, x20, [x2]
     cmp w1, #SHORTY_REFERENCE
     bne 2f
     // Result is a reference
-    bl FreeFrame
+    bl MAKE_ASM_NAME(FreeFrame)
 #if defined(PANDA_32_BIT_MANAGED_POINTER)
     // Clear the upper 32 bits, since the compiler may
     // generate code that uses them (ex: ldr w?, [x19, #?])
@@ -240,12 +240,12 @@ CompiledCodeToInterpreterBridge:
     cmp w1, #(SHORTY_NUM_FLOAT_TYPES - 1)
     bls 3f
     // Result is an integer or tagged value
-    bl FreeFrame
+    bl MAKE_ASM_NAME(FreeFrame)
     mov x0, x19
     mov x1, x20
     b 4f
 3:  // Result is a float value
-    bl FreeFrame
+    bl MAKE_ASM_NAME(FreeFrame)
     fmov d0, x19
 
 4:

@@ -15,4 +15,4 @@
 
 #include "bridge/arch/aarch64/proxy_entrypoint_aarch64.S"
 
-PROXY_ENTRYPOINT EtsProxyEntryPoint EtsProxyMethodInvoke
+PROXY_ENTRYPOINT EtsProxyEntryPoint, EtsProxyMethodInvoke

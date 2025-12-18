@@ -18,17 +18,17 @@
 #include "shorty_values.h"
 
 // uint32_t EtsNapiCalcStackArgsSpaceSize(Method *method, bool is_critical)
-.extern EtsNapiCalcStackArgsSpaceSize
+.extern MAKE_ASM_NAME(EtsNapiCalcStackArgsSpaceSize)
 // void EtsNapiBeginCritical(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern EtsNapiBeginCritical
+.extern MAKE_ASM_NAME(EtsNapiBeginCritical)
 // void EtsNapiBegin(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern EtsNapiBegin
+.extern MAKE_ASM_NAME(EtsNapiBegin)
 // void EtsNapiEnd(Method *method)
-.extern EtsNapiEnd
+.extern MAKE_ASM_NAME(EtsNapiEnd)
 // ObjectHeader *EtsNapiObjEnd(Method *method, Reference *ref)
-.extern EtsNapiObjEnd
+.extern MAKE_ASM_NAME(EtsNapiObjEnd)
 // bool IsEtsMethodFastNative(Method *method)
-.extern IsEtsMethodFastNative
+.extern MAKE_ASM_NAME(IsEtsMethodFastNative)
 
 
 // The entrypoint for EtsNapi critical method.
@@ -38,9 +38,10 @@
 // 2. We have to convert double arguments and the return value to floats
 //    Panda runtime operates only with doubles.
 // The function handles all the cases above.
-.global EtsNapiCriticalNativeEntryPoint
-.type EtsNapiCriticalNativeEntryPoint, %function
-EtsNapiCriticalNativeEntryPoint:
+
+.global MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint)
+TYPE_FUNCTION(EtsNapiCriticalNativeEntryPoint)
+MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -88,7 +89,7 @@ EtsNapiCriticalNativeEntryPoint:
 
     mov x0, x19
     mov w1, #1
-    bl EtsNapiCalcStackArgsSpaceSize
+    bl MAKE_ASM_NAME(EtsNapiCalcStackArgsSpaceSize)
 
 .Lprepare_stack_critical:
     mov x1, sp
@@ -97,7 +98,7 @@ EtsNapiCriticalNativeEntryPoint:
     mov x3, sp
     mov x4, THREAD_REG
     mov x0, x19
-    bl EtsNapiBeginCritical
+    bl MAKE_ASM_NAME(EtsNapiBeginCritical)
 
     // load the arguments
     ldp x0, x1, [sp], #16
@@ -171,7 +172,7 @@ EtsNapiCriticalNativeEntryPoint:
     ldp x16, x17, [fp, #-CALLER_REG0_OFFSET+8*16]
     ldr x18, [fp, #-CALLER_REG0_OFFSET+8*18]
 
-    b ThrowNativeExceptionBridge
+    b MAKE_ASM_NAME(ThrowNativeExceptionBridge)
 
 .Lexit_:
     ret
@@ -262,9 +263,9 @@ EtsNapiCriticalNativeEntryPoint:
 // Each panda method accepts Method* in the first argument
 // The goal of this function is just drop this argument and
 // shift other arguments back
-.global EtsNapiEntryPoint
-.type EtsNapiEntryPoint, %function
-EtsNapiEntryPoint:
+.global MAKE_ASM_NAME(EtsNapiEntryPoint)
+TYPE_FUNCTION(EtsNapiEntryPoint)
+MAKE_ASM_NAME(EtsNapiEntryPoint):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -331,7 +332,7 @@ EtsNapiEntryPoint:
 
     // save IsFastNative to x26
     mov x0, x19
-    bl IsEtsMethodFastNative
+    bl MAKE_ASM_NAME(IsEtsMethodFastNative)
     mov x26, x0
 
     str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]
@@ -348,7 +349,7 @@ EtsNapiEntryPoint:
 
     mov x0, x19
     mov w1, #0
-    bl EtsNapiCalcStackArgsSpaceSize
+    bl MAKE_ASM_NAME(EtsNapiCalcStackArgsSpaceSize)
 
 .Lprepare_stack:
     mov x1, sp
@@ -357,7 +358,7 @@ EtsNapiEntryPoint:
     mov x3, sp
     mov x0, x19
     mov x4, THREAD_REG
-    bl EtsNapiBegin
+    bl MAKE_ASM_NAME(EtsNapiBegin)
 
     mov lr, x0
     // load the arguments
@@ -383,7 +384,7 @@ EtsNapiEntryPoint:
     mov x0, x19
     mov x1, THREAD_REG
     mov x2, x26
-    bl EtsNapiEnd
+    bl MAKE_ASM_NAME(EtsNapiEnd)
     b .Lreturn
 
 1:  cmp w27, #SHORTY_REFERENCE
@@ -393,7 +394,7 @@ EtsNapiEntryPoint:
     mov x2, THREAD_REG
     mov x1, x0
     mov x0, x19
-    bl EtsNapiObjEnd
+    bl MAKE_ASM_NAME(EtsNapiObjEnd)
     b .Lreturn
 4:  sub w27, w27, #SHORTY_FIRST_FLOAT
     cmp w27, #(SHORTY_NUM_FLOAT_TYPES - 1)
@@ -404,14 +405,14 @@ EtsNapiEntryPoint:
     mov x0, x1
     mov x1, THREAD_REG
     mov x2, x26
-    bl EtsNapiEnd
+    bl MAKE_ASM_NAME(EtsNapiEnd)
     mov x0, x19
     b .Lreturn
 2:  mov x0, x19
     fmov x19, d0
     mov x1, THREAD_REG
     mov x2, x26
-    bl EtsNapiEnd
+    bl MAKE_ASM_NAME(EtsNapiEnd)
     fmov d0, x19
     b .Lreturn
 
@@ -419,7 +420,7 @@ EtsNapiEntryPoint:
     mov x1, THREAD_REG
     mov x0, x19
     mov x2, x26
-    bl EtsNapiEnd
+    bl MAKE_ASM_NAME(EtsNapiEnd)
     b .Lreturn
 
 .Lreturn:
@@ -493,7 +494,7 @@ EtsNapiEntryPoint:
     ldp x16, x17, [fp, #-CALLER_REG0_OFFSET+8*16]
     ldr x18, [fp, #-CALLER_REG0_OFFSET+8*18]
 
-    b ThrowNativeExceptionBridge
+    b MAKE_ASM_NAME(ThrowNativeExceptionBridge)
 
 .Lexit:
     ret

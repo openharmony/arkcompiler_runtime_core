@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,11 +37,25 @@
 
 // clang-format off
 
-#ifndef PANDA_TARGET_WINDOWS
+#if !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define TYPE_FUNCTION(name) .type name, %function
 #else
 #define TYPE_FUNCTION(name)
+#endif
+
+#ifdef PANDA_TARGET_MACOS
+/* When compiling on MacOS, the symbols in the object file (.c) have an underscore,
+which does not match the symbols in the object file (.S),
+and this leads to a linking error.
+*/
+/* CC-OFFNXT(G.PRE.02) name part*/
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define MAKE_ASM_NAME(name) _##name
+#else
+/* CC-OFFNXT(G.PRE.02) name part*/
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define MAKE_ASM_NAME(name) name
 #endif
 
 #ifdef PANDA_COMPILER_DEBUG_INFO

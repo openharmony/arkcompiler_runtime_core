@@ -18,12 +18,12 @@
 #include "shorty_values.h"
 
 // Promise EtsAsyncCall(Method *method, ManagedThread *thread, const uint8_t *reg_args, const uint8_t *stack_args)
-.extern EtsAsyncCall
+.extern MAKE_ASM_NAME(EtsAsyncCall)
 
 // The entrypoint for an async method
-.global EtsAsyncEntryPoint
-.type EtsAsyncEntryPoint, %function
-EtsAsyncEntryPoint:
+.global MAKE_ASM_NAME(EtsAsyncEntryPoint)
+TYPE_FUNCTION(EtsAsyncEntryPoint)
+MAKE_ASM_NAME(EtsAsyncEntryPoint):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -90,7 +90,7 @@ EtsAsyncEntryPoint:
 
     add x3, fp, #16
     mov x1, THREAD_REG
-    bl EtsAsyncCall
+    bl MAKE_ASM_NAME(EtsAsyncCall)
 
     strb w20, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     mov w10, w20
@@ -161,7 +161,7 @@ EtsAsyncEntryPoint:
     ldp x16, x17, [fp, #-CALLER_REG0_OFFSET+8*16]
     ldr x18, [fp, #-CALLER_REG0_OFFSET+8*18]
 
-    b ThrowNativeExceptionBridge
+    b MAKE_ASM_NAME(ThrowNativeExceptionBridge)
 
 .Lexit:
     ret

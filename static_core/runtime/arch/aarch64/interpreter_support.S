@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "arch/asm_support.h"
+
 #define xlr x30
 
-.global ExecuteImplStub
-.type ExecuteImplStub, %function
+.global MAKE_ASM_NAME(ExecuteImplStub)
+TYPE_FUNCTION(ExecuteImplStub)
 /* parameter:
  * x0 thread
  * x1 PC
@@ -24,7 +26,7 @@
  * x3 jump_to_eh
  * x4 impl
  */
-ExecuteImplStub:
+MAKE_ASM_NAME(ExecuteImplStub):
     .cfi_startproc
     stp x20, xlr, [sp, #-16]!
     .cfi_adjust_cfa_offset 16

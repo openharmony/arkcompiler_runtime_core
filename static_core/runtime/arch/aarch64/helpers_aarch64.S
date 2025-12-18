@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+#include "arch/asm_support.h"
 
 #define CALLEE_SAVED_GP_REGS_COUNT 10
 
@@ -142,7 +144,11 @@
 .endm
 
 .macro END_CALL func
+#ifdef PANDA_TARGET_MACOS
+    bl _\func
+#else
     bl \func
+#endif
     POP_CALLER_REGS
 .endm
 
