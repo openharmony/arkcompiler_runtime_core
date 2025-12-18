@@ -14,36 +14,38 @@
  */
 
 //! CHECKER       JIT Test cpp intrinsics
-//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-loop-idioms=false --compiler-regex=.*::test_.*array_set_.*cpp", entry: "ets_escompat_typed_arrays_set_get_part2.ETSGLOBAL::main"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get_part2.ETSGLOBAL::main",
+//!               options: "--compiler-encode-intrinsics=false --compiler-loop-idioms=false \
+//!                 --compiler-regex=.*::test.*ArraySet.*Cpp"
 //!
-//! METHOD        "test_uint8array_set_int_cpp"
+//! METHOD        "testUint8ArraySetIntCpp"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ArraySetInt "
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST          "Intrinsic.UInt8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
 //!
-//! METHOD        "test_uint8array_set_rangeerror_cpp"
+//! METHOD        "testUint8ArraySetRangeErrorCpp"
 //!
-//! METHOD        "test_uint8clampedarray_set_int_cpp"
+//! METHOD        "testUint8ClampedArraySetIntCpp"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt8ClampedArraySetInt "
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST          "Intrinsic.UInt8ClampedArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
 //!
-//! METHOD        "test_uint8clampedarray_set_rangeerror_cpp"
+//! METHOD        "testUint8ClampedArraySetRangeErrorCpp"
 //!
-//! METHOD        "test_uint16array_set_int_cpp"
+//! METHOD        "testUint16ArraySetIntCpp"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt16ArraySetInt "
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST          "Intrinsic.UInt16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
 //!
-//! METHOD        "test_uint16array_set_rangeerror_cpp"
+//! METHOD        "testUint16ArraySetRangeErrorCpp"
 //!
-//! METHOD        "test_uint32array_set_int_cpp"
+//! METHOD        "testUint32ArraySetIntCpp"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt32ArraySetInt "
 //! INST_NOT      "Intrinsic.UInt32ArraySetLong "
@@ -51,9 +53,9 @@
 //! INST          "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
 //!
-//! METHOD        "test_uint32array_set_rangeerror_cpp"
+//! METHOD        "testUint32ArraySetRangeErrorCpp"
 //!
-//! METHOD        "test_uint32array_set_long_cpp"
+//! METHOD        "testUint32ArraySetLongCpp"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.UInt32ArraySetLong "
 //! INST_NOT      "Intrinsic.UInt32ArraySetInt "
@@ -61,14 +63,14 @@
 //! INST          "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
 //!
-//! METHOD        "test_biguint64array_set_int_cpp"
+//! METHOD        "testBigUint64ArraySetIntCpp"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.BigUInt64ArraySetInt "
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetLong "
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST          "Intrinsic.BigUInt64ArrayGet "
 //!
-//! METHOD        "test_biguint64array_set_long_cpp"
+//! METHOD        "testBigUint64ArraySetLongCpp"
 //! METHOD        "escompat_BigUint64Array::__set"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.BigUInt64ArraySetLong "
@@ -79,14 +81,15 @@
 //! INST          "Intrinsic.BigUInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
 //!
-//! METHOD        "test_biguint64array_set_rangeerror_cpp"
+//! METHOD        "testBigUint64ArraySetRangeErrorCpp"
 //! METHOD        "escompat_BigUint64Array::__set"
 
 
 //! CHECKER       JIT Test IR intrinsics
-//! RUN           force_jit: true, options: "--compiler-regex=.*::test_.*array_set_.*ir", entry: "ets_escompat_typed_arrays_set_get_part2.ETSGLOBAL::main"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get_part2.ETSGLOBAL::main",
+//!               options: "--compiler-regex=.*::test.*ArraySet.*Ir"
 //!
-//! METHOD        "test_uint8array_set_int_ir"
+//! METHOD        "testUint8ArraySetIntIr"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt8ArraySetInt "
 //! INST_NOT      /Call.*Array::\$_set/
@@ -98,7 +101,7 @@
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
-//! METHOD        "test_uint8clampedarray_set_int_ir"
+//! METHOD        "testUint8ClampedArraySetIntIr"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt8ClampedArraySetInt "
 //! INST_NOT      /Call.*Array::\$_set/
@@ -110,7 +113,7 @@
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
-//! METHOD        "test_uint16array_set_int_ir"
+//! METHOD        "testUint16ArraySetIntIr"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt16ArraySetInt "
 //! INST_NOT      /Call.*Array::\$_set/
@@ -122,7 +125,7 @@
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
-//! METHOD        "test_uint32array_set_int_ir"
+//! METHOD        "testUint32ArraySetIntIr"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt32ArraySetInt "
 //! INST_NOT      "Intrinsic.UInt32ArraySetLong "
@@ -135,7 +138,7 @@
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
-//! METHOD        "test_uint32array_set_long_ir"
+//! METHOD        "testUint32ArraySetLongIr"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.UInt32ArraySetLong "
 //! INST_NOT      "Intrinsic.UInt32ArraySetInt "
@@ -148,7 +151,7 @@
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
-//! METHOD        "test_biguint64array_set_int_ir"
+//! METHOD        "testBigUint64ArraySetIntIr"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetInt "
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetLong "
@@ -160,7 +163,7 @@
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 //!
-//! METHOD        "test_biguint64array_set_long_ir"
+//! METHOD        "testBigUint64ArraySetLongIr"
 //! METHOD        "escompat_BigUint64Array::__set"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetLong "
@@ -180,7 +183,7 @@
 //! INST          /LoadObject.*std\.core\.ArrayBuffer\.data/
 //! EVENT_NOT     /Deoptimization/
 
-function test_uint8array_set_int_cpp(): void {
+function testUint8ArraySetIntCpp(): void {
     let ar = new Uint8Array(6)
     ar[2] = -1
     ar[3] = 255
@@ -190,12 +193,12 @@ function test_uint8array_set_int_cpp(): void {
     arktest.assertEQ(1, ar[4])
 }
 
-function test_uint8array_set_rangeerror_cpp(): void {
+function testUint8ArraySetRangeErrorCpp(): void {
     let ar = new Uint8Array(6)
     arktest.expectThrow(() => { ar[11] = 1 }, expectedRangeErrors)
 }
 
-function test_uint8array_set_int_ir(): void {
+function testUint8ArraySetIntIr(): void {
     let ar = new Uint8Array(6)
     ar[2] = -1
     ar[3] = 255
@@ -205,7 +208,7 @@ function test_uint8array_set_int_ir(): void {
     arktest.assertEQ(1, ar[4])
 }
 
-function test_uint8clampedarray_set_int_cpp(): void {
+function testUint8ClampedArraySetIntCpp(): void {
     let ar = new Uint8ClampedArray(6)
     ar.fill(77)
     ar[2] = -1
@@ -216,12 +219,12 @@ function test_uint8clampedarray_set_int_cpp(): void {
     arktest.assertEQ(255, ar[4])
 }
 
-function test_uint8clampedarray_set_rangeerror_cpp(): void {
+function testUint8ClampedArraySetRangeErrorCpp(): void {
     let ar = new Uint8ClampedArray(6)
     arktest.expectThrow(() => { ar[11] = 1 }, expectedRangeErrors)
 }
 
-function test_uint8clampedarray_set_int_ir(): void {
+function testUint8ClampedArraySetIntIr(): void {
     let ar = new Uint8ClampedArray(6)
     ar.fill(77)
     ar[2] = -1
@@ -232,7 +235,7 @@ function test_uint8clampedarray_set_int_ir(): void {
     arktest.assertEQ(255, ar[4])
 }
 
-function test_uint16array_set_int_cpp(): void {
+function testUint16ArraySetIntCpp(): void {
     let ar = new Uint16Array(6)
     ar[2] = -1
     ar[3] = 65535
@@ -242,12 +245,12 @@ function test_uint16array_set_int_cpp(): void {
     arktest.assertEQ(1, ar[4])
 }
 
-function test_uint16array_set_rangeerror_cpp(): void {
+function testUint16ArraySetRangeErrorCpp(): void {
     let ar = new Uint16Array(6)
     arktest.expectThrow(() => { ar[11] = 1 }, expectedRangeErrors)
 }
 
-function test_uint16array_set_int_ir(): void {
+function testUint16ArraySetIntIr(): void {
     let ar = new Uint16Array(6)
     ar[2] = -1
     ar[3] = 65535
@@ -258,7 +261,7 @@ function test_uint16array_set_int_ir(): void {
 }
 
 
-function test_uint32array_set_int_cpp(): void {
+function testUint32ArraySetIntCpp(): void {
     let ar = new Uint32Array(6)
     ar[2] = -1
     ar[3] = 2147483647
@@ -266,12 +269,12 @@ function test_uint32array_set_int_cpp(): void {
     arktest.assertEQ(2147483647, ar[3])
 }
 
-function test_uint32array_set_rangeerror_cpp(): void {
+function testUint32ArraySetRangeErrorCpp(): void {
     let ar = new Uint32Array(6)
     arktest.expectThrow(() => { ar[11] = 1 }, expectedRangeErrors)
 }
 
-function test_uint32array_set_int_ir(): void {
+function testUint32ArraySetIntIr(): void {
     let ar = new Uint32Array(6)
     ar[2] = -1
     ar[3] = 2147483647
@@ -279,7 +282,7 @@ function test_uint32array_set_int_ir(): void {
     arktest.assertEQ(2147483647, ar[3])
 }
 
-function test_uint32array_set_long_cpp(): void {
+function testUint32ArraySetLongCpp(): void {
     let ar = new Uint32Array(6)
     ar[2] = (-1).toLong()
     ar[3] = 4294967295
@@ -289,7 +292,7 @@ function test_uint32array_set_long_cpp(): void {
     arktest.assertEQ(1, ar[4])
 }
 
-function test_uint32array_set_long_ir(): void {
+function testUint32ArraySetLongIr(): void {
     let ar = new Uint32Array(6)
     ar[2] = (-1).toLong()
     ar[3] = 4294967295
@@ -299,7 +302,7 @@ function test_uint32array_set_long_ir(): void {
     arktest.assertEQ(1, ar[4])
 }
 
-function test_biguint64array_set_int_cpp(): void {
+function testBigUint64ArraySetIntCpp(): void {
     let ar = new BigUint64Array(6)
     ar[2] = -1
     ar[3] = 2147483647
@@ -307,7 +310,7 @@ function test_biguint64array_set_int_cpp(): void {
     arktest.assertEQ(2147483647n, ar[3])
 }
 
-function test_biguint64array_set_int_ir(): void {
+function testBigUint64ArraySetIntIr(): void {
     let ar = new BigUint64Array(6)
     ar[2] = -1
     ar[3] = 2147483647
@@ -315,7 +318,7 @@ function test_biguint64array_set_int_ir(): void {
     arktest.assertEQ(2147483647n, ar[3])
 }
 
-function test_biguint64array_set_long_cpp(): void {
+function testBigUint64ArraySetLongCpp(): void {
     let ar = new BigUint64Array(6)
     ar[2] = 18446744073709551618n
     ar[3] = -18446744073709551618n
@@ -327,12 +330,12 @@ function test_biguint64array_set_long_cpp(): void {
     arktest.assertEQ(18446744073709551615n, ar[5])
 }
 
-function test_biguint64array_set_rangeerror_cpp(): void {
+function testBigUint64ArraySetRangeErrorCpp(): void {
     let ar = new BigUint64Array(6)
     arktest.expectThrow(() => { ar[11] = 1n }, expectedRangeErrors)
 }
 
-function test_biguint64array_set_long_ir(): void {
+function testBigUint64ArraySetLongIr(): void {
     let ar = new BigUint64Array(6)
     ar[2] = 18446744073709551618n
     ar[3] = -18446744073709551618n
@@ -350,27 +353,27 @@ const expectedRangeErrors = (e: Error): boolean => {
 }
 
 function main() {
-    test_uint8array_set_int_cpp()
-    test_uint8array_set_rangeerror_cpp()
-    test_uint8array_set_int_ir()
+    testUint8ArraySetIntCpp()
+    testUint8ArraySetRangeErrorCpp()
+    testUint8ArraySetIntIr()
 
-    test_uint8clampedarray_set_int_cpp()
-    test_uint8clampedarray_set_rangeerror_cpp()
-    test_uint8clampedarray_set_int_ir()
+    testUint8ClampedArraySetIntCpp()
+    testUint8ClampedArraySetRangeErrorCpp()
+    testUint8ClampedArraySetIntIr()
 
-    test_uint16array_set_int_cpp()
-    test_uint16array_set_rangeerror_cpp()
-    test_uint16array_set_int_ir()
+    testUint16ArraySetIntCpp()
+    testUint16ArraySetRangeErrorCpp()
+    testUint16ArraySetIntIr()
 
-    test_uint32array_set_int_cpp()
-    test_uint32array_set_rangeerror_cpp()
-    test_uint32array_set_int_ir()
-    test_uint32array_set_long_cpp()
-    test_uint32array_set_long_ir()
+    testUint32ArraySetIntCpp()
+    testUint32ArraySetRangeErrorCpp()
+    testUint32ArraySetIntIr()
+    testUint32ArraySetLongCpp()
+    testUint32ArraySetLongIr()
 
-    test_biguint64array_set_int_cpp()
-    test_biguint64array_set_int_ir()
-    test_biguint64array_set_long_cpp()
-    test_biguint64array_set_rangeerror_cpp()
-    test_biguint64array_set_long_ir()
+    testBigUint64ArraySetIntCpp()
+    testBigUint64ArraySetIntIr()
+    testBigUint64ArraySetLongCpp()
+    testBigUint64ArraySetRangeErrorCpp()
+    testBigUint64ArraySetLongIr()
 }
