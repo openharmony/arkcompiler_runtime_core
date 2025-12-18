@@ -7869,11 +7869,7 @@ following:
    (see :ref:`Ternary Conditional Expressions`);
 
 -  Parenthesized expressions (see :ref:`Parenthesized Expression`) that contain
-   constant expressions;
-
--  Simple names or qualified names that refer to constants (see
-   :ref:`Constant Declarations`) with constant expressions as initializers,
-   declared in the same module.
+   constant expressions.
 
 .. index::
    constant expression
@@ -7924,31 +7920,6 @@ following:
    constant expression
    initializer
    module
-
-The examples of constant expressions are presented below:
-
-.. code-block:: typescript
-   :linenos:
-
-    const a = 2
-
-    // Constant expressions:
-    1 + 2
-    a + 1
-    "aa" + "bb"
-    (a < 0) || (a > 5)
-
-.. note::
-   The following expressions are not constant expressions:
-
-   .. code-block:: typescript
-      :linenos:
-
-       let x = 2
-
-       // non-constant expressions:
-       x + 1
-       0x7f as short
 
 .. raw:: pdf
 
