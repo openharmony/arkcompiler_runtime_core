@@ -126,36 +126,6 @@ is handled as a :index:`compile-time error`.
    pattern
    super
 
-The syntax of *arguments* is presented below:
-
-.. code-block:: abnf
-
-    arguments:
-        '(' argumentSequence? ')'
-        ;
-
-    argumentSequence:
-        restArgument
-        | expression (',' expression)* (',' restArgument)? ','?
-        ;
-
-    restArgument:
-        '...'? expression
-        ;
-
-The *arguments* grammar rule refers to the list of call arguments. Only
-the last argument can have the form of a spread expression (see
-:ref:`Spread Expression`).
-
-.. index::
-   argument
-   call argument
-   syntax
-   expression
-   call
-   grammar rule
-   spread expression
-
 |
 
 .. _Operators:
@@ -2671,11 +2641,10 @@ The syntax of *method call expression* is presented below:
 .. code-block:: abnf
 
     methodCallExpression:
-        objectReference ('.' | '?.') identifier typeArguments? arguments block?
+        objectReference ('.' | '?.') identifier typeArguments? callArguments
         ;
 
-The syntax form that has a block associated with the method call is a special
-form called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
+*Call arguments* are described in :ref:`Call Arguments`.
 
 A method call with ``'?.'`` (see :ref:`Chaining Operator`) is called a
 *safe method call* because it handles nullish values safely.
@@ -2878,11 +2847,10 @@ The syntax of *function call expression* is presented below:
 .. code-block:: abnf
 
     functionCallExpression:
-        expression ('?.' | typeArguments)? arguments block?
+        expression ('?.' | typeArguments)? callArguments
         ;
 
-A special syntactic form that contains a block associated with the function
-call is called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
+*Call arguments* are described in :ref:`Call Arguments`.
 
 A :index:`compile-time error` occurs if the expression type is one of the
 following:
@@ -2909,9 +2877,9 @@ following:
 If the operator ``'?.'`` (see :ref:`Chaining Operator`) is present, and the
 *expression* evaluates to a nullish value, then:
 
--  *Arguments* are not evaluated;
+-  *Call arguments* are not evaluated;
 -  Call is not performed; and
--  Result of *functionCallExpression* is not produced as a consequence.
+-  Result of *function call expression* is not produced as a consequence.
 
 The function call is *safe* because it handles nullish values properly.
 
@@ -2992,6 +2960,44 @@ Type of a *function call expression* is the return type of the function.
    callee
    type annotation
    return type
+
+|
+
+.. _Call Arguments:
+
+Call Arguments
+==============
+
+.. meta:
+    frontend_status: Done
+
+The syntax of *call arguments* is presented below:
+
+.. code-block:: abnf
+
+    callArguments:
+        '(' argumentSequence? ')' trailingLambda?
+        | trailingLambda
+        ;
+
+    argumentSequence:
+        expression (',' expression)* ','?
+        ;
+
+The ``callArguments`` grammar rule refers to the list of call arguments. Only
+an argument that corresponds to a *rest parameter* can be a spread expression (see
+:ref:`Spread Expression`).
+
+A special syntactic form of call arguments that contains a *trailing lambda*
+is called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
+
+.. index::
+   argument
+   call argument
+   syntax
+   expression
+   call
+   spread expression
 
 |
 

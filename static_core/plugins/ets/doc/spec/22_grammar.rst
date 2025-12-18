@@ -248,19 +248,6 @@ Grammar Summary
         | primaryExpression
         ;
 
-    arguments:
-        '(' argumentSequence? ')'
-        ;
-
-    argumentSequence:
-        restArgument
-        | expression (',' expression)* (',' restArgument)? ','?
-        ;
-
-    restArgument:
-        '...'? expression
-        ;
-
     namedReference:
       qualifiedName typeArguments?
       ;
@@ -310,11 +297,20 @@ Grammar Summary
         ;
 
     methodCallExpression:
-        objectReference ('.' | '?.') identifier typeArguments? arguments block?
+        objectReference ('.' | '?.') identifier typeArguments? callArguments
         ;
 
     functionCallExpression:
-        expression ('?.' | typeArguments)? arguments block?
+        expression ('?.' | typeArguments)? callArguments
+        ;
+
+    callArguments:
+        '(' argumentSequence? ')' trailingLambda?
+        | trailingLambda
+        ;
+
+    argumentSequence:
+        expression (',' expression)* ','?
         ;
 
     indexingExpression:

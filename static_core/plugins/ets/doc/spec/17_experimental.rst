@@ -3625,6 +3625,12 @@ or method call when the last parameter of a function or a method is of
 function type, and the argument is passed as a lambda using the
 :ref:`Block` notation. The *trailing lambda* syntactically looks as follows:
 
+.. code-block:: abnf
+
+    trailingLambda:
+        block
+        ;
+
 .. index::
    trailing lambda
    notation
@@ -3637,6 +3643,8 @@ function type, and the argument is passed as a lambda using the
    lambda
    block notation
 
+The use of a trailing lambda is represented in the example below:
+
 .. code-block:: typescript
    :linenos:
 
@@ -3648,19 +3656,7 @@ function type, and the argument is passed as a lambda using the
       a.foo() { console.log ("method lambda argument is activated") }
       // method foo receives last argument as the trailing lambda
 
-
-The syntax of *trailing lambda* is presented below:
-
-.. code-block:: abnf
-
-    trailingLambdaCall:
-        ( objectReference '.' identifier typeArguments?
-        | expression ('?.' | typeArguments)?
-        )
-        arguments block
-        ;
-
-Currently, no parameter can be specified for the trailing lambda,
+Currently, no parameter can be specified for the type of a trailing lambda,
 except a receiver parameter (see :ref:`Lambda Expressions with Receiver`).
 Otherwise, a :index:`compile-time error` occurs.
 
