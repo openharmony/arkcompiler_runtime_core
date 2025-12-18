@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import re
+from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal, cast
@@ -96,6 +97,19 @@ class Test:
     def has_expected_err(self) -> bool:
         """ True if test.expected.err file exists """
         return self.path_to_expected_err.exists()
+
+    @staticmethod
+    def prepare_config_parser(prs: ArgumentParser, params: dict) -> ArgumentParser:
+        for key, val in params.items():
+            if isinstance(val, bool):
+                prs.add_argument(f'--{key}',
+                                               dest=f"{key}", action='store_true')
+            elif isinstance(val, list):
+                prs.add_argument(f'--{key}', dest=f"{key}", action='append')
+            else:
+                prs.add_argument(f'--{key}', dest=f"{key}")
+
+        return prs
 
     def run(self, repeat: int) -> Test | GTest:
         start = datetime.now(pytz.UTC)
@@ -180,7 +194,7 @@ class Test:
         workflow_params = self.get_entity_params("workflow")
         test_suite_main_params = self.get_entity_params("test-suite")
         test_suite_collections_params = self.get_collection_params()
-        runner_params = self.get_changed_runner_params()
+        runner_params = self.get_actual_runner_params()
 
         for key, val in workflow_params.items():
             if isinstance(val, list):
@@ -214,7 +228,7 @@ class Test:
 
         return cast(dict, getattr(self.test_env.config.general, data)["parameters"])
 
-    def get_changed_runner_params(self) -> dict:
+    def get_actual_runner_params(self) -> dict:
         cli_options = self.test_env.config.general.cli_options
         cli_options_splited = []
         for option in cli_options:
@@ -228,26 +242,11 @@ class Test:
         runner_args, other_args = runner_parser.parse_known_args(cli_options)
 
         test_suite_parser = argparse.ArgumentParser(description="Test Suite args parser")
-        for key, val in self.test_env.config.test_suite.parameters.items():
-            if isinstance(val, bool):
-                test_suite_parser.add_argument(f'--{key}',
-                                               dest=f"{key}", action='store_true')
-            elif isinstance(val, list):
-                test_suite_parser.add_argument(f'--{key}', dest=f"{key}", action='append')
-            else:
-                test_suite_parser.add_argument(f'--{key}', dest=f"{key}", type=type(val))
-
+        test_suite_parser = Test.prepare_config_parser(test_suite_parser, self.test_env.config.test_suite.parameters)
         test_suite_args, other_args = test_suite_parser.parse_known_args(other_args)
 
         workflow_parser = argparse.ArgumentParser(description="Workflow args parser")
-        for key, val in self.test_env.config.workflow.parameters.items():
-            if isinstance(val, bool):
-                workflow_parser.add_argument(f'--{key}',
-                                               dest=f"{key}", action='store_true')
-            elif isinstance(val, list):
-                workflow_parser.add_argument(f'--{key}', dest=f"{key}", action='append')
-            else:
-                workflow_parser.add_argument(f'--{key}', dest=f"{key}", type=type(val))
+        workflow_parser = Test.prepare_config_parser(workflow_parser, self.test_env.config.workflow.parameters)
 
         workflow_args, other_args = workflow_parser.parse_known_args(other_args)
 

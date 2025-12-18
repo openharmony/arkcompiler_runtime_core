@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 import os
 import shutil
 import sys
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from datetime import datetime
 from pathlib import Path
 from typing import ClassVar, NamedTuple, cast
@@ -35,7 +35,7 @@ from runner.options.options import IOptions
 from runner.options.step import StepKind
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.suites.work_dir import WorkDir
-from runner.test.test_utils import random_suffix
+from runner.test import test_utils
 
 
 class KeyValueType(NamedTuple):
@@ -115,7 +115,7 @@ class OptionsTest(TestCase):
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
         'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
         'PANDA_BUILD': ".",
-        'WORK_DIR': f"work-{random_suffix()}"
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
     }, clear=True)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "111111111")
     def test_workflow_panda(self) -> None:
@@ -154,7 +154,7 @@ class OptionsTest(TestCase):
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
         'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
         'PANDA_BUILD': ".",
-        'WORK_DIR': f"work-{random_suffix()}"
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
     }, clear=True)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "999999999")
     def test_workflow_not_panda(self) -> None:
@@ -195,7 +195,7 @@ class OptionsTest(TestCase):
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
         'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
         'PANDA_BUILD': ".",
-        'WORK_DIR': f"work-{random_suffix()}"
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
     }, clear=True)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222222")
     def test_workflow_panda_multiple(self) -> None:
@@ -257,7 +257,7 @@ class OptionsTest(TestCase):
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
         'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
         'PANDA_BUILD': ".",
-        'WORK_DIR': f"work-{random_suffix()}"
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
     }, clear=True)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222223")
     def test_reproduce_str_short_cli(self) -> None:
@@ -300,7 +300,7 @@ class OptionsTest(TestCase):
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
         'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
         'PANDA_BUILD': ".",
-        'WORK_DIR': f"work-{random_suffix()}"
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
     }, clear=True)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222224")
     def test_reproduce_str_full_cli(self) -> None:
@@ -332,7 +332,7 @@ class OptionsTest(TestCase):
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
         'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
         'PANDA_BUILD': ".",
-        'WORK_DIR': f"work-{random_suffix()}"
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
     }, clear=True)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222225")
     def test_reproduce_str_redefine_option_from_ts(self) -> None:
@@ -363,7 +363,7 @@ class OptionsTest(TestCase):
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
         'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
         'PANDA_BUILD': ".",
-        'WORK_DIR': f"work-{random_suffix()}"
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
     }, clear=True)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222226")
     def test_reproduce_str_redefine_option_from_wf(self) -> None:
@@ -394,7 +394,7 @@ class OptionsTest(TestCase):
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
         'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
         'PANDA_BUILD': ".",
-        'WORK_DIR': f"work-{random_suffix()}"
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
     }, clear=True)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222227")
     def test_reproduce_str_full_cli_option_default(self) -> None:
@@ -423,3 +423,42 @@ class OptionsTest(TestCase):
 
         # clear up
         shutil.rmtree(work_dir.root, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "222222244")
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "panda", "test_suite1", "--verbose", "silent"],),
+        (["runner.sh", "panda", "test_suite1", "--verbose", "SILENT"],),
+        (["runner.sh", "panda", "test_suite1", "--verbose", "sileNt"],),
+    ])
+    def test_cli_enum_vals_case_insensitive(self, argv: Callable) -> None:
+        with patch('sys.argv', argv):
+            # preparation
+            test_env, test_root, work_dir = self.prepare()
+            # test
+            test = TestStandardFlow(
+                test_env=test_env,
+                test_path=test_root / "test1.ets",
+                params=IOptions({}),
+                test_id="test1.ets"
+            )
+
+            full_cli = test.get_full_cli()
+            workflow_name = sys.argv[1]
+            test_suite_name = sys.argv[2]
+            verbose_val = sys.argv[4]
+
+            self.assertIn(test.test_id, full_cli)
+            self.assertIn(workflow_name, full_cli)
+            self.assertIn(test_suite_name, full_cli)
+            self.assertIn(verbose_val.lower(), full_cli)
+
+            # clear up
+            shutil.rmtree(work_dir.root, ignore_errors=True)
