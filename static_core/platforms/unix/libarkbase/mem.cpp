@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,7 +157,7 @@ static size_t GetCacheLineSizeFromOs()
 #else
     long sz = 0;
     size_t length = sizeof(sz);
-    sysctlbyname("hw.l1cachesize", &sz, &length, NULL, 0);
+    sysctlbyname("hw.cachelinesize", &sz, &length, NULL, 0);
 #endif
     LOG_IF(sz <= 0, FATAL, RUNTIME) << "Can't get cache line size from OS";
     return static_cast<uint32_t>(sz);

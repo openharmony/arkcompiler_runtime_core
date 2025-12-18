@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ namespace ark::helpers::math {
  * @param X - should be power of 2
  * @return log2(X) or undefined if X 0
  */
-constexpr uint32_t GetIntLog2(const uint32_t x)
+inline constexpr uint32_t GetIntLog2(const uint32_t x)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
     return static_cast<uint32_t>(PANDA_BIT_UTILS_CTZ(x));
@@ -41,10 +41,23 @@ constexpr uint32_t GetIntLog2(const uint32_t x)
  * @param X - of type uint64_t, should be power of 2
  * @return log2(X) or undefined if X 0
  */
-constexpr uint64_t GetIntLog2(const uint64_t x)
+inline constexpr uint64_t GetIntLog2(const uint64_t x)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
     return static_cast<uint64_t>(PANDA_BIT_UTILS_CTZLL(x));
+}
+
+/**
+ * @brief returns log2 for argument
+ * @param X - of type T, should be power of 2
+ * @return log2(X) or undefined if X 0
+ */
+template <typename T>
+inline constexpr T GetIntLog2(T x)
+{
+    static_assert(sizeof(T) == sizeof(uint32_t) || sizeof(T) == sizeof(uint64_t));
+    using U = std::make_unsigned_t<T>;
+    return static_cast<T>(GetIntLog2(static_cast<U>(x)));
 }
 
 template <typename T>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,8 +48,8 @@ void *HumongousObjAllocator<AllocConfigT, LockConfigT>::Alloc(const size_t size,
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Try to allocate memory with size " << size;
 
     // Check that we can get a memory header for the memory pointer by using PAGE_SIZE_MASK mask
-    if (UNLIKELY(PAGE_SIZE <= sizeof(MemoryPoolHeader) + GetAlignmentInBytes(align))) {
-        ASSERT(PAGE_SIZE > sizeof(MemoryPoolHeader) + GetAlignmentInBytes(align));
+    if (UNLIKELY(PANDA_PAGE_SIZE <= sizeof(MemoryPoolHeader) + GetAlignmentInBytes(align))) {
+        ASSERT(PANDA_PAGE_SIZE > sizeof(MemoryPoolHeader) + GetAlignmentInBytes(align));
         LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "The align is too big for this allocator. Return nullptr.";
         return nullptr;
     }
@@ -168,7 +168,7 @@ bool HumongousObjAllocator<AllocConfigT, LockConfigT>::AddMemoryPool(void *mem, 
     ASSERT(mem != nullptr);
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Add memory pool to HumongousObjAllocator from  " << std::hex << mem
                                        << " with size " << std::dec << size;
-    if (AlignUp(ToUintPtr(mem), PAGE_SIZE) != ToUintPtr(mem)) {
+    if (AlignUp(ToUintPtr(mem), PANDA_PAGE_SIZE) != ToUintPtr(mem)) {
         return false;
     }
     auto mempoolHeader = static_cast<MemoryPoolHeader *>(mem);

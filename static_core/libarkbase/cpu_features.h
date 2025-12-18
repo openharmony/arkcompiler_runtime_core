@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,12 @@ PANDA_PUBLIC_API bool CpuFeaturesHasAtomics();
 
 namespace ark {
 #if defined(PANDA_TARGET_AMD64) || defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_ARM32)
+#if defined(PANDA_TARGET_MACOS) && defined(PANDA_TARGET_ARM64)
+// Apple M-family processors has a wider cache line.
+static constexpr size_t CACHE_LINE_SIZE = 128;
+#else
 static constexpr size_t CACHE_LINE_SIZE = 64;
+#endif
 #else
 static constexpr size_t CACHE_LINE_SIZE = 0;
 static_assert(CACHE_LINE_SIZE, "Undefined cacheline size");

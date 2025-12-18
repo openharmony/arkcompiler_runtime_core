@@ -1539,7 +1539,7 @@ public:
     virtual size_t GetProtectedMemorySize() const
     {
         // Conservatively, we believe that one page is protected. There can't be less than one.
-        return PAGE_SIZE;
+        return PANDA_PAGE_SIZE;
     }
 
     /// Entrypoints
