@@ -916,7 +916,7 @@ A class can contain declarations of the following members:
 -  Constructors,
 -  Method overloads (see :ref:`Explicit Class Method Overload`),
 -  Constructor overloads (see :ref:`Explicit Constructor Overload`), and
--  Single static block for initialization (see :ref:`Static Initialization`).
+-  Single static initialization block (see :ref:`Static Initialization`).
 
 The syntax is presented below:
 
@@ -1501,7 +1501,7 @@ using the default value (see :ref:`Default Values for Types`) or a field
 initializer (see below) if present. Otherwise, a field can be initialized as
 follows:
 
-- Static field, by a static initializer block (see
+- Static field, by a static initialization block (see
   :ref:`Static Initialization`), or
 - Instance field, by a class constructor (see
   :ref:`Constructor Declaration`).
@@ -1542,7 +1542,8 @@ subsequent assignment are only performed once.
    method
 
 The initializer of a non-static field declaration is evaluated at runtime.
-The assignment is performed each time an instance of the class is created.
+The assignment is performed each time an instance of the class is created (see
+:ref:`New Expressions`).
 
 The instance field initializer expression cannot use the following directly in
 any form:
@@ -1978,7 +1979,7 @@ A non-static method declared in a class can do the following:
 - Act as method declaration of a new method.
 
 
-Class static methods never implement or override superclass or superinterafce
+Class static methods never implement or override superclass or superinterface
 methods.
 
 
@@ -2832,7 +2833,49 @@ following strategy is to be taken:
           }
     }
 
+Example below illustrates how new expressions (see :ref:`New Expressions`) work
+together with the constructor body execution sequence:
 
+.. code-block:: typescript
+   :linenos:
+
+   let count = 0
+   function trace (msg: string) {
+      count++
+      console.log (count + ": " + msg)
+      return count
+   }
+
+   class C {
+      C_field = trace("C fields initialization performed")
+      constructor() {
+         trace ("C constructor called")
+      }
+   }
+   class B extends C {
+      B_field = trace("B fields initialization performed")
+      constructor() {
+         super ()
+         trace ("B constructor called")
+      }
+   }
+   class A extends B {
+      A_field = trace("A fields initialization performed")
+      constructor(p: number) {
+         super()
+         trace ("A constructor called")
+      }
+   }
+   new A (trace("constructor arguments evaluated"))
+
+   // The output
+   // "1: constructor arguments evaluated"
+   // "2: C fields initialization performed"
+   // "3: C constructor called "
+   // "4: B fields initialization performed"
+   // "5: B constructor called "
+   // "6: A fields initialization performed"
+   // "7: A constructor called "
 
 .. index::
    primary constructor

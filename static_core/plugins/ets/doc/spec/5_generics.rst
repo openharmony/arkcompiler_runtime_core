@@ -660,7 +660,10 @@ Implicit Generic Instantiations
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
 Such type arguments are inferred (see :ref:`Type Inference`) from the context
-in which a generic is referred. It is represented in the example below:
+in which a generic is referred. If type arguments can not be inferred then
+a :index:`compile-time error` occurs.
+
+Different cases type argument inference are represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -669,7 +672,6 @@ in which a generic is referred. It is represented in the example below:
     foo (new Object, new Object)     // Implicit generic function instantiation
       // based on argument types: the type argument is inferred
 
-
     function process <P, R> (arg: P, cb?: (p: P) => R): P | R {
        // return the data itself or if the processing function provided the
        // result of processing
@@ -677,6 +679,8 @@ in which a generic is referred. It is represented in the example below:
     }
     process (123, () => {}) // P is inferred as 'int', while R is 'void'
 
+    function bar <T> (p: number) {}
+    bar (1) // Compile-time error: type argument can not be inferred
 
 
 Implicit instantiation is only possible for generic functions and methods.
