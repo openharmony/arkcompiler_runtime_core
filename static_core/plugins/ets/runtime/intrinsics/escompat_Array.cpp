@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,11 @@
 #include <cstddef>
 #include <cstdint>
 
+#ifdef PANDA_TARGET_MACOS
+#include <machine/endian.h>
+#else
 #include <endian.h>
+#endif
 #include <optional>
 
 #include "runtime/include/coretypes/string.h"

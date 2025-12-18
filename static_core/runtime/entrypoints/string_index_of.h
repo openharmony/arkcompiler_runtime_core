@@ -253,8 +253,14 @@ inline ALWAYS_INLINE int32_t Utf8StringLastIndexOfChar(uint8_t *data, size_t off
 {
     if ((length - offset) >= IndexOfConstants<uint8_t, uint64_t>::VECTOR_SIZE * 2) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+#ifndef PANDA_TARGET_MACOS
         auto pos = reinterpret_cast<uint8_t *>(memrchr(data, ch, length - offset));
         return pos == nullptr ? -1 : pos - data;
+#else
+        using sv = std::basic_string_view<uint8_t>;
+        auto const pos = sv {data + offset, length - offset}.find_last_of(ch);
+        return pos == sv::npos ? -1 : pos;
+#endif
     }
     return StringLastIndexOfSwar<uint8_t, uint64_t>(data, offset, length, ch);
 }

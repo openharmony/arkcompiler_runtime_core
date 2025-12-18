@@ -16,6 +16,7 @@
 #include <ctime>
 
 #include "gtest/gtest.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 #include "runtime/mem/internal_allocator-inl.h"
 

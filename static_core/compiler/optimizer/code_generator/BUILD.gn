@@ -102,11 +102,7 @@ if (enable_codegen) {
       external_deps += [ vixl_dep ]
     }
 
-    if (is_mac) {
-      defines += [ "VIXL_CODE_BUFFER_MALLOC" ]
-    } else {
-      defines += [ "VIXL_CODE_BUFFER_MMAP" ]
-    }
+    defines += [ "VIXL_CODE_BUFFER_MMAP" ]
     configs = [
       "$ark_root:ark_config",
       "$ark_root/libarkbase:arkbase_public_config",
@@ -197,11 +193,7 @@ if (enable_codegen) {
       external_deps += [ vixl_dep ]
     }
 
-    if (is_mac) {
-      defines += [ "VIXL_CODE_BUFFER_MALLOC" ]
-    } else {
-      defines += [ "VIXL_CODE_BUFFER_MMAP" ]
-    }
+    defines += [ "VIXL_CODE_BUFFER_MMAP" ]
     configs = [
       "$ark_root:ark_config",
       "$ark_root/libarkbase:arkbase_public_config",

@@ -17,6 +17,9 @@
 #include <cmath>
 #include <thread>
 #include <set>
+#include <cstdlib>
+#include <csignal>
+#include <ctime>
 
 #include "libarkbase/macros.h"
 #include "libarkbase/os/exec.h"

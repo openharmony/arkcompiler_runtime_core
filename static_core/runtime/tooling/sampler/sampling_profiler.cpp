@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -539,6 +539,7 @@ void Sampler::SamplerThreadEntry()
     }
     ++g_sCurrentHandlersCounter;
 
+#ifndef PANDA_TARGET_MACOS
     auto pid = getpid();
     // Atomic with acquire order reason: To ensure start/stop load correctly
     while (isActive_.load(std::memory_order_acquire)) {
@@ -553,6 +554,7 @@ void Sampler::SamplerThreadEntry()
         }
         os::thread::NativeSleepUS(sampleInterval_);
     }
+#endif
 
     // Sending last sample on finish to avoid of deadlock in listener
     SampleInfo lastSample;

@@ -271,7 +271,9 @@ MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint):
 // shift other arguments back
 .macro ANI_ENTRY_POINT_GENERIC name, native_begin_fn, native_end_fn, native_object_end_fn
 .global \name
+#ifndef PANDA_TARGET_MACOS
 .type \name, %function
+#endif
 \name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
