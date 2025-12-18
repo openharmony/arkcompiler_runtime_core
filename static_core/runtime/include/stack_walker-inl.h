@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,8 @@ bool StackWalker::IterateAllRegsForCFrame(Func func)
         interpreter::VRegister vreg0;
         interpreter::VRegister vreg1;
         interpreter::StaticVRegisterRef resReg(&vreg0, &vreg1);
-        cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+        // Need cast as uintptr_t and uint64_t are not compatible on 64-bit macOS.
+        cframe.GetVRegValue(regInfo, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()), resReg);
         if (!InvokeCallback<false, WITH_REG_INFO>(func, regInfo, resReg)) {
             return false;
         }
@@ -76,7 +77,7 @@ bool StackWalker::IterateRegsForCFrameStatic(Func func)
             interpreter::VRegister vreg0;
             interpreter::VRegister vreg1;
             interpreter::StaticVRegisterRef resReg(&vreg0, &vreg1);
-            cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+            cframe.GetVRegValue(regInfo, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()), resReg);
             if (!InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, resReg)) {
                 return false;
             }
@@ -89,7 +90,7 @@ bool StackWalker::IterateRegsForCFrameStatic(Func func)
             interpreter::VRegister vreg0;
             interpreter::VRegister vreg1;
             interpreter::StaticVRegisterRef resReg(&vreg0, &vreg1);
-            cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+            cframe.GetVRegValue(regInfo, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()), resReg);
             return !resReg.HasObject() || InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, resReg);
         });
         return true;
@@ -109,7 +110,7 @@ bool StackWalker::IterateRegsForCFrameDynamic(Func func)
         for (auto regInfo : CFrameDynamicNativeMethodIterator<RUNTIME_ARCH>::MakeRange(&cframe)) {
             interpreter::VRegister vreg0;
             interpreter::DynamicVRegisterRef resReg(&vreg0);
-            cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+            cframe.GetVRegValue(regInfo, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()), resReg);
             if (!InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, resReg)) {
                 return false;
             }
@@ -121,7 +122,7 @@ bool StackWalker::IterateRegsForCFrameDynamic(Func func)
         codeInfo_.EnumerateDynamicRoots(stackmap_, [this, &cframe, &func](VRegInfo regInfo) {
             interpreter::VRegister vreg0;
             interpreter::DynamicVRegisterRef resReg(&vreg0);
-            cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+            cframe.GetVRegValue(regInfo, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()), resReg);
             return !resReg.HasObject() || InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, resReg);
         });
         return true;

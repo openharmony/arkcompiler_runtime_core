@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,8 +60,9 @@ Expected<int, Error> ExecWithCallback(Callback callback, Span<const char *> args
     if (resPid != pid) {
         return Unexpected(Error(errno));
     }
-    if (WIFEXITED(static_cast<unsigned int>(status))) {
-        return static_cast<int>(WEXITSTATUS(static_cast<unsigned int>(status)));
+    unsigned int statusCasted = static_cast<unsigned int>(status);
+    if (WIFEXITED(statusCasted)) {
+        return static_cast<int>(WEXITSTATUS(statusCasted));
     }
     return Unexpected(Error("Process finished improperly"));
 }
