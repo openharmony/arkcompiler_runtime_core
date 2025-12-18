@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,29 +23,26 @@ export namespace ops {
     }
 }
 
-function getIntValue1(i: int): int {
+function getIntValue(i: int): int {
     return 0;
 }
-function getIntValue2(i: String): int {
+function getIntValue(i: String): int {
     return 1;
 }
-function getIntValue3(): int {
+function getIntValue(): int {
     return 2;
 }
 
-overload getIntValue {getIntValue1, getIntValue2, getIntValue3}
 export function getInitialStringValue(): String {
     return "a";
 }
 
-function overloaded1(i: int): int {
+function overloaded(i: int): int {
     return 0
 }
-function overloaded2(): int {
+function overloaded(): int {
     return 1
 }
-
-overload overloaded {overloaded1, overloaded2}
 
 function getIntValueA(i: int): void {}
 function getIntValueB(i: int): void {}

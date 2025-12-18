@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,13 +69,14 @@ public:
     static std::vector<MirrorFieldInfo> GetClassMembers()
     {
         return std::vector<MirrorFieldInfo> {
+            // clang-format off
             MIRROR_FIELD_INFO(EtsClass, name_, "name"),
             MIRROR_FIELD_INFO(EtsClass, superClass_, "superClass"),
             MIRROR_FIELD_INFO(EtsClass, linker_, "linker"),
             MIRROR_FIELD_INFO(EtsClass, typeMetaData_, "typeMetaData"),
-            MIRROR_FIELD_INFO(EtsClass, overloadMap_, "overloadMap"),
             MIRROR_FIELD_INFO(EtsClass, flags_, "flags"),
             MIRROR_FIELD_INFO(EtsClass, methodsNum_, "methodsNum"),
+            // clang-format on
         };
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,40 +153,13 @@ TEST_F(ModuleBindNativeFunctionsTest, function_not_found)
 
     std::array functions = {
         ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
-        ani_native_function {"foo", "ii:i", reinterpret_cast<void *>(Foo)},
-        ani_native_function {"foo", "iii:i", reinterpret_cast<void *>(FooA)},
+        ani_native_function {"foo1", "ii:i", reinterpret_cast<void *>(Foo)},
+        ani_native_function {"foo2", "iii:i", reinterpret_cast<void *>(FooA)},
         ani_native_function {"concatX", CONCAT_SIGNATURE, reinterpret_cast<void *>(Concat)},
     };
     ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
 
-TEST_F(ModuleBindNativeFunctionsTest, new_overload_bind)
-{
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
-    std::array functions = {
-        ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
-        ani_native_function {"foo", "ii:i", reinterpret_cast<void *>(Foo)},
-        ani_native_function {"foo", "iii:i", reinterpret_cast<void *>(FooA)},
-    };
-    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
-}
-
-TEST_F(ModuleBindNativeFunctionsTest, new_overload_direct_bind)
-{
-    ani_module module {};
-    ASSERT_EQ(env_->FindModule(MODULE_NAME, &module), ANI_OK);
-    ASSERT_NE(module, nullptr);
-
-    std::array functions = {
-        ani_native_function {"sum", "ii:i", reinterpret_cast<void *>(Sum)},
-        ani_native_function {"foo1", "ii:i", reinterpret_cast<void *>(Foo)},
-        ani_native_function {"foo2", "iii:i", reinterpret_cast<void *>(FooA)},
-    };
-    ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
-}
 // NOLINTNEXTLINE(readability-named-parameter)
 static ani_int NativeMethodsFooNative(ani_env *, ani_class)
 {

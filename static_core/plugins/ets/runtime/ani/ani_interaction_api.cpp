@@ -486,22 +486,7 @@ static ani_status DoGetClassMethodUnderManagedScope(EtsClass *klass, const char 
         *result = method;
         return ANI_OK;
     }
-    PandaVector<EtsMethod *> methodVec;
-    if constexpr (IS_STATIC_METHOD) {
-        methodVec = klass->GetStaticMethodOverload(name, methodSignature);
-    } else {
-        methodVec = klass->GetInstanceMethodOverload(name, methodSignature);
-    }
-    if (methodVec.empty()) {
-        return ANI_NOT_FOUND;
-    }
-    if (methodVec.size() > 1U) {
-        return ANI_AMBIGUOUS;
-    }
-    method = methodVec[0];
-    ASSERT(method->IsStatic() == IS_STATIC_METHOD);
-    *result = method;
-    return ANI_OK;
+    return ANI_NOT_FOUND;
 }
 
 template <bool IS_STATIC_METHOD>
@@ -1243,21 +1228,7 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         EtsMethod *method = etsClass->GetStaticMethod(name, methodSignature);
-        if (method != nullptr) {
-            etsMethods.push_back(method);
-            continue;
-        }
-        PandaVector<EtsMethod *> methodVec = etsClass->GetStaticMethodOverload(name, methodSignature);
-        if (methodVec.size() == 1U) {
-            etsMethods.push_back(methodVec[0]);
-            continue;
-        }
-        if (methodVec.empty()) {
-            return ANI_NOT_FOUND;
-        }
-        if (methodVec.size() > 1U) {
-            return ANI_AMBIGUOUS;
-        }
+        etsMethods.push_back(method);
     }
     return DoBindNative(s, etsMethods, functions, nrFunctions);
 }
@@ -1431,18 +1402,6 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(ani_env *env, ani_fix
     return SetPrimitiveTypeArrayRegion(env, array, offset, length, nativeBuffer);
 }
 
-static ani_status GetDirectMethodOverload(EtsClass *klass, const char *name,
-                                          std::optional<EtsMethodSignature> &methodSignature, EtsMethod **result)
-{
-    PandaVector<EtsMethod *> methodVec = klass->GetDirectMethodOverload(name, methodSignature);
-    if (!methodVec.empty()) {
-        ANI_CHECK_RETURN_IF_GT(methodVec.size(), 1U, ANI_AMBIGUOUS);
-        ASSERT(methodVec.size() == 1U);
-        *result = methodVec[0];
-    }
-    return ANI_OK;
-}
-
 static void CheckWrongBindingMethodType(EtsClass *klass, bool isStatic, const char *name,
                                         std::optional<EtsMethodSignature> &methodSignature)
 {
@@ -1495,11 +1454,6 @@ static ani_status BindNativeMethods(ani_env *env, ani_class cls, const ani_nativ
             ANI_CHECK_RETURN_IF_EQ(isUnique, false, ANI_AMBIGUOUS);
         } else {
             method = klass->GetDirectMethod(isStatic, name, methodSignature.value());
-        }
-
-        if (method == nullptr && !isStatic) {
-            ani_status status = GetDirectMethodOverload(klass, name, methodSignature, &method);
-            ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
         }
 
         if (method == nullptr) {
