@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -210,8 +210,9 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
 #endif /* defined(PANDA_TARGET_OHOS) */
     }
 #else  /* PANDA_TARGET_MACOS */
+    *stackAddr = pthread_get_stackaddr_np(thread);
+    *stackSize = pthread_get_stacksize_np(thread);
     s += pthread_attr_getguardsize(&attr, guardSize);
-    s += pthread_attr_getstack(&attr, stackAddr, stackSize);
 #endif /* PANDA_TARGET_MACOS */
     s += pthread_attr_destroy(&attr);
     return s;
