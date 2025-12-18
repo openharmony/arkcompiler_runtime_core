@@ -62,7 +62,15 @@ export class WorkerLocal<T> {
      * @returns {T} Worker-specific stored value
      * @throws {Error} When value not initialized and no init function provided
      */
-    get():T {
+    get(): T {
+        let res : T | undefined = undefined;
+        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, (): T => {
+            res = this.getinner();
+        });
+        return res!;
+    }
+ 
+    private getinner(): T {
         const workerId = CoroutineExtras.getWorkerId();
 
         let wrapped: Wrapper<T> | undefined = this.storage.get(workerId);
@@ -85,18 +93,25 @@ export class WorkerLocal<T> {
      * @param {T} value - New value to store for current worker
      */ 
     set(value: T):void {
-        const workerId = CoroutineExtras.getWorkerId();
-        this.storage.set(workerId, new Wrapper<T>(value));
+        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+            const workerId = CoroutineExtras.getWorkerId();
+            this.storage.set(workerId, new Wrapper<T>(value));
+        });
     }
 
     /**
      * Delete the worker-local value for current worker.
      */ 
-    delete():void {
-        const workerId = CoroutineExtras.getWorkerId();
-        this.storage.delete(workerId);
+    delete(): void {
+        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+            const workerId = CoroutineExtras.getWorkerId();
+            this.storage.delete(workerId);
+        });
     }
-
-    private storage = new containers.ConcurrentHashMap<WorkerId, Wrapper<T>>();
+    // Asynchronous Lock may cause data refreesh failures in high-concurrency scenarios
+    // Using spinlock replace it
+    // NOTE(liu_yaning, #26285): current solution is temporary, the performance will be improved in future
+    private tableSpinlock: Object = ConcurrencyHelpers.spinlockCreate();
+    private storage = new Map<WorkerId, Wrapper<T>>();
     private init?: () => T;
 }
