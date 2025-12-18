@@ -1276,6 +1276,16 @@ is of readonly array type.
    readonly
    array
 
+If the other type used in a context then the
+ref:`Array Type Inference from Types of Elements` is used to inference the type
+of the array literal.
+
+.. code-block:: typescript
+   :linenos:
+
+    let o: Object = [1, 2] /* Type of array literal is inferred from the type
+                              of its elements */
+
 |
 
 .. _Array Type Inference from Types of Elements:
