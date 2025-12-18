@@ -876,6 +876,10 @@
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_m_10.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_m_11.ets
 
+#28786 Incorrect value of overriden field
+09.classes/10.inheritance/inheritance_abstr_field_override_2.ets
+09.classes/10.inheritance/inheritance_abstr_field_override_8.ets
+
 #30206
 10.interfaces/02.superinterfaces_and_subinterfaces/methods_with_override_compatible_signatures_12.ets
 10.interfaces/02.superinterfaces_and_subinterfaces/methods_with_override_compatible_signatures_13.ets
