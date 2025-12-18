@@ -22,26 +22,77 @@ let ns = STValue.findNamespace('stvalue_accessor.magicNamespace');
 let SType = etsVm.SType;
 let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');
 let mediaEnum = STValue.findEnum('stvalue_accessor.MEDIA');
+let zeroFixedArray = tns.namespaceGetVariable('zeroFixedArray', SType.REFERENCE);
+let intFixedArray = tns.namespaceGetVariable('intFixedArray', SType.REFERENCE);
+let boolFixedArray = tns.namespaceGetVariable('boolFixedArray', SType.REFERENCE);
+let strFixedArray = tns.namespaceGetVariable('strFixedArray', SType.REFERENCE);
+let stuFixedArray = tns.namespaceGetVariable('stuFixedArray', SType.REFERENCE);
 let zeroArray = tns.namespaceGetVariable('zeroArray', SType.REFERENCE);
 let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
 let boolArray = tns.namespaceGetVariable('boolArray', SType.REFERENCE);
+let byteArray = tns.namespaceGetVariable('byteArray', SType.REFERENCE);
+let charArray = tns.namespaceGetVariable('charArray', SType.REFERENCE);
+let shortArray = tns.namespaceGetVariable('shortArray', SType.REFERENCE);
+let longArray = tns.namespaceGetVariable('longArray', SType.REFERENCE);
+let floatArray = tns.namespaceGetVariable('floatArray', SType.REFERENCE);
+let doubleArray = tns.namespaceGetVariable('doubleArray', SType.REFERENCE);
 let strArray = tns.namespaceGetVariable('strArray', SType.REFERENCE);
 let stuArray = tns.namespaceGetVariable('stuArray', SType.REFERENCE);
 let studentCls = STValue.findClass('stvalue_accessor.Student');
 
 function testFixedArrayGetLength(): void {
-    ASSERT_TRUE(zeroArray.fixedArrayGetLength() === 0);
-    ASSERT_TRUE(strArray.fixedArrayGetLength() === 3);
-    ASSERT_TRUE(boolArray.fixedArrayGetLength() === 4);
-    ASSERT_TRUE(intArray.fixedArrayGetLength() === 5);
+    ASSERT_TRUE(zeroFixedArray.fixedArrayGetLength() === 0);
+    ASSERT_TRUE(strFixedArray.fixedArrayGetLength() === 3);
+    ASSERT_TRUE(boolFixedArray.fixedArrayGetLength() === 4);
+    ASSERT_TRUE(intFixedArray.fixedArrayGetLength() === 5);
 
     try {
         ASSERT_TRUE(colorEnum.fixedArrayGetLength() === 1);
     } catch (e: Error) { }
 
     try {
-        strArray.fixedArrayGetLength(11);
+        strFixedArray.fixedArrayGetLength(11);
     } catch (e: Error) { }
+}
+
+function testArrayGetLength(): void {
+    ASSERT_TRUE(zeroArray.arrayGetLength() === 0);
+    ASSERT_TRUE(intArray.arrayGetLength() === 5);
+    ASSERT_TRUE(boolArray.arrayGetLength() === 4);
+    ASSERT_TRUE(strArray.arrayGetLength() === 3);
+    ASSERT_TRUE(stuArray.arrayGetLength() === 1);
+
+    let checkRes = false;
+    try {
+        ASSERT_TRUE(intArray.arrayGetLength(5) === 5);
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 0 args, but got 1 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let nullArray = STValue.getNull();
+        nullArray.arrayGetLength();
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let undefArray = STValue.getUndefined();
+        undefArray.arrayGetLength();
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
 }
 
 function testEnumAll(): void {
@@ -190,29 +241,29 @@ function testObjectGetAndSetProperty(): void {
 }
 
 function testFixedArrayGetAndSet(): void {
-    ASSERT_TRUE(intArray.fixedArrayGet(0, SType.INT).unwrapToNumber() === 1);
-    ASSERT_TRUE(boolArray.fixedArrayGet(3, SType.BOOLEAN).unwrapToBoolean() === false);
-    ASSERT_TRUE(strArray.fixedArrayGet(1, SType.REFERENCE).unwrapToString() === 'cd');
-    ASSERT_TRUE(stuArray.fixedArrayGet(0, SType.REFERENCE).objectGetProperty('age', SType.INT).unwrapToNumber() === 28);
+    ASSERT_TRUE(intFixedArray.fixedArrayGet(0, SType.INT).unwrapToNumber() === 1);
+    ASSERT_TRUE(boolFixedArray.fixedArrayGet(3, SType.BOOLEAN).unwrapToBoolean() === false);
+    ASSERT_TRUE(strFixedArray.fixedArrayGet(1, SType.REFERENCE).unwrapToString() === 'cd');
+    ASSERT_TRUE(stuFixedArray.fixedArrayGet(0, SType.REFERENCE).objectGetProperty('age', SType.INT).unwrapToNumber() === 28);
 
-    intArray.fixedArraySet(0, STValue.wrapInt(10), SType.INT);
-    boolArray.fixedArraySet(3, STValue.wrapBoolean(true), SType.BOOLEAN);
-    strArray.fixedArraySet(1, STValue.wrapString('xy'), SType.REFERENCE);
+    intFixedArray.fixedArraySet(0, STValue.wrapInt(10), SType.INT);
+    boolFixedArray.fixedArraySet(3, STValue.wrapBoolean(true), SType.BOOLEAN);
+    strFixedArray.fixedArraySet(1, STValue.wrapString('xy'), SType.REFERENCE);
 
-    ASSERT_TRUE(intArray.fixedArrayGet(0, SType.INT).unwrapToNumber() === 10);
-    ASSERT_TRUE(boolArray.fixedArrayGet(3, SType.BOOLEAN).unwrapToBoolean() === true);
+    ASSERT_TRUE(intFixedArray.fixedArrayGet(0, SType.INT).unwrapToNumber() === 10);
+    ASSERT_TRUE(boolFixedArray.fixedArrayGet(3, SType.BOOLEAN).unwrapToBoolean() === true);
 
     try {
-        strArray.fixedArraySet(0, STValue.getNull(), SType.REFERENCE);
-        ASSERT_TRUE(strArray.fixedArrayGet(0, SType.REFERENCE).isNull());
+        strFixedArray.fixedArraySet(0, STValue.getNull(), SType.REFERENCE);
+        ASSERT_TRUE(strFixedArray.fixedArrayGet(0, SType.REFERENCE).isNull());
     } catch (e: Error) { }
 
     try {
-        intArray.fixedArrayGet(5, SType.INT);
+        intFixedArray.fixedArrayGet(5, SType.INT);
     } catch (e: Error) { }
 
     try {
-        intArray.fixedArrayGet(-1, SType.INT);
+        intFixedArray.fixedArrayGet(-1, SType.INT);
     } catch (e: Error) { }
 
     try {
@@ -221,11 +272,11 @@ function testFixedArrayGetAndSet(): void {
     } catch (e: Error) { }
 
     try {
-        intArray.fixedArraySet(0, STValue.wrapNumber(111), SType.FLOAT);
+        intFixedArray.fixedArraySet(0, STValue.wrapNumber(111), SType.FLOAT);
     } catch (e: Error) { }
 
     try {
-        intArray.fixedArraySet(0, STValue.wrapString('11'), SType.INT);
+        intFixedArray.fixedArraySet(0, STValue.wrapString('11'), SType.INT);
     } catch (e: Error) { }
 
     try {
@@ -233,9 +284,394 @@ function testFixedArrayGetAndSet(): void {
     } catch (e: Error) { }
 
     try {
-        boolArray.fixedArrayGet(3, SType.BOOLEAN, STValue.wrapNumber(111));
+        boolFixedArray.fixedArrayGet(3, SType.BOOLEAN, STValue.wrapNumber(111));
     } catch (e: Error) { }
 
+}
+
+function testArrayGetAndSet(): void {
+    ASSERT_TRUE(intArray.arrayGet(0).objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 1);
+    ASSERT_TRUE(boolArray.arrayGet(3).objectInvokeMethod('toBoolean', ':z', []).unwrapToBoolean() === false);
+    ASSERT_TRUE(byteArray.arrayGet(1).objectInvokeMethod('toByte', ':b', []).unwrapToNumber() === 0x02);
+    ASSERT_TRUE(charArray.arrayGet(1).objectInvokeMethod('toChar', ':c', []).unwrapToNumber() === 98);
+    ASSERT_TRUE(shortArray.arrayGet(1).objectInvokeMethod('toShort', ':s', []).unwrapToNumber() === 200);
+    ASSERT_TRUE(longArray.arrayGet(1).objectInvokeMethod('toLong', ':l', []).unwrapToNumber() === 2000000000);
+    ASSERT_TRUE(Math.abs(floatArray.arrayGet(1).objectInvokeMethod('toFloat', ':f', []).unwrapToNumber() - 2.718) < 0.001);
+    ASSERT_TRUE(Math.abs(doubleArray.arrayGet(1).objectInvokeMethod('toDouble', ':d', []).unwrapToNumber() - 2.718281) < 0.000001);
+    ASSERT_TRUE(strArray.arrayGet(1).objectInvokeMethod('toString', ':C{std.core.String}', []).unwrapToString() === 'cd');
+    ASSERT_TRUE(stuArray.arrayGet(0).objectGetProperty('age', SType.INT).unwrapToNumber() === 28);
+
+    let intClass = STValue.findClass('std.core.Int');
+    let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(10)]);
+    intArray.arraySet(0, intObj);
+
+    let boolClass = STValue.findClass('std.core.Boolean');
+    let boolObj = boolClass.classInstantiate('z:', [STValue.wrapBoolean(true)]);
+    boolArray.arraySet(3, boolObj);
+
+    let byteClass = STValue.findClass('std.core.Byte');
+    let byteObj = byteClass.classInstantiate('b:', [STValue.wrapByte(0x04)]);
+    byteArray.arraySet(1, byteObj);
+
+    let charClass = STValue.findClass('std.core.Char');
+    let charObj = charClass.classInstantiate('c:', [STValue.wrapChar('d')]);
+    charArray.arraySet(1, charObj);
+    
+    let shortClass = STValue.findClass('std.core.Short');
+    let shortObj = shortClass.classInstantiate('s:', [STValue.wrapShort(300)]);
+    shortArray.arraySet(1, shortObj);
+
+    let longClass = STValue.findClass('std.core.Long');
+    let longObj = longClass.classInstantiate('l:', [STValue.wrapLong(3000000000)]);
+    longArray.arraySet(1, longObj);
+
+    let floatClass = STValue.findClass('std.core.Float');
+    let floatObj = floatClass.classInstantiate('f:', [STValue.wrapFloat(2.719)]);
+    floatArray.arraySet(1, floatObj);
+
+    let doubleClass = STValue.findClass('std.core.Double');
+    let doubleObj = doubleClass.classInstantiate('d:', [STValue.wrapNumber(2.718282)]);
+    doubleArray.arraySet(1, doubleObj);
+    
+    strArray.arraySet(1, STValue.wrapString('xy'));
+
+    ASSERT_TRUE(intArray.arrayGet(0).objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 10);
+    ASSERT_TRUE(boolArray.arrayGet(3).objectInvokeMethod('toBoolean', ':z', []).unwrapToBoolean() === true);
+    ASSERT_TRUE(byteArray.arrayGet(1).objectInvokeMethod('toByte', ':b', []).unwrapToNumber() === 0x04);
+    ASSERT_TRUE(charArray.arrayGet(1).objectInvokeMethod('toChar', ':c', []).unwrapToNumber() === 100);
+    ASSERT_TRUE(shortArray.arrayGet(1).objectInvokeMethod('toShort', ':s', []).unwrapToNumber() === 300);
+    ASSERT_TRUE(longArray.arrayGet(1).objectInvokeMethod('toLong', ':l', []).unwrapToNumber() === 3000000000);
+    ASSERT_TRUE(Math.abs(floatArray.arrayGet(1).objectInvokeMethod('toFloat', ':f', []).unwrapToNumber() - 2.719) < 0.001);
+    ASSERT_TRUE(Math.abs(doubleArray.arrayGet(1).objectInvokeMethod('toDouble', ':d', []).unwrapToNumber() - 2.718282) < 0.000001);
+    ASSERT_TRUE(strArray.arrayGet(1).objectInvokeMethod('toString', ':C{std.core.String}', []).unwrapToString() === 'xy');
+
+    strArray.arraySet(0, STValue.wrapString(''));
+    ASSERT_TRUE(strArray.arrayGet(0).objectInvokeMethod('toString', ':C{std.core.String}', []).unwrapToString() === '');
+}
+
+function testArrayGetAndSetInvailidParam(): void {
+    let checkRes = false;
+    try {
+        intArray.arrayGet(5);
+    } catch (e: Error) {
+        checkRes = e.message.includes('ANI error occurred');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        intArray.arrayGet(-1);
+    } catch (e: Error) {
+        checkRes = e.message.includes('ANI error occurred');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        intArray.arrayGet(0, SType.INT);
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 2 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let undefinedArray = STValue.getUndefined();
+        undefinedArray.arrayGet(0);
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let nullArray = STValue.getNull();
+        nullArray.arrayGet(0);
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    let intClass = STValue.findClass('std.core.Int');
+    let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(10)]);
+    
+    checkRes = false;
+    try {
+        intArray.arraySet(-1, intObj);
+    } catch (e: Error) {
+        checkRes = e.message.includes('ANI error occurred');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        intArray.arraySet(5, intObj);
+    } catch (e: Error) {
+        checkRes = e.message.includes('ANI error occurred');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        intArray.arraySet(0, STValue.wrapNumber(111));
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('value');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let undefinedArray = STValue.getUndefined();
+        undefinedArray.arraySet(0, STValue.wrapString('xy'));
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let nullArray = STValue.getNull();
+        nullArray.arraySet(0, STValue.wrapString('xy'));
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        strArray.arraySet(0, STValue.getNull());
+        ASSERT_TRUE(strArray.arrayGet(0).objectInvokeMethod('toString', ':C{std.core.String}', []).isNull());
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+}
+
+function testArrayPushAndPop(): void {
+    let intClass = STValue.findClass('std.core.Int');
+    let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(10)]);
+
+    let boolClass = STValue.findClass('std.core.Boolean');
+    let boolObj = boolClass.classInstantiate('z:', [STValue.wrapBoolean(true)]);
+    
+    let byteClass = STValue.findClass('std.core.Byte');
+    let byteObj = byteClass.classInstantiate('b:', [STValue.wrapByte(0x04)]);
+
+    let charClass = STValue.findClass('std.core.Char');
+    let charObj = charClass.classInstantiate('c:', [STValue.wrapChar('d')]);
+    
+    let shortClass = STValue.findClass('std.core.Short');
+    let shortObj = shortClass.classInstantiate('s:', [STValue.wrapShort(300)]);
+
+    let longClass = STValue.findClass('std.core.Long');
+    let longObj = longClass.classInstantiate('l:', [STValue.wrapLong(3000000000)]);
+
+    let floatClass = STValue.findClass('std.core.Float');
+    let floatObj = floatClass.classInstantiate('f:', [STValue.wrapFloat(2.719)]);
+
+    let doubleClass = STValue.findClass('std.core.Double');
+    let doubleObj = doubleClass.classInstantiate('d:', [STValue.wrapNumber(2.718282)]);
+
+    intArray.arrayPush(intObj);
+    boolArray.arrayPush(boolObj);
+    byteArray.arrayPush(byteObj);
+    charArray.arrayPush(charObj);
+    shortArray.arrayPush(shortObj);
+    longArray.arrayPush(longObj);
+    floatArray.arrayPush(floatObj);
+    doubleArray.arrayPush(doubleObj);
+    strArray.arrayPush(STValue.wrapString('gh'));
+
+    ASSERT_TRUE(intArray.arrayGetLength() === 6);
+    ASSERT_TRUE(boolArray.arrayGetLength() === 5);
+    ASSERT_TRUE(byteArray.arrayGetLength() === 4);
+    ASSERT_TRUE(charArray.arrayGetLength() === 4);
+    ASSERT_TRUE(shortArray.arrayGetLength() === 3);
+    ASSERT_TRUE(longArray.arrayGetLength() === 3);
+    ASSERT_TRUE(floatArray.arrayGetLength() === 3);
+    ASSERT_TRUE(doubleArray.arrayGetLength() === 3);
+    ASSERT_TRUE(strArray.arrayGetLength() === 4);
+
+    ASSERT_TRUE(intArray.arrayGet(5).objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 10);
+    ASSERT_TRUE(boolArray.arrayGet(4).objectInvokeMethod('toBoolean', ':z', []).unwrapToBoolean() === true);
+    ASSERT_TRUE(byteArray.arrayGet(3).objectInvokeMethod('toByte', ':b', []).unwrapToNumber() === 0x04);
+    ASSERT_TRUE(charArray.arrayGet(3).objectInvokeMethod('toChar', ':c', []).unwrapToNumber() === 100);
+    ASSERT_TRUE(shortArray.arrayGet(2).objectInvokeMethod('toShort', ':s', []).unwrapToNumber() === 300);
+    ASSERT_TRUE(longArray.arrayGet(2).objectInvokeMethod('toLong', ':l', []).unwrapToNumber() === 3000000000);
+    ASSERT_TRUE(Math.abs(floatArray.arrayGet(2).objectInvokeMethod('toFloat', ':f', []).unwrapToNumber() - 2.719) < 0.001);
+    ASSERT_TRUE(Math.abs(doubleArray.arrayGet(2).objectInvokeMethod('toDouble', ':d', []).unwrapToNumber() - 2.718282) < 0.000001);
+    ASSERT_TRUE(strArray.arrayGet(3).objectInvokeMethod('toString', ':C{std.core.String}', []).unwrapToString() === 'gh');
+    
+    ASSERT_TRUE(intArray.arrayPop().objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 10);
+    ASSERT_TRUE(boolArray.arrayPop().objectInvokeMethod('toBoolean', ':z', []).unwrapToBoolean() === true);
+    ASSERT_TRUE(byteArray.arrayPop().objectInvokeMethod('toByte', ':b', []).unwrapToNumber() === 0x04);
+    ASSERT_TRUE(charArray.arrayPop().objectInvokeMethod('toChar', ':c', []).unwrapToNumber() === 100);
+    ASSERT_TRUE(shortArray.arrayPop().objectInvokeMethod('toShort', ':s', []).unwrapToNumber() === 300);
+    ASSERT_TRUE(longArray.arrayPop().objectInvokeMethod('toLong', ':l', []).unwrapToNumber() === 3000000000);
+    ASSERT_TRUE(Math.abs(floatArray.arrayPop().objectInvokeMethod('toFloat', ':f', []).unwrapToNumber() - 2.719) < 0.001);
+    ASSERT_TRUE(Math.abs(doubleArray.arrayPop().objectInvokeMethod('toDouble', ':d', []).unwrapToNumber() - 2.718282) < 0.000001);
+    ASSERT_TRUE(strArray.arrayPop().objectInvokeMethod('toString', ':C{std.core.String}', []).unwrapToString() === 'gh');
+    
+    ASSERT_TRUE(intArray.arrayGetLength() === 5);
+    ASSERT_TRUE(boolArray.arrayGetLength() === 4);
+    ASSERT_TRUE(byteArray.arrayGetLength() === 3);
+    ASSERT_TRUE(charArray.arrayGetLength() === 3);
+    ASSERT_TRUE(shortArray.arrayGetLength() === 2);
+    ASSERT_TRUE(longArray.arrayGetLength() === 2);
+    ASSERT_TRUE(floatArray.arrayGetLength() === 2);
+    ASSERT_TRUE(doubleArray.arrayGetLength() === 2);
+    ASSERT_TRUE(strArray.arrayGetLength() === 3);
+
+    let intObj1 = intClass.classInstantiate('i:', [STValue.wrapInt(1)]);
+    let intObj2 = intClass.classInstantiate('i:', [STValue.wrapInt(2)]);
+    let intObj3 = intClass.classInstantiate('i:', [STValue.wrapInt(3)]);
+    let intObj4 = intClass.classInstantiate('i:', [STValue.wrapInt(4)]);
+
+    let intLIFOArray = STValue.newArray(1, intObj1);
+    intLIFOArray.arrayPush(intObj2);
+    intLIFOArray.arrayPush(intObj3);
+    intLIFOArray.arrayPush(intObj4);
+
+    ASSERT_TRUE(intLIFOArray.arrayPop().objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 4);
+    ASSERT_TRUE(intLIFOArray.arrayPop().objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 3);
+    ASSERT_TRUE(intLIFOArray.arrayPop().objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 2);
+    ASSERT_TRUE(intLIFOArray.arrayPop().objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 1);
+}
+
+function testArrayPushAndPopInvailidParam(): void {
+    let intClass = STValue.findClass('std.core.Int');
+    let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(10)]);
+
+    let checkRes = false;
+    try {
+        intArray.arrayPush();
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 0 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        intArray.arrayPush(intObj, intObj);
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 2 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        intArray.arrayPush(STValue.wrapNumber(111));
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('value');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let nullArray = STValue.getNull();
+        nullArray.arrayPush(intObj);
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let undefinedArray = STValue.getUndefined();
+        undefinedArray.arrayPush(intObj);
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let nullArray = STValue.getNull();
+        nullArray.arrayPush(intObj);
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        strArray.arrayPush(STValue.getNull());
+        ASSERT_TRUE(strArray.arrayGet(3).objectInvokeMethod('toString', ':C{std.core.String}', []).isNull());
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        intArray.arrayPop(intObj);
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 0 args, but got 1 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let nullArray = STValue.getNull();
+        nullArray.arrayPop();
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let undefinedArray = STValue.getUndefined();
+        undefinedArray.arrayPop();
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('this');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    while (intArray.arrayGetLength() > 0) {
+        intArray.arrayPop();
+    }
+    ASSERT_TRUE(intArray.arrayGetLength() === 0);
+    ASSERT_TRUE(intArray.arrayPop().isUndefined());
 }
 
 function testNamespaceVariable(): void {
@@ -687,9 +1123,14 @@ function testFindEnum(): void {
 function stvalueAccessor() {
     testClassGetSuperClass();
     testFixedArrayGetLength();
+    testArrayGetLength();
     testClassGetAndSetStaticField();
     testObjectGetAndSetProperty();
     testFixedArrayGetAndSet();
+    testArrayGetAndSet();
+    testArrayGetAndSetInvailidParam();
+    testArrayPushAndPop();
+    testArrayPushAndPopInvailidParam();
     testNamespaceVariable();
     testNamespaceVariablesInvailidParam();
     testObjectGetType();

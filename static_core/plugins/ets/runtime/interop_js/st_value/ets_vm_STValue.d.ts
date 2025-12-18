@@ -48,6 +48,7 @@ export declare class STValue {
 
     static newFixedArrayPrimitive(len: number, elementType: SType): STValue
     static newFixedArrayReference(len: number, elementType: STValue, initialElement: STValue): STValue
+    static newArray(len: number, initialElement: STValue): STValue
 
     static typeIsAssignableFrom(from_type: STValue, to_type: STValue): boolean
 
@@ -67,6 +68,12 @@ export declare class STValue {
     fixedArrayGet(idx: number, elementType: SType): STValue
     fixedArraySet(idx: number, val: STValue, elementType: SType): void
     fixedArrayGetLength(): number
+
+    arrayGet(idx: number): STValue
+    arraySet(idx: number, initialElement: STValue): void
+    arrayPush(initialElement: STValue): void
+    arrayPop(): STValue
+    arrayGetLength(): number
 
     enumGetIndexByName(name: string): number
     enumGetValueByName(name: string, valueType: SType): STValue

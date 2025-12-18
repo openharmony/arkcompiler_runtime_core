@@ -414,6 +414,7 @@ napi_value GetSTValueClass(napi_env env)
         napi_property_descriptor {"classInstantiate", 0, STValueClassInstantiateImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"classGetSuperClass", 0, ClassGetSuperClassImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"fixedArrayGetLength", 0, FixedArrayGetLengthImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"arrayGetLength", 0, ArrayGetLengthImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"enumGetIndexByName", 0, EnumGetIndexByNameImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"enumGetValueByName", 0, EnumGetValueByNameImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"classGetStaticField", 0, ClassGetStaticFieldImpl, 0, 0, 0, napi_default, 0},
@@ -422,6 +423,10 @@ napi_value GetSTValueClass(napi_env env)
         napi_property_descriptor {"objectSetProperty", 0, ObjectSetPropertyImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"fixedArrayGet", 0, FixedArrayGetImpl, 0, 0, 0, napi_default, 0},
         napi_property_descriptor {"fixedArraySet", 0, FixedArraySetImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"arrayGet", 0, ArrayGetImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"arraySet", 0, ArraySetImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"arrayPush", 0, ArrayPushImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"arrayPop", 0, ArrayPopImpl, 0, 0, 0, napi_default, 0},
     };
     NAPI_CHECK_FATAL(napi_define_class(env, "STValue", NAPI_AUTO_LENGTH, STValueCtorImpl, nullptr,
                                        instanceProperties.size(), instanceProperties.data(), &STValueCtor));
@@ -448,6 +453,7 @@ napi_value GetSTValueClass(napi_env env)
                                   0},
         napi_property_descriptor {"newFixedArrayReference", 0, STValueNewFixedArrayReferenceImpl, 0, 0, 0, napi_default,
                                   0},
+        napi_property_descriptor {"newArray", 0, STValueNewArrayImpl, 0, 0, 0, napi_default, 0},
     };
     NAPI_CHECK_FATAL(napi_define_properties(env, STValueCtor, staticProperties.size(), staticProperties.data()));
 

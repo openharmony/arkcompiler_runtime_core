@@ -142,6 +142,166 @@ function testNewFixedArrayReference(): void {
     ASSERT_TRUE(checkRes);
 }
 
+function testNewArray(): void {
+    let boolClass = STValue.findClass('std.core.Boolean');
+    let boolObj = boolClass.classInstantiate('z:', [STValue.wrapBoolean(false)]);
+    let boolArray = STValue.newArray(5, boolObj);
+    let res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [boolArray, boolObj]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let byteClass = STValue.findClass('std.core.Byte');
+    let byteObj = byteClass.classInstantiate('b:', [STValue.wrapByte(0x02)]);
+    let byteArray = STValue.newArray(5, byteObj);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [byteArray, byteObj]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let charClass = STValue.findClass('std.core.Char');
+    let charObj = charClass.classInstantiate('c:', [STValue.wrapChar('a')]);
+    let charArray = STValue.newArray(5, charObj);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [charArray, charObj]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let shortClass = STValue.findClass('std.core.Short');
+    let shortObj = shortClass.classInstantiate('s:', [STValue.wrapShort(42)]);
+    let shortArray = STValue.newArray(5, shortObj);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [shortArray, shortObj]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let intClass = STValue.findClass('std.core.Int');
+    let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(0)]);
+    let intArray = STValue.newArray(5, intObj);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [intArray, intObj]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let longClass = STValue.findClass('std.core.Long');
+    let longObj = longClass.classInstantiate('l:', [STValue.wrapLong(1000000001)]);
+    let longArray = STValue.newArray(5, longObj);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [longArray, longObj]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let floatClass = STValue.findClass('std.core.Float');
+    let floatObj = floatClass.classInstantiate('f:', [STValue.wrapFloat(3.14)]);
+    let floatArray = STValue.newArray(5, floatObj);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [floatArray, floatObj]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let doubleClass = STValue.findClass('std.core.Double');
+    let doubleObj = doubleClass.classInstantiate('d:', [STValue.wrapNumber(3.1415926)]);
+    let doubleArray = STValue.newArray(5, doubleObj);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [doubleArray, doubleObj]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let undefArray = STValue.newArray(5, STValue.getUndefined());
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [undefArray, STValue.getUndefined()]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let strArray = STValue.newArray(5, STValue.wrapString('hello world!'));
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [strArray, STValue.wrapString('hello world!')]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let emptyArray = STValue.newArray(0, STValue.getUndefined());
+    ASSERT_TRUE(emptyArray.arrayGetLength() === 0);
+
+    let checkRes = false;
+    try {
+        STValue.newArray(999, [STValue.getNull()]);
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('initialElement');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        STValue.newArray(999, STValue.wrapInt(123));
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('initialElement');
+        checkRes = checkRes && e.message.includes('reference');
+        checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+}
+
+function testNewTwoDimensionalArray(): void {
+    let boolClass = STValue.findClass('std.core.Boolean');
+    let boolObj = boolClass.classInstantiate('z:', [STValue.wrapBoolean(false)]);
+    let boolArray = STValue.newArray(5, boolObj);
+    let twoDimBoolArray = STValue.newArray(5, boolArray);
+    let res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimBoolArray, boolArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let byteClass = STValue.findClass('std.core.Byte');
+    let byteObj = byteClass.classInstantiate('b:', [STValue.wrapByte(0x02)]);
+    let byteArray = STValue.newArray(5, byteObj);
+    let twoDimByteArray = STValue.newArray(5, byteArray);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimByteArray, byteArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let charClass = STValue.findClass('std.core.Char');
+    let charObj = charClass.classInstantiate('c:', [STValue.wrapChar('a')]);
+    let charArray = STValue.newArray(5, charObj);
+    let twoDimCharArray = STValue.newArray(5, charArray);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimCharArray, charArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let shortClass = STValue.findClass('std.core.Short');
+    let shortObj = shortClass.classInstantiate('s:', [STValue.wrapShort(42)]);
+    let shortArray = STValue.newArray(5, shortObj);
+    let twoDimShortArray = STValue.newArray(5, shortArray);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimShortArray, shortArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let intClass = STValue.findClass('std.core.Int');
+    let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(0)]);
+    let intArray = STValue.newArray(5, intObj);
+    let twoDimIntArray = STValue.newArray(5, intArray);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimIntArray, intArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let longClass = STValue.findClass('std.core.Long');
+    let longObj = longClass.classInstantiate('l:', [STValue.wrapLong(1000000001)]);
+    let longArray = STValue.newArray(5, longObj);
+    let twoDimLongArray = STValue.newArray(5, longArray);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimLongArray, longArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let floatClass = STValue.findClass('std.core.Float');
+    let floatObj = floatClass.classInstantiate('f:', [STValue.wrapFloat(3.14)]);
+    let floatArray = STValue.newArray(5, floatObj);
+    let twoDimFloatArray = STValue.newArray(5, floatArray);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimFloatArray, floatArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let doubleClass = STValue.findClass('std.core.Double');
+    let doubleObj = doubleClass.classInstantiate('d:', [STValue.wrapNumber(3.1415926)]);
+    let doubleArray = STValue.newArray(5, doubleObj);
+    let twoDimDoubleArray = STValue.newArray(5, doubleArray);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimDoubleArray, doubleArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let undefArray = STValue.newArray(5, STValue.getUndefined());
+    let twoDimUndefArray = STValue.newArray(5, undefArray);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimUndefArray, undefArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let strArray = STValue.newArray(5, STValue.wrapString('hello world!'));
+    let twoDimStrArray = STValue.newArray(5, strArray);
+    res = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimStrArray, strArray]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+
+    let invalidRes = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimIntArray, intObj]);
+    ASSERT_TRUE(!invalidRes.unwrapToBoolean());
+
+    invalidRes = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [twoDimIntArray, shortArray]);
+    ASSERT_TRUE(!invalidRes.unwrapToBoolean());
+
+    invalidRes = ns.namespaceInvokeFunction('checkArray', 'C{escompat.Array}C{std.core.Object}:z', [intArray, intArray]);
+    ASSERT_TRUE(!invalidRes.unwrapToBoolean());
+}
+
 // classFull.classInstantiateImpl(ctorSinature, array<Stvalue>): STValue
 function testClassInstantiate(): void {
     let clsObj1 = studentCls.classInstantiate(':', []);
@@ -183,6 +343,8 @@ function testClassInstantiate(): void {
 function main(): void {
     testNewFixedArrayPrimitive();
     testNewFixedArrayReference();
+    testNewArray();
+    testNewTwoDimensionalArray();
     testClassInstantiate();
 }
 

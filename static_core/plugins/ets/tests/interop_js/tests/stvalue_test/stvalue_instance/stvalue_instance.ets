@@ -33,10 +33,11 @@ export class SubStudent extends Student {
 }
 
 export namespace Instance {
-    function checkPrimitiveArray<T>(arr: FixedArray<T>, value: T): boolean {
+    export function checkArray<T>(arr: Array<T>, value: T): boolean {
         if (arr.length !== 5) {
             return false;
         }
+        console.log("value:" + value);
         for (let i = 0; i < 5; i++) {
             if (arr[i] !== value) {
                 return false;
