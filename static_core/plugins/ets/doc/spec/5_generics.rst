@@ -856,11 +856,12 @@ Partial Utility Type
 .. meta:
     frontend_status: Done
 
-Type ``Partial<T>`` constructs a type with all properties of ``T`` set to
-optional. ``T`` must be a class or an interface type. Otherwise, a
-:index:`compile-time error` occurs. No method (not even any getter or setter)
-of ``T`` is a part of the ``Partial<T>`` type. The use is represented in the
-example below:
+Type ``Partial<T>`` constructs a type with all fields (see
+:ref:`Field Declarations`) and properties in their field form (see
+:ref:`Interface Properties`) of ``T`` set to optional. ``T`` must be a class or
+an interface type. Otherwise, a :index:`compile-time error` occurs. No method
+(not even any getter or setter) of ``T`` is a part of the ``Partial<T>`` type.
+The use is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -963,10 +964,12 @@ Required Utility Type
     frontend_status: Done
 
 Type ``Required<T>`` is opposite to ``Partial<T>``, and constructs a type with
-all properties of ``T`` set to required (i.e., not optional). ``T`` must be a
-class or an interface type, otherwise a :index:`compile-time error` occurs. No
-method (not even any getter or setter) of ``T`` is part of the ``Required<T>``
-type. Its usage is represented in the example below:
+all fields (see :ref:`Field Declarations`) and properties in their field form
+(see :ref:`Interface Properties`) of ``T`` set to required (i.e., not optional).
+``T`` must be a class or an interface type, otherwise a
+:index:`compile-time error` occurs. No method (not even any getter or setter)
+of ``T`` is part of the  ``Required<T>`` type. Its usage is represented in the
+example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1024,12 +1027,13 @@ Readonly Utility Type
 .. meta:
     frontend_status: Done
 
-Type ``Readonly<T>`` constructs a type with all properties of ``T`` set to
-``readonly``. It means that the properties of the constructed value cannot be
-reassigned. ``T`` must be a class or an interface type, otherwise a
-:index:`compile-time error` occurs. No method (not even any getter or setter)
-of ``T`` is part of the ``Readonly<T>`` type. Its usage is represented in the
-example below:
+Type ``Readonly<T>`` constructs a type with all fields (see
+:ref:`Field Declarations`) and properties in their field form (see
+:ref:`Interface Properties`) of ``T`` set to ``readonly``. It means that such
+fields and properties of the constructed type cannot be reassigned. ``T`` must
+be a class or an interface type, otherwise a :index:`compile-time error`
+occurs. No method (not even any getter or setter) of ``T`` is part of the
+``Readonly<T>`` type. Its usage is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
