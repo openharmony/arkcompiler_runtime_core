@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,20 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    A field declared in a superclass or a superinterface can be overridden by a field
-    with the same name, and the same static or non-static modifier status.
-    A compile-time error occurs if:
-    - Field marked with the modifier override does not override a field from a superclass.
-    - Field declaration contains the modifier static along with the modifier override.
-    - Types of the overriding field and of the overridden field are different.
+    Compile-time error, conflict in overriding
 tags: [compile-only, negative]
-expected_out: [{{c.expected_out or ""}}]
+expected_out: "Expected CTE output is unknown"
 ---*/
 
-{{c.decl}}
+interface I {
+  num: number
+  methI(): string {
+    return "methI"
+  }
+}
 
-{% endfor %}
+class A implements I {
+  num = 2
+}
+
+function main(): void {
+}
