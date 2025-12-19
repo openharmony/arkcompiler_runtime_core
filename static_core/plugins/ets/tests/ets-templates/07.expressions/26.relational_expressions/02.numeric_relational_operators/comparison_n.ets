@@ -19,6 +19,8 @@
 desc: Non numeric comparison 
 {% if ":" in ic.xtype %} function type {% else %} {{ic.xtype}} {% endif %}vs {{ic.ytype}}. CTE expected
 tags: [compile-only, negative]
+expected_error: |
+    TypeError: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type.
 ---*/
 
 {% if ic.declare == "outer" %}let x: {{ic.xtype}}{% endif %}

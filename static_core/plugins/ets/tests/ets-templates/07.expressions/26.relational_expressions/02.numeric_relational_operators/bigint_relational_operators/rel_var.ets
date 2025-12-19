@@ -17,7 +17,6 @@
 
 /*---
 desc: {{ c.desc }}
-tags: []
 ---*/
 
 let b: bigint = {{c.b}};
