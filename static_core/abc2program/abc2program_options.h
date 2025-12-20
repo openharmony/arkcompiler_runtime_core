@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ namespace ark::abc2program {
 
 class Abc2ProgramOptions {
 public:
+    Abc2ProgramOptions();
     bool Parse(int argc, const char **argv);
     const std::string &GetInputFilePath() const;
     const std::string &GetOutputFilePath() const;
@@ -36,11 +37,11 @@ private:
     std::string inputFilePath_;
     std::string outputFilePath_;
     std::string errorMsg_;
-    ark::PandArg<bool> *helpArg_ = nullptr;
-    ark::PandArg<bool> *debugArg_ = nullptr;
-    ark::PandArg<std::string> *debugFileArg_ = nullptr;
-    ark::PandArg<std::string> *inputFileArg_ = nullptr;
-    ark::PandArg<std::string> *outputFileArg_ = nullptr;
+    ark::PandArg<bool> helpArg_;
+    ark::PandArg<bool> debugArg_;
+    ark::PandArg<std::string> debugFileArg_;
+    ark::PandArg<std::string> inputFileArg_;
+    ark::PandArg<std::string> outputFileArg_;
 };  // class Abc2ProgramOptions
 
 }  // namespace ark::abc2program

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,25 +18,25 @@
 
 namespace ark::abc2program {
 
+Abc2ProgramOptions::Abc2ProgramOptions()
+    : helpArg_(std::string("help"), false, std::string("Print this message and exit")),
+      debugArg_(
+          std::string("debug"), false,
+          std::string("enable debug messages (will be printed to standard output if no --debug-file was specified) ")),
+      debugFileArg_(std::string("debug-file"), std::string(""),
+                    std::string("(--debug-file FILENAME) set debug file name. default is std::cout")),
+      inputFileArg_(std::string("inputFile"), std::string(""), std::string("Path to the source binary code")),
+      outputFileArg_(std::string("outputFile"), std::string(""), std::string("Path to the generated assembly code"))
+{
+    paParser_.Add(&helpArg_);
+    paParser_.Add(&debugArg_);
+    paParser_.Add(&debugFileArg_);
+    paParser_.PushBackTail(&inputFileArg_);
+    paParser_.PushBackTail(&outputFileArg_);
+}
+
 bool Abc2ProgramOptions::Parse(int argc, const char **argv)
 {
-    ark::PandArg<bool> help("help", false, "Print this message and exit");
-    ark::PandArg<bool> debug(
-        "debug", false, "enable debug messages (will be printed to standard output if no --debug-file was specified) ");
-    ark::PandArg<std::string> debugFile("debug-file", "",
-                                        "(--debug-file FILENAME) set debug file name. default is std::cout");
-    ark::PandArg<std::string> inputFile("inputFile", "", "Path to the source binary code");
-    ark::PandArg<std::string> outputFile("outputFile", "", "Path to the generated assembly code");
-    helpArg_ = &help;
-    debugArg_ = &debug;
-    debugFileArg_ = &debugFile;
-    inputFileArg_ = &inputFile;
-    outputFileArg_ = &outputFile;
-    paParser_.Add(&help);
-    paParser_.Add(&debug);
-    paParser_.Add(&debugFile);
-    paParser_.PushBackTail(&inputFile);
-    paParser_.PushBackTail(&outputFile);
     paParser_.EnableTail();
     if (!ProcessArgs(argc, argv)) {
         PrintErrorMsg();
@@ -53,20 +53,20 @@ bool Abc2ProgramOptions::ProcessArgs(int argc, const char **argv)
         ConstructErrorMsg();
         return false;
     }
-    if (debugArg_->GetValue()) {
-        if (debugFileArg_->GetValue().empty()) {
+    if (debugArg_.GetValue()) {
+        if (debugFileArg_.GetValue().empty()) {
             ark::Logger::InitializeStdLogging(ark::Logger::Level::DEBUG,
                                               ark::Logger::ComponentMask().set(ark::Logger::Component::ABC2PROGRAM));
         } else {
-            ark::Logger::InitializeFileLogging(debugFileArg_->GetValue(), ark::Logger::Level::DEBUG,
+            ark::Logger::InitializeFileLogging(debugFileArg_.GetValue(), ark::Logger::Level::DEBUG,
                                                ark::Logger::ComponentMask().set(ark::Logger::Component::ABC2PROGRAM));
         }
     } else {
         ark::Logger::InitializeStdLogging(ark::Logger::Level::ERROR,
                                           ark::Logger::ComponentMask().set(ark::Logger::Component::ABC2PROGRAM));
     }
-    inputFilePath_ = inputFileArg_->GetValue();
-    outputFilePath_ = outputFileArg_->GetValue();
+    inputFilePath_ = inputFileArg_.GetValue();
+    outputFilePath_ = outputFileArg_.GetValue();
     if (inputFilePath_.empty() || outputFilePath_.empty()) {
         ConstructErrorMsg();
         return false;
