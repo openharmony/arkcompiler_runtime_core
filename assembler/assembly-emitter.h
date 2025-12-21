@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,7 +76,8 @@ public:
 
     // The function releases the data in progs in advance for the sake of the peak memory at compiler time.
     static bool EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
-                             const EmitterConfig &emitterConfig = EmitterConfig {});
+                             const EmitterConfig &emitterConfig = EmitterConfig {},
+                             std::map<std::string, size_t> *stat = nullptr);
 
     PANDA_PUBLIC_API static std::unique_ptr<const panda_file::File> Emit(
         const Program &program, PandaFileToPandaAsmMaps *maps = nullptr, uint8_t api = 0,
