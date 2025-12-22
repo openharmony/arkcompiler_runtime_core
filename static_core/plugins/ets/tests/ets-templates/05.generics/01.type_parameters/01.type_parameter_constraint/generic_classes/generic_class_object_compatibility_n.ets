@@ -1,5 +1,5 @@
 /*---
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -17,12 +17,15 @@
 
 /*---
 desc: >-
-    If no constraint is specified, then type parameter is not compatible with Object,
-    and has no methods or fields available for use.
-    Lack of constraint effectively means extends Object|null|undefined.
-    If the constraint S is a non-nullish type (see Nullish Types), then T is also non-nullish.
-    {{case.doc}}
+    If no constraint is specified, then the constraint is Type Any, i.e., the lacking 
+    explicit constraint effectively means extends Any. As a consequence, the type parameter 
+    is not compatible with Type Object, and has neither methods nor fields available for use.
+    If type parameter T has type constraint S, then the actual type of the generic 
+    instantiation must be a subtype of S (see Subtyping). If the constraint S is a 
+    non-nullish type (see Nullish Types), then T is also non-nullish.
+    {{case.desc}}
 tags: [compile-only, negative]
+expected_out: {{ case.expected_error | tojson }}
 ---*/
 
 {{case.code}}
