@@ -3121,9 +3121,6 @@ declaration scope are *implicitly overloaded*.
    A :index:`compile-time error` occurs if the names of an imported function
    and of a function declared in the current module are the same.
 
-A :index:`compile-time error` occurs if signatures of two implicitly overloaded
-functions are *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`).
-
 When calling an overloaded function (see :ref:`Function Call Expression`),
 :ref:`Overload Resolution` is used to determine exactly which function must be
 called.
@@ -3151,17 +3148,29 @@ called.
    overload set
    call
 
-Instantiation of a generic function can cause a :index:`compile-time error`
-if it leads to a function that is *overload-equivalent* to other function:
+If signatures of two non-generic implicitly overloaded functions are
+overload-equivalent (see :ref:Overload-Equivalent Signatures), then a
+:index:compile-time error occurs. However, an implicit overload with
+instantiation of a generic and overload-equivalent non-generic
+function causes no compile-time error, and the textually first function is
+used:
 
 .. code-block:: typescript
    :linenos:
 
+     function goo(x: int): void {}
+     function goo(x: int): void {}  // compile-time error, overload-equivalent 
+                                    // non-generic functions
+
      function foo<T>(x: T) {}
      function foo(x: number) {}
 
-     // This instantiation leads to two *overload-equivalent* functions:
-     foo<number>(1)
+     foo(1)   // OK, instance of foo<T>() with T=number called
+
+     function bar(x: number) {}
+     function bar<T>(x: T) {}
+
+     bar(1)   // OK, plain bar() called
 
 |
 
@@ -3237,19 +3246,23 @@ called.
     c.foo("5") // method marked #2 is called
 
 If an instantiation of a generic class or a generic interface leads to an
-*overload-equivalent* method, then a :index:`compile-time error` occurs
-as follows:
+*overload-equivalent* method, then the textually first method is called:
 
 .. code-block:: typescript
    :linenos:
 
      class Template<T> {
-        foo (p: number) { ... }
-        foo (p: T) { ... }
+        foo (p: T) { console.log("generic foo") }
+        foo (p: number) { console.log("plain foo") }
+        bar (p: number) { console.log("plain bar") }
+        bar (p: T) { console.log("generic bar") }
      }
 
      // This instantiation leads to two *overload-equivalent* methods
-     let instantiation: Template<number>
+     let instantiation: Template<number> = new Template<number>
+
+     instantiation.foo(1)  // prints 'generic foo'
+     instantiation.bar(1)  // prints 'plain bar'
 
 |
 

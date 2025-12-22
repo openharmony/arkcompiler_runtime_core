@@ -1539,10 +1539,31 @@ in the example below:
 An overloaded entity in an *explicit overload declaration* can be *generic*
 (see :ref:`Generics`).
 
-If *type arguments* are provided explicitly in a call of an *overloaded entity*
-(see :ref:`Explicit Generic Instantiations`), then only entities with an equal
-number of *type parameters* and *type arguments* are considered during
-:ref:`Overload Resolution`.
+If type arguments are provided explicitly in a call of an overloaded entity
+(see :ref:Explicit Generic Instantiations), then only the entities that have
+the number of type arguments compatible with the number of mandatory and
+optional type parameters (entities with optional type parameters are the
+entities that have type parameter default) are
+considered during :ref:Overload Resolution:
+
+.. code-block:: typescript
+   :linenos:
+
+    // Resolution with explicit type arguments
+    function one<T>() { console.log("one") }
+    function two<T, U=string>() { console.log("two") }
+    function three<T, U=string, V=number>() { console.log("three") }
+
+    overload numbers { one, two, three }
+
+    numbers<string, number, int>() // Only 'three` considered
+
+    numbers<string, number>() // 'two' and 'three; considered as both
+                              // allow 2 type arguments
+
+    numbers<int>()  // 'one', 'two' and 'three; considered as all
+                    // allow 1 type argument
+
 
 If *type arguments* are not provided explicitly (see
 :ref:`Implicit Generic Instantiations`), then consideration is given to all
