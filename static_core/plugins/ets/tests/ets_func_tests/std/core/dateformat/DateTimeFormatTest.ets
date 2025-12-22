@@ -40,7 +40,7 @@ function initFormatResults(): void {
 }
 
 function dateFormatWithLocaleAndOptions(): void {
-    FORMAT_RESULTS.forEach((formatResult: [Date, string | undefined, Intl.DateTimeFormatOptions | undefined, string], index: number) => {
+    FORMAT_RESULTS.forEach((formatResult: [Date, string | undefined, Intl.DateTimeFormatOptions | undefined, string], index: int) => {
         const locale = formatResult[1]
         const options = formatResult[2]
 
