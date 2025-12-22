@@ -67,6 +67,14 @@ ohos_static_library("abckit_wrapper_static") {
     "$ark_root/static_core/libarkbase:libarktsbase_frontend_static",
   ]
 
+  if (is_mingw || is_win) {
+    output_extension = "lib"
+  } else {
+    output_extension = "a"
+  }
+
+  complete_static_lib = true
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
@@ -84,6 +92,12 @@ ohos_shared_library("abckit_wrapper_shared") {
     "$ark_root/libabckit/src:libabckit",
     "$ark_root/static_core/libarkbase:libarktsbase",
   ]
+
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
+    output_extension = "so"
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"

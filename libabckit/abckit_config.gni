@@ -22,3 +22,12 @@ declare_args() {
   abckit_with_coverage = false
   abckit_enable_tests = false
 }
+
+if ((!defined(ark_standalone_build) || !ark_standalone_build) &&
+    (!defined(ark_static_standalone_build) || !ark_static_standalone_build)) {
+  import("//build/ohos_var.gni")
+
+  if (sdk_build_arkts) {
+    abckit_enable = true
+  }
+}
