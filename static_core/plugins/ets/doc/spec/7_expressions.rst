@@ -1564,9 +1564,22 @@ field type:
     let f: Friend = {name: 123} /* compile-time error - type of right hand-side
     is not assignable to the type of the left hand-side */
 
-If some class fields have default values (see :ref:`Default Values for Types`)
-or explicit initializers (see :ref:`Variable and Constant Declarations`), then
-such fields can be skipped in the object literal.
+Only class fields that have default values (see :ref:Default Values for Types)
+or explicit initializers (see :ref:Variable and Constant Declarations) can be
+skipped in the object literal. A :index:compile-time error occurs otherwise.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        f1: number
+        f2: string
+        f3!: Object
+    }
+    let c1: C = {f2: "xyz", f3: new Object} // OK, f1 type has a default value
+    let c2: C = {f2: "xyz"} // compile-time error, f3 value is not provided
+
+
 
 .. index::
    expression
