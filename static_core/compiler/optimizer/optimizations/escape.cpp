@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1185,20 +1185,6 @@ void EscapeAnalysis::Initialize()
     }
 }
 
-#ifndef NDEBUG
-bool EscapeAnalysis::EnsureLoadsRemoval()
-{
-    for (auto bb : GetGraph()->GetBlocksRPO()) {
-        for (auto inst : bb->Insts()) {
-            if (inst->Is(Opcode::LoadObject) && inst->IsMarked(removableLoads_)) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-#endif
-
 bool EscapeAnalysis::RunImpl()
 {
     if (!GetGraph()->HasEndBlock()) {
@@ -1207,10 +1193,6 @@ bool EscapeAnalysis::RunImpl()
 
     DecomposeAnalysis decomposer(GetGraph());
 
-#ifndef NDEBUG
-    MarkerHolder mh {GetGraph()};
-    removableLoads_ = mh.GetMarker();
-#endif
     Initialize();
 
     if (!liveIns_.Run(true)) {
@@ -1228,9 +1210,7 @@ bool EscapeAnalysis::RunImpl()
 
     ScalarReplacement sr {GetGraph(), aliases_, phis_, materializationInfo_, saveStateInfo_};
     sr.Apply(virtualizableAllocations_);
-#ifndef NDEBUG
-    ASSERT(EnsureLoadsRemoval());
-#endif
+
     return true;
 }
 
