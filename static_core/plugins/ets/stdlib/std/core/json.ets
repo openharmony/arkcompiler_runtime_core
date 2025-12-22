@@ -1688,43 +1688,43 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
 }
 
 function escapeString(str: string): string {
-    let result = "\""
+    let result = new StringBuilder("\"")
     for (let i = 0; i < str.length; i++) {
         const ch = str.charAt(i)
         switch (ch) {
             case c'\"':
-                result += "\\\""
+                result.append("\\\"")
                 break
             case c'\\':
-                result += "\\\\"
+                result.append("\\\\")
                 break
             case c'\b':
-                result += "\\b"
+                result.append("\\b")
                 break
             case c'\f':
-                result += "\\f"
+                result.append("\\f")
                 break
             case c'\n':
-                result += "\\n"
+                result.append("\\n")
                 break
             case c'\r':
-                result += "\\r"
+                result.append("\\r")
                 break
             case c'\t':
-                result += "\\t"
+                result.append("\\t")
                 break
             default:
                 if (ch.toInt() < 32) {
                     let int_value = new Int(ch.toInt());
-                    result += "\\u" + int_value.toString(16).padStart(4, "0")
+                    result.append("\\u" + int_value.toString(16).padStart(4, "0"))
                 } else {
-                    result += ch
+                    result.append(ch)
                 }
                 break
         }
     }
-    result += "\""
-    return result
+    result.append("\"")
+    return result.toString()
 }
 
 
@@ -2483,7 +2483,7 @@ export class JsonLexer
      * @throws JsonError if string is malformed
      */
     private readString(start: int): JsonToken {
-        let value = ""
+        let value = new StringBuilder()
 
         while (!this.isAtEnd() && this.peek() != c'"') {
             let ch = this.advance()
@@ -2494,37 +2494,37 @@ export class JsonLexer
                 let escaped = this.advance()
                 switch (escaped) {
                     case c'"':
-                        value += "\""
+                        value.append("\"")
                         break
                     case c'\\':
-                        value += "\\"
+                        value.append("\\")
                         break
                     case c'/':
-                        value += "/"
+                        value.append("/")
                         break
                     case c'b':
-                        value += "\b"
+                        value.append("\b")
                         break
                     case c'f':
-                        value += "\f"
+                        value.append("\f")
                         break
                     case c'n':
-                        value += "\n"
+                        value.append("\n")
                         break
                     case c'r':
-                        value += "\r"
+                        value.append("\r")
                         break
                     case c't':
-                        value += "\t"
+                        value.append("\t")
                         break
                     case c'u':
-                        value += this.readUnicodeEscape()
+                        value.append(this.readUnicodeEscape())
                         break
                     default:
                         throw new JsonParseError(`Invalid escape sequence '\\${escaped}' in string`, start, this.index)
                 }
             } else {
-                value += ch
+                value.append(ch)
             }
         }
 
@@ -2533,7 +2533,7 @@ export class JsonLexer
         }
 
         this.advance() // Consume closing quote
-        return this.makeToken(JsonTokenKind.String, start, value)
+        return this.makeToken(JsonTokenKind.String, start, value.toString())
     }
 
     /**
@@ -2542,7 +2542,7 @@ export class JsonLexer
      * @throws JsonError if escape sequence is malformed
      */
     private readUnicodeEscape(): string {
-        let codeStr = ""
+        let codeStr = new StringBuilder()
         for (let i = 0; i < 4; i++) {
             if (this.isAtEnd()) {
                 throw new JsonParseError("Incomplete Unicode escape sequence")
@@ -2551,10 +2551,10 @@ export class JsonLexer
             if (!this.isHexDigit(ch)) {
                 throw new JsonParseError(`Invalid hexadecimal digit '${ch}' in Unicode escape`, this.index)
             }
-            codeStr += ch
+            codeStr.append(ch)
         }
 
-        let codePoint = Double.parseInt(codeStr, 16).toInt()
+        let codePoint = Double.parseInt(codeStr.toString(), 16).toInt()
         return String.fromCharCode(codePoint.toDouble())
     }
 
@@ -2565,19 +2565,19 @@ export class JsonLexer
      * @throws JsonError if number format is invalid
      */
     private readNumber(start: int): JsonToken {
-        let value = ""
+        let value = new StringBuilder()
 
         // Handle optional minus sign
         if (this.peek() == c'-') {
-            value += this.advance()
+            value.append(this.advance())
         }
 
         // Read integer part
         if (this.peek() == c'0') {
-            value += this.advance()
+            value.append(this.advance())
         } else if (this.isDigit(this.peek())) {
             while (!this.isAtEnd() && this.isDigit(this.peek())) {
-                value += this.advance()
+                value.append(this.advance())
             }
         } else {
             throw new JsonParseError("Invalid number format", start, this.index)
@@ -2585,30 +2585,30 @@ export class JsonLexer
 
         // Read decimal part if present
         if (!this.isAtEnd() && this.peek() == c'.') {
-            value += this.advance()
+            value.append(this.advance())
             if (this.isAtEnd() || !this.isDigit(this.peek())) {
                 throw new JsonParseError("Invalid number format: decimal point must be followed by digits", start, this.index)
             }
             while (!this.isAtEnd() && this.isDigit(this.peek())) {
-                value += this.advance()
+                value.append(this.advance())
             }
         }
 
         // Read exponent part if present
         if (!this.isAtEnd() && (this.peek() == c'e' || this.peek() == c'E')) {
-            value += this.advance()
+            value.append(this.advance())
             if (!this.isAtEnd() && (this.peek() == c'+' || this.peek() == c'-')) {
-                value += this.advance()
+                value.append(this.advance())
             }
             if (this.isAtEnd() || !this.isDigit(this.peek())) {
                 throw new JsonParseError("Invalid number format: exponent must contain digits", start, this.index)
             }
             while (!this.isAtEnd() && this.isDigit(this.peek())) {
-                value += this.advance()
+                value.append(this.advance())
             }
         }
 
-        return this.makeToken(JsonTokenKind.Number, start, value)
+        return this.makeToken(JsonTokenKind.Number, start, value.toString())
     }
 
     /**
