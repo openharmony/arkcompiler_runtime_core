@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -300,6 +300,17 @@ template <MTModeT MT_MODE>
 PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetMovableRegions()
 {
     return objectAllocator_->GetAllRegions();
+}
+
+template <MTModeT MT_MODE>
+PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetNonYoungRegions() const
+{
+    PandaVector<Region *> regions = objectAllocator_->GetAllSpecificRegions<RegionFlag::IS_OLD>();
+    PandaVector<Region *> nonMovableRegions = nonmovableAllocator_->GetAllRegions();
+    PandaVector<Region *> humongousRegions = humongousObjectAllocator_->GetAllRegions();
+    regions.insert(regions.end(), nonMovableRegions.begin(), nonMovableRegions.end());
+    regions.insert(regions.end(), humongousRegions.begin(), humongousRegions.end());
+    return regions;
 }
 
 template <MTModeT MT_MODE>

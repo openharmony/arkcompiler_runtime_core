@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,7 +72,7 @@ private:
                      "Not suitable space for to_obj: " << obj);
 
         // don't need lock because only one thread changes remsets
-        RemSet<>::AddRefWithAddr<false>(fromRemset_, ref, obj);
+        RemSet<>::AddRefWithAddr<false>(ref, obj);
         LOG(DEBUG, GC) << "fill rem set " << ref << " -> " << obj;
         handler_(fromObject, ToUintPtr(ref) - ToUintPtr(fromObject));
     }

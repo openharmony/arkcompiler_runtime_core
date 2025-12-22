@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,14 +88,14 @@ public:
      * Pause cards processing in UpdateRemsetWorker during regions invalidation
      * @param regions regions for invalidation
      */
-    void InvalidateRegions(RegionVector *regions);
+    void InvalidateRegions(RegionVector *allRegions);
 
     /**
      * @brief Invalidate regions in the GC thread
      * Can be called only if UpdateRemsetWorker is suspended
      * @param regions regions for invalidation
      */
-    void GCInvalidateRegions(RegionVector *regions);
+    void GCInvalidateRegions(RegionVector *allRegions);
 
 #ifndef NDEBUG
     // only debug purpose
@@ -194,7 +194,7 @@ private:
     void FillFromPostBarrierBuffer(GCG1BarrierSet::ThreadLocalCardQueues *postWrb,
                                    PandaUnorderedSet<CardTable::CardPtr> *cards);
 
-    void DoInvalidateRegions(RegionVector *regions) REQUIRES(updateRemsetLock_);
+    void DoInvalidateRegions(RegionVector *allRegions) REQUIRES(updateRemsetLock_);
 
     void UpdateCardStatus(CardTable::CardPtr card);
 

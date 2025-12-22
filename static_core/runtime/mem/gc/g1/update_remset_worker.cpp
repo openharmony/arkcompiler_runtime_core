@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,25 +223,27 @@ void UpdateRemsetWorker<LanguageConfig>::DrainAllCards(PandaUnorderedSet<CardTab
 }
 
 template <class LanguageConfig>
-void UpdateRemsetWorker<LanguageConfig>::DoInvalidateRegions(RegionVector *regions)
+void UpdateRemsetWorker<LanguageConfig>::DoInvalidateRegions(RegionVector *allRegions)
 {
-    for (auto *region : *regions) {
-        // don't need lock because only one thread changes remsets
-        RemSet<>::template InvalidateRegion<false>(region);
+    for (Region *region : *allRegions) {
+        if (!region->HasFlag(RegionFlag::IS_INVALID)) {
+            RemSet<> *remset = region->GetRemSet();
+            remset->RemoveInvalidRegions();
+        }
     }
 }
 
 template <class LanguageConfig>
-void UpdateRemsetWorker<LanguageConfig>::GCInvalidateRegions(RegionVector *regions)
+void UpdateRemsetWorker<LanguageConfig>::GCInvalidateRegions(RegionVector *allRegions)
 {
     // Do invalidate region on pause in GCThread
     ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD));
     os::memory::LockHolder holder(updateRemsetLock_);
-    DoInvalidateRegions(regions);
+    DoInvalidateRegions(allRegions);
 }
 
 template <class LanguageConfig>
-void UpdateRemsetWorker<LanguageConfig>::InvalidateRegions(RegionVector *regions)
+void UpdateRemsetWorker<LanguageConfig>::InvalidateRegions(RegionVector *allRegions)
 {
     // Do invalidate region during concurrent sweep
     ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PROCESS_CARD));
@@ -251,7 +253,7 @@ void UpdateRemsetWorker<LanguageConfig>::InvalidateRegions(RegionVector *regions
     // Aquare lock to be sure that UpdateRemsetWorker has been stopped
     os::memory::LockHolder holder(updateRemsetLock_);
     LOG(DEBUG, GC) << "Remset worker has been paused to invalidate region on concurrent";
-    DoInvalidateRegions(regions);
+    DoInvalidateRegions(allRegions);
     // Atomic with relaxed order reason: memory order is not required
     deferCards_.store(false, std::memory_order_relaxed);
     RemoveFlag(UpdateRemsetWorkerFlags::IS_INVALIDATE_REGIONS);

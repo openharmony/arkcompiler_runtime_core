@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -373,11 +373,15 @@ void G1GC<LanguageConfig>::CollectNonRegularObjects()
             : GCObjectVisitor(
                   // CC-OFFNXT(G.FMT.06-CPP) project code style
                   NonRegularObjectsDeathChecker<LanguageConfig, CONCURRENTLY, true>(&deleteSize, &deleteCount));
-    auto regionVisitor = [this](PandaVector<Region *> &regions) {
+    auto allRegions = GetG1ObjectAllocator()->GetAllRegions();
+    auto regionVisitor = [this, &allRegions]([[maybe_unused]] PandaVector<Region *> &regions) {
+        for (auto region : regions) {
+            region->AddFlag(RegionFlag::IS_INVALID);
+        }
         if constexpr (CONCURRENTLY) {
-            updateRemsetWorker_->InvalidateRegions(&regions);
+            updateRemsetWorker_->InvalidateRegions(&allRegions);
         } else {
-            updateRemsetWorker_->GCInvalidateRegions(&regions);
+            updateRemsetWorker_->GCInvalidateRegions(&allRegions);
         }
     };
     this->GetG1ObjectAllocator()->CollectNonRegularRegions(regionVisitor, deathChecker);
@@ -391,11 +395,15 @@ void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *>
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     {
+        for (auto *region : emptyTenuredRegions) {
+            region->AddFlag(RegionFlag::IS_INVALID);
+        }
         ScopedTiming t1("Region Invalidation", *this->GetTiming());
+        auto allRegions = GetG1ObjectAllocator()->GetAllRegions();
         if constexpr (CONCURRENTLY) {
-            updateRemsetWorker_->InvalidateRegions(&emptyTenuredRegions);
+            updateRemsetWorker_->InvalidateRegions(&allRegions);
         } else {
-            updateRemsetWorker_->GCInvalidateRegions(&emptyTenuredRegions);
+            updateRemsetWorker_->GCInvalidateRegions(&allRegions);
         }
     }
     size_t deleteSize = 0;
@@ -2689,15 +2697,22 @@ void G1GC<LanguageConfig>::ActualizeRemSets()
     auto *objectAllocator = this->GetG1ObjectAllocator();
     // Invalidate regions from collection set in all remsets
     for (Region *region : collectionSet_.Young()) {
-        if (!region->HasFlag(RegionFlag::IS_PROMOTED)) {
-            RemSet<>::template InvalidateRegion<false>(region);
-        } else {
+        if (region->HasFlag(RegionFlag::IS_PROMOTED)) {
             objectAllocator->AddPromotedRegionToQueueIfPinned(region);
             region->RmvFlag(RegionFlag::IS_PROMOTED);
         }
     }
-    for (Region *region : collectionSet_.Tenured()) {
-        RemSet<>::template InvalidateRegion<false>(region);
+
+    if (collectionSet_.Tenured().empty() && !this->IsFullGC()) {
+        return;
+    }
+
+    auto allRegions = GetG1ObjectAllocator()->GetAllRegions();
+    for (Region *region : allRegions) {
+        if (!region->HasFlag(RegionFlag::IS_COLLECTION_SET)) {
+            RemSet<> *remset = region->GetRemSet();
+            remset->RemoveInvalidRegions();
+        }
     }
 }
 
@@ -2762,8 +2777,12 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::RestoreYoungRegionsAfterFullGC(const CollectionSet &collectionSet)
 {
     RestoreYoungCards(collectionSet);
-    for (Region *region : collectionSet.Young()) {
-        RemSet<>::template InvalidateRefsFromRegion<false>(region);
+    auto allRegions = GetG1ObjectAllocator()->GetAllRegions();
+    for (Region *region : allRegions) {
+        RemSet<> *remset = region->GetRemSet();
+        for (Region *invalidRegion : collectionSet.Young()) {
+            remset->InvalidateRegion<false>(invalidRegion);
+        }
     }
 }
 

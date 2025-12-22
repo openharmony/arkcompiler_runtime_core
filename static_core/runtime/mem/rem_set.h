@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,10 +56,9 @@ public:
     void Clear();
 
     template <bool NEED_LOCK = true>
-    static void InvalidateRegion(Region *invalidRegion);
+    void InvalidateRegion(Region *invalidRegion);
 
-    template <bool NEED_LOCK = true>
-    static void InvalidateRefsFromRegion(Region *invalidRegion);
+    void RemoveInvalidRegions();
 
     size_t Size() const
     {
@@ -80,13 +79,11 @@ public:
 
     /**
      * Used in the barrier. Record the reference from the region of fromAddr to the region of valueAddr.
-     * @param fromRemset - pointer to remset of region which contains fromAddr object (avoid region resolving on each
-     * call)
      * @param fromAddr - pointer to the reference in the object where value is stored
      * @param valueAddr - address of the reference in the field
      */
     template <bool NEED_LOCK = true>
-    static void AddRefWithAddr(RemSet<> *fromRemset, const void *fromAddr, const ObjectHeader *valueAddr);
+    static void AddRefWithAddr(const void *fromAddr, const ObjectHeader *valueAddr);
 
     void Dump(std::ostream &out);
 
@@ -155,19 +152,9 @@ public:
     };
 
 private:
-    template <bool NEED_LOCK>
-    PandaUnorderedSet<Region *> *GetRefRegions();
-    template <bool NEED_LOCK>
-    void AddRefRegion(Region *region);
-    template <bool NEED_LOCK>
-    void RemoveFromRegion(Region *region);
-    template <bool NEED_LOCK>
-    void RemoveRefRegion(Region *region);
-
     LockConfigT remSetLock_;
     // NOTE(alovkov): make value a Set?
     PandaUnorderedMap<uintptr_t, Bitmap> bitmaps_;
-    PandaUnorderedSet<Region *> refRegions_;
 
     friend class test::RemSetTest;
 };
