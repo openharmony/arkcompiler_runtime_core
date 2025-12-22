@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,6 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
-#include "plugins/ets/runtime/types/ets_module.h"
-#include "plugins/ets/runtime/types/ets_namespace.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/coroutines/coroutine_scopes.h"
 
@@ -374,7 +372,7 @@ static ani_status ClassGetStaticFieldByName(ani_env *env, ani_class cls, const c
     ScopedManagedCodeFix s(env);
     EtsClass *etsClass = s.ToInternalType(cls);
 
-    EtsField *etsField = etsClass->GetStaticFieldIDByName(name, nullptr);
+    EtsField *etsField = etsClass->GetStaticFieldIDByName(name);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
@@ -395,7 +393,7 @@ static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const c
     ScopedManagedCodeFix s(env);
     EtsClass *etsClass = s.ToInternalType(cls);
 
-    EtsField *etsField = etsClass->GetStaticFieldIDByName(name, nullptr);
+    EtsField *etsField = etsClass->GetStaticFieldIDByName(name);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
@@ -550,16 +548,16 @@ static ani_status GetNamespaceFunction(ani_env *env, ani_namespace ns, const cha
                                        EtsMethod **result)
 {
     ScopedManagedCodeFix s(env);
-    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
-    return DoGetClassMethodUnderManagedScope<true>(etsNs->AsClass(), name, signature, result);
+    EtsClass *etsClass = s.ToInternalType(ns);
+    return DoGetClassMethodUnderManagedScope<true>(etsClass, name, signature, result);
 }
 
-static ani_status GetModuleFunction(ani_env *env, ani_module ns, const char *name, const char *signature,
+static ani_status GetModuleFunction(ani_env *env, ani_module module, const char *name, const char *signature,
                                     EtsMethod **result)
 {
     ScopedManagedCodeFix s(env);
-    EtsModule *etsModule = EtsModule::FromClass(s.ToInternalType(ns)->AsClass());
-    return DoGetClassMethodUnderManagedScope<true>(etsModule->AsClass(), name, signature, result);
+    EtsClass *etsClass = s.ToInternalType(module);
+    return DoGetClassMethodUnderManagedScope<true>(etsClass, name, signature, result);
 }
 
 template <typename ReturnType, EtsType EXPECT_TYPE, typename Args>
@@ -807,11 +805,11 @@ NO_UB_SANITIZE static ani_status Namespace_FindVariable(ani_env *env, ani_namesp
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsNamespace *etsNs = EtsNamespace::FromClass(s.ToInternalType(ns)->AsClass());
-    EtsVariable *variable = etsNs->GetVariabe(variableDescriptor);
-    ANI_CHECK_RETURN_IF_EQ(variable, nullptr, ANI_NOT_FOUND);
+    EtsClass *etsClass = s.ToInternalType(ns);
+    EtsField *field = etsClass->GetStaticFieldIDByName(variableDescriptor);
+    ANI_CHECK_RETURN_IF_EQ(field, nullptr, ANI_NOT_FOUND);
 
-    *result = ToAniVariable(variable);
+    *result = ToAniVariable(field);
     return ANI_OK;
 }
 
@@ -843,8 +841,8 @@ NO_UB_SANITIZE static ani_status Module_FindVariable(ani_env *env, ani_module mo
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsModule *etsModule = EtsModule::FromClass(s.ToInternalType(module)->AsClass());
-    EtsVariable *variable = etsModule->GetVariabe(variableDescriptor);
+    EtsClass *etsClass = s.ToInternalType(module);
+    EtsField *variable = etsClass->GetStaticFieldIDByName(variableDescriptor, nullptr);
     ANI_CHECK_RETURN_IF_EQ(variable, nullptr, ANI_NOT_FOUND);
 
     *result = ToAniVariable(variable);
@@ -1231,7 +1229,7 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
 {
     ANI_CHECK_RETURN_IF_EQ(nrFunctions, 0, ANI_OK);
     ScopedManagedCodeFix s(env);
-    EtsNamespace *etsNs = s.ToInternalType(ns);
+    EtsClass *etsClass = s.ToInternalType(ns);
     PandaVector<EtsMethod *> etsMethods;
     etsMethods.reserve(nrFunctions);
     for (const auto &fn : Span(functions, nrFunctions)) {
@@ -1244,12 +1242,12 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
         }
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        EtsMethod *method = etsNs->GetFunction(name, methodSignature);
+        EtsMethod *method = etsClass->GetStaticMethod(name, methodSignature);
         if (method != nullptr) {
             etsMethods.push_back(method);
             continue;
         }
-        PandaVector<EtsMethod *> methodVec = etsNs->GetFunctionOverload(name, methodSignature);
+        PandaVector<EtsMethod *> methodVec = etsClass->GetStaticMethodOverload(name, methodSignature);
         if (methodVec.size() == 1U) {
             etsMethods.push_back(methodVec[0]);
             continue;
@@ -1547,8 +1545,7 @@ static ani_status SetVariableValue(ani_env *env, ani_variable variable, T value)
     CHECK_PTR_ARG(variable);
 
     ScopedManagedCodeFix s(env);
-    EtsVariable *etsVariable = ToInternalVariable(variable);
-    EtsField *etsField = etsVariable->AsField();
+    EtsField *etsField = ToInternalField(variable);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
     EtsClass *cls = etsField->GetDeclaringClass();
@@ -2071,7 +2068,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Ref(ani_env *env, an
     ScopedManagedCodeFix s(env);
     EtsClass *klass = s.ToInternalType(cls);
 
-    EtsField *etsField = klass->GetStaticFieldIDByName(name, nullptr);
+    EtsField *etsField = klass->GetStaticFieldIDByName(name);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
@@ -2165,7 +2162,7 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(ani_env *env, an
     ScopedManagedCodeFix s(env);
     EtsClass *klass = s.ToInternalType(cls);
 
-    EtsField *etsField = klass->GetStaticFieldIDByName(name, nullptr);
+    EtsField *etsField = klass->GetStaticFieldIDByName(name);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
@@ -4587,8 +4584,7 @@ static ani_status DoVariableGetValue(ani_env *env, ani_variable variable, R *res
     using Res = std::conditional_t<IS_REF, EtsObject *, R>;
 
     ScopedManagedCodeFix s(env);
-    EtsVariable *internalVariable = ToInternalVariable(variable);
-    EtsField *field = internalVariable->AsField();
+    EtsField *field = ToInternalField(variable);
     ANI_CHECK_RETURN_IF_NE(field->GetEtsType(), AniTypeInfo<R>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
     EtsClass *cls = field->GetDeclaringClass();
@@ -5927,7 +5923,7 @@ template <typename T>
 static T *GetArrayFromInternalEnum(EtsHandle<EtsClass> enumClass, const char *name)
 {
     ASSERT(enumClass.GetPtr() != nullptr);
-    EtsField *field = enumClass->GetStaticFieldIDByName(name, nullptr);
+    EtsField *field = enumClass->GetStaticFieldIDByName(name);
     if (field == nullptr) {
         return nullptr;
     }

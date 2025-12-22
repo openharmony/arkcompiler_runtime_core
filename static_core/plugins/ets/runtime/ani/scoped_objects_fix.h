@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,6 @@
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/types/ets_module.h"
-#include "plugins/ets/runtime/types/ets_namespace.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 
@@ -130,16 +128,16 @@ public:
         return reinterpret_cast<EtsClass *>(GetInternalType(cls));
     }
 
-    EtsNamespace *ToInternalType(ani_namespace ns)
+    EtsClass *ToInternalType(ani_namespace ns)
     {
         ASSERT(!IsNullishValue(ns));
-        return reinterpret_cast<EtsNamespace *>(GetInternalType(ns));
+        return reinterpret_cast<EtsClass *>(GetInternalType(ns));
     }
 
-    EtsModule *ToInternalType(ani_module module)
+    EtsClass *ToInternalType(ani_module module)
     {
         ASSERT(!IsNullishValue(module));
-        return reinterpret_cast<EtsModule *>(GetInternalType(module));
+        return reinterpret_cast<EtsClass *>(GetInternalType(module));
     }
 
     EtsString *ToInternalType(ani_string str)

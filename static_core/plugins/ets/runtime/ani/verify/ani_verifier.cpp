@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
+#include "plugins/ets/runtime/ani/ani_type_check.h"
 #include "runtime/include/cframe.h"
 #include "runtime/include/stack_walker-inl.h"
 
@@ -155,7 +156,7 @@ bool ANIVerifier::IsValidStackRef(VRef *vref)
     size_t refIndex = 0;
     auto &cframe = stack.GetCFrame();
     bool notEqual = stack.IterateObjectsWithInfo([vref, &refIndex, &cframe, &stack](auto &regInfo, auto &stackReg) {
-        if (EtsMethod::FromRuntimeMethod(stack.GetMethod())->IsFunction() && refIndex++ == 0) {
+        if (IsFunction(EtsMethod::FromRuntimeMethod(stack.GetMethod())) && refIndex++ == 0) {
             [[maybe_unused]] auto stackEtsObj = EtsObject::FromCoreType(stackReg.GetReference());
             ASSERT(EtsReferenceStorage::IsUndefinedEtsObject(stackEtsObj));
             return true;

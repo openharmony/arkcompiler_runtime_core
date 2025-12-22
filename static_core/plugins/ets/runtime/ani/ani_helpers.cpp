@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
+#include "plugins/ets/runtime/ani/ani_type_check.h"
 
 #include <cstdint>
 
@@ -274,28 +275,26 @@ static uint8_t *PrepareArgsOnStack(Method *method, uint8_t *inRegsArgs, uint8_t 
 
     EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
     EtsReference *classOrThisRef = nullptr;
-    if (method->IsStatic()) {
-        if (etsMethod->IsFunction()) {
-            // NOTE:
-            //  Replace the method pointer (Method *) with a pointer to the nullptr
-            //  to avoid GC crash during traversal of method arguments.
-            auto classPtr = reinterpret_cast<EtsObject **>(inRegsArgs);
-            *classPtr = nullptr;
-        } else {
-            // Handle class object
-            auto classObj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
-            ASSERT(classObj != nullptr);
+    if (IsFunction(etsMethod)) {
+        // NOTE:
+        //  Replace the method pointer (Method *) with a pointer to the nullptr
+        //  to avoid GC crash during traversal of method arguments.
+        auto classPtr = reinterpret_cast<EtsObject **>(inRegsArgs);
+        *classPtr = nullptr;
+    } else if (IsStaticMethod(etsMethod)) {
+        // Handle class object
+        auto classObj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
+        ASSERT(classObj != nullptr);
 
-            // Replace the method pointer (Method *) with a pointer to the class object
-            auto classPtr = reinterpret_cast<EtsObject **>(inRegsArgs);
-            *classPtr = classObj;
+        // Replace the method pointer (Method *) with a pointer to the class object
+        auto classPtr = reinterpret_cast<EtsObject **>(inRegsArgs);
+        *classPtr = classObj;
 
-            classOrThisRef = EtsReferenceStorage::NewEtsStackRef(classPtr);
-        }
+        classOrThisRef = EtsReferenceStorage::NewEtsStackRef(classPtr);
     } else {
         ASSERT(method->GetNumArgs() != 0);
         ASSERT(!method->GetArgType(0).IsPrimitive());
-        ASSERT(!etsMethod->IsFunction());
+        ASSERT(!IsFunction(etsMethod));
 
         // Handle this arg
         auto thisPtr = const_cast<EtsObject **>(argReader.ReadPtr<EtsObject *>());
@@ -304,7 +303,7 @@ static uint8_t *PrepareArgsOnStack(Method *method, uint8_t *inRegsArgs, uint8_t 
 
     // Prepare ANI args
     argWriter.Write(static_cast<ani_env *>(pandaEnv));
-    if (!etsMethod->IsFunction()) {
+    if (!IsFunction(etsMethod)) {
         argWriter.Write(classOrThisRef);
     }
     ARCH_COPY_METHOD_ARGS(method, argReader, argWriter);

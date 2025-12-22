@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,16 +17,14 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_ANI_CONVERTERS_H
 
 #include "ani.h"
-#include "plugins/ets/runtime/types/ets_field.h"
-#include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/types/ets_variable.h"
+#include "plugins/ets/runtime/ani/ani_type_check.h"
 
 namespace ark::ets::ani {
 
 inline ani_field ToAniField(EtsField *field)
 {
     ASSERT(field != nullptr);
-    ASSERT(!field->IsStatic());
+    ASSERT(IsInstanceField(field));
     return reinterpret_cast<ani_field>(field);
 }
 
@@ -34,14 +32,14 @@ inline EtsField *ToInternalField(ani_field field)
 {
     auto *f = reinterpret_cast<EtsField *>(field);
     ASSERT(f != nullptr);
-    ASSERT(!f->IsStatic());
+    ASSERT(IsInstanceField(f));
     return f;
 }
 
 inline ani_static_field ToAniStaticField(EtsField *field)
 {
     ASSERT(field != nullptr);
-    ASSERT(field->IsStatic());
+    ASSERT(IsStaticField(field));
     return reinterpret_cast<ani_static_field>(field);
 }
 
@@ -49,22 +47,22 @@ inline EtsField *ToInternalField(ani_static_field field)
 {
     auto *f = reinterpret_cast<EtsField *>(field);
     ASSERT(f != nullptr);
-    ASSERT(f->IsStatic());
+    ASSERT(IsStaticField(f));
     return f;
 }
 
-inline ani_variable ToAniVariable(EtsVariable *variable)
+inline ani_variable ToAniVariable(EtsField *variable)
 {
     ASSERT(variable != nullptr);
-    ASSERT(variable->AsField()->IsStatic());
+    ASSERT(IsVariable(variable));
     return reinterpret_cast<ani_variable>(variable);
 }
 
-inline EtsVariable *ToInternalVariable(ani_variable variable)
+inline EtsField *ToInternalField(ani_variable variable)
 {
-    auto *v = reinterpret_cast<EtsVariable *>(variable);
+    auto *v = reinterpret_cast<EtsField *>(variable);
     ASSERT(v != nullptr);
-    ASSERT(v->AsField()->IsStatic());
+    ASSERT(IsVariable(v));
     return v;
 }
 
@@ -72,16 +70,14 @@ inline EtsMethod *ToInternalMethod(ani_method method)
 {
     auto *m = reinterpret_cast<EtsMethod *>(method);
     ASSERT(m != nullptr);
-    ASSERT(!m->IsStatic());
-    ASSERT(!m->IsFunction());
+    ASSERT(IsInstanceMethod(m));
     return m;
 }
 
 inline ani_method ToAniMethod(EtsMethod *method)
 {
     ASSERT(method != nullptr);
-    ASSERT(!method->IsStatic());
-    ASSERT(!method->IsFunction());
+    ASSERT(IsInstanceMethod(method));
     return reinterpret_cast<ani_method>(method);
 }
 
@@ -89,16 +85,14 @@ inline EtsMethod *ToInternalMethod(ani_static_method method)
 {
     auto *m = reinterpret_cast<EtsMethod *>(method);
     ASSERT(m != nullptr);
-    ASSERT(m->IsStatic());
-    ASSERT(!m->IsFunction());
+    ASSERT(IsStaticMethod(m));
     return m;
 }
 
 inline ani_static_method ToAniStaticMethod(EtsMethod *method)
 {
     ASSERT(method != nullptr);
-    ASSERT(method->IsStatic());
-    ASSERT(!method->IsFunction());
+    ASSERT(IsStaticMethod(method));
     return reinterpret_cast<ani_static_method>(method);
 }
 
@@ -106,16 +100,14 @@ inline EtsMethod *ToInternalMethod(ani_function fn)
 {
     auto *m = reinterpret_cast<EtsMethod *>(fn);
     ASSERT(m != nullptr);
-    ASSERT(m->IsStatic());
-    ASSERT(m->IsFunction());
+    ASSERT(IsFunction(m));
     return m;
 }
 
 inline ani_function ToAniFunction(EtsMethod *method)
 {
     ASSERT(method != nullptr);
-    ASSERT(method->IsStatic());
-    ASSERT(method->IsFunction());
+    ASSERT(IsFunction(method));
     return reinterpret_cast<ani_function>(method);
 }
 
