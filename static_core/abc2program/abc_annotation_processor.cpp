@@ -17,9 +17,9 @@
 #include "abc_file_utils.h"
 #include "abc_literal_array_processor.h"
 #include "abc_method_processor.h"
-#include "libpandafile/file-inl.h"
-#include "libpandafile/class_data_accessor.h"
-#include "libpandafile/method_data_accessor.h"
+#include "libarkfile/file-inl.h"
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/method_data_accessor.h"
 
 namespace ark::abc2program {
 

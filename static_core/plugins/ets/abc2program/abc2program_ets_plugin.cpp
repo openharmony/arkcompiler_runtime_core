@@ -16,8 +16,8 @@
 #include "abc_file_processor.h"
 #include "abc_file_utils.h"
 #include "abc_method_processor.h"
-#include "annotation_data_accessor.h"
-#include "class_data_accessor.h"
+#include "libarkfile/annotation_data_accessor.h"
+#include "libarkfile/class_data_accessor.h"
 
 namespace ark::abc2program {
 void AbcFileProcessor::GetETSMetadata(const std::map<std::string, pandasm::Function> &functionTable)

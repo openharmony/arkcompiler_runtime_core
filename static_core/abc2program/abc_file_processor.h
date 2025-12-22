@@ -16,10 +16,10 @@
 #ifndef ABC2PROGRAM_ABC_FILE_PROCESSOR_H
 #define ABC2PROGRAM_ABC_FILE_PROCESSOR_H
 
-#include "source_lang_enum.h"
-#include "value.h"
+#include <libarkfile/include/source_lang_enum.h>
+#include "libarkfile/value.h"
 #include "abc2program_key_data.h"
-#include "annotation_data_accessor.h"
+#include "libarkfile/annotation_data_accessor.h"
 
 namespace ark::abc2program {
 

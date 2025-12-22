@@ -26,7 +26,7 @@ namespace MyUtil{
 
     export interface PubKey {
         publicKey: string
-        getKey(key: string): string;
+        getKey(key: string): string
     }
 
     export interface KeyPair {

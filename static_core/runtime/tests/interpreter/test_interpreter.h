@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_TESTS_INTERPRETER_TEST_INTERPRETER_H_
 #define PANDA_RUNTIME_TESTS_INTERPRETER_TEST_INTERPRETER_H_
 
-#include "libpandafile/bytecode_instruction-inl.h"
+#include "libarkfile/bytecode_instruction-inl.h"
 #include "runtime/include/thread.h"
 #include "runtime/interpreter/frame.h"
 

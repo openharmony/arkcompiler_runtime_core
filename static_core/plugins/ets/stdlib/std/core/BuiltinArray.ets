@@ -89,9 +89,9 @@ function cloneArray(self: FixedArray<boolean>): FixedArray<boolean> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<boolean>, index: int): Boolean | undefined {
+export function at(self: FixedArray<boolean>, index: int): Boolean {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -101,60 +101,10 @@ export function at(self: FixedArray<boolean>, index: int): Boolean | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
- */
-export function at(self: FixedArray<boolean>, index: number): Boolean | undefined {
-    return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<boolean>, ...items: (boolean | ConcatFixedArray<boolean>)[]): FixedArray<boolean> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArray<boolean>>): FixedArray<boolean> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<boolean> = new boolean[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -194,10 +144,10 @@ export function copyWithin(self: FixedArray<boolean>, target: int, start: int): 
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<boolean>, target: int, start: int, end: int): FixedArray<boolean> {
+export function copyWithin(self: FixedArray<boolean>, target: int, start: int, end?: int): FixedArray<boolean> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -223,22 +173,6 @@ export function copyWithin(self: FixedArray<boolean>, target: int, start: int, e
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<boolean>, target: number, start: number, end?: Number): FixedArray<boolean> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
  * Changes all elements in the Array to a static value, from a start index to an end index
  *
  * @param value to fill the array with
@@ -249,30 +183,14 @@ export function copyWithin(self: FixedArray<boolean>, target: number, start: num
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<boolean>, value: boolean, start: int, end: int): FixedArray<boolean> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<boolean>, value: boolean, start?: int, end?: int): FixedArray<boolean> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
 
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<boolean>, value: boolean, start?: Number, end?: Number): FixedArray<boolean> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -286,12 +204,12 @@ export function fill(self: FixedArray<boolean>, value: boolean, start?: Number, 
  *
  * @returns the value of the first element in the array or undefined
  */
-export function find(self: FixedArray<boolean>, predicate: (value: boolean, index: number, array: FixedArray<boolean>) => boolean): Boolean | undefined {
+export function find(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): Boolean | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -304,9 +222,9 @@ export function find(self: FixedArray<boolean>, predicate: (value: boolean, inde
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean, index: number, array: FixedArray<boolean>) => boolean): number {
+export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i;
         }
     }
@@ -321,10 +239,10 @@ export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean,
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: FixedArray<boolean>, predicate: (elem: boolean, index: number, array: FixedArray<boolean>) => boolean): Boolean | undefined {
+export function findLast(self: FixedArray<boolean>, predicate: (elem: boolean, index: int, array: FixedArray<boolean>) => boolean): Boolean | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i.toDouble(), self)) {
+        if (predicate(val, i, self)) {
             return val;
         }
     }
@@ -340,9 +258,9 @@ export function findLast(self: FixedArray<boolean>, predicate: (elem: boolean, i
  *
  * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: FixedArray<boolean>, predicate: (value: boolean, index: number, array: FixedArray<boolean>) => boolean): boolean {
+export function every(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i.toDouble(), self)) {
+        if (!predicate(self[i], i, self)) {
             return false
         }
     }
@@ -358,9 +276,9 @@ export function every(self: FixedArray<boolean>, predicate: (value: boolean, ind
  *
  * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: FixedArray<boolean>, predicate: (value: boolean, index: number, array: FixedArray<boolean>) => boolean): boolean {
+export function some(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return true
         }
     }
@@ -376,9 +294,9 @@ export function some(self: FixedArray<boolean>, predicate: (value: boolean, inde
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<boolean>, predicate: (element: boolean, index: number, array: FixedArray<boolean>) => boolean): number {
+export function findLastIndex(self: FixedArray<boolean>, predicate: (element: boolean, index: int, array: FixedArray<boolean>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i
         }
     }
@@ -392,13 +310,13 @@ export function findLastIndex(self: FixedArray<boolean>, predicate: (element: bo
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: number, array: FixedArray<boolean>) => boolean): boolean {
+export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -412,10 +330,10 @@ export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: bo
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: number, array: FixedArray<boolean>) => U, initialValue: U): U {
+export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: FixedArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -429,12 +347,27 @@ export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (prev
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: number, array: FixedArray<boolean>) => U, initialValue: U): U {
+export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: FixedArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, index: int, array: FixedArray<boolean>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
 }
 
 /**
@@ -450,21 +383,6 @@ export function slice(self: FixedArray<boolean>, start: int): FixedArray<boolean
 }
 
 /**
- * Performs the specified action for each element in an array.
- *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
- */
-export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, index: number, array: FixedArray<boolean>) => void): void {
-    const len0 = self.length;
-    for (let i = 0; i < len0; i++) {
-        if (i >= self.length) {
-            break
-        }
-        callbackfn(self[i], i.toDouble(), self)
-    }
-}
-
-/**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
  * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
  *
@@ -474,36 +392,18 @@ export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, 
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<boolean>, start: int, end: int): FixedArray<boolean> {
+export function slice(self: FixedArray<boolean>, start?: int, end?: int): FixedArray<boolean> {
     const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
         count = 0;
     }
     let res : FixedArray<boolean> = new boolean[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<boolean>, start?: Number, end?: Number): FixedArray<boolean> {
-    const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
 }
 
 /**
@@ -531,7 +431,7 @@ export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromInd
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -608,7 +508,7 @@ export function toLocaleString(self: FixedArray<boolean>): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x = self[i] as NullishType;
+        let x = self[i] as Any;
         if ((null !== x) && (undefined !== x)) {
             sb.append((x! as object).toLocaleString()) // #26217
         }
@@ -669,21 +569,7 @@ export function toSpliced(self: FixedArray<boolean>, start: int, delete: int, ..
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<boolean>, start: number, delete: number, ...items: FixedArray<boolean>): FixedArray<boolean> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<boolean>, start?: Number, delete?: Number): FixedArray<boolean> {
+export function toSpliced(self: FixedArray<boolean>, start?: int, delete?: int): FixedArray<boolean> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
 }
@@ -698,7 +584,7 @@ export function toSpliced(self: FixedArray<boolean>, start?: Number, delete?: Nu
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -722,7 +608,7 @@ export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: Nu
 export function indexOf(self: FixedArray<boolean>, val: boolean, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
     for (let i = normFromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -809,20 +695,6 @@ export function with(self: FixedArray<boolean>, index: int, value: boolean): Fix
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<boolean>, index: number, value: boolean): FixedArray<boolean> {
-    return with(self, index.toInt(), value)
-}
-
-/**
  * Returns an iterator over all values
  */
 export function values(self: FixedArray<boolean>): IterableIterator<boolean> {
@@ -843,11 +715,11 @@ export function entries(self: FixedArray<boolean>): IterableIterator<[number, bo
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, index: number, array: FixedArray<boolean>) => boolean): FixedArray<boolean> {
+export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): FixedArray<boolean> {
     const len = self.length;
     let res : FixedArray<boolean> = new boolean[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i.toDouble(), self);
+        res[i] = callbackfn(self[i], i, self);
     }
     return res;
 }
@@ -859,13 +731,13 @@ export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, inde
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: FixedArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: number, array: FixedArray<boolean>) => boolean): boolean {
+export function reduceRight(self: FixedArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -919,6 +791,37 @@ export function concat(self: FixedArray<boolean>, fst: FixedArray<boolean>, ...m
         // impossible
     }
     return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArray<boolean>>): FixedArray<boolean> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<boolean> = new boolean[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
 }
 
 /**
@@ -1022,9 +925,9 @@ function cloneArray(self: FixedArray<byte>): FixedArray<byte> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<byte>, index: int): Byte | undefined {
+export function at(self: FixedArray<byte>, index: int): Byte {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -1034,60 +937,10 @@ export function at(self: FixedArray<byte>, index: int): Byte | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
- */
-export function at(self: FixedArray<byte>, index: number): Byte | undefined {
-    return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<byte>, ...items: (byte | ConcatFixedArray<byte>)[]): FixedArray<byte> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<byte>>): FixedArray<byte> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<byte> = new byte[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -1127,10 +980,10 @@ export function copyWithin(self: FixedArray<byte>, target: int, start: int): Fix
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<byte>, target: int, start: int, end: int): FixedArray<byte> {
+export function copyWithin(self: FixedArray<byte>, target: int, start: int, end?: int): FixedArray<byte> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -1156,22 +1009,6 @@ export function copyWithin(self: FixedArray<byte>, target: int, start: int, end:
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<byte>, target: number, start: number, end?: Number): FixedArray<byte> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
  * Changes all elements in the Array to a static value, from a start index to an end index
  *
  * @param value to fill the array with
@@ -1182,30 +1019,14 @@ export function copyWithin(self: FixedArray<byte>, target: number, start: number
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<byte>, value: byte, start: int, end: int): FixedArray<byte> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<byte>, value: byte, start?: int, end?: int): FixedArray<byte> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
 
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<byte>, value: byte, start?: Number, end?: Number): FixedArray<byte> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -1219,12 +1040,12 @@ export function fill(self: FixedArray<byte>, value: byte, start?: Number, end?: 
  *
  * @returns the value of the first element in the array or undefined
  */
-export function find(self: FixedArray<byte>, predicate: (value: byte, index: number, array: FixedArray<byte>) => boolean): Byte | undefined {
+export function find(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): Byte | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -1237,9 +1058,9 @@ export function find(self: FixedArray<byte>, predicate: (value: byte, index: num
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index: number, array: FixedArray<byte>) => boolean): number {
+export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i;
         }
     }
@@ -1254,10 +1075,10 @@ export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: FixedArray<byte>, predicate: (elem: byte, index: number, array: FixedArray<byte>) => boolean): Byte | undefined {
+export function findLast(self: FixedArray<byte>, predicate: (elem: byte, index: int, array: FixedArray<byte>) => boolean): Byte | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i.toDouble(), self)) {
+        if (predicate(val, i, self)) {
             return val;
         }
     }
@@ -1273,9 +1094,9 @@ export function findLast(self: FixedArray<byte>, predicate: (elem: byte, index: 
  *
  * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: FixedArray<byte>, predicate: (value: byte, index: number, array: FixedArray<byte>) => boolean): boolean {
+export function every(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i.toDouble(), self)) {
+        if (!predicate(self[i], i, self)) {
             return false
         }
     }
@@ -1291,9 +1112,9 @@ export function every(self: FixedArray<byte>, predicate: (value: byte, index: nu
  *
  * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: FixedArray<byte>, predicate: (value: byte, index: number, array: FixedArray<byte>) => boolean): boolean {
+export function some(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return true
         }
     }
@@ -1309,9 +1130,9 @@ export function some(self: FixedArray<byte>, predicate: (value: byte, index: num
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte, index: number, array: FixedArray<byte>) => boolean): number {
+export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte, index: int, array: FixedArray<byte>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i
         }
     }
@@ -1325,13 +1146,13 @@ export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte,
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: number, array: FixedArray<byte>) => byte): byte {
+export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: FixedArray<byte>) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -1345,10 +1166,10 @@ export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte,
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: number, array: FixedArray<byte>) => U, initialValue: U): U {
+export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: FixedArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -1362,12 +1183,27 @@ export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousVa
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: number, array: FixedArray<byte>) => U, initialValue: U): U {
+export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: FixedArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index: int, array: FixedArray<byte>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
 }
 
 /**
@@ -1383,21 +1219,6 @@ export function slice(self: FixedArray<byte>, start: int): FixedArray<byte> {
 }
 
 /**
- * Performs the specified action for each element in an array.
- *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
- */
-export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index: number, array: FixedArray<byte>) => void): void {
-    const len0 = self.length;
-    for (let i = 0; i < len0; i++) {
-        if (i >= self.length) {
-            break
-        }
-        callbackfn(self[i], i.toDouble(), self)
-    }
-}
-
-/**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
  * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
  *
@@ -1407,36 +1228,18 @@ export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index:
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<byte>, start: int, end: int): FixedArray<byte> {
+export function slice(self: FixedArray<byte>, start?: int, end?: int): FixedArray<byte> {
     const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
         count = 0;
     }
     let res : FixedArray<byte> = new byte[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<byte>, start?: Number, end?: Number): FixedArray<byte> {
-    const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
 }
 
 /**
@@ -1464,7 +1267,7 @@ export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex?: i
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -1541,7 +1344,7 @@ export function toLocaleString(self: FixedArray<byte>): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x = self[i] as NullishType;
+        let x = self[i] as Any;
         if ((null !== x) && (undefined !== x)) {
             sb.append((x! as object).toLocaleString()) // #26217
         }
@@ -1602,21 +1405,7 @@ export function toSpliced(self: FixedArray<byte>, start: int, delete: int, ...it
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<byte>, start: number, delete: number, ...items: FixedArray<byte>): FixedArray<byte> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<byte>, start?: Number, delete?: Number): FixedArray<byte> {
+export function toSpliced(self: FixedArray<byte>, start?: int, delete?: int): FixedArray<byte> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
 }
@@ -1631,7 +1420,7 @@ export function toSpliced(self: FixedArray<byte>, start?: Number, delete?: Numbe
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<byte>, val: byte, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<byte>, val: byte, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -1655,7 +1444,7 @@ export function includes(self: FixedArray<byte>, val: byte, fromIndex?: Number):
 export function indexOf(self: FixedArray<byte>, val: byte, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
     for (let i = normFromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -1742,20 +1531,6 @@ export function with(self: FixedArray<byte>, index: int, value: byte): FixedArra
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<byte>, index: number, value: byte): FixedArray<byte> {
-    return with(self, index.toInt(), value)
-}
-
-/**
  * Returns an iterator over all values
  */
 export function values(self: FixedArray<byte>): IterableIterator<byte> {
@@ -1776,11 +1551,11 @@ export function entries(self: FixedArray<byte>): IterableIterator<[number, byte]
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: number, array: FixedArray<byte>) => byte): FixedArray<byte> {
+export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: int, array: FixedArray<byte>) => byte): FixedArray<byte> {
     const len = self.length;
     let res : FixedArray<byte> = new byte[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i.toDouble(), self);
+        res[i] = callbackfn(self[i], i, self);
     }
     return res;
 }
@@ -1792,13 +1567,13 @@ export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: num
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: FixedArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: number, array: FixedArray<byte>) => byte): byte {
+export function reduceRight(self: FixedArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: FixedArray<byte>) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -1852,6 +1627,37 @@ export function concat(self: FixedArray<byte>, fst: FixedArray<byte>, ...more: F
         // impossible
     }
     return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<byte>>): FixedArray<byte> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<byte> = new byte[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
 }
 
 /**
@@ -1955,9 +1761,9 @@ function cloneArray(self: FixedArray<short>): FixedArray<short> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<short>, index: int): Short | undefined {
+export function at(self: FixedArray<short>, index: int): Short {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -1967,60 +1773,10 @@ export function at(self: FixedArray<short>, index: int): Short | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
- */
-export function at(self: FixedArray<short>, index: number): Short | undefined {
-    return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<short>, ...items: (short | ConcatFixedArray<short>)[]): FixedArray<short> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray<short>>): FixedArray<short> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<short> = new short[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -2060,10 +1816,10 @@ export function copyWithin(self: FixedArray<short>, target: int, start: int): Fi
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<short>, target: int, start: int, end: int): FixedArray<short> {
+export function copyWithin(self: FixedArray<short>, target: int, start: int, end?: int): FixedArray<short> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -2089,22 +1845,6 @@ export function copyWithin(self: FixedArray<short>, target: int, start: int, end
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<short>, target: number, start: number, end?: Number): FixedArray<short> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
  * Changes all elements in the Array to a static value, from a start index to an end index
  *
  * @param value to fill the array with
@@ -2115,30 +1855,14 @@ export function copyWithin(self: FixedArray<short>, target: number, start: numbe
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<short>, value: short, start: int, end: int): FixedArray<short> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<short>, value: short, start?: int, end?: int): FixedArray<short> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
 
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<short>, value: short, start?: Number, end?: Number): FixedArray<short> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -2152,12 +1876,12 @@ export function fill(self: FixedArray<short>, value: short, start?: Number, end?
  *
  * @returns the value of the first element in the array or undefined
  */
-export function find(self: FixedArray<short>, predicate: (value: short, index: number, array: FixedArray<short>) => boolean): Short | undefined {
+export function find(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): Short | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -2170,9 +1894,9 @@ export function find(self: FixedArray<short>, predicate: (value: short, index: n
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<short>, predicate: (value: short, index: number, array: FixedArray<short>) => boolean): number {
+export function findIndex(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i;
         }
     }
@@ -2187,10 +1911,10 @@ export function findIndex(self: FixedArray<short>, predicate: (value: short, ind
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: FixedArray<short>, predicate: (elem: short, index: number, array: FixedArray<short>) => boolean): Short | undefined {
+export function findLast(self: FixedArray<short>, predicate: (elem: short, index: int, array: FixedArray<short>) => boolean): Short | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i.toDouble(), self)) {
+        if (predicate(val, i, self)) {
             return val;
         }
     }
@@ -2206,9 +1930,9 @@ export function findLast(self: FixedArray<short>, predicate: (elem: short, index
  *
  * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: FixedArray<short>, predicate: (value: short, index: number, array: FixedArray<short>) => boolean): boolean {
+export function every(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i.toDouble(), self)) {
+        if (!predicate(self[i], i, self)) {
             return false
         }
     }
@@ -2224,9 +1948,9 @@ export function every(self: FixedArray<short>, predicate: (value: short, index: 
  *
  * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: FixedArray<short>, predicate: (value: short, index: number, array: FixedArray<short>) => boolean): boolean {
+export function some(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return true
         }
     }
@@ -2242,9 +1966,9 @@ export function some(self: FixedArray<short>, predicate: (value: short, index: n
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<short>, predicate: (element: short, index: number, array: FixedArray<short>) => boolean): number {
+export function findLastIndex(self: FixedArray<short>, predicate: (element: short, index: int, array: FixedArray<short>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i
         }
     }
@@ -2258,13 +1982,13 @@ export function findLastIndex(self: FixedArray<short>, predicate: (element: shor
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: FixedArray<short>, callbackfn: (previousValue: short, currentValue: short, index: number, array: FixedArray<short>) => short): short {
+export function reduce(self: FixedArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: FixedArray<short>) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -2278,10 +2002,10 @@ export function reduce(self: FixedArray<short>, callbackfn: (previousValue: shor
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: number, array: FixedArray<short>) => U, initialValue: U): U {
+export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: FixedArray<short>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -2295,12 +2019,27 @@ export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previous
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: number, array: FixedArray<short>) => U, initialValue: U): U {
+export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: FixedArray<short>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: FixedArray<short>, callbackfn: (value: short, index: int, array: FixedArray<short>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
 }
 
 /**
@@ -2316,21 +2055,6 @@ export function slice(self: FixedArray<short>, start: int): FixedArray<short> {
 }
 
 /**
- * Performs the specified action for each element in an array.
- *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
- */
-export function forEach(self: FixedArray<short>, callbackfn: (value: short, index: number, array: FixedArray<short>) => void): void {
-    const len0 = self.length;
-    for (let i = 0; i < len0; i++) {
-        if (i >= self.length) {
-            break
-        }
-        callbackfn(self[i], i.toDouble(), self)
-    }
-}
-
-/**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
  * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
  *
@@ -2340,36 +2064,18 @@ export function forEach(self: FixedArray<short>, callbackfn: (value: short, inde
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<short>, start: int, end: int): FixedArray<short> {
+export function slice(self: FixedArray<short>, start?: int, end?: int): FixedArray<short> {
     const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
         count = 0;
     }
     let res : FixedArray<short> = new short[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<short>, start?: Number, end?: Number): FixedArray<short> {
-    const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
 }
 
 /**
@@ -2397,7 +2103,7 @@ export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex?:
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -2474,7 +2180,7 @@ export function toLocaleString(self: FixedArray<short>): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x = self[i] as NullishType;
+        let x = self[i] as Any;
         if ((null !== x) && (undefined !== x)) {
             sb.append((x! as object).toLocaleString()) // #26217
         }
@@ -2535,21 +2241,7 @@ export function toSpliced(self: FixedArray<short>, start: int, delete: int, ...i
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<short>, start: number, delete: number, ...items: FixedArray<short>): FixedArray<short> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<short>, start?: Number, delete?: Number): FixedArray<short> {
+export function toSpliced(self: FixedArray<short>, start?: int, delete?: int): FixedArray<short> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
 }
@@ -2564,7 +2256,7 @@ export function toSpliced(self: FixedArray<short>, start?: Number, delete?: Numb
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<short>, val: short, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<short>, val: short, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -2588,7 +2280,7 @@ export function includes(self: FixedArray<short>, val: short, fromIndex?: Number
 export function indexOf(self: FixedArray<short>, val: short, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
     for (let i = normFromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -2675,20 +2367,6 @@ export function with(self: FixedArray<short>, index: int, value: short): FixedAr
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<short>, index: number, value: short): FixedArray<short> {
-    return with(self, index.toInt(), value)
-}
-
-/**
  * Returns an iterator over all values
  */
 export function values(self: FixedArray<short>): IterableIterator<short> {
@@ -2709,11 +2387,11 @@ export function entries(self: FixedArray<short>): IterableIterator<[number, shor
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: FixedArray<short>, callbackfn: (value: short, index: number, array: FixedArray<short>) => short): FixedArray<short> {
+export function map(self: FixedArray<short>, callbackfn: (value: short, index: int, array: FixedArray<short>) => short): FixedArray<short> {
     const len = self.length;
     let res : FixedArray<short> = new short[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i.toDouble(), self);
+        res[i] = callbackfn(self[i], i, self);
     }
     return res;
 }
@@ -2725,13 +2403,13 @@ export function map(self: FixedArray<short>, callbackfn: (value: short, index: n
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: FixedArray<short>, callbackfn: (previousValue: short, currentValue: short, index: number, array: FixedArray<short>) => short): short {
+export function reduceRight(self: FixedArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: FixedArray<short>) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -2785,6 +2463,37 @@ export function concat(self: FixedArray<short>, fst: FixedArray<short>, ...more:
         // impossible
     }
     return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray<short>>): FixedArray<short> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<short> = new short[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
 }
 
 /**
@@ -2888,9 +2597,9 @@ function cloneArray(self: FixedArray<int>): FixedArray<int> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<int>, index: int): Int | undefined {
+export function at(self: FixedArray<int>, index: int): Int {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -2900,60 +2609,10 @@ export function at(self: FixedArray<int>, index: int): Int | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
- */
-export function at(self: FixedArray<int>, index: number): Int | undefined {
-    return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<int>, ...items: (int | ConcatFixedArray<int>)[]): FixedArray<int> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<int>>): FixedArray<int> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<int> = new int[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -2993,10 +2652,10 @@ export function copyWithin(self: FixedArray<int>, target: int, start: int): Fixe
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<int>, target: int, start: int, end: int): FixedArray<int> {
+export function copyWithin(self: FixedArray<int>, target: int, start: int, end?: int): FixedArray<int> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -3022,22 +2681,6 @@ export function copyWithin(self: FixedArray<int>, target: int, start: int, end: 
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<int>, target: number, start: number, end?: Number): FixedArray<int> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
  * Changes all elements in the Array to a static value, from a start index to an end index
  *
  * @param value to fill the array with
@@ -3048,30 +2691,14 @@ export function copyWithin(self: FixedArray<int>, target: number, start: number,
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<int>, value: int, start: int, end: int): FixedArray<int> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<int>, value: int, start?: int, end?: int): FixedArray<int> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
 
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<int>, value: int, start?: Number, end?: Number): FixedArray<int> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -3085,12 +2712,12 @@ export function fill(self: FixedArray<int>, value: int, start?: Number, end?: Nu
  *
  * @returns the value of the first element in the array or undefined
  */
-export function find(self: FixedArray<int>, predicate: (value: int, index: number, array: FixedArray<int>) => boolean): Int | undefined {
+export function find(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): Int | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -3103,9 +2730,9 @@ export function find(self: FixedArray<int>, predicate: (value: int, index: numbe
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<int>, predicate: (value: int, index: number, array: FixedArray<int>) => boolean): number {
+export function findIndex(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i;
         }
     }
@@ -3120,10 +2747,10 @@ export function findIndex(self: FixedArray<int>, predicate: (value: int, index: 
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: FixedArray<int>, predicate: (elem: int, index: number, array: FixedArray<int>) => boolean): Int | undefined {
+export function findLast(self: FixedArray<int>, predicate: (elem: int, index: int, array: FixedArray<int>) => boolean): Int | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i.toDouble(), self)) {
+        if (predicate(val, i, self)) {
             return val;
         }
     }
@@ -3139,9 +2766,9 @@ export function findLast(self: FixedArray<int>, predicate: (elem: int, index: nu
  *
  * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: FixedArray<int>, predicate: (value: int, index: number, array: FixedArray<int>) => boolean): boolean {
+export function every(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i.toDouble(), self)) {
+        if (!predicate(self[i], i, self)) {
             return false
         }
     }
@@ -3157,9 +2784,9 @@ export function every(self: FixedArray<int>, predicate: (value: int, index: numb
  *
  * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: FixedArray<int>, predicate: (value: int, index: number, array: FixedArray<int>) => boolean): boolean {
+export function some(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return true
         }
     }
@@ -3175,9 +2802,9 @@ export function some(self: FixedArray<int>, predicate: (value: int, index: numbe
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<int>, predicate: (element: int, index: number, array: FixedArray<int>) => boolean): number {
+export function findLastIndex(self: FixedArray<int>, predicate: (element: int, index: int, array: FixedArray<int>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i
         }
     }
@@ -3191,13 +2818,13 @@ export function findLastIndex(self: FixedArray<int>, predicate: (element: int, i
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, currentValue: int, index: number, array: FixedArray<int>) => int): int {
+export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: FixedArray<int>) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -3211,10 +2838,10 @@ export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, c
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: number, array: FixedArray<int>) => U, initialValue: U): U {
+export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: FixedArray<int>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -3228,12 +2855,27 @@ export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValu
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: number, array: FixedArray<int>) => U, initialValue: U): U {
+export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: FixedArray<int>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: int, array: FixedArray<int>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
 }
 
 /**
@@ -3249,21 +2891,6 @@ export function slice(self: FixedArray<int>, start: int): FixedArray<int> {
 }
 
 /**
- * Performs the specified action for each element in an array.
- *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
- */
-export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: number, array: FixedArray<int>) => void): void {
-    const len0 = self.length;
-    for (let i = 0; i < len0; i++) {
-        if (i >= self.length) {
-            break
-        }
-        callbackfn(self[i], i.toDouble(), self)
-    }
-}
-
-/**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
  * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
  *
@@ -3273,36 +2900,18 @@ export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: n
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<int>, start: int, end: int): FixedArray<int> {
+export function slice(self: FixedArray<int>, start?: int, end?: int): FixedArray<int> {
     const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
         count = 0;
     }
     let res : FixedArray<int> = new int[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<int>, start?: Number, end?: Number): FixedArray<int> {
-    const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
 }
 
 /**
@@ -3330,7 +2939,7 @@ export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex?: int
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -3407,7 +3016,7 @@ export function toLocaleString(self: FixedArray<int>): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x = self[i] as NullishType;
+        let x = self[i] as Any;
         if ((null !== x) && (undefined !== x)) {
             sb.append((x! as object).toLocaleString()) // #26217
         }
@@ -3468,21 +3077,7 @@ export function toSpliced(self: FixedArray<int>, start: int, delete: int, ...ite
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<int>, start: number, delete: number, ...items: FixedArray<int>): FixedArray<int> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<int>, start?: Number, delete?: Number): FixedArray<int> {
+export function toSpliced(self: FixedArray<int>, start?: int, delete?: int): FixedArray<int> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
 }
@@ -3497,7 +3092,7 @@ export function toSpliced(self: FixedArray<int>, start?: Number, delete?: Number
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<int>, val: int, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<int>, val: int, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -3521,7 +3116,7 @@ export function includes(self: FixedArray<int>, val: int, fromIndex?: Number): b
 export function indexOf(self: FixedArray<int>, val: int, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
     for (let i = normFromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -3608,20 +3203,6 @@ export function with(self: FixedArray<int>, index: int, value: int): FixedArray<
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<int>, index: number, value: int): FixedArray<int> {
-    return with(self, index.toInt(), value)
-}
-
-/**
  * Returns an iterator over all values
  */
 export function values(self: FixedArray<int>): IterableIterator<int> {
@@ -3642,11 +3223,11 @@ export function entries(self: FixedArray<int>): IterableIterator<[number, int]> 
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: FixedArray<int>, callbackfn: (value: int, index: number, array: FixedArray<int>) => int): FixedArray<int> {
+export function map(self: FixedArray<int>, callbackfn: (value: int, index: int, array: FixedArray<int>) => int): FixedArray<int> {
     const len = self.length;
     let res : FixedArray<int> = new int[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i.toDouble(), self);
+        res[i] = callbackfn(self[i], i, self);
     }
     return res;
 }
@@ -3658,13 +3239,13 @@ export function map(self: FixedArray<int>, callbackfn: (value: int, index: numbe
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: FixedArray<int>, callbackfn: (previousValue: int, currentValue: int, index: number, array: FixedArray<int>) => int): int {
+export function reduceRight(self: FixedArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: FixedArray<int>) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -3718,6 +3299,37 @@ export function concat(self: FixedArray<int>, fst: FixedArray<int>, ...more: Fix
         // impossible
     }
     return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<int>>): FixedArray<int> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<int> = new int[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
 }
 
 /**
@@ -3821,9 +3433,9 @@ function cloneArray(self: FixedArray<long>): FixedArray<long> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<long>, index: int): Long | undefined {
+export function at(self: FixedArray<long>, index: int): Long {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -3833,60 +3445,10 @@ export function at(self: FixedArray<long>, index: int): Long | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
- */
-export function at(self: FixedArray<long>, index: number): Long | undefined {
-    return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<long>, ...items: (long | ConcatFixedArray<long>)[]): FixedArray<long> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<long>>): FixedArray<long> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<long> = new long[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -3926,10 +3488,10 @@ export function copyWithin(self: FixedArray<long>, target: int, start: int): Fix
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<long>, target: int, start: int, end: int): FixedArray<long> {
+export function copyWithin(self: FixedArray<long>, target: int, start: int, end?: int): FixedArray<long> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -3955,22 +3517,6 @@ export function copyWithin(self: FixedArray<long>, target: int, start: int, end:
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<long>, target: number, start: number, end?: Number): FixedArray<long> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
  * Changes all elements in the Array to a static value, from a start index to an end index
  *
  * @param value to fill the array with
@@ -3981,30 +3527,14 @@ export function copyWithin(self: FixedArray<long>, target: number, start: number
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<long>, value: long, start: int, end: int): FixedArray<long> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<long>, value: long, start?: int, end?: int): FixedArray<long> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
 
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<long>, value: long, start?: Number, end?: Number): FixedArray<long> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -4018,12 +3548,12 @@ export function fill(self: FixedArray<long>, value: long, start?: Number, end?: 
  *
  * @returns the value of the first element in the array or undefined
  */
-export function find(self: FixedArray<long>, predicate: (value: long, index: number, array: FixedArray<long>) => boolean): Long | undefined {
+export function find(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): Long | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -4036,9 +3566,9 @@ export function find(self: FixedArray<long>, predicate: (value: long, index: num
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<long>, predicate: (value: long, index: number, array: FixedArray<long>) => boolean): number {
+export function findIndex(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i;
         }
     }
@@ -4053,10 +3583,10 @@ export function findIndex(self: FixedArray<long>, predicate: (value: long, index
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: FixedArray<long>, predicate: (elem: long, index: number, array: FixedArray<long>) => boolean): Long | undefined {
+export function findLast(self: FixedArray<long>, predicate: (elem: long, index: int, array: FixedArray<long>) => boolean): Long | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i.toDouble(), self)) {
+        if (predicate(val, i, self)) {
             return val;
         }
     }
@@ -4072,9 +3602,9 @@ export function findLast(self: FixedArray<long>, predicate: (elem: long, index: 
  *
  * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: FixedArray<long>, predicate: (value: long, index: number, array: FixedArray<long>) => boolean): boolean {
+export function every(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i.toDouble(), self)) {
+        if (!predicate(self[i], i, self)) {
             return false
         }
     }
@@ -4090,9 +3620,9 @@ export function every(self: FixedArray<long>, predicate: (value: long, index: nu
  *
  * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: FixedArray<long>, predicate: (value: long, index: number, array: FixedArray<long>) => boolean): boolean {
+export function some(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return true
         }
     }
@@ -4108,9 +3638,9 @@ export function some(self: FixedArray<long>, predicate: (value: long, index: num
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<long>, predicate: (element: long, index: number, array: FixedArray<long>) => boolean): number {
+export function findLastIndex(self: FixedArray<long>, predicate: (element: long, index: int, array: FixedArray<long>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i
         }
     }
@@ -4124,13 +3654,13 @@ export function findLastIndex(self: FixedArray<long>, predicate: (element: long,
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long, currentValue: long, index: number, array: FixedArray<long>) => long): long {
+export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: FixedArray<long>) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -4144,10 +3674,10 @@ export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long,
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: number, array: FixedArray<long>) => U, initialValue: U): U {
+export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: FixedArray<long>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -4161,12 +3691,27 @@ export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousVa
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: number, array: FixedArray<long>) => U, initialValue: U): U {
+export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: FixedArray<long>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: FixedArray<long>, callbackfn: (value: long, index: int, array: FixedArray<long>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
 }
 
 /**
@@ -4182,21 +3727,6 @@ export function slice(self: FixedArray<long>, start: int): FixedArray<long> {
 }
 
 /**
- * Performs the specified action for each element in an array.
- *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
- */
-export function forEach(self: FixedArray<long>, callbackfn: (value: long, index: number, array: FixedArray<long>) => void): void {
-    const len0 = self.length;
-    for (let i = 0; i < len0; i++) {
-        if (i >= self.length) {
-            break
-        }
-        callbackfn(self[i], i.toDouble(), self)
-    }
-}
-
-/**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
  * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
  *
@@ -4206,36 +3736,18 @@ export function forEach(self: FixedArray<long>, callbackfn: (value: long, index:
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<long>, start: int, end: int): FixedArray<long> {
+export function slice(self: FixedArray<long>, start?: int, end?: int): FixedArray<long> {
     const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
         count = 0;
     }
     let res : FixedArray<long> = new long[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<long>, start?: Number, end?: Number): FixedArray<long> {
-    const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
 }
 
 /**
@@ -4263,7 +3775,7 @@ export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex?: i
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -4340,7 +3852,7 @@ export function toLocaleString(self: FixedArray<long>): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x = self[i] as NullishType;
+        let x = self[i] as Any;
         if ((null !== x) && (undefined !== x)) {
             sb.append((x! as object).toLocaleString()) // #26217
         }
@@ -4401,21 +3913,7 @@ export function toSpliced(self: FixedArray<long>, start: int, delete: int, ...it
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<long>, start: number, delete: number, ...items: FixedArray<long>): FixedArray<long> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<long>, start?: Number, delete?: Number): FixedArray<long> {
+export function toSpliced(self: FixedArray<long>, start?: int, delete?: int): FixedArray<long> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
 }
@@ -4430,7 +3928,7 @@ export function toSpliced(self: FixedArray<long>, start?: Number, delete?: Numbe
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<long>, val: long, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<long>, val: long, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -4454,7 +3952,7 @@ export function includes(self: FixedArray<long>, val: long, fromIndex?: Number):
 export function indexOf(self: FixedArray<long>, val: long, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
     for (let i = normFromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -4541,20 +4039,6 @@ export function with(self: FixedArray<long>, index: int, value: long): FixedArra
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<long>, index: number, value: long): FixedArray<long> {
-    return with(self, index.toInt(), value)
-}
-
-/**
  * Returns an iterator over all values
  */
 export function values(self: FixedArray<long>): IterableIterator<long> {
@@ -4575,11 +4059,11 @@ export function entries(self: FixedArray<long>): IterableIterator<[number, long]
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: FixedArray<long>, callbackfn: (value: long, index: number, array: FixedArray<long>) => long): FixedArray<long> {
+export function map(self: FixedArray<long>, callbackfn: (value: long, index: int, array: FixedArray<long>) => long): FixedArray<long> {
     const len = self.length;
     let res : FixedArray<long> = new long[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i.toDouble(), self);
+        res[i] = callbackfn(self[i], i, self);
     }
     return res;
 }
@@ -4591,13 +4075,13 @@ export function map(self: FixedArray<long>, callbackfn: (value: long, index: num
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: FixedArray<long>, callbackfn: (previousValue: long, currentValue: long, index: number, array: FixedArray<long>) => long): long {
+export function reduceRight(self: FixedArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: FixedArray<long>) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -4651,6 +4135,37 @@ export function concat(self: FixedArray<long>, fst: FixedArray<long>, ...more: F
         // impossible
     }
     return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<long>>): FixedArray<long> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<long> = new long[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
 }
 
 /**
@@ -4754,9 +4269,9 @@ function cloneArray(self: FixedArray<float>): FixedArray<float> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<float>, index: int): Float | undefined {
+export function at(self: FixedArray<float>, index: int): Float {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -4766,60 +4281,10 @@ export function at(self: FixedArray<float>, index: int): Float | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
- */
-export function at(self: FixedArray<float>, index: number): Float | undefined {
-    return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<float>, ...items: (float | ConcatFixedArray<float>)[]): FixedArray<float> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray<float>>): FixedArray<float> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<float> = new float[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -4859,10 +4324,10 @@ export function copyWithin(self: FixedArray<float>, target: int, start: int): Fi
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<float>, target: int, start: int, end: int): FixedArray<float> {
+export function copyWithin(self: FixedArray<float>, target: int, start: int, end?: int): FixedArray<float> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -4888,22 +4353,6 @@ export function copyWithin(self: FixedArray<float>, target: int, start: int, end
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<float>, target: number, start: number, end?: Number): FixedArray<float> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
  * Changes all elements in the Array to a static value, from a start index to an end index
  *
  * @param value to fill the array with
@@ -4914,30 +4363,14 @@ export function copyWithin(self: FixedArray<float>, target: number, start: numbe
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<float>, value: float, start: int, end: int): FixedArray<float> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<float>, value: float, start?: int, end?: int): FixedArray<float> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
 
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<float>, value: float, start?: Number, end?: Number): FixedArray<float> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -4951,12 +4384,12 @@ export function fill(self: FixedArray<float>, value: float, start?: Number, end?
  *
  * @returns the value of the first element in the array or undefined
  */
-export function find(self: FixedArray<float>, predicate: (value: float, index: number, array: FixedArray<float>) => boolean): Float | undefined {
+export function find(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): Float | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -4969,9 +4402,9 @@ export function find(self: FixedArray<float>, predicate: (value: float, index: n
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<float>, predicate: (value: float, index: number, array: FixedArray<float>) => boolean): number {
+export function findIndex(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i;
         }
     }
@@ -4986,10 +4419,10 @@ export function findIndex(self: FixedArray<float>, predicate: (value: float, ind
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: FixedArray<float>, predicate: (elem: float, index: number, array: FixedArray<float>) => boolean): Float | undefined {
+export function findLast(self: FixedArray<float>, predicate: (elem: float, index: int, array: FixedArray<float>) => boolean): Float | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i.toDouble(), self)) {
+        if (predicate(val, i, self)) {
             return val;
         }
     }
@@ -5005,9 +4438,9 @@ export function findLast(self: FixedArray<float>, predicate: (elem: float, index
  *
  * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: FixedArray<float>, predicate: (value: float, index: number, array: FixedArray<float>) => boolean): boolean {
+export function every(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i.toDouble(), self)) {
+        if (!predicate(self[i], i, self)) {
             return false
         }
     }
@@ -5023,9 +4456,9 @@ export function every(self: FixedArray<float>, predicate: (value: float, index: 
  *
  * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: FixedArray<float>, predicate: (value: float, index: number, array: FixedArray<float>) => boolean): boolean {
+export function some(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return true
         }
     }
@@ -5041,9 +4474,9 @@ export function some(self: FixedArray<float>, predicate: (value: float, index: n
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<float>, predicate: (element: float, index: number, array: FixedArray<float>) => boolean): number {
+export function findLastIndex(self: FixedArray<float>, predicate: (element: float, index: int, array: FixedArray<float>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i
         }
     }
@@ -5057,13 +4490,13 @@ export function findLastIndex(self: FixedArray<float>, predicate: (element: floa
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: FixedArray<float>, callbackfn: (previousValue: float, currentValue: float, index: number, array: FixedArray<float>) => float): float {
+export function reduce(self: FixedArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: FixedArray<float>) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -5077,10 +4510,10 @@ export function reduce(self: FixedArray<float>, callbackfn: (previousValue: floa
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: number, array: FixedArray<float>) => U, initialValue: U): U {
+export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: FixedArray<float>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -5094,12 +4527,27 @@ export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previous
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: number, array: FixedArray<float>) => U, initialValue: U): U {
+export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: FixedArray<float>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: FixedArray<float>, callbackfn: (value: float, index: int, array: FixedArray<float>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
 }
 
 /**
@@ -5115,21 +4563,6 @@ export function slice(self: FixedArray<float>, start: int): FixedArray<float> {
 }
 
 /**
- * Performs the specified action for each element in an array.
- *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
- */
-export function forEach(self: FixedArray<float>, callbackfn: (value: float, index: number, array: FixedArray<float>) => void): void {
-    const len0 = self.length;
-    for (let i = 0; i < len0; i++) {
-        if (i >= self.length) {
-            break
-        }
-        callbackfn(self[i], i.toDouble(), self)
-    }
-}
-
-/**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
  * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
  *
@@ -5139,36 +4572,18 @@ export function forEach(self: FixedArray<float>, callbackfn: (value: float, inde
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<float>, start: int, end: int): FixedArray<float> {
+export function slice(self: FixedArray<float>, start?: int, end?: int): FixedArray<float> {
     const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
         count = 0;
     }
     let res : FixedArray<float> = new float[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<float>, start?: Number, end?: Number): FixedArray<float> {
-    const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
 }
 
 /**
@@ -5196,7 +4611,7 @@ export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex?:
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -5273,7 +4688,7 @@ export function toLocaleString(self: FixedArray<float>): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x = self[i] as NullishType;
+        let x = self[i] as Any;
         if ((null !== x) && (undefined !== x)) {
             sb.append((x! as object).toLocaleString()) // #26217
         }
@@ -5334,21 +4749,7 @@ export function toSpliced(self: FixedArray<float>, start: int, delete: int, ...i
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<float>, start: number, delete: number, ...items: FixedArray<float>): FixedArray<float> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<float>, start?: Number, delete?: Number): FixedArray<float> {
+export function toSpliced(self: FixedArray<float>, start?: int, delete?: int): FixedArray<float> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
 }
@@ -5363,7 +4764,7 @@ export function toSpliced(self: FixedArray<float>, start?: Number, delete?: Numb
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<float>, val: float, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<float>, val: float, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     if (isNaN(val)) {
@@ -5395,7 +4796,7 @@ export function includes(self: FixedArray<float>, val: float, fromIndex?: Number
 export function indexOf(self: FixedArray<float>, val: float, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
     for (let i = normFromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -5482,20 +4883,6 @@ export function with(self: FixedArray<float>, index: int, value: float): FixedAr
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<float>, index: number, value: float): FixedArray<float> {
-    return with(self, index.toInt(), value)
-}
-
-/**
  * Returns an iterator over all values
  */
 export function values(self: FixedArray<float>): IterableIterator<float> {
@@ -5516,11 +4903,11 @@ export function entries(self: FixedArray<float>): IterableIterator<[number, floa
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: FixedArray<float>, callbackfn: (value: float, index: number, array: FixedArray<float>) => float): FixedArray<float> {
+export function map(self: FixedArray<float>, callbackfn: (value: float, index: int, array: FixedArray<float>) => float): FixedArray<float> {
     const len = self.length;
     let res : FixedArray<float> = new float[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i.toDouble(), self);
+        res[i] = callbackfn(self[i], i, self);
     }
     return res;
 }
@@ -5532,13 +4919,13 @@ export function map(self: FixedArray<float>, callbackfn: (value: float, index: n
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: FixedArray<float>, callbackfn: (previousValue: float, currentValue: float, index: number, array: FixedArray<float>) => float): float {
+export function reduceRight(self: FixedArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: FixedArray<float>) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -5592,6 +4979,37 @@ export function concat(self: FixedArray<float>, fst: FixedArray<float>, ...more:
         // impossible
     }
     return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray<float>>): FixedArray<float> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<float> = new float[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
 }
 
 /**
@@ -5695,9 +5113,9 @@ function cloneArray(self: FixedArray<double>): FixedArray<double> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<double>, index: int): Double | undefined {
+export function at(self: FixedArray<double>, index: int): Double {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -5707,60 +5125,10 @@ export function at(self: FixedArray<double>, index: int): Double | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
- */
-export function at(self: FixedArray<double>, index: number): Double | undefined {
-    return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<double>, ...items: (double | ConcatFixedArray<double>)[]): FixedArray<double> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArray<double>>): FixedArray<double> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<double> = new double[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -5800,10 +5168,10 @@ export function copyWithin(self: FixedArray<double>, target: int, start: int): F
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<double>, target: int, start: int, end: int): FixedArray<double> {
+export function copyWithin(self: FixedArray<double>, target: int, start: int, end?: int): FixedArray<double> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -5829,22 +5197,6 @@ export function copyWithin(self: FixedArray<double>, target: int, start: int, en
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<double>, target: number, start: number, end?: Number): FixedArray<double> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
  * Changes all elements in the Array to a static value, from a start index to an end index
  *
  * @param value to fill the array with
@@ -5855,30 +5207,14 @@ export function copyWithin(self: FixedArray<double>, target: number, start: numb
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<double>, value: double, start: int, end: int): FixedArray<double> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<double>, value: double, start?: int, end?: int): FixedArray<double> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
 
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<double>, value: double, start?: Number, end?: Number): FixedArray<double> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -5892,12 +5228,12 @@ export function fill(self: FixedArray<double>, value: double, start?: Number, en
  *
  * @returns the value of the first element in the array or undefined
  */
-export function find(self: FixedArray<double>, predicate: (value: double, index: number, array: FixedArray<double>) => boolean): Double | undefined {
+export function find(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): Double | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -5910,9 +5246,9 @@ export function find(self: FixedArray<double>, predicate: (value: double, index:
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<double>, predicate: (value: double, index: number, array: FixedArray<double>) => boolean): number {
+export function findIndex(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i;
         }
     }
@@ -5927,10 +5263,10 @@ export function findIndex(self: FixedArray<double>, predicate: (value: double, i
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: FixedArray<double>, predicate: (elem: double, index: number, array: FixedArray<double>) => boolean): Double | undefined {
+export function findLast(self: FixedArray<double>, predicate: (elem: double, index: int, array: FixedArray<double>) => boolean): Double | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i.toDouble(), self)) {
+        if (predicate(val, i, self)) {
             return val;
         }
     }
@@ -5946,9 +5282,9 @@ export function findLast(self: FixedArray<double>, predicate: (elem: double, ind
  *
  * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: FixedArray<double>, predicate: (value: double, index: number, array: FixedArray<double>) => boolean): boolean {
+export function every(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i.toDouble(), self)) {
+        if (!predicate(self[i], i, self)) {
             return false
         }
     }
@@ -5964,9 +5300,9 @@ export function every(self: FixedArray<double>, predicate: (value: double, index
  *
  * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: FixedArray<double>, predicate: (value: double, index: number, array: FixedArray<double>) => boolean): boolean {
+export function some(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return true
         }
     }
@@ -5982,9 +5318,9 @@ export function some(self: FixedArray<double>, predicate: (value: double, index:
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<double>, predicate: (element: double, index: number, array: FixedArray<double>) => boolean): number {
+export function findLastIndex(self: FixedArray<double>, predicate: (element: double, index: int, array: FixedArray<double>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i
         }
     }
@@ -5998,13 +5334,13 @@ export function findLastIndex(self: FixedArray<double>, predicate: (element: dou
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: FixedArray<double>, callbackfn: (previousValue: double, currentValue: double, index: number, array: FixedArray<double>) => double): double {
+export function reduce(self: FixedArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: FixedArray<double>) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -6018,10 +5354,10 @@ export function reduce(self: FixedArray<double>, callbackfn: (previousValue: dou
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: number, array: FixedArray<double>) => U, initialValue: U): U {
+export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: FixedArray<double>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -6035,12 +5371,27 @@ export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previo
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: number, array: FixedArray<double>) => U, initialValue: U): U {
+export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: FixedArray<double>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: FixedArray<double>, callbackfn: (value: double, index: int, array: FixedArray<double>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
 }
 
 /**
@@ -6056,21 +5407,6 @@ export function slice(self: FixedArray<double>, start: int): FixedArray<double> 
 }
 
 /**
- * Performs the specified action for each element in an array.
- *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
- */
-export function forEach(self: FixedArray<double>, callbackfn: (value: double, index: number, array: FixedArray<double>) => void): void {
-    const len0 = self.length;
-    for (let i = 0; i < len0; i++) {
-        if (i >= self.length) {
-            break
-        }
-        callbackfn(self[i], i.toDouble(), self)
-    }
-}
-
-/**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
  * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
  *
@@ -6080,36 +5416,18 @@ export function forEach(self: FixedArray<double>, callbackfn: (value: double, in
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<double>, start: int, end: int): FixedArray<double> {
+export function slice(self: FixedArray<double>, start?: int, end?: int): FixedArray<double> {
     const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
         count = 0;
     }
     let res : FixedArray<double> = new double[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<double>, start?: Number, end?: Number): FixedArray<double> {
-    const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
 }
 
 /**
@@ -6137,7 +5455,7 @@ export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -6214,7 +5532,7 @@ export function toLocaleString(self: FixedArray<double>): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x = self[i] as NullishType;
+        let x = self[i] as Any;
         if ((null !== x) && (undefined !== x)) {
             sb.append((x! as object).toLocaleString()) // #26217
         }
@@ -6275,21 +5593,7 @@ export function toSpliced(self: FixedArray<double>, start: int, delete: int, ...
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<double>, start: number, delete: number, ...items: FixedArray<double>): FixedArray<double> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<double>, start?: Number, delete?: Number): FixedArray<double> {
+export function toSpliced(self: FixedArray<double>, start?: int, delete?: int): FixedArray<double> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
 }
@@ -6304,7 +5608,7 @@ export function toSpliced(self: FixedArray<double>, start?: Number, delete?: Num
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<double>, val: double, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<double>, val: double, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     if (isNaN(val)) {
@@ -6336,7 +5640,7 @@ export function includes(self: FixedArray<double>, val: double, fromIndex?: Numb
 export function indexOf(self: FixedArray<double>, val: double, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
     for (let i = normFromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -6423,20 +5727,6 @@ export function with(self: FixedArray<double>, index: int, value: double): Fixed
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<double>, index: number, value: double): FixedArray<double> {
-    return with(self, index.toInt(), value)
-}
-
-/**
  * Returns an iterator over all values
  */
 export function values(self: FixedArray<double>): IterableIterator<double> {
@@ -6457,11 +5747,11 @@ export function entries(self: FixedArray<double>): IterableIterator<[number, dou
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: FixedArray<double>, callbackfn: (value: double, index: number, array: FixedArray<double>) => double): FixedArray<double> {
+export function map(self: FixedArray<double>, callbackfn: (value: double, index: int, array: FixedArray<double>) => double): FixedArray<double> {
     const len = self.length;
     let res : FixedArray<double> = new double[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i.toDouble(), self);
+        res[i] = callbackfn(self[i], i, self);
     }
     return res;
 }
@@ -6473,13 +5763,13 @@ export function map(self: FixedArray<double>, callbackfn: (value: double, index:
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: FixedArray<double>, callbackfn: (previousValue: double, currentValue: double, index: number, array: FixedArray<double>) => double): double {
+export function reduceRight(self: FixedArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: FixedArray<double>) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -6533,6 +5823,37 @@ export function concat(self: FixedArray<double>, fst: FixedArray<double>, ...mor
         // impossible
     }
     return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArray<double>>): FixedArray<double> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<double> = new double[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
 }
 
 /**
@@ -6636,9 +5957,9 @@ function cloneArray(self: FixedArray<char>): FixedArray<char> {
  * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
  *
  * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ * Throw range error if `index` < `-length()` or `index` >= `length()`.
  */
-export function at(self: FixedArray<char>, index: int): Char | undefined {
+export function at(self: FixedArray<char>, index: int): Char {
     let len = self.length;
     let k: int;
     if (index >= 0) {
@@ -6648,60 +5969,10 @@ export function at(self: FixedArray<char>, index: int): Char | undefined {
     }
 
     if (k < 0 || k >= len) {
-        return undefined;
+        throw new RangeError("Invalid index");
     }
 
     return self[k];
-}
-
-/**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
- *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Returns undefined if `index` < `-length()` or `index` >= `length()`.
- */
-export function at(self: FixedArray<char>, index: number): Char | undefined {
-    return at(self, index.toInt())
-}
-
-/**
- * Creates a new `Array` from this `Array` instance and given `Array` instance.
- *
- * @param other to concatenate into a new array.
- *
- * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
- */
-// export function concat(self: FixedArray<char>, ...items: (char | ConcatFixedArray<char>)[]): FixedArray<char> {
-//     throw new Error("not implemented")
-// }
-
-export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<char>>): FixedArray<char> {
-    let totalAdd = self.length;
-    for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
-    }
-
-    const buf : FixedArray<char> = new char[totalAdd];
-
-    for (let i = 0; i < self.length; i++) {
-        buf[i] = self[i];
-    }
-
-    let insertTo = self.length;
-    for (let i = 0; i < items.length; i++) {
-        const arr = items[i]
-        const len = arr.length.toInt()
-        for (let j = 0; j < len; j++) {
-            buf[insertTo++] = arr.$_get(j)
-        }
-    }
-
-    return buf;
 }
 
 /**
@@ -6741,10 +6012,10 @@ export function copyWithin(self: FixedArray<char>, target: int, start: int): Fix
  *
  * @returns this array after transformation
  */
-export function copyWithin(self: FixedArray<char>, target: int, start: int, end: int): FixedArray<char> {
+export function copyWithin(self: FixedArray<char>, target: int, start: int, end?: int): FixedArray<char> {
     target = normalizeIndex(target, self.length)
     start = normalizeIndex(start, self.length)
-    end = normalizeIndex(end, self.length)
+    end = normalizeIndex(end ?? self.length, self.length)
 
     if (end <= start) {
         return self;
@@ -6770,22 +6041,6 @@ export function copyWithin(self: FixedArray<char>, target: int, start: int, end:
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
- *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
- */
-export function copyWithin(self: FixedArray<char>, target: number, start: number, end?: Number): FixedArray<char> {
-    copyWithin(self, target.toInt(), start.toInt(), asIntOrDefault(end, self.length));
-    return self;
-}
-
-/**
  * Changes all elements in the Array to a static value, from a start index to an end index
  *
  * @param value to fill the array with
@@ -6796,30 +6051,14 @@ export function copyWithin(self: FixedArray<char>, target: number, start: number
  *
  * @returns this array after transformation
  */
-export function fill(self: FixedArray<char>, value: char, start: int, end: int): FixedArray<char> {
-    start = normalizeIndex(start, self.length);
-    end = normalizeIndex(end, self.length)
+export function fill(self: FixedArray<char>, value: char, start?: int, end?: int): FixedArray<char> {
+    start = normalizeIndex(start ?? 0, self.length);
+    end = normalizeIndex(end ?? self.length, self.length)
 
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
 
-    return self;
-}
-
-/**
- * Changes all elements in the Array to a static value, from a start index to an end index
- *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
- */
-export function fill(self: FixedArray<char>, value: char, start?: Number, end?: Number): FixedArray<char> {
-    fill(self, value, asIntOrDefault(start, 0), asIntOrDefault(end, self.length));
     return self;
 }
 
@@ -6833,12 +6072,12 @@ export function fill(self: FixedArray<char>, value: char, start?: Number, end?: 
  *
  * @returns the value of the first element in the array or undefined
  */
-export function find(self: FixedArray<char>, predicate: (value: char, index: number, array: FixedArray<char>) => boolean): Char | undefined {
+export function find(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): Char | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
     }
-    return self[res.toInt()];
+    return self[res];
 }
 
 /**
@@ -6851,9 +6090,9 @@ export function find(self: FixedArray<char>, predicate: (value: char, index: num
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: FixedArray<char>, predicate: (value: char, index: number, array: FixedArray<char>) => boolean): number {
+export function findIndex(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i;
         }
     }
@@ -6868,10 +6107,10 @@ export function findIndex(self: FixedArray<char>, predicate: (value: char, index
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: FixedArray<char>, predicate: (elem: char, index: number, array: FixedArray<char>) => boolean): Char | undefined {
+export function findLast(self: FixedArray<char>, predicate: (elem: char, index: int, array: FixedArray<char>) => boolean): Char | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (predicate(val, i.toDouble(), self)) {
+        if (predicate(val, i, self)) {
             return val;
         }
     }
@@ -6887,9 +6126,9 @@ export function findLast(self: FixedArray<char>, predicate: (elem: char, index: 
  *
  * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: FixedArray<char>, predicate: (value: char, index: number, array: FixedArray<char>) => boolean): boolean {
+export function every(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!predicate(self[i], i.toDouble(), self)) {
+        if (!predicate(self[i], i, self)) {
             return false
         }
     }
@@ -6905,9 +6144,9 @@ export function every(self: FixedArray<char>, predicate: (value: char, index: nu
  *
  * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: FixedArray<char>, predicate: (value: char, index: number, array: FixedArray<char>) => boolean): boolean {
+export function some(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return true
         }
     }
@@ -6923,9 +6162,9 @@ export function some(self: FixedArray<char>, predicate: (value: char, index: num
  *
  * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: FixedArray<char>, predicate: (element: char, index: number, array: FixedArray<char>) => boolean): number {
+export function findLastIndex(self: FixedArray<char>, predicate: (element: char, index: int, array: FixedArray<char>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (predicate(self[i], i.toDouble(), self)) {
+        if (predicate(self[i], i, self)) {
             return i
         }
     }
@@ -6939,13 +6178,13 @@ export function findLastIndex(self: FixedArray<char>, predicate: (element: char,
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char, currentValue: char, index: number, array: FixedArray<char>) => char): char {
+export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: FixedArray<char>) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -6959,10 +6198,10 @@ export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char,
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: number, array: FixedArray<char>) => U, initialValue: U): U {
+export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: FixedArray<char>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -6976,12 +6215,27 @@ export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousVa
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: number, array: FixedArray<char>) => U, initialValue: U): U {
+export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: FixedArray<char>) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: FixedArray<char>, callbackfn: (value: char, index: int, array: FixedArray<char>) => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        if (i >= self.length) {
+            break
+        }
+        callbackfn(self[i], i, self)
+    }
 }
 
 /**
@@ -6997,21 +6251,6 @@ export function slice(self: FixedArray<char>, start: int): FixedArray<char> {
 }
 
 /**
- * Performs the specified action for each element in an array.
- *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
- */
-export function forEach(self: FixedArray<char>, callbackfn: (value: char, index: number, array: FixedArray<char>) => void): void {
-    const len0 = self.length;
-    for (let i = 0; i < len0; i++) {
-        if (i >= self.length) {
-            break
-        }
-        callbackfn(self[i], i.toDouble(), self)
-    }
-}
-
-/**
  * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
  * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
  *
@@ -7021,36 +6260,18 @@ export function forEach(self: FixedArray<char>, callbackfn: (value: char, index:
  *
  * @returns `Array` instance, constructed from extracted elements of `this` instance.
  */
-export function slice(self: FixedArray<char>, start: int, end: int): FixedArray<char> {
+export function slice(self: FixedArray<char>, start?: int, end?: int): FixedArray<char> {
     const len: int = self.length;
-    const relStart = normalizeIndex(start, len)
-    const relEnd = normalizeIndex(end, len)
+    const relStart = normalizeIndex(start ?? 0, len)
+    const relEnd = normalizeIndex(end ?? len, len)
 
     let count = relEnd - relStart;
     if (count < 0) {
         count = 0;
     }
     let res : FixedArray<char> = new char[count]
-    for (let i = 0; i < count; i++) {
-        res[i] = self[relStart + i];
-    }
-
+    copyTo(self, res, 0, relStart, relStart + count);
     return res
-}
-
-/**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
- *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
- */
-export function slice(self: FixedArray<char>, start?: Number, end?: Number): FixedArray<char> {
-    const len: int = self.length;
-    return slice(self, asIntOrDefault(start, 0), asIntOrDefault(end, len))
 }
 
 /**
@@ -7078,7 +6299,7 @@ export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex?: i
     }
 
     while (k >= 0) {
-        if (__runtimeEquals(self[k], element)) {
+        if (self[k] === element) {
             return k;
         }
         k--;
@@ -7155,7 +6376,7 @@ export function toLocaleString(self: FixedArray<char>): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x = self[i] as NullishType;
+        let x = self[i] as Any;
         if ((null !== x) && (undefined !== x)) {
             sb.append((x! as object).toLocaleString()) // #26217
         }
@@ -7216,21 +6437,7 @@ export function toSpliced(self: FixedArray<char>, start: int, delete: int, ...it
  *
  * @returns a new Array with some elements removed and/or replaced at a given index.
  */
-export function toSpliced(self: FixedArray<char>, start: number, delete: number, ...items: FixedArray<char>): FixedArray<char> {
-    const len = self.length;
-    return toSpliced(self, start.toInt(), delete.toInt(), ...items)
-}
-
-/**
- * Copying version of the splice() method.
- *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
- */
-export function toSpliced(self: FixedArray<char>, start?: Number, delete?: Number): FixedArray<char> {
+export function toSpliced(self: FixedArray<char>, start?: int, delete?: int): FixedArray<char> {
     const len = self.length;
     return toSpliced(self, asIntOrDefault(start, len), asIntOrDefault(delete, len))
 }
@@ -7245,7 +6452,7 @@ export function toSpliced(self: FixedArray<char>, start?: Number, delete?: Numbe
  *
  * @returns true if val is in Array
  */
-export function includes(self: FixedArray<char>, val: char, fromIndex?: Number): boolean {
+export function includes(self: FixedArray<char>, val: char, fromIndex?: int): boolean {
     const len = self.length;
     const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
     for (let i = fi; i < len; i++) {
@@ -7269,7 +6476,7 @@ export function includes(self: FixedArray<char>, val: char, fromIndex?: Number):
 export function indexOf(self: FixedArray<char>, val: char, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
     for (let i = normFromIndex; i < self.length; i++) {
-        if (__runtimeEquals(val, self[i])) {
+        if (val === self[i]) {
             return i
         }
     }
@@ -7356,20 +6563,6 @@ export function with(self: FixedArray<char>, index: int, value: char): FixedArra
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
- *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
- */
-export function with(self: FixedArray<char>, index: number, value: char): FixedArray<char> {
-    return with(self, index.toInt(), value)
-}
-
-/**
  * Returns an iterator over all values
  */
 export function values(self: FixedArray<char>): IterableIterator<char> {
@@ -7390,11 +6583,11 @@ export function entries(self: FixedArray<char>): IterableIterator<[number, char]
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: FixedArray<char>, callbackfn: (value: char, index: number, array: FixedArray<char>) => char): FixedArray<char> {
+export function map(self: FixedArray<char>, callbackfn: (value: char, index: int, array: FixedArray<char>) => char): FixedArray<char> {
     const len = self.length;
     let res : FixedArray<char> = new char[len];
     for (let i = 0; i < len; i++) {
-        res[i] = callbackfn(self[i], i.toDouble(), self);
+        res[i] = callbackfn(self[i], i, self);
     }
     return res;
 }
@@ -7406,13 +6599,13 @@ export function map(self: FixedArray<char>, callbackfn: (value: char, index: num
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: FixedArray<char>, callbackfn: (previousValue: char, currentValue: char, index: number, array: FixedArray<char>) => char): char {
+export function reduceRight(self: FixedArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: FixedArray<char>) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }
@@ -7466,6 +6659,37 @@ export function concat(self: FixedArray<char>, fst: FixedArray<char>, ...more: F
         // impossible
     }
     return r
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<char>>): FixedArray<char> {
+    let totalAdd = self.length;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length.toInt()
+    }
+
+    const buf : FixedArray<char> = new char[totalAdd];
+
+    for (let i = 0; i < self.length; i++) {
+        buf[i] = self[i];
+    }
+
+    let insertTo = self.length;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length.toInt()
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return buf;
 }
 
 /**

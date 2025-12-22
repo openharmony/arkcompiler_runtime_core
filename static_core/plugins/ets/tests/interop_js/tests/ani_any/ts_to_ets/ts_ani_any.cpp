@@ -233,10 +233,10 @@ public:
         return isInstance == ANI_TRUE ? ANI_TRUE : ANI_FALSE;
     }
 
-    static bool RegisterETSChecker(ani_env *env)
+    bool RegisterETSChecker(ani_env *env)
     {
-        ani_module mod {};
-        if (env->FindModule("ets_any", &mod) != ANI_OK) {
+        ani_ref classRef = GetClassRefObject(env, "ets_any.ETSGLOBAL");
+        if (classRef == nullptr) {
             return false;
         }
 
@@ -260,7 +260,8 @@ public:
             ani_native_function {"nativeCheckAnyInstanceOf", nullptr,
                                  reinterpret_cast<void *>(NativeCheckAnyInstanceOf)},
         };
-        return env->Module_BindNativeFunctions(mod, methods.data(), methods.size()) == ANI_OK;
+        return env->Module_BindNativeFunctions(static_cast<ani_module>(classRef), methods.data(), methods.size()) ==
+               ANI_OK;
     }
 };
 

@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "ets_vm.h"
-#include "libpandabase/test_utilities.h"
+#include "libarkbase/test_utilities.h"
 
 namespace ark::test {
 class PendingEtsExceptionTest : public testing::TestWithParam<int> {

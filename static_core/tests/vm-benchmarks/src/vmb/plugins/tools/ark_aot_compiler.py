@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,17 +36,11 @@ class Tool(ToolBase):
                 f'{out}/../test/test',
                 f'{out}/../thirdparty/icu',
                 f'{out}/../thirdparty/zlib')])
-            # builtins should be compiled outside aot tool,
-            # but not to the moment of this init
-            self.libark_abc = \
-                ToolBase.libs.joinpath('lib_ark_builtins.d.abc')
         elif Target.OHOS == self.target:
             self.aot_compiler = str(self.dev_dir.joinpath('ark_aot_compiler'))
-            self.libark_abc = self.dev_dir.joinpath(
-                'libs', 'lib_ark_builtins.d.abc')
             self.lib_path = str(self.dev_dir)
         else:
-            raise NotImplementedError(f'Wrong target: {self.target}!')
+            raise RuntimeError(f'Wrong target: {self.target} for ark_aot_compiler!')
 
     @property
     def name(self) -> str:

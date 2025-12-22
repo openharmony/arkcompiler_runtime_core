@@ -184,19 +184,6 @@ export function swap{{Tdef}}(arr: FixedArray<{{T}}>, i: int, j: int): void {
 }
 {%-endif%}
 
-function bubbleSort{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if ({{prec % ('arr[i + 1]', 'arr[i]')}}) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -267,7 +254,7 @@ function heapSortDown{{Tdef}}(arr: FixedArray<{{T}}>, idxFromStart: int, startIn
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot{{fwdArg}})
 }
 
-export function heapSort{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): void {
+function heapSort{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex{{fwdArg}})
@@ -368,7 +355,7 @@ function quickSortSplitLeft{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, end
     return j
 }
 
-{% for quickUpTo in [3, 40] %}
+{% for quickUpTo in [40] %}
 function quickSortImpl{{quickUpTo}}{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int, maxDepth: int{{arg}}{{initIndex}}): void {
     {%- set fwdInitIndex = initIndex.split(':')[0] %}
     while (endIndex - startIndex > {{quickUpTo}}) {
@@ -520,116 +507,6 @@ function countSortBoolsInv(arr: FixedArray<boolean>, startIndex: int, endIndex: 
     }
 }
 {%- endif %}
-
-// ======== tests section ========
-
-/** note: used for tests, {@link test_sortAllOn} */
-class test_SortData{{T}} {
-    name: string = ''
-    arr: FixedArray<{{T}}> = []
-
-    constructor(name: string, arr: FixedArray<{{T}}>) {
-        this.name = name
-        this.arr = arr
-    }
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: FixedArray<{{T}}>): FixedArray<{{T}}> {
-    let c : FixedArray<{{T}}> = new {{T}}[arr.length]
-    for (let i = 0; i < arr.length; i++) {
-        c[i] = arr[i]
-    }
-    return c
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd_{{T}}(l: {{T}}, r: {{T}}): boolean {
-{%- set mapMPArg = '%s' if T != 'boolean' else '((%s) ? 1 : 0)' %}
-    return {{mapMPArg % 'l'}} < {{mapMPArg % 'r'}}
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv_{{T}}(l: {{T}}, r: {{T}}): boolean {
-    return {{mapMPArg % 'r'}} < {{mapMPArg % 'l'}}
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int) {
-    for (let i = startIndex; i < endIndex; i++) {
-        console.print(arr[i] + ' ')
-    }
-    console.println('')
-}
-
-/**
- * Function used to test sorting in standard library tests.
- * There is only one exported function: `sort`, but for testing
- * we need access to all sub sorts that are used. Hence this part of "tests"
- * is located here. All related entities are prefixed whith `test_` to stand out
- */
-export function test_sortAllOn(arr: FixedArray<{{T}}>) {
-    {%- for name, arg in [('', ''), ('_subarray', ', test_sortAllOnCmpFwd_' + T), ('_subarray', ', test_sortAllOnCmpInv_' + T)] %}
-    // block for comparator `{{arg[3:]}}`
-    if (true) {
-        const sorts = new Array<test_SortData{{T}}>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length{{arg}})
-        sorts.push(new test_SortData{{T}}("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length{{arg}})
-        sorts.push(new test_SortData{{T}}("insertion", insertion))
-
-        {%- if T == 'byte' and arg == '' %}
-        const cnt = test_sortCopy(arr)
-        countSort(cnt, 0, cnt.length)
-        sorts.push(new test_SortData{{T}}("cnt()", cnt))
-        {%- endif %}
-
-        {% if T == 'boolean' %}
-        const bcnt = test_sortCopy(arr)
-            {%- if arg != ', test_sortAllOnCmpInv_' + T %}
-        countSortBools(bcnt, 0, bcnt.length)
-            {%- else %}
-        countSortBoolsInv(bcnt, 0, bcnt.length)
-            {%- endif %}
-        sorts.push(new test_SortData{{T}}("bools cnt()", bcnt))
-        {%- else %}
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length{{arg}})
-        sorts.push(new test_SortData{{T}}("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length{{arg}})
-        sorts.push(new test_SortData{{T}}("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length{{arg}})
-        sorts.push(new test_SortData{{T}}("quick with insertion", quickedInsertion))
-        {%- endif %}
-
-        const just = test_sortCopy(arr)
-        sort{{name}}(just{{arg}})
-        sorts.push(new test_SortData{{T}}("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts {{arg[3:]}} are not equal: " + sort0.name + ' ' + sortS.name + ' for {{T}}')
-                }
-            }
-        }
-    }
-    {%- endfor %}
-}
-// ======== end of tests section ========
 {% endif %}
 
 {%- endfor %}

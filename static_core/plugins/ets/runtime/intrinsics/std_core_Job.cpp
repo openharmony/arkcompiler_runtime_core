@@ -15,6 +15,7 @@
 
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/ets_class_linker.h"

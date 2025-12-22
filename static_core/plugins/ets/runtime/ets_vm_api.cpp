@@ -16,7 +16,7 @@
 #include <iostream>
 #include "ets_vm_api.h"
 #include "ets_vm.h"
-#include "generated/logger_options.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 
 #ifdef PANDA_TARGET_OHOS
 #include <hilog/log.h>

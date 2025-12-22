@@ -14,8 +14,8 @@
  */
 
 #include "plugins/ets/stdlib/native/init_native_methods.h"
-#include "plugins/ets/stdlib/native/escompat/Process.h"
-#include "plugins/ets/stdlib/native/escompat/RegExp.h"
+#include "plugins/ets/stdlib/native/core/Process.h"
+#include "plugins/ets/stdlib/native/core/regexp/RegExp.h"
 #include "plugins/ets/stdlib/native/core/Intl.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 

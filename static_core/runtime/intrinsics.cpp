@@ -20,10 +20,10 @@
 #include <string_view>
 #include <type_traits>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/span.h"
-#include "libpandabase/utils/time.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/time.h"
 #include "runtime/compiler.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/compiler_interface.h"
@@ -36,7 +36,7 @@
 #include "runtime/include/thread_status.h"
 #include "runtime/interpreter/frame.h"
 #include "runtime/coroutines/coroutine_manager.h"
-#include "utils/math_helpers.h"
+#include "libarkbase/utils/math_helpers.h"
 #include "intrinsics.h"
 
 namespace ark::intrinsics {
@@ -442,6 +442,8 @@ void Memsetf64(ObjectHeader *array, double value, uint32_t initialIndex, uint32_
 }
 }  // namespace ark::intrinsics
 
-#include "runtime/include/core_any_intrinsics.inc"
+#include "core_any_intrinsics.inc"
+
+#include "runtime/entrypoints/entrypoints.h"
 
 #include <intrinsics_gen.h>

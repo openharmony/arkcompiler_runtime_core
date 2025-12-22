@@ -41,6 +41,7 @@ panda_ets_add_gtest(
     NO_CORES
     NAME ets_internal_objects_tests
     SOURCES
+        get_test_class.cpp
         ets_promise_test.cpp
         ets_job_test.cpp
         ets_class_test.cpp
@@ -48,10 +49,11 @@ panda_ets_add_gtest(
         ets_string_from_char_code_test.cpp
         ets_sync_primitives_test.cpp
         ets_arraybuf_test.cpp
-        ets_arrayobj_test.cpp
+        ets_escompat_array_test.cpp
         ets_string_builder_members_test.cpp
         ets_to_string_cache_test.cpp
         ets_finalizable_weak_ref_test.cpp
+        ets_finalization_registry_test.cpp
         ets_runtime_linker_test.cpp
         ets_abc_runtime_linker_test.cpp
         ets_typeapi_test.cpp
@@ -60,9 +62,13 @@ panda_ets_add_gtest(
         ets_base_enum_test.cpp
         ets_error_test.cpp
         ets_atomic_flag_test.cpp
+        ets_atomic_int_test.cpp
         ets_stacktrace_element_test.cpp
         ets_typed_arrays_test.cpp
         ets_typed_unsigned_arrays_test.cpp
+        ets_map_test.cpp
+        ets_set_test.cpp
+        ets_weakmap_test.cpp
     LIBRARIES
         arkassembler
         arkruntime

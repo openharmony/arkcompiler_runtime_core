@@ -158,19 +158,19 @@ ohos_source_set("libabckit_mock") {
 group("libabckit_all") {
   deps = []
   deps += libabckit_so_deps
-  deps += [":libabckit_source_set"]
+  deps += [ ":libabckit_source_set" ]
   deps += [
     "$ark_root_static/abc2program:arkts_abc2program_static",
     "$ark_root_static/assembler:libarktsassembler_frontend_static",
     "$ark_root_static/bytecode_optimizer:libarktsbytecodeopt_frontend_static",
-    "$ark_root_static/libpandabase:libarktsbase_frontend_static",
-    "$ark_root_static/libpandafile:libarktsfile_frontend_static",
+    "$ark_root_static/libarkbase:libarktsbase_frontend_static",
+    "$ark_root_static/libarkfile:libarktsfile_frontend_static",
   ]
 }
 
 ohos_static_library("libabckit_static") {
-  deps = [":libabckit_all"]
-  include_dirs = libabckit_include_dirs                    
+  deps = [ ":libabckit_all" ]
+  include_dirs = libabckit_include_dirs
   configs = [ "$abckit_root:abckit_config" ]
 
   if (enable_hilog) {

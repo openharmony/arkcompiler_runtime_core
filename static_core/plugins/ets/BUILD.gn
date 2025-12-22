@@ -158,12 +158,14 @@ if (!(ark_standalone_build ||
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "c_utils:utils",
+      "ets_utils:console",
       "hilog:libhilog",
+      "libuv:uv",
       "openssl:libcrypto_shared",
       icuuc_dep,
     ]
     deps = [
-      "$ark_root/libpandabase:libarktsbase_static",
+      "$ark_root/libarkbase:libarktsbase_static",
       "$ark_root/plugins/ets/runtime/ani:ani",
     ]
     subsystem_name = "arkcompiler"
@@ -223,7 +225,7 @@ config("runtime") {
   configs = [
     "$ark_es2panda_root:libes2panda_public_config",
     "$ark_root/assembler:arkassembler_public_config",
-    "$ark_root/libpandafile:arkfile_public_config",
+    "$ark_root/libarkfile:arkfile_public_config",
   ]
 }
 
@@ -342,6 +344,18 @@ if (with_stdlib) {
     }
   }
 
+  if (is_mac) {
+    copy("etsstdlib_copy_mac") {
+      deps = [ ":etsstdlib" ]
+      if (ark_static_standalone_build) {
+        sources = [ "$root_build_dir/plugins/ets/etsstdlib.abc" ]
+      } else {
+        sources = [ "$target_gen_dir/etsstdlib.abc" ]
+      }
+      outputs = [ "$root_build_dir/ohos-sdk/mac/ets/ets1.2/build-tools/ets2panda/lib/etsstdlib.abc" ]
+    }
+  }
+
   action("ets-compile-stdlib-default") {
     # Running ark_aot compilation for etsstdlib with default options
     script = "$ark_root/plugins/ets/compiler/tools/paoc_compile_stdlib.sh"
@@ -371,7 +385,11 @@ if (with_stdlib) {
         "tests/interop_js/eacoro:eacoro_tests",
         "tests/interop_js/serialize:serialize_tests",
         "tests/interop_js/taskpool:taskpool_tests",
+        "tests/interop_js/taskpool:taskpool_tests",
         "tests/interop_js/xgc:xgc_tests",
+
+        # Check for offsets between managed and mirror classes
+        "tests/runtime/types:ets_internal_objects_tests_gtests",
       ]
     }
   }

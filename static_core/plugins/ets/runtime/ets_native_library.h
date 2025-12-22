@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_H_
 
 #include "runtime/include/mem/panda_string.h"
-#include "libpandabase/os/library_loader.h"
+#include "libarkbase/os/library_loader.h"
 
 namespace ark::ets {
 class EtsNativeLibrary {

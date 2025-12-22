@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ export class AnyTypeMethodClass<T> implements AnyTypeMethod<T> {
 	}
 }
 
-export function createInterfaceClassAnyTypeMethod(): anyTypeMethodClass<unknown> {
+export function createInterfaceClassAnyTypeMethod(): AnyTypeMethodClass<unknown> {
 	return new AnyTypeMethodClass<unknown>();
 }
 
@@ -41,7 +41,7 @@ export class UnionTypeMethodClass implements UnionTypeMethod {
 	}
 }
 
-export function createInterfaceClassUnionTypeMethod(): anyTypeMethodClass<number> {
+export function createInterfaceClassUnionTypeMethod(): AnyTypeMethodClass<number> {
 	return new AnyTypeMethodClass<number>();
 }
 

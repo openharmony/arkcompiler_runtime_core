@@ -19,7 +19,7 @@ package std.interop.js;
 // TODO(ivagin): This is a workaround and should be removed if the future
 class Shareable { private internal_ : long; };
 
-class MimicJSValueIteratableIterator implements IterableIterator<Any> {
+export class MimicJSValueIteratableIterator implements IterableIterator<Any> {
     private iterator: Any;
     private nextMethod: Any;
 
@@ -43,7 +43,7 @@ class MimicJSValueIteratableIterator implements IterableIterator<Any> {
         }
         const valueObject = JSRuntime.getValueObject(iterValue, Class.of(new Object()));
         // convert to Tuple2 for array&map&set
-        // NOTE(#IC68BA) Need to create special iterable iterator object at function level 
+        // NOTE(#IC68BA) Need to create special iterable iterator object at function level
         if (valueObject instanceof Array && valueObject.length == 2) {
             return new IteratorResult<Any>(new Tuple2<Any, Any>(valueObject[0] as Any,valueObject[1] as Any));
         } else {

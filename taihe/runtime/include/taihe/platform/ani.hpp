@@ -16,13 +16,10 @@
 #define RUNTIME_INCLUDE_TAIHE_PLATFORM_ANI_HPP_
 // NOLINTBEGIN
 
-#include <future>
-
 #include <taihe/object.hpp>
 #include <taihe/runtime.hpp>
 
 #include <taihe.platform.ani.proj.hpp>
-#include "ani.h"
 
 namespace taihe {
 // convert between ani types and taihe types

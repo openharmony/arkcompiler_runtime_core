@@ -15,27 +15,20 @@
 
 /*---
 desc: T1 is compatible with T2 if implicitly convertible. Class does not implement interface.
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: Partial<{name: string; age: number}>;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
-class A {
-  i: Partial<{name: string; age: number}>;
-}
-
-function checkTypeIdentity<T>(a: T, b: T): boolean {
-    return typeof a === typeof b;
-}
+type my_partial = [string | undefined, number | undefined]
 
 function main(): void {
-  const val1: Partial<{name: string; age: number}> = { name: "Alice" };
-  const val2: Partial<{name: string; age: number}> = { age: 25 };
-  const diffTypeVal: any = "This can be any type";
+  const val1: my_partial = ["Alice", undefined];
+  const val2: my_partial = [undefined, 25];
+  const diffTypeVal: Any = "This can be any type";
 
-  const result1 = checkTypeIdentity<Partial<{name: string; age: number}>>(val1, val2);
+  const result1 = checkTypeIdentity(val1, val2);
 
   const result2 = checkTypeIdentity(val1, diffTypeVal);
 

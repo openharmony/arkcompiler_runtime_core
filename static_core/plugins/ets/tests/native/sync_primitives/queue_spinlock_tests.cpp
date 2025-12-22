@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "ani_gtest.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
 
 namespace ark::ets::test {
 

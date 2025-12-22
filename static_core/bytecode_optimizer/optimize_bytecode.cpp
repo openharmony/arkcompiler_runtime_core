@@ -17,9 +17,10 @@
 
 #include "assembler/assembly-emitter.h"
 #include "assembler/extensions/extensions.h"
-#include "bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "bytecodeopt_options.h"
 #include "bytecodeopt_peepholes.h"
+#include "call_devirtualization.h"
 #include "canonicalization.h"
 #include "check_resolver.h"
 #include "codegen.h"
@@ -39,15 +40,17 @@
 #include "compiler/optimizer/optimizations/move_constants.h"
 #include "compiler/optimizer/optimizations/peepholes.h"
 #include "compiler/optimizer/optimizations/regalloc/reg_alloc.h"
+#include "compiler/optimizer/optimizations/simplify_string_builder.h"
 #include "compiler/optimizer/optimizations/vn.h"
-#include "libpandabase/mem/arena_allocator.h"
-#include "libpandabase/mem/pool_manager.h"
-#include "libpandafile/class_data_accessor.h"
-#include "libpandafile/class_data_accessor-inl.h"
-#include "libpandafile/method_data_accessor.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/class_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor.h"
 #include "reg_acc_alloc.h"
 #include "reg_encoder.h"
-#include "runtime_adapter.h"
+
+#include "generated/runtime_adapter_inc.h"
 
 #include <regex>
 
@@ -69,6 +72,10 @@ constexpr void RunOpts(compiler::Graph *graph, [[maybe_unused]] BytecodeOptIrInt
     if constexpr (std::is_same_v<T, ConstArrayResolver>) {
         graph->RunPass<ConstArrayResolver>(iface);
         // NOLINTNEXTLINE(readability-misleading-indentation)
+    } else if constexpr (std::is_same_v<T, compiler::SimplifyStringBuilder>) {
+        if (NeedToRunSimplifyStringBuilder(graph->GetLanguage())) {
+            graph->RunPass<compiler::SimplifyStringBuilder>();
+        }  // else skip pass
     } else {
         graph->RunPass<T>();
     }
@@ -104,10 +111,10 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
                 BytecodeOptPeepholes>(graph);
     } else if (ark::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_2) {
         // ConstArrayResolver Pass is disabled as it requires fixes for stability
-        RunOpts<ConstArrayResolver, compiler::BranchElimination, compiler::ValNum, compiler::IfMerging, compiler::Cse,
-                compiler::Peepholes, compiler::Licm, compiler::Lse, compiler::ValNum, compiler::Cse,
-                compiler::BranchElimination, Canonicalization, compiler::Lowering, compiler::MoveConstants,
-                BytecodeOptPeepholes>(graph, iface);
+        RunOpts<ConstArrayResolver, compiler::BranchElimination, compiler::SimplifyStringBuilder, compiler::ValNum,
+                compiler::IfMerging, compiler::Cse, compiler::Peepholes, CallDevirtualization, compiler::Licm,
+                compiler::Lse, compiler::ValNum, compiler::Cse, compiler::BranchElimination, Canonicalization,
+                compiler::Lowering, compiler::MoveConstants, BytecodeOptPeepholes>(graph, iface);
     } else {
         UNREACHABLE();
     }
@@ -232,8 +239,8 @@ static bool SkipFunction(const pandasm::Function &function, const std::string &f
     }
 
     if ((function.GetTotalRegs() + function.GetParamsNum()) > compiler::VIRTUAL_FRAME_SIZE) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Unable to optimize " << funcName
-                                       << ": Function frame size is larger than allowed one";
+        LOG(WARNING, BYTECODE_OPTIMIZER) << "Unable to optimize " << funcName
+                                         << ": Function frame size is larger than allowed one";
         return true;
     }
     return false;
@@ -273,8 +280,8 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     }
     auto methodPtr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
 
-    ark::BytecodeOptimizerRuntimeAdapter adapter(mda.GetPandaFile());
-    auto graphArgs = compiler::Graph::GraphArgs {&allocator, &localAllocator, Arch::NONE, methodPtr, &adapter};
+    auto adapter = CreateBytecodeOptimizerRuntimeAdapter(mda.GetPandaFile(), allocator, lang);
+    auto graphArgs = compiler::Graph::GraphArgs {&allocator, &localAllocator, Arch::NONE, methodPtr, adapter};
     auto graph = allocator.New<compiler::Graph>(graphArgs, nullptr, false, isDynamic, true);
     if (graph == nullptr) {
         return false;
@@ -291,12 +298,13 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     BuildMapFromPcToIns(function, irInterface, graph, methodPtr);
 
     if (!graph->RunPass<ark::compiler::IrBuilder>()) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": IR builder failed!";
+        LOG(WARNING, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": IR builder failed!";
         return false;
     }
 
     if (graph->HasIrreducibleLoop()) {
-        LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": Graph has irreducible loop!";
+        // RegAlloc doesn't play well with such graphs
+        LOG(WARNING, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": Graph has irreducible loop!";
         return false;
     }
 

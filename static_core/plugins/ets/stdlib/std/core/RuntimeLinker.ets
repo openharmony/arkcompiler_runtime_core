@@ -20,10 +20,10 @@ package std.core;
  * All classes deriving from RuntimeLinker must implement findClass.
  */
 export abstract class RuntimeLinker {
-    private classLinkerCtxPtr: long;
+    private classLinkerCtxPtr: long
 
     protected constructor() {
-        this.initializeContext();
+        this.initializeContext()
     }
 
     /**
@@ -33,7 +33,7 @@ export abstract class RuntimeLinker {
      *
      * @returns Class if it was found, undefined otherwise.
      */
-    public final native findLoadedClass(clsName: string): Class | undefined;
+    public final native findLoadedClass(clsName: string): Class | undefined
 
     /**
      * Loads class into this linker's context.
@@ -47,20 +47,20 @@ export abstract class RuntimeLinker {
      * @throws LinkerClassNotFoundError if the class was not found or errors happened during class initialization.
      */
     public final loadClass(clsName: string, init: boolean = false): Class {
-        const optClass = this.loadClassSafe(clsName, init);
+        const optClass = this.loadClassSafe(clsName, init)
         if (optClass) {
-            return optClass;
+            return optClass
         }
-        throw new LinkerClassNotFoundError(clsName);
+        throw new LinkerClassNotFoundError(clsName)
     }
 
     public final getType(td: TypeDescriptor): Type | undefined {
         // Load class with lazy initialization
-        const optClass = this.loadClassSafe(td, false);
+        const optClass = this.loadClassSafe(td, false)
         if (optClass === undefined) {
-            return undefined;
+            return undefined
         }
-        return Type.resolve(optClass.getDescriptor(), this);
+        return Type.resolve(optClass.getDescriptor(), this)
     }
 
     /**
@@ -74,31 +74,27 @@ export abstract class RuntimeLinker {
      *
      * @throws errors happened during class initialization.
      */
-    protected abstract findAndLoadClass(clsName: string, init: boolean): Class | undefined;
+    protected abstract findAndLoadClass(clsName: string, init: boolean): Class | undefined
 
     /**
      * Version of loadClass which does not throw LinkerClassNotFoundError.
      */
     protected final loadClassSafe(clsName: string, init: boolean): Class | undefined {
-        let optClass = this.findLoadedClass(clsName);
+        let optClass = this.findLoadedClass(clsName)
         if (optClass) {
             if (init) {
                 // No-op if class is already initialized
-                optClass.initialize();
+                optClass.initialize()
             }
-            return optClass;
+            return optClass
         }
-        optClass = this.findAndLoadClass(clsName, init);
-        if (optClass) {
-            return optClass;
-        }
-        return undefined;
+        return this.findAndLoadClass(clsName, init)
     }
 
     /**
      * Initialization of runtime internal structs.
      */
-    private native initializeContext(): void;
+    private native initializeContext(): void
 }
 
 /**
@@ -106,11 +102,11 @@ export abstract class RuntimeLinker {
  *
  * @param path to library to load
  */
-export native function loadLibrary(path: String): void;
+export native function loadLibrary(path: String): void
 
 /**
  * use the permission check hook when loadLibrary 
  * @param path to library to load
  * @param fileName The name of the file, for example: @ohos.bundle.d.ts
  */
-export native function loadLibraryWithPermissionCheck(path: String, fileName: String): void;
+export native function loadLibraryWithPermissionCheck(path: String, fileName: String): void

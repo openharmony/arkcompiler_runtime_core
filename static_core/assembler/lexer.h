@@ -26,7 +26,7 @@
 #include "define.h"
 #include "error.h"
 #include "isa.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::pandasm {
 

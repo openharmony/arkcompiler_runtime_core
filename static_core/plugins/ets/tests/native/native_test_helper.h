@@ -19,11 +19,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
-#include "plugins/ets/runtime/ani/ani_checkers.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
-#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 namespace ark::ets::test {
 
@@ -120,60 +117,6 @@ protected:
     ani_vm *vm_ {nullptr};
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
-
-using AniFinalize = void (*)(void *, void *);
-
-// CC-OFFNXT(G.FUD.06) solid logic, ODR
-inline ani_status DoCreateExternalArrayBuffer(ani_env *env, void *externalData, size_t length, AniFinalize finalizeCB,
-                                              void *finalizeHint, ani_arraybuffer *resultBuffer)
-{
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(externalData);
-    ANI_CHECK_RETURN_IF_GT(length, static_cast<size_t>(std::numeric_limits<ani_int>::max()), ANI_INVALID_ARGS);
-    CHECK_PTR_ARG(finalizeCB);
-    CHECK_PTR_ARG(resultBuffer);
-
-    ani::ScopedManagedCodeFix s(env);
-    EtsCoroutine *coro = s.GetCoroutine();
-
-    EtsEscompatArrayBuffer *internalArrayBuffer =
-        EtsEscompatArrayBuffer::Create(coro, externalData, length, finalizeCB, finalizeHint);
-    ANI_CHECK_RETURN_IF_EQ(internalArrayBuffer, nullptr, ANI_OUT_OF_MEMORY);
-    ASSERT(coro->HasPendingException() == false);
-
-    ani_ref arrayObject = nullptr;
-    ani_status ret = s.AddLocalRef(internalArrayBuffer, &arrayObject);
-    ANI_CHECK_RETURN_IF_NE(ret, ANI_OK, ret);
-    ASSERT(arrayObject != nullptr);
-    *resultBuffer = reinterpret_cast<ani_arraybuffer>(arrayObject);
-    return ret;
-}
-
-inline ani_status ArrayBufferDetach(ani_env *env, ani_arraybuffer buffer)
-{
-    ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(buffer);
-    ani::ScopedManagedCodeFix s(env);
-    auto *internalArrayBuffer = s.ToInternalType(buffer);
-    if (!internalArrayBuffer->IsDetachable()) {
-        return ANI_INVALID_ARGS;
-    }
-    internalArrayBuffer->Detach();
-    return ANI_OK;
-}
-
-inline ani_status ArrayBufferIsDetached(ani_env *env, ani_arraybuffer buffer, bool *result)
-{
-    ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(buffer);
-    CHECK_PTR_ARG(result);
-    ani::ScopedManagedCodeFix s(env);
-    auto *internalArrayBuffer = s.ToInternalType(buffer);
-    *result = internalArrayBuffer->WasDetached();
-    return ANI_OK;
-}
 
 inline void CheckUnhandledError(ani_env *env, ani_boolean shouldExist = ANI_FALSE)
 {

@@ -49,7 +49,7 @@ export final class TypeAPIParameter extends Object {
         return this.getName() + ": " + this.getType().toString()
     }
 
-    public equals(oth: NullishType): boolean {
+    public equals(oth: Any): boolean {
         return oth instanceof TypeAPIParameter &&
                 this.paramType!.equals((oth as TypeAPIParameter).paramType!) &&
                 this.name == (oth as TypeAPIParameter).name &&

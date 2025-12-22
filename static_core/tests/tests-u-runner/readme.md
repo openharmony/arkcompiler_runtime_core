@@ -307,7 +307,7 @@ For `pylint` settings see `.pylintrc` file. For `mypy` settings see `mypy.ini` f
 ```bash
 sudo apt-get -y install npm
 sudo npm install -g n
-sudo n install 21.4.0
+sudo n install 22
 cd $PROJECT/tests/tests-u-runner/tools/generate-es-checked
 npm install
 ```

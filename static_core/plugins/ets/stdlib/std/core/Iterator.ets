@@ -15,9 +15,9 @@
 
 package std.core;
 
-export class IteratorResult<T> {
+export class IteratorResult<out T> {
     done: boolean
-    value: T | undefined
+    readonly value: T | undefined
 
     constructor() {
         this.done = true
@@ -57,15 +57,4 @@ export function iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {
         }
         fn(v.value as V)
     }
-}
-
-export function tryGetIteratorLength (a: Object): int | null {
-    const aType = Type.of(a) as ClassType
-    for (let i = 0; i < aType.getMethodsNum(); ++i) {
-        let m = aType.getMethod(i)
-        if (m.getName() == "__Iterator_getLength" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-            return m.invoke(a, [])! as int
-        }
-    }
-    return null
 }

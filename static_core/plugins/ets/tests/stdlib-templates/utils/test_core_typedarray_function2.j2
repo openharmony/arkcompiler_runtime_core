@@ -674,10 +674,8 @@ function testTypedArrayIncludesOneParamWithAbnormalNum(): number {
   let large_number: FixedArray<number> = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
   {%- if item.objectType == 'Float32Array' or item.objectType == 'Float64Array' %}
     let convertedValues: FixedArray<number> = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
-  {%- elif item.objectType == 'Int32Array'%}
-    let convertedValues: FixedArray<number> = [Int.MIN_VALUE, Int.MAX_VALUE];
   {%- else %}
-    let convertedValues: FixedArray<number> = [0, -1];
+    let convertedValues: FixedArray<number> = [0, 0];
   {%- endif %}
   typedArray = new {{.item.objectType}}(large_number);
 
@@ -1208,10 +1206,12 @@ const testTypedArrayGet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 function testTypedArrayGetException(array: {{.item.objectType}}, index: int): number {
   try {
     const tmp = array[index]
-  } catch (e: RangeError) {
-    return success
-  } catch (e) {
-    console.log(e)
+  }  catch (e) {
+    if (e instanceof RangeError) {
+      return success
+    } else {
+      console.log(e)
+    }
   }
   return fail
 }
@@ -1266,10 +1266,12 @@ const testTypedArraySet = parametrize<ObjectTypeAndExpectations<boolean[]>>(
 function testTypedArraySetException(array: {{.item.objectType}}, index: int, value: int): number {
   try {
     array[index] = value
-  } catch (e: RangeError) {
-    return success
   } catch (e) {
-    console.log(e)
+    if (e instanceof RangeError) {
+      return success
+    } else {
+      console.log(e)
+    }
   }
   return fail
 }

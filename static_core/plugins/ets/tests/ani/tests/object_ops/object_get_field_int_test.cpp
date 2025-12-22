@@ -105,4 +105,76 @@ TEST_F(ObjectGetFieldIntTest, invalid_argument3)
     ASSERT_EQ(env_->Object_GetField_Int(sarah, field, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(ObjectGetFieldIntTest, check_hierarchy)
+{
+    ani_class clsParent {};
+    ASSERT_EQ(env_->FindClass("object_get_field_int_test.Parent", &clsParent), ANI_OK);
+    ani_method ctorParent {};
+    ASSERT_EQ(env_->Class_FindMethod(clsParent, "<ctor>", ":", &ctorParent), ANI_OK);
+    ani_object objParent {};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Object_New(clsParent, ctorParent, &objParent), ANI_OK);
+
+    ani_class clsChild {};
+    ASSERT_EQ(env_->FindClass("object_get_field_int_test.Child", &clsChild), ANI_OK);
+    ani_method ctorChild {};
+    ASSERT_EQ(env_->Class_FindMethod(clsChild, "<ctor>", ":", &ctorChild), ANI_OK);
+    ani_object objChild {};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Object_New(clsChild, ctorChild, &objChild), ANI_OK);
+
+    ani_field parentFieldInParent {};
+    ASSERT_EQ(env_->Class_FindField(clsParent, "parentField", &parentFieldInParent), ANI_OK);
+    ani_field parentFieldInChild {};
+    ASSERT_EQ(env_->Class_FindField(clsChild, "parentField", &parentFieldInChild), ANI_OK);
+    ani_field childFieldInParent {};
+    ASSERT_EQ(env_->Class_FindField(clsParent, "childField", &childFieldInParent), ANI_NOT_FOUND);
+    ani_field childFieldInChild {};
+    ASSERT_EQ(env_->Class_FindField(clsChild, "childField", &childFieldInChild), ANI_OK);
+    ani_field overridedFieldInParent {};
+    ASSERT_EQ(env_->Class_FindField(clsParent, "overridedField", &overridedFieldInParent), ANI_OK);
+    ani_field overridedFieldInChild {};
+    ASSERT_EQ(env_->Class_FindField(clsChild, "overridedField", &overridedFieldInChild), ANI_OK);
+
+    const ani_int parentFieldValueInParent = 1;
+    const ani_int overridedFieldValueInParent = 2;
+    const ani_int childFieldValueInChild = 3;
+
+    // |-------------------------------------------------------------------------------------------------------|
+    // | ani_object  |             ani_field              |  ani_status  |               action                |
+    // |-------------|------------------------------------|--------------|-------------------------------------|
+    // |   parent    |   parentField from Parent class    |    ANI_OK    |    access to parent.parentField     |
+    // |   parent    |   parentField from Child class     |    ANI_OK    |    access to parent.parentField     |
+    // |   parent    |    childField from Child class     |      UB      |                 --                  |
+    // |   parent    |  overridedField from Child class   |    ANI_OK    |   access to parent.overridedField   |
+    // |   parent    |  overridedField from Parent class  |    ANI_OK    |   access to parent.overridedField   |
+    // |   child     |    parentField from Parent class   |    ANI_OK    |    access to parent.parentField     |
+    // |   child     |    parentField from Child class    |    ANI_OK    |    access to parent.parentField     |
+    // |   child     |    childField from Child class     |    ANI_OK    |     access to child.childField      |
+    // |   child     |  overridedField from Child class   |    ANI_OK    |   access to parent.overridedField   |
+    // |   child     |  overridedField from Parent class  |    ANI_OK    |   access to parent.overridedField   |
+    // |-------------|------------------------------------|--------------|-------------------------------------|
+
+    ani_int value {};
+    ASSERT_EQ(env_->Object_GetField_Int(objParent, parentFieldInParent, &value), ANI_OK);
+    ASSERT_EQ(value, parentFieldValueInParent);
+    ASSERT_EQ(env_->Object_GetField_Int(objParent, parentFieldInChild, &value), ANI_OK);
+    ASSERT_EQ(value, parentFieldValueInParent);
+    ASSERT_EQ(env_->Object_GetField_Int(objParent, overridedFieldInChild, &value), ANI_OK);
+    ASSERT_EQ(value, overridedFieldValueInParent);
+    ASSERT_EQ(env_->Object_GetField_Int(objParent, overridedFieldInParent, &value), ANI_OK);
+    ASSERT_EQ(value, overridedFieldValueInParent);
+
+    ASSERT_EQ(env_->Object_GetField_Int(objChild, parentFieldInParent, &value), ANI_OK);
+    ASSERT_EQ(value, parentFieldValueInParent);
+    ASSERT_EQ(env_->Object_GetField_Int(objChild, parentFieldInChild, &value), ANI_OK);
+    ASSERT_EQ(value, parentFieldValueInParent);
+    ASSERT_EQ(env_->Object_GetField_Int(objChild, childFieldInChild, &value), ANI_OK);
+    ASSERT_EQ(value, childFieldValueInChild);
+    ASSERT_EQ(env_->Object_GetField_Int(objChild, overridedFieldInChild, &value), ANI_OK);
+    ASSERT_EQ(value, overridedFieldValueInParent);
+    ASSERT_EQ(env_->Object_GetField_Int(objChild, overridedFieldInParent, &value), ANI_OK);
+    ASSERT_EQ(value, overridedFieldValueInParent);
+}
+
 }  // namespace ark::ets::ani::testing

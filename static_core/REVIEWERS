@@ -42,9 +42,9 @@ static_core/libllvmbackend/           ^Prof @urandon @asidorov
 static_core/libpandabase/             @dmitriitr @nazarovkonstantin ^igelhaus
 static_core/libpandafile/             @igelhaus
 static_core/libziparchive/            @nazarovkonstantin ^igelhaus
-static_core/panda/                    @nazarovkonstantin ^igelhaus
+static_core/panda/                    @nazarovkonstantin ^igelhaus @xucheng46 ^gitee-dakeQI
 static_core/pandastdlib/              @igelhaus
-static_core/platforms/                @dmitriitr @igelhaus
+static_core/platforms/                @dmitriitr @igelhaus @xucheng46 ^gitee-dakeQI
 static_core/quickener/                @nsizov ^igelhaus
 static_core/runtime/                  @igelhaus
 static_core/runtime/*cframe*          @Prof ^dingding5
@@ -127,8 +127,8 @@ static_core/runtime/include/tooling/                                          @s
 static_core/runtime/tests/tooling/                                            @slynkodenis
 static_core/plugins/ets/runtime/ani/ani_helpers*                              @wanzixuan330 @v-cherkashin ^slynkodenis ^liwentao_uiw ^asidorov
 static_core/plugins/ets/runtime/finalreg/*                                    ^dmitriitr @udav @ipetrov ^shemetovphilip
-static_core/plugins/ets/runtime/interop_js/                                   @nazarovkonstantin @vpukhov @zmzhao1995 @gitee-dakeQI
-static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting
+static_core/plugins/ets/runtime/interop_js/                                   @igelhaus @nazarovkonstantin @vpukhov ^slynkodenis
+static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting @tanglu100 @MofengMa @weixin_41079876
 static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @udav ^ipetrov ^molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
@@ -201,8 +201,8 @@ static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @k
 static_core/plugins/ets/tests/ets_test_suite/gc/                              @udav
 static_core/plugins/ets/tests/ets_test_suite/gc/*finalization*                @udav ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/gc/*finreg*                      @udav ^shemetovphilip
-static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov
-static_core/plugins/ets/tests/interop_js/tests/                               ^igelhaus @nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav
+static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov @tanglu100 @MofengMa @weixin_41079876
+static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus @nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav ^slynkodenis
 static_core/plugins/ets/tests/interop_js/xgc/                                 @ipetrov ^udav
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
 static_core/plugins/ets/tests/runtime/tooling/                                @slynkodenis
@@ -215,6 +215,7 @@ static_core/plugins/ets/tests/interop_js/tests/checked/                       ^i
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof @dingding5
 static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @Nojpg ^igelhaus ^trubachevilya ^ivagin ^Prof  @chenmudan	^luobohua2025
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
+static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/generate-es-checked ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 
 /AUTHORS @jokerxd-liu @dmitriitr @Prof @igelhaus
 /BUILD.gn @jokerxd-liu

@@ -21,8 +21,8 @@
 #include <securec.h>
 #include <string>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/os/thread.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/thread.h"
 
 namespace ark::tooling::sampler {
 

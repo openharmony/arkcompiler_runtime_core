@@ -40,8 +40,8 @@ const std::array<unsigned, AARCH32_COUNT_REG> AARCH32_TMP_REG = {
     vixl::aarch32::r8.GetCode(), vixl::aarch32::r9.GetCode(), vixl::aarch32::r12.GetCode()};
 
 // Temporary vector registers used
-const std::array<unsigned, AARCH32_COUNT_VREG> AARCH32_TMP_VREG = {vixl::aarch32::s14.GetCode(),
-                                                                   vixl::aarch32::s15.GetCode()};
+const std::array<unsigned, AARCH32_COUNT_VREG> AARCH32_TMP_VREG = {vixl::aarch32::s30.GetCode(),
+                                                                   vixl::aarch32::s31.GetCode()};
 
 static inline constexpr const uint8_t UNDEF_REG = std::numeric_limits<uint8_t>::max();
 
@@ -240,6 +240,7 @@ public:
     void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
     void GenerateNativePrologue(const FrameInfo &frameInfo) override;
     void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
+    void GenerateEpilogueHead(const FrameInfo &frameInfo, std::function<void()> postJob) override;
 
     void *GetCodeEntry() override;
     uint32_t GetCodeSize() override;
@@ -297,6 +298,7 @@ public:
     void EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
     void EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
     void EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeExtractBits(Reg dst, Reg src, Imm imm1, Imm imm2, bool signExt) override;
 
     void EncodeLdr(Reg dst, bool dstSigned, MemRef mem) override;
     void EncodeLdr(Reg dst, bool dstSigned, const vixl::aarch32::MemOperand &vixlMem);
@@ -348,13 +350,14 @@ public:
     void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding) override;
 
-    void EncodeSelect(ArgsSelect &&args) override;
-    void EncodeSelect(ArgsSelectImm &&args) override;
-    void EncodeSelectTest(ArgsSelect &&args) override;
-    void EncodeSelectTest(ArgsSelectImm &&args) override;
+    void EncodeSelect(const ArgsSelect &args) override;
+    void EncodeSelect(const ArgsSelectImm &args) override;
+    void EncodeSelectTest(const ArgsSelect &args) override;
+    void EncodeSelectTest(const ArgsSelectImm &args) override;
 
     bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signedCompare) override;
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
+    bool CanEncodeBitfieldExtractionFor(DataType::Type type) override;
 
     size_t GetCursorOffset() const override;
     void SetCursorOffset(size_t offset) override;

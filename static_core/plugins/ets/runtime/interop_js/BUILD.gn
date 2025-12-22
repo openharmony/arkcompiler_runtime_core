@@ -54,7 +54,7 @@ ohos_source_set("ets_interop_js_napi_static") {
   deps = [
     ":interop_intrinsic_kinds_h",
     "$ark_root/compiler:libarktscompiler",
-    "$ark_root/libpandabase:libarktsbase",
+    "$ark_root/libarkbase:libarktsbase",
     "$ark_root/runtime:libarkruntime",
   ]
 
@@ -62,11 +62,12 @@ ohos_source_set("ets_interop_js_napi_static") {
     defines = [ "PANDA_OHOS_USE_INNER_HILOG" ]
     deps += [ ":etsstdlib_install" ]
     external_deps = [
+      "ets_utils:console",
       "hilog:libhilog",
+      "init:libbegetutil",
       "libuv:uv",
       "napi:ace_napi",
       sdk_libc_secshared_dep,
-      "init:libbegetutil",
     ]
   } else if (ark_standalone_build && ark_ets_hybrid) {
     deps += [

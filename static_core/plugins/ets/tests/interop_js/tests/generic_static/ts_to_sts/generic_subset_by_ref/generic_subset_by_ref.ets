@@ -13,20 +13,49 @@
  * limitations under the License.
  */
 
-import {
-    SubsetByRefStatic,
-    genericSubsetByRefStaticCallFromTs,
-    BaseObj,
-} from "main_js"
+let module = ESValue.load('main_js')
+let SubsetByRefStatic = module.getProperty('SubsetByRefStatic');
+let genericSubsetByRefStaticCallFromTs = module.getProperty('genericSubsetByRefStaticCallFromTs');
+let BaseObj = module.getProperty('BaseObj');
 
 function checkSubsetByRefStatic(): boolean {
-    const res = SubsetByRefStatic.get(BaseObj);
-
-    return res.a as int == BaseObj.a as int
+    try {
+        const res = SubsetByRefStatic.invokeMethod('get', BaseObj);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        const resA = res.getProperty('a');
+        const baseObjA = BaseObj.getProperty('a');
+        
+        if (resA == null || baseObjA == null) {
+            return false;
+        }
+        
+        return resA.toNumber() === baseObjA.toNumber();
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericSubsetByRefStaticCallFromTs(): boolean {
-    const res = genericSubsetByRefStaticCallFromTs(BaseObj);
-
-    return res.a as int == BaseObj.a as int
+    try {
+        const res = genericSubsetByRefStaticCallFromTs.invoke(BaseObj);
+        
+        if (res == null) {
+            return false;
+        }
+        
+        const resA = res.getProperty('a');
+        const baseObjA = BaseObj.getProperty('a');
+        
+        if (resA == null || baseObjA == null) {
+            return false;
+        }
+        
+        return resA.toNumber() === baseObjA.toNumber();
+    } catch (e) {
+        return false;
+    }
 }

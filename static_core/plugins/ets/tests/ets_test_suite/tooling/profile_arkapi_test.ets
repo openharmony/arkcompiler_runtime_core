@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+// CC-OFFNXT(G.FMT.09) project code style
 function foo1(repetitions: int) {
     let ret: double = 0.0;
     let sign: int = 1;
@@ -22,6 +23,7 @@ function foo1(repetitions: int) {
     }
 }
 
+// CC-OFFNXT(G.FMT.09) project code style
 function foo2(repetitions: int) {
     let ret: double = 0.0;
     let sign: int = 1;
@@ -31,6 +33,7 @@ function foo2(repetitions: int) {
     }
 }
 
+// CC-OFFNXT(G.FMT.09) project code style
 function foo3(size: int) {
     let num: double = 0.0;
     let signNum: int = 1;
@@ -45,6 +48,7 @@ function foo3(size: int) {
     }
 }
 
+// CC-OFFNXT(G.FMT.09) project code style
 function foo() {
     let repetitions: int = 2;
     let delay: int = 1;
@@ -57,10 +61,11 @@ function foo() {
 		foo1(repetitions);
         foo2(repetitions);
         foo3(repetitions);
-        checkpoint ++ ;
+        checkpoint++;
     }, delay)
 }
 
+// CC-OFFNXT(G.FMT.09) project code style
 function main(): int {
     foo();
     return 0;

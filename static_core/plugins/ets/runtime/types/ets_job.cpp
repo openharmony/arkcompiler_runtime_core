@@ -40,6 +40,7 @@ EtsJob *EtsJob::Create(EtsCoroutine *coro)
 void EtsJob::EtsJobFinish(EtsJob *job, EtsObject *value)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     if (job == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);
@@ -60,6 +61,7 @@ void EtsJob::EtsJobFinish(EtsJob *job, EtsObject *value)
 void EtsJob::EtsJobFail(EtsJob *job, EtsObject *error)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     if (job == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);

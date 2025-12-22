@@ -23,8 +23,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "utils/json_builder.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/json_builder.h"
+#include "libarkbase/utils/logger.h"
 
 #include "json_serialization/jrpc_error.h"
 

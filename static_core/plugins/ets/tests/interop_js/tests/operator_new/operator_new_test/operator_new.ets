@@ -12,83 +12,90 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {primitive, TestObject, testfn, ManyArgsClass,fnTestUser,SubClass,TwoArgClass,OneArgClass, NoArgClass} from "js_import"
+let module = ESValue.load('js_import')
+let primitive = module.getProperty('primitive');
+let TestObject = module.getProperty('TestObject');
+let testfn = module.getProperty('testfn');
+let ManyArgsClass = module.getProperty('ManyArgsClass');
+let fnTestUser = module.getProperty('fnTestUser');
+let SubClass = module.getProperty('SubClass');
+let TwoArgClass = module.getProperty('TwoArgClass');
+let OneArgClass = module.getProperty('OneArgClass');
+let NoArgClass = module.getProperty('NoArgClass');
 
-function noArgsClass():boolean{
-    const testObj = new NoArgClass;
-    return testObj.message == 'Class without args'
+function noArgsClass(): boolean {
+    const testObj = NoArgClass.instantiate();
+    return testObj.getProperty('message').toString() === 'Class without args';
 }
 
-function noArgsClassBrackes():boolean{
-    const testObj = new NoArgClass();
-    return testObj.message == 'Class without args'
+function noArgsClassBrackes(): boolean {
+    const testObj = NoArgClass.instantiate();
+    return testObj.getProperty('message').toString() === 'Class without args';
 }
 
-function oneArgsClass():boolean{
-    const testObj = new OneArgClass('TestName');
-    return testObj.name == 'TestName'
+function oneArgsClass(): boolean {
+    const testObj = OneArgClass.instantiate('TestName');
+    return testObj.getProperty('name').toString() === 'TestName';
 }
 
-function twoArgsClass():boolean{
-    const testObj = new TwoArgClass('TestName','TestCity');
-    return testObj.city == 'TestCity' && testObj.name == 'TestName'
+function twoArgsClass(): boolean {
+    const testObj = TwoArgClass.instantiate('TestName', 'TestCity');
+    return testObj.getProperty('city').toString() === 'TestCity' && testObj.getProperty('name').toString() === 'TestName';
+}
+function manyArgsClass(): boolean {
+    const testObj = ManyArgsClass.instantiate('TestName', 30, 'US', 'Boston');
+    return testObj.invokeMethod('showInfo').toString() === 'Name: TestName, age:30, country: US, city: Boston';
 }
 
-function manyArgsClass():boolean{
-    const testObj = new ManyArgsClass('TestName',30,'US','Boston');
-    return testObj.showInfo() == 'Name: TestName, age:30, country: US, city: Boston'
+function newWithSubClass(): boolean {
+    const testObj = SubClass.instantiate('TestName', 'Test surname');
+    return testObj.getProperty('name').toString() === 'TestName' && testObj.getProperty('surname').toString() === 'Test surname';
 }
 
-function newWithSubClass():boolean{
-    const testObj = new SubClass('TestName','Test surname')
-    return testObj.name == 'TestName' && testObj.surname == 'Test surname'
+function newWithException(): boolean {
+    const testException = new Error('Test error');
+    return testException.message === 'Test error';
+}
+function newWithFunction(): boolean {
+    const testObj = fnTestUser.instantiate('Test name', 'Surname test');
+    return testObj.getProperty('name').toString() === 'Test name' && testObj.getProperty('surname').toString() === 'Surname test';
 }
 
-function newWithException():boolean{
-    const testException = new Error('Test error')
-    return testException.message == 'Test error'
-}
-function newWithFunction():boolean{
-    const testObj = new fnTestUser('Test name','Surname test')
-    return testObj.name == 'Test name' && testObj.surname == 'Surname test'
+function newWithArrey(): boolean {  
+    let testArr: Array<String> = new Array<String>();
+    testArr.push('Test');
+    return testArr[0] === 'Test';
 }
 
-function newWithArrey():boolean{
-    let testArr:Array<String> = new Array<String>()
-    testArr.push('Test')
-    return testArr[0] == 'Test'
-}
-
-function newWithPrototype():boolean{
-    const testObj = new fnTestUser('Fill','Smith');
-    return testObj.showInfo() == 'Name: Fill, surname: Smith'
+function newWithPrototype(): boolean {
+    const testObj = fnTestUser.instantiate('Fill', 'Smith');
+    return testObj.invokeMethod('showInfo').toString() === 'Name: Fill, surname: Smith';
 }
 
 // Negative cases
-function newWithJustFunction():boolean{
-   try {
-    const instance = new testfn();
-    return false
-   }catch(e){
-    return true
-   }
-}
-
-function newWithObj():boolean{
+function newWithJustFunction(): boolean {
     try {
-     const instance = new TestObject();
-     return false
-    }catch(e){
-     return true
-    }
- }
-
- function newWithPrimitive():boolean{
-    try{
-        const newPrimitive = new primitive()
+        const instance = testfn.instantiate();
         return false
-    }catch(e){
+    } catch (e) {
         return true
     }
-    
- }
+}
+
+function newWithObj(): boolean {
+    try {
+        const instance = TestObject.instantiate();
+        return false
+    } catch (e) {
+        return true
+    }
+}
+
+function newWithPrimitive(): boolean {
+    try {
+        const newPrimitive = primitive.instantiate();
+        return false
+    } catch (e) {
+        return true
+    }   
+}

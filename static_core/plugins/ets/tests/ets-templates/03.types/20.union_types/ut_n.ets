@@ -21,6 +21,7 @@ desc: >-
     Values of union types can be valid values of all types and values of literals the
     union was created from.
 tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 {{c.decl}}
 

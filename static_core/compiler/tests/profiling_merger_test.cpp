@@ -25,7 +25,7 @@
 #include "jit/libprofile/aot_profiling_data.h"
 #include "jit/profiling_loader.h"
 #include "jit/profiling_saver.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "unit_test.h"
 #include "panda_runner.h"
 #include "runtime/jit/profiling_data.h"

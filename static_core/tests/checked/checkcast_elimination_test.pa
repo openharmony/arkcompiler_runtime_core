@@ -119,7 +119,7 @@ catch_block2_begin:
 
 .function u1 main4() {
     newobj v0, D
-    ldobj v0, D.b
+    ldobj.obj v0, D.b
 
 try_begin:
     checkcast A

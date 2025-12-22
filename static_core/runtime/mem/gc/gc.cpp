@@ -15,11 +15,11 @@
 
 #include <memory>
 
-#include "libpandabase/os/cpu_affinity.h"
-#include "libpandabase/os/mem.h"
-#include "libpandabase/os/thread.h"
-#include "libpandabase/utils/time.h"
-#include "libpandabase/taskmanager/task_manager.h"
+#include "libarkbase/os/cpu_affinity.h"
+#include "libarkbase/os/mem.h"
+#include "libarkbase/os/thread.h"
+#include "libarkbase/utils/time.h"
+#include "libarkbase/taskmanager/task_manager.h"
 #include "runtime/assert_gc_scope.h"
 #include "runtime/include/class.h"
 #include "runtime/include/coretypes/dyn_objects.h"
@@ -27,6 +27,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/stack_walker-inl.h"
+#include "runtime/include/safepoint_timer.h"
 #include "runtime/mem/gc/epsilon/epsilon.h"
 #include "runtime/mem/gc/epsilon-g1/epsilon-g1.h"
 #include "runtime/mem/gc/gc.h"
@@ -46,6 +47,7 @@
 #include "runtime/include/coretypes/class.h"
 #include "runtime/thread_manager.h"
 #include "runtime/mem/gc/gc_adaptive_stack_inl.h"
+#include "libarkbase/utils/utils.h"
 #include "runtime/trace.h"
 
 namespace ark::mem {
@@ -641,7 +643,7 @@ void GC::PreStartup()
         GetPandaVm()->GetGCTrigger()->SetMinTargetFootprint(startupLimit);
         PreStartupImp();
         size_t originSize = AdujustStartupLimit(startupLimit);
-        constexpr uint64_t DISABLE_GC_DURATION_NS = 3000ULL * 1000 * 1000;
+        constexpr uint64_t DISABLE_GC_DURATION_NS = 3000ULL;
         auto task = MakePandaUnique<PostForkGCTask>(GCTaskCause::STARTUP_COMPLETE_CAUSE,
                                                     time::GetCurrentTimeInNanos() + DISABLE_GC_DURATION_NS, originSize);
         AddGCTask(true, std::move(task));
@@ -649,9 +651,36 @@ void GC::PreStartup()
     }
 }
 
+#ifdef SAFEPOINT_TIME_CHECKER_ENABLED
+namespace {
+class NonRecordingScopedSafepointTimer final {
+public:
+    explicit NonRecordingScopedSafepointTimer(bool isManaged) : isManaged_ {isManaged}
+    {
+        if (isManaged_) {
+            SafepointTimerTable::ResetTimers(ManagedThread::GetCurrent()->GetInternalId(), true);
+        }
+    }
+
+    ~NonRecordingScopedSafepointTimer()
+    {
+        if (isManaged_) {
+            SafepointTimerTable::ResetTimers(ManagedThread::GetCurrent()->GetInternalId(), false);
+        }
+    }
+
+private:
+    bool isManaged_;
+};
+}  // unnamed namespace
+#endif  // SAFEPOINT_TIME_CHECKER_ENABLED
+
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
 bool GC::AddGCTask(bool isManaged, PandaUniquePtr<GCTask> task)
 {
+#ifdef SAFEPOINT_TIME_CHECKER_ENABLED
+    NonRecordingScopedSafepointTimer scopedTimer {isManaged};
+#endif
     bool triggeredByThreshold = (task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
     if (gcSettings_.RunGCInPlace()) {
         auto *gcTask = task.get();
@@ -802,10 +831,12 @@ bool GC::WaitForGCInManaged(const GCTask &task)
         [[maybe_unused]] bool isDaemon = MTManagedThread::ThreadIsMTManagedThread(baseThread) &&
                                          MTManagedThread::CastFromThread(baseThread)->IsDaemon();
         ASSERT(!isDaemon || thread->GetStatus() == ThreadStatus::RUNNING);
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
         vm_->GetMutatorLock()->Unlock();
         thread->PrintSuspensionStackIfNeeded();
         WaitForGC(task);
         vm_->GetMutatorLock()->ReadLock();
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), false));
         ASSERT(vm_->GetMutatorLock()->HasLock());
         this->GetPandaVm()->HandleGCRoutineInMutator();
         return true;
@@ -912,7 +943,7 @@ void GC::MoveObjectsToPygoteSpace()
         size_t size = GetObjectSize(src);
         auto dst = reinterpret_cast<ObjectHeader *>(pygoteSpaceAllocator->Alloc(size));
         ASSERT(dst != nullptr);
-        memcpy_s(dst, size, src, size);
+        MemcpyUnsafe(dst, src, size);
         allSizeMove += size;
         movedObjectsNum++;
         SetForwardAddress(src, dst);

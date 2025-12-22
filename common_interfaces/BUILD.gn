@@ -26,8 +26,8 @@ ohos_static_library("common_interfaces_header") {
   public_configs = [
     ":common_interfaces_public_config",
     "$ark_root/libpandabase:libpandabase_public_config",
-    "$ark_root/libpandafile:arkfile_public_config"
-    ]
+    "$ark_root/libpandafile:arkfile_public_config",
+  ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"

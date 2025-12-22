@@ -67,11 +67,11 @@ function delayWithYield(duration: int): void {
     Coroutine.Schedule();
 }
 
-function launchImpl(func: () => NullishType): Promise<NullishType> {
-    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+function launchImpl(func: () => Any): Promise<Any> {
+    const job: Job<Any> = launch<Any, () => Any>(
         func
     );
-    return new Promise<NullishType>((resolve, reject) => {
+    return new Promise<Any>((resolve, reject) => {
         try {
             let res = job.Await();
             resolve(res);
@@ -107,11 +107,11 @@ class Event {
     private job: CompletableJob<boolean>;
 }
 
-function testDelayFunc(): NullishType {
+function testDelayFunc(): Any {
     let task1 = new taskpool.Task(returnFailAbc);
     let res: string = '';
     let isTask1Finished = new Event();
-    taskpool.executeDelayed(100, task1).catch((e: NullishType) => {
+    taskpool.executeDelayed(100, task1).catch((e: Any) => {
         res = (e as Error).message;
         isTask1Finished.fire();
     })
@@ -188,7 +188,7 @@ function verifySendDataRes(a:int):void{
     verifyCount++;
 }
 
-function verifySendDataResWithRestParameter(...args:FixedArray<NullishType>) {
+function verifySendDataResWithRestParameter(...args:FixedArray<Any>) {
     let arg1 = args[0] as Array<int>;
     let arg2 = args[1] as Array<string>;
     arktest.assertEQ(arg1[0], 1);
@@ -545,6 +545,7 @@ async function isCancelPromiseTest() {
     arktest.assertEQ(res, 'abc');
     arktest.assertEQ(taskpool.Task.isCanceled(), false);
     // Check canceling of exeuting Promise task
+    // CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN); 
     let isCanceled = new Event();
     let isRunning = new Event();
     let waitForCancel = new Event();
@@ -608,10 +609,10 @@ async function cancelExecutingTaskTest():Promise<void> {
     let task2 = new taskpool.Task(testCancelFunc, 300);
     let val: int = 0;
     let isExecuted = new Event();
-    taskpool.execute(task2).then((value: NullishType): void => {
+    taskpool.execute(task2).then((value: Any): void => {
         val = 1;
         isExecuted.fire();
-    }).catch((e: NullishType): void => {
+    }).catch((e: Any): void => {
         val = 2;
         isExecuted.fire();
     });
@@ -962,7 +963,7 @@ async function tasksExecutionTest() {
     }
     let allExecuted = new Event();
     for (let i: int = 0; i < count; ++i) {
-        taskpool.execute(taskArray[i]).then((value: NullishType): void => {
+        taskpool.execute(taskArray[i]).then((value: Any): void => {
             num++;
             if (num == count) {
                 allExecuted.fire();
@@ -1219,6 +1220,85 @@ async function testExecuteUndefined() {
     await taskpool.execute(task);
 }
 
+class TestFoo {
+    static total: number = 0;
+    static tag: string = "foo";
+
+    name: string;
+    age: number;
+    active: boolean;
+    nums: number[];
+
+    constructor(name: string, age: number) {
+        this.name = name;
+        this.age = age;
+        this.active = true;
+        this.nums = [];
+        TestFoo.total++;
+    }
+
+    public describe(): string {
+        return `${this.name}:${this.age}:${this.active}`;
+    }
+
+    public static create(name: string): TestFoo {
+        return new TestFoo(name, 0);
+    }
+}
+
+async function useTestFoo() {
+    let task = new taskpool.Task(TestFoo.create, 'test');
+    let res = await taskpool.execute(task) as TestFoo;
+    let type = Type.from<TestFoo>() as ClassType;
+    res.nums.push(1, 2, 3);
+    arktest.assertEQ(res.describe(), 'test:0:true');
+    arktest.assertEQ(RuntimeDebug.countInstancesOfClass(type), 1);
+}
+
+function testTaskpoolReturnObjWithGC() {
+    waitForCompletion(useTestFoo);
+
+    let type = Type.from<TestFoo>() as ClassType;
+    let instanceCount = RuntimeDebug.countInstancesOfClass(type);
+    if (instanceCount != 0) {
+        const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE);
+        if (gcId > 0) {
+            GC.waitForFinishGC(gcId);
+        }
+    }
+
+    arktest.assertEQ(RuntimeDebug.countInstancesOfClass(type), 0);
+}
+
+function executeAfterExecutePeriodically() {
+    let task = new taskpool.Task(sum, 1, 2);
+    taskpool.executePeriodically(100, task);
+    arktest.expectError(() => {
+        taskpool.execute(task);
+    }, new Error("taskpool:: the periodicTask cannot execute again"));
+    taskpool.cancel(task);
+}
+
+function periodicTaskAddDepedency() {
+    let task1 = new taskpool.Task(sum, 1, 2);
+    let task2 = new taskpool.Task(sum, 3, 4);
+    taskpool.executePeriodically(100, task1);
+    arktest.expectError(() => {
+        task1.addDependency(task2);
+    }, new Error("taskpool:: the periodic task cannot have a dependency"));
+    taskpool.cancel(task1);
+}
+
+function periodicTaskAddedAsDepedency() {
+    let task1 = new taskpool.Task(sum, 1, 2);
+    let task2 = new taskpool.Task(sum, 3, 4);
+    taskpool.executePeriodically(100, task1);
+    arktest.expectError(() => {
+        task2.addDependency(task1);
+    }, new Error("taskpool:: the periodic task cannot have a dependency"));
+    taskpool.cancel(task1);
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1228,8 +1308,8 @@ function main(): int {
     commonTaskSuite.addAsyncTest('OneTaskExecutionTest', oneTaskExecutionTest);
     commonTaskSuite.addAsyncTest('CallbackTest', callbackTest);
     commonTaskSuite.addAsyncTest('IsCancelTest', isCancelTest);
-    commonTaskSuite.addAsyncTest('CancelNonExecutingTaskTest', cancelNonExecutingTaskTest);
     commonTaskSuite.addAsyncTest('IsCancelPromiseTest', isCancelPromiseTest);
+    commonTaskSuite.addAsyncTest('CancelNonExecutingTaskTest', cancelNonExecutingTaskTest);
     commonTaskSuite.addAsyncTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
     commonTaskSuite.addAsyncTest('CheckIsDoneAndCancelTaskTest', checkIsDoneAndCancelTaskTest);
     commonTaskSuite.addAsyncTest('DependentTasksTest', dependentTasksTest);
@@ -1263,6 +1343,10 @@ function main(): int {
     commonTaskSuiteDisabled.addAsyncTest('taskpoolRetriggerShrinkTest', taskpoolRetriggerShrinkTest);
     commonTaskSuiteDisabled.addAsyncTest('taskpoolShrinkTest', taskpoolShrinkTest);
     commonTaskSuite.addAsyncTest('TestExecuteUndefined', testExecuteUndefined);
+    commonTaskSuite.addTest('testTaskpoolReturnObjWithGC', testTaskpoolReturnObjWithGC);
+    commonTaskSuite.addTest('executeAfterExecutePeriodically', executeAfterExecutePeriodically);
+    commonTaskSuite.addTest('periodicTaskAddDepedency', periodicTaskAddDepedency);
+    commonTaskSuite.addTest('periodicTaskAddedAsDepedency', periodicTaskAddedAsDepedency);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;

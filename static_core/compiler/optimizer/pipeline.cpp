@@ -65,6 +65,7 @@
 #include "optimizer/optimizations/move_constants.h"
 #include "optimizer/optimizations/adjust_arefs.h"
 #include "optimizer/optimizations/if_merging.h"
+#include "optimizer/optimizations/string_flat_check.h"
 
 #include "compiler/generated/pipeline_includes.h"
 
@@ -251,6 +252,7 @@ bool Pipeline::RunOptimizations()
     if (graph->IsAotMode()) {
         graph->RunPass<Cse>();
     }
+    graph->RunPass<StringFlatCheck>();
     graph->RunPass<SaveStateOptimization>();
     graph->RunPass<Peepholes>();
 #ifndef NDEBUG
@@ -261,7 +263,9 @@ bool Pipeline::RunOptimizations()
     graph->RunPass<Cleanup>(false);
     graph->RunPass<CodeSink>();
     graph->RunPass<MemoryCoalescing>(g_options.IsCompilerMemoryCoalescingAligned());
-    graph->RunPass<IfConversion>(g_options.GetCompilerIfConversionLimit());
+    if (graph->RunPass<IfConversion>(g_options.GetCompilerIfConversionLimit())) {
+        graph->RunPass<Cleanup>();
+    }
     graph->RunPass<Scheduler>();
     // Perform MoveConstants after Scheduler because Scheduler can rearrange constants
     // and cause spillfill in reg alloc

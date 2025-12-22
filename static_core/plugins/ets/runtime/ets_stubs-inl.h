@@ -20,12 +20,12 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
-#include "libpandafile/proto_data_accessor-inl.h"
+#include "libarkfile/proto_data_accessor-inl.h"
 
 namespace ark::ets {
 
-static constexpr const char *GETTER_PREFIX = "<get>";
-static constexpr const char *SETTER_PREFIX = "<set>";
+static constexpr const char *GETTER_PREFIX = "%%get-";
+static constexpr const char *SETTER_PREFIX = "%%set-";
 
 ALWAYS_INLINE inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref)
 {

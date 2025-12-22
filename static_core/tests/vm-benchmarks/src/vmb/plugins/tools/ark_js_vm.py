@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,14 +24,16 @@ class Tool(ToolBase):
 
     def __init__(self, *args) -> None:
         super().__init__(*args)
-        self.sdk = self.ensure_dir_env('OHOS_SDK')
         if Target.HOST == self.target:
-            self.ark_js_vm = self.ensure_file(
-                self.sdk, 'out/x64.release/arkcompiler/ets_runtime/ark_js_vm')
+            self.ark_js_vm = \
+                self.ensure_file(self.custom_path) if self.custom_path \
+                else self.ensure_file(
+                    self.ensure_dir_env('OHOS_SDK'),
+                    'out/x64.release/arkcompiler/ets_runtime/ark_js_vm')
         elif Target.OHOS == self.target:
-            self.ark_js_vm = f'{self.dev_dir}/ark_js_vm'
+            self.ark_js_vm = f'{self.dev_dir.as_posix()}/ark_js_vm'
         else:
-            raise NotImplementedError(f'Wrong target: {self.target}!')
+            raise RuntimeError(f'Wrong target: {self.target} for ark_js_vm!')
 
     @property
     def name(self) -> str:
@@ -41,9 +43,10 @@ class Tool(ToolBase):
         name = bu.src('.abc').with_suffix('').name
         bu_path = bu.path if self.target == Target.HOST \
             else bu.device_path
-        aot = f'--aot-file={name} ' if OptFlags.AOT in self.flags else ''
+        aot = f'--aot-file={name} ' if OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags else ''
         res = self.x_run(
             f'{self.ark_js_vm} --entry-point={name} '
+            f'--open-ark-tools=true '
             f'{aot}{self.custom} {name}.abc',
             cwd=str(bu_path))
         bu.parse_run_output(res)
@@ -57,6 +60,7 @@ class Tool(ToolBase):
             '--enable-pgo-profiler=true --asm-interpreter=true '
             f'--compiler-pgo-profiler-path={name}.ap '
             f'--entry-point={name} '
+            f'--open-ark-tools=true '
             f'{self.custom} {aot}'
             f'{name}.abc'
         )

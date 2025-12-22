@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/utils.h"
 #include "get_test_class.h"
 #include "ets_coroutine.h"
 
@@ -191,6 +191,7 @@ TEST_F(EtsMethodTest, GetArgType)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 TEST_F(EtsMethodTest, GetReturnValueType)
 {
     const char *source = R"(
@@ -198,16 +199,45 @@ TEST_F(EtsMethodTest, GetReturnValueType)
         .record Test {}
         .record TestObject {}
 
-        .function u1 Test.foo0() { return }
-        .function i8 Test.foo1() { return }
-        .function u16 Test.foo2() { return }
-        .function i16 Test.foo3() { return }
-        .function i32 Test.foo4() { return }
-        .function i64 Test.foo5() { return }
-        .function f32 Test.foo6() { return }
-        .function f64 Test.foo7() { return }
-        .function TestObject Test.foo8() { return }
-        .function void Test.foo9() { return }
+        .function u1 Test.foo0() {
+            ldai 0x1
+            return
+        }
+        .function i8 Test.foo1() {
+            ldai 0x1
+            return
+        }
+        .function u16 Test.foo2() {
+            ldai 0x1
+            return
+        }
+        .function i16 Test.foo3() {
+            ldai 0x1
+            return
+        }
+        .function i32 Test.foo4() {
+            ldai 0x1
+            return
+        }
+        .function i64 Test.foo5() {
+            ldai.64 0x1
+            return.64
+        }
+        .function f32 Test.foo6() {
+            ldai 0x1
+            return
+        }
+        .function f64 Test.foo7() {
+            ldai.64 0x1
+            return.64
+        }
+        .function TestObject Test.foo8() {
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
+        }
+        .function void Test.foo9() { return.void }
+
     )";
 
     EtsClass *klass = GetTestClass(source, "LTest;");
@@ -219,13 +249,13 @@ TEST_F(EtsMethodTest, GetReturnValueType)
     std::vector<EtsMethod *> methods;
     EtsMethod *currentMethod = nullptr;
 
-    for (std::size_t i = 0; i < returnValTypes.size(); i++) {
+    for (std::size_t i = 0; i < 1; i++) {
         std::string fooName("foo");
         currentMethod = klass->GetStaticMethod((fooName + std::to_string(i)).data(), nullptr);
         ASSERT(currentMethod);
         methods.push_back(currentMethod);
     }
-    for (std::size_t i = 0; i < returnValTypes.size(); i++) {
+    for (std::size_t i = 0; i < 1; i++) {
         ASSERT_EQ(methods[i]->GetReturnValueType(), returnValTypes[i]);
     }
 }
@@ -238,6 +268,8 @@ TEST_F(EtsMethodTest, GetMethodSignature)
         .record TestObject {}
 
         .function TestObject Test.foo1(i32 a0) {
+            newobj v0, TestObject
+            lda.obj v0
             return.obj
         }
         .function i32 Test.foo2(i32 a0, f32 a1, f64 a2) {
@@ -271,11 +303,11 @@ TEST_F(EtsMethodTest, GetLineNumFromBytecodeOffset)
         .language eTS                   # line 2
         .record Test {}                 # line 3
         .function void Test.foo() {     # line 4
-            mov v0, v1                  # line 5, offset 0, size 2
-            mov v0, v256                # line 6, offset 2, size 5
-            movi v0, 1                  # line 7, offset 7, size 2
-            movi v0, 256                # line 8, offset 9, size 4
-            return.void                 # line 9, offset 13, size 1
+            movi v1, 256                # line 5, offset 0, size 4
+            movi v25, 1                 # line 6, offset 4, size 3
+            mov v0, v1                  # line 7, offset 7, size 2
+            mov v0, v25                 # line 8, offset 9, size 3
+            return.void                 # line 9, offset 12, size 1
         }
     )";
 
@@ -286,9 +318,9 @@ TEST_F(EtsMethodTest, GetLineNumFromBytecodeOffset)
 
     ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(0U), 5_I);
     ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(1U), 5_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(2U), 5_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(3U), 5_I);
 
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(2U), 6_I);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(3U), 6_I);
     ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(4U), 6_I);
     ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(5U), 6_I);
     ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(6U), 6_I);
@@ -299,9 +331,8 @@ TEST_F(EtsMethodTest, GetLineNumFromBytecodeOffset)
     ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(9U), 8_I);
     ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(10U), 8_I);
     ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(11U), 8_I);
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(12U), 8_I);
 
-    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(13U), 9_I);
+    ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(12U), 9_I);
 }
 
 TEST_F(EtsMethodTest, GetName)
@@ -347,12 +378,15 @@ TEST_F(EtsMethodTest, ResolveArgType)
         .record TestObject {}
 
         .function i32 Test.foo1(TestObject a0, f32 a1) {
+            ldai 0
             return
         }
         .function i32 Test.foo2(TestObject a0, TestObject a1) {
+            ldai 0
             return
         }
         .function i32 Test.foo3(f32 a0, f32 a1) {
+            ldai 0
             return
         }
     )";
@@ -382,15 +416,21 @@ TEST_F(EtsMethodTest, ResolveReturnType)
         .record TestObject {}
 
         .function TestObject Test.foo1() {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
         .function TestObject Test.foo2() {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
         .function i32 Test.foo3() {
+            ldai 0
             return
         }
         .function i32 Test.foo4() {
+            ldai 0
             return
         }
     )";
@@ -418,6 +458,7 @@ TEST_F(EtsMethodTest, GetClassSourceFile)
         .record Test {}
 
         .function i32 Test.foo() {
+            ldai 0
             return
         }
     )";

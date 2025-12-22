@@ -21,13 +21,19 @@
 #include "objects/string/tree_string.h"
 
 namespace common {
+using TreeString = TreeStringTemplate<COMMON_POINTER_SIZE>;
+
+template <size_t POINTER_SIZE>
 template <typename Allocator, typename WriteBarrier, objects_traits::enable_if_is_allocate<Allocator, BaseObject *>,
           objects_traits::enable_if_is_write_barrier<WriteBarrier>>
-TreeString *TreeString::Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> left,
-                               ReadOnlyHandle<BaseString> right, uint32_t length, bool compressed)
+TreeStringTemplate<POINTER_SIZE> *TreeStringTemplate<POINTER_SIZE>::Create(Allocator &&allocator,
+                                                                           WriteBarrier &&writeBarrier,
+                                                                           ReadOnlyHandle<BaseString> left,
+                                                                           ReadOnlyHandle<BaseString> right,
+                                                                           uint32_t length, bool compressed)
 {
-    auto string =
-        TreeString::Cast(std::invoke(std::forward<Allocator>(allocator), TreeString::SIZE, ObjectType::TREE_STRING));
+    auto string = TreeStringTemplate<POINTER_SIZE>::Cast(std::invoke(
+        std::forward<Allocator>(allocator), TreeStringTemplate<POINTER_SIZE>::SIZE, ObjectType::TREE_STRING));
     string->InitLengthAndFlags(length, compressed);
     string->SetMixHashcode(0);
     string->SetLeftSubString(std::forward<WriteBarrier>(writeBarrier), left.GetBaseObject());
@@ -35,15 +41,17 @@ TreeString *TreeString::Create(Allocator &&allocator, WriteBarrier &&writeBarrie
     return string;
 }
 
+template <size_t POINTER_SIZE>
 template <typename ReadBarrier>
-bool TreeString::IsFlat(ReadBarrier &&readBarrier) const
+bool TreeStringTemplate<POINTER_SIZE>::IsFlat(ReadBarrier &&readBarrier) const
 {
     auto strRight = BaseString::Cast(GetRightSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
     return strRight->GetLength() == 0;
 }
 
+template <size_t POINTER_SIZE>
 template <bool VERIFY, typename ReadBarrier>
-uint16_t TreeString::Get(ReadBarrier &&readBarrier, int32_t index) const
+uint16_t TreeStringTemplate<POINTER_SIZE>::Get(ReadBarrier &&readBarrier, int32_t index) const
 {
     auto length = static_cast<int32_t>(GetLength());
     if constexpr (VERIFY) {
@@ -57,22 +65,22 @@ uint16_t TreeString::Get(ReadBarrier &&readBarrier, int32_t index) const
         return left->At<VERIFY>(std::forward<ReadBarrier>(readBarrier), index);
     }
     const BaseString *string = this;
-    while (true) {
-        if (string->IsTreeString()) {
-            BaseString *left = BaseString::Cast(
-                TreeString::ConstCast(string)->GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
-            if (static_cast<int32_t>(left->GetLength()) > index) {
-                string = left;
-            } else {
-                index -= static_cast<int32_t>(left->GetLength());
-                string = BaseString::Cast(TreeString::ConstCast(string)->GetRightSubString<BaseObject *>(
-                    std::forward<ReadBarrier>(readBarrier)));
-            }
+    const TreeStringTemplate<POINTER_SIZE> *tree = nullptr;
+    while (string->IsTreeString()) {
+        tree = TreeStringTemplate<POINTER_SIZE>::ConstCast(string);
+        BaseString *left =
+            BaseString::Cast(tree->GetLeftSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
+
+        if (static_cast<int32_t>(left->GetLength()) > index) {
+            string = left;
         } else {
-            return string->At<VERIFY>(std::forward<ReadBarrier>(readBarrier), index);
+            index -= static_cast<int32_t>(left->GetLength());
+
+            tree = TreeStringTemplate<POINTER_SIZE>::ConstCast(string);
+            string = BaseString::Cast(tree->GetRightSubString<BaseObject *>(std::forward<ReadBarrier>(readBarrier)));
         }
     }
-    UNREACHABLE_CC();
+    return string->At<VERIFY>(std::forward<ReadBarrier>(readBarrier), index);
 }
 }  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_STRING_TREE_STRING_INL_H

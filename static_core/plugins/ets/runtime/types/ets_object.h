@@ -19,7 +19,7 @@
 #include <cstdint>
 #include "plugins/ets/runtime/ets_mark_word.h"
 #include "mark_word.h"
-#include "mem/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/include/object_header-inl.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -187,9 +187,19 @@ public:
         return FromCoreType(ObjectHeader::Clone(GetCoreType()));
     }
 
+    static constexpr ObjectHeader *ToCoreType(EtsObject *obj)
+    {
+        return static_cast<ObjectHeader *>(obj);
+    }
+
+    static constexpr const ObjectHeader *ToCoreType(const EtsObject *obj)
+    {
+        return static_cast<const ObjectHeader *>(obj);
+    }
+
     ObjectHeader *GetCoreType() const
     {
-        return static_cast<ObjectHeader *>(const_cast<EtsObject *>(this));
+        return ToCoreType(const_cast<EtsObject *>(this));
     }
 
     static constexpr EtsObject *FromCoreType(ObjectHeader *objectHeader)

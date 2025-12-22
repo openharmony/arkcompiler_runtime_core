@@ -16,9 +16,8 @@
 {% for c in cases %}
 /*---
 desc: >-
-    Type K is restricted to number types, type string, union types
-    constructed from these types, and literals of these types.
-tags: [{{c.tags}}]
+    Type K is restricted to numeric types, type string, string literal types, enum types, and union
+    types constructed from these types.
 ---*/
 
 {{c.decl}}

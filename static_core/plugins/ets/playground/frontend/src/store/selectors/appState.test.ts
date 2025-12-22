@@ -47,14 +47,6 @@ export const mockAllState: RootState = {
         verifierRes: null
     },
     logs: {
-        compileOut: [],
-        compileErr: [],
-        runOut: [],
-        runErr: [],
-        disasmOut: [],
-        disasmErr: [],
-        verifierOut: [],
-        verifierErr: [],
         out: [],
         err: [],
         highlightErrors: [],

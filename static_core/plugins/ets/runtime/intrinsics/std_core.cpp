@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_atomic_flag.h"
+#include "plugins/ets/runtime/types/ets_atomic_int.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -235,7 +236,7 @@ static Class *GetTaskPoolClass()
     auto *runtime = Runtime::GetCurrent();
     auto *classLinker = runtime->GetClassLinker();
     ClassLinkerExtension *cle = classLinker->GetExtension(SourceLanguage::ETS);
-    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
+    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lstd/concurrency/taskpool;");
     return cle->GetClass(mutf8Name);
 }
 
@@ -358,11 +359,73 @@ extern "C" EtsInt EtsEscompatUint8ClampedArrayToUint8Clamped(EtsDouble val)
     return std::lrint(val);
 }
 
+extern "C" void EtsAtomicIntSetValue(EtsObject *atomicInt, EtsInt value)
+{
+    EtsAtomicInt::FromEtsObject(atomicInt)->SetValue(value);
+}
+
+extern "C" EtsInt EtsAtomicIntGetValue(EtsObject *atomicInt)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->GetValue();
+}
+
+extern "C" EtsInt EtsAtomicIntGetAndSet(EtsObject *atomicInt, EtsInt value)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->GetAndSet(value);
+}
+
+extern "C" EtsInt EtsAtomicIntCompareAndSet(EtsObject *atomicInt, EtsInt expected, EtsInt newValue)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->CompareAndSet(expected, newValue);
+}
+
+extern "C" EtsInt EtsAtomicIntFetchAndAdd(EtsObject *atomicInt, EtsInt value)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->FetchAndAdd(value);
+}
+
+extern "C" EtsInt EtsAtomicIntFetchAndSub(EtsObject *atomicInt, EtsInt value)
+{
+    return EtsAtomicInt::FromEtsObject(atomicInt)->FetchAndSub(value);
+}
+
 extern "C" EtsBoolean StdSystemIsExternalTimerEnabled()
 {
     auto *coro = EtsCoroutine::GetCurrent();
     auto extTimerOption = ark::ets::ToEtsBoolean(coro->GetManager()->GetConfig().enableExternalTimer);
     return extTimerOption && coro->GetWorker()->IsExternalSchedulingEnabled();
+}
+
+extern "C" void StdSystemDumpUhandledFailedJobs()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    ScopedNativeCodeThread snct(coro);
+    coro->ProcessUnhandledFailedJobs();
+}
+
+static void SetPrimitiveFieldInClass(const char *name, ClassRoot root)
+{
+    auto *ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(panda_file::SourceLang::ETS);
+    auto *klass = EtsClass::FromRuntimeClass(ext->GetClassRoot(ClassRoot::CLASS));
+    auto *primCls = EtsClass::FromRuntimeClass(ext->GetClassRoot(root));
+    EtsField *primField = klass->GetStaticFieldIDByName(name, nullptr);
+    ASSERT(primField != nullptr);
+    klass->SetStaticFieldObject(primField, reinterpret_cast<EtsObject *>(primCls));
+}
+
+extern "C" void InitializePrimitivesInClass()
+{
+    SetPrimitiveFieldInClass("PRIMITIVE_BOOLEAN", ClassRoot::U1);
+    SetPrimitiveFieldInClass("PRIMITIVE_BYTE", ClassRoot::I8);
+    SetPrimitiveFieldInClass("PRIMITIVE_CHAR", ClassRoot::U16);
+    SetPrimitiveFieldInClass("PRIMITIVE_SHORT", ClassRoot::I16);
+    SetPrimitiveFieldInClass("PRIMITIVE_INT", ClassRoot::I32);
+    SetPrimitiveFieldInClass("PRIMITIVE_LONG", ClassRoot::I64);
+    SetPrimitiveFieldInClass("PRIMITIVE_FLOAT", ClassRoot::F32);
+    SetPrimitiveFieldInClass("PRIMITIVE_DOUBLE", ClassRoot::F64);
+    SetPrimitiveFieldInClass("PRIMITIVE_NUMBER", ClassRoot::F64);
+    SetPrimitiveFieldInClass("PRIMITIVE_VOID", ClassRoot::V);
 }
 
 }  // namespace ark::ets::intrinsics

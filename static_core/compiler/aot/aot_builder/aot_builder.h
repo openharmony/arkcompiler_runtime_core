@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 #include "aot/compiled_method.h"
 #include "aot/aot_file.h"
 #include "elf_builder.h"
-#include "utils/arch.h"
-#include "utils/arena_containers.h"
-#include "utils/bit_vector.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/bit_vector.h"
 #include "optimizer/ir/runtime_interface.h"
 #include <string>
 #include <vector>
@@ -163,10 +163,10 @@ private:
     uint32_t gcType_ {static_cast<uint32_t>(mem::GCType::INVALID_GC)};
     uint64_t intfInlineCacheIndex_ {0};
     std::vector<compiler::RoData> roDatas_;
-    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> gotPlt_;
-    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> gotVirtIndexes_;
-    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> gotClass_;
-    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> gotString_;
+    std::map<std::pair<const panda_file::File *, uint32_t>, std::pair<int32_t, bool>> gotPlt_;
+    std::map<std::pair<const panda_file::File *, uint32_t>, std::pair<int32_t, bool>> gotVirtIndexes_;
+    std::map<std::pair<const panda_file::File *, uint32_t>, std::pair<int32_t, bool>> gotClass_;
+    std::map<std::pair<const panda_file::File *, uint32_t>, std::pair<int32_t, bool>> gotString_;
     std::map<std::pair<const panda_file::File *, uint64_t>, int32_t> gotIntfInlineCache_;
     std::map<std::pair<const panda_file::File *, uint64_t>, int32_t> gotCommon_;
     bool bootAot_ {false};

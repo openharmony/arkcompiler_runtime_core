@@ -5,7 +5,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- *tsClass *$1;
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,8 +29,9 @@ namespace ark::ets {
 void EtsPlatformTypes::CreateAndInitializeCaches()
 {
     auto *charClass = this->coreString;
+    // asciiCharCache_ must point to a piece of memory in the non-movable space.
     asciiCharCache_ = EtsTypedObjectArray<EtsString>::Create(charClass, EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE,
-                                                             ark::SpaceType::SPACE_TYPE_OBJECT);
+                                                             ark::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     if (UNLIKELY(asciiCharCache_ == nullptr)) {
         LOG(FATAL, RUNTIME) << "Failed to create asciiCharCache";
     }
@@ -45,16 +46,6 @@ void EtsPlatformTypes::VisitRoots(const GCRootVisitor &visitor) const
 {
     if (asciiCharCache_ != nullptr) {
         visitor(mem::GCRoot(mem::RootType::ROOT_VM, asciiCharCache_->GetCoreType()));
-    }
-}
-
-void EtsPlatformTypes::UpdateCachesVmRefs(const GCRootUpdater &updater) const
-{
-    if (asciiCharCache_ != nullptr) {
-        auto *obj = static_cast<ark::ObjectHeader *>(asciiCharCache_->GetCoreType());
-        if (updater(&obj)) {
-            asciiCharCache_ = reinterpret_cast<EtsTypedObjectArray<EtsString> *>(obj);
-        }
     }
 }
 
@@ -121,6 +112,15 @@ void EtsPlatformTypes::PreloadType(EtsClassLinker *linker, EtsClass **slot, std:
     entryTable_.insert({utf::CStringAsMutf8(cls->GetDescriptor()), entry});
 }
 
+static EtsClass *GetTypeEntryClass(EtsPlatformTypes *ptypes, std::string_view descriptor)
+{
+    auto entry = ptypes->GetTypeEntry(utf::CStringAsMutf8(descriptor.data()));
+    if (entry == nullptr) {
+        return nullptr;
+    }
+    return *(reinterpret_cast<EtsClass **>(ptypes) + entry->slotIndex);
+}
+
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 {
@@ -148,25 +148,20 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
         updateOffset(slot);
     };
 
-    findType(&EtsPlatformTypes::coreObject, OBJECT);
-    findType(&EtsPlatformTypes::coreClass, CLASS);
-    findType(&EtsPlatformTypes::coreString, STRING);
-    findType(&EtsPlatformTypes::coreLineString, LINE_STRING);
-    findType(&EtsPlatformTypes::coreSlicedString, SLICED_STRING);
-    findType(&EtsPlatformTypes::coreTreeString, TREE_STRING);
-
-    findType(&EtsPlatformTypes::coreBoolean, BOX_BOOLEAN);
-    findType(&EtsPlatformTypes::coreByte, BOX_BYTE);
-    findType(&EtsPlatformTypes::coreChar, BOX_CHAR);
-    findType(&EtsPlatformTypes::coreShort, BOX_SHORT);
-    findType(&EtsPlatformTypes::coreInt, BOX_INT);
-    findType(&EtsPlatformTypes::coreLong, BOX_LONG);
-    findType(&EtsPlatformTypes::coreFloat, BOX_FLOAT);
-    findType(&EtsPlatformTypes::coreDouble, BOX_DOUBLE);
-
-    findType(&EtsPlatformTypes::escompatBigint, BIG_INT);
-    findType(&EtsPlatformTypes::escompatError, ERROR);
-    findType(&EtsPlatformTypes::coreFunction, FUNCTION);
+    // NOLINTBEGIN(cppcoreguidelines-macro-usage)
+    // CC-OFFNXT(G.PRE.09) macro expansion
+#define T(descr, name) findType(&EtsPlatformTypes::name, descr);
+#define M(descr, mname, msig, name, isStatic) \
+    /* CC-OFFNXT(G.PRE.09) macro expansion */ \
+    findMethod(&EtsPlatformTypes::name, GetTypeEntryClass(this, descr), mname, msig, isStatic);
+#define I(descr, mname, msig, name) M(descr, mname, msig, name, false)
+#define S(descr, mname, msig, name) M(descr, mname, msig, name, true)
+    ETS_PLATFORM_TYPES_LIST(T, I, S)
+#undef T
+#undef M
+#undef I
+#undef S
+    // NOLINTEND(cppcoreguidelines-macro-usage)
 
     for (size_t i = 0; i < coreFunctions.size(); ++i) {
         PandaString descr = "Lstd/core/Function" + PandaString(std::to_string(i)) + ";";
@@ -179,95 +174,9 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
         updateOffset(&coreFunctionRs[i]);
     }
 
-    findType(&EtsPlatformTypes::coreTuple, TUPLE);
-    findType(&EtsPlatformTypes::coreTupleN, TUPLEN);
-
-    findType(&EtsPlatformTypes::coreRuntimeLinker, RUNTIME_LINKER);
-    findType(&EtsPlatformTypes::coreBootRuntimeLinker, BOOT_RUNTIME_LINKER);
-    findType(&EtsPlatformTypes::coreAbcRuntimeLinker, ABC_RUNTIME_LINKER);
-    findType(&EtsPlatformTypes::coreMemoryRuntimeLinker, MEMORY_RUNTIME_LINKER);
-    findType(&EtsPlatformTypes::coreAbcFile, ABC_FILE);
-
-    findType(&EtsPlatformTypes::coreOutOfMemoryError, OUT_OF_MEMORY_ERROR);
-    findType(&EtsPlatformTypes::coreException, EXCEPTION);
-    findType(&EtsPlatformTypes::coreStackTraceElement, STACK_TRACE_ELEMENT);
-
-    findType(&EtsPlatformTypes::coreStringBuilder, STRING_BUILDER);
-
-    findType(&EtsPlatformTypes::corePromise, PROMISE);
-    findType(&EtsPlatformTypes::coreJob, JOB);
-
-    findMethod(&EtsPlatformTypes::corePromiseSubscribeOnAnotherPromise, corePromise, "subscribeOnAnotherPromise",
-               "Lstd/core/PromiseLike;:V", false);
-    findType(&EtsPlatformTypes::corePromiseRef, PROMISE_REF);
-    findType(&EtsPlatformTypes::coreWaitersList, WAITERS_LIST);
-    findType(&EtsPlatformTypes::coreMutex, MUTEX);
-    findType(&EtsPlatformTypes::coreEvent, EVENT);
-    findType(&EtsPlatformTypes::coreCondVar, COND_VAR);
-    findType(&EtsPlatformTypes::coreQueueSpinlock, QUEUE_SPINLOCK);
-    findType(&EtsPlatformTypes::coreRWLock, RW_LOCK);
-
-    findType(&EtsPlatformTypes::coreFinalizableWeakRef, FINALIZABLE_WEAK_REF);
-    findType(&EtsPlatformTypes::coreFinalizationRegistry, FINALIZATION_REGISTRY);
-    findMethod(&EtsPlatformTypes::coreFinalizationRegistryExecCleanup, coreFinalizationRegistry, "execCleanup",
-               "[Lstd/core/WeakRef;I:V", true);
-
-    findType(&EtsPlatformTypes::escompatArray, ARRAY);
-    findMethod(&EtsPlatformTypes::escompatArrayPush, escompatArray, "pushSingle", "Lstd/core/Object;:V", false);
-    findMethod(&EtsPlatformTypes::escompatArrayPop, escompatArray, "pop", ":Lstd/core/Object;", false);
-    findType(&EtsPlatformTypes::escompatArrayBuffer, ARRAY_BUFFER);
-    findType(&EtsPlatformTypes::escompatInt8Array, INT8_ARRAY);
-    findType(&EtsPlatformTypes::escompatUint8Array, UINT8_ARRAY);
-    findType(&EtsPlatformTypes::escompatUint8ClampedArray, UINT8_CLAMPED_ARRAY);
-    findType(&EtsPlatformTypes::escompatInt16Array, INT16_ARRAY);
-    findType(&EtsPlatformTypes::escompatUint16Array, UINT16_ARRAY);
-    findType(&EtsPlatformTypes::escompatInt32Array, INT32_ARRAY);
-    findType(&EtsPlatformTypes::escompatUint32Array, UINT32_ARRAY);
-    findType(&EtsPlatformTypes::escompatFloat32Array, FLOAT32_ARRAY);
-    findType(&EtsPlatformTypes::escompatFloat64Array, FLOAT64_ARRAY);
-    findType(&EtsPlatformTypes::escompatBigInt64Array, BIG_INT64_ARRAY);
-    findType(&EtsPlatformTypes::escompatBigUint64Array, BIG_UINT64_ARRAY);
-    findType(&EtsPlatformTypes::containersArrayAsListInt, ARRAY_AS_LIST_INT);
-    findType(&EtsPlatformTypes::escompatRecord, RECORD);
-    findMethod(&EtsPlatformTypes::escompatRecordGetter, escompatRecord, GET_INDEX_METHOD, nullptr, false);
-    findMethod(&EtsPlatformTypes::escompatRecordSetter, escompatRecord, SET_INDEX_METHOD, nullptr, false);
-
-    findType(&EtsPlatformTypes::interopJSValue, JS_VALUE);
-
-    findType(&EtsPlatformTypes::coreField, FIELD);
-    findType(&EtsPlatformTypes::coreMethod, METHOD);
-    findType(&EtsPlatformTypes::coreTypeAPIParameter, PARAMETER);
-    findType(&EtsPlatformTypes::coreClassType, CLASS_TYPE);
-
-    findType(&EtsPlatformTypes::reflectInstanceField, REFLECT_INSTANCE_FIELD);
-    findType(&EtsPlatformTypes::reflectInstanceMethod, REFLECT_INSTANCE_METHOD);
-    findType(&EtsPlatformTypes::reflectStaticField, REFLECT_STATIC_FIELD);
-    findType(&EtsPlatformTypes::reflectStaticMethod, REFLECT_STATIC_METHOD);
-    findType(&EtsPlatformTypes::reflectConstructor, REFLECT_CONSTRUCTOR);
-
-    findType(&EtsPlatformTypes::coreReflectProxy, PROXY);
-    findMethod(&EtsPlatformTypes::coreReflectProxyConstructor, coreReflectProxy, "<ctor>",
-               "Lstd/core/reflect/InvocationHandler;:V", false);
-    findMethod(&EtsPlatformTypes::coreReflectProxyInvoke, coreReflectProxy, "invoke", nullptr, true);
-    findMethod(&EtsPlatformTypes::coreReflectProxyInvokeSet, coreReflectProxy, "invokeSet", nullptr, true);
-    findMethod(&EtsPlatformTypes::coreReflectProxyInvokeGet, coreReflectProxy, "invokeGet", nullptr, true);
-
-    findType(&EtsPlatformTypes::escompatProcess, PROCESS);
-    findMethod(&EtsPlatformTypes::escompatProcessListUnhandledJobs, escompatProcess, "listUnhandledJobs",
-               "Lescompat/Array;:V", true);
-    findMethod(&EtsPlatformTypes::escompatProcessListUnhandledPromises, escompatProcess, "listUnhandledPromises",
-               "Lescompat/Array;:V", true);
-
-    findType(&EtsPlatformTypes::escompatRegExpExecArray, REG_EXP_EXEC_ARRAY);
-    findType(&EtsPlatformTypes::escompatJsonReplacer, JSON_REPLACER);
-    findType(&EtsPlatformTypes::escompatErrorOptions, ERROR_OPTIONS);
-    findType(&EtsPlatformTypes::escompatErrorOptionsImpl, ERROR_OPTIONS_IMPL);
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
         CreateAndInitializeCaches();
     }
-
-    findType(&EtsPlatformTypes::escompatMap, MAP);
-    findType(&EtsPlatformTypes::escompatMapEntry, MAPENTRY);
 }
 
 void EtsPlatformTypes::InitializeClasses(EtsCoroutine *coro)

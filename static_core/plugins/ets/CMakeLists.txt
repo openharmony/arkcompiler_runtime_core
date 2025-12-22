@@ -53,15 +53,13 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
 
     set(COMPILE_DEPENDENCIES)
     set(E2P)
+    
     get_filename_component(OUTPUT_DIR ${OUTPUT_ABC} DIRECTORY)
     file(MAKE_DIRECTORY ${OUTPUT_DIR})
 
     if ("${ETS_SRC}" STREQUAL "GEN_STD_LIB")
         set(E2P ${es2panda_bin_stdlib})
-        set(DECLS_DST_DIR "${OUTPUT_DIR}/stdlib/decls")
-        file(MAKE_DIRECTORY ${DECLS_DST_DIR})
         list(APPEND ES2PANDA_ARGUMENTS "--gen-stdlib=true")
-        list(APPEND ES2PANDA_ARGUMENTS "--generate-decl:enabled,path=${DECLS_DST_DIR}")
         list(APPEND ES2PANDA_ARGUMENTS "--arktsconfig=${STDLIB}/stdconfig.json")
 
         set(STAMP "${OUTPUT_ABC}.stamp")
@@ -199,7 +197,7 @@ if(TARGET es2panda)
             ${RUN_VERIFIER_DST_DIR}/run_verifier.sh
             COPYONLY
         )
-        add_custom_command(TARGET etsstdlib 
+        add_custom_command(TARGET etsstdlib
             COMMAND bash -c "${RUN_VERIFIER_DST_DIR}/run_verifier.sh '${verifier_bin}' '${ETS_STD_LIB}'" -P
         )
 

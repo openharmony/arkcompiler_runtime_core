@@ -23,6 +23,7 @@ set(COMPILER_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/optimizer/ets_intrinsics_peephole.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/optimizer/ets_codegen_extensions.cpp
   ${PANDA_ETS_PLUGIN_SOURCE}/compiler/ir_build_intrinsics_ets.cpp
+  ${PANDA_ETS_PLUGIN_SOURCE}/compiler/runtime_adapter_ets.cpp
 )
 
 if (NOT PANDA_TARGET_MACOS)
@@ -42,7 +43,7 @@ if (PANDA_ETS_INTEROP_JS)
       DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
       TEMPLATE ${PANDA_ETS_PLUGIN_SOURCE}/compiler/optimizer/interop_intrinsic_kinds.h.erb
       API ${PANDA_ROOT}/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb
-      REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
+      REQUIRES ${PANDA_ROOT}/libarkbase/utils.rb
       EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
       OUTPUTFILE ${INTEROP_INTRINSIC_KINDS_H}
   )

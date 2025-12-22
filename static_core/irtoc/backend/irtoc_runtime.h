@@ -21,10 +21,10 @@
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "compilation.h"
 #include "irtoc_interface_extensions_includes.inl.h"
-#include "libpandabase/mem/gc_barrier.h"
+#include "libarkbase/mem/gc_barrier.h"
 #include "runtime/mem/gc/g1/g1-allocator_constants.h"
 #include "runtime/include/hclass.h"
-#include "libpandabase/utils/bit_utils.h"
+#include "libarkbase/utils/bit_utils.h"
 
 namespace ark::irtoc {
 

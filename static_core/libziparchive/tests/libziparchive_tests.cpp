@@ -14,9 +14,9 @@
  */
 
 #include "zip_archive.h"
-#include "libpandafile/file.h"
-#include "os/file.h"
-#include "os/mem.h"
+#include "libarkfile/file.h"
+#include "libarkbase/os/file.h"
+#include "libarkbase/os/mem.h"
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"

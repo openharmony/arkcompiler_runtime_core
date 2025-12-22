@@ -107,7 +107,6 @@ private:
     void CheckInputType(Inst *inst);
 #ifdef COMPILER_DEBUG_CHECKS
     bool NeedCheckSaveState();
-    void PrepareUsers(Inst *inst, ArenaVector<User *> *users);
     bool IsPhiSafeToSkipObjectCheck(Inst *inst, Marker visited);
     bool IsPhiUserSafeToSkipObjectCheck(Inst *inst, Marker visited);
     void CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users);
@@ -190,8 +189,8 @@ private:
     static PANDA_PUBLIC_API void VisitFillConstArray([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitStoreResolvedObjectFieldStatic([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadStatic([[maybe_unused]] GraphVisitor *v, Inst *inst);
-    static PANDA_PUBLIC_API void VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst);
-    static PANDA_PUBLIC_API void VisitLoadAndInitClass([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitLoadClass([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static PANDA_PUBLIC_API void VisitLoadAndInitClass([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitUnresolvedLoadAndInitClass([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitGetInstanceClass([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitNewObject([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -236,6 +235,8 @@ private:
                                                              [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitSelectImmNotReference([[maybe_unused]] GraphVisitor *v,
                                                             [[maybe_unused]] Inst *inst);
+    static PANDA_PUBLIC_API void VisitSelectTransform(GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitSelectImmTransform(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitIf([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitIfImm([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitTry([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -254,6 +255,7 @@ private:
     static PANDA_PUBLIC_API void VisitAndNotSR(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitOrNotSR(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitXorNotSR(GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitExtractBitfield(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitNegSR([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitCompareAnyType(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitCastAnyTypeValue(GraphVisitor *v, Inst *inst);
@@ -269,6 +271,7 @@ private:
     static PANDA_PUBLIC_API void VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitCallNative(GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitStringFlatCheck(GraphVisitor *v, Inst *inst);
 
 #include "visitor.inc"
 

@@ -29,17 +29,11 @@ function max(a: int, b: int): int {
     return (a > b) ? a : b;
 }
 
-function delayWithYield(duration: int): void {
-    let t = Date.now();
-    while ((Date.now() - t) < duration) {}
-    Coroutine.Schedule();
-}
-
-function launchImpl(func: () => NullishType): Promise<NullishType> {
-    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+function launchImpl(func: () => Any): Promise<Any> {
+    const job: Job<Any> = launch<Any, () => Any>(
         func
     );
-    return new Promise<NullishType>((resolve, reject) => {
+    return new Promise<Any>((resolve, reject) => {
         try {
             let res = job.Await();
             resolve(res);
@@ -75,21 +69,14 @@ async function executeDelayedTest() {
     }, new Error('taskpool:: groupTask cannot executeDelayed outside'));
 }
 
-function testPeriodFunc(): NullishType {
+function testPeriodFunc(): Any {
     let task = new taskpool.Task(sum, 100, 300);
     taskpool.executePeriodically(200, task);
-    let isTaskCanceled: AtomicFlag = new AtomicFlag(false);
-    setTimeout(() => {
-        taskpool.cancel(task);
-        isTaskCanceled.set(true);
-    }, 50);
-    while (!isTaskCanceled.get()) {
-        delayWithYield(50);
-    }
     let g = new taskpool.TaskGroup();
     arktest.expectError(() => {
         g.addTask(task);
     }, new Error('taskpool:: The interface does not support the periodicTask'));
+    taskpool.cancel(task);
     return 'success';
 }
 

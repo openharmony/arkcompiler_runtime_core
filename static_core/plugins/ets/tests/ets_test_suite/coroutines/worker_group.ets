@@ -216,7 +216,9 @@ function testEADomain() {
 
 function testInvalidGroupId() {
     const params: LaunchParams = {workerGroupId: WorkerGroup.INVALID_ID};
-    arktest.expectThrow(() => { launch<void, () => void>((): void => {}, params).Await(); });
+    arktest.expectThrow(() => { launch<void, () => void>((): void => {}, params).Await(); }, (e: Error) => {
+        return (e as Error).message === 'Cannot launch with invalid group id!';
+    });
 }
 
 function main(): int {

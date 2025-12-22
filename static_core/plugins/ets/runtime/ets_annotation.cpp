@@ -15,8 +15,8 @@
 
 #include "plugins/ets/runtime/ets_annotation.h"
 
-#include "libpandafile/annotation_data_accessor.h"
-#include "libpandafile/method_data_accessor-inl.h"
+#include "libarkfile/annotation_data_accessor.h"
+#include "libarkfile/method_data_accessor-inl.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "runtime/include/method.h"
 

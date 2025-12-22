@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define ABC2PROGRAM_ABC_METHOD_PROCESSOR_H
 
 #include "abc_file_entity_processor.h"
-#include "method_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor-inl.h"
 
 namespace ark::abc2program {
 

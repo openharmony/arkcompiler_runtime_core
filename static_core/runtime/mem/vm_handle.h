@@ -15,7 +15,7 @@
 #ifndef RUNTIME_MEM_OBJECT_VMHANDLE_H
 #define RUNTIME_MEM_OBJECT_VMHANDLE_H
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/handle_base.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/handle_scope.h"

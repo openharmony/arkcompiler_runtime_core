@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_HCLASS_H_
 #define PANDA_RUNTIME_HCLASS_H_
 
-#include "mem/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "mem/vm_handle.h"
 #include "runtime/include/class.h"
 

@@ -14,13 +14,13 @@
  */
 
 #include "intrinsics.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/refstorage/reference.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -92,7 +92,7 @@ Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limit
     return exclusiveCoro;
 }
 
-static constexpr uint64_t ASYNC_WORK_WAITING_TIME = 10;
+static constexpr uint64_t ASYNC_WORK_WAITING_TIME = 100 * 1000U;
 
 void RunTaskOnEACoroutine(PandaEtsVM *etsVM, bool needInterop, mem::Reference *taskRef)
 {
@@ -121,6 +121,19 @@ bool HasPendingError(bool limitIsReached, bool jsEnvEmpty)
         return true;
     }
     return false;
+}
+
+void DestroyExclusiveWorker(PandaEtsVM *etsVM, bool supportInterop)
+{
+    auto *coroMan = etsVM->GetCoroutineManager();
+    if (supportInterop) {
+        auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+        auto *jsEnv = ifaceTable->GetJSEnv();
+        coroMan->DestroyExclusiveWorker();
+        ifaceTable->CleanUpJSEnv(jsEnv);
+    } else {
+        coroMan->DestroyExclusiveWorker();
+    }
 }
 
 EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
@@ -162,7 +175,7 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
             workerId = eaCoro->GetWorker()->GetId();
             event.Fire();
             RunTaskOnEACoroutine(etsVM, supportInterop, taskRef);
-            etsVM->GetCoroutineManager()->DestroyExclusiveWorker();
+            DestroyExclusiveWorker(etsVM, supportInterop);
         });
         os::thread::SetThreadName(t.native_handle(), nameStr.c_str());
         event.Wait();
@@ -187,7 +200,8 @@ void JoinExclusiveWorker(EtsInt workerId, EtsObject *finalTask)
         RunExclusiveTask(ref, eaCoro->GetVM()->GetGlobalObjectStorage());
         eaCoro->GetWorker()->DestroyCallbackPoster();
     };
-    coroMan->LaunchNative(joiningFunc, taskRef, "joining ea-coro", eaGroup, CoroutinePriority::DEFAULT_PRIORITY, true);
+    coroMan->LaunchNative(joiningFunc, taskRef, "joining ea-coro", eaGroup, CoroutinePriority::DEFAULT_PRIORITY, false,
+                          true);
 }
 
 }  // namespace ark::ets::intrinsics

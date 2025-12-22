@@ -23,7 +23,7 @@ enum JobStatus { RUNNING = 0, FINISHED = 1, FAILED = 2 }
  */
 export class Job<T> {
 
-    private constructor() {}
+    protected constructor() {}
 
 
     /**
@@ -94,5 +94,5 @@ export final class CompletableJob<T> extends Job<T>
     }
 
     private native finishImpl<U>(value: U): void
-    private native failImpl(error: NullishType): void
+    private native failImpl(error: Any): void
 }

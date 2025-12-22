@@ -17,7 +17,7 @@
 #define PANDA_IR_INTERFACE_H
 
 #include "assembler/assembly-emitter.h"
-#include "libpandafile/method_data_accessor-inl.h"
+#include "libarkfile/method_data_accessor-inl.h"
 #include "compiler/optimizer/ir/constants.h"
 
 namespace ark::bytecodeopt {

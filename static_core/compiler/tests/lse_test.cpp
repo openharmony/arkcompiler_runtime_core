@@ -4296,7 +4296,9 @@ OUT_GRAPH(EliminateOverSaveStateDeoptimize, Graph *graph)
             INST(6U, Opcode::StoreObject).ref().Inputs(0U, 1U).TypeId(122U);
             INST(12U, Opcode::LoadObject).ref().Inputs(0U).TypeId(124U);
 
-            INST(7U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
+            INST(7U, Opcode::SaveStateDeoptimize)
+                .Inputs(0U, 1U, 12U)
+                .SrcVregs({0U, VirtualRegister::BRIDGE, VirtualRegister::BRIDGE});
             INST(14U, Opcode::StoreObject).s32().Inputs(0U, 3U).TypeId(123U);
 
             INST(16U, Opcode::SaveState).Inputs(12U, 1U, 12U).SrcVregs({0U, 1U, 2U});

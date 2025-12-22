@@ -16,26 +16,16 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ESCOMPAT_ARRAY_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ESCOMPAT_ARRAY_H
 
-#include <cstdint>
-
-#include "libpandabase/macros.h"
-#include "libpandabase/mem/object_pointer.h"
-#include "runtime/include/thread.h"
-#include "runtime/include/managed_thread.h"
-#include "runtime/coroutines/coroutine.h"
-#include "runtime/entrypoints/entrypoints.h"
-#include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "libarkbase/mem/object_pointer.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/types/ets_box_primitive.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 
 namespace ark::ets {
 
 namespace test {
-class EtsEscompatArrayMembers;
+class EtsEscompatArrayTest;
 }  // namespace test
 
 // Mirror class for Array<T> from ETS stdlib
@@ -62,22 +52,6 @@ public:
         return reinterpret_cast<EtsEscompatArray *>(etsObj);
     }
 
-    EtsObjectArray *GetData()
-    {
-        auto *buff = ObjectAccessor::GetObject(this, GetBufferOffset());
-        return EtsObjectArray::FromCoreType(buff);
-    }
-
-    uint32_t GetActualLength()
-    {
-        return ObjectAccessor::GetFieldPrimitive<uint32_t>(this, GetActualLengthOffset(), std::memory_order_relaxed);
-    }
-
-    void SetActualLength(uint32_t newLength)
-    {
-        SetFieldPrimitive(GetActualLengthOffset(), newLength);
-    }
-
     static constexpr size_t GetBufferOffset()
     {
         return MEMBER_OFFSET(EtsEscompatArray, buffer_);
@@ -88,83 +62,100 @@ public:
         return MEMBER_OFFSET(EtsEscompatArray, actualLength_);
     }
 
-    static EtsEscompatArray *Create(size_t length)
+    /// @brief Creates instance of `std.core.Array` with given length
+    static EtsEscompatArray *Create(EtsCoroutine *coro, size_t length);
+
+    /// @brief Checks whether the object's real type is `std.core.Array`
+    static bool IsExactlyEscompatArray(const EtsObject *obj, EtsCoroutine *coro)
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro->HasPendingException() == false);
-
-        EtsHandleScope scope(coro);
-
-        const EtsPlatformTypes *platformTypes = PlatformTypes();
-
-        // Create escompat array
-        EtsClass *klass = platformTypes->escompatArray;
-        EtsHandle<EtsEscompatArray> arrayHandle(coro, FromEtsObject(EtsObject::Create(klass)));
-
-        // Create fixed array, field of escompat
-        EtsClass *cls = platformTypes->coreObject;
-        auto buffer = EtsObjectArray::Create(cls, length);
-        ObjectAccessor::SetObject(coro, arrayHandle.GetPtr(), GetBufferOffset(), buffer->GetCoreType());
-
-        // Set length
-        arrayHandle->actualLength_ = length;
-
-        return arrayHandle.GetPtr();
+        return obj->GetClass() == PlatformTypes(coro)->escompatArray;  // NOLINT (readability-implicit-bool-conversion)
     }
 
-    /// @return Returns a status code of bool indicating success or failure.
-    bool SetRef(size_t index, EtsObject *ref)
+    /// @brief Checks whether the object's real type is `std.core.Array`
+    bool IsExactlyEscompatArray(EtsCoroutine *coro) const
     {
-        if (index >= GetActualLength()) {
-            return false;
-        }
-
-        GetData()->Set(index, ref);
-        return true;
+        return EtsEscompatArray::IsExactlyEscompatArray(this, coro);
     }
 
-    /// @return Returns a status code of bool indicating success or failure.
-    bool GetRef(size_t index, EtsObject **ref)
-    {
-        ASSERT(ref != nullptr);
-        if (index >= GetActualLength()) {
-            return false;
-        }
+    /// @brief Implementation of `std.core.Array` method `$_get`
+    EtsObject *EscompatArrayGet(EtsInt index);
 
-        *ref = GetData()->Get(index);
-        return true;
+    /// @brief Implementation of `std.core.Array` method `$_set`
+    void EscompatArraySet(EtsInt index, EtsObject *value);
+
+    /// @brief Implementation of `std.core.Array` method `$_set_unsafe`
+    EtsObject *EscompatArrayGetUnsafe(EtsInt index);
+
+    /// @brief Implementation of `std.core.Array` method `$_get_unsafe`
+    void EscompatArraySetUnsafe(EtsInt index, EtsObject *value);
+
+    /**
+     * @brief Implementation of `std.core.Array` method `pop`
+     * Note that this method is valid only when `values` array is exactly `std.core.Array`.
+     * Implementation of this method must be aligned with managed implementation of `pop` method
+     */
+    EtsObject *EscompatArrayPop();
+
+    /// @brief Returns underlying buffer, object must be exactly `std.core.Array`
+    EtsObjectArray *GetDataFromEscompatArray()
+    {
+        ASSERT(IsExactlyEscompatArray(EtsCoroutine::GetCurrent()));
+        return GetDataFromEscompatArrayImpl();
     }
 
-    void Push(EtsObject *ref)
+    /// @brief Returns `actualLength` of array, object must be exactly `std.core.Array`
+    EtsInt GetActualLengthFromEscompatArray()
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro->HasPendingException() == false);
-
-        EtsHandleScope scope(coro);
-
-        auto *pushMethod = PlatformTypes()->escompatArrayPush;
-        ASSERT(pushMethod != nullptr);
-
-        std::array args {Value(GetCoreType()), Value(ref->GetCoreType())};
-        pushMethod->GetPandaMethod()->Invoke(coro, args.data());
+        ASSERT(IsExactlyEscompatArray(EtsCoroutine::GetCurrent()));
+        return GetActualLengthFromEscompatArrayImpl();
     }
 
-    EtsObject *Pop()
+    /**
+     * @brief Returns length of array according to possible inheritance of underlying array
+     * Note that this method is potentially throwing
+     */
+    bool GetLength(EtsCoroutine *coro, EtsInt *result);
+
+    /**
+     * @brief Sets value at index according to possible inheritance of underlying array
+     * Note that this method is potentially throwing
+     */
+    bool SetRef(EtsCoroutine *coro, size_t index, EtsObject *ref);
+
+    /**
+     * @brief Gets value at index according to possible inheritance of underlying array
+     * Note that this method is potentially throwing
+     */
+    std::optional<EtsObject *> GetRef(EtsCoroutine *coro, size_t index);
+
+    /**
+     * @brief Pop from array according to possible inheritance of underlying array
+     * Note that this method is potentially throwing
+     */
+    EtsObject *Pop(EtsCoroutine *coro);
+
+private:
+    EtsObjectArray *GetDataFromEscompatArrayImpl()
     {
-        if (actualLength_ == 0) {
-            return nullptr;
-        }
-        auto ref = GetData()->Get(actualLength_ - 1);
-        GetData()->Set(actualLength_ - 1, nullptr);
-        actualLength_--;
-        return ref;
+        auto *buff = ObjectAccessor::GetObject(this, GetBufferOffset());
+        return EtsObjectArray::FromCoreType(buff);
+    }
+
+    EtsInt GetActualLengthFromEscompatArrayImpl()
+    {
+        return ObjectAccessor::GetFieldPrimitive<EtsInt>(this, GetActualLengthOffset(), std::memory_order_relaxed);
+    }
+
+    void SetActualLengthFromEscompatArrayImpl(EtsInt value)
+    {
+        ObjectAccessor::SetFieldPrimitive<EtsInt>(this, GetActualLengthOffset(), value, std::memory_order_relaxed);
     }
 
 private:
     ObjectPointer<EtsObjectArray> buffer_;
     EtsInt actualLength_;
 
-    friend class test::EtsEscompatArrayMembers;
+    friend class test::EtsEscompatArrayTest;
 };
 
 }  // namespace ark::ets

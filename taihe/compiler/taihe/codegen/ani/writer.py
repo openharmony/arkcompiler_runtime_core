@@ -81,7 +81,7 @@ class StsWriter(FileWriter):
     def write_prologue(self, f: TextIO):
         f.write('"use static";\n')
         for import_name, decl_pair in self.import_dict.items():
-            module_name, decl_name = decl_pair
+            module_path, decl_name = decl_pair
             if decl_name is None:
                 import_str = f"* as {import_name}"
             elif decl_name == "default":
@@ -90,31 +90,31 @@ class StsWriter(FileWriter):
                 import_str = f"{{{decl_name}}}"
             else:
                 import_str = f"{{{decl_name} as {import_name}}}"
-            f.write(f"import {import_str} from '{module_name}';\n")
+            f.write(f"import {import_str} from '{module_path}';\n")
 
     def add_import_module(
         self,
-        module_name: str,
+        module_path: str,
         import_name: str,
     ):
-        self._add_import(import_name, (module_name, None))
+        self._add_import(import_name, (module_path, None))
 
     def add_import_default(
         self,
-        module_name: str,
+        module_path: str,
         import_name: str,
     ):
-        self._add_import(import_name, (module_name, "default"))
+        self._add_import(import_name, (module_path, "default"))
 
     def add_import_decl(
         self,
-        module_name: str,
+        module_path: str,
         decl_name: str,
         import_name: str | None = None,
     ):
         if import_name is None:
             import_name = decl_name
-        self._add_import(import_name, (module_name, decl_name))
+        self._add_import(import_name, (module_path, decl_name))
 
     def _add_import(
         self,

@@ -15,9 +15,9 @@
 #ifndef PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
 #define PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
 
-#include "libpandabase/os/mutex.h"
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class_root.h"
 #include "runtime/include/class.h"
@@ -28,6 +28,11 @@ namespace ark {
 class ClassLinker;
 class ClassLinkerErrorHandler;
 
+/**
+ * @brief Base class for class loading extensions.
+ * Plugins must extend this class in order to define language-specific operations with classes.
+ * `ClassLinkerExtension` instances are owned by `ClassLinker` in a one-to-many relationship.
+ */
 class ClassLinkerExtension {
 public:
     explicit ClassLinkerExtension(panda_file::SourceLang lang) : lang_(lang), bootContext_(this) {}
@@ -47,6 +52,8 @@ public:
     {
         return false;
     }
+
+    virtual void InitializeSyntheticClass(Class *synClass) = 0;
 
     virtual void InitializePrimitiveClass(Class *primitiveClass) = 0;
 
@@ -97,12 +104,6 @@ public:
     virtual ClassLinkerContext *CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path);
 
     virtual ClassLinkerContext *GetCommonContext([[maybe_unused]] Span<Class *> classes) const
-    {
-        UNREACHABLE();
-    }
-
-    virtual const uint8_t *ComputeLUB([[maybe_unused]] const ClassLinkerContext *ctx,
-                                      [[maybe_unused]] const uint8_t *descriptor)
     {
         UNREACHABLE();
     }
@@ -282,6 +283,8 @@ protected:
     void InitializePrimitiveClassRoot(ClassRoot root, panda_file::Type::TypeId typeId, const char *descriptor);
 
     void InitializeArrayClassRoot(ClassRoot root, ClassRoot componentRoot, const char *descriptor);
+
+    void InitializeSyntheticClassRoot(ClassRoot root, const char *descriptor);
 
     void FreeLoadedClasses();
 

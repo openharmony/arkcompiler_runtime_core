@@ -20,7 +20,7 @@ assert: Exception propagation occurs in two cases. If a call of a throwing funct
 
 class A {
   public constructor() throws {
-    throw new Exception();
+    throw new Error();
   }
 }
 

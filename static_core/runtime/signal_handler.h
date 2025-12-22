@@ -20,9 +20,9 @@
 #include <cstdint>
 #include <iostream>
 #include <vector>
-#include <libpandabase/macros.h>
+#include <libarkbase/macros.h>
 #include "runtime/include/mem/panda_containers.h"
-#include "libpandabase/os/sighook.h"
+#include "libarkbase/os/sighook.h"
 
 namespace ark {
 

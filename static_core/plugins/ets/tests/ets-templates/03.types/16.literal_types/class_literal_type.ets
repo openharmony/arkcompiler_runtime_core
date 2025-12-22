@@ -20,7 +20,6 @@ desc: >-
     Their names are same as the names of their values, i.e., literals.
     Only three literal types are supported - string, null and undefined.
     {{c.doc}}
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl|indent}}

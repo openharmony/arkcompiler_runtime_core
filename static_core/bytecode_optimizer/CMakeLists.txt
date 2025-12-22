@@ -21,6 +21,7 @@ set(BYTECODE_OPT_SOURCES
     canonicalization.cpp
     codegen.cpp
     bytecodeopt_peepholes.cpp
+    call_devirtualization.cpp
     optimize_bytecode.cpp
     reg_acc_alloc.cpp
     reg_encoder.cpp
@@ -88,6 +89,7 @@ set(BYTECODE_OPT_TEST_SOURCES
     tests/check_resolver_test.cpp
     tests/canonicalization_test.cpp
     tests/irbuilder_test.cpp
+    tests/bytecodeopt_peepholes_initobj.cpp
 )
 
 panda_add_gtest(

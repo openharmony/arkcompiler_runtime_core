@@ -17,11 +17,11 @@
 #include <algorithm>
 #include <thread>
 
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/os/mem.h"
-#include "libpandabase/utils/asan_interface.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/math_helpers.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/os/mem.h"
+#include "libarkbase/utils/asan_interface.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/math_helpers.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/alloc_config.h"
 #include "runtime/mem/tlab.h"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,9 +16,11 @@
 #
 
 import logging
+import os
 
 from vmb.unit import BenchUnit
 from vmb.hook import HookBase
+from vmb.helpers import copy_file
 
 log = logging.getLogger('vmb')
 
@@ -33,4 +35,8 @@ class Hook(HookBase):
     def before_unit(self, bu: BenchUnit) -> None:
         for lib in {js.with_suffix('')
                     for js in bu.libs('.mjs', '.ts')}:
-            lib.symlink_to(lib.with_suffix('.mjs').resolve())
+            dest = lib.with_suffix('.mjs').resolve()
+            if 'nt' == os.name:
+                copy_file(dest, lib)  # no symlinks on nt
+                continue
+            lib.symlink_to(dest)

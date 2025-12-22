@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
 
-#include "libpandabase/trace/trace.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/trace/trace.h"
+#include "libarkbase/utils/logger.h"
 #include "runtime/include/object_header-inl.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/gc_root-inl.h"

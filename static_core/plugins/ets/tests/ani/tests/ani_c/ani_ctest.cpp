@@ -29,6 +29,6 @@ TEST_F(FindClassTest, has_class)
     auto status = ANI_CLIB_FindClass(env_, "ani_ctest.Point", &cls);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(cls, nullptr);
-};
+}
 
 }  // namespace ark::ets::ani::testing

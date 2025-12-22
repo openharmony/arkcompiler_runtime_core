@@ -73,7 +73,7 @@ function testBasicOperations() {
     let itemArr = ["aa", "bb", "cc"]
     let item: string;
     let i: int = 0;
-    for (item in treeSet) {
+    for (item of treeSet) {
         arktest.assertEQ(item, itemArr[i]);
         i++;
     }

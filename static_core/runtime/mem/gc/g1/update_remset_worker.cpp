@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 #include "runtime/mem/gc/g1/update_remset_worker.h"
-
+#include "runtime/mem/gc/g1/update_remset_worker-inl.h"
 #include "mem/gc/card_table.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/panda_vm.h"
@@ -175,18 +175,11 @@ bool UpdateRemsetWorker<LanguageConfig>::NeedProcessHotCards()
 template <class LanguageConfig>
 size_t UpdateRemsetWorker<LanguageConfig>::ProcessAllCards()
 {
-    size_t processedCardsCnt = ProcessCommonCards();
+    auto emptyHandler = [](ObjectHeader *, size_t) {};
+    size_t processedCardsCnt = ProcessCommonCards(emptyHandler);
     if (NeedProcessHotCards()) {
-        processedCardsCnt += ProcessHotCards();
+        processedCardsCnt += ProcessHotCards(emptyHandler);
     }
-    return processedCardsCnt;
-}
-
-template <class LanguageConfig>
-size_t UpdateRemsetWorker<LanguageConfig>::ProcessHotCards()
-{
-    CardHandler<LanguageConfig> cardHandler(gc_->GetCardTable(), regionSizeBits_, deferCards_);
-    auto processedCardsCnt = hotCards_.HandleCards(cardHandler);
     return processedCardsCnt;
 }
 
@@ -218,38 +211,6 @@ void UpdateRemsetWorker<LanguageConfig>::UpdateCardStatus(CardTable::CardPtr car
 }
 
 template <class LanguageConfig>
-size_t UpdateRemsetWorker<LanguageConfig>::ProcessCommonCards()
-{
-    FillFromQueue(&cards_);
-    FillFromThreads(&cards_);
-    FillFromPostBarrierBuffers(&cards_);
-
-    std::for_each(cards_.begin(), cards_.end(), [this](auto *card) { UpdateCardStatus(card); });
-
-    // clear cards before we process it, because parallel mutator thread can make a write and we would miss it
-    arch::StoreLoadBarrier();
-
-    LOG_IF(!cards_.empty(), DEBUG, GC) << "Started process: " << cards_.size() << " cards";
-
-    size_t cardsSize = 0;
-    CardHandler<LanguageConfig> cardHandler(gc_->GetCardTable(), regionSizeBits_, deferCards_);
-    for (auto it = cards_.begin(); it != cards_.end();) {
-        auto cardPtr = *it;
-        if (!cardPtr->IsHot()) {
-            if (!cardHandler.Handle(cardPtr)) {
-                break;
-            }
-            ++cardsSize;
-        }
-        it = cards_.erase(it);
-    }
-    LOG_IF(!cards_.empty(), DEBUG, GC) << "Processed " << cardsSize << " cards";
-
-    hotCards_.DecrementHotValue();
-    return cardsSize;
-}
-
-template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::DrainAllCards(PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
     ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD));
@@ -259,16 +220,6 @@ void UpdateRemsetWorker<LanguageConfig>::DrainAllCards(PandaUnorderedSet<CardTab
     FillFromThreads(cards);
     FillFromPostBarrierBuffers(cards);
     FillFromHotCards(cards);
-}
-
-template <class LanguageConfig>
-void UpdateRemsetWorker<LanguageConfig>::GCProcessCards()
-{
-    ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD));
-    os::memory::LockHolder holder(updateRemsetLock_);
-    ProcessCommonCards();
-    ProcessHotCards();
-    hotCards_.ClearHotCards();
 }
 
 template <class LanguageConfig>

@@ -13,34 +13,52 @@
  * limitations under the License.
  */
 
-import { A } from "missing_js"
-
 function Test1(): int {
-    let a: A = { name: "Edalyn", age: 30, location: "Boiling Isles" };
-    if (a.name as String != "Edalyn") {
+    let a = ESValue.instantiateEmptyObject();
+    a.setProperty('name', 'Edalyn');
+    a.setProperty('age', 30);
+    a.setProperty('location', 'Boiling Isles');
+
+    let nameValue = a.getProperty('name');
+    if (!nameValue.isString() || nameValue.toString() !== 'Edalyn') {
         return 1;
     }
-    if (a.age as int != 30) {
+
+    let ageValue = a.getProperty('age');
+    if (!ageValue.isNumber() || ageValue.toNumber() !== 30) {
         return 2;
     }
-    if (a.location as String != "Boiling Isles") {
+
+    let locationValue = a.getProperty('location');
+    if (!locationValue.isString() || locationValue.toString() !== 'Boiling Isles') {
         return 3;
     }
+
     return 0;
 }
 
 function Test2(): int {
-    let a: A = { name: "Luz", age: 13, location: "Boiling Isles" };
-    a.name = "king";
-    if (a.name as String != "king") {
+    let a = ESValue.instantiateEmptyObject();
+    a.setProperty('name', 'Luz');
+    a.setProperty('age', 13);
+    a.setProperty('location', 'Boiling Isles');
+
+    a.setProperty('name', 'king');
+    let nameValue = a.getProperty('name');
+    if (!nameValue.isString() || nameValue.toString() !== 'king') {
         return 1;
     }
-    a.age = 5;
-    if (a.age as int != 5) {
+
+    a.setProperty('age', 5);
+    let ageValue = a.getProperty('age');
+    if (!ageValue.isNumber() || ageValue.toNumber() !== 5) {
         return 2;
     }
-    if (a.location as String != "Boiling Isles") {
+
+    let locationValue = a.getProperty('location');
+    if (!locationValue.isString() || locationValue.toString() !== 'Boiling Isles') {
         return 3;
     }
+
     return 0;
 }

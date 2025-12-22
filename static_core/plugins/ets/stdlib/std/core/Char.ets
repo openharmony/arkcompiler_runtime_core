@@ -40,15 +40,6 @@ export final class Char extends Object implements Comparable<Char> {
     }
 
     /**
-     * unboxed() returns an underlying primitive char.
-     *
-     * @returns the underlying primitive char.
-     */
-    public unboxed(): char {
-        return this.value;
-    }
-
-    /**
      * valueOf(char) creates a Char object from a primitive char.
      * This method is preferred over {@link <constructor(char)>} since this method can use a cached Char object,
      * i.e. this method might be more efficient.
@@ -70,7 +61,7 @@ export final class Char extends Object implements Comparable<Char> {
     * @returns comparison result of underlying primitive chars.
     * Returns false if the argument is not an instance of Char.
     */
-    public equals(other: NullishType): boolean {
+    public equals(other: Any): boolean {
         if (this === other) {
             return true
         }
@@ -95,6 +86,16 @@ export final class Char extends Object implements Comparable<Char> {
     }
 
     /**
+     * The `toLocaleString()` method returns the string representation of the given Char
+     * in the form of a copy of the original object.
+     *
+     * @returns a copy of the original Char as a String
+     */
+    public override toLocaleString(): String {
+        return this.toString();
+    }
+
+    /**
      * compare(Char, Char) compares two Chars by their underlying chars.
      *
      * @param lhs the first Char to compare.
@@ -104,7 +105,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns comparison result of the underlying chars.
      */
     public static compare(lhs: Char, rhs: Char): boolean {
-        return (lhs.unboxed() == rhs.unboxed());
+        return (lhs == rhs);
     }
 
     /**
@@ -115,10 +116,16 @@ export final class Char extends Object implements Comparable<Char> {
      *
      * @param other Char object to compare with
      *
-     * @returns result of the comparison
+     * @returns result of the comparison, -1 if this instance is less than provided object, 0 if equal, 1 if greater
      */
     public override compareTo(other: Char): int {
-        return this.toInt() - other.toInt();
+        if (this.value < other) {
+            return -1;
+        }
+        if (this.value == other) {
+            return 0;
+        }
+        return 1;
     }
 
     public static readonly CHAR_BIT_SIZE = 16;

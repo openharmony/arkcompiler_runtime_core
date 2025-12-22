@@ -38,7 +38,7 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::Allocate([[maybe_unused]] size_t size,
                                                    [[maybe_unused]] bool pinned)
 {
 #if defined(ARK_HYBRID)
-    return reinterpret_cast<void *>(common::HeapAllocator::Allocate(size, common::Language::STATIC));
+    return reinterpret_cast<void *>(common::HeapAllocator::Allocate(size, common::LanguageType::STATIC));
 #else
     return nullptr;
 #endif
@@ -51,7 +51,8 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::AllocateNonMovable(
     [[maybe_unused]] ObjectAllocatorBase::ObjMemInitPolicy objInit)  // CC-OFF(G.FMT.06) project code style
 {
 #if defined(ARK_HYBRID)
-    return reinterpret_cast<ObjectHeader *>(common::HeapAllocator::AllocateInNonmove(size, common::Language::STATIC));
+    return reinterpret_cast<ObjectHeader *>(
+        common::HeapAllocator::AllocateInNonmove(size, common::LanguageType::STATIC));
 #else
     return nullptr;
 #endif

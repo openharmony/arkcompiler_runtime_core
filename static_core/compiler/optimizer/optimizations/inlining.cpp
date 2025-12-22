@@ -17,10 +17,9 @@
 #include <cstddef>
 #include "compiler_logger.h"
 #include "compiler_options.h"
-#include "events_gen.h"
+#include "libarkbase/generated/events_gen.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/basicblock.h"
-#include "optimizer/ir/graph_cloner.h"
 #include "optimizer/ir_builder/ir_builder.h"
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/rpo.h"
@@ -28,17 +27,12 @@
 #include "optimizer/analysis/object_type_propagation.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/branch_elimination.h"
-#include "optimizer/optimizations/licm.h"
-#include "optimizer/optimizations/licm_conditions.h"
-#include "optimizer/optimizations/loop_peeling.h"
-#include "optimizer/optimizations/loop_unswitch.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
 #include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
-#include "optimizer/optimizations/redundant_loop_elimination.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "runtime/include/class.h"
-#include "events/events.h"
+#include "libarkbase/events/events.h"
 
 namespace ark::compiler {
 using MethodPtr = RuntimeInterface::MethodPtr;
@@ -314,7 +308,7 @@ bool Inlining::TryInlineWithInlineCaches(CallInst *callInst)
     ArenaVector<RuntimeInterface::ClassPtr> receivers(GetGraph()->GetLocalAllocator()->Adapter());
     auto callKind = pic->GetClasses(GetGraph()->GetMethod(), callInst->GetPc(), &receivers);
 
-    if (GetGraph()->IsAotMode()) {
+    if (GetGraph()->IsAotMode() && !g_options.IsCompilerInlineExternalMethodsAot()) {
         for (auto receiver : receivers) {
             if (runtime->IsClassExternal(GetGraph()->GetMethod(), receiver)) {
                 LOG_INLINING(INFO) << "AOT inline caches external inlining is not supported";
@@ -348,7 +342,6 @@ bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPt
 {
     auto runtime = GetGraph()->GetRuntime();
     auto currMethod = GetGraph()->GetMethod();
-    ASSERT(!GetGraph()->IsAotMode() || !runtime->IsClassExternal(currMethod, receiver));
 
     InlineContext ctx;
     ctx.method = runtime->ResolveVirtualMethod(receiver, callInst->GetCallMethod());
@@ -369,9 +362,13 @@ bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPt
 
     Inst *loadClsInst = nullptr;
     if (GetGraph()->IsAotMode()) {
-        loadClsInst = GetGraph()->CreateInstLoadClass(
-            DataType::REFERENCE, callInst->GetPc(), saveState,
-            TypeIdMixin {runtime->GetClassIdWithinFile(currMethod, receiver), currMethod}, receiver);
+        auto classId = runtime->GetClassIdWithinFile(currMethod, receiver);
+        if (classId == 0) {
+            classId = runtime->GetClassIdWithinFile(currMethod, runtime->GetClass(currMethod));
+        }
+        ASSERT(classId != 0);
+        loadClsInst = GetGraph()->CreateInstLoadClass(DataType::REFERENCE, callInst->GetPc(), saveState,
+                                                      TypeIdMixin {classId, currMethod}, receiver);
     } else {
         loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
     }
@@ -418,14 +415,17 @@ void Inlining::CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeI
 {
     auto runtime = GetGraph()->GetRuntime();
     auto currMethod = GetGraph()->GetMethod();
-    ASSERT(!GetGraph()->IsAotMode() || !runtime->IsClassExternal(currMethod, receiver));
 
     Inst *loadClsInst = nullptr;
     if (GetGraph()->IsAotMode()) {
         auto saveState = GetOrCloneSaveState(callInst, callBb);
-        loadClsInst = GetGraph()->CreateInstLoadClass(
-            DataType::REFERENCE, callInst->GetPc(), saveState,
-            TypeIdMixin {runtime->GetClassIdWithinFile(currMethod, receiver), currMethod}, receiver);
+        auto classId = runtime->GetClassIdWithinFile(currMethod, receiver);
+        if (classId == 0) {
+            classId = runtime->GetClassIdWithinFile(currMethod, runtime->GetClass(currMethod));
+        }
+        ASSERT(classId != 0);
+        loadClsInst = GetGraph()->CreateInstLoadClass(DataType::REFERENCE, callInst->GetPc(), saveState,
+                                                      TypeIdMixin {classId, currMethod}, receiver);
     } else {
         loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
     }
@@ -882,7 +882,7 @@ bool Inlining::TryInlineExternalAot(CallInst *callInst, InlineContext *ctx)
     if (!GetGraph()->GetAotData()->GetUseCha()) {
         return false;
     }
-    IrBuilderExternalInliningAnalysis bytecodeAnalysis(GetGraph(), ctx->method);
+    IrBuilderExternalInliningAnalysisForLLVMAot bytecodeAnalysis(GetGraph(), ctx->method);
     if (!GetGraph()->RunPass(&bytecodeAnalysis)) {
         EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::UNSUITABLE);
         LOG_INLINING(DEBUG) << "We can't inline external method: " << GetMethodFullName(GetGraph(), ctx->method);
@@ -1086,7 +1086,22 @@ bool Inlining::DoInline(CallInst *callInst, InlineContext *ctx)
             return false;
         }
         if (GetGraph()->IsAotMode()) {
-            return TryInlineExternal(callInst, ctx);
+            if (!g_options.IsCompilerInlineExternalMethodsAot()) {
+                // Skip external methods
+                EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::SKIP_EXTERNAL);
+                LOG_INLINING(DEBUG) << "We can't inline external method in AOT mode: "
+                                    << GetMethodFullName(GetGraph(), ctx->method);
+                return false;
+            }
+            // We can't guarantee without cha that runtime will use this external file.
+            if (!GetGraph()->GetAotData()->GetUseCha()) {
+                return false;
+            }
+            // NOTE(llvm): Temporary use old way of inlining external methods in LLVM AOT mode
+            //             until default way will be fixed #27874
+            if (GetGraph()->GetAotData()->IsLLVMAotMode()) {
+                return TryInlineExternalAot(callInst, ctx);
+            }
         }
     }
 
@@ -1159,6 +1174,23 @@ bool Inlining::CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool 
         EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::LIMIT);
         LOG_INLINING(DEBUG) << "Reached vregs limit: current=" << vregsCount_ << ", inlined=" << vregsNum;
         return false;
+    }
+    if (GetGraph()->IsAotMode()) {
+        // Check bytecode in external methods including nested ones
+        auto *rootGraph = GetGraph();
+        while (rootGraph->GetParentGraph() != nullptr) {
+            rootGraph = rootGraph->GetParentGraph();
+        }
+        auto isExternal = GetGraph()->GetRuntime()->IsMethodExternal(rootGraph->GetMethod(), ctx.method);
+        if (isExternal && !IsIntrinsic(&ctx)) {
+            IrBuilderExternalInliningAnalysis bytecodeAnalysis(GetGraph(), ctx.method);
+            if (!GetGraph()->RunPass(&bytecodeAnalysis)) {
+                EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
+                LOG_INLINING(DEBUG) << "We can't inline external method: '" << GetMethodFullName(GetGraph(), ctx.method)
+                                    << "', because it contains unsuitable bytecode";
+                return false;
+            }
+        }
     }
     IrBuilderInliningAnalysis bytecodeAnalysis(GetGraph(), ctx.method);
     if (!GetGraph()->RunPass(&bytecodeAnalysis)) {
@@ -1252,37 +1284,6 @@ bool Inlining::CheckLoops(bool *calleeCallRuntime, Graph *graphInl)
     return true;
 }
 
-bool Inlining::TryToApplyOptimization(Graph *graphInl, InlineContext *ctx, CallInst *callInst, uint64_t savedPbcInstNum,
-                                      PassManagerStatistics *stats)
-{
-    graphInl->RunPass<Cleanup>(false);
-    auto peepholeApplied = graphInl->RunPass<Peepholes>();
-    auto objectTypeApplied = graphInl->RunPass<ObjectTypeCheckElimination>();
-    if (peepholeApplied || objectTypeApplied) {
-        auto clone = GraphCloner(graphInl, GetAllocator(), GetLocalAllocator()).CloneGraph();
-        ASSERT(clone != nullptr);
-        clone->RunPass<Licm>(g_options.GetCompilerLicmHoistLimit());
-        clone->RunPass<LicmConditions>();
-        clone->RunPass<RedundantLoopElimination>();
-        clone->RunPass<LoopPeeling>();
-        clone->RunPass<LoopUnswitch>(g_options.GetCompilerLoopUnswitchMaxLevel(),
-                                     g_options.GetCompilerLoopUnswitchMaxInsts());
-        clone->RunPass<BranchElimination>();
-        // after BranchElimination pass, we should do InfiniteLoop check again.
-        clone->RunPass<LoopAnalyzer>();
-        if (clone->HasInfiniteLoop()) {
-            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::INF_LOOP);
-            stats->SetPbcInstNum(savedPbcInstNum);
-            return false;
-        }
-        graphInl->RunPass<BranchElimination>();
-    }
-    graphInl->RunPass<Cleanup>(false);
-    graphInl->RunPass<OptimizeStringConcat>();
-    graphInl->RunPass<SimplifyStringBuilder>();
-    return true;
-}
-
 /* static */
 void Inlining::PropagateObjectInfo(Graph *graphInl, CallInst *callInst)
 {
@@ -1318,9 +1319,23 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
 
     PropagateObjectInfo(graphInl, callInst);
 
-    if (!TryToApplyOptimization(graphInl, ctx, callInst, savedPbcInstNum, stats)) {
-        return InlinedGraph();
+    // Run basic optimizations
+    graphInl->RunPass<Cleanup>(false);
+    auto peepholeApplied = graphInl->RunPass<Peepholes>();
+    auto objectTypeApplied = graphInl->RunPass<ObjectTypeCheckElimination>();
+    if (peepholeApplied || objectTypeApplied) {
+        graphInl->RunPass<BranchElimination>();
+        // after BranchElimination pass, we should do InfiniteLoop check again.
+        graphInl->RunPass<LoopAnalyzer>();
+        if (graphInl->HasInfiniteLoop()) {
+            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::INF_LOOP);
+            stats->SetPbcInstNum(savedPbcInstNum);
+            return InlinedGraph();
+        }
     }
+    graphInl->RunPass<Cleanup>(false);
+    graphInl->RunPass<OptimizeStringConcat>();
+    graphInl->RunPass<SimplifyStringBuilder>();
 
     auto inlinedInstsCount = CalculateInstructionsCount(graphInl);
     LOG_INLINING(DEBUG) << "Actual insts-bc ratio: (" << inlinedInstsCount << " insts) / ("
@@ -1386,6 +1401,7 @@ bool Inlining::CheckTooBigMethodCanBeInlined(const CallInst *callInst, InlineCon
         if (GetGraph()->GetRuntime()->IsMethodExternal(GetGraph()->GetMethod(), ctx->method)) {
             // Do not replace to call static if --compiler-inline-external-methods=false
             ctx->replaceToStatic &= g_options.IsCompilerInlineExternalMethods();
+            ctx->replaceToStatic &= !GetGraph()->IsAotMode() || g_options.IsCompilerInlineExternalMethodsAot();
             ASSERT(ctx->method != nullptr);
             // Allow to replace CallVirtual with CallStatic if the resolved method is same as the called method
             // In AOT mode the resolved method id can be different from the method id in the callInst,
@@ -1437,7 +1453,8 @@ bool Inlining::CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *
     }
 
     if constexpr (CHECK_EXTERNAL) {
-        if ((!g_options.IsCompilerInlineExternalMethods() || GetGraph()->IsAotMode()) &&
+        if ((!g_options.IsCompilerInlineExternalMethods() ||
+             (GetGraph()->IsAotMode() && !g_options.IsCompilerInlineExternalMethodsAot())) &&
             GetGraph()->GetRuntime()->IsMethodExternal(GetGraph()->GetMethod(), ctx->method)) {
             // Skip external methods
             EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::SKIP_EXTERNAL);
@@ -1716,14 +1733,12 @@ void Inlining::InsertChaGuard(CallInst *callInst, InlineContext *ctx)
 
 bool Inlining::IsManualDevirtualize(CallInst *callInst, RuntimeInterface *runtime)
 {
-    auto calleeMethod = GetGraph()->GetMethod();
+    auto callerMethod = GetGraph()->GetMethod();
+    auto callerClass = runtime->GetClass(callerMethod);
+    auto calleeMethod = callInst->GetCallMethod();
     auto calleeClass = runtime->GetClass(calleeMethod);
-    auto method = callInst->GetCallMethod();
-    auto methodClass = runtime->GetClass(method);
-    // Replace CallVirtual instruction for Array methods inside Map methods. Disable inlining for Map constructors since
-    // they can take an array parameter.
-    return runtime->IsClassEscompatMap(calleeClass) && runtime->IsClassEscompatArray(methodClass) &&
-           !runtime->IsMethodEscompatMapCtor(calleeMethod);
+    // Replace CallVirtual instruction for Map methods inside Set methods
+    return runtime->IsClassEscompatSet(callerClass) && runtime->IsClassEscompatMap(calleeClass);
 }
 
 bool Inlining::SkipBlock(const BasicBlock *block) const

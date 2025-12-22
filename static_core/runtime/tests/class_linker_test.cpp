@@ -23,8 +23,8 @@
 
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandafile/modifiers.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkfile/modifiers.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/class_linker.h"
@@ -139,6 +139,8 @@ std::set<std::string> GetClassesForEnumerateClassesTest()
             "f32",
             "f64",
             "any",
+            "Y",
+            "N",
             "[Z",
             "[B",
             "[H",

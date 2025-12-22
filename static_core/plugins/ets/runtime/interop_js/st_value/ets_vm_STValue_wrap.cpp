@@ -34,7 +34,6 @@
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 
-#include "generated/logger_options.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "interop_js/napi_impl/napi_impl.h"
@@ -217,7 +216,7 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
         res = static_cast<ani_long>(result);
        */
         std::string bigIntString = BigIntToStringJS(env, input);
-        static constexpr const char *className = "escompat.BigInt";
+        static constexpr const char *className = "std.core.BigInt";
         ani_class bigIntClass;
         auto aniEnv = GetAniEnv();
 
@@ -240,7 +239,7 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &INT64_MAX_ANI_OBJ, INT64_MAX_STR_ANI));
         ani_boolean isGreaterThanInt64Max = ANI_FALSE;
         auto status =
-            aniEnv->Object_CallMethodByName_Boolean(staticBigIntObject, "operatorGreaterThan", "C{escompat.BigInt}:z",
+            aniEnv->Object_CallMethodByName_Boolean(staticBigIntObject, "operatorGreaterThan", "C{std.core.BigInt}:z",
                                                     &isGreaterThanInt64Max, INT64_MAX_ANI_OBJ);
         ANI_CHECK_ERROR_RETURN(env, status);
         if (isGreaterThanInt64Max == ANI_TRUE) {
@@ -255,9 +254,9 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
             env, aniEnv->String_NewUTF8(INT64_MIN_STR.c_str(), INT64_MIN_STR.length(), &INT64_MIN_STR_ANI));
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &INT64_MIN_ANI_OBJ, INT64_MIN_STR_ANI));
         ani_boolean isLessThanInt64Min = ANI_FALSE;
-        ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Boolean(staticBigIntObject, "operatorLessThan",
-                                                                            "C{escompat.BigInt}:z", &isLessThanInt64Min,
-                                                                            INT64_MIN_ANI_OBJ));
+        AniCheckAndThrowToDynamic(env, aniEnv->Object_CallMethodByName_Boolean(staticBigIntObject, "operatorLessThan",
+                                                                               "C{std.core.BigInt}:z",
+                                                                               &isLessThanInt64Min, INT64_MIN_ANI_OBJ));
         if (isLessThanInt64Min == ANI_TRUE) {
             STValueThrowJSError(env, "Value is out of range for long type.");
             return nullptr;
@@ -332,7 +331,7 @@ napi_value WrapBigIntImpl(napi_env env, napi_callback_info info)
 
     napi_value dynBigInt = jsArgv[0];
     std::string bigIntString = BigIntToStringJS(env, dynBigInt);
-    static constexpr const char *className = "escompat.BigInt";
+    static constexpr const char *className = "std.core.BigInt";
     ani_class bigIntClass;
     auto aniEnv = GetAniEnv();
 

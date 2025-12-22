@@ -16,13 +16,12 @@
 {% for t in cases %}
 /*---
 desc: >-
-  Try statements run the block of code to handle exceptions and errors.
-  Try statements can contain several catch clauses to handle exceptions and
-  errors.
+  Try statements run the block of code to handle errors.
+  Try statements can contain several catch clauses to handle errors.
 ---*/
 
-class Ex extends Exception {}
-class Fx extends Exception {}
+class Ex extends Error {}
+class Fx extends Error {}
 class X extends Error {}
 class Y extends Error {}
 

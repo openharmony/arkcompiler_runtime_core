@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "libpandabase/utils/time.h"
+#include "libarkbase/utils/time.h"
 #include "runtime/compiler_queue_interface.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/method-inl.h"

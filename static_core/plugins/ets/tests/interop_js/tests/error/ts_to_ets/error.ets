@@ -35,8 +35,8 @@ function testThrowError(): boolean {
     try {
         etsErrorFunc.invoke(ErrorMessage);
         res = false;
-    } catch (error: Error) {
-        res = (error instanceof Error) && (error.message === ErrorMessage);
+    } catch (error) {
+        res = error.message === ErrorMessage;
     }
     return res;
 }
@@ -45,7 +45,7 @@ function testCustomThrowError(): boolean {
     let error_catched = false;
     try {
         etsCustomErrorFunc.invoke(CustomErrorMessage, CustomErrorCode);
-    } catch (e: Error) {
+    } catch (e) {
         error_catched = true;
 
         arktest.assertEQ(e instanceof Error, true);
@@ -60,7 +60,7 @@ function testRangeError(): boolean {
     try {
         let error = new RangeError();
         res = errRangeErrorModule.instanceOf(Type.of(error));
-    } catch (e: Error) {
+    } catch (e) {
         res = false;
     }
     return res;

@@ -20,7 +20,7 @@ Get as much type information as possible from control- and data-flow graphs. Thi
 Instruction visit consists of two parts:
 
 1. **AliasVisitor** part - here we track object creations, object moves (i.e. `Phi` instructions) and Loads/Stores.
-    * There is special processing of Load/Store instructions with non-immediate indices (like `a[x]` and unlike `a[3]` or `a.field`). We have unique `Pointer::CreateUnknownOffset` offset, which corresponds to all such offsets. Unknown offset may alias with any other (constant or unknown) offset, so real refs corresponding to fixed offset `f`in `a` are union `a[f] | a[UNKNOWN]` (makes sence only for arrays)
+    * There is special processing of Load/Store instructions with non-immediate indices (like `a[x]` and unlike `a[3]` or `a.field`). We have unique `Pointer::CreateUnknownOffset` offset, which corresponds to all such offsets. Unknown offset may alias with any other (constant or unknown) offset, so real refs corresponding to fixed offset `f`in `a` are union `a[f] | a[UNKNOWN]` (makes sence only for arrays). Reading from an unknown offset for this reason can't be analysed and is not modeled.
 2. **TypePropagationVisitor** part - here we update `TypeInfo`s we have (stored in `TypedRefSet`s)
 
 ### Visiting Loops

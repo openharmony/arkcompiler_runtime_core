@@ -34,11 +34,9 @@ void AniModuleFindEnumFuzzTest(const char *data, size_t size)
     AniFuzzEngine *engine = AniFuzzEngine::GetInstance();
     ani_env *env {};
     engine->GetAniEnv(&env);
-    ani_module md {};
-    env->FindModule("std.core", &md);
     ani_enum e {};
-    std::string input(data, size);
-    env->Module_FindEnum(md, input.c_str(), &e);
+    std::string enumName = "std.core." + std::string(data, size);
+    env->FindEnum(enumName.c_str(), &e);
 }
 }  // namespace OHOS
 

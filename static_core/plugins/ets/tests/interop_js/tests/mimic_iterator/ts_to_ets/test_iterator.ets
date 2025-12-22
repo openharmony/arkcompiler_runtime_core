@@ -24,7 +24,7 @@ let strArr = strArray as Array<String>;
 let booArr = booArray as Array<Boolean>;
 
 function testMimicIteratorNumberForOf() {
-    let idx: number = 0;
+    let idx: int = 0;
     for (let elem of numArr) {
         if (elem !== numArr[idx++]) {
             return false;
@@ -34,7 +34,7 @@ function testMimicIteratorNumberForOf() {
 }
 
 function testMimicIteratorNumberKeys() {
-    let idx: number = 0;
+    let idx: int = 0;
     for (let elem of numArr.keys()) {
         if (elem !== idx++) {
             return false;
@@ -44,7 +44,7 @@ function testMimicIteratorNumberKeys() {
 }
 
 function testMimicIteratorNumberValues() {
-    let idx: number = 0;
+    let idx: int = 0;
     for (let elem of numArr.values()) {
         if (elem !== numArr[idx++]) {
             return false;
@@ -54,7 +54,7 @@ function testMimicIteratorNumberValues() {
 }
 
 function testMimicIteratorString() {
-    let idx: number = 0;
+    let idx: int = 0;
     for (let elem of strArr) {
         if (elem !== strArr[idx++]) {
             return false;
@@ -64,7 +64,7 @@ function testMimicIteratorString() {
 }
 
 function testMimicIteratorBoolean() {
-    let idx: number = 0;
+    let idx: int = 0;
     for (let elem of booArr) {
         if (elem !== booArr[idx++]) {
             return false;
@@ -75,7 +75,7 @@ function testMimicIteratorBoolean() {
 
 function testMimicIteratorBooleanEntries() {
     for (let elem of booArr.entries()) {
-        if (elem[1] !== booArr[elem[0]]) {
+        if (elem[1] !== booArr[elem[0].toInt()]) {
             return false;
         }
     }
@@ -84,7 +84,7 @@ function testMimicIteratorBooleanEntries() {
 
 function testMimicIteratorStringEntries() {
     for (let elem of strArr.entries()) {
-        if (elem[1] !== strArr[elem[0]]) {
+        if (elem[1] !== strArr[elem[0].toInt()]) {
             return false;
         }
     }
@@ -93,7 +93,7 @@ function testMimicIteratorStringEntries() {
 
 function testMimicIteratorNumberEntries() {
     for (let elem of numArr.entries()) {
-        if (elem[1] !== numArr[elem[0]]) {
+        if (elem[1] !== numArr[elem[0].toInt()]) {
             return false;
         }
     }

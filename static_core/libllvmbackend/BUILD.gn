@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,8 +39,28 @@ if (is_llvmbackend) {
     }
   }
 
+  action("llvm_cflags") {
+    script = "$ark_root/scripts/llvm/llvm-config.sh"
+    outputs = [ "$target_gen_dir/llvm_cflags.rsp" ]
+    if (defined(clang_base_path)) {
+      llvm_config_path = rebase_path("${clang_base_path}/bin/llvm-config")
+    } else {
+      # Assume that "llvm-config" can be found in $PATH, similar to
+      # how //build/toolchain:clang-14 finds "clang-14".
+      llvm_config_path = "llvm-config"
+    }
+    args = [
+      rebase_path("$target_gen_dir/llvm_cflags.rsp"),
+      llvm_config_path,
+      "--cflags",
+    ]
+  }
+
   ### LLVM Backend
   config("libllvmbackend_public_config") {
+    llvm_cflags_outputs = get_target_outputs(":llvm_cflags")
+    cflags = [ "@" + rebase_path(llvm_cflags_outputs[0]) ]
+
     include_dirs = [
       "$ark_root/libllvmbackend",
       "$target_gen_dir",
@@ -112,8 +132,8 @@ if (is_llvmbackend) {
       ":libllvmbackend_public_config",
       "$ark_root:ark_config",
       "$ark_root/compiler/aot/aot_builder:aotbuilder_public_config",
-      "$ark_root/libpandabase:arkbase_public_config",
-      "$ark_root/libpandafile:arkfile_public_config",
+      "$ark_root/libarkbase:arkbase_public_config",
+      "$ark_root/libarkfile:arkfile_public_config",
       "$ark_root/runtime:arkruntime_public_config",
     ]
 
@@ -134,10 +154,11 @@ if (is_llvmbackend) {
       ":libllvmbackend_llvm_passes_inl",
       ":libllvmbackend_pipeline_gen_inc",
       ":libllvmbackend_pipeline_irtoc_gen_inc",
+      ":llvm_cflags",
       ":llvm_lib",
       "$ark_root/compiler:libarktscompiler",
-      "$ark_root/libpandabase:libarktsbase",
-      "$ark_root/libpandafile:libarktsfile",
+      "$ark_root/libarkbase:libarktsbase",
+      "$ark_root/libarkfile:libarktsfile",
     ]
 
     external_deps = [ sdk_libc_secshared_dep ]
@@ -162,7 +183,7 @@ if (is_llvmbackend) {
     template_file = "$llvmbackend_templates_dir/intrinsics_gen.inl.erb"
     data = [ intrinsics_yaml ]
     api = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
-    requires = [ "$ark_root/libpandabase/utils.rb" ]
+    requires = [ "$ark_root/libarkbase/utils.rb" ]
     output_file = "$target_gen_dir/intrinsics_gen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
@@ -172,7 +193,7 @@ if (is_llvmbackend) {
         "$llvmbackend_templates_dir/can_compile_intrinsics_gen.inl.erb"
     data = [ intrinsics_yaml ]
     api = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
-    requires = [ "$ark_root/libpandabase/utils.rb" ]
+    requires = [ "$ark_root/libarkbase/utils.rb" ]
     output_file = "$target_gen_dir/can_compile_intrinsics_gen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
@@ -181,7 +202,7 @@ if (is_llvmbackend) {
     template_file = "$llvmbackend_templates_dir/intrinsic_names_gen.inl.erb"
     data = [ intrinsics_yaml ]
     api = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
-    requires = [ "$ark_root/libpandabase/utils.rb" ]
+    requires = [ "$ark_root/libarkbase/utils.rb" ]
     output_file = "$target_gen_dir/intrinsic_names_gen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
@@ -190,7 +211,7 @@ if (is_llvmbackend) {
     template_file = "$llvmbackend_templates_dir/intrinsics_llvm_codegen.inl.erb"
     data = [ intrinsics_yaml ]
     api = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
-    requires = [ "$ark_root/libpandabase/utils.rb" ]
+    requires = [ "$ark_root/libarkbase/utils.rb" ]
     output_file = "$target_gen_dir/intrinsics_llvm_codegen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
@@ -299,7 +320,6 @@ if (is_llvmbackend) {
     sources = [
       "$ark_root/runtime/class_linker.cpp",
       "$ark_root/runtime/entrypoints/entrypoints.cpp",
-      "$ark_root/runtime/interpreter/runtime_interface.cpp",
       "$ark_root/runtime/mem/heap_manager.cpp",
       "$ark_root/runtime/mem/tlab.cpp",
       "$ark_root/runtime/object_header.cpp",
@@ -308,10 +328,10 @@ if (is_llvmbackend) {
 
     public_configs = [
       "$ark_root:ark_config",
-      "$ark_root/libpandabase:arkbase_public_config",
+      "$ark_root/libarkbase:arkbase_public_config",
       "$ark_root/runtime:arkruntime_public_config",
       "$ark_root/runtime:arkruntime_config",
-      "$ark_root/libpandafile:arkfile_public_config",
+      "$ark_root/libarkfile:arkfile_public_config",
     ]
 
     deps = [
@@ -339,8 +359,6 @@ if (is_llvmbackend) {
       rebase_path("$target_out_dir/../runtime/bitcode/runtime.o"),
       rebase_path(
           "$target_out_dir/../runtime/entrypoints/bitcode/entrypoints.o"),
-      rebase_path(
-          "$target_out_dir/../runtime/interpreter/bitcode/runtime_interface.o"),
       rebase_path("$target_out_dir/../runtime/bitcode/object_header.o"),
       rebase_path("$target_out_dir/../runtime/mem/bitcode/heap_manager.o"),
       rebase_path("$target_out_dir/../runtime/mem/bitcode/tlab.o"),

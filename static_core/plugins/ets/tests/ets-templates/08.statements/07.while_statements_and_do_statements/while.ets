@@ -21,10 +21,9 @@ desc: >-
     evaluates and checks expression first while doStatement executes statement first.
 ---*/
 
-function main(): int {
+function main(): void {
     let i = 1
     let j = 1
     {{c.use|indent}}
-    return 1;
 }
 {% endfor %}

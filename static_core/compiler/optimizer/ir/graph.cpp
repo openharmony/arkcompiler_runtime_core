@@ -873,6 +873,7 @@ void GraphMode::Dump(std::ostream &stm)
     DUMP_MODE(Interpreter);
     DUMP_MODE(InterpreterEntry);
     DUMP_MODE(AbcKit);
+    DUMP_MODE(NativePlus);
 
 #undef DUMP_MODE
 }

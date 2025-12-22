@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -72,17 +72,20 @@ class UtilTest262:
         }
 
     @staticmethod
-    def validate_parse_result(return_code: int, _: str, desc: Dict[str, Any], out: str) -> Tuple[bool, bool]:
+    def validate_parse_result(return_code: int, cerr: str, desc: Dict[str, Any], cout: str) -> Tuple[bool, bool]:
         is_negative = (desc['negative_phase'] == 'parse')
 
         if return_code == 0:  # passed
             if is_negative:
-                return False, False  # negative test passed
+                return False, False  # negative test failed
 
             return True, True  # positive test passed
 
         if return_code == 1:  # failed
-            return is_negative and (desc['negative_type'] in out), False
+            # NOTE(pronai) use runner.parser #30090
+            real_name_error = "Syntax error" if desc['negative_type'] == "SyntaxError" else desc['negative_type']
+            # NOTE(pronai) re-examine during #29808
+            return is_negative and (real_name_error in cerr or real_name_error in cout), False
 
         return False, False  # abnormal
 
@@ -154,9 +157,12 @@ class UtilTest262:
 
         if return_code == 0:  # passed
             if is_negative:
-                return False  # negative test passed
+                return False  # negative test failed
 
-            passed = (len(std_err) == 0)
+            # NOTE(pronai) re-examine below comment for #29808
+            # We don't check std_err string is empty because in case of eval code,
+            # errors are wrote in stderr and it is correct
+            passed = True
             if 'async' in desc['flags']:
                 passed = passed and bool(self.async_ok.search(out))
             return passed  # positive test passed?

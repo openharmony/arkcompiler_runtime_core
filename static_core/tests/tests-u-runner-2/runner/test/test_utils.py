@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import functools
 import random
 import unittest
 from collections.abc import Callable
@@ -90,12 +91,19 @@ def create_runner_test_id(test_file: str) -> str:
     return Path(test_file).relative_to(current_file_parent).as_posix()
 
 
-def test_cmake_cache(_: TestLists) -> list[str]:
+def test_cmake_build(_: TestLists) -> list[str]:
     return [
         'PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER=false',
         'PANDA_ENABLE_ADDRESS_SANITIZER=true',
         'PANDA_ENABLE_THREAD_SANITIZER=false',
         'CMAKE_BUILD_TYPE=fastverify'
+    ]
+
+
+def test_gn_build(_: TestLists) -> list[str]:
+    return [
+        'is_asan=true',
+        'is_fastverify=true'
     ]
 
 
@@ -113,3 +121,14 @@ def test_environ(test_root_name: str | None = None, test_root_value: str | None 
 
 def data_folder(main_path: str, test_data_folder: str = "data") -> Path:
     return Path(main_path).parent / test_data_folder
+
+
+def parametrized_test_cases(test_cases: list[tuple[list[str]]]) -> Callable:
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(self: 'unittest.TestCase') -> None:
+            for i, test_case in enumerate(test_cases):
+                with self.subTest(case_index=i, args=test_case):
+                    func(self, *test_case)
+        return wrapper
+    return decorator

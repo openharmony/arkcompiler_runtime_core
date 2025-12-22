@@ -43,9 +43,9 @@ async function mustCallCheckAll() {
                 });
                 mustChecks.length = 0;
                 resolve(undefined);
-            } catch (e: Error) {
+            } catch (e) {
                 mustChecks.length = 0;
-                reject(e);
+                reject(e)
             }
         }, 2000);
     })
@@ -136,7 +136,7 @@ function testStreamWritableConstructorSetMethodsError() {
     const test = (): void => {
         writableStream.end('test');
     }
-    let exceptionCheck = (e: Error | Exception): boolean => {
+    let exceptionCheck = (e: Error): boolean => {
         return ((e as BusinessError).message == "The doWrite() method is not implemented.")
     }
     arktest.expectThrow(() => { test(); }, exceptionCheck);

@@ -84,7 +84,8 @@ static void NativeCall(ani_env *env, ani_int id)
     event.Wait();
 }
 
-TEST_F(SendEventManagedTest, SendEvent)
+// NOTE(dslynko, #27940): enable this test after fixing flaky failures
+TEST_F(SendEventManagedTest, DISABLED_SendEvent)
 {
     ani_module module = nullptr;
     ASSERT_EQ(env_->FindModule("send_event_test_managed", &module), ANI_OK);

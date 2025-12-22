@@ -25,10 +25,9 @@ namespace class_descriptors {
 
 // Base classes
 static constexpr std::string_view ERROR                                = "Lescompat/Error;";
-static constexpr std::string_view ARRAY_BUFFER                         = "Lescompat/ArrayBuffer;";
-static constexpr std::string_view BIG_INT                              = "Lescompat/BigInt;";
+static constexpr std::string_view ARRAY_BUFFER                         = "Lstd/core/ArrayBuffer;";
+static constexpr std::string_view BIG_INT                              = "Lstd/core/BigInt;";
 static constexpr std::string_view ASYNC                                = "Lets/coroutine/Async;";
-static constexpr std::string_view EXCEPTION                            = "Lstd/core/Exception;";
 static constexpr std::string_view OBJECT                               = "Lstd/core/Object;";
 static constexpr std::string_view PROMISE                              = "Lstd/core/Promise;";
 static constexpr std::string_view JOB                                  = "Lstd/core/Job;";
@@ -47,6 +46,7 @@ static constexpr std::string_view TREE_STRING                          = "Lstd/c
 static constexpr std::string_view WEAK_REF                             = "Lstd/core/WeakRef;";
 static constexpr std::string_view FINALIZABLE_WEAK_REF                 = "Lstd/core/FinalizableWeakRef;";
 static constexpr std::string_view FINALIZATION_REGISTRY                = "Lstd/core/FinalizationRegistry;";
+static constexpr std::string_view FINREG_NODE                          = "Lstd/core/FinRegNode;";
 static constexpr std::string_view TYPE                                 = "Lstd/core/Type;";
 static constexpr std::string_view FIELD                                = "Lstd/core/Field;";
 static constexpr std::string_view METHOD                               = "Lstd/core/Method;";
@@ -157,6 +157,7 @@ static constexpr std::string_view ARRAY_INDEX_OUT_OF_BOUNDS_ERROR      = "Lstd/c
 static constexpr std::string_view ARRAY_STORE_ERROR                    = "Lstd/core/ArrayStoreError;";
 static constexpr std::string_view CLASS_CAST_ERROR                     = "Lstd/core/ClassCastError;";
 static constexpr std::string_view COROUTINES_LIMIT_EXCEED_ERROR        = "Lstd/core/CoroutinesLimitExceedError;";
+static constexpr std::string_view ILLEGAL_LOCK_STATE_ERROR             = "Lstd/core/IllegalLockStateError;";
 static constexpr std::string_view EXCEPTION_IN_INITIALIZER_ERROR       = "Lstd/core/ExceptionInInitializerError;";
 static constexpr std::string_view FILE_NOT_FOUND_ERROR                 = "Lstd/core/FileNotFoundError;";
 static constexpr std::string_view ILLEGAL_ACCESS_ERROR                 = "Lstd/core/IllegalAccessError;";
@@ -218,10 +219,12 @@ static constexpr std::string_view ES_ERROR                             = "Lstd/i
 // Interop function class for invoking dynamic functions
 static constexpr std::string_view INTEROP_DYNAMIC_FUNCTION             = "Lstd/interop/js/DynamicFunction;";
 
-static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
+static constexpr std::string_view ARRAY                                = "Lstd/core/Array;";
 static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/containers/ArrayAsListInt;";
-static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lescompat/RegExpExecArray;";
-static constexpr std::string_view JSON_REPLACER                        = "Lescompat/JsonReplacer;";
+
+static constexpr std::string_view REG_EXP_EXEC_ARRAY                   = "Lstd/core/RegExpExecArray;";
+static constexpr std::string_view JSON_REPLACER                        = "Lstd/core/JsonReplacer;";
+static constexpr std::string_view JSON_ELEMENT_SERIALIZABLE            = "Lstd/core/jsonx/JsonElementSerializable;";
 
 // ANI annotation classes
 static constexpr std::string_view ANI_UNSAFE_QUICK                     = "Lstd/annotations/ani/unsafe/Quick;";
@@ -235,19 +238,18 @@ static constexpr std::string_view ANNOTATION_MODULE_EXPORTED           = "export
 static constexpr std::string_view INTERFACE_OBJ_LITERAL                = "Lstd/annotations/InterfaceObjectLiteral;";
 
 // escompat
-static constexpr std::string_view DATE                                 = "Lescompat/Date;";
-static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lescompat/ArrayEntriesIterator_T;";
+static constexpr std::string_view DATE                                 = "Lstd/core/Date;";
+static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lstd/core/ArrayEntriesIterator_T;";
 static constexpr std::string_view ITERATOR_RESULT                      = "Lstd/core/IteratorResult;";
-static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lescompat/ArrayKeysIterator;";
-static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lescompat/ArrayValuesIterator_T;";
-static constexpr std::string_view MAP                                  = "Lescompat/Map;";
-static constexpr std::string_view MAPENTRY                             = "Lescompat/MapEntry;";
-static constexpr std::string_view MAPITERATOR                          = "Lescompat/MapIterator;";
-static constexpr std::string_view SETITERATOR                          = "Lescompat/SetIterator;";
-static constexpr std::string_view EMPTYMAPITERATOR                     = "Lescompat/EmptyMapIterator;";
-static constexpr std::string_view SET                                  = "Lescompat/Set;";
-static constexpr std::string_view RECORD                               = "Lescompat/Record;";
-static constexpr std::string_view PROCESS                              = "Lescompat/StdProcess;";
+static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lstd/core/ArrayKeysIterator;";
+static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lstd/core/ArrayValuesIterator_T;";
+static constexpr std::string_view MAP                                  = "Lstd/core/Map;";
+static constexpr std::string_view MAPITERATOR                          = "Lstd/core/MapIteratorImpl;";
+static constexpr std::string_view SETITERATOR                          = "Lstd/core/SetIteratorImpl;";
+static constexpr std::string_view EMPTYMAPITERATOR                     = "Lstd/core/EmptyMapIteratorImpl;";
+static constexpr std::string_view SET                                  = "Lstd/core/Set;";
+static constexpr std::string_view RECORD                               = "Lstd/core/Record;";
+static constexpr std::string_view PROCESS                              = "Lstd/core/StdProcess;";
 static constexpr std::string_view INT8_ARRAY                           = "Lescompat/Int8Array;";
 static constexpr std::string_view UINT8_ARRAY                          = "Lescompat/Uint8Array;";
 static constexpr std::string_view UINT8_CLAMPED_ARRAY                  = "Lescompat/Uint8ClampedArray;";
@@ -261,9 +263,9 @@ static constexpr std::string_view BIG_INT64_ARRAY                      = "Lescom
 static constexpr std::string_view BIG_UINT64_ARRAY                     = "Lescompat/BigUint64Array;";
 
 // Json Annotations
-static constexpr std::string_view JSON_STRINGIFY_IGNORE                = "Lescompat/JSONStringifyIgnore;";
-static constexpr std::string_view JSON_PARSE_IGNORE                    = "Lescompat/JSONParseIgnore;";
-static constexpr std::string_view JSON_RENAME                          = "Lescompat/JSONRename;";
+static constexpr std::string_view JSON_STRINGIFY_IGNORE                = "Lstd/core/JSONStringifyIgnore;";
+static constexpr std::string_view JSON_PARSE_IGNORE                    = "Lstd/core/JSONParseIgnore;";
+static constexpr std::string_view JSON_RENAME                          = "Lstd/core/JSONRename;";
 
 // Annotation for optional parameters
 static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =

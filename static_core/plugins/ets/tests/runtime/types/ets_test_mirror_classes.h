@@ -19,7 +19,7 @@
 #include <cstddef>
 #include <gtest/gtest.h>
 #include <string_view>
-#include <libpandabase/macros.h>
+#include <libarkbase/macros.h>
 #include "types/ets_class.h"
 #include "ets_platform_types.h"
 

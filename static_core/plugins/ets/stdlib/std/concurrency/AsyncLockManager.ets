@@ -20,8 +20,11 @@ package std.concurrency;
  * Information about all lock operations on the AsyncLock instance.
  */
 class AsyncLockManager {
-
-    constructor() {}
+    constructor() {
+        this.finreg = new FinalizationRegistry<String>((s: String) => {
+            this.locks.delete(s)
+        });
+    }
 
     /**
     * Find or create an instance of AsyncLock using the specified name.
@@ -99,11 +102,29 @@ class AsyncLockManager {
         this.finreg.register(asyncLock, asyncLock.name, asyncLock);
     }
 
+   /**
+   * It is expected to be made private in future versions.
+   * Query information about all possible deadlocks.
+   *
+   * @returns { Array<AsyncLock> } Returns a array string info about possible deadlocks on all locks.
+   */
+    public queryAllLocks() : Array <AsyncLock>
+    {
+        let arr : Array<AsyncLock> = new Array<AsyncLock>();
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        this.locks.forEach((val) => {
+            let a = val.deref();
+            if (a != undefined) {
+                 arr.push(a);
+            }
+        });
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
+        return arr;
+    }
+
     private locks: Map<string, WeakRef<AsyncLock>> = new Map<string, WeakRef<AsyncLock>>();
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
-    private finreg: FinalizationRegistry<String> = new FinalizationRegistry<String>((s: String) => {
-            this.locks.delete(s)
-        });
+    private finreg: FinalizationRegistry<String>
 }
 
 const asyncLockManager: AsyncLockManager;
@@ -131,7 +152,6 @@ export class AsyncLockState {
         });
         return array;
     }
-
     /**
     * Held locks information.
     */

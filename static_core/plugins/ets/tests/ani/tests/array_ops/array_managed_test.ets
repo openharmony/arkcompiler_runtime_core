@@ -30,3 +30,13 @@ function checkEmptyArray(a: Array<Int>): boolean {
 function checkArray(a: Array<Int>): boolean {
     return a[0] == 10 && a[1] == 20 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
+
+class ArrayWithThrowingLength<T> extends Array<T> {
+    public override get length(): int {
+        throw new Error("length was called")
+    }
+}
+
+export function getExtendedArray() {
+    return new ArrayWithThrowingLength<int>()
+}

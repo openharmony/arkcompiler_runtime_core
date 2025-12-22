@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/os/thread.h"
+#include "libarkbase/os/thread.h"
 #include "hybridgref_ani.h"
 
 namespace ark::ets::hygref {
@@ -93,7 +93,7 @@ static bool InitializeGlobal(ani_env *env)
                                    "dX{C{std.core.Null}C{std.core.Object}}:", &g_methodSetPropertyByIndex);
     ASSERT(status == ANI_OK);
     status =
-        env->Class_FindStaticMethod(esobjectClass, "<get>Undefined", ":C{std.interop.ESValue}", &g_methodGetUndefined);
+        env->Class_FindStaticMethod(esobjectClass, "%%get-Undefined", ":C{std.interop.ESValue}", &g_methodGetUndefined);
     ASSERT(status == ANI_OK);
     status = env->Class_FindMethod(esobjectClass, "isUndefined", ":z", &g_methodIsUndefined);
     ASSERT(status == ANI_OK);

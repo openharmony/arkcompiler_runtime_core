@@ -15,10 +15,10 @@
 
 #include <algorithm>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/hash.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandafile/class_data_accessor.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/hash.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkfile/class_data_accessor.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/runtime.h"
 

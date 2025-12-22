@@ -30,3 +30,12 @@ class TestIntA extends TestInt {
 final class TestIntFinal extends TestInt {
     static int_value: int = 3;
 }
+
+class Parent {
+    static parentField: int = 1;
+    static overridedField: int = 2;
+}
+class Child extends Parent {
+    static overridedField: int = 4;
+    static childField: int = 3;
+}

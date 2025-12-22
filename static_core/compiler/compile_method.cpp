@@ -15,8 +15,8 @@
 
 #include "optimizer_run.h"
 #include "compile_method.h"
-#include "mem/pool_manager.h"
-#include "mem/code_allocator.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/mem/code_allocator.h"
 #include "include/class.h"
 #include "include/method.h"
 #include "optimizer/ir/ir_constructor.h"
@@ -24,12 +24,13 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/pass.h"
 #include "optimizer/ir_builder/ir_builder.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "code_info/code_info.h"
-#include "events/events.h"
-#include "trace/trace.h"
+#include "libarkbase/events/events.h"
+#include "libarkbase/trace/trace.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/code_generator/codegen.h"
+#include "libarkbase/utils/utils.h"
 
 namespace ark::compiler {
 
@@ -137,12 +138,11 @@ static Span<uint8_t> EmitCode(const Graph *graph, CodeAllocator *allocator)
     }
 
     auto data = reinterpret_cast<uint8_t *>(memRange.GetData());
-    memcpy_s(data, sizeof(CodePrefix), &prefix, sizeof(CodePrefix));
+    MemcpyUnsafe(data, &prefix, sizeof(CodePrefix));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    memcpy_s(&data[codeOffset], graph->GetCode().size(), graph->GetCode().data(), graph->GetCode().size());
+    MemcpyUnsafe(&data[codeOffset], graph->GetCode().data(), graph->GetCode().size());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    memcpy_s(&data[prefix.codeInfoOffset], graph->GetCodeInfoData().size(), graph->GetCodeInfoData().data(),
-             graph->GetCodeInfoData().size());
+    MemcpyUnsafe(&data[prefix.codeInfoOffset], graph->GetCodeInfoData().data(), graph->GetCodeInfoData().size());
 
     allocator->ProtectCode(memRange);
 

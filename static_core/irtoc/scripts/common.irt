@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -81,11 +81,12 @@ module Constants
     TLAB_CUR_FREE_POSITION_OFFSET = "cross_values::GetTlabCurFreePositionOffset(GetArch())"
     TLAB_MEMORY_END_ADDR_OFFSET = "cross_values::GetTlabMemoryEndAddrOffset(GetArch())"
     OBJECT_CLASS_OFFSET = "cross_values::GetObjectHeaderClassPointerOffset(GetArch())"
-    WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
-    ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
-    GET_CALLEE_METHOD = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::GET_CALLEE_METHOD_DIRECT)"
-    INITIALIZE_CLASS_BY_ID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::INITIALIZE_CLASS_BY_ID_DIRECT)"
-    RESOLVE_CLASS = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::RESOLVE_CLASS_DIRECT)"
+    WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
+    ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
+    ANNOTATE_SANITIZERS_POISON_NO_BRIDGE = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_POISON_NO_BRIDGE)"
+    GET_CALLEE_METHOD = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::GET_CALLEE_METHOD_DIRECT)"
+    INITIALIZE_CLASS_BY_ID = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::INITIALIZE_CLASS_BY_ID_DIRECT)"
+    RESOLVE_CLASS = "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::RESOLVE_CLASS_DIRECT)"
     GET_VTABLE_INDEX = "cross_values::GetMethodVTableIndexOffset(GetArch())"
     CLASS_STATE_OFFSET = "cross_values::GetClassStateOffset(GetArch())"
     ARRAY_LENGTH_OFFSET = "cross_values::GetCoretypesArrayLengthOffset(GetArch())"
@@ -111,6 +112,9 @@ module Constants
     METHOD_CODE_ID_OFFSET = "cross_values::GetMethodCodeIdOffset(GetArch())"
     METHOD_NATIVE_POINTER_OFFSET = "cross_values::GetMethodNativePointerOffset(GetArch())"
     METHOD_COMPILED_ENTRY_POINT_OFFSET = "cross_values::GetMethodCompiledEntryPointOffset(GetArch())"
+    METHOD_NUM_VREGS_OFFSET = "cross_values::GetMethodNumVregsOffset(GetArch())"
+    METHOD_INSTRUCTIONS_OFFSET = "cross_values::GetMethodInstructionsOffset(GetArch())"
+    METHOD_VREGS_UNKNOWN = "cross_values::GetMethodVregsUnknown(GetArch())"
     FRAME_NUM_VREGS_OFFSET = "cross_values::GetFrameNumVregsOffset(GetArch())"
     FRAME_NUM_ACTUAL_ARGS_OFFSET = "cross_values::GetFrameNumActualArgsOffset(GetArch())"
     FRAME_METHOD_OFFSET = "cross_values::GetFrameMethodOffset(GetArch())"
@@ -127,6 +131,7 @@ module Constants
     THREAD_FRAME_OFFSET = "cross_values::GetManagedThreadFrameOffset(GetArch())"
     THREAD_EXCEPTION_OFFSET = "cross_values::GetManagedThreadExceptionOffset(GetArch())"
     THREAD_INTERPRETER_CACHE_OFFSET = "cross_values::GetManagedThreadInterpreterCacheOffset(GetArch())"
+    THREAD_FLATTENED_STRING_CACHE_OFFSET = "cross_values::GetManagedThreadFlattenedStringCacheOffset(GetArch())"
     THREAD_FLAG_OFFSET = "cross_values::GetManagedThreadFlagOffset(GetArch())"
     THREAD_VM_OFFSET = "cross_values::GetThreadVmOffset(GetArch())"
     MARK_WORD_OFFSET = "cross_values::GetObjectHeaderMarkWordOffset(GetArch())"
@@ -147,6 +152,7 @@ module Constants
     MARK_WORD_LWL_COUNTER_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE)"
     MARK_WORD_LWL_THREAD_ID_AND_COUNTER_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE | MarkWord::LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE)"
     MARK_WORD_STATUS_MASK_AND_LWL_THREAD_ID_MASK = "static_cast<uint64_t>(MarkWord::STATUS_MASK | MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE)"
+    CLASS_BASE_OFFSET = "cross_values::GetClassBaseOffset(GetArch())"
     CLASS_COMPONENT_OFFSET = "cross_values::GetClassComponentTypeOffset(GetArch())"
     CLASS_TYPE_OFFSET = "cross_values::GetClassTypeOffset(GetArch())"
     CLASS_ITABLE_ENTRIES_DATA_OFFSET = "CLASS_ITABLE_OFFSET + CLASS_ITABLE_ENTRIES_DATA_OFFSET"
@@ -205,29 +211,60 @@ module Constants
     STRING_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::String) + TLAB_ALIGNMENT - 1"
     STRING_MUTF8_1B_MAX = "0x7f"
     STRING_MUTF8_1B_MIN = "0x01"
-    STRING_LENGTH_OFFSET = "ark::coretypes::STRING_LENGTH_OFFSET"
-    STRING_LENGTH_SHIFT = "ark::coretypes::String::STRING_LENGTH_SHIFT"
-    STRING_HASHCODE_OFFSET = "ark::coretypes::STRING_HASHCODE_OFFSET"
+    STRING_LENGTH_OFFSET = "common::BaseString::LENGTH_AND_FLAGS_OFFSET"
+    STRING_LENGTH_SHIFT = "common::BaseString::LengthBits::START_BIT"
+    STRING_HASHCODE_OFFSET = "common::BaseString::MIX_HASHCODE_OFFSET"
     STRING_DATA_OFFSET = "ark::coretypes::STRING_DATA_OFFSET"
     STRING_TYPE_OFFSET = "cross_values::GetBaseClassStringTypeOffset(GetArch())"
     STRING_TYPE_LINE = "ark::coretypes::STRING_TYPE_LINE"
     STRING_TYPE_SLICE = "ark::coretypes::STRING_TYPE_SLICE"
     STRING_TYPE_TREE = "ark::coretypes::STRING_TYPE_TREE"
+    LINE_STRING_CLASS_OFFSET = "cross_values::GetPlatformTypesCoreLineStringClassOffset(graph->GetArch())"
+    SLICED_STRING_CLASS_OFFSET = "cross_values::GetPlatformTypesCoreSlicedStringClassOffset(graph->GetArch())"
+    SLICED_STRING_PARENT_OFFSET = "cross_values::GetSlicedStringParentOffset(GetArch())"
+    SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET = "cross_values::GetSlicedStringStartindexAndFlagsOffset(GetArch())"
+    SLICED_STRING_STARTINDEX_SHIFT = "cross_values::GetSlicedStringStartindexShift(GetArch())"
+    SLICED_STRING_MIN_LENGTH = "common::SlicedString::MIN_SLICED_STRING_LENGTH"
+    SLICED_STRING_ALIGNED_OBJ_SIZE = "common::SlicedString::SIZE + TLAB_ALIGNMENT - 1"
+    TREE_STRING_CLASS_OFFSET = "cross_values::GetPlatformTypesCoreTreeStringClassOffset(graph->GetArch())"
+    TREE_STRING_LEFT_OFFSET = "common::TreeString::LEFT_OFFSET"
+    TREE_STRING_RIGHT_OFFSET = "common::TreeString::RIGHT_OFFSET"
+    TREE_STRING_ALIGNED_OBJ_SIZE = "common::TreeString::SIZE + TLAB_ALIGNMENT - 1"
+    TREE_STRING_MIN_LENGTH = "common::TreeString::MIN_TREE_STRING_LENGTH"
+
     ALIGNMENT_MASK = "~(TLAB_ALIGNMENT - 1)"
 
     # shift one bit less to keep ACC_INTRINSIC bit
     INTRINSIC_MASK_SHIFT = "INTRINSIC_SHIFT - VERIFICATION_STATUS_WIDTH - 1"
     VERIFIED_OK = "static_cast<uint64_t>(Method::VerificationStage::VERIFIED_OK)"
+
+    MANAGED_THREAD_STACK_FRAME_ALLOCATOR_OFFSET = "cross_values::GetManagedThreadStackFrameAllocatorOffset(GetArch())"
+    STACK_FRAME_ALLOCATOR_FREE_POINTER_OFFSET = "cross_values::GetStackFrameAllocatorFreePointerOffset(GetArch())"
+    STACK_FRAME_ALLOCATOR_END_ADDR_OFFSET = "cross_values::GetStackFrameAllocatorEndAddrOffset(GetArch())"
+    STACK_FRAME_ALLOCATOR_RELEASE_PAGES_SHIFT = "ark::mem::StackLikeAllocator<>::RELEASE_PAGES_SHIFT"
+
+    # StringBuilder
+    SB_BUFFER_OFFSET = "RuntimeInterface::GetSbBufferOffset()"
+    SB_INDEX_OFFSET = "RuntimeInterface::GetSbIndexOffset()"
+    SB_LENGTH_OFFSET = "RuntimeInterface::GetSbLengthOffset()"
+    SB_COMPRESS_OFFSET = "RuntimeInterface::GetSbCompressOffset()"
   end
 
-macro(:call_runtime) { |e, *args|
-    entry := LoadI(%tr).Imm(e).ptr
+macro(:get_entry) { |entry_offset|
+    table := LoadI(%tr).Imm("cross_values::GetManagedThreadEntrypointsTableOffset(GetArch())").ptr
+    LoadI(table).Imm(entry_offset).ptr
+}
+
+macro(:call_runtime) { |entry_offset, *args|
+    entry := get_entry(entry_offset)
     CallIndirect(entry, *args)
 }
 
-macro(:call_runtime_save_all) { |e, *args|
+macro(:call_runtime_save_all) { |entry_offset, *args|
+    # Load entry before save registers because stack SpillFill is possible
+    entry := get_entry(entry_offset)
     Intrinsic(:SAVE_REGISTERS_EP).void
-    ret = call_runtime(e, *args)
+    ret := CallIndirect(entry, *args)
     Intrinsic(:RESTORE_REGISTERS_EP).void
     ret
 }
@@ -326,6 +363,15 @@ macro(:load_class) do |obj|
   end
 end
 
+macro(:load_base_class) do |klass|
+  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+    base_klass = LoadI(klass).Imm(Constants::CLASS_BASE_OFFSET).Volatile.u64
+    Bitcast(And(base_klass, 0x0000ffffffffffff).u64).ref
+  else
+    LoadI(klass).Imm(Constants::CLASS_BASE_OFFSET).Volatile.ref
+  end
+end
+
 macro(:store_class) do |obj, klass|
   if defines.ARK_HYBRID && defines.PANDA_TARGET_64
     StoreI(obj, OrI(Bitcast(klass).u64).Imm("0x1000000000000000UL").u64).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile.u64
@@ -353,5 +399,13 @@ macro(:nullptr) do
 end
 
 macro(:get_entrypoint_offset) do |entrypoint_id|
-  "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::#{entrypoint_id})"
+  "cross_values::GetEntrypointOffset(GetArch(), EntrypointId::#{entrypoint_id})"
+end
+
+macro(:reftoptr) do |ref_val|
+  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+    Bitcast(ref_val).ptr
+  else
+    Cast(ref_val).SrcType("DataType::REFERENCE").ptr
+  end
 end

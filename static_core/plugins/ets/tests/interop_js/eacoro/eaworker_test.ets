@@ -44,7 +44,7 @@ function RunTasksWithJsCallTest(): void {
         try {
             arktest.assertEQ(val, 2);
         }
-        catch(e: Error) {
+        catch(e) {
             console.log("RunTasksWithJsCallTest failed");
             return 1;
         }
@@ -103,7 +103,7 @@ function CreateEAWorkerWithoutInterop(): void {
             let val = JSRuntime.getPropertyJSValue(module, 'returnTwo');
         };
         eaw.run<void>(callback).Await();
-    } catch(e: Error) {
+    } catch(e) {
         res = true;
         eaw.join();
     }
@@ -119,13 +119,13 @@ function RunSetTimeoutTest(): void {
 
     let w = new EAWorker(true);
     w.start();
-    let p = w.run<NullishType>(()=>{
+    let p = w.run<Any>(()=>{
         let p1 = asyncCall(() => {});
 
-        let p2 = p1.then<NullishType, NullishType>((value: NullishType) => {
+        let p2 = p1.then<Any, Any>((value: Any) => {
             setTimeout(() => {
                 job.finish();
-            }, 100);
+            }, 10);
 
         });
     });
@@ -139,15 +139,15 @@ function RunNewCoroInSetTimeoutTest(): void {
 
     let w = new EAWorker(true);
     w.start();
-    let p = w.run<NullishType>(()=>{
+    let p = w.run<Any>(()=>{
         let p1 = asyncCall(() => {
         });
-        let p2 = p1.then<NullishType, NullishType>((value: NullishType) => {
+        let p2 = p1.then<Any, Any>((value: Any) => {
             setTimeout(() => {
                 let p3 = asyncCall(()=>{
                     job.finish();
                 });
-            }, 100);
+            }, 10);
         });
     });
     w.join();

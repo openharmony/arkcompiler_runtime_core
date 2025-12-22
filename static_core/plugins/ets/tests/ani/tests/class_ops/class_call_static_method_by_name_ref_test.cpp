@@ -38,6 +38,26 @@ public:
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, name, "ii:C{std.core.String}", value, args), ANI_OK);
         va_end(args);
     }
+
+    void TestFuncVCorrectSignature(ani_class cls, ani_ref *value, ...)
+    {
+        va_list args {};
+        va_start(args, value);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, "method", "C{std.core.String}:C{std.core.String}",
+                                                           value, args),
+                  ANI_OK);
+        va_end(args);
+    }
+
+    void TestFuncVWrongSignature(ani_class cls, ani_ref *value, ...)
+    {
+        va_list args {};
+        va_start(args, value);
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_V(cls, "method", "C{std/core/String}:C{std.core.String}",
+                                                           value, args),
+                  ANI_INVALID_DESCRIPTOR);
+        va_end(args);
+    }
     void CheckRefUp(ani_ref ref)
     {
         auto string = reinterpret_cast<ani_string>(ref);
@@ -281,10 +301,8 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_a_inva
 
 TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combine_scenes_1)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_ref_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.na.A", &cls), ANI_OK);
 
     ani_ref value = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
@@ -305,12 +323,8 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
 
 TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combine_scenes_2)
 {
-    ani_namespace nb {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_ref_test.nb", &nb), ANI_OK);
-    ani_namespace nc {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(nb, "nc", &nc), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(nc, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.nb.nc.A", &cls), ANI_OK);
 
     ani_ref value = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
@@ -331,10 +345,8 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
 
 TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combine_scenes_3)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_ref_test.na", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "A", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.na.A", &cls), ANI_OK);
 
     ani_ref value = nullptr;
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(cls, "funcA", "ii:C{std.core.String}", &value, VAL3, VAL4),
@@ -359,10 +371,8 @@ TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combin
 
 TEST_F(ClassCallStaticMethodByNameRefTest, call_static_method_by_name_ref_combine_scenes_4)
 {
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("class_call_static_method_by_name_ref_test.nd", &ns), ANI_OK);
     ani_class cls {};
-    ASSERT_EQ(env_->Namespace_FindClass(ns, "B", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.nd.B", &cls), ANI_OK);
 
     ani_ref value = nullptr;
     const ani_int value1 = VAL3;
@@ -557,6 +567,37 @@ TEST_F(ClassCallStaticMethodByNameRefTest, check_initialization_ref_a)
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref_A(cls, "publicMethod", "ii:C{std.core.String}", &value, args),
               ANI_OK);
     ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_ref_test.G"));
+}
+
+TEST_F(ClassCallStaticMethodByNameRefTest, check_wrong_signature)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_ref_test.CheckWrongSignature", &cls), ANI_OK);
+
+    std::string input = "hello";
+
+    ani_string str;
+    ASSERT_EQ(env_->String_NewUTF8(input.c_str(), input.size(), &str), ANI_OK);
+
+    ani_ref value {};
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Ref(env_, cls, "method",
+                                                            "C{std.core.String}:C{std.core.String}", &value, str),
+              ANI_OK);
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Ref(env_, cls, "method",
+                                                            "C{std/core/String}:C{std.core.String}", &value, str),
+              ANI_INVALID_DESCRIPTOR);
+
+    ani_value arg;
+    arg.r = str;
+    ASSERT_EQ(
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "method", "C{std.core.String}:C{std.core.String}", &value, &arg),
+        ANI_OK);
+    ASSERT_EQ(
+        env_->Class_CallStaticMethodByName_Ref_A(cls, "method", "C{std/core/String}:C{std.core.String}", &value, &arg),
+        ANI_INVALID_DESCRIPTOR);
+
+    TestFuncVCorrectSignature(cls, &value, str);
+    TestFuncVWrongSignature(cls, &value, str);
 }
 
 }  // namespace ark::ets::ani::testing

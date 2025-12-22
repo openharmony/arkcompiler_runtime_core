@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "runtime/include/safepoint_timer.h"
 
 namespace ark::intrinsics {
 class SuppressErrorHandler : public ClassLinkerErrorHandler {
@@ -32,6 +34,7 @@ extern "C" <%= intrinsic.impl_signature.ret %> <%= implementation %>CompiledAbi(
 %   nargs = intrinsic.impl_signature.args.size
 %   arg_list = (0...nargs).map { |i| "arg#{i}" }.join(", ")
 %   ret_type = intrinsic.impl_signature.ret
+    SAFEPOINT_TIME_CHECKER(SafepointTimer timer("<%= implementation %>"));
 %   if ret_type == 'void'
     <%= intrinsic.impl %>(<%= arg_list %>);
 %   else

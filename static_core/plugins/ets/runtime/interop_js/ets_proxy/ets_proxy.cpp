@@ -90,7 +90,7 @@ napi_value CreateEtsRecordInstance(napi_env env)
     INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
     ScopedManagedCodeThread managedScope(coro);
 
-    EtsClass *etsClass = PlatformTypes()->escompatRecord;
+    EtsClass *etsClass = PlatformTypes()->coreRecord;
     EtsObject *etsInstance = etsClass->CreateInstance();
     if (UNLIKELY(etsInstance == nullptr)) {
         ASSERT(coro->HasPendingException());

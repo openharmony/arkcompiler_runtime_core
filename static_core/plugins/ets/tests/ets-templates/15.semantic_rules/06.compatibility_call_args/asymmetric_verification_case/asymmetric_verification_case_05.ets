@@ -15,15 +15,10 @@
 
 /*---
 desc: Verifying asymmetric compatibility between number[] and string[].
-tags: [compile-only, negative]
 ---*/
 
-interface I {
-  i: number[];
-}
-
-class A {
-  i: string[];
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
@@ -31,8 +26,6 @@ function main(): void {
   const val2: string[] = ["1", "2", "3"];
 
   const result1 = checkTypeIdentity(val1, val2);
-  const result2 = checkTypeIdentity(val2, val1);
 
-  arktest.assertEQ(result1, false);
-  arktest.assertEQ(result2, false);
+  arktest.assertEQ(result1, true);
 }

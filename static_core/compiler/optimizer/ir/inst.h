@@ -26,14 +26,15 @@
 
 #include "ir-dyn-base-types.h"
 #include "marker.h"
-#include "utils/arena_containers.h"
-#include "utils/span.h"
-#include "utils/bit_field.h"
-#include "utils/bit_utils.h"
-#include "utils/bit_vector.h"
-#include "macros.h"
-#include "mem/arena_allocator.h"
+#include "libarkbase/utils/arena_containers.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/bit_field.h"
+#include "libarkbase/utils/bit_utils.h"
+#include "libarkbase/utils/bit_vector.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/mem/arena_allocator.h"
 #include "opcodes.h"
+#include "optimizer/select_transform_type.h"
 #include "compiler_options.h"
 #include "runtime_interface.h"
 #include "spill_fill_data.h"
@@ -78,6 +79,7 @@ enum ConditionCode {
     CC_LAST = CC_TST_NE,
 };
 
+const char *GetConditionCodeString(ConditionCode code);
 ConditionCode GetInverseConditionCode(ConditionCode code);
 ConditionCode InverseSignednessConditionCode(ConditionCode code);
 bool IsSignedConditionCode(ConditionCode code);
@@ -124,7 +126,7 @@ bool Compare(ConditionCode cc, T lhs, T rhs)
     }
 }
 
-enum class Opcode {
+enum class Opcode : int16_t {
     INVALID = -1,
 // NOLINTBEGIN(readability-identifier-naming)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -1028,6 +1030,16 @@ public:
         return GetFlag(inst_flags::PSEUDO_DST) || GetFlag(inst_flags::NO_DST) || GetType() == DataType::VOID;
     }
 
+    bool HasSideEffectsFlags() const
+    {
+        // NOTE (#31054): When adding new instruction flags, update this method accordingly.
+        const uintptr_t forbiddenFlags = inst_flags::CAN_THROW | inst_flags::TERMINATOR | inst_flags::ALLOC |
+                                         inst_flags::CALL | inst_flags::RUNTIME_CALL |
+                                         inst_flags::IMPLICIT_RUNTIME_CALL | inst_flags::STORE | inst_flags::BARRIER |
+                                         inst_flags::REQUIRE_STATE | inst_flags::CAN_DEOPTIMIZE | inst_flags::NO_DCE;
+        return (GetFlagsMask() & forbiddenFlags) != 0;
+    }
+
     bool HasPseudoDestination() const
     {
         return GetFlag(inst_flags::PSEUDO_DST);
@@ -1563,6 +1575,27 @@ public:
         return bitFields_;
     }
 
+    bool Is(Opcode opcode) const
+    {
+        return opcode_ == opcode;
+    }
+
+    bool IsNot(Opcode opcode) const
+    {
+        return opcode_ != opcode;
+    }
+
+    bool IsOneOf(Opcode opcode1, Opcode opcode2) const
+    {
+        return Is(opcode1) || Is(opcode2);
+    }
+
+    template <typename... Ts>
+    bool IsOneOf(Opcode opcode1, Ts... opcodes) const
+    {
+        return Is(opcode1) || IsOneOf(opcodes...);
+    }
+
     bool IsPhi() const
     {
         return opcode_ == Opcode::Phi;
@@ -1606,7 +1639,11 @@ public:
         return 0;
     }
 
-    virtual void SetVnObject([[maybe_unused]] VnObject *vnObj) {}
+    virtual void SetVnObject(VnObject *vnObj) const
+    {
+        AppendOpcodeAndTypeToVnObject(vnObj);
+        AppendInputsToVnObject(vnObj);  // Default behavior for most insts
+    }
 
     Register GetDstReg() const
     {
@@ -1718,6 +1755,9 @@ protected:
     {
         return reinterpret_cast<DynamicOperands *>(reinterpret_cast<uintptr_t>(this) - sizeof(DynamicOperands));
     }
+
+    void AppendOpcodeAndTypeToVnObject(VnObject *vnObj) const;
+    void AppendInputsToVnObject(VnObject *vnObj) const;
 
 private:
     template <typename InstType, typename... Args>
@@ -1963,6 +2003,9 @@ public:
         return method_;
     }
 
+protected:
+    void AppendTypeIdAndMethodToVnObject(VnObject *vnObj) const;
+
 private:
     uint32_t typeId_ {0};
     // The pointer to the method in which this instruction is executed(inlined method)
@@ -2106,6 +2149,9 @@ public:
     {
         return field_;
     }
+
+protected:
+    void AppendObjFieldToVnObject(VnObject *vnObj) const;
 
 private:
     RuntimeInterface::FieldPtr field_ {nullptr};
@@ -2297,6 +2343,43 @@ protected:
     using CcFlag = typename T::LastField::template NextField<ConditionCode, MinimumBitsToStore(ConditionCode::CC_LAST)>;
     using PredictionFlag = typename CcFlag::template NextField<Prediction, MinimumBitsToStore(Prediction::SIZE)>;
     using LastField = PredictionFlag;
+};
+
+template <typename T>
+class SelectTransformTypeMixin : public T {
+public:
+    using T::T;
+    explicit SelectTransformTypeMixin(SelectTransformType type)
+    {
+        SetSelectTransformType(type);
+    }
+    NO_COPY_SEMANTIC(SelectTransformTypeMixin);
+    NO_MOVE_SEMANTIC(SelectTransformTypeMixin);
+    ~SelectTransformTypeMixin() override = default;
+
+    SelectTransformType GetSelectTransformType() const
+    {
+        return T::template GetField<SelectTransformTypeFlag>();
+    }
+
+    void SetSelectTransformType(SelectTransformType type)
+    {
+        T::template SetField<SelectTransformTypeFlag>(type);
+    }
+
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        auto *clone = T::Clone(targetGraph);
+        static_cast<SelectTransformTypeMixin *>(clone)->SetSelectTransformType(this->GetSelectTransformType());
+        return clone;
+    }
+
+protected:
+    SelectTransformTypeMixin() = default;
+
+    using SelectTransformTypeFlag =
+        typename T::LastField::template NextField<SelectTransformType, MinimumBitsToStore(SelectTransformType::LAST)>;
+    using LastField = SelectTransformType;
 };
 
 /// Mixin for instrucion with ShiftType
@@ -2547,7 +2630,7 @@ public:
         return true;
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     Inst *Evaluate();
 };
@@ -2621,7 +2704,7 @@ public:
         return GetType();
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     bool IsSafeInst() const override
@@ -2661,7 +2744,7 @@ public:
         return GetType();
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
     Inst *Clone(const Graph *targetGraph) const override;
 };
@@ -2686,7 +2769,7 @@ public:
     }
 
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
 };
 
@@ -2712,6 +2795,7 @@ public:
 
     void SetWidth(unsigned width)
     {
+        ASSERT(width > 0);
         width_ = width;
     }
 
@@ -2746,6 +2830,10 @@ public:
     {
         return !signExt_;
     }
+
+    void SetVnObject(VnObject *vnObj) const override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
 private:
     unsigned sourceBit_ {0};
@@ -2895,6 +2983,8 @@ protected:
     NO_MOVE_SEMANTIC(MethodDataMixin);
     virtual ~MethodDataMixin() = default;
 
+    void AppendMethodIdToVnObject(VnObject *vnObj) const;
+
 private:
     uint32_t methodId_ {INVALID_METHOD_ID};
     RuntimeInterface::MethodPtr method_ {nullptr};
@@ -2930,6 +3020,7 @@ public:
         return instClone;
     }
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
@@ -2969,6 +3060,7 @@ public:
         return instClone;
     }
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
@@ -3164,7 +3256,7 @@ public:
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -3264,7 +3356,7 @@ public:
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -3287,7 +3379,7 @@ public:
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -3320,6 +3412,7 @@ public:
         return AnyBaseTypeToDataType(GetAnyType());
     }
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -3349,6 +3442,7 @@ public:
         return GetInput(index).GetInst()->GetType();
     }
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -4800,6 +4894,7 @@ public:
 
     uint32_t GetTypeId() = delete;  // only method field of TypeIdMixin is used
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
@@ -4840,7 +4935,7 @@ public:
         return type != DataType::NO_TYPE ? type : GetInput(0).GetInst()->GetType();
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
@@ -4902,7 +4997,7 @@ public:
         return GetOperandsType();
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
@@ -4949,6 +5044,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -5078,6 +5174,7 @@ public:
         return g_options.GetCompilerSchedLatencyLong();
     }
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
@@ -5303,6 +5400,7 @@ public:
         return GetNeedBarrier() || GetVolatile() || Inst::IsBarrier();
     }
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -5362,6 +5460,7 @@ public:
         return g_options.GetCompilerSchedLatencyLong();
     }
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
@@ -5857,7 +5956,7 @@ public:
         SetField<StringFlag>(v);
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
 protected:
     using StringFlag = LastField::NextFlag;
@@ -5883,6 +5982,8 @@ public:
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+
+    void SetVnObject(VnObject *vnObj) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5946,7 +6047,7 @@ public:
         return klass_;
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     void SetClass(RuntimeInterface::ClassPtr klass)
     {
@@ -6005,6 +6106,8 @@ public:
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+
+    void SetVnObject(VnObject *vnObj) const override;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -6161,7 +6264,7 @@ public:
         return obj_;
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
@@ -6197,7 +6300,7 @@ public:
         functionPtr_ = ptr;
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
 private:
@@ -6230,7 +6333,7 @@ public:
         objectPtr_ = ptr;
     }
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
 private:
@@ -6257,7 +6360,7 @@ public:
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -6271,10 +6374,25 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
-        ASSERT(clone->CastToSelect()->GetCc() == GetCc());
-        ASSERT(clone->CastToSelect()->GetOperandsType() == GetOperandsType());
+        ASSERT(static_cast<SelectInst *>(clone)->GetCc() == GetCc());
+        ASSERT(static_cast<SelectInst *>(clone)->GetOperandsType() == GetOperandsType());
         return clone;
     }
+};
+
+class PANDA_PUBLIC_API SelectTransformInst : public SelectTransformTypeMixin<SelectInst> {
+public:
+    using Base = SelectTransformTypeMixin<SelectInst>;
+    using Base::Base;
+
+    SelectTransformInst(Initializer t, DataType::Type operType, ConditionCode cc, SelectTransformType transform)
+        : Base(t, operType, cc)
+    {
+        SetSelectTransformType(transform);
+    }
+
+    void SetVnObject(VnObject *vnObj) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// SelectImm with comparison with immediate
@@ -6305,17 +6423,34 @@ public:
         return GetOperandsType();
     }
 
+    void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
-        ASSERT(clone->CastToSelectImm()->GetCc() == GetCc());
-        ASSERT(clone->CastToSelectImm()->GetOperandsType() == GetOperandsType());
-        clone->CastToSelectImm()->SetImm(GetImm());
+        ASSERT(static_cast<SelectImmInst *>(clone)->GetCc() == GetCc());
+        ASSERT(static_cast<SelectImmInst *>(clone)->GetOperandsType() == GetOperandsType());
+        static_cast<SelectImmInst *>(clone)->SetImm(GetImm());
         return clone;
     }
+};
+
+class PANDA_PUBLIC_API SelectImmTransformInst : public SelectTransformTypeMixin<SelectImmInst> {
+public:
+    using Base = SelectTransformTypeMixin<SelectImmInst>;
+    using Base::Base;
+
+    SelectImmTransformInst(Initializer t, uint64_t imm, DataType::Type operType, ConditionCode cc,
+                           SelectTransformType transform)
+        : Base(std::move(t), imm, operType, cc)
+    {
+        SetSelectTransformType(transform);
+    }
+
+    void SetVnObject(VnObject *vnObj) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Conditional jump instruction
@@ -6345,7 +6480,7 @@ public:
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6393,7 +6528,7 @@ public:
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
-    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    void SetVnObject(VnObject *vnObj) const override;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {

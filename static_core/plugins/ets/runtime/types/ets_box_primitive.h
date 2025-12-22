@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
 namespace ark::ets {

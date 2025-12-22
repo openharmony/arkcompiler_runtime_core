@@ -18,7 +18,7 @@
 
 #include "pgo_header.h"
 #include "aot_profiling_data.h"
-#include "utils/span.h"
+#include "libarkbase/utils/span.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/mem/panda_containers.h"
 

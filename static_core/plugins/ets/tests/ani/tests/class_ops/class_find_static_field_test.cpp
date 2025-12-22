@@ -63,4 +63,38 @@ TEST_F(ClassFindStaticFieldTest, check_initialization)
     ASSERT_FALSE(IsRuntimeClassInitialized("class_find_static_field_test.Singleton"));
 }
 
+TEST_F(ClassFindStaticFieldTest, check_hierarchy)
+{
+    ani_class clsParent {};
+    ASSERT_EQ(env_->FindClass("class_find_static_field_test.Parent", &clsParent), ANI_OK);
+    ani_class clsChild {};
+    ASSERT_EQ(env_->FindClass("class_find_static_field_test.Child", &clsChild), ANI_OK);
+
+    // |------------------------------------------------------------------------------------------------|
+    // |                        |    Parent class   |     Child class   |    The same field is found    |
+    // |------------------------|-------------------|-------------------|-------------------------------|
+    // |  Parent static field   |       ANI_OK      |       ANI_OK      |              Yes              |
+    // |   Child static field   |   ANI_NOT_FOUND   |       ANI_OK      |               No              |
+    // | Overrided static field |       ANI_OK      |       ANI_OK      |               NO              |
+    // |------------------------|-------------------|-------------------|-------------------------------|
+
+    ani_static_field parentFieldInParent {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "parentStaticField", &parentFieldInParent), ANI_OK);
+    ani_static_field childFieldInParent {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "childStaticField", &childFieldInParent), ANI_NOT_FOUND);
+    ani_static_field overridedFieldInParent {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "overridedStaticField", &overridedFieldInParent), ANI_OK);
+
+    ani_static_field parentFieldInChild {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "parentStaticField", &parentFieldInChild), ANI_OK);
+    ani_static_field childFieldInChild {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "childStaticField", &childFieldInChild), ANI_OK);
+    ani_static_field overridedFieldInChild {};
+    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "overridedStaticField", &overridedFieldInChild), ANI_OK);
+
+    ASSERT_EQ(parentFieldInParent, parentFieldInChild);
+    ASSERT_NE(childFieldInParent, childFieldInChild);
+    ASSERT_NE(overridedFieldInParent, overridedFieldInChild);
+}
+
 }  // namespace ark::ets::ani::testing

@@ -122,7 +122,7 @@ cases:
                 ret += 10
             } catch (e: Ex2) {
                 ret += 2
-            } catch (e: Exception) {
+            } catch (e: Error) {
                 ret += 100
             } finally {
                 ret += 1000
@@ -148,7 +148,7 @@ cases:
             try {
                 if (t1 != t2) throw new Er2()
                 ret += 1
-            } catch (e: Exception) {
+            } catch (e: Error) {
                 ret += 2
             } catch (e: Er) {
                 ret += 10

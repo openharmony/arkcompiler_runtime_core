@@ -19,6 +19,7 @@
 #include <iostream>
 #include <iomanip>
 
+
 namespace panda::debug {
 
 [[noreturn]] void AssertionFail(const char *expr, const char *file, unsigned line, const char *function)

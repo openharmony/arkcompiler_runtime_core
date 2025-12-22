@@ -18,7 +18,7 @@
 #include "runtime/mem/gc/g1/g1-evacuate-regions-worker-state.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/region_space.h"
-#include "libpandabase/utils/type_converter.h"
+#include "libarkbase/utils/type_converter.h"
 #include "runtime/mem/object-references-iterator-inl.h"
 #include "runtime/mem/gc/gc_adaptive_stack_inl.h"
 
@@ -90,6 +90,7 @@ ObjectHeader *G1EvacuateRegionsWorkerState<LanguageConfig>::Evacuate(ObjectHeade
     TSAN_ANNOTATE_IGNORE_WRITES_END();
 
     if (forwardAddr == nullptr) {
+        LOG_DEBUG_OBJECT_EVENTS << "MOVE object " << obj << " -> " << newObj;
         ObjectIterator<LanguageConfig::LANG_TYPE>::template IterateAndDiscoverReferences(
             GetGC(), newObj, &evacuationObjectPointerHandler_);
 
@@ -220,5 +221,26 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::EvacuateLiveObjects()
 {
     refStack_->TraverseObjects(*this);
 }
+
+template <typename LanguageConfig>
+void G1EvacuateRegionsWorkerState<LanguageConfig>::PrintObjectEvents(const CollectionSet &collectionSet)
+{
+    for (auto *region : collectionSet) {
+        auto objectVisitor = [region](ObjectHeader *obj) {
+            MarkWord markWord = obj->GetMark();
+            if (markWord.IsForwarded()) {
+                return;
+            }
+            if (region->HasFlag(RegionFlag::IS_OLD)) {
+                LOG_DEBUG_OBJECT_EVENTS << "DELETE tenured object " << obj << " region " << region;
+            } else {
+                ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
+                LOG_DEBUG_OBJECT_EVENTS << "DELETE young object " << obj << " region " << region;
+            }
+        };
+        region->IterateOverObjects(objectVisitor);
+    }
+}
+
 }  // namespace ark::mem
 #endif

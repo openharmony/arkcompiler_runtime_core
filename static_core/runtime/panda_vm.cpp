@@ -24,7 +24,7 @@
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
 
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 
 namespace ark {
 /* static */

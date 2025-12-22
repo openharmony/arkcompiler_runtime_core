@@ -17,11 +17,112 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/gc_root.h"
 #include "runtime/mem/heap_verifier.h"
+#include "runtime/mem/object_helpers-inl.h"
+#include "libarkbase/utils/utf.h"
 
 namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_HEAP_VERIFIER LOG(ERROR, GC) << "HEAP_VERIFIER: "
+
+template <LangTypeT LANG_TYPE>
+static Field *GetFieldFromOffsetForObject([[maybe_unused]] const ObjectHeader *object, Class *cls,
+                                          const uint32_t offset)
+{
+    if constexpr (LANG_TYPE == LangTypeT::LANG_TYPE_DYNAMIC) {
+        UNREACHABLE();  // Dynamic classes do not provide info
+    }
+    ASSERT(object != nullptr);
+    ASSERT(cls != nullptr);
+    ASSERT(!cls->IsDynamicClass());
+
+    while (cls != nullptr) {
+        size_t refNum = cls->GetRefFieldsNum<false>();
+        int32_t localI = (static_cast<int32_t>(offset) - static_cast<int32_t>(cls->GetRefFieldsOffset<false>())) /
+                         ClassHelper::OBJECT_POINTER_SIZE;
+        if (localI < 0 || localI >= static_cast<int32_t>(refNum)) {
+            cls = cls->GetBase();
+            continue;
+        }
+        auto fields = cls->GetFields();
+        ASSERT(fields.size() == refNum);
+        return &fields[localI];
+    }
+    return nullptr;
+}
+
+template <LangTypeT LANG_TYPE>
+static uint32_t GetIndexFromOffsetForArray(const coretypes::Array *array, [[maybe_unused]] Class *cls,
+                                           [[maybe_unused]] const uint32_t offset)
+{
+    if constexpr (LANG_TYPE == LangTypeT::LANG_TYPE_DYNAMIC) {
+        UNREACHABLE();  // Dynamic classes do not provide info
+    }
+    ASSERT(array != nullptr);
+    ASSERT(cls != nullptr);
+    ASSERT(!cls->IsDynamicClass());
+
+    uintptr_t arrayStart = ToUintPtr(array->GetBase<ObjectPointerType *>());
+    ASSERT(offset > arrayStart);
+    return static_cast<uint32_t>((offset - arrayStart) / coretypes::Array::GetElementSize<ObjectHeader *, false>());
+}
+
+template <LangTypeT LANG_TYPE>
+static Field *GetFieldFromOffsetForClass(const Class *cls, const uint32_t offset)
+{
+    if constexpr (LANG_TYPE == LangTypeT::LANG_TYPE_DYNAMIC) {
+        UNREACHABLE();  // Dynamic classes do not provide info
+    }
+    ASSERT(cls != nullptr);
+    ASSERT(!cls->IsDynamicClass());
+    ObjectHeader *object = cls->GetManagedObject();
+    ASSERT(object != nullptr);
+    size_t localI = (offset - ToUintPtr(cls) + cls->GetRefFieldsOffset<true>() - ToUintPtr(object)) /
+                    ClassHelper::OBJECT_POINTER_SIZE;
+    auto fields = cls->GetFields();
+    ASSERT(localI < fields.size());
+    return &fields[localI];
+}
+
+template <LangTypeT LANG_TYPE>
+static std::variant<Field *, uint32_t> GetFieldFromOffset([[maybe_unused]] const ObjectHeader *objectHeader,
+                                                          [[maybe_unused]] const uint32_t offset)
+{
+    if constexpr (LANG_TYPE == LangTypeT::LANG_TYPE_DYNAMIC) {
+        return nullptr;  // Dynamic classes do not provide info
+    }
+    auto *cls = objectHeader->ClassAddr<Class>();
+    ASSERT(cls != nullptr);
+
+    if (cls->IsObjectArrayClass()) {
+        return GetIndexFromOffsetForArray<LANG_TYPE>(static_cast<const coretypes::Array *>(objectHeader), cls, offset);
+    }
+    if (cls->IsClassClass()) {
+        auto objectCls = ark::Class::FromClassObject(objectHeader);
+        if (objectCls->IsInitializing() || objectCls->IsInitialized()) {
+            return GetFieldFromOffsetForClass<LANG_TYPE>(objectCls, offset);
+        } else {
+            return nullptr;
+        }
+    }
+    return GetFieldFromOffsetForObject<LANG_TYPE>(objectHeader, cls, offset);
+}
+
+template <LangTypeT LANG_TYPE>
+static PandaString GetFieldInfo(const ObjectHeader *obj, const uint32_t offset)
+{
+    ASSERT(obj != nullptr);
+    std::variant<Field *, uint32_t> res = GetFieldFromOffset<LANG_TYPE>(obj, offset);
+    if (std::holds_alternative<uint32_t>(res)) {
+        return "index " + PandaString(std::to_string(std::get<uint32_t>(res)));
+    }
+    Field *field = std::get<Field *>(res);
+    if (field == nullptr) {
+        return "unresolved field";
+    }
+    auto field_name = PandaString(utf::Mutf8AsCString(field->GetName().data));
+    return "field: " + field_name;
+}
 
 // Should be called only with MutatorLock held
 template <class LanguageConfig>
@@ -38,11 +139,12 @@ template <LangTypeT LANG_TYPE>
 void HeapObjectVerifier<LANG_TYPE>::operator()(ObjectHeader *obj)
 {
     HeapReferenceVerifier<LANG_TYPE> refVerifier(heap_, failCount_);
-    ObjectHelpers<LANG_TYPE>::TraverseAllObjects(obj, refVerifier);
+    ObjectHelpers<LANG_TYPE>::template TraverseAllObjectsWithInfo<false>(obj, refVerifier);
 }
 
 template <LangTypeT LANG_TYPE>
-void HeapReferenceVerifier<LANG_TYPE>::operator()([[maybe_unused]] ObjectHeader *objectHeader, ObjectHeader *referent)
+bool HeapReferenceVerifier<LANG_TYPE>::operator()(ObjectHeader *objectHeader, ObjectHeader *referent,
+                                                  [[maybe_unused]] uint32_t offset, [[maybe_unused]] bool isVolatile)
 {
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (LANG_TYPE == LANG_TYPE_DYNAMIC) {
@@ -53,14 +155,29 @@ void HeapReferenceVerifier<LANG_TYPE>::operator()([[maybe_unused]] ObjectHeader 
         }
     }
     if (!heap_->IsLiveObject(referent)) {
-        LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
-                          << " references a dead object at " << referent;
+        if constexpr (LANG_TYPE == LANG_TYPE_DYNAMIC) {
+            LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
+                              << " references a dead object at " << referent;
+        } else {
+            Class *cls = objectHeader->template ClassAddr<Class>();
+            LOG_HEAP_VERIFIER << "Heap corruption found! Heap object at " << std::hex << objectHeader
+                              << " (class: " << cls->GetName() << ") references a dead object at " << referent
+                              << " with " << GetFieldInfo<LANG_TYPE>(objectHeader, offset);
+        }
         ++(*failCount_);
     } else if (referent->IsForwarded()) {
-        LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
-                          << " references a forwarded object at " << referent;
+        if constexpr (LANG_TYPE == LANG_TYPE_DYNAMIC) {
+            LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
+                              << " references a forwarded object at " << referent;
+        } else {
+            Class *cls = objectHeader->template ClassAddr<Class>();
+            LOG_HEAP_VERIFIER << "Heap corruption found! Heap object at " << std::hex << objectHeader
+                              << " (class: " << cls->GetName() << ") references a forwarded object at " << referent
+                              << " with " << GetFieldInfo<LANG_TYPE>(objectHeader, offset);
+        }
         ++(*failCount_);
     }
+    return true;
 }
 
 template <LangTypeT LANG_TYPE>
@@ -145,7 +262,8 @@ size_t FastHeapVerifier<LanguageConfig>::CheckHeap(const PandaUnorderedSet<const
             LOG_HEAP_VERIFIER << "Heap object " << std::hex << objectCache.heapObject << " ("
                               << GetClassName<LanguageConfig>(objectCache.heapObject)
                               << ") references a dead object at " << objectCache.referent << " ("
-                              << GetClassName<LanguageConfig>(objectCache.referent) << ")";
+                              << GetClassName<LanguageConfig>(objectCache.referent) << ") with "
+                              << GetFieldInfo<LanguageConfig::LANG_TYPE>(objectCache.heapObject, objectCache.offset);
             ++failsCount;
         }
     }
@@ -153,6 +271,7 @@ size_t FastHeapVerifier<LanguageConfig>::CheckHeap(const PandaUnorderedSet<const
 }
 
 template <class LanguageConfig>
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
 {
     PandaUnorderedSet<const ObjectHeader *> heapObjects;
@@ -160,13 +279,17 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
     size_t failsCount = 0;
 
     auto lazyVerify = [&heapObjects, &referentObjects, &failsCount](const ObjectHeader *objectHeader,
-                                                                    const ObjectHeader *referent) {
+                                                                    const ObjectHeader *referent, size_t offset,
+                                                                    [[maybe_unused]] bool isVolatile) {
         // Lazy verify during heap objects collection
         if (heapObjects.find(referent) == heapObjects.end()) {
-            referentObjects.push_back(ObjectCache({objectHeader, referent}));
+            referentObjects.push_back(ObjectCache({objectHeader, referent, offset}));
         }
-        if (objectHeader->IsForwarded()) {
-            LOG_HEAP_VERIFIER << "Heap object " << std::hex << objectHeader << " is forwarded object";
+        if (referent->IsForwarded()) {
+            LOG_HEAP_VERIFIER << "Heap object " << std::hex << objectHeader << " ("
+                              << GetClassName<LanguageConfig>(objectHeader) << ") references a forwarded object at "
+                              << referent << " (" << GetClassName<LanguageConfig>(referent) << ") with "
+                              << GetFieldInfo<LanguageConfig::LANG_TYPE>(objectHeader, offset);
             ++failsCount;
         }
         auto *classAddr = objectHeader->ClassAddr<BaseClass>();
@@ -175,11 +298,12 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
                               << " has non-heap class address: " << classAddr;
             ++failsCount;
         }
+        return true;
     };
-    const std::function<void(ObjectHeader *, ObjectHeader *)> lazyVerifyFunctor(lazyVerify);
+    const std::function<bool(ObjectHeader *, ObjectHeader *, size_t, bool)> lazyVerifyFunctor(lazyVerify);
     auto collectObjects = [&heapObjects, &lazyVerifyFunctor](ObjectHeader *object) {
         heapObjects.insert(object);
-        ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, lazyVerifyFunctor);
+        ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<false>(object, lazyVerifyFunctor);
     };
 
     // Heap objects verifier
@@ -307,6 +431,7 @@ void HeapVerifierIntoGC<LanguageConfig>::CollectVerificationInfo(PandaVector<Mem
 }
 
 template <class LanguageConfig>
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&aliveMemRanges)
 {
     size_t failsCount = 0U;
@@ -324,25 +449,38 @@ size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&ali
         }
     }
     collectableVerificationInfo_.clear();
-    const std::function<void(ObjectHeader *, ObjectHeader *)> nonYoungChecker =
-        [this, &failsCount](const ObjectHeader *objectHeader, const ObjectHeader *referent) {
+    const std::function<bool(ObjectHeader *, ObjectHeader *, uint32_t, bool)> nonYoungChecker =
+        [this, &failsCount](const ObjectHeader *objectHeader, const ObjectHeader *referent,
+                            [[maybe_unused]] const uint32_t offset, [[maybe_unused]] bool isVolatile) {
             if (this->InCollectableSpace(referent)) {
-                LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << " references a dead object " << referent
-                                  << " after collection";
+                if constexpr (LanguageConfig::LANG_TYPE == LANG_TYPE_DYNAMIC) {
+                    LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << " references a dead object "
+                                      << referent << " after collection";
+                } else {
+                    Class *cls = objectHeader->template ClassAddr<Class>();
+                    ASSERT(cls != nullptr);
+                    LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << "(class: " << cls->GetName()
+                                      << ") references a dead object " << referent << " after collection (with "
+                                      << GetFieldInfo<LanguageConfig::LANG_TYPE>(objectHeader, offset) << ")";
+                }
                 ++failsCount;
             }
+            return true;
         };
-    const std::function<void(ObjectHeader *, ObjectHeader *)> sameObjChecker =
-        [this, &nonYoungChecker, &refNumber, &failsCount, &it](ObjectHeader *objectHeader, ObjectHeader *referent) {
+    const std::function<bool(ObjectHeader *, ObjectHeader *, uint32_t, bool)> sameObjChecker =
+        [this, &nonYoungChecker, &refNumber, &failsCount, &it](ObjectHeader *objectHeader, ObjectHeader *referent,
+                                                               [[maybe_unused]] const uint32_t offset,
+                                                               [[maybe_unused]] bool isVolatile) {
             auto refIt = it->second.find(refNumber);
             if (refIt != it->second.end()) {
                 if (!refIt->second.VerifyUpdatedRef(objectHeader, referent, this->InAliveSpace(referent))) {
                     ++failsCount;
                 }
             } else {
-                nonYoungChecker(objectHeader, referent);
+                nonYoungChecker(objectHeader, referent, offset, isVolatile);
             }
             ++refNumber;
+            return true;
         };
     // Check references in alive objects
     ObjectVisitor traverseAliveObj = [&nonYoungChecker, &sameObjChecker, &refNumber, this, &it](ObjectHeader *object) {
@@ -351,10 +489,12 @@ size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&ali
         }
         it = this->permanentVerificationInfo_.find(object);
         if (it == this->permanentVerificationInfo_.end()) {
-            ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, nonYoungChecker);
+            ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<false>(object,
+                                                                                                 nonYoungChecker);
         } else {
             refNumber = 0U;
-            ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object, sameObjChecker);
+            ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<false>(object,
+                                                                                                 sameObjChecker);
         }
     };
     heap_->IterateOverObjects(traverseAliveObj);

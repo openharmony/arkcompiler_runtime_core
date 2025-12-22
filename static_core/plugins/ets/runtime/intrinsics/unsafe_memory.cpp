@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 
-#include "libpandabase/utils/arch.h"
+#include "libarkbase/utils/arch.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/thread.h"

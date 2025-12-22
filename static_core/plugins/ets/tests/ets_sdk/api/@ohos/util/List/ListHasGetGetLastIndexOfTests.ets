@@ -14,6 +14,7 @@
  */
 
 import {List} from '@ohos.util.List';
+import { BusinessError } from "@ohos.base";
 
 function main() {
     const suite = new arktest.ArkTestsuite("List API tests");
@@ -98,7 +99,14 @@ function testGetWithinRange() {
 function testGetOutsideRange() {
     let list = new List<double>();
     initializeList(list, TestData.arrayForNumber1);
-    arktest.assertEQ(list.get(TestData.testNumber1w), undefined, "Element at index 10000 should be undefined");
+    try {
+        let result = list.get(TestData.testNumber1w);
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.code, 10200001);
+    }
 }
 
 function testGetLastIndexOfUniqueElement() {

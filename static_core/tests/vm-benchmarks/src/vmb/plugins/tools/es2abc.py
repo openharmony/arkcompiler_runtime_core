@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ import os
 from typing import Union
 from pathlib import Path
 
-from vmb.tool import ToolBase, VmbToolExecError
+from vmb.tool import ToolBase, VmbToolExecError, OptFlags
 from vmb.unit import BenchUnit
 from vmb.result import BuildResult, BUStatus
 from vmb.shell import ShellResult
@@ -30,14 +30,15 @@ class Tool(ToolBase):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.sdk = self.ensure_dir_env('OHOS_SDK')
         self.opts = f'--module --merge-abc {self.custom}'
-        if not os.path.isdir(self.sdk):
-            raise RuntimeError('OHOS_SDK not found.')
-        self.es2abc = os.path.join(
-            self.sdk, 'out/x64.release/arkcompiler/ets_frontend/es2abc')
+        if self.custom_path:
+            self.es2abc = self.custom_path
+        else:
+            sdk = self.ensure_dir_env('OHOS_SDK')
+            self.es2abc = os.path.join(
+                sdk, 'out/x64.release/arkcompiler/ets_frontend/es2abc')
         if not os.path.isfile(self.es2abc):
-            raise RuntimeError('es2abc not found.')
+            raise RuntimeError(f'es2abc not found: {self.es2abc}')
 
     @property
     def name(self) -> str:
@@ -53,7 +54,8 @@ class Tool(ToolBase):
             if not src.is_file():
                 continue
             abc = src.with_suffix('.abc')
-            abc.unlink(missing_ok=True)
+            if OptFlags.SKIP_COMPILATION not in self.flags:
+                abc.unlink(missing_ok=True)
             res = self.run_es2abc(src, abc, lang)
             if res.ret != 0 or not abc.is_file():
                 bu.status = BUStatus.COMPILATION_FAILED
@@ -67,7 +69,21 @@ class Tool(ToolBase):
                    src: Union[str, Path],
                    out: Union[str, Path],
                    lang: str = 'ts') -> ShellResult:
+        # Do not re-build if specifically asked so
+        if OptFlags.SKIP_COMPILATION and Path(out).exists():
+            return ShellResult(ret=0, out="Compilation skipped")
         return self.sh.run(
             f'{self.es2abc} --extension={lang} {self.opts} '
             f'--output={out} {src}',
             measure_time=True)
+
+    def compile_builtins(self) -> Path:
+        """Compile ts_types/lib_ark_builtins. DEPRECATED."""
+        sdk = ToolBase.ensure_dir_env('OHOS_SDK')
+        libark_abc = ToolBase.libs / 'lib_ark_builtins.d.abc'
+        res = self.run_es2abc(f'{sdk}/arkcompiler/ets_runtime/'
+                              'ecmascript/ts_types/lib_ark_builtins.d.ts',
+                              libark_abc)
+        if not res or res.ret != 0:
+            raise RuntimeError('lib_ark_builtins compilation failed')
+        return libark_abc

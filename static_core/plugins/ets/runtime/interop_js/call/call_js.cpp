@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/mem/local_object_handle.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/call/arg_convertors.h"
@@ -151,42 +151,83 @@ ALWAYS_INLINE inline uint64_t CallJSHandler::Handle()
     return static_cast<uint64_t>(etsRes.value().GetAsLong());
 }
 
+class ArrayView final {
+public:
+    static std::optional<ArrayView> Create(EtsCoroutine *coro, EtsHandle<EtsObject> &ref)
+    {
+        auto *klass = ref->GetClass();
+        bool isFixedArray = klass->IsArrayClass();
+        size_t length = 0;
+        if (isFixedArray) {
+            length = EtsObjectArray::FromEtsObject(ref.GetPtr())->GetLength();
+        } else {
+            auto *array = EtsEscompatArray::FromEtsObject(ref.GetPtr());
+            EtsInt result = 0;
+            if (UNLIKELY(!array->GetLength(coro, &result))) {
+                ASSERT(InteropCtx::SanityETSExceptionPending());
+                return {};
+            }
+            if (UNLIKELY(result < 0)) {
+                InteropCtx::ThrowETSError(coro, "cannot work with arrays of negative length");
+                return {};
+            }
+            length = static_cast<size_t>(result);
+        }
+        return ArrayView(ref, isFixedArray, length);
+    }
+
+    size_t GetLength() const
+    {
+        return length_;
+    }
+
+    std::optional<EtsObject *> Get(EtsCoroutine *coro, size_t index)
+    {
+        if (isFixedArray_) {
+            return EtsObjectArray::FromEtsObject(ref_.GetPtr())->Get(index);
+        }
+        return EtsEscompatArray::FromEtsObject(ref_.GetPtr())->GetRef(coro, index);
+    }
+
+private:
+    explicit ArrayView(EtsHandle<EtsObject> &ref, bool isFixedArray, size_t length)
+        : ref_(ref), isFixedArray_(isFixedArray), length_(length)
+    {
+    }
+
+private:
+    EtsHandle<EtsObject> &ref_;
+    bool isFixedArray_ {false};
+    size_t length_ {0};
+};
+
 template <bool IS_NEWCALL, typename FRead>
 ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndCall(FRead &readVal,
                                                                                     Span<napi_value> jsargs)
 {
     INTEROP_TRACE();
     auto *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
-    auto *klass = ref->template ClassAddr<Class>();
-    if (!klass->IsArrayClass()) {
-        ASSERT(klass == ctx_->GetArrayClass());
-        VMHandle<EtsEscompatArray> etsArr(coro_, ref);
-        ASSERT(etsArr.GetPtr() != nullptr);
-        auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetActualLength() + jsargs.size());
-        for (uint32_t el = 0; el < jsargs.size(); ++el) {
-            allJsArgs[el] = jsargs[el];
-        }
-        for (uint32_t el = 0; el < etsArr->GetActualLength(); ++el) {
-            EtsObject *etsElem = nullptr;
-            etsArr->GetRef(el, &etsElem);
-            auto refConv = JSRefConvertResolve<true>(ctx_, etsElem->GetClass()->GetRuntimeClass());
-            ASSERT(refConv != nullptr);
-            allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
-        }
-        return CallConverted<IS_NEWCALL>(*allJsArgs);
+    EtsHandle<EtsObject> arrayReference(coro_, EtsObject::FromCoreType(ref));
+    auto optArrayView = ArrayView::Create(coro_, arrayReference);
+    if (UNLIKELY(!optArrayView.has_value())) {
+        ASSERT(InteropCtx::SanityETSExceptionPending());
+        return {};
     }
 
-    LocalObjectHandle<coretypes::Array> etsArr(coro_, ref);
-
-    auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetLength() + jsargs.size());
-    for (uint32_t el = 0; el < jsargs.size(); ++el) {
-        allJsArgs[el] = jsargs[el];
+    const auto arrayLength = optArrayView->GetLength();
+    auto allJsArgs = ctx_->GetTempArgs<napi_value>(arrayLength + jsargs.size());
+    for (size_t i = 0; i < jsargs.size(); ++i) {
+        allJsArgs[i] = jsargs[i];
     }
-    for (uint32_t el = 0; el < etsArr->GetLength(); ++el) {
-        auto *etsElem = EtsObject::FromCoreType(etsArr->Get<ObjectHeader *>(el));
-        auto refConv = JSRefConvertResolve<true>(ctx_, etsElem->GetClass()->GetRuntimeClass());
+    for (size_t i = 0; i < arrayLength; ++i) {
+        auto optEtsArg = optArrayView->Get(coro_, i);
+        if (!optEtsArg.has_value()) {
+            ASSERT(InteropCtx::SanityETSExceptionPending());
+            return {};
+        }
+        auto refConv = JSRefConvertResolve<true>(ctx_, optEtsArg.value()->GetClass()->GetRuntimeClass());
         ASSERT(refConv != nullptr);
-        allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
+        allJsArgs[i + jsargs.size()] = refConv->Wrap(ctx_, optEtsArg.value());
     }
     return CallConverted<IS_NEWCALL>(*allJsArgs);
 }
@@ -232,41 +273,42 @@ napi_value CallJSHandler::HandleSpecialMethod(Span<napi_value> jsargs)
     napi_value handlerResult {};
     napi_env env = ctx_->GetJSEnv();
     ScopedNativeCodeThread nativeScope(coro_);
-    const char *methodName = EtsMethod::FromRuntimeMethod(protoReader_.GetMethod())->GetName();
-    if (methodName != nullptr && std::strlen(methodName) >= SETTER_GETTER_PREFIX_LENGTH) {
-        std::string content = std::string(methodName).substr(SETTER_GETTER_PREFIX_LENGTH);
-        if (std::strncmp(methodName, GETTER_BEGIN, SETTER_GETTER_PREFIX_LENGTH) == 0) {
-            NAPI_CHECK_FATAL(napi_get_named_property(env, jsThis_, content.c_str(), &handlerResult));
-        } else if (std::strncmp(methodName, SETTER_BEGIN, SETTER_GETTER_PREFIX_LENGTH) == 0) {
-            NAPI_CHECK_FATAL(napi_create_string_utf8(env, content.c_str(), NAPI_AUTO_LENGTH, &handlerResult));
-            NAPI_CHECK_FATAL(napi_set_property(env, jsThis_, handlerResult, jsargs[0]));
-            napi_get_undefined(env, &handlerResult);
-        } else if (std::strncmp(methodName, GET_INDEX_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
-            int32_t idx;
-            NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
-            NAPI_CHECK_FATAL(napi_get_element(env, jsThis_, idx, &handlerResult));
-        } else if (std::strncmp(methodName, SET_INDEX_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
-            int32_t idx;
-            NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
-            NAPI_CHECK_FATAL(napi_set_element(env, jsThis_, idx, jsargs[1]));
-            napi_get_undefined(env, &handlerResult);
-        } else if (std::strncmp(methodName, ITERATOR_METHOD, SETTER_GETTER_PREFIX_LENGTH) == 0) {
-            napi_value global;
-            NAPI_CHECK_FATAL(napi_get_global(env, &global));
-            napi_value symbol;
-            NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Symbol", &symbol));
-            napi_value symbolIterator;
-            NAPI_CHECK_FATAL(napi_get_named_property(env, symbol, "iterator", &symbolIterator));
-            napi_value iteratorMethod;
-            NAPI_CHECK_FATAL(napi_get_property(env, jsThis_, symbolIterator, &iteratorMethod));
-            if (GetValueType(env, iteratorMethod) == napi_undefined) {
-                NAPI_CHECK_FATAL(napi_get_undefined(env, &handlerResult));
-                return handlerResult;
-            }
-            size_t jsArgc = 0;
-            NAPI_CHECK_FATAL(napi_call_function(env, jsThis_, iteratorMethod, jsArgc, nullptr, &handlerResult));
+    std::string_view methodName(EtsMethod::FromRuntimeMethod(protoReader_.GetMethod())->GetName());
+
+    if (methodName.rfind(GETTER_BEGIN, 0) == 0) {
+        std::string content = std::string(methodName.substr(SETTER_GETTER_PREFIX_LENGTH));
+        NAPI_CHECK_FATAL(napi_get_named_property(env, jsThis_, content.c_str(), &handlerResult));
+    } else if (methodName.rfind(SETTER_BEGIN, 0) == 0) {
+        std::string content = std::string(methodName.substr(SETTER_GETTER_PREFIX_LENGTH));
+        NAPI_CHECK_FATAL(napi_create_string_utf8(env, content.c_str(), NAPI_AUTO_LENGTH, &handlerResult));
+        NAPI_CHECK_FATAL(napi_set_property(env, jsThis_, handlerResult, jsargs[0]));
+        napi_get_undefined(env, &handlerResult);
+    } else if (methodName == GET_INDEX_METHOD) {
+        int32_t idx;
+        NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
+        NAPI_CHECK_FATAL(napi_get_element(env, jsThis_, idx, &handlerResult));
+    } else if (methodName == SET_INDEX_METHOD) {
+        int32_t idx;
+        NAPI_CHECK_FATAL(napi_get_value_int32(env, jsargs[0], &idx));
+        NAPI_CHECK_FATAL(napi_set_element(env, jsThis_, idx, jsargs[1]));
+        napi_get_undefined(env, &handlerResult);
+    } else if (methodName == ITERATOR_METHOD) {
+        napi_value global;
+        NAPI_CHECK_FATAL(napi_get_global(env, &global));
+        napi_value symbol;
+        NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Symbol", &symbol));
+        napi_value symbolIterator;
+        NAPI_CHECK_FATAL(napi_get_named_property(env, symbol, "iterator", &symbolIterator));
+        napi_value iteratorMethod;
+        NAPI_CHECK_FATAL(napi_get_property(env, jsThis_, symbolIterator, &iteratorMethod));
+        if (GetValueType(env, iteratorMethod) == napi_undefined) {
+            NAPI_CHECK_FATAL(napi_get_undefined(env, &handlerResult));
+            return handlerResult;
         }
+        size_t jsArgc = 0;
+        NAPI_CHECK_FATAL(napi_call_function(env, jsThis_, iteratorMethod, jsArgc, nullptr, &handlerResult));
     }
+
     return handlerResult;
 }
 
@@ -592,10 +634,13 @@ static std::optional<uint32_t> GetQnameCount(Class *klass)
 static uint8_t InitCallJSClass(bool isNewCall)
 {
     auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
     auto ctx = InteropCtx::Current(coro);
+    ASSERT(ctx != nullptr);
     auto *classInFrame = GetMethodOwnerClassInFrames(coro, 0);
     ASSERT(classInFrame != nullptr);
     auto *klass = classInFrame->GetRuntimeClass();
+    ASSERT(klass != nullptr);
     INTEROP_LOG(DEBUG) << "Bind bridge call methods for " << utf::Mutf8AsCString(klass->GetDescriptor());
 
     for (auto &method : klass->GetMethods()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef PANDA_DWARF_BUILDER_H
 #define PANDA_DWARF_BUILDER_H
 
-#include "utils/arch.h"
-#include "utils/span.h"
+#include "libarkbase/utils/arch.h"
+#include "libarkbase/utils/span.h"
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
 #include <libdwarf/libdwarf.h>

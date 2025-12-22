@@ -14,6 +14,7 @@
  */
 
 import {Queue} from "@ohos.util.Queue";
+import { BusinessError } from "@ohos.base";
 
 class C1 {
     name: string = "";
@@ -31,6 +32,7 @@ function main() {
     suite.addTest("Testing Queue pop operation without elements", testQueuePopWithoutElements);
     suite.addTest("Testing Queue getFirst operation with elements", testQueueGetFirstWithElements);
     suite.addTest("Testing Queue getFirst operation without elements", testQueueGetFirstWithoutElements);
+    suite.addTest("Testing Queue get and pop operation with undefined elements", testQueueGetPopWithUndefinedElements);
 
     return suite.run();
 }
@@ -93,8 +95,14 @@ function testQueuePopWithElements() {
 // Test cases ported from ArkTS 1.0: QUEUE_POP_0700
 function testQueuePopWithoutElements() {
     let queue = new Queue<double | string | object>();
-    let result = queue.pop();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = queue.pop();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 // Test cases ported from ArkTS 1.0: QUEUE_GETFIRST_0800
@@ -115,6 +123,21 @@ function testQueueGetFirstWithElements() {
 // Test cases ported from ArkTS 1.0: QUEUE_GETFIRST_0900
 function testQueueGetFirstWithoutElements() {
     let queue = new Queue<double | string | object>();
+    try {
+        let result = queue.getFirst();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
+}
+
+function testQueueGetPopWithUndefinedElements () {
+    let queue = new Queue<undefined>();
+    queue.add(undefined);
     let result = queue.getFirst();
     arktest.assertEQ(result, undefined);
+    let result1 = queue.pop();
+    arktest.assertEQ(result1, undefined);
 }

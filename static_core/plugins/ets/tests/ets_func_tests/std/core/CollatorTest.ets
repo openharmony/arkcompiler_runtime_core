@@ -150,7 +150,7 @@ function testPunctuation() : int {
 }
 
 function testNumeric() : int {
-    const collator = new Intl.Collator(RU_RU, {sensitivity: 'base', 'numeric': true}  as Intl.CollatorOptions)
+    const collator = new Intl.Collator(RU_RU, {sensitivity: 'base', numeric: true}  as Intl.CollatorOptions)
     arktest.assertEQ(collator.compare('3', '14'), -1)
     arktest.assertEQ(collator.compare('2', '15'), -1)
     arktest.assertEQ(collator.compare('9', '61'), -1)
@@ -331,7 +331,7 @@ function testUsage() : int {
         }
     }
     {
-        let options = {sensitivity: 'base', 'numeric': true}  as Intl.CollatorOptions
+        let options = {sensitivity: 'base', numeric: true}  as Intl.CollatorOptions
         {
             const collator = new Intl.Collator(RU_RU, options)
             arktest.assertEQ(collator.compare('3', '14'), -1);
@@ -396,7 +396,7 @@ function testCollationFromLocale() : int {
         arktest.assertEQ(resolved.collation, 'zhuyin')
     }
     {
-        let c = new Intl.Collator('zh-Hant-u-co-zhuyin', {'collation': 'pinyin'} as Intl.CollatorOptions)
+        let c = new Intl.Collator('zh-Hant-u-co-zhuyin', {collation: 'pinyin'} as Intl.CollatorOptions)
         let resolved = c.resolvedOptions()
         arktest.assertEQ(resolved.collation, 'pinyin')
     }
@@ -411,12 +411,12 @@ function testNumericFromLocale() : int {
         arktest.assertEQ(resolved.numeric, true)
     }
     {
-        let c = new Intl.Collator('fr-Latn-FR-u-kn-false', {'numeric': true} as Intl.CollatorOptions)
+        let c = new Intl.Collator('fr-Latn-FR-u-kn-false', {numeric: true} as Intl.CollatorOptions)
         let resolved = c.resolvedOptions()
         arktest.assertEQ(resolved.numeric, true)
     }
     {
-        let c = new Intl.Collator('fr-Latn-FR-u-kn-true', {'numeric': false} as Intl.CollatorOptions)
+        let c = new Intl.Collator('fr-Latn-FR-u-kn-true', {numeric: false} as Intl.CollatorOptions)
         let resolved = c.resolvedOptions()
         arktest.assertEQ(resolved.numeric, false)
     }
@@ -431,12 +431,12 @@ function testCaseFirstFromLocale() : int {
         arktest.assertEQ(resolved.caseFirst, 'upper')
     }
     {
-        let c = new Intl.Collator('fr-Latn-FR-u-kf-upper', {'caseFirst': 'lower'} as Intl.CollatorOptions)
+        let c = new Intl.Collator('fr-Latn-FR-u-kf-upper', {caseFirst: 'lower'} as Intl.CollatorOptions)
         let resolved = c.resolvedOptions()
         arktest.assertEQ(resolved.caseFirst, 'lower')
     }
     {
-        let c = new Intl.Collator('fr-Latn-FR-u-kf-upper', {'caseFirst': 'false'} as Intl.CollatorOptions)
+        let c = new Intl.Collator('fr-Latn-FR-u-kf-upper', {caseFirst: 'false'} as Intl.CollatorOptions)
         let resolved = c.resolvedOptions()
         arktest.assertEQ(resolved.caseFirst, 'false')
     }

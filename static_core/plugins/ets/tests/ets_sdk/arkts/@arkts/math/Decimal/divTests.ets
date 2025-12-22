@@ -29,7 +29,7 @@ function main(): int {
     return suite.run();
 }
 
-function checkResultIsNotZero(expected: boolean, dividend: int, divisor: double) {
+function checkResultIsNotZero(expected: boolean, dividend: double, divisor: double) {
     let quotient = new Decimal(dividend).div(divisor);
     let result = quotient.isZero() && quotient.isNegative();
     arktest.assertEQ(result, expected);
@@ -50,9 +50,9 @@ function testDivforIsZeroAndIsNegative() {
     checkResultIsNotZero(false, 1, Infinity);
     checkResultIsNotZero(false, -1, -Infinity);
     checkResultIsNotZero(false, 0, 1);
-    checkResultIsNotZero(false, -0, -1);
+    checkResultIsNotZero(false, -0.0, -1);
     checkResultIsNotZero(false, 0, Infinity);
-    checkResultIsNotZero(false, -0, -Infinity);
+    checkResultIsNotZero(false, -0.0, -Infinity);
 }
 
 function testDivWithSpecificConfig001() {

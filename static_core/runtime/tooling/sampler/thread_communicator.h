@@ -20,9 +20,9 @@
 #include <poll.h>
 #include <unistd.h>
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/logger.h"
-#include "os/failure_retry.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/os/failure_retry.h"
 
 #include "runtime/tooling/sampler/sample_info.h"
 

@@ -55,49 +55,49 @@ class Test {
     private intArrayComponentType(): void {
         const ints: FixedArray<int> = [1, 2]
         const compCls = Class.of(ints).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.of(new Int(1)))
+        arktest.assertEQ(compCls, Class.PRIMITIVE_INT)
     }
 
     private longArrayComponentType(): void {
         const longs: FixedArray<long> = [1, 2]
         const compCls = Class.of(longs).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.of(new Long(1)))
+        arktest.assertEQ(compCls, Class.PRIMITIVE_LONG)
     }
 
     private doubleArrayComponentType(): void {
         const doubles: FixedArray<double> = [1.0, 2.0]
         const compCls = Class.of(doubles).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.of(new Double(1.0)))
+        arktest.assertEQ(compCls, Class.PRIMITIVE_DOUBLE)
     }
 
     private floatArrayComponentType(): void {
         const floats: FixedArray<float> = [1.0, 2.0]
         const compCls = Class.of(floats).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.of(new Float(1.0)))
+        arktest.assertEQ(compCls, Class.PRIMITIVE_FLOAT)
     }
 
     private byteArrayComponentType(): void {
         const bytes: FixedArray<byte> = [1, 2]
         const compCls = Class.of(bytes).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.of(new Byte(1)))
+        arktest.assertEQ(compCls, Class.PRIMITIVE_BYTE)
     }
 
     private shortArrayComponentType(): void {
         const shorts: FixedArray<short> = [1, 2]
         const compCls = Class.of(shorts).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.of(new Short(1)))
+        arktest.assertEQ(compCls, Class.PRIMITIVE_SHORT)
     }
 
     private charArrayComponentType(): void {
         const chars: FixedArray<char> = [c'A', c'B']
         const compCls = Class.of(chars).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.of(new Char(c'A')))
+        arktest.assertEQ(compCls, Class.PRIMITIVE_CHAR)
     }
 
     private booleanArrayComponentType(): void {
         const bools: FixedArray<boolean> = [true, false]
         const compCls = Class.of(bools).getFixedArrayComponentType()
-        arktest.assertEQ(compCls, Class.of(new Boolean(true)))
+        arktest.assertEQ(compCls, Class.PRIMITIVE_BOOLEAN)
     }
 
     public testClassGetFixedArrayComponentType(): void {
@@ -117,7 +117,7 @@ class Test {
         const arraysCompCls = Class.of(arrays).getFixedArrayComponentType()
         arktest.assertNE(arraysCompCls, undefined)
         arktest.assertNE(arraysCompCls!.getFixedArrayComponentType(), undefined)
-        arktest.assertEQ(arraysCompCls!.getFixedArrayComponentType(), Class.of(new Int(1)))
+        arktest.assertEQ(arraysCompCls!.getFixedArrayComponentType(), Class.PRIMITIVE_INT)
     }
 }
 

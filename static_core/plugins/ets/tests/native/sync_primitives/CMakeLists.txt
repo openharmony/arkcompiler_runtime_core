@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ani_add_gtest(ets_native_queue_spinlock_tests
-    CPP_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/queue_spinlock_tests.cpp
-    ETS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/queue_spinlock_tests.ets
+ets_native_test_helper(ets_native_queue_spinlock_tests
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/queue_spinlock_tests.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/queue_spinlock_tests.ets
+    ETS_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH"
+    VERIFY_SOURCES true
 )

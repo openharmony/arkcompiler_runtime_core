@@ -32,8 +32,6 @@ void StdCoreVerifyBCP47LanguageTag(ani_env *env, [[maybe_unused]] ani_class klas
         std::string message = "Incorrect locale information provided";
         ThrowNewError(env, "std.core.RangeError", message.c_str(), "C{std.core.String}:");
     }
-
-    return;
 }
 
 ani_status RegisterIntlLocaleHelper(ani_env *env)

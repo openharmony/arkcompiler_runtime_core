@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,41 +12,171 @@
 # limitations under the License.
 
 server:
-  host: "127.0.0.1"
-  port: 8000
+  cors_allow_origins: ["*"]
+  cors_allow_methods: ["*"]
+  cors_allow_headers: ["*"]
+  cors_allow_credentials: true
+  cors: true
+  uvicorn_config:
+    host: "0.0.0.0"
+    port: 8000
 binary:
-  build: "/arkcompiler/runtime_core/static_core/build"
-  timeout: 35
+  build: "../../../../build/returntype"
+  icu_data: "../../../../build/static_core/third_party/icu/ohos_icu4j/data/icudt72l.dat"
 options:
   - flag: "--opt-level"
-    values: [0, 1, 2]
+    values: [ 0,1,2 ]
     default: 2
 syntax:
-  "tokenizer": {
-    "root": [
-      [
-        "/\\b(function|if|else|return|char|void)\\b/",
-        "keyword"
-      ],
-      [
-        "/[{}[\\]()]/",
-        "@brackets"
-      ],
-      [
-        "/[a-zA-Z_$][\\w$]*/",
-        "identifier"
-      ],
-      [
-        "\\d+",
-        "number"
-      ],
-      [
-        "/\".*?\"/",
-        "string"
-      ],
-      [
-        "/[;,.]/",
-        "delimiter",
-      ]
-    ]
-  }
+  keywords:
+    - abstract
+    - alignof
+    - as
+    - assert
+    - async
+    - await
+    - break
+    - case
+    - catch
+    - class
+    - const
+    - constructor
+    - continue
+    - declare
+    - default
+    - do
+    - else
+    - enum
+    - export
+    - extends
+    - "false"
+    - final
+    - finally
+    - for
+    - from
+    - function
+    - get
+    - global
+    - if
+    - implements
+    - import
+    - in
+    - instanceof
+    - interface
+    - internal
+    - intrinsic
+    - is
+    - keyof
+    - let
+    - namespace
+    - native
+    - new
+    - "null"
+    - of
+    - out
+    - overload
+    - override
+    - package
+    - private
+    - protected
+    - public
+    - readonly
+    - require
+    - return
+    - set
+    - static
+    - struct
+    - super
+    - switch
+    - this
+    - throw
+    - "true"
+    - try
+    - type
+    - typeof
+    - undefined
+    - unreachable
+    - var
+    - while
+    - yield
+
+  typeKeywords:
+    - Any
+    - Array
+    - BigInt
+    - Boolean
+    - Byte
+    - Char
+    - Double
+    - Float
+    - Int
+    - Long
+    - Number
+    - NonNullable
+    - Object
+    - Short
+    - String
+    - anyref
+    - bigint
+    - boolean
+    - byte
+    - char
+    - double
+    - f32
+    - f64
+    - float
+    - funcref
+    - i8
+    - i16
+    - i32
+    - i64
+    - isize
+    - int
+    - long
+    - number
+    - object
+    - short
+    - string
+    - u8
+    - u16
+    - u32
+    - u64
+    - usize
+    - v128
+    - void
+
+  builtins:
+    - Intl
+    - console
+    - Date
+    - Error
+    - Map
+    - Set
+    - Math
+
+  tokenizer:
+    root:
+      - - "/[a-zA-Z_$][\\w$]*/"
+        - cases:
+            "@keywords": keyword
+            "@typeKeywords": type
+            "@builtins": type
+            "@default": identifier
+      - - "/[{}[\\]()]/"
+        - "@brackets"
+      - - "/\\b(NaN|Infinity)\\b/"
+        - number
+      - - "/0[xX][0-9a-fA-F]+n?|0[bB][01]+n?|0[oO][0-7]+n?|\\d+(?:_\\d+)*(?:\\.\\d+(?:_\\d+)*)?(?:[eE][+-]?\\d+)?n?/"
+        - number
+      - - "/`(?:[^`\\\\]|\\\\.)*`/"
+        - string
+      - - "/'(?:[^'\\\\]|\\\\.)*'/"
+        - string
+      - - "/\".*?\"/"
+        - string
+      - - "/[;,.]/"
+        - delimiter
+      - - "/\/\/.*$/"
+        - comment
+      - - "/\\/\\*[\\s\\S]*?\\*\\//"
+        - comment

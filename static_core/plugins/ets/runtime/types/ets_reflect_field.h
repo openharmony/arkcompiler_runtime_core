@@ -38,6 +38,8 @@ public:
 
     static EtsReflectField *Create(EtsCoroutine *etsCoroutine, bool isStatic = false);
 
+    static EtsReflectField *CreateFromEtsField(EtsCoroutine *coro, EtsField *field);
+
     EtsObject *AsObject()
     {
         return EtsObject::FromCoreType(this);

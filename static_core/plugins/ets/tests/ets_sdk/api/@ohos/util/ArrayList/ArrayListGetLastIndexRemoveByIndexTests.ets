@@ -117,15 +117,19 @@ function testRemoveByIndexWithBoundaryIndices() {
 function testRemoveByIndexOutOfRange() {
     let arrayList = new ArrayList<double>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: 12`) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == OutOfBoundsErrorCodeId && e.message ==
+                `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: 12`;
+        }
+        return false;
     }
-    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message ==
-            `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: -12`) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck1 = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.code == OutOfBoundsErrorCodeId && e.message ==
+                `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: -12`;
+        }
+        return false;
     }
     arktest.expectThrow(() => {arrayList.removeByIndex(TestData.testNumber12)}, exceptionCheck);
     arktest.expectThrow(() => {arrayList.removeByIndex(-TestData.testNumber12)}, exceptionCheck1);
@@ -133,9 +137,11 @@ function testRemoveByIndexOutOfRange() {
 
 function testRemoveByIndexEmptyContainer() {
     let arrayList = new ArrayList<double>();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError && (e as BusinessError).name == 'BusinessError') && ((e as BusinessError).message == `Container is empty`) &&
-            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
+    let exceptionCheck = (e: Error): boolean | string => {
+        if (e instanceof BusinessError) {
+            return e.name == "BusinessError" && e.message == `Container is empty`;
+        }
+        return false;
     }
     arktest.expectThrow(() => {arrayList.removeByIndex(0)}, exceptionCheck);
 }

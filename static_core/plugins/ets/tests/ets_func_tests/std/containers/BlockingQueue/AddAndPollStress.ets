@@ -42,7 +42,7 @@ async function addAndPoll() {
 
     // Test body
     let addAndPollStressTest = (testBQ: containers.BlockingQueue<number>) => {
-        let arrPromise = new Array<Promise<NullishType>>(20)
+        let arrPromise = new Array<Promise<Any>>(20)
         for (let i = 0; i < 10; i++) {
             arrPromise[i] = taskpool.execute(addSome, testBQ, i * 1000)
         }

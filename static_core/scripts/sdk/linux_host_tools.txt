@@ -1,3 +1,4 @@
+bin/arktsconfig.json
 bin/ark
 bin/ark_aot
 bin/ark_disasm

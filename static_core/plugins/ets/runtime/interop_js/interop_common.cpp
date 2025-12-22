@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #ifdef OHOS_PANDA_TRACE_ENABLE
 #include "syspara/parameters.h"
 #endif

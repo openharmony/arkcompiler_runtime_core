@@ -18,7 +18,7 @@
 
 #include "compiler/optimizer/ir/ir_constructor.h"
 #include "compiler/optimizer/code_generator/relocations.h"
-#include "utils/expected.h"
+#include "libarkbase/utils/expected.h"
 #include "source_languages.h"
 #include "irtoc_options.h"
 
@@ -280,9 +280,8 @@ private:
     // the llvm::Intrinsic::aarch64_fjcvtzs intrinsic lowering yet.
     static constexpr std::array SKIPPED_FASTPATHS_JSCVT = {
         "CreateStringFromCharCodeTlab",
-        "CreateStringFromCharCodeTlabCompressed",
         "CreateStringFromCharCodeSingleTlab",
-        "CreateStringFromCharCodeSingleTlabCompressed",
+        "CreateStringFromCharCodeSingleNoCacheTlab",
     };
 #endif  // PANDA_LLVM_FASTPATH
 #endif  // PANDA_LLVM_IRTOC

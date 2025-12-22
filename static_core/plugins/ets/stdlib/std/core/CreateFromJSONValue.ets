@@ -53,25 +53,6 @@ export function createFromJSONValue(this: Byte, json: JSONValue): Byte {
 }
 
 /**
- * Creates a Short instance based on JSONValue
- *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid short
- *
- * @returns Short - short value decoded from JSON
- */
-export function createFromJSONValue(this: Short, json: JSONValue): Short {
-    if (json instanceof JSONNumber) {
-        let num = (json as JSONNumber).value
-        if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
-            return Short.valueOf(num.toShort())
-        }
-    }
-    throw new JSONTypeError('Cannot create Short from JSON', {cause: json as Object} as ErrorOptions)
-}
-
-/**
  * Creates a Char instance based on JSONValue
  *
  * @param json: JSONValue - a JSON representation
@@ -88,6 +69,25 @@ export function createFromJSONValue(this: Char, json: JSONValue): Char {
         }
     }
     throw new JSONTypeError('Cannot create Char from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+ * Creates a Short instance based on JSONValue
+ *
+ * @param json: JSONValue - a JSON representation
+ *
+ * @throws JSONTypeError if json does not encode a valid short
+ *
+ * @returns Short - short value decoded from JSON
+ */
+export function createFromJSONValue(this: Short, json: JSONValue): Short {
+    if (json instanceof JSONNumber) {
+        let num = (json as JSONNumber).value
+        if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
+            return Short.valueOf(num.toShort())
+        }
+    }
+    throw new JSONTypeError('Cannot create Short from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**

@@ -24,3 +24,11 @@ cases:
           let a = new Object()
           let b = "abc"
           cls.foo(b, a)
+    - decl: |-
+          class A {}        
+          class C {
+            f<T extends A>(a: T) { }
+          }        
+          class X {}
+      use: |-
+        (new C()).f(new X()) // CTE: X is not compatible with A, so there is no matching signature

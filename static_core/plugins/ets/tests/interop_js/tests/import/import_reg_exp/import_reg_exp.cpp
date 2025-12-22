@@ -20,7 +20,7 @@ namespace ark::ets::interop::js::testing {
 
 class EtsImportRegExpTsToEtsTest : public EtsInteropTest {};
 
-TEST_F(EtsImportRegExpTsToEtsTest, checkChangeRegExp)
+TEST_F(EtsImportRegExpTsToEtsTest, DISABLED_checkChangeRegExp)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeRegExp"));
 }

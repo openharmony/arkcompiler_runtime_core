@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,12 @@
 #include <sstream>
 
 #include "assembly-parser.h"
-#include "libpandabase/mem/pool_manager.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandafile/bytecode_emitter.h"
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
-#include "libpandafile/value.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkfile/bytecode_emitter.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
+#include "libarkfile/value.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"

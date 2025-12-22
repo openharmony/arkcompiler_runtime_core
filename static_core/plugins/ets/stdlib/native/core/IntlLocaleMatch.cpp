@@ -17,7 +17,7 @@
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
 #include "plugins/ets/stdlib/native/core/IntlLanguageTag.h"
 #include "plugins/ets/stdlib/native/core/IntlLocale.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "unicode/locid.h"
 #include "unicode/localebuilder.h"
 #include "unicode/localematcher.h"
@@ -107,7 +107,7 @@ static std::string GetDefaultLocaleTag()
     return defaultLocaleTag;
 }
 
-static std::vector<std::string> ToStringList(ani_env *env, ani_array_ref aniList)
+static std::vector<std::string> ToStringList(ani_env *env, ani_array aniList)
 {
     ani_size len;
     ANI_FATAL_IF_ERROR(env->Array_GetLength(aniList, &len));
@@ -117,7 +117,7 @@ static std::vector<std::string> ToStringList(ani_env *env, ani_array_ref aniList
 
     for (ani_size i = 0; i < len; i++) {
         ani_ref aniRef;
-        ANI_FATAL_IF_ERROR(env->Array_Get_Ref(aniList, i, &aniRef));
+        ANI_FATAL_IF_ERROR(env->Array_Get(aniList, i, &aniRef));
 
         auto item = ConvertFromAniString(env, reinterpret_cast<ani_string>(aniRef));
         result.push_back(item);
@@ -125,21 +125,22 @@ static std::vector<std::string> ToStringList(ani_env *env, ani_array_ref aniList
     return result;
 }
 
-static ani_array_ref ToAniStrArray(ani_env *env, std::vector<std::string> strings)
+static ani_array ToAniStrArray(ani_env *env, std::vector<std::string> strings)
 {
     ani_class stringClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
 
-    ani_array_ref array;
+    ani_array array;
     if (strings.empty()) {
-        ANI_FATAL_IF_ERROR(env->Array_New_Ref(stringClass, 0, nullptr, &array));
+        ANI_FATAL_IF_ERROR(env->Array_New(0, nullptr, &array));
         return array;
     }
     auto first = intl::StdStrToAni(env, strings[0]);
-    ANI_FATAL_IF_ERROR(env->Array_New_Ref(stringClass, strings.size(), first, &array));
+
+    ANI_FATAL_IF_ERROR(env->Array_New(strings.size(), first, &array));
     for (size_t i = 1; i < strings.size(); ++i) {
         auto item = intl::StdStrToAni(env, strings[i]);
-        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(array, i, item));
+        ANI_FATAL_IF_ERROR(env->Array_Set(array, i, item));
     }
     return array;
 }
@@ -218,7 +219,7 @@ icu::Locale GetLocale(ani_env *env, std::string &locTag)
     return locale;
 }
 
-ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class klass, ani_array_ref locales)
+ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class klass, ani_array locales)
 {
     auto tags = ToStringList(env, locales);
     for (const auto &tag : tags) {
@@ -289,7 +290,7 @@ std::vector<std::string> LookupLocales(std::vector<std::string> &availableLocale
     return result;
 }
 
-ani_array_ref StdCoreIntlBestFitLocales(ani_env *env, [[maybe_unused]] ani_class klass, ani_array_ref locales)
+ani_array StdCoreIntlBestFitLocales(ani_env *env, [[maybe_unused]] ani_class klass, ani_array locales)
 {
     auto tags = ToStringList(env, locales);
 
@@ -371,7 +372,7 @@ ani_string StdCoreIntlLookupLocale(ani_env *env, [[maybe_unused]] ani_class klas
     return intl::StdStrToAni(env, GetDefaultLocaleTag());
 }
 
-ani_array_ref StdCoreIntlLookupLocales(ani_env *env, [[maybe_unused]] ani_class klass, ani_array_ref locales)
+ani_array StdCoreIntlLookupLocales(ani_env *env, [[maybe_unused]] ani_class klass, ani_array locales)
 {
     auto tags = ToStringList(env, locales);
     auto availableLocales = GetAvailableLocales();
@@ -386,13 +387,13 @@ ani_array_ref StdCoreIntlLookupLocales(ani_env *env, [[maybe_unused]] ani_class 
 
 ani_status RegisterIntlLocaleMatch(ani_env *env)
 {
-    const auto methods = std::array {ani_native_function {"bestFitLocale", "C{escompat.Array}:C{std.core.String}",
+    const auto methods = std::array {ani_native_function {"bestFitLocale", "C{std.core.Array}:C{std.core.String}",
                                                           reinterpret_cast<void *>(StdCoreIntlBestFitLocale)},
-                                     ani_native_function {"lookupLocale", "C{escompat.Array}:C{std.core.String}",
+                                     ani_native_function {"lookupLocale", "C{std.core.Array}:C{std.core.String}",
                                                           reinterpret_cast<void *>(StdCoreIntlLookupLocale)},
-                                     ani_native_function {"bestFitLocales", "C{escompat.Array}:C{escompat.Array}",
+                                     ani_native_function {"bestFitLocales", "C{std.core.Array}:C{std.core.Array}",
                                                           reinterpret_cast<void *>(StdCoreIntlBestFitLocales)},
-                                     ani_native_function {"lookupLocales", "C{escompat.Array}:C{escompat.Array}",
+                                     ani_native_function {"lookupLocales", "C{std.core.Array}:C{std.core.Array}",
                                                           reinterpret_cast<void *>(StdCoreIntlLookupLocales)}};
 
     ani_class localeMatchClass;

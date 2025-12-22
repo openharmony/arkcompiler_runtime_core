@@ -157,7 +157,7 @@ TEST_F(ArrayBufferGetInfoTest, GetInfoFromResizableBuffer)
     ASSERT_EQ(byteData[2U], THREE);
 
     ani_class arrayBufferClass {};
-    ASSERT_EQ(env_->FindClass("escompat.ArrayBuffer", &arrayBufferClass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.ArrayBuffer", &arrayBufferClass), ANI_OK);
     ani_method resizableGetter {};
     ASSERT_EQ(env_->Class_FindGetter(arrayBufferClass, "resizable", &resizableGetter), ANI_OK);
     ani_boolean isResizable = ANI_FALSE;

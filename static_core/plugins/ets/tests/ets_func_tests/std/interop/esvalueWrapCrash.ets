@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const expectedESValueWrapErrors = (e: Error | Exception): boolean => {  
+const expectedESValueWrapErrors = (e: Error): boolean => {  
     if (e instanceof NoInteropContextError) {
         return e.message === 'Interop call may be done only from _main_ or exclusive worker';  
     } else {  

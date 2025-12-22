@@ -13,37 +13,36 @@
  * limitations under the License.
  */
 
-import {
-	tsNumber,
-	tsString,
-	AnyTypeMethodClass,
-	createInterfaceClassAnyTypeMethod,
-	UnionTypeMethodClass,
-	createInterfaceClassUnionTypeMethod,
-	unionTypeMethodInstanceClass,
-	subsetByRefInterface,
-	SubsetByValueClass,
-	createSubsetByValueClassFromTs,
-	subsetByValueInstanceClass,
-	TupleTypeMethodClass,
-	createInterfaceClassTupleTypeMethodFromTs,
-	tupleInstanceClass,
-	WithOptionalMethodClass,
-	WithoutOptionalMethodClass,
-	createClassWithOptionalMethod,
-	createClassWithoutOptionalMethod,
-	withoutOptionalMethodInstanceClass,
-	withOptionalMethodInstanceClass,
-	optionalArg,
-	optionalArgArray,
-} from 'dynamic_import'
+let module = ESValue.load('dynamic_import');
+let tsNumber = module.getProperty('tsNumber').toNumber();
+let tsString = module.getProperty('tsString').toString();
+let AnyTypeMethodClass = module.getProperty('AnyTypeMethodClass');
+let createInterfaceClassAnyTypeMethod = module.getProperty('createInterfaceClassAnyTypeMethod');
+let UnionTypeMethodClass = module.getProperty('UnionTypeMethodClass');
+let createInterfaceClassUnionTypeMethod = module.getProperty('createInterfaceClassUnionTypeMethod');
+let unionTypeMethodInstanceClass = module.getProperty('unionTypeMethodInstanceClass');
+let subsetByRefInterface = module.getProperty('subsetByRefInterface');
+let SubsetByValueClass = module.getProperty('SubsetByValueClass');
+let createSubsetByValueClassFromTs = module.getProperty('createSubsetByValueClassFromTs');
+let subsetByValueInstanceClass = module.getProperty('subsetByValueInstanceClass');
+let TupleTypeMethodClass = module.getProperty('TupleTypeMethodClass');
+let createInterfaceClassTupleTypeMethodFromTs = module.getProperty('createInterfaceClassTupleTypeMethodFromTs');
+let tupleInstanceClass = module.getProperty('tupleInstanceClass');
+let WithOptionalMethodClass = module.getProperty('WithOptionalMethodClass');
+let WithoutOptionalMethodClass = module.getProperty('WithoutOptionalMethodClass');
+let createClassWithOptionalMethod = module.getProperty('createClassWithOptionalMethod');
+let createClassWithoutOptionalMethod = module.getProperty('createClassWithoutOptionalMethod');
+let withoutOptionalMethodInstanceClass = module.getProperty('withoutOptionalMethodInstanceClass');
+let withOptionalMethodInstanceClass = module.getProperty('withOptionalMethodInstanceClass');
+let optionalArg = module.getProperty('optionalArg');
+let optionalArgArray = module.getProperty('optionalArgArray');
 
-const str = 'string'
-const bool = true
-const num = 1
-const arr = []
-const obj: Object = {}
-const arrTuple: [int, string] = [num, str]
+const str: string = 'string';
+const bool: boolean = true;
+const num: int = 1;
+const arr: int[] = [];
+const obj: Object = {};
+const arrTuple: [int, string] = [num, str];
 
 class ObjMethod {
 	get(): int {
@@ -52,192 +51,202 @@ class ObjMethod {
 }
 
 function checkAnyTypeInterfaceClassString(): boolean {
-	const anyTypeMethodClass = new AnyTypeMethodClass()
+	const anyTypeMethodClass = AnyTypeMethodClass.instantiate();
 
-	return (str as string) == (anyTypeMethodClass.get(str) as string)
+	return (str as string) === (anyTypeMethodClass.invokeMethod('get', str).toString());
 }
 
 function checkAnyTypeInterfaceClassInt(): boolean {
-	const anyTypeMethodClass = new AnyTypeMethodClass()
+	const anyTypeMethodClass = AnyTypeMethodClass.instantiate();
 
-	return (num as int) == (anyTypeMethodClass.get(num) as int)
+	return (num as int) === (anyTypeMethodClass.invokeMethod('get', num).toNumber());
 }
 
 function checkAnyTypeInterfaceClassBool(): boolean {
-	const anyTypeMethodClass = new AnyTypeMethodClass()
+	const anyTypeMethodClass = AnyTypeMethodClass.instantiate();
 
-	return (bool as boolean) == (anyTypeMethodClass.get(bool) as boolean)
+	return (bool as boolean) === (anyTypeMethodClass.invokeMethod('get', bool).toBoolean());
 }
 
 function checkAnyTypeInterfaceClassArray(): boolean {
-	const anyTypeMethodClass = new AnyTypeMethodClass()
+	const anyTypeMethodClass = AnyTypeMethodClass.instantiate();
 
-	return (anyTypeMethodClass.get(arr) as Array<int>) instanceof Array
+	return (anyTypeMethodClass.invokeMethod('get', arr).unwrap() as Array<int>) instanceof Array;
 }
 
 function checkAnyTypeInterfaceClassObject(): boolean {
-	const anyTypeMethodClass = new AnyTypeMethodClass()
+	const anyTypeMethodClass = AnyTypeMethodClass.instantiate()
 
-	return 'object' == (typeof anyTypeMethodClass.get(obj) as Object)
+	return 'object' === (anyTypeMethodClass.invokeMethod('get', obj).typeOf());
 }
 
 function checkCreateInterfaceClassAnyTypeMethodString(): boolean {
-	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod.invoke();
 
-	return (str as string) == (anyTypeMethodClass.get(str) as string)
+	return (str as string) === (anyTypeMethodClass.invokeMethod('get', str).toString());
 }
 
 function checkCreateInterfaceClassAnyTypeMethodInt(): boolean {
-	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod.invoke();
 
-	return (num as int) == (anyTypeMethodClass.get(num) as int)
+	return (num as int) === (anyTypeMethodClass.invokeMethod('get', num).toNumber());
 }
 
 function checkCreateInterfaceClassAnyTypeMethodBool(): boolean {
-	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod.invoke();
 
-	return (bool as boolean) == (anyTypeMethodClass.get(bool) as boolean)
+	return (bool as boolean) === (anyTypeMethodClass.invokeMethod('get', bool).toBoolean());
 }
 
 function checkCreateInterfaceClassAnyTypeMethodArray(): boolean {
-	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod.invoke();
 
-	return (anyTypeMethodClass.get(arr) as Array<int>) instanceof Array
+	return (anyTypeMethodClass.invokeMethod('get', arr).unwrap() as Array<int>) instanceof Array;
 }
 
 function checkCreateInterfaceClassAnyTypeMethodObject(): boolean {
-	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod.invoke();
 
-	return 'object' == (typeof anyTypeMethodClass.get(obj) as Object)
+	return 'object' === (anyTypeMethodClass.invokeMethod('get', obj).typeOf() as Object);
 }
 
 function checkUnionTypeInterfaceClassString(): boolean {
-	const unionTypeMethodClass = new UnionTypeMethodClass()
+	const unionTypeMethodClass = UnionTypeMethodClass.instantiate();
 
-	return (str as string) == (unionTypeMethodClass.get(str) as string)
+	return (str as string) === (unionTypeMethodClass.invokeMethod('get', str).toString());
 }
 
 function checkUnionTypeInterfaceClassInt(): boolean {
-	const unionTypeMethodClass = new UnionTypeMethodClass()
+	const unionTypeMethodClass = UnionTypeMethodClass.instantiate();
 
-	return (num as int) == (unionTypeMethodClass.get(num) as int)
+	return (num as int) === (unionTypeMethodClass.invokeMethod('get', num).toNumber());
 }
 
 function checkCreateInterfaceClassUnionTypeMethodString(): boolean {
-	const unionTypeMethodClass = createInterfaceClassUnionTypeMethod()
+	const unionTypeMethodClass = createInterfaceClassUnionTypeMethod.invoke();
 
-	return (str as string) == (unionTypeMethodClass.get(str) as string)
+	return (str as string) === (unionTypeMethodClass.invokeMethod('get', str).toString());
 }
 
 function checkCreateInterfaceClassUnionTypeMethodInt(): boolean {
-	const unionTypeMethodClass = createInterfaceClassUnionTypeMethod()
+	const unionTypeMethodClass = createInterfaceClassUnionTypeMethod.invoke();
 
-	return (num as int) == (unionTypeMethodClass.get(num) as int)
+	return (num as int) === (unionTypeMethodClass.invokeMethod('get', num).toNumber());
 }
 
 function checkInstanceInterfaceClassUnionTypeMethodString(): boolean {
-	return (str as string) == (unionTypeMethodInstanceClass.get(str) as string)
+	return (str as string) === (unionTypeMethodInstanceClass.invokeMethod('get', str).toString());
 }
 
 function checkInstanceInterfaceClassUnionTypeMethodInt(): boolean {
-	return (num as int) == (unionTypeMethodInstanceClass.get(num) as int)
+	return (num as int) === (unionTypeMethodInstanceClass.invokeMethod('get', num).toNumber());
 }
 
 function checkSubsetByRefInterface(): boolean {
-	return (num as int) == (subsetByRefInterface(new ObjMethod()) as int)
+	return (num as int) === (subsetByRefInterface.invoke(new ObjMethod()).toNumber());
 }
 
 function checkSubsetByRefInterfaceError(): boolean {
 	try {
-		subsetByRefInterface(obj)
-
-		return false
+		subsetByRefInterface.invoke(obj);
+		return false;
 	} catch (e) {
-		return true
+		return true;
 	}
 }
 
 function checkSubsetByValueClass(): boolean {
-	const subsetByValueClass = new SubsetByValueClass()
-	const userClass = subsetByValueClass.get()
+	const subsetByValueClass = SubsetByValueClass.instantiate();
+	const userClass = subsetByValueClass.invokeMethod('get');
 
-	return (tsNumber as int) == (userClass.value as int)
+	return (tsNumber as int) === (userClass.getProperty('value').toNumber());
 }
 
 function checkCreateSubsetByValueClassFromTs(): boolean {
-	const subsetByValueClass = createSubsetByValueClassFromTs()
-	const userClass = subsetByValueClass.get()
+	const subsetByValueClass = createSubsetByValueClassFromTs.invoke();
+	const userClass = subsetByValueClass.invokeMethod('get');
 
-	return (tsNumber as int) == (userClass.value as int)
+	return (tsNumber as int) === (userClass.getProperty('value').toNumber());
 }
 
 function checkInstanceSubsetByValueClassFromTs(): boolean {
-	const userClass = subsetByValueInstanceClass.get()
+	const userClass = subsetByValueInstanceClass.invokeMethod('get');
 
-	return (tsNumber as int) == (userClass.value as int)
+	return (tsNumber as int) === (userClass.getProperty('value').toNumber());
 }
 
 function checkTupleTypeClass(): boolean {
-	const tupleClass = new TupleTypeMethodClass()
+	const tupleClass = TupleTypeMethodClass.instantiate()
 
-	const result = tupleClass.get(arrTuple)
-	return (result as Array<[int, string]>) instanceof Array && (result[0] as int) == (num as int) && (result[1] as string) == (str as string)
+	const result = tupleClass.invokeMethod('get', arrTuple);
+	return result.unwrap() as Array<[int, string]> instanceof Array &&
+		   result.getProperty(0).toNumber() === (num as int) &&
+		   result.getProperty(0).toString() === str as string;
 }
 
 function checkCreateTupleClassFromTs(): boolean {
-	const tupleClass = createInterfaceClassTupleTypeMethodFromTs()
+	const tupleClass = createInterfaceClassTupleTypeMethodFromTs.invoke();
 
-	const result = tupleClass.get(arrTuple)
-	return (result as Array<[int, string]>) instanceof Array && (result[0] as int) == (num as int) && (result[1] as string) == (str as string)
+	const result = tupleClass.invokeMethod('get', arrTuple);
+	return result.unwrap() as Array<[int, string]> instanceof Array &&
+		   (result.getProperty(0).toNumber()) === (num as int) &&
+		   (result.getProperty(1).toString()) === (str as string);
 }
 
 function checkInstanceTupleClassFromTs(): boolean {
-	const result = tupleInstanceClass.get(arrTuple)
-	return (result as Array<[int, string]>) instanceof Array && (result[0] as int) == (num as int) && (result[1] as string) == (str as string)
+	const result = tupleInstanceClass.invokeMethod('get', arrTuple);
+	return result.unwrap() as Array<[int, string]> instanceof Array &&
+		   (result.getProperty(0).toNumber()) === (num as int) &&
+		   (result.getProperty(1).toString()) === (str as string);
 }
 
 function checkWithOptionalMethodClass(): boolean {
-	const optionalClass = new WithOptionalMethodClass()
+	const optionalClass = WithOptionalMethodClass.instantiate();
 
-	return (optionalClass.getNum() as int) == (tsNumber as int) && (optionalClass.getStr() as string) == (tsString as string)
+	return (optionalClass.invokeMethod('getNum').toNumber()) === (tsNumber as int) &&
+		   (optionalClass.invokeMethod('getStr').toString()) === (tsString as string);
 }
 
 function checkWithoutOptionalMethodClass(): boolean {
-	const optionalClass = new WithoutOptionalMethodClass()
+	const optionalClass = WithoutOptionalMethodClass.instantiate();
 
-	return (optionalClass.getStr() as string) == (tsString as string)
+	return (optionalClass.invokeMethod('getStr').toString()) === (tsString as string);
 }
 
 function checkCreateClassWithOptionalMethod() {
-	const optionalClass = createClassWithOptionalMethod()
+	const optionalClass = createClassWithOptionalMethod.invoke();
 
-	return (optionalClass.getNum() as int) == (tsNumber as int) && (optionalClass.getStr() as string) == (tsString as string)
+	return (optionalClass.invokeMethod('getNum').toNumber()) === (tsNumber as int) &&
+		   (optionalClass.invokeMethod('getStr').toString()) === (tsString as string);
 }
 
 function checkCreateClassWithoutOptionalMethod() {
-	const optionalClass = createClassWithoutOptionalMethod()
+	const optionalClass = createClassWithoutOptionalMethod.invoke();
 
-	return (optionalClass.getStr() as string) == (tsString as string)
+	return (optionalClass.invokeMethod('getStr').toString()) === (tsString as string);
 }
 
 function checkWithOptionalMethodInstanceClass(): boolean {
-	return (withOptionalMethodInstanceClass.getNum() as int) == (tsNumber as int) && (withOptionalMethodInstanceClass.getStr() as string) == (tsString as string)
+	let resNum = (withOptionalMethodInstanceClass.invokeMethod('getNum').toNumber());
+	let resStr = (withOptionalMethodInstanceClass.invokeMethod('getStr').toString());
+	return resNum === (tsNumber as int) && resStr === (tsString as string);
 }
 
 function checkWithoutOptionalMethodInstanceClass() {
-	return (withoutOptionalMethodInstanceClass.getStr() as string) == (tsString as string)
+	let resStr = (withoutOptionalMethodInstanceClass.invokeMethod('getStr').toString());
+	return resStr === (tsString as string);
 }
 
 function checkOptionalArgWithAllArgs(): boolean {
-	const result = optionalArg(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass)
+	const result = optionalArg.invoke(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass);
 
-	return !!result.with && !!result.without
+	return !!result.getProperty('with').unwrap() && !!result.getProperty('without').unwrap();
 }
 
 function checkOptionalArgWithOneArgs(): boolean {
-	const result = optionalArg(withOptionalMethodInstanceClass)
+	const result = optionalArg.invoke(withOptionalMethodInstanceClass);
 
-	return !!result.with
+	return !!result.getProperty('with').unwrap();
 }
 
 // NOTE (issues 17772) fix spread operator and
@@ -256,11 +265,11 @@ function checkOptionalArgWithOneArgs(): boolean {
 // }
 
 function checkWithoutSpreadOperatorArgWithAllArgs(): boolean {
-	const result = optionalArgArray(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass)
-	return !!result.with && !!result.without
+	const result = optionalArgArray.invoke(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass)
+	return !!result.getProperty('with').unwrap() && !!result.getProperty('without').unwrap();
 }
 
 function checkWithoutSpreadOperatorArgWithOneArgs(): boolean {
-	const result = optionalArgArray(withOptionalMethodInstanceClass)
-	return !!result.with
+	const result = optionalArgArray.invoke(withOptionalMethodInstanceClass)
+	return !!result.getProperty('with').unwrap();
 }

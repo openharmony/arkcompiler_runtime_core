@@ -16,7 +16,7 @@
 #ifndef PANDA_FILE_MANAGER_H_
 #define PANDA_FILE_MANAGER_H_
 
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "runtime/compiler.h"
 #include "runtime/include/mem/panda_string.h"
 

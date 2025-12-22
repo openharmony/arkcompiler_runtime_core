@@ -129,21 +129,26 @@ function createCoro(idx: int): FinalizationRegistry<String> {
 }
 
 
-async function createCoroA(idx: int): Promise<FinalizationRegistry<String>> {
-	let finreg = new FinalizationRegistry<String>((string: String): void => { cntr++ });
+async function createCoroA(idx: int, noToken: boolean): Promise<FinalizationRegistry<String>> {
+    let finreg = new FinalizationRegistry<String>((s: String): void => { cntr++; });
 	let o = new Object();
-	finreg.register(o, "<<< :Async: >>> " + idx, o);
+    if (noToken) {
+        finreg.register(o, "<<< :Async1: >>> " + idx);
+    } else {
+        finreg.register(o, "<<< :Async2: >>> " + idx, o);
+    }
 	return finreg;
 }
 
 
 async function ctorTests() {
 
-	for (let i = 0; i < promise_count; i++) {
-		regs_promise.push(createCoroA(i));
+    for (let i = 0; i < promise_count; i++) {
+        regs_promise.push(createCoroA(i, true));
+	    regs_promise.push(createCoroA(i, false));
 	}
 
-	for (let i = 0; i < promise_count; i++) {
+    for (let i = 0; i < regs_promise.length; i++) {
 		await regs_promise[i];
 	}
 
@@ -154,11 +159,11 @@ async function ctorTests() {
 }
 
 function main(): void {
-	registry = new FinalizationRegistry<String>((string: String): void => { });
+    registry = new FinalizationRegistry<String>((string: String): void => { });
 	getSizeTests(registry!);
 	unregisterTests(registry!);
 
 	waitForCompletion(ctorTests);
- arktest.assertEQ(cntr, promise_count, "Counter of ctors is not valid");
+ arktest.assertEQ(cntr, promise_count * 2, "Counter of ctors is not valid");
 
 }

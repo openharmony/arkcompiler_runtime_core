@@ -406,7 +406,7 @@ class CMakeOutputManager(OutputManager):
                 f")",
             ):
                 self.target.writelns(
-                    f"{self.runtime_include_dir.as_posix()}",
+                    f'"{self.runtime_include_dir.as_posix()}"',
                 )
         with self.target.indented(
             f"if(NOT DEFINED TAIHE_RUNTIME_C_SRC_INNER)",
@@ -430,7 +430,7 @@ class CMakeOutputManager(OutputManager):
             ):
                 for runtime_src_file in self.runtime_cxx_src_files:
                     self.target.writelns(
-                        f"{runtime_src_file.as_posix()}",
+                        f'"{runtime_src_file.as_posix()}"',
                     )
         with self.target.indented(
             f"set(TAIHE_RUNTIME_INCLUDE",

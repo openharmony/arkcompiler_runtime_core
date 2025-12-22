@@ -57,11 +57,12 @@ namespace common {
  * Used for substring operations, SlicedString holds a reference to a parent BaseString
  * and an offset indicating the starting index of the slice.
  */
-class SlicedString : public BaseString {
+template <size_t POINTER_SIZE>
+class SlicedStringTemplate : public BaseString {
 public:
-    BASE_CAST_CHECK(SlicedString, IsSlicedString);
-    NO_MOVE_SEMANTIC_CC(SlicedString);
-    NO_COPY_SEMANTIC_CC(SlicedString);
+    BASE_CAST_CHECK(SlicedStringTemplate<POINTER_SIZE>, IsSlicedString);
+    NO_MOVE_SEMANTIC_CC(SlicedStringTemplate<POINTER_SIZE>);
+    NO_COPY_SEMANTIC_CC(SlicedStringTemplate<POINTER_SIZE>);
     static constexpr uint32_t MIN_SLICED_STRING_LENGTH = 13;
     static constexpr size_t PARENT_OFFSET = BaseString::SIZE;
     static constexpr uint32_t START_INDEX_BITS_NUM = 30U;
@@ -75,7 +76,10 @@ public:
     // NOLINTNEXTLINE(misc-redundant-expression)
     static_assert(StartIndexBits::SIZE == LengthBits::SIZE, "The size of startIndex should be same with Length");
 
-    POINTER_FIELD(Parent, PARENT_OFFSET, STARTINDEX_AND_FLAGS_OFFSET)
+    static constexpr size_t STARTINDEX_AND_FLAGS_OFFSET = PARENT_OFFSET + POINTER_SIZE;
+    SET_POINTER_FIELD(Parent, PARENT_OFFSET)
+    GET_POINTER_FIELD(Parent, PARENT_OFFSET)
+
     PRIMITIVE_FIELD(StartIndexAndFlags, uint32_t, STARTINDEX_AND_FLAGS_OFFSET, SIZE);
 
     /**
@@ -90,7 +94,8 @@ public:
     template <typename Allocator, typename WriteBarrier,
               objects_traits::enable_if_is_allocate<Allocator, BaseObject *> = 0,
               objects_traits::enable_if_is_write_barrier<WriteBarrier> = 0>
-    static SlicedString *Create(Allocator &&allocator, WriteBarrier &&writeBarrier, ReadOnlyHandle<BaseString> parent);
+    static SlicedStringTemplate<POINTER_SIZE> *Create(Allocator &&allocator, WriteBarrier &&writeBarrier,
+                                                      ReadOnlyHandle<BaseString> parent);
     /**
      * @brief Get the start index of the sliced region.
      * @return Start index into parent string.

@@ -98,7 +98,7 @@ function checkChar(val: char) {
 }
 
 function checkCharBoxed(val: Char) {
-    arktest.assertTrue(val.unboxed() == c'1')
+    arktest.assertTrue(val == c'1')
 }
 
 function checkString(val: string) {

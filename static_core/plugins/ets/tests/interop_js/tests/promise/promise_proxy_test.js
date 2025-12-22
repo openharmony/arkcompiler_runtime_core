@@ -44,11 +44,11 @@ function runTest(test) {
         if (is_unset()) {
             return;
         }
-        helper.clearInterval(tId);
+        clearInterval(tId);
         const check = etsVm.getFunction(globalName, 'check');
         check();
     };
-    tId = helper.setInterval(checkFn);
+    tId = setInterval(checkFn);
 }
 
 let args = helper.getArgv();

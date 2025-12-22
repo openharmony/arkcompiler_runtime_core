@@ -13,419 +13,391 @@
  * limitations under the License.
  */
 
-import {
-    TupleT,
-    tsNumber,
-    tsString,
-    tsBool,
-    tsArr,
-    tsObj,
-    tsUnion,
-    tsTuple,
-    tsLiteral,
-    anyTypeParameter,
-    anyTypeParameterExplicitCallFromTsInt,
-    anyTypeParameterExplicitCallFromTsString,
-    anyTypeParameterExplicitCallFromTsBool,
-    anyTypeParameterExplicitCallFromTsArr,
-    anyTypeParameterExplicitCallFromTsObj,
-    anyTypeParameterExplicitCallFromTsUnion,
-    anyTypeParameterExplicitCallFromTsTuple,
-    anyTypeParameterExplicitCallFromTsLiteral,
-    //
-    genericTypeFunctionReturnAny,
-    genericTypeFunctionExplicitCallFromTsInt,
-    genericTypeFunctionExplicitCallFromTsString,
-    genericTypeFunctionExplicitCallFromTsBool,
-    genericTypeFunctionExplicitCallFromTsArr,
-    genericTypeFunctionExplicitCallFromTsObj,
-    genericTypeFunctionExplicitCallFromTsUnion,
-    genericTypeFunctionExplicitCallFromTsTuple,
-    genericTypeFunctionExplicitCallFromTsLiteral,
-    //
-    extendGenericNumber,
-    extendGenericString,
-    extendGenericBool,
-    extendGenericArr,
-    extendGenericObj,
-    extendGenericUnion,
-    extendGenericTuple,
-    extendGenericLiteral,
-    //
-    GInterfaceClass,
-    GTypeClass,
-    genericExtendInterface,
-    genericExtendType,
-    //
-    tupleGeneric,
-    //
-    collectGeneric,
-    //
-    UserClass,
-    createClassFromTs,
-    userClassInstance,
-    //
-    genericDefaultInt,
-    genericDefaultString,
-    genericDefaultBool,
-    genericDefaultArr,
-    genericDefaultObj,
-    genericDefaultUnion,
-    genericDefaultTuple,
-    genericDefaultLiteral,
-    genericDefaultIntCallFromTs,
-    genericDefaultStringCallFromTs,
-    genericDefaultBoolCallFromTs,
-    genericDefaultArrCallFromTs,
-    genericDefaultObjCallFromTs,
-    genericDefaultUnionCallFromTs,
-    genericDefaultTupleCallFromTs,
-    genericDefaultLiteralCallFromTs,
-    //
-    DataClass,
-    genericExtendClass,
-} from 'main_js';
+let module = ESObject.load('../../plugins/ets/tests/interop_js/tests/generic_as_parameter/ts_to_sts/generic_as_parameter');
+
+let tsNumber = module.getProperty('tsNumber');
+let tsString = module.getProperty('tsString');
+let tsBool = module.getProperty('tsBool');
+let tsArr = module.getProperty('tsArr');
+let tsObj = module.getProperty('tsObj');
+let tsUnion = module.getProperty('tsUnion');
+let tsTuple = module.getProperty('tsTuple');
+let tsLiteral = module.getProperty('tsLiteral');
+let anyTypeParameter = module.getProperty('anyTypeParameter');
+let anyTypeParameterExplicitCallFromTsInt = module.getProperty('anyTypeParameterExplicitCallFromTsInt');
+let anyTypeParameterExplicitCallFromTsString = module.getProperty('anyTypeParameterExplicitCallFromTsString');
+let anyTypeParameterExplicitCallFromTsBool = module.getProperty('anyTypeParameterExplicitCallFromTsBool');
+let anyTypeParameterExplicitCallFromTsArr = module.getProperty('anyTypeParameterExplicitCallFromTsArr');
+let anyTypeParameterExplicitCallFromTsObj = module.getProperty('anyTypeParameterExplicitCallFromTsObj');
+let anyTypeParameterExplicitCallFromTsUnion = module.getProperty('anyTypeParameterExplicitCallFromTsUnion');
+let anyTypeParameterExplicitCallFromTsTuple = module.getProperty('anyTypeParameterExplicitCallFromTsTuple');
+let anyTypeParameterExplicitCallFromTsLiteral = module.getProperty('anyTypeParameterExplicitCallFromTsLiteral');
+let genericTypeFunctionReturnAny = module.getProperty('genericTypeFunctionReturnAny');
+let genericTypeFunctionExplicitCallFromTsInt = module.getProperty('genericTypeFunctionExplicitCallFromTsInt');
+let genericTypeFunctionExplicitCallFromTsString = module.getProperty('genericTypeFunctionExplicitCallFromTsString');
+let genericTypeFunctionExplicitCallFromTsBool = module.getProperty('genericTypeFunctionExplicitCallFromTsBool');
+let genericTypeFunctionExplicitCallFromTsArr = module.getProperty('genericTypeFunctionExplicitCallFromTsArr');
+let genericTypeFunctionExplicitCallFromTsObj = module.getProperty('genericTypeFunctionExplicitCallFromTsObj');
+let genericTypeFunctionExplicitCallFromTsUnion = module.getProperty('genericTypeFunctionExplicitCallFromTsUnion');
+let genericTypeFunctionExplicitCallFromTsTuple = module.getProperty('genericTypeFunctionExplicitCallFromTsTuple');
+let genericTypeFunctionExplicitCallFromTsLiteral = module.getProperty('genericTypeFunctionExplicitCallFromTsLiteral');
+let extendGenericNumber = module.getProperty('extendGenericNumber');
+let extendGenericString = module.getProperty('extendGenericString');
+let extendGenericBool = module.getProperty('extendGenericBool');
+let extendGenericArr = module.getProperty('extendGenericArr');
+let extendGenericObj = module.getProperty('extendGenericObj');
+let extendGenericUnion = module.getProperty('extendGenericUnion');
+let extendGenericTuple = module.getProperty('extendGenericTuple');
+let extendGenericLiteral = module.getProperty('extendGenericLiteral');
+let GInterfaceClass = module.getProperty('GInterfaceClass');
+let GTypeClass = module.getProperty('GTypeClass');
+let genericExtendInterface = module.getProperty('genericExtendInterface');
+let genericExtendType = module.getProperty('genericExtendType');
+let tupleGeneric = module.getProperty('tupleGeneric');
+let collectGeneric = module.getProperty('collectGeneric');
+let UserClass = module.getProperty('UserClass');
+let createClassFromTs = module.getProperty('createClassFromTs');
+let userClassInstance = module.getProperty('userClassInstance');
+let genericDefaultInt = module.getProperty('genericDefaultInt');
+let genericDefaultString = module.getProperty('genericDefaultString');
+let genericDefaultBool = module.getProperty('genericDefaultBool');
+let genericDefaultArr = module.getProperty('genericDefaultArr');
+let genericDefaultObj = module.getProperty('genericDefaultObj');
+let genericDefaultUnion = module.getProperty('genericDefaultUnion');
+let genericDefaultTuple = module.getProperty('genericDefaultTuple');
+let genericDefaultLiteral = module.getProperty('genericDefaultLiteral');
+let genericDefaultIntCallFromTs = module.getProperty('genericDefaultIntCallFromTs');
+let genericDefaultStringCallFromTs = module.getProperty('genericDefaultStringCallFromTs');
+let genericDefaultBoolCallFromTs = module.getProperty('genericDefaultBoolCallFromTs');
+let genericDefaultArrCallFromTs = module.getProperty('genericDefaultArrCallFromTs');
+let genericDefaultObjCallFromTs = module.getProperty('genericDefaultObjCallFromTs');
+let genericDefaultUnionCallFromTs = module.getProperty('genericDefaultUnionCallFromTs');
+let genericDefaultTupleCallFromTs = module.getProperty('genericDefaultTupleCallFromTs');
+let genericDefaultLiteralCallFromTs = module.getProperty('genericDefaultLiteralCallFromTs');
+let DataClass = module.getProperty('DataClass');
+let genericExtendClass = module.getProperty('genericExtendClass');
 
 type TupleT = [int, boolean];
-type Union = string | number;
-
-const etsNumber = 1;
-const etsString = 'string';
-const etsBool = true;
-const etsArr: FixedArray<int> = [etsNumber];
+const etsNumber: number = 1;
+const etsString: string = 'string';
+const etsBool: boolean = true;
+const etsArr = [etsNumber];
 const etsObj: object = {};
-const etsUnion: Union = etsNumber;
-const etsTuple: TupleT = [etsNumber, etsBool];
+const etsUnion = etsNumber;
+const etsTuple = [etsNumber, etsBool];
 
 function checkAnyTypeParameterInt(): boolean {
-    return anyTypeParameter(etsNumber) as int == etsNumber as int;
+    return anyTypeParameter.invoke(etsNumber).toNumber() == etsNumber;
 }
 
 function checkAnyTypeParameterString(): boolean {
-    return anyTypeParameter(etsString) as string == etsString as string;
+    return anyTypeParameter.invoke(etsString).toString() == etsString.toString();
 }
 
 function checkAnyTypeParameterBool(): boolean {
-    return anyTypeParameter(etsBool) as boolean == etsBool as boolean;
+    return anyTypeParameter.invoke(etsBool).toBoolean() == etsBool.toBoolean();
 }
 
 function checkAnyTypeParameterArr(): boolean {
-    const res = anyTypeParameter(etsArr);
-
-    return res as Array<int> instanceof Array
-        && res[0] as int == etsArr[0] as int;
+    const res = anyTypeParameter.invoke(etsArr);
+    return res.getProperty(0).toNumber() == etsArr[0];
 }
 
 function checkAnyTypeParameterObj(): boolean {
-    return typeof anyTypeParameter(etsObj) == 'object';
+    return anyTypeParameter.invoke(etsObj).typeOf() == 'object';
 }
 
 function checkAnyTypeParameterUnion(): boolean {
-    return anyTypeParameter(etsUnion) as int == etsNumber as int;
+    return anyTypeParameter.invoke(etsUnion).toNumber() == etsNumber;
 }
 
 function checkAnyTypeParameterTuple(): boolean {
-    const res = anyTypeParameter(etsTuple);
+    const res = anyTypeParameter.invoke(etsTuple);
 
-    return res as Array<TupleT> instanceof Array
-        && res[0] as int == etsTuple[0] as int
-        && res[1] as boolean == etsTuple[1] as boolean;
+    return res.getProperty(0).toNumber() == etsTuple[0]
+        && res.getProperty(1).toBoolean() == etsTuple[1];
 }
 // any type parameter explicit
 
 function checkAnyTypeParameterExplicitCallInt(): boolean {
-    return anyTypeParameterExplicitCallFromTsInt() as int == tsNumber as int;
+    return anyTypeParameterExplicitCallFromTsInt.invoke().toNumber() == tsNumber.toNumber();
 }
 
 function checkAnyTypeParameterExplicitCallString(): boolean {
-    return anyTypeParameterExplicitCallFromTsString() as string == tsString as string;
+    return anyTypeParameterExplicitCallFromTsString.invoke().toString() == tsString.toString();
 }
 
 function checkAnyTypeParameterExplicitCallBool(): boolean {
-    return anyTypeParameterExplicitCallFromTsBool() as boolean == tsBool as boolean;
+    return anyTypeParameterExplicitCallFromTsBool.invoke().toBoolean() == tsBool.toBoolean();
 }
 
 function checkAnyTypeParameterExplicitCallArr(): boolean {
-    const res = anyTypeParameterExplicitCallFromTsArr();
-    return res as Array<int> instanceof Array
-        && res[0] as int == tsArr[0] as int;
+    const res = anyTypeParameterExplicitCallFromTsArr.invoke();
+    return res.getProperty(0).toNumber() == tsArr.getProperty(0).toNumber();
 }
 
 function checkAnyTypeParameterExplicitCallObj(): boolean {
-    return typeof anyTypeParameterExplicitCallFromTsObj() == 'object';
+    return anyTypeParameterExplicitCallFromTsObj.invoke().typeOf() == 'object';
 }
 
 function checkAnyTypeParameterExplicitCallUnion(): boolean {
-    return anyTypeParameterExplicitCallFromTsUnion() as int == tsUnion as int;
+    return anyTypeParameterExplicitCallFromTsUnion.invoke().toNumber() == tsUnion.toNumber();
 }
 
 function checkAnyTypeParameterExplicitCallTuple(): boolean {
-    const res = anyTypeParameterExplicitCallFromTsTuple();
-    return res as Array<TupleT> instanceof Array
-        && res[0] as int == tsTuple[0] as int
-        && res[1] as boolean == tsTuple[1] as boolean;
+    const res = anyTypeParameterExplicitCallFromTsTuple.invoke();
+    return res.getProperty(0).toNumber() == tsTuple.getProperty(0).toNumber()
+        && res.getProperty(1).toBoolean() == tsTuple.getProperty(1).toBoolean();
 }
 
 function checkAnyTypeParameterExplicitCallLiteral(): boolean {
-    return anyTypeParameterExplicitCallFromTsLiteral() as int == tsLiteral as int;
+    return anyTypeParameterExplicitCallFromTsLiteral.invoke().toNumber() == tsLiteral.toNumber();
 }
 
 // generic type function return any
 function checkGenericTypeFunctionReturnAnyInt(): boolean {
-    return genericTypeFunctionReturnAny(etsNumber) as int == etsNumber as int;
+    return genericTypeFunctionReturnAny.invoke(etsNumber).toNumber() == etsNumber;
 }
 
 function checkGenericTypeFunctionReturnAnyString(): boolean {
-    return genericTypeFunctionReturnAny(etsString) as string == etsString as string;
+    return genericTypeFunctionReturnAny.invoke(etsString).toString() == etsString;
 }
 
 function checkGenericTypeFunctionReturnAnyBool(): boolean {
-    return genericTypeFunctionReturnAny(etsBool) as boolean == etsBool as boolean;
+    return genericTypeFunctionReturnAny.invoke(etsBool).toBoolean() == etsBool.toBoolean();
 }
 
 function checkGenericTypeFunctionReturnAnyArr(): boolean {
-    const res = genericTypeFunctionReturnAny(etsArr);
-
-    return res as Array<int> instanceof Array
-        && res[0] as int == etsArr[0] as int;
+    const res = genericTypeFunctionReturnAny.invoke(etsArr);
+    return res.getProperty(0).toNumber() == etsArr[0];
 }
 
 function checkGenericTypeFunctionReturnAnyObj(): boolean {
-    return typeof genericTypeFunctionReturnAny(etsObj) == 'object';
+    return genericTypeFunctionReturnAny.invoke(etsObj).typeOf() == 'object';
 }
 
 function checkGenericTypeFunctionReturnAnyUnion(): boolean {
-    return genericTypeFunctionReturnAny(etsUnion) as int == etsNumber as int;
+    return genericTypeFunctionReturnAny.invoke(etsUnion).toNumber() == etsNumber;
 }
 
 function checkGenericTypeFunctionReturnAnyTuple(): boolean {
-    const res = genericTypeFunctionReturnAny(etsTuple);
+    const res = genericTypeFunctionReturnAny.invoke(etsTuple);
 
-    return res as Array<TupleT> instanceof Array
-        && res[0] as int == etsTuple[0] as int
-        && res[1] as boolean == etsTuple[1] as boolean;
+    return res.getProperty(0).toNumber() == etsTuple[0]
+        && res.getProperty(1).toNumber() == etsTuple[1];
 }
 //
 function checkGenericTypeFunctionExplicitCallInt(): boolean {
-    return genericTypeFunctionExplicitCallFromTsInt() as int == tsNumber as int;
+    return genericTypeFunctionExplicitCallFromTsInt.invoke().toNumber() == tsNumber.toNumber();
 }
 
 function checkGenericTypeFunctionExplicitCallString(): boolean {
-    return genericTypeFunctionExplicitCallFromTsString() as string == tsString as string;
+    return genericTypeFunctionExplicitCallFromTsString.invoke().toString() == tsString.toString();
 }
 
 function checkGenericTypeFunctionExplicitCallBool(): boolean {
-    return genericTypeFunctionExplicitCallFromTsBool() as boolean == tsBool as boolean;
+    return genericTypeFunctionExplicitCallFromTsBool.invoke().toBoolean() == tsBool.toBoolean();
 }
 
 function checkGenericTypeFunctionExplicitCallArr(): boolean {
-    const res = genericTypeFunctionExplicitCallFromTsArr();
-    return res as Array<int> instanceof Array
-        && res[0] as int == tsArr[0] as int;
+    const res = genericTypeFunctionExplicitCallFromTsArr.invoke();
+    return res.getProperty(0).toNumber() == tsArr.getProperty(0).toNumber();
 }
 
 function checkGenericTypeFunctionExplicitCallObj(): boolean {
-    return typeof genericTypeFunctionExplicitCallFromTsObj() == 'object';
+    return genericTypeFunctionExplicitCallFromTsObj.invoke().typeOf() == 'object';
 }
 
 function checkGenericTypeFunctionExplicitCallUnion(): boolean {
-    return genericTypeFunctionExplicitCallFromTsUnion() as int == tsUnion as int;
+    return genericTypeFunctionExplicitCallFromTsUnion.invoke().toNumber() == tsUnion.toNumber();
 }
 
 function checkGenericTypeFunctionExplicitCallTuple(): boolean {
-    const res = genericTypeFunctionExplicitCallFromTsTuple();
-    return res as Array<TupleT> instanceof Array
-        && res[0] as int == tsTuple[0] as int
-        && res[1] as boolean == tsTuple[1] as boolean;
+    const res = genericTypeFunctionExplicitCallFromTsTuple.invoke();
+    return res.getProperty(0).toNumber() == tsTuple.getProperty(0).toNumber()
+        && res.getProperty(1).toBoolean() == tsTuple.getProperty(1).toBoolean();
 }
 
 function checkGenericTypeFunctionExplicitCallLiteral(): boolean {
-    return genericTypeFunctionExplicitCallFromTsLiteral() as int == tsLiteral as int;
+    return genericTypeFunctionExplicitCallFromTsLiteral.invoke().toNumber() == tsLiteral.toNumber();
 }
 // extends generic arg
 function checkExtendGenericNumber(): boolean {
-    return extendGenericNumber(etsNumber) as int == etsNumber as int;
+    return extendGenericNumber.invoke(etsNumber).toNumber() == etsNumber;
 }
 
 function checkExtendGenericString(): boolean {
-    return extendGenericString(etsString) as string == etsString as string;
+    return extendGenericString.invoke(etsString).toString() == etsString.toString();
 }
 
 function checkExtendGenericBool(): boolean {
-    return extendGenericBool(etsBool) as boolean == etsBool as boolean;
+    return extendGenericBool.invoke(etsBool).toBoolean() == etsBool.toBoolean();
 }
 
 function checkExtendGenericArr(): boolean {
-    const res = extendGenericArr(etsArr);
-    return res as Array<int> instanceof Array
-        && res[0] as int == etsArr[0] as int;
+    const res = extendGenericArr.invoke(etsArr);
+    return res.getProperty(0).toNumber() == etsArr[0];
 }
 
 function checkExtendGenericObj(): boolean {
-    return typeof extendGenericObj(etsObj) == 'object';
+    return extendGenericObj.invoke(etsObj).typeOf() == 'object';
 }
 
 function checkExtendGenericUnion(): boolean {
-    return extendGenericUnion(etsUnion) as int == etsUnion as int;
+    return extendGenericUnion.invoke(etsUnion).toNumber() == etsUnion;
 }
 
 function checkExtendGenericTuple(): boolean {
-    const res = extendGenericTuple(etsTuple);
+    const res = extendGenericTuple.invoke(etsTuple);
 
-    return res as Array<TupleT> instanceof Array
-        && res[0] as int == etsTuple[0] as int
-        && res[1] as boolean == etsTuple[1] as boolean;
+    return res.getProperty(0).toNumber() == etsTuple[0]
+        && res.getProperty(1).toNumber() == etsTuple[1];
 }
 
 function checkExtendGenericLiteral(): boolean {
-    return extendGenericLiteral(tsLiteral) as int == tsLiteral as int;
+    return extendGenericLiteral.invoke(tsLiteral).toNumber() == tsLiteral.toNumber();
 }
 // generic extend type and interface
 function checkGenericExtendInterface(): boolean {
-    const obj = new GInterfaceClass();
-    const res = genericExtendInterface(obj);
-
-    return !!res.data && res.data as string == obj.data as string;
+    const obj = GTypeClass.instantiate();
+  
+    const res = genericExtendInterface.invoke(obj);
+    return res.getPropertySafe("data").toString() == obj.getPropertySafe("data").toString();
 }
 
 function checkGenericExtendType(): boolean {
-    const obj = new GTypeClass();
-    const res = genericExtendType(obj);
-
-    return !!res.data && res.data as string == obj.data as string;
+    const obj = GTypeClass.instantiate();
+    const res = genericExtendType.invoke(obj);
+    return !!res.getPropertySafe("data") && res.getPropertySafe("data").toString() == obj.getPropertySafe("data").toString();
 }
 
 function checkTupleGeneric() {
-    const res = tupleGeneric(etsTuple);
+    const res = tupleGeneric.invoke(etsTuple);
 
-    return res as Array<TupleT> instanceof Array
-        && res[0] as boolean == etsTuple[1] as boolean
-        && res[1] as int == etsTuple[0] as int;
+    return res.getProperty(0).toNumber() == etsTuple[0]
+        && res.getProperty(1).toNumber() == etsTuple[1];
 }
 // collectGeneric
 
 function checkCollectGenericInt(): boolean {
-    const res = collectGeneric(etsNumber);
-
-    return res as Array<int> instanceof Array && res[0] as int == etsNumber as int;
+    const res = collectGeneric.invoke(etsNumber);
+    return res.getProperty(0).toNumber() == etsNumber;
 }
 
 function checkCollectGenericString(): boolean {
-    const res = collectGeneric(etsString);
+    const res = collectGeneric.invoke(etsString);
 
-    return res as Array<string> instanceof Array && res[0] as string == etsString as string;
+    return res.getProperty(0).toString() == etsString;
 }
 
 function checkCollectGenericBool(): boolean {
-    const res = collectGeneric(etsBool);
+    const res = collectGeneric.invoke(etsBool);
 
-    return res as Array<boolean> instanceof Array && res[0] as boolean == etsBool as boolean;
+    return res.getProperty(0).toBoolean() == etsBool.toBoolean();
 }
 
 function checkCollectGenericObj(): boolean {
-    const res = collectGeneric(tsObj);
-
-    return res as Array<object> instanceof Array;
+    const res = collectGeneric.invoke(tsObj);
+    return res.isObject();
 }
 
 //user class
 function checkGenericUserClass(): boolean {
-    const user = new UserClass(etsString, etsNumber);
-
-    return user.name as string == etsString as string && user.age as int == etsNumber as int;
+    const user = UserClass.instantiate(etsString, etsNumber);
+    return user.getPropertySafe("name").toString() == etsString
+           && user.getPropertySafe("age").toNumber() == etsNumber;
 }
 
 function checkCreateClassFromTs(): boolean {
-    const user = createClassFromTs();
+    const user = createClassFromTs.invoke();
 
-    return user.name as string == tsString as string && user.age as int == tsNumber as int;
+    return user.getPropertySafe('name').toString() == tsString.toString()
+           && user.getPropertySafe('age').toNumber() == tsNumber.toNumber();
 }
 
 function checkUserClassInstance(): boolean {
     const user = userClassInstance;
 
-    return user.name as string == tsString as string && user.age as int == tsNumber as int;
+    return user.getPropertySafe("name").toString() == tsString.toString() 
+           && user.getPropertySafe("age").toNumber() == tsNumber.toNumber();
 }
 // generic default type
 function checkGenericDefaultInt(): boolean {
-    return genericDefaultInt(etsNumber) as int == etsNumber as int;
+    return genericDefaultInt.invoke(etsNumber).toNumber() == etsNumber;
 }
 
 function checkGenericDefaultString(): boolean {
-    return genericDefaultString(etsString) as string == etsString as string;
+    return genericDefaultString.invoke(etsString).toString() == etsString.toString();
 }
 
 function checkGenericDefaultBool(): boolean {
-    return genericDefaultBool(etsBool) as boolean == etsBool as boolean;
+    return genericDefaultBool.invoke(etsBool).toBoolean() == etsBool.toBoolean();
 }
 
 function checkGenericDefaultArr(): boolean {
-    const res = genericDefaultArr(etsArr);
+    const res = genericDefaultArr.invoke(etsArr);
 
-    return res as Array<int> instanceof Array
-        && res[0] as int == etsArr[0] as int;
+    return res.getProperty(0).toNumber() == etsArr[0];
 }
 
 function checkGenericDefaultObj(): boolean {
-    return typeof genericDefaultObj(etsObj) == 'object';
+    return genericDefaultObj.invoke(etsObj).typeOf() == 'object';
 }
 
 function checkGenericDefaultUnion(): boolean {
-    return genericDefaultUnion(etsUnion) as int == etsNumber as int;
+    return genericDefaultUnion.invoke(etsUnion).toNumber() == etsNumber;
 }
 
 function checkGenericDefaultTuple(): boolean {
-    const res = genericDefaultTuple(etsTuple);
+    const res = genericDefaultTuple.invoke(etsTuple);
 
-    return res as Array<TupleT> instanceof Array
-        && res[0] as int == etsTuple[0] as int
-        && res[1] as boolean == etsTuple[1] as boolean;
+    return res.getProperty(0).toNumber() == etsTuple[0]
+        && res.getProperty(1).toNumber() == etsTuple[1];
 }
 
 function checkGenericDefaultLiteral(): boolean {
-    return genericDefaultLiteral(etsNumber) as int == etsNumber as int;
+    return genericDefaultLiteral.invoke(etsNumber).toNumber() == etsNumber;
 }
 
 function checkGenericDefaultIntCallFromTs(): boolean {
-    return genericDefaultIntCallFromTs() as int == etsNumber as int;
+    return genericDefaultIntCallFromTs.invoke().toNumber() == etsNumber;
 }
 
 function checkGenericDefaultStringCallFromTs(): boolean {
-    return genericDefaultStringCallFromTs() as string == etsString as string;
+    return genericDefaultStringCallFromTs.invoke().toString() == etsString.toString();
 }
 
 function checkGenericDefaultBoolCallFromTs(): boolean {
-    return genericDefaultBoolCallFromTs() as boolean == etsBool as boolean;
+    return genericDefaultBoolCallFromTs.invoke().toBoolean() == etsBool.toBoolean();
 }
 
 function checkGenericDefaultArrCallFromTs(): boolean {
-    const res = genericDefaultArrCallFromTs();
+    const res = genericDefaultArrCallFromTs.invoke();
 
-    return res as Array<int> instanceof Array
-        && res[0] as int == etsArr[0] as int;
+    return res.getProperty(0).toNumber() == etsArr[0];
 }
 
 function checkGenericDefaultObjCallFromTs(): boolean {
-    return typeof genericDefaultObjCallFromTs(etsObj) == 'object';
+    return genericDefaultObjCallFromTs.invoke(etsObj).typeOf() == 'object';
 }
 
 function checkGenericDefaultUnionCallFromTs(): boolean {
-    return genericDefaultUnionCallFromTs() as int == etsNumber as int;
+    return genericDefaultUnionCallFromTs.invoke().toNumber() == etsNumber;
 }
 
 function checkGenericDefaultTupleCallFromTs(): boolean {
-    const res = genericDefaultTupleCallFromTs();
+    const res = genericDefaultTupleCallFromTs.invoke();
 
-    return res as Array<TupleT> instanceof Array
-        && res[0] as int == etsTuple[0] as int
-        && res[1] as boolean == etsTuple[1] as boolean;
+    return res.getProperty(0).toNumber() == etsTuple[0]
+        && res.getProperty(1).toBoolean() == etsTuple[1];
 }
 
 function checkGenericDefaultLiteralCallFromTs(): boolean {
-    return genericDefaultLiteralCallFromTs() as int == etsNumber as int;
+    return genericDefaultLiteralCallFromTs.invoke().toNumber() == etsNumber;
 }
 //generic extend class
 function checkGenericExtendClass(): boolean {
-    const data = new DataClass();
-    return genericExtendClass(data).data as string == data.data as string;
+    const data = DataClass.instantiate();
+    return genericExtendClass.invoke(data).getPropertySafe('data').toString() ==
+           data.getPropertySafe('data').toString();
 }

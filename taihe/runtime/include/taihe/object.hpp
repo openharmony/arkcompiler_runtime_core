@@ -196,10 +196,27 @@ public:
     }
 
 public:
+    static inline void const *query_interface_id(void const *id)
+    {
+        void const *vtbl_ptr = nullptr;
+        (
+            [&] {
+                using InterfaceType = InterfaceTypes;
+                for (std::size_t j = 0; j < sizeof(InterfaceType::template idmap_impl<Impl>) / sizeof(IdMapItem); j++) {
+                    if (id == InterfaceType::template idmap_impl<Impl>[j].id) {
+                        vtbl_ptr = InterfaceType::template idmap_impl<Impl>[j].vtbl_ptr;
+                    }
+                }
+            }(),
+            ...);
+        return vtbl_ptr;
+    }
+
     static constexpr struct typeinfo_t {
         free_func_t *free_fptr = &free_data_ptr<Impl>;
         hash_func_t *hash_fptr = &hash_data_ptr<Impl>;
         same_func_t *same_fptr = &same_data_ptr<Impl>;
+        qiid_func_t *qiid_fptr = &query_interface_id;
         uint64_t len = 0;
         struct IdMapItem idmap[((sizeof(InterfaceTypes::template idmap_impl<Impl>) / sizeof(IdMapItem)) + ...)] = {};
     } rtti = [] {
@@ -208,7 +225,7 @@ public:
             [&] {
                 using InterfaceType = InterfaceTypes;
                 for (std::size_t j = 0; j < sizeof(InterfaceType::template idmap_impl<Impl>) / sizeof(IdMapItem);
-                     info.len++, j++) {
+                     j++, info.len++) {
                     info.idmap[info.len] = InterfaceType::template idmap_impl<Impl>[j];
                 }
             }(),

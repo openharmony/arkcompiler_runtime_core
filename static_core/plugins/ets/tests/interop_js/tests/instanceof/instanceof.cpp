@@ -75,7 +75,8 @@ TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_etstype)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDynvalueInstanceofEtstype"));
 }
 
-TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_etstype)
+// When the SPEC determines whether 1.1 can inherit 1.2, then decides whether to enable.
+TEST_F(EtsInteropInstanceOf, DISABLED_Test_dyndecl_instanceof_etstype)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDyndeclInstanceofEtstype"));
 }

@@ -17,8 +17,8 @@
 #define ABC2PROGRAM_ABC_FILE_UTILS_H
 
 #include <string>
-#include "libpandafile/file.h"
-#include "value.h"
+#include "libarkfile/file.h"
+#include "libarkfile/value.h"
 
 namespace ark::abc2program {
 

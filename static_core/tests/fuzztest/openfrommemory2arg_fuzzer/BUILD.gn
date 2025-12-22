@@ -29,7 +29,7 @@ ohos_fuzztest("OpenFromMemory2ArgFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "openfrommemory2arg_fuzzer.cpp" ]
-  deps = [ "$ark_root/libpandafile:libarktsfile_static" ]
+  deps = [ "$ark_root/libarkfile:libarktsfile_static" ]
 }
 
 ###############################################################################

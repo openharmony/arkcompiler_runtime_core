@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_INCLUDE_TOOLING_PT_THREAD_H
 
 #include <cstdint>
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/include/managed_thread.h"
 

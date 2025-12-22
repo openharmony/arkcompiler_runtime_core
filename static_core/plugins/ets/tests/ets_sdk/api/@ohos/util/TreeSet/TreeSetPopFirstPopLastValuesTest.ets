@@ -14,6 +14,7 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet PopFirst PopLast Values API tests")
@@ -46,8 +47,14 @@ function main(): int {
 //Test cases ported from ArkTS 1.0:TREESET_5600
 function testPopFirstOnEmptySet() {
     let treeSet = new TreeSet<string>();
-    let result = treeSet.popFirst();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.popLast();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_5700
@@ -88,7 +95,14 @@ function testPopFirstAfterRemoveMakesEmpty() {
     let treeSet = new TreeSet<string>();
     treeSet.add("squirrel");
     treeSet.remove("squirrel");
-    treeSet.popFirst();
+    try {
+        let result = treeSet.popFirst();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     let result = treeSet.has("squirrel");
     arktest.assertFalse(result,
         "Expected has('squirrel') to be false after remove() and then popFirst() on an empty set");
@@ -100,8 +114,14 @@ function testPopFirstAfterClear() {
     treeSet.add("squirrel");
     treeSet.add("sparrow");
     treeSet.clear();
-    let result = treeSet.popFirst();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.popFirst();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     let resultOne = treeSet.has("squirrel");
     arktest.assertFalse(resultOne, "Expected has('squirrel') to be false after clear() and popFirst()");
     let resultTwo = treeSet.has("sparrow");
@@ -111,8 +131,14 @@ function testPopFirstAfterClear() {
 //Test cases ported from ArkTS 1.0:TREESET_6200
 function testPopLastOnEmptySet() {
     let treeSet = new TreeSet<string>();
-    let result = treeSet.popLast();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.popLast();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_6300
@@ -153,7 +179,14 @@ function testPopLastAfterRemoveMakesEmpty() {
     let treeSet = new TreeSet<string>();
     treeSet.add("squirrel");
     treeSet.remove("squirrel");
-    treeSet.popLast();
+    try {
+        let result = treeSet.popLast();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     let result = treeSet.has("squirrel");
     arktest.assertFalse(result,
         "Expected has('squirrel') to be false after remove() and then popLast() on an empty set");
@@ -165,8 +198,14 @@ function testPopLastAfterClear() {
     treeSet.add("squirrel");
     treeSet.add("sparrow");
     treeSet.clear();
-    let result = treeSet.popLast();
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.popLast();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
     let resultOne = treeSet.has("squirrel");
     arktest.assertFalse(resultOne, "Expected has('squirrel') to be false after clear() and popLast()");
     let resultTwo = treeSet.has("sparrow");

@@ -21,12 +21,12 @@
 #include <iostream>
 #include <memory>
 
-#include "libpandafile/file.h"
-#include "libpandafile/file_items.h"
+#include "libarkfile/file.h"
+#include "libarkfile/file_items.h"
 #include "runtime/include/field.h"
 #include "runtime/include/itable.h"
 #include "runtime/include/method.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark {
 
@@ -547,6 +547,23 @@ public:
      */
     bool IsAssignableFrom(const Class *klass) const;
 
+    /**
+     * Internal helper for CheckCast/IsInstance slow-path entrypoints.
+     *
+     * Purpose: re-check assignability for cases that fast paths cannot prove,
+     * while deliberately NOT traversing the linear superclass chain for plain
+     * reference types.
+     *
+     * Preconditions (guaranteed by fast paths):
+     *  - `this` and `klass` are non-null;
+     *  - exact-type equality was already checked;
+     *  - linear superclass-chain traversal for the plain ref case was already
+     *    performed by fast path.
+     *
+     * This is an internal API intended to be invoked from CheckCast and IsInstance entrypoints only.
+     */
+    bool IsAssignableFromRefNoSuper(const Class *klass) const;
+
     bool IsProxy() const
     {
         return (GetAccessFlags() & ACC_PROXY) != 0;
@@ -715,6 +732,14 @@ public:
     Field *GetStaticFieldByName(const uint8_t *mutf8Name) const;
 
     Field *GetDeclaredFieldByName(const uint8_t *mutf8Name) const;
+
+    Field *GetDeclaredInstanceFieldByName(const uint8_t *mutf8Name) const;
+
+    Field *GetDeclaredInstanceFieldByName(const uint8_t *mutf8Name, uint32_t mutf16Length) const;
+
+    Field *GetDeclaredStaticFieldByName(const uint8_t *mutf8Name) const;
+
+    Field *GetDeclaredStaticFieldByName(const uint8_t *mutf8Name, uint32_t mutf16Length) const;
 
     Method *GetClassMethod(const uint8_t *mutf8Name) const;
 

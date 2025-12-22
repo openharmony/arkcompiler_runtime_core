@@ -18,7 +18,7 @@ export const JSValue: string = 'Any';
 export const ESObject: string = 'ESObject';
 export const ArrayType: string = 'Array';
 export const KitPrefix: string[] = [];
-export const BuiltInType: string[] = ['Symbol', 'PropertyDecorator', 'SharedArrayBuffer'];
+export const BuiltInType: string[] = ['Symbol', 'SharedArrayBuffer', 'PropertyDecorator'];
 export const ETSKeyword: string[] = ['Class', 'ESObject', 'MethodType'];
 export const UtilityTypes = new Map<string, string>([
     ['Capitalize', JSValue],
@@ -113,7 +113,7 @@ export const FINAL_CLASS: string[] = [
     'MethodCreator',
     'MethodType',
     'NegativeArraySizeError',
-    'NoDataException',
+    'NoDataError',
     'NullType',
     'NullValue',
     'Parameter',
@@ -153,6 +153,23 @@ export const InvalidFuncParaNames: Set<string> = new Set([
     'boolean',
     'abstract',
     'async',
-    'object'
+    'object',
+    'Any',
+    'bigint',
+    'Byte',
+    'Char',
+    'Double',
+    'Float',
+    'Int',
+    'Long',
+    'number',
+    'Object',
+    'Short',
+    'string',
+    'interface',
+    'native',
+    'overload',
+    'function',
+    'constructor',
 ]);
 export const LIMIT_DECORATOR: string[] = ['Sendable', 'Concurrent'];

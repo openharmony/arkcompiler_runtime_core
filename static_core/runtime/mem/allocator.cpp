@@ -17,9 +17,9 @@
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/allocator-inl.h"
-#include "mem/mem_pool.h"
-#include "mem/mem_config.h"
-#include "mem/mem.h"
+#include "libarkbase/mem/mem_pool.h"
+#include "libarkbase/mem/mem_config.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/object_header.h"
@@ -573,6 +573,14 @@ template <MTModeT MT_MODE>
 bool ObjectAllocatorGen<MT_MODE>::IsObjectInNonMovableSpace(const ObjectHeader *obj)
 {
     return nonMovableObjectAllocator_->ContainObject(obj);
+}
+
+template <MTModeT MT_MODE>
+bool ObjectAllocatorGen<MT_MODE>::IsNonMovable(const ObjectHeader *obj)
+{
+    return objectAllocator_->ContainObject(obj) || nonMovableObjectAllocator_->ContainObject(obj) ||
+           largeObjectAllocator_->ContainObject(obj) || humongousObjectAllocator_->ContainObject(obj) ||
+           largeNonMovableObjectAllocator_->ContainObject(obj);
 }
 
 template <MTModeT MT_MODE>

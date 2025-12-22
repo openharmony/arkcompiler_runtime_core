@@ -13,12 +13,6 @@ regression/12581_custom_class_Engine_array.ets
 #25425
 regression/15278_1.ets
 
-#22791
-regression/16158_2.ets
-
-#23652
-regression/23652.ets
-
 #26443
 regression/23659_0.ets
 regression/23659_1.ets
@@ -26,7 +20,6 @@ regression/23659_1.ets
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
-spec/nullables/nullable-member_2.ets
 
 #19663 (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_0.ets
@@ -38,7 +31,6 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 
 ### Undefined type
 spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_10.ets
-spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_9.ets
 
 #19963
 spec/03.types/References_Types/Type_undefined/array-of-complex-type.ets
@@ -52,18 +44,12 @@ spec/03.types/References_Types/Type_undefined/array-of-type_1.ets
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-undefined_1.ets
 spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-untyped_1.ets
 
-#19947
-spec/03.types/References_Types/Type_undefined/array-of-class-and-undefined_4.ets
-
 #19960
 spec/03.types/References_Types/Type_undefined/set-add/add-undefined-to-undefined.ets
 
 #19962
 spec/03.types/References_Types/Type_undefined/undefined-union-array-type_2.ets
 spec/03.types/References_Types/Type_undefined/undefined-union-array-type_3.ets
-
-#26717
-spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-in-other-class_1.ets
 
 ### tuples
 spec/03.types/References_Types/Tuples_type/tuple_as_rest_param_0.ets
@@ -88,19 +74,6 @@ spec/03.types/References_Types/unions/union_param_n_02.ets
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassInterfaceArgs.ets
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassLambdas_0.ets
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassLambdas_1.ets
-
-#23815
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0001.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0002.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0003.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0004.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0005.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0006.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0007.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0008.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0009.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0010.ets
-spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0011.ets
 
 #16696
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_04.ets
@@ -128,22 +101,6 @@ spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_01.ets
 #16535
 spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_02.ets
 
-#24958
-spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda1.ets
-
-#23719 lambda issues
-spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda1.ets
-
-#19964 lambda issues
-spec/07.expressions/7.32.Lambda_Expressions/callRegularLambdaWithAsyncOverload.ets
-
-#23445 lambda issues
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_0.ets
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_1.ets
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.ets
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_3.ets
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_4.ets
-
 ### Negative tests lambda issues
 spec/07.expressions/7.32.Lambda_Expressions/incorrectVariableDeclaration.ets
 
@@ -159,7 +116,7 @@ spec/09.classes/Accessor_Declarations/issue-15142_8.ets
 #19722 (accessors)
 spec/09.classes/Accessor_Declarations/issue-15142_5.ets
 
-#23815 (Class constructor inheritance)
+#19726 (Class constructor inheritance)
 spec/09.classes/constructor-inheritance/issue14720_2.ets
 
 #19811
@@ -205,13 +162,11 @@ spec/11.Enumerations/enum_const_expr_01_06.ets
 spec/11.Enumerations/enum_const_expr_02_01.ets
 spec/11.Enumerations/enum_const_expr_02_02.ets
 spec/11.Enumerations/enum_const_expr_02_03.ets
-regression/14654_0.ets
 
 ### cannot create runtime (compound tests not supported) (Import-export)
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/05.default_import_binding/default_import_binding.ets
 
 #19935 (Import-export)
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_02.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/non_linux_path_separators.ets
 
@@ -229,7 +184,6 @@ spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_expor
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_exported_but_subtype_of_t_exported.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_isnt_exported_but_var_of_t_exported.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re-export_directive_02.ets
-spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.ets
 
 ### Negative tests (Import-export)
@@ -250,7 +204,6 @@ spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/n
 
 #19953
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-double-object-zero-expression.ets
-spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-short-nonzero-expres
 
 #14040 Annotations not yet implemented
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder.ets
@@ -303,9 +256,6 @@ spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0080.ets
 #19716
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s03-0000.ets
 
-#17149
-spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.2.Static_Method_Declarations/static_method_0003.ets
-
 ### for of is not implemented
 spec/17.Experimental_Features/Iterable_Types/for_of_08.ets
 spec/17.Experimental_Features/Iterable_Types/for_of_09.ets
@@ -313,23 +263,23 @@ spec/17.Experimental_Features/Iterable_Types/for_of_10.ets
 spec/17.Experimental_Features/Iterable_Types/for_of_11.ets
 spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 
+#30708
+std/concurrency/eaworker_message.ets
+
 #29357
 std/concurrency/messageHandler_basic_interface.ets
 
-#24088
-std/containers/linked_blocking_queue/LinkedBlockingQueue_AddTest.ets
+#30642
+std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
-#27586
-std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
-
 #25264
 std/core/ConsoleArrayTest.ets
 
-#27145
-std/core/dateformat/IntlDateFormatTest.ets
+#25130
+std/core/dateformat/DateTimeFormatTest.ets
 
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
@@ -349,25 +299,29 @@ std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 
 ### Negative tests (Import-export)
-spec/import_export/07.export_directives/02.export_type_directives/to_export_negative.ets
+spec/import_export/05.export_directives/02.export_type_directives/to_export_negative.ets
 
 ### Not-a-test (Import-export)
 spec/import_export/03.import_directives/to_export.ets
 spec/import_export/03.import_directives/05.default_import_binding_additional/default_to_export.ets
 spec/import_export/03.import_directives/06.import_path/to_export.ets
 spec/import_export/06.top-level_declarations/01.exported_declarations/to_export.ets
-spec/import_export/07.export_directives/01.selective_export_directive/to_export.ets
-spec/import_export/07.export_directives/03.re-export_directives/re-export_all.ets
-spec/import_export/07.export_directives/03.re-export_directives/re-export_not_all.ets
-spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
-spec/import_export/07.export_directives/03.re-export_directives/to_export_2.ets
-spec/import_export/07.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
+spec/import_export/05.export_directives/01.selective_export_directive/to_export.ets
+spec/import_export/05.export_directives/03.re-export_directives/re-export_all.ets
+spec/import_export/05.export_directives/03.re-export_directives/re-export_not_all.ets
+spec/import_export/05.export_directives/03.re-export_directives/to_export.ets
+spec/import_export/05.export_directives/03.re-export_directives/to_export_2.ets
+spec/import_export/05.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
 
 #10874
 std/math/std_math_clz64_long.ets
 
-#18766
-spec/partial_type/partialType_main.ets
+#25752
+float32array_newFloat32Array_newArrayBuffer_2_Float32Array_BYTES_PER_ELEMENT___1_0_pars_0.ets
+#25740
+uint32array_newUint32Array_newArrayBuffer_2_Uint32Array_BYTES_PER_ELEMENT__1_0_pars_0.ets
+#25741
+uint32array_newUint32Array_newArrayBuffer_2_Uint32Array_BYTES_PER_ELEMENT__9_0_pars_0.ets
 
 #21382 - fixed array -> T[] casts
 escompat/ArrayTest1.ets
@@ -383,65 +337,27 @@ std/core/std_core_typedarrays_function2_Int8Array.ets
 std/core/std_core_char_instance_Char_toUpperCase.ets
 
 #24986 (16 tests)
-std/core/Object.ets
 std/math/std_math_sign_double.ets
 std/core/IntlPluralRulesTest.ets
 std/core/TypeAssignableFromTest.ets
 std/core/std_core_char_instance_Char_toLowerCase.ets
 std/core/std_core_type_numeric_type_numeric_type.ets
-escompat/JsonTest.ets
+std/core/JsonTest.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 std/core/NumberTest.ets
-escompat/JsonStringifyTest.ets
+std/core/json/JsonStringifyTest1.ets
+
+#29995
+escompat/JsonAnnotationTest.ets
+ets_func_tests/escompat/JsonAnnotationTest.ets
 
 ############
 # temporary place for the tests related to primitive types refactoring
 ############
 
-# 1.
-# TypeError: Reference to splice is ambiguous
-
-# 2.
-# TypeError: Property 'toBigInt' does not exist on type 'BigInt'
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-12.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-13.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-18.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-19.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-2.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-2.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc.ets
-
 # 3.
 # TypeError: Value is possibly nullish
-std/containers/concurrent_hash_map/ConcurrentHashMap_ForEachTest.ets
-std/containers/concurrent_hash_map/ConcurrentHashMap_PressureTest_Remove.ets
 std/core/TypeCreateErasedBodyTest.ets
-std/core/TypeMethodInvoke.ets
-std/core/std_core_string_String_repeat_int.ets
-std/core/std_core_string_String_repeat_number.ets
-escompat/escompat_BigInt_instance_BigInt_toString_011.ets
-std/core/std_core_string_String_codePointCount_number_number.ets
-
-# 4.
-# TypeError: Reference to lastIndexOf is ambiguous
-std/core/std_core_typedarrays_methods__Float32Array.ets
-std/core/std_core_typedarrays_methods__Float64Array.ets
-std/core/std_core_typedarrays_methods__Float64Array_001.ets
-std/core/std_core_typedarrays_methods__Int16Array.ets
-std/core/std_core_typedarrays_methods__Int32Array.ets
-std/core/std_core_typedarrays_methods__Int8Array.ets
-std/core/std_core_typeduarrays_methods__Uint16Array.ets
-std/core/std_core_typeduarrays_methods__Uint32Array.ets
-std/core/std_core_typeduarrays_methods__Uint8Array.ets
-std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
 
 # 5.
 # TypeError: Unresolved reference compareWrapperObjectValue
@@ -449,13 +365,7 @@ std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
 
 # 6.
 # verifier failures:
-std/core/std_core_typedarrays_methods__Float32Array.ets
-std/core/std_core_typedarrays_methods__Float64Array.ets
-std/core/std_core_typedarrays_methods__Float64Array_001.ets
-std/core/std_core_typedarrays_methods__Int16Array.ets
-std/core/std_core_typedarrays_methods__Int32Array.ets
-std/core/std_core_typedarrays_methods__Int8Array.ets
-escompat/JsonTest.ets
+std/core/JsonTest.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 
 # 7.
@@ -465,13 +375,12 @@ std/serialization/std_serialization_json_stringify_float_array.ets
 
 # 8.
 # abort
-spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-03.ets
 std/core/NumberTest.ets
 
 # 9.
 # other fails
-escompat/JsonStringifyTest.ets
-escompat/escompat_BigInt_instance_BigInt_toString_011.ets
+std/core/json/JsonStringifyTest1.ets
+std/core/std_core_BigInt_instance_BigInt_toString_011.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-12.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-13.ets
@@ -494,18 +403,19 @@ std/core/TypeMethodInvoke.ets
 std/core/std_core_string_String_codePointCount_number_number.ets
 std/core/std_core_string_String_repeat_int.ets
 std/core/std_core_string_String_repeat_number.ets
-std/core/std_core_typedarrays_methods__Float32Array.ets
-std/core/std_core_typedarrays_methods__Float64Array.ets
-std/core/std_core_typedarrays_methods__Float64Array_001.ets
-std/core/std_core_typedarrays_methods__Int16Array.ets
-std/core/std_core_typedarrays_methods__Int32Array.ets
-std/core/std_core_typedarrays_methods__Int8Array.ets
-std/core/std_core_typeduarrays_methods__Uint16Array.ets
-std/core/std_core_typeduarrays_methods__Uint32Array.ets
-std/core/std_core_typeduarrays_methods__Uint8Array.ets
-std/core/std_core_typeduarrays_methods__Uint8ClampedArray.ets
-escompat/JsonReplacerTest.ets
-escompat/JsonStringifyRegExpExecArrayTest.ets
-std/core/std_core_typeduarrays_methods__BigUint64Array.ets
+std/core/JsonReplacerTest.ets
+std/core/regexp/JsonStringifyRegExpExecArrayTest.ets
 regression/15278_0.ets
-spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda2.ets
+
+#30585
+std/core/EAWorker_out_of_coro_creation.ets
+
+#31475
+escompat/DateTest.ets
+std/core/IntlPluralRulesSupportedLocalesOfTest.ets
+std/core/ReflectFieldTest.ets
+std/concurrency/messageHandler_basic_interface.ets
+std/concurrency/message_basic_interface.ets
+std/concurrency/AsyncLockTimeoutTest.ets
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-assert.ets
+

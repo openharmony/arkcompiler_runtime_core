@@ -25,8 +25,8 @@
 #include "unzip.h"
 
 #include "file_mapper.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::extractor {
 class ZipFileReader;

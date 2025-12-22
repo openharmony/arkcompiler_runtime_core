@@ -17,8 +17,8 @@
 
 #include <cstdint>
 
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/mem/panda_containers.h"

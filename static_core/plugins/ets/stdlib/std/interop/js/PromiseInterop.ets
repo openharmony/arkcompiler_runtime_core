@@ -19,12 +19,12 @@ final class PromiseInterop {
     static connectPromise<T>(p: Promise<T>, deferred: long): void {
         p.then<void, void>((value: T): void => {
             PromiseInterop.resolve<T>(value, deferred);
-        }, (error: NullishType): void => {
+        }, (error: Any): void => {
             PromiseInterop.reject(error, deferred);
         });
     }
 
     private static native resolve<T>(value: T, deferred: long): void;
-    private static native reject(error: NullishType, deferred: long): void;
+    private static native reject(error: Any, deferred: long): void;
 }
 

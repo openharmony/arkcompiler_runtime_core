@@ -15,7 +15,7 @@
 #ifndef RUNTIME_MEM_LOCK_CONFIG_HELPER_H
 #define RUNTIME_MEM_LOCK_CONFIG_HELPER_H
 
-#include "file_items.h"
+#include "libarkfile/file_items.h"
 
 namespace ark {
 enum LangTypeT : bool { LANG_TYPE_STATIC, LANG_TYPE_DYNAMIC };

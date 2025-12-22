@@ -14,10 +14,11 @@
  */
 
 #include "include/coretypes/string.h"
-#include "libpandabase/utils/utils.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utils.h"
+#include "libarkbase/utils/utf.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/runtime.h"
+#include "compiler/optimizer/ir/runtime_interface.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
@@ -27,17 +28,21 @@
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
-#include "utils/math_helpers.h"
+#include "libarkbase/utils/math_helpers.h"
 #include <cstdint>
 #include <cmath>
 
 namespace ark::ets {
 
 /// StringBuilder fields offsets
-static constexpr uint32_t SB_BUFFER_OFFSET = ark::ObjectHeader::ObjectHeaderSize();
-static constexpr uint32_t SB_INDEX_OFFSET = SB_BUFFER_OFFSET + ark::OBJECT_POINTER_SIZE;
-static constexpr uint32_t SB_LENGTH_OFFSET = SB_INDEX_OFFSET + sizeof(int32_t);
-static constexpr uint32_t SB_COMPRESS_OFFSET = SB_LENGTH_OFFSET + sizeof(int32_t);
+static_assert(compiler::RuntimeInterface::GetSbBufferOffset() == EtsStringBuilder::GetBufOffset());
+static_assert(compiler::RuntimeInterface::GetSbIndexOffset() == EtsStringBuilder::GetIndexOffset());
+static_assert(compiler::RuntimeInterface::GetSbLengthOffset() == EtsStringBuilder::GetLengthOffset());
+static_assert(compiler::RuntimeInterface::GetSbCompressOffset() == EtsStringBuilder::GetCompressOffset());
+static constexpr uint32_t SB_BUFFER_OFFSET = EtsStringBuilder::GetBufOffset();
+static constexpr uint32_t SB_INDEX_OFFSET = EtsStringBuilder::GetIndexOffset();
+static constexpr uint32_t SB_LENGTH_OFFSET = EtsStringBuilder::GetLengthOffset();
+static constexpr uint32_t SB_COMPRESS_OFFSET = EtsStringBuilder::GetCompressOffset();
 
 /// "null", "true" and "false" packed to integral types
 static constexpr uint64_t TRUE_CODE = 0x0065007500720074;
@@ -328,9 +333,11 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     auto str0 = str0Handle.GetPtr();
     auto str1 = str1Handle.GetPtr();
 
+    ASSERT(sb != nullptr);
     // sb.append(str0, str1)
     auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
+    ASSERT(buf != nullptr);
     // Check buf overflow
     if (index + 1U >= buf->GetLength()) {
         auto *coroutine = EtsCoroutine::GetCurrent();
@@ -345,10 +352,13 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         str0 = str0Handle.GetPtr();
         str1 = str1Handle.GetPtr();
         // Remember the new buffer
+        ASSERT(sb != nullptr);
         sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
     }
     // Append strings to the buf
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    ASSERT(str0 != nullptr);
+    ASSERT(str1 != nullptr);
     buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
     buf->Set(index + 1U, EtsObject::FromCoreType(str1->GetCoreType()));
     // Increment the index
@@ -414,10 +424,12 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     auto str1 = str1Handle.GetPtr();
     auto str2 = str2Handle.GetPtr();
 
+    ASSERT(sb != nullptr);
     // sb.append(str0, str2, str3)
     auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
     // Check buf overflow
+    ASSERT(buf != nullptr);
     if (index + 2U >= buf->GetLength()) {
         auto *coroutine = EtsCoroutine::GetCurrent();
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
@@ -432,10 +444,14 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         str1 = str1Handle.GetPtr();
         str2 = str2Handle.GetPtr();
         // Remember the new buffer
+        ASSERT(sb != nullptr);
         sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
     }
     // Append strings to the buf
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    ASSERT(str0 != nullptr);
+    ASSERT(str1 != nullptr);
+    ASSERT(str2 != nullptr);
     buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
     buf->Set(index + 1U, EtsObject::FromCoreType(str1->GetCoreType()));
     buf->Set(index + 2U, EtsObject::FromCoreType(str2->GetCoreType()));
@@ -515,9 +531,11 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     auto str2 = str2Handle.GetPtr();
     auto str3 = str3Handle.GetPtr();
 
+    ASSERT(sb != nullptr);
     // sb.append(str0, str2, str3, str4)
     auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
+    ASSERT(buf != nullptr);
     // Check buf overflow
     if (index + 3U >= buf->GetLength()) {
         auto *coroutine = EtsCoroutine::GetCurrent();
@@ -534,10 +552,15 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
         str2 = str2Handle.GetPtr();
         str3 = str3Handle.GetPtr();
         // Remember the new buffer
+        ASSERT(sb != nullptr);
         sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
     }
     // Append strings to the buf
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    ASSERT(str0 != nullptr);
+    ASSERT(str1 != nullptr);
+    ASSERT(str2 != nullptr);
+    ASSERT(str3 != nullptr);
     buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
     buf->Set(index + 1U, EtsObject::FromCoreType(str1->GetCoreType()));
     buf->Set(index + 2U, EtsObject::FromCoreType(str2->GetCoreType()));

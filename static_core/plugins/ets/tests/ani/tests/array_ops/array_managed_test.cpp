@@ -16,12 +16,16 @@
 #include <limits>
 #include "ani.h"
 #include "array_gtest_helper.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArrayManagedTest : public ArrayHelperTest {};
+class ArrayManagedTest : public ArrayHelperTest {
+public:
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr const char *MODULE_NAME = "array_managed_test";
+};
 
 TEST_F(ArrayManagedTest, GetLengthTest)
 {
@@ -104,6 +108,32 @@ TEST_F(ArrayManagedTest, PopTest)
     }
     const auto res = CallEtsFunction<ani_boolean>("array_managed_test", "checkEmptyArray", array1);
     ASSERT_EQ(res, ANI_TRUE);
+}
+
+TEST_F(ArrayManagedTest, GetLengthWithError)
+{
+    auto throwingArray = CallEtsFunction<ani_object>(MODULE_NAME, "getExtendedArray");
+    ani_boolean result = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_IsNullishValue(throwingArray, &result), ANI_OK);
+    ASSERT_EQ(result, ANI_FALSE);
+    ani_class escompatArray {};
+    ASSERT_EQ(env_->FindClass("std.core.Array", &escompatArray), ANI_OK);
+    ASSERT_EQ(env_->Object_InstanceOf(throwingArray, escompatArray, &result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+
+    ani_size unused = 0;
+    ASSERT_EQ(env_->Array_GetLength(static_cast<ani_array>(throwingArray), &unused), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ExistUnhandledError(&result), ANI_OK);
+    ASSERT_EQ(result, ANI_TRUE);
+    ani_error pendingError {};
+    ASSERT_EQ(env_->GetUnhandledError(&pendingError), ANI_OK);
+    ASSERT_EQ(env_->ResetError(), ANI_OK);
+    ani_ref message {};
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(pendingError, "%%get-message", ":C{std.core.String}", &message),
+              ANI_OK);
+    std::string messageStr;
+    GetStdString(static_cast<ani_string>(message), messageStr);
+    ASSERT_STREQ(messageStr.c_str(), "length was called");
 }
 
 }  // namespace ark::ets::ani::testing

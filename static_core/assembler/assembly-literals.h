@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "libpandafile/literal_data_accessor-inl.h"
+#include "libarkfile/literal_data_accessor-inl.h"
 
 namespace ark::pandasm {
 

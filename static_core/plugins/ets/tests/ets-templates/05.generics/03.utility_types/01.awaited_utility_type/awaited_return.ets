@@ -17,7 +17,6 @@
 /*---
 desc: >-
     Type Awaited<T> constructs a type which has no type Promise in it.
-tags: [{{c.tags}}]
 ---*/
 
 function foo<T>(): Awaited<T> {
@@ -25,7 +24,7 @@ function foo<T>(): Awaited<T> {
 }
 
 function main() {
-    let actual = foo()
+    let actual = foo<string>()
     arktest.assertEQ(actual, {{c.expected_value}})
 }
 

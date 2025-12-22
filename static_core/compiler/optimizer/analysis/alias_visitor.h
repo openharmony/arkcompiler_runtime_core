@@ -18,7 +18,7 @@
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_visitor.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 namespace ark::compiler {
 
@@ -52,11 +52,10 @@ enum PointerType {
 };
 
 class PointerOffset {
-protected:
+public:
     PointerOffset(PointerType type, uint64_t imm, const void *typePtr) : type_(type), imm_(imm), typePtr_(typePtr) {};
     PointerOffset() = default;
 
-public:
     // Used for fields with offset not known in compile-time
     static PointerOffset CreateUnknownOffset()
     {
@@ -82,6 +81,11 @@ public:
     const void *GetTypePtr() const
     {
         return typePtr_;
+    }
+
+    bool IsObject() const
+    {
+        return type_ == OBJECT;
     }
 
     struct Hash {
@@ -120,18 +124,17 @@ private:
 
 std::ostream &operator<<(std::ostream &out, const PointerOffset &p);
 
-class Pointer : private PointerOffset {
+class Pointer {
 private:
     Pointer(PointerType type, const Inst *base, const Inst *idx, uint64_t imm, const void *typePtr)
-        : PointerOffset(type, imm, typePtr), base_(base), idx_(idx) {};
+        : base_(base), idx_(idx), off_(type, imm, typePtr) {};
 
 public:
-    Pointer(const Inst *base, const PointerOffset &offset) : PointerOffset(offset), base_(base) {}
+    Pointer(const Inst *base, const PointerOffset &offset)
+        : Pointer(offset.GetType(), base, nullptr, offset.GetImm(), offset.GetTypePtr())
+    {
+    }
     Pointer() = default;
-
-    using PointerOffset::GetImm;
-    using PointerOffset::GetType;
-    using PointerOffset::GetTypePtr;
 
     static Pointer CreateObject(const Inst *base)
     {
@@ -177,7 +180,7 @@ public:
 
     static Pointer CreateUnknownOffset(const Inst *obj)
     {
-        return Pointer(UNKNOWN_OFFSET, obj, nullptr, 0, nullptr);
+        return Pointer(obj, PointerOffset::CreateUnknownOffset());
     }
 
     const Inst *GetBase() const
@@ -190,12 +193,30 @@ public:
         return idx_;
     }
 
-    void Dump(std::ostream *out) const;
+    PointerType GetType() const
+    {
+        return off_.GetType();
+    }
+
+    uint64_t GetImm() const
+    {
+        return off_.GetImm();
+    }
+
+    const void *GetTypePtr() const
+    {
+        return off_.GetTypePtr();
+    }
 
     bool IsNotEscapingAlias() const;
 
     /// Returns true if reference is created in the current function
     bool IsLocalCreatedAlias() const;
+
+    bool IsObject() const
+    {
+        return GetType() == OBJECT;
+    }
 
     struct Hash {
         uint32_t operator()(Pointer const &p) const
@@ -214,54 +235,55 @@ public:
 
     bool operator==(const Pointer &p) const
     {
-        auto ret = PointerOffset::operator==(p) && GetBase() == p.GetBase() && GetIdx() == p.GetIdx();
+        auto ret = GetOffset() == p.GetOffset() && GetBase() == p.GetBase() && GetIdx() == p.GetIdx();
         return ret;
     }
 
-    bool HasSameOffset(const Pointer &p) const
+    bool HasSameOffsetDroppedIdx(const Pointer &p) const
     {
-        return PointerOffset::HasSameOffset(p);
+        return GetOffsetDroppedIdx().HasSameOffset(p.GetOffsetDroppedIdx());
     }
 
-    bool IsObject() const
-    {
-        return GetType() == OBJECT;
-    }
-
-    PointerOffset GetOffset() const
-    {
-        // copy the base class PointerOffset
-        return {static_cast<const PointerOffset &>(*this)};
-    }
-
-    Pointer DropIdx() const
+    PointerOffset GetOffsetDroppedIdx() const
     {
         if (idx_ == nullptr) {
-            return *this;
+            return GetOffset();
         }
         ASSERT(GetTypePtr() == nullptr);
         if (!idx_->IsConst() || GetType() == DICTIONARY_ELEMENT) {
-            return CreateUnknownOffset(base_);
+            return PointerOffset::CreateUnknownOffset();
         }
         ASSERT(GetType() == ARRAY_ELEMENT || GetType() == RAW_OFFSET);
         auto newImm = GetImm() + idx_->CastToConstant()->GetIntValue();
-        return {GetType(), base_, nullptr, newImm, GetTypePtr()};
+        return PointerOffset(GetType(), newImm, GetTypePtr());
     }
+
+    std::pair<const Inst *, PointerOffset> DropIdx() const
+    {
+        return {GetBase(), GetOffsetDroppedIdx()};
+    }
+
+    void Dump(std::ostream *out) const;
 
     using Set = ArenaUnorderedSet<Pointer, Hash>;
     template <class T>
     using Map = ArenaUnorderedMap<Pointer, T, Hash>;
 
 private:
+    const PointerOffset &GetOffset() const
+    {
+        return off_;
+    }
+
     /**
      * Returns true if a reference escapes the scope of current function:
      * Various function calls, constructors and stores to another objects' fields, arrays
      */
     static bool IsEscapingAlias(const Inst *inst);
 
-private:
     const Inst *base_ {nullptr};
     const Inst *idx_ {nullptr};
+    PointerOffset off_;
 };
 
 std::ostream &operator<<(std::ostream &out, const Pointer &p);
@@ -295,6 +317,7 @@ public:
     static void VisitMultiArray(GraphVisitor *v, Inst *inst);
     static void VisitInitEmptyString(GraphVisitor *v, Inst *inst);
     static void VisitInitString(GraphVisitor *v, Inst *inst);
+    static void VisitStringFlatCheck(GraphVisitor *v, Inst *inst);
     /**
      * Instructions that can introduce references that are an alias of
      * something already existed.

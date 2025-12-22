@@ -43,9 +43,12 @@ The syntax of *enumeration declaration* is presented below:
    user-defined type
    constant
    named constant
+   value
+   enumeration declaration
+   syntax
 
 Type ``const enum`` is supported for source-level compatibility with |TS|.
-Modifier ``const`` is skipped as it has no impact on ``enum`` semantics in
+The modifier ``const`` is skipped as it has no impact on ``enum`` semantics in
 |LANG|.
 
 Enumerations with explicitly specified type values are described in
@@ -73,6 +76,7 @@ are exported along with the mandatory qualification ``Color``.
 .. index::
    source-level compatibility
    const enum
+   const modifier
    semantics
    qualification
    access
@@ -97,25 +101,28 @@ constants are combined in a single enumeration.
 .. index::
    enum constant
    numeric constant expression
+   expression
+   value
+   integer value
    type int
    constant expression
-   numeric value
    enumeration constant
    integer type
    string type
    enumeration
 
 A type to which all enumeration constant values belong is called *enumeration
-base type*. This type is ``int``, ``long``, ``string`` or an explicitly
-specified type, see :ref:`Enumeration with Explicit Type`.
+base type*. This type is ``int``, ``long``, ``string``, or any explicitly
+specified valid type (see :ref:`Enumeration with Explicit Type`).
 
 .. index::
    enumeration base type
+   enumeration constant value
+   type
 
 Any enumeration constant is of type ``enumeration``. Implicit conversion (see
 :ref:`Enumeration to Constants Type Conversions`) of an enumeration constant
-to numeric types or type ``string`` depends on the type of
-constants.
+to numeric types or type ``string`` depends on the type of constants.
 
 In addition, all enumeration constant names must be unique. Otherwise,
 a :index:`compile-time error` occurs.
@@ -138,6 +145,11 @@ Empty ``enum`` is supported as a corner case for compatibility with |TS|.
 
 .. index::
    enumeration constant
+   conversion
+   enumeration type
+   numeric type
+   string type
+   constant
    type enumeration
    conversion
    type string
@@ -168,11 +180,12 @@ explicitly:
    enum constant
    enumeration constant
    integer type
+   type
    value
    expression
    constant expression
-   type int
-   type long
+   int type
+   long type
 
 .. code-block:: typescript
    :linenos:
@@ -190,9 +203,9 @@ immediately preceding constant plus one.
 If some but not all constants have their values set explicitly, then
 the values of the constants are set by the following rules:
 
--  The constant which is first and has no explicit value gets zero value.
--  A constant with an explicit value has that explicit value.
--  A constant that is not the first and has no explicit value takes the value
+-  The constant which is the first and has no explicit value gets zero value.
+-  Constant with an explicit value has that explicit value.
+-  Constant that is not the first and has no explicit value takes the value
    of the immediately preceding constant plus one.
 
 In the example below, the value of ``Red`` is 0, of ``Blue``, 5, and of
@@ -204,8 +217,8 @@ In the example below, the value of ``Red`` is 0, of ``Blue``, 5, and of
     enum Color { Red, Blue = 5, Green }
 
 .. index::
-   type int
-   type long
+   int type
+   long type
    integer literal
    assignment
    constant
@@ -250,7 +263,10 @@ using the method ``toString``:
 
 .. index::
    enumeration constant
-   type string
+   value
+   conversion
+   type
+   string type
    method
 
 .. code-block:: typescript
@@ -277,7 +293,7 @@ constant has the priority:
    :linenos:
 
     enum E { One = 1, one = 1, oNe = 1 }
-    console.log(E[1 as E]) // prints: oNe
+    console.log(E.fromValue (1)) // prints: oNe
 
 
 Additional methods available for enumeration types and constants are discussed
@@ -286,7 +302,10 @@ in :ref:`Enumeration Methods` in the chapter Experimental Features.
 .. index::
    method
    enumeration type
+   value
+   name
    constant
+   enumeration constant
 
 .. raw:: pdf
 

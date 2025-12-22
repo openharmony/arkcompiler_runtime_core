@@ -57,7 +57,7 @@ function getLength(value: buffer.Buffer | Uint8Array): number {
 
 function stringify(buffer: ArrayBuffer, encoding: string, resolvedStart: int, resolvedEnd: int): string {
     let val  = '';
-    if (encoding == "utf8" || encoding == "utf-8" || encoding == "ascii") {
+    if (encoding == "utf8" || encoding == "utf-8" || encoding == "ascii" || encoding === "latin1") {
         return ArrayBuffer.stringify(buffer, encoding, resolvedStart, resolvedEnd);
     } else if (encoding == "utf16le" || encoding == "utf-16le" || encoding == "ucs2" || encoding == "ucs-2") {
         for (let i = resolvedStart; i + 1 < resolvedEnd; i += 2) { // 2 is array->NextIndex
@@ -65,7 +65,7 @@ function stringify(buffer: ArrayBuffer, encoding: string, resolvedStart: int, re
             const b: Int = (buffer.at(i + 1) & 0xff);
             val += String.fromCharCode((b << 8) + a);
         }
-    } else if (encoding === "binary" || encoding === "latin1") {
+    } else if (encoding === "binary") {
         for (let i = resolvedStart; i < resolvedEnd; i++) {
             val += String.fromCharCode(+(buffer.at(i) & 0xff));
         }
@@ -81,16 +81,16 @@ function stringify(buffer: ArrayBuffer, encoding: string, resolvedStart: int, re
             const byte3 = i + 2 < resolvedEnd ? (buffer.at(i + 2) & 0xff) : NaN;
 
             const enc1 = byte1 >> 2;
-            const enc2 = ((byte1 & 3) << 4) | (byte2 >> 4);
-            const enc3 = ((byte2 & 15) << 2) | (byte3 >> 6);
-            const enc4 = byte3 & 63;
+            const enc2 = (((byte1 & 3) << 4) | (byte2 >> 4)).toInt();
+            const enc3 = (((byte2 & 15) << 2) | (byte3 >> 6)).toInt();
+            const enc4 = (byte3 & 63).toInt();
 
             if (isNaN(byte2)) {
-                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + '==';
+                base64 += encodings.charAt(enc1).toString() + encodings.charAt(enc2).toString() + '==';
             } else if (isNaN(byte3)) {
-                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + encodings.charAt(enc3) + '=';
+                base64 += encodings.charAt(enc1).toString() + encodings.charAt(enc2).toString() + encodings.charAt(enc3).toString() + '=';
             } else {
-                base64 += encodings.charAt(enc1) + encodings.charAt(enc2) + encodings.charAt(enc3) + encodings.charAt(enc4);
+                base64 += encodings.charAt(enc1).toString() + encodings.charAt(enc2).toString() + encodings.charAt(enc3).toString() + encodings.charAt(enc4).toString();
             }
         }
         if (encoding == "base64url") {
@@ -178,6 +178,14 @@ function sanitizeLatin1(str: string): string {
     return sb.toString();
 }
 
+function checkLengthOffset(offset: int, length: int, objLength: int): int{
+    let resolvedLength: int = length
+    if (length < 0 || length > objLength - offset) {
+        resolvedLength = objLength > offset ? objLength - offset : 0;
+    }
+    return resolvedLength;
+}
+
 /**
  * Namespace containing Buffer implementation and related utilities
  * for handling binary data and various encoding operations.
@@ -211,6 +219,8 @@ export default namespace buffer {
         | Float64Array
         | BigInt64Array
         | BigUint64Array;
+
+    type supportedObjectType = ArrayBuffer | string | Uint8Array
 
     /**
      * Allocates a new Buffer using an array of bytes in the range 0 – 255.
@@ -250,8 +260,6 @@ export default namespace buffer {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. `+
                     `It must be >= 0 and <= ${arrayBuffer.byteLength}. Received value is: ${length}`)
             }
-        }
-        if ((byteOffset != undefined) || (length != undefined)) {
             return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength));
         }
         let buffer = new Buffer(arrayBuffer, resolvedByteOffset)
@@ -287,16 +295,23 @@ export default namespace buffer {
             throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of "encoding" must be BufferEncoding. ` +
                 `the encoding ${offsetOrEncoding} is unknown`);
         }
-        if (input instanceof string || input instanceof ArrayBuffer) {
-            const resolvedByteOffset: int = (offsetOrEncoding instanceof string) ? 0 : offsetOrEncoding;
-            return new Buffer(ArrayBuffer.fromObject(input, offsetOrEncoding, length), resolvedByteOffset);
+        if(!(input instanceof supportedObjectType)) {
+            throw createBusinessError(TypeErrorCodeId,
+                'Parameter error. The type of "input" must be Buffer or ArrayBuffer, Array, Array-like');
         }
-        if (!(input instanceof Uint8Array)) {
-            throw createBusinessError(TypeErrorCodeId, 'Parameter error. The type of "input" must be Buffer or ArrayBuffer, Array, Array-like');
+        let resolvedByteOffset: int = (offsetOrEncoding instanceof string) ? 0 : offsetOrEncoding;
+        let resolvedLength: int = length;
+        if (input instanceof string) {
+            resolvedLength = checkLengthOffset(resolvedByteOffset, resolvedLength, (input as string).length)
+            return new Buffer(ArrayBuffer.fromObject(input, offsetOrEncoding, resolvedLength));
         }
+        if (input instanceof ArrayBuffer) {
+            resolvedLength = checkLengthOffset(resolvedByteOffset, resolvedLength, (input as ArrayBuffer).byteLength)
+                return new Buffer(ArrayBuffer.fromObject(input, offsetOrEncoding, resolvedLength));
+        } 
+        resolvedLength = checkLengthOffset(resolvedByteOffset, resolvedLength, (input as Uint8Array).byteLength)
         if (offsetOrEncoding instanceof string) {
-            const resolvedByteOffset: int = 0;
-            return new Buffer(ArrayBuffer.fromObject(input.buffer, offsetOrEncoding, length), resolvedByteOffset);
+            return new Buffer(ArrayBuffer.fromObject((input as Uint8Array).buffer, offsetOrEncoding, resolvedLength));
         }
         return new Buffer(ArrayBuffer.from(input as Uint8Array));
     }
@@ -500,6 +515,7 @@ export default namespace buffer {
         for (const item of list) {
             resolvedList.push(getArrayBufferFrom(item));
         }
+        if (totalLength == 0) totalLength = undefined;
         const length: int = totalLength ?? resolvedList.reduce(
             (acc: number, item: ArrayBuffer): number => acc + item.byteLength.toInt(), 0).toInt()
         if (length < 0) {
@@ -514,8 +530,12 @@ export default namespace buffer {
         }
         const buffer = new ArrayBuffer(length);
         let offset = 0;
-        for (let i = 0; i < listOfBytes.length; i++) {
-            buffer.set(offset, listOfBytes[i]);
+        for (let i = 0; i < length; i++) {
+            if(i < listOfBytes.length) {
+                buffer.set(offset, listOfBytes[i]);
+            } else {
+                buffer.set(offset, 0);
+            }
             offset += 1;
         }
         return new Buffer(buffer);
@@ -660,7 +680,7 @@ export default namespace buffer {
      * A class representing a fixed-length sequence of bytes.
      * Provides methods for reading and manipulating binary data with various encodings.
      */
-    export class Buffer implements jsonx.JsonElementDeserializable {
+    export class Buffer implements jsonx.JsonElementSerializable {
         /** The underlying ArrayBuffer storing the binary data */
         private bufferData: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */
@@ -670,7 +690,7 @@ export default namespace buffer {
          * Gets the length of the buffer in bytes
          * @returns {int} The number of bytes in the buffer
          */
-        get length(): int { return this.buffer.getByteLength() }
+        get length(): int { return this.buffer.getByteLength() - this.byteOffsetNumber}
 
         get byteOffset(): int { return this.byteOffsetNumber }
 
@@ -699,8 +719,8 @@ export default namespace buffer {
          */
         public toString(): string {
             let resolvedEncoding: string = "utf8";
-            let resolvedStart: int = 0;
-            let resolvedEnd: int = buffer.byteLength(this.buffer).toInt();
+            let resolvedStart: int = this.byteOffset;
+            let resolvedEnd: int = this.length + this.byteOffset;
             return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
@@ -712,21 +732,17 @@ export default namespace buffer {
          * @param {int} [end=buffer.length] - Where to stop decoding
          * @returns {string} The decoded string
          */
-        public toString(encoding?: BufferEncoding, start?: double, end?: double): string {
+        public toString(encoding?: BufferEncoding, start?: int, end?: int): string {
             let resolvedEncoding: string = encoding ?? "utf8";
-            let resolvedStart: int = 0;
-            let resolvedEnd: int = (this.length).toInt();
-            if (start !== undefined && !isNaN(start!) && start! > 0) {
-                resolvedStart = start!.toInt();
+            let resolvedStart: int = start ?? 0;
+            let resolvedEnd: int = end ?? this.length;
+            resolvedStart = resolvedStart < 0 ? 0 : resolvedStart;
+            resolvedEnd = resolvedEnd > this.length ? this.length : resolvedEnd;
+            if (resolvedStart > this.length || resolvedStart > resolvedEnd) {
+                return '';
             }
-            if (end !== undefined && !isNaN(end!)) {
-                resolvedEnd = end!.toInt();
-            }
-            let bufLength = this.length;
-            if (resolvedStart >= bufLength || resolvedStart > resolvedEnd) {
-                 return '';
-            }
-            resolvedEnd = resolvedEnd > bufLength ? bufLength.toInt() : resolvedEnd;
+            resolvedStart += this.byteOffset;
+            resolvedEnd += this.byteOffset;
             return stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
@@ -737,7 +753,7 @@ export default namespace buffer {
          * @returns {long} The byte at the specified position
          */
         public at(index: int): long {
-            return this.buffer.at(index);
+            return this.buffer.at(index + this.byteOffset);
         }
 
         /**
@@ -871,16 +887,16 @@ export default namespace buffer {
             const resolvedTarget: ArrayBuffer = getArrayBufferFrom(target);
 
             const resolvedTargetStart = targetStart ?? 0;
-            const resolveTargetEnd = targetEnd ?? resolvedTarget.byteLength.toInt();
+            const resolvedTargetEnd = targetEnd ?? target.length;
             const resolvedSourceStart = sourceStart ?? 0;
-            const resolvedSourceEnd = sourceEnd ?? resolvedSource.byteLength.toInt();
+            const resolvedSourceEnd = sourceEnd ?? this.length;
             if (resolvedTargetStart < 0) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetStart" is out of range. ` +
                     `It must be >= 0 and <= 2147483647. Received value is: ${targetStart}`);
             }
-            if (resolveTargetEnd < 0 || resolveTargetEnd > resolvedTarget.byteLength.toInt()) {
+            if (resolvedTargetEnd < 0 || resolvedTargetEnd > target.length) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetEnd" is out of range. ` +
-                    `It must be >= 0 and <= ${resolvedTarget.byteLength.toInt()}. Received value is: ${targetEnd}`);
+                    `It must be >= 0 and <= ${target.length}. Received value is: ${targetEnd}`);
             }
             if (resolvedSourceStart < 0) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. ` +
@@ -890,8 +906,10 @@ export default namespace buffer {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. ` +
                     `It must be >= 0 and <= ${this.length}. Received value is: ${sourceEnd}`);
             }
-            const targetSlice = resolvedTarget.slice(resolvedTargetStart, resolveTargetEnd);
-            const sourceSlice = resolvedSource.slice(resolvedSourceStart, resolvedSourceEnd);
+            const targetSlice = resolvedTarget.slice(resolvedTargetStart + target.byteOffset,
+                                                     resolvedTargetEnd + target.byteOffset);
+            const sourceSlice = resolvedSource.slice(resolvedSourceStart + this.byteOffset,
+                                                     resolvedSourceEnd + this.byteOffset);
             return compare(new Buffer(sourceSlice), new Buffer(targetSlice));
         }
 
@@ -934,19 +952,19 @@ export default namespace buffer {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. ` +
                     `It must be >= 0. Received value is: ${sourceEnd}`);
             }
-            if (resolvedTargetStart >= resolvedTarget.byteLength.toInt()) {
+            if (resolvedTargetStart >= target.length) {
                 return 0;
             }
-            if (resolvedSourceEnd <= resolvedSourceStart || resolvedSourceStart >= this.length) {
+            if (resolvedSourceStart >= resolvedSourceEnd || resolvedSourceStart >= this.length) {
                 return 0;
             }
-            const sourceSlice: ArrayBuffer = resolvedSource.slice(resolvedSourceStart,
-                resolvedSourceEnd);
+            const sourceSlice: ArrayBuffer = resolvedSource.slice(resolvedSourceStart + this.byteOffset,
+                resolvedSourceEnd + this.byteOffset);
             let copyLen = 0;
             for (; copyLen < sourceSlice.byteLength
-                && resolvedTargetStart + copyLen < resolvedTarget.byteLength;
+                && resolvedTargetStart + target.byteOffset + copyLen < resolvedTarget.byteLength;
                 copyLen++) {
-                resolvedTarget.set(resolvedTargetStart + copyLen, sourceSlice.at(copyLen));
+                resolvedTarget.set(resolvedTargetStart + target.byteOffset + copyLen, sourceSlice.at(copyLen));
             }
             return copyLen;
         }
@@ -1023,8 +1041,8 @@ export default namespace buffer {
                 klass = parts[parts.length - 1];
             }
 
-            const offsetInt = offset.toInt();
-            const resolvedEndInt = resolvedEnd.toInt();
+            const offsetInt = offset + this.byteOffset;
+            const resolvedEndInt = resolvedEnd + this.byteOffset;
             const resolvedEncoding: BufferEncoding = encoding ?? "utf-8";
 
             switch (klass) {
@@ -1182,14 +1200,11 @@ Received value is: ${value}`)
             if (start == undefined || isNaN(start!)) {
                 start = 0
             }
-            if (end == undefined || isNaN(end!)) {
+            if (end == undefined || isNaN(end!) || end > this.length) {
                 end = this.length
             }
-            let e = end!
-            if (e > this.length) {
-                e = this.length
-            }
-            let s = start!
+            let s = start + this.byteOffset
+            let e = end + this.byteOffset
             if (s < 0 || e < 0 || e <= s) {
                 return new Buffer(new ArrayBuffer(0))
             }
@@ -1206,7 +1221,7 @@ Received value is: ${value}`)
             if (this.length % 2 != 0) {
                 throw createBusinessError(IncorrectBufferSizeId, 'The buffer size must be a multiple of 16-bits')
             }
-            for (let i = 0; i < this.length; i += 2) {
+            for (let i = this.byteOffset; i < this.length + this.byteOffset; i += 2) {
                 const a = this.buffer.at(i);
                 this.buffer.set(i, this.buffer.at(i + 1));
                 this.buffer.set(i + 1, a);
@@ -1224,7 +1239,7 @@ Received value is: ${value}`)
             if (this.length % 4 != 0) {
                 throw createBusinessError(IncorrectBufferSizeId, 'The buffer size must be a multiple of 32-bits')
             }
-            for (let i = 0; i < this.length; i += 4) {
+            for (let i = this.byteOffset; i < this.length + this.byteOffset; i += 4) {
                 const a = this.buffer.at(i);
                 const b = this.buffer.at(i + 1);
                 this.buffer.set(i, this.buffer.at(i + 3));
@@ -1245,7 +1260,7 @@ Received value is: ${value}`)
             if (this.length % 8 != 0) {
                 throw createBusinessError(IncorrectBufferSizeId, 'The buffer size must be a multiple of 64-bits')
             }
-            for (let i = 0; i < this.length; i += 8) {
+            for (let i = this.byteOffset; i < this.length + this.byteOffset; i += 8) {
                 const a = this.buffer.at(i);
                 const b = this.buffer.at(i + 1);
                 const c = this.buffer.at(i + 2);
@@ -1269,7 +1284,7 @@ Received value is: ${value}`)
         * @private
         */
         private getDataView(): DataView {
-            return new DataView(this.buffer, 0, this.length.toInt());
+            return new DataView(this.buffer, this.byteOffset, this.length);
         }
 
         /**
@@ -1725,7 +1740,7 @@ Received value is: ${value}`)
                 throw new RangeError("wrong index");
             }
             let res: int = 0;
-            const startByte = byteOffset;
+            const startByte = byteOffset + this.byteOffset;
             for (let i = 0; i < 4; i++) {
                 let byteVal: int = (this.bufferData.at(startByte + 3 - i));
                 byteVal &= 0xff;
@@ -1755,7 +1770,7 @@ Received value is: ${value}`)
                 throw new RangeError("wrong index");
             }
             let res: int = 0;
-            const startByte = byteOffset;
+            const startByte = byteOffset + this.byteOffset;
             for (let i = 0; i < 4; i++) {
                 let byteVal: int = (this.buffer.at(startByte + i));
                 byteVal &= 0xff;
@@ -1830,7 +1845,7 @@ Received value is: ${value}`)
                 throw new RangeError("wrong index");
             }
             let res: long = 0;
-            const startByte = byteOffset;
+            const startByte = byteOffset + this.byteOffset;
             for (let i = 0; i < 4; i++) {
                 let byteVal: long = (this.buffer.at(startByte + 3 - i));
                 byteVal &= 0xff;
@@ -1860,7 +1875,7 @@ Received value is: ${value}`)
                 throw new RangeError("wrong index");
             }
             let res: long = 0;
-            const startByte = offset;
+            const startByte = offset + this.byteOffset;
             for (let i = 0; i < 4; i++) {
                 let byteVal: long = (this.bufferData.at(startByte + i));
                 byteVal &= 0xff;
@@ -2119,7 +2134,7 @@ Received value is: ${value}`)
 
         private set32Litter(byteOffset: int, value: long): void {
             let len = this.length;
-            if (byteOffset < 0 || byteOffset + 4.0 > len) {
+            if (byteOffset < 0 || byteOffset + 4 > len) {
                 throw new RangeError("wrong index");
             }
             let bits = value;

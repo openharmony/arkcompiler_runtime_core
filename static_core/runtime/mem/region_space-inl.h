@@ -16,7 +16,7 @@
 #define PANDA_RUNTIME_MEM_REGION_SPACE_INL_H
 
 #include "runtime/mem/region_space.h"
-#include "libpandabase/utils/asan_interface.h"
+#include "libarkbase/utils/asan_interface.h"
 
 namespace ark::mem {
 

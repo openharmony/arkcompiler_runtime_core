@@ -16,6 +16,7 @@
 #include "plugins/ets/runtime/types/ets_reflect_field.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/types/ets_typeapi.h"
 
 namespace ark::ets {
 
@@ -25,6 +26,41 @@ EtsReflectField *EtsReflectField::Create(EtsCoroutine *etsCoroutine, bool isStat
         isStatic ? PlatformTypes(etsCoroutine)->reflectStaticField : PlatformTypes(etsCoroutine)->reflectInstanceField;
     EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
     return EtsReflectField::FromEtsObject(etsObject);
+}
+
+/* static */
+EtsReflectField *EtsReflectField::CreateFromEtsField(EtsCoroutine *coro, EtsField *field)
+{
+    ASSERT(coro != nullptr);
+    ASSERT(field != nullptr);
+
+    [[maybe_unused]] EtsHandleScope scope(coro);
+
+    auto reflectField = EtsHandle<EtsReflectField>(coro, EtsReflectField::Create(coro, field->IsStatic()));
+    if (UNLIKELY(reflectField.GetPtr() == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
+
+    // do not expose primitive types and string types except std.sore.String
+    auto *resolvedType = field->GetType()->ResolvePublicClass();
+    reflectField->SetFieldType(resolvedType);
+    reflectField->SetEtsField(reinterpret_cast<EtsLong>(field));
+    reflectField->SetOwnerType(field->GetDeclaringClass());
+
+    uint32_t attr = 0;
+    attr |= (field->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
+    attr |= (field->IsReadonly()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::READONLY) : 0U;
+
+    reflectField->SetAttributes(attr);
+
+    int8_t accessMod = field->IsPublic()
+                           ? static_cast<int8_t>(EtsTypeAPIAccessModifier::PUBLIC)
+                           : (field->IsProtected() ? static_cast<int8_t>(EtsTypeAPIAccessModifier::PROTECTED)
+                                                   : static_cast<int8_t>(EtsTypeAPIAccessModifier::PRIVATE));
+    reflectField->SetAccessModifier(accessMod);
+
+    return reflectField.GetPtr();
 }
 
 }  // namespace ark::ets

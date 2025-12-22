@@ -15,7 +15,6 @@
 
 /*---
 desc: Verifying that an interface type variable cannot be assigned to a class type variable.
-tags: [compile-only, negative]
 ---*/
 
 interface MyInterface {
@@ -26,16 +25,12 @@ class MyClass implements MyInterface {
   method() {}
 }
 
-interface I {
-  i: MyInterface;
-}
-
-class A {
-  i: MyClass;
+function checkTypeIdentity(a: Any, b: Any): boolean {
+    return Class.of(a as Object) === Class.of(b as Object);
 }
 
 function main(): void {
-  const val1: MyInterface = {method() {}};
+  const val1: MyInterface = { method() {} };
   const val2: MyClass = val1;
 
   const result = checkTypeIdentity(val1, val2);

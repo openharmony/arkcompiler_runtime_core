@@ -21,7 +21,7 @@
 #include <queue>
 
 #include "runtime/include/external_callback_poster.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark {
@@ -79,7 +79,7 @@ public:
 private:
     void PostImpl([[maybe_unused]] WrappedCallback &&callback) override {};
 
-    void PostImpl() override;
+    void PostImpl([[maybe_unused]] int64_t delayMs) override;
 
     static void CallbackExecutor(uv_async_t *async);
 

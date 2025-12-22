@@ -46,6 +46,11 @@ class BenchUnit:
     __real_tm_patt = re.compile(
         r"(?:Elapsed.*\(h:mm:ss or m:ss\)|Real time)[^:]*:\s*"
         r"(?:(\d*):)?(\d*)(?:.(\d*))?")
+    __intmem_patt = re.compile(r".*Internal memory allocations:.*"
+                               r".*allocations count:\s*(?P<count>\d+).*"
+                               r".*total allocated:\s*(?P<total>\d+).*"
+                               r".*peak allocated:\s*(?P<peak>\d+).*",
+                               flags=re.MULTILINE | re.DOTALL)
 
     def __init__(self,
                  path: Union[str, Path],
@@ -133,6 +138,11 @@ class BenchUnit:
             if (0 == self.result.execution_status
                 and len(self.result.execution_forks) > 0) \
             else BUStatus.EXECUTION_FAILED
+        mem_match = re.match(self.__intmem_patt, res.out)
+        if mem_match:
+            self.result.int_mem_alloc = {
+                key: int(value) for key, value in mem_match.groupdict().items()
+            }
         if not res.err:
             return
         # pylint: disable-next=protected-access

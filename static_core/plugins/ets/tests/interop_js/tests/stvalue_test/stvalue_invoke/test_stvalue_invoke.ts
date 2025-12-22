@@ -61,7 +61,7 @@ function testFunctionalObjectInvoke(): void {
         getSumFn.functionalObjectInvoke([numberObj3, STValue.getUndefined()]);
     } catch (e: Error) {
         res = true;
-        res = res && e.message.includes('undefined cannot be cast to Double');
+        res = res && e.message.includes('undefined cannot be cast to std.core.Double');
     }
     ASSERT_TRUE(res);
 }
@@ -641,11 +641,11 @@ function testNspBigIntInvokeFunction(): void {
     let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
     let b1 = STValue.wrapBigInt(BigInt('12345678'));
     let b2 = STValue.wrapBigInt(BigInt(12345678n));
-    //let s = nsp.namespaceInvokeFunction('BigIntInvoke','C{escompat.BigInt}C{escompat.BigInt}:C{escompat.BigInt}',[b1,b2]);
-    let s = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{escompat.BigInt}C{escompat.BigInt}:C{escompat.BigInt}', [b1, b2]);
+    //let s = nsp.namespaceInvokeFunction('BigIntInvoke','C{std.core.BigInt}C{std.core.BigInt}:C{std.core.BigInt}',[b1,b2]);
+    let s = nsp.namespaceInvokeFunction('BigIntInvoke', 'C{std.core.BigInt}C{std.core.BigInt}:C{std.core.BigInt}', [b1, b2]);
     ASSERT_TRUE(s.unwrapToBigInt() === BigInt(24691356n));
 
-    s = nsp.namespaceInvokeFunction('BigIntEmptyInvoke', ':C{escompat.BigInt}', []);
+    s = nsp.namespaceInvokeFunction('BigIntEmptyInvoke', ':C{std.core.BigInt}', []);
     ASSERT_TRUE(s.unwrapToBigInt() === BigInt(1234n));
 }
 
@@ -683,10 +683,10 @@ function funJsFullGC(): void {
 
 let module = STValue.findNamespace('stvalue_invoke.ETSGLOBAL');
 function createWeakRefForSTValue(): void {
-    const dateCls = STValue.findClass('escompat.Date');
+    const dateCls = STValue.findClass('std.core.Date');
     const dateObj = dateCls.classInstantiate(':', []);
     const staticWeakRef = module.namespaceInvokeFunction('createWeakRef',
-        'C{escompat.Date}:C{std.core.WeakRef}', [dateObj]);
+        'C{std.core.Date}:C{std.core.WeakRef}', [dateObj]);
     return [new WeakRef(dateObj), staticWeakRef];
 }
 

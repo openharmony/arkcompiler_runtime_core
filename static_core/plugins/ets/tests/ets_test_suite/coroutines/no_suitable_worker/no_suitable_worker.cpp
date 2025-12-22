@@ -35,7 +35,7 @@ TEST_F(EtsNoSuitableWorkerTest, NoSuitableWorkerForNativeCoro)
     auto groupId = CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::EXACT_ID, {99});
     auto cb = []([[maybe_unused]] void *data) {};
     auto launchRes = coroManager->LaunchNative(cb, reinterpret_cast<void *>(1U), "NoSuitableWorkerForNativeCoro",
-                                               groupId, CoroutinePriority::DEFAULT_PRIORITY, false);
+                                               groupId, CoroutinePriority::DEFAULT_PRIORITY, false, false);
     ASSERT_EQ(launchRes, LaunchResult::NO_SUITABLE_WORKER);
     ASSERT_TRUE(coro->HasPendingException());
 }

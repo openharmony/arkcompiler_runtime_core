@@ -10,6 +10,9 @@ Prerequisites are `python3` (3.7+) with `jinja2` module installed.
 Virtual Machine to test should be installed on host and/or device.
 See [Notes on setup for platforms](#platforms).
 
+For experimental Windows host support please refer to [this notes](./windows.readme.md).
+
+
 #### Option 1: Using wrapper script
 
 This option is to try VMB without any installation involved.
@@ -164,11 +167,49 @@ Note: options `--tests` and `--test-list` could be combined (by OR condition) in
   (no warmup, no tuning cycles).
   Benchmark will run this number of iterations, regardless of time elapsed.
 
+## Reuse compiled test binaries (experimental)
+To re-run tests several times without re-compilation use combination of
+`vmb all --skip-cleanup` and `vmb run --skip-compilation`.
+First command will go through whole cycle (generation, compilation and run)
+and the second one will use compiled binaries.
+Note `all` vs `run` and paths used:
+
+```shell
+vmb all -p arkts_host -A -v debug --skip-cleanup ./examples/benchmarks/ets
+
+find ./generated/ -name "*.abc"
+./generated/benches/bu_ArraySort_baseline/bench_ArraySort_baseline.abc
+./generated/benches/bu_ArraySort_sort/bench_ArraySort_sort.abc
+./generated/benches/bu_ArraySort_sort_1/bench_ArraySort_sort_1.abc
+./generated/benches/bu_ArraySort_baseline_1/bench_ArraySort_baseline_1.abc
+
+vmb run -p arkts_host -A -v debug --skip-cleanup --skip-compilation ./generated/
+```
+
+
 ## Custom options
 To provide additional option to compiler or virtual machine
 `--<tool>-custom-option` could be used. F.e. add cpu profiling for `node`:
 `vmb all -p node_host --node-custom-option='--cpu-prof' -v debug ./examples/benchmarks/ts/VoidBench.ts`
 
+## Custom paths to executables (experimental)
+To override paths to compilers and/or virtual machines
+`--<tool>-path` option could be used. F.e. to not use `OHOS_SDK` root:
+`--es2abc-path=/path/to/es2abc.exe`.
+(Only `es2abc`, `es2panda` and `ark_js_vm` are supported currently)
+
+## Custom script
+To run custom shell script after each benchmark test
+use `--custom-script` option.
+Provided script will run on host or device depending on target platform.
+F.e.
+```shell
+vmb all -p node_host -v debug \
+    --custom-script ./examples/scripts/print_health.sh ./examples/benchmarks/ts/
+```
+These env vars will be set for script:
+- `VMB_BU_PATH` - full path to work dir with current test
+- `VMB_BU_NAME` - test name as it stored in report
 
 ## Reports:
 * `--report-json=path.json` to save results in json format,
@@ -188,6 +229,45 @@ Output format could be controlled by `--number-format` option to `run|all|report
 - `auto` (default) : `1µ 1m 1K ..`
 - `nano`: `1n 1000n ..`
 - `expo`: `7.00e-02 5.01e+03 ..`
+
+### Results comparison
+
+Reports could compared with `vmb report --compare etalon.json report.json`:
+
+```shell
+vmb report --compare \
+    [--full] \                  # print all (even same) results to console
+    [--json=file.json] \        # save comparison to file
+    [--flaky-list=flaky.txt] \  # ignore results for tests from flaky.txt
+    [--status-by-compare] \     # set non zero exit code if there were regressions
+    [--tags=general,basic] \    # compare only tests tagged general or basic
+    [--skip-tags=one,two] \     # skip tests tagged one or two
+    report-etalon.json report-to-check.json
+```
+
+By default all results are compared with precision (tolerance) of `0.5%`.
+This could be tuned by options:
+
+```shell
+```shell
+vmb report --compare \
+    [--tolerance=1.5] \                 # set overall tolerance as 1.5%
+    [--tolerance-time=2] \              # set tolerance for time-based metrics as 2%
+    [--tolerance-code-size=3] \         # set tolerance for code size-based metrics as 3%
+    [--tolerance-rss=4] \               # set tolerance for memory size-based metrics as 4%
+    [--tolerance-compile-time=5] \      # set tolerance for compilation time-based metrics as 5%
+    [--tolerance-count=6] \             # set tolerance for count-based metrics as 6% (number of passed)
+    [--tolerance-list=fine-tuning.csv]  # set tolerances individually for each test
+    report-etalon.json report-to-check.json
+```
+Example of `tolerance-fine-tuning.csv`.
+(No tabs allowed in header, only spaces; Comma should follow value immediately)
+
+```csv
+name,    time, code_size, rss, compile_time
+A_test,  3,    20,        30
+B_test,  15,   ,          ,    7.75
+```
 
 ### Comparison of full test time
 

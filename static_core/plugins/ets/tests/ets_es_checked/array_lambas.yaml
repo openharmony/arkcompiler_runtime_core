@@ -41,24 +41,24 @@ sub:
         - |
           (x: number): boolean => Math.abs(x) == 1
         - |
-          (x: number, i: number, s: Array<number>): boolean => (x + i) > 0
+          (x: number, i, s: Array<number>): boolean => (x + i) > 0
         - |
-          (x: number, i: number, s: Array<number>): boolean => (x + i) % 2 == 0
+          (x: number, i, s: Array<number>): boolean => (x + i) % 2 == 0
         - |
-          (x: number, i: number, s: Array<number>): boolean => i % 2 == 0
+          (x: number, i, s: Array<number>): boolean => i % 2 == 0
         - |
-          (x: number, i: number, s: Array<number>): boolean => (x + i) < 0
+          (x: number, i, s: Array<number>): boolean => (x + i) < 0
         - |
-          (x: number, i: number, s: Array<number>): boolean => (x + i) == 1
+          (x: number, i, s: Array<number>): boolean => (x + i) == 1
       number_lambdas:
         - |
           (): number => 1234.0
         - |
           (x: number): number => x * 2.0
         - |
-          (x: number, i: number): number => x + i
+          (x: number, i): number => x + i
         - |
-          (x: number, i: number, s: Array<number>): number => x + i
+          (x: number, i, s: Array<number>): number => x + i
     sub:
       - method: filter
         params:
@@ -86,13 +86,13 @@ sub:
         params:
           -
             - |
-              (value: number, index: number, array: Array<number>): void => {
+              (value: number, index, array: Array<number>): void => {
                 if (array.length < 15) {
                   array.push(-value)
                 }
               }
             - |
-              (value: number, index: number): void => { value = value + index }
+              (value: number, index): void => { value = value + index }
             - |
               (value: number): void => { value = value + value }
             - |

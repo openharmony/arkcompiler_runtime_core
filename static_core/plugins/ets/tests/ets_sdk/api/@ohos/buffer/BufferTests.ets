@@ -630,6 +630,37 @@ function testFrom0014() {
     arktest.assertEQ(str, 'ab');
 }
 
+function testKeys() {
+    const arr = new Uint8Array(4);
+    arr[0] = 97;
+    arr[1] = 98;
+    arr[2] = 99;
+    arr[3] = 100;
+    let buf = buffer.from(arr.buffer, 1);
+    let keys = buf.keys();
+    let tmp = 0;
+    for (const key of keys) {
+        arktest.assertEQ(String(key),String(tmp));
+        tmp++;
+    }
+}
+
+function testValues() {
+    const arr = new Uint8Array(4);
+    arr[0] = 97;
+    arr[1] = 98;
+    arr[2] = 99;
+    arr[3] = 100;
+    let buf = buffer.from(arr.buffer, 1);
+    let values = buf.values();
+    let tmp = arr[1];
+    for (const value of values) {
+        arktest.assertEQ(String(value),String(tmp));
+        tmp++;
+    }
+}
+
+
 function main(): int {
     const suite = new arktest.ArkTestsuite("Buffer API tests")
     suite.addTest("Test buffer toString", testToString)
@@ -703,5 +734,7 @@ function main(): int {
     suite.addTest("Test buffer testBufferBufferCompare0017", testBufferBufferCompare0017)
     suite.addTest("Test buffer testFrom0009", testFrom0009)
     suite.addTest("Test buffer testFrom0014", testFrom0014)
+    suite.addTest("Test buffer testKeys", testKeys)
+    suite.addTest("Test buffer testValues", testValues)
     return suite.run()
 }

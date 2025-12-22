@@ -13,26 +13,25 @@
  * limitations under the License.
  */
 
-import {
-    Foo,
-    createFooClassFromTs,
-} from 'main_js';
+let module = ESValue.load('main_js');
+let Foo = module.getProperty('Foo');
+let createFooClassFromTs = module.getProperty('createFooClassFromTs');
 
-import { launch } from "std/concurrency"
+function EtsGlobalInitPlaceholder(): void {}
 
-function EtsGlobalInitPlaceholder() {}
-
-function Bar() {
-    return createFooClassFromTs(JSRuntime.newJSValueInt(42));
+function Bar(): object {
+    return createFooClassFromTs.invoke(JSRuntime.newJSValueInt(42));
 }
 
 function checkInteropNegative(): boolean {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     EtsGlobalInitPlaceholder();
     try {
-        launch<JSValue, () => JSValue>(Bar).Await();
-    } catch (e: NoInteropContextError) {
-        return true;
+        launch<Any, () => Any>(Bar).Await();
+    } catch (e) {
+        if (e instanceof NoInteropContextError) {
+            return true;
+        }
     }
     return false;
 }
@@ -41,7 +40,7 @@ function checkInteropPositive(): boolean {
     EtsGlobalInitPlaceholder();
     try {
         Bar();
-    } catch (e: Error) {
+    } catch (e) {
         return false;
     }
     return true;

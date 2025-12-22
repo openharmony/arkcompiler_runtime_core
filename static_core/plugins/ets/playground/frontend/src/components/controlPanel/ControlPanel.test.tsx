@@ -26,6 +26,13 @@ describe('ControlPanel component', () => {
     let store: ReturnType<typeof mockStore>;
 
     beforeEach(() => {
+        // Mock fetch for the releases API call
+        global.fetch = jest.fn(() =>
+            Promise.resolve({
+                json: () => Promise.resolve([]),
+            })
+        ) as jest.Mock;
+
         store = mockStore({
         // @ts-ignore
             appState: { disasm: false },
@@ -33,6 +40,10 @@ describe('ControlPanel component', () => {
             options: { isLoading: false, options: [], pickedOptions: [] }
         });
         store.dispatch = jest.fn();
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     const renderWithProviders = (component: JSX.Element): ReturnType<typeof render> => {

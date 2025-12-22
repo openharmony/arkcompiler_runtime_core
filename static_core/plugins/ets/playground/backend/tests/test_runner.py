@@ -339,21 +339,21 @@ async def test_get_versions(monkeypatch, ark_build):
 
 
 @pytest.mark.asyncio
-async def test_dump_ast_ok(monkeypatch, ark_build):
-    mocker = MockAsyncSubprocess([
+async def test_dump_ast_ok(monkeypatch, ark_build, fake_saved_stsfile):
+    subproc_mock = MockAsyncSubprocess([
         FakeCommand(
             expected=str(ark_build[1]),  # es2panda
-            opts=["--dump-ast", "--extension=ets"],
+            opts=["--dump-ast", "--extension=ets", f"--output={fake_saved_stsfile}.abc"],
             stdout=b"AST TREE",
             return_code=0,
         ),
     ])
-    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+    monkeypatch.setattr("asyncio.create_subprocess_exec", subproc_mock.create_subprocess_exec())
 
     r = Runner(ark_build[0])
-    res = await r.dump_ast("code")
+    ast_result = await r.dump_ast("code")
 
-    assert res == {
+    assert ast_result == {
         "ast": "AST TREE",
         "output": "AST TREE",
         "error": "",
@@ -362,22 +362,22 @@ async def test_dump_ast_ok(monkeypatch, ark_build):
 
 
 @pytest.mark.asyncio
-async def test_dump_ast_with_opts(monkeypatch, ark_build):
+async def test_dump_ast_with_opts(monkeypatch, ark_build, fake_saved_stsfile):
     compile_opts = ["--opt-level=2"]
-    mocker = MockAsyncSubprocess([
+    subproc_mock = MockAsyncSubprocess([
         FakeCommand(
             expected=str(ark_build[1]),
-            opts=["--dump-ast", "--extension=ets", *compile_opts],
+            opts=["--dump-ast", "--extension=ets", f"--output={fake_saved_stsfile}.abc", *compile_opts],
             stdout=b"AST",
             return_code=0,
         ),
     ])
-    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+    monkeypatch.setattr("asyncio.create_subprocess_exec", subproc_mock.create_subprocess_exec())
 
     r = Runner(ark_build[0])
-    res = await r.dump_ast("code", compile_opts)
+    ast_result = await r.dump_ast("code", compile_opts)
 
-    assert res == {
+    assert ast_result == {
         "ast": "AST",
         "output": "AST",
         "error": "",
@@ -386,22 +386,22 @@ async def test_dump_ast_with_opts(monkeypatch, ark_build):
 
 
 @pytest.mark.asyncio
-async def test_dump_ast_stdout_empty_not_use_stderr(monkeypatch, ark_build):
-    mocker = MockAsyncSubprocess([
+async def test_dump_ast_stdout_empty_not_use_stderr(monkeypatch, ark_build, fake_saved_stsfile):
+    subproc_mock = MockAsyncSubprocess([
         FakeCommand(
             expected=str(ark_build[1]),
-            opts=["--dump-ast", "--extension=ets"],
+            opts=["--dump-ast", "--extension=ets", f"--output={fake_saved_stsfile}.abc"],
             stdout=b"",
             stderr=b"some log in stderr",
             return_code=0,
         ),
     ])
-    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+    monkeypatch.setattr("asyncio.create_subprocess_exec", subproc_mock.create_subprocess_exec())
 
     r = Runner(ark_build[0])
-    res = await r.dump_ast("code")
+    ast_result = await r.dump_ast("code")
 
-    assert res == {
+    assert ast_result == {
         "ast": None,
         "output": "",
         "error": "some log in stderr",
@@ -410,22 +410,22 @@ async def test_dump_ast_stdout_empty_not_use_stderr(monkeypatch, ark_build):
 
 
 @pytest.mark.asyncio
-async def test_dump_ast_segfault(monkeypatch, ark_build):
-    mocker = MockAsyncSubprocess([
+async def test_dump_ast_segfault(monkeypatch, ark_build, fake_saved_stsfile):
+    subproc_mock = MockAsyncSubprocess([
         FakeCommand(
             expected=str(ark_build[1]),
-            opts=["--dump-ast", "--extension=ets"],
+            opts=["--dump-ast", "--extension=ets", f"--output={fake_saved_stsfile}.abc"],
             stdout=b"",
             stderr=b"oops",
             return_code=-11,
         ),
     ])
-    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+    monkeypatch.setattr("asyncio.create_subprocess_exec", subproc_mock.create_subprocess_exec())
 
     r = Runner(ark_build[0])
-    res = await r.dump_ast("code")
+    ast_result = await r.dump_ast("code")
 
-    assert res == {
+    assert ast_result == {
         "ast": None,
         "output": "",
         "error": "oopsast: Segmentation fault",

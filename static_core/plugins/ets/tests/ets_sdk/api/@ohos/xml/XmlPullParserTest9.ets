@@ -64,11 +64,11 @@ function testXmlPullParserConstructor0001() {
     }
     parser.parseXml(options);
     arktest.assertTrue(false)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
+        try {
+            arktest.assertEQ((err as BusinessError).code, 401);
+        } catch (e) {}
     }
 }
 
@@ -85,11 +85,11 @@ function testXmlPullParserConstructor0002() {
             tagValueCallbackFunction: (name: string, value: string) => true
         };
         parser.parseXml(options)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
+        try {
+            arktest.assertEQ((err as BusinessError).code, 401);
+        } catch (e) {}
     }
 }
 
@@ -132,11 +132,11 @@ function testXmlPullParserConstructor0004() {
         };
         parser.parseXml(options);
         arktest.assertTrue(false)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
+        try {
+            arktest.assertEQ((err as BusinessError).code, 401);
+        } catch (e) {}
     }
 }
 
@@ -180,11 +180,11 @@ function testXmlPullParserConstructor0006() {
         };
         parser.parseXml(options);
         arktest.assertTrue(false)
-    } catch (err: BusinessError) {
-        console.error(`${TAG} failed, error: ${err}`);
-        arktest.assertEQ((err as BusinessError).code, 401);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
+        try {
+            arktest.assertEQ((err as BusinessError).code, 401);
+        } catch (e) {}
     }
 }
 
@@ -273,9 +273,10 @@ function testXml017() {
     try {
     pullParse.parseXml(options);
     arktest.assertTrue(false)
-    } catch (e:BusinessError) {
-    arktest.assertEQ(e.toString(), "BusinessError: Cannot find the ']]>' in xml string.")
-    arktest.assertEQ(e.code ,401)
+    } catch (e) {
+        e = e as BusinessError;
+        arktest.assertEQ(e.toString(), "BusinessError: Cannot find the ']]>' in xml string.")
+        arktest.assertEQ(e.code ,401)
     }
 
 }

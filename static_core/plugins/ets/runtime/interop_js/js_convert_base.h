@@ -154,9 +154,6 @@ struct JSConvertBase {
         if constexpr (IS_REFTYPE) {
             // NOTE(kprokopenko) can't assign null to EtsString *, hence fallback into UnwrapImpl
             if (UNLIKELY(IsUndefined<true>(env, jsVal))) {
-                if constexpr (IS_JSVALUE) {
-                    return JSValue::CreateUndefined(EtsCoroutine::GetCurrent(), ctx);
-                }
                 return nullptr;
             }
         }

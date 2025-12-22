@@ -24,22 +24,24 @@ function main(): int {
 
 class TestData {
     static readonly src = Array.of<number>(1, 2, 3);
-    static readonly arrayLength1: number = -1;
+    static readonly arrayLength1: int = -1;
     static readonly expected1 = Array.from<number>(TestData.src);
-    static readonly arrayLength2: number = 2;
+    static readonly arrayLength2: int = 2;
     static readonly expected2 = TestData.src.slice(0, 2);
-    static readonly arrayLength3: number = 5;
+    static readonly arrayLength3: int = 5;
     static readonly expected3 = Array.from<number>(TestData.src);
-    static readonly arrayLength4: number = Int.MIN_VALUE.toDouble()
+    static readonly arrayLength4: int = Int.MIN_VALUE
     static readonly limit4: number = 10;
     static readonly expected4 = new Array<number>;
 }
 
 function testShrinkToNegLength() {
-    let a = Array.from<number>(TestData.src);
-    a.shrinkTo(TestData.arrayLength1);
-    let result: boolean = equaled(TestData.expected1, a);
-    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected1);
+    try {
+        let a = Array.from<number>(TestData.src);
+        a.shrinkTo(TestData.arrayLength1);
+    } catch(error) {
+        arktest.assertEQ(error.toString(), 'RangeError: Parameter error.Invalid array length.')
+    }
 }
 
 function testShrinkToLength() {
@@ -58,10 +60,12 @@ function testShrinkToOutLength() {
 
 function testShrinkToIntMinValue() {
     let a = Array.from<number>(TestData.src);
-    for (let i: number = 0; i < TestData.limit4; ++i) {
-        a.shrinkTo(TestData.arrayLength4 + i);
-        let result: boolean = equaled(TestData.expected4, a);
-        arktest.assertTrue(result, "Error. " + i + " Got: " + a + ". Expected: " + TestData.expected4);
+    for (let i: int = 0; i < TestData.limit4; ++i) {
+        try {
+            a.shrinkTo(TestData.arrayLength4 + i);
+        } catch(error) {
+            arktest.assertEQ( error.toString(), 'RangeError: Parameter error.Invalid array length.')
+        }
     }
 }
 

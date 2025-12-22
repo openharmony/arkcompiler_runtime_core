@@ -14,29 +14,18 @@
  */
 
 /*---
-desc: Verifying compatibility in multiple inheritance.
-tags: [compile-only, negative]
+desc: Verifying compatibility in inheritance from class and interface.
 ---*/
 
 class Parent1 {}
-class Parent2 {}
-class Child extends Parent1, Parent2 {}\
-
-interface I {
-  i: Parent1;
-}
-
-class A {
-  i: Child;
-}
+interface Parent2 {}
+class Child extends Parent1 implements Parent2 {}
 
 function main(): void {
   const val1: Child = new Child();
   const val2: Parent1 = new Parent1();
 
-  const result1 = checkTypeIdentity(val1, val2);
-  const result2 = checkTypeIdentity(val2, val1);
-
-  arktest.assertEQ(result1, true);
-  arktest.assertEQ(result2, false);
+  arktest.assertTrue(val1 instanceof Parent1);
+  arktest.assertTrue(val1 instanceof Parent2);
+  arktest.assertEQ(val2 instanceof Parent2, false);
 }

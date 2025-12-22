@@ -15,7 +15,7 @@
 
 #include "conditional_breakpoint.h"
 
-#include "debug_info_extractor.h"
+#include "libarkfile/debug_info_extractor.h"
 #include "error.h"
 #include "evaluation/evaluation_engine.h"
 

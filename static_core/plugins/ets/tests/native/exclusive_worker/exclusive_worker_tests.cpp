@@ -14,7 +14,7 @@
  */
 
 #include <atomic>
-#include "ani_gtest.h"
+#include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/include/runtime.h"
 
@@ -86,6 +86,8 @@ public:
             ani_option {"--ext:compiler-enable-jit", nullptr},
             // Note: here set the coroutine-e-workers-limit to 2 to save system resources
             ani_option {"--ext:coroutine-e-workers-limit=2", nullptr},
+            // Note: reduce the maximum the coroutine number here to save system resources in the limit test
+            ani_option {"--ext:coroutines-stack-mem-limit=268435456", nullptr},
         };
     }
 

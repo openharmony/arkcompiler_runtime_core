@@ -133,7 +133,7 @@ bool ETSAni::PreCreateExclusiveWorkerForTaskpool()
     auto *runtime = Runtime::GetCurrent();
     auto *classLinker = runtime->GetClassLinker();
     ClassLinkerExtension *ext = classLinker->GetExtension(SourceLanguage::ETS);
-    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
+    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lstd/concurrency/taskpool;");
     auto *klass = ext->GetClass(mutf8Name);
     if (klass == nullptr) {
         LOG(ERROR, COROUTINES) << "Load taskpool failed in post zygote fork";
@@ -154,7 +154,7 @@ bool ETSAni::DestroyExclusiveWorkerForTaskpoolIfExists()
     auto *runtime = Runtime::GetCurrent();
     auto *classLinker = runtime->GetClassLinker();
     ClassLinkerExtension *ext = classLinker->GetExtension(SourceLanguage::ETS);
-    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lescompat/taskpool;");
+    auto mutf8Name = reinterpret_cast<const uint8_t *>("Lstd/concurrency/taskpool;");
     auto *klass = ext->GetClass(mutf8Name);
     if (klass == nullptr) {
         LOG(ERROR, COROUTINES) << "Load taskpool failed in pre zygote fork";

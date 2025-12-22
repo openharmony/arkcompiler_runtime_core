@@ -18,6 +18,31 @@
 package escompat
 import {iteratorForEach, tryGetIteratorLength} from "std/core"
 
+function asIntOrDefault(n: int | undefined, def: int): int {
+    return n ?? def
+}
+
+function asIntOrDefault(n: Number | undefined, def: int): int {
+    if (n === undefined) {
+        return def
+    }
+    return (n!).toInt();
+}
+
+function normalizeIndex(idx: int, len: int): int {
+    if (idx < -len) {
+        return 0
+    }
+    if (idx < 0) {
+        return len + idx
+    }
+    if (idx > len) {
+        return len
+    }
+    return idx
+}
+
+
 {%- for N, U, T, BT, S in [
     ('Int8', 'Uint8', 'byte', 'Byte', 1),
     ('Int16', 'Uint16', 'short', 'Short', 2),
@@ -35,23 +60,23 @@ import {iteratorForEach, tryGetIteratorLength} from "std/core"
     {%- set numberBigIntToPrimitive = ('.to' + BT + '()') if elementCompat == 'number' else '.getLong()' %}
     {%- set numberBigIntUndefToPrimitive = ('!' + numberBigIntToPrimitive) %}
 
-class {{N}}ArrayIteratorKeys implements IterableIterator<number> {
+class {{N}}ArrayIteratorKeys implements IterableIterator<int> {
     private length: int
     private idx: int = 0
 
     constructor(parent: {{N}}Array) {
-        this.length = parent.length.toInt()
+        this.length = parent.length
     }
 
-    public override $_iterator(): IterableIterator<number> {
+    public override $_iterator(): IterableIterator<int> {
         return this
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<int> {
         if (this.idx < 0 || this.idx >= this.length) {
-            return new IteratorResult<number>()
+            return new IteratorResult<int>()
         }
-        return new IteratorResult<number>(false, (this.idx++).toDouble())
+        return new IteratorResult<int>(false, this.idx++)
     }
 }
 
@@ -68,14 +93,14 @@ class {{N}}ArrayIterator implements IterableIterator<{{subsetTypeValues}}> {
     }
 
     override next(): IteratorResult<{{subsetTypeValues}}> {
-        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<{{subsetTypeValues}}>()
         }
         return new IteratorResult<{{subsetTypeValues}}>(false, new {{subsetTypeValues}}(this.parent[this.idx++]))
     }
 }
 
-{% set subsetTypeValuesEntries = '[' + 'Number' + ', ' + subsetTypeValues + ']' -%}
+{% set subsetTypeValuesEntries = '[' + 'int' + ', ' + subsetTypeValues + ']' -%}
 
 class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEntries}}> {
     private parent: {{N}}Array
@@ -90,11 +115,11 @@ class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEn
     }
 
     override next(): IteratorResult<{{subsetTypeValuesEntries}}> {
-        if (this.idx < 0 || this.idx >= this.parent.length.toInt()) {
+        if (this.idx < 0 || this.idx >= this.parent.length) {
             return new IteratorResult<{{subsetTypeValuesEntries}}>()
         }
         return new IteratorResult<{{subsetTypeValuesEntries}}>(
-            false, [new Number(this.idx), new {{subsetTypeValues}}(this.parent[this.idx++])]{{ '' if elementCompat != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
+            false, [this.idx, new {{subsetTypeValues}}(this.parent[this.idx++])]{{ '' if elementCompat != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
         )
     }
 }
@@ -160,8 +185,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             {%- if N == 'BigInt64' %}
             this.setUnsafe(i, numbers[i].toLong())
             {%- elif N not in ['Float32', 'Float64'] %}
-            this.setUnsafe(i, {{ ('this.zeroIfInfinity(numbers[i]).to' + BT + '()')
-                            if elementCompat != 'BigInt' else 'this.zeroIfInfinity(numbers[i].toLong())' }})
+            this.setUnsafe(i, {{ ('numbers[i].to' + BT + '()')
+                            if elementCompat != 'BigInt' else 'numbers[i].toLong()' }})
             {%- else %}
             this.setUnsafe(i, numbers[i]{{fromElementCompat}})
             {%- endif %}
@@ -176,11 +201,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         for (let i: int = 0; i < this.lengthInt; ++i) {
             {%- if N == 'BigInt64' %}
             this.setUnsafe(i, numbers[i].toLong())
-            {%- elif N not in ['Float32', 'Float64'] %}
-            this.setUnsafe(i, {{ ('this.zeroIfInfinity(numbers[i]).to' + BT + '()')
-                if elementCompat != 'BigInt' else 'this.zeroIfInfinity(numbers[i].toLong())' }})
+            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+            this.setUnsafe(i, {{N}}Array.doubleToInt(numbers[i]))
+            {%- elif N == 'Float32' %}
+            this.setUnsafe(i, numbers[i].toFloat())
             {%- else %}
-            this.setUnsafe(i, numbers[i]{{fromElementCompat}})
+            this.setUnsafe(i, numbers[i])
             {%- endif %}
         }
     }
@@ -204,23 +230,20 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public constructor(elements: Iterable<{{subsetTypeValues}}>) {
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
-            const arr = Types.identity_cast<{{subsetTypeValues}}>(items as ArrayLike<{{subsetTypeValues}}>)
+            const arr = reflect.internals.Types.identity_cast<{{subsetTypeValues}}>(items as ArrayLike<{{subsetTypeValues}}>)
             this.byteLength = arr.length * {{N}}Array.BYTES_PER_ELEMENT
             this.lengthInt = arr.length
             this.buffer = new ArrayBuffer(this.byteLength)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 {%- if N == 'BigInt64' %}
-                this.setUnsafe(i, arr.$_get(i).getLong())
+                this.setUnsafe(i, arr[i].getLong())
                 {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
-                let temp: double = arr.$_get(i);
-                if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
-                    this.setUnsafe(i, 0);
-                } else {
-                    this.setUnsafe(i, {{N}}Array.doubleToInt(temp));
-                }
+                this.setUnsafe(i, {{N}}Array.doubleToInt(arr[i]))
+                {%- elif N == 'Float32' %}
+                this.setUnsafe(i, arr[i].toFloat())
                 {%- else %}
-                this.setUnsafe(i, arr.$_get(i).to{{T.capitalize()}}());
+                this.setUnsafe(i, arr[i])
                 {%- endif %}
             }
         } else {
@@ -233,7 +256,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     }
 
     {%- if N == 'Int32' or N == 'Int16' or N == 'Int8' %}
-    public static native doubleToInt(d: double): {{T}};
+    private static native doubleToInt(d: double): {{T}};
     {%- endif %}
 
     /**
@@ -343,33 +366,20 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             this.buffer = new ArrayBuffer(this.byteLength)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).to{{T.capitalize()}}())
+                {%- if N == 'BigInt64' %}
+                this.setUnsafe(i, arr[i].toLong())
+                {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+                this.setUnsafe(i, {{N}}Array.doubleToInt(arr[i]))
+                {%- elif N == 'Float32' %}
+                this.setUnsafe(i, arr[i].toFloat())
+                {%- else %}
+                this.setUnsafe(i, arr[i])
+                {%- endif %}
             }
         } else {
             throw new Error("unexpected type of buf")
         }
     }
-
-    {%- if N not in ['Float32', 'Float64', 'BigInt64'] %}
-
-    private zeroIfInfinity(val: {{T}}): {{T}} {
-        if ((val == Infinity) || (val == -Infinity)) {
-            return {{ '0' if S >= 4 else 'Int.to' + BT + '(0)' }}
-        }
-        return val
-    }
-
-    private zeroIfInfinity(val: {{elementCompat}}): {{elementCompat}} {
-        {%- if elementCompat == 'number' %}
-        if ((val == Infinity) || (val == -Infinity)) {
-        {%- else %}
-        if ((val{{fromElementCompat}} == Infinity) || (val{{fromElementCompat}} == -Infinity)) {
-        {%- endif %}
-            return {{ '0' if elementCompat != 'BigInt' else 'new BigInt(0)' }}
-        }
-        return {{asElementCompat % 'val'}}
-    }
-    {%- endif %}
 
     /**
      * Assigns val as element on index.
@@ -402,11 +412,14 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @param index index to change
      */
     public $_set(index: int, val: {{elementCompat}}): void {
-        {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
-        let v = this.zeroIfInfinity(val)
-        this.$_set(index, v{{fromElementCompat}})
+        {%- if N == 'BigInt64' %}
+        this.$_set(index, val.getLong())
+        {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+        this.$_set(index, {{N}}Array.doubleToInt(val))
+        {%- elif N == 'Float32' %}
+        this.$_set(index, val.toFloat())
         {%- else %}
-        this.$_set(index, val{{fromElementCompat}})
+        this.$_set(index, val)
         {%- endif %}
     }
     {%- endif %}
@@ -503,7 +516,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public native copyWithinImpl(target: int, start: int, end: int): {{N}}Array
+    private native copyWithinImpl(target: int, start: int, end: int): {{N}}Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of {{N}}Array.
@@ -552,10 +565,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns modified {{N}}Array
      */
     public fill(value: {{elementCompat}}, start?: int, end?: int): this {
-        {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
-        value = this.zeroIfInfinity(value)
+        {%- if N == 'BigInt64' %}
+        this.fill(value.getLong(), start, end)
+        {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+        this.fill({{N}}Array.doubleToInt(value), start, end)
+        {%- elif N == 'Float32' %}
+        this.fill(value.toFloat(), start, end)
+        {%- else %}
+        this.fill(value, start, end)
         {%- endif %}
-        this.fill(value{{fromElementCompat}}, start, end)
         return this
     }
 
@@ -569,16 +587,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns modified {{N}}Array
      */
     public fill(value: {{elementCompat}}, start?: int, end?: int): this {
-        {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
-        value = this.zeroIfInfinity(value)
-        {%- endif %}
         const k = normalizeIndex(start ?? 0, this.lengthInt)
         const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
-        this.fillInternal(value, k, finalPos)
+        this.fillInternal(value{{fromElementCompat}}, k, finalPos)
         return this
     }
 
-    {%- endif %}
+    {%- endif %} 
 
     private final native fillInternal(value: {{T}}, start: int, end: int): void
 
@@ -635,13 +650,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length.toInt(); ++i) {
-        {%- if not N in ['Float32', 'Float64', 'BigInt64'] %}
-            let v = this.zeroIfInfinity(arr[i])
-            this.$_set(offset + i, v)
-        {%- else %}
-            this.$_set(offset + i, arr[i])
-        {%- endif %}
+        for (let i = 0; i < arr.length; ++i) {
+            this.setUnsafe(offset + i, arr[i])
         }
     }
 
@@ -669,18 +679,20 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (offset < 0 || offset + arr.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length.toInt(); ++i) {
-        {%- if (N == 'BigInt64') %}
-            let truncatedVal: BigInt = BigInt.asIntN(64, arr[i])
-            this.$_set(offset + i, truncatedVal{{fromElementCompat}})
-        {%- elif (N != 'Float32') and (N != 'Float64') %}
-            let v = this.zeroIfInfinity(arr[i])
-            this.$_set(offset + i, v{{fromElementCompat}})
-        {%- else %}
-            this.$_set(offset + i, arr[i]{{fromElementCompat}})
-        {%- endif %}
+        for (let i = 0; i < arr.length; ++i) {
+            {%- if N == 'BigInt64' %}
+            this.setUnsafe(offset + i, arr[i].getLong())
+            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+            this.setUnsafe(offset + i, {{N}}Array.doubleToInt(arr[i]))
+            {%- elif N == 'Float32' %}
+            this.setUnsafe(offset + i, arr[i].toFloat())
+            {%- else %}
+            this.setUnsafe(offset + i, arr[i])
+            {%- endif %}
         }
     }
+
+    private native final set(array: Array<{{updatedElementCompat}}>): void;
 
     public native set(array: {{N}}Array): void
 
@@ -702,16 +714,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length.toInt(); ++i) {
-        {%- if (N == 'BigInt64') %}
-            let truncatedVal: BigInt = BigInt.asIntN(64, array[i])
-            this.$_set(insertPos + i, truncatedVal{{fromElementCompat}})
-        {%- elif (N != 'Float32') and (N != 'Float64') %}
-            let v = this.zeroIfInfinity(array[i])
-            this.$_set(insertPos + i, v{{fromElementCompat}})
-        {%- else %}
-            this.$_set(insertPos + i, array[i]{{fromElementCompat}})
-        {%- endif %}
+        for (let i = 0; i < array.length; ++i) {
+            {%- if N == 'BigInt64' %}
+            this.setUnsafe(insertPos + i, array[i].getLong())
+            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+            this.setUnsafe(insertPos + i, {{N}}Array.doubleToInt(array[i]))
+            {%- elif N == 'Float32' %}
+            this.setUnsafe(insertPos + i, array[i].toFloat())
+            {%- else %}
+            this.setUnsafe(insertPos + i, array[i])
+            {%- endif %}
         }
     }
     {%- set uniquePrimitiveTypes = ['number', 'int', T] if T != 'int' else ['number', 'int'] %}
@@ -728,32 +740,39 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      */
     public static of(...items: FixedArray<{{argType}}>): {{N}}Array {
         let res = new {{N}}Array(items.length.toInt())
-        for (let i: int = 0; i < items.length; i++) {
-        {%- if argType == 'number' %}
-            {%- if N == 'BigInt64' %}
-            res.setUnsafe(i, items[i].toLong())
-            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
-            let temp: double = items[i];
-            if (Double.isNaN(temp) || temp == Double.POSITIVE_INFINITY || temp == Double.NEGATIVE_INFINITY) {
-                res.setUnsafe(i, 0);
-            } else {
-                res.setUnsafe(i, {{N}}Array.doubleToInt(temp));
-            }
-            {%- else %}
-            res.setUnsafe(i, items[i]{{ '.to' + BT + '()' if argType != T and T != 'double' else ''}})
-            {%- endif %}
+        {%- if argType == 'byte' %}
+        res.ofByte(items)
+        {%- elif argType == 'short' %}
+        res.ofShort(items)
+        {%- elif argType == 'int' %}
+        res.ofInt(items)
+        {%- elif argType == 'long' %}
+        res.ofLong(items)
+        {%- elif argType == 'float' %}
+        res.ofFloat(items)
+        {%- elif argType == 'bigint' %}
+        res.ofBigInt(items)
         {%- else %}
-            {%- if N == 'BigInt64' and argType == 'bigint' %}
-            res.setUnsafe(i, items[i].getLong())
-            {%- else %}
-            res.setUnsafe(i, items[i]{{ '.to' + BT + '()' if argType != T else ''}})
-            {%- endif %}
+        res.ofNumber(items)
         {%- endif %}
-        }
         return res
     }
         {%- endif %}
     {%- endfor %}
+
+    private final native ofInt(items: FixedArray<int>): void
+    private final native ofNumber(items: FixedArray<number>): void
+
+    {%- if N == 'Int8' %}
+    private final native ofByte(items: FixedArray<byte>): void
+    {%- elif N == 'Int16' %}
+    private final native ofShort(items: FixedArray<short>): void
+    {%- elif N == 'BigInt64' %}
+    private final native ofLong(items: FixedArray<long>): void
+    private final native ofBigInt(items: FixedArray<Object>): void
+    {%- elif N == 'Float32' %}
+    private final native ofFloat(items: FixedArray<float>): void
+    {%- endif %}
 
     /**
      * Returns a new array from a set of elements.
@@ -782,7 +801,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     }
 
     /**
-     * Creates an array from a set of type escompat.Set<{{updatedElementCompat}}>.
+     * Creates an array from a set of type std.core.Set<{{updatedElementCompat}}>.
      *
      * @param set A set object to convert to an array.
      *
@@ -830,19 +849,36 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     }
     {%- endif %}
 
-    private native final set(array: Array<{{updatedElementCompat}}>): void;
+    /**
+     * Creates an array from an object of FixedArray<{{updatedElementCompat}}>.
+     *
+     * @param arr An instance of the FixedArray type to convert to an array.
+     *
+     * @returns new {{N}}Array
+     */
+    public static fromFixedArray{{updatedElementCompat}}(arr: FixedArray<{{updatedElementCompat}}>): {{N}}Array {
+        let result = new {{N}}Array(arr.length)
+        {%- if updatedElementCompat == 'number' %}
+        result.ofNumber(arr)
+        {%- elif updatedElementCompat == 'BigInt' %}
+        result.ofBigInt(arr)
+        {%- else %}
+        result.ofInt(arr)
+        {%- endif %}
+        return result
+    }
 
     /**
-     * Creates an array from an object of escompat.Array<{{updatedElementCompat}}>.
+     * Creates an array from an object of std.core.Array<{{updatedElementCompat}}>.
      *
-     * @param arr An instance of the escompat.Array type to convert to an array.
+     * @param arr An instance of the std.core.Array type to convert to an array.
      *
      * @returns new {{N}}Array
      */
     public static fromArray{{updatedElementCompat}}(arr: Array<{{updatedElementCompat}}>): {{N}}Array {
         let result = new {{N}}Array(arr.length)
         result.set(arr)
-        return result;
+        return result
     }
 
     /**
@@ -872,12 +908,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 if (x.done) {
                     return new {{N}}Array(result.buffer, 0, i)
                 }
-                {%- if N not in ['Float32', 'Float64', 'BigInt64'] %}
-                const mapped = result.zeroIfInfinity((mapfn)!(x.value!, i));
-                result.setUnsafe(i, mapped{{fromElementCompat}});
+                const mapped = (mapfn)!(x.value!, i)
+                {%- if N == 'BigInt64' %}
+                result.setUnsafe(i, mapped.getLong())
+                {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+                result.setUnsafe(i, {{N}}Array.doubleToInt(mapped))
+                {%- elif N == 'Float32' %}
+                result.setUnsafe(i, mapped.toFloat())
                 {%- else %}
-                const mapped = (mapfn)!(x.value!, i);
-                result.setUnsafe(i, mapped{{fromElementCompat}});
+                result.setUnsafe(i, mapped)
                 {%- endif %}
             }
             return result
@@ -891,19 +930,22 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         iteratorForEach<{{elementCompat}}>(iter, (x: {{elementCompat}}): void => {
             if (index[0] + 1 > temp.lengthInt) {
                 // NOTE (templin.konstantin): Progressive reallocation
-                const curLength = (temp.buffer as Buffer).getByteLength()
+                const curLength = temp.buffer.getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
-                    tb.set(i, (temp.buffer as Buffer).at(i))
+                    tb.set(i, temp.buffer.at(i))
                 }
                 temp = new {{N}}Array(tb)
             }
-            {%- if N not in ['Float32', 'Float64', 'BigInt64'] %}
-            const val = temp.zeroIfInfinity((mapfn)!(x, index[0]));
-            temp.setUnsafe(index[0], val{{fromElementCompat}});
+            const mapped = (mapfn)!(x, index[0])
+            {%- if N == 'BigInt64' %}
+            temp.setUnsafe(index[0], mapped.getLong())
+            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+            temp.setUnsafe(index[0], {{N}}Array.doubleToInt(mapped))
+            {%- elif N == 'Float32' %}
+            temp.setUnsafe(index[0], mapped.toFloat())
             {%- else %}
-            const val = (mapfn)!(x, index[0]);
-            temp.setUnsafe(index[0], val{{fromElementCompat}});
+            temp.setUnsafe(index[0], mapped)
             {%- endif %}
             index[0]++
         })
@@ -925,22 +967,25 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            {%- if N not in ['Float32', 'Float64', 'BigInt64'] %}
-            const mapped = mapfn(x as T, idx[0].toDouble());
-            const safe = res.zeroIfInfinity(mapped);
-            res.setUnsafe(idx[0], safe{{fromElementCompat}});
+            const mapped = mapfn(x as T, idx[0])
+            {%- if N == 'BigInt64' %}
+            res.setUnsafe(idx[0], mapped.getLong())
+            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+            res.setUnsafe(idx[0], {{N}}Array.doubleToInt(mapped))
+            {%- elif N == 'Float32' %}
+            res.setUnsafe(idx[0], mapped.toFloat())
             {%- else %}
-            const mapped = mapfn(x as T, idx[0]);
-            res.setUnsafe(idx[0], mapped{{fromElementCompat}});
+            res.setUnsafe(idx[0], mapped)
             {%- endif %}
-            idx[0]++;
+            idx[0]++
         })
         return res
     }
 
     public static overload from {
         fromSet{{updatedElementCompat}}, from{{N}}Array{%- if U|length %} ,from{{U}}Array{%- endif %},
-        fromArray{{updatedElementCompat}}, fromArrayLikeNumber, fromArrayLike, fromIterable
+        fromFixedArray{{updatedElementCompat}}, fromArray{{updatedElementCompat}}, fromArrayLikeNumber,
+        fromArrayLike, fromIterable
     };
 
     {%- if (N == 'Float32') or (N == 'Float64') %}
@@ -999,7 +1044,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     {%- endif %}
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
     }
-    
+
     /**
      * Returns the index of the first occurrence of a value in {{N}}Array.
      *
@@ -1049,7 +1094,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             return this.indexOfImpl(searchElement as long, fromIndex ?? 0)
         {%- endif %}
     }
-    
+
     /**
      * Returns the index of the first occurrence of a value in {{N}}Array.
      *
@@ -1103,10 +1148,10 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns iterator over keys
      */
-    public keys(): IterableIterator<number> {
+    public keys(): IterableIterator<int> {
         return new {{N}}ArrayIteratorKeys(this)
     }
-    
+
     /**
      * Returns the index of the last occurrence of a value in {{N}}Array.
      *
@@ -1170,7 +1215,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             return this.lastIndexOfImpl(searchElement as long, fromIndex ?? 0)
         {%- endif %}
     }
-    
+
     /**
      * Returns the index of the last occurrence of a value in {{N}}Array.
      *
@@ -1214,6 +1259,17 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public native reverse(): {{N}}Array
 
     /**
+     * Creates a slice of current {{N}}Array using range [begin, this.length).
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @returns a new {{N}}Array with elements of current {{N}}Array[begin, this.length)
+     */
+    public slice(begin: int): {{N}}Array {
+        return this.sliceFromTo(begin, this.lengthInt)
+    }
+
+    /**
      * Creates a slice of current {{N}}Array using range [begin, end)
      *
      * @param begin start index to be taken into slice
@@ -1225,27 +1281,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: int, end?: int): {{N}}Array {
-        const len: int = this.lengthInt
-        const relStart = normalizeIndex(begin ?? 0, len)
-        const relEnd = normalizeIndex(end ?? len, len)
-        let count = relEnd - relStart
-        if (count < 0) {
-            count = 0
-        }
-        let buf = this.buffer.slice(relStart * {{N}}Array.BYTES_PER_ELEMENT.toInt(), relEnd * {{N}}Array.BYTES_PER_ELEMENT.toInt()) as ArrayBuffer
+        return this.sliceFromTo(begin ?? 0, end ?? this.lengthInt)
+    }
+
+    private sliceFromTo(begin: int, end: int): {{N}}Array {
+        const relStart: int = normalizeIndex(begin, this.lengthInt)
+        const relEnd: int = normalizeIndex(end, this.lengthInt)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
         return new {{N}}Array(buf)
     }
 
-    /**
-     * Creates a slice of current {{N}}Array using range [begin, this.length).
-     *
-     * @param begin start index to be taken into slice
-     *
-     * @returns a new {{N}}Array with elements of current {{N}}Array[begin, this.length)
-     */
-    public slice(begin: int): {{N}}Array {
-        return this.slice(begin, this.lengthInt)
-    }
 
     /**
      * Creates a {{N}}Array with the same underlying ArrayBuffer
@@ -1265,31 +1310,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             count = 0
         }
         return new {{N}}Array(this.buffer, relStart * {{N}}Array.BYTES_PER_ELEMENT.toInt(), count)
-    }
-
-
-    /**
-     * Converts {{N}}Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("{{N}}Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts {{N}}Array to a string with respect to locale
-     *
-     * @param locales
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
     }
 
     /**
@@ -1323,7 +1343,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns a reversed copy
      */
     public toReversed(): {{N}}Array {
-        return new {{N}}Array(this).reverse()
+        let newArray = new {{N}}Array(this.lengthInt);
+        if (this.lengthInt > 0) {
+            {{N}}Array.reverseCopyBuffer(newArray.buffer, this.buffer, this.byteOffset, this.lengthInt);
+        }
+        return newArray
     }
 
     /**
@@ -1391,7 +1415,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns an {{N}}Array with replaced value on index
      */
     public with(index: int, value: {{elementCompat}}): {{N}}Array {
-        return this.with(index, value{{fromElementCompat}})
+        let res = new {{N}}Array(this)
+        {%- if N != 'Float64' %}
+        res.set(index, value{{fromElementCompat}})
+        {%- else %}
+        res.set(index, value)
+        {%- endif %}
+        return res
     }
 
     /// === with element lambda functions ===
@@ -1794,6 +1824,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public valueOf(): {{N}}Array {
         return this
     }
+
+    private static native reverseCopyBuffer(dstBuf: ArrayBuffer, srcBuf: ArrayBuffer, startPos: int, length: int): void
 
     private final native getUnsafe(index: int): {{T}}
 

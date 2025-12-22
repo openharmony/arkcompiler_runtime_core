@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,11 @@
 #ifndef DPROF_CONVERTER_FEATURES_HOTNESS_COUNTERS_H
 #define DPROF_CONVERTER_FEATURES_HOTNESS_COUNTERS_H
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "features_manager.h"
 #include "dprof/storage.h"
-#include "utils/logger.h"
-#include "serializer/serializer.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/serializer/serializer.h"
 
 #include <list>
 

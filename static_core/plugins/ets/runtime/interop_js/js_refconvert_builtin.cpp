@@ -139,10 +139,7 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;Lescompat/ErrorOptions;:V", 2, "<ctor>"}}};
-        static const ets_proxy::EtsClassWrapper::OverloadsMap W_EXCEPTION_OVERLOADS = {
-            {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;:V", 1, "<ctor>"}}};
         wError_ = RegisterClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
-        RegisterClass(descriptors::EXCEPTION, nullptr, &W_EXCEPTION_OVERLOADS);
 
         static const std::array STD_EXCEPTIONS_LIST = {
             // Errors
@@ -155,16 +152,13 @@ private:
             std::make_tuple("Lstd/core/ArithmeticError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/ClassCastError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/IllegalArgumentError;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/IndexOutOfBoundsError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/ArrayStoreError;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/NegativeArraySizeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/NoDataError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/LinkerError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/LinkerClassNotFoundError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/ArgumentOutOfRangeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/UnsupportedOperationError;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            // Exceptions
-            std::make_tuple("Lstd/core/NoDataException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
-            std::make_tuple("Lstd/core/IllegalMonitorStateError;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalMonitorStateError;", NO_MIRROR, &W_ERROR_OVERLOADS),
         };
         for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {
             RegisterClass(descr, mirror, ovl);
@@ -213,17 +207,10 @@ private:
             {utf::CStringAsMutf8("$_get"), {"I:Lstd/core/Object;", 2, "$_get"}},
             {utf::CStringAsMutf8("$_set"), {"ILstd/core/Object;:V", 3, "$_set"}},
             {utf::CStringAsMutf8("at"), {"I:Lstd/core/Object;", 2, "at"}},
-            {utf::CStringAsMutf8("copyWithin"), {"III:Lescompat/Array;", 4, "copyWithin"}},
-            {utf::CStringAsMutf8("fill"),
-             {"Lstd/core/Object;Lstd/core/Double;Lstd/core/Double;:Lescompat/Array;", 4, "fill"}},
             {utf::CStringAsMutf8("indexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "indexOf"}},
             {utf::CStringAsMutf8("lastIndexOf"), {"Lstd/core/Object;Lstd/core/Int;:I", 3, "lastIndexOf"}},
-            {utf::CStringAsMutf8("slice"), {"II:Lescompat/Array;", 3, "slice"}},
-            {utf::CStringAsMutf8("splice"), {"I:Lescompat/Array;", 2, "splice"}},
-            {utf::CStringAsMutf8("splice"), {"IILescompat/Array;:Lescompat/Array;", 3, "splice"}},
-            {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lescompat/Array;", 3, "toSpliced"}},
-            {utf::CStringAsMutf8("with"), {"DLstd/core/Object;:Lescompat/Array;", 3, "with"}},
-            {utf::CStringAsMutf8("push"), {"Lescompat/Array;:D", 1, "pushArray"}}};
+            {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lstd/core/Array;", 3, "toSpliced"}},
+            {utf::CStringAsMutf8("push"), {"Lstd/core/Array;:I", 1, "pushArray"}}};
 
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
         wArray_->GetOverloadNameMapping()["pushOne"] = "push";
@@ -260,7 +247,7 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_MAP_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"),
-             {"{ULescompat/ReadonlyArray;Lstd/core/Iterable;Lstd/core/Null;}:V", 2, "<ctor>"}}};
+             {"{ULstd/core/Iterable;Lstd/core/Null;Lstd/core/ReadonlyArray;}:V", 2, "<ctor>"}}};
         wMap_ = RegisterClassWithLeafMatcher(descriptors::MAP, "Map", &W_MAP_OVERLOADS);
     }
 
@@ -275,11 +262,11 @@ private:
     void RegisterDate()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_DATE_OVERLOADS = {
-            {utf::CStringAsMutf8("setDate"), {"D:D", 2, "setDate"}},
-            {utf::CStringAsMutf8("setUTCDate"), {"D:D", 2, "setUTCDate"}},
-            {utf::CStringAsMutf8("setMilliseconds"), {"D:D", 2, "setMilliseconds"}},
-            {utf::CStringAsMutf8("setUTCMilliseconds"), {"D:D", 2, "setUTCMilliseconds"}},
-            {utf::CStringAsMutf8("setTime"), {"J:V", 2, "setTime"}},
+            {utf::CStringAsMutf8("setDate"), {"I:J", 2, "setDate"}},
+            {utf::CStringAsMutf8("setUTCDate"), {"I:J", 2, "setUTCDate"}},
+            {utf::CStringAsMutf8("setMilliseconds"), {"I:J", 2, "setMilliseconds"}},
+            {utf::CStringAsMutf8("setUTCMilliseconds"), {"I:J", 2, "setUTCMilliseconds"}},
+            {utf::CStringAsMutf8("setTime"), {"J:J", 2, "setTime"}},
         };
         wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date", &W_DATE_OVERLOADS);
     }
@@ -506,7 +493,6 @@ public:
 
         RegisterDate();
         // #IC4UO2
-        RegisterClassWithLeafMatcher(descriptors::MAPENTRY, nullptr);
         RegisterClassWithLeafMatcher(descriptors::MAPITERATOR, nullptr);
         RegisterClassWithLeafMatcher(descriptors::EMPTYMAPITERATOR, nullptr);
         RegisterClassWithLeafMatcher(descriptors::SETITERATOR, nullptr);

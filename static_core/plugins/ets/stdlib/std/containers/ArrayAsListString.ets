@@ -230,7 +230,7 @@ export namespace containers {
                 }
                 return res;
             }
-            throw new NoDataException();
+            throw new NoDataError();
         }
 
         public foldWith(combine: (lhs: , rhs: String): , initVal: ):  {

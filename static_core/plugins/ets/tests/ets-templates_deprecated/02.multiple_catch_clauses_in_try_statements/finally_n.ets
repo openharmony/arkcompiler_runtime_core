@@ -21,7 +21,7 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-class Ex extends Exception {}
+class Ex extends Error {}
 
 let t1 = 1, t2 = 2  // global vars, never changed in tests
 

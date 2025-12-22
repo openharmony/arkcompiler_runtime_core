@@ -17,6 +17,7 @@
 
 /*---
 desc: {{c.desc}}
+tags: [no-warmup]
 ---*/
 
 {{c.decl}}

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,7 +23,7 @@ function(gen_intrinsics_yaml)
             ${ARGN})
     set(GENERATOR ${CMAKE_CURRENT_SOURCE_DIR}/templates/gen_intrinsics_data.rb)
     set(TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/intrinsics.yaml.erb)
-    set(REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/templates/runtime.rb ${PANDA_ROOT}/libpandabase/utils.rb)
+    set(REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/templates/runtime.rb ${PANDA_ROOT}/libarkbase/utils.rb)
     set(DEPENDS_LIST ${GENERATOR} ${TEMPLATE} ${ARG_DEPENDS})
     string(REPLACE ";" "," DATAFILES_STR "${ARG_DATAFILES}")
     foreach(d ${ARG_DATAFILES})
@@ -75,7 +75,7 @@ panda_gen(
     TARGET_NAME intrinsics_gen_arkruntime
     TEMPLATES ${RUNTIME_TEMPLATES}
     API ${CMAKE_CURRENT_SOURCE_DIR}/templates/intrinsics.rb
-    REQUIRES ${PANDA_ROOT}/libpandabase/utils.rb
+    REQUIRES ${PANDA_ROOT}/libarkbase/utils.rb
     SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/templates
     DESTINATION ${GEN_INCLUDE_DIR}
     EXTRA_DEPENDENCIES ${INTRINSICS_TARGET}

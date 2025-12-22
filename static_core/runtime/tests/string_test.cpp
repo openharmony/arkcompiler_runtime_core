@@ -16,9 +16,9 @@
 #include <ctime>
 
 #include "gtest/gtest.h"
-#include "libpandabase/utils/span.h"
-#include "libpandabase/utils/utf.h"
-#include "libpandabase/utils/utils.h"
+#include "libarkbase/utils/span.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/utils/utils.h"
 #include "runtime/mem/vm_handle-inl.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/class_linker_extension.h"

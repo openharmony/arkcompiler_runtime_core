@@ -34,7 +34,8 @@ function hasValidRecordProperty(record: Record<string, number>) {
     return record['prop'] === 1;
 }
 
-interface IDataInterface {
+// must be exported because of explict dependence in the test
+export interface IDataInterface {
     value: number;
 }
 
@@ -43,7 +44,8 @@ function isValidDataInterface(data: IDataInterface): boolean {
            typeof data.value === 'number';
 }
 
-interface IUserProfile {
+// must be exported because of explict dependence in the test
+export interface IUserProfile {
     name: string;
     age: number;
 }

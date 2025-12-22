@@ -20,7 +20,7 @@
 #include <thread>
 
 #include "runtime/include/runtime.h"
-#include "trace/trace.h"
+#include "libarkbase/trace/trace.h"
 
 namespace ark {
 

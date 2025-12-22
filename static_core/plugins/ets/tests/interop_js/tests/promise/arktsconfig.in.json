@@ -11,7 +11,11 @@
             ]
         },
         "dependencies": {
-			"promiseProxy": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/promise_proxy_test_exports" }
+			"promiseProxy": {
+                "language": "js",
+                "path": "${CMAKE_CURRENT_SOURCE_DIR}/promise_proxy_test_exports.d.ets",
+                "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/promise_proxy_test_exports"
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -123,7 +123,7 @@ exit:
 #! RUN          entry: "_GLOBAL::main"
 
 .function void farray(f64[] a0) {
-    ldai 2
+    fldai.64 2
     movi v0, 1
     fstarr.64 a0, v0
     return.void
@@ -306,7 +306,7 @@ exit:
 }
 
 #! CHECKER      Inline external files in AOT mode
-#! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-regex=Test4.*"
+#! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-inline-external-methods-aot=true --compiler-regex=Test4.*"
 #! METHOD       "Test4::func_A_getConst_static__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallStatic.*A::getConst/
@@ -346,53 +346,55 @@ exit:
 #! INST         /CallStatic.*A::getObj/
 #! INST_NOT     "LoadObject"
 #! PASS_AFTER   "Inline"
-#! INST_NOT      /CallStatic.*A::getObj/
+#! INST         /CallStatic.*A::getObj/
 #! INST         "LoadObject"
 #! METHOD       "Test4::func_A_getObj_virtual__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallVirtual.*A::getObj/
 #! INST_NOT     "LoadObject"
 #! PASS_AFTER   "Inline"
-#! INST_NOT     /CallVirtual.*A::getObj/
+#! INST         /CallVirtual.*A::getObj/
 #! INST         "LoadObject"
 #! METHOD       "Test4::func_A_setObj_static__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallStatic.*A::setObj/
 #! INST_NOT     "StoreObject"
 #! PASS_AFTER   "Inline"
-#! INST_NOT     /CallStatic.*A::setObj/
+#! INST         /CallStatic.*A::setObj/
 #! INST         "StoreObject"
 #! METHOD       "Test4::func_A_setObj_virtual__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallVirtual.*A::setObj/
 #! INST_NOT     "StoreObject"
 #! PASS_AFTER   "Inline"
-#! INST_NOT     /CallVirtual.*A::setObj/
+#! INST         /CallVirtual.*A::setObj/
 #! INST         "StoreObject"
 #! METHOD       "Test4::func_A_getObj_wrong_virtual__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallVirtual.*A::getObj/
 #! INST_NOT     "LoadObject"
 #! PASS_AFTER   "Inline"
-#! INST_NOT      /CallVirtual.*A::getObj/
+#! INST         /CallVirtual.*A::getObj/
 #! INST         "LoadObject"
 #! METHOD       "Test4::func_A_setObj_wrong_virtual__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallVirtual.*A::setObj/
 #! INST_NOT     "StoreObject"
 #! PASS_AFTER   "Inline"
-#! INST_NOT     /CallVirtual.*A::setObj/
+#! INST         /CallVirtual.*A::setObj_wrong_virt/
 #! INST         "StoreObject"
 #! METHOD       "Test4::func_A_setObj_multiple__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallStatic.*A::setObj_multiple/
 #! PASS_AFTER   "Inline"
-#! INST_NOT     /CallStatic.*A::setObj_multiple/
+#! INST         /CallStatic.*A::setObj_multiple/
+#! INST         "StoreObject"
 #! METHOD       "Test4::func_A_complexMethod__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallVirtual.*A::complexMethod/
 #! PASS_AFTER   "Inline"
-#! INST_NOT     /CallVirtual.*A::complexMethod/
+#! INST         /CallVirtual.*A::complexMethod/
+#! INST         "LoadObject"
 #! METHOD       "Test4::func_A_setObj_unknown_target__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallStatic.*A::setObj/
@@ -401,7 +403,7 @@ exit:
 #! RUN          options: "--panda-files=../../inline_external.checked/test.abc", entry: "Test4::main"
 
 #! CHECKER      Inline external files in LLVM AOT mode
-#! RUN_LLVM     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-regex=Test4.*"
+#! RUN_LLVM     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-inline-external-methods-aot=true --compiler-regex=Test4.*"
 #! METHOD       "Test4::func_A_getConst_static__noinline__"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /CallStatic.*A::getConst/
@@ -496,7 +498,7 @@ exit:
 #! RUN          options: "--panda-files=../../inline_external.checked/test.abc", entry: "Test4::main"
 
 #! CHECKER      CallVirtual for external method is replaced with CallStatic
-#! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true \
+#! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true --compiler-inline-external-methods-aot=true \
 #!                        --compiler-regex=Test4.* --compiler-inlining-max-insts=0 --compiler-inlining-always-inline-bc-size=0"
 #! METHOD       "Test4::func_A_complexMethod__noinline__"
 #! PASS_AFTER   "IrBuilder"
@@ -524,6 +526,17 @@ exit:
 #! PASS_AFTER   "Inline"
 #! INST         /CallStatic.*A::getConst/
 #! INST_NOT     "Constant"
+
+#! CHECKER      CallVirtual for external method is not replaced with CallStatic if external inlining is disabled for AOT
+#! RUN_PAOC     options: "--panda-files=../../inline_external.checked/test.abc --paoc-use-cha=true \
+#!                        --compiler-regex=Test4.* --compiler-inlining-max-insts=0 \
+#!                        --compiler-inline-external-methods-aot=false --compiler-inlining-always-inline-bc-size=0"
+#! METHOD       "Test4::func_A_complexMethod__noinline__"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /CallVirtual.*A::complexMethod/
+#! PASS_AFTER   "Inline"
+#! INST_NOT     /CallStatic.*A::complexMethod/
+#! INST         /CallVirtual.*A::complexMethod/
 
 .record A {
     i32 data <external>

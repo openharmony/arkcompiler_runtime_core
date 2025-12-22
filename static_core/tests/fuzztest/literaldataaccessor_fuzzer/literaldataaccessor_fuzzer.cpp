@@ -14,8 +14,8 @@
  */
 
 #include "literaldataaccessor_fuzzer.h"
-#include "libpandafile/file.h"
-#include "libpandafile/literal_data_accessor.h"
+#include "libarkfile/file.h"
+#include "libarkfile/literal_data_accessor.h"
 
 namespace OHOS {
 void LiteralDataAccessorFuzzTest(const uint8_t *data, size_t size)

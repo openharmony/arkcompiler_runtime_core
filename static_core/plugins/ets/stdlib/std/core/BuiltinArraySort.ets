@@ -505,19 +505,6 @@ export function arr_sort_stable(arr: FixedArray<Double>, startIndex: int, endInd
     }
 }
 
-function bubbleSort(arr: FixedArray<boolean>, startIndex: int, endIndex: int): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if ((((arr[i + 1]) ? 1 : 0) < ((arr[i]) ? 1 : 0))) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort(arr: FixedArray<boolean>, startIndex: int, endIndex: int, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -576,19 +563,6 @@ export function swap(arr: FixedArray<boolean>, i: int, j: int): void {
     let temp = arr[i]
     arr[i] = arr[j]
     arr[j] = temp
-}
-
-function bubbleSort(arr: FixedArray<boolean>, startIndex: int, endIndex: int, mustPrecede: (lhs: boolean, rhs: boolean) => boolean): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (mustPrecede(arr[i + 1], arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
 }
 
 function insertionSort(arr: FixedArray<boolean>, startIndex: int, endIndex: int, mustPrecede: (lhs: boolean, rhs: boolean) => boolean, initIndex: int = startIndex): void {
@@ -691,155 +665,6 @@ function countSortBoolsInv(arr: FixedArray<boolean>, startIndex: int, endIndex: 
     }
 }
 
-// ======== tests section ========
-
-/** note: used for tests, {@link test_sortAllOn} */
-class test_SortDataboolean {
-    name: string = ''
-    arr: FixedArray<boolean> = []
-
-    constructor(name: string, arr: FixedArray<boolean>) {
-        this.name = name
-        this.arr = arr
-    }
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: FixedArray<boolean>): FixedArray<boolean> {
-    let c : FixedArray<boolean> = new boolean[arr.length]
-    for (let i = 0; i < arr.length; i++) {
-        c[i] = arr[i]
-    }
-    return c
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd_boolean(l: boolean, r: boolean): boolean {
-    return ((l) ? 1 : 0) < ((r) ? 1 : 0)
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv_boolean(l: boolean, r: boolean): boolean {
-    return ((r) ? 1 : 0) < ((l) ? 1 : 0)
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: FixedArray<boolean>, startIndex: int, endIndex: int) {
-    for (let i = startIndex; i < endIndex; i++) {
-        console.print(arr[i] + ' ')
-    }
-    console.println('')
-}
-
-/**
- * Function used to test sorting in standard library tests.
- * There is only one exported function: `sort`, but for testing
- * we need access to all sub sorts that are used. Hence this part of "tests"
- * is located here. All related entities are prefixed whith `test_` to stand out
- */
-export function test_sortAllOn(arr: FixedArray<boolean>) {
-    // block for comparator ``
-    if (true) {
-        const sorts = new Array<test_SortDataboolean>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length)
-        sorts.push(new test_SortDataboolean("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length)
-        sorts.push(new test_SortDataboolean("insertion", insertion))
-
-        const bcnt = test_sortCopy(arr)
-        countSortBools(bcnt, 0, bcnt.length)
-        sorts.push(new test_SortDataboolean("bools cnt()", bcnt))
-
-        const just = test_sortCopy(arr)
-        sort(just)
-        sorts.push(new test_SortDataboolean("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpFwd_boolean`
-    if (true) {
-        const sorts = new Array<test_SortDataboolean>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_boolean)
-        sorts.push(new test_SortDataboolean("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_boolean)
-        sorts.push(new test_SortDataboolean("insertion", insertion))
-
-        const bcnt = test_sortCopy(arr)
-        countSortBools(bcnt, 0, bcnt.length)
-        sorts.push(new test_SortDataboolean("bools cnt()", bcnt))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd_boolean)
-        sorts.push(new test_SortDataboolean("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd_boolean are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpInv_boolean`
-    if (true) {
-        const sorts = new Array<test_SortDataboolean>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_boolean)
-        sorts.push(new test_SortDataboolean("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_boolean)
-        sorts.push(new test_SortDataboolean("insertion", insertion))
-
-        const bcnt = test_sortCopy(arr)
-        countSortBoolsInv(bcnt, 0, bcnt.length)
-        sorts.push(new test_SortDataboolean("bools cnt()", bcnt))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv_boolean)
-        sorts.push(new test_SortDataboolean("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv_boolean are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
-                }
-            }
-        }
-    }
-}
-// ======== end of tests section ========
-
 function copyPart(dst: FixedArray<byte>, counter: int, src: FixedArray<byte>, start: int, end?: int) {
     if (end == undefined) {
         end = src.length
@@ -889,19 +714,6 @@ export function mergeSort(array: FixedArray<byte>, cmp: (lhs: byte, rhs: byte) =
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
-}
-
-function bubbleSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if ((arr[i + 1] < arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
 }
 
 function insertionSort(arr: FixedArray<byte>, startIndex: int, endIndex: int, initIndex: int = startIndex): void {
@@ -972,7 +784,7 @@ function heapSortDown(arr: FixedArray<byte>, idxFromStart: int, startIndex: int,
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
 }
 
-export function heapSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void {
+function heapSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex)
@@ -1073,35 +885,6 @@ function quickSortSplitLeft(arr: FixedArray<byte>, startIndex: int, endIndex: in
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<byte>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex)
-            return
-        }
-        // Here we assume that current interval is not the most left in the sorted range
-        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
-            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
-            // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
-            // with many occurencies of the smallest element
-            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
-            continue
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
-        let p = quickSortSplit(arr, startIndex, endIndex)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, initIndex)
-}
 function quickSortImpl40(arr: FixedArray<byte>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -1179,19 +962,6 @@ export function swap(arr: FixedArray<byte>, i: int, j: int): void {
     arr[j] = temp
 }
 
-function bubbleSort(arr: FixedArray<byte>, startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (mustPrecede(arr[i + 1], arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort(arr: FixedArray<byte>, startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -1260,7 +1030,7 @@ function heapSortDown(arr: FixedArray<byte>, idxFromStart: int, startIndex: int,
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort(arr: FixedArray<byte>, startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
+function heapSort(arr: FixedArray<byte>, startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -1361,26 +1131,6 @@ function quickSortSplitLeft(arr: FixedArray<byte>, startIndex: int, endIndex: in
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<byte>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex, mustPrecede)
-            return
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
-        let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, mustPrecede)
-}
 function quickSortImpl40(arr: FixedArray<byte>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -1466,182 +1216,6 @@ function countSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void 
     }
 }
 
-// ======== tests section ========
-
-/** note: used for tests, {@link test_sortAllOn} */
-class test_SortDatabyte {
-    name: string = ''
-    arr: FixedArray<byte> = []
-
-    constructor(name: string, arr: FixedArray<byte>) {
-        this.name = name
-        this.arr = arr
-    }
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: FixedArray<byte>): FixedArray<byte> {
-    let c : FixedArray<byte> = new byte[arr.length]
-    for (let i = 0; i < arr.length; i++) {
-        c[i] = arr[i]
-    }
-    return c
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd_byte(l: byte, r: byte): boolean {
-    return l < r
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv_byte(l: byte, r: byte): boolean {
-    return r < l
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: FixedArray<byte>, startIndex: int, endIndex: int) {
-    for (let i = startIndex; i < endIndex; i++) {
-        console.print(arr[i] + ' ')
-    }
-    console.println('')
-}
-
-/**
- * Function used to test sorting in standard library tests.
- * There is only one exported function: `sort`, but for testing
- * we need access to all sub sorts that are used. Hence this part of "tests"
- * is located here. All related entities are prefixed whith `test_` to stand out
- */
-export function test_sortAllOn(arr: FixedArray<byte>) {
-    // block for comparator ``
-    if (true) {
-        const sorts = new Array<test_SortDatabyte>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length)
-        sorts.push(new test_SortDatabyte("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length)
-        sorts.push(new test_SortDatabyte("insertion", insertion))
-        const cnt = test_sortCopy(arr)
-        countSort(cnt, 0, cnt.length)
-        sorts.push(new test_SortDatabyte("cnt()", cnt))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length)
-        sorts.push(new test_SortDatabyte("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts.push(new test_SortDatabyte("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts.push(new test_SortDatabyte("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort(just)
-        sorts.push(new test_SortDatabyte("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpFwd_byte`
-    if (true) {
-        const sorts = new Array<test_SortDatabyte>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_byte)
-        sorts.push(new test_SortDatabyte("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_byte)
-        sorts.push(new test_SortDatabyte("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_byte)
-        sorts.push(new test_SortDatabyte("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_byte)
-        sorts.push(new test_SortDatabyte("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_byte)
-        sorts.push(new test_SortDatabyte("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd_byte)
-        sorts.push(new test_SortDatabyte("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd_byte are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpInv_byte`
-    if (true) {
-        const sorts = new Array<test_SortDatabyte>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_byte)
-        sorts.push(new test_SortDatabyte("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_byte)
-        sorts.push(new test_SortDatabyte("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_byte)
-        sorts.push(new test_SortDatabyte("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_byte)
-        sorts.push(new test_SortDatabyte("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_byte)
-        sorts.push(new test_SortDatabyte("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv_byte)
-        sorts.push(new test_SortDatabyte("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv_byte are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
-                }
-            }
-        }
-    }
-}
-// ======== end of tests section ========
-
 function copyPart(dst: FixedArray<short>, counter: int, src: FixedArray<short>, start: int, end?: int) {
     if (end == undefined) {
         end = src.length
@@ -1691,19 +1265,6 @@ export function mergeSort(array: FixedArray<short>, cmp: (lhs: short, rhs: short
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
-}
-
-function bubbleSort(arr: FixedArray<short>, startIndex: int, endIndex: int): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if ((arr[i + 1] < arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
 }
 
 function insertionSort(arr: FixedArray<short>, startIndex: int, endIndex: int, initIndex: int = startIndex): void {
@@ -1774,7 +1335,7 @@ function heapSortDown(arr: FixedArray<short>, idxFromStart: int, startIndex: int
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
 }
 
-export function heapSort(arr: FixedArray<short>, startIndex: int, endIndex: int): void {
+function heapSort(arr: FixedArray<short>, startIndex: int, endIndex: int): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex)
@@ -1875,35 +1436,6 @@ function quickSortSplitLeft(arr: FixedArray<short>, startIndex: int, endIndex: i
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<short>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex)
-            return
-        }
-        // Here we assume that current interval is not the most left in the sorted range
-        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
-            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
-            // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
-            // with many occurencies of the smallest element
-            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
-            continue
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
-        let p = quickSortSplit(arr, startIndex, endIndex)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, initIndex)
-}
 function quickSortImpl40(arr: FixedArray<short>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -1978,19 +1510,6 @@ export function swap(arr: FixedArray<short>, i: int, j: int): void {
     arr[j] = temp
 }
 
-function bubbleSort(arr: FixedArray<short>, startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (mustPrecede(arr[i + 1], arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort(arr: FixedArray<short>, startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -2059,7 +1578,7 @@ function heapSortDown(arr: FixedArray<short>, idxFromStart: int, startIndex: int
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort(arr: FixedArray<short>, startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
+function heapSort(arr: FixedArray<short>, startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -2160,26 +1679,6 @@ function quickSortSplitLeft(arr: FixedArray<short>, startIndex: int, endIndex: i
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<short>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex, mustPrecede)
-            return
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
-        let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, mustPrecede)
-}
 function quickSortImpl40(arr: FixedArray<short>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -2252,179 +1751,6 @@ export function sort_subarray(arr: FixedArray<short>, startIndex: int, mustPrece
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-// ======== tests section ========
-
-/** note: used for tests, {@link test_sortAllOn} */
-class test_SortDatashort {
-    name: string = ''
-    arr: FixedArray<short> = []
-
-    constructor(name: string, arr: FixedArray<short>) {
-        this.name = name
-        this.arr = arr
-    }
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: FixedArray<short>): FixedArray<short> {
-    let c : FixedArray<short> = new short[arr.length]
-    for (let i = 0; i < arr.length; i++) {
-        c[i] = arr[i]
-    }
-    return c
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd_short(l: short, r: short): boolean {
-    return l < r
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv_short(l: short, r: short): boolean {
-    return r < l
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: FixedArray<short>, startIndex: int, endIndex: int) {
-    for (let i = startIndex; i < endIndex; i++) {
-        console.print(arr[i] + ' ')
-    }
-    console.println('')
-}
-
-/**
- * Function used to test sorting in standard library tests.
- * There is only one exported function: `sort`, but for testing
- * we need access to all sub sorts that are used. Hence this part of "tests"
- * is located here. All related entities are prefixed whith `test_` to stand out
- */
-export function test_sortAllOn(arr: FixedArray<short>) {
-    // block for comparator ``
-    if (true) {
-        const sorts = new Array<test_SortDatashort>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length)
-        sorts.push(new test_SortDatashort("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length)
-        sorts.push(new test_SortDatashort("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length)
-        sorts.push(new test_SortDatashort("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts.push(new test_SortDatashort("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts.push(new test_SortDatashort("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort(just)
-        sorts.push(new test_SortDatashort("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpFwd_short`
-    if (true) {
-        const sorts = new Array<test_SortDatashort>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_short)
-        sorts.push(new test_SortDatashort("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_short)
-        sorts.push(new test_SortDatashort("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_short)
-        sorts.push(new test_SortDatashort("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_short)
-        sorts.push(new test_SortDatashort("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_short)
-        sorts.push(new test_SortDatashort("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd_short)
-        sorts.push(new test_SortDatashort("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd_short are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpInv_short`
-    if (true) {
-        const sorts = new Array<test_SortDatashort>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_short)
-        sorts.push(new test_SortDatashort("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_short)
-        sorts.push(new test_SortDatashort("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_short)
-        sorts.push(new test_SortDatashort("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_short)
-        sorts.push(new test_SortDatashort("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_short)
-        sorts.push(new test_SortDatashort("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv_short)
-        sorts.push(new test_SortDatashort("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv_short are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
-                }
-            }
-        }
-    }
-}
-// ======== end of tests section ========
-
 function copyPart(dst: FixedArray<int>, counter: int, src: FixedArray<int>, start: int, end?: int) {
     if (end == undefined) {
         end = src.length
@@ -2474,19 +1800,6 @@ export function mergeSort(array: FixedArray<int>, cmp: (lhs: int, rhs: int) => n
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
-}
-
-function bubbleSort(arr: FixedArray<int>, startIndex: int, endIndex: int): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if ((arr[i + 1] < arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
 }
 
 function insertionSort(arr: FixedArray<int>, startIndex: int, endIndex: int, initIndex: int = startIndex): void {
@@ -2557,7 +1870,7 @@ function heapSortDown(arr: FixedArray<int>, idxFromStart: int, startIndex: int, 
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
 }
 
-export function heapSort(arr: FixedArray<int>, startIndex: int, endIndex: int): void {
+function heapSort(arr: FixedArray<int>, startIndex: int, endIndex: int): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex)
@@ -2658,35 +1971,6 @@ function quickSortSplitLeft(arr: FixedArray<int>, startIndex: int, endIndex: int
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<int>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex)
-            return
-        }
-        // Here we assume that current interval is not the most left in the sorted range
-        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
-            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
-            // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
-            // with many occurencies of the smallest element
-            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
-            continue
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
-        let p = quickSortSplit(arr, startIndex, endIndex)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, initIndex)
-}
 function quickSortImpl40(arr: FixedArray<int>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -2761,19 +2045,6 @@ export function swap(arr: FixedArray<int>, i: int, j: int): void {
     arr[j] = temp
 }
 
-function bubbleSort(arr: FixedArray<int>, startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (mustPrecede(arr[i + 1], arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort(arr: FixedArray<int>, startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -2842,7 +2113,7 @@ function heapSortDown(arr: FixedArray<int>, idxFromStart: int, startIndex: int, 
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort(arr: FixedArray<int>, startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
+function heapSort(arr: FixedArray<int>, startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -2943,26 +2214,6 @@ function quickSortSplitLeft(arr: FixedArray<int>, startIndex: int, endIndex: int
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<int>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex, mustPrecede)
-            return
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
-        let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, mustPrecede)
-}
 function quickSortImpl40(arr: FixedArray<int>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -3035,179 +2286,6 @@ export function sort_subarray(arr: FixedArray<int>, startIndex: int, mustPrecede
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-// ======== tests section ========
-
-/** note: used for tests, {@link test_sortAllOn} */
-class test_SortDataint {
-    name: string = ''
-    arr: FixedArray<int> = []
-
-    constructor(name: string, arr: FixedArray<int>) {
-        this.name = name
-        this.arr = arr
-    }
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: FixedArray<int>): FixedArray<int> {
-    let c : FixedArray<int> = new int[arr.length]
-    for (let i = 0; i < arr.length; i++) {
-        c[i] = arr[i]
-    }
-    return c
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd_int(l: int, r: int): boolean {
-    return l < r
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv_int(l: int, r: int): boolean {
-    return r < l
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: FixedArray<int>, startIndex: int, endIndex: int) {
-    for (let i = startIndex; i < endIndex; i++) {
-        console.print(arr[i] + ' ')
-    }
-    console.println('')
-}
-
-/**
- * Function used to test sorting in standard library tests.
- * There is only one exported function: `sort`, but for testing
- * we need access to all sub sorts that are used. Hence this part of "tests"
- * is located here. All related entities are prefixed whith `test_` to stand out
- */
-export function test_sortAllOn(arr: FixedArray<int>) {
-    // block for comparator ``
-    if (true) {
-        const sorts = new Array<test_SortDataint>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length)
-        sorts.push(new test_SortDataint("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length)
-        sorts.push(new test_SortDataint("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length)
-        sorts.push(new test_SortDataint("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts.push(new test_SortDataint("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts.push(new test_SortDataint("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort(just)
-        sorts.push(new test_SortDataint("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpFwd_int`
-    if (true) {
-        const sorts = new Array<test_SortDataint>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_int)
-        sorts.push(new test_SortDataint("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_int)
-        sorts.push(new test_SortDataint("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_int)
-        sorts.push(new test_SortDataint("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_int)
-        sorts.push(new test_SortDataint("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_int)
-        sorts.push(new test_SortDataint("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd_int)
-        sorts.push(new test_SortDataint("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd_int are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpInv_int`
-    if (true) {
-        const sorts = new Array<test_SortDataint>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_int)
-        sorts.push(new test_SortDataint("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_int)
-        sorts.push(new test_SortDataint("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_int)
-        sorts.push(new test_SortDataint("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_int)
-        sorts.push(new test_SortDataint("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_int)
-        sorts.push(new test_SortDataint("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv_int)
-        sorts.push(new test_SortDataint("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv_int are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
-                }
-            }
-        }
-    }
-}
-// ======== end of tests section ========
-
 function copyPart(dst: FixedArray<long>, counter: int, src: FixedArray<long>, start: int, end?: int) {
     if (end == undefined) {
         end = src.length
@@ -3257,19 +2335,6 @@ export function mergeSort(array: FixedArray<long>, cmp: (lhs: long, rhs: long) =
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
-}
-
-function bubbleSort(arr: FixedArray<long>, startIndex: int, endIndex: int): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if ((arr[i + 1] < arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
 }
 
 function insertionSort(arr: FixedArray<long>, startIndex: int, endIndex: int, initIndex: int = startIndex): void {
@@ -3340,7 +2405,7 @@ function heapSortDown(arr: FixedArray<long>, idxFromStart: int, startIndex: int,
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
 }
 
-export function heapSort(arr: FixedArray<long>, startIndex: int, endIndex: int): void {
+function heapSort(arr: FixedArray<long>, startIndex: int, endIndex: int): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex)
@@ -3441,35 +2506,6 @@ function quickSortSplitLeft(arr: FixedArray<long>, startIndex: int, endIndex: in
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<long>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex)
-            return
-        }
-        // Here we assume that current interval is not the most left in the sorted range
-        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
-            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
-            // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
-            // with many occurencies of the smallest element
-            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
-            continue
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
-        let p = quickSortSplit(arr, startIndex, endIndex)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, initIndex)
-}
 function quickSortImpl40(arr: FixedArray<long>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -3544,19 +2580,6 @@ export function swap(arr: FixedArray<long>, i: int, j: int): void {
     arr[j] = temp
 }
 
-function bubbleSort(arr: FixedArray<long>, startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (mustPrecede(arr[i + 1], arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort(arr: FixedArray<long>, startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -3625,7 +2648,7 @@ function heapSortDown(arr: FixedArray<long>, idxFromStart: int, startIndex: int,
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort(arr: FixedArray<long>, startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
+function heapSort(arr: FixedArray<long>, startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -3726,26 +2749,6 @@ function quickSortSplitLeft(arr: FixedArray<long>, startIndex: int, endIndex: in
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<long>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex, mustPrecede)
-            return
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
-        let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, mustPrecede)
-}
 function quickSortImpl40(arr: FixedArray<long>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -3818,179 +2821,6 @@ export function sort_subarray(arr: FixedArray<long>, startIndex: int, mustPreced
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-// ======== tests section ========
-
-/** note: used for tests, {@link test_sortAllOn} */
-class test_SortDatalong {
-    name: string = ''
-    arr: FixedArray<long> = []
-
-    constructor(name: string, arr: FixedArray<long>) {
-        this.name = name
-        this.arr = arr
-    }
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: FixedArray<long>): FixedArray<long> {
-    let c : FixedArray<long> = new long[arr.length]
-    for (let i = 0; i < arr.length; i++) {
-        c[i] = arr[i]
-    }
-    return c
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd_long(l: long, r: long): boolean {
-    return l < r
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv_long(l: long, r: long): boolean {
-    return r < l
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: FixedArray<long>, startIndex: int, endIndex: int) {
-    for (let i = startIndex; i < endIndex; i++) {
-        console.print(arr[i] + ' ')
-    }
-    console.println('')
-}
-
-/**
- * Function used to test sorting in standard library tests.
- * There is only one exported function: `sort`, but for testing
- * we need access to all sub sorts that are used. Hence this part of "tests"
- * is located here. All related entities are prefixed whith `test_` to stand out
- */
-export function test_sortAllOn(arr: FixedArray<long>) {
-    // block for comparator ``
-    if (true) {
-        const sorts = new Array<test_SortDatalong>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length)
-        sorts.push(new test_SortDatalong("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length)
-        sorts.push(new test_SortDatalong("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length)
-        sorts.push(new test_SortDatalong("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts.push(new test_SortDatalong("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts.push(new test_SortDatalong("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort(just)
-        sorts.push(new test_SortDatalong("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpFwd_long`
-    if (true) {
-        const sorts = new Array<test_SortDatalong>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_long)
-        sorts.push(new test_SortDatalong("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_long)
-        sorts.push(new test_SortDatalong("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_long)
-        sorts.push(new test_SortDatalong("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_long)
-        sorts.push(new test_SortDatalong("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_long)
-        sorts.push(new test_SortDatalong("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd_long)
-        sorts.push(new test_SortDatalong("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd_long are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpInv_long`
-    if (true) {
-        const sorts = new Array<test_SortDatalong>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_long)
-        sorts.push(new test_SortDatalong("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_long)
-        sorts.push(new test_SortDatalong("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_long)
-        sorts.push(new test_SortDatalong("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_long)
-        sorts.push(new test_SortDatalong("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_long)
-        sorts.push(new test_SortDatalong("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv_long)
-        sorts.push(new test_SortDatalong("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv_long are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
-                }
-            }
-        }
-    }
-}
-// ======== end of tests section ========
-
 function copyPart(dst: FixedArray<float>, counter: int, src: FixedArray<float>, start: int, end?: int) {
     if (end == undefined) {
         end = src.length
@@ -4040,19 +2870,6 @@ export function mergeSort(array: FixedArray<float>, cmp: (lhs: float, rhs: float
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
-}
-
-function bubbleSort(arr: FixedArray<float>, startIndex: int, endIndex: int): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if ((arr[i + 1] < arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
 }
 
 function insertionSort(arr: FixedArray<float>, startIndex: int, endIndex: int, initIndex: int = startIndex): void {
@@ -4123,7 +2940,7 @@ function heapSortDown(arr: FixedArray<float>, idxFromStart: int, startIndex: int
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
 }
 
-export function heapSort(arr: FixedArray<float>, startIndex: int, endIndex: int): void {
+function heapSort(arr: FixedArray<float>, startIndex: int, endIndex: int): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex)
@@ -4224,35 +3041,6 @@ function quickSortSplitLeft(arr: FixedArray<float>, startIndex: int, endIndex: i
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<float>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex)
-            return
-        }
-        // Here we assume that current interval is not the most left in the sorted range
-        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
-            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
-            // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
-            // with many occurencies of the smallest element
-            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
-            continue
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
-        let p = quickSortSplit(arr, startIndex, endIndex)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, initIndex)
-}
 function quickSortImpl40(arr: FixedArray<float>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -4327,19 +3115,6 @@ export function swap(arr: FixedArray<float>, i: int, j: int): void {
     arr[j] = temp
 }
 
-function bubbleSort(arr: FixedArray<float>, startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (mustPrecede(arr[i + 1], arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort(arr: FixedArray<float>, startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -4408,7 +3183,7 @@ function heapSortDown(arr: FixedArray<float>, idxFromStart: int, startIndex: int
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort(arr: FixedArray<float>, startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
+function heapSort(arr: FixedArray<float>, startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -4509,26 +3284,6 @@ function quickSortSplitLeft(arr: FixedArray<float>, startIndex: int, endIndex: i
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<float>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex, mustPrecede)
-            return
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
-        let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, mustPrecede)
-}
 function quickSortImpl40(arr: FixedArray<float>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -4601,179 +3356,6 @@ export function sort_subarray(arr: FixedArray<float>, startIndex: int, mustPrece
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-// ======== tests section ========
-
-/** note: used for tests, {@link test_sortAllOn} */
-class test_SortDatafloat {
-    name: string = ''
-    arr: FixedArray<float> = []
-
-    constructor(name: string, arr: FixedArray<float>) {
-        this.name = name
-        this.arr = arr
-    }
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: FixedArray<float>): FixedArray<float> {
-    let c : FixedArray<float> = new float[arr.length]
-    for (let i = 0; i < arr.length; i++) {
-        c[i] = arr[i]
-    }
-    return c
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd_float(l: float, r: float): boolean {
-    return l < r
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv_float(l: float, r: float): boolean {
-    return r < l
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: FixedArray<float>, startIndex: int, endIndex: int) {
-    for (let i = startIndex; i < endIndex; i++) {
-        console.print(arr[i] + ' ')
-    }
-    console.println('')
-}
-
-/**
- * Function used to test sorting in standard library tests.
- * There is only one exported function: `sort`, but for testing
- * we need access to all sub sorts that are used. Hence this part of "tests"
- * is located here. All related entities are prefixed whith `test_` to stand out
- */
-export function test_sortAllOn(arr: FixedArray<float>) {
-    // block for comparator ``
-    if (true) {
-        const sorts = new Array<test_SortDatafloat>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length)
-        sorts.push(new test_SortDatafloat("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length)
-        sorts.push(new test_SortDatafloat("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length)
-        sorts.push(new test_SortDatafloat("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts.push(new test_SortDatafloat("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts.push(new test_SortDatafloat("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort(just)
-        sorts.push(new test_SortDatafloat("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpFwd_float`
-    if (true) {
-        const sorts = new Array<test_SortDatafloat>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_float)
-        sorts.push(new test_SortDatafloat("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_float)
-        sorts.push(new test_SortDatafloat("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_float)
-        sorts.push(new test_SortDatafloat("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_float)
-        sorts.push(new test_SortDatafloat("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_float)
-        sorts.push(new test_SortDatafloat("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd_float)
-        sorts.push(new test_SortDatafloat("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd_float are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpInv_float`
-    if (true) {
-        const sorts = new Array<test_SortDatafloat>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_float)
-        sorts.push(new test_SortDatafloat("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_float)
-        sorts.push(new test_SortDatafloat("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_float)
-        sorts.push(new test_SortDatafloat("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_float)
-        sorts.push(new test_SortDatafloat("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_float)
-        sorts.push(new test_SortDatafloat("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv_float)
-        sorts.push(new test_SortDatafloat("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv_float are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
-                }
-            }
-        }
-    }
-}
-// ======== end of tests section ========
-
 function copyPart(dst: FixedArray<double>, counter: int, src: FixedArray<double>, start: int, end?: int) {
     if (end == undefined) {
         end = src.length
@@ -4823,19 +3405,6 @@ export function mergeSort(array: FixedArray<double>, cmp: (lhs: double, rhs: dou
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
-}
-
-function bubbleSort(arr: FixedArray<double>, startIndex: int, endIndex: int): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if ((arr[i + 1] < arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
 }
 
 function insertionSort(arr: FixedArray<double>, startIndex: int, endIndex: int, initIndex: int = startIndex): void {
@@ -4906,7 +3475,7 @@ function heapSortDown(arr: FixedArray<double>, idxFromStart: int, startIndex: in
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
 }
 
-export function heapSort(arr: FixedArray<double>, startIndex: int, endIndex: int): void {
+function heapSort(arr: FixedArray<double>, startIndex: int, endIndex: int): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex)
@@ -5007,35 +3576,6 @@ function quickSortSplitLeft(arr: FixedArray<double>, startIndex: int, endIndex: 
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<double>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex)
-            return
-        }
-        // Here we assume that current interval is not the most left in the sorted range
-        if ((startIndex != initIndex) && !(arr[startIndex - 1] < arr[startIndex])) {
-            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
-            // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
-            // with many occurencies of the smallest element
-            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
-            continue
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
-        let p = quickSortSplit(arr, startIndex, endIndex)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, initIndex)
-}
 function quickSortImpl40(arr: FixedArray<double>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -5110,19 +3650,6 @@ export function swap(arr: FixedArray<double>, i: int, j: int): void {
     arr[j] = temp
 }
 
-function bubbleSort(arr: FixedArray<double>, startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (mustPrecede(arr[i + 1], arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort(arr: FixedArray<double>, startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -5191,7 +3718,7 @@ function heapSortDown(arr: FixedArray<double>, idxFromStart: int, startIndex: in
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort(arr: FixedArray<double>, startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
+function heapSort(arr: FixedArray<double>, startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -5292,26 +3819,6 @@ function quickSortSplitLeft(arr: FixedArray<double>, startIndex: int, endIndex: 
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<double>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex, mustPrecede)
-            return
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
-        let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, mustPrecede)
-}
 function quickSortImpl40(arr: FixedArray<double>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -5384,192 +3891,6 @@ export function sort_subarray(arr: FixedArray<double>, startIndex: int, mustPrec
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-// ======== tests section ========
-
-/** note: used for tests, {@link test_sortAllOn} */
-class test_SortDatadouble {
-    name: string = ''
-    arr: FixedArray<double> = []
-
-    constructor(name: string, arr: FixedArray<double>) {
-        this.name = name
-        this.arr = arr
-    }
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: FixedArray<double>): FixedArray<double> {
-    let c : FixedArray<double> = new double[arr.length]
-    for (let i = 0; i < arr.length; i++) {
-        c[i] = arr[i]
-    }
-    return c
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd_double(l: double, r: double): boolean {
-    return l < r
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv_double(l: double, r: double): boolean {
-    return r < l
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: FixedArray<double>, startIndex: int, endIndex: int) {
-    for (let i = startIndex; i < endIndex; i++) {
-        console.print(arr[i] + ' ')
-    }
-    console.println('')
-}
-
-/**
- * Function used to test sorting in standard library tests.
- * There is only one exported function: `sort`, but for testing
- * we need access to all sub sorts that are used. Hence this part of "tests"
- * is located here. All related entities are prefixed whith `test_` to stand out
- */
-export function test_sortAllOn(arr: FixedArray<double>) {
-    // block for comparator ``
-    if (true) {
-        const sorts = new Array<test_SortDatadouble>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length)
-        sorts.push(new test_SortDatadouble("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length)
-        sorts.push(new test_SortDatadouble("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length)
-        sorts.push(new test_SortDatadouble("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts.push(new test_SortDatadouble("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts.push(new test_SortDatadouble("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort(just)
-        sorts.push(new test_SortDatadouble("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpFwd_double`
-    if (true) {
-        const sorts = new Array<test_SortDatadouble>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_double)
-        sorts.push(new test_SortDatadouble("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_double)
-        sorts.push(new test_SortDatadouble("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_double)
-        sorts.push(new test_SortDatadouble("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_double)
-        sorts.push(new test_SortDatadouble("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_double)
-        sorts.push(new test_SortDatadouble("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd_double)
-        sorts.push(new test_SortDatadouble("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd_double are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpInv_double`
-    if (true) {
-        const sorts = new Array<test_SortDatadouble>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_double)
-        sorts.push(new test_SortDatadouble("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_double)
-        sorts.push(new test_SortDatadouble("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_double)
-        sorts.push(new test_SortDatadouble("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_double)
-        sorts.push(new test_SortDatadouble("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_double)
-        sorts.push(new test_SortDatadouble("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv_double)
-        sorts.push(new test_SortDatadouble("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv_double are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
-                }
-            }
-        }
-    }
-}
-// ======== end of tests section ========
-
-function bubbleSort(arr: FixedArray<char>, startIndex: int, endIndex: int): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (((arr[i + 1].compareTo(arr[i])) < 0)) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort(arr: FixedArray<char>, startIndex: int, endIndex: int, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -5638,7 +3959,7 @@ function heapSortDown(arr: FixedArray<char>, idxFromStart: int, startIndex: int,
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot)
 }
 
-export function heapSort(arr: FixedArray<char>, startIndex: int, endIndex: int): void {
+function heapSort(arr: FixedArray<char>, startIndex: int, endIndex: int): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex)
@@ -5739,35 +4060,6 @@ function quickSortSplitLeft(arr: FixedArray<char>, startIndex: int, endIndex: in
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<char>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex)
-            return
-        }
-        // Here we assume that current interval is not the most left in the sorted range
-        if ((startIndex != initIndex) && !((arr[startIndex - 1].compareTo(arr[startIndex])) < 0)) {
-            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
-            // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
-            // with many occurencies of the smallest element
-            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
-            continue
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
-        let p = quickSortSplit(arr, startIndex, endIndex)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, initIndex)
-}
 function quickSortImpl40(arr: FixedArray<char>, startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -5842,19 +4134,6 @@ export function swap(arr: FixedArray<char>, i: int, j: int): void {
     arr[j] = temp
 }
 
-function bubbleSort(arr: FixedArray<char>, startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (mustPrecede(arr[i + 1], arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
-}
-
 function insertionSort(arr: FixedArray<char>, startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean, initIndex: int = startIndex): void {
     if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
@@ -5923,7 +4202,7 @@ function heapSortDown(arr: FixedArray<char>, idxFromStart: int, startIndex: int,
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort(arr: FixedArray<char>, startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
+function heapSort(arr: FixedArray<char>, startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -6024,26 +4303,6 @@ function quickSortSplitLeft(arr: FixedArray<char>, startIndex: int, endIndex: in
     return j
 }
 
-function quickSortImpl3(arr: FixedArray<char>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex, mustPrecede)
-            return
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
-        let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, mustPrecede)
-}
 function quickSortImpl40(arr: FixedArray<char>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
@@ -6116,196 +4375,10 @@ export function sort_subarray(arr: FixedArray<char>, startIndex: int, mustPreced
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-// ======== tests section ========
-
-/** note: used for tests, {@link test_sortAllOn} */
-class test_SortDatachar {
-    name: string = ''
-    arr: FixedArray<char> = []
-
-    constructor(name: string, arr: FixedArray<char>) {
-        this.name = name
-        this.arr = arr
-    }
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortCopy(arr: FixedArray<char>): FixedArray<char> {
-    let c : FixedArray<char> = new char[arr.length]
-    for (let i = 0; i < arr.length; i++) {
-        c[i] = arr[i]
-    }
-    return c
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd_char(l: char, r: char): boolean {
-    return l < r
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv_char(l: char, r: char): boolean {
-    return r < l
-}
-
-/** note: used for tests, {@link test_sortAllOn} */
-function test_printArr(arr: FixedArray<char>, startIndex: int, endIndex: int) {
-    for (let i = startIndex; i < endIndex; i++) {
-        console.print(arr[i] + ' ')
-    }
-    console.println('')
-}
-
-/**
- * Function used to test sorting in standard library tests.
- * There is only one exported function: `sort`, but for testing
- * we need access to all sub sorts that are used. Hence this part of "tests"
- * is located here. All related entities are prefixed whith `test_` to stand out
- */
-export function test_sortAllOn(arr: FixedArray<char>) {
-    // block for comparator ``
-    if (true) {
-        const sorts = new Array<test_SortDatachar>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length)
-        sorts.push(new test_SortDatachar("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length)
-        sorts.push(new test_SortDatachar("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length)
-        sorts.push(new test_SortDatachar("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length)
-        sorts.push(new test_SortDatachar("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length)
-        sorts.push(new test_SortDatachar("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort(just)
-        sorts.push(new test_SortDatachar("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpFwd_char`
-    if (true) {
-        const sorts = new Array<test_SortDatachar>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_char)
-        sorts.push(new test_SortDatachar("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_char)
-        sorts.push(new test_SortDatachar("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_char)
-        sorts.push(new test_SortDatachar("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_char)
-        sorts.push(new test_SortDatachar("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_char)
-        sorts.push(new test_SortDatachar("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd_char)
-        sorts.push(new test_SortDatachar("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd_char are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
-                }
-            }
-        }
-    }
-    // block for comparator `est_sortAllOnCmpInv_char`
-    if (true) {
-        const sorts = new Array<test_SortDatachar>()
-        const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_char)
-        sorts.push(new test_SortDatachar("bubble", bubbled))
-
-        const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_char)
-        sorts.push(new test_SortDatachar("insertion", insertion))
-
-        const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_char)
-        sorts.push(new test_SortDatachar("heap", heaped))
-
-        const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_char)
-        sorts.push(new test_SortDatachar("quick", quicked))
-
-        const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_char)
-        sorts.push(new test_SortDatachar("quick with insertion", quickedInsertion))
-
-        const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv_char)
-        sorts.push(new test_SortDatachar("sort()", just))
-
-        let sort0 = sorts.at(0)!
-        for (let s = 1; s < sorts.length; s++) {
-            let sortS = sorts.at(s)!
-            for (let i = 0; i < arr.length; i++) {
-                if (sort0.arr[i] != sortS.arr[i]) {
-                    console.println(sort0.name + ': ')
-                    test_printArr(sort0.arr, 0, arr.length)
-                    console.println(sortS.name + ': ')
-                    test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv_char are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
-                }
-            }
-        }
-    }
-}
-// ======== end of tests section ========
-
 export function swap<T>(arr: FixedArray<T>, i: int, j: int): void {
     let temp = arr[i]
     arr[i] = arr[j]
     arr[j] = temp
-}
-
-function bubbleSort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
-    let was = true
-    while (was) {
-        was = false
-        for (let i = startIndex; i < endIndex - 1; i++) {
-            if (mustPrecede(arr[i + 1], arr[i])) {
-                swap(arr, i, i + 1)
-                was = true
-            }
-        }
-    }
 }
 
 function insertionSort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean, initIndex: int = startIndex): void {
@@ -6376,7 +4449,7 @@ function heapSortDown<T>(arr: FixedArray<T>, idxFromStart: int, startIndex: int,
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
+function heapSort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -6477,26 +4550,6 @@ function quickSortSplitLeft<T>(arr: FixedArray<T>, startIndex: int, endIndex: in
     return j
 }
 
-function quickSortImpl3<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
-    while (endIndex - startIndex > 3) {
-        if (--maxDepth == 0) {
-            heapSort(arr, startIndex, endIndex, mustPrecede)
-            return
-        }
-
-        median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2, mustPrecede)
-        let p = quickSortSplit(arr, startIndex, endIndex, mustPrecede)
-        // make a call for the smaller part of array and continue processing the larger part in the loop
-        if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth, mustPrecede)
-            startIndex = p + 1
-        } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth, mustPrecede)
-            endIndex = p
-        }
-    }
-    insertionSort(arr, startIndex, endIndex, mustPrecede)
-}
 function quickSortImpl40<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: T, rhs: T) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {

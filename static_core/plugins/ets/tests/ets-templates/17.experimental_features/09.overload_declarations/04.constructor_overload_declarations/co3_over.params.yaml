@@ -120,6 +120,7 @@ cases:
           arktest.assertEQ(a.fld, 3)
           a = new A(new Error(), new Object(), new Object(), new Object())
           arktest.assertEQ(a.fld, 4)
+      tags: negative, compile-only
 
     - decl: |-
           // constructor overloaded with type variables

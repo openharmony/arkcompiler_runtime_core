@@ -63,10 +63,11 @@ void CoverageListener::StopDumpThread()
 
 void CoverageListener::DumpThreadWorker()
 {
-    auto dumpQueue = [this]() {
+    // Atomic with acquire order reason: ensure we see the latest store from the releasing thread.
+    while (!stopThread_.load(std::memory_order_acquire)) {
         auto localQueueOpt = delegate_->GetQueue();
         if (!localQueueOpt.has_value()) {
-            return;
+            continue;
         }
         std::queue<BytecodeCountMap> &localQueue = localQueueOpt.value();
         while (!localQueue.empty()) {
@@ -74,13 +75,7 @@ void CoverageListener::DumpThreadWorker()
             localQueue.pop();
             DumpCoverageInfoToFile(tempMap);
         }
-    };
-
-    // Atomic with acquire order reason: ensure we see the latest store from the releasing thread.
-    while (!stopThread_.load(std::memory_order_acquire)) {
-        dumpQueue();
     }
-    dumpQueue();
     LOG(INFO, RUNTIME) << "Dump thread stopped";
 }
 

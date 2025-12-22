@@ -59,4 +59,6 @@ export final class CoroutineExtras {
     public static native retriggerTaskPoolShrink(): void;
     // get taskpool workers limit based on the device
     public static native getTaskPoolWorkersLimit(): int;
+    // dump currently stored unhandled failed jobs
+    public static native dumpUnhandledFailedJobs(): void;
 }

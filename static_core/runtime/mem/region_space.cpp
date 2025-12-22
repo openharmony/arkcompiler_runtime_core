@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "mem/mem_pool.h"
+#include "libarkbase/mem/mem_pool.h"
 #include "runtime/mem/region_space-inl.h"
 #include "runtime/mem/rem_set-inl.h"
 #include "runtime/include/runtime.h"

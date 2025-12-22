@@ -13,8 +13,21 @@
  * limitations under the License.
  */
 
- export type TreeMapForEachCb<K, V> = (value: V, key: K, map: TreeMap<K, V>) => void;
- export type TreeMapComparator<K> = (firstValue: K, secondValue: K) => double;
+import { BusinessError } from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: int = 10200001;
+const EmptyContainerId: int = 10200010;
+
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
+export type TreeMapForEachCb<K, V> = (value: V, key: K, map: TreeMap<K, V>) => void;
+export type TreeMapComparator<K> = (firstValue: K, secondValue: K) => double;
 
 export interface ReadonlyTreeMap<K, V> extends Iterable<[K, V]> {
     /**
@@ -370,18 +383,15 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
     /**
      * Return the key of the first element in the TreeMap
      *
-     * @returns the key of the first element if exists
+     * @returns the key of the first element
      */
-    getFirstKey(): K | undefined {
-        if (this.rootEntry !== undefined) {
-            let entry = this.rootEntry!;
-            while (entry.left !== undefined) {
-                entry = entry.left!;
-            }
-            return entry.key;
-        } else {
-            return undefined;
+    getFirstKey(): K {
+        this.checkEmptyContainer();
+        let entry = this.rootEntry!;
+        while (entry.left !== undefined) {
+            entry = entry.left!;
         }
+        return entry.key;
     }
 
     /**
@@ -389,9 +399,10 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
      *
      * @param key: the key of the element which will be get the higher key
      *
-     * @returns the higher key of the given key's element if exists or undefined
+     * @returns the higher key of the given key's element
      */
     getHigherKey(key: K): K | undefined {
+        this.checkEmptyContainer();
         let resultEntry: TreeMapEntry<K, V> | undefined = undefined;
         let entry = this.rootEntry;
 
@@ -414,18 +425,15 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
     /**
      * Return the key of the last element in the TreeMap
      *
-     * @returns the key of the last element if exists
+     * @returns the key of the last element
      */
-    getLastKey(): K | undefined {
-        if (this.rootEntry !== undefined) {
-            let entry = this.rootEntry!;
-            while (entry.right !== undefined) {
-                entry = entry.right!;
-            }
-            return entry.key;
-        } else {
-            return undefined;
+    getLastKey(): K {
+        this.checkEmptyContainer();
+        let entry = this.rootEntry!;
+        while (entry.right !== undefined) {
+            entry = entry.right!;
         }
+        return entry.key;
     }
 
     /**
@@ -436,6 +444,7 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
      * @returns the lower key of the given key's element if exists or undefined
      */
     getLowerKey(key: K): K | undefined {
+        this.checkEmptyContainer();
         let resultEntry: TreeMapEntry<K, V> | undefined = undefined;
         let entry = this.rootEntry;
 
@@ -776,5 +785,11 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
      */
     override $_iterator(): IterableIterator<[K, V]> {
         return this.entries();
+    }
+
+    private checkEmptyContainer(): void {
+        if (this.isEmpty()) {
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
+        }
     }
 }

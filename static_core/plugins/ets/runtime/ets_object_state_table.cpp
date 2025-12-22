@@ -14,8 +14,8 @@
  */
 
 #include "plugins/ets/runtime/ets_object_state_table.h"
-#include "libpandabase/macros.h"
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/mutex.h"
 
 namespace ark::ets {
 

@@ -353,6 +353,11 @@ public:
         return std::accumulate(a.begin(), a.end(), 0);
     }
 
+    void OverloadFuncEnumRecord(::overload::Color const &p1, map_view<string, int16_t> p2)
+    {
+        // Function body
+    }
+
     void OverloadFuncArrayRecord(array_view<int32_t> p1, map_view<string, int16_t> p2)
     {
         // Function body

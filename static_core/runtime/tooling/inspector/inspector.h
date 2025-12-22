@@ -35,7 +35,7 @@
 #include "common.h"
 #include "inspector_server.h"
 #include "runtime/tooling/tools.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"

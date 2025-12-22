@@ -17,7 +17,6 @@ limitations under the License.
 
 /*---
 desc:  Use imported interface with optional fields as T for Required<T>
-tags: [{% if c.result == -1 %}compile-only, negative{% endif %}]
 files:
     - ../exported_data.ets
 ---*/

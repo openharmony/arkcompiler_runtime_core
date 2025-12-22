@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,8 +28,8 @@
 #include "include/runtime.h"
 #include "include/runtime_notification.h"
 #include "include/tooling/debug_interface.h"
-#include "libpandabase/os/mutex.h"
-#include "libpandabase/utils/span.h"
+#include "libarkbase/os/mutex.h"
+#include "libarkbase/utils/span.h"
 #include "pt_hooks_wrapper.h"
 #include "runtime/thread_manager.h"
 

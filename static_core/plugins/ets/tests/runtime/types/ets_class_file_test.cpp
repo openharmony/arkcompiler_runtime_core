@@ -20,6 +20,7 @@
 
 #include "types/ets_class.h"
 #include "types/ets_method.h"
+#include "ets_utils.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -221,9 +222,12 @@ TEST_F(EtsClassTest, GetFieldIndexByName)
                 TestObject obj_z
                 TestObject obj_k
             }
+            .record B <ets.extends = A> {
+                TestObject obj_l
+            }
         )";
 
-    EtsClass *klass = GetTestClass(source, "LA;");
+    EtsClass *klass = GetTestClass(source, "LB;");
     ASSERT_NE(klass, nullptr);
 
     std::unordered_set<std::uint32_t> descSetIndex = {0, 1, 2, 3};
@@ -464,7 +468,9 @@ TEST_F(EtsClassTest, GetDirectMethod)
             return.void
         }
         .function TestObject B.foo2(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
     )";
 
@@ -498,7 +504,9 @@ TEST_F(EtsClassTest, GetMethod)
             return.void
         }
         .function TestObject B.foo2(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
     )";
 
@@ -525,7 +533,7 @@ TEST_F(EtsClassTest, GetMethodByIndex)
 {
     const char *source = R"(
         .language eTS
-        .record N {}
+        .record NN {}
         .record A {}
         .record B <ets.extends = A> {}
         .record TestObject {}
@@ -537,7 +545,9 @@ TEST_F(EtsClassTest, GetMethodByIndex)
             return.void
         }
         .function TestObject B.foo3(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
     )";
 
@@ -552,7 +562,7 @@ TEST_F(EtsClassTest, GetMethodByIndex)
     ASSERT_EQ(klassAMethodSize, klassA->GetMethodsNum());
     ASSERT_EQ(klassBMethodSize, klassB->GetMethodsNum());
 
-    EtsClass *klassN = GetTestClass(source, "LN;");
+    EtsClass *klassN = GetTestClass(source, "LNN;");
     ASSERT_NE(klassN, nullptr);
     ASSERT_FALSE(klassN->GetMethodsNum());
 
@@ -573,7 +583,7 @@ TEST_F(EtsClassTest, GetMethods)
 {
     const char *source = R"(
         .language eTS
-        .record N {}
+        .record NN {}
         .record A {}
         .record B <ets.extends = A> {}
         .record TestObject {}
@@ -585,7 +595,9 @@ TEST_F(EtsClassTest, GetMethods)
             return.void
         }
         .function TestObject B.foo3(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
-            return
+            newobj v0, TestObject
+            lda.obj v0
+            return.obj
         }
     )";
 
@@ -612,35 +624,11 @@ TEST_F(EtsClassTest, GetMethods)
         descSetB.erase(etsMethodsB.at(i)->GetName());
     }
 
-    EtsClass *klassN = GetTestClass(source, "LN;");
+    EtsClass *klassN = GetTestClass(source, "LNN;");
     ASSERT_NE(klassN, nullptr);
     auto etsMethodsC = PandaVector<EtsMethod *>();
     etsMethodsC = klassN->GetMethods();
     ASSERT_TRUE(etsMethodsC.empty());
-}
-
-static void TestGetPrimitiveClass(const char *primitiveName)
-{
-    EtsString *inputName = EtsString::CreateFromMUtf8(primitiveName);
-    ASSERT_NE(inputName, nullptr);
-
-    auto *klass = EtsClass::GetPrimitiveClass(inputName);
-    ASSERT_NE(klass, nullptr);
-
-    ASSERT_TRUE(inputName->StringsAreEqual(klass->GetName()->AsObject()));
-}
-
-TEST_F(EtsClassTest, GetPrimitiveClass)
-{
-    TestGetPrimitiveClass("void");
-    TestGetPrimitiveClass("boolean");
-    TestGetPrimitiveClass("byte");
-    TestGetPrimitiveClass("char");
-    TestGetPrimitiveClass("short");
-    TestGetPrimitiveClass("int");
-    TestGetPrimitiveClass("long");
-    TestGetPrimitiveClass("float");
-    TestGetPrimitiveClass("double");
 }
 
 TEST_F(EtsClassTest, SetAndGetName)
@@ -847,11 +835,21 @@ TEST_F(EtsClassTest, EnumerateMethods)
     const char *source = R"(
         .language eTS
         .record Test {}
-        .function void Test.foo1() {}
-        .function void Test.foo2() {}
-        .function void Test.foo3() {}
-        .function void Test.foo4() {}
-        .function void Test.foo5() {}
+        .function void Test.foo1() {
+            return.void
+        }
+        .function void Test.foo2() {
+            return.void
+        }
+        .function void Test.foo3() {
+            return.void
+        }
+        .function void Test.foo4() {
+            return.void
+        }
+        .function void Test.foo5() {
+            return.void
+        }
     )";
 
     EtsClass *klass = GetTestClass(source, "LTest;");
@@ -955,6 +953,42 @@ TEST_F(EtsClassTest, EnumerateVTable)
     for (std::size_t i = 0; i < methodsVectorSize; ++i) {
         ASSERT_EQ(methods[i], enumerateMethods[i]);
     }
+}
+
+TEST_F(EtsClassTest, NameFromDescriptor)
+{
+    ark::ets::RuntimeDescriptorParser nameParser("[Lstd/core/Object;");
+    ASSERT_EQ(nameParser.Resolve(), "std.core.Object[]");
+
+    nameParser = RuntimeDescriptorParser("{U[I[J[Lstd/core/String;}");
+    ASSERT_EQ(nameParser.Resolve(), "{Ui32[],i64[],std.core.String[]}");
+
+    nameParser = RuntimeDescriptorParser("{ULLLL/L;LLLL/N;}");
+    ASSERT_EQ(nameParser.Resolve(), "{ULLL.L,LLL.N}");
+
+    nameParser = RuntimeDescriptorParser("[[{U[I[J[Lstd/core/String;}");
+    ASSERT_EQ(nameParser.Resolve(), "{Ui32[],i64[],std.core.String[]}[][]");
+
+    nameParser = RuntimeDescriptorParser("{ULstd/core/String;[{ULstd/core/String;[Lstd/core/String;}}");
+    ASSERT_EQ(nameParser.Resolve(), "{Ustd.core.String,{Ustd.core.String,std.core.String[]}[]}");
+}
+
+TEST_F(EtsClassTest, NameToDescriptor)
+{
+    ark::ets::ClassPublicNameParser tdParser("std.core.Object[]");
+    ASSERT_EQ(tdParser.Resolve(), "[Lstd/core/Object;");
+
+    tdParser = ClassPublicNameParser("{Ui32[],i64[],std.core.String[]}");
+    ASSERT_EQ(tdParser.Resolve(), "{U[I[J[Lstd/core/String;}");
+
+    tdParser = ClassPublicNameParser("{ULLL.L,LLL.N}");
+    ASSERT_EQ(tdParser.Resolve(), "{ULLLL/L;LLLL/N;}");
+
+    tdParser = ClassPublicNameParser("{Ui32[],i64[],std.core.String[]}[][]");
+    ASSERT_EQ(tdParser.Resolve(), "[[{U[I[J[Lstd/core/String;}");
+
+    tdParser = ClassPublicNameParser("{Ustd.core.String,{Ustd.core.String,std.core.String[]}[]}");
+    ASSERT_EQ(tdParser.Resolve(), "{ULstd/core/String;[{ULstd/core/String;[Lstd/core/String;}}");
 }
 
 }  // namespace ark::ets::test

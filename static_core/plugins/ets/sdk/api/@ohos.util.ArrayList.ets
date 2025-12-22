@@ -18,6 +18,7 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: int = 401;
 const OutOfBoundsErrorCodeId: int = 10200001;
 const IncorrectBufferSizeId: int = 10200009;
+const EmptyContainerId: int = 10200010;
 const CapacityErrorCodeId: int = 10200062;
 const INT_MAX_VALUE_OFFSET: int = 2147483647;
 
@@ -35,17 +36,17 @@ function createBusinessError(code: int, message: string) {
 
 export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 10;
-    private capacity: int = this.DEFAULT_CAPACITY;
+    private capacity: int;
     private buffer: Array<T>;
 
     public toString(): string {
         return "[object ArrayList]";
     }
 
-    public jsonReplacer(): Record<String, NullishType> {
+    public jsonReplacer(): Record<String, Any> {
         const buf = this.buffer;
         const len = buf.length;
-        let arrayObj: Record<String, NullishType> = {};
+        let arrayObj: Record<String, Any> = {};
         for (let i = 0; i < len; i++) {
             arrayObj[String(i)] = buf[i];
         }
@@ -63,6 +64,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * Creates a new instance of ArrayList.
      */
     public constructor() {
+        this.capacity = this.DEFAULT_CAPACITY;
         this.buffer = new Array<T>(this.capacity);
         this.buffer.length = 0;
     }
@@ -402,7 +404,7 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
 
     private checkEmptyContainer(): void {
         if (this.isEmpty()) {
-            throw createBusinessError(OutOfBoundsErrorCodeId, `Container is empty`);
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
         }
     }
 

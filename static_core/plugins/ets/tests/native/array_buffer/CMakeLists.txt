@@ -15,10 +15,12 @@ panda_add_gtest_with_ani(array_buffer_native_test
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/native_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/NativeTest.ets
     TEST_GROUP ets_native_gtests
+    LIBRARIES ani_helpers
 )
 
 panda_add_gtest_with_ani(array_buffer_native_managed_test
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/managed_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ManagedTest.ets
     TEST_GROUP ets_native_gtests
+    LIBRARIES ani_helpers
 )

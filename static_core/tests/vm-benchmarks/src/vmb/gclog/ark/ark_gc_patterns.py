@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,10 +23,10 @@ class ArkGcPatterns:
     GC_COUNTER = r'\[(?P<gc_counter>\w+)\]'
     GC_CAUSE = r'\[(?P<gc_collection_type>\w+) ' \
                r'\((?P<gc_cause>\w+(?:\s+\w+)?)\)\]'
-    OBJS_FREED = r'(?P<obj_count>\d+)\((?P<obj_mem_freed>\d+)' \
-                 r'(?P<obj_mem_units>(?:B|KB|MB))\),'
-    LOBJS_FREED = r'(?P<large_obj_count>\d+)\((?P<large_obj_mem_freed>\d+)' \
-                  r'(?P<large_obj_mem_units>(?:B|KB|MB))\) LOS objects,'
+    OBJS_FREED = r'(?P<obj_mem_freed>\d+)' \
+                 r'(?P<obj_mem_units>(?:B|KB|MB)),'
+    LOBJS_FREED = r'(?P<large_obj_mem_freed>\d+)' \
+                  r'(?P<large_obj_mem_units>(?:B|KB|MB)) LOS objects,'
     HEAP_FREE = r'(?P<heap_free_mem>\d+)% free,'
     MEM_AFTER_TOTAL = r'(?P<mem_after>\d+)(?P<mem_after_units>(?:B|KB|MB))\/' \
                       r'(?P<mem_total>\d+)(?P<mem_total_units>(?:B|KB|MB)),'

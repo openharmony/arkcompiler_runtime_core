@@ -16,7 +16,6 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Explicitly return in an asynchronous method.
-tags: [compile-only, positive]
 ---*/
 
 class MethodReturnVoidImplicit {
@@ -32,5 +31,5 @@ async function startTest() {
 }
 
 function main(): void {
-    startTest();
+   waitForCompletion(startTest);
 }

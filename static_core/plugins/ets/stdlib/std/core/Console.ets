@@ -140,47 +140,47 @@ export final class Console {
         return Console.INDENT_MARGIN.repeat(this.indentationLevel)
     }
 
-    private static NullishTypeToPrint(o: NullishType): String {
+    private static AnyToPrint(o: Any): String {
         return reflect.Value.of(o).toPrint(MAX_CONSOLE_PRINT_DEPTH)
     }
 
     /**
      * Implementations for printing primitive types
-     * @param {string | boolean | byte | short | char | int | long | float | double | NullishType} i - The value to print
+     * @param {string | boolean | byte | short | char | int | long | float | double | Any} i - The value to print
      * @returns {void}
      * @public
      * @deprecated Will be removed in future. Please use log instead
      */
     public print(i: boolean): void {
         this.addToBuffer(new Boolean(i).toString(), LogLevel.PRINTLN)
-    }
+    };
     public print(i: byte): void {
         this.addToBuffer(new Byte(i).toString(), LogLevel.PRINTLN)
-    }
+    };
     public print(i: short): void {
         this.addToBuffer(new Short(i).toString(), LogLevel.PRINTLN)
-    }
+    };
     public print(i: char): void {
         this.addToBuffer(new Char(i).toString(), LogLevel.PRINTLN)
-    }
+    };
     public print(i: int): void {
         this.addToBuffer(new Int(i).toString(), LogLevel.PRINTLN)
-    }
+    };
     public print(i: long): void {
         this.addToBuffer(new Long(i).toString(), LogLevel.PRINTLN)
-    }
+    };
     public print(i: float): void {
         this.addToBuffer(new Float(i).toString(), LogLevel.PRINTLN)
-    }
+    };
     public print(i: double): void {
         this.addToBuffer(new Double(i).toString(), LogLevel.PRINTLN)
-    }
+    };
     public print(i: String): void {
         this.addToBuffer(i, LogLevel.PRINTLN)
-    }
-    public print(o: NullishType): void {
-        this.print(Console.NullishTypeToPrint(o))
-    }
+    };
+    public print(o: Any): void {
+        this.print(Console.AnyToPrint(o))
+    };
 
     /**
      * @section Println definitions
@@ -198,7 +198,7 @@ export final class Console {
 
     /**
      * Prints an object followed by a newline to stdout
-     * @param {NullishType | string | boolean | byte | short | char | int | long | float | double} i - The value to print
+     * @param {Any | string | boolean | byte | short | char | int | long | float | double} i - The value to print
      * @returns {void}
      * @public
      * @deprecated Will be removed in future. Please use log instead
@@ -239,7 +239,7 @@ export final class Console {
         this.print(i)
         this.println()
     }
-    public println(i: NullishType): void {
+    public println(i: Any): void {
         this.print(i)
         this.println()
     }
@@ -250,7 +250,7 @@ export final class Console {
 
     /**
      * Implementations for log primitive types to stdout
-     * @param {string | boolean | byte | short | char | int | long | NullishType} i - The value to print to stdout
+     * @param {string | boolean | byte | short | char | int | long | Any} i - The value to print to stdout
      * @returns {void}
      * @public
      */
@@ -291,7 +291,7 @@ export final class Console {
      * @section Variadics
      */
 
-    private printRest(level: LogLevel, ...vals: NullishType[]) {
+    private printRest(level: LogLevel, ...vals: Any[]) {
         let sb = new StringBuilder()
 
         if (vals.length != 0) {
@@ -302,9 +302,9 @@ export final class Console {
                 vals.shift()
                 sb.append((new Formatter).format(dFst as String, vals))
             } else {
-                sb.append(Console.NullishTypeToPrint(dFst))
+                sb.append(Console.AnyToPrint(dFst))
                 for (let i = 1; i < vals.length; ++i) {
-                    sb.append(" " + Console.NullishTypeToPrint(vals[i]))
+                    sb.append(" " + Console.AnyToPrint(vals[i]))
                 }
             }
         }
@@ -316,66 +316,66 @@ export final class Console {
     /**
      * Prints log-level messages
      * If first argument is a string it is treated as a format string
-     * @param {...NullishType[]} vals - Variable number of values to be logged
+     * @param {...Any[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
-    public log(...vals: NullishType[]): void {
+    public log(...vals: Any[]): void {
         this.printRest(LogLevel.LOG, ...vals)
     }
 
     /**
      * Prints debug-level messages
      * If first argument is a string it is treated as a format string
-     * @param {...NullishType[]} vals - Variable number of values to be logged
+     * @param {...Any[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
-    public debug(...vals: NullishType[]): void {
+    public debug(...vals: Any[]): void {
         this.printRest(LogLevel.DEBUG, ...vals)
     }
 
     /**
      * Prints info-level messages
      * If first argument is a string it is treated as a format string
-     * @param {...NullishType[]} vals - Variable number of values to be logged
+     * @param {...Any[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
-    public info(...vals: NullishType[]): void {
+    public info(...vals: Any[]): void {
         this.printRest(LogLevel.INFO, ...vals)
     }
 
     /**
      * Prints warn-level messages
      * If first argument is a string it is treated as a format string
-     * @param {...NullishType[]} vals - Variable number of values to be logged
+     * @param {...Any[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
-    public warn(...vals: NullishType[]): void {
+    public warn(...vals: Any[]): void {
         this.printRest(LogLevel.WARN, ...vals)
     }
 
     /**
      * Prints error-level messages
      * If first argument is a string it is treated as a format string
-     * @param {...NullishType[]} vals - Variable number of values to be logged
+     * @param {...Any[]} vals - Variable number of values to be logged
      * @returns {void}
      * @public
      */
-    public error(...vals: NullishType[]): void {
+    public error(...vals: Any[]): void {
         this.printRest(LogLevel.ERROR, ...vals)
     }
 
     /**
      * Conditionally prints an error message if the assertion condition is false
-     * @param {...NullishType[]} vals - Values to be logged if condition is false.
+     * @param {...Any[]} vals - Values to be logged if condition is false.
      * Condition is the first value in vals (if exist)
      * @returns {void}
      * @public
      */
-    public assert(...vals: NullishType[]): void {
+    public assert(...vals: Any[]): void {
         if (vals.length == 0) {
             return
         }
@@ -427,10 +427,10 @@ export final class Console {
     /**
     * Prints a formatted representation of an object to stdout
     * Filters out properties containing 'field#' in their keys
-    * @param {NullishType} obj - The object to inspect
+    * @param {Any} obj - The object to inspect
     * @returns {void}
     */
-    public dir(obj?: NullishType): void {
+    public dir(obj?: Any): void {
         if (obj == null || obj == undefined) {
             return
         }
@@ -448,7 +448,7 @@ export final class Console {
         //     "age": 25,
         //     "field#m": 25         // Internal field
         //  }
-        const filterer = (key: String, value: NullishType): NullishType => {
+        const filterer = (key: String, value: Any): Any => {
             if (key.includes("field#")) {
                 return undefined;
             }
@@ -461,10 +461,10 @@ export final class Console {
     /**
     * Prints an XML representation of an object to stdout
     * Currently outputs the object as-is
-    * @param {NullishType} obj - The object to display as XML
+    * @param {Any} obj - The object to display as XML
     * @returns {void}
     */
-    public dirxml(obj: NullishType): void {
+    public dirxml(obj: Any): void {
         this.log(obj)
     }
 
@@ -480,7 +480,7 @@ export final class Console {
     * @param {string} [objs] - Data to be printed without additional indent
     * @returns {void}
     */
-    public group(...objs: NullishType[]): void {
+    public group(...objs: Any[]): void {
         if (objs.length != 0) {
             this.log(objs)
         }
@@ -505,7 +505,7 @@ export final class Console {
     * @returns {void}
     * @see group
     */
-    public groupCollapsed(...objs: NullishType[]): void {
+    public groupCollapsed(...objs: Any[]): void {
         this.group(...objs);
     }
 
@@ -516,10 +516,10 @@ export final class Console {
     /**
     * Displays an array of objects in tabular format
     * Converts the data to a DataFrame and renders it
-    * @param {NullishType[]} data - Array of objects to display as a table
+    * @param {Any[]} data - Array of objects to display as a table
     * @returns {void}
     */
-    public table(...data: NullishType[]): void {
+    public table(...data: Any[]): void {
         if (data.length == 0) {
             return
         }
@@ -529,7 +529,7 @@ export final class Console {
         let dat = data[0]!
 
         const isSimple = (dat == undefined) || (dat == null)
-                || (dat instanceof String) || (Object.keys(__narrowAny(dat)!).length == 0)
+                || (dat instanceof String) || (Object.keys(dat as Object).length == 0)
         if (isSimple) {
             this.log(dat)
             return
@@ -537,8 +537,8 @@ export final class Console {
 
         let df: DataFrame | undefined = undefined
         if (dat instanceof ArrayLike) {
-            dat = dat as ArrayLike<NullishType>
-            let d = new Array<NullishType>(dat.length)
+            dat = dat as ArrayLike<Any>
+            let d = new Array<Any>(dat.length)
             for (let i = 0; i < d.length; ++i) {
                 d[i] = dat[i]
             }
@@ -568,7 +568,7 @@ export final class Console {
             this.warn("⚠️ Warning: Label 'default' already exists for console.time()")
             return
         }
-        const start = Date.now().toLong()
+        const start = Date.now()
         this.timers.set(key, start)
     }
 
@@ -593,7 +593,7 @@ export final class Console {
             result += " ";
             result += arguments[i].toString();
         }
-        const end = Date.now().toLong()
+        const end = Date.now()
         const duration = end - startTime
         this.log(`${key}: ${duration}ms ${result}`)
     }
@@ -616,10 +616,10 @@ export final class Console {
     /**
     * Prints the current stack trace with an optional label
     * Skips the first stack frame (the trace call itself)
-    * @param {NullishType[]} ...data - args to prints
+    * @param {Any[]} ...data - args to prints
     * @returns {void}
     */
-    public trace(...data: NullishType[]): void {
+    public trace(...data: Any[]): void {
         this.log("Trace:", data)
         const stackT = StackTrace.provisionStackTrace();
         for (let i = 1; i < stackT.length; ++i) {
@@ -633,7 +633,7 @@ export final class Console {
         }
     }
 
-    private static parseObject(...data: NullishType[]): void {
+    private static parseObject(...data: Any[]): void {
         const dat = data[0];
         const objType = Type.of(dat);
         const objValue = reflect.Value.of(dat);
@@ -674,7 +674,7 @@ export final class Console {
         let keys:Array<string> = new Array<string>();
         let innerLength: number = 0;
         let innerValue: Array<string> = new Array<string>();
-        if (valueType.toString() == "escompat.Array") {
+        if (valueType.toString() == "std.core.Array") {
             let innerValueStr = (reflect.Value.of(value)).toPrint(10);
             Console.parseString(innerValueStr, keys, innerValue);
             innerLength = innerValue.length;
@@ -693,7 +693,7 @@ export final class Console {
             let innerKey = keys[j];
             if (!initialMap.has(innerKey)) {
                 let mapArrayLen = innerLength > keyLength ? innerLength : keyLength;
-                let mapArray = new Array<string>(mapArrayLen).fill("");
+                let mapArray = new Array<string>(mapArrayLen.toInt()).fill("");
                 mapArray[i] = innerValue[j];
                 columnMap.columnValue.set(innerKey, mapArray);
                 initialMap.set(innerKey, true);
@@ -769,7 +769,7 @@ export final class Console {
         }
         let keyLength = mapLen + 1;
         let valueLength = keyLength * length;
-        let outputValuesArray:Array<string> = new Array<string>(valueLength);
+        let outputValuesArray:Array<string> = new Array<string>(valueLength.toInt());
         let valueIndex = 0;
         for (let i = 0; i < length; i++) {
             let key = keyArray[i];
@@ -905,7 +905,7 @@ export final class Console {
         }
         return rows;
     }
-    
+
     private static printTable(tableResult: Array<string>): void {
         let len = tableResult.length;
         for (let i = 0; i < len; i++) {
@@ -1107,7 +1107,7 @@ class DataFrame {
     * @param obj - The object to be converted into table info
     * @returns A Map containing string representations of object properties
     */
-    private static getObjectInfoForTable(obj: NullishType): Map<string, string> {
+    private static getObjectInfoForTable(obj: Any): Map<string, string> {
         const mapping = new Map<string, string>();
         const objType = Type.of(obj);
         const objValue = reflect.Value.of(obj);
@@ -1174,10 +1174,10 @@ class DataFrame {
 
     /**
      * Creates a DataFrame from an array of objects
-     * @param {NullishType[]} data - Array of objects to convert
+     * @param {Any[]} data - Array of objects to convert
      * @static
      */
-    public static fromObjects(...data: NullishType[]): void {
+    public static fromObjects(...data: Any[]): void {
         let dat = data[0];
         const objType = Type.of(dat);
         const objValue = reflect.Value.of(dat);

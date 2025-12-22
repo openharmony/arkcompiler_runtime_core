@@ -38,15 +38,6 @@ export final class Int extends Integral implements Comparable<Int> {
     }
 
     /**
-     * Returns value of this instance as a primitive
-     *
-     * @returns value of this instance
-     */
-    public unboxed(): int {
-        return this.value;
-    }
-
-    /**
      * Returns boxed representation of the primitive
      *
      * @param value value to box
@@ -280,16 +271,27 @@ export final class Int extends Integral implements Comparable<Int> {
      *
      * @param other Int object to compare with
      *
-     * @returns result of the comparison
+     * @returns result of the comparison, -1 if this instance is less than provided object, 0 if equal, 1 if greater
      */
     public override compareTo(other: Int): int {
-        if (this.value < other.unboxed()) {
+        if (this.value < other) {
             return -1;
         }
-        if (this.value == other.unboxed()) {
+        if (this.value == other) {
             return 0;
         }
         return 1;
+    }
+
+    /**
+     * Converts the primitive to a string
+     *
+     * @param v value to be converted
+     *
+     * @returns result of the conversion
+     */
+    public static toString(v: int): string {
+        return StringBuilder.toString(v);
     }
 
     /**
@@ -310,7 +312,7 @@ export final class Int extends Integral implements Comparable<Int> {
         return (new Long(this.value)).toString(radix);
     }
 
-    equals(other: NullishType): boolean {
+    equals(other: Any): boolean {
         if (this === other) {
             return true
         }
@@ -320,6 +322,10 @@ export final class Int extends Integral implements Comparable<Int> {
         }
 
         return this.value == (other as Int).value
+    }
+
+    public toLocaleString(): string {
+        return new Intl.NumberFormat().format(this.value)
     }
 
     /**

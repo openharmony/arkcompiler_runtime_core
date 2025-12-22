@@ -131,7 +131,7 @@ Inst *BalanceExpressions::AllocateSourcesRec(size_t firstIdx, size_t lastIdx)
 {
     ASSERT(lastIdx > firstIdx);
     COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Allocating operators for sources_[" << firstIdx << " to " << lastIdx << "]";
-    size_t memSize = firstIdx + GetBitFloor(lastIdx - firstIdx + 1);
+    size_t memSize = firstIdx + BitFloor(lastIdx - firstIdx);
     size_t splitIdx = memSize > 0 ? memSize - 1 : 0;
 
     Inst *lhs = GetOperand(firstIdx, splitIdx);
@@ -248,7 +248,7 @@ bool BalanceExpressions::NeedsOptimization()
         return false;
     }
     size_t current = 1UL << (exprMaxDepth_);
-    size_t optimal = GetBitCeil(sources_.size());
+    size_t optimal = BitCeil(sources_.size());
     return current > optimal;
 }
 
@@ -274,7 +274,4 @@ void BalanceExpressions::Dump(std::ostream *out) const
         (*out) << *i << '\n';
     }
 }
-
-template size_t BalanceExpressions::GetBitFloor<size_t>(size_t val);
-template size_t BalanceExpressions::GetBitCeil<size_t>(size_t val);
 }  // namespace ark::compiler

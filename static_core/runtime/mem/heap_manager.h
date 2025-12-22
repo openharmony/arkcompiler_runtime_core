@@ -18,8 +18,8 @@
 #include <cstddef>
 #include <memory>
 
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/macros.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -199,6 +199,15 @@ public:
         return GetObjectAllocator().AsObjectAllocator()->IsObjectInNonMovableSpace(obj);
     }
 
+    /**
+     * Check GC will never move the object.
+     * Object may be in non-movable space or it may be a homoungous object in case of G1.
+     */
+    ALWAYS_INLINE bool IsNonMovable(const ObjectHeader *obj)
+    {
+        return GetObjectAllocator().AsObjectAllocator()->IsNonMovable(obj);
+    }
+
     ALWAYS_INLINE bool IsLiveObject(const ObjectHeader *obj)
     {
         return GetObjectAllocator().AsObjectAllocator()->IsLive(obj);
@@ -208,6 +217,16 @@ public:
     {
         return GetObjectAllocator().AsObjectAllocator()->ContainObject(obj);
     }
+
+    ObjectHeader *RegisterFinalizableIfNeeded(ObjectHeader *obj, BaseClass *cls, size_t size, ManagedThread *thread);
+
+    /**
+     * Initialize GC bits and also zeroing memory for the whole Object memory
+     * @param cls - class
+     * @param mem - pointer to the ObjectHeader
+     * @return pointer to the ObjectHeader
+     */
+    ObjectHeader *InitObjectHeaderAtMem(BaseClass *cls, void *mem);
 
     HeapManager() : targetUtilization_(DEFAULT_TARGET_UTILIZATION) {}
 
@@ -251,14 +270,6 @@ private:
             }
         }
     }
-
-    /**
-     * Initialize GC bits and also zeroing memory for the whole Object memory
-     * @param cls - class
-     * @param mem - pointer to the ObjectHeader
-     * @return pointer to the ObjectHeader
-     */
-    ObjectHeader *InitObjectHeaderAtMem(BaseClass *cls, void *mem);
 
     /// Triggers GC if needed
     void TriggerGCIfNeeded();

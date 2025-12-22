@@ -140,3 +140,8 @@ final class C extends B {
 
 	private intValue: int;
 }
+
+class CheckWrongSignature {
+    public method(a: String): void {
+    }
+}

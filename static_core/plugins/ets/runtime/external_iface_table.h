@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,8 @@ public:
     using JSEnv = void *;
     using ClearInteropHandleScopesFunction = std::function<void(Frame *)>;
     using CreateJSRuntimeFunction = std::function<JSEnv()>;
+    using CleanUpJSEnvFunction = std::function<void(JSEnv)>;
+    using GetJSEnvFunction = std::function<JSEnv()>;
     using CreateInteropCtxFunction = std::function<void(Coroutine *, JSEnv)>;
 
     NO_COPY_SEMANTIC(ExternalIfaceTable);
@@ -66,11 +68,39 @@ public:
         createJSRuntime_ = std::move(cb);
     }
 
+    void SetCleanUpJSEnvFunction(CleanUpJSEnvFunction &&cb)
+    {
+        ASSERT(!cleanUpJSEnv_);
+        cleanUpJSEnv_ = std::move(cb);
+    }
+
+    void SetGetJSEnvFunction(GetJSEnvFunction &&cb)
+    {
+        ASSERT(!getJSEnv_);
+        getJSEnv_ = std::move(cb);
+    }
+
     void *CreateJSRuntime()
     {
         void *jsEnv = nullptr;
         if (createJSRuntime_) {
             jsEnv = createJSRuntime_();
+        }
+        return jsEnv;
+    }
+
+    void CleanUpJSEnv(JSEnv env)
+    {
+        if (cleanUpJSEnv_) {
+            cleanUpJSEnv_(env);
+        }
+    }
+
+    JSEnv GetJSEnv()
+    {
+        void *jsEnv = nullptr;
+        if (getJSEnv_) {
+            jsEnv = getJSEnv_();
         }
         return jsEnv;
     }
@@ -92,6 +122,8 @@ private:
     PandaUniquePtr<JobQueue> jobQueue_ = nullptr;
     ClearInteropHandleScopesFunction clearInteropHandleScopes_ = nullptr;
     CreateJSRuntimeFunction createJSRuntime_ = nullptr;
+    CleanUpJSEnvFunction cleanUpJSEnv_ = nullptr;
+    GetJSEnvFunction getJSEnv_ = nullptr;
     CreateInteropCtxFunction createInteropCtx_ = nullptr;
 };
 

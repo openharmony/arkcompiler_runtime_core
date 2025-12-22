@@ -25,7 +25,7 @@
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 
 #include "static_core/compiler/optimizer/ir/inst.h"
-#include "libpandabase/mem/arena_allocator.h"
+#include "libarkbase/mem/arena_allocator.h"
 #include "static_core/assembler/annotation.h"
 
 #include <string>

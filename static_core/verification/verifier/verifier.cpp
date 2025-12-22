@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "libpandabase/os/native_stack.h"
+#include "libarkbase/os/native_stack.h"
 #include "monitor.h"
-#include "os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread_scopes.h"
-#include "utils/logger.h"
-#include "utils/span.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/utils/span.h"
 #include "verification/plugins.h"
 #include "verification/util/is_system.h"
 #include "verification/util/optional_ref.h"
@@ -28,8 +28,8 @@
 #endif
 
 // generated
-#include "ark_version.h"
-#include "generated/logger_options.h"
+#include "libarkbase/generated/ark_version.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 #include "generated/verifier_options_gen.h"
 
 #include <csignal>
@@ -366,6 +366,7 @@ static int Run(Options &cliOptions, RuntimeOptions &runtimeOptions, logger::Opti
     if (!mainFileName.empty()) {
         if (pandaFiles.empty()) {
             bootPandaFiles.push_back(mainFileName);
+            runtimeOptions.SetLoadInBoot(true);
         } else {
             auto foundIter = std::find_if(pandaFiles.begin(), pandaFiles.end(),
                                           [&mainFileName](auto &fileName) { return mainFileName == fileName; });

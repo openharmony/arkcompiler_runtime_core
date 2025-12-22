@@ -14,9 +14,9 @@
  */
 
 #include "methoddataaccessor_fuzzer.h"
-#include "libpandafile/file.h"
-#include "libpandafile/method_data_accessor.h"
-#include "libpandafile/class_data_accessor-inl.h"
+#include "libarkfile/file.h"
+#include "libarkfile/method_data_accessor.h"
+#include "libarkfile/class_data_accessor-inl.h"
 
 namespace OHOS {
 void MethodDataAccessorFuzzTest(const uint8_t *data, size_t size)

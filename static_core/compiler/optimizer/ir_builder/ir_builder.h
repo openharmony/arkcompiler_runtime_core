@@ -16,11 +16,11 @@
 #ifndef PANDA_IR_BUILDER_H
 #define PANDA_IR_BUILDER_H
 
-#include "bytecode_instruction.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/pass.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "pbc_iterator.h"
 #include "inst_builder.h"
 
@@ -211,6 +211,26 @@ private:
 private:
     RuntimeInterface::MethodPtr method_;
     bool hasRuntimeCalls_ {false};
+};
+
+class IrBuilderExternalInliningAnalysisForLLVMAot : public IrBuilderInliningAnalysis {
+public:
+    IrBuilderExternalInliningAnalysisForLLVMAot(Graph *graph, RuntimeInterface::MethodPtr method)
+        : IrBuilderInliningAnalysis(graph, method)
+    {
+    }
+
+    NO_COPY_SEMANTIC(IrBuilderExternalInliningAnalysisForLLVMAot);
+    NO_MOVE_SEMANTIC(IrBuilderExternalInliningAnalysisForLLVMAot);
+    ~IrBuilderExternalInliningAnalysisForLLVMAot() override = default;
+
+    const char *GetPassName() const override
+    {
+        return "IrBuilderExternalInliningAnalysisForLLVMAot";
+    }
+
+private:
+    bool IsSuitableForInline(const BytecodeInstruction *inst) override;
 };
 
 class IrBuilderExternalInliningAnalysis : public IrBuilderInliningAnalysis {

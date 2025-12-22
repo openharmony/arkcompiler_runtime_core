@@ -227,6 +227,19 @@ template int AotBuilder::PrepareElfBuilder<Arch::AARCH32>(ElfBuilder<Arch::AARCH
 template int AotBuilder::PrepareElfBuilder<Arch::AARCH64>(ElfBuilder<Arch::AARCH64> &builder,
                                                           const std::string &cmdline, const std::string &file_name);
 
+static inline uint64_t PackFileEntityId(RuntimeInterface *runtime,
+                                        const std::pair<const panda_file::File *, uint32_t> &gotItem, bool isExternal)
+{
+    auto [pf, entityIdOffset] = gotItem;
+    if (!isExternal || !g_options.IsCompilerInlineExternalMethods() ||
+        !g_options.IsCompilerInlineExternalMethodsAot()) {
+        return entityIdOffset;
+    }
+    auto pandaFileIndex = runtime->GetAOTBinaryFileSnapshotIndex(
+        const_cast<RuntimeInterface::BinaryFilePtr>(reinterpret_cast<const void *>(pf)));
+    return panda_file::File::PackFileEntityIdWithIndex(entityIdOffset, pandaFileIndex);
+}
+
 template <Arch ARCH>
 void AotBuilder::EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptrView, size_t gotDataSize)
 {
@@ -239,25 +252,29 @@ void AotBuilder::EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptrView, size
         auto diff = static_cast<ssize_t>(ptrCnt - end);
         ptrView[ptrCnt - gotDataSize] = 0;
         constexpr size_t IMM_2 = 2;
-        for (auto [method, idx] : gotPlt_) {
+        for (auto [method, value] : gotPlt_) {
+            auto [idx, isExternal] = value;
             ASSERT(idx <= 0);
             ptrView[diff + idx] = AotFile::AotSlotType::PLT_SLOT;
-            ptrView[diff + idx - IMM_2] = method.second;
+            ptrView[diff + idx - IMM_2] = PackFileEntityId(runtime_, method, isExternal);
         }
-        for (auto [method, idx] : gotVirtIndexes_) {
+        for (auto [method, value] : gotVirtIndexes_) {
+            auto [idx, isExternal] = value;
             ASSERT(idx <= 0);
             ptrView[diff + idx] = AotFile::AotSlotType::VTABLE_INDEX;
-            ptrView[diff + idx - 1] = method.second;
+            ptrView[diff + idx - 1] = PackFileEntityId(runtime_, method, isExternal);
         }
-        for (auto [klass, idx] : gotClass_) {
+        for (auto [klass, value] : gotClass_) {
+            auto [idx, isExternal] = value;
             ASSERT(idx <= 0);
             ptrView[diff + idx] = AotFile::AotSlotType::CLASS_SLOT;
-            ptrView[diff + idx - IMM_2] = klass.second;
+            ptrView[diff + idx - IMM_2] = PackFileEntityId(runtime_, klass, isExternal);
         }
-        for (auto [string_id, idx] : gotString_) {
+        for (auto [string_id, value] : gotString_) {
+            auto [idx, isExternal] = value;
             ASSERT(idx <= 0);
             ptrView[diff + idx] = AotFile::AotSlotType::STRING_SLOT;
-            ptrView[diff + idx - 1] = string_id.second;
+            ptrView[diff + idx - 1] = PackFileEntityId(runtime_, string_id, isExternal);
         }
         for (auto [cache, idx] : gotIntfInlineCache_) {
             (void)cache;

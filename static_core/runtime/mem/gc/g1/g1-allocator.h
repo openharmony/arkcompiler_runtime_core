@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,8 @@ class ObjectAllocatorG1 final : public ObjectAllocatorGenBase {
     static_assert(REGION_SIZE == mem::G1_REGION_SIZE);
 
 public:
+    using GarbageRegions = ObjectAllocator::GarbageRegions;
+
     NO_MOVE_SEMANTIC(ObjectAllocatorG1);
     NO_COPY_SEMANTIC(ObjectAllocatorG1);
 
@@ -114,9 +116,11 @@ public:
     const std::vector<MemRange> &GetYoungSpaceMemRanges() final;
 
     template <bool INCLUDE_CURRENT_REGION>
-    PandaVector<std::pair<uint32_t, Region *>> GetTopGarbageRegions(double garbageThreshold = 0.0)
+    void GetTopGarbageRegions(double garbageThreshold, GarbageRegions &garbageRegions,
+                              PandaVector<Region *> &emptyRegions)
     {
-        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>(garbageThreshold);
+        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>(garbageThreshold, garbageRegions,
+                                                                                       emptyRegions);
     }
 
     std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() final;
@@ -174,6 +178,7 @@ public:
     }
 
     bool IsObjectInNonMovableSpace(const ObjectHeader *obj) final;
+    bool IsNonMovable(const ObjectHeader *obj) final;
 
     void UpdateSpaceData() final;
 

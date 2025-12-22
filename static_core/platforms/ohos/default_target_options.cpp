@@ -21,23 +21,13 @@
 
 namespace ark::default_target_options {
 
-static uint32_t GetHardawareSpecificIntValue(const std::map<std::string, uint32_t> &modelMap)
+std::string GetTargetString()
 {
     std::string model = ark::ohos_device::GetHardwareModelString();
-    if (modelMap.count(model) == 0) {
-        return modelMap.at("default");
-    }
-    return modelMap.at(model);
-}
-
-uint32_t GetGcWorkersCount(const std::map<std::string, uint32_t> &modelMap)
-{
-    return GetHardawareSpecificIntValue(modelMap);
-}
-
-uint32_t GetTaskmanagerWorkersCount(const std::map<std::string, uint32_t> &modelMap)
-{
-    return GetHardawareSpecificIntValue(modelMap);
+#ifdef PANDA_TARGET_ARM32
+    model = "arm32";
+#endif
+    return model;
 }
 
 bool GetCoverageEnable()
@@ -49,4 +39,5 @@ std::string GetCodeCoverageOutput()
 {
     return ark::ohos_device::GetCodeCoverageOutput();
 }
+
 }  // namespace ark::default_target_options

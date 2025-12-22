@@ -14,11 +14,11 @@
  */
 
 function returnAbc(): string {
-    return (() => 'a')() + (() => 'b')() + (() => 'c')();
+    return (() => "a")() + (() => "b")() + (() => "c")();
 }
 
 function returnDef(): string {
-    return (() => 'de')() + (() => 'f')();
+    return (() => "de")() + (() => "f")();
 }
 
 function sum(a: int, b: int): int {
@@ -30,7 +30,7 @@ function max(a: int, b: int): int {
 }
 
 function main(): int {
-    let g2 = new taskpool.TaskGroup('g2');
+    let g2 = new taskpool.TaskGroup("g2");
     let t1 = new taskpool.Task(returnAbc);
     let t2 = new taskpool.Task(returnDef);
     let t3 = new taskpool.Task(sum, 10, 20);
@@ -41,7 +41,7 @@ function main(): int {
     g2.addTask(t4);
     let res2 = await taskpool.execute(g2);
     // Run group without tasks
-    let g0 = new taskpool.TaskGroup('g0');
+    let g0 = new taskpool.TaskGroup("g0");
     let res0 = await taskpool.execute(g0);
     return 0;   // #BP
 }

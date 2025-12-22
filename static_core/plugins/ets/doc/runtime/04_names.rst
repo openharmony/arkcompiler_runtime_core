@@ -329,7 +329,7 @@ All the other entities in the bytecode (some has non-mangled names, others are n
     :widths: 35, 65
 
     ==================== ====================
-    **Primitive types**  **Name in bytecode**
+    **Primitive types**  **Name in assembly**
     ==================== ====================
     ``byte``             ``i8``              
     -------------------- --------------------
@@ -353,13 +353,13 @@ All the other entities in the bytecode (some has non-mangled names, others are n
     :widths: 35, 65
 
     ==================================== =====================================================================
-    **Built-in reference types**         **Representation in the bytecode**                
+    **Built-in reference types**         **Name in assembly**                
     ==================================== =====================================================================
     ``object/Object``                    ``std.core.Object``                 
     ------------------------------------ ---------------------------------------------------------------------
     ``string/String``                    ``std.core.String``                 
     ------------------------------------ ---------------------------------------------------------------------
-    ``simple array``                     ``typename_in_bytecode + "[" + "]"``
+    ``fixed array``                      ``typename_in_assembly + "[" + "]"``
     ------------------------------------ ---------------------------------------------------------------------
     ``void``                             ``void``                            
     ------------------------------------ ---------------------------------------------------------------------
@@ -376,7 +376,7 @@ All the other entities in the bytecode (some has non-mangled names, others are n
     :widths: 35, 65
 
     ================================ ===============================================================
-    **User defined reference types** **Representation in the bytecode**            
+    **User defined reference types** **Name in assembly**            
     ================================ ===============================================================
     ``function type``                ``std.core.Function + counter`` (counter: number of parameters)
     -------------------------------- ---------------------------------------------------------------
@@ -460,7 +460,7 @@ Other examples related to non-mangled names:
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     let arr: int[] = [1, 2, 3]                     |     i32[]                                             |
+    |     let arr: FixedArray<int> = [1, 2, 3]           |     i32[]                                             |
     +----------------------------------------------------+-------------------------------------------------------+
 
 .. table::

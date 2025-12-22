@@ -43,6 +43,8 @@ class VmbLauncher {
         let now: long = Double.toLong(Date.now());
     {% if print_func == 'console' %}
         console.info(now + " " + msg);
+    {% elif print_func == 'console_println' %}
+        console.println(now + " " + msg);
     {% elif print_func == 'hilog' %}
         info(0, "VMB", now + " " + msg);
     {% else %}
@@ -80,10 +82,10 @@ class VmbLauncher {
             let elapsedMs: long = 0;
         {% if gc > 0 %}
             VmbLauncher.log("Force GC");
-            let gc = GC.startGC(GC.Cause.FULL);
+            let gc = GC.startGC(GC.Cause.THRESHOLD);
             GC.waitForFinishGC(gc);
             VmbLauncher.log("Force GC");
-            gc = GC.startGC(GC.Cause.FULL);
+            gc = GC.startGC(GC.Cause.THRESHOLD);
             GC.waitForFinishGC(gc);
             // No sleep in ETS: sleep({{gc}})
         {% else %}

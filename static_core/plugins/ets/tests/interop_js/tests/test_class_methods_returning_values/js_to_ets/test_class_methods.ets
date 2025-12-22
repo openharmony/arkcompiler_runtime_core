@@ -13,50 +13,39 @@
  * limitations under the License.
  */
 
-import {
-    TReturnsAny,
-    TReturnsStrLiteral,
-    TReturnsIntLiteral,
-    TReturnsBoolLiteral,
-    TReturnsBigNLiteral,
-    TReturnsString,
-    TReturnsMap,
-    TTestClass,
-    TTestInterface,
-    TestClass,
+let module = ESValue.load('js_code');
+let TestClass = module.getProperty('TestClass');
 
-    returnIntegerAsAny,
-    returnStringAsAny,
-    returnBigIntegerAsAny,
-    returnBooleanAsAny,
-    returnUndefinedAsAny,
-    returnNullAsAny,
-    returnMapAsAny,
-    returnSetAsAny,
+let returnIntegerAsAny = module.getProperty('returnIntegerAsAny');
+let returnStringAsAny = module.getProperty('returnStringAsAny');
+let returnBigIntegerAsAny = module.getProperty('returnBigIntegerAsAny');
+let returnBooleanAsAny = module.getProperty('returnBooleanAsAny');
+let returnUndefinedAsAny = module.getProperty('returnUndefinedAsAny');
+let returnNullAsAny = module.getProperty('returnNullAsAny');
+let returnMapAsAny = module.getProperty('returnMapAsAny');
+let returnSetAsAny = module.getProperty('returnSetAsAny');
 
-    returnStrLiteral,
-    returnIntLiteral,
-    returnBoolLiteral,
-    returnsBigNLiteral,
+let returnStrLiteral = module.getProperty('returnStrLiteral');
+let returnIntLiteral = module.getProperty('returnIntLiteral');
+let returnBoolLiteral = module.getProperty('returnBoolLiteral');
+let returnsBigNLiteral = module.getProperty('returnsBigNLiteral');
 
-    returnMap,
-    returnSet,
-    returnTuple,
-    isTTupleTS,
+let returnMap = module.getProperty('returnMap');
+let returnSet = module.getProperty('returnSet');
+let returnTuple = module.getProperty('returnTuple');
+let isTTupleTS = module.getProperty('isTTupleTS');
 
-    returnStringSubsetByRef,
-    returnMapSubsetByRef,
-    returnStringSubsetByValue,
-    returnIntSubsetByValue,
-    returnLongIntSubsetByValue,
-    returnBoolSubsetByValue,
-    returnUndefinedSubsetByValue,
-    returnNullSubsetByValue,
-
-    returnUnion,
-    returnClass,
-    returnInterface
-} from 'js_code';
+let returnStringSubsetByRef = module.getProperty('returnStringSubsetByRef');
+let returnMapSubsetByRef = module.getProperty('returnMapSubsetByRef');
+let returnStringSubsetByValue = module.getProperty('returnStringSubsetByValue');
+let returnIntSubsetByValue = module.getProperty('returnIntSubsetByValue');
+let returnLongIntSubsetByValue = module.getProperty('returnLongIntSubsetByValue');
+let returnBoolSubsetByValue = module.getProperty('returnBoolSubsetByValue');
+let returnUndefinedSubsetByValue = module.getProperty('returnUndefinedSubsetByValue');
+let returnNullSubsetByValue = module.getProperty('returnNullSubsetByValue');
+let returnUnion = module.getProperty('returnUnion');
+let returnClass = module.getProperty('returnClass');
+let returnInterface = module.getProperty('returnInterface');
 
 const SAMPLE_STRING = 'This is a test string'
 const TEST_LONG_INT = 9007199254740991
@@ -72,208 +61,207 @@ const TEST_LITERAL_BIGN = 100n
 type ETSTupleType = [ string, int, boolean ]
 
 function TestReturnIntegerAsAny(): boolean {
-    const TestFunc: TReturnsAny = returnIntegerAsAny
-    const testVal = TestFunc() as number
-    return testVal == TEST_INT
+    const TestFunc: Any = returnIntegerAsAny;
+    const testVal = TestFunc.invoke().toNumber();
+    return testVal === TEST_INT;
 }
 
 function TestReturnStringAsAny(): boolean {
-    const TestFunc: TReturnsAny = returnStringAsAny
-    const testVal = TestFunc()
-    return testVal == SAMPLE_STRING
+    const TestFunc: Any = returnStringAsAny;
+    const testVal = TestFunc.invoke().toString();
+    return testVal === SAMPLE_STRING;
 }
 
 function TestReturnBigIntegerAsAny(): boolean {
-    const TestFunc: TReturnsAny = returnBigIntegerAsAny
-    const testVal = TestFunc()
-    return testVal == TEST_BIG_INT
+    const TestFunc: Any = returnBigIntegerAsAny;
+    const testVal = TestFunc.invoke().toBigInt();
+    return testVal === TEST_BIG_INT
 }
 
 function TestReturnBooleanAsAny(): boolean {
-    const TestFunc: TReturnsAny = returnBooleanAsAny
-    const testVal = TestFunc() as boolean
-    return testVal == TEST_BOOLEAN
+    const TestFunc: Any = returnBooleanAsAny;
+    const testVal = TestFunc.invoke().toBoolean();
+    return testVal === TEST_BOOLEAN;
 }
 
-// Note: Using NullishType is a workaround until #17745 is not resolved
+// Note: Using Any is a workaround until #17745 is not resolved
 function TestReturnNullAsAny(): boolean {
-    const TestFunc: TReturnsAny = returnNullAsAny
-    const testVal = TestFunc() as NullishType
-    return testVal == null
+    const TestFunc: Any = returnNullAsAny;
+    const testVal = TestFunc.invoke().unwrap() as Any;
+    return testVal === null;
 }
 
 function TestReturnUndefinedAsAny(): boolean {
-    const TestFunc: TReturnsAny = returnUndefinedAsAny
-    const testVal = TestFunc()
-    return testVal == undefined
+    const TestFunc: Any = returnUndefinedAsAny
+    const testVal = TestFunc.invoke().toUndefined();
+    return testVal === undefined
 }
 
 function TestReturnMapAsAny(): boolean {
-    const TestFunc: TReturnsAny = returnMapAsAny
-    const map = TestFunc()
-    return map.has(SAMPLE_STRING.toUpperCase()) as boolean
+    const TestFunc: Any = returnMapAsAny;
+    const map = TestFunc.invoke().unwrap() as Map<Any, Any>;
+    return map.has(SAMPLE_STRING.toUpperCase()) as boolean;
 }
 
 function TestReturnSetAsAny(): boolean {
-    const TestFunc: TReturnsAny = returnSetAsAny
-    const set = TestFunc()
+    const TestFunc: Any = returnSetAsAny;
+    const set = TestFunc.invoke().unwrap() as Set<Any>;
     return (
         set.size as int > 0
-        && !(set.has(SAMPLE_STRING) as boolean) 
+        && !(set.has(SAMPLE_STRING) as boolean)
         && set.has(SAMPLE_STRING.toLowerCase()) as boolean
-    )
+    );
 }
 
 function TestReturnStringAsLiteral(): boolean {
-    const TestFunc: TReturnsStrLiteral = returnStrLiteral
-    const testVal = TestFunc()
-    return testVal == TEST_LITERAL_STRING
+    const TestFunc: Any = returnStrLiteral;
+    const testVal = TestFunc.invoke().toString();
+    return testVal === TEST_LITERAL_STRING;
 }
 
 function TestReturnBigNAsLiteral(): boolean {
-    const TestFunc: TReturnsBigNLiteral = returnsBigNLiteral
-    const testVal = TestFunc()
-    return testVal == TEST_LITERAL_BIGN
+    const TestFunc: Any = returnsBigNLiteral;
+    const testVal = TestFunc.invoke().toBigInt();
+    return testVal === TEST_LITERAL_BIGN;
 }
 
 function TestReturnIntAsLiteral(): boolean {
-    const TestFunc: TReturnsIntLiteral = returnIntLiteral
-    const testVal = TestFunc() as int
-    return testVal == TEST_LITERAL_INTEGER
+    const TestFunc: Any = returnIntLiteral;
+    const testVal = TestFunc.invoke().toNumber();
+    return testVal === TEST_LITERAL_INTEGER;
 }
 
 function TestReturnBoolAsLiteral(): boolean {
-    const TestFunc: TReturnsBoolLiteral = returnBoolLiteral
-    const testVal = TestFunc() as boolean
-    return testVal == TEST_LITERAL_BOOLEAN
+    const TestFunc: Any = returnBoolLiteral;
+    const testVal = TestFunc.invoke().toBoolean();
+    return testVal === TEST_LITERAL_BOOLEAN;
 }
 
 function TestReturnMap(): boolean {
-    const map = returnMap()
-    return map.has(SAMPLE_STRING.toUpperCase()) as boolean
+    const map = returnMap.invoke().unwrap() as Map<Any, Any>;
+    return map.has(SAMPLE_STRING.toUpperCase()) as boolean;
 }
 
 function TestReturnSet(): boolean {
-    const set = returnSet()
+    const set = returnSet.invoke().unwrap() as Set<Any>;
     return (
         set.size as int > 0
-        && !(set.has(SAMPLE_STRING) as boolean) 
+        && !(set.has(SAMPLE_STRING) as boolean)
         && set.has(SAMPLE_STRING.toLowerCase()) as boolean
-    )
+    );
 }
 
 function TestReturnTuple(): boolean {
-    const expectedTuple: ETSTupleType = returnTuple() as ETSTupleType
-    return (expectedTuple instanceof ETSTupleType && isTTupleTS(expectedTuple) as boolean)
+    const expectedTuple: Any = returnTuple.invoke().unwrap() as ETSTupleType;
+    return (isTTupleTS.invoke(expectedTuple).toBoolean());
 }
 
 function TestReturnStringSubsetByRef(): boolean {
-    const TestFunc: TReturnsString = returnStringSubsetByRef
-    const testVal = TestFunc() as string
+    const TestFunc: Any = returnStringSubsetByRef;
+    const testVal = TestFunc.invoke();
     return (
-        testVal == SAMPLE_STRING
-        && typeof testVal == 'string'
-    )
+        testVal.toString() === SAMPLE_STRING
+        && testVal.typeOf() === 'string'
+    );
 }
 
 function TestReturnMapSubsetByRef(): boolean {
-    const TestFunc: TReturnsMap = returnMapSubsetByRef
-    const initialMap = TestFunc()
-    const changedMap = TestFunc()
+    const TestFunc: Any = returnMapSubsetByRef
+    const initialMap = TestFunc.invoke().unwrap() as Map<Any, Any>;
+    const changedMap = TestFunc.invoke().unwrap() as Map<Any, Any>;
 
-    const initialInitialMapSize: number = initialMap.size
-    const initialChangedMapSize: number = changedMap.size
-    changedMap.set('2', 'Test')
-    const finalInitialMapSize: number = initialMap.size 
-    const finalChangedMapSize: number = changedMap.size
-    
+    const initialInitialMapSize: number = initialMap.size;
+    const initialChangedMapSize: number = changedMap.size;
+    changedMap.set('2', 'Test');
+    const finalInitialMapSize: number = initialMap.size;
+    const finalChangedMapSize: number = changedMap.size;
+
     return (
-        initialInitialMapSize == 1 
-        && initialChangedMapSize == 1
+        initialInitialMapSize === 1
+        && initialChangedMapSize === 1
         && initialMap.has('2') as boolean
-        && finalInitialMapSize == 2
-        && finalChangedMapSize == 2
+        && finalInitialMapSize === 2
+        && finalChangedMapSize === 2
     )
 }
 
 function TestReturnStringSubsetByValue(): boolean {
-    const testVal  = returnStringSubsetByValue() as string
+    const testVal  = returnStringSubsetByValue.invoke();
     return (
-        testVal == SAMPLE_STRING
-        && typeof testVal == 'string'
-    )
+        testVal.toString() === SAMPLE_STRING
+        && testVal.typeOf() === 'string'
+    );
 }
 
 function TestReturnIntSubsetByValue(): boolean {
-    const TestFunc = returnIntSubsetByValue
-    const testVal = TestFunc() as int
+    const TestFunc = returnIntSubsetByValue;
+    const testVal = TestFunc.invoke();
     return (
-        testVal == TEST_INT
-        && typeof testVal == 'number'
-    )
+        testVal.toNumber() === TEST_INT
+        && testVal.typeOf() === 'number'
+    );
 }
 
 function TestReturnLongIntSubsetByValue(): boolean {
-    const TestFunc = returnLongIntSubsetByValue
-    const testVal = TestFunc() as long
+    const TestFunc = returnLongIntSubsetByValue;
+    const testVal = TestFunc.invoke().unwrap() as double;
     return (
-        testVal == TEST_LONG_INT
-        && typeof testVal == 'number'
-    )
+        testVal === TEST_LONG_INT
+        && typeof testVal === 'number'
+    );
 }
 
 function TestReturnBoolSubsetByValue(): boolean {
-    const TestFunc = returnBoolSubsetByValue
-    const testVal = TestFunc() as boolean
+    const TestFunc = returnBoolSubsetByValue;
+    const testVal = TestFunc.invoke();
     return (
-        testVal == TEST_BOOLEAN
-        && typeof testVal == 'boolean'
-    )
+        testVal.toBoolean() === TEST_BOOLEAN
+        && testVal.typeOf() === 'boolean'
+    );
 }
 
-// Note: Using NullishType is a workaround until #17745 is not resolved
+// Note: Using Any is a workaround until #17745 is not resolved
 function TestReturnNullSubsetByValue(): boolean {
-    const TestFunc = returnNullSubsetByValue
-    const testVal = TestFunc() as NullishType
+    const TestFunc = returnNullSubsetByValue;
+    const testVal = TestFunc.invoke().unwrap() as Any;
     return (
-        testVal == null
-        && typeof testVal == 'object'
-    )
+        testVal === null
+        && typeof testVal === 'object'
+    );
 }
 
 function TestReturnUndefinedSubsetByValue(): boolean {
-    const TestFunc = returnUndefinedSubsetByValue
-    const testVal = TestFunc()
-    return testVal == undefined
+    const TestFunc = returnUndefinedSubsetByValue;
+    const testVal = TestFunc.invoke().toUndefined();
+    return testVal === undefined;
 }
 
 function TestReturnUnion(): boolean {
-    const TestFunc = returnUnion
-    const testValStr = TestFunc(true) as string
-    const testValNum = TestFunc(false) as number
-
+    const TestFunc = returnUnion;
+    const testValStr = TestFunc.invoke(true).toString();
+    const testValNum = TestFunc.invoke(false).toNumber();
     return (
-        typeof testValStr == 'string' && testValStr as string == '1000'
-        && typeof testValNum == 'number' && testValNum as number == 1000)
+        typeof testValStr === 'string' && testValStr as string === '1000'
+        && typeof testValNum === 'number' && testValNum as number === 1000);
 
 }
 
 function TestReturnClass(): boolean {
-    const testFunc: TTestClass = returnClass
-    const testClassVal = testFunc()
+    const testFunc: Any = returnClass;
+    const testClassVal = testFunc.invoke();
     return (
-        testClassVal.testString as string == 'Test'
-        && testClassVal.testNumber as number == 1
-        && testClassVal.testFunction() as number == 1
-        && (TestClass.isTestClass(testClassVal) as boolean) == true
-    )
+        testClassVal.getProperty('testString').toString() === 'Test'
+        && testClassVal.getProperty('testNumber').toNumber() === 1
+        && testClassVal.invokeMethod('testFunction').toNumber() === 1
+        && TestClass.invokeMethod('isTestClass', testClassVal).toBoolean() === true
+    );
 }
 
 function TestReturnInterface(): boolean {
-    const TestFunc: TTestInterface = returnInterface
-    const testVal = TestFunc()
+    const TestFunc: Any = returnInterface;
+    const testVal = TestFunc.invoke();
     return (
-        testVal.testString as string == 'Test'
-        && testVal.testNumber as number == 100
-    )
+        testVal.getProperty('testString').toString() === 'Test'
+        && testVal.getProperty('testNumber').toNumber() === 100
+    );
 }

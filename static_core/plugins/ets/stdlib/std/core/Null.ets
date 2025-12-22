@@ -20,7 +20,7 @@ export final class Null {
 
     public override toString(): String { return "null"; }
 
-    public equals(to: NullishType): boolean {
+    public equals(to: Any): boolean {
         throw new Error("Internal error: null.equals was called!")
     }
 }

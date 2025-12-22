@@ -17,9 +17,9 @@
 #define PANDA_PLUGINS_ETS_TYPEAPI_H_
 
 #include <string>
-#include "type.h"
+#include <libarkfile/include/type.h>
 #include "types/ets_primitives.h"
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 #include "types/ets_string.h"
 
 namespace ark::ets {

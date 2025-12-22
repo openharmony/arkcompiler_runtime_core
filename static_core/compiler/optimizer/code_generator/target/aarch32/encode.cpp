@@ -1326,10 +1326,46 @@ void Aarch32Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr double HALF = 0.5;
     // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double NEG_HALF = -0.5;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr double ONE = 1.0;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double ZERO = 0.0;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double NEG_ZERO = -0.0;
 
     ScopedTmpRegF64 ceil(this);
     vixl::aarch32::DRegister tmp(ceil.GetReg().GetId() + 1);
+
+    auto skipZero = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto negZeroCase = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto done = static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+
+    GetMasm()->Vmov(tmp, NEG_HALF);
+    GetMasm()->Vcmp(VixlVReg(src), tmp);
+    GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
+    GetMasm()->B(vixl::aarch32::lt, skipZero);
+
+    GetMasm()->Vmov(tmp, HALF);
+    GetMasm()->Vcmp(VixlVReg(src), tmp);
+    GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
+    GetMasm()->B(vixl::aarch32::ge, skipZero);
+
+    GetMasm()->Vmov(tmp, NEG_HALF);
+    GetMasm()->Vcmp(VixlVReg(src), tmp);
+    GetMasm()->Vmrs(vixl::aarch32::APSR_nzcv, vixl::aarch32::FPSCR);
+    GetMasm()->B(vixl::aarch32::lt, negZeroCase);
+
+    GetMasm()->Vmov(tmp, ZERO);
+    GetMasm()->Vmov(VixlVReg(dst), tmp);
+    GetMasm()->B(done);
+
+    GetMasm()->Bind(negZeroCase);
+    GetMasm()->Vmov(tmp, NEG_ZERO);
+    GetMasm()->Vmov(VixlVReg(dst), tmp);
+    GetMasm()->B(done);
+
+    GetMasm()->Bind(skipZero);
 
     // calculate ceil(val)
     GetMasm()->Vrintp(VixlVReg(ceil), VixlVReg(src));
@@ -1346,6 +1382,7 @@ void Aarch32Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
 
     // final value is ceil(val) if le
     GetMasm()->Vmov(Convert(Condition::LE), VixlVReg(dst), VixlVReg(ceil));  // ceil(val)
+    GetMasm()->Bind(done);
 }
 
 void Aarch32Encoder::EncodeReverseBits(Reg dst, Reg src)
@@ -2227,6 +2264,15 @@ void Aarch32Encoder::EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1)
     GetMasm()->Mov(cc.Negate(), VixlRegU(dst), VixlRegU(src0));
 }
 
+void Aarch32Encoder::EncodeExtractBits(Reg dst, Reg src, Imm imm1, Imm imm2, bool signExt)
+{
+    if (signExt) {
+        GetMasm()->Sbfx(VixlReg(dst), VixlReg(src), imm1.GetAsInt(), imm2.GetAsInt());
+    } else {
+        GetMasm()->Ubfx(VixlReg(dst), VixlReg(src), imm1.GetAsInt(), imm2.GetAsInt());
+    }
+}
+
 template <bool IS_MAX>
 void Aarch32Encoder::EncodeMinMaxFp(Reg dst, Reg src0, Reg src1)
 {
@@ -3057,7 +3103,7 @@ void Aarch32Encoder::EncodeStackOverflowCheck(ssize_t offset)
     EncodeLdr(tmp, false, MemRef(tmp));
 }
 
-void Aarch32Encoder::EncodeSelect(ArgsSelect &&args)
+void Aarch32Encoder::EncodeSelect(const ArgsSelect &args)
 {
     auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat());
@@ -3073,7 +3119,7 @@ void Aarch32Encoder::EncodeSelect(ArgsSelect &&args)
     }
 }
 
-void Aarch32Encoder::EncodeSelect(ArgsSelectImm &&args)
+void Aarch32Encoder::EncodeSelect(const ArgsSelectImm &args)
 {
     auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -3121,7 +3167,7 @@ void Aarch32Encoder::EncodeSelect(ArgsSelectImm &&args)
     }
 }
 
-void Aarch32Encoder::EncodeSelectTest(ArgsSelect &&args)
+void Aarch32Encoder::EncodeSelectTest(const ArgsSelect &args)
 {
     auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -3137,7 +3183,7 @@ void Aarch32Encoder::EncodeSelectTest(ArgsSelect &&args)
     }
 }
 
-void Aarch32Encoder::EncodeSelectTest(ArgsSelectImm &&args)
+void Aarch32Encoder::EncodeSelectTest(const ArgsSelectImm &args)
 {
     auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
@@ -3186,6 +3232,11 @@ bool Aarch32Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
     }
 #endif  // NDEBUG
     return vixl::aarch32::ImmediateA32::IsImmediateA32(imm);
+}
+
+bool Aarch32Encoder::CanEncodeBitfieldExtractionFor(DataType::Type type)
+{
+    return type == DataType::INT32 || type == DataType::UINT32;
 }
 
 using vixl::aarch32::MemOperand;

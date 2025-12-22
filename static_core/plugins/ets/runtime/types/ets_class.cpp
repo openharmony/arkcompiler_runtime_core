@@ -16,8 +16,9 @@
 #include "ets_panda_file_items.h"
 #include "include/language_context.h"
 #include "include/mem/panda_containers.h"
-#include "libpandabase/utils/utf.h"
-#include "macros.h"
+#include "libarkbase/utils/utf.h"
+#include "libarkbase/macros.h"
+#include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_utils.h"
@@ -338,10 +339,10 @@ EtsField *EtsClass::GetOwnFieldByIndex(uint32_t i)
     return EtsField::FromRuntimeField(&GetRuntimeClass()->GetFields()[i]);
 }
 
-EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature, bool isANIFormat)
+EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature)
 {
     auto coreName = reinterpret_cast<const uint8_t *>(name);
-    return GetDirectMethod(coreName, signature, isANIFormat);
+    return GetDirectMethod(coreName, signature);
 }
 
 EtsMethod *EtsClass::GetDirectMethod(const char *name)
@@ -351,9 +352,9 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name)
     return EtsMethod::FromRuntimeMethod(rtMethod);
 }
 
-EtsMethod *EtsClass::GetDirectMethod(const uint8_t *name, const char *signature, bool isANIFormat)
+EtsMethod *EtsClass::GetDirectMethod(const uint8_t *name, const char *signature)
 {
-    EtsMethodSignature methodSignature(signature, isANIFormat);
+    EtsMethodSignature methodSignature(signature);
     if (!methodSignature.IsValid()) {
         LOG(ERROR, RUNTIME) << "Wrong method signature: " << signature;
         return nullptr;
@@ -369,20 +370,27 @@ EtsMethod *EtsClass::GetDirectMethod(const char *name, const Method::Proto &prot
     return EtsMethod::FromRuntimeMethod(method);
 }
 
-EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, const char *signature) const
+EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, const char *signature) const
 {
-    Span<Method> methods = GetRuntimeClass()->GetStaticMethods();
+    EtsMethodSignature methodSignature(signature);
+    if (!methodSignature.IsValid()) {
+        LOG(ERROR, ANI) << "Wrong method signature: " << signature;
+        return nullptr;
+    }
+    return GetDirectMethod(isStatic, name, methodSignature);
+}
+
+EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, const EtsMethodSignature &methodSignature) const
+{
+    const Class *rtClass = GetRuntimeClass();
+    Span<Method> methods = isStatic ? rtClass->GetStaticMethods() : rtClass->GetVirtualMethods();
+
     const uint8_t *mutf8Name = utf::CStringAsMutf8(name);
     const MethodNameComp comp;
     panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     auto it = std::lower_bound(methods.begin(), methods.end(), key, comp);
 
-    EtsMethodSignature methodSignature(signature, true);
-    if (!methodSignature.IsValid()) {
-        LOG(ERROR, ANI) << "Wrong method signature: " << signature;
-        return nullptr;
-    }
-    Method::Proto &proto = methodSignature.GetProto();
+    const Method::Proto &proto = methodSignature.GetProto();
     while (it != methods.end()) {
         auto &m = *it;
         if (!comp.equal(m, key)) {
@@ -396,12 +404,13 @@ EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, const char *signatu
     return nullptr;
 }
 
-EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, bool *outIsUnique) const
+EtsMethod *EtsClass::GetDirectMethod(bool isStatic, const char *name, bool *outIsUnique) const
 {
     ASSERT(outIsUnique != nullptr);
     *outIsUnique = true;
 
-    Span<Method> methods = GetRuntimeClass()->GetStaticMethods();
+    const Class *rtClass = GetRuntimeClass();
+    Span<Method> methods = isStatic ? rtClass->GetStaticMethods() : rtClass->GetVirtualMethods();
     const uint8_t *mutf8Name = utf::CStringAsMutf8(name);
     const MethodNameComp comp;
     panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
@@ -419,7 +428,14 @@ EtsMethod *EtsClass::GetDirectStaticMethod(const char *name, bool *outIsUnique) 
 
 uint32_t EtsClass::GetMethodsNum()
 {
-    return GetMethods().size();
+    // Atomic with relaxed order reason: get the latest value
+    uint32_t currentNum = methodsNum_.load(std::memory_order_relaxed);
+    if (currentNum == 0) {
+        uint32_t newNum = GetMethods().size();
+        methodsNum_.compare_exchange_strong(currentNum, newNum);
+        return newNum;
+    }
+    return currentNum;
 }
 
 EtsMethod *EtsClass::GetMethodByIndex(uint32_t ind)
@@ -502,73 +518,6 @@ EtsMethod *EtsClass::ResolveVirtualMethod(const EtsMethod *method) const
     return reinterpret_cast<EtsMethod *>(GetRuntimeClass()->ResolveVirtualMethod(method->GetPandaMethod()));
 }
 
-static std::pair<char const *, EtsClassRoot> GetNameAndClassRoot(char hash)
-{
-    const char *primitiveName = nullptr;
-    EtsClassRoot classRoot;
-
-    switch (hash) {
-        case 'v':
-            primitiveName = "void";
-            classRoot = EtsClassRoot::VOID;
-            break;
-        case 'b':
-            primitiveName = "boolean";
-            classRoot = EtsClassRoot::BOOLEAN;
-            break;
-        case 'B':
-            primitiveName = "byte";
-            classRoot = EtsClassRoot::BYTE;
-            break;
-        case 'c':
-            primitiveName = "char";
-            classRoot = EtsClassRoot::CHAR;
-            break;
-        case 's':
-            primitiveName = "short";
-            classRoot = EtsClassRoot::SHORT;
-            break;
-        case 'i':
-            primitiveName = "int";
-            classRoot = EtsClassRoot::INT;
-            break;
-        case 'l':
-            primitiveName = "long";
-            classRoot = EtsClassRoot::LONG;
-            break;
-        case 'f':
-            primitiveName = "float";
-            classRoot = EtsClassRoot::FLOAT;
-            break;
-        case 'd':
-            primitiveName = "double";
-            classRoot = EtsClassRoot::DOUBLE;
-            break;
-        default:
-            break;
-    }
-
-    return {primitiveName, classRoot};
-}
-
-/* static */
-EtsClass *EtsClass::GetPrimitiveClass(EtsString *name)
-{
-    if (name == nullptr || name->GetMUtf8Length() < 2) {  // MUtf8Length must be >= 2
-        return nullptr;
-    }
-    // StringIndexOutOfBoundsException is not thrown by At method, because index (0, 1) < length (>= 2)
-    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    char hash = name->At(0) ^ ((name->At(1) & 0x10) << 1);  // NOLINT(hicpp-signed-bitwise, readability-magic-numbers)
-    auto [primitiveName, classRoot] = GetNameAndClassRoot(hash);
-
-    if (primitiveName != nullptr && name->IsEqual(primitiveName)) {  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
-        return PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(classRoot);
-    }
-
-    return nullptr;
-}
-
 EtsString *EtsClass::CreateEtsClassName([[maybe_unused]] const char *descriptor)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
@@ -581,35 +530,9 @@ EtsString *EtsClass::CreateEtsClassName([[maybe_unused]] const char *descriptor)
         std::replace(etsName.begin(), etsName.end(), '/', '.');
         return EtsString::CreateFromMUtf8(etsName.data(), etsName.length());
     }
-    if (*descriptor == '[') {
-        PandaString etsName(descriptor);
-        std::replace(etsName.begin(), etsName.end(), '/', '.');
-        return EtsString::CreateFromMUtf8(etsName.data(), etsName.length());
-    }
 
-    switch (*descriptor) {
-        case 'Z':
-            return EtsString::CreateFromMUtf8("boolean");
-        case 'B':
-            return EtsString::CreateFromMUtf8("byte");
-        case 'C':
-            return EtsString::CreateFromMUtf8("char");
-        case 'S':
-            return EtsString::CreateFromMUtf8("short");
-        case 'I':
-            return EtsString::CreateFromMUtf8("int");
-        case 'J':
-            return EtsString::CreateFromMUtf8("long");
-        case 'F':
-            return EtsString::CreateFromMUtf8("float");
-        case 'D':
-            return EtsString::CreateFromMUtf8("double");
-        case 'V':
-            return EtsString::CreateFromMUtf8("void");
-        default:
-            LOG(FATAL, RUNTIME) << "Incorrect primitive name" << descriptor;
-            UNREACHABLE();
-    }
+    ark::ets::RuntimeDescriptorParser nameParser(descriptor);
+    return EtsString::CreateFromMUtf8(nameParser.Resolve().c_str());
 }
 
 EtsString *EtsClass::GetName()
@@ -617,20 +540,17 @@ EtsString *EtsClass::GetName()
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
 
     EtsString *name = nullptr;
-    bool success = false;
 
-    do {
-        name = reinterpret_cast<EtsString *>(GetObjectHeader()->GetFieldObject(GetNameOffset()));
-        if (name != nullptr) {
-            return name;
-        }
+    name = reinterpret_cast<EtsString *>(GetObjectHeader()->GetFieldObject(GetNameOffset()));
+    if (name != nullptr) {
+        return name;
+    }
 
-        name = CreateEtsClassName(GetDescriptor());
-        if (name == nullptr) {
-            return nullptr;
-        }
-        success = CompareAndSetName(nullptr, name);
-    } while (!success);
+    name = CreateEtsClassName(GetDescriptor());
+    if (name == nullptr) {
+        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        return nullptr;
+    }
     return name;
 }
 
@@ -726,6 +646,7 @@ static bool HasFunctionTypeInSuperClasses(EtsClass *cls)
     return false;
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType,
                           ClassLinkerErrorHandler *errorHandler)
 {
@@ -733,6 +654,12 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     SetName(nullptr);
     // Class of interface extends Object, but we should not expose this information to user.
     IsInterface() ? SetSuperClass(nullptr) : SetSuperClass(superClass);
+
+    // Save reference to defining RuntimeLinker in order to prevent its collection
+    auto *ctx = GetLoadContext();
+    ASSERT(ctx != nullptr);
+    SetLinker(ctx->IsBootContext() ? nullptr
+                                   : EtsClassLinkerContext::FromCoreType(ctx)->GetRuntimeLinker()->GetCoreType());
 
     uint32_t flags = accessFlags;
     if (isPrimitiveType) {
@@ -811,6 +738,11 @@ EtsClass *EtsClass::GetComponentType() const
     return FromRuntimeClass(componentType);
 }
 
+void EtsClass::SetLinker(ObjectHeader *linker)
+{
+    GetObjectHeader()->SetFieldObject(MEMBER_OFFSET(EtsClass, linker_), linker);
+}
+
 void EtsClass::SetName(EtsString *name)
 {
     GetObjectHeader()->SetFieldObject(GetNameOffset(), reinterpret_cast<ObjectHeader *>(name));
@@ -825,9 +757,9 @@ bool EtsClass::CompareAndSetName(EtsString *oldName, EtsString *newName)
 
 EtsField *EtsClass::GetFieldIDByName(const char *name, const char *sig)
 {
+    ASSERT(name != nullptr);
     auto u8name = reinterpret_cast<const uint8_t *>(name);
     auto *field = reinterpret_cast<EtsField *>(GetRuntimeClass()->GetInstanceFieldByName(u8name));
-
     if (sig != nullptr && field != nullptr) {
         if (strcmp(field->GetTypeDescriptor(), sig) != 0) {
             return nullptr;
@@ -866,8 +798,10 @@ EtsField *EtsClass::GetStaticFieldIDByName(const char *name, const char *sig)
 
 EtsField *EtsClass::GetDeclaredFieldIDByName(const char *name)
 {
+    ASSERT(name != nullptr);
     return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindDeclaredField([name](const ark::Field &field) -> bool {
         auto *efield = EtsField::FromRuntimeField(&field);
+        ASSERT(efield != nullptr);
         return ::strcmp(efield->GetName(), name) == 0;
     }));
 }
@@ -950,8 +884,8 @@ EtsObject *EtsClass::CreateInstance()
     }
 
     EtsMethod *ctor = GetDirectMethod(panda_file_items::CTOR.data(), ":V");
-    if (UNLIKELY(ctor == nullptr)) {
-        throwCreateInstanceErr("No default constructor in");
+    if (UNLIKELY(ctor == nullptr) || !ctor->IsPublic()) {
+        throwCreateInstanceErr("No default public constructor in");
         return nullptr;
     }
 
@@ -986,48 +920,12 @@ EtsClass *EtsClass::ResolveStringClass()
     return this;
 }
 
-static EtsClass *ResolvePrimitivePublicClass(panda_file::Type type)
-{
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
-    switch (type.GetId()) {
-        case panda_file::Type::TypeId::U1:
-            return ptypes->coreBoolean;
-        case panda_file::Type::TypeId::I8:
-            return ptypes->coreByte;
-        case panda_file::Type::TypeId::I16:
-            return ptypes->coreShort;
-        case panda_file::Type::TypeId::U16:
-            return ptypes->coreChar;
-        case panda_file::Type::TypeId::I32:
-            return ptypes->coreInt;
-        case panda_file::Type::TypeId::I64:
-            return ptypes->coreLong;
-        case panda_file::Type::TypeId::F32:
-            return ptypes->coreFloat;
-        case panda_file::Type::TypeId::F64:
-            return ptypes->coreDouble;
-        case panda_file::Type::TypeId::VOID:
-            return coroutine->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::VOID);
-        default:
-            LOG(FATAL, RUNTIME) << "ResolveArgType: not a valid ets type for " << type;
-            return nullptr;
-    };
-}
-
 EtsClass *EtsClass::ResolvePublicClass()
 {
-    if (!IsStringClass() && !IsPrimitive()) {
-        return this;
-    }
     if (IsStringClass()) {
         return ResolveStringClass();
     }
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto type = panda_file::Type::GetTypeIdBySignature(GetDescriptor()[0]);
-    return ResolvePrimitivePublicClass(type);
+    return this;
 }
 
 }  // namespace ark::ets

@@ -15,7 +15,7 @@
 
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -32,8 +32,9 @@
 #include "plugins/ets/runtime/types/ets_typeapi.h"
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
 #include "runtime/handle_scope-inl.h"
-#include "libpandabase/utils/utf.h"
+#include "libarkbase/utils/utf.h"
 
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -62,14 +63,15 @@ EtsString *StdCoreClassGetNameInternal(EtsClass *cls)
     return cls->GetName();
 }
 
+EtsRuntimeLinker *StdCoreClassGetLinkerInternal(EtsClass *cls)
+{
+    auto *ctx = cls->GetLoadContext();
+    return ctx->IsBootContext() ? nullptr : EtsClassLinkerContext::FromCoreType(ctx)->GetRuntimeLinker();
+}
+
 EtsBoolean StdCoreClassIsNamespace(EtsClass *cls)
 {
     return cls->IsModule();
-}
-
-EtsRuntimeLinker *StdCoreClassGetLinker(EtsClass *cls)
-{
-    return EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(cls->GetLoadContext());
 }
 
 EtsClass *StdCoreClassOf(EtsObject *obj)
@@ -77,14 +79,6 @@ EtsClass *StdCoreClassOf(EtsObject *obj)
     ASSERT(obj != nullptr);
     auto *cls = obj->GetClass();
     return cls->ResolvePublicClass();
-}
-
-EtsClass *StdCoreClassOfNull()
-{
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    const auto *nullObject = EtsObject::FromCoreType(coro->GetNullValue());
-    return nullObject->GetClass();
 }
 
 EtsClass *StdCoreClassCurrent()
@@ -134,9 +128,9 @@ EtsObject *StdCoreClassCreateInstance(EtsClass *cls)
 
 EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsString *clsName)
 {
-    const auto name = clsName->GetMutf8();
-    PandaString descriptor;
-    const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);
+    ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
+    const auto name = parser.Resolve();
+    const auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
     if (classDescriptor == nullptr) {
         return nullptr;
     }
@@ -145,7 +139,14 @@ EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsSt
 
 void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
 {
-    auto *ext = PandaEtsVM::GetCurrent()->GetEtsClassLinkerExtension();
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *ext = coro->GetPandaVM()->GetEtsClassLinkerExtension();
+    if (UNLIKELY(runtimeLinker->IsInstanceOf(PlatformTypes(coro)->coreBootRuntimeLinker))) {
+        // BootRuntimeLinker is a singletone, initialize it once
+        runtimeLinker->SetClassLinkerContext(ext->GetBootContext());
+        return;
+    }
+
     ext->RegisterContext([ext, runtimeLinker]() {
         ASSERT(runtimeLinker->GetClassLinkerContext() == nullptr);
         auto allocator = ext->GetClassLinker()->GetAllocator();
@@ -163,9 +164,9 @@ void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
 
 EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsString *clsName, EtsBoolean init)
 {
-    const auto name = clsName->GetMutf8();
-    PandaString descriptor;
-    auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);
+    ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
+    const auto name = parser.Resolve();
+    auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
     if (classDescriptor == nullptr) {
         return nullptr;
     }
@@ -201,85 +202,22 @@ EtsRuntimeLinker *EtsGetNearestNonBootRuntimeLinker()
             auto *ctx = cls->GetLoadContext();
             ASSERT(ctx != nullptr);
             if (!ctx->IsBootContext()) {
-                return reinterpret_cast<EtsClassLinkerContext *>(ctx)->GetRuntimeLinker();
+                return EtsClassLinkerContext::FromCoreType(ctx)->GetRuntimeLinker();
             }
         }
     }
     return nullptr;
 }
 
-template <typename Func>
-static void GetInterfaceMethodsRecursive(Class *currIntf, Func &&collectDirectMethods)
-{
-    ASSERT(currIntf != nullptr);
-
-    collectDirectMethods(currIntf);
-
-    for (auto *intf : currIntf->GetInterfaces()) {
-        ASSERT(intf != nullptr);
-        GetInterfaceMethodsRecursive(intf, std::forward<Func>(collectDirectMethods));
-    }
-}
-
-static PandaVector<EtsMethod *> GetInstanceMethodsForInterface(EtsClass *cls, bool onlyPublic)
-{
-    ASSERT(cls->IsInterface());
-
-    PandaUnorderedMap<PandaString, EtsMethod *> uniqNames;
-    PandaVector<EtsMethod *> instanceMethods;
-
-    auto collectDirectMethods = [&uniqNames, &onlyPublic](Class *intfClass) {
-        for (auto &method : intfClass->GetMethods()) {
-            if ((onlyPublic && !method.IsPublic())) {
-                continue;
-            }
-            // Must be fixed: #30139
-            PandaString methodName = utf::Mutf8AsCString(method.GetName().data);
-            if (auto methodIt = uniqNames.find(methodName); methodIt == uniqNames.end()) {
-                uniqNames.emplace(methodName, EtsMethod::FromRuntimeMethod(&method));
-            }
-        }
-    };
-
-    GetInterfaceMethodsRecursive(cls->GetRuntimeClass(), std::move(collectDirectMethods));
-
-    instanceMethods.reserve(uniqNames.size());
-    for (auto &[name, method] : uniqNames) {
-        instanceMethods.push_back(method);
-    }
-    return instanceMethods;
-}
-
-static PandaVector<EtsMethod *> GetInstanceMethodsForClass(EtsClass *cls, bool onlyPublic)
-{
-    PandaVector<EtsMethod *> instanceMethods;
-    instanceMethods.reserve(cls->GetRuntimeClass()->GetVTableSize());
-
-    cls->EnumerateVtable([&instanceMethods, onlyPublic](Method *method) {
-        if (!method->IsConstructor() && ((onlyPublic && method->IsPublic()) || !onlyPublic)) {
-            instanceMethods.push_back(EtsMethod::FromRuntimeMethod(method));
-        }
-        return false;
-    });
-
-    return instanceMethods;
-}
-
-static PandaVector<EtsMethod *> GetInstanceMethods(EtsClass *cls, bool onlyPublic)
-{
-    if (cls->IsInterface()) {
-        return GetInstanceMethodsForInterface(cls, onlyPublic);
-    }
-    return GetInstanceMethodsForClass(cls, onlyPublic);
-}
-
-static ObjectHeader *CreateEtsReflectMethodArray(EtsCoroutine *coro, const PandaVector<EtsMethod *> &methods,
-                                                 bool isStatic = false, bool isConstructor = false)
+template <bool IS_STATIC = false, bool IS_CONSTRUCTOR = false>
+static ObjectHeader *CreateEtsReflectMethodArray(EtsCoroutine *coro, const PandaVector<EtsMethod *> &methods)
 {
     [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsClass *klass = isConstructor ? PlatformTypes(coro)->reflectConstructor
-                                    : (isStatic ? PlatformTypes(coro)->reflectStaticMethod
-                                                : PlatformTypes(coro)->reflectInstanceMethod);
+
+    EtsClass *klass = IS_CONSTRUCTOR ? PlatformTypes(coro)->reflectConstructor
+                                     : (IS_STATIC ? PlatformTypes(coro)->reflectStaticMethod
+                                                  : PlatformTypes(coro)->reflectInstanceMethod);
+    ASSERT(klass != nullptr);
 
     EtsHandle<EtsObjectArray> arrayH(coro, EtsObjectArray::Create(klass, methods.size()));
     if (UNLIKELY(arrayH.GetPtr() == nullptr)) {
@@ -298,68 +236,12 @@ static ObjectHeader *CreateEtsReflectMethodArray(EtsCoroutine *coro, const Panda
 
 ObjectHeader *StdCoreClassGetInstanceMethodsInternal(EtsClass *cls, EtsBoolean publicOnly)
 {
-    ASSERT(cls != nullptr);
-
     auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-
-    auto instanceMethods = GetInstanceMethods(cls, publicOnly != 0U);
-
+    PandaVector<EtsMethod *> instanceMethods;
+    for (auto iter = helpers::InstanceMethodsIterator(cls, FromEtsBoolean(publicOnly)); !iter.IsEmpty(); iter.Next()) {
+        instanceMethods.emplace_back(iter.Value());
+    }
     return CreateEtsReflectMethodArray(coro, instanceMethods);
-}
-
-EtsReflectMethod *StdCoreClassGetInstanceMethodByNameInternal(EtsClass *cls, EtsString *name, EtsBoolean publicOnly)
-{
-    ASSERT(cls != nullptr);
-    ASSERT(name != nullptr);
-
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-
-    [[maybe_unused]] EtsHandleScope scope(coro);
-
-    // Hadle case with overloads in case of spec issue#362
-    EtsMethod *method = cls->GetInstanceMethod(name->GetUtf8().c_str(), nullptr);
-    if (method == nullptr) {
-        return nullptr;
-    }
-    if ((publicOnly != 0U) && !method->IsPublic()) {
-        return nullptr;
-    }
-
-    return EtsReflectMethod::CreateFromEtsMethod(coro, method);
-}
-
-static EtsReflectField *CreateEtsReflectFieldUnderHandleScope(EtsCoroutine *coro, EtsField *field)
-{
-    ASSERT(field != nullptr);
-
-    auto reflectField = EtsHandle<EtsReflectField>(coro, EtsReflectField::Create(coro, field->IsStatic()));
-    if (UNLIKELY(reflectField.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
-        return nullptr;
-    }
-    ASSERT(reflectField.GetPtr() != nullptr);
-
-    // do not expose primitive types and string types except std.sore.String
-    auto *resolvedType = field->GetType()->ResolvePublicClass();
-    reflectField->SetFieldType(resolvedType);
-    reflectField->SetEtsField(reinterpret_cast<EtsLong>(field));
-    reflectField->SetOwnerType(field->GetDeclaringClass());
-
-    uint32_t attr = 0;
-    attr |= (field->IsStatic()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::STATIC) : 0U;
-    attr |= (field->IsReadonly()) ? static_cast<uint32_t>(EtsTypeAPIAttributes::READONLY) : 0U;
-
-    reflectField->SetAttributes(attr);
-
-    int8_t accessMod = field->IsPublic()
-                           ? static_cast<int8_t>(EtsTypeAPIAccessModifier::PUBLIC)
-                           : (field->IsProtected() ? static_cast<int8_t>(EtsTypeAPIAccessModifier::PROTECTED)
-                                                   : static_cast<int8_t>(EtsTypeAPIAccessModifier::PRIVATE));
-    reflectField->SetAccessModifier(accessMod);
-
-    return reflectField.GetPtr();
 }
 
 EtsReflectField *StdCoreClassGetInstanceFieldByNameInternal(EtsClass *cls, EtsString *name, EtsBoolean publicOnly)
@@ -370,16 +252,12 @@ EtsReflectField *StdCoreClassGetInstanceFieldByNameInternal(EtsClass *cls, EtsSt
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    Field *field = cls->GetRuntimeClass()->GetDeclaredInstanceFieldByName(name->GetDataMUtf8(), name->GetUtf16Length());
+    if (field == nullptr || (FromEtsBoolean(publicOnly) && !field->IsPublic())) {
+        return nullptr;
+    }
 
-    EtsField *field = cls->GetFieldIDByName(name->GetUtf8().c_str(), nullptr);
-    if (field == nullptr) {
-        return nullptr;
-    }
-    if ((publicOnly != 0U) && !field->IsPublic()) {
-        return nullptr;
-    }
-    return CreateEtsReflectFieldUnderHandleScope(coro, field);
+    return EtsReflectField::CreateFromEtsField(coro, EtsField::FromRuntimeField(field));
 }
 
 EtsReflectField *StdCoreClassGetStaticFieldByNameInternal(EtsClass *cls, EtsString *name, EtsBoolean publicOnly)
@@ -390,16 +268,12 @@ EtsReflectField *StdCoreClassGetStaticFieldByNameInternal(EtsClass *cls, EtsStri
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    Field *field = cls->GetRuntimeClass()->GetDeclaredStaticFieldByName(name->GetDataMUtf8(), name->GetUtf16Length());
+    if (field == nullptr || (FromEtsBoolean(publicOnly) && !field->IsPublic())) {
+        return nullptr;
+    }
 
-    EtsField *field = cls->GetStaticFieldIDByName(name->GetUtf8().data(), nullptr);
-    if (field == nullptr) {
-        return nullptr;
-    }
-    if (publicOnly != 0U && !field->IsPublic()) {
-        return nullptr;
-    }
-    return CreateEtsReflectFieldUnderHandleScope(coro, field);
+    return EtsReflectField::CreateFromEtsField(coro, EtsField::FromRuntimeField(field));
 }
 
 static PandaVector<EtsMethod *> GetConstructors(EtsClass *cls, bool onlyPublic)
@@ -425,38 +299,9 @@ ObjectHeader *StdCoreClassGetConstructorsInternal(EtsClass *cls, EtsBoolean publ
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    auto constructors = GetConstructors(cls, publicOnly != 0U);
+    auto constructors = GetConstructors(cls, FromEtsBoolean(publicOnly));
 
-    return CreateEtsReflectMethodArray(coro, constructors, false, true);
-}
-
-static PandaVector<EtsMethod *> GetStaticMethods(EtsClass *cls, bool onlyPublic)
-{
-    PandaVector<EtsMethod *> staticMethods;
-    PandaUnorderedSet<PandaString> prevUniqNames;
-
-    EnumerateBaseClassesReverseOrder(cls, [&](EtsClass *c) {
-        auto methods = c->GetRuntimeClass()->GetStaticMethods();
-        PandaUnorderedSet<PandaString> curUniqNames;
-        auto mnum = methods.Size();
-        for (uint32_t i = 0; i < mnum; i++) {
-            if (onlyPublic && !methods[i].IsPublic()) {
-                continue;
-            }
-            PandaString methodName = utf::Mutf8AsCString(methods[i].GetName().data);
-            if (prevUniqNames.count(methodName)) {
-                // static methods can be shadowed by name regardless of their signature
-                continue;
-            }
-            curUniqNames.insert(methodName);
-            staticMethods.push_back(EtsMethod::FromRuntimeMethod(&methods[i]));
-        }
-        // update set of methods names with methods from current class
-        prevUniqNames.merge(curUniqNames);
-        return false;
-    });
-
-    return staticMethods;
+    return CreateEtsReflectMethodArray<false, true>(coro, constructors);
 }
 
 ObjectHeader *StdCoreClassGetStaticMethodsInternal(EtsClass *cls, EtsBoolean publicOnly)
@@ -466,146 +311,36 @@ ObjectHeader *StdCoreClassGetStaticMethodsInternal(EtsClass *cls, EtsBoolean pub
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    auto staticMethods = GetStaticMethods(cls, publicOnly != 0U);
+    bool collectPublic = FromEtsBoolean(publicOnly);
+    PandaVector<EtsMethod *> staticMethods;
 
-    return CreateEtsReflectMethodArray(coro, staticMethods, true, false);
-}
+    Span<Method> sMethods = cls->GetRuntimeClass()->GetStaticMethods();
 
-static EtsMethod *GetDirectStaticMethodBySignature(EtsCoroutine *coro, EtsClass *cls, EtsString *name,
-                                                   ObjectHeader *signature, EtsBoolean publicOnly)
-{
-    ASSERT(cls != nullptr);
-    ASSERT(name != nullptr);
-    ASSERT(signature != nullptr);
-
-    auto arrayH = EtsHandle<EtsObjectArray>(coro, EtsObjectArray::FromCoreType(signature));
-    ASSERT(arrayH.GetPtr() != nullptr);
-    EtsMethod *method = nullptr;
-    PandaString lookUpMethodName = name->GetMutf8();
-    size_t argsNum = arrayH->GetLength();
-    auto methods = cls->GetRuntimeClass()->GetStaticMethods();
-    auto mnum = methods.Size();
-    for (uint32_t i = 0; i < mnum; i++) {
-        if (publicOnly && !methods[i].IsPublic()) {
-            continue;
-        }
-        PandaString methodName = utf::Mutf8AsCString(methods[i].GetName().data);
-        if (methodName != lookUpMethodName) {
-            continue;
-        }
-        if (methods[i].GetNumArgs() != argsNum) {
-            continue;
-        }
-        bool notMatched = false;
-        auto *etsMethod = EtsMethod::FromRuntimeMethod(&methods[i]);
-        for (size_t idx = 0; idx < argsNum; ++idx) {
-            ASSERT(arrayH->Get(idx) != nullptr);
-            auto *resolvedType = etsMethod->ResolveArgType(idx)->ResolvePublicClass();
-            auto *lookUpType = EtsClass::FromEtsClassObject(arrayH->Get(idx));
-            if (resolvedType != lookUpType) {
-                notMatched = true;
-                break;
-            }
-        }
-        if (!notMatched) {
-            method = etsMethod;
-            break;
+    for (auto &method : sMethods) {
+        if (!collectPublic || method.IsPublic()) {
+            staticMethods.push_back(EtsMethod::FromRuntimeMethod(&method));
         }
     }
-    return method;
+
+    return CreateEtsReflectMethodArray<true, false>(coro, staticMethods);
 }
 
-EtsReflectMethod *StdCoreClassGetDirectStaticMethodByNameInternal(EtsClass *cls, EtsString *name,
-                                                                  ObjectHeader *signature, EtsBoolean publicOnly)
+template <bool IS_STATIC = false>
+static ObjectHeader *CreateEtsReflectFieldArray(EtsCoroutine *coro, const PandaVector<EtsField *> &fields)
 {
-    ASSERT(cls != nullptr);
-    ASSERT(name != nullptr);
-
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    EtsClass *klass = IS_STATIC ? PlatformTypes(coro)->reflectStaticField : PlatformTypes(coro)->reflectInstanceField;
+    ASSERT(klass != nullptr);
 
     [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsMethod *method = nullptr;
-
-    if (signature == nullptr) {
-        bool outIsUnique;
-        method = cls->GetDirectStaticMethod(name->GetUtf8().c_str(), &outIsUnique);
-    } else {
-        method = GetDirectStaticMethodBySignature(coro, cls, name, signature, publicOnly);
-    }
-
-    if (method == nullptr) {
-        return nullptr;
-    }
-
-    if ((publicOnly != 0U) && !method->IsPublic()) {
-        return nullptr;
-    }
-
-    return EtsReflectMethod::CreateFromEtsMethod(coro, method);
-}
-
-static PandaVector<EtsField *> GetInstanceFields(EtsClass *cls, bool onlyPublic)
-{
-    PandaVector<EtsField *> instanceFields;
-    PandaUnorderedSet<PandaString> uniqNames;
-
-    EnumerateBaseClassesReverseOrder(cls, [&](EtsClass *c) {
-        auto fields = c->GetRuntimeClass()->GetInstanceFields();
-        auto fnum = fields.Size();
-        for (uint32_t i = 0; i < fnum; i++) {
-            if (onlyPublic && !fields[i].IsPublic()) {
-                continue;
-            }
-            PandaString fieldName = utf::Mutf8AsCString(fields[i].GetName().data);
-            if (!uniqNames.count(fieldName)) {
-                instanceFields.push_back(EtsField::FromRuntimeField(&fields[i]));
-                uniqNames.emplace(fieldName);
-            }
-        }
-        return false;
-    });
-    return instanceFields;
-}
-
-static PandaVector<EtsField *> GetStaticFields(EtsClass *cls, bool onlyPublic)
-{
-    PandaVector<EtsField *> staticFields;
-    PandaUnorderedSet<PandaString> uniqNames;
-
-    EnumerateBaseClassesReverseOrder(cls, [&](EtsClass *c) {
-        auto fields = c->GetRuntimeClass()->GetStaticFields();
-        auto fnum = fields.Size();
-        for (uint32_t i = 0; i < fnum; i++) {
-            if (onlyPublic && !fields[i].IsPublic()) {
-                continue;
-            }
-            PandaString fieldName = utf::Mutf8AsCString(fields[i].GetName().data);
-            if (!uniqNames.count(fieldName)) {
-                staticFields.push_back(EtsField::FromRuntimeField(&fields[i]));
-                uniqNames.emplace(fieldName);
-            }
-        }
-        return false;
-    });
-    return staticFields;
-}
-
-static ObjectHeader *CreateEtsReflectFieldArray(EtsCoroutine *coro, const PandaVector<EtsField *> &fields,
-                                                bool isStatic = false)
-{
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsClass *klass = isStatic ? PlatformTypes(coro)->reflectStaticField : PlatformTypes(coro)->reflectInstanceField;
 
     EtsHandle<EtsObjectArray> arrayH(coro, EtsObjectArray::Create(klass, fields.size()));
     if (UNLIKELY(arrayH.GetPtr() == nullptr)) {
         ASSERT(coro->HasPendingException());
         return nullptr;
     }
-    ASSERT(arrayH.GetPtr() != nullptr);
 
     for (size_t idx = 0; idx < fields.size(); ++idx) {
-        auto *reflectField = CreateEtsReflectFieldUnderHandleScope(coro, fields[idx]);
+        auto *reflectField = EtsReflectField::CreateFromEtsField(coro, fields[idx]);
         arrayH->Set(idx, reflectField->AsObject());
     }
 
@@ -620,7 +355,16 @@ ObjectHeader *StdCoreClassGetInstanceFieldsInternal(EtsClass *cls, EtsBoolean pu
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    auto instanceFields = GetInstanceFields(cls, publicOnly != 0U);
+    bool collectPublic = FromEtsBoolean(publicOnly);
+
+    PandaVector<EtsField *> instanceFields;
+    Span<Field> fields(cls->GetRuntimeClass()->GetInstanceFields());
+
+    for (auto &field : fields) {
+        if (!collectPublic || field.IsPublic()) {
+            instanceFields.push_back(EtsField::FromRuntimeField(&field));
+        }
+    }
 
     return CreateEtsReflectFieldArray(coro, instanceFields);
 }
@@ -633,9 +377,18 @@ ObjectHeader *StdCoreClassGetStaticFieldsInternal(EtsClass *cls, EtsBoolean publ
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
 
-    auto staticFields = GetStaticFields(cls, publicOnly != 0U);
+    bool collectPublic = FromEtsBoolean(publicOnly);
 
-    return CreateEtsReflectFieldArray(coro, staticFields, true);
+    PandaVector<EtsField *> staticFields;
+    Span<Field> fields(cls->GetRuntimeClass()->GetStaticFields());
+
+    for (auto &field : fields) {
+        if (!collectPublic || field.IsPublic()) {
+            staticFields.push_back(EtsField::FromRuntimeField(&field));
+        }
+    }
+
+    return CreateEtsReflectFieldArray<true>(coro, staticFields);
 }
 
 EtsBoolean StdCoreClassIsEnum(EtsClass *cls)
@@ -658,51 +411,18 @@ EtsBoolean StdCoreClassIsFixedArray(EtsClass *cls)
 
 EtsBoolean StdCoreClassIsSubtypeOf(EtsClass *cls, EtsClass *other)
 {
-    if (LIKELY(other->IsInterface())) {
+    if (other->IsInterface()) {
         return static_cast<EtsBoolean>(cls->GetRuntimeClass()->Implements(other->GetRuntimeClass()));
     }
-    return static_cast<EtsBoolean>(cls->IsSubClass(other));
+    return static_cast<EtsBoolean>(other->IsAssignableFrom(cls));
 }
-
-namespace {
-EtsClass *ConvertPandaTypeIdToEtsClass(panda_file::Type::TypeId typeId)
-{
-    switch (typeId) {
-        case ark::panda_file::Type::TypeId::I32:
-            return PlatformTypes()->coreInt;
-        case ark::panda_file::Type::TypeId::I64:
-            return PlatformTypes()->coreLong;
-        case ark::panda_file::Type::TypeId::F64:
-            return PlatformTypes()->coreDouble;
-        case ark::panda_file::Type::TypeId::F32:
-            return PlatformTypes()->coreFloat;
-        case ark::panda_file::Type::TypeId::I8:
-            return PlatformTypes()->coreByte;
-        case ark::panda_file::Type::TypeId::I16:
-            return PlatformTypes()->coreShort;
-        case ark::panda_file::Type::TypeId::U16:
-            return PlatformTypes()->coreChar;
-        case ark::panda_file::Type::TypeId::U1:
-            return PlatformTypes()->coreBoolean;
-        default:
-            UNREACHABLE();
-    }
-}
-}  // namespace
 
 EtsClass *StdCoreClassGetFixedArrayComponentType(EtsClass *cls)
 {
     if (!cls->IsArrayClass()) {
         return nullptr;
     }
-
-    EtsClass *compCls = cls->GetComponentType();
-    if (compCls->IsPrimitive()) {
-        auto *rtCls = compCls->GetRuntimeClass();
-        return ConvertPandaTypeIdToEtsClass(rtCls->GetType().GetId());
-    }
-
-    return compCls;
+    return cls->GetComponentType();
 }
 
 EtsBoolean StdCoreClassIsUnion(EtsClass *cls)
@@ -744,6 +464,12 @@ EtsBoolean StdCoreClassIsAbstract(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
     return cls->IsAbstract();
+}
+
+EtsBoolean StdCoreClassIsPrimitive(EtsClass *cls)
+{
+    ASSERT(cls != nullptr);
+    return cls->IsPrimitive();
 }
 
 }  // namespace ark::ets::intrinsics

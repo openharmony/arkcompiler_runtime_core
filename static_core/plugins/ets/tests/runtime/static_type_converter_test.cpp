@@ -316,8 +316,8 @@ TEST_F(StaticTypeConverterTest, UnwrapBaseBigInt)
     for (uint32_t i = 0; i < LENGTH; i++) {
         etsIntArray->Set(i, static_cast<int32_t>(digits[i]));
     }
-    ASSERT(ptypes->escompatBigint != nullptr);
-    auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(ptypes->escompatBigint));
+    ASSERT(ptypes->coreBigint != nullptr);
+    auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(ptypes->coreBigint));
     bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(etsIntArray));
     bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), tarSign);
 

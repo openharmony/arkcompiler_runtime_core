@@ -1,3 +1,12 @@
+#30572
+escompat/MathClz32Test.ets
+
+#28345
+escompat/JsonParseTest.ets
+
+#24357 Koala related issues
+koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
+
 #24986 (16 tests)
 std/core/Object.ets
 std/core/TypedArrayConstructorNumbersInts.ets
@@ -6,7 +15,7 @@ std/core/IntlPluralRulesTest.ets
 std/core/TypeAssignableFromTest.ets
 std/core/std_core_char_instance_Char_toLowerCase.ets
 std/core/std_core_type_numeric_type_numeric_type.ets
-escompat/JsonTest.ets
+std/core/JsonTest.ets
 regression/15867_spread_in_arrayof_segfaut.ets
 spec/05.Generics/callFromAsyncLambda.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
@@ -15,38 +24,10 @@ spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
 std/containers/concurrent_set/ConcurrentSet_ConstructorTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_ConstructorTest.ets
 std/core/NumberTest.ets
-escompat/JsonStringifyTest.ets
-
-#28349
-escompat/RegExpTest.ets
-
-#28354
-escompat/escompat_regexp_match_String_001.ets
-
-#28350
-escompat/RegExpFlagdTest.ets
-
-#28355
-escompat/MathClz32Test.ets
-escompat/escompat_regexp_match_String.ets
-
-#28357
-escompat/escompat_regexp_test_StringWithUnicodeFlag.ets
-
-#29145
-std/core/json/JsonStringifyParseBigIntTest.ets
-
-#28347
-escompat/RegExpDtsTest.ets
-
-#28352
-escompat/RegExpReplaceFunctionTest.ets
+std/core/json/JsonStringifyTest1.ets
 
 #29144
 std/core/json/JsonStringifyBigIntTest.ets
 
 #29146
 algorithms/SortingTest.ets
-
-#31076
-escompat/JsonParseTest.ets

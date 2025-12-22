@@ -17,8 +17,8 @@
 
 #include <memory>
 
-#include "libpandabase/utils/logger.h"
-#include "libpandafile/file_items.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkfile/file_items.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/coretypes/array.h"
@@ -28,6 +28,7 @@
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
+#include "runtime/include/safepoint_timer.h"
 #include "runtime/mem/gc/gc.h"
 
 namespace ark::interpreter {
@@ -150,8 +151,35 @@ public:
         return coretypes::Array::Create(klass, length);
     }
 
-    static ObjectHeader *CreateObject(Class *klass);
-    static ObjectHeader *CreateObject(ManagedThread *thread, Class *klass);
+    static ObjectHeader *CreateObject(ManagedThread *thread, Class *klass)
+    {
+        ASSERT(!klass->IsArrayClass());
+
+        if (klass->IsStringClass()) {
+            LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*klass);
+            return coretypes::String::CreateEmptyString(ctx, Runtime::GetCurrent()->GetPandaVM());
+        }
+
+        if (LIKELY(klass->IsInstantiable())) {
+            mem::HeapManager *heapManager = thread->GetVM()->GetHeapManager();
+            auto *currentTlab = thread->GetTLAB();
+            size_t size = klass->GetObjectSize();
+            if (currentTlab->GetFreeSize() < size || heapManager->IsObjectFinalized(klass)) {
+                // Slow path
+                return ObjectHeader::Create(thread, klass);
+            }
+            auto *mem = currentTlab->Alloc(size);
+            ASSERT(mem != nullptr);
+            ObjectHeader *object = heapManager->InitObjectHeaderAtMem(klass, mem);
+            object = heapManager->RegisterFinalizableIfNeeded(object, klass, size, thread);
+            return object;
+        }
+
+        const auto &name = klass->GetName();
+        PandaString pname(name.cbegin(), name.cend());
+        ark::ThrowInstantiationError(pname);
+        return nullptr;
+    }
 
     static Value InvokeMethod(ManagedThread *thread, Method *method, Value *args)
     {
@@ -283,6 +311,7 @@ public:
      */
     static void Safepoint(ManagedThread *thread)
     {
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
 #ifndef NDEBUG
         // NOTE(sarychevkonstantin, #I9624): achieve consistency between mutator lock ownership and IsManaged method
         if (Runtime::GetOptions().IsRunGcEverySafepoint() && Thread::GetCurrent()->GetMutatorLock()->HasLock()) {
@@ -298,6 +327,7 @@ public:
         if (thread->IsSuspended()) {
             ThreadSuspension(thread);
         }
+        SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), false));
     }
 
     static void Safepoint()

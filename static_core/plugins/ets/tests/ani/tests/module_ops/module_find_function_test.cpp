@@ -199,7 +199,7 @@ TEST_F(ModuleFindFunctionTest, find_func_all_Type)
     fn = nullptr;
 
     ani_class kclass {};
-    ASSERT_EQ(env_->Module_FindClass(module, "TestA", &kclass), ANI_OK);
+    ASSERT_EQ(env_->FindClass("@abcModule.module_find_function_test.TestA", &kclass), ANI_OK);
     ASSERT_NE(kclass, nullptr);
 
     ani_static_method staticMethod {};
@@ -220,7 +220,7 @@ TEST_F(ModuleFindFunctionTest, find_func_B_in_namespace_A)
     ASSERT_EQ(env_->Module_FindFunction(module, "getIntValueOps", ":i", &fn), ANI_NOT_FOUND);
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->Module_FindNamespace(module, "ops", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("@abcModule.module_find_function_test.ops", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
     ASSERT_EQ(env_->Namespace_FindFunction(ns, "getIntValueOps", ":i", &fn), ANI_OK);
     ASSERT_NE(fn, nullptr);

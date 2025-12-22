@@ -195,6 +195,35 @@ panda_gen_file(
     OUTPUTFILE ${INTRINSICS_PEEPHOLE_INL_H}
 )
 
+set(LI_MEMMOVE_INTRINSIC_ID_SWITCH_CASE_INL
+    ${PANDA_BINARY_ROOT}/compiler/generated/loop_idioms_memmove_intrinsic_id_switch_case.inl)
+panda_gen_file(
+        DATA ${GEN_PLUGIN_OPTIONS_YAML}
+        TEMPLATE ${PANDA_ROOT}/compiler/optimizer/templates/intrinsics/loop_idioms_memmove_intrinsic_id_switch_case.inl.erb
+        API ${PANDA_ROOT}/templates/plugin_options.rb
+        EXTRA_DEPENDENCIES ${YAML_FILES} plugin_options_merge
+        OUTPUTFILE ${LI_MEMMOVE_INTRINSIC_ID_SWITCH_CASE_INL}
+)
+
+set(LI_CUSTOMIZE_MEMMOVE_INTRINSIC_SWITCH_CASE_INL
+    ${PANDA_BINARY_ROOT}/compiler/generated/loop_idioms_customize_memmove_intrinsic_switch_case.inl)
+panda_gen_file(
+        DATA ${GEN_PLUGIN_OPTIONS_YAML}
+        TEMPLATE ${PANDA_ROOT}/compiler/optimizer/templates/intrinsics/loop_idioms_customize_memmove_intrinsic_switch_case.inl.erb
+        API ${PANDA_ROOT}/templates/plugin_options.rb
+        EXTRA_DEPENDENCIES ${YAML_FILES} plugin_options_merge
+        OUTPUTFILE ${LI_CUSTOMIZE_MEMMOVE_INTRINSIC_SWITCH_CASE_INL}
+)
+
+set(INTRINSIC_STRING_FLAT_CHECK_INL ${PANDA_BINARY_ROOT}/compiler/generated/intrinsic_string_flat_check.inl)
+panda_gen_file(
+        DATA ${GEN_PLUGIN_OPTIONS_YAML}
+        TEMPLATE ${PANDA_ROOT}/compiler/optimizer/templates/intrinsics/intrinsic_string_flat_check.inl.erb
+        API ${PANDA_ROOT}/templates/plugin_options.rb
+        EXTRA_DEPENDENCIES ${YAML_FILES} plugin_options_merge
+        OUTPUTFILE ${INTRINSIC_STRING_FLAT_CHECK_INL}
+)
+
 set(PIPELINE_INCLUDES_H ${PANDA_BINARY_ROOT}/compiler/generated/pipeline_includes.h)
 panda_gen_file(
     DATA ${GEN_PLUGIN_OPTIONS_YAML}
@@ -225,6 +254,8 @@ add_custom_target(compiler_intrinsics DEPENDS
     ${INTRINSICS_INLINING_EXPANSION_SWITCH_CASE_INL}
     ${INTRINSICS_GRAPH_CHECKER_INL}
     ${INTRINSICS_INLINE_NATIVE_METHOD_INL}
+    ${LI_MEMMOVE_INTRINSIC_ID_SWITCH_CASE_INL}
+    ${LI_CUSTOMIZE_MEMMOVE_INTRINSIC_SWITCH_CASE_INL}
     ${INTRINSICS_PEEPHOLE_INL_H}
     ${PIPELINE_INCLUDES_H}
 )

@@ -235,7 +235,7 @@ function testUrlTest128() {
 		let murl = url.URL.parseURL("http://username:password@host:199/directory/file?query#fragment");
 		murl.href = "saaf^as\tk\njf";
 	 arktest.assertEQ(1, 0)
-	} catch (err: BusinessError) {
+	} catch (err) {
 	 arktest.assertEQ(err.toString(), 'BusinessError: Syntax Error. Invalid Url string.')
 	 arktest.assertEQ(err.code, 10200002)
 	 arktest.assertEQ(err.message, "Syntax Error. Invalid Url string.");

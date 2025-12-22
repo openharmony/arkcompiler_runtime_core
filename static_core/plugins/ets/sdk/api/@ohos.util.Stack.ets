@@ -13,7 +13,20 @@
  * limitations under the License.
  */
 
- export type StackForEachCb<T> = (value: T, index: int, stack: Stack<T>) => void;
+import { BusinessError } from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: int = 10200001;
+const EmptyContainerId: int = 10200010;
+
+function createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
+export type StackForEachCb<T> = (value: T, index: int, stack: Stack<T>) => void;
 
 export class Stack<T> implements Iterable<T> {
     private buffer: Array<T>;
@@ -31,10 +44,11 @@ export class Stack<T> implements Iterable<T> {
 
     /**
      * Retrieves the top element in the Stack without removing it.
-     * @returns The top element in the Stack, or undefined if the Stack is empty.
+     * @returns The top element in the Stack.
      */
-    public peek(): T | undefined {
-        return this.buffer.length == 0 ? undefined : this.buffer[this.length - 1];
+    public peek(): T {
+        this.checkEmptyContainer();
+        return this.buffer[this.length - 1];
     }
 
     /**
@@ -51,6 +65,7 @@ export class Stack<T> implements Iterable<T> {
      * @returns The first element in the Stack, or undefined if the Stack is empty.
      */
     public pop(): T | undefined {
+        this.checkEmptyContainer();
         return this.buffer.pop();
     }
 
@@ -94,5 +109,11 @@ export class Stack<T> implements Iterable<T> {
      */
     public override $_iterator(): IterableIterator<T> {
         return this.buffer.$_iterator();
+    }
+
+    private checkEmptyContainer(): void {
+        if (this.isEmpty()) {
+            throw createBusinessError(EmptyContainerId, `Container is empty`);
+        }
     }
 }

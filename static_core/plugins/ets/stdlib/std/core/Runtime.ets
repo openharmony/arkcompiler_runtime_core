@@ -38,29 +38,6 @@ export final class Runtime {
      */
     public static native getHashCodeByValue(o: Object): long;
 
-     /**
-      * Checks if two items are equal.
-      *
-      * @param o1 first object to compare
-      *
-      * @param o2 second object to compare
-      *
-      * @returns true if items are equal
-      */
-    public static equals(o1: Any, o2: Any): boolean {
-        if (Runtime.isSameReference(o1, null)) {
-            return Runtime.isSameReference(o2, null)
-        }
-        if (Runtime.isSameReference(o1, undefined)) {
-            return Runtime.isSameReference(o2, undefined)
-        }
-        if (Runtime.isSameReference(o2, null) || Runtime.isSameReference(o2, undefined)) {
-            return false;
-        }
-
-        return o1 == o2
-    }
-
     /**
      * Checks if two items are equal 'by value'
      *
@@ -71,18 +48,20 @@ export final class Runtime {
      * @returns true if items are equal 'by value'
      */
     public static sameValue(o1: Any, o2: Any): boolean {
-        if (Runtime.isSameReference(o1, null)) {
-            return Runtime.isSameReference(o2, null)
+        if (o1 === null) {
+            return o2 === null
         }
-        if (Runtime.isSameReference(o1, undefined)) {
-            return Runtime.isSameReference(o2, undefined)
+        if (o1 === undefined) {
+            return o2 === undefined
         }
-        if (Runtime.isSameReference(o2, null) || Runtime.isSameReference(o2, undefined)) {
+        if (o2 === null || o2 === undefined) {
             return false;
         }
 
         if (o1 instanceof Number && o2 instanceof Number) {
             return Runtime.sameNumberValue(o1 as Number, o2 as Number)
+        } else if (o1 instanceof String && o2 instanceof String) {
+            return (o1 as String).equals(o2) // same semantics as ==, but faster
         } else if (o1 instanceof Float && o2 instanceof Float) {
             return Runtime.sameFloatValue(o1 as Float, o2 as Float)
         }
@@ -106,33 +85,20 @@ export final class Runtime {
     }
 
     private static sameFloatValue(f1: Float, f2: Float): boolean {
-        const f1val = f1.unboxed()
-        const f2val = f2.unboxed()
-
-        if (f1val == 0 || f2val == 0) {
-            return Float.bitCastToInt(f1val) == Float.bitCastToInt(f2val)
+        if (f1 == 0 || f2 == 0) {
+            return Float.bitCastToInt(f1) == Float.bitCastToInt(f2)
         }
 
-        if (isNaN(f1val) != isNaN(f2val)) {
+        if (isNaN(f1) != isNaN(f2)) {
             return false
-        } else if (isNaN(f1val)) {
+        } else if (isNaN(f1)) {
             return true
         } else {
-            return f1val == f2val
+            return f1 == f2
         }
     }
 
-    public static sameValueZero(o1: Any, o2: Any): boolean {
-        if (Runtime.sameValue(o1, o2)) {
-            return true;
-        }
-        if (o1 instanceof Number && o2 instanceof Number) {
-            const n1 = (o1 as Number).valueOf()
-            const n2 = (o2 as Number).valueOf()
-            return n1 == 0 && n2 == 0;
-        }
-        return false;
-    }
+    public static native sameValueZero(o1: Any, o2: Any): boolean
 
     /**
      * Check if it is a little-endian platform
@@ -152,23 +118,17 @@ export final class Runtime {
      */
     public static native isSameReference(o1: Any, o2: Any): boolean;
 
-    /**
-     * Internal entrypoint to create exception for failed type cast
-     *
-     * @param src source value
-     *
-     * @param dstStr target type string
-     *
-     * @param isUndef true if undefined is in target type
-     *
-     * @returns exception object to throw
-     */
-    static native failedTypeCastException(src: Any, dstStr: string, isUndef: boolean): ClassCastError
-
+    // Deprecated.
     native static __getTypeInfo(o: Any): Class|undefined;
 
-    native static allocSameTypeArray<T extends FixedArray<Any>>(type: Class, length: int): T;
+    // Internal stubs to create a ClassCastError during failed cast events
+    static native failedTypeCastExclUndefinedStub(source: Any, target: Class | undefined): ClassCastError
+    static native failedTypeCastInclUndefinedStub(source: Any, target: Class | undefined): ClassCastError
 
+    // Internal stub to create a FixedArray of the specified type and length
+    private native static allocSameTypeArray<T extends FixedArray<Any>>(type: Class, length: int): T;
+
+    // Internal stub to create a FixedArray with elements prepended in front of the original array
     static addFrontElementsStub(original: FixedArray<Any>, front: FixedArray<Any>): FixedArray<Any> {
         let res = Runtime.allocSameTypeArray<FixedArray<Any>>(Class.of(original), original.length + front.length)
         for (let i: int = 0; i < front.length; ++i) {
@@ -180,6 +140,7 @@ export final class Runtime {
         return res
     }
 
+    // Internal stub to create a FixedArray with several elements removed from front of the original array
     static removeFrontElementsStub(original: FixedArray<Any>, count: int): FixedArray<Any> {
         let res = Runtime.allocSameTypeArray<FixedArray<Any>>(Class.of(original), original.length - count)
         for (let i: int = count; i < original.length; ++i) {
@@ -188,6 +149,7 @@ export final class Runtime {
         return res
     }
 
+    // Internal stub to pad rest arguments array to handle possible argument underapplication
     static restArgumentsUnderapplicationStub(rest: FixedArray<Any>, required: int): FixedArray<Any> {
         if (rest.length >= required) {
             return rest
@@ -201,25 +163,14 @@ export final class Runtime {
         }
         return newRest
     }
+
+    // Internal stub to handle a generic case of unsafeCall for std.core.Lambda... helper classes
+    static lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
+        return __lambdaUnsafeCallStub(fn, r)
+    }
 }
 
 // Deprecated. Narrow the value to type T or to default (object | null | undefined).
 export function __narrowAny<T = (object | null | undefined)>(v: Any): T {
     return v as T
-}
-
-export function __runtimeEquals(o1: Any, o2: Any): boolean {
-    return Runtime.equals(o1, o2)
-}
-
-export function __runtimeSameValueZero(o1: Any, o2: Any): boolean {
-    return Runtime.sameValueZero(o1, o2)
-}
-
-export function __runtimeSameValue(o1: Any, o2: Any): boolean {
-    return Runtime.sameValue(o1, o2)
-}
-
-export function __runtimeIsSameReference(o1: Any, o2: Any): boolean {
-    return Runtime.isSameReference(o1, o2)
 }

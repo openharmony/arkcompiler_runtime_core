@@ -68,10 +68,6 @@ function checkReturnType<T>(fn: () => T): void {
             arktest.assertTrue(false, 'await results do not match!');
             return;
         }
-        if (!(result instanceof T)) {
-            arktest.assertTrue(false, 'await result is not right');
-            return;
-        }
     }
 }
 

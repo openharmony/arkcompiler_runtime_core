@@ -49,8 +49,8 @@ ohos_source_set("abckit_adapter_static_source_set") {
     "modify_name_helper.cpp",
     "name_util.cpp",
     "runtime_adapter_static.cpp",
-    "utils/function_util.cpp",
     "string_util.cpp",
+    "utils/function_util.cpp",
   ]
 
   ins_create_wrapper_dyn_dir =
@@ -82,8 +82,8 @@ ohos_source_set("abckit_adapter_static_source_set") {
     "$ark_root_static/assembler:arkassembler_public_config",
     "$ark_root_static/bytecode_optimizer:bytecodeopt_public_config",
     "$ark_root_static/compiler:arkcompiler_public_config",
-    "$ark_root_static/libpandafile:arkfile_public_config",
-    "$ark_root_static/libpandabase:arkbase_public_config",
+    "$ark_root_static/libarkfile:arkfile_public_config",
+    "$ark_root_static/libarkbase:arkbase_public_config",
     "$ark_root_static/runtime:arkruntime_public_config",
     "$ark_root_dynamic/static_core:ark_config",
     "$abckit_root:abckit_config",
@@ -97,7 +97,7 @@ ohos_source_set("abckit_adapter_static_source_set") {
     "$ark_root_static/assembler:libarktsassembler",
     "$ark_root_static/bytecode_optimizer:libarktsbytecodeopt",
     "$ark_root_static/bytecode_optimizer:libarktsbytecodeopt",
-    "$ark_root_static/libpandabase:libarktsbase",
-    "$ark_root_static/libpandafile:libarktsfile",
+    "$ark_root_static/libarkbase:libarktsbase",
+    "$ark_root_static/libarkfile:libarktsfile",
   ]
 }

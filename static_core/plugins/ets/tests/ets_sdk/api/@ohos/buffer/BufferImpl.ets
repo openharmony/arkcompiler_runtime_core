@@ -15,6 +15,7 @@
 
 import buffer from "@ohos.buffer"
 import { jsonx } from "std/core"
+import { BusinessError } from '@ohos.base';
 
 
 function main(): int {
@@ -62,6 +63,8 @@ function main(): int {
     suite.addTest("Test Buffer.compare with Buffer/Uint8Array", testBufferCompareUint8Array)
     suite.addTest("Test Buffer.copy", testBufferCopy)
     suite.addTest("Test Buffer.copy with params", testBufferCopyWithParams)
+    suite.addTest("Test Buffer.copy with params 1", testBufferCopyWithParams1)
+    suite.addTest("Test Buffer.copy with params 2", testBufferCopyWithParams2)
     suite.addTest("Test Buffer.copy with undefined", testBufferCopyWithUndefined)
     suite.addTest("Test entries", testEntries)
     suite.addTest("Test equals", testEquals)
@@ -247,7 +250,7 @@ function testFromBufferOrUint8Array() {
     arktest.assertEQ(bufOffset.at(2), 5)
     arktest.assertEQ(bufOffset.at(3), 6)
     arktest.assertEQ(bufOffset.length, 4)
-    arktest.assertEQ(bufOffset.byteOffset, 3)
+    arktest.assertEQ(bufOffset.byteOffset, 0)
 
     let ab1 = ArrayBuffer.from("1236", "utf-8")
     arktest.assertEQ(ab1.byteLength, 4)
@@ -584,9 +587,14 @@ function testBufferCompareUint8Array() {
     arktest.assertEQ(bufOffset.at(2), 5)
     arktest.assertEQ(bufOffset.at(3), 6)
     arktest.assertEQ(bufOffset.length, 4)
-    arktest.assertEQ(bufOffset.byteOffset, 3)
+    arktest.assertEQ(bufOffset.byteOffset, 0)
     arktest.assertEQ(buffer.compare(u2, bufOffset), 1)
     arktest.assertEQ(buffer.compare(bufOffset, u2), -1)
+
+    arktest.expectError(() => {
+        let set = new Set<number>([97, 98, 99, 100, 101, 102, 103]);
+        let buf = buffer.from(set as Object, 3, 4);
+    }, 'Parameter error. The type of \"input\" must be Buffer or ArrayBuffer, Array, Array-like');
 }
 
 function testBufferCopy() {
@@ -603,6 +611,27 @@ function testBufferCopyWithParams() {
     arktest.assertEQ(num, 2)
     arktest.assertEQ(b2.toString(), "12bc789")
 }
+
+function testBufferCopyWithParams1() {
+    const arr1 = new Uint8Array([97, 98, 99, 100, 101, 102, 103])
+    let b1 = buffer.from(arr1.buffer, 2);
+    const arr2 = new Uint8Array([49, 50, 51, 52, 53, 54, 55])
+    let b2 = buffer.from(arr2.buffer, 1);
+    let num = b1.copy(b2, 2, 1, 3)
+    arktest.assertEQ(num, 2)
+    arktest.assertEQ(b2.toString(), "23de67")
+}
+      
+function testBufferCopyWithParams2() {
+    const arr1 = new Uint8Array([97, 98, 99, 100, 101, 102, 103])
+    let b1 = buffer.from(arr1.buffer, 2);
+    const arr2 = new Uint8Array([49, 50, 51, 52, 53, 54, 55])
+    let b2 = buffer.from(arr2.buffer, 1);
+    let num = b1.copy(b2, 2, 1, 7)
+    arktest.assertEQ(num, 4)
+    arktest.assertEQ(b2.toString(), "23defg")
+}
+
 
 function testBufferCopyWithUndefined() {
     let buf1 = buffer.allocUninitializedFromPool(26);
@@ -695,6 +724,11 @@ function testSubarray() {
     buf2 = buf1.subarray(2, 2)
     res = buf2.toString('ascii', 0, bufLength)
     arktest.assertEQ(res, '')
+
+    const arr1 = new Uint8Array([97, 98, 99, 100, 101, 102, 103])
+    buf = buffer.from(arr1.buffer, 1);
+    subBuf = buf.subarray(2, 5)
+    arktest.assertEQ(subBuf.toString(), "def")
 }
 
 function testSwap16() {
@@ -783,6 +817,17 @@ function testInt32ReadWrite() {
 
     // Test Little Endian
     buf.writeInt32LE(-2147483648, 4)
+    arktest.assertEQ(buf.readInt32LE(4), -2147483648)
+
+    const arr1 = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8])
+    const buf1 = buffer.from(arr1.buffer, 1);
+
+    // Test Big Endian
+    buf1.writeInt32BE(2147483647, 0)
+    arktest.assertEQ(buf.readInt32BE(0), 2147483647)
+
+    // Test Little Endian
+    buf1.writeInt32LE(-2147483648, 4)
     arktest.assertEQ(buf.readInt32LE(4), -2147483648)
 }
 

@@ -60,11 +60,11 @@ export final class String extends Object implements Comparable<String>, Iterable
     public native constructor(otherStr: String)
 
     /**
-     * Constructs String from NullishType
+     * Constructs String from Any
      *
      * @param object initializer
      */
-    public native constructor(object: NullishType)
+    public native constructor(object: Any)
 
     /**
      * Creates a new instance of a String
@@ -76,13 +76,102 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
     /**
+     * Creates a new instance of a String from boolean
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: boolean): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from byte
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: byte): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from char
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: char): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from short
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: short): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from int
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: int): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from long
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: long): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from float
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: float): string {
+        return new String(value);
+    }
+
+    /**
+     * Creates a new instance of a String from double
+     *
+     * @param value The value to be converted to a string.
+     *
+     * @returns A new String instance
+     */
+    static $_invoke(value: double): string {
+        return new String(value);
+    }
+
+
+    /**
      * Creates a new instance of a String
      *
      * @param value The value to be converted to a string. Can be an Object or null.
      *
      * @returns A new String instance
      */
-    static $_invoke(value: Object | null | undefined): string {
+    static $_invoke(value: Any): string {
         return new String(value);
     }
 
@@ -105,9 +194,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns true if strings are equal and false otherwise
      *
      * @remarks
-     * Implemented as native function,  @see `equals()` intrinsic [declaration].
+     * Implemented as native function,  @see `equals()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L596).
      */
-    public native equals(to: NullishType): boolean;
+    public native equals(to: Any): boolean;
 
     /**
      * Length of this string
@@ -115,7 +204,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns length of this string
      *
      * @remarks
-     * Implemented as native function,  @see `getLength()` intrinsic [declaration].
+     * Implemented as native function,  @see `getLength()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L563).
      */
     public native getLength(): int;
 
@@ -138,37 +227,16 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws StringIndexOutOfBoundsError if index is negative or >= length
      *
      * @remarks
-     * Implemented as native function,  @see `charAt()` intrinsic [declaration].
+     * Implemented as native function,  @see `charAt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L585).
      */
     public native charAt(index: int): char;
-
-    /**
-     * Getter for char at some index
-     *
-     * @param index index in char array inside String
-     *
-     * @returns char value at index
-     *
-     * @throws StringIndexOutOfBoundsError if index is negative or >= length
-     *
-     * @remarks
-     * Implemented as native function,  @see `charAt()` intrinsic [declaration].
-     */
-    public charAt(index: number): String {
-        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return '';
-        }
-        let c : FixedArray<char> = new char[1];
-        c[0] = this.charAt(index.toInt())
-        return new String(c)
-    }
 
     /**
      * Checks if this string is empty
      *
      * @returns true if empty and false otherwise
      * @remarks
-     * Implemented as native function,  @see `length()` intrinsic [declaration].
+     * Implemented as native function,  @see `length()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L574).
      */
     public native isEmpty(): boolean;
 
@@ -183,43 +251,10 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns the codepoint at the specified index
      */
-    public codePointAt(index: int): Number | undefined {
+    public codePointAt(index: int): int | undefined {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             return undefined
         }
-        return (this.codePointAtInt(index)).toDouble();
-    }
-
-    /**
-     * Gets the codepoint at the specified index in this string.
-     * Is similar to charAt(index), but if the character at the
-     * index is the beginning of a surrogate pair, the int
-     * representation for this codepoint is returned. Otherwise,
-     * the character at the index is returned.
-     *
-     * @param index index of the potential surrogate pair
-     *
-     * @returns the codepoint at the specified index
-     */
-    public codePointAt(index: number): Number | undefined {
-        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return undefined
-        }
-        return (this.codePointAtInt(index.toInt())).toDouble();
-    }
-
-    /**
-     * Gets the codepoint at the specified index in this string.
-     * Is similar to charAt(index), but if the character at the
-     * index is the beginning of a surrogate pair, the int
-     * representation for this codepoint is returned. Otherwise,
-     * the character at the index is returned.
-     *
-     * @param index index of the potential surrogate pair
-     *
-     * @returns the codepoint at the specified index
-     */
-    private codePointAtInt(index: int): int {
         let highValue: char = this.charAt(index);
         if (!Char.isHighSurrogate(highValue) || ++index == this.getLength()) {
             return highValue.toInt();
@@ -230,7 +265,6 @@ export final class String extends Object implements Comparable<String>, Iterable
         }
         return Char.charsToCodePoint(highValue, lowValue);
     }
-
     /**
      * Returns the amount of full codepoints between begin and end
      * indexes. Characters outside the range are not counted, even if
@@ -260,7 +294,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         }
         return counter;
     }
-
+    
     /**
      * Returns the amount of full codepoints between begin and end
      * indexes. Characters outside the range are not counted, even if
@@ -304,7 +338,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns char[] array
      *
      * @remark
-     * Implemented as native function,  @see `getChars()` intrinsic [declaration].
+     * Implemented as native function,  @see `getChars()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L231).
      */
     public getChars(begin: int, end: int): char[] {
         // #24515: Need to remove the following function call after primitive type refactoring
@@ -445,17 +479,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     public native indexOf(ch: char, fromIndex: int): int;
 
     /**
-     * Finds the first occurrence of another String in this String at position >= fromIndex.
-     * Negative fromIndex is equivalent to fromIndex = 0, and fromIndex >= length implies no match.
-     *
-     * @param str to find
-     * @param fromIndex to start searching from
-     *
-     * @returns index of the str from the beginning of this string, or -1 if not found
-     */
-    public native indexOf(str: String, fromIndex: int): int;
-
-    /**
      * Finds the first occurrence of another String in this String
      *
      * @param str to find
@@ -464,12 +487,23 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
-    public indexOf(str: String, fromIndex?: Number): number {
+    public indexOf(str: String, fromIndex?: int): int {
         if (fromIndex == undefined) {
-            return this.indexOf(str, 0)
+            return this.indexOfImpl(str, 0)
         }
-        return this.indexOf(str, fromIndex.toInt())
+        return this.indexOfImpl(str, fromIndex.toInt())
     }
+
+    /**
+     * Finds the first occurrence of another String in this String at position >= fromIndex.
+     * Negative fromIndex is equivalent to fromIndex = 0, and fromIndex >= length implies no match.
+     *
+     * @param str to find
+     * @param fromIndex to start searching from
+     *
+     * @returns index of the str from the beginning of this string, or -1 if not found
+     */
+    public native indexOfImpl(str: String, fromIndex: int): int;
 
     /**
      * Finds the last occurrence of a character in this String.
@@ -504,17 +538,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
     /**
-     * Finds the last occurrence of another String in this String at position <= fromIndex.
-     * All values of fromIndex >= length are equivalent, and negative fromIndex implies no match.
-     *
-     * @param str to find
-     * @param fromIndex to start searching from
-     *
-     * @returns index of the str from the beginning of this string, or -1 if not found
-     */
-    public native lastIndexOf(str: String, fromIndex: int): int;
-
-    /**
      * Finds the last occurrence of another String in this String.
      *
      * @param str to find
@@ -525,12 +548,23 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
-    public lastIndexOf(str: String, fromIndex?: Number): number {
+    public lastIndexOf(str: String, fromIndex?: int): int {
         if (fromIndex == undefined || isNaN(fromIndex)) {
-            return this.lastIndexOf(str, Int.MAX_VALUE as int)
+            return this.lastIndexOfImpl(str, Int.MAX_VALUE as int)
         }
-        return this.lastIndexOf(str, fromIndex.toInt())
+        return this.lastIndexOfImpl(str, fromIndex.toInt())
     }
+
+    /**
+     * Finds the last occurrence of another String in this String at position <= fromIndex.
+     * All values of fromIndex >= length are equivalent, and negative fromIndex implies no match.
+     *
+     * @param str to find
+     * @param fromIndex to start searching from
+     *
+     * @returns index of the str from the beginning of this string, or -1 if not found
+     */
+    private native lastIndexOfImpl(str: String, fromIndex: int): int;
 
     /**
      * Selects a substring of this String, starting at a specified index
@@ -582,19 +616,20 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns new String which is a concatenation of this + strings[0] + ... + strings[string.length - 1]
      */
+    public concat2(s: String): String {
+        return String.concat2(this, s);
+    }
+    public concat3(s1: String, s2: String): String {
+        return String.concat3(this, s1, s2);
+    }
+    public concat4(s1: String, s2: String, s3: String): String {
+        return String.concat4(this, s1, s2, s3);
+    }
+
     public concat(...strings: String[]): String {
         let length = strings.length
         if (length == 0) {
             return this
-        }
-        if (length == 1) {
-            return String.concat2(this, strings[0]);
-        }
-        if (length == 2) {
-            return String.concat3(this, strings[0], strings[1]);
-        }
-        if (length == 3) {
-            return String.concat4(this, strings[0], strings[1], strings[2]);
         }
         let res = new StringBuilder(this);
         for (let i = 0; i < length; i++) {
@@ -602,6 +637,8 @@ export final class String extends Object implements Comparable<String>, Iterable
         }
         return res.toString();
     }
+
+    overload concat { concat2, concat3, concat4, concat };
 
     /**
      * Concatenation of two, three of four strings
@@ -696,11 +733,11 @@ export final class String extends Object implements Comparable<String>, Iterable
             return q;
         }
         for (let i = 0; i < rLength - 1; ++i) {
-            if (s.codePointAtInt(q + i) != r.codePointAtInt(i)) {
+            if (s.codePointAt(q + i) != r.codePointAt(i)) {
                 return -1;
             }
         }
-        if (s.codePointAtInt(q + rLength - 1) != r.codePointAtInt(rLength - 1) as int) {
+        if (s.codePointAt(q + rLength - 1) != r.codePointAt(rLength - 1) as int) {
             // For making algorithm compiler-friendly
             // should be removed after BoundsAnalysis improvement
             return -1;
@@ -1171,11 +1208,18 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
     /*
+     * The link() method creates a string that embeds a string in an <a> element (<a href="...">str</a>), to be used as a hypertext link to another URL.
+     */
+    public link(link: String): String{
+        return this.CreateHTMLString('a', ' href=\"' + link + '\"')
+    }
+
+    /*
      * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
      */
     public charCodeAt(index: int): number {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return NaN;
+            throw new RangeError(`Invalid index: ${index}`);
         }
         return this.charAt(index).toDouble();
     }
@@ -1184,18 +1228,10 @@ export final class String extends Object implements Comparable<String>, Iterable
      * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
      */
     public charCodeAt(index: number): number {
-        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
-            return NaN;
-        }
-        return this.charAt(index.toInt()).toDouble();
+        return this.charCodeAt(index.toInt());
     }
 
-    /*
-     * The link() method creates a string that embeds a string in an <a> element (<a href="...">str</a>), to be used as a hypertext link to another URL.
-     */
-    public link(link: String): String{
-        return this.CreateHTMLString('a', ' href=\"' + link + '\"')
-    }
+    public static native fromCharCodeImpl(codes: Array<number>): String;
 
     /**
      * The String.fromCharCode() static method returns a string created from the specified UTF-16 code unit
@@ -1215,7 +1251,12 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns string consisting of the specified UTF-16 code units.
      *
      */
-    public static native fromCharCode(...codes: number[]): String;
+    public static fromCharCode(...codes: number[]): String {
+        if (codes.length < 0) {
+            throw new NegativeArraySizeError("The value must be non negative")
+        }
+        return String.fromCharCodeImpl(codes)
+    }
 
     /*
      * The valueOf() method returns the primitive value of a String object.
@@ -1241,7 +1282,6 @@ export final class String extends Object implements Comparable<String>, Iterable
         }
         return this.indexOf(searchString, position.toInt()) == -1 ? false : true;
     }
-    
 
     public padEnd(end: int): String {
         return this.padEnd(end, ' ')
@@ -1301,6 +1341,17 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.padEnd(maxLength.toInt(), str)
     }
 
+     /**
+     * The padStart() method pads the current string with another string (multiple times, if needed)
+     * until the resulting string reaches the given length.
+     * The padding is applied from the start of the resulting string.
+     *
+     * @param maxLength of the resulting string once the current str has been padded
+     *
+     * @param fillString to pad the current str with
+     *
+     * @returns string with the padString applied at the end of the current str
+     */
     public padStart(end: int): String {
         return this.padStart(end, ' ')
     }
@@ -1344,17 +1395,6 @@ export final class String extends Object implements Comparable<String>, Iterable
         return new String(arr);
     }
 
-    /**
-     * The padStart() method pads the current string with another string (multiple times, if needed)
-     * until the resulting string reaches the given length.
-     * The padding is applied from the start of the resulting string.
-     *
-     * @param maxLength of the resulting string once the current str has been padded
-     *
-     * @param fillString to pad the current str with
-     *
-     * @returns string with the padString applied at the end of the current str
-     */
     public padStart(maxLength: number, fillString?: String): String {
         const str = (fillString == undefined) ? '\u0020' : fillString
         return this.padStart(maxLength.toInt(), str)
@@ -1368,6 +1408,16 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.substr(begin, this.getLength() as int);
     }
 
+    /**
+     * The substr() method returns a portion of the string, starting at the specified
+     * index and extending for a given number of characters afterwards.
+     *
+     * @param begin is index of the first character to include in the returned substring
+     *
+     * @param length is number of characters to extract
+     *
+     * @returns new string containing the specified part of the given string
+     */
     public substr(begin: int, length: int): String {
         begin = normalizeIndex(begin, this.getLength());
         let end = begin + length
@@ -1380,19 +1430,10 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.substring(begin, end);
     }
 
-    /**
-     * The substr() method returns a portion of the string, starting at the specified
-     * index and extending for a given number of characters afterwards.
-     *
-     * @param begin is index of the first character to include in the returned substring
-     *
-     * @param length is number of characters to extract
-     *
-     * @returns new string containing the specified part of the given string
-     */
     public substr(begin: number, length?: Number): String {
         return this.substr(begin.toInt(), asIntOrDefault(length, this.getLength()));
     }
+
 
     /*
      * The trimEnd() method removes whitespace from the end of a string and returns a new string,
@@ -1624,7 +1665,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         let result = ''
         let arrayMatchPositions = matchPositions.toArray()
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
-            let p = arrayMatchPositions[i].unboxed()
+            let p = arrayMatchPositions[i]
             let preserved = this.substring(endOfLastMatch, p)
             let replacement = String.getSubstitution(searchValue, this, p, new String[0], undefined, replaceValue)
             result = result + preserved + replacement
@@ -1676,7 +1717,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         let result = ''
         let arrayMatchPositions = matchPositions.toArray()
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
-            let p = arrayMatchPositions[i].unboxed()
+            let p = arrayMatchPositions[i]
             let preserved = this.substring(endOfLastMatch, p)
             let args = new containers.UndefinableObjectArray(2)
             args.pushBack(Double.valueOf(p))
@@ -1717,6 +1758,7 @@ export final class String extends Object implements Comparable<String>, Iterable
     public search(regexp: RegExp): number {
         return regexp.search(this)
     }
+
     public search(regexp: StringOrRegExp): number {
         if (regexp instanceof String) {
             return new RegExp(regexp as String).search(this)
@@ -1774,6 +1816,7 @@ export final class String extends Object implements Comparable<String>, Iterable
     public match(regexp: RegExp): RegExpMatchArray | null {
         return regexp.match(this)
     }
+
     public match(regexp: StringOrRegExp): RegExpMatchArray | null {
         if (regexp instanceof String) {
             return new RegExp(regexp as String).match(this)
@@ -1958,3 +2001,8 @@ class StringIterator implements IterableIterator<string> {
         return new IteratorResult<String>(String.fromCharCode(highValue.toDouble(), lowValue.toDouble()));
     }
 }
+
+/**
+ * `string` is an alias for type `String`
+ */
+export type string = String;

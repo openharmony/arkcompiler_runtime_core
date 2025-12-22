@@ -41,6 +41,9 @@ function(add_ets_coroutines_test)
     set(multiValues OPTIONS IMPL OPTION_SETS_THREADED OPTION_SETS_STACKFUL WORKERS MODE)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
 
+    # NOTE(26403) Profilesaver is turned off beause of integer overflow
+    list(APPEND ARG_OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false")
+
     if (ARG_SKIP_ARM32_COMPILER)
         set(SKIP_ARM32_COMPILER "SKIP_ARM32_COMPILER")
     endif()
@@ -121,6 +124,15 @@ add_ets_coroutines_test(FILE unhandled_rejection_event.ets
 
 add_ets_coroutines_test(FILE unhandled_rejection_promise.ets
                         SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE dump_unhandled_jobs.ets
+                        SKIP_ARM32_COMPILER
+                        LIST_UNHANDLED
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO" "ONE"
@@ -211,10 +223,8 @@ if (NOT PANDA_TARGET_ARM32)
                             MODE "AOT"
     )
 
-    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE class_load_race.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "THREADED" "STACKFUL"
                             OPTION_SETS_THREADED "DEFAULT"
                             OPTION_SETS_STACKFUL "DEFAULT" "POOL"
@@ -222,40 +232,50 @@ if (NOT PANDA_TARGET_ARM32)
                             MODE "INT" "JIT"
     )
 
-    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_n_workers.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "AUTO"
                             MODE "INT" "JIT" "AOT"
     )
 
-    # NOTE(26403) Profilesaver is turned off because of data race
     add_ets_coroutines_test(FILE launch_n_workers.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "POOL"
                             WORKERS "AUTO"
                             MODE "INT" "JIT"
     )
 
-    # NOTE(26403) Profilesaver is turned off because of data race
-    add_ets_coroutines_test(FILE launch_oom.ets
-                            SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
-                            IMPL "STACKFUL"
-                            OPTION_SETS_STACKFUL "POOL"
-                            WORKERS "ONE"
-                            MODE "INT" "JIT" "AOT"
-    )
 
-    # NOTE(26403) Profilesaver is turned off because of data race
+    # limit with 10'000 coroutine can be faced only on 64bit arch
+    if (NOT PANDA_ENABLE_THREAD_SANITIZER AND NOT PANDA_ENABLE_ADDRESS_SANITIZER)
+        add_ets_coroutines_test(FILE launch_10000.ets
+                                SKIP_ARM32_COMPILER
+                                LIST_UNHANDLED
+                                IMPL "STACKFUL"
+                                OPTION_SETS_STACKFUL "DEFAULT"
+                                WORKERS "AUTO" "ONE"
+                                MODE "INT" "JIT" "AOT"
+        )
+    endif()
+
+    # NOTE(30627) Temporarily disabled due failures under TSan
+    if (NOT PANDA_ENABLE_THREAD_SANITIZER)
+        add_ets_coroutines_test(FILE launch_oom.ets
+                                SKIP_ARM32_COMPILER
+                                OPTIONS "--gc-type=epsilon" "--coroutines-stack-mem-limit=268435456"
+                                IMPL "STACKFUL"
+                                OPTION_SETS_STACKFUL "POOL"
+                                WORKERS "ONE"
+                                MODE "INT" "JIT" "AOT"
+        )
+    endif()
+
     add_ets_coroutines_test(FILE launch_oom.ets
                             SKIP_ARM32_COMPILER
-                            OPTIONS "--gc-type=epsilon" "--profilesaver-enabled=false" "--incremental-profilesaver-enabled=false"
+                            OPTIONS "--gc-type=epsilon" "--coroutines-stack-mem-limit=268435456"
                             IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT"
                             WORKERS "ONE"
@@ -469,7 +489,7 @@ add_ets_coroutines_test(FILE eworker_post_to_main.ets
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE sync_primitives.ets
+add_ets_coroutines_test(FILE worker_group.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
@@ -477,7 +497,7 @@ add_ets_coroutines_test(FILE sync_primitives.ets
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE worker_group.ets
+add_ets_coroutines_test(FILE sync_primitives.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"

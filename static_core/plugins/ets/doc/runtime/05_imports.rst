@@ -172,7 +172,7 @@ core runtime side.
     }
 
     // runtime-specific API:
-    final class ABCFile {
+    export final class ABCFile {
         private constructor()
         static native loadAbcFile(runtimeLinker: RuntimeLinker, path: string): AbcFile
         native loadClass(runtimeLinker: RuntimeLinker, clsName: string, init: boolean): Class | null

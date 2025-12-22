@@ -167,9 +167,15 @@ class Option < SimpleDelegator
   def default_value
     if default_target_specific?
       raise "Syntax error, 'default_target_specific' should be of 'OpenStruct' class, got '#{default_target_specific.class}'" unless default_target_specific.is_a?(OpenStruct)
-      res = "ark::default_target_options::#{getter_name }({"
+      res = "ark::default_target_options::GetTargetSpecificOptionValue<std::map<std::string, "
+      res += type
+      res += ">>("
+      res += "std::map<std::string, "
+      res += type
+      res += ">"
+      res += "{"
       default_target_specific.each_pair { |k, v| res += "{#{expand_string k.to_s}, #{v}}," }
-      res += "})"
+      res += "}, ark::default_target_options::GetTargetString)"
     else
       return default_constant_name if need_default_constant
       return '{' + default.map { |e| expand_string(e) }.join(', ') + '}' if type == 'arg_list_t'

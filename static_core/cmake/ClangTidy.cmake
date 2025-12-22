@@ -18,20 +18,45 @@
 #   - believes that size of pointer is 64 instead of 32 for aarch32
 # TODO: Retry once we upgrade the checker.
 
+# Split huge static_core and ets2panda folders on several subsets
+set(CTIDY_CORE_PART1 "tools|tests|compiler|runtime")
+set(CTIDY_CORE_PART2 "plugins/ets/tests/ani")
+set(CTIDY_CORE_PART3 "?!(${CTIDY_CORE_PART1}|${CTIDY_CORE_PART2})")
+set(CTIDY_ETS_PART1  "test")
+set(CTIDY_ETS_PART2  "?!${CTIDY_ETS_PART1}")
+
 add_custom_target(clang-tidy-changed-check
   COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --changed-only ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
   USES_TERMINAL
   DEPENDS panda_gen_files
 )
 
-add_custom_target(clang-tidy-static-core-check
-  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter /runtime_core/static_core/ ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
+add_custom_target(clang-tidy-static-core-tools-check
+  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter "'/runtime_core/static_core/(${CTIDY_CORE_PART1})'" ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
   USES_TERMINAL
   DEPENDS panda_gen_files
 )
 
-add_custom_target(clang-tidy-ets2panda-check
-  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter /ets2panda/ ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
+add_custom_target(clang-tidy-static-core-libs-check
+  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter "'/runtime_core/static_core/(${CTIDY_CORE_PART2})'" ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
+  USES_TERMINAL
+  DEPENDS panda_gen_files
+)
+
+add_custom_target(clang-tidy-static-core-main-check
+  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter "'/runtime_core/static_core/(${CTIDY_CORE_PART3})'" ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
+  USES_TERMINAL
+  DEPENDS panda_gen_files
+)
+
+add_custom_target(clang-tidy-ets2panda-main-check
+  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter "'/ets2panda/(${CTIDY_ETS_PART2})'" ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
+  USES_TERMINAL
+  DEPENDS panda_gen_files
+)
+
+add_custom_target(clang-tidy-ets2panda-test-check
+  COMMAND ${PANDA_ROOT}/scripts/clang-tidy/clang_tidy_check.py --filename-filter /ets2panda/${CTIDY_ETS_PART1} ${PANDA_ROOT} ${PANDA_BINARY_ROOT}
   USES_TERMINAL
   DEPENDS panda_gen_files
 )

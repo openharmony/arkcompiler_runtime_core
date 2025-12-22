@@ -15,8 +15,8 @@
 
 #include <algorithm>
 #include <limits>
-#include "libpandabase/macros.h"
-#include "libpandabase/os/time.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/os/time.h"
 #include "runtime/coroutines/coroutine_worker_group.h"
 #include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/coroutine.h"
@@ -33,15 +33,13 @@ namespace ark {
 
 uint8_t *StackfulCoroutineManager::AllocCoroutineStack()
 {
-    Pool stackPool = PoolManager::GetMmapMemPool()->AllocPool<OSPagesAllocPolicy::NO_POLICY>(
-        coroStackSizeBytes_, SpaceType::SPACE_TYPE_NATIVE_STACKS, AllocatorType::NATIVE_STACKS_ALLOCATOR);
-    return static_cast<uint8_t *>(stackPool.GetMem());
+    return nativeStackAllocator_.AcquireStack();
 }
 
 void StackfulCoroutineManager::FreeCoroutineStack(uint8_t *stack)
 {
     if (stack != nullptr) {
-        PoolManager::GetMmapMemPool()->FreePool(stack, coroStackSizeBytes_);
+        nativeStackAllocator_.ReleaseStack(stack);
     }
 }
 
@@ -194,6 +192,7 @@ void StackfulCoroutineManager::OnWorkerStartupImpl(StackfulCoroutineWorker *work
 {
     workers_.push_back(worker);
     ++activeWorkersCount_;
+    worker->OnWorkerStartup();
     workersCv_.Signal();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::OnWorkerStartup(): COMPLETED, active workers = "
                            << activeWorkersCount_;
@@ -247,7 +246,7 @@ bool StackfulCoroutineManager::IsCoroutineSwitchDisabled()
     return GetCurrentWorker()->IsCoroutineSwitchDisabled();
 }
 
-void StackfulCoroutineManager::Initialize(Runtime *runtime, PandaVM *vm)
+void StackfulCoroutineManager::InitializeScheduler(Runtime *runtime, PandaVM *vm)
 {
     // enable stats collection if needed
     if (GetConfig().enablePerfStats) {
@@ -271,6 +270,7 @@ void StackfulCoroutineManager::Initialize(Runtime *runtime, PandaVM *vm)
     CalculateUserCoroutinesLimits(userCoroutineCountLimit_,
                                   Runtime::GetCurrent()->GetOptions().GetCoroutinesUserLimit());
 
+    nativeStackAllocator_.Initialize(coroStackSizeBytes_);
     ASSERT(commonWorkersCount_ + exclusiveWorkersLimit_ <= AffinityMask::MAX_WORKERS_COUNT);
     InitializeWorkerIdAllocator();
     {
@@ -296,6 +296,7 @@ void StackfulCoroutineManager::Finalize()
         CoroutineManager::DestroyEntrypointfulCoroutine(co);
     }
     coroutinePool_.clear();
+    nativeStackAllocator_.Finalize();
 }
 
 void StackfulCoroutineManager::AddToRegistry(Coroutine *co)
@@ -474,10 +475,10 @@ LaunchResult StackfulCoroutineManager::LaunchImmediately(CompletionEvent *comple
 
 LaunchResult StackfulCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
                                                     const CoroutineWorkerGroup::Id &groupId, CoroutinePriority priority,
-                                                    bool abortFlag)
+                                                    bool launchImmediately, bool abortFlag)
 {
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
-    return LaunchWithGroupId(epInfo, std::move(coroName), groupId, priority, false, abortFlag);
+    return LaunchWithGroupId(epInfo, std::move(coroName), groupId, priority, launchImmediately, abortFlag);
 }
 
 void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
@@ -531,6 +532,17 @@ bool StackfulCoroutineManager::EnumerateThreadsImpl(const ThreadManager::Callbac
     os::memory::LockHolder lock(coroListLock_);
     for (auto *t : coroutines_) {
         if (!ApplyCallbackToThread(cb, t, incMask, xorMask)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool StackfulCoroutineManager::EnumerateWorkersImpl(const EnumerateWorkerCallback &cb) const
+{
+    os::memory::LockHolder lock(workersLock_);
+    for (auto *w : workers_) {
+        if (!cb(w)) {
             return false;
         }
     }

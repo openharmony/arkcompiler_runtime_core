@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,9 +23,7 @@ from vmb.gclog.event_parser import LogEntry
 class ArkPauseEvent(LogEntry):
     gc_name: str
     timestamp: int
-    freed_object_count: int
     freed_object_mem: int
-    freed_large_object_count: int
     freed_large_object_mem: int
     mem_after: int
     mem_total: int

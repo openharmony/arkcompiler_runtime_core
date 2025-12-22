@@ -18,7 +18,7 @@
 desc: Class field initializers cannot call throwing or rethrowing functions.
 tags: [{{c.tags}}]
 ---*/
-class MyException extends Exception {}
+class MyException extends Error {}
 class MyError extends Error {}
 
 {{c.decl}}

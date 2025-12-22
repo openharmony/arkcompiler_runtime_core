@@ -21,7 +21,7 @@
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/pass.h"
-#include "utils/arena_containers.h"
+#include "libarkbase/utils/arena_containers.h"
 
 namespace ark::compiler {
 /**

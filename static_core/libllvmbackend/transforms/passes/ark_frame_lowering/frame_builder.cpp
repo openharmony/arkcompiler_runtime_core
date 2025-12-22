@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #include "frame_builder.h"
 #include "llvm_ark_interface.h"
 
-#include "utils/bit_field.h"
-#include "libpandabase/utils/cframe_layout.h"
-#include "libpandabase/utils/arch.h"
+#include "libarkbase/utils/bit_field.h"
+#include "libarkbase/utils/cframe_layout.h"
+#include "libarkbase/utils/arch.h"
 #include "compiler/optimizer/code_generator/target_info.h"
 
 #include <llvm/CodeGen/GlobalISel/MachineIRBuilder.h>

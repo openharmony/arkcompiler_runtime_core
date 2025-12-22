@@ -59,7 +59,7 @@ void SetRuntimeLinker(ani_env *env, const std::string &modulePath)
     env->FindClass(clsDescriptor.c_str(), &cls);
 
     ani_method ctor {};
-    env->Class_FindMethod(cls, "<ctor>", "C{std.core.RuntimeLinker}C{escompat.Array}:", &ctor);
+    env->Class_FindMethod(cls, "<ctor>", "C{std.core.RuntimeLinker}C{std.core.Array}:", &ctor);
 
     ani_object obj {};
     // NOLINTNEXTLINE

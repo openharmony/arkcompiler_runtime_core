@@ -31,7 +31,7 @@
 #include "ide_helpers.h"
 #include "lexer.h"
 #include "meta.h"
-#include "utils/expected.h"
+#include "libarkbase/utils/expected.h"
 
 namespace ark::pandasm {
 
@@ -220,6 +220,7 @@ private:
     bool ParseOperandLabel();
     bool ParseOperandField();
     bool ParseOperandType(Type::VerificationType verType);
+    void ParseComponentOperandTypeIfNeeded(Type type);
     bool ParseOperandNone();
     bool ParseOperandString();
     bool ParseOperandLiteralArray();

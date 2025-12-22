@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "libpandabase/taskmanager/task_scheduler.h"
+#include "libarkbase/taskmanager/task_scheduler.h"
 #include "runtime/mem/gc/workers/gc_workers_task_queue.h"
 
 namespace ark::mem {

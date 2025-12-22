@@ -56,6 +56,14 @@ if (is_standard_system || ark_standalone_build) {
 }
 
 declare_args() {
+  is_gcov_tools = false
+}
+
+declare_args() {
+  runtime_core_enable_ffrt = true
+}
+
+declare_args() {
   ark_enabled_plugins = default_ark_enabled_plugins
   extras = []
   if (!defined(is_ohos)) {
@@ -67,6 +75,10 @@ declare_args() {
 
   if (!defined(is_llvmbackend)) {
     is_llvmbackend = true
+  }
+
+  if (!defined(is_safepoint_checkers_build)) {
+    is_safepoint_checkers_build = false
   }
 
   if ((is_ohos && is_standard_system) || ark_ets_hybrid) {
@@ -130,8 +142,8 @@ if (is_mingw || current_os == "win" || current_os == "mingw" ||
 if (ark_standalone_build ||
     ((!ark_static_standalone_build &&
       (target_cpu == "x64" || target_cpu == "x86_64")) ||
-     (current_os == "win" || current_os == "mingw" ||
-      current_os == "winuwp")) || ark_hybrid) {
+     (current_os == "win" || current_os == "mingw" || current_os == "winuwp" ||
+      current_os == "mac")) || ark_hybrid) {
   is_llvmbackend = false
   is_llvm_interpreter = false
   is_llvm_fastpath = false
@@ -141,6 +153,9 @@ if (target_cpu == "arm") {
   is_llvmbackend = false
   is_llvm_interpreter = false
   is_llvm_fastpath = false
+  is_llvm_aot = false
+}
+if (target_cpu == "arm64") {
   is_llvm_aot = false
 }
 

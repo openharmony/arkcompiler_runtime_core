@@ -49,9 +49,9 @@ async function mustCallCheckAll() {
                 });
                 mustChecks.length = 0;
                 resolve(undefined);
-            } catch (e: Error) {
+            } catch (e) {
                 mustChecks.length = 0;
-                reject(e);
+                reject(e)
             }
         }, 2000);
     })
@@ -130,7 +130,7 @@ function testTransformConstructor() {
         transform.end('test');
     }
 
-    let exceptionCheck = (e: Error | Exception): string | boolean => {
+    let exceptionCheck = (e: Error): string | boolean => {
         return ((e as BusinessError).message == "The doTransform() method is not implemented.");
     }
     arktest.expectThrow(() => { test(); }, exceptionCheck);

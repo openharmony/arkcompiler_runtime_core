@@ -156,7 +156,7 @@ private:
     mem::Reference *returnValueObject_ = nullptr;
 };
 
-class TimerEvent : public CoroutineEvent {
+class TimerEvent : public CoroutineEvent {  // NOLINT(cppcoreguidelines-special-member-functions)
 public:
     explicit TimerEvent(CoroutineManager *coroManager, EventId id) : CoroutineEvent(Type::TIMER, coroManager, id) {}
 
@@ -165,7 +165,7 @@ public:
 
     bool IsExpired() const
     {
-        return expirationTime_ < currentTime_;
+        return expirationTime_ <= currentTime_;
     }
 
     void SetExpired()
@@ -189,6 +189,7 @@ public:
     }
 
 private:
+    /// the time is represented in microseconds
     std::atomic<uint64_t> currentTime_ = 0;
     uint64_t expirationTime_ = 0;
 };

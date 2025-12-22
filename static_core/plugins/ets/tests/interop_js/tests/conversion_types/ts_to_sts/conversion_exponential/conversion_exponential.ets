@@ -13,52 +13,88 @@
  * limitations under the License.
  */
 
-import { tsExponential } from 'main_js';
+let global = ESValue.getGlobal();
+let gtestEnv = global.getProperty("gtest_env");
+let module = ESValue.load('main_js');
+
+let tsExponential = module.getProperty('tsExponential');
 
 function checkConversionExponentialToInt(): boolean {
-    const val = Double.toInt(parseInt(tsExponential));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsExponential);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToNumber(): boolean {
-    const val = parseInt(tsExponential).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsExponential);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToFloat(): boolean {
-    const val = Double.toFloat(parseInt(tsExponential));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsExponential);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToByte(): boolean {
-    const val = Double.toByte(parseInt(tsExponential));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsExponential);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToShort(): boolean {
-    const val = Double.toShort(parseInt(tsExponential));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsExponential);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToLong(): boolean {
-    const val = Double.toLong(parseInt(tsExponential));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsExponential);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToDouble(): boolean {
-    const val = parseInt(tsExponential).toDouble();
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsExponential);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkConversionExponentialToChar(): boolean {
-    const val = Int.toChar(Double.toInt(parseInt(tsExponential)));
-
-    return typeof val == 'number';
+    try {
+        const parseInt = global.getProperty('parseInt');
+        const val = parseInt.invoke(tsExponential);
+        return val.typeOf() == 'number';
+    } catch (e) {
+        return false;
+    }
 }

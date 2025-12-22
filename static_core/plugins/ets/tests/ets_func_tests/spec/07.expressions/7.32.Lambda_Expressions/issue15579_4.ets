@@ -16,7 +16,7 @@
 /*---
 desc: Issue 15579 Test
 name: issue15579_4.ets
-tags: [compile-only]
+tags: [compile-only, negative]
 ---*/
 
 class Some {

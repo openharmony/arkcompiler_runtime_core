@@ -23,16 +23,25 @@ namespace ark::pandasm {
 static std::unordered_map<std::string_view, std::string_view> g_primitiveTypes = {
     {"u1", "Z"},  {"i8", "B"},  {"u8", "H"},  {"i16", "S"}, {"u16", "C"},  {"i32", "I"}, {"u32", "U"},
     {"f32", "F"}, {"f64", "D"}, {"i64", "J"}, {"u64", "Q"}, {"void", "V"}, {"any", "A"}};
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+static std::vector<std::string_view> g_syntheticReferenceTypes = {"Y", "N"};
 
 std::string Type::GetComponentDescriptor(bool ignorePrimitive) const
 {
+    const std::string &componentName = GetComponentName();
     if (!ignorePrimitive) {
-        auto it = g_primitiveTypes.find(GetComponentName());
+        auto it = g_primitiveTypes.find(componentName);
         if (it != g_primitiveTypes.cend()) {
             return it->second.data();
         }
     }
-    auto res = "L" + GetComponentName() + ";";
+
+    const auto it = std::find(g_syntheticReferenceTypes.begin(), g_syntheticReferenceTypes.end(), (componentName));
+    if (it != g_syntheticReferenceTypes.cend()) {
+        return it->data();
+    }
+
+    auto res = "L" + componentName + ";";
     std::replace(res.begin(), res.end(), '.', '/');
     return res;
 }
@@ -144,8 +153,8 @@ std::string Type::GetName(std::string_view componentName, size_t rank)
 static std::pair<std::string_view, size_t> FromDescriptorComponent(std::string_view descriptor)
 {
     static std::unordered_map<std::string_view, std::string_view> reversePrimitiveTypes = {
-        {"Z", "u1"},  {"B", "i8"},  {"H", "u8"},  {"S", "i16"}, {"C", "u16"},  {"I", "i32"}, {"U", "u32"},
-        {"F", "f32"}, {"D", "f64"}, {"J", "i64"}, {"Q", "u64"}, {"V", "void"}, {"A", "any"}};
+        {"Z", "u1"},  {"B", "i8"},  {"H", "u8"},  {"S", "i16"},  {"C", "u16"}, {"I", "i32"}, {"U", "u32"}, {"F", "f32"},
+        {"D", "f64"}, {"J", "i64"}, {"Q", "u64"}, {"V", "void"}, {"A", "any"}, {"Y", "Y"},   {"N", "N"}};
 
     bool isRefType = descriptor[0] == 'L';
     if (isRefType) {

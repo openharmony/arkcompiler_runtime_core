@@ -23,7 +23,8 @@
 #include "marker.h"
 #include "optimizer/code_generator/method_properties.h"
 #include "optimizer/pass_manager.h"
-#include "utils/arena_containers.h"
+#include "optimizer/optimizations/string_flat_check.h"
+#include "libarkbase/utils/arena_containers.h"
 #include <algorithm>
 #include <optional>
 
@@ -111,13 +112,16 @@ public:
     DECLARE_GRAPH_MODE(InterpreterEntry);
     // Graph will be compiled for abckit
     DECLARE_GRAPH_MODE(AbcKit);
+    // Declare an interpreter mode to use by the IrToc
+    DECLARE_GRAPH_MODE(NativePlus);
 
 #undef DECLARE_GRAPH_MODE
 #undef DECLARE_GRAPH_MODE_MODIFIERS
 
     bool SupportManagedCode() const
     {
-        return !IsNative() && !IsFastPath() && !IsBoundary() && !IsInterpreter() && !IsInterpreterEntry();
+        return !IsNative() && !IsFastPath() && !IsBoundary() && !IsInterpreter() && !IsInterpreterEntry() &&
+               !IsNativePlus();
     }
 
     void Dump(std::ostream &stm);
@@ -133,6 +137,7 @@ private:
     using FlagInterpreter = FlagBoundary::NextFlag;
     using FlagInterpreterEntry = FlagInterpreter::NextFlag;
     using FlagAbcKit = FlagInterpreterEntry::NextFlag;
+    using FlagNativePlus = FlagAbcKit::NextFlag;
 
     uint32_t value_ {0};
 
@@ -195,7 +200,8 @@ public:
           tryBeginBlocks_(args.allocator->Adapter()),
           throwBlocks_(args.allocator->Adapter()),
           spilledConstants_(args.allocator->Adapter()),
-          parentGraph_(parent)
+          parentGraph_(parent),
+          stringFlatCheckConstraint_(runtime_->IsUseAllStrings() && !StringFlatCheck::IsEnable(runtime_))
     {
         SetNeedCleanup(true);
         SetCanOptimizeNativeMethods(g_options.IsCompilerOptimizeNativeCalls() && (GetArch() != Arch::AARCH32) &&
@@ -362,7 +368,8 @@ public:
 
     bool IsOfflineCompilationMode() const
     {
-        return IsAotMode() || GetMode().IsInterpreter() || GetMode().IsFastPath() || GetMode().IsInterpreterEntry();
+        return IsAotMode() || GetMode().IsInterpreter() || GetMode().IsFastPath() || GetMode().IsNativePlus() ||
+               GetMode().IsInterpreterEntry();
     }
 
     bool IsDefaultLocationsInit() const
@@ -1354,7 +1361,8 @@ public:
 
     bool SupportsIrtocBarriers() const
     {
-        return (IsJitOrOsrMode() || IsAotMode() || GetMode().IsInterpreter() || GetMode().IsInterpreterEntry()) &&
+        return (GetMode().IsFastPath() || GetMode().IsNativePlus() || IsJitOrOsrMode() || IsAotMode() ||
+                GetMode().IsInterpreter() || GetMode().IsInterpreterEntry()) &&
                !IsDynamicMethod() && GetArch() != Arch::AARCH32;
     }
 
@@ -1366,6 +1374,11 @@ public:
     uint32_t GetMaxInliningDepth()
     {
         return maxInliningDepth_;
+    }
+
+    bool IsStringFlatCheckConstraint() const
+    {
+        return stringFlatCheckConstraint_;
     }
 
 private:
@@ -1470,6 +1483,8 @@ private:
     uint32_t vregsCount_ {0};
     // Source language of the method being compiled
     SourceLanguage lang_ {SourceLanguage::PANDA_ASSEMBLY};
+    // true if tree strings are enabled but StringFlatCheck pass is disabled
+    bool stringFlatCheckConstraint_;
 };
 
 class MarkerHolder {

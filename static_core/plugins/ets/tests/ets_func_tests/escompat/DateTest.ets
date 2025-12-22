@@ -371,11 +371,8 @@ function testLeapYear() {
 }
 
 function testInvalidDate() {
-    let invalidDate = new Date(' 2024-02-19T08:00:00');
-    arktest.assertEQ(isNaN(invalidDate.valueOf()), true);
-    arktest.assertEQ(invalidDate.isDateValid(), false);
-    invalidDate = new Date('Not date');
-    arktest.assertTrue(isNaN(invalidDate.valueOf()));
+    arktest.expectError(() => { new Date(" 2024-02-19T08:00:00") }, "Invalid time value")
+    arktest.expectError(() => { new Date("Not date") }, "Invalid time value")
 }
 
 function testDateToLocaleStringConstEvent0001() {
@@ -435,6 +432,127 @@ function testDateToLocaleTimeStringAndLocaleString0001() {
         hour: 'numeric', minute: '2-digit', second: 'numeric'}));   
 }
 
+function testInvalidDate0002() {
+    const errorMsg = "Invalid time value";
+
+    let birthday = new Date('August 0, 1975 23:15:30');
+    arktest.expectError(() => { birthday.getDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getTime() }, errorMsg);
+    arktest.expectError(() => { birthday.getTimezoneOffset() }, errorMsg);
+    
+    birthday = new Date('August 0, 1975 23:15:30 GMT+11:00');
+    arktest.expectError(() => { birthday.getDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getTime() }, errorMsg);
+    arktest.expectError(() => { birthday.getTimezoneOffset() }, errorMsg);
+
+    birthday = new Date('August 32, 1975 23:15:30');
+    arktest.expectError(() => { birthday.getDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getTime() }, errorMsg);
+    arktest.expectError(() => { birthday.getTimezoneOffset() }, errorMsg);
+
+    birthday = new Date('August 0, 1975 23:15:30 GMT+11:00');
+    arktest.expectError(() => { birthday.getDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getTime() }, errorMsg);
+    arktest.expectError(() => { birthday.getTimezoneOffset() }, errorMsg);
+
+    birthday = new Date('');
+    arktest.expectError(() => { birthday.getDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDate() }, errorMsg);
+    arktest.expectError(() => { birthday.getDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCDay() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getFullYear() }, errorMsg);
+    arktest.expectError(() => { birthday.getHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCHours() }, errorMsg);
+    arktest.expectError(() => { birthday.getMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMilliseconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCSeconds() }, errorMsg);
+    arktest.expectError(() => { birthday.getMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMonth() }, errorMsg);
+    arktest.expectError(() => { birthday.getTime() }, errorMsg);
+    arktest.expectError(() => { birthday.getTimezoneOffset() }, errorMsg);
+
+    birthday = new Date('March 13, 09 04:60');
+    arktest.expectError(() => { birthday.getMinutes() }, errorMsg);
+    arktest.expectError(() => { birthday.getUTCMinutes() }, errorMsg);
+}
+
+function testSetTime0002() {
+    let birthday = new Date('');
+    let copy = new Date();
+    copy.setTime(birthday.getTime());
+    arktest.assertTrue(Double.isNaN(copy.setTime(birthday.getTime())), 'result='+copy.setTime(birthday.getTime()));
+}
+
+function testSetTime0003() {
+    let birthday = new Date('');
+    birthday.setTime(0);
+    arktest.assertEQ(birthday.getTime(), 0, 'result='+birthday.getTime());
+}
+
 function main() {
     let myTestsuite = new arktest.ArkTestsuite("DateTest");
     myTestsuite.addTest('testDateToUTCString', testDateToUTCString);
@@ -473,5 +591,8 @@ function main() {
     myTestsuite.addTest('testDateToLocaleStringConstEvent0001', testDateToLocaleStringConstEvent0001);
     myTestsuite.addTest('testDateToLocaleTimeString0001', testDateToLocaleTimeString0001);
     myTestsuite.addTest('testDateToLocaleTimeStringAndLocaleString0001', testDateToLocaleTimeStringAndLocaleString0001);
+    myTestsuite.addTest('testInvalidDate0002', testInvalidDate0002);
+    myTestsuite.addTest('testSetTime0002', testSetTime0002);
+    myTestsuite.addTest('testSetTime0003', testSetTime0003);
     myTestsuite.run();
 }

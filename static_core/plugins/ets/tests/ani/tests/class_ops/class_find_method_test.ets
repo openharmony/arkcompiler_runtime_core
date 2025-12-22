@@ -391,7 +391,7 @@ class Student extends Person {
     }
 };
 
-class Child extends Student {
+class Teen extends Student {
     public override add_method(a0: int, a1: int): int
     {
         return a0 * a1;
@@ -565,4 +565,23 @@ class FindOverloadedConstructor {
 
 class FindConstructorWithDefaultParams {
     public constructor(a?: int, b?: int) {}
+}
+
+class CheckWrongSignature {
+    public static method (a: String) {}
+}
+
+class Parent {
+    parentMethod() {};
+    overridedMethod() {};
+
+    static parentStaticMethod() {};
+    static overridedStaticMethod() {};
+}
+class Child extends Parent {
+    childMethod() {};
+    override overridedMethod() {};
+
+    static childStaticMethod() {};
+    static overridedStaticMethod() {};
 }

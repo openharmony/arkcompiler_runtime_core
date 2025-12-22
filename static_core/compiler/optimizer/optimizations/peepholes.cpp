@@ -14,6 +14,7 @@
  */
 
 #include "compiler_logger.h"
+#include "optimizer/ir/inst.h"
 #include "peepholes.h"
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/optimizations/const_folding.h"
@@ -1305,7 +1306,8 @@ void Peepholes::VisitCast([[maybe_unused]] GraphVisitor *v, Inst *inst)
 
 void Peepholes::VisitLenArray(GraphVisitor *v, Inst *inst)
 {
-    auto graph = static_cast<Peepholes *>(v)->GetGraph();
+    auto visitor = static_cast<Peepholes *>(v);
+    auto graph = visitor->GetGraph();
     if (graph->IsBytecodeOptimizer()) {
         return;
     }
@@ -1324,10 +1326,16 @@ void Peepholes::VisitLenArray(GraphVisitor *v, Inst *inst)
             return;
         }
         inst->ReplaceUsers(arraySize);
-        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
+        PEEPHOLE_IS_APPLIED(visitor, inst);
+        return;
     }
-    if (static_cast<Peepholes *>(v)->OptimizeLenArrayForMultiArray(inst, input, 0)) {
-        PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
+
+    if (input->IsPhi() && visitor->TryOptimizeLenArrayForPhi(inst, input->CastToPhi())) {
+        PEEPHOLE_IS_APPLIED(visitor, inst);
+        return;
+    }
+    if (visitor->OptimizeLenArrayForMultiArray(inst, input, 0)) {
+        PEEPHOLE_IS_APPLIED(visitor, inst);
     }
 }
 
@@ -3014,6 +3022,29 @@ bool Peepholes::OptimizeLenArrayForMultiArray(Inst *lenArray, Inst *inst, size_t
         return OptimizeLenArrayForMultiArray(lenArray, input, indexSize + 1);
     }
     return false;
+}
+
+bool Peepholes::TryOptimizeLenArrayForPhi(Inst *lenArray, PhiInst *phi)
+{
+    ASSERT(lenArray->GetDataFlowInput(0) == phi);
+    inputs_.clear();
+    inputs_.reserve(phi->GetInputsCount());
+    for (auto i : phi->GetInputs()) {
+        auto input = i.GetInst();
+        if (input->GetOpcode() != Opcode::NewArray) {
+            return false;
+        }
+        ASSERT(input->GetDataFlowInput(1) != nullptr);
+        inputs_.push_back(input->GetDataFlowInput(1));
+    }
+    auto newPhi = GetGraph()->CreateInstPhi(lenArray->GetType(), lenArray->GetPc());
+    for (auto input : inputs_) {
+        newPhi->AppendInput(input);
+    }
+    lenArray->ReplaceUsers(newPhi);
+    phi->GetBasicBlock()->AppendPhi(newPhi);
+    lenArray->GetBasicBlock()->RemoveInst(lenArray);
+    return true;
 }
 
 bool Peepholes::IsNegationPattern(Inst *inst)

@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::extractor {
 namespace {

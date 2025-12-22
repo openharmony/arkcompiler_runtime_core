@@ -213,7 +213,7 @@ cases:
               }
               constructor() { throw ex }
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: FF) { if (p == this.t) throw ex; else this.t = "FF" }
+              constructor(p: FF) { if (typeof p == this.t) throw ex; else this.t = "FF" }
               constructor(p: EE) { this.t = "EE" }
           }
           function fff(v: number): string {

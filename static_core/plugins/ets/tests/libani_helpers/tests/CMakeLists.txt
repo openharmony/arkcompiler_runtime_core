@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+add_custom_target(ani_helpers_tests COMMENT "Common target to run libani_helpers tests")
+
 function(ani_helpers_add_gtest TARGET)
     cmake_parse_arguments(
         ARG # give prefix `ARG` to each argument
@@ -19,14 +21,16 @@ function(ani_helpers_add_gtest TARGET)
         "CPP_SOURCES;ETS_SOURCES;LIBRARIES"
         ${ARGN}
     )
-    ani_add_gtest(${TARGET}
+
+    ets_native_test_helper(${TARGET}
         ETS_CONFIG ${ARG_ETS_CONFIG}
         CPP_SOURCES ${ARG_CPP_SOURCES}
         ETS_SOURCES ${ARG_ETS_SOURCES}
         LIBRARIES ${ARG_LIBRARIES} ani_helpers
-    )
-    panda_target_include_directories(${TARGET} PRIVATE
-        ${PANDA_ROOT}/plugins/ets/runtime/ani
+        INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani ${PANDA_ETS_PLUGIN_SOURCE}/tests/ani/ani_gtest
+        VERIFY_SOURCES true
+        ETS_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH"
+        TEST_GROUP ani_helpers_tests
     )
 endfunction(ani_helpers_add_gtest)
 

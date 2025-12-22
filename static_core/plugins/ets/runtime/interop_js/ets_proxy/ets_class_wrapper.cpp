@@ -91,6 +91,7 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
     // etsObject will be wrapped in jsValue in responce to jsCtor call
     auto *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     // See (CheckClassInitialized) reason
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     EtsHandle<EtsObject> handle(coro, etsObject);

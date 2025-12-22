@@ -21,8 +21,8 @@ Each module creates its own scope, i.e., any declarations (variables,
 functions, classes, etc.) declared in the module are only visible outside
 that module if exported explicitly.
 
-Conversely, a variable, function, class, interface, etc. exported from
-another module must first be imported to a module.
+Conversely, a variable, function, class, interface, etc., exported from
+another module must be imported to a module first.
 
 |
 

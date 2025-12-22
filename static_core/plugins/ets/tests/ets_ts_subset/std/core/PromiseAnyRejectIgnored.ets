@@ -14,31 +14,27 @@
  */
 class Fulfill implements PromiseLike<string> {
     then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, _?:
-            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
-        return new Promise<U>((resolve: (value: U | PromiseLike<U>) => void) => {
-            resolve(onFulfilled!('abc'));
-        });
+     (error: Error) => E | PromiseLike<E>): PromiseLike<Awaited<U|E>> {
+        return Promise.resolve(onFulfilled ? onFulfilled("abc") : ("abc" as U));
     }
 }
 
 class Reject implements PromiseLike<string> {
     then<U, E>(onFulfilled?: (value: string) => U | PromiseLike<U>, onRejected?:
-            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
-        return new Promise<U>((resolve: (value: U | PromiseLike<U>) => void) => {
-            let v = onFulfilled!('def');
-            onRejected!(new Error('xyz'));
-            resolve(v);
-        });
+    (error: Error) => E | PromiseLike<E>): PromiseLike<Awaited<U|E>> {
+        const value = onFulfilled ? onFulfilled("def") : ("def" as U);
+        if (onRejected) onRejected(new Error("xyz"));
+        return Promise.resolve(value);
     }
 }
 
 let thenable: PromiseLike<string>[] = [new Fulfill(), new Reject()];
 Promise.any<string>(thenable).then<void, void>((value): void => {
     if (value != 'abc') {
-        console.log('Test failed. The promise should be resolved by the specified value.');
+        console.error('Test failed. The promise should be resolved by the specified value.');
         return;
     }
     console.log('Test passed.');
 }, (error: Error): void => {
-    console.log('Test failed. The promise should not be rejected.');
+    console.error('Test failed. The promise should not be rejected.');
 });

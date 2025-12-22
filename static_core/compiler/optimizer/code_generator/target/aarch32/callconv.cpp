@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -270,9 +270,16 @@ void Aarch32CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo
 {
     GeneratePrologue(frameInfo);
 }
+
 void Aarch32CallingConvention::GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
 {
     GenerateEpilogue(frameInfo, postJob);
+}
+
+void Aarch32CallingConvention::GenerateEpilogueHead([[maybe_unused]] const FrameInfo &frameInfo,
+                                                    [[maybe_unused]] std::function<void()> postJob)
+{
+    UNREACHABLE();
 }
 
 void Aarch32CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &frameInfo)

@@ -36,7 +36,7 @@ function callbackEtsFunctionSum(sumFunc: Function): boolean {
 function testErrorCall(sumFunc: ()=> void, erroString: string): void {
     try {
         sumFunc();
-    } catch (e: Error) {
+    } catch (e) {
         ASSERT_TRUE(e.toString() === erroString);
     }
 }

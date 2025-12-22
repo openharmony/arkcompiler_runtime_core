@@ -20,15 +20,18 @@ from __future__ import annotations
 import logging
 import json
 from dataclasses import dataclass
-from typing import TextIO, Tuple, Optional, List, Dict, Any
+from typing import Set, TextIO, Tuple, Optional, List, Dict, Any
 import re
 from enum import Enum
 import os
+from typing_extensions import assert_never
 
 from runner.logger import Log
 
 _LOGGER = logging.getLogger('runner.astchecker.util_astchecker')
 
+# NOTE(pronai) use runner.parser #30090
+_error_msg_pattern = re.compile(r"[\w\s]*error:.*",re.IGNORECASE)
 
 class UtilASTChecker:
     skip_options = {'SkipErrors': False, 'SkipWarnings': False}
@@ -136,12 +139,13 @@ class UtilASTChecker:
         Log.all(_LOGGER, f'No Expected error {expected_error}')
         return False
 
+    # NOTE(pronai) Use runner.parser instead #30090
     @staticmethod
-    def get_actual_errors(error: str) -> set:
+    def get_actual_errors(error: str) -> Set[Tuple[str,str]]:
         actual_errors = set()
         for error_str in error.splitlines():
             if error_str.strip():
-                error_text, error_loc = error_str.rsplit(' ', 1)
+                error_loc, error_text = error_str.split(' ', 1)
                 actual_errors.add((error_text.strip(), error_loc))
         return actual_errors
 
@@ -330,37 +334,17 @@ class UtilASTChecker:
         Takes AST and runs tests on it, returns True if all tests passed
         """
         Log.all(_LOGGER, f'Running {len(test_cases.tests_list)} tests...')
-        failed_tests = 0
         actual_errors = self.get_actual_errors(error)
-        node_test_passed = True
-        error_test_passed = True
-        warning_test_passed = True
         tests_set = set(test_cases.tests_list)
 
-        for i, test in enumerate(tests_set):
-            if test.test_type == UtilASTChecker._TestType.NODE:
-                node_test_passed = self.run_node_test(test, ast)
-            elif test.test_type == UtilASTChecker._TestType.ERROR:
-                error_test_passed = self.run_error_test(test_file, test, actual_errors)
-                if test_cases.skip_errors:
-                    error_test_passed = True
-            elif test.test_type == UtilASTChecker._TestType.WARNING:
-                warning_test_passed = self.run_error_test(test_file, test, actual_errors)
-                if test_cases.skip_warnings:
-                    warning_test_passed = True
-            test_name = f'Test {i + 1}' + ('' if test.name is None else f': {test.name}')
-            if bool(node_test_passed and error_test_passed and warning_test_passed):
-                Log.all(_LOGGER, f'PASS: {test_name}')
-            else:
-                Log.all(_LOGGER, f'FAIL: {test_name} in {test_file}')
-                failed_tests += 1
+        failed_tests = self._count_failures(test_file, test_cases, ast, actual_errors, tests_set)
 
         for actual_error in actual_errors:
-            if actual_error[0].split()[0] == "Warning:" and not self.check_skip_warning():
+            message = actual_error[0]
+            if not self.check_skip_warning() and message.startswith("Warning:"):
                 Log.all(_LOGGER, f'Unexpected warning {actual_error}')
                 failed_tests += 1
-            if (actual_error[0].split()[0] in ("TypeError:", "SyntaxError:", "Error:")
-                    and not self.check_skip_error()):
+            if not self.check_skip_error() and _error_msg_pattern.match(message):
                 Log.all(_LOGGER, f'Unexpected error {actual_error}')
                 failed_tests += 1
 
@@ -370,3 +354,27 @@ class UtilASTChecker:
 
         Log.all(_LOGGER, f'Failed {failed_tests} tests')
         return False
+
+    def _count_failures(self, test_file: str, test_cases: TestCasesList, ast: dict,
+                        actual_errors: Set[Tuple[str, str]], tests_set: Set[_TestCase])-> int:
+        failed_tests = 0
+        for i, test in enumerate(tests_set):
+            if test.test_type == UtilASTChecker._TestType.NODE:
+                test_passed = self.run_node_test(test, ast)
+            elif test.test_type == UtilASTChecker._TestType.ERROR:
+                test_passed = self.run_error_test(test_file, test, actual_errors)
+                if test_cases.skip_errors:
+                    test_passed = True
+            elif test.test_type == UtilASTChecker._TestType.WARNING:
+                test_passed = self.run_error_test(test_file, test, actual_errors)
+                if test_cases.skip_warnings:
+                    test_passed = True
+            else:
+                assert_never(test.test_type)
+            test_name = f'Test {i + 1}' + ('' if test.name is None else f': {test.name}')
+            if test_passed:
+                Log.all(_LOGGER, f'PASS: {test_name}')
+            else:
+                Log.all(_LOGGER, f'FAIL: {test_name} in {test_file}')
+                failed_tests += 1
+        return failed_tests

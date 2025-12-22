@@ -229,26 +229,73 @@ cases:
           a.set(42, "0")
           arktest.assertTrue(a.get(42) == "0")
 
-    - use: |-
-          let r: Record<char, string> = {}  // CTE: wrong key type
-      tags: 'compile-only, negative'
+    - decl: |-
+        type TT = [number, number, string, boolean, Object]
+      use: |-
+        let ti: TT = [ 6, 7, "abc", true, 42]
+        let r: Record<Int, TT> = {0: ti}
+        arktest.assertEQ(42, r.get(0)?.[4])
 
     - use: |-
-          let r: Record<string|boolean|number, string> = {}  // CTE: wrong key type
-      tags: 'compile-only, negative'
+        let r: Record<Int, FixedArray<String>> = {0: ['a', 'b', 'c']}
+        arktest.assertEQ(3, r.get(0)?.length)
 
     - use: |-
-          let r: Record<'a'|'b'|number, string> = {}  // CTE: wrong key type
-      tags: 'compile-only, negative'
+        let r: Record<Int, Any> = {0: 'Hello World'}
+        arktest.assertEQ('Hello World', r.get(0))
 
-    - use: |-
-          let r: Record<'a'|'b'|1|2, string> = {}  // CTE: wrong key type
-      tags: 'compile-only, negative'
+    - decl: |-
+        let r: Record<string, int>|null = {
+            'a': 1,
+            'b': 2,
+        } as Record<string, int>
+      use: |-
+        arktest.assertEQ(r!['a'], 1)
+        arktest.assertEQ(r!['b'], 2)
 
-    - use: |-
-          let r: Record<string|null, string> = {}  // CTE: wrong key type
-      tags: 'compile-only, negative'
+    - decl: |-
+        let r: Record<string, int>|undefined = {
+            'a': 1,
+            'b': 2,
+        } as Record<string, int>
+      use: |-
+        arktest.assertEQ(r!['a'], 1)
+        arktest.assertEQ(r!['b'], 2)
 
-    - use: |-
-          let r: Record<number|undefined, string> = {}  // CTE: wrong key type
-      tags: 'compile-only, negative'
+    - decl: |-
+        let r: Record<string, int|null>|null = {
+            'a': 1,
+            'b': null,
+        } as Record<string, int|null>
+      use: |-
+        arktest.assertEQ(r!['a'], 1)
+        arktest.assertEQ(r!['b'], null)
+
+    - decl: |-
+        let r: Record<string, int|undefined>|undefined = {
+            'a': 1,
+            'b': undefined,
+        } as Record<string, int|undefined>
+      use: |-
+        arktest.assertEQ(r!['a'], 1)
+        arktest.assertEQ(r!['b'], undefined)
+
+    - decl: |-
+        let r: Record<string, Record<string, int|null>|null>|null = {
+            'a': null,
+            'b': { 'bb1': null, 'bb2': 42 } as Record<string, int|null>,
+        } as Record<string, Record<string, int|null>|null>
+      use: |-
+        arktest.assertEQ(r!['a'], null)
+        arktest.assertEQ(r!['b']!['bb1'], null)
+        arktest.assertEQ(r!['b']!['bb2'], 42)
+
+    - decl: |-
+        let r: Record<string, Record<string, int|undefined>|undefined>|undefined = {
+            'a': undefined,
+            'b': { 'bb1': undefined, 'bb2': 42 } as Record<string, int|undefined>,
+        } as Record<string, Record<string, int|undefined>|undefined>
+      use: |-
+        arktest.assertEQ(r!['a'], undefined)
+        arktest.assertEQ(r!['b']!['bb1'], undefined)
+        arktest.assertEQ(r!['b']!['bb2'], 42)

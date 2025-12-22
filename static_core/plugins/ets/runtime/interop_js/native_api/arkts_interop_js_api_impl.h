@@ -19,7 +19,7 @@
 #include <ani.h>
 #include <node_api.h>
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 
 namespace ark::ets {
 class EtsCoroutine;

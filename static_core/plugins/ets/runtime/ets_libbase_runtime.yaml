@@ -29,6 +29,7 @@ coretypes:
 
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
+  string_class: true
 
 - managed_class: std.core.Promise
   mirror_class: ark::ets::EtsPromise
@@ -72,6 +73,9 @@ coretypes:
 - managed_class: std.debug.concurrency.AtomicFlag
   mirror_class: ark::ets::EtsAtomicFlag
 
+- managed_class: std.containers.AtomicInt
+  mirror_class: ark::ets::EtsAtomicInt
+
 - managed_class: std.core.StackTraceElement
   mirror_class: ark::ets::EtsStackTraceElement
 
@@ -96,10 +100,13 @@ coretypes:
 - managed_class: std.core.RWLock
   mirror_class: ark::ets::EtsRWLock
 
-- managed_class: escompat.Array
+- managed_class: std.core.Set
+  mirror_class: ark::ets::EtsEscompatSet
+
+- managed_class: std.core.Array
   mirror_class: ark::ets::EtsEscompatArray
 
-- managed_class: escompat.ArrayBuffer
+- managed_class: std.core.ArrayBuffer
   mirror_class: ark::ets::EtsEscompatArrayBuffer
 
 - managed_class: escompat.Int8Array
@@ -147,14 +154,8 @@ coretypes:
 - managed_class: escompat.BigUint64Array
   mirror_class: ark::ets::EtsEscompatBigUInt64Array
 
-- managed_class: escompat.Map
+- managed_class: std.core.Map
   mirror_class: ark::ets::EtsEscompatMap
-
-- managed_class: escompat.MapEntry
-  mirror_class: ark::ets::EtsEscompatMapEntry
-
-- managed_class: escompat.Set
-  mirror_class: ark::ets::EtsEscompatSet
 
 intrinsics_namespace: ark::ets::intrinsics
 
@@ -691,19 +692,29 @@ intrinsics:
       args: [ std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::LoadLibraryWithPermissionCheck
 
+  - name: StdCoreInitializePrimitivesInClass
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: initializePrimitivesInClass
+    static: true
+    signature:
+      ret: void
+      args: [ ]
+    impl: ark::ets::intrinsics::InitializePrimitivesInClass
+
 ###################
-# Escompat.JSON #
+# std.core.JSON #
 ###################
 
-  - name: EscompatJSONStringifyFast
+  - name: StdCoreJSONStringifyFast
     space: ets
-    class_name: escompat.JSON
+    class_name: std.core.JSON
     method_name: stringifyFast
     static: true
     signature:
       ret: std.core.String
       args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EscompatJSONStringifyFast
+    impl: ark::ets::intrinsics::StdCoreJSONStringifyFast
 
 ###################
 # std.core.String #
@@ -725,6 +736,7 @@ intrinsics:
     need_param_locations: true
     clear_flags: [ ]
     set_flags: [ ]
+    require_flat_check: true
 
   - name: StdCoreStringGetBytes
     space: ets
@@ -743,6 +755,7 @@ intrinsics:
     need_param_locations: true
     clear_flags: [ ]
     set_flags: [ ]
+    require_flat_check: true
 
   - name: StdCoreStringGetLength
     space: ets
@@ -757,7 +770,7 @@ intrinsics:
   - name: StdCoreStringLength
     space: ets
     class_name: std.core.String
-    method_name: <get>length
+    method_name: \u0025\u0025get-length
     static: false
     signature:
       ret: i32
@@ -783,6 +796,10 @@ intrinsics:
       ret: u16
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCharAt
+    llvm_codegen_func: EmitStringCharAt
+    codegen_func: CreateStringCharAt
+    codegen_arch: [arm64, amd64]
+    require_flat_check: true
 
   - name: StdCoreStringEquals
     space: ets
@@ -793,12 +810,13 @@ intrinsics:
       ret: u1
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreStringEquals
-    codegen_func: CreateStringEquals
+    irtoc_impl: EtsStringEqualsNativePlus
+    codegen_func: CreateEtsStringEquals
     codegen_arch: [arm64, amd64]
-    llvm_codegen_func: EmitStringEquals
+    llvm_codegen_func: EmitEtsStringEquals
     peephole_func: PeepholeStringEquals
     need_param_locations: true
-    safe_intrinsic: true
+    require_flat_check: true
 
   - name: StdCoreStringNormalizeNFC
     space: ets
@@ -899,9 +917,11 @@ intrinsics:
       ret: i32
       args: [u16]
     impl: ark::ets::intrinsics::StdCoreStringIndexOf
+    irtoc_impl: StringIndexOfNativePlus
     codegen_arch: [arm64]
     codegen_func: CreateStringIndexOf
     llvm_codegen_func: EmitStringIndexOf
+    require_flat_check: true
 
   - name: StdCoreStringIndexOfAfter
     space: ets
@@ -912,15 +932,17 @@ intrinsics:
       ret: i32
       args: [u16, i32]
     impl: ark::ets::intrinsics::StdCoreStringIndexOfAfter
+    irtoc_impl: StringIndexOfAfterNativePlus
     codegen_arch: [arm64]
     codegen_func: CreateStringIndexOfAfter
     llvm_codegen_func: EmitStringIndexOfAfter
     need_param_locations: true
+    require_flat_check: true
 
   - name: StdCoreStringIndexOfString
     space: ets
     class_name: std.core.String
-    method_name: indexOf
+    method_name: indexOfImpl
     static: false
     signature:
       ret: i32
@@ -930,7 +952,7 @@ intrinsics:
   - name: StdCoreStringLastIndexOfString
     space: ets
     class_name: std.core.String
-    method_name: lastIndexOf
+    method_name: lastIndexOfImpl
     static: false
     signature:
       ret: i32
@@ -951,6 +973,7 @@ intrinsics:
     llvm_codegen_func: EmitStdStringSubstring
     need_param_locations: true
     peephole_func: PeepholeStringSubstring
+    require_flat_check: true
 
   - name: StdCoreStringCodePointToChar
     space: ets
@@ -961,6 +984,24 @@ intrinsics:
       ret: i32
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCodePointToChar
+
+#  Not yet clear if we have to retain the dedicated hashcode implementation
+#  for Strings as an intrinsic, will clear this out in the follow up patch
+#  Now just make sure it works as intended wrt finalized Object.$_hashCode
+#  - name: StdCoreStringHashCode
+#    space: ets
+#    class_name: std.core.String
+#    method_name: $_hashCode
+#    static: false
+#    signature:
+#      ret: i32
+#      args: [ ]
+#    impl: ark::ets::intrinsics::StdCoreStringHashCode
+#    irtoc_impl: StringHashCodeCompressedNativePlus
+#    codegen_func: CreateStringHashCode
+#    codegen_arch: [arm64, amd64]
+#    llvm_codegen_func: EmitStringHashCode
+#    safe_intrinsic: true
 
   - name: StdCoreStringIsCompressed
     space: ets
@@ -1029,7 +1070,9 @@ intrinsics:
     llvm_codegen_func: EmitStringCompareTo
     codegen_arch: [arm64, amd64]
     impl: ark::ets::intrinsics::StdCoreStringCompareTo
+    irtoc_impl: StringCompareToNativePlus
     need_param_locations: true
+    require_flat_check: true
 
   - name: StdCoreStringTrimLeft
     space: ets
@@ -1043,6 +1086,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringTrimLeft
     llvm_codegen_func: EmitStringTrimLeft
+    require_flat_check: true
 
   - name: StdCoreStringTrimRight
     space: ets
@@ -1056,6 +1100,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringTrimRight
     llvm_codegen_func: EmitStringTrimRight
+    require_flat_check: true
 
   - name: StdCoreStringTrim
     space: ets
@@ -1069,6 +1114,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringTrim
     llvm_codegen_func: EmitStringTrim
+    require_flat_check: true
 
   - name: StdCoreStringStartsWith
     space: ets
@@ -1079,9 +1125,11 @@ intrinsics:
       ret: u1
       args: [ std.core.String, i32 ]
     impl: ark::ets::intrinsics::StdCoreStringStartsWith
+    irtoc_impl: StringStartsWithNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringStartsWith
     llvm_codegen_func: EmitStringStartsWith
+    require_flat_check: true
 
   - name: StdCoreStringEndsWith
     space: ets
@@ -1092,18 +1140,20 @@ intrinsics:
       ret: u1
       args: [ std.core.String, i32 ]
     impl: ark::ets::intrinsics::StdCoreStringEndsWith
+    irtoc_impl: StringEndsWithNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringEndsWith
     llvm_codegen_func: EmitStringEndsWith
+    require_flat_check: true
 
   - name: StdCoreStringFromCharCode
     space: ets
     class_name: std.core.String
-    method_name: fromCharCode
+    method_name: fromCharCodeImpl
     static: true
     signature:
       ret: std.core.String
-      args: [ escompat.Array ]
+      args: [ std.core.Array ]
     impl: ark::ets::intrinsics::StdCoreStringFromCharCode
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateStringFromCharCode
@@ -1132,6 +1182,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringRepeat
     llvm_codegen_func: EmitStringRepeat
+    require_flat_check: true
 
   - name: StdCoreStringGet
     space: ets
@@ -1145,15 +1196,6 @@ intrinsics:
 ##########################
 # std.core.StringBuilder #
 ##########################
-  - name: StdCoreStringBuilderConcatStrings
-    space: ets
-    class_name: std.core.StringBuilder
-    method_name: concatStrings
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String, std.core.String ]
-    impl: ark::ets::intrinsics::StdCoreStringBuilderConcatStrings
 
   - name: StdCoreToStringBoolean
     space: ets
@@ -1419,75 +1461,55 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathRandom
 
 #################
-# escompat.JSON #
+# std.core.JSON #
 #################
-  - name: EscompatJSONGetJSONStringifyIgnoreByIdx
+  - name: StdCoreJSONGetJSONStringifyIgnore
     space: ets
-    class_name: escompat.JSONAPI
-    method_name: getJSONStringifyIgnoreByIdx
+    class_name: std.core.JSONAPI
+    method_name: getJSONStringifyIgnore
     static: true
     signature:
       ret: u1
-      args: [ std.core.Class, i64 ]
-    impl: ark::ets::intrinsics::EscompatJSONGetJSONStringifyIgnoreByIdx
+      args: [ std.core.reflect.InstanceField ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetJSONStringifyIgnore
 
-  - name: EscompatJSONGetJSONStringifyIgnoreByName
+  - name: StdCoreJSONGetJSONParseIgnore
     space: ets
-    class_name: escompat.JSONAPI
-    method_name: getJSONStringifyIgnoreByName
+    class_name: std.core.JSONAPI
+    method_name: getJSONParseIgnore
     static: true
     signature:
       ret: u1
-      args: [ std.core.Class, std.core.String ]
-    impl: ark::ets::intrinsics::EscompatJSONGetJSONStringifyIgnoreByName
+      args: [ std.core.reflect.InstanceField ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetJSONParseIgnore
 
-  - name: EscompatJSONGetJSONParseIgnoreFromAnnotation
+  - name: StdCoreJSONGetJSONRename
     space: ets
-    class_name: escompat.JSONAPI
-    method_name: getJSONParseIgnoreFromAnnotation
-    static: true
-    signature:
-      ret: u1
-      args: [ std.core.Class, i64 ]
-    impl: ark::ets::intrinsics::EscompatJSONGetJSONParseIgnoreFromAnnotation
-
-  - name: EscompatJSONGetJSONRenameByIdx
-    space: ets
-    class_name: escompat.JSONAPI
-    method_name: getJSONRenameByIdx
+    class_name: std.core.JSONAPI
+    method_name: getJSONRename
     static: true
     signature:
       ret: std.core.String
-      args: [ std.core.Class, i64 ]
-    impl: ark::ets::intrinsics::EscompatJSONGetJSONRenameByIdx
-
-  - name: EscompatJSONGetJSONRenameByName
-    space: ets
-    class_name: escompat.JSONAPI
-    method_name: getJSONRenameByName
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.Class, std.core.String ]
-    impl: ark::ets::intrinsics::EscompatJSONGetJSONRenameByName
+      args: [ std.core.reflect.InstanceField ]
+    impl: ark::ets::intrinsics::StdCoreJSONGetJSONRename
 
 
 #################
-# escompat.Date #
+# std.core.Date #
 #################
   - name: EscompatDateNow
     space: ets
-    class_name: escompat.Date
+    class_name: std.core.Date
     method_name: now
     static: true
     signature:
-      ret: f64
+      ret: i64
       args: []
     impl: ark::ets::intrinsics::EscompatDateNow
 
   - name: EscompatDateGetLocalTimezoneOffset
     space: ets
-    class_name: escompat.Date
+    class_name: std.core.Date
     method_name: getLocalTimezoneOffset
     static: true
     signature:
@@ -1497,7 +1519,7 @@ intrinsics:
 
   - name: EscompatDateGetTimezoneName
     space: ets
-    class_name: escompat.Date
+    class_name: std.core.Date
     method_name: getTimezoneName
     static: true
     signature:
@@ -1506,11 +1528,11 @@ intrinsics:
     impl: ark::ets::intrinsics::EscompatDateGetTimezoneName
 
 ##################
-# escompat.Array #
+# std.core.Array #
 ##################
   - name: EscompatArrayGet
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: $_get
     static: false
     signature:
@@ -1520,7 +1542,7 @@ intrinsics:
 
   - name: EscompatArraySet
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: $_set
     static: false
     signature:
@@ -1530,67 +1552,63 @@ intrinsics:
 
   - name: EscompatArrayJoin
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: joinInternal
-    static: false
+    static: true
     signature:
       ret: std.core.String
-      args: [ std.core.String ]
+      args:
+        - std.core.Object[]
+        - i32
+        - std.core.String
     impl: ark::ets::intrinsics::EtsEscompatArrayJoinInternal
-
-  - name: EscompatArrayIndexOf
-    space: ets
-    class_name: escompat.Array
-    method_name: indexOf
-    static: false
-    signature:
-      ret: i32
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatArrayIndexOf
 
   - name: EscompatInternalArrayIndexOf
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: indexOfImpl
-    static: false
+    static: true
     signature:
       ret: i32
-      args: [ std.core.Object, i32 ]
+      args:
+        - std.core.Object[]
+        - i32
+        - std.core.Object
+        - i32
     impl: ark::ets::intrinsics::EtsEscompatArrayInternalIndexOf
-
-  - name: EscompatArrayLastIndexOf
-    space: ets
-    class_name: escompat.Array
-    method_name: lastIndexOf
-    static: false
-    signature:
-      ret: i32
-      args: [ std.core.Object]
-    impl: ark::ets::intrinsics::EtsEscompatArrayLastIndexOf
 
   - name: EscompatArrayInternalLastIndexOf
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: lastIndexOfImpl
-    static: false
+    static: true
     signature:
       ret: i32
-      args: [ std.core.Object, i32]
+      args:
+        - std.core.Object[]
+        - i32
+        - std.core.Object
+        - i32
     impl: ark::ets::intrinsics::EtsEscompatArrayInternalLastIndexOf
 
-  - name: EscompatArrayFill
+  - name: EscompatArrayFillImpl
     space: ets
-    class_name: escompat.Array
-    method_name: fill
-    static: false
+    class_name: std.core.Array
+    method_name: fillImpl
+    static: true
     signature:
-      ret: escompat.Array
-      args: [ std.core.Object, i32, i32 ]
-    impl: ark::ets::intrinsics::EtsEscompatArrayFill
+      ret: void
+      args:
+        - std.core.Object[]
+        - i32
+        - std.core.Object
+        - i32
+        - i32
+    impl: ark::ets::intrinsics::EtsEscompatArrayFillImpl
 
   - name: EscompatArrayGetUnsafe
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: $_get_unsafe
     static: false
     signature:
@@ -1600,7 +1618,7 @@ intrinsics:
 
   - name: EscompatArraySetUnsafe
     space: ets
-    class_name: escompat.Array
+    class_name: std.core.Array
     method_name: $_set_unsafe
     static: false
     signature:
@@ -1608,12 +1626,84 @@ intrinsics:
       args: [ i32, std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatArraySetUnsafe
 
+  - name: EscompatArrayUnshiftInternal
+    space: ets
+    class_name: std.core.Array
+    method_name: unshiftInternal
+    static: true
+    signature:
+      ret: void
+      args:
+        - std.core.Object[]
+        - i32
+        - std.core.Object[]
+        - std.core.Array
+    impl: ark::ets::intrinsics::EtsEscompatArrayUnshiftInternal
+
+  - name: EscompatArrayReverse
+    space: ets
+    class_name: std.core.Array
+    method_name: reverseImpl
+    static: true
+    signature:
+      ret: void
+      args:
+        - std.core.Object[]
+        - i32
+    impl: ark::ets::intrinsics::EtsEscompatArrayReverse
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateEscompatArrayReverse
+    llvm_codegen_func: EmitEscompatArrayReverse
+
+  - name: EscompatArrayIsPlatformArray
+    space: ets
+    class_name: std.core.Array
+    method_name: isPlatformArray
+    static: true
+    signature:
+      ret: u1
+      args:
+        - std.core.Object
+    impl: ark::ets::intrinsics::EtsEscompatArrayIsPlatformArray
+    safe_intrinsic: true
+    irtoc_impl: EscompatArrayIsPlatformArrayFastNativePlus
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateEscompatArrayIsPlatformArray
+    llvm_codegen_func: EmitEscompatArrayIsPlatformArray
+
+  - name: EscompatArrayGetBuffer
+    space: ets
+    class_name: std.core.Array
+    method_name: getBuffer
+    static: true
+    signature:
+      ret: std.core.Object[]
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayGetBuffer
+    safe_intrinsic: true
+
+
+####################
+# std.containers.WeakMap #
+####################
+  - name: WeakMapValidateKey
+    space: ets
+    class_name: std.containers.WeakMap
+    method_name: validateKey
+    static: true
+    signature:
+      ret: u1
+      args:
+        - std.core.Object
+    impl: ark::ets::intrinsics::EtsWeakMapValidateKey
+
+
 ########################
-# escompat.ArrayBuffer #
+# std.core.ArrayBuffer #
 ########################
   - name: EscompatArrayBufferAt
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atImpl
     static: false
     signature:
@@ -1623,7 +1713,7 @@ intrinsics:
 
   - name: EscompatArrayBufferSet
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: setImpl
     static: false
     signature:
@@ -1633,17 +1723,17 @@ intrinsics:
 
   - name: EscompatArrayBufferSetValues
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: setValues
     static: false
     signature:
       ret: void
-      args: [escompat.ArrayBuffer, i32]
+      args: [std.core.ArrayBuffer, i32]
     impl: ark::ets::intrinsics::EtsEscompatArrayBufferSetValues
 
   - name: EscompatArrayBufferAllocateNonMovable
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: allocateNonMovable
     static: true
     signature:
@@ -1653,7 +1743,7 @@ intrinsics:
 
   - name: EscompatArrayBufferGetAddress
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: getAddress
     static: true
     signature:
@@ -1664,27 +1754,27 @@ intrinsics:
 
   - name: EscompatArrayBufferFromEncodedString
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: from
     static: true
     signature:
-      ret: escompat.ArrayBuffer
+      ret: std.core.ArrayBuffer
       args: [std.core.String, std.core.String]
     impl: ark::ets::intrinsics::EtsArrayBufferFromEncodedString
 
   - name: EscompatArrayBufferFromBufferSlice
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: from
     static: true
     signature:
-      ret: escompat.ArrayBuffer
-      args: [escompat.ArrayBuffer, i32, i32]
+      ret: std.core.ArrayBuffer
+      args: [std.core.ArrayBuffer, i32, i32]
     impl: ark::ets::intrinsics::EtsArrayBufferFromBufferSlice
 
   - name: EtsStringBytesLength
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: bytesLength
     static: true
     signature:
@@ -1694,13 +1784,33 @@ intrinsics:
 
   - name: EtsArrayBufferToString
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: stringify
     static: true
     signature:
       ret: std.core.String
-      args: [escompat.ArrayBuffer, std.core.String, i32, i32]
+      args: [std.core.ArrayBuffer, std.core.String, i32, i32]
     impl: ark::ets::intrinsics::EtsArrayBufferToString
+
+  - name: EtsArrayBufferRegisterWeakRef
+    space: ets
+    class_name: std.core.ArrayBuffer
+    method_name: registerWeakRef
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.ArrayBuffer, i64, i64 ]
+    impl: ark::ets::intrinsics::EtsArrayBufferRegisterWeakRef
+
+  - name: EtsArrayBufferUnregisterWeakRef
+    space: ets
+    class_name: std.core.ArrayBuffer
+    method_name: unregisterWeakRef
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsArrayBufferUnregisterWeakRef
 
   - name: Int8ArraySetInt
     space: ets
@@ -1779,7 +1889,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateInt8ArraySetValuesFromArray
@@ -1804,6 +1914,7 @@ intrinsics:
       ret: void
       args: [i8, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArrayFillInternal
+    irtoc_impl: Int8ArrayFillInternalNativePlus
     codegen_func: CreateInt8ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitInt8ArrayFillInternal
@@ -1895,7 +2006,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateInt16ArraySetValuesFromArray
@@ -1930,6 +2041,7 @@ intrinsics:
       ret: void
       args: [i16, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArrayFillInternal
+    irtoc_impl: Int16ArrayFillInternalNativePlus
     codegen_func: CreateInt16ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitInt16ArrayFillInternal
@@ -1991,7 +2103,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateInt32ArraySetValuesFromArray
@@ -2026,6 +2138,7 @@ intrinsics:
       ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArrayFillInternal
+    irtoc_impl: Int32ArrayFillInternalNativePlus
     codegen_func: CreateInt32ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitInt32ArrayFillInternal
@@ -2087,7 +2200,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateBigInt64ArraySetValuesFromArray
@@ -2122,6 +2235,7 @@ intrinsics:
       ret: void
       args: [i64, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayFillInternal
+    irtoc_impl: BigInt64ArrayFillInternalNativePlus
     codegen_func: CreateBigInt64ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitBigInt64ArrayFillInternal
@@ -2183,7 +2297,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateFloat32ArraySetValuesFromArray
@@ -2208,6 +2322,7 @@ intrinsics:
       ret: void
       args: [f32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayFillInternal
+    irtoc_impl: Float32ArrayFillInternalNativePlus
     codegen_func: CreateFloat32ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitFloat32ArrayFillInternal
@@ -2289,7 +2404,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateFloat64ArraySetValuesFromArray
@@ -2314,6 +2429,7 @@ intrinsics:
       ret: void
       args: [f64, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayFillInternal
+    irtoc_impl: Float64ArrayFillInternalNativePlus
     codegen_func: CreateFloat64ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitFloat64ArrayFillInternal
@@ -2395,7 +2511,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateUint8ClampedArraySetValuesFromArray
@@ -2420,6 +2536,7 @@ intrinsics:
       ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayFillInternal
+    irtoc_impl: UInt8ClampedArrayFillInternalNativePlus
     codegen_func: CreateUInt8ClampedArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt8ClampedArrayFillInternal
@@ -2501,7 +2618,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatUint8ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateUint8ArraySetValuesFromArray
@@ -2526,6 +2643,7 @@ intrinsics:
       ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayFillInternal
+    irtoc_impl: UInt8ArrayFillInternalNativePlus
     codegen_func: CreateUInt8ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt8ArrayFillInternal
@@ -2607,7 +2725,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatUint16ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateUint16ArraySetValuesFromArray
@@ -2622,6 +2740,7 @@ intrinsics:
       ret: void
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayFillInternal
+    irtoc_impl: UInt16ArrayFillInternalNativePlus
     codegen_func: CreateUInt16ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt16ArrayFillInternal
@@ -2723,7 +2842,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatUint32ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateUint32ArraySetValuesFromArray
@@ -2738,6 +2857,7 @@ intrinsics:
       ret: void
       args: [i64, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayFillInternal
+    irtoc_impl: UInt32ArrayFillInternalNativePlus
     codegen_func: CreateUInt32ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt32ArrayFillInternal
@@ -2829,7 +2949,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [escompat.Array]
+      args: [std.core.Array]
     impl: ark::ets::intrinsics::EtsEscompatBigUint64ArraySetValuesFromArray
     codegen_arch: [ arm64, amd64 ]
     codegen_func: CreateBigUint64ArraySetValuesFromArray
@@ -2844,6 +2964,7 @@ intrinsics:
       ret: void
       args: [i64, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayFillInternal
+    irtoc_impl: BigUInt64ArrayFillInternalNativePlus
     codegen_func: CreateBigUInt64ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitBigUInt64ArrayFillInternal
@@ -2867,6 +2988,10 @@ intrinsics:
       ret: std.core.String
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatBigUint64ArrayJoin
+
+################################
+# escompat.TypedArrays.reverse #
+################################
 
   - name: Int8ArrayReverse
     space: ets
@@ -2977,6 +3102,135 @@ intrinsics:
       ret: escompat.BigUint64Array
       args: []
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayReverse
+
+############################################
+# escompat.TypedArrays.reverseCopyBuffer #
+############################################
+
+  - name: Int8ArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: Int16ArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: Int32ArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: BigInt64ArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: Float32ArraReverseCopyBuffer
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: Float64ArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UInt8ArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UInt8ClampedArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UInt16ArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UInt32ArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: BigUInt64ArrayReverseCopyBuffer
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: reverseCopyBuffer
+    static: true
+    signature:
+      ret: void
+      args: [std.core.ArrayBuffer, std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayReverseCopyBuffer
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+###################################
+# escompat.TypedArrays.copyWithin #
+###################################
 
   - name: Int8ArrayCopyWithinImpl
     space: ets
@@ -3528,6 +3782,351 @@ intrinsics:
       args: [i64, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayLastIndexOfLong
 
+################################
+# escompat.TypedArrays.of      #
+################################
+
+  - name: Int8ArrayOfInt
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayOfInt
+
+  - name: Int8ArrayOfNumber
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayOfNumber
+
+  - name: Int8ArrayOfByte
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: ofByte
+    static: false
+    signature:
+      ret: void
+      args:
+        - i8\[
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayOfByte
+
+  - name: Int16ArrayOfInt
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayOfInt
+
+  - name: Int16ArrayOfNumber
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayOfNumber
+
+  - name: Int16ArrayOfShort
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: ofShort
+    static: false
+    signature:
+      ret: void
+      args:
+        - i16\[
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayOfShort
+
+  - name: Int32ArrayOfInt
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayOfInt
+
+  - name: Int32ArrayOfNumber
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayOfNumber
+
+  - name: BigInt64ArrayOfInt
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayOfInt
+
+  - name: BigInt64ArrayOfBigInt
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: ofBigInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayOfBigInt
+
+  - name: BigInt64ArrayOfLong
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: ofLong
+    static: false
+    signature:
+      ret: void
+      args:
+        - i64\[
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayOfLong
+
+  - name: BigInt64ArrayOfNumber
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayOfNumber
+
+  - name: Float32ArrayOfInt
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayOfInt
+
+  - name: Float32ArrayOfFloat
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: ofFloat
+    static: false
+    signature:
+      ret: void
+      args:
+        - f32\[
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayOfFloat
+
+  - name: Float32ArrayOfNumber
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayOfNumber
+
+  - name: Float64ArrayOfInt
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayOfInt
+
+  - name: Float64ArrayOfNumber
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayOfNumber
+
+  - name: Uint8ClampedArrayOfNumber
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayOfNumber
+
+  - name: Uint8ClampedArrayOfInt
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayOfInt
+
+  - name: Uint8ClampedArrayOfShort
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: ofShort
+    static: false
+    signature:
+      ret: void
+      args:
+        - i16\[
+    impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayOfShort
+
+  - name: Uint8ArrayOfNumber
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatUint8ArrayOfNumber
+
+  - name: Uint8ArrayOfInt
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatUint8ArrayOfInt
+
+  - name: Uint8ArrayOfShort
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: ofShort
+    static: false
+    signature:
+      ret: void
+      args:
+        - i16\[
+    impl: ark::ets::intrinsics::EtsEscompatUint8ArrayOfShort
+
+  - name: Uint16ArrayOfNumber
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatUint16ArrayOfNumber
+
+  - name: Uint16ArrayOfInt
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatUint16ArrayOfInt
+
+  - name: Uint32ArrayOfNumber
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: ofNumber
+    static: false
+    signature:
+      ret: void
+      args:
+        - f64\[
+    impl: ark::ets::intrinsics::EtsEscompatUint32ArrayOfNumber
+
+  - name: Uint32ArrayOfInt
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatUint32ArrayOfInt
+
+  - name: Uint32ArrayOfLong
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: ofLong
+    static: false
+    signature:
+      ret: void
+      args:
+        - i64\[
+    impl: ark::ets::intrinsics::EtsEscompatUint32ArrayOfLong
+
+  - name: BigUint64ArrayOfInt
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: ofInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - i32\[
+    impl: ark::ets::intrinsics::EtsEscompatBigUint64ArrayOfInt
+
+  - name: BigUint64ArrayOfLong
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: ofLong
+    static: false
+    signature:
+      ret: void
+      args:
+        - i64\[
+    impl: ark::ets::intrinsics::EtsEscompatBigUint64ArrayOfLong
+
+  - name: BigUint64ArrayOfBigInt
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: ofBigInt
+    static: false
+    signature:
+      ret: void
+      args:
+        - std.core.Object[]
+    impl: ark::ets::intrinsics::EtsEscompatBigUint64ArrayOfBigInt
+
   - name: Uint8ClampedArrayToUint8Clamped
     space: ets
     class_name: escompat.Uint8ClampedArray
@@ -3539,11 +4138,11 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayToUint8Clamped
 
 ########################
-# escompat.taskpool #
+# std.concurrency.taskpool #
 ########################
   - name: TaskpoolGenerateId
     space: ets
-    class_name: escompat.taskpool.Task
+    class_name: std.concurrency.taskpool.Task
     method_name: generateId
     static: true
     signature:
@@ -3553,7 +4152,7 @@ intrinsics:
 
   - name: TaskpoolGenerateGroupId
     space: ets
-    class_name: escompat.taskpool.GroupState
+    class_name: std.concurrency.taskpool.GroupState
     method_name: generateGroupId
     static: true
     signature:
@@ -3563,7 +4162,7 @@ intrinsics:
 
   - name: TaskpoolIsUsingLaunch
     space: ets
-    class_name: escompat.taskpool
+    class_name: std.concurrency.taskpool
     method_name: isUsingLaunch
     static: true
     signature:
@@ -3573,7 +4172,7 @@ intrinsics:
 
   - name: TaskpoolIsSupportInterop
     space: ets
-    class_name: escompat.taskpool
+    class_name: std.concurrency.taskpool
     method_name: isSupportingInterop
     static: true
     signature:
@@ -3583,7 +4182,7 @@ intrinsics:
 
   - name: TaskpoolGenerateSequenceRunnerId
     space: ets
-    class_name: escompat.taskpool.SequenceRunner
+    class_name: std.concurrency.taskpool.SequenceRunner
     method_name: generateSeqRunnerId
     static: true
     signature:
@@ -3593,7 +4192,7 @@ intrinsics:
 
   - name: TaskpoolGenerateAsyncRunnerId
     space: ets
-    class_name: escompat.taskpool.AsyncRunner
+    class_name: std.concurrency.taskpool.AsyncRunner
     method_name: generateAsyncRunnerId
     static: true
     signature:
@@ -3603,7 +4202,7 @@ intrinsics:
 
   - name: TaskpoolGetTaskPoolWorkersLimit
     space: ets
-    class_name: escompat.taskpool
+    class_name: std.concurrency.taskpool
     method_name: getTaskPoolWorkersLimit
     static: true
     signature:
@@ -4328,6 +4927,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreBoolCopyTo
+    irtoc_impl: ArrayCopyTo1BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4347,6 +4947,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreCharCopyTo
+    irtoc_impl: ArrayCopyTo2BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4366,6 +4967,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreByteCopyTo
+    irtoc_impl: ArrayCopyTo1BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4385,6 +4987,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreShortCopyTo
+    irtoc_impl: ArrayCopyTo2BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4404,6 +5007,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreIntCopyTo
+    irtoc_impl: ArrayCopyTo4BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4423,9 +5027,44 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreLongCopyTo
+    irtoc_impl: ArrayCopyTo8BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
+    need_param_locations: true
+
+  - name: StdCoreObjectCopyTo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyTo
+    static: true
+    signature:
+      ret: void
+      args:
+        - std.core.Object\[
+        - std.core.Object\[
+        - i32
+        - i32
+        - i32
+    impl: ark::ets::intrinsics::StdCoreObjectCopyTo
+
+  - name: EscompatObjectFastCopyToUnchecked
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyToFast
+    static: true
+    signature:
+      ret: void
+      args:
+        - std.core.Object\[
+        - std.core.Object\[
+        - i32
+        - i32
+        - i32
+    impl: ark::ets::intrinsics::EscompatObjectFastCopyToUnchecked
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateArrayFastCopyToRef
+    llvm_codegen_func: EmitArrayFastCopyToRef
     need_param_locations: true
 
   - name: StdCoreFloatCopyTo
@@ -4442,6 +5081,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreFloatCopyTo
+    irtoc_impl: ArrayCopyTo4BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4461,6 +5101,7 @@ intrinsics:
          - i32
          - i32
     impl: ark::ets::intrinsics::StdCoreDoubleCopyTo
+    irtoc_impl: ArrayCopyTo8BNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
@@ -4778,15 +5419,25 @@ intrinsics:
 #################################
 # std.core.FinalizationRegistry #
 #################################
-  - name: StdFinalizationRegistryRegisterInstance
+  - name: StdFinalizationRegistryGetWorkerId
     space: ets
     class_name: std.core.FinalizationRegistry
-    method_name: registerInstance
+    method_name: getWorkerId
     static: true
     signature:
       ret: i32
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::StdFinalizationRegistryRegisterInstance
+      args: [ ]
+    impl: ark::ets::intrinsics::StdFinalizationRegistryGetWorkerId
+
+  - name: StdFinalizationRegistryGetWorkerDomain
+    space: ets
+    class_name: std.core.FinalizationRegistry
+    method_name: getWorkerDomain
+    static: true
+    signature:
+      ret: i32
+      args: [  ]
+    impl: ark::ets::intrinsics::StdFinalizationRegistryGetWorkerDomain
 
   - name: StdFinalizationRegistryFinishCleanup
     space: ets
@@ -5023,12 +5674,12 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsWriteUnlock
 
 ############################
-#   escompat.ArrayBuffer  #
+#   std.core.ArrayBuffer  #
 ############################
 
   - name: ArrayBufferAddI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddI8
     static: false
     signature:
@@ -5038,7 +5689,7 @@ intrinsics:
 
   - name: ArrayBufferAndI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndI8
     static: false
     signature:
@@ -5048,7 +5699,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeI8
     static: false
     signature:
@@ -5058,7 +5709,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeI8
     static: false
     signature:
@@ -5068,7 +5719,7 @@ intrinsics:
 
   - name: ArrayBufferLoadI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadI8
     static: false
     signature:
@@ -5078,7 +5729,7 @@ intrinsics:
 
   - name: ArrayBufferrI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrI8
     static: false
     signature:
@@ -5088,7 +5739,7 @@ intrinsics:
 
   - name: ArrayBufferStoreI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreI8
     static: false
     signature:
@@ -5098,7 +5749,7 @@ intrinsics:
 
   - name: ArrayBufferSubI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubI8
     static: false
     signature:
@@ -5108,7 +5759,7 @@ intrinsics:
 
   - name: ArrayBufferXorI8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorI8
     static: false
     signature:
@@ -5118,7 +5769,7 @@ intrinsics:
 
   - name: ArrayBufferAddI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddI16
     static: false
     signature:
@@ -5128,7 +5779,7 @@ intrinsics:
 
   - name: ArrayBufferAndI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndI16
     static: false
     signature:
@@ -5138,7 +5789,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeI16
     static: false
     signature:
@@ -5148,7 +5799,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeI16
     static: false
     signature:
@@ -5158,7 +5809,7 @@ intrinsics:
 
   - name: ArrayBufferLoadI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadI16
     static: false
     signature:
@@ -5168,7 +5819,7 @@ intrinsics:
 
   - name: ArrayBufferOrI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrI16
     static: false
     signature:
@@ -5178,7 +5829,7 @@ intrinsics:
 
   - name: ArrayBufferStoreI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreI16
     static: false
     signature:
@@ -5188,7 +5839,7 @@ intrinsics:
 
   - name: ArrayBufferSubI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubI16
     static: false
     signature:
@@ -5198,7 +5849,7 @@ intrinsics:
 
   - name: ArrayBufferXorI16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorI16
     static: false
     signature:
@@ -5208,7 +5859,7 @@ intrinsics:
 
   - name: ArrayBufferAddI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddI32
     static: false
     signature:
@@ -5218,7 +5869,7 @@ intrinsics:
 
   - name: ArrayBufferAndI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndI32
     static: false
     signature:
@@ -5228,7 +5879,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeI32
     static: false
     signature:
@@ -5238,7 +5889,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeI32
     static: false
     signature:
@@ -5248,7 +5899,7 @@ intrinsics:
 
   - name: ArrayBufferLoadI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadI32
     static: false
     signature:
@@ -5258,7 +5909,7 @@ intrinsics:
 
   - name: ArrayBufferOrI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrI32
     static: false
     signature:
@@ -5268,7 +5919,7 @@ intrinsics:
 
   - name: ArrayBufferStoreI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreI32
     static: false
     signature:
@@ -5278,7 +5929,7 @@ intrinsics:
 
   - name: ArrayBufferSubI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubI32
     static: false
     signature:
@@ -5288,7 +5939,7 @@ intrinsics:
 
   - name: ArrayBufferXorI32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorI32
     static: false
     signature:
@@ -5298,7 +5949,7 @@ intrinsics:
 
   - name: ArrayBufferAddI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddI64
     static: false
     signature:
@@ -5308,7 +5959,7 @@ intrinsics:
 
   - name: ArrayBufferAndI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndI64
     static: false
     signature:
@@ -5318,7 +5969,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeI64
     static: false
     signature:
@@ -5328,7 +5979,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeI64
     static: false
     signature:
@@ -5338,7 +5989,7 @@ intrinsics:
 
   - name: ArrayBufferLoadI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadI64
     static: false
     signature:
@@ -5348,7 +5999,7 @@ intrinsics:
 
   - name: ArrayBufferOrI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrI64
     static: false
     signature:
@@ -5358,7 +6009,7 @@ intrinsics:
 
   - name: ArrayBufferStoreI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreI64
     static: false
     signature:
@@ -5368,7 +6019,7 @@ intrinsics:
 
   - name: ArrayBufferSubI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubI64
     static: false
     signature:
@@ -5378,7 +6029,7 @@ intrinsics:
 
   - name: ArrayBufferXorI64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorI64
     static: false
     signature:
@@ -5388,7 +6039,7 @@ intrinsics:
 
   - name: ArrayBufferAddU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddU8
     static: false
     signature:
@@ -5398,7 +6049,7 @@ intrinsics:
 
   - name: ArrayBufferAndU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndU8
     static: false
     signature:
@@ -5408,7 +6059,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeU8
     static: false
     signature:
@@ -5418,7 +6069,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeU8
     static: false
     signature:
@@ -5428,7 +6079,7 @@ intrinsics:
 
   - name: ArrayBufferLoadU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadU8
     static: false
     signature:
@@ -5438,7 +6089,7 @@ intrinsics:
 
   - name: ArrayBufferOrU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrU8
     static: false
     signature:
@@ -5448,7 +6099,7 @@ intrinsics:
 
   - name: ArrayBufferStoreU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreU8
     static: false
     signature:
@@ -5458,7 +6109,7 @@ intrinsics:
 
   - name: ArrayBufferSubU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubU8
     static: false
     signature:
@@ -5468,7 +6119,7 @@ intrinsics:
 
   - name: ArrayBufferXorU8
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorU8
     static: false
     signature:
@@ -5478,7 +6129,7 @@ intrinsics:
 
   - name: ArrayBufferAddU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddU16
     static: false
     signature:
@@ -5488,7 +6139,7 @@ intrinsics:
 
   - name: ArrayBufferAndU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndU16
     static: false
     signature:
@@ -5498,7 +6149,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeU16
     static: false
     signature:
@@ -5508,7 +6159,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeU16
     static: false
     signature:
@@ -5518,7 +6169,7 @@ intrinsics:
 
   - name: ArrayBufferLoadU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadU16
     static: false
     signature:
@@ -5528,7 +6179,7 @@ intrinsics:
 
   - name: ArrayBufferOrU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrU16
     static: false
     signature:
@@ -5538,7 +6189,7 @@ intrinsics:
 
   - name: ArrayBufferStoreU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreU16
     static: false
     signature:
@@ -5548,7 +6199,7 @@ intrinsics:
 
   - name: ArrayBufferSubU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubU16
     static: false
     signature:
@@ -5558,7 +6209,7 @@ intrinsics:
 
   - name: ArrayBufferXorU16
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorU16
     static: false
     signature:
@@ -5568,7 +6219,7 @@ intrinsics:
 
   - name: ArrayBufferAddU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddU32
     static: false
     signature:
@@ -5578,7 +6229,7 @@ intrinsics:
 
   - name: ArrayBufferAndU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndU32
     static: false
     signature:
@@ -5588,7 +6239,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeU32
     static: false
     signature:
@@ -5598,7 +6249,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeU32
     static: false
     signature:
@@ -5608,7 +6259,7 @@ intrinsics:
 
   - name: ArrayBufferLoadU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadU32
     static: false
     signature:
@@ -5618,7 +6269,7 @@ intrinsics:
 
   - name: ArrayBufferOrU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrU32
     static: false
     signature:
@@ -5628,7 +6279,7 @@ intrinsics:
 
   - name: ArrayBufferStoreU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreU32
     static: false
     signature:
@@ -5638,7 +6289,7 @@ intrinsics:
 
   - name: ArrayBufferSubU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubU32
     static: false
     signature:
@@ -5648,7 +6299,7 @@ intrinsics:
 
   - name: ArrayBufferXorU32
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorU32
     static: false
     signature:
@@ -5658,7 +6309,7 @@ intrinsics:
 
   - name: ArrayBufferAddU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAddU64
     static: false
     signature:
@@ -5668,7 +6319,7 @@ intrinsics:
 
   - name: ArrayBufferAndU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicAndU64
     static: false
     signature:
@@ -5678,7 +6329,7 @@ intrinsics:
 
   - name: ArrayBufferCompareExchangeU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicCompareExchangeU64
     static: false
     signature:
@@ -5688,7 +6339,7 @@ intrinsics:
 
   - name: ArrayBufferExchangeU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicExchangeU64
     static: false
     signature:
@@ -5698,7 +6349,7 @@ intrinsics:
 
   - name: ArrayBufferLoadU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicLoadU64
     static: false
     signature:
@@ -5708,7 +6359,7 @@ intrinsics:
 
   - name: ArrayBufferOrU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicOrU64
     static: false
     signature:
@@ -5718,7 +6369,7 @@ intrinsics:
 
   - name: ArrayBufferStoreU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicStoreU64
     static: false
     signature:
@@ -5728,7 +6379,7 @@ intrinsics:
 
   - name: ArrayBufferSubU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicSubU64
     static: false
     signature:
@@ -5738,7 +6389,7 @@ intrinsics:
 
   - name: ArrayBufferXorU64
     space: ets
-    class_name: escompat.ArrayBuffer
+    class_name: std.core.ArrayBuffer
     method_name: atomicXorU64
     static: false
     signature:
@@ -5920,6 +6571,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdSystemIsExternalTimerEnabled
 
+  - name: StdCoroutineDumpUnhandledFailedJobs
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: dumpUnhandledFailedJobs
+    static: true
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::StdSystemDumpUhandledFailedJobs
+
 ####################################
 # std.debug.concurrency.AtomicFlag #
 ####################################
@@ -5988,16 +6649,45 @@ intrinsics:
       ret: i64
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdRuntimeGetHashCodeByValue
+    #irtoc_impl: getHashCodeByValueNativePlus
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateGetHashCodeByValue
+    llvm_codegen_func: EmitGetHashCodeByValue
+    need_param_locations: true
 
-  - name: StdCoreRuntimeFailedTypeCastException
+  - name: StdRuntimeSameValueZero
     space: ets
     class_name: std.core.Runtime
-    method_name: failedTypeCastException
+    method_name: sameValueZero
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::StdRuntimeSameValueZero
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateSameValueZero
+    llvm_codegen_func: EmitSameValueZero
+
+  - name: StdCoreRuntimeFailedTypeCastExclUndefinedStub
+    space: ets
+    class_name: std.core.Runtime
+    method_name: failedTypeCastExclUndefinedStub
     static: true
     signature:
       ret: std.core.ClassCastError
-      args: [ std.core.Object, std.core.String, u1 ]
-    impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
+      args: [ std.core.Object, std.core.Class ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastExclUndefinedStub
+    clear_flags: [ ]
+
+  - name: StdCoreRuntimeFailedTypeCastInclUndefinedStub
+    space: ets
+    class_name: std.core.Runtime
+    method_name: failedTypeCastInclUndefinedStub
+    static: true
+    signature:
+      ret: std.core.ClassCastError
+      args: [ std.core.Object, std.core.Class ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastInclUndefinedStub
     clear_flags: [ ]
 
   - name: StdCoreRuntimeGetTypeInfo
@@ -6112,6 +6802,43 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::ReflectFieldGetNameInternal
 
+  - name: StdCoreReflectFieldSetValueInternal
+    space: ets
+    class_name: std.core.reflect.Field
+    method_name: setValueInternal
+    static: false
+    signature:
+      ret: void
+      args:
+        - std.core.Object
+        - std.core.Object
+    impl: ark::ets::intrinsics::ReflectFieldSetValueInternal
+
+  - name: StdCoreReflectFieldGetValueInternal
+    space: ets
+    class_name: std.core.reflect.Field
+    method_name: getValueInternal
+    static: false
+    signature:
+      ret: std.core.Object
+      args:
+        - std.core.Object
+    impl: ark::ets::intrinsics::ReflectFieldGetValueInternal
+
+##############################
+# std.core.reflect.internals #
+##############################
+
+  - name: StdCoreReflectInternalsCreateFixedArray
+    space: ets
+    class_name: std.core.reflect.internals
+    method_name: createFixedArray
+    static: true
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Class, i32 ]
+    impl: ark::ets::intrinsics::StdCoreReflectInternalsCreateFixedArray
+
 ##################
 # std.core.Class #
 ##################
@@ -6124,6 +6851,16 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetNameInternal
+
+  - name: StdCoreClassGetLinkerInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getLinkerInternal
+    static: false
+    signature:
+      ret: std.core.RuntimeLinker
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetLinkerInternal
 
   - name: StdCoreClassIsNamespace
     space: ets
@@ -6145,16 +6882,6 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassGetFixedArrayComponentType
 
-  - name: StdCoreClassGetLinker
-    space: ets
-    class_name: std.core.Class
-    method_name: getLinker
-    static: false
-    signature:
-      ret: std.core.RuntimeLinker
-      args: [ ]
-    impl: ark::ets::intrinsics::StdCoreClassGetLinker
-
   - name: StdCoreClassOf
     space: ets
     class_name: std.core.Class
@@ -6164,16 +6891,6 @@ intrinsics:
       ret: std.core.Class
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreClassOf
-
-  - name: StdCoreClassOfNull
-    space: ets
-    class_name: std.core.Class
-    method_name: ofNull
-    static: true
-    signature:
-      ret: std.core.Class
-      args: []
-    impl: ark::ets::intrinsics::StdCoreClassOfNull
 
   - name: StdCoreClassCurrent
     space: ets
@@ -6235,16 +6952,6 @@ intrinsics:
       args: [ u1 ]
     impl: ark::ets::intrinsics::StdCoreClassGetInstanceMethodsInternal
 
-  - name: StdCoreClassGetInstanceMethodByNameInternal
-    space: ets
-    class_name: std.core.Class
-    method_name: getInstanceMethodByNameInternal
-    static: false
-    signature:
-      ret: std.core.reflect.InstanceMethod
-      args: [ std.core.String, u1 ]
-    impl: ark::ets::intrinsics::StdCoreClassGetInstanceMethodByNameInternal
-
   - name: StdCoreClassGetInstanceFieldByNameInternal
     space: ets
     class_name: std.core.Class
@@ -6264,19 +6971,6 @@ intrinsics:
       ret: std.core.reflect.StaticField
       args: [ std.core.String, u1 ]
     impl: ark::ets::intrinsics::StdCoreClassGetStaticFieldByNameInternal
-
-  - name: StdCoreClassGetDirectStaticMethodByNameInternal
-    space: ets
-    class_name: std.core.Class
-    method_name: getDirectStaticMethodByNameInternal
-    static: false
-    signature:
-      ret: std.core.reflect.StaticMethod
-      args:
-        - std.core.String
-        - std.core.Class[]
-        - u1
-    impl: ark::ets::intrinsics::StdCoreClassGetDirectStaticMethodByNameInternal
 
   - name: StdCoreClassGetStaticMethodsInternal
     space: ets
@@ -6408,6 +7102,16 @@ intrinsics:
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreClassIsAbstract
 
+  - name: StdCoreClassIsPrimitive
+    space: ets
+    class_name: std.core.Class
+    method_name: isPrimitive
+    static: false
+    signature:
+      ret: u1
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassIsPrimitive
+
 ##########################
 # std.core.RuntimeLinker #
 ##########################
@@ -6526,15 +7230,17 @@ intrinsics:
 ###################
 # std.core.RegExp #
 ###################
-  - name: EscompatRegExpParse
+  - name: StdCoreRegExpParse
     space: ets
-    class_name: escompat.RegExp
+    class_name: std.core.RegExp
     method_name: parse
     static: true
     signature:
-      ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::EscompatRegExpParse
+      ret: void
+      args:
+        - std.core.String
+        - std.core.String
+    impl: ark::ets::intrinsics::StdCoreRegExpParse
 
 ####################
 # std.core.TypeAPI #
@@ -7039,6 +7745,7 @@ intrinsics:
       ret: u1
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreCharIsWhiteSpace
+    irtoc_impl: CharIsWhiteSpaceNativePlus
     safe_intrinsic: true
     codegen_arch: [arm64, amd64]
     codegen_func: CreateCharIsWhiteSpace
@@ -8026,6 +8733,70 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
 
+################################
+# std.containers.AtomicInt #
+################################
+
+  - name: AtomicIntSet
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntSetValue
+
+  - name: AtomicIntGet
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: get
+    static: false
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicIntGetValue
+
+  - name: AtomicIntExchange
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: exchange
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntGetAndSet
+
+  - name: AtomicIntCompareAndSwap
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: i32
+      args: [ i32, i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntCompareAndSet
+
+  - name: AtomicIntFetchAndAdd
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: fetchAndAdd
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndAdd
+
+  - name: AtomicIntFetchAndSub
+    space: ets
+    class_name: std.containers.AtomicInt
+    method_name: fetchAndSub
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndSub
+
 ###############################
 # std.core.RuntimeDebug #
 ###############################
@@ -8253,110 +9024,6 @@ intrinsics:
         - std.core.Object
     impl: ark::ets::intrinsics::DebuggerAPISetLocalObject
 
-###############################
-# escompat.ConcurrencyHelpers #
-###############################
-
-  - name: escompatConcurrencyHelpersMutexCreate
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: mutexCreate
-    static: true
-    signature:
-      ret: std.core.Object
-      args: []
-    impl: ark::ets::intrinsics::EtsMutexCreate
-
-  - name: escompatConcurrencyHelpersMutexLock
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: mutexLock
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsMutexLock
-
-  - name: escompatConcurrencyHelpersMutexUnlock
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: mutexUnlock
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsMutexUnlock
-
-  - name: escompatConcurrencyHelpersEventCreate
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: eventCreate
-    static: true
-    signature:
-      ret: std.core.Object
-      args: []
-    impl: ark::ets::intrinsics::EtsEventCreate
-
-  - name: escompatConcurrencyHelpersEventWait
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: eventWait
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEventWait
-
-  - name: escompatConcurrencyHelpersEventFire
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: eventFire
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEventFire
-
-  - name: escompatConcurrencyHelpersCondVarCreate
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: condVarCreate
-    static: true
-    signature:
-      ret: std.core.Object
-      args: []
-    impl: ark::ets::intrinsics::EtsCondVarCreate
-
-  - name: escompatConcurrencyHelpersCondVarWait
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: condVarWait
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object, std.core.Object ]
-    impl: ark::ets::intrinsics::EtsCondVarWait
-
-  - name: escompatConcurrencyHelpersCondVarNotifyOne
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: condVarNotifyOne
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object, std.core.Object ]
-    impl: ark::ets::intrinsics::EtsCondVarNotifyOne
-
-  - name: escompatConcurrencyHelpersCondVarNotifyAll
-    space: ets
-    class_name: escompat.ConcurrencyHelpers
-    method_name: condVarNotifyAll
-    static: true
-    signature:
-      ret: void
-      args: [ std.core.Object, std.core.Object ]
-    impl: ark::ets::intrinsics::EtsCondVarNotifyAll
-
 ##############################
 #      std.core.Reflect      #
 ##############################
@@ -8455,6 +9122,46 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
 
+  - name: stdConcurrencyConcurrencyHelpersCondVarCreate
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: condVarCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsCondVarCreate
+
+  - name: escompatConcurrencyHelpersCondVarWait
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: condVarWait
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarWait
+
+  - name: stdConcurrencyConcurrencyHelpersCondVarNotifyOne
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: condVarNotifyOne
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyOne
+
+  - name: stdConcurrencyConcurrencyHelpersCondVarNotifyAll
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: condVarNotifyAll
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyAll
+
 #########################################
 # std.concurrency.NativeAsyncWorkHelper #
 #########################################
@@ -8492,8 +9199,42 @@ intrinsics:
       ret: i64[]
       args:
         - i32
-        - escompat.Array
+        - std.core.Array
     impl: ark::ets::intrinsics::WorkerGroupGenerateGroupIdImpl
+
+###############################
+# std.core.ConcurrencyHelpers #
+###############################
+
+  - name: stdCoreConcurrencyHelpersMutexCreate
+    space: ets
+    class_name: std.core.ConcurrencyHelpers
+    method_name: mutexCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsMutexCreate
+
+  - name: stdCoreConcurrencyHelpersMutexLock
+    space: ets
+    class_name: std.core.ConcurrencyHelpers
+    method_name: mutexLock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexLock
+
+  - name: stdCoreConcurrencyHelpersMutexUnlock
+    space: ets
+    class_name: std.core.ConcurrencyHelpers
+    method_name: mutexUnlock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexUnlock
 
 ###############################
 # std.core.ExclusiveLauncher #
@@ -8844,77 +9585,6 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreLongToChar
     safe_intrinsic: true
 
-########################
-# escompat.Map #
-########################
-  - name: MapGet
-    space: ets
-    class_name: escompat.Map
-    method_name: get
-    static: false
-    signature:
-      ret: std.core.Object
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatMapGet
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateMapGet
-    llvm_codegen_func: EmitMapGet
-
-  - name: MapHas
-    space: ets
-    class_name: escompat.Map
-    method_name: has
-    static: false
-    signature:
-      ret: u1
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatMapHas
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateMapHas
-    llvm_codegen_func: EmitMapHas
-
-  - name: MapDelete
-    space: ets
-    class_name: escompat.Map
-    method_name: delete
-    static: false
-    signature:
-      ret: u1
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatMapDelete
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateMapDelete
-    llvm_codegen_func: EmitMapDelete
-
-########################
-# escompat.Set #
-########################
-  - name: SetHas
-    space: ets
-    class_name: escompat.Set
-    method_name: has
-    static: false
-    signature:
-      ret: u1
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatSetHas
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateSetHas
-    llvm_codegen_func: EmitSetHas
-
-  - name: SetDelete
-    space: ets
-    class_name: escompat.Set
-    method_name: delete
-    static: false
-    signature:
-      ret: u1
-      args: [ std.core.Object ]
-    impl: ark::ets::intrinsics::EtsEscompatSetDelete
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateSetDelete
-    llvm_codegen_func: EmitSetDelete
-
 #####################
 # std.reflect.Proxy #
 #####################
@@ -8929,5 +9599,5 @@ intrinsics:
         - std.core.RuntimeLinker
         - std.core.String
         - std.core.Class[]
-        - escompat.Array
+        - std.core.Array
     impl: ark::ets::intrinsics::ReflectProxyGenerateProxy

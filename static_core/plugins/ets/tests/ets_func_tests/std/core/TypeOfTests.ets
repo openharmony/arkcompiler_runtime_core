@@ -157,9 +157,9 @@ function testTypeOfIntArray() {
     let arr: int[] = [1, 2];
     const type = Type.of(arr);
     arktest.assertEQ(
-        'escompat.Array',
+        'std.core.Array',
         type.toString(),
-        `Expected 'escompat.Array', got '${type.toString()}'`
+        `Expected 'std.core.Array', got '${type.toString()}'`
     );
 }
 
@@ -167,9 +167,9 @@ function testTypeOfStringArray() {
     let arr: string[] = ['a', 'b'];
     const type = Type.of(arr);
     arktest.assertEQ(
-        'escompat.Array',
+        'std.core.Array',
         type.toString(),
-        `Expected 'escompat.Array', got '${type.toString()}'`
+        `Expected 'std.core.Array', got '${type.toString()}'`
     );
 }
 

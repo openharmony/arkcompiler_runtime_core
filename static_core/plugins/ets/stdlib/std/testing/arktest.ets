@@ -236,30 +236,6 @@ export namespace arktest {
     */
     export function expectThrow(
         cb: () => void,
-        test?: (v: Error | Exception) => boolean | string) {
-        try {
-            cb()
-        } catch (e) {
-            e = (e instanceof Error) ? e as Error
-                : (e instanceof Exception) ? e as Exception
-                    : failingAssertion("An arbitrary object instance was caught!") 
-            let res = test?.(e)
-            if (res != undefined && res != true) {
-                failingAssertion((typeof res == "string") ? res as string : ("Unexpected value thrown: " + e))
-            }
-            return
-        }
-        failingAssertion("Callback expected to throw");
-    }
-
-    /**
-    * Assert callback throws and test the thrown value
-    * @param cb callback to be executed
-    * @param test for a thrown value, acts as predicate or returns an error message
-    * @throws AssertionError if no value thrown or value doesn't match the test predicate
-    */
-    export function expectThrowError(
-        cb: () => void,
         test?: (v: Error) => boolean | string) {
         try {
             cb()
@@ -273,36 +249,6 @@ export namespace arktest {
             return
         }
         failingAssertion("Callback expected to throw");
-    }
-
-    /**
-    * Execute callback and check that Exception was occurred and it is the same as expected if it passed
-    * @param fn executing callback
-    * @param message optional string message or Exception to be tested upon the thrown value
-    * @throws AssertionError if an exception was not occured or occured exception is not same as expected exception
-    */
-    export function expectException(fn: () => void, expect?: string | Exception): void {
-        expectThrow(fn, (e) => {
-            if (!(e instanceof Exception)) {
-                return "Expected an instance of Exception, got " + Type.of(e).getName()
-            }
-            if (expect == undefined) {
-                return true
-            } else if (typeof expect == "string") {
-                return e.message == expect
-            } else {
-                const expectedException = expect as Exception // broken smartcast
-                const eType = Type.of(e)
-                const expectType = Type.of(expectedException)
-                if (!eType.equals(expectType)) {
-                    return "Expected " + expectType.getName() + ", got " + eType.getName()
-                }
-                if (e.message != expectedException.message) {
-                    return "Expected '" + expectedException.message + "', got '" + e.message + "'"
-                }
-                return true
-            }
-        })
     }
 
     /**
@@ -336,15 +282,15 @@ export namespace arktest {
     }
 
     /**
-    * Execute callback and check that any Exception or Error was not occurred
+    * Execute callback and check that no Error occurred
     * @param fn executing callback
-    * @throws AssertionError if an error or an exception was occured
+    * @throws AssertionError if an error occured
     */
     export function expectNoThrow(fn: () => void): void {
         try {
             fn();
         } catch (e) {
-            assertCommon(false, "Error or Exception is not expected, but was ocurred: " + e);
+            assertCommon(false, "Error is not expected, but has ocurred: " + e);
         }
     }
 
@@ -391,17 +337,15 @@ export namespace arktest {
                 const failedMsg = this.addTermColor(TermColor.RED, "FAILED")
                 const msgFail = "[ " + failedMsg + " ] " + testcaseName + " (" + (Date.now() - startMs) + " ms)";
                 if (!(e instanceof AssertionError)) {
-                    console.log("Unexpected exception: " + e);
+                    console.error("Unexpected error: " + e);
                 } else {
-                    // AssertionError already print message in constructor,
+                    // AssertionError already print message in constructor console.error,
                     // so set message to empty to avoid double printing
                     e.message = "";
                 }
                 if (e instanceof Error) {
                     if (e.stack) {
-                        console.log(e.stack);
-                        console.log(msgFail)
-                        return false;
+                        console.error(e.stack);
                     }
                 }
                 console.log(msgFail);

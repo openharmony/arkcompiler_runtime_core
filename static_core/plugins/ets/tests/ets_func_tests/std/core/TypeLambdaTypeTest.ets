@@ -37,10 +37,11 @@ function testNoThrow(fn: () => boolean): boolean {
 function testGetParameterError(lambdaType: LambdaType): boolean {
     try {
         lambdaType.getParameter(1000)
-    } catch (ignored: TypeError) {
+    } catch (ignored) {
+        if (ignored instanceof TypeError){
+            return true
+        }
         // Expected error is catched
-        return true
-    } catch (other) {
     }
     return false
 }

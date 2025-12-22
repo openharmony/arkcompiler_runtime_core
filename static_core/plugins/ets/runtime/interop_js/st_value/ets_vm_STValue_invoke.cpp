@@ -39,7 +39,6 @@
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/interop_js/st_value/ets_vm_STValue_param_getter.h"
 
-#include "generated/logger_options.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "interop_js/napi_impl/napi_impl.h"

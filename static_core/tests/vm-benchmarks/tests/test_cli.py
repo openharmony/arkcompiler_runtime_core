@@ -24,8 +24,21 @@ import pytest  # type: ignore
 from unittest import TestCase
 from unittest.mock import patch
 from vmb.cli import Args, Command
+from vmb.target import Target
 from vmb.tool import OptFlags, ToolBase
 from vmb.unit import BenchUnit
+
+
+class FakeTool(ToolBase):
+    def __init__(self, *a):
+        super().__init__(*a)
+
+    @property
+    def name(self) -> str:
+        return ''
+
+    def exec(self, bu: BenchUnit) -> None:
+        pass
 
 
 def cmdline(line):
@@ -49,13 +62,21 @@ def test_run_command():
         test.assertTrue(args.get('platform') == 'fake')
 
 
+def test_comma_separated_set():
+    test = TestCase()
+    with cmdline('all -p fake --hooks one,two --hooks zero,,three foo/bar'):
+        args = Args()
+        test.assertTrue(args.command == Command.ALL)
+        test.assertTrue(args.hooks == {'one', 'two', 'zero', 'three'})
+
+
 def test_wrong_opts():
     with cmdline('blah blah'):
         with pytest.raises(SystemExit):
             Args()
 
 
-def test_optfalgs():
+def test_optflags():
     with cmdline('all --lang=blah --platform=xxx '
                  '--mode=jit --mode=int foo/bar'):
         args = Args()
@@ -67,18 +88,20 @@ def test_optfalgs():
         test.assertTrue(OptFlags.GC_STATS not in flags)
 
 
+@pytest.mark.parametrize('arg_flag, expected', [
+    ('--safepoint-checker', True),
+    ('', False)
+])
+def test_safepoint_optflag(arg_flag, expected):
+    with cmdline(f'all --lang=blah --platform=xxx {arg_flag}'):
+        args = Args()
+        flags = args.get_opts_flags()
+        test = TestCase()
+        test.assertTrue((OptFlags.SAFEPOINT_CHECKER in flags) == expected)
+
+
 def test_custom_opts():
-    class FakeTool(ToolBase):
-        def __init__(self, **a):
-            super().__init__(**a)
-
-        @property
-        def name(self) -> str:
-            return ''
-
-        def exec(self, bu: BenchUnit) -> None:
-            pass
-
+    test = TestCase()
     with (cmdline('all --lang=blah --platform=xxx '
                   '--node-custom-option="--a=b" '
                   '--other-custom-option=--a=A '
@@ -87,10 +110,29 @@ def test_custom_opts():
                   '--node-custom-option=-s=short '
                   'foo/bar')):
         args = Args()
-        opts = args.custom_opts.get('node', [])
-        tool = FakeTool(custom_opts=opts)
+        tool = FakeTool(Target.HOST,
+                        args.get_opts_flags(),
+                        args.custom_opts.get('node', []))
         expected = {'a': 'b', 'c': 'd', 'e': 'f', 's': 'short'}
         actual = tool.custom_opts_obj()
-        test = TestCase()
         test.assertDictEqual(expected, actual)
         test.assertEqual('''"--a=b" '--c=d' --e=f -s=short''', tool.custom)
+
+
+def test_custom_paths():
+    test = TestCase()
+    with (cmdline('all --lang=blah --platform=xxx '
+                  '--node-custom-option="--a=b" '
+                  '--node-path=/some/custom/path/to/node '
+                  '--node-custom-option=--c=d '
+                  'foo/bar')):
+        args = Args()
+        tool = FakeTool(Target.HOST,
+                        args.get_opts_flags(),
+                        args.custom_opts.get('node', []),
+                        args.custom_paths.get('node', ''))
+        expected = {'a': 'b', 'c': 'd'}
+        actual = tool.custom_opts_obj()
+        test.assertDictEqual(expected, actual)
+        test.assertEqual('''"--a=b" --c=d''', tool.custom)
+        test.assertEqual("/some/custom/path/to/node", tool.custom_path)

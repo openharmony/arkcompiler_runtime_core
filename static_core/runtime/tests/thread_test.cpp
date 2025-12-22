@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "runtime/include/runtime.h"
-#include "libpandabase/test_utilities.h"
+#include "libarkbase/test_utilities.h"
 
 namespace ark::test {
 

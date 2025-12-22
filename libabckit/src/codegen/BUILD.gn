@@ -34,7 +34,7 @@ ark_gen("abckit_ark_gen") {
     "$ark_root_static/runtime:arkruntime_gen_intrinsics_yaml",
   ]
   requires = [
-    "$ark_root_static/libpandabase/utils.rb",
+    "$ark_root_static/libarkbase/utils.rb",
     "codegen_static_isapi.rb",
     "$ark_root_static/assembler/asm_isapi.rb",
   ]
@@ -73,7 +73,7 @@ ark_gen("abckit_ark_gen") {
     "$ark_root_static:concat_plugins_yamls",
     "$abckit_root/src:abckit_concat_intrinsics_yaml",
   ]
-  requires = [ "$ark_root_static/libpandabase/utils.rb" ]
+  requires = [ "$ark_root_static/libarkbase/utils.rb" ]
   destination = "$target_gen_dir/generated/tmp"
 }
 
@@ -179,8 +179,8 @@ ohos_source_set("abckit_codegen_static_source_set") {
     "$ark_root_static/assembler:arkassembler_public_config",
     "$ark_root_static/compiler:arkcompiler_public_config",
     "$ark_root_static/bytecode_optimizer:bytecodeopt_public_config",
-    "$ark_root_static/libpandafile:arkfile_public_config",
-    "$ark_root_static/libpandabase:arkbase_public_config",
+    "$ark_root_static/libarkfile:arkfile_public_config",
+    "$ark_root_static/libarkbase:arkbase_public_config",
     "$ark_root_static/runtime:arkruntime_public_config",
     "$abckit_root:abckit_config",
   ]
@@ -190,8 +190,8 @@ ohos_source_set("abckit_codegen_static_source_set") {
     ":abckit_ark_gen_insn_selection_static_cpp",
     ":abckit_codegen_static_source_set_header_deps",
     "$ark_root_static/compiler:libarktscompiler",
-    "$ark_root_static/libpandabase:libarktsbase",
-    "$ark_root_static/libpandafile:libarktsfile",
+    "$ark_root_static/libarkbase:libarktsbase",
+    "$ark_root_static/libarkfile:libarktsfile",
   ]
 }
 
@@ -249,8 +249,8 @@ ohos_source_set("abckit_codegen_dynamic_source_set") {
     "$ark_root_static/:ark_config",
     "$ark_root_static/runtime:arkruntime_public_config",
     "$ark_root_static/compiler:arkcompiler_public_config",
-    "$ark_root_static/libpandabase:arkbase_public_config",
-    "$ark_root_static/libpandafile:arkfile_public_config",
+    "$ark_root_static/libarkbase:arkbase_public_config",
+    "$ark_root_static/libarkfile:arkfile_public_config",
     "$abckit_root:abckit_config",
   ]
 

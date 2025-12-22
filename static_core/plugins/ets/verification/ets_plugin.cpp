@@ -15,7 +15,7 @@
 
 #include "ets_plugin.h"
 #include "abs_int_inl_compat_checks.h"
-#include "source_lang_enum.h"
+#include <libarkfile/include/source_lang_enum.h>
 #include "verifier_messages.h"
 #include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -46,6 +46,49 @@ void EtsPlugin::DestroyManagedThread(ManagedThread *thr) const
 void EtsPlugin::TypeSystemSetup(TypeSystem *types) const
 {
     types->SetSupertypeOfArray(types->Object());
+}
+
+CheckResult const &EtsPlugin::CheckFieldAccessViolation(Field const *field, Method const *from, TypeSystem *types) const
+{
+    if (field->IsPublic()) {
+        return CheckResult::ok;
+    }
+    if (field->IsProtected()) {
+        if (!IsSubtype(Type {from->GetClass()}, Type {field->GetClass()}, types)) {
+            return CheckResult::protected_field;
+        }
+        return CheckResult::ok;
+    }
+    if (field->IsPrivate()) {
+        if (from->GetClass() != field->GetClass()) {
+            return CheckResult::private_field;
+        }
+        return CheckResult::ok;
+    }
+    // NOTE(mgroshev): #31410 Fields without access modifiers should be proibited
+    return CheckResult::ok;
+}
+
+CheckResult const &EtsPlugin::CheckMethodAccessViolation(Method const *method, Method const *from,
+                                                         TypeSystem *types) const
+{
+    if (method->IsPublic()) {
+        return CheckResult::ok;
+    }
+    if (method->IsProtected()) {
+        if (!IsSubtype(Type {from->GetClass()}, Type {method->GetClass()}, types)) {
+            return CheckResult::protected_method;
+        }
+        return CheckResult::ok;
+    }
+    if (method->IsPrivate()) {
+        if (from->GetClass() != method->GetClass()) {
+            return CheckResult::private_method;
+        }
+        return CheckResult::ok;
+    }
+    // NOTE(mgroshev): #31410 Methods without access modifiers should be proibited
+    return CheckResult::ok;
 }
 
 Type EtsPlugin::NormalizeType(Type type, TypeSystem *types) const

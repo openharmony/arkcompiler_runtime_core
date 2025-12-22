@@ -161,7 +161,7 @@ cases:
               },
               "b": {},
           }
-          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
           arktest.expectThrow(() => {a["a"]![1]!}, expectedException)
 
     - tags: []
@@ -173,6 +173,5 @@ cases:
               },
               "b": {},
           }
-          let expectedException = (e: Error | Exception): boolean => {return (e instanceof NullPointerError)}
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
           arktest.expectThrow(() => {!a["a"]![42]!}, expectedException)
-          

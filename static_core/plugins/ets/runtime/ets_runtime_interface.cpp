@@ -166,6 +166,26 @@ bool EtsRuntimeInterface::IsMethodStringConcat(MethodPtr method) const
            MethodCast(method)->GetProto().GetSignature() == "([Lstd/core/String;)Lstd/core/String;";
 }
 
+bool EtsRuntimeInterface::IsMethodStringGetLength(MethodPtr method) const
+{
+    auto methodName = GetMethodFullName(method, false);
+    return (methodName == "std.core.String::%%get-length" || methodName == "std.core.String::getLength") &&
+           MethodCast(method)->GetProto().GetSignature() == "()I";
+}
+
+Field *EtsRuntimeInterface::GetFieldPtrByName(ClassPtr klass, std::string_view name) const
+{
+    if (klass == nullptr) {
+        return nullptr;
+    }
+    auto etsClass = EtsClass::FromRuntimeClass(ClassCast(klass));
+    auto fieldIndex = etsClass->GetFieldIndexByName(name.data());
+    if (fieldIndex == -1U) {
+        return nullptr;
+    }
+    return etsClass->GetFieldByIndex(fieldIndex)->GetRuntimeField();
+}
+
 bool EtsRuntimeInterface::IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const
 {
     return MethodCast(method)->IsConstructor() && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
@@ -195,11 +215,6 @@ bool EtsRuntimeInterface::IsMethodStringBuilderAppend(MethodPtr method) const
     return GetMethodFullName(method, false) == "std.core.StringBuilder::append";
 }
 
-bool EtsRuntimeInterface::IsMethodEscompatMapCtor(MethodPtr method) const
-{
-    return MethodCast(method)->IsConstructor() && IsClassEscompatMap(MethodCast(method)->GetClass());
-}
-
 bool EtsRuntimeInterface::IsMethodInModuleScope(MethodPtr method) const
 {
     return static_cast<EtsMethod *>(method)->GetClass()->IsModule();
@@ -212,7 +227,12 @@ bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
 
 bool EtsRuntimeInterface::IsClassEscompatMap(ClassPtr klass) const
 {
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatMap;
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreMap;
+}
+
+bool EtsRuntimeInterface::IsClassEscompatSet(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreSet;
 }
 
 bool EtsRuntimeInterface::IsClassEscompatArray(ClassPtr klass) const
@@ -344,12 +364,18 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayLengthIn
 
 EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayBufferClass() const
 {
-    return PlatformTypes(PandaEtsVM::GetCurrent())->escompatArrayBuffer->GetRuntimeClass();
+    return PlatformTypes(PandaEtsVM::GetCurrent())->coreArrayBuffer->GetRuntimeClass();
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferDataAddress(ClassPtr klass) const
 {
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("dataAddress"));
+}
+
+// NOTE(@volkovanton, #31053) Will be refactored as a follow-up.
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferManagedData(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("data"));
 }
 
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
@@ -367,6 +393,15 @@ uint32_t EtsRuntimeInterface::GetMethodId(MethodPtr method) const
 {
     ASSERT(method != nullptr);
     return static_cast<EtsMethod *>(method)->GetMethodId();
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetInstanceMethodByName(ClassPtr klass, std::string_view name) const
+{
+    if (klass != nullptr) {
+        auto etsClass = EtsClass::FromRuntimeClass(ClassCast(klass));
+        return etsClass->GetInstanceMethod(name.data(), nullptr);
+    }
+    return nullptr;
 }
 
 bool EtsRuntimeInterface::IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
@@ -406,6 +441,11 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderCompress
 {
     ASSERT(IsClassStringBuilder(klass));
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("compress"));
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetGetterStringBuilderStringLength(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetClassMethod(utf::CStringAsMutf8("%%get-stringLength"));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayActualLength(ClassPtr klass) const
@@ -579,9 +619,19 @@ void *EtsRuntimeInterface::GetDoubleToStringCache() const
     return ark::ets::PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
 }
 
+void *EtsRuntimeInterface::GetAsciiCharCache() const
+{
+    return PlatformTypes(PandaEtsVM::GetCurrent())->GetAsciiCacheTable();
+}
+
 bool EtsRuntimeInterface::IsStringCachesUsed() const
 {
-    return Runtime::GetCurrent()->GetOptions().IsUseStringCaches();
+    return Runtime::GetOptions().IsUseStringCaches();
+}
+
+bool EtsRuntimeInterface::IsUseAllStrings() const
+{
+    return Runtime::GetCurrent()->GetOptions().IsUseAllStrings();
 }
 
 bool EtsRuntimeInterface::IsNativeMethodOptimizationEnabled() const
@@ -599,9 +649,54 @@ bool EtsRuntimeInterface::IsBoxedClass(ClassPtr klass) const
     return EtsClass::FromRuntimeClass(ClassCast(klass))->IsBoxed();
 }
 
+bool EtsRuntimeInterface::IsEnumClass(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass))->IsEtsEnum();
+}
+
+bool EtsRuntimeInterface::IsBigIntClass(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass))->IsBigInt();
+}
+
+bool EtsRuntimeInterface::IsFunctionReference(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass))->IsFunctionReference();
+}
+
 bool EtsRuntimeInterface::IsClassBoxedBoolean(ClassPtr klass) const
 {
     return PlatformTypes(PandaEtsVM::GetCurrent())->coreBoolean->GetRuntimeClass() == klass;
+}
+
+ark::compiler::DataType::Type EtsRuntimeInterface::GetBoxedClassDataType(ClassPtr klass) const
+{
+    auto platformTypes = PlatformTypes(PandaEtsVM::GetCurrent());
+    if (platformTypes->coreBoolean->GetRuntimeClass() == klass) {
+        return compiler::DataType::BOOL;
+    }
+    if (platformTypes->coreByte->GetRuntimeClass() == klass) {
+        return compiler::DataType::INT8;
+    }
+    if (platformTypes->coreChar->GetRuntimeClass() == klass) {
+        return compiler::DataType::UINT16;
+    }
+    if (platformTypes->coreShort->GetRuntimeClass() == klass) {
+        return compiler::DataType::INT16;
+    }
+    if (platformTypes->coreInt->GetRuntimeClass() == klass) {
+        return compiler::DataType::INT32;
+    }
+    if (platformTypes->coreLong->GetRuntimeClass() == klass) {
+        return compiler::DataType::INT64;
+    }
+    if (platformTypes->coreFloat->GetRuntimeClass() == klass) {
+        return compiler::DataType::FLOAT32;
+    }
+    if (platformTypes->coreDouble->GetRuntimeClass() == klass) {
+        return compiler::DataType::FLOAT64;
+    }
+    return compiler::DataType::NO_TYPE;
 }
 
 size_t EtsRuntimeInterface::GetTlsNativeApiOffset(Arch arch) const

@@ -24,9 +24,7 @@ export async function AsyncIdentity(param: int): Promise<int> {
 }
 
 export const myPromise: Promise<number> = new Promise<number>((resolve, reject) => {
-    setTimeout(() => {
-        resolve(42);
-    }, 1000);
+    resolve(42);
 });
 
 export let cb: (arg: number) => void = (arg: number) => {}

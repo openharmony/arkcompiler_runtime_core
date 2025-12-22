@@ -63,16 +63,16 @@ A compile-time error occurs if a new value is assigned to a constant.
 Automatic Type Inference
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-As |LANG| is a statically typed language, the types of all entities, like
+As |LANG| is a statically-typed language, the types of all entities, like
 variables and constants, have to be known at compile time.
 
-However, developers do not need to explicitly specify the type of a declared
-entity if a variable or a constant declaration contains an initial value.
-All cases that allow inferring type automatically are specified in
-the |LANG| Specification.
+However, developers do not need to specify the type of a declared
+entity explicitly if a variable or a constant declaration contains an
+initial value. All cases that allow inferring type automatically are specified
+in the |LANG| Specification.
 
-Both variable declarations are valid, and both variables are of the ``string``
-type:
+Both variable declarations shown below are valid, and both variables are of the
+type ``string``:
 
 .. code-block:: typescript
 
@@ -87,7 +87,7 @@ Types
 -----
 
 ``Class``, ``interface``, ``function``, ``enum``, ``union`` types, and type
-``aliases`` are described in the corresponding sections.
+``aliases`` are discussed in the corresponding sections.
 
 |
 
@@ -107,11 +107,11 @@ Integer literals include the following:
 * Decimal integers that consist of a sequence of digits. For example:
   ``0``, ``117``, ``-345``;
 * Hexadecimal integers that start with 0x (or 0X), and can contain digits
-  (0-9) and letters a-f or A-F. For example: ``0x1123``, ``0x00111``,
+  (0-9) and letters (a-f or A-F). For example: ``0x1123``, ``0x00111``,
   ``-0xF1A7``;
 * Octal integers that start with 0o (or 0O), and can only contain digits
   (0-7). For example: ``0o777``;
-* Binary integers that start with 0b (or 0B), and can only contain the
+* Binary integers that start with 0b (or 0B), and can only contain
   digits 0 and 1. For example: ``0b11``, ``0b0011``, ``-0b11``.
 
 A floating-point literal includes the following:
@@ -172,10 +172,10 @@ A ``string`` is a sequence of characters; some characters can be set by using
 escape sequences.
 
 A ``string`` literal consists of zero or more characters enclosed in single
-(' \' ') quote or double quotes (' \" ').
+quote (' \' ') or double quotes (' \" ').
 
-A special form of string literals are template literals enclosed in backticks
-(' \` '):
+A special form of ``string`` literals are template literals enclosed in
+backticks (' \` '):
 
 .. code-block:: typescript
 
@@ -191,9 +191,8 @@ A special form of string literals are template literals enclosed in backticks
 ``void`` Type
 ~~~~~~~~~~~~~
 
-Type ``void`` is used to specify that a function returns no value.
-As a reference type, ``void``
-can be used as type argument for generic types:
+Type ``void`` is used to specify that a function returns no value. Type ``void``
+as a reference type can be used as type argument for generic types:
 
 .. code-block:: typescript
 
@@ -268,8 +267,8 @@ constant:
 ~~~~~~~~~~~~~~
 
 Type ``union`` is a reference type created as a combination of other types.
-Values of a ``union`` type can be valid values of all types the union is
-created from:
+Valid values of all types the union is created from can be the values of a
+``union`` type:
 
 .. code-block:: typescript
 
@@ -290,7 +289,7 @@ created from:
     animal = 42
     // One may assign the variable of the union type with any valid value
 
-There are different mechanisms to get a value of a particular type from a
+Different mechanisms can be used to get a value of a particular type from a
 union. For example:
 
 .. code-block:: typescript
@@ -456,11 +455,11 @@ Statements
 ``if`` Statements
 ~~~~~~~~~~~~~~~~~
 
-An ``if`` statement is used to execute a sequence of statements when a logical
+An ``if`` statement is used to execute a sequence of statements when the logical
 condition is ``true``. Another set of statements (if provided) is used otherwise.
 The ``else`` part can also contain more ``if`` statements.
 
-An ``if`` statement looks as follows:
+An ``if`` statement is as follows:
 
 .. code-block:: typescript
 
@@ -472,7 +471,7 @@ An ``if`` statement looks as follows:
         // else_statements
     }
 
-All conditional expressions must be of type ``boolean``, or other types
+All conditional expressions must be of type ``boolean`` or other types
 (``string``, ``number``, etc.). For types other than ``boolean``, implicit
 conversion rules apply as follows:
 
@@ -544,13 +543,13 @@ Conditional Expressions
 The conditional expression '``? :``' uses the ``boolean`` value of the first
 expression to decide which of two other expressions to evaluate.
 
-A conditional expression looks as follows:
+A conditional expression is as follows:
 
 .. code-block:: typescript
 
     condition ? expression1 : expression2
 
-The condition must be a logical expression. If that logical expression is
+The condition must be a logical expression. If the logical expression is
 ``true``, then the first expression is used as the result of the ternary
 expression. Otherwise, the second expression is used. For example:
 
@@ -590,13 +589,12 @@ When a ``for`` statement is executed, the following process takes place:
 
 #. The statements of the ``for`` body are executed.
 
-#. If there is an ``update`` expression, then the ``update`` expression
-   is executed.
+#. An ``update`` expression is executed, if any.
 
 #. Go back to step 2.
 
 
-It is illustrated in the example below:
+The process is illustrated in the example below:
 
 .. code-block:: typescript
 
@@ -635,7 +633,7 @@ Another example is below:
 ~~~~~~~~~~~~~~~~~~~~
 
 A ``while`` statement has its body statements executed as long as the
-specified condition evaluates to ``true``. A ``while`` statement looks as
+specified condition evaluates to ``true``. A ``while`` statement is as
 follows:
 
 .. code-block:: typescript
@@ -720,7 +718,7 @@ enclosing statement to the one that has the same label identifier:
 ``continue`` Statements
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-A ``continue`` statement stops the execution of the current loop iteration,
+A ``continue`` statement stops the execution of the current loop iteration
 and passes control to the next iteration:
 
 .. code-block:: typescript
@@ -801,5 +799,4 @@ The ``finally`` clause is also supported:
         }
     }
 
-|
 |

@@ -18,50 +18,50 @@ cases:
           let a1: Object|null|undefined = new Object
       use: |-
           // not array type
-          arktest.assertTrue(((...p: Object[]): int => p.length > 0 ? p.length : -1)(...a1) == -1)
+          arktest.assertEQ(((...p: Object[]): int => p.length > 0 ? p.length : -1)(...a1), -1)
       tags: 'negative, compile-only'
 
     - decl: |-
           let a1: number[] = [1.0, 2.0]
       use: |-
           // not rest parameters
-          arktest.assertTrue(((p1: number, p2: number): number => p1 + p2)(...a1) == 3.0)
+          arktest.assertEQ(((p1: number, p2: number): number => p1 + p2)(...a1), 3.0)
       tags: 'negative, compile-only'
 
     - use: |-
           // empty arrays
           let a1: Object[] = [], a2: Error[] = []
-          arktest.assertTrue(((...p: Object[]): int => p.length)(...[...a1, ...a2, new Object(), ...a1]) == 1)
+          arktest.assertEQ(((...p: Object[]): int => p.length)(...[...a1, ...a2, new Object(), ...a1]), 1)
 
     - use: |-
           // spread of char array
           let a: char[] = [c'b', c'c']
-          arktest.assertTrue(((...p: char[]): int => p.length)(...a) == 2)
+          arktest.assertEQ(((...p: char[]): int => p.length)(...a), 2)
 
     - use: |-
           // spread of byte array
           let a: byte[] = [1 as byte, 2 as byte, 3 as byte]
-          arktest.assertTrue(((a: int, ...p: byte[]): int => a + reduce(p, (prev: int, next: byte) => prev + next, 0))(42, ...a) == 48)
+          arktest.assertEQ(((a: int, ...p: byte[]): int => a + reduce(p, (prev: int, next: byte) => prev + next, 0))(42, ...a), 48)
 
     - use: |-
           // spread of short array
           let a: short[] = [1 as short, 2 as short, 3 as short]
-          arktest.assertTrue(((a: int, ...p: short[]): int => a + reduce(p, (prev: int, next: short) => prev + next, 0))(42, ...a) == 48)
+          arktest.assertEQ(((a: int, ...p: short[]): int => a + reduce(p, (prev: int, next: short) => prev + next, 0))(42, ...a), 48)
 
     - use: |-
           // spread of long array
           let a: long[] = [1 as long, 2 as long, 3 as long]
-          arktest.assertTrue(((a: long, ...p: long[]): long => a + reduce(p, (prev: long, next: long) => prev + next, 0 as long))(42, ...a) == 48)
+          arktest.assertEQ(((a: long, ...p: long[]): long => a + reduce(p, (prev: long, next: long) => prev + next, 0 as long))(42, ...a), 48)
 
     - use: |-
           // spread of float array
-          let a: float[] = [1f, 2f, 3f]
-          arktest.assertTrue(((a: float, ...p: float[]): float => a + reduce(p, (prev: float, next: float) => prev + next, 0f))(42f, ...a) == 48f)
+          let a: float[] = [1.0f, 2.0f, 3.0f]
+          arktest.assertEQ(((a: float, ...p: float[]): float => a + reduce(p, (prev: float, next: float) => prev + next, 0.0f))(42.0f, ...a), 48.0f)
 
     - use: |-
           // spread of number array
           let a: number[] = [1.0, 2.0, 3.0]
-          arktest.assertTrue(((a: number, ...p: number[]): number => a + reduce(p, (prev: number, next: number) => prev + next, 0.0))(42, ...a) == 48.0)
+          arktest.assertEQ(((a: number, ...p: number[]): number => a + reduce(p, (prev: number, next: number) => prev + next, 0.0))(42, ...a), 48.0)
 
     - decl: |-
           type F = (p: number) => number
@@ -80,30 +80,30 @@ cases:
       use: |-
           // spread of enums
           let a: Color[] = [Color.Red, Color.Blue, Color.Green]
-          arktest.assertTrue(((...p: Color[]): Color => p.length ? p[p.length - 1] : Color.Red)(...a) == Color.Green)
+          arktest.assertEQ(((...p: Color[]): Color => p.length ? p[p.length - 1] : Color.Red)(...a), Color.Green)
 
     - use: |-
           // expression in parentheses
-          arktest.assertTrue(((...p: number[]): number => p.length ? p[p.length - 1] : -1.0)(...([1.0, 2.0])) == 2.0)
+          arktest.assertEQ(((...p: number[]): number => p.length ? p[p.length - 1] : -1.0)(...([1.0, 2.0])), 2.0)
 
     - decl: |-
           let a1: Object[]|null = [new Object, new Object]
       use: |-
           // ensure-not-nullish expression
-          arktest.assertTrue(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!) == 7)
+          arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!), 7)
 
     - decl: |-
           let a1: Object[]|null = null
       use: |-
           // ensure-not-nullish expression
-          arktest.assertTrue(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!) == 7)  // NPE expected
+          arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!), 7)  // NPE expected
       tags: 'negative'
 
     - decl: |-
           let a1: Object[]|null = [new Object, new Object]
       use: |-
           // nullish expression
-          arktest.assertTrue(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1) == 7)  // CTE expected
+          arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1), 7)  // CTE expected
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -111,7 +111,7 @@ cases:
           let a2: Object[]|null = [new Object, new Object]
       use: |-
           // nullish-coalescing expression
-          arktest.assertTrue(((a: int, ...p: Object[]): int => a + p.length)(5, ...(a1 ?? a2)!) == 7)
+          arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...(a1 ?? a2)!), 7)
 
     - decl: |-
           function foo(): number[] {
@@ -119,43 +119,43 @@ cases:
           }
       use: |-
           // function call in expression
-          arktest.assertTrue(((...p: number[]): number => reduce(p, (prev: number, next: number) => prev + next, 0.0))(...foo()) == 3.0)
+          arktest.assertEQ(((...p: number[]): number => reduce(p, (prev: number, next: number) => prev + next, 0.0))(...foo()), 3.0)
 
     - use: |-
           // function call in expression
           let s = ["h", "", "el", "", "", "l", "", "o"]
-          arktest.assertTrue(((...p: string[]): string => String.join(p, ""))(...((s: string[]): string[] => {
+          arktest.assertEQ(((...p: string[]): string => String.join(p, ""))(...((s: string[]): string[] => {
                 let res: string[] = []
                 for (let el of s) if (el.length > 0) res = [...res, el]
                 return res
-          })(s)) == "hello")
+          })(s)), "hello")
 
     - use: |-
           // new expression in expression
-          arktest.assertTrue(((...p: number[]): number =>  p.length ? p[p.length - 1] : -1)(...(new number[256])) == 0)
+          arktest.assertEQ(((...p: number[]): number =>  p.length ? p[p.length - 1] : -1)(...(new number[256])), 0)
 
     - use: |-
           // array index expression
           let a: double[][] = [[2.0, 3.0], []]
-          arktest.assertTrue(((...p: double[]): double => p[0] + p[1])(...a[0]) == 5)
+          arktest.assertEQ(((...p: double[]): double => p[0] + p[1])(...a[0]), 5)
 
     - use: |-
           // tuple index expression
           let a: [string, double[], string] = ["X", [2.0, 3.0, 4.0], "Z"]
-          arktest.assertTrue(((...p: double[]): double => p[0] + p[1] + p[2])(...a[1]) == 9)
+          arktest.assertEQ(((...p: double[]): double => p[0] + p[1] + p[2])(...a[1]), 9)
 
     - use: |-
           // assignment expression in expression
           let a1 = ["1", "2", "3"]
           let a2 = ["a", "b"]
-          arktest.assertTrue(((...p: string[]): string => String.join(p, "-"))(...(a1 = a2)) == "a-b")
+          arktest.assertEQ(((...p: string[]): string => String.join(p, "-"))(...(a1 = a2)), "a-b")
 
     - decl: |-
           let a1 = ["1", "2", "3"]
           let a2 = ["a", "b"]
       use: |-
           // conditional expression in expression
-          arktest.assertTrue(((...p: string[]): string => String.join(p, "-"))(...(a1.length > a2.length ? a1 : a2)) == "1-2-3")
+          arktest.assertEQ(((...p: string[]): string => String.join(p, "-"))(...(a1.length > a2.length ? a1 : a2)), "1-2-3")
 
     - decl: |-
           class A {
@@ -170,7 +170,7 @@ cases:
       use: |-
           // use this expression
           let a: A = new A([false, false], [true, true])
-          arktest.assertTrue(a.meth() == 46)
+          arktest.assertEQ(a.meth(), 46)
 
     - decl: |-
           abstract class A {
@@ -193,16 +193,16 @@ cases:
       use: |-
           // use super expression
           let b: B = new B([false, false], [true, true])
-          arktest.assertTrue(b.bar() == 46)
+          arktest.assertEQ(b.bar(), 46)
 
     - use: |-
           // spread of arrays
           let a1: number[][] = [[1.0, 2.0], [], [3.0, 4.0], [5.0]]
-          arktest.assertTrue(((...p: number[][]): int => {
+          arktest.assertEQ(((...p: number[][]): int => {
               let res = 0
               for (let el of p) res += el.length
               return res
-          })(...a1) == 5)
+          })(...a1), 5)
 
     - decl: |-
           function bar(...p: number[]): number {
@@ -214,7 +214,7 @@ cases:
           // spread of arrays, flatten array
           let a1: number[][] = [[1.0, 2.0], [3.0, 4.0]]
           let a2: number[][] = [[5.0, 6.0], []]
-          arktest.assertTrue(bar(...[
+          arktest.assertEQ(bar(...[
               ...((...p: number[][]): number[] => {
                   let res: number[] = []
                   for (let el of p) res = [...res, ...el]
@@ -225,32 +225,32 @@ cases:
                   for (let el of p) res = [...res, ...el]
                   return res
               })(...a2)
-          ]) == 21.0)
+          ]), 21.0)
 
     - use: |-
           // union of value types in result array
           let a1: Double[] = [1, 2, 3], a2: Short[] = [4, 5], a3: Byte[] = [6]
           let ar = [-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]
-          arktest.assertTrue(((...p: (Double|Short|Byte)[]): double => {
+          arktest.assertEQ(((...p: (Double|Short|Byte)[]): double => {
               let res = 0.0
               for (let el of p) res += (el as Numeric).toDouble()
               return res
-          })(...ar) == 42.0)
+          })(...ar), 42.0)
 
     - use: |-
           // union of value types in result array
           let a1: Double[] = [1, 2, 3], a2: Short[] = [4, 5], a3: Byte[] = [6]
           let ar = [-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]
-          arktest.assertTrue(((...p: (Double|Short|Byte)[]): double => {
+          arktest.assertEQ(((...p: (Double|Short|Byte)[]): double => {
               let res = 0.0
               for (let el of p) res += (el as Numeric).doubleValue()
               return res
-          })(...ar) == 42.0)
+          })(...ar), 42.0)
 
     - use: |-
           // union of reference types in result array
           let a1: (Int|Number|String|undefined)[] = [new Int(), new Int(), undefined, "Z", 42.0]
-          arktest.assertTrue(((...p: (Int|Number|String|undefined)[]): int => p.length)(...a1) == 5)
+          arktest.assertEQ(((...p: (Int|Number|String|undefined)[]): int => p.length)(...a1), 5)
 
     - decl: |-
           class A<T> {}
@@ -260,19 +260,20 @@ cases:
           // use generics
           let f = <T, U, V> (...p: (A<T>|B<U>|C<V>|null)[]): int => p.length
           let a1: (A<String>|B<Long>|C<Error>|null)[] = [new A<String>, new B<Long>, new C<Error>]
-          arktest.assertTrue(f<String, Long, Error>(...a1) == 3)
+          arktest.assertEQ(f<String, Long, Error>(...a1), 3)
+      tags: 'negative, compile-only'
 
     - decl: |-
           let a1 = ["1", "2", "3"]
       use: |-
           // lambda expression in expression
-          arktest.assertTrue(((...p: string[]): string => String.join(p, ""))(...((): string[] => a1)()) == "123")
+          arktest.assertEQ(((...p: string[]): string => String.join(p, ""))(...((): string[] => a1)()), "123")
 
     - decl: |-
           let a1 = ["1", "2", "3"]
       use: |-
           // lambda expression in expression
-          arktest.assertTrue(((...p: string[]): string => String.join(p, ""))(...((p: string[], q: string[]): string[] => [...p, ...q])(a1, a1)) == "123123")
+          arktest.assertEQ(((...p: string[]): string => String.join(p, ""))(...((p: string[], q: string[]): string[] => [...p, ...q])(a1, a1)), "123123")
 
 # tuples
     - use: |-
@@ -289,22 +290,22 @@ cases:
     - use: |-
           // spread tuples of all value types
           let r: [byte, short, int, long, float, double, boolean, char, string] =
-              [1 as byte, 2 as short, 3, 4 as long, 5f, 6.0, true, c'Z', "X"]
-          arktest.assertTrue(((...p: [byte, short, int, long, float, double, boolean, char, string]):
+              [1 as byte, 2 as short, 3, 4 as long, 5.0f, 6.0, true, c'Z', "X"]
+          arktest.assertEQ(((...p: [byte, short, int, long, float, double, boolean, char, string]):
               [byte, short, int, long, float, double, boolean, char, string, int] =>
-              [...p, 42])(...r)[9] == 42)
+              [...p, 42])(...r)[9], 42)
 
     - decl: |-
           let a1: [Object, Error]|null = [new Object, new Error]
       use: |-
           // ensure-not-nullish expression
-          arktest.assertTrue(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...a1!) == 3)
+          arktest.assertEQ(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...a1!), 3)
 
     - decl: |-
           let a1: [Object, Error]|null = null
       use: |-
           // ensure-not-nullish expression
-          arktest.assertTrue(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...a1!) == 3) // NPE expected
+          arktest.assertEQ(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...a1!), 3) // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -312,14 +313,14 @@ cases:
           let a2: [Object, Error]|null = [new Object, new Error]
       use: |-
           // nullish-coalescing expression
-          arktest.assertTrue(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)!) == 3)
+          arktest.assertEQ(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)!), 3)
 
     - decl: |-
           let a1: [Object, Error]|null = null
           let a2: [Object, Error]|null = null
       use: |-
           // nullish-coalescing expression
-          arktest.assertTrue(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)!) == 3) // NPE expected
+          arktest.assertEQ(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)!), 3) // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -327,7 +328,7 @@ cases:
           let a2: [Object, Error]|null = null
       use: |-
           // nullish-coalescing expression
-          arktest.assertTrue(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)) == 3)  // CTE, nullish expression
+          arktest.assertEQ(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)), 3)  // CTE, nullish expression
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -342,13 +343,13 @@ cases:
     - use: |-
           // tuple index expression
           let a: [[double, double], [char, char]] = [[2.0, 3.0], [c'Z', c'X']]
-          arktest.assertTrue(((...p: [double, double]): double => p[0] + p[1])(...a[0]) == 5.0)
+          arktest.assertEQ(((...p: [double, double]): double => p[0] + p[1])(...a[0]), 5.0)
 
     - use: |-
           // assignment expression in expression
           let a1: [string, int] = ["1", 10]
           let a2: [string, int] = ["2", 20]
-          arktest.assertTrue(((...p: [string, int]): int => p[1])(...(a1 = a2)) == 20)
+          arktest.assertEQ(((...p: [string, int]): int => p[1])(...(a1 = a2)), 20)
 
     - decl: |-
           let a1: [int, int] = [1, 2]
@@ -356,7 +357,7 @@ cases:
       use: |-
           // conditional expression in expression
           let r = ((...p: [int, int]): int => p[0] + p[1])(...(a1[0] > a2[0] ? a1 : a2))
-          arktest.assertTrue(r == 11)
+          arktest.assertEQ(r, 11)
 
     - decl: |-
           class A {
@@ -371,7 +372,7 @@ cases:
       use: |-
           // use this expression
           let a: A = new A(1, c'Z')
-          arktest.assertTrue(a.meth() == 111)
+          arktest.assertEQ(a.meth(), 111)
 
     - decl: |-
           abstract class A {
@@ -389,7 +390,7 @@ cases:
               }
               meth(): [int, char] {
                   this.fld[0] = 10 + ((...p: [int, char]): int => 100 + p[0])(...super.meth())
-                  return this.fld 
+                  return this.fld
               }
           }
       use: |-
@@ -400,15 +401,16 @@ cases:
     - decl: |-
           class A<T> {}
           class B<T> {}
+      tags: 'compile-only, negative'
       use: |-
           // use generics
           let f = <T, U> (...p: [A<T>, B<U>]): boolean => p[0] == p[1]
           let a1: [A<Long>, B<Error>] = [new A<Long>, new B<Error>]
-          arktest.assertTrue(f<Long, Error>(...a1) == false)
+          arktest.assertFalse(f<Long, Error>(...a1))
 
     - decl: |-
           let a2: [int, int] = [6, 5]
       use: |-
           // lambda expression in expression
           let r = ((...p: [int, int]): string => "" + p[0] + p[1])(...((p: [int, int]): [int, int] => [p[1], p[0]])(a2))
-          arktest.assertTrue(r == "56")
+          arktest.assertEQ(r, "56")

@@ -34,8 +34,10 @@ type CoroFunT<A, R> = (
   a15: A
 ) => R;
 
+
 /**
  * @class LaunchParams Class for coroutine launch params.
+ * @internal
  */
 export class LaunchParams {
   /** @property { boolean } abortFlag if true, aborts the program if unhandled exception were thrown inside the coroutine. */
@@ -52,9 +54,11 @@ export class LaunchParams {
  * @param args arguments for the function coroFun.
  *
  * @returns instance of the Job class that represents newly launched coroutine.
+ *
+ * @internal
  */
-export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<NullishType>): Job<R> {
-  return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>, launchParams);
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<Any>): Job<R> {
+  return launchInternal<R, F>(coroFun, args as FixedArray<Any>, launchParams);
 }
 
 /**
@@ -64,14 +68,18 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams
  * @param args arguments for the function coroFun.
  *
  * @returns instance of the Job class that represents newly launched coroutine.
+ *
+ * @internal
  */
-export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<NullishType>): Job<R> {
-  return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>);
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<Any>): Job<R> {
+  return launchInternal<R, F>(coroFun, args as FixedArray<Any>);
 }
 
 /**
  * @enum WorkerDomain The existing worker domains. A worker domain defines a group of workers with some common
  * properties.
+ *
+ * @internal
  */
 export enum WorkerDomain {
     // NOTE(konstanting): we need a mirror class for this to verify that the IDs match the runtime IDs
@@ -81,12 +89,23 @@ export enum WorkerDomain {
     EA,
 }
 
+/**
+ * @internal
+ */
 export type WorkerGroupId = FixedArray<long>;
+/**
+ * @internal
+ */
 export type CoroutineId = int;
+/**
+ * @internal
+ */
 export type WorkerId = int;
 
 /**
- * @class WorkerGroup a group of workers which a coroutine can be launched to. 
+ * @class WorkerGroup a group of workers which a coroutine can be launched to.
+ *
+ * @internal
  */
 export class WorkerGroup {
     // NOTE(konstanting): we need a mirror class for this to verify that the IDs match the runtime IDs
@@ -129,7 +148,7 @@ export class WorkerGroup {
  * @param asyncCallback Asynchronous callback function that returns a promise.
  *
  * @returns The resolved value from the promise returned by the callback.
- * 
+ *
  * @throws The rejection error if the promise is rejected.
  */
 export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
@@ -143,24 +162,11 @@ export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
     return job.Await();
 }
 
-function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<NullishType>, launchParams?: LaunchParams): Job<R> {
-  const paddedArgs = padArrayToMaxArgs(args);
+function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<Any>, launchParams?: LaunchParams): Job<R> {
   if (launchParams) {
-    return launchInternalJobNative<F, R>(coroFun, args as FixedArray<NullishType>, launchParams.abortFlag, launchParams.workerGroupId);
+    return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag, launchParams.workerGroupId);
   }
-  return launchInternalJobNative<F, R>(coroFun, args as FixedArray<NullishType>, false, WorkerGroup.ANY_ID);
+  return launchInternalJobNative<F, R>(coroFun, args as FixedArray<Any>, false, WorkerGroup.ANY_ID);
 }
 
-function padArrayToMaxArgs<T>(arr: FixedArray<T>): FixedArray<(T | undefined)> {
-  const MAX_ARGS = 16;
-  const res: FixedArray<(T | undefined)> = new (T | undefined)[MAX_ARGS];
-  for (let i = 0; i < arr.length && i < MAX_ARGS; ++i) {
-    res[i] = arr[i];
-  }
-  for (let i = arr.length; i < MAX_ARGS; ++i) {
-    res[i] = undefined;
-  }
-  return res;
-}
-
-native function launchInternalJobNative<F, R>(coroFun: F, args: FixedArray<NullishType>, abortFlag: boolean, gid: WorkerGroupId): Job<R>;
+native function launchInternalJobNative<F, R>(coroFun: F, args: FixedArray<Any>, abortFlag: boolean, gid: WorkerGroupId): Job<R>;

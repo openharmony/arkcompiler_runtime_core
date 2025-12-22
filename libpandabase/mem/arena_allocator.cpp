@@ -28,14 +28,7 @@ ArenaAllocatorT<use_oom_handler>::ArenaAllocatorT(SpaceType space_type, BaseMemS
     ASSERT(!use_oom_handler);
     if (!ON_STACK_ALLOCATION_ENABLED) {
         arenas_ = PoolManager::AllocArena(DEFAULT_ARENA_SIZE, space_type_, AllocatorType::ARENA_ALLOCATOR, this);
-        if (UNLIKELY(arenas_ == nullptr)) {
-            std::cerr << "CHECK FAILED: : arenas_ == nullptr IN: " << __FILE__ << ":" << __LINE__ <<
-                         " in " << __FUNCTION__ << std::endl <<
-                         "Solutions: > Free up system memory by closing unnecessary applications" <<
-                         "> Consider reducing memory usage or implementing memory cleanup" << std::endl;
-            panda::PrintStack(std::cerr);
-            std::abort();
-        }
+        CHECK_NOT_NULL(arenas_);
         AllocArenaMemStats(DEFAULT_ARENA_SIZE);
     }
 }

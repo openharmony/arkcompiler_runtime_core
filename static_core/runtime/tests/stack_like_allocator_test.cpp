@@ -18,11 +18,11 @@
 #include <limits>
 #include <string>
 
-#include "libpandabase/mem/mem.h"
-#include "libpandabase/mem/mem_config.h"
-#include "libpandabase/mem/pool_manager.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/mem/stack_like_allocator-inl.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/mem/mem_config.h"
+#include "libarkbase/mem/pool_manager.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/mem/stack_like_allocator-inl.h"
 #include "runtime/tests/allocator_test_base.h"
 
 namespace ark::mem {

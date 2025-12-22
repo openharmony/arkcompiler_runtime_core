@@ -124,7 +124,7 @@ function jsonStringifyArrayReplacer3() {
     arktest.assertEQ(ret, expect);
 }
 
-function replaceNumber(key: string, value: NullishType): NullishType {
+function replaceNumber(key: string, value: Any): Any {
     if (key == '1' || key == '4') {
         return key + '_' + value;
     } else {
@@ -137,6 +137,115 @@ function jsonStringifyArrayReplacer4() {
     let expect = '[1,"1_2",3,4]';
     let ret = JSON.stringify(arr, replaceNumber);
     arktest.assertEQ(ret, expect);
+}
+
+function jsonStringifyRegExptest1() {
+    const str = "For more information, see Chapter 3.4.5.1";
+    const re = new RegExp('see (chapter \\d+(\\.\\d)*)', 'i');
+    const found = str.match(re);
+    let str1 = JSON.stringify(found);
+    let expect = '["see Chapter 3.4.5.1","Chapter 3.4.5.1",".1"]'
+    arktest.assertEQ(str1, expect);
+}
+
+function jsonStringifyRegExptest2() {
+    const str = "ABCDEFGHIJKLMNOPQRSTUVWHIZabcdefghijklmnopqrstuvwxyz";
+    const re = new RegExp('[A-E]', 'gi');
+    const found = str.match(re);
+    let str1 = JSON.stringify(found);
+    let expect = '["A","B","C","D","E","a","b","c","d","e"]'
+    arktest.assertEQ(str1, expect);
+}
+
+function jsonStringifyRegExptest3() {
+    const str = "The quick brown fox jumps over the lazy dog. It barked.";
+    const re = new RegExp('(?<animal>fox|cat) jumps over');
+    const found = str.match(re);
+    let str1 = JSON.stringify(found);
+    let expect = '["fox jumps over","fox"]'
+    arktest.assertEQ(str1, expect);
+}
+
+function jsonStringifyRegExptest4() {
+    const str = encodeURI('\r'); 
+    const re = new RegExp(str, 'g');
+    let search = re.exec(str);
+    let expected = '["%0D"]'; 
+    let ret = JSON.stringify(search);
+    arktest.assertEQ(ret, expected);
+}
+
+function jsonStringifyRegExptest5() {
+    const str = encodeURI('\b\t\n');
+    const re = new RegExp(str, 'g');
+    let match = re.exec(str);
+    let ret = JSON.stringify(match);
+    let expected = '["%08%09%0A"]';
+    arktest.assertEQ(ret, expected);
+}
+
+class ObjWithBoolArray {
+    arr: FixedArray<boolean> = [true]
+}
+
+function jsonStringifyObjWithBoolArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithBoolArray()), '{"arr":[true]}')
+}
+
+class ObjWithByteArray {
+    arr: FixedArray<byte> = [1]
+}
+
+function jsonStringifyObjWithByteArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithByteArray()), '{"arr":[1]}')
+}
+
+class ObjWithCharArray {
+    arr: FixedArray<char> = [c'a']
+}
+
+function jsonStringifyObjWithCharArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithCharArray()), '{"arr":["a"]}')
+}
+
+class ObjWithShortArray {
+    arr: FixedArray<short> = [ 1 ]
+}
+
+function jsonStringifyObjWithShortArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithShortArray()), '{"arr":[1]}')
+}
+
+class ObjWithIntArray {
+    arr: FixedArray<int> = [ 1 ]
+}
+
+function jsonStringifyObjWithIntArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithIntArray()), '{"arr":[1]}')
+}
+
+class ObjWithLongArray {
+    arr: FixedArray<long> = [ 1 ]
+}
+
+function jsonStringifyObjWithLongArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithLongArray()), '{"arr":[1]}')
+}
+
+class ObjWithFloatArray {
+    arr: FixedArray<float> = [ 1.0 ]
+}
+
+function jsonStringifyObjWithFloatArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithFloatArray()), '{"arr":[1]}')
+}
+
+class ObjWithDoubleArray {
+    arr: FixedArray<double> = [ 1.0 ]
+}
+
+function jsonStringifyObjWithDoubleArray(): void {
+    arktest.assertEQ(JSON.stringify(new ObjWithDoubleArray()), '{"arr":[1]}')
 }
 
 function main(): int {
@@ -154,5 +263,18 @@ function main(): int {
     suite.addTest('for replacer 2', jsonStringifyArrayReplacer2);
     suite.addTest('for replacer 3', jsonStringifyArrayReplacer3);
     suite.addTest('for replacer 4', jsonStringifyArrayReplacer4);
+    suite.addTest('for RegExp 1', jsonStringifyRegExptest1);
+    suite.addTest('for RegExp 2', jsonStringifyRegExptest2);
+    suite.addTest('for RegExp 3', jsonStringifyRegExptest3);
+    suite.addTest('for RegExp 2', jsonStringifyRegExptest4);
+    suite.addTest('for RegExp 3', jsonStringifyRegExptest5);
+    suite.addTest('for object with FixedArray<boolean> field', jsonStringifyObjWithBoolArray)
+    suite.addTest('for object with FixedArray<byte> field', jsonStringifyObjWithByteArray)
+    suite.addTest('for object with FixedArray<char> field', jsonStringifyObjWithCharArray)
+    suite.addTest('for object with FixedArray<short> field', jsonStringifyObjWithShortArray)
+    suite.addTest('for object with FixedArray<int> field', jsonStringifyObjWithIntArray)
+    suite.addTest('for object with FixedArray<long> field', jsonStringifyObjWithLongArray)
+    suite.addTest('for object with FixedArray<float> field', jsonStringifyObjWithFloatArray)
+    suite.addTest('for object with FixedArray<double> field', jsonStringifyObjWithDoubleArray)
     return suite.run();
 }

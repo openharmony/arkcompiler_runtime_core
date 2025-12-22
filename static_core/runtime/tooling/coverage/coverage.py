@@ -39,7 +39,6 @@ class Constants:
     BRANCH_INDEX = "branch_index"
     CASE_INDEX = "case_index"
     COUNT = "count"
-    BRANCH_TYPE = "branch_type"
     BODY = "body"
     ALTERNATE = "alternate"
     STATEMENTS = "statements"
@@ -515,12 +514,10 @@ class CoverageInfo:
         """Validate if the function is defined in the source file and register it if valid."""
         if func_name == Constants.CTOR:
             func_name = Constants.CONSTRUCTOR
-        if func_name.startswith("%%async-"):
-            func_name = func_name.replace("%%async-", "")
-
         # Function is defined in source file
         if (
                 func_name in self.function_name_to_lines
+                or func_name == Constants.CCTOR
                 or func_name.startswith(Constants.LAMBDA_INVOKE_1)
                 or Constants.LAMBDA_INVOKE_2 in func_name
         ):
@@ -663,7 +660,7 @@ class CoverageInfo:
                     # For nested if statements, recursively process them
                     self._process_if_statement(first_statement)
                 else:
-                    self._create_branch_entry(first_statement, start_line, branch_index, branch_type='if')
+                    self._create_branch_entry(first_statement, start_line, branch_index)
         # Handle direct statements with STATEMENTS key
         elif Constants.STATEMENTS in node:
             statements = node[Constants.STATEMENTS]
@@ -677,7 +674,7 @@ class CoverageInfo:
                     # For nested if statements, recursively process them
                     self._process_if_statement(first_statement)
                 else:
-                    self._create_branch_entry(first_statement, start_line, branch_index, branch_type='if')
+                    self._create_branch_entry(first_statement, start_line, branch_index)
         # Handle direct node without STATEMENTS key
         else:
             # Check if it's a nested if statement
@@ -688,7 +685,7 @@ class CoverageInfo:
                 # For nested if statements, recursively process them
                 self._process_if_statement(node)
             else:
-                self._create_branch_entry(node, start_line, branch_index, branch_type='if')
+                self._create_branch_entry(node, start_line, branch_index)
 
     def _process_if_statement(self, node: Dict):
         """Process if statement"""
@@ -739,7 +736,7 @@ class CoverageInfo:
                 first_statement = body
 
         if first_statement:
-            self._create_branch_entry(first_statement, start_line, 0, branch_type='loop')
+            self._create_branch_entry(first_statement, start_line, 0)
         else:
             print(f"Warning: Loop statement has unexpected body structure")
 
@@ -806,7 +803,7 @@ class CoverageInfo:
                 )
 
     def _create_branch_entry(self, node: Dict, start_line: int,
-                             case_index: int, default_count: int = 0, branch_type: str = 'other'):
+                             case_index: int, default_count: int = 0):
         """Create branch entry"""
         if node and Constants.LOC in node:
             line_num = node[Constants.LOC][Constants.START].get(Constants.LINE)
@@ -818,7 +815,6 @@ class CoverageInfo:
                     Constants.BRANCH_INDEX: 0,
                     Constants.CASE_INDEX: case_index,
                     Constants.COUNT: default_count,
-                    Constants.BRANCH_TYPE: branch_type
                 }
 
     def _process_runtime_info(self, runtime_info: List[Dict]) -> bool:
@@ -929,65 +925,20 @@ class CoverageInfo:
         ]
 
     def _generate_branch_coverage_lines(self) -> List[str]:
-        """Generate branch coverage lines in LCOV format"""
+        """Generate branch coverage-related LCOV lines"""
         lines = []
 
-        # collect all branches and group by(start_line, branch_index)
-        branches_by_location = {}
-        for _, branch in self.branch_stats.items():
-            key = (branch[Constants.START_LINE], branch[Constants.BRANCH_INDEX])
-            if key not in branches_by_location:
-                branches_by_location[key] = {}
-            branches_by_location[key][branch[Constants.CASE_INDEX]] = branch
+        for branch_key, branch in self.branch_stats.items():
+            brda_line = (
+                f"BRDA:{branch[Constants.START_LINE]},"
+                f"{branch[Constants.BRANCH_INDEX]},"
+                f"{branch[Constants.CASE_INDEX]},"
+                f"{branch[Constants.COUNT]}"
+            )
+            lines.append(brda_line)
 
-        # process each group, ensure complete branch information
-        for (start_line, branch_index), case_branches in branches_by_location.items():
-            # check if only one branch exists
-            if len(case_branches) == 1:
-                existing_case_index = list(case_branches.keys())[0]
-                existing_branch = case_branches[existing_case_index]
-                existing_count = existing_branch[Constants.COUNT]
-
-                # get branch type, default is 'other'
-                branch_type = existing_branch.get(Constants.BRANCH_TYPE, 'other')
-                missing_case_index = 1
-                n = self.line_stats.get(start_line, 0)
-                if branch_type == 'loop':
-                    missing_count = 1 if n > 0 else 0
-                else:
-                    missing_count = n - existing_count
-
-                # add missing branch
-                missing_branch = {
-                    Constants.START_LINE: start_line,
-                    Constants.BRANCH_INDEX: branch_index,
-                    Constants.CASE_INDEX: missing_case_index,
-                    Constants.COUNT: missing_count,
-                    Constants.BRANCH_TYPE: branch_type  # retain the branch type
-                }
-                case_branches[missing_case_index] = missing_branch
-
-            # generate all branch BRDA lines, sorted by case_index
-            for case_index in sorted(case_branches.keys()):
-                branch = case_branches[case_index]
-                brda_line = (
-                    f"BRDA:{branch[Constants.START_LINE]},"
-                    f"{branch[Constants.BRANCH_INDEX]},"
-                    f"{branch[Constants.CASE_INDEX]},"
-                    f"{branch[Constants.COUNT]}"
-                )
-                lines.append(brda_line)
-
-                if runtime_config.report_type == 'diff':
-                    # find original branch_key or use None
-                    original_branch_key = None
-                    for key, b in self.branch_stats.items():
-                        if (b[Constants.START_LINE] == start_line and
-                            b[Constants.BRANCH_INDEX] == branch_index and
-                            b[Constants.CASE_INDEX] == case_index):
-                            original_branch_key = key
-                            break
-                    self.branch_info_for_diff[brda_line] = original_branch_key
+            if runtime_config.report_type == 'diff':
+                self.branch_info_for_diff[brda_line] = branch_key
 
         return lines
 

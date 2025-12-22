@@ -144,7 +144,8 @@ function testUtilGetHash011() {
 function testUtilGetHash012() {
     try {
         util.getHash(null);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        e = e as BusinessError;
         arktest.assertEQ(e.message, "Parameter error. The type of Parameter must be object.");
         return;
     }
@@ -153,7 +154,8 @@ function testUtilGetHash012() {
 function testUtilGetHash013() {
     try {
         util.getHash(undefined);
-    } catch (e: BusinessError) {
+    } catch (e) {
+        e = e as BusinessError;
         arktest.assertEQ(e.message, "Parameter error. The type of Parameter must be object.");
         return;
     }

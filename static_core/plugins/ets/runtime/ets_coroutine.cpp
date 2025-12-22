@@ -14,8 +14,10 @@
  */
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "mem/refstorage/global_object_storage.h"
+#include "plugins/ets/runtime/ets_call_stack.h"
 #include "runtime/include/value.h"
-#include "macros.h"
+#include "libarkbase/macros.h"
 #include "mem/refstorage/reference.h"
 #include "runtime/include/object_header.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
@@ -255,10 +257,36 @@ ExternalIfaceTable *EtsCoroutine::GetExternalIfaceTable()
 
 void EtsCoroutine::OnHostWorkerChanged()
 {
+    UpdateCachedObjects();
+}
+
+void EtsCoroutine::UpdateCachedObjects()
+{
     // update the interop context pointer
     auto *worker = GetWorker();
     auto *ptr = worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, void *>();
     GetLocalStorage().Set<DataIdx::INTEROP_CTX_PTR>(ptr);
+
+    if (GetType() == Coroutine::Type::MUTATOR) {
+        // update the string cache pointer
+        auto *curCoro = EtsCoroutine::GetCurrent();
+        ASSERT(curCoro != nullptr);
+        auto setStringCachePtr = [this, worker]() {
+            auto *cacheRef =
+                worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::FLATTENED_STRING_CACHE, mem::Reference *>();
+            auto *cache = GetVM()->GetGlobalObjectStorage()->Get(cacheRef);
+            SetFlattenedStringCache(cache);
+        };
+        // We need to put the current coro into the managed state to be GC-safe, because we manipulate a raw
+        // ObjectHeader*
+        if (ManagedThread::IsManagedScope()) {
+            setStringCachePtr();
+        } else {
+            // maybe we will find a more performant solution in future...
+            ScopedManagedCodeThread s(curCoro);
+            setStringCachePtr();
+        }
+    }
 }
 
 void EtsCoroutine::OnContextSwitchedTo()
@@ -268,11 +296,10 @@ void EtsCoroutine::OnContextSwitchedTo()
     }
 }
 
-[[noreturn]] void EtsCoroutine::HandleUncaughtException()
+void EtsCoroutine::HandleUncaughtException()
 {
     ASSERT(HasPendingException());
     GetPandaVM()->HandleUncaughtException();
-    UNREACHABLE();
 }
 
 void EtsCoroutine::ListUnhandledEventsOnProgramExit()
@@ -299,7 +326,6 @@ void EtsCoroutine::ProcessUnhandledFailedJobs()
             }
             if (HasPendingException()) {
                 HandleUncaughtException();
-                UNREACHABLE();
             }
         }
     }
@@ -324,10 +350,47 @@ void EtsCoroutine::ProcessUnhandledRejectedPromises(bool listAllObjects)
             }
             if (HasPendingException()) {
                 HandleUncaughtException();
-                UNREACHABLE();
             }
         }
     }
+}
+
+bool EtsCoroutine::IsContextSwitchRisky() const
+{
+    auto *callStk = GetLocalStorage().Get<DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
+    if (callStk != nullptr && callStk->Current() != nullptr) {
+        return true;
+    }
+    return false;
+}
+
+void EtsCoroutine::PrintCallStack() const
+{
+    ASSERT(this == EtsCoroutine::GetCurrent());
+    auto *callStk = GetLocalStorage().Get<DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
+    if (callStk == nullptr) {
+        Coroutine::PrintCallStack();
+        return;
+    }
+    auto istk = callStk->GetRecords();
+    auto istkIt = istk.rbegin();
+
+    auto printIstkFrames = [&istkIt, &istk](void *fp) {
+        while (istkIt != istk.rend() && fp == istkIt->etsFrame) {
+            LOG(ERROR, COROUTINES) << "<interop> " << (istkIt->descr != nullptr ? istkIt->descr : "unknown");
+            istkIt++;
+        }
+    };
+
+    for (auto stack = StackWalker::Create(this); stack.HasFrame(); stack.NextFrame()) {
+        printIstkFrames((istkIt != istk.rend()) ? istkIt->etsFrame : nullptr);
+        Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
+        LOG(ERROR, COROUTINES) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
+                               << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
+    }
+    ASSERT(istkIt == istk.rend() || istkIt->etsFrame == nullptr);
+    printIstkFrames(nullptr);
 }
 
 }  // namespace ark::ets

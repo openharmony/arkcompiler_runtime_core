@@ -13,50 +13,261 @@
  * limitations under the License.
  */
 
-import {
-    ChildClass,
-    UserClass,
-    createChildClassFromTs,
-    instanceChildClass,
-} from 'main_js';
+let module = ESValue.load('main_js');
+let ChildClass = module.getProperty('ChildClass');
+let UserClass = module.getProperty('UserClass');
+let createChildClassFromTs = module.getProperty('createChildClassFromTs');
+let instanceChildClass = module.getProperty('instanceChildClass');
 
 function checkChildClassMethod(): boolean {
-    const TSClass = new ChildClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (ChildClass.isUndefined() || ChildClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassFromTs(): boolean {
-    const TSClass = createChildClassFromTs();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (createChildClassFromTs.isUndefined() || createChildClassFromTs.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassFromTs.invoke();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
-
 function checkInstanceChildClass(): boolean {
-    const TSClass = instanceChildClass;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.compare(TSClass.get) as boolean;
+        if (instanceChildClass.isUndefined() || instanceChildClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceChildClass;
+
+        const getMethod = TSClass.getPropertySafe('get');
+        if (getMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareMethod = TSClass.getPropertySafe('compare');
+        if (compareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('compare', getMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkChildClassMethodOwnMethod(): boolean {
-    const TSClass = new ChildClass();
-    const ParentClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.childMethodCompare(ParentClass.get) as boolean;
+        if (ChildClass.isUndefined() || ChildClass.isNull()) {
+            return false;
+        }
+
+        if (UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = ChildClass.instantiate();
+        const ParentClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        if (ParentClass.isUndefined() || ParentClass.isNull()) {
+            return false;
+        }
+
+        const parentGetMethod = ParentClass.getPropertySafe('get');
+        if (parentGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const childMethodCompareMethod = TSClass.getPropertySafe('childMethodCompare');
+        if (childMethodCompareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('childMethodCompare', parentGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkCreateChildClassFromTsOwnMethod(): boolean {
-    const TSClass = createChildClassFromTs();
-    const ParentClass = new UserClass();
-     
-    return TSClass.childMethodCompare(ParentClass.get) as boolean;
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
+
+        if (createChildClassFromTs.isUndefined() || createChildClassFromTs.isNull()) {
+            return false;
+        }
+
+        if (UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = createChildClassFromTs.invoke();
+        const ParentClass = UserClass.instantiate();
+
+        if (TSClass.isUndefined() || TSClass.isNull()) {
+            return false;
+        }
+
+        if (ParentClass.isUndefined() || ParentClass.isNull()) {
+            return false;
+        }
+
+        const parentGetMethod = ParentClass.getPropertySafe('get');
+        if (parentGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const childMethodCompareMethod = TSClass.getPropertySafe('childMethodCompare');
+        if (childMethodCompareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('childMethodCompare', parentGetMethod);
+        
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }
 
-
 function checkInstanceChildClassOwnMethod(): boolean {
-    const TSClass = instanceChildClass;
-    const ParentClass = new UserClass();
+    try {
+        if (module.isUndefined() || module.isNull()) {
+            return false;
+        }
 
-    return TSClass.childMethodCompare(ParentClass.get) as boolean;
+        if (instanceChildClass.isUndefined() || instanceChildClass.isNull()) {
+            return false;
+        }
+
+        if (UserClass.isUndefined() || UserClass.isNull()) {
+            return false;
+        }
+
+        const TSClass = instanceChildClass;
+        const ParentClass = UserClass.instantiate();
+
+        if (ParentClass.isUndefined() || ParentClass.isNull()) {
+            return false;
+        }
+
+        const parentGetMethod = ParentClass.getPropertySafe('get');
+        if (parentGetMethod.isUndefined()) {
+            return false;
+        }
+
+        const childMethodCompareMethod = TSClass.getPropertySafe('childMethodCompare');
+        if (childMethodCompareMethod.isUndefined()) {
+            return false;
+        }
+
+        const compareResult = TSClass.invokeMethod('childMethodCompare', parentGetMethod);
+
+        if (compareResult.isBoolean()) {
+            return compareResult.toBoolean();
+        }
+
+        return false;
+
+    } catch (e) {
+        return false;
+    }
 }

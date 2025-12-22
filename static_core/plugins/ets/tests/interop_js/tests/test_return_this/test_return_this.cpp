@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 namespace ark::ets::interop::js::testing {
 

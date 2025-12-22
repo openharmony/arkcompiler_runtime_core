@@ -89,7 +89,7 @@
     {
         "file": "core/Exceptions.ets",
         "interfaces": [
-            "NoDataException",
+            "NoDataError",
             "ArgumentOutOfRangeError",
             "IllegalStateError",
             "UnsupportedOperationError",

@@ -14,12 +14,12 @@
  */
 
 #include "disassembler.h"
-#include "class_data_accessor.h"
-#include "field_data_accessor.h"
-#include "libpandafile/type_helper.h"
-#include "literal_data_accessor.h"
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/field_data_accessor.h"
+#include "libarkfile/type_helper.h"
+#include "libarkfile/literal_data_accessor.h"
 #include "mangling.h"
-#include "utils/logger.h"
+#include "libarkbase/utils/logger.h"
 
 #include <cstdint>
 #include <iomanip>
@@ -309,8 +309,10 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
         lineNumber += static_cast<size_t>(std::count(insSsStr.begin(), insSsStr.end(), '\n'));
 
         if (lineTable != nullptr) {
+            auto &table = method.IsStatic() ? methodStaticNameToId_ : methodInstanceNameToId_;
+            ASSERT(table.find(signature) != table.end());
             lineTable->emplace_back(
-                panda_file::LineTableEntry {static_cast<uint32_t>(method.ins[i].insDebug.BoundLeft()), lineNumber - 1});
+                panda_file::LineTableEntry {bytecodeOffset_.at({table.at(signature), i}), lineNumber - 1});
         }
 
         os << insSsStr;
@@ -322,9 +324,10 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
 inline bool Disassembler::IsSystemType(const std::string &typeName)
 {
     bool isArrayType = typeName.back() == ']';
+    bool isSyntheticType = typeName.front() == '{';
     bool isGlobal = typeName == "_GLOBAL";
 
-    return isArrayType || isGlobal;
+    return isArrayType || isGlobal || isSyntheticType;
 }
 
 void Disassembler::GetRecord(pandasm::Record &record, const panda_file::File::EntityId &recordId)
@@ -356,12 +359,6 @@ void Disassembler::AddMethodToTables(const panda_file::File::EntityId &methodId)
         return;
     }
 
-    if (isStatic) {
-        methodStaticNameToId_.emplace(signature, methodId);
-    } else {
-        methodInstanceNameToId_.emplace(signature, methodId);
-    }
-
     prog_.functionSynonyms[newMethod.name].push_back(signature);
     functionTable.emplace(signature, std::move(newMethod));
 }
@@ -384,6 +381,10 @@ void Disassembler::GetMethod(pandasm::Function *method, const panda_file::File::
 
     GetParams(method, methodAccessor.GetProtoId());
     GetMetaData(method, methodId);
+
+    const auto signature = pandasm::GetFunctionSignatureFromName(method->name, method->params);
+    method->IsStatic() ? methodStaticNameToId_.emplace(signature, methodId)
+                       : methodInstanceNameToId_.emplace(signature, methodId);
 
     if (!method->HasImplementation()) {
         return;
@@ -2023,8 +2024,7 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
         }
 
         auto paIns = BytecodeInstructionToPandasmInstruction(bcIns, methodId);
-        paIns.insDebug.SetBoundLeft(bcIns.GetAddress() -
-                                    from);  // It is used to produce a line table during method serialization
+        bytecodeOffset_.emplace(std::pair {methodId, method->ins.size()}, bcIns.GetAddress() - from);
         if (paIns.IsJump()) {
             TranslateImmToLabel(&paIns, &labelTable, insArr, bcIns, bcInsLast, codeId);
         }

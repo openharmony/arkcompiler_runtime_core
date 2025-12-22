@@ -18,8 +18,8 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
-#include "libpandabase/mem/mem.h"
-#include "libpandafile/bytecode_instruction.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkfile/bytecode_instruction.h"
 #include "runtime/interpreter/runtime_interface.h"
 
 #include <iomanip>
@@ -76,10 +76,30 @@ typename StackWalker::FrameVariant StackWalker::GetTopFrameFromFp(void *ptr, boo
     return reinterpret_cast<Frame *>(ptr);
 }
 
+Method *StackWalker::GetInlinedMethod(CFrameType &cframe)
+{
+    ASSERT(IsInlined());
+    auto methodVariant = codeInfo_.GetMethod(stackmap_, inlineDepth_);
+    if (std::holds_alternative<uint32_t>(methodVariant)) {
+        auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+        auto inlineInfo = codeInfo_.GetInlineInfo(stackmap_, inlineDepth_);
+        auto entityId = panda_file::File::EntityId(std::get<uint32_t>(methodVariant));
+        auto pandaFileIndex = inlineInfo.GetFileIndex();
+        if (pandaFileIndex != panda_file::File::INVALID_FILE_INDEX) {
+            pandaFileIndex -= panda_file::File::FILE_INDEX_BASE_OFFSET;
+            auto pf = classLinker->GetAotManager()->GetPandaFileBySnapshotIndex(pandaFileIndex);
+            return classLinker->GetMethod(*pf, entityId, cframe.GetMethod()->GetClass()->GetLoadContext());
+        }
+        return classLinker->GetMethod(*cframe.GetMethod(), entityId);
+    }
+    return reinterpret_cast<Method *>(std::get<void *>(methodVariant));
+}
+
 Method *StackWalker::GetMethod()
 {
     ASSERT(HasFrame());
     if (!IsCFrame()) {
+        ASSERT(GetIFrame() != nullptr);
         return GetIFrame()->GetMethod();
     }
     auto &cframe = GetCFrame();
@@ -89,12 +109,7 @@ Method *StackWalker::GetMethod()
             return nullptr;
         }
         if (IsInlined()) {
-            auto methodVariant = codeInfo_.GetMethod(stackmap_, inlineDepth_);
-            if (std::holds_alternative<uint32_t>(methodVariant)) {
-                return Runtime::GetCurrent()->GetClassLinker()->GetMethod(
-                    *cframe.GetMethod(), panda_file::File::EntityId(std::get<uint32_t>(methodVariant)));
-            }
-            return reinterpret_cast<Method *>(std::get<void *>(methodVariant));
+            return GetInlinedMethod(cframe);
         }
     }
     return cframe.GetMethod();

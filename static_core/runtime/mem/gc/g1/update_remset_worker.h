@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_MEM_GC_G1_UPDATE_REMSET_WORKER_H
 #define PANDA_RUNTIME_MEM_GC_G1_UPDATE_REMSET_WORKER_H
 
-#include "libpandabase/os/mutex.h"
+#include "libarkbase/os/mutex.h"
 #include "runtime/mem/gc/card_table.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/gc/g1/hot_cards.h"
@@ -78,7 +78,8 @@ public:
      * @brief Process all cards in the GC thread.
      * Can be called only if UpdateRemsetWorker is suspended
      */
-    void GCProcessCards();
+    template <typename Handler>
+    void GCProcessCards(const Handler &handler);
 
     using RegionVector = PandaVector<Region *>;
 
@@ -116,10 +117,12 @@ protected:
     size_t ProcessAllCards() REQUIRES(updateRemsetLock_);
 
     /// @brief Try to process hot cards in one thread
-    size_t ProcessHotCards() REQUIRES(updateRemsetLock_);
+    template <typename Handler>
+    size_t ProcessHotCards(const Handler &handler) REQUIRES(updateRemsetLock_);
 
     /// @brief Try to process cards from barriers in one thread
-    size_t ProcessCommonCards() REQUIRES(updateRemsetLock_);
+    template <typename Handler>
+    size_t ProcessCommonCards(const Handler &handler) REQUIRES(updateRemsetLock_);
 
     /**
      * @brief Notify UpdateRemsetWorker to continue process cards

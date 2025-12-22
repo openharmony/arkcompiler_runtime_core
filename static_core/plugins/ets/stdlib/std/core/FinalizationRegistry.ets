@@ -15,6 +15,21 @@
 
 package std.core;
 
+class FinRegNode<T> extends WeakRef<Object> {
+    constructor (obj: Object, arg: T, token: WeakRef<Object>|undefined, finReg: FinalizationRegistry<T>) {
+        super(obj);
+        this.token = token;
+        this.arg = arg;
+        this.finReg = finReg;
+    }
+    public token: WeakRef<Object> | undefined;
+    public arg: T;
+    public finReg: FinalizationRegistry<T>;
+    public prev: FinRegNode<T> | undefined = undefined;
+    public next: FinRegNode<T> | undefined = undefined;
+    public bucketIdx: int = -1;
+}
+
 /**
   * FinalizationRegistry provides a way to execute the provided callback when a
   * registered object gets garbage collected.
@@ -34,98 +49,6 @@ package std.core;
   * - The callback may be called in any coroutine.
   */
 export final class FinalizationRegistry<T> {
-    private callback: (value: T) => void;
-    // Can be changed to local trimplet class when it will be implemented
-    private obj_token_refs: FixedArray<Object | undefined> = [];
-    private callback_arguments: FixedArray<T | undefined> = [];
-    // Contains chains of used and free trimplet indexes, [0] serves as uselist head
-    private idxarr: FixedArray<int> = [];
-    private freeidx: int = -1;
-    private static finalizationRegistryLock = new Mutex();
-    private mutex = new Mutex();
-    private workerDomain: int;
-
-    private static readonly FIRST_SIZE = 32;
-
-    private static execCleanup<T>(array: FixedArray<(WeakRef<FinalizationRegistry<T>> | undefined)>, workerDomain: int): void {
-        FinalizationRegistry.finalizationRegistryLock.lock();
-        try {
-            for (let i = 0; i < array.length; i++) {
-                if (array[i]?.deref() !== undefined) {
-                    if (array[i]!.deref()!.workerDomain == workerDomain) {
-                        try {
-                            FinalizationRegistry.finalizationRegistryLock.unlock();
-                            array[i]!.deref()!.cleanup();
-                        } finally {
-                            FinalizationRegistry.finalizationRegistryLock.lock();
-                        }
-                    }
-                } else {
-                    array[i] = undefined;
-                }
-            }
-        } finally {
-            FinalizationRegistry.finalizationRegistryLock.unlock();
-            FinalizationRegistry.finishCleanup();
-        }
-    }
-
-    private init_arrays(size: int): void {
-        arktest.assertLT(1, size);
-        if (size <= 1) {
-            throw new AssertionError("Size is " + size + " it should be > 1")
-        }
-        this.idxarr = new int[size];
-        this.idxarr[0] = -1; // first elem reserved for useidx head
-        this.enlarge_freeidx(1);
-
-        this.obj_token_refs = new Object[2 * size];
-        this.callback_arguments = new (T | undefined)[size];
-    }
-
-    private enlarge_arrays(newsize: int): void {
-        let old_idxarr = this.idxarr;
-        this.idxarr = new int[newsize];
-        for (let i = 0; i < old_idxarr.length; ++i) {
-            this.idxarr[i] = old_idxarr[i];
-        }
-        this.enlarge_freeidx(old_idxarr.length);
-
-        let old_obj_token_refs = this.obj_token_refs;
-        this.obj_token_refs = new (Object | undefined)[newsize * 2];
-        for (let i = 0; i < old_obj_token_refs.length; ++i) {
-            this.obj_token_refs[i] = old_obj_token_refs[i];
-        }
-        let old_callback_arguments = this.callback_arguments;
-        this.callback_arguments = new (T | undefined)[newsize];
-        for (let i = 0; i < old_callback_arguments.length; ++i) {
-            this.callback_arguments[i] = old_callback_arguments[i];
-        }
-    }
-
-    private enlarge_freeidx(oldsize: int): void {
-        // push new idxarr elements to freelist
-        let last_free = this.idxarr.length - 1;
-        this.idxarr[last_free] = this.freeidx;
-        for (let i = oldsize; i < last_free; i++) {
-            this.idxarr[i] = i + 1;
-        }
-        this.freeidx = oldsize;
-    }
-
-    /**
-     * @returns size of the FinalizationRegistry
-     */
-    public getSize(): int {
-        let count: int = 0;
-        this.mutex.lockGuard(() => {
-            for (let i = this.idxarr[0]; i != -1; i = this.idxarr[i]) {
-                ++count;
-            }
-        });
-        return count;
-    }
-
     /**
      * Create FinalizationRegistry object with the specific callback function.
      * One can register an object and after reclamation of the object
@@ -135,11 +58,21 @@ export final class FinalizationRegistry<T> {
      * after registered object reclamation.
      */
     public constructor(callback: (value: T) => void) {
-        this.init_arrays(FinalizationRegistry.FIRST_SIZE);
         this.callback = callback;
-        FinalizationRegistry.finalizationRegistryLock.lockGuard(() => {
-            this.workerDomain = FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
+        this.workerId = FinalizationRegistry.getWorkerId();
+        this.workerDomain = FinalizationRegistry.getWorkerDomain();
+        this.buckets = new (FinRegNode<T> | undefined)[FinalizationRegistry.INITIAL_BUCKETS_COUNT];
+    }
+
+    /**
+     * @returns size of the FinalizationRegistry
+     */
+    public getSize(): int {
+        let count: int = 0;
+        this.mutex.lockGuard(() => {
+            count = this.mapSize + this.listSize;
         });
+        return count;
     }
 
     /**
@@ -156,16 +89,46 @@ export final class FinalizationRegistry<T> {
      * @param token an object used to remove the entry from the registry
      */
     public register(object: Object, callbackArg: T, token?: Object): void {
-        let refObject = new WeakRef<Object>(object);
-        let refToken: WeakRef<Object> | undefined;
         if (token != undefined) {
-            refToken = new WeakRef<Object>(token);
+            // Add unregistrable node into map
+            const refToken = new WeakRef<Object>(token!);
+            const objectHash = Runtime.getHashCode(token!);
+            let newNode = new FinRegNode<T>(object, callbackArg, refToken, this);
+
+            this.mutex.lock();
+            try {
+                const bucketIdx = this.getBucketIndex(objectHash);
+                newNode.bucketIdx = bucketIdx;
+                if (this.buckets[bucketIdx] != undefined) {
+                    let head = this.buckets[bucketIdx]!;
+                    head.prev = newNode;
+                    newNode.next = head;
+                }
+                this.buckets[bucketIdx] = newNode;
+                this.mapSize++;
+
+                // Rehash if elements count > 0.75 of map size
+                if (this.mapSize * 4 > this.buckets.length * 3) {
+                    this.rehash(this.buckets.length * 4)
+                }
+            } finally {
+                this.mutex.unlock();
+            }
+        } else {
+            // Add non-unregistrable node into list
+            let newNode = new FinRegNode<T>(object, callbackArg, undefined, this);
+            this.mutex.lock();
+            try {
+                newNode.next = this.nonUnregistrableList;
+                if (this.nonUnregistrableList !== undefined) {
+                    this.nonUnregistrableList!.prev = newNode;
+                }
+                this.nonUnregistrableList = newNode;
+                this.listSize++;
+            } finally {
+                this.mutex.unlock();
+            }
         }
-        this.mutex.lock();
-        let free_index = this.allocTrimplet();
-        // NOTE: GC and thus cleanup function can be triggered here after JIT/AOT optimizations
-        this.setTrimplet(free_index, refObject, callbackArg, refToken);
-        this.mutex.unlock();
     }
 
     /**
@@ -174,43 +137,17 @@ export final class FinalizationRegistry<T> {
      * @param token object specified which entries should be removed
      */
     public unregister(token: Object): void {
-        this.mutex.lockGuard(() => {
-            let prev = 0;
-            for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
-                let refToken = this.getToken(i);
-                if (refToken != undefined && refToken.deref() == token) {
-                    this.freeNextTrimplet(prev);
-                    i = prev; // iterator rollback
-                }
-            }
-        });
-    }
-
-    private cleanup(): void {
         this.mutex.lock();
         try {
-            let prev = 0;
-            for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
-                let object = this.getObject(i);
-                if (object != undefined && object.deref() == undefined) {
-                    // Remove from trimplet first to prevent
-                    // calling it again in separate thread
-                    let arg: T | undefined = this.getCallbackArg(i);
-                    this.freeNextTrimplet(prev);
-                    i = prev; // iterator rollback
-                    try {
-                        this.mutex.unlock();
-                        this.callback(arg as T);
-                    } catch (e) {
-                        if (e instanceof Error) {
-                            console.log("Error: " + e.toString());
-                            if (e.stack) {
-                                console.log(e.stack);
-                            }
-                        }
-                    } finally {
-                        this.mutex.lock();
+            const bucketIdx = this.getBucketIndex(Runtime.getHashCode(token));
+            if (this.buckets[bucketIdx] != undefined) {
+                let currNode = this.buckets[bucketIdx];
+                while (currNode != undefined) {
+                    const nextNode = currNode.next;
+                    if (token == currNode.token!.deref()) {
+                        this.deleteSingleNodeFromMap(currNode, bucketIdx);
                     }
+                    currNode = nextNode;
                 }
             }
         } finally {
@@ -218,54 +155,103 @@ export final class FinalizationRegistry<T> {
         }
     }
 
-    private allocTrimplet(): int {
-        if (this.freeidx == -1) {
-            // The value selected relative to the internal issue
-            const mult: int = this.idxarr.length < 1024 ? 32 : 2;
-            this.enlarge_arrays(this.idxarr.length * mult);
+    private rehash(newSizeArg: int) {
+        const oldMap = this.buckets;
+        const newSize = newSizeArg;
+        this.buckets = new (FinRegNode<T> | undefined)[newSize];
+        this.mapSize = 0;
+        for (let oldMapIdx = 0; oldMapIdx < oldMap.length; oldMapIdx++) {
+            let nextNode: (FinRegNode<T> | undefined) = undefined;
+            for (let currNode = oldMap[oldMapIdx]; currNode != undefined; currNode = nextNode) {
+                nextNode = currNode!.next;
+                if (currNode!.token!.deref() != undefined) {
+                    const bucketIdx = this.getBucketIndex(Runtime.getHashCode(currNode!.token!.deref()!));
+                    if (this.buckets[bucketIdx] == undefined) {
+                        this.buckets[bucketIdx] = currNode;
+                        currNode!.prev = undefined;
+                        currNode!.next = undefined;
+                    } else {
+                        let head = this.buckets[bucketIdx]!;
+                        head.prev = currNode;
+                        currNode!.prev = undefined;
+                        currNode!.next = head;
+                        this.buckets[bucketIdx] = currNode;
+                    }
+                    this.mapSize++;
+                } else {
+                    // Token was deleted, so put node into non-unregistrable list
+                    currNode!.prev = undefined;
+                    currNode!.next = this.nonUnregistrableList;
+                    this.nonUnregistrableList = currNode;
+                    this.listSize++;
+                }
+            }
         }
-        // pop elem from freelist
-        let new_idx = this.freeidx;
-        this.freeidx = this.idxarr[new_idx];
-
-        // push elem to uselist
-        this.idxarr[new_idx] = this.idxarr[0];
-        this.idxarr[0] = new_idx;
-        return new_idx;
     }
 
-    private freeNextTrimplet(index: int): void {
-        // remove next elem from uselist
-        let freed_idx = this.idxarr[index];
-        this.idxarr[index] = this.idxarr[freed_idx];
-
-        // push freed elem to freelist
-        this.idxarr[freed_idx] = this.freeidx;
-        this.freeidx = freed_idx;
-
-        // clean data
-        this.setTrimplet(freed_idx, undefined, undefined, undefined);
+    private getBucketIndex(x: int): int {
+        const t = x >> 31;
+        return ((x ^ t) - t) & (this.buckets.length - 1);
     }
 
-    private getObject(index: int): WeakRef<Object> | undefined {
-        return this.obj_token_refs[2 * index] as (WeakRef<Object> | undefined);
+    private deleteSingleNodeFromMap(nodeToDelete: FinRegNode<T>, bucketIdx: int) {
+        let prev = nodeToDelete.prev;
+        let next = nodeToDelete.next;
+
+        if (prev == undefined && next == undefined) {
+            this.buckets[bucketIdx] = undefined;
+        } else if (prev == undefined) {
+            this.buckets[bucketIdx] = next;
+            next!.prev = undefined;
+        } else if (next == undefined) {
+            prev!.next = undefined;
+        } else {
+            prev!.next = next;
+            next!.prev = prev;
+        }
+
+        this.mapSize--;
     }
 
-    private getCallbackArg(index: int): T | undefined {
-        return this.callback_arguments[index];
+    private static execCleanup(head: FinRegNode<T> | undefined): void {
+        while (head != undefined) {
+            let finReg = head.finReg;
+            let arg = head.arg;
+            try {
+                finReg.callback(arg);
+            } catch (e) {
+                console.log(`Error: ` + e.toString());
+                if (e instanceof Error) {
+                    if (e.stack) {
+                        console.log(e.stack);
+                    }
+                }
+            }
+            head = head.next;
+        }
+        FinalizationRegistry.finishCleanup();
     }
 
-    private getToken(index: int): WeakRef<Object> | undefined {
-        return this.obj_token_refs[2 * index + 1] as (WeakRef<Object> | undefined);
-    }
-
-    private setTrimplet(index: int, obj: WeakRef<Object> | undefined, cbArg: T | undefined, token: WeakRef<Object> | undefined): void {
-        this.obj_token_refs[2 * index] = obj;
-        this.obj_token_refs[2 * index + 1] = token;
-        this.callback_arguments[index] = cbArg;
-    }
-
-    private static native registerInstance(object: Object): int;
+    private static native getWorkerId(): int;
+    private static native getWorkerDomain(): int;
     private static native finishCleanup(): void;
 
+    private callback: (value: T) => void;
+    private mutex = new Mutex();
+    private workerId: int;
+    private workerDomain: int;
+
+    // Map for unregistrable objects
+    private buckets: FixedArray<FinRegNode<T> | undefined> = [];
+    private mapSize: int = 0;
+
+    // List for non-unregistrable objects
+    private nonUnregistrableList: FinRegNode<T> | undefined = undefined;
+    private listSize: int = 0;
+
+    private nextFinReg: FinalizationRegistry<T> | undefined = undefined;
+    private finalizationQueueHead: FinRegNode<T> | undefined = undefined;
+    private finalizationQueueTail: FinRegNode<T> | undefined = undefined;
+
+    private static readonly INITIAL_BUCKETS_COUNT: int = 16;
 }

@@ -60,9 +60,9 @@ async function mustCallCheckAll() {
                 });
                 mustChecks.length = 0;
                 resolve(undefined);
-            } catch (e: Error) {
+            } catch (e) {
                 mustChecks.length = 0;
-                reject(e);
+                reject(e)
             }
         }, 2000);
     })
@@ -253,7 +253,7 @@ function testWritableDefaultEncodingBehavior() {
         testWritable.write('bar');
         testWritable.end();
     }
-    let exceptionCheck = (e: Error | Exception): boolean => {
+    let exceptionCheck = (e: Error): boolean => {
         return ((e as BusinessError).message == "Parameter error. The type of abc must be string.")
     }
     arktest.expectThrow(test, exceptionCheck);

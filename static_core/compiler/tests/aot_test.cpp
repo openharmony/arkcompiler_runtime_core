@@ -18,11 +18,11 @@
 #include "aot/aot_builder/aot_builder.h"
 #include "aot/compiled_method.h"
 #include "compiler/code_info/code_info_builder.h"
-#include "os/exec.h"
+#include "libarkbase/os/exec.h"
 #include "assembly-parser.h"
 #include <elf.h>
-#include "utils/string_helpers.h"
-#include "events/events.h"
+#include "libarkbase/utils/string_helpers.h"
+#include "libarkbase/events/events.h"
 #include "mem/gc/gc_types.h"
 #include "runtime/include/file_manager.h"
 #include "zip_archive.h"
@@ -315,6 +315,49 @@ public:
         bootContext->RemoveClass(klass_);
     };
 
+    void CheckLinkAotCodeForBootAotClassInvalid(AotManager *aotManager, const char *tmpfilePn)
+    {
+        auto aotFile = aotManager->GetFile(tmpfilePn);
+        ASSERT_TRUE(aotFile);
+        ASSERT_TRUE(strcmp(cmdline_, aotFile->GetCommandLine()) == 0U);
+        ASSERT_TRUE(strcmp(tmpfilePn, aotFile->GetFileName()) == 0U);
+        ASSERT_EQ(aotFile->GetFilesCount(), 1U);
+
+        const AotPandaFile *aotPfile = aotManager->FindPandaFile(tmpFilePf_);
+        ASSERT_NE(aotPfile, nullptr);
+
+        Runtime *runtime = Runtime::GetCurrent();
+        ClassLinker *classLinker = runtime->GetClassLinker();
+        panda_file::SourceLang lang = plugins::RuntimeTypeToLang(runtime->GetRuntimeType());
+        ClassLinkerContext *bootContext = classLinker->GetExtension(lang)->GetBootContext();
+
+        auto thread = MTManagedThread::GetCurrent();
+        if (thread != nullptr) {
+            thread->ManagedCodeBegin();
+        }
+        auto etx = runtime->GetClassLinker()->GetExtension(runtime->GetLanguageContext(runtime->GetRuntimeType()));
+        Class *klass = etx->CreateClass(reinterpret_cast<const uint8_t *>("Bar"), 0, 0,
+                                        AlignUp(sizeof(Class), OBJECT_POINTER_SIZE));
+        if (thread != nullptr) {
+            thread->ManagedCodeEnd();
+        }
+
+        klass->SetFileId(panda_file::File::EntityId(14U));
+
+        uint32_t methodId = 44;
+        Method method(klass, nullptr, File::EntityId(methodId), File::EntityId(), 0U, 1U, nullptr);
+        klass->SetMethods(Span<Method>(&method, 1U), 1U, 0U);
+
+        bootContext->InsertClass(klass);
+        classLinker->TryReLinkAotCodeForBoot(nullptr, aotPfile, lang);
+
+        compiler::AotClass aotClass = aotPfile->GetClass(klass->GetFileId().GetOffset());
+        ASSERT_FALSE(aotClass.IsValid());
+        ASSERT_EQ(method.GetCompiledEntryPoint(), nullptr);
+
+        bootContext->RemoveClass(klass);
+    };
+
 private:
     const char *tmpFilePf_ = "test.pf";
     const char *cmdline_ = "cmdline";
@@ -391,6 +434,27 @@ TEST_F(AotTestBuildAndCheck, LinkAotCodeForBoot)
     }
     auto aotManager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
     CheckLinkAotCodeForBoot(aotManager, tmpfilePn);
+}
+
+TEST_F(AotTestBuildAndCheck, LinkAotCodeForBootAotClassInvalid)
+{
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        return;
+    }
+    uint32_t tid = os::thread::GetCurrentThreadId();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::string tmpfile = helpers::string::Format("test.an", tid);
+    const char *tmpfilePn = tmpfile.c_str();
+
+    auto runtime = Runtime::GetCurrent();
+    auto gcType = Runtime::GetGCType(runtime->GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
+    BuildAot(tmpfilePn, gcType);
+    {
+        auto res = FileManager::LoadAnFile(tmpfilePn);
+        ASSERT_TRUE(res) << "Fail to load an file";
+    }
+    auto aotManager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
+    CheckLinkAotCodeForBootAotClassInvalid(aotManager, tmpfilePn);
 }
 
 static void PaocSpecifyMethodsEmit(const TmpFile &pandaFname)

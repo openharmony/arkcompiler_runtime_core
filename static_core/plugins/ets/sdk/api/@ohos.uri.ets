@@ -520,8 +520,8 @@ export namespace uri {
 
     const digitAggregate = "0123456789";
     const alphasAggregate = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const schemeAggregate = "+-.| _-~!$&=,;'(){}*";
-    const uricAggregate = "/?:@[]%\"";
+    const schemeAggregate = "+-.| _-~!$&=,;'(){}*"
+    const uricAggregate = "/?:@[]%\""
     const pathAggregate = "/:@%";
     const userInfoAggregate = ":%";
     const portAggregate = ".:@-;&=+$,-_!~*'()";
@@ -884,7 +884,9 @@ export namespace uri {
       if (portStr == '') {
         return false;
       }
-
+      if(pos > 0 && this.data.substring(pos-1, pos) == ':') {
+        return false;
+      }
       let port = new Number(portStr);
       if (isNaN(port)) {
         this.data = this.data.substring(0, pos);

@@ -61,11 +61,11 @@ cases:
           }
 
     - defs: |-
-        function catch(e: Exception) throws { // catch is a soft keyword
+        function catch(e: Error) throws { // catch is a soft keyword
             throw e;
         }
       use: |-
-        let e: Exception = new Exception();
+        let e: Error = new Error();
         try {
             try {
                   if (t1 == t2) throw new Fx();

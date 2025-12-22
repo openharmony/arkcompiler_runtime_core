@@ -15,6 +15,8 @@ group("fuzztest") {
   testonly = true
 
   deps = [
+    "aniarrayget_fuzzer:fuzztest",
+    "aniarrayset_fuzzer:fuzztest",
     "aniclasscallstaticmethodbynameboolean_fuzzer:fuzztest",
     "aniclasscallstaticmethodbynamebooleana_fuzzer:fuzztest",
     "aniclasscallstaticmethodbynamebyte_fuzzer:fuzztest",

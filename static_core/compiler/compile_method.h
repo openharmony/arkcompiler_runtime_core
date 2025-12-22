@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,10 @@
 #define COMPILER_COMPILE_METHOD_H
 
 #include "compiler_options.h"
-#include "mem/arena_allocator.h"
-#include "mem/code_allocator.h"
+#include "libarkbase/mem/arena_allocator.h"
+#include "libarkbase/mem/code_allocator.h"
 #include "include/method.h"
-#include "utils/arch.h"
+#include "libarkbase/utils/arch.h"
 #include "compiler_task_runner.h"
 
 namespace ark::compiler {

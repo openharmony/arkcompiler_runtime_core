@@ -15,7 +15,7 @@
 
 #include "runtime/mem/gc/g1/update_remset_task_queue.h"
 
-#include "libpandabase/taskmanager/task_scheduler.h"
+#include "libarkbase/taskmanager/task_scheduler.h"
 #include "runtime/include/language_config.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 

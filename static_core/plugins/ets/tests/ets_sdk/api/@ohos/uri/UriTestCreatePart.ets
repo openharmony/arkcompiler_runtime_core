@@ -30,7 +30,7 @@ function testUriCreateFromParts003() {
   arktest.assertEQ(route.toString(), "foo:");
   try {
     uri.URI.createFromParts("", "", "");
-  } catch (err: BusinessError) {
+  } catch (err) {
     arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.");
     arktest.assertEQ(err.code, 10200002);
     arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Scheme the first character must be a letter.");
@@ -147,7 +147,7 @@ function testspecialPort004() {
 function testUriConstruction032() {
   try {
     let that = new uri.URI('ht/tp://username:pas sword@host:8080/di[rectory/file?foo=1&bar=2');
-  } catch (err: BusinessError) {
+  } catch (err) {
     arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The SpecialPath does not conform to the rule.");
     arktest.assertEQ(err.code, 10200002);
     arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The SpecialPath does not conform to the rule.");
@@ -157,7 +157,7 @@ function testUriConstruction032() {
 function testUriConstruction033() {
   try {
     let that = new uri.URI('http://username:password@[::]:8080/directory/file?Query#abc^de');
-  } catch (err: BusinessError) {
+  } catch (err) {
     arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Fragment does not conform to the rule.");
     arktest.assertEQ(err.code, 10200002);
     arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Fragment does not conform to the rule.");
@@ -168,7 +168,7 @@ function testUriConstruction034() {
   try {
     let route = new uri.URI('content://com.test.uri/files/a^a');
     let segments = route.getSegment();
-  } catch (err: BusinessError) {
+  } catch (err) {
     arktest.assertEQ(err.toString(), "BusinessError: Syntax Error. Invalid Uri string: The Path does not conform to the rule.");
     arktest.assertEQ(err.code, 10200002);
     arktest.assertEQ(err.message, "Syntax Error. Invalid Uri string: The Path does not conform to the rule.");

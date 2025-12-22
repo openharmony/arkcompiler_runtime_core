@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,12 @@
 #ifndef PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H_
 #define PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H_
 
-#include "macros.h"
+#include "libarkbase/macros.h"
 
 #include "verification/util/hash.h"
 #include "verification/util/optional_ref.h"
 
-#include "libpandafile/file.h"
+#include "libarkfile/file.h"
 
 #include "runtime/include/mem/panda_containers.h"
 

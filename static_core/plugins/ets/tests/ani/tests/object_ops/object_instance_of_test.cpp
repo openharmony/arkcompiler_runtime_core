@@ -145,11 +145,11 @@ TEST_F(ObjectInstanceOfTest, object_instance_of_array)
 {
     ani_object objectArr;
     ani_class classA;
-    GetMethodData(&objectArr, &classA, "object_instance_of_test.A", "new_A_array", ":C{escompat.Array}");
+    GetMethodData(&objectArr, &classA, "object_instance_of_test.A", "new_A_array", ":C{std.core.Array}");
 
     ani_boolean res;
     ani_class arrayCls;
-    ASSERT_EQ(env_->FindClass("escompat.Array", &arrayCls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("std.core.Array", &arrayCls), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(objectArr, arrayCls, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 }

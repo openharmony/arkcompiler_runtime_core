@@ -22,8 +22,8 @@
 #include "runtime_helpers.h"
 #include "include/runtime.h"
 #include "include/runtime_options.h"
-#include "libpandabase/utils/logger.h"
-#include "libpandabase/test_utilities.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/test_utilities.h"
 
 namespace ark::test {
 class BackTraceTest : public testing::Test {

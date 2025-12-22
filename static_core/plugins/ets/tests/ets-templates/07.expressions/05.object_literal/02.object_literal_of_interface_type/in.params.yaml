@@ -91,8 +91,8 @@ cases:
           arktest.assertTrue( arr[1] instanceof A && arr[1].name == null )
 
     - decl: |-
-          interface A {
-              name: string|undefined
+          interface A {  // 10.4.2 : Optional property short form identifier '?' ':' T
+              name?: string
           }
           interface B extends A {
               age: number
@@ -102,16 +102,23 @@ cases:
           arktest.assertTrue( b instanceof B && b.age == 42 && b.name == "John" )
           let a: A = b
           arktest.assertTrue( a instanceof A && a.name == "John" )
-          let c: B = {}
+          let c: B = {age: 0}
           arktest.assertTrue( c instanceof B && c.age == 0 && c.name == undefined )
 
     - decl: |-
-          interface A {
-              age: number
-          }
+        interface A {  // 10.4.2 : Explicit form identifier ':' T | undefined
+            name: string | undefined
+        }
+        interface B extends A {
+            age: number
+        }
       use: |-
-          let a: A = {}
-          arktest.assertTrue( a instanceof A && a.age == 0 )
+        let b: B = { name: "John", age: 42 }
+        arktest.assertTrue( b instanceof B && b.age == 42 && b.name == "John" )
+        let a: A = b
+        arktest.assertTrue( a instanceof A && a.name == "John" )
+        let c: B = {age: 0}
+        arktest.assertTrue( c instanceof B && c.age == 0 && c.name == undefined )
 
     - decl: |-
           interface A {}
@@ -127,7 +134,7 @@ cases:
               age: number
           }
       use: |-
-          let v: Object[] = [ {} as A, {} as B, {} ]
+          let v: Object[] = [ {age: 0} as A, {age: 0} as B, {} ]
           arktest.assertTrue( v[0] instanceof A && (v[0] as A).age == 0 )
           arktest.assertTrue( v[1] instanceof B && (v[1] as B).age == 0 )
           arktest.assertTrue( v[2] instanceof Object )
@@ -177,3 +184,181 @@ cases:
           // expressions in field values
           let a: A = { first_name: fn, last_name: ln(), full_name: fn + " " + ln() }
           arktest.assertTrue(a.full_name == "John Smith")
+
+    - decl: |-
+          interface A {
+              age: number
+              name?: string
+          }
+      use: |-
+          let a: A = { age: 42 }
+          arktest.assertTrue(a instanceof A)
+          arktest.assertEQ(a.age, 42)
+          arktest.assertEQ(a.name, undefined)
+
+    - decl: |-
+        type FR = (input: string) => string
+        interface A {
+            name: string | null
+            func: FR
+        }
+      use: |-
+        let a: A = { name: 'John', func: (input: string) => { return input + input } }
+        arktest.assertEQ('JohnJohn', a.func('John'))
+
+    # interface with declared method
+    - decl: |-
+        interface I {
+            c1: int;
+            c2: string;
+            foo(f: number): string|number
+        }
+      use: |-
+        let c: I = {
+            c1: 2,
+            c2: 'c2',
+            foo(f: number): string|number {
+                return f - 1
+            }
+        }
+        arktest.assertEQ(c.c1, 2)
+        arktest.assertEQ(c.c2, 'c2')
+        arktest.assertEQ(c.foo(1), 0)
+
+    # interface with implemented method
+    - decl: |-
+        interface I {
+            c1: int;
+            c2: string;
+            foo(f: number): string|number {
+                return f - 1
+            }
+        }
+      use: |-
+        let c: I = {
+            c1: 2,
+            c2: 'c2'
+        }
+        arktest.assertEQ(c.c1, 2)
+        arktest.assertEQ(c.c2, 'c2')
+        arktest.assertEQ(c.foo(1), 0)
+    # overriding method in object literal
+    - decl: |-
+        interface I {
+            c1: int;
+            c2: string;
+            foo(f: number): string|number {
+                return f + 1
+            }
+        }
+      use: |-
+        let c: I = {
+            c1: 2,
+            c2: 'c2',
+            foo(f: number): string|number {
+                return f - 1
+            }
+        }
+        arktest.assertEQ(c.c1, 2)
+        arktest.assertEQ(c.c2, 'c2')
+        arktest.assertEQ(c.foo(1), 0)
+
+    # interface with declared method
+    - decl: |-
+        class A {
+            a: string = 'a'
+            foo(b: B): A {
+                return b as A;
+            }
+        }
+
+        class B extends A {
+            b: string = 'b'
+            foo(a: A): B {
+                return new B()
+            }
+        }
+        interface I {
+            c1: A;
+            c2: B;
+            foo(f: B): string|number {
+                return f.a
+            }
+        }
+      use: |-
+        let c: I = {
+            c1: { a: 'aa'},
+            c2: { a: 'aaa', b: 'bb'}
+        }
+        arktest.assertEQ(c.c1.a, 'aa')
+        arktest.assertEQ(c.c2.a, 'aaa')
+        arktest.assertEQ(c.c2.b, 'bb')
+        arktest.assertEQ(c.foo(c.c2), 'aaa')
+
+    # overriding declared method in object literal
+    - decl: |-
+        class A {
+            a: string = 'a'
+            foo(b: B): A {
+                return b as A;
+            }
+        }
+
+        class B extends A {
+            b: string = 'b'
+            foo(a: A): B {
+                return new B()
+            }
+        }
+        interface I {
+            c1: A;
+            c2: B;
+            foo(f: B): string|number
+        }
+      use: |-
+        let c: I = {
+            c1: { a: 'aa'},
+            c2: { a: 'aaa', b: 'bb'},
+            foo(f: A): string {
+                return f.a
+            }
+        }
+        arktest.assertEQ(c.c1.a, 'aa')
+        arktest.assertEQ(c.c2.a, 'aaa')
+        arktest.assertEQ(c.c2.b, 'bb')
+        arktest.assertEQ(c.foo(c.c2), 'aaa')
+
+    # overriding method in object literal
+    - decl: |-
+        class A {
+            a: string = 'a'
+            foo(b: B): A {
+                return b as A;
+            }
+        }
+
+        class B extends A {
+            b: string = 'b'
+            foo(a: A): B {
+                return new B()
+            }
+        }
+        interface I {
+            c1: A;
+            c2: B;
+            foo(f: B): string|number {
+                return f.a
+            }
+        }
+      use: |-
+        let c: I = {
+            c1: { a: 'aa'},
+            c2: { a: 'aaa', b: 'bb'},
+            foo(f: A): string {
+                return f.a
+            }
+        }
+        arktest.assertEQ(c.c1.a, 'aa')
+        arktest.assertEQ(c.c2.a, 'aaa')
+        arktest.assertEQ(c.c2.b, 'bb')
+        arktest.assertEQ(c.foo(c.c2), 'aaa')

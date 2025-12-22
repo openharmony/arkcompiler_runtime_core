@@ -13,16 +13,28 @@
  * limitations under the License.
  */
 
-import {
-    tsTuple,
-    ExtraSetStatic,
-    genericExtraSetCallFromTs,
-} from "main_js"
+let module = ESValue.load('main_js')
+let ExtraSetStatic = module.getProperty('ExtraSetStatic');
+let genericExtraSetCallFromTs = module.getProperty('genericExtraSetCallFromTs');
 
 function checkGenericExtraSet(): boolean {
-    return ExtraSetStatic.get(tsTuple) as int == tsTuple[0] as int;
+    try {
+        const testString = 'test';
+        const tsString = ESValue.wrapString(testString);
+        const res = ExtraSetStatic.invokeMethod('get', tsString);
+        return res.toString() === 't';
+    } catch (e) {
+        return false;
+    }
 }
 
 function checkGenericExtraSetCallFromTs(): boolean {
-    return genericExtraSetCallFromTs(tsTuple) as int == tsTuple[0] as int;
+    try {
+        const testString = 'test';
+        const tsString = ESValue.wrapString(testString);
+        const res = genericExtraSetCallFromTs.invoke(tsString);   
+        return res.toString() === 't';
+    } catch (e) {
+        return false;
+    }
 }

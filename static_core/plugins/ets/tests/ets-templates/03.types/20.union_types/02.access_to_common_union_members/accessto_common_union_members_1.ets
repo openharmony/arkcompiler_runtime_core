@@ -14,19 +14,29 @@
  */
 
 /*---
-desc: Accessing common methods.
+desc: Access to Common Union Members.
 ---*/
 
 class A {
     tmp = 1;
+    tmp1 = "aa";
+    foo() {}
+    goo(tmp: number):number {
+        return tmp;
+    }
 }
 
 class B {
     tmp = 2;
+    tmp1 = 3.14;
+    foo() {}
+    goo(tmp: number):number {
+        return tmp;
+    }
 }
 
 function main(): void {
     let account: A | B = new A();
-    let num = account.tmp;
-    arktest.assertTrue(num === 1);
+    let result = account.goo(1);
+    arktest.assertEQ(result, 1);
 }

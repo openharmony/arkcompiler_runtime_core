@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -121,7 +121,6 @@ class Function
     new_basic_block()
 
     # Process function's arguments
-    @params = params
     params.each_with_index do |(name, type), i|
       inst = create_instruction(:Parameter)
       inst.send(type)
@@ -129,6 +128,7 @@ class Function
       @arguments << inst
       let(name, inst)
     end
+    @params = params
   end
 
   # Return true if graph doesn't contain conditional basic block, i.e. with more than one successor.
@@ -218,26 +218,7 @@ class Function
     end
   end
 
-  def emit_ir(suffix)
-    Output.printlni("COMPILE(#{@name}#{suffix}) {")
-    raise "Compilation mode is not specified" unless @mode
-    Output.println("if(GetGraph()->GetArch() != #{Options.cpp_arch}) LOG(FATAL, IRTOC) << \"Arch doesn't match\";")
-    if suffix == "_LLVM"
-      Output.println("GetGraph()->SetIrtocPrologEpilogOptimized();")
-    end
-    Output.println("GetGraph()->SetRelocationHandler(this);")
-    Output.println("SetLanguage(SourceLanguage::#{@lang});")
-    Output.println("[[maybe_unused]] auto *graph = GetGraph();")
-    Output.println("[[maybe_unused]] auto *runtime = GetGraph()->GetRuntime();")
-    Output.println("SetArgsCount(#{@params.length});")
-    if @mode
-      ss = "GetGraph()->SetMode(GraphMode(0)"
-      @mode.each do |m|
-        ss += " | GraphMode::#{m.to_s}(true)"
-      end
-      ss += ");"
-      Output.println(ss)
-    end
+  def emit_body()
     if @regalloc_mask
       Output.println("GetGraph()->SetArchUsedRegs(~0x#{@regalloc_mask.value.to_s(16)});")
       Output << "// Regalloc mask: #{@regalloc_mask}"
@@ -250,12 +231,60 @@ class Function
       Output.println("uint32_t FILE_#{index} = AddSourceFile(\"#{file}\");")
     end
     Output.printlni("GRAPH(GetGraph()) {")
+    if @mode.include?(:NativePlus)
+      @arguments.each_with_index do |(v), i|
+        v.set_parameter_index(i+1)
+      end
+      inst = create_instruction(:Parameter)
+      inst.send(:ref)
+      inst.set_parameter_index(0)
+      @arguments.prepend(inst)
+    end
     @arguments.each { |inst| inst.emit_ir }
     @constants.each { |_, inst| inst.emit_ir }
     @registers.each { |_, inst| inst.emit_ir }
     @basic_blocks.each {|bb| bb.emit_ir }
     Output.printlnd("}")
     Output.printlnd("}")
+  end
+
+  def emit_header(suffix, mode)
+    Output.printlni("COMPILE(#{@name}#{suffix}) {")
+
+    Output.println("if(GetGraph()->GetArch() != #{Options.cpp_arch}) LOG(FATAL, IRTOC) << \"Arch doesn't match\";")
+    if suffix == "_LLVM"
+      Output.println("GetGraph()->SetIrtocPrologEpilogOptimized();")
+    end
+    Output.println("GetGraph()->SetRelocationHandler(this);")
+    Output.println("SetLanguage(SourceLanguage::#{@lang});")
+    Output.println("[[maybe_unused]] auto *graph = GetGraph();")
+    Output.println("[[maybe_unused]] auto *runtime = GetGraph()->GetRuntime();")
+    Output.println("SetArgsCount(#{@params.length});")
+    ss = "GetGraph()->SetMode(GraphMode(0)"
+    @mode.each do |m|
+      ss += " | GraphMode::#{m.to_s}(true)"
+    end
+    Output.println(ss + ");")
+  end
+
+  def emit_ir(suffix)
+    raise "Compilation mode is not specified" unless @mode
+
+    if @mode.include?(:FastPathPlus) # only FastPathPlus macro is supported for now
+      @mode.delete(:FastPathPlus)
+      @mode.push(:FastPath)
+      emit_header(suffix, mode)
+	  emit_body
+      @mode.pop()
+      @mode.push(:NativePlus)
+      emit_header(suffix + 'NativePlus', mode)
+	  emit_body
+      @mode.pop()
+      @mode.push(:FastPathPlus)
+    else
+	  emit_header(suffix, mode)
+	  emit_body
+  	end
   end
 
   def generate_builder

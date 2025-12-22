@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_REMOTE_OBJECT_TYPE_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_REMOTE_OBJECT_TYPE_H
 
-#include "utils/json_builder.h"
+#include "libarkbase/utils/json_builder.h"
 #include "tooling/inspector/types/numeric_id.h"
 #include "tooling/inspector/json_serialization/serializable.h"
 

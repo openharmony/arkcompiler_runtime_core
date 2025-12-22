@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Union
 from operator import add
 from pathlib import Path
-from vmb.helpers import Jsonable, StringEnum
+from vmb.helpers import Jsonable, StringEnum, check_file_exists
 from vmb.helpers_numbers import format_number
 
 
@@ -101,6 +101,7 @@ class AOTStats(Jsonable):
     @classmethod
     def from_csv(cls, csv_file: Union[str, Path]):
         data: Dict[Any, Any] = {}
+        check_file_exists(csv_file)
         with open(csv_file, mode='r', encoding='utf-8', newline='\n') as f:
             for method, pass_name, *stat, pbc_inst_num in csv.reader(
                     f, delimiter=','):
@@ -136,6 +137,7 @@ class JITStat(Jsonable):
     @staticmethod
     def from_csv(csv_file: Union[str, Path]) -> List[JITStat]:
         data: List[JITStat] = []
+        check_file_exists(csv_file)
         with open(csv_file, mode='r', encoding='utf-8', newline='\n') as f:
             for method, is_osr, bc_size, code_size, time in csv.reader(
                     f, delimiter=','):
@@ -200,6 +202,8 @@ class TestResult(Jsonable):
     execution_forks: List[RunResult] = field(default_factory=list)
     mem_bytes: int = -1
     gc_stats: Optional[GCStats] = None
+    safepoint_checker: Optional[Dict[str, int]] = None
+    int_mem_alloc: Optional[Dict[str, int]] = None
     aot_stats: Optional[AOTStats] = None
     jit_stats: Optional[List[JITStat]] = None
     full_time: float = 0.0
@@ -305,6 +309,7 @@ class RunMeta(Jsonable):
     mr_change_id: str = ''
     panda_commit_hash: str = ''
     panda_commit_msg: str = ''
+    branch: str = ''
 
 
 @dataclass

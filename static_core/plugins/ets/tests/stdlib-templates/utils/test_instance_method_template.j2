@@ -32,8 +32,8 @@ actual = obj.{{.item.method_name}}({{.item.method_signature.keys() | join(", ")}
 {%- if item.method_throws == "true" %}
 } catch(e) {
 {%- filter indent(width=4) %}
-console.println("Unexpected exception")
-throw e as Exception;
+console.println("Unexpected error")
+throw e as Error;
 {%- endfilter %}
 }
 {%- endif %}

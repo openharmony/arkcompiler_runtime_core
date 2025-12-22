@@ -14,6 +14,7 @@
  */
 
 import Deque from "@ohos.util.Deque";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Deque API tests");
@@ -40,7 +41,14 @@ class TestData {
 function testGetFirstFromEmptyDeque() {
     let deque = new Deque<double>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
-    arktest.assertEQ(deque.getFirst(), undefined, "Get first from empty deque should return undefined");
+    try {
+        let first = deque.getFirst();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testGetFirstFromNonEmptyDeque() {
@@ -56,7 +64,14 @@ function testGetFirstFromNonEmptyDeque() {
 function testGetLastFromEmptyDeque() {
     let deque = new Deque<double>();
     arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
-    arktest.assertEQ(deque.getLast(), undefined, "Get last from empty deque should return undefined");
+    try {
+        let first = deque.getLast();
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 function testGetLastFromNonEmptyDeque() {

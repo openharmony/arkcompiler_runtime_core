@@ -19,7 +19,7 @@
 #include <string>
 #include <utility>
 
-#include "libpandafile/file_items.h"
+#include "libarkfile/file_items.h"
 
 namespace ark::pandasm {
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_OBJECT_REFERENCE_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_OBJECT_REFERENCE_H_
 
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/logger.h"
+#include "libarkbase/macros.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include <memory>
 

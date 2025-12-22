@@ -81,7 +81,7 @@ function testIsAliveAndQuit() {
     arktest.assertTrue(eaw2.isAlive());
     arktest.assertTrue(eaw3.isAlive());
     eaw1.quit();
-    eaw2.quitSafely();
+    eaw2.quit();
     eaw3.join();
     let maxChecks = 10;
     let sleepTime = 10;
@@ -102,14 +102,14 @@ function testMainQuit() {
         eawMain.quit();
     }, new Error('Main worker cannot be stopped'));
     arktest.expectError(() => {
-        eawMain.quitSafely();
+        eawMain.quit();
     }, new Error('Main worker cannot be stopped'));
     arktest.expectError(() => {
         eawMain.join();
     }, new Error('Main worker cannot be stopped'));
 }
 
-function testQuitSafely() {
+function testQuit() {
     let eaw2 = new EAWorker();
     eaw2.start();
     let checkPoints = 0;
@@ -119,13 +119,11 @@ function testQuitSafely() {
     let job2 = eaw2.run<void>(() => {
         checkPoints += 1;
     });
-    eaw2.quitSafely();
+    eaw2.quit();
     arktest.assertEQ(checkPoints, 2);
 }
 
 function testCurrent() {
-    let main = EAWorker.current();
-    arktest.assertEQ(main, EAWorker.main());
     let eaw = new EAWorker();
     eaw.start();
     let waiter = new Event();
@@ -245,7 +243,7 @@ function testMain() {
     }, new Error('Main worker cannot be stopped'));
 
     arktest.expectError(() => {
-        mainWorker.quitSafely();
+        mainWorker.quit();
     }, new Error('Main worker cannot be stopped'));
 
     arktest.expectError(() => {
@@ -292,27 +290,6 @@ function testQuitBeforeStart() {
     }, new Error('Worker already started or quit'));
 }
 
-function testQuitSafelyBeforeStart() {
-    let eaw = new EAWorker();
-    arktest.expectError(() => {
-        eaw.quitSafely();
-    }, new Error('Cannot stop worker before start'));
-    eaw.start();
-    eaw.quitSafely();
-    arktest.expectError(() => {
-        eaw.start();
-    }, new Error('Worker already started or quit'));
-}
-
-function testStartafterJoin() {
-    let eaw = new EAWorker();
-    arktest.expectError(() => {
-         eaw.join();
-    }, new Error('Cannot stop worker before start'));
-    eaw.start();
-    eaw.quit();
-}
-
 function testPostTaskWhenNotStarted() {
     let eaw = new EAWorker();
     arktest.expectError(() => {
@@ -328,13 +305,61 @@ function testStartAfterQuit() {
     }, new Error('Can not start worker after quit'));
 }
 
+function testStartafterJoin() {
+    let eaw = new EAWorker();
+    arktest.expectError(() => {
+         eaw.join();
+    }, new Error('Cannot stop worker before start'));
+    eaw.start();
+    eaw.quit();
+}
+
+function testRunAfterQuit() {
+    let eaw = new EAWorker();
+    eaw.start();
+    eaw.run<void>(() => {
+        sleep(1);
+    });
+    eaw.quit();
+    /**
+     * Since task below could be added to task queue in two scenarios:
+     * 1. during quitting process, specifically, after enqueueing closingTask 
+     * 2. after quitting finished, specifically, after executing closingTask
+     * So it might throw exception either
+     * 1. "Can not run task when worker is quitted" or
+     * 2. "Can not run task when worker is not started"
+     */
+    arktest.expectError(() => {
+        eaw.run<void>(() => {});
+    });
+}
+
+function testWrapTaskErrorHandling() {
+    let errorCaught = false;
+    let waiter = new Event();
+    let eaw = new EAWorker(() => {
+        throw new Error('This is an uncaught exception!'); 
+    });
+    eaw.setUncaughtExceptionHandler((e: Error) => {
+        arktest.assertEQ(e.message, 'This is an uncaught exception!');
+        errorCaught = true;
+        waiter.fire();
+    });
+    eaw.start();
+    waiter.wait();
+    arktest.assertTrue(errorCaught);
+    arktest.expectError(() => {
+        eaw.join();
+    }, 'Unable to launch coroutine: no suitable worker was found');
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
     suite.addTest('testNamedEAWorker', testNamedEAWorker);
     suite.addTest('testTaskEAWorker', testTaskEAWorker);
     suite.addTest('testIsAliveAndQuit', testIsAliveAndQuit);
     suite.addTest('testMainQuit', testMainQuit);
-    suite.addTest('testQuitSafely', testQuitSafely);
+    suite.addTest('testQuit', testQuit);
     suite.addTest('testCurrent', testCurrent);
     suite.addTest('testUncaughtExceptionHandler', testUncaughtExceptionHandler);
     suite.addTest('testPostTask', testPostTask);
@@ -342,9 +367,10 @@ function main() {
     suite.addTest('testCommunication', testCommunication);
     suite.addTest('testMainWorker', testMain);
     suite.addTest('testQuitBeforeStart', testQuitBeforeStart);
-    suite.addTest('testQuitSafelyBeforeStart', testQuitSafelyBeforeStart);
     suite.addTest('testStartafterJoin', testStartafterJoin);
+    suite.addTest('testRunAfterQuit', testRunAfterQuit);
+    suite.addTest('testWrapTaskErrorHandling', testWrapTaskErrorHandling);
     // flaky fail test case #28321
     // suite.addTest('testTaskPool', testTaskPool);
-    suite.run();
+    return suite.run();
 }

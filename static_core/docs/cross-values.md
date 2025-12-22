@@ -6,7 +6,7 @@
 * An auto-generated file for each platform with constants' definition of format *"ptrdiff_t name = integer_literal;"* ([build/cross_values/generated_values/...](../build/cross_values/generated_values/)))
   * *"integer_literal"* is equal to the constant expression on the corresponding platform;
 * An auto-generated file which contain a getter function for each value ([build/cross_values/cross_values.h](../build/cross_values/cross_values.h)));
-  *  These getters take [*Arch*](../libpandabase/utils/arch.h) as an argument and return the value on that platform;
+  *  These getters take [*Arch*](../libarkbase/utils/arch.h) as an argument and return the value on that platform;
 ## Contents
 1. [Rationale](#rationale)  
 2. [Interface](#interface)

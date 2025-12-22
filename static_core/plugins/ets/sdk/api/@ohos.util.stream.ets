@@ -413,8 +413,12 @@ export namespace stream {
                     this.writableCb--;
 
                     if (param.length > 0 && param[0] instanceof Error && !this.erroredInner) {
-                        this.throwError(param[0] as Error);
-                        this.errorFresh();
+                        this.writableInner = false;
+                        this.erroredInner = param[0] as Error;
+                        Promise.resolve().then((): void => {
+                            this.throwError(param[0] as Error);
+                            this.errorFresh();
+                        });
                         return;
                     }
                     if (this.erroredInner) {
@@ -433,7 +437,11 @@ export namespace stream {
                     }
                 } else {
                     if (!this.erroredInner) {
-                        this.throwError(ERR_MULTIPLE_CALLBACK);
+                        this.writableInner = false;
+                        this.erroredInner = ERR_MULTIPLE_CALLBACK;
+                        Promise.resolve().then((): void => {
+                            this.throwError(ERR_MULTIPLE_CALLBACK);
+                        });
                     }
                     this.errorFresh();
                 }
@@ -495,8 +503,12 @@ export namespace stream {
                     this.writing = false;
                     this.writableCb--;
                     if (param.length > 0 && param[0] instanceof Error && !this.erroredInner) {
-                        this.throwError(param[0] as Error);
-                        this.errorFresh();
+                        this.writableInner = false;
+                        this.erroredInner = param[0] as Error;
+                        Promise.resolve().then((): void => {
+                            this.throwError(param[0] as Error);
+                            this.errorFresh();
+                        });
                         return;
                     }
                     if (this.erroredInner) {
@@ -514,7 +526,11 @@ export namespace stream {
                     }
                 } else {
                     if (!this.erroredInner) {
-                        this.throwError(ERR_MULTIPLE_CALLBACK);
+                        this.writableInner = false;
+                        this.erroredInner = ERR_MULTIPLE_CALLBACK;
+                        Promise.resolve().then((): void => {
+                            this.throwError(ERR_MULTIPLE_CALLBACK);
+                        });
                     }
                     this.errorFresh();
                 }

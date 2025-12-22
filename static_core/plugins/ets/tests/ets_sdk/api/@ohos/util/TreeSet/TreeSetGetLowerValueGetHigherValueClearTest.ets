@@ -14,6 +14,7 @@
  */
 
 import {TreeSet} from "@ohos.util.TreeSet";
+import { BusinessError } from "@ohos.base";
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("TreeSet GetLowerValue GetHigherValue Clear API tests")
@@ -44,22 +45,40 @@ function main(): int {
 //Test cases ported from ArkTS 1.0:TREESET_4200
 function testGetLowerValueEmptyStringOnEmptySet() {
     let treeSet = new TreeSet<string>();
-    let result = treeSet.getLowerValue("");
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.getLowerValue("");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_4500
 function testGetLowerValueNumberOnEmptySet1() {
     let treeSet = new TreeSet<double>();
-    let result = treeSet.getLowerValue(123);
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.getLowerValue(123);
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_4600
 function testGetLowerValueNumberOnEmptySet2() {
     let treeSet = new TreeSet<double>();
-    let result = treeSet.getLowerValue(123);
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.getLowerValue(123);
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_4700
@@ -87,22 +106,40 @@ function testGetLowerValueWithCustomReverseComparator() {
 //Test cases ported from ArkTS 1.0:TREESET_4900
 function testGetHigherValueEmptyStringOnEmptySet() {
     let treeSet = new TreeSet<string>();
-    let result = treeSet.getHigherValue("");
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.getHigherValue("");
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_5200
 function testGetHigherValueNumberOnEmptySet1() {
     let treeSet = new TreeSet<double>();
-    let result = treeSet.getHigherValue(123);
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.getHigherValue(123);
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_5300
 function testGetHigherValueNumberOnEmptySet2() {
     let treeSet = new TreeSet<double>();
-    let result = treeSet.getHigherValue(123);
-    arktest.assertEQ(result, undefined);
+    try {
+        let result = treeSet.getHigherValue(123);
+    } catch (e) {
+        if (!(e instanceof BusinessError)) {
+            arktest.assertTrue(false);
+        }
+        arktest.assertEQ(e.message, "Container is empty");
+    }
 }
 
 //Test cases ported from ArkTS 1.0:TREESET_5400

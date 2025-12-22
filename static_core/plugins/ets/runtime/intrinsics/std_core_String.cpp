@@ -19,8 +19,8 @@
 #include "include/mem/panda_string.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
-#include "libpandabase/utils/logger.h"
-#include "macros.h"
+#include "libarkbase/utils/logger.h"
+#include "libarkbase/macros.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/string_flatten.h"
@@ -31,12 +31,13 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_string_helpers.h"
 
 #include "unicode/locid.h"
 #include "unicode/coll.h"
 #include "unicode/unistr.h"
 #include "unicode/normalizer2.h"
-#include "utils/span.h"
+#include "libarkbase/utils/span.h"
 
 using icu::Normalizer2;
 
@@ -192,13 +193,16 @@ EtsBoolean StdCoreStringIsEmpty(EtsString *s)
 
 uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
 {
+    if (owner == nullptr) {
+        return UINT8_C(s == nullptr);
+    }
     if ((owner->AsObject()) == s) {
         return UINT8_C(1);
     }
     if (s == nullptr || !(s->GetClass()->IsStringClass())) {
         return UINT8_C(0);
     }
-    return static_cast<uint8_t>(owner->StringsAreEqual(s));
+    return ToEtsBoolean(owner->Compare(EtsString::FromEtsObject(s)) == 0);
 }
 
 EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
@@ -528,16 +532,8 @@ EtsString *StdCoreStringConcat4(EtsString *str1, EtsString *str2, EtsString *str
 
 EtsInt StdCoreStringCompareTo(EtsString *str1, EtsString *str2)
 {
-    /* corner cases */
-    if (str1->GetLength() == 0) {
-        return -str2->GetLength();
-    }
-    if (str2->GetLength() == 0) {
-        return str1->GetLength();
-    }
-
-    /* use the default implementation otherwise */
-    return str1->Compare(str2);
+    auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    return str1->GetCoreType()->Compare(str2->GetCoreType(), ctx);
 }
 
 EtsString *StdCoreStringTrimLeft(EtsString *thisStr)
@@ -570,15 +566,13 @@ EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt e
 EtsString *StdCoreStringFromCharCode(EtsEscompatArray *charCodes)
 {
     ASSERT(charCodes != nullptr);
-    ASSERT(charCodes->GetData() != nullptr);
-    return EtsString::CreateNewStringFromCharCode(charCodes->GetData(), charCodes->GetActualLength());
+    return helpers::CreateNewStringFromCharCode(charCodes);
 }
 
 EtsString *StdCoreStringFromCharCodeSingle(EtsDouble charCode)
 {
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
-        constexpr double UTF16_CHAR_DIVIDER = 0x10000;
-        auto character = static_cast<uint16_t>(static_cast<int64_t>(std::fmod(charCode, UTF16_CHAR_DIVIDER)));
+        auto character = EtsString::CodeToChar(charCode);
         if (character < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE && coretypes::String::IsASCIICharacter(character)) {
             auto *cache = PlatformTypes()->GetAsciiCacheTable();
             return static_cast<EtsString *>(cache->Get(character));

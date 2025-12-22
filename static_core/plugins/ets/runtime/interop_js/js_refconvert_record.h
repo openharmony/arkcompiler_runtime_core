@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REFCONVERT_RECORD_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REFCONVERT_RECORD_H_
 
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"

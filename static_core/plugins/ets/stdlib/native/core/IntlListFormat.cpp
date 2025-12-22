@@ -15,7 +15,7 @@
 
 #include "IntlListFormat.h"
 #include "IntlCommon.h"
-#include "libpandabase/macros.h"
+#include "libarkbase/macros.h"
 #include "stdlib_ani_helpers.h"
 
 #include "unicode/locid.h"
@@ -107,7 +107,7 @@ static ani_array ToAniArray(ani_env *env, std::vector<ani_string> strings)
     return array;
 }
 
-ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_array_ref aniList, ani_string aniLocale,
+ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_array aniList, ani_string aniLocale,
                          ani_string aniStyle, ani_string aniType)
 {
     auto list = ToIcuList(env, aniList);
@@ -168,7 +168,7 @@ ani_status RegisterIntlListFormat(ani_env *env)
 {
     std::array methods = {ani_native_function {
         "formatToPartsNative",
-        "C{escompat.Array}C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.Object}",
+        "C{std.core.Array}C{std.core.String}C{std.core.String}C{std.core.String}:C{std.core.Object}",
         reinterpret_cast<void *>(FormatToParts)}};
 
     g_elementAniStr = StdStrToAni(env, "element");

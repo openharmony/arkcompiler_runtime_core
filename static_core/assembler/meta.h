@@ -25,7 +25,7 @@
 #include <vector>
 
 #include "annotation.h"
-#include "modifiers.h"
+#include "libarkfile/modifiers.h"
 
 #include "assembly-type.h"
 

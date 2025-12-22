@@ -104,7 +104,7 @@ function testParseTag() : int {
         arktest.assertEQ(ruRu.numeric, true)
     }
     {
-        processCreateLocaleError(() => new Intl.Locale("ru-u-kn-fggkhjkjg", {"numeric" : false} as Intl.LocaleOptions))
+        processCreateLocaleError(() => new Intl.Locale("ru-u-kn-fggkhjkjg", {numeric : false} as Intl.LocaleOptions))
     }
     {
         const ruRu = new Intl.Locale("ru-Ru-u-co-emoji")
@@ -158,7 +158,7 @@ function testCalendar() : int {
         arktest.assertEQ(loc.calendar, undefined)
     }
     {
-        const loc = new Intl.Locale("en-US", {"calendar": "gregory"} as Intl.LocaleOptions)
+        const loc = new Intl.Locale("en-US", {calendar: "gregory"} as Intl.LocaleOptions)
         arktest.assertEQ(loc.calendar, "gregory")
     }
     {
@@ -173,11 +173,11 @@ function testCaseFirst() : int {
         arktest.assertEQ(loc.caseFirst, undefined)
     }
     {
-        const loc = new Intl.Locale("en-US", {"caseFirst": "upper"} as Intl.LocaleOptions)
+        const loc = new Intl.Locale("en-US", {caseFirst: "upper"} as Intl.LocaleOptions)
         arktest.assertEQ(loc.caseFirst, "upper")
     }
     {
-        processInvalidValues((invalidValue : string) => new Intl.Locale("ru-u-cf-invalid", {"caseFirst" : invalidValue} as Intl.LocaleOptions))
+        processInvalidValues((invalidValue : string) => new Intl.Locale("ru-u-cf-invalid", {caseFirst : invalidValue} as Intl.LocaleOptions))
     }
     return success
 }

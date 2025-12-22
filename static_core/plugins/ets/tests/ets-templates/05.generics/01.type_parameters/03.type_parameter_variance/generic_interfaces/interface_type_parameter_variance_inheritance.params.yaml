@@ -13,27 +13,19 @@
 
 ---
 cases:
-  - { class: class,     param: 'T',     type1: A, type2: A, desc: Invariant                    }
-  - { class: class,     param: 'T',     type1: A, type2: B, desc: Invariant,     tag: negative }
-  - { class: class,     param: 'T',     type1: B, type2: A, desc: Invariant,     tag: negative }
-  - { class: class,     param: 'T',     type1: B, type2: B, desc: Invariant                    }
-  - { class: class,     param: 'in T',  type1: A, type2: A, desc: Contravariant                }
-  - { class: class,     param: 'in T',  type1: A, type2: B, desc: Contravariant, tag: negative }
-  - { class: class,     param: 'in T',  type1: B, type2: A, desc: Contravariant                }
-  - { class: class,     param: 'in T',  type1: B, type2: B, desc: Contravariant                }
-  - { class: class,     param: 'out T', type1: A, type2: A, desc: Covariant                    }
-  - { class: class,     param: 'out T', type1: A, type2: B, desc: Covariant                    }
-  - { class: class,     param: 'out T', type1: B, type2: A, desc: Covariant,     tag: negative }
-  - { class: class,     param: 'out T', type1: B, type2: B, desc: Covariant                    }
-  - { class: interface, param: 'T',     type1: A, type2: A, desc: Invariant                    }
-  - { class: interface, param: 'T',     type1: A, type2: B, desc: Invariant,     tag: negative }
-  - { class: interface, param: 'T',     type1: B, type2: A, desc: Invariant,     tag: negative }
-  - { class: interface, param: 'T',     type1: B, type2: B, desc: Invariant                    }
-  - { class: interface, param: 'in T',  type1: A, type2: A, desc: Contravariant                }
-  - { class: interface, param: 'in T',  type1: A, type2: B, desc: Contravariant, tag: negative }
-  - { class: interface, param: 'in T',  type1: B, type2: A, desc: Contravariant                }
-  - { class: interface, param: 'in T',  type1: B, type2: B, desc: Contravariant                }
-  - { class: interface, param: 'out T', type1: A, type2: A, desc: Covariant                    }
-  - { class: interface, param: 'out T', type1: A, type2: B, desc: Covariant                    }
-  - { class: interface, param: 'out T', type1: B, type2: A, desc: Covariant,     tag: negative }
-  - { class: interface, param: 'out T', type1: B, type2: B, desc: Covariant                    }
+  - { class: class,     param: 'T',     type1: A, type2: A, desc: Invariant }
+  - { class: class,     param: 'T',     type1: B, type2: B, desc: Invariant }
+  - { class: class,     param: 'in T',  type1: A, type2: A, desc: Contravariant }
+  - { class: class,     param: 'in T',  type1: B, type2: A, desc: Contravariant }
+  - { class: class,     param: 'in T',  type1: B, type2: B, desc: Contravariant }
+  - { class: class,     param: 'out T', type1: A, type2: A, desc: Covariant }
+  - { class: class,     param: 'out T', type1: A, type2: B, desc: Covariant }
+  - { class: class,     param: 'out T', type1: B, type2: B, desc: Covariant }
+  - { class: interface, param: 'T',     type1: A, type2: A, desc: Invariant }
+  - { class: interface, param: 'T',     type1: B, type2: B, desc: Invariant }
+  - { class: interface, param: 'in T',  type1: A, type2: A, desc: Contravariant }
+  - { class: interface, param: 'in T',  type1: B, type2: A, desc: Contravariant }
+  - { class: interface, param: 'in T',  type1: B, type2: B, desc: Contravariant }
+  - { class: interface, param: 'out T', type1: A, type2: A, desc: Covariant }
+  - { class: interface, param: 'out T', type1: A, type2: B, desc: Covariant }
+  - { class: interface, param: 'out T', type1: B, type2: B, desc: Covariant }

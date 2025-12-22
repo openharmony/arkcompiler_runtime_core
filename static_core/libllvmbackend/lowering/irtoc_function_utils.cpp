@@ -66,6 +66,7 @@ constexpr std::array PTR_IGN_IRTOC_FUNC = {
     "GetMethodClassById"sv,
     "VmCreateString"sv,
     "AllocFrameInterp"sv,
+    "AllocFrameStackOverflow"sv,
     "InitializeFrame"sv,
     "memmove"sv,
 };

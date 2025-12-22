@@ -18,9 +18,9 @@
 
 namespace ark::compiler {
 /*
-1. Let actualLength = LoadObject obj (escompat.Array.actualLength)
+1. Let actualLength = LoadObject obj (std.core.Array.actualLength)
 2. BoundsCheck actualLength index (forced de-opt if check fails)
-3. Let buffer = LoadObject obj (escompat.Array.buffer)
+3. Let buffer = LoadObject obj (std.core.Array.buffer)
 4. Let value = LoadArray buffer, index
 Returns value
 */
@@ -58,9 +58,9 @@ void Inlining::ExpandIntrinsicEscompatArrayGet(CallInst *callInst)
 }
 
 /*
-1. Let actualLength = LoadObject obj (escompat.Array.actualLength)
+1. Let actualLength = LoadObject obj (std.core.Array.actualLength)
 2. BoundsCheck actualLength index (forced de-opt if check fails)
-3. Let buffer = LoadObject obj (escompat.Array.buffer)
+3. Let buffer = LoadObject obj (std.core.Array.buffer)
 4. StoreArray buffer, index, value
 */
 void Inlining::ExpandIntrinsicEscompatArraySet(CallInst *callInst)

@@ -105,9 +105,9 @@ function testRestParameterFunctions() {
 function generic<T>(value: T): T {
   return value
 }
-function testGenericFunctions() {
-  let g1 = generic
-  let g2 = generic
+function testGenericFunctions<T>() {
+  let g1 = generic<T>
+  let g2 = generic<T>
   arktest.assertEQ(g1, g2)
 }
 
@@ -170,7 +170,8 @@ function main() {
   suite.addTest('Arrow Function (No Capture)', testArrowFunctionNoCapture)
   suite.addTest('Arrow Function (Capture)', testArrowFunctionCaptureIrrelevant)
   suite.addTest('Rest Parameter Function', testRestParameterFunctions)
-  suite.addTest('Generic Function Comparison', testGenericFunctions)
+  suite.addTest('Generic Function Comparison (Int)', testGenericFunctions<Int>)
+  suite.addTest('Generic Function Comparison (String)', testGenericFunctions<String>)
   suite.addTest('Overloaded Function Comparison', testOverloadedFunction)
   suite.addTest('Override & Inheritance Comparison', testOverridingBehavior)
   suite.addTest('VerifyLambda: Static no fields', testVerifyLambda_Static_NoFields)

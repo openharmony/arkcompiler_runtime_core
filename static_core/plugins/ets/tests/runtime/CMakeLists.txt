@@ -31,7 +31,7 @@ panda_ets_add_gtest(
     LIBRARIES arkbase arkfile arkruntime
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
     SANITIZERS ${PANDA_SANITIZERS_LIST}
-    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc" 
+    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
     DEPS_TARGETS etsstdlib
 )
 
@@ -71,7 +71,7 @@ panda_ets_add_gtest(
     LIBRARIES arkbase arkfile arkruntime
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
     SANITIZERS ${PANDA_SANITIZERS_LIST}
-    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc" 
+    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
     DEPS_TARGETS etsstdlib
 )
 

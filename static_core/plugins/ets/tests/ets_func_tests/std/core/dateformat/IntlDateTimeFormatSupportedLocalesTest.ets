@@ -13,14 +13,28 @@
  * limitations under the License.
  */
 
-function testResolvedOptionsRetrieval(): void {
+function testResolvedOptionsRetrieval1(): void {
     const locale = "en-US"
     const opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }
     const formatter = new Intl.DateTimeFormat(locale, opts)
     const resolvedOpts = formatter.resolvedOptions()
 
     arktest.assertEQ(resolvedOpts.locale, locale)
-    arktest.assertEQ(resolvedOpts.calendar, "gregorian")
+    arktest.assertEQ(resolvedOpts.calendar, "gregory")
+    arktest.assertEQ(resolvedOpts.numberingSystem, "latn")
+    arktest.assertEQ(resolvedOpts.timeZone, opts.timeZone)
+    arktest.assertEQ(resolvedOpts.hourCycle, "h12")
+    arktest.assertEQ(resolvedOpts.hour12, true)
+}
+
+function testResolvedOptionsRetrieval2(): void {
+    const locale = "am-ET-u-ca-ethioaa"
+    const opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }
+    const formatter = new Intl.DateTimeFormat(locale, opts)
+    const resolvedOpts = formatter.resolvedOptions()
+
+    arktest.assertEQ(resolvedOpts.locale, locale)
+    arktest.assertEQ(resolvedOpts.calendar, "ethioaa")
     arktest.assertEQ(resolvedOpts.numberingSystem, "latn")
     arktest.assertEQ(resolvedOpts.timeZone, opts.timeZone)
     arktest.assertEQ(resolvedOpts.hourCycle, "h12")
@@ -64,7 +78,8 @@ function testSupportedLocalesOfLocale(): void {
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat")
-    suite.addTest("resolved options retrieval", testResolvedOptionsRetrieval)
+    suite.addTest("resolved options retrieval", testResolvedOptionsRetrieval1)
+    suite.addTest("resolved options retrieval", testResolvedOptionsRetrieval2)
     suite.addTest("supportedLocalesOf(string[])", testSupportedLocalesOfStringArray)
     suite.addTest("supportedLocalesOf(string)", testSupportedLocalesOfString)
     suite.addTest("supportedLocalesOf(Locale[])", testSupportedLocalesOfLocaleArray)

@@ -37,10 +37,6 @@
 #include <cstring>
 
 namespace common {
-class LineString;
-class TreeString;
-class SlicedString;
-
 /*
  +-----------------------------+ <-- offset 0
  |      BaseObject fields      |
@@ -111,7 +107,7 @@ public:
         INVALID_STRING_ADD,
     };
 
-    using CompressedStatusBit = BitField<CompressedStatus, 0>;                    // 1
+    using CompressedStatusBit = common::BitField<CompressedStatus, 0>;            // 1
     using IsInternBit = CompressedStatusBit::NextFlag;                            // 1
     using LengthBits = IsInternBit::NextField<uint32_t, STRING_LENGTH_BITS_NUM>;  // 30
     static_assert(LengthBits::START_BIT + LengthBits::SIZE == sizeof(uint32_t) * BITS_PER_BYTE,
