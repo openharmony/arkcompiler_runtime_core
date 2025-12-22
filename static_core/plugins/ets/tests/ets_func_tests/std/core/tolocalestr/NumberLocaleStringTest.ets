@@ -57,11 +57,58 @@ function testCurrencyToLocaleString(): void {
     const inrResult = num.toLocaleString("en-IN", { style: "currency", currency: "INR" });
     arktest.assertEQ(inrResult, "₹1,23,456.79", "INR format");
 }
+function testMinimumFractionDigits1(): void {
+    const num: Number = 0.756;
+
+    const result = num.toLocaleString(undefined, { style: "percent", minimumFractionDigits: 2 });
+    arktest.assertEQ(result, "75.60%");
+}
+
+function testMinimumFractionDigits2(): void {
+    const num: Number = -0.111;
+
+    const result = num.toLocaleString(undefined, { style: "percent", minimumFractionDigits: 2 });
+    arktest.assertEQ(result, "-11.10%");
+}
+
+function testMinimumFractionDigits3(): void {
+    const num: Number = 1.0;
+
+    const result = num.toLocaleString(undefined, { style: "percent", minimumFractionDigits: 2 });
+    arktest.assertEQ(result, "100.00%");
+}
+
+function testMinimumFractionDigits4(): void {
+    const num: Number = 0;
+
+    const result = num.toLocaleString(undefined, { style: "percent", minimumFractionDigits: 2 });
+    arktest.assertEQ(result, "0.00%");
+}
+
+function testMinimumFractionDigits5(): void {
+    const num: Number = 0.55;
+
+    const result = num.toLocaleString(undefined, { style: "percent", maximumFractionDigits: 3, minimumFractionDigits: 2 });
+    arktest.assertEQ(result, "55.00%");
+}
+
+function testMinimumFractionDigits6(): void {
+    const num: Number = 0.123456;
+
+    const result = num.toLocaleString(undefined, { style: "percent", maximumFractionDigits: 5, minimumFractionDigits: 3 });
+    arktest.assertEQ(result, "12.3456%");
+}
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("Number")
     suite.addTest("toLocaleString", testNumberToLocaleString)
     suite.addTest("NaN.toLocaleString", testNaNToLocaleString)
     suite.addTest("num.toLocaleString", testCurrencyToLocaleString)
+    suite.addTest("num.toLocaleString", testMinimumFractionDigits1)
+    suite.addTest("num.toLocaleString", testMinimumFractionDigits2)
+    suite.addTest("num.toLocaleString", testMinimumFractionDigits3)
+    suite.addTest("num.toLocaleString", testMinimumFractionDigits4)
+    suite.addTest("num.toLocaleString", testMinimumFractionDigits5)
+    suite.addTest("num.toLocaleString", testMinimumFractionDigits6)
     return suite.run()
 }
