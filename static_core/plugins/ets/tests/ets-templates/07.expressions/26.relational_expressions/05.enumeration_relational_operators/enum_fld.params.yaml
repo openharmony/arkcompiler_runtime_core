@@ -12,7 +12,12 @@
 # limitations under the License.
 
 ---
-enums:
+operands:
+    - [new A(0).fld, Color.Green, new A(2).fld]
+    - [r, new A(1).fld, Color.Blue]
+    - [Color.Red, new A(1).fld, new A(2).fld]
+
+cases:
     - decl: |-
           // default integer values
           enum Color { Red, Green, Blue }
@@ -71,8 +76,3 @@ enums:
           // different case and encoding string values
           enum Color { Blue = "   а code", Red = "   A code", Green = "   a code" }
       op: ['', '', '', '', '', '', '!', '!', '!', '!', '!', '!']
-
-operands:
-    - [foo(0), Color.Green, foo(2)]
-    - [r, foo(1), Color.Blue]
-    - [Color.Red, foo(1), foo(2)]

@@ -26,38 +26,43 @@ cases:
               else if (p == 1) return Color2.Green;
               else return Color2.Blue
           }
-      use: |-
+      checks: |-
           // different enum types
           arktest.assertTrue(foo1(0) >= foo2(0))
+      expected: 'Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type.'
 
     - decl: |-
           enum Color { Red, Green, Blue }
           enum Size { XS, S, M, L, XL, XXL }
-      use: |-
+      checks: |-
           // different enum types
           arktest.assertTrue(Color.Red <= Size.XL)
+      expected: 'Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type.'
 
     - decl: |-
           enum Color { Red = "1", Green = "2", Blue = "3" }
           enum Size { XS = "0", S = "1", M = "2", L = "3", XL = "4", XXL = "5" }
           let c = Color.Blue
-      use: |-
+      checks: |-
           // string values, different enum types
           arktest.assertTrue(c > Size.S)
           arktest.assertTrue(Size.S < c)
+      expected: 'Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type.'
 
     - decl: |-
           enum Color { Red, Green, Blue }
           enum Size { XS, S, M, L, XL, XXL }
           let c: Color|Size = Color.Red
           let s: Color|Size = Size.XL
-      use: |-
+      checks: |-
           // compare enums in unions
           arktest.assertTrue((c as Color) < (s as Size))
+      expected: 'Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type.'
 
     - decl: |-
           // different types literals - bigint is not a numeric type
           enum NumT {Bgnt = 1n, Next = 1n + 6}
-      use: |-
+      checks: |-
           arktest.assertTrue(NumT.Bgnt.valueOf() == 1n, "Bigint problem")
           arktest.assertTrue(NumT.Next.valueOf() <= 1n + 6, "Bigint.Next problem")
+      expected: 'Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String.'

@@ -12,7 +12,11 @@
 # limitations under the License.
 
 ---
-enums:
+operands:
+    - ['arr[0]', Color.Green, 'arr[2]']
+    - [r, 'arr[1]', Color.Blue]
+
+cases:
     - decl: |-
           // default integer values
           enum Color { Red, Green, Blue }
@@ -71,7 +75,3 @@ enums:
           // different case and encoding string values
           enum Color { Blue = "   а code", Red = "   A code", Green = "   a code" }
       op: ['', '', '', '', '', '', '!', '!', '!', '!', '!', '!']
-
-operands:
-    - ['arr[0]', Color.Green, 'arr[2]']
-    - [r, 'arr[1]', Color.Blue]

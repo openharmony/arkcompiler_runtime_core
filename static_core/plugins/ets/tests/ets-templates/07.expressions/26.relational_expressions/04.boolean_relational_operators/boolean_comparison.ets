@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for case in boolean_comparison %}
+{% for case in cases %}
 
 /*---
 desc: Boolean comparison {{case.left}} {{case.op}} {{case.right}}

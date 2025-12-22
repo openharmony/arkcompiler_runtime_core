@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- # List of string comparison conditions
-boolean_comparison_neg:
+cases:
   - {ltype: "boolean", rtype: "int", left: "false", right: 99, op: "<"}
   - {ltype: "boolean", rtype: "double", left: "true", right: 25.145, op: "<"}
   - {ltype: "boolean", rtype: "char", left: "true", right: c'f', op: "<"}

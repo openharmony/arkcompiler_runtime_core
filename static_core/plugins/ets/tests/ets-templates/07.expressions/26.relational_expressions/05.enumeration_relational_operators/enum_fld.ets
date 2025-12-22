@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{%- for c in enums %}
+{%- for c in cases %}
 /*---
 desc: >-
     If both operands are of the same Enumeration type, then Numerical Relational Operators
@@ -23,18 +23,17 @@ desc: >-
 {{c.decl}}
 let r = Color.Red, g = Color.Green, b = Color.Blue;
 
-// use lambda expressions
-let rl: (i: int) => Color = (i: int): Color => {
-    if (i == 0) return Color.Red;
-    throw new Error("Invalid argument")
-}
-let gl: (i: int) => Color = (i: int): Color => {
-    if (i == 1) return Color.Green;
-    throw new Error("Invalid argument")
-}
-let bl: (i: int) => Color = (i: int): Color => {
-    if (i == 2) return Color.Blue;
-    throw new Error("Invalid argument")
+// use field references
+class A {
+    fld: Color
+    constructor(i: int) {
+        switch(i) {
+            case 0: this.fld = Color.Red; break;
+            case 1: this.fld = Color.Green; break;
+            case 2: this.fld = Color.Blue; break;
+            default: throw new Error("Invalid parameter")
+        }
+    }
 }
 
 function main() {
