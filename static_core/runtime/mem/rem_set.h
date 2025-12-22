@@ -37,7 +37,7 @@ class Region;
 template <typename LockConfigT = RemSetLockConfig::CommonLock>
 class RemSet {
 public:
-    RemSet() = default;
+    RemSet();
     ~RemSet();
 
     NO_COPY_SEMANTIC(RemSet);
@@ -153,6 +153,7 @@ public:
 
 private:
     LockConfigT remSetLock_;
+    static constexpr float DEFAULT_LOAD_FACTOR = 0.7F;
     // NOTE(alovkov): make value a Set?
     PandaUnorderedMap<uintptr_t, Bitmap> bitmaps_;
 

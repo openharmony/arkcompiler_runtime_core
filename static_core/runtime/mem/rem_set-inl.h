@@ -23,6 +23,12 @@
 namespace ark::mem {
 
 template <typename LockConfigT>
+RemSet<LockConfigT>::RemSet()
+{
+    bitmaps_.max_load_factor(DEFAULT_LOAD_FACTOR);
+}
+
+template <typename LockConfigT>
 RemSet<LockConfigT>::~RemSet()
 {
     Clear();
