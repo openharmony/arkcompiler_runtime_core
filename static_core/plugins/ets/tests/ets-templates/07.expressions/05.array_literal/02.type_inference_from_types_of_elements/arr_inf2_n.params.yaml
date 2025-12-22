@@ -14,30 +14,38 @@
 ---
 cases:
     - decl: |-
-          const a = []  // CTE, type cannot be determined
+          const a = []
       use: ''
+      expected_out: "Semantic error ESE0301: Can't resolve array type"
 
     - decl: |-
-          let a = []    // CTE, type cannot be determined
+          let a = []  
       use: ''
+      expected_out: "Semantic error ESE0301: Can't resolve array type"
 
     - use: |-
-          const a = []  // CTE, type cannot be determined
+          const a = []
+      expected_out: "Semantic error ESE0301: Can't resolve array type"
 
     - use: |-
-          let a = []  // CTE, type cannot be determined
+          let a = []
+      expected_out: "Semantic error ESE0301: Can't resolve array type"
 
     - use: |-
-          let a = [[]]  // CTE, type cannot be determined
+          let a = [[]]
+      expected_out: "Semantic error ESE0301: Can't resolve array type"
 
     - use: |-
-          let a = [[1,], []]  // CTE, type cannot be resolved
+          let a = [[1,], []]
+      expected_out: "Semantic error ESE0301: Can't resolve array type"
 
     - use: |-
-          let a = [{}, {},]  // CTE, type cannot be determined
+          let a = [{}, {},]
+      expected_out: "Semantic error ESE0062: need to specify target type for class composite"
 
     - use: |-
-          [(): void => {}, {}]  // CTE, type cannot be resolved
+          [(): void => {}, {}]
+      expected_out: "Semantic error ESE0062: need to specify target type for class composite"
 
     - decl: |-
           class A<T> {
@@ -47,3 +55,4 @@ cases:
           }
       use: |-
           let a: Number[] = new A<Number>().dup()
+      expected_out: "Semantic error ESE0292: This expression is not constructible."

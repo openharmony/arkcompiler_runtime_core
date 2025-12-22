@@ -15,19 +15,28 @@
 cases:
     - use: |-
         let s = "100"
-        s++  // Bad operand type, the type of the operand must be numeric type
+        s++
+      expected_out: 'Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.'
     - use: |-
         let a: int[] = []
-        a++  // Bad operand type, the type of the operand must be numeric type
+        a++
+      expected_out: 'Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.'
     - use: |-
-        4++  // Invalid left-hand side operator
+        4++
+      expected_out: 'Syntax error ESY0053: Invalid left-hand side operator.'
     - use: |-
         let x = -5;
-        (x++)++  // Invalid left-hand side operator
+        (x++)++
+      expected_out: 'Syntax error ESY0053: Invalid left-hand side operator.'
     - decl: |-
         class C {
             f: number
         }
       use: |-
         let c = new C();
-        (c?.f)++  // Invalid left-hand side operator
+        (c?.f)++
+      expected_out: 'Syntax error ESY0053: Invalid left-hand side operator.'
+    - use: |-
+        let a: Boolean = True
+        a++
+      expected_out: 'Semantic error ESE0066: Bad operand type, the type of the operand must be numeric type.'

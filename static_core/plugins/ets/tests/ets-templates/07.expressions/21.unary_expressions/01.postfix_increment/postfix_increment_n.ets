@@ -19,6 +19,7 @@ desc: >-
     The expression must be left-hand-side expression (see Left-Hand-Side Expressions),
     so it denotes a variable.
 tags: [compile-only, negative]
+expected_out: '{{c.expected_out}}'
 ---*/
 
 {{c.decl}}
