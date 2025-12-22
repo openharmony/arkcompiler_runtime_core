@@ -29,6 +29,7 @@ inline std::string FormatString(const char *fmt, ...)
     std::array<char, bufferSize> buffer {};
     int put = vsnprintf_s(buffer.data(), bufferSize, bufferSize - 1, fmt, args);
     if (put < 0) {
+        va_end(args);
         return "";
     }
     va_end(args);
