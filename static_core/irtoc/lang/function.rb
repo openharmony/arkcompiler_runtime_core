@@ -446,7 +446,7 @@ class Function
       label.bb = @current_block
       label.refs.each { |bb| bb.set_true_succ(@current_block) }
     else
-      label = @Label.new(global_label_name, @current_block)
+      label = Label.new(global_label_name, @current_block)
       label.explicitly_defined = true
       label.refs.each { |bb| bb.set_true_succ(@current_block) }
       @global_labels[global_label_name] = label

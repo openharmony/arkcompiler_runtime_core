@@ -16,6 +16,7 @@
 #include "plugins/ets/runtime/types/ets_map.h"
 #include "intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
+#include "plugins/ets/runtime/types/ets_base_enum.h"
 
 namespace ark::ets {
 static constexpr int NUMERIC_INT_MAX = std::numeric_limits<int>::max();
@@ -46,36 +47,44 @@ static uint32_t GetHashFloats(EtsObject *obj)
     return static_cast<uint32_t>(static_cast<int32_t>(val));
 }
 
-uint32_t EtsEscompatMap::GetHashCode(EtsObject *&key)
+static uint32_t GetBoxedHash(EtsObject *key, EtsClass::BoxedType type)
+{
+    switch (type) {
+        case EtsClass::BoxedType::INT:
+            return EtsBoxPrimitive<EtsInt>::Unbox(key);
+        case EtsClass::BoxedType::DOUBLE:
+            return GetHashFloats<EtsDouble>(key);
+        case EtsClass::BoxedType::FLOAT:
+            return GetHashFloats<EtsFloat>(key);
+        case EtsClass::BoxedType::LONG:
+            return EtsBoxPrimitive<EtsLong>::Unbox(key);
+        case EtsClass::BoxedType::SHORT:
+            return EtsBoxPrimitive<EtsShort>::Unbox(key);
+        case EtsClass::BoxedType::BYTE:
+            return EtsBoxPrimitive<EtsByte>::Unbox(key);
+        case EtsClass::BoxedType::CHAR:
+            return EtsBoxPrimitive<EtsChar>::Unbox(key);
+        case EtsClass::BoxedType::BOOLEAN:
+            return EtsBoxPrimitive<EtsBoolean>::Unbox(key);
+        default:
+            LOG(FATAL, RUNTIME) << "Unknown boxed type";
+            UNREACHABLE();
+    }
+}
+
+uint32_t EtsEscompatMap::GetHashCode(EtsObject *key)
 {
     auto *klass = key->GetClass();
+    if (klass->IsEtsEnum()) {
+        key = EtsBaseEnum::FromEtsObject(key)->GetValue();
+        klass = key->GetClass();
+    }
     if (klass->IsNullValue()) {
         return 0;
     }
 
     if (klass->IsBoxed()) {
-        auto type = klass->GetBoxedType();
-        switch (type) {
-            case EtsClass::BoxedType::INT:
-                return EtsBoxPrimitive<EtsInt>::Unbox(key);
-            case EtsClass::BoxedType::DOUBLE:
-                return GetHashFloats<EtsDouble>(key);
-            case EtsClass::BoxedType::FLOAT:
-                return GetHashFloats<EtsFloat>(key);
-            case EtsClass::BoxedType::LONG:
-                return EtsBoxPrimitive<EtsLong>::Unbox(key);
-            case EtsClass::BoxedType::SHORT:
-                return EtsBoxPrimitive<EtsShort>::Unbox(key);
-            case EtsClass::BoxedType::BYTE:
-                return EtsBoxPrimitive<EtsByte>::Unbox(key);
-            case EtsClass::BoxedType::CHAR:
-                return EtsBoxPrimitive<EtsChar>::Unbox(key);
-            case EtsClass::BoxedType::BOOLEAN:
-                return EtsBoxPrimitive<EtsBoolean>::Unbox(key);
-            default:
-                LOG(FATAL, RUNTIME) << "Unknown boxed type";
-                UNREACHABLE();
-        }
+        return GetBoxedHash(key, klass->GetBoxedType());
     }
 
     if (klass->IsStringClass()) {

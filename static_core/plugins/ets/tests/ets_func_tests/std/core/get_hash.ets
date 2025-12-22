@@ -175,6 +175,75 @@ function testLong(): void {
   }
 }
 
+enum Status {
+  PENDING,
+  PROCESSING,
+  COMPLETED
+}
+function testGetHashEnum01() {
+  const set: Set<Status | number> = new Set<Status | number>([
+      Status.PENDING,
+      0, // Numeric equivalent of PENDING
+      Status.PROCESSING,
+      1, // Numeric equivalent of PROCESSING
+      Status.COMPLETED
+  ]);
+
+  const values: (Status | number)[] = Array.from(set.values());
+  const arr = new Array<int>(0, 1, 2)
+  arktest.assertEQ(values.length, 3)
+  arktest.assertEQ(values.toString(), arr.toString())
+}
+
+function testGetHashEnum02() {
+  const map: Map<Status | number, string> = new Map<Status | number, string>([
+      [Status.PENDING, "1"],
+      [0, "1"],// Numeric equivalent of PENDING
+      [Status.PROCESSING, "1"],
+      [1, "1"],// Numeric equivalent of PROCESSING
+      [Status.COMPLETED, "1"]
+  ]);
+  const values = Array.from(map.keys());
+  const arr = new Array<int>(0, 1, 2)
+  arktest.assertEQ(values.length, 3)
+  arktest.assertEQ(values.toString(), arr.toString())
+}
+
+enum StatusString {
+  PENDING = "pending",
+  PROCESSING = "processing",
+  COMPLETED = "completed"
+}
+
+function testGetHashEnumString01() {
+  const set: Set<StatusString | string> = new Set<StatusString | string>([
+    StatusString.PENDING,
+    "pending", // String equivalent of PENDING
+    StatusString.PROCESSING,
+    "processing", // String equivalent of PROCESSING
+    StatusString.COMPLETED
+  ]);
+
+  const values: (StatusString | string)[] = Array.from(set.values());
+  const arr = new Array<string>("pending", "processing", "completed")
+  arktest.assertEQ(values.length, 3)
+  arktest.assertEQ(values.toString(), arr.toString())
+}
+
+function testGetHashEnumString02() {
+  const map: Map<StatusString | string, string> = new Map<StatusString | string, string>([
+    [StatusString.PENDING, "1"],
+    ["pending", "1"], // String equivalent of PENDING
+    [StatusString.PROCESSING, "1"],
+    ["processing", "1"], // String equivalent of PROCESSING
+    [StatusString.COMPLETED, "1"]
+  ]);
+  const values = Array.from(map.keys());
+  const arr = new Array<string>("pending", "processing", "completed")
+  arktest.assertEQ(values.length, 3)
+  arktest.assertEQ(values.toString(), arr.toString())
+}
+
 ////////////////////////////////////////////////////////////////
 
 function main(): int {
@@ -203,6 +272,10 @@ function main(): int {
     suite.addTest("Get hash code of bigint", testGetHashCode20)
     suite.addTest("Get hash code of object", testGetHashCode21)
     suite.addTest("Get hash code of testLong", testLong)
+    suite.addTest("Get hash code of enum", testGetHashEnum01)
+    suite.addTest("Get hash code of enum", testGetHashEnum02)
+    suite.addTest("Get hash code of enum string", testGetHashEnumString01)
+    suite.addTest("Get hash code of enum string", testGetHashEnumString02)
 
     return suite.run()
 }

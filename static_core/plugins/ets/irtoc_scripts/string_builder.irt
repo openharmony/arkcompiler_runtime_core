@@ -534,7 +534,7 @@ Label(:ForEachBufferSlot)
   # -------------------
   # Object is a string
   # -------------------
-  flat_str := try_use_cached_flat_str_reject_sliced(obj)
+  flat_str := try_use_cached_flat_str_reject_sliced(obj, AsGlobalLabel(:SlowPathEntrypoint))
   str_len := LoadI(flat_str).Imm(Constants::STRING_LENGTH_OFFSET).i32
   src_data := AddI(Cast(flat_str).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
   src_len := ShrI(str_len).Imm(Constants::STRING_LENGTH_SHIFT).i32
@@ -582,7 +582,7 @@ Label(:NextObject)
   Return(new_str).ptr
 
   # SlowPath if new string can not be allocated in TLAB
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
     Return(Call(sb).Method('StringBuilderToStringEntrypoint').ptr).ptr
   else

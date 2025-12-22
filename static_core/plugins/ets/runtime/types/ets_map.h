@@ -118,7 +118,7 @@ public:
         return data->Get(MAP_IDX_FACTOR * idx + 1);
     }
 
-    static uint32_t GetHashCode(EtsObject *&key);
+    static uint32_t GetHashCode(EtsObject *key);
 
 private:
     EtsObjectArray *GetData(EtsCoroutine *coro)

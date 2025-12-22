@@ -26,5 +26,6 @@
 #include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/types/ets_set.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"
+#include "plugins/ets/runtime/types/ets_base_enum.h"
 
 #endif  // PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H

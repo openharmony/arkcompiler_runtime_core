@@ -36,6 +36,8 @@ module RuntimeConstants
   ETS_CLASS_IS_VALUE_TYPED_FLAG = "cross_values::GetEtsClassIsValueTypedFlag(graph->GetArch())"
   ETS_CLASS_IS_BIGINT_FLAG = "cross_values::GetEtsClassIsBigintFlag(graph->GetArch())"
 
+  ETS_CLASS_IS_ENUM_FLAG = "cross_values::GetEtsClassIsEnumFlag(graph->GetArch())"
+
   INT_MAX = "std::numeric_limits<int>::max()"
   INT_MIN = "std::numeric_limits<int>::min()"
 
@@ -95,6 +97,10 @@ end
 
 scoped_macro(:isValueTypedType) do |flags|
   AndI(flags).Imm(RuntimeConstants::ETS_CLASS_IS_VALUE_TYPED_FLAG).u32
+end
+
+scoped_macro(:isEnumType) do |flags|
+  AndI(flags).Imm(RuntimeConstants::ETS_CLASS_IS_ENUM_FLAG).u32
 end
 
 # isChar, isShort, isInt, isLong, isFloat, isDouble
@@ -205,6 +211,15 @@ Label(:Done)
   hash_code := Phi(hash_code_double, hash_code_float, hash_code_int, hash_code_char, hash_code_short, hash_code_byte).u32
 end
 
+
+scoped_macro(:hashcode_string) do |value, slowpath|
+  str := try_use_cached_flat_str_reject_sliced(value, slowpath)
+  hash := fetchHashCodeString(str) 
+  If(hash, 0).EQ.Unlikely { 
+    GotoGlobal(slowpath)
+  } 
+  Cast(Cast(hash).i32).i64
+end
 ################################################################
 
 def GenerateGetHashCodeByValue(cgmode)
@@ -222,12 +237,7 @@ def GenerateGetHashCodeByValue(cgmode)
 
     klass := load_class(obj)
     If(isString(klass), 0).NE {
-      str := try_use_cached_flat_str_reject_sliced(obj)
-      hash := fetchHashCodeString(str)
-      If(hash, 0).EQ.Unlikely {
-        Goto(:SlowPathEntrypointString)
-      }
-      Return(Cast(Cast(hash).i32).i64).i64
+      Return(hashcode_string(obj, AsGlobalLabel(:SlowPathEntrypointString))).i64
     }
 
     flags := LoadI(klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
@@ -237,6 +247,19 @@ def GenerateGetHashCodeByValue(cgmode)
     If(isBigintType(flags), 0).NE.Unlikely {
       Goto(:SlowPathEntrypointBigint)
     }
+    If(isEnumType(flags), 0).NE.Unlikely {
+      enum_value := LoadI(obj).Imm(EtsConstants::ENUM_VALUE_OFFSET).ref
+      enum_klass := load_class(enum_value)
+      enum_flags := LoadI(enum_klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
+      
+      If(isBoxedType(enum_flags), 0).NE.Likely {
+        Return(Cast(Cast(calcHashCode(enum_value, enum_flags)).i32).i64).i64
+      }
+
+      If(isString(enum_klass), 0).NE {
+        Return(hashcode_string(enum_value, AsGlobalLabel(:SlowPathEntrypointEnumString))).i64
+      }
+    }
 
     If(isHashedObject(obj), 0).EQ.Unlikely {
       Goto(:SlowPathEntrypointObject)
@@ -244,8 +267,12 @@ def GenerateGetHashCodeByValue(cgmode)
 
     Return(Cast(Cast(fetchHashCodeObject(obj)).i32).i64).i64
 
-Label(:SlowPathEntrypoint)  # jump here from try_use_cached_flat_str_reject_sliced macro
-Label(:SlowPathEntrypointString)
+LabelGlobal(:SlowPathEntrypointEnumString)
+  entrypoint = get_entrypoint_offset("GET_HASH_CODE_STRING_ODD_SAVED")
+  Intrinsic(:SLOW_PATH_ENTRY, enum_value).AddImm(entrypoint).MethodAsImm("GetHashCodeStringOddSavedBridge").Terminator.i64
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+
+LabelGlobal(:SlowPathEntrypointString)
   if mode == :NativePlus
     Return(Call(obj).Method('GetHashCodeStringSlowPath').i64).i64
   else
@@ -377,7 +404,7 @@ def GenerateSameValueZero(cgmode)
         Goto(:SlowPathEntrypoint)
       }
       ep_offset = get_entrypoint_offset("ETS_STRING_EQUALS")
-      flatStr := try_use_cached_flat_str_reject_sliced(o1)
+      flatStr := try_use_cached_flat_str_reject_sliced(o1, AsGlobalLabel(:SlowPathEntrypoint))
       # StringEqualsCompressed requires flat string as arg0
       LiveOut(flatStr).DstReg(regmap[:arg0]).ref
       LiveOut(o2).DstReg(regmap[:arg1]).ref
@@ -393,7 +420,7 @@ def GenerateSameValueZero(cgmode)
       Return(0).b
     }
 
-  Label(:SlowPathEntrypoint)
+  LabelGlobal(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("SAME_VALUE_ZERO_SLOW_PATH")
     Intrinsic(:SLOW_PATH_ENTRY, o1, o2).AddImm(entrypoint).MethodAsImm("SameValueZeroUsualBridge").Terminator.b
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
