@@ -3063,9 +3063,8 @@ Receiver Type
     frontend_status: Done
 
 *Receiver type* is the type of the *receiver parameter* in a function,
-function type, and lambda with receiver. A *receiver type* may be an interface
-type, a class type, an array type, or a type parameter. Otherwise, a
-:index:`compile-time error` occurs.
+function type, and lambda with receiver. 
+
 The use of array type as a *receiver type* is presented in the example below:
 
 .. code-block:: typescript
@@ -3077,6 +3076,21 @@ The use of array type as a *receiver type* is presented in the example below:
 
       let x: number[] = [1, 2]
       x.addElements(3, 4)
+
+The use of union type as *receiver type* is presented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+      function process_union(this: number | string) {
+          console.log (this)
+      }
+
+      (5).process_union ()
+      ("555").process_union ()
+      process_union (5)
+      process_union ("555")
+
 
 .. index::
    receiver type
