@@ -820,7 +820,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public override filter(predicate: (value: T, index: int, array: Array<T>) => boolean): Array<T> {
         const res = new Array<T>()
-        for (let i: int = 0; i < this.actualLength; i++) {
+        const len = this.actualLength
+        for (let i: int = 0; i < len && i < this.actualLength; i++) {
             const val = this.$_get_unsafe(i)
             if (predicate(val, i, this)) {
                 res.push(val)

@@ -819,7 +819,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public override filter(predicate: (value: T, index: int, array: Array<T>) => boolean): Array<T> {
         const res = new Array<T>()
-        for (let i: int = 0; i < this.actualLength; i++) {
+        const len = this.actualLength
+        for (let i: int = 0; i < len && i < this.actualLength; i++) {
             const val = this.$_get_unsafe(i)
             if (predicate(val, i, this)) {
                 res.push(val)
@@ -1053,11 +1054,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns the value of the first element in the array or undefined
      */
     public override find(predicate: (value: T, index: int, array: Array<T>) => boolean): T | undefined {
-        const res = this.findIndex(predicate)
-        if (res == -1) {
-            return undefined
+        const len = this.actualLength
+        for (let i = 0; i < len && i < this.actualLength; i++) {
+            const val = this.$_get_unsafe(i);
+            if (predicate(val, i, this)) {
+                return val;
+            }
         }
-        return this.$_get_unsafe(res);
+        return undefined;
     }
 
     /**
@@ -1071,7 +1075,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns found element index or -1 otherwise
      */
     public override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): int {
-        for (let i = 0; i < this.actualLength; i++) {
+        const len = this.actualLength
+        for (let i = 0; i < len && i < this.actualLength; i++) {
             if (predicate(this.$_get_unsafe(i), i, this)) {
                 return i;
             }
@@ -1088,7 +1093,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns found element or undefined otherwise
      */
     public override findLast(predicate: (elem: T, index: int, array: Array<T>) => boolean): T | undefined {
-        for (let i = this.actualLength - 1; i >= 0; i--) {
+        for (let i = this.actualLength - 1; i >= 0 && i < this.actualLength; i--) {
             const val = this.$_get_unsafe(i);
             if (predicate(val, i, this)) {
                 return val;
@@ -1126,7 +1131,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
      */
     public override some(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
-        for (let i = 0; i < this.actualLength; i++) {
+        const len = this.actualLength
+        for (let i = 0; i < len && i < this.actualLength; i++) {
             if (predicate(this.$_get_unsafe(i), i, this)) {
                 return true
             }
@@ -1144,7 +1150,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns index of first element satisfying to predicate, -1 if no such element
      */
     public override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): int {
-        for (let i = this.actualLength - 1; i >= 0; i--) {
+        for (let i = this.actualLength - 1; i >= 0 && i < this.actualLength; i--) {
             if (predicate(this.$_get_unsafe(i), i, this)) {
                 return i
             }
@@ -1164,7 +1170,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(0);
-        for (let i = 1; i < this.actualLength; i++) {
+        const len = this.actualLength
+        for (let i = 1; i < len && i < this.actualLength; i++) {
             acc = callbackfn(acc, this.$_get_unsafe(i), i, this)
         }
         return acc
@@ -1181,7 +1188,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
-        for (let i = 0; i < this.actualLength; i++) {
+        const len = this.actualLength
+        for (let i = 0; i < len && i < this.actualLength; i++) {
             acc = callbackfn(acc, this.$_get_unsafe(i), i, this)
         }
         return acc
@@ -1199,7 +1207,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            acc = callbackfn(acc, this.$_get_unsafe(i), i, this)
+            if (i < this.actualLength) {
+                acc = callbackfn(acc, this.$_get_unsafe(i), i, this)
+            }
         }
         return acc
     }
@@ -1211,7 +1221,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public override forEach(callbackfn: (value: T, index: int, array: Array<T>) => void): void {
         const len0 = this.actualLength;
-        for (let i = 0; i < len0; i++) {
+        for (let i = 0; i < len0 && i < this.actualLength; i++) {
             if (i >= this.actualLength) {
                 break
             }
@@ -1667,7 +1677,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public override map<U>(callbackfn: (value: T, index: int, array: Array<T>) => U): Array<U> {
         const len = this.actualLength;
         let res : FixedArray<Any> = new Any[len];
-        for (let i = 0; i < this.actualLength; i++) {
+        for (let i = 0; i < len && i < this.actualLength; i++) {
             res[i] = callbackfn(this.$_get_unsafe(i), i, this);
         }
         return new Array<U>(FROM_BUFFER, res);
