@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,29 @@
 #include <set>
 
 namespace ark::ets::stdlib::intl {
+
+namespace refs {
+extern ani_class g_resolvedOptionsClass;
+
+extern ani_field g_locale_field;
+extern ani_field g_compactDisplay_field;
+extern ani_field g_currencySign_field;
+extern ani_field g_currency_field;
+extern ani_field g_currencyDisplay_field;
+extern ani_field g_minFractionDigits_field;
+extern ani_field g_maxFractionDigits_field;
+extern ani_field g_minSignificantDigits_field;
+extern ani_field g_maxSignificantDigits_field;
+extern ani_field g_minIntegerDigits_field;
+extern ani_field g_notation_field;
+extern ani_field g_numberingSystem_field;
+extern ani_field g_signDisplay_field;
+extern ani_field g_style_field;
+extern ani_field g_unit_field;
+extern ani_field g_unitDisplay_field;
+extern ani_field g_useGrouping_field;
+extern ani_field g_numberFormat_options_field;
+}  // namespace refs
 
 constexpr std::string_view COMPACT_DISPLAY_SHORT = "short";
 constexpr std::string_view COMPACT_DISPLAY_LONG = "long";

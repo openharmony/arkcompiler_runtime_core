@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -374,30 +374,47 @@ ani_status InitNumRangeFormatter(ani_env *env, const ParsedOptions &options, Loc
     return err;
 }
 
+static std::string GetFieldStrById(ani_env *env, ani_object obj, ani_field fieldId, bool allowUndefined)
+{
+    ani_ref ref = nullptr;
+    ANI_FATAL_IF_ERROR(env->Object_GetField_Ref(obj, fieldId, &ref));
+    if (allowUndefined) {
+        ani_boolean isUndefined = ANI_FALSE;
+        ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(ref, &isUndefined));
+        if (isUndefined) {
+            return std::string();
+        }
+    }
+
+    auto aniStr = static_cast<ani_string>(ref);
+    ASSERT(aniStr != nullptr);
+    return ConvertFromAniString(env, aniStr);
+}
+
 void ParseOptions(ani_env *env, ani_object self, ParsedOptions &options)
 {
     ani_ref optionsRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(self, "options", &optionsRef));
+    ANI_FATAL_IF_ERROR(env->Object_GetField_Ref(self, refs::g_numberFormat_options_field, &optionsRef));
     auto optionsObj = static_cast<ani_object>(optionsRef);
     ASSERT(optionsObj != nullptr);
 
-    options.locale = GetFieldStr(env, optionsObj, "_locale");
-    options.compactDisplay = GetFieldStrUndefined(env, optionsObj, "_compactDisplay");
-    options.currencySign = GetFieldStrUndefined(env, optionsObj, "_currencySign");
-    options.currency = GetFieldStrUndefined(env, optionsObj, "_currency");
-    options.currencyDisplay = GetFieldStrUndefined(env, optionsObj, "_currencyDisplay");
-    options.minFractionDigits = GetFieldStr(env, optionsObj, "minFracStr");
-    options.maxFractionDigits = GetFieldStr(env, optionsObj, "maxFracStr");
-    options.minSignificantDigits = GetFieldStrUndefined(env, optionsObj, "minSignStr");
-    options.maxSignificantDigits = GetFieldStrUndefined(env, optionsObj, "maxSignStr");
-    options.minIntegerDigits = GetFieldStr(env, optionsObj, "minIntStr");
-    options.notation = GetFieldStrUndefined(env, optionsObj, "_notation");
-    options.numberingSystem = GetFieldStr(env, optionsObj, "_numberingSystem");
-    options.signDisplay = GetFieldStrUndefined(env, optionsObj, "_signDisplay");
-    options.style = GetFieldStr(env, optionsObj, "_style");
-    options.unit = GetFieldStrUndefined(env, optionsObj, "_unit");
-    options.unitDisplay = GetFieldStrUndefined(env, optionsObj, "_unitDisplay");
-    options.useGrouping = GetFieldStrUndefined(env, optionsObj, "useGroupingStr");
+    options.locale = GetFieldStrById(env, optionsObj, refs::g_locale_field, false);
+    options.compactDisplay = GetFieldStrById(env, optionsObj, refs::g_compactDisplay_field, true);
+    options.currencySign = GetFieldStrById(env, optionsObj, refs::g_currencySign_field, true);
+    options.currency = GetFieldStrById(env, optionsObj, refs::g_currency_field, true);
+    options.currencyDisplay = GetFieldStrById(env, optionsObj, refs::g_currencyDisplay_field, true);
+    options.minFractionDigits = GetFieldStrById(env, optionsObj, refs::g_minFractionDigits_field, true);
+    options.maxFractionDigits = GetFieldStrById(env, optionsObj, refs::g_maxFractionDigits_field, true);
+    options.minSignificantDigits = GetFieldStrById(env, optionsObj, refs::g_minSignificantDigits_field, true);
+    options.maxSignificantDigits = GetFieldStrById(env, optionsObj, refs::g_maxSignificantDigits_field, true);
+    options.minIntegerDigits = GetFieldStrById(env, optionsObj, refs::g_minIntegerDigits_field, true);
+    options.notation = GetFieldStrById(env, optionsObj, refs::g_notation_field, true);
+    options.numberingSystem = GetFieldStrById(env, optionsObj, refs::g_numberingSystem_field, true);
+    options.signDisplay = GetFieldStrById(env, optionsObj, refs::g_signDisplay_field, true);
+    options.style = GetFieldStrById(env, optionsObj, refs::g_style_field, true);
+    options.unit = GetFieldStrById(env, optionsObj, refs::g_unit_field, true);
+    options.unitDisplay = GetFieldStrById(env, optionsObj, refs::g_unitDisplay_field, true);
+    options.useGrouping = GetFieldStrById(env, optionsObj, refs::g_useGrouping_field, true);
 }
 
 }  // namespace ark::ets::stdlib::intl

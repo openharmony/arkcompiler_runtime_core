@@ -160,15 +160,18 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlFormattersCache.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocaleMatch.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCollator.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCollatorCache.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocale.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocaleHelper.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlPluralRules.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlSegmenter.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/stdlib_ani_helpers.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDateTimeFormat.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDateTimeFormatCache.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlListFormat.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDisplayNames.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlRelativeTimeFormat.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlRelativeTimeFormatCache.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLanguageTag.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/Process.cpp
 )

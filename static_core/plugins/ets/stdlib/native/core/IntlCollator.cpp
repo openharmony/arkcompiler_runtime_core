@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #include "IntlCollator.h"
 #include "IntlCommon.h"
+#include "IntlState.h"
+#include "IntlCollatorCache.h"
 #include "ani.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "libarkbase/macros.h"
@@ -83,45 +85,23 @@ ani_string StdCoreIntlCollatorRemovePunctuation(ani_env *env, [[maybe_unused]] a
 }
 
 ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class klass, ani_string collationIn,
-                                        ani_string langIn, ani_string firstStr, ani_string secondStr)
+                                        ani_string langIn, ani_string firstStr, ani_string secondStr,
+                                        ani_string caseFirstIn)
 {
     auto collation = ConvertFromAniString(env, collationIn);
     auto lang = ConvertFromAniString(env, langIn);
     auto str1 = ConvertFromAniString(env, firstStr);
     auto str2 = ConvertFromAniString(env, secondStr);
+    auto caseFirst = ConvertFromAniString(env, caseFirstIn);
 
-    auto locale = GetLocale(env, lang);
-    UErrorCode status = U_ZERO_ERROR;
-    icu::StringPiece collationName = "collation";
-    icu::StringPiece collationValue = collation.c_str();
-    locale.setUnicodeKeywordValue(collationName, collationValue, status);
-    if (UNLIKELY(U_FAILURE(status))) {
-        const auto errorMessage = std::string("Collation '").append(collation).append("' is invalid or not supported");
-        ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), "C{std.core.String}:");
+    icu::Collator *collator = g_intlState->collatorCache.GetOrCreateCollator(env, lang, collation, caseFirst);
+    if (collator == nullptr) {
+        ThrowNewError(env, "std.core.RuntimeError", "Failed to create Collator instance for comparison",
+                      "C{std.core.String}:");
         return 0;
     }
 
-    status = U_ZERO_ERROR;
-    std::unique_ptr<icu::Collator> collator(icu::Collator::createInstance(locale, status));
-    if (UNLIKELY(U_FAILURE(status))) {
-        icu::UnicodeString dispName;
-        locale.getDisplayName(dispName);
-        std::string localeName;
-        dispName.toUTF8String(localeName);
-        const auto errorMessage = std::string("Failed to create the collator for ").append(localeName);
-        ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), "C{std.core.String}:");
-    }
-
-    auto strPiece1 = icu::StringPiece(str1.c_str());
-    auto strPiece2 = icu::StringPiece(str2.c_str());
-    if ((strPiece1.empty() != 0) && (strPiece2.empty() != 0)) {
-        auto res = collator->compareUTF8(strPiece1, strPiece2, status);
-        if (UNLIKELY(U_FAILURE(status))) {
-            ThrowNewError(env, "std.core.RuntimeError", "Comparison failed", "C{std.core.String}:");
-        }
-        return res;
-    }
-
+    UErrorCode status = U_ZERO_ERROR;
     icu::UnicodeString source = StdStrToUnicode(str1);
     icu::UnicodeString target = StdStrToUnicode(str2);
     auto res = collator->compare(source, target, status);
@@ -138,9 +118,10 @@ ani_status RegisterIntlCollator(ani_env *env)
                                          reinterpret_cast<void *>(StdCoreIntlCollatorRemovePunctuation)},
                     ani_native_function {"removeAccents", "C{std.core.String}:C{std.core.String}",
                                          reinterpret_cast<void *>(StdCoreIntlCollatorRemoveAccents)},
-                    ani_native_function {"compareByCollation",
-                                         "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}:d",
-                                         reinterpret_cast<void *>(StdCoreIntlCollatorLocaleCmp)}};
+                    ani_native_function {
+                        "compareByCollation",
+                        "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}:d",
+                        reinterpret_cast<void *>(StdCoreIntlCollatorLocaleCmp)}};
 
     ani_class collatorClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.Collator", &collatorClass));

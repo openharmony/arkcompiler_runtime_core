@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,9 @@ function main(): int {
     suite.addTest("testNumberFormat0004", testNumberFormat0004);
     suite.addTest("testNumberFormat0005", testNumberFormat0005);
     suite.addTest("testNumberFormat0006", testNumberFormat0006);
+    suite.addTest("testNumberFormat0006", testNumberFormat0007);
+    suite.addTest("testNumberFormat0006", testNumberFormat0008);
+    suite.addTest("testNumberFormat0006", testNumberFormat0009);
     return suite.run();
 }
 
@@ -65,4 +68,28 @@ function testNumberFormat0006() {
     }
     let format = Intl.NumberFormat.$_invoke("de", options).format(100);
     arktest.assertEQ(format, "10.000\xa0%");
+}
+
+function testNumberFormat0007() {
+    let options: Intl.NumberFormatOptions = {
+        style: 'unit', unit: 'liter', unitDisplay: 'long'
+    }
+    let format = Intl.NumberFormat.$_invoke('en-US', options).format(12345);
+    arktest.assertEQ(format, "12,345 liters");
+}
+
+function testNumberFormat0008() {
+    let options: Intl.NumberFormatOptions = {
+        notation: 'compact', compactDisplay: 'short'
+    }
+    let format = Intl.NumberFormat.$_invoke('en-US', options).format(1234567);
+    arktest.assertEQ(format, "1.2M");
+}
+
+function testNumberFormat0009() {
+    let options: Intl.NumberFormatOptions = {
+        signDisplay: 'always'
+    }
+    let format = Intl.NumberFormat.$_invoke('en-US', options).format(123);
+    arktest.assertEQ(format, "+123");
 }
