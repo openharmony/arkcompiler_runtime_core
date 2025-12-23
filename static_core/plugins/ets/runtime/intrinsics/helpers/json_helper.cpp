@@ -610,6 +610,8 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         isSuccessful = SerializeJSONNullValue();
     } else if (value->IsInstanceOf(platformTypes->interopJSValue)) {
         isSuccessful = false;
+    } else if (valueCls->IsEtsEnum()) {
+        isSuccessful = false;
     } else {
         if (value->IsInstanceOf(platformTypes->coreRegExpResultArray)) {
             coro->ManagedCodeEnd();
