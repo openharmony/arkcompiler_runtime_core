@@ -1319,10 +1319,10 @@ Optional Parameters
         ;
 
 The first form contains an ``expression`` that specifies a *default value*.
-It is called a *parameter with default value*. The value of the parameter is set
-to the *default value* if the argument corresponding to that parameter is
-omitted in a function or a method call, or if it has *undefined* passed as an
-argument:
+It is called a *parameter with default value*, and acts as an optional parameter
+of the type of a function and of its call sites. If a corresponding argument
+value is `undefined`` (i.e., a parameter is omitted, or `undefined` is
+passed explicitly), then the default value is used:
 
 .. index::
    optional parameter

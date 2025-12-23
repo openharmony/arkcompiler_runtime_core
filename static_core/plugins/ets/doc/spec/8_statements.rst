@@ -20,9 +20,9 @@ Statements
 
 *Statements* are designed to control execution.
 
-Some statements are simple like single expressions (see
-:ref:`Expression Statements`); other statements consist of other statements, and
-take many lines of program code like :ref:`Block` or :ref:`If statements`:
+Some statements are simple like a single *expressionStatement*
+(see :ref:`Expression Statements`), while others like :ref:`Block` or
+:ref:`if Statements` take several lines of program code.
 
 .. code-block:: typescript
 
@@ -38,6 +38,10 @@ take many lines of program code like :ref:`Block` or :ref:`If statements`:
 .. note:: 
    The difference between statements and expressions is that :ref:`Expressions`
    evaluate a value of a certain type, while statements do not.
+
+   From the viewpoint of the grammar rules, any expression ending in the
+   semicolon '``;``' forms an *expressionStatement*. A missing semicolon is added
+   automatically to an expression used as a statement.
 
    A statement can consist of one or more expressions, or contain no expression
    at all. For example, the statement ``i = 1`` consists of an assignment

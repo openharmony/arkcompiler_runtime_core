@@ -1069,9 +1069,9 @@ Reference Types
    void type
    type parameter
 
-Variables and constants (see :ref:`Variable and Constant Declarations`) of
-reference types refer to instances of any types called under the term
-*objects* in this document. 
+The term *Objects* is used further in this document to denote any instances
+pointed at by variables and constants of reference types
+(see :ref:`Variable and Constant Declarations`).
 
 Multiple references to an object are possible.
 
@@ -1080,10 +1080,9 @@ stored in its fields. A state of an object that is an array (see
 :ref:`Array Types`) or a tuple (see :ref:`Tuple Types`) is stored in
 its elements.
 
-If two variables of any type except :ref:`Value Types` contain references
-to the same object, and the state of that object is modified in the reference
-of either variable, then the state so modified can be seen in the reference of
-the other variable.
+If two variables of a reference type contain references
+to the same object, and either variable modifies the state of that object,
+then the change of the state is also visible in the other variable.
 
 .. index::
    object
@@ -2316,32 +2315,8 @@ Literal types are represented by the following example:
 .. index::
    literal type
    predefined type
-   conversion
-
-.. note::
-   A :index:`compile-time error` occurs if an expression of a *union*
-   type is compared to a literal value or a constant that does not belong to the
-   values of the *union* type:
-
-.. code-block:: typescript
-   :linenos:
-
-    type BMW_ModelCode = "325" | "530" | "735"
-    let car_code: BMW_ModelCode = "325"
-    if (car_code == "234"){ ... }
-    /*
-       compile-time error as "234" does not belong to
-       values of literal type BMW_ModelCode
-    */
-
-    function model_code_test (code: string) {
-       if (car_code == code) { ... }
-       // This test is to be resolved during program execution
-    }
-
-
-.. index::
    union type
+   conversion
    literal value
    value
 

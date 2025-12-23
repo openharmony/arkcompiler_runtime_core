@@ -6113,13 +6113,6 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
 
 - Both operands are of :ref:`Type bigint` and have the same value;
 
-- One operand is of :ref:`Type bigint`, the other is one of :ref:`Numeric Types`,
-  and the following conditions are met:
-
-  1. Fractional part  of a ``numeric`` operand (*R = F % 1*) is *0* (zero), and
-  2. Integer part  of a ``numeric`` operand converted to ``bigint``
-     (*BigInt(F - R)*) has the same value as the ``bigint`` operand.
-
 - Both operands are of :ref:`Numeric Types` and have the same value except ``NaN``
   (see :ref:`Numeric Equality Operators` for detail) after a numeric conversion
   (see :ref:`Widening numeric conversions`,
@@ -6355,26 +6348,8 @@ operators ``'=='`` or ``'==='`` produce the value ``true``. Otherwise, the
 result is ``false``. The result produced by ``a != b`` and ``a !== b``
 is the same as the result of ``!(a == b)`` and ``!(a === b)``, respectively.
 
-A special case is where one operand in an equality operator is of type
-``bigint``, and the other operand is of type ``numeric``. In this case, not
-only the operand ``bigint`` must be compared to the result of the ``BigInt()``
-conversion of the numeric operand (thus truncating the fractional part), but
-the fractional part of the numeric operand must be also taken into account.
-
-Where the left operand *N* is of type ``bigint``, and the right operand *F* is
-of any numeric type, *R = F % 1* is the fractional part of *F*), and
-*I = BigInt(F - R)* is the integer part of *F* converted to ``bigint``, the
-result of the operator ``'=='`` or ``'==='`` produces the value ``true`` if
-*N == I*, and *R == 0*. The results produced by ``a != b`` and ``a !== b`` are
-the same as the results of ``!(a == b)`` and ``!(a === b)``, respectively.
-
-.. code-block:: typescript
-   :linenos:
-
-   console.log(2n == 2)    // true
-   console.log(2n == 2.0)  // true
-   console.log(2n == 2.5)  // false
-
+If one operand is of type ``bigint``, and the other is of a numeric type, then
+the result is ``false``.
 
 .. _Function Type Equality Operators:
 
