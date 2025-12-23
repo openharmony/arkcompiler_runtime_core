@@ -1293,13 +1293,27 @@ export namespace taskpool {
     }
 
     /**
-     * Execute a concurrent task
+     * Execute a concurrent task with default priority
      *
      * @param task The task to execute
-     * @param { Priority } [priority] priority for the task
      * @returns { Promise<Any> } Promise for result of executed task
      */
-    export function execute(task: Task, priority?: Priority): Promise<Any> {
+    export function execute(task: Task): Promise<Any>{
+        return executeImpl(task);
+    }
+
+    /**
+     * Execute a concurrent task with specified priority
+     *
+     * @param task The task to execute
+     * @param { Priority } priority for the task
+     * @returns { Promise<Any> } Promise for result of executed task
+     */
+    export function execute(task: Task, priority: Priority): Promise<Any>{
+        return executeImpl(task, priority);
+    }
+
+    function executeImpl(task: Task, priority?: Priority): Promise<Any> {
         initWorkerPoolSync();
         InternalTask.of(task).checkExecution();
         taskSubmitted(task);
@@ -1418,13 +1432,27 @@ export namespace taskpool {
     }
 
     /**
-     * Delayed execution of a concurrent task
+     * Execute a task periodically with default priority
      *
      * @param { int } period period in ms to execute task
      * @param { Task } task The task to execute
-     * @param { Priority } [priority] priority for task
      */
-    export function executePeriodically(period: int, task: Task, priority?: Priority): void {
+    export function executePeriodically(period: int, task: Task): void {
+        return executePeriodicallyImpl(period, task);
+    }
+
+    /**
+     * Execute a task periodically with specified priority
+     *
+     * @param { int } period period in ms to execute task
+     * @param { Task } task The task to execute
+     * @param { Priority } priority priority for task
+     */
+    export function executePeriodically(period: int, task: Task, priority: Priority): void {
+        return executePeriodicallyImpl(period, task, priority);
+    }
+
+    function executePeriodicallyImpl(period: int, task: Task, priority?: Priority): void {
         initWorkerPoolSync();
         InternalTask.of(task).checkExecutionForPeriodTask(period);
         InternalTask.of(task).isSubmitted = true;
