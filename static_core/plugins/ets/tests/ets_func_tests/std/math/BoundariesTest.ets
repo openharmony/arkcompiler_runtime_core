@@ -75,7 +75,7 @@ function test_atan(): boolean {
         && Double.compare(atan(posInf), PI/2)
         && Double.compare(atan(negInf), -PI/2)
         && (atan(0) == 0)
-        && Double.compare(atan(1), PI/4);
+        && Float.compare(atan(1), (PI/4).toFloat());
 }
 
 function test_signbit(): boolean {

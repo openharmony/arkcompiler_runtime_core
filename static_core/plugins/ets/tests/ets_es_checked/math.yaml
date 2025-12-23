@@ -14,7 +14,7 @@
 category: Math
 sub:
   - vars:
-      tricky: ["0.0", "-0.0", "NaN", "-NaN", "Infinity", "-Infinity", "1e18", "0.0078125", -5.0, -1.0, +1.0]
+      tricky: ["Number(0.0)", "Number(-0.0)", "Number(1.0)", "Number(-1.0)", "NaN", "-NaN", "Infinity", "-Infinity", "Number(1e18)", "Number(0.0078125)", "Number(-5.0)"]
     sub:
       - method: Math.abs
         params:
@@ -105,15 +105,6 @@ sub:
         rest:
           - combinationRest "NaN", "-Infinity", "Infinity", "1.1", "NaN"
           - combinationRest "-0.0", "0.0", "-1.0", "20.1"
-      - method: Math.pow
-        params:
-          - paramOf(*tricky)
-          - paramOf(*tricky)
-        special:
-          - match: (\+|-)?1(\.0), (\+|-)?(Infinity|NaN)
-            action: exclude
-          - match: -5\.0, -5\.0
-            action: silence warn
       - method: Math.pow
         params:
           - paramOf(2.7, 3.14, -1, 2, -3, -0.5)

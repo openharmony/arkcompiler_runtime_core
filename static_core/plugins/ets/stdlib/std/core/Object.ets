@@ -48,7 +48,49 @@ export class Object {
     * @returns result of the conversion
     */
     public toString(): String {
-        return reflect.Value.of(this).toString()
+        const thisObj = this
+        if (thisObj instanceof Function) {
+            return "Cannot get source code of function"
+        }
+
+        const thisType = Class.of(thisObj)
+        if (thisType.isFixedArray()) {
+            if (thisObj instanceof FixedArray<Any>) {
+                const len = thisObj.length
+                if (len == 0) {
+                    return ""
+                }
+
+                const res = new StringBuilder()
+                for (let i = 0; i < len - 1; i++) {
+                    res.append("" + thisObj[i]).append(",")
+                }
+                res.append("" + thisObj[len - 1])
+                return res.toString()
+            }
+
+            if (thisObj instanceof FixedArray<boolean>) {
+                return join(thisObj, ",")
+            } else if (thisObj instanceof FixedArray<byte>) {
+                return join(thisObj, ",")
+            } else if (thisObj instanceof FixedArray<char>) {
+                return join(thisObj, ",")
+            } else if (thisObj instanceof FixedArray<short>) {
+                return join(thisObj, ",")
+            } else if (thisObj instanceof FixedArray<int>) {
+                return join(thisObj, ",")
+            } else if (thisObj instanceof FixedArray<long>) {
+                return join(thisObj, ",")
+            } else if (thisObj instanceof FixedArray<float>) {
+                return join(thisObj, ",")
+            } else if (thisObj instanceof FixedArray<double>) {
+                return join(thisObj, ",")
+            } else {
+                throw new AssertionError("unexpected FixedArray type: " + thisType.getName())
+            }
+        }
+
+        return "[object Object]"
     }
 
     /**

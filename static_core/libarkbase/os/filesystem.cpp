@@ -46,8 +46,16 @@ void CreateDirectories(const std::string &folderName)
 
 bool IsFileExists(const std::string &filepath)
 {
+    if (filepath.empty()) {
+        return false;
+    }
+#if PANDA_TARGET_WINDOWS
+    DWORD fileAttr = GetFileAttributesA(filepath.c_str());
+    return (fileAttr != INVALID_FILE_ATTRIBUTES);
+#else
     std::ifstream openedFile(filepath);
     return openedFile.good();
+#endif
 }
 
 std::string GetParentDir(const std::string &filepath)

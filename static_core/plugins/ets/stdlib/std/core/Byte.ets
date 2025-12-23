@@ -291,31 +291,7 @@ export final class Byte extends Integral implements Comparable<Byte> {
      * @returns result of the conversion
      */
     public override toString(): String {
-        // Check for zero, log10 would go inf otherwise
-        if (this.value == 0) {
-            return '0';
-        }
-        let val = this.value;
-        let negative: boolean = (val < 0);
-        let digitsNum = Double.toInt(log10(abs(this.value)) + 1);
-        if (negative) {
-            ++digitsNum;
-        }
-        let data : FixedArray<char> = new char[digitsNum];
-        let curPlace = digitsNum - 1;
-        while (val != 0) {
-            let remainder = val % 10;
-            if (negative) {
-                remainder = -remainder;
-            }
-            data[curPlace] = (remainder + c'0'.toInt()).toChar();
-            val /= 10;
-            curPlace -= 1;
-        }
-        if (negative) {
-            data[0] = c'-';
-        }
-        return new String(data);
+        return StringBuilder.toString(this.value);
     }
 
     /**
