@@ -10,26 +10,41 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Modules and Namespaces:
+.. _Namespaces and Modules:
 
-Modules and Namespaces
+Namespaces and Modules
 ######################
 
 .. meta:
     frontend_status: Done
 
-Programs in |LANG| are structured as sequences of elements ready for
-compilation called *modules*. Each module creates its own scope (see
-:ref:`Scopes`). Variables, functions, classes, interfaces, or other
-declarations of a module are only accessible (see :ref:`Accessible`)
-within such a scope if not explicitly exported.
+Programs in |LANG| are structured as sequences of elements ready for compilation
+in the form of *modules* (see :ref:`Module Declarations`). A module is a specific
+form of a namespace called *top-level namespace*. A module can contain nested
+namespaces (see :ref:`Namespace Declarations`).
+
+|
+
+.. _Module Declarations:
+
+Module Declarations
+*******************
+
+.. meta:
+    frontend_status: Done
+
+Each module creates its own scope (see :ref:`Scopes`).
+Variables, functions, classes, interfaces, or other declarations of a module
+are only accessible (see :ref:`Accessible`) within such a scope if not
+explicitly exported (see :ref:`Export Directives`).
 
 A variable, function, class, interface, or other declarations exported from
 a module must be imported first by the module that is to use them.
 
 .. Only exported declarations are available for the 3rd party tools and programs written in other programming languages.
 
-All *modules* are stored in a file system or a database (see :ref:`Modules in Host System`).
+All *modules* are stored in a file system or a database
+(see :ref:`Modules in Host System`).
 
 A *module* can optionally consist of the following four parts:
 
@@ -41,7 +56,6 @@ A *module* can optionally consist of the following four parts:
 
 #. Re-export directives.
 
-
 The syntax of *module* is presented below:
 
 .. code-block:: abnf
@@ -50,8 +64,8 @@ The syntax of *module* is presented below:
         importDirective* (topDeclaration | topLevelStatements | exportDirective)*
         ;
 
-Every module can directly use all exported entities from the standard library
-(see :ref:`Standard Library Usage`).
+Every module can directly use a set of exported entities defined in the
+standard library (see :ref:`Standard Library Usage`).
 
 .. code-block:: typescript
    :linenos:
@@ -62,9 +76,9 @@ Every module can directly use all exported entities from the standard library
     }
 
 If a module has at least one top-level ambient declaration (see
-:ref:`Ambient Declarations`) then all other declarations must be ambient as
-well and no top-level statements (see :ref:`Top-Level Statements`). Otherwise,
-a :index:`compile-time error` occurs.
+:ref:`Ambient Declarations`), then all other declarations must be ambient,
+while there must be no top-level statement (see :ref:`Top-Level Statements`).
+Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -91,6 +105,348 @@ a :index:`compile-time error` occurs.
 
 |
 
+.. _Namespace Declarations:
+
+Namespace Declarations
+**********************
+
+.. meta:
+    frontend_status: Done
+
+*Namespace declaration* introduces a named container of entities with
+distinguishable names.
+Each namespace creates its own scope (see :ref:`Scopes`). Variables,
+functions, classes, interfaces, or other declarations of a namespace are only
+accessible (see :ref:`Accessible`) within this scope if not exported explicitly.
+Any use of exported entities is to be qualified with the name of a namespace.
+
+The syntax of *namespace declarations* is presented below:
+
+.. code-block:: abnf
+
+    namespaceDeclaration:
+        'namespace' qualifiedName
+        '{' (topDeclaration | topLevelStatements | exportDirective)* '}'
+        ;
+
+
+Namespaces like modules can have top-level statements which act as namespace
+initializers, and are called only if at least one of the exported namespace
+members is used in the program (see :ref:`Static Initialization` for detail).
+
+The usage of namespaces is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    namespace NS1 {
+        export function foo() {  }
+        export let variable = 1234
+        export const constant = 1234
+        export let someVar: string
+
+        // Will be executed before any use of NS1 members
+        someVar = "some string"
+        console.log("Init for NS1 done")
+        export function bar() {}
+    }
+
+    namespace NS2 {
+        export const constant = 1
+        // Will never be executed since NS2 members are never used
+        console.log("Init for NS2 done")
+        export function bar() {}
+    }
+
+    export function bar() {}  // That is a different bar()
+
+    if (NS1.variable == NS1.constant) {
+        NS1.variable = 4321
+    }
+    NS1.bar()  // namespace bar() is called
+    bar()      // top-level bar() is called
+
+.. index::
+   namespace
+   namespace declaration
+   qualified name
+   qualifier
+   access
+   entity
+   syntax
+   export
+   qualified name
+   initializer block
+   namespace variable
+   static initialization
+   call
+
+
+.. note::
+   An exported namespace entity can be used in the form of a *qualifiedName*
+   outside a namespace in the same module. Any namespace entity can be and
+   typically is used inside a namespace without qualification, i.e., without a
+   namespace name. A *qualifiedName* inside a namespace can be used for a
+   namespace entity only when the entity is exported. Using a *qualifiedName*
+   for non-exported entity both inside and outside a namespace causes a
+   :index:`compile-time error`:
+
+   .. code-block:: typescript
+      :linenos:
+
+       namespace NS {
+           export let a: number = 1
+           let b = 2
+
+           export function foo() {
+               let v: number
+               v = a // OK, no qualification
+               v = NS.a // OK, `a` exported
+           }
+
+           export function bar() {
+               let v: number
+               v = b  // OK, no qualification
+               v = NS.b // CTE, `b` not exported
+           }
+       }
+
+       NS.a = 1 // OK,  `NS.a` exported
+       NS.b = 1 // CTE, `NS.b` not exported
+
+.. note::
+   A namespace must be exported to be used in another module:
+
+   .. code-block:: typescript
+      :linenos:
+
+       // File1
+       namespace Space1 {
+           export function foo() { ... }
+           export let variable = 1234
+           export const constant = 1234
+       }
+       export namespace Space2 {
+           export function foo(p: number) { ... }
+           export let variable = "1234"
+       }
+
+       // File2
+       import {Space2 as Space1} from "File1"
+
+       // compile-time error - there is no variable or constant called 'constant'
+       if (Space1.variable == Space1.constant) {
+            // compile-time error - incorrect assignment as type 'number'
+            // is not compatible with type 'string'
+           Space1.variable = 4321
+       }
+       Space1.foo()     // compile-time error - there is no function 'foo()'
+       Space1.foo(1234) // OK
+
+.. index::
+   namespace
+   module
+   variable
+   constant
+   function
+   compatibility
+   string
+   embedded namespace
+
+.. note::
+   Embedded namespaces are allowed:
+
+   .. code-block:: typescript
+      :linenos:
+
+       namespace ExternalSpace {
+           export function foo() { ... }
+           export let variable = 1234
+           export namespace EmbeddedSpace {
+               export const constant = 1234
+           }
+       }
+
+       if (ExternalSpace.variable == ExternalSpace.EmbeddedSpace.constant) {
+           ExternalSpace.variable = 4321
+       }
+
+
+.. note::
+   Namespaces with identical namespace names in a single module merge their
+   exported declarations into a single namespace. A duplication causes a
+   :index:`compile-time error`. Exported and non-exported declarations with the
+   same name are also considered a :index:`compile-time error`. Only one of the
+   merging namespaces can have an initializer. Otherwise, a
+   :index:`compile-time error` occurs.
+
+.. index::
+   embedded namespace
+   namespace
+   namespace name
+   module
+   export
+   declaration
+   exported declaration
+   non-exported declaration
+   initializer
+
+.. code-block:: typescript
+   :linenos:
+
+    // One source file
+    namespace A {
+        export function foo() { console.log ("1st A.foo() exported") }
+        function bar() {  }
+        export namespace C {
+            export function too() { console.log ("1st A.C.too() exported") }
+        }
+    }
+
+    namespace B {  }
+
+    namespace A {
+        export function goo() {
+            A.foo() // calls exported foo()
+            foo()   /* calls exported foo() as well as all A namespace
+                       declarations are merged into one */
+            A.C.moo()
+        }
+        //export function foo() {  }
+        // Compile-time error as foo() was already defined
+
+        // function foo() { console.log ("2nd A.foo() non-exported") }
+        // Compile-time error as foo() was already defined as exported
+    }
+
+    namespace A.C {
+        export function moo() {
+            too() // too()  accessible when namespace C and too() are both exported
+            A.C.too()
+
+        }
+    }
+
+    A.goo()
+
+    // File
+    namespace A {
+        export function foo() { ... }
+        export function bar() { ... }
+    }
+
+    namespace A {
+        function goo() { bar() }  // exported bar() is accessible in the same namespace
+        export function foo() { ... }  // Compile-time error as foo() was already defined
+    }
+
+.. index::
+   namespace
+   export function
+   qualified name
+   notation
+   shortcut notation
+   embedded namespace
+   access
+   accessibility
+   export function
+   initializer
+
+.. note::
+   A namespace name can be a qualified name. It is a shortcut notation of
+   embedded namespaces as represented below:
+
+   .. code-block:: typescript
+      :linenos:
+
+       namespace A.B {
+           /*some declarations*/
+       }
+
+   The code above is a shortcut to the following code:
+
+   .. code-block:: typescript
+      :linenos:
+
+       namespace A {
+           export namespace B {
+             /*some declarations*/
+           }
+       }
+
+   This code is illustratative of the use of declarations in the case below:
+
+   .. code-block:: typescript
+      :linenos:
+
+       namespace A.B.C {
+           export function foo() { ... }
+       }
+
+       A.B.C.foo() // Valid function call, as 'B' and 'C' are implicitly exported
+
+   Where a namespace merges with qualified names, all qualification levels are
+   merged. A :index:`compile-time error` occurs in the case of a duplication.
+
+   .. code-block:: typescript
+      :linenos:
+
+       namespace A {
+           function foo() { ... } // #1
+           export namespace B {
+              export function foo() { ... } // #2
+           }
+       }
+
+       namespace A.B {
+           export function foo() { ... } // #3
+       }
+
+       // Declarations of functions #2 and #3 lead to a compile-time error:
+       //   duplicated declaration of function A.B.foo()
+
+       // While function foo() in namespace A is a valid declaration
+
+
+
+If an ambient namespace (see :ref:`Ambient Namespace Declarations`) is defined
+in a module (see :ref:`Module Declarations`), then all ambient namespace
+declarations are accessible across all declarations and top-level statements of
+the module.
+
+.. code-block:: typescript
+   :linenos:
+
+    declare namespace A {
+        function foo(): void
+        type X = Array<number>
+    }
+
+    A.foo() // Valid function call, as 'foo' is accessible for top-level statements
+    function foo () {
+        A.foo() // Valid function call, as 'foo' is accessible here as well
+    }
+    class C {
+        method () {
+            A.foo() // Valid function call, as 'foo' is accessible here too
+            let x: A.X = [] // Type A.X can be used
+        }
+    }
+
+.. index::
+   namespace
+   export namespace
+   module
+   ambient namespace
+   declaration
+   accessible declaration
+   access
+   accessibility
+   top-level statement
+   module
+
+|
+
 .. _Import Directives:
 
 Import Directives
@@ -101,8 +457,9 @@ Import Directives
     todo: syntax is updated
 
 *Import directives* make entities exported from other modules (see
-:ref:`Modules and Namespaces`) available for use in the current module by using different
-binding forms. These directives have no effect during the program execution.
+:ref:`Module Declarations`) available for use in the current module by using
+different binding forms. These directives have no effect during
+the program execution.
 
 An import declaration has the following two parts:
 
@@ -156,7 +513,7 @@ The syntax of *import directives* is presented below:
         ;
 
     nameBinding:
-        `type`? identifier bindingAlias?
+        'type'? identifier bindingAlias?
         | 'default' 'as' identifier
         ;
 
@@ -164,20 +521,19 @@ The syntax of *import directives* is presented below:
         StringLiteral
         ;
 
-Each binding adds a declaration or declarations to the scope of a module
-(see :ref:`Scopes`). Any declaration added so must be distinguishable in the
+Each binding adds an entity or entities to the scope of a module
+(see :ref:`Scopes`). Any entity so added must be distinguishable in the
 declaration scope (see :ref:`Declarations`).
 
 Import with ``type`` modifier is discussed in :ref:`Import Type Directive`.
 
 A :index:`compile-time error` occurs if:
 
--  Declaration added to the scope of a module by a binding is not
+-  Entity added to the scope of a module by a binding is not
    distinguishable;
 -  Module imports itself directly: ``importPath`` refers to the
    file in which the current module is stored; or
--  ``import type`` is used, and one of bindings also uses ``type``.
-
+-  ``import type`` is used while ``type`` is also used by one of bindings.
 
 .. index::
    binding
@@ -308,30 +664,28 @@ the original name. Otherwise, the identifier specified in *binding alias*
 is used. In the latter case, the bounded entity is no longer accessible (see
 :ref:`Accessible`) under the original name.
 
-If an *identifier* denotes an *overload alias* (see
-:ref:`Function Overload Declarations`), then all its accessible overloaded
-functions, either imported or not, are considered in the process of
-:ref:`Overload Resolution` for call validity.
+If an *identifier* refers to an *overloaded function* (see
+:ref:`Overloading`), then all accessible overloaded functions are imported,
+including *explicitly overloaded functions* (see
+:ref:`Explicit Function Overload`).
 
 .. code-block:: typescript
    :linenos:
 
     // File1
-    export function f1(p: number) {}
-    export function f2(p: string) {}
-    export overload foo {f1, f2}
+    export function foo(p: number) {} // #1
+    export function foo(p: string) {} // #2
+    export function fooBoolean(p: Boolean) {}
+    export overload foo {foo, fooBoolean)
+
+    function foo() {} // #3
 
     // File2
-    import {foo} from "File1"  // Note: f1 and f2 are not mandatory imported
-    foo(5)                     // f1() is called
-    foo("a string")            // f2() is called
-
-    // File3
-    import {foo, f1} from "File1"  // Note: f1 is accessible as well
-    f1(5)                          // f1() is called
-    foo(6)                         // f1() is called
-    foo("a string")                // f2() is called
-
+    import {foo} from "File1"  // all exported 'foo' are imported
+    foo(5)          // #1 is called
+    foo("a string") // #2 is called
+    foo(true)       // fooBoolean is called
+    foo()           // compile-time error, as #3 is not exported
 
 *Selective binding* that uses exported entities is represented in the examples
 below:
@@ -350,8 +704,6 @@ below:
    accessibility
    bound entity
    selective binding
-   overload alias
-   overload declaration
    binding
 
 .. code-block:: typescript
@@ -360,8 +712,9 @@ below:
     export const PI = 3.14
     export function sin(d: number): number {}
 
-**Note**. The import path of the module is irrelevant and replaced for '``...``'
-in the examples below:
+.. note::
+   The import path of the module is irrelevant and replaced for ``'...'``
+   in the examples below:
 
 +---------------------------------+--+--------------------------------------+
 |   Import                        |  |   Usage                              |
@@ -382,7 +735,7 @@ in the examples below:
 |                                 |  |        is not accessible */          |
 +---------------------------------+--+--------------------------------------+
 
-A single import statement can list several names as follows:
+A single import directive can list several names as follows:
 
 +-------------------------------------+--+---------------------------------+
 |   Import                            |  |   Usage                         |
@@ -405,7 +758,7 @@ Complex cases with several bindings mixed on one import path are discussed
 below in :ref:`Several Bindings for One Import Path`.
 
 .. index::
-   import statement
+   import directive
    import path
    binding
    import
@@ -501,12 +854,12 @@ module is to be searched for.
 
 *Import path* can include the following:
 
-- Initial dot  '``.``' or two dots '``..``' followed by the slash character '``/``'.
+- Initial dot  ``'.'`` or two dots ``'..'`` followed by the slash character ``'/'``.
 - One or more path components (the subset of characters and case sensitivity of
   path components must follow the path rules of a host filesystem).
 - Slash characters separating components of the path.
 
-The slash character '``/``' is used in import paths irrespective of the host
+The slash character ``'/'`` is used in import paths irrespective of the host
 system. The backslash character is not used in this context.
 
 In most file systems, an import path looks like a file path. *Relative* (see
@@ -550,7 +903,7 @@ definitely, then a :index:`compile-time error` occurs.
    extension
    file
 
-A *relative import path* starts with '``./``' or '``../``'. Examples of relative
+A *relative import path* starts with ``'./'`` or ``'../'``. Examples of relative
 paths are presented below:
 
 .. code-block:: typescript
@@ -573,7 +926,7 @@ Resolving a *non-relative path* depends on the compilation environment. The
 definition of the compiler environment can be particularly provided in a
 configuration file or environment variables.
 
-The *base URL* setting is used to resolve a path that starts with '``/``'.
+The *base URL* setting is used to resolve a path that starts with ``'/'``.
 *Path mapping* is used in all other cases. Resolution details depend on
 the implementation. For example, the compilation configuration file can contain
 the following lines:
@@ -732,44 +1085,6 @@ applied to a single name:
 
 |
 
-.. _Standard Library Usage:
-
-Standard Library Usage
-**********************
-
-.. meta:
-    frontend_status: Done
-    todo: now core, containers, math and time are also imported because of stdlib internal dependencies
-    todo: fix stdlib and tests, then import only core by default
-    todo: add escompat to spec and default
-
-All entities exported from the standard library (see :ref:`Standard Library`)
-are accessible as simple names (see :ref:`Accessible`) in any module.
-Using these names as programmer-defined entities at module scope causes a
-:index:`compile-time error` in accordance to :ref:`Declarations`.
-
-.. code-block:: typescript
-   :linenos:
-
-    console.log("Hello, world!") // ok, 'console' is defined in the library
-
-    let console = 5 // compile-time error
-
-.. index::
-   entity
-   export
-   scope
-   name
-   accessibility
-   access
-   simple name
-   standard library
-   access
-   declaration
-
-
-|
-
 .. _Top-Level Declarations:
 
 Top-Level Declarations
@@ -782,11 +1097,11 @@ Top-Level Declarations
 ``enum`` see :ref:`Type Declarations`), top-level variables (see
 :ref:`Variable Declarations`), constants (see :ref:`Constant Declarations`),
 functions (see :ref:`Function Declarations`,
-overloads (see :ref:`Overload Declarations`),
+overloads (see :ref:`Explicit Function Overload`),
 namespaces (see :ref:`Namespace Declarations`),
 or other declarations (see :ref:`Ambient Declarations`, :ref:`Annotations`,
-:ref:`Accessor Declarations`, :ref:`Functions with Receiver`, 
-:ref:`Accessors with Receiver`). 
+:ref:`Accessor Declarations`, :ref:`Functions with Receiver`,
+:ref:`Accessors with Receiver`).
 Top-level declarations can be exported.
 
 The syntax of *top-level declarations* is presented below:
@@ -800,7 +1115,7 @@ The syntax of *top-level declarations* is presented below:
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
-        | overloadFunctionDeclaration
+        | explicitFunctionOverload
         | namespaceDeclaration
         | ambientDeclaration
         | annotationDeclaration
@@ -834,9 +1149,7 @@ The syntax of *top-level declarations* is presented below:
    accessor declaration
    function with receiver
    accessor with receiver
-   overload signature
-   overload
-   overload declaration
+   explicit function overload
    namespace
    namespace declaration
    declaration
@@ -858,9 +1171,9 @@ Exported Declarations
 
 Top-level declarations can use export modifiers that make the declarations
 accessible (see :ref:`Accessible`) in other modules by using import
-(see :ref:`Import Directives`). The same result may be achieved using export
-directive (see :ref:`Export Directives`) for tne top-level declaration.
-The declarations which are not exported as mentioned above can be used only
+(see :ref:`Import Directives`). The same result can be achieved by using an
+export directive (see :ref:`Export Directives`) for a top-level declaration.
+Declarations that are not exported as mentioned above can be used only
 inside the module they are declared in.
 
 .. code-block:: typescript
@@ -880,7 +1193,7 @@ inside the module they are declared in.
    accessible declaration
    declaration
    accessibility
-   module                                                                                                                                                                                                  
+   module
    import directive
    import
 
@@ -934,8 +1247,9 @@ constant variable that is exported by using this export directive. Otherwise, a
 
 If a function, a variable, a constant, or an accessor is exported, or an
 exported class field or method is public, then any type declared in the current
-module and used in their declaration must be exported. Otherwise, a
-:index:`compile-time error` occurs.
+module and used in their declaration must be exported likewise. If an annotation
+is applied to the declaration, then the types used in the annotation must be
+exported likewise. Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -971,332 +1285,6 @@ module and used in their declaration must be exported. Otherwise, a
 
 |
 
-.. _Namespace Declarations:
-
-Namespace Declarations
-**********************
-
-.. meta:
-    frontend_status: Done
-
-*Namespace declaration* introduces the qualified name to be used as a
-qualifier for access to each exported entity of the namespace.
-
-The syntax of *namespace declarations* is presented below:
-
-.. code-block:: abnf
-
-    namespaceDeclaration:
-        'namespace' qualifiedName
-        '{' namespaceMember* staticBlock? namespaceMember* '}'
-        ;
-
-    namespaceMember:
-        topDeclaration | exportDirective
-        ;
-
-Namespace can have an initializer block (*staticBlock*
-in *namespace declaration*  syntax above).
-The initializer block is called only in case when at least one
-of exported namespace members is used in the program. It is guaranteed
-that its code is called before any use of namespace members (see
-:ref:`Static Initialization` for detail).
-
-The usage of a namespace is represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    namespace NS1 {
-        export function foo() {  }
-        export let variable = 1234
-        export const constant = 1234
-        export let someVar: string
-
-        // Will be called before any use of NS1 members
-        static {
-            someVar = "some string"
-            console.log("Init for NS1 done")
-        }
-        export function bar() {}
-    }
-
-    namespace NS2 {
-        export const constant = 1
-        // Will never be called since NS2 members are never used
-        static {
-            console.log("Init for NS2 done")
-        }
-        export function bar() {}
-    }
-
-    export function bar() {}  // That is a different bar()
-
-    if (NS1.variable == NS1.constant) {
-        NS1.variable = 4321
-    }
-    NS1.bar()  // namespace bar() is called
-    bar()      // top-level bar() is called
-
-.. index::
-   namespace
-   namespace declaration
-   qualified name
-   qualifier
-   access
-   entity
-   syntax
-   export
-   qualified name
-   initializer block
-   namespace variable
-   static initialization
-   call
-
-
-**Note**. An exported namespace entity can be used in the form of a
-*qualifiedName* outside a namespace in the same module. Any namespace
-entity can be and typically is used inside a namespace without qualification,
-i.e., without a namespace name. A *qualifiedName* inside a namespace can be
-used for a namespace entity only when the entity is exported. Using a
-*qualifiedName* for non-exported entity both inside and outside a namespace
-causes a :index:`compile-time error`:
-
-.. code-block:: typescript
-   :linenos:
-
-    namespace NS {
-        export let a: number = 1
-        let b = 2
-
-        export function foo() {
-            let v: number
-            v = a // OK, no qualification
-            v = NS.a // OK, `a` exported
-        }
-
-        export function bar() {
-            let v: number
-            v = b  // OK, no qualification
-            v = NS.b // CTE, `b` not exported
-        }
-    }
-
-    NS.a = 1 // OK,  `NS.a` exported
-    NS.b = 1 // CTE, `NS.b` not exported
- 
-**Note**. A namespace must be exported to be used in another module:
-
-.. code-block:: typescript
-   :linenos:
-
-    // File1
-    namespace Space1 {
-        export function foo() { ... }
-        export let variable = 1234
-        export const constant = 1234
-    }
-    export namespace Space2 {
-        export function foo(p: number) { ... }
-        export let variable = "1234"
-    }
-
-    // File2
-    import {Space2 as Space1} from "File1"
-
-    // compile-time error - there is no variable or constant called 'constant'
-    if (Space1.variable == Space1.constant) {
-         // compile-time error - incorrect assignment as type 'number'
-         // is not compatible with type 'string'
-        Space1.variable = 4321
-    }
-    Space1.foo()     // compile-time error - there is no function 'foo()'
-    Space1.foo(1234) // OK
-
-.. index::
-   namespace
-   module
-   variable
-   constant
-   function
-   compatibility
-   string
-   embedded namespace
-
-**Note**. Embedded namespaces are allowed:
-
-.. code-block:: typescript
-   :linenos:
-
-    namespace ExternalSpace {
-        export function foo() { ... }
-        export let variable = 1234
-        export namespace EmbeddedSpace {
-            export const constant = 1234
-        }
-    }
-
-    if (ExternalSpace.variable == ExternalSpace.EmbeddedSpace.constant) {
-        ExternalSpace.variable = 4321
-    }
-
-
-**Note**. Namespaces with identical namespace names in a single module merge
-their exported declarations into a single namespace. A duplication causes a
-:index:`compile-time error`. Exported and non-exported declarations with the
-same name are also considered a :index:`compile-time error`. Only one of the
-merging namespaces can have an initializer. Otherwise, a 
-:index:`compile-time error` occurs.
-
-.. index::
-   embedded namespace
-   namespace
-   namespace name
-   module
-   export
-   declaration
-   exported declaration
-   non-exported declaration
-   initializer
-
-.. code-block:: typescript
-   :linenos:
-
-    // One source file
-    namespace A {
-        export function foo() { console.log ("1st A.foo() exported") }
-        function bar() {  }
-        export namespace C {
-            export function too() { console.log ("1st A.C.too() exported") }
-        }
-    }
-
-    namespace B {  }
-
-    namespace A {
-        export function goo() {
-            A.foo() // calls exported foo()
-            foo()   /* calls exported foo() as well as all A namespace
-                       declarations are merged into one */
-            A.C.moo()
-        }
-        //export function foo() {  }
-        // Compile-time error as foo() was already defined
-
-        // function foo() { console.log ("2nd A.foo() non-exported") }
-        // Compile-time error as foo() was already defined as exported
-    }
-
-    namespace A.C {
-        export function moo() {
-            too() // too()  accessible when namespace C and too() are both exported
-            A.C.too()
-
-        }
-    }
-
-    A.goo()
-
-    // File
-    namespace A {
-        export function foo() { ... }
-        export function bar() { ... }
-    }
-
-    namespace A {
-        function goo() { bar() }  // exported bar() is accessible in the same namespace
-        export function foo() { ... }  // Compile-time error as foo() was already defined
-    }
-
-    namespace X {
-        static {}
-    }
-    namespace X {
-        static {} // Compile-time error as only one initializer allowed
-    }
-
-**Note**. A namespace name can be a qualified name. It is a shortcut notation of
-embedded namespaces as represented below:
-
-.. index::
-   namespace
-   export function
-   qualified name
-   notation
-   shortcut notation
-   embedded namespace
-   access
-   accessibility
-   export function
-   initializer
-
-.. code-block:: typescript
-   :linenos:
-
-    namespace A.B {
-        /*some declarations*/
-    }
-
-The code above is the shortcut to the following code:
-
-.. code-block:: typescript
-   :linenos:
-
-    namespace A {
-        export namespace B {
-          /*some declarations*/
-        }
-    }
-
-This code illustrates the usage of declarations in the following case:
-
-.. code-block:: typescript
-   :linenos:
-
-    namespace A.B.C {
-        export function foo() { ... }
-    }
-
-    A.B.C.foo() // Valid function call, as 'B' and 'C' are implicitly exported
-
-If an ambient namespace (see :ref:`Ambient Namespace Declarations`) defined in
-a module (see :ref:`Modules and Namespaces`), then all ambient namespace
-declarations are accessible across all declarations and top-level statements of
-the module.
-
-.. code-block:: typescript
-   :linenos:
-
-    declare namespace A {
-        function foo(): void
-        type X = Array<number>
-    }
-
-    A.foo() // Valid function call, as 'foo' is accessible for top-level statements
-    function foo () {
-        A.foo() // Valid function call, as 'foo' is accessible here as well
-    }
-    class C {
-        method () {
-            A.foo() // Valid function call, as 'foo' is accessible here too
-            let x: A.X = [] // Type A.X can be used
-        }
-    }
-
-.. index::
-   namespace
-   export namespace
-   module
-   ambient namespace
-   declaration
-   accessible declaration
-   access
-   accessibility
-   top-level statement
-   module
-
-|
-
 .. _Export Directives:
 
 Export Directives
@@ -1323,6 +1311,18 @@ The syntax of an *export directive* is presented below:
         | exportTypeDirective
         | reExportDirective
         ;
+
+A :index:`compile-time error` occurs if an *export directive* uses
+*selectiveBindings* or *bindingAlias*, gives a declaration a new name,
+and such a new name clashes with the name of another exported declaration.
+
+.. code-block:: typescript
+   :linenos:
+
+    export function foo() {}
+    function bar() {}
+    export {bar as foo} // Compile-time error: 'foo' is already exported
+
 
 .. index::
    export directive
@@ -1405,7 +1405,7 @@ The syntax of *single export directive* is presented below:
 
     singleExportDirective:
         'export'
-        ( `type`? identifier
+        ( 'type'? identifier
         | 'default' (expression | identifier)
         | '{' identifier 'as' 'default' '}'
         )
@@ -1739,6 +1739,45 @@ appearance within the module until an error situation is thrown (see
 
 |
 
+.. _Standard Library Usage:
+
+Standard Library Usage
+**********************
+
+.. meta:
+    frontend_status: Done
+    todo: now core, containers, math and time are also imported because of stdlib internal dependencies
+    todo: fix stdlib and tests, then import only core by default
+    todo: add escompat to spec and default
+
+A set of entities exported from the standard library (see
+:ref:`Standard Library`)
+is accessible as simple names (see :ref:`Accessible`) at module scope and
+in nested scopes if not redefined.
+Using these names as names of programmer-defined entities at the module scope
+causes a :index:`compile-time error` as discussed in :ref:`Declarations`.
+
+.. code-block:: typescript
+   :linenos:
+
+    console.log("Hello, world!") // ok, 'console' is defined in the standard library
+
+    let console = 5 // compile-time error
+
+.. index::
+   entity
+   export
+   scope
+   name
+   accessibility
+   access
+   simple name
+   standard library
+   access
+   declaration
+
+|
+
 .. _Program Entry Point:
 
 Program Entry Point
@@ -1786,7 +1825,7 @@ Entry point functions have the following features:
   line;
 - Entry point function return type is either ``void`` (see :ref:`Type void`) or
   ``int``;
-- Entry point function cannot have overloading;
+- Entry point function cannot be overloaded;
 - Entry point function is called ``main`` by default.
 
 .. index::
@@ -1806,7 +1845,8 @@ Entry point functions have the following features:
    top-level statements
    default
 
-The example below represents different forms of valid and invalid entry points:
+Different forms of valid and invalid entry points are represented in the example
+below:
 
 .. code-block-meta:
    expect-cte:

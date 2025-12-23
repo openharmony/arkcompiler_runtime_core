@@ -10,10 +10,29 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-############
-CONTRIBUTORS
-############
+.. _Spec Refs:
 
-Author of Concurrency specification:
+Spec Refs
+#########
 
-- Trubenkov Dmitrii
+Temporarily: for refs to big spec.
+
+.. _Standard Library:
+
+Standard Library
+****************
+
+.. _Return Type Inference:
+
+Return Type Inference
+*********************
+
+.. _Lambda Expressions:
+
+Lambda Expressions
+******************
+
+.. _Method Declarations:
+
+Method Declarations
+*******************

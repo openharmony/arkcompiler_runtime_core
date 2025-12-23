@@ -20,6 +20,30 @@ Statements
 
 *Statements* are designed to control execution.
 
+Some statements are simple like single expressions (see
+:ref:`Expression Statements`); other statements consist of other statements, and
+take many lines of program code like :ref:`Block` or :ref:`If statements`:
+
+.. code-block:: typescript
+
+    ...
+    i++    // statement consists of single expression
+    ... 
+    if (i > 100) // 'if' statement starts
+    {          // 'block' statement starts, it is a part of 'if' statement
+        i %= 100        // statement belonging to 'block'
+        console.log(i)  // another statement belonging to 'block'
+    }   //  'block' statement ends, 'if' statement end
+    
+.. note:: 
+   The difference between statements and expressions is that :ref:`Expressions`
+   evaluate a value of a certain type, while statements do not.
+
+   A statement can consist of one or more expressions, or contain no expression
+   at all. For example, the statement ``i = 1`` consists of an assignment
+   expresssion that has the inferred type ``int``, and the evaluated value
+   ``'1'``.
+
 The syntax of *statements* is presented below:
 
 .. code-block:: abnf
@@ -40,6 +64,39 @@ The syntax of *statements* is presented below:
 
 |
 
+
+Here is the list of statements in |LANG|:
+
+.. list-table::
+   :width: 100%
+   :widths: 30 70
+   :header-rows: 1
+
+   * - Statement
+     - Reference
+   * - Expression statements
+     - :ref:`Expression Statements`
+   * - '{}' (block)
+     - :ref:`Block`
+   * - `let`, `const` (local declarations)
+     - :ref:`Local Declarations`
+   * - if-then-else
+     - :ref:`if Statements`
+   * - `while`, `do`, `for`, `for-of`
+     - :ref:`Loop Statements`
+   * - break
+     - :ref:`break Statements`
+   * - continue
+     - :ref:`continue Statements`
+   * - return
+     - :ref:`return Statements`
+   * - switch
+     - :ref:`switch Statements`
+   * - throw
+     - :ref:`throw Statements`
+   * - try-catch-finally
+     - :ref:`try Statements`
+
 .. _Normal and Abrupt Statement Execution:
 
 Normal and Abrupt Statement Execution
@@ -49,9 +106,8 @@ Normal and Abrupt Statement Execution
     frontend_status: Done
 
 The actions that every statement performs in a normal mode of execution are
-specific for the particular kind of statement. Normal modes of
-evaluation for each kind of statement are described in the following
-sections.
+specific for the particular kind of statement. Normal modes of evaluation for
+each kind of statement are described in the following sections.
 
 A statement execution is considered to *complete normally* if the desired
 action is performed without an error being thrown. On the contrary, a statement
@@ -166,8 +222,6 @@ execution, and actually act as statements.
    let declaration
    const declaration
 
-|
-
 The syntax of *local declaration* is presented below:
 
 .. code-block:: abnf
@@ -187,6 +241,27 @@ are dedicated to a detailed discussion of the following entities:
 - :ref:`if Statements`,
 - :ref:`For Statements`,
 - :ref:`For-Of Statements`.
+
+A local declaration can shadow another same-name declaration if any in the same
+surrounding scope.
+
+.. code-block:: typescript
+   :linenos:
+
+    let item: number = 123
+    {
+       const item: string = "123"
+       // Here 'item' is of type 'string'
+    }
+    // Here 'item' is of type 'number'
+
+    function foo (item: boolean) {
+       // Here 'item' is of type 'number'
+       let item: number[] = [] // Compile-time error as parameter 'item' and
+                               // local variable 'item' lead to duplciation as
+                               // they are in the same scope
+    }
+
 
 The usage of annotations is discussed in :ref:`Using Annotations`.
 
@@ -469,7 +544,7 @@ mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
 
     // new variable is declared as a loop index variable with its type
     // explicitly specified
-    for (let i: number = 1; i < 10; i++) {
+    for (let i: int = 1; i < 10; i++) {
       console.log(i)
     }
 
@@ -491,18 +566,18 @@ mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
 
 A variable declared in the *forInit*-part has the loop scope. It can be used
 in a *forContinue* expression, a *forUpdate* expression, a single-body
-statement, or in a body block if enclosed in parentheses:
+statement, or in a body block:
 
 .. code-block:: typescript
    :linenos:
 
     // forInit declaration and no body block
-    let k: number = 0
-    for (let i: number = 1; i < 10; i++)
+    let k: int = 0
+    for (let i: int = 1; i < 10; i++)
       k += i
     console.log(k)
     // i =  k  // CTE when uncommented
-    let i: number = k  // OK
+    let i: int = k  // OK
 
 |
 
@@ -788,7 +863,7 @@ Examples of ``continue`` statements with and without a label are presented below
 
     // continue without label
     // will print 0, 1, 2, 4 (3 skipped)
-    for (let a: number = 0; a < 5; a++){
+    for (let a: int = 0; a < 5; a++){
       if (a == 3) continue
       console.log("a = " + a)
     }
@@ -806,7 +881,7 @@ Examples of ``continue`` statements with and without a label are presented below
 
 |
 
-.. _Return Statements:
+.. _return Statements:
 
 ``return`` Statements
 *********************
@@ -1015,7 +1090,7 @@ The execution of a ``switch`` statement starts from the evaluation of the
 The value of the ``switch`` expression is compared repeatedly to the value
 of case expressions. The comparison starts from the top and proceeds until the
 first *match*. A *match* occurs when a particular case expression value equals
-the value of the ``switch`` expression in terms of the operator '``==``'. The
+the value of the ``switch`` expression in terms of the operator ``'=='``. The
 execution is transferred to the set of statements of the *caseClause* where the
 match occurred. If this set of statements executes a ``break`` statement, then
 the entire ``switch`` statement terminates. If no ``break`` statement is
@@ -1045,7 +1120,7 @@ transferred to the statements of the *defaultClause*.
 
 |
 
-.. _Throw Statements:
+.. _throw Statements:
 
 ``throw`` Statements
 ********************
@@ -1130,14 +1205,19 @@ The syntax of *try statement* is presented below:
           'finally' block
           ;
 
-A ``try`` statement must contain either a ``finally`` clause, or a
-``catch`` clause. Otherwise, a :index:`compile-time error` occurs.
+A ``try`` statement must contain:
 
-If the ``try`` block completes normally, then no action is taken, and no
-``catch`` clause block is executed.
+- ``finally`` clause; 
+- ``catch`` clause, or
+- Both a ``finally`` clause and a ``catch`` clause.
+
+Otherwise, a :index:`compile-time error` occurs.
+
+If the ``try`` block completes normally, then no ``catch`` clause block is
+executed, if present.
 
 If an error is thrown in the ``try`` block directly or indirectly, then the
-control is transferred to the ``catch`` clause.
+control is transferred to the ``catch`` clause, if present.
 
 .. index::
    syntax
@@ -1152,7 +1232,7 @@ control is transferred to the ``catch`` clause.
 
 |
 
-.. _Catch Statements:
+.. _Catch Clause:
 
 ``catch`` Clause
 ================
@@ -1288,7 +1368,7 @@ can be performed while leaving the ``try-catch``:
    ``catch`` block is executed. The execution of a ``try`` block completes
    abruptly if an error is thrown inside the ``try`` block. 
 
-#. The the execution of a ``try`` block completes abruptly if error *x* is
+#. The execution of a ``try`` block completes abruptly if error *x* is
    thrown inside the ``try`` block. If the ``catch`` clause is present, and the
    execution of the body of the ``catch`` clause completes normally, then the
    entire ``try`` statement completes normally. Otherwise, the ``try``

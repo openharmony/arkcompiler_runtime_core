@@ -23,12 +23,14 @@ Welcome to STS Concurrency's documentation!
    :caption: Contents:
 
    01_concurrency_overview.rst
-   02_concurrency_stdlib.rst
-   03_concurrency_features.rst
-   04_concurrency_runtime.rst
-   05_concurrency_requirements_for_interop.rst
-   06_glossary.rst
-   07_contributors.rst
+   02_concurrency_features.rst
+   03_concurrency_coroutines.rst
+   04_concurrency_stdlib.rst
+   05_concurrency_runtime.rst
+   06_concurrency_requirements_for_interop.rst
+   07_glossary.rst
+   08_refs.rst
+   09_contributors.rst
 
 TODO list:
 ==========

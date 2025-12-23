@@ -55,7 +55,7 @@ The syntax of *ambient declaration* is presented below:
         'declare'
         ( ambientConstantDeclaration
         | ambientFunctionDeclaration
-        | overloadFunctionDeclaration
+        | explicitFunctionOverload
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
@@ -78,18 +78,6 @@ context that is already ambient:
     declare namespace A{
         declare function foo(): void // compile-time error
     }
-
-A :index:`compile-time warning` occurs if an ambient declaration is marked
-with ``export`` keyword as all  ambient declarations are exported by
-default:
-
-.. code-block:: typescript
-   :linenos:
-
-    export declare namespace A{ // compile-time warning
-        function foo(): void 
-    }
-
 
 .. index::
    syntax
@@ -128,25 +116,15 @@ The syntax of *ambient constant declaration* is presented below:
         ;
 
     ambientConst:
-        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral|MultilineStringLiteral)))
+        identifier ':' type
         ;
-
-An initializer expression for an ambient constant must be a numeric or string
-literal. The meaning of the literal is to define the type of the ambient
-constant, while the actual value must be provided when a non-ambient declaration
-is available.
 
 .. index::
    ambient constant
    constant declaration
-   syntax
    declaration
-   type annotation
-   initializer expression
    ambient constant
    non-ambient declaration
-   string literal
-   numeric literal
 
 |
 
@@ -196,7 +174,8 @@ Ambient function declarations cannot specify function bodies.
     declare function foo(x?: string): void // ok
     declare function bar(y: number = 1): void // compile-time error
 
-**Note**. The modifier ``async`` cannot be used in an ambient context.
+.. note::
+   The modifier ``async`` cannot be used in an ambient context.
 
 .. index::
    ambient function declaration
@@ -221,7 +200,7 @@ Ambient Overload Function Declarations
     frontend_status: None
 
 The syntax of *ambient overload function declaration* is identical to that of
-:ref:`Function Overload Declarations`. The semantics of such declarations is
+:ref:`Explicit Function Overload`. The semantics of such declarations is
 defined by the same rules.
 
 
@@ -249,7 +228,7 @@ defined by the same rules.
 .. index::
    ambient overload function declaration
    ambient overload function
-   function overload declaration
+   explicit function overload
    semantics
    syntax
 
@@ -278,7 +257,7 @@ The syntax of *ambient class declaration* is presented below:
         ( ambientFieldDeclaration
         | ambientConstructorDeclaration
         | ambientMethodDeclaration
-        | overloadMethodDeclaration
+        | explicitClassMethodOverload
         | ambientClassAccessorDeclaration
         | ambientIndexerDeclaration
         | ambientCallSignatureDeclaration
@@ -341,12 +320,12 @@ Their syntax is presented below:
     ambientClassAccessorDeclaration:
         ambientMethodModifier*
         ( 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' parameter ')'
+        | 'set' identifier '(' requiredParameter ')'
         )
         ;
 
 Ambient methods can be overloaded similarly to non-ambient methods with the
-same syntax and semantics (see :ref:`Class Method Overload Declarations`).
+same syntax and semantics (see :ref:`Explicit Class Method Overload`).
 
 .. code-block:: typescript
    :linenos:
@@ -461,14 +440,43 @@ The syntax of *ambient call signature declaration* is presented below:
 
     declare class C {
         (someArg: number): boolean
+        (someArg: string): boolean
+        ...
     }
 
-**Note**. *Ambient class signature declaration* is supported in ambient contexts
+*Ambient class signature declaration* is supported in ambient contexts
 only. If written in |LANG|, ambient class implementation must conform to
 :ref:`Callable Types with $_invoke Method`.
+   
+Multiple *ambient call signatures* are allowed in an ambient class declaration
+provided that they are distinct (see :ref:`Declaration Distinguishable by Signatures`).
+Multiple distinct ambient call signatures are represented in the following
+example:
 
-The following restriction applies: only one *ambient call signature* is allowed
-in an ambient class declaration.
+.. code-block:: typescript
+   :linenos:
+
+   // sdk_file.d.ets, declaration file
+   export declare class C {
+      (x: string): void
+      (x: number): void
+   }
+
+   // sdk_file.ets, implementation file
+   export class C {
+      static $_invoke(x: string): void {
+         console.log('string')
+      }
+      static $_invoke(x: number): void {
+         console.log('number')
+      }
+   }
+
+   // app.ets
+   import { C } from './sdk_file'
+
+   C(123)    // log: number
+   C('abc')  // log: string
 
 .. index::
    ambient call signature declaration
@@ -516,9 +524,10 @@ The following restrictions apply:
         [Symbol.iterator] (): CIterator
     }
 
-**Note**. *Ambient iterable declaration* is supported in ambient contexts only.
-If written in |LANG|, ambient class implementation must conform to
-:ref:`Iterable Types`.
+.. note::
+   *Ambient iterable declaration* is supported in ambient contexts only.
+   If written in |LANG|, ambient class implementation must conform to
+   :ref:`Iterable Types`.
 
 .. index::
    ambient iterable
@@ -784,7 +793,7 @@ is presented below:
 
     ambientAccessorDeclaration:
         ( 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' parameter ')' 
+        | 'set' identifier '(' requiredParameter ')'
         )
         ;
 

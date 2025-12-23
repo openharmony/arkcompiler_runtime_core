@@ -201,14 +201,14 @@ Identifiers
 Unicode grammar of identifiers is based on character properties
 specified by the Unicode Standard.
 
-The first character in an identifier must be '``$``', '``_``', or any Unicode
+The first character in an identifier must be ``'$'``, ``'_'``, or any Unicode
 code point with the Unicode property 'ID_Start'[2]_. Other characters
 must be Unicode code points with the Unicode property, or one of the following
 characters:
 
--  '``$``' (\\U+0024),
--  'Zero-Width Non-Joiner' (<ZWNJ>, \\U+200C), or
--  'Zero-Width Joiner' (<ZWJ>, \\U+200D).
+-  ``'$'`` (\\U+0024),
+-  ``'``Zero-Width Non-Joiner``'`` (``<ZWNJ>``, \\U+200C), or
+-  ``'``Zero-Width Joiner``'`` (``<ZWJ>``, \\U+200D).
 
 .. index::
    identifier
@@ -468,7 +468,7 @@ The following character sequences represent operators and punctuators:
    comparison
    punctuator
    semicolon
-   parenthesis
+   parentheses
    comma
    square bracket
    keyword
@@ -625,7 +625,7 @@ Integral literals with different radices are represented by the examples below:
     0o777 // octal literal
     0b101 // binary literal
 
-The underscore character '``_``' between successive
+The underscore character ``'_'`` between successive
 digits can be used to improve readability.
 Underscore characters in such positions do not change the values of literals.
 However, the underscore character must be neither the very first nor the very
@@ -640,7 +640,7 @@ last symbol of an integer literal.
 
 Type of integer literal is determined by using
 :ref:`Type Inference for Numeric Literals` if its context allows inferring type.
-Otherwise, the type is determened as follows:
+Otherwise, the type is determined as follows:
 
 - ``int`` if the literal value can be represented
   by a non-negative 32-bit number, i.e., the value is in the
@@ -694,7 +694,7 @@ a ``float`` type suffix as follows:
     FloatLiteral:
         DecimalIntegerLiteral '.' FractionalPart? ExponentPart? FloatTypeSuffix?
         | '.' FractionalPart ExponentPart? FloatTypeSuffix?
-        | DecimalIntegerLiteral ExponentPart FloatTypeSuffix?
+        | DecimalIntegerLiteral ExponentPart? FloatTypeSuffix
         ;
 
     ExponentPart:
@@ -718,10 +718,11 @@ The concept is represented by the examples below:
     3.14f
     3.141_592
     .5
+    1234f
     1e10
     1e10f
 
-The underscore character '``_``' between successive
+The underscore character ``'_'`` between successive
 digits can be used to improve readability.
 Underscore characters in such positions do not change the values of literals.
 However, the underscore character must be neither the very first nor the very
@@ -774,7 +775,7 @@ Bigint Literals
 
 *Bigint literals* are always of type ``bigint`` (see :ref:`Type bigint`).
 
-A ``bigint`` literal is an *integer literal* followed by the symbol '``n``':
+A ``bigint`` literal is an *integer literal* followed by the symbol ``'n'``:
 
 .. code-block:: abnf
 
@@ -789,7 +790,7 @@ The concept is represented by the examples below:
     -153n // negative bigint literal
     0xBAD_3n // bigint literal in hexadecimal notation
 
-The underscore character '``_``' between successive digits can be used to
+The underscore character ``'_'`` between successive digits can be used to
 improve readability. Underscore characters in
 such positions do not change the values of literals. However, the underscore
 character must be neither the very first nor the very last symbol of a ``bigint``
@@ -907,9 +908,9 @@ certain non-graphic characters can be represented by explicit specifications
 or Unicode codes. Such constructs are called *escape sequences*.
 
 Escape sequences can represent graphic characters within a *string literal*,
-e.g., single quotes '\'', double quotes '``"``', backslashes '``\``', and
-some others. An escape sequence always starts with the backslash character
-'``\``', followed by one of the following characters:
+e.g., single quotes (``'``), double quotes (``"``), backslashes (``\``),
+and some others. An escape sequence always starts with the backslash character
+``'\'``, followed by one of the following characters:
 
 .. index::
    string literal
@@ -948,8 +949,8 @@ some others. An escape sequence always starts with the backslash character
 -  ``u{`` and at least one hexadecimal digit followed by ``}`` (forming
    a bounded Unicode escape sequence like ``\u{5c}``), and
 
--  any single character except digits from '1' to '9', and characters '``x``',
-   '``u``', '``CR``', and '``LF``'.
+-  any single character except digits from '1' to '9', and characters ``'x'``,
+   ``'u'``, ``'CR'``, and ``'LF'``.
 
 .. index::
    string literal
@@ -986,8 +987,8 @@ Multiline String Literal
     frontend_status: Done
 
 *Multiline strings* can contain arbitrary text delimited by backtick characters
-'\`'. Multiline strings can contain any character, except the escape character
-'``\``'. Multiline strings can contain newline characters:
+``'`` \` ``'``. Multiline strings can contain any character, except the backlash
+character ``'\'``. Multiline strings can contain newline characters:
 
 .. index::
    string literal
@@ -1082,7 +1083,7 @@ Regex Literal
     CharacterClass: 
         '[' '^'? '\b'? (RegexCharacter | (RegexCharacter '-' RegexCharacter) '\B'?)+ '\b'? ']'
         | '.'
-        | '\' 
+        | '\'
         ('d' | 'D' | 'w' | 'W' | 's' | 'S' | 't' | 'r' | 'n' | 'v' | 'f' | '0' 
          | 'c' ['A'-'Z'] | 'x' DecimalDigit DecimalDigit 
          | DecimalIntegerLiteral | 'k<' Identifier '>'
@@ -1188,7 +1189,7 @@ Comments
 the source code. Comments are insignificant for the syntactic grammar (see
 :ref:`Grammar Summary`).
 
-*Line comments* begin with the sequence of characters '``//``' as in the
+*Line comments* begin with the sequence of characters ``'//'`` as in the
 example below, and end with the line separator character. Any character
 or sequence of characters between them is allowed but ignored.
 
@@ -1197,9 +1198,9 @@ or sequence of characters between them is allowed but ignored.
 
     // This is a line comment
 
-*Multiline comments* begin with the sequence of characters '``\*``' as
+*Multiline comments* begin with the sequence of characters ``'\*'`` as
 in the example below, and end with the first subsequent sequence of characters
-'``*/``'. Any character or sequence of characters between them is allowed but
+``'*/'``. Any character or sequence of characters between them is allowed but
 ignored.
 
 .. code-block:: typescript

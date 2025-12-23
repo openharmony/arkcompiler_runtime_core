@@ -14,7 +14,7 @@
 @echo off
 md __build
 cd annotations
-sphinx-build -n -b latex . ..\__build
+sphinx-build -n -W --keep-going -b latex . ..\__build
 cd ..\__build
 latexmk -f -silent -pdf -dvi- -ps- *.tex
 md ..\annotations\build

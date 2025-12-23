@@ -63,7 +63,7 @@ any declared entity. Names can have two syntactical forms:
 
     - *Simple name* that consists of a single identifier;
     - *Qualified name* that consists of a sequence of identifiers with the
-      token '``.``' as separator.
+      token ``'.'`` as separator.
 
 Both situations are covered by the below syntax rule:
 
@@ -74,11 +74,11 @@ Both situations are covered by the below syntax rule:
       ;
 
 In a qualified name *N.x* (where *N* is a simple name, and ``x`` is an
-identifier that can follow a sequence of identifiers separated with '``.``'
+identifier that can follow a sequence of identifiers separated with ``'.'``
 tokens), *N* can name the following:
 
--  Name of a module (see :ref:`Modules and Namespaces`) that is introduced as a
-   result of    ``import * as N`` (see :ref:`Bind All with Qualified Access`)
+-  Name of a module (see :ref:`Module Declarations`) that is introduced as a
+   result of ``import * as N`` (see :ref:`Bind All with Qualified Access`)
    with ``x`` to name the exported entity;
 
 -  A class or interface type (see :ref:`Classes`, :ref:`Interfaces`) with ``x``
@@ -125,6 +125,7 @@ A declaration introduces a named entity in an appropriate *declaration scope*
    declared entity
    declaration scope
 
+- :ref:`Namespace Declarations`;
 - :ref:`Type Declarations`;
 - :ref:`Variable and Constant Declarations`;
 - :ref:`Function Declarations`;
@@ -133,14 +134,23 @@ A declaration introduces a named entity in an appropriate *declaration scope*
 - :ref:`Enumerations`;
 - :ref:`Local Declarations`;
 - :ref:`Top-Level Declarations`;
-- :ref:`Overload Declarations`;
+- :ref:`Explicit Overload Declarations`;
 - :ref:`Annotations`;
-- :ref:`Ambient Declarations`.
+- :ref:`Ambient Declarations`;
+- :ref:`Accessor Declarations`;
+- :ref:`Functions with Receiver`;
+- :ref:`Accessors with Receiver`.
 
-Each declaration in the declaration scope must be *distinguishable*.
-Declarations are *distinguishable* if they have different names.
+Each declaration in the declaration scope (see :ref:`Scopes`)
+must be *distinguishable*.
+
+Declarations are *distinguishable* if they have:
+
+-  Different names,
+-  Different signatures (see :ref:`Declaration Distinguishable by Signatures`).
 
 .. index::
+   distinguishable declaration
    declaration scope
    name
    signature
@@ -161,7 +171,9 @@ Distinguishable declarations are represented by the examples below:
         static field: number = PI + pi
     }
 
-A :index:`compile-time error` occurs if a declaration is not distinguishable:
+If a declaration is not distinguishable by name, except a valid overload
+(see :ref:`Declaration Distinguishable by Signatures`),
+then a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -200,6 +212,73 @@ A :index:`compile-time error` occurs if a declaration is not distinguishable:
 .. index::
    declaration
    distinguishable functions
+
+|
+
+.. _Declaration Distinguishable by Signatures:
+
+Declaration Distinguishable by Signatures
+=========================================
+
+.. meta:
+    frontend_status: None
+
+The following kinds of same-name declarations are distinguishable
+by signatures if signatures are not overload-equivalent
+(see :ref:`Overload-Equivalent Signatures`):
+
+-  Functions of the same name in the same *declaration scope*
+   (see :ref:`Implicit Function Overloading`);
+-  Methods of the same class with the same name (see
+   :ref:`Implicit Method Overloading`);
+-  Unnamed constructors of the same class.
+
+.. index::
+   distinguishable declaration
+   signature
+   function
+   overloading
+   constructor
+
+A :index:`compile-time error` occurs if two same-name functions
+declared in different scopes are made accessible in one scope:
+
+.. code-block:: typescript
+   :linenos:
+
+    import {foo, goo as bar} from "some module"
+
+    function foo() {} // compile-time error: duplicate declaration
+    function bar() {} // compile-time error: duplicate declaration
+
+Functions distinguishable by signatures are represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+      function foo() {}
+      function foo(x: number) {}
+      function foo(x: number[]) {}
+      function foo(x: string) {}
+
+Functions with overload-equivalent signatures cause a
+:index:`compile-time error` as represented in the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+      // Functions have overload-equivalent signatures
+      function foo(x: number) {}
+      function foo(y: number) {}
+
+      // Functions have overload-equivalent signatures because of type erasure
+      function bar(x: Array<number>) {}
+      function bar(x: Array<string>) {}
+
+.. index::
+   distinguishable function
+   function
+   signature
 
 |
 
@@ -267,8 +346,8 @@ declared in:
 .. meta:
     frontend_status: Partly
 
--  *Namespace level scope* is applicable to namespaces only. 
-   *Constants*   and *variables* are accessible 
+-  *Namespace level scope* is applicable to namespaces only.
+   *Constants*   and *variables* are accessible
    (see :ref:`Accessible`) from their respective points of declaration
    to the end of the namespace including all embedded namespaces.
    Other entities are accessible through the entire namespace scope level
@@ -425,7 +504,7 @@ of two names overlap, then:
 -  Access to the outer name is not possible.
 
 Class, interface, and enum members can only be accessed by applying the dot
-operator '``.``' to an instance. Accessing them otherwise is not possible.
+operator ``'.'`` to an instance. Accessing them otherwise is not possible.
 
 .. index::
    name
@@ -615,14 +694,18 @@ if it is one of the following:
 
     type D = string | Array<D> // ok
 
-Any other use causes a :index:`compile-time error`, because the compiler
-does not have enough information about the defined alias:
+Any other use including unresolvable circular references causes a
+:index:`compile-time error`, because the compiler does not have enough
+information about the defined alias:
 
 .. code-block:: typescript
    :linenos:
 
-    type E = E // compile-time error
-    type F = string | E // compile-time error
+    type E = E          // compile-time error
+    type F = string | F // compile-time error
+    type C<T> = T
+    type A = C<A>       // compile-time error
+    
 
 .. index::
    type alias
@@ -659,9 +742,9 @@ a type argument:
 
     type A<T> = Array<A> // compile-time error
 
-**Note**. There is no restriction on using a type parameter *T* in
-the right side of a type alias declaration. The following code
-is valid:
+.. note::
+   There is no restriction on using a type parameter *T* in the right side of
+   a type alias declaration. The following code is valid:
 
 .. code-block:: typescript
    :linenos:
@@ -674,6 +757,37 @@ is valid:
    type argument
    type alias
    type parameter
+
+A :index:`compile-time error` occurs if a type alias is exported but the type
+alias it refers to is not exported:
+
+.. code-block:: typescript
+   :linenos:
+
+    class B {}
+    export type A = B // compile-time error as B is not exported
+
+A type parameter of a type alias can *depend* on another type parameter
+of the same generic.
+
+.. index::
+   type parameter
+   generic
+
+.. code-block:: typescript
+   :linenos:
+
+    type X<T, S extends T> = T | S 
+
+A :index:`compile-time error` occurs if a type parameter in the type parameter
+section depends on itself directly or indirectly:
+
+.. code-block:: typescript
+   :linenos:
+
+   type X<T extends T> = T // circular dependency
+   type Y<T extends R, R extends T>  = T // circular dependency
+   type Z<T extends R, R extends T | undefined> = T // circular dependency
 
 |
 
@@ -907,14 +1021,23 @@ from the initializer expression as follows:
 
 -  In a variable declaration (not in a constant declaration, though), if the
    initializer expression is of a literal type, then the literal type is
-   replaced for its supertype, if any (see :ref:`Subtyping for Literal Types`).
+   replaced with its supertype, if any (see :ref:`Subtyping for Literal Types`).
    If the initializer expression is of a union type that contains literal types,
-   then each literal type is replaced for its supertype (see
+   then each literal type is replaced with its supertype (see
    :ref:`Subtyping for Literal Types`), and then normalized (see
    :ref:`Union Types Normalization`).
 
 -  Otherwise, the type of a declaration is inferred from the initializer
    expression.
+
+-  For an expression with ternary operator `condition ? expr1 : expr2`
+   (see :ref:`Ternary Conditional Expressions`), the type is inferred as follows:
+
+   - If *condition* can be evaluated at compile time, the type of the whole expression
+     is inferred from the *expression1* (when *condition* is *true*) or *expression2*
+     (when *condition* is *false*) according to rules described above.
+   - Otherwise, the type of the ternary expression is a normalized union of
+     inferred types for *expression1* and *expression2*.
 
 If the type of the initializer expression cannot be inferred, then a
 :index:`compile-time error` occurs (see :ref:`Object Literal`):
@@ -936,21 +1059,36 @@ If the type of the initializer expression cannot be inferred, then a
 .. code-block:: typescript
    :linenos:
 
+    // Get boolean value unknown at compiletime
+    function cond(): boolean { return Math.random() < 0.5 ? true : false; }
+
     let a = null                // type of 'a' is null
     let aa = undefined          // type of 'aa' is undefined
     let arr = [null, undefined] // type of 'arr' is (null | undefined)[]
 
-    let cond: boolean = /*some initialization*/
+    let b = cond() ? 1 : 2         // type of 'b' is int
 
-    let b = cond ? 1 : 2         // type of 'b' is int
-    let c = cond ? 3 : 3.14      // type of 'c' is double
-    let d = cond ? "one" : "two" // type of 'd' is string
-    let e = cond ? 1 : "one"     // type of 'e' is int | string
+    let c = cond() ? 3 : 3.14       // type of 'c' is int | double
+    let c1 = true ? 3 : 3.14      // type of 'c1' is int
+    let c2 = false ? 3 : 3.14     // type of 'c1' is double
 
-    const bb = cond ? 1 : 2         // type of 'bb' is int
-    const cc = cond ? 3 : 3.14      // type of 'cc' is double
-    const dd = cond ? "one" : "two" // type of 'dd' is "one" | "two"
-    const ee = cond ? 1 : "one"     // type of 'ee' is int | "one"
+    let d = cond() ? "one" : "two" // type of 'd' is string
+
+    let e = cond() ? 1 : "one"     // type of 'e' is int | string
+    let e1 = true ? 1 : "one"    // type of 'e1' is int
+    let e2 = false ? 1 : "one" // type of 'e2' is string
+
+    const bb  = cond() ? 1 : 2        // type of 'bb' is int
+
+    const cc  = cond() ? 1 : 3.14      // type of 'cc' is int | double
+    const cc1 = true   ? 1 : 3.14      // type of 'cc1' is int
+    const cc2 = false  ? 1 : 3.14      // type of 'cc2' is double
+
+    const dd  = cond() ? "one" : "two" // type of 'dd'  is "one" | "two"
+    const dd1 = true   ? "one" : "two" // type of 'dd1' is "one"
+    const dd2 = cond() ? "one" : "two" // type of 'dd2' is "two"
+
+    const ee = cond() ? 1 : "one"     // type of 'ee' is int | "one"
 
     let f = {name: "aa"} // compile-time error: type unknown
 
@@ -963,7 +1101,6 @@ If the type of the initializer expression cannot be inferred, then a
     declare const s2 = "1" // type of 's2' is "1"
     let           s3 = "1" // type of 's3' is string
     const         s4 = "1" // type of 's4' is "1"
-
 
 |
 
@@ -1078,10 +1215,14 @@ The syntax of *parameter list* is presented below:
     requiredParameter:
         identifier ':' type
         ;
+    optionalParameter:
+        identifier ':' type '=' expression
+        | identifier '?' ':' type
+        ;
 
 If a parameter is *required*, then each function or method call must contain
-an argument corresponding to that parameter.
-The function below has *required parameters*:
+an argument corresponding to that parameter. :ref:`Optional parameters` are
+described in a separate section. The function below has *required parameters*:
 
 .. code-block:: typescript
    :linenos:
@@ -1173,14 +1314,15 @@ Optional Parameters
 .. code-block:: abnf
 
     optionalParameter:
-        identifier (':' type)? '=' expression
+        identifier ':' type '=' expression
         | identifier '?' ':' type
         ;
 
-The first form contains an ``expression`` that specifies a *default value*. It is
-called a *parameter with default value*. The value of the parameter is set
+The first form contains an ``expression`` that specifies a *default value*.
+It is called a *parameter with default value*. The value of the parameter is set
 to the *default value* if the argument corresponding to that parameter is
-omitted in a function or method call:
+omitted in a function or a method call, or if it has *undefined* passed as an
+argument:
 
 .. index::
    optional parameter
@@ -1200,19 +1342,11 @@ omitted in a function or method call:
     }
     pair(1, 2) // prints: 1 2
     pair(1) // prints: 1 7
+    pair(1, undefined) // prints: 1 7
 
-If type annotation is omitted, then the parameter type is inferred from
-the type of the ``expression``. If the type cannot be inferred, then a
-:index:`compile-time error` occurs.
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo (p = new Object) {} //  the type of 'p' is Object
-    function foo (p = {f: 1}) {} // compile-time error, type of 'p' cannot be inferred
-
-
-
+.. note::
+   *undefined* passed as an argument does not affect the *type* of the
+   parameter in a function, a method, or a constructor body.
 
 The second form is a short-cut notation and ``identifier '?' ':' type``
 effectively means that ``identifier`` has type ``T | undefined`` with the
@@ -1257,7 +1391,14 @@ Rest Parameter
 
 *Rest parameters* allow functions, methods, constructors, or lambdas to take
 arbitrary numbers of arguments. *Rest parameters* have the ``spread`` operator
-'``...``' as a prefix before the parameter name.
+``'...'`` as a prefix before the parameter name.
+
+.. note::
+   The ``spread`` operator ``'...'`` is also used as a prefix in *spread
+   expressions* in |LANG|. The concepts *rest parameter* and *spread expression*
+   are syntactically similar as a result. The difference between the two is
+   clarified in :ref:`Spread Expression`.
+
 
 The syntax of *rest parameter* is presented below:
 
@@ -1267,13 +1408,13 @@ The syntax of *rest parameter* is presented below:
         annotationUsage? '...' identifier ':' type
         ;
 
-A :index:`compile-time error` occurs if a rest parameter:
+A :index:`compile-time error` occurs if a *rest parameter*:
 
--  Is not the last parameter in a parameter list;
+-  Is followed by a parameter, which is not a *rest parameter* ;
 -  Has a type that is not an array type, a tuple type, nor a type
    parameter constrained by an array or a tuple type.
 
-A call of entity with a rest parameter of array type ``T[]``
+A call of entity with a *rest parameter* of array type ``T[]``
 (or ``FixedArray<T>``) can accept any number of arguments
 of types that are assignable (see :ref:`Assignability`) to ``T``:
 
@@ -1308,8 +1449,8 @@ of types that are assignable (see :ref:`Assignability`) to ``T``:
     sum(1, 2, 3) // returns 6
 
 If an argument of array type ``T[]`` is to be passed to a call of entity
-with the rest parameter, then the spread expression (see
-:ref:`Spread Expression`) must be used with the ``spread`` operator '``...``'
+with the *rest parameter*, then the spread expression (see
+:ref:`Spread Expression`) must be used with the ``spread`` operator ``'...'``
 as a prefix before the array argument:
 
 .. code-block-meta:
@@ -1337,7 +1478,7 @@ as a prefix before the array argument:
    array argument
    array type
 
-A call of entity with a rest parameter of tuple type
+A call of entity with a *rest parameter* of tuple type
 [``T``:sub:`1` ``, ..., T``:sub:`n`] can accept only ``n`` arguments of types
 that are assignable (see :ref:`Assignability`) to the corresponding
 ``T``:sub:`i`:
@@ -1363,9 +1504,9 @@ that are assignable (see :ref:`Assignability`) to the corresponding
     sum(1, 2, 3)   // returns 6
 
 It is legal though meaningless to declare a function with an optional
-parameter followed by a rest parameter of a tuple type.
+parameter followed by a *rest parameter* of a tuple type.
 However, use of such function without explicitly set optional and
-rest parameters will cause compile-time error:
+*rest parameters* will cause compile-time error:
 
 .. code-block:: typescript
    :linenos:
@@ -1382,7 +1523,7 @@ rest parameters will cause compile-time error:
 If an argument of tuple type [``T``:sub:`1` ``, ..., T``:sub:`n`]
 is to be passed to a call of entity with the rest parameter,
 then a spread expression (see :ref:`Spread Expression`)
-must have the ``spread`` operator '``...``' as a
+must have the ``spread`` operator ``'...'`` as a
 prefix before the tuple argument:
 
 .. code-block-meta:
@@ -1412,7 +1553,7 @@ prefix before the tuple argument:
 
 If an argument of fixed-size array type ``FixedArray<T>`` is to be passed to a
 function or a method with the rest parameter, then the spread expression (see
-:ref:`Spread Expression`) must be used with the ``spread`` operator '``...``'
+:ref:`Spread Expression`) must be used with the ``spread`` operator ``'...'``
 as a prefix before the fixed-size array argument:
 
 .. code-block-meta:
@@ -1445,19 +1586,23 @@ generics as a *rest parameter*.
       return res
     }
 
-**Note**. Any call to a function, method, constructor, or lambda with a rest
-parameter implies that a new array or tuple is created from the arguments
-provided.
+.. note::
+   Any call to a function, method, constructor, or lambda with a rest
+   parameter implies that a new array or tuple is created from the arguments
+   provided.
 
 .. code-block:: typescript
    :linenos:
 
-    function foo(...array_parameter: number[], ...tuple_parameter: [number, string]) {
+    function rest_array(...array_parameter: number[]) {
        // array_parameter is a new array created from the arguments passed
-       // tuple_parameter is a new tuple created from the arguments passed
        array_parameter[0] = 1234
+       console.log (array_parameter[0]) // 1234 is the output
+    }
+    function rest_tuple(...tuple_parameter: [number, string]) {
+       // tuple_parameter is a new tuple created from the arguments passed
        tuple_parameter[0] = 1234
-       console.log (array_parameter[0], tuple_parameter[0]) // 1234 1234 is the output
+       console.log (tuple_parameter[0]) // 1234 is the output
     }
 
     const array_argument: number[] =  [1,2,3,4]
@@ -1465,8 +1610,10 @@ provided.
 
     console.log (array_argument[0], tuple_argument[0]) // 1 1 is the output
 
-    foo (...array_argument, ...tuple_argument) 
+    rest_array (...array_argument)
          // array_argument is spread into a sequence of its elements
+
+    rest_tuple (...tuple_argument)
          // tuple_argument is spread into a sequence of its elements
 
     console.log (array_argument[0], tuple_argument[0]) // 1 1 is the output
@@ -1539,7 +1686,7 @@ Return Type
 .. meta:
     frontend_status: Done
 
-Function, method, or lambda return type defines the resultant type of the
+A function, a method, or a lambda return type defines the resultant type of the
 function, method, or lambda execution (see :ref:`Function Call Expression`,
 :ref:`Method Call Expression`, and :ref:`Lambda Expressions`). During the
 execution, the function, method, or lambda can produce a value of a type
@@ -1553,21 +1700,44 @@ The syntax of *return type* is presented below:
         ':' (type | 'this')
         ;
 
-If function or method return type is not ``void`` (see :ref:`Type void`), and
-the execution path of the function or method body has no return statement (see
-:ref:`Return Statements`), then a :index:`compile-time error` occurs.
+If a function, a method, or a lambda return type is other than ``void`` (see
+:ref:`Type void`) or ``undefined`` (see :ref:`Type undefined`), and the
+execution path in the function, method, or lambda body has neither a
+``return`` statement (see :ref:`Return Statements`) nor a ``throw`` statement
+(see :ref:`Throw Statements`), then a :index:`compile-time error` occurs.
 
-A :index:`compile-time error` occurs if lambda return type is not ``never``
-(see :ref:`Type never`), and the execution path of a function, method, or
-lambda body has no return statement (see :ref:`Return Statements`).
+If a function, a method, or a lambda return type is ``never`` (see
+:ref:`Type never`), and there is an execution path in which all statements
+execute normally (see :ref:`Normal and Abrupt Statement Execution`), then a
+:index:`compile-time error` occurs.
 
 A special form of return type with the keyword ``this`` as type annotation can
 be used in class instance methods only (see :ref:`Methods Returning this`).
 
-If function, method, or lambda return type is not specified, then it is
+If a function, a method, or a lambda return type is not specified, then it is
 inferred from its body (see :ref:`Return Type Inference`). If there is no body,
 then the function, method, or lambda return type is ``void`` (see
 :ref:`Type void`).
+
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo1 (): number {}  // compile-time error: return or throw missing
+    let foo2 =  (): number => {} // compile-time error: return or throw missing
+
+    function foo3 (): undefined {}  // OK: it returns 'undefined' value
+    let foo4 =  (): undefined => {} // OK: it returns 'undefined' value
+
+    function foo5 (): never {}  // compile-time error: no throw or return never type function call
+    let foo6 =  (): never => {} // compile-time error: no throw or return never type function call
+
+    function foo7 (): void {}  // OK: it returns undefined value
+    let foo8 =  (): void => {} // OK: it returns undefined value
+
+    function foo9 () {}   // OK: return type is void and return value is 'undefined'
+    let foo10 =  () => {} // OK: return type is void and return value is 'undefined'
+
 
 .. index::
    return type

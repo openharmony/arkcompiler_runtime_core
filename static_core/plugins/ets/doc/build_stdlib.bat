@@ -14,7 +14,7 @@
 @echo off
 md __build
 cd stdlib
-sphinx-build -n -b latex . ..\__build
+sphinx-build -n -W --keep-going -b latex . ..\__build
 cd ..\__build
 latexmk -f -silent -pdf -dvi- -ps- *.tex
 md ..\stdlib\build

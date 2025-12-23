@@ -10,35 +10,26 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-====================
-|LANG| Specification
-====================
+.. _Runtime System:
 
-.. toctree::
-   :numbered:
-   :maxdepth: 3
+Runtime System
+##############
 
-   /1_intro
-   /2_lexical
-   /3_types
-   /4_names
-   /5_generics
-   /6_conversions
-   /7_expressions
-   /8_statements
-   /9_classes
-   /10_interfaces
-   /11_enums
-   /12_errors
-   /13_modules
-   /14_ambients
-   /15_semantics
-   /16_concurrency
-   /17_experimental
-   /18_annotations
-   /19_stdlib
-   /20_implementation
-   /21_runtime
-   /22_grammar
-   /0_authors
+
+.. .. _Overview:
+   Overview
+   ********
+   Runtime specification presents complete information on the structure of the |LANG|
+   runtime system with the detailed description of runtime data structures used
+   and approaches followed.
+
+.. include:: ../runtime/01_intro.rst
+.. include:: ../runtime/02_bytecode.rst
+.. include:: ../runtime/03_file_format.rst
+.. include:: ../runtime/04_names.rst
+.. include:: ../runtime/05_imports.rst
+.. include:: ../runtime/06_runtime_class.rst
+.. include:: ../runtime/07_verifier.rst
+
+
 

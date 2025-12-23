@@ -169,7 +169,6 @@ issue occurs then a proper exception is thrown.
    sting literal
    module
    argument
-   static initialization
    function
    argument
    access
@@ -221,30 +220,6 @@ declarations that use specific ArkUI types.
    ArkUI plugin
    ArkUI type
    ArkUI code
-
-|
-
-.. OutOfMemoryError for Primitive Type Operations:
-
-``OutOfMemoryError`` for Primitive Type Operations
-**************************************************
-
-The execution of some primitive type operations (e.g., increment, decrement, and
-assignment) can throw ``OutOfMemoryError`` (see :ref:`Error Handling`) if
-allocation of a new object is required but the available memory is not
-sufficient to perform it.
-
-.. index::
-   primitive type
-   primitive type operation
-   operation
-   increment
-   decrement
-   assignment
-   error
-   allocation
-   object
-   available memory
 
 |
 

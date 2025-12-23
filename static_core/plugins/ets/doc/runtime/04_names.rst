@@ -13,27 +13,27 @@
 .. _Runtime Names:
 
 Runtime Names
-#############
+*************
 
 |LANG| runtime (including internal ``ClassLinker`` APIs, standard library
-reflection and class loading APIs) and build-time (build system, frontend,
-bytecode manipulation tools) both work with modules, classes and other entities
-through **runtime names**.
+reflection, and class loading APIs) and build time (build system, frontend,
+bytecode manipulation tools) use *runtime names* to work with modules, classes,
+and other entities.
 
-A runtime name is formed according to the following rules:
+A *runtime name* is formed in accordance with the following rules:
 
-- |LANG| compiler associates a **name** with a **group** of source code files
+- |LANG| compiler associates a *name* with a *group* of source code files
   compiled within a single compilation configuration file
-  (``build-config.json``).
+  ``build-config.json``.
 
-- |LANG| compiler limits relative imports to be in the **same group** of
-  source code files.
+- |LANG| compiler limits relative imports to only a single and always the
+  *same group* of source code files.
 
-- |LANG| compiler obtains the **current group name** from the current
+- |LANG| compiler obtains the *current group name* from the current
   compilation configuration file.
 
-- If the imported file is from the **external group** of source code files,
-  the external group name is obtained from the corresponding external
+- If a file is imported from an **external group** of source code files,
+  then the external group name is obtained from the corresponding external
   compilation configuration file.
 
 .. code-block:: json
@@ -52,28 +52,30 @@ A runtime name is formed according to the following rules:
     :linenos:
 
     import { A } from "@ohos/apix/fs"           // "fs" is associated with the name "@ohos/apix"
-    import { B } from "@lib/components/buttons" // "components/buttons" is associated with name "@lib"
+    import { B } from "@lib/components/buttons" // "components/buttons" is associated with the name "@lib"
     import { C } from "../bar"                  // "bar" is associated with the name "@app"
 
-- |LANG| compiler computes the **module name** for each file according to the
-  **group name** and the relative path. ``@ohos/apix/fs`` will have module
-  name ``@ohos.apix.fs``.
+- |LANG| compiler computes the *module name* for each file in accordance with
+  the *group name*, and the module of the relative path ``@ohos/apix/fs`` is
+  ``@ohos.apix.fs``.
 
-- Module itself uses the same module name as its runtime name.
+- The name of a module is the same as the runtime name of the module.
 
-- Entities inside the module are prefixed with the module name. As shown below,
-  classes are named `@ohos.apix.fs.A` and so on.
+- All entities inside a module use the module name as a prefix. Classes are
+  named ``@ohos.apix.fs.A`` and so on as shown below.
 
-Modules within a well-formed build-system are guaranteed to not clash by runtime
-name. Well-formed assumes parties do not assign same **group** name, ``.abc``
-files are not patched.
+Modules within a well-formed build system are guaranteed against a clash with
+a runtime name. A build system is *well-formed* if its parts do not assign the
+same *group* name, and ``.abc`` files are not patched.
+
+|
 
 .. _Comprehensive Runtime Names Example:
 
 Comprehensive Runtime Names Example
 ===================================
 
-Let's assume the following source code in ``appsrc/mod.ets``:
+The source code in ``appsrc/mod.ets`` is as follows:
 
 .. code-block:: typescript
     :linenos:
@@ -97,7 +99,7 @@ Let's assume the following source code in ``appsrc/mod.ets``:
         static x3 = foo()
     }
 
-Runtime names are generated as follows (illustrated with pseudo-code):
+Runtime names are generated as illustrated by the following pseudo-code:
 
 .. code-block:: typescript
     :linenos:
@@ -136,12 +138,15 @@ Runtime names are generated as follows (illustrated with pseudo-code):
         }
     }
 
-.. _Name mangling for bytecode:
+|
 
-Name mangling
-=============
+.. _Name Mangling for Bytecode:
 
-We use the following easily readable name format to display all the mangled names in the bytecode:
+Name Mangling for Bytecode
+==========================
+
+The following easily readable name format is used to display all mangled names
+in bytecode:
 
 .. code-block:: abnf
 
@@ -151,14 +156,15 @@ We use the following easily readable name format to display all the mangled name
         ('-' additionalInformation)?
         ('-' counter)?
 
-where:
+--where:
 
-- **specialCharacter** is the ``%%`` symbol
-- **elementType** is a predefined set of names to identify the entity
-- **additionalInformation** is an optional part a developer can use to provide further information about the entity, if necessary
-- **counter** is an optional counter, if needed
+- *specialCharacter* is the symbol ``%%``;
+- *elementType* is a predefined set of names to identify an entity;
+- *additionalInformation* is an optional part that a developer can use to
+  provide further information about the entity, if necessary;
+- *counter* is an optional counter, if needed.
 
-The following table lists all the currently used **elementType** values:
+All *elementType* values used currently are listed in the following table:
 
 .. table::
     :widths: 30, 30, 30
@@ -174,7 +180,7 @@ The following table lists all the currently used **elementType** values:
     ==================== ==================== ====================
 
 
-All the currently used mangled names in the bytecode can be found in this table:
+All mangled names currently used in bytecode are listed in the following table:
 
 .. table::
     :widths: 35, 65
@@ -201,13 +207,14 @@ All the currently used mangled names in the bytecode can be found in this table:
     ``union_prop``                             ``%%union_prop-prop_type-prop_name``                
     ========================================== ====================================================
 
-Simple examples to show from which STS code what mangled name is created:
+The correlation between |LANG| code and mangled names created from it are
+represented in the following examples:
 
 .. table::
     :widths: 40, 60
 
     +----------------------------------------------------+-------------------------------------------------------+
-    | **Annotation**                                     | **Mangled name**                                      |
+    | **Annotation**                                     | **Mangled Name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
@@ -217,7 +224,7 @@ Simple examples to show from which STS code what mangled name is created:
     |                                                    |                                                       |
     |     class MyClass {                                |                                                       |
     |         @ExampleAnnotation()                       |                                                       |
-    |         foo() {}                                   |     //The 'foo' method will have the annotation on it.|
+    |         foo() {}                                   |     //The method 'foo' has an annotation on it.       |
     |     }                                              |     %%annotation-ExampleAnnotation-testArr-1          |
     +----------------------------------------------------+-------------------------------------------------------+
 
@@ -225,11 +232,11 @@ Simple examples to show from which STS code what mangled name is created:
     :widths: 55, 45
 
     +----------------------------------------------------+-------------------------------------------------------+
-    | **Async function**                                 | **Mangled name**                                      |
+    | **Async Function**                                 | **Mangled Name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     async function exampleFunc() {}                |     //the original name will not change               |
+    |     async function exampleFunc() {}                |     //the original name does not change               |
     |                                                    |                                                       |
     |     //The generated pair of the original.          |     %%async-exampleFunc                               |
     |     public static %%async-exampleFunc(): Object {} |                                                       |
@@ -239,7 +246,7 @@ Simple examples to show from which STS code what mangled name is created:
     :widths: 45, 55
 
     +----------------------------------------------------+-------------------------------------------------------+
-    | **Get (getter)**                                   | **Mangled name**                                      |
+    | **Get (Getter)**                                   | **Mangled Name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
@@ -252,7 +259,7 @@ Simple examples to show from which STS code what mangled name is created:
     :widths: 40, 60
 
     +----------------------------------------------------+-------------------------------------------------------+
-    | **Lambda**                                         | **Mangled name**                                      |
+    | **Lambda**                                         | **Mangled Name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
@@ -263,7 +270,7 @@ Simple examples to show from which STS code what mangled name is created:
     :widths: 60, 40
 
     +----------------------------------------------------+-------------------------------------------------------+
-    | **Partial**                                        | **Mangled name**                                      |
+    | **Partial**                                        | **Mangled Name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
@@ -276,7 +283,7 @@ Simple examples to show from which STS code what mangled name is created:
     :widths: 60, 40
 
     +----------------------------------------------------+-------------------------------------------------------+
-    | **Inherited property access in class**             | **Mangled name**                                      |
+    | **Inherited Property Access in Class**             | **Mangled Name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
@@ -293,7 +300,7 @@ Simple examples to show from which STS code what mangled name is created:
     :widths: 45, 55
 
     +----------------------------------------------------+-------------------------------------------------------+
-    | **Set (setter)**                                   | **Mangled name**                                      |
+    | **Set (Setter)**                                   | **Mangled Name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
@@ -306,12 +313,12 @@ Simple examples to show from which STS code what mangled name is created:
     :widths: 35, 65
 
     +----------------------------------------------------+-------------------------------------------------------+
-    | **Union property access**                          | **Mangled name**                                      |
+    | **Union Property Access**                          | **Mangled Name**                                      |
     +====================================================+=======================================================+
     | .. code-block:: typescript                         | .. code-block:: typescript                            |
     |                                                    |                                                       |
-    |     class A {                                      |     //it will only be generated when accessing        |
-    |       testMember: Number = 9                       |     //the 'testMember' member in 'foo' through 'a0'   |
+    |     class A {                                      |     //it is only generated when accessing the         |
+    |       testMember: Number = 9                       |     //'testMember' member in 'foo' through 'a0'       |
     |     }                                              |     %%union_prop-std_core_Double-testMember           |
     |                                                    |                                                       |
     |     class B {                                      |                                                       |
@@ -323,13 +330,14 @@ Simple examples to show from which STS code what mangled name is created:
     |     }                                              |                                                       |
     +----------------------------------------------------+-------------------------------------------------------+
 
-All the other entities in the bytecode (some has non-mangled names, others are not represented):
+Other entities in bytecode (some with non-mangled names, while others are not
+represented) are as follows:
 
 .. table::
     :widths: 35, 65
 
     ==================== ====================
-    **Primitive types**  **Name in assembly**
+    **Primitive Types**  **Name in Bytecode**
     ==================== ====================
     ``byte``             ``i8``              
     -------------------- --------------------
@@ -352,147 +360,147 @@ All the other entities in the bytecode (some has non-mangled names, others are n
 .. table::
     :widths: 35, 65
 
-    ==================================== =====================================================================
-    **Built-in reference types**         **Name in assembly**                
-    ==================================== =====================================================================
-    ``object/Object``                    ``std.core.Object``                 
-    ------------------------------------ ---------------------------------------------------------------------
-    ``string/String``                    ``std.core.String``                 
-    ------------------------------------ ---------------------------------------------------------------------
-    ``fixed array``                      ``typename_in_assembly + "[" + "]"``
-    ------------------------------------ ---------------------------------------------------------------------
-    ``void``                             ``void``                            
-    ------------------------------------ ---------------------------------------------------------------------
-    ``null``                             ``std.core.Object``                 
-    ------------------------------------ ---------------------------------------------------------------------
-    ``undefined``                        ``std.core.Object``                 
-    ------------------------------------ ---------------------------------------------------------------------
-    ``boxed types``                      ``"std.core." + boxed_type_name``   
-    ------------------------------------ ---------------------------------------------------------------------
-    ``tuple``                            an array of the least upper bound type of the types used in the tuple
-    ==================================== =====================================================================
+    =============================== =========================================================================
+    **Built-in Reference Types**    **Representation in Bytecode**
+    =============================== =========================================================================
+    ``object/Object``               ``std.core.Object``
+    ------------------------------- -------------------------------------------------------------------------
+    ``string/String``               ``std.core.String``
+    ------------------------------- -------------------------------------------------------------------------
+    ``simple array``                ``typename_in_bytecode + "[" + "]"``
+    ------------------------------- -------------------------------------------------------------------------
+    ``void``                        ``void``
+    ------------------------------- -------------------------------------------------------------------------
+    ``null``                        ``std.core.Object``
+    ------------------------------- -------------------------------------------------------------------------
+    ``undefined``                   ``std.core.Object``
+    ------------------------------- -------------------------------------------------------------------------
+    ``boxed types``                 ``"std.core." + boxed_type_name``
+    ------------------------------- -------------------------------------------------------------------------
+    ``tuple``                       An array of the least upper bound (LUB) type of the types used in a tuple
+    =============================== =========================================================================
 
 .. table::
     :widths: 35, 65
 
     ================================ ===============================================================
-    **User defined reference types** **Name in assembly**            
+    **User-defined Reference Types** **Representation in Bytecode**
     ================================ ===============================================================
     ``function type``                ``std.core.Function + counter`` (counter: number of parameters)
     -------------------------------- ---------------------------------------------------------------
-    ``union type``                   the least upper bound type of the types used in the union
+    ``union type``                   The LUB type of the types used in a union
     -------------------------------- ---------------------------------------------------------------
-    ``type parameter``               ``std.core.Object`` (because of type erasure)           
+    ``type parameter``               ``std.core.Object`` (because of type erasure)
     -------------------------------- ---------------------------------------------------------------
-    ``literal type with string``     ``std.core.String``                                      
+    ``literal type with string``     ``std.core.String``
     -------------------------------- ---------------------------------------------------------------
-    ``literal type with null``       ``std.core.Object``                                      
+    ``literal type with null``       ``std.core.Object``
     -------------------------------- ---------------------------------------------------------------
-    ``literal type with undefined``  ``std.core.Object``                                      
+    ``literal type with undefined``  ``std.core.Object``
     -------------------------------- ---------------------------------------------------------------
-    ``class/interface/function``     ``"." + class/interface/function_name``                  
+    ``class/interface/function``     ``"." + class/interface/function_name``
     -------------------------------- ---------------------------------------------------------------
-    ``namespace``                    ``"." + namespace_name``                  
+    ``namespace``                    ``"." + namespace_name``
     ================================ ===============================================================
 
 .. table::
     :widths: 35, 65
 
-    ================================ ===============================================================
-    **Other utility types**          **Representation in the bytecode**                       
-    ================================ ===============================================================
-    ``Required``                     not represented in the bytecode                          
-    -------------------------------- ---------------------------------------------------------------
-    ``Readonly``                     not represented in the bytecode                          
-    ================================ ===============================================================
+    ================================ =================================================
+    **Other utility types**          **Representation in Bytecode**
+    ================================ =================================================
+    ``Required``                     Not represented in bytecode
+    -------------------------------- -------------------------------------------------
+    ``Readonly``                     Not represented in bytecode
+    ================================ =================================================
 
-Other examples related to non-mangled names:
-
-.. table::
-    :widths: 45, 55
-
-    +----------------------------------------------------+-------------------------------------------------------+
-    | **Class**                                          | **How it looks in the bytecode**                      |
-    +====================================================+=======================================================+
-    | .. code-block:: typescript                         | .. code-block:: typescript                            |
-    |                                                    |                                                       |
-    |     class TestClass {}                             |     .TestClass                                        |
-    +----------------------------------------------------+-------------------------------------------------------+
+Other examples related to non-mangled names are as follows:
 
 .. table::
     :widths: 45, 55
 
-    +----------------------------------------------------+-------------------------------------------------------+
-    | **Function**                                       | **How it looks in the bytecode**                      |
-    +====================================================+=======================================================+
-    | .. code-block:: typescript                         | .. code-block:: typescript                            |
-    |                                                    |                                                       |
-    |     function testFunction() {}                     |     .testFunction                                     |
-    +----------------------------------------------------+-------------------------------------------------------+
+    +----------------------------------------------------+---------------------------------------------------+
+    | **Class**                                          | **How It Looks in Bytecode**                      |
+    +====================================================+===================================================+
+    | .. code-block:: typescript                         | .. code-block:: typescript                        |
+    |                                                    |                                                   |
+    |     class TestClass {}                             |     .TestClass                                    |
+    +----------------------------------------------------+---------------------------------------------------+
 
 .. table::
     :widths: 45, 55
 
-    +----------------------------------------------------+-------------------------------------------------------+
-    | **Interface**                                      | **How it looks in the bytecode**                      |
-    +====================================================+=======================================================+
-    | .. code-block:: typescript                         | .. code-block:: typescript                            |
-    |                                                    |                                                       |
-    |     interface TestInterface {}                     |     .TestInterface                                    |
-    +----------------------------------------------------+-------------------------------------------------------+
+    +----------------------------------------------------+---------------------------------------------------+
+    | **Function**                                       | **How It Looks in Bytecode**                      |
+    +====================================================+===================================================+
+    | .. code-block:: typescript                         | .. code-block:: typescript                        |
+    |                                                    |                                                   |
+    |     function testFunction() {}                     |     .testFunction                                 |
+    +----------------------------------------------------+---------------------------------------------------+
 
 .. table::
     :widths: 45, 55
 
-    +----------------------------------------------------+-------------------------------------------------------+
-    | **Namespace**                                      | **How it looks in the bytecode**                      |
-    +====================================================+=======================================================+
-    | .. code-block:: typescript                         | .. code-block:: typescript                            |
-    |                                                    |                                                       |
-    |     namespace TestNamespace {}                     |     .TestNamespace                                    |
-    +----------------------------------------------------+-------------------------------------------------------+
+    +----------------------------------------------------+-----------------------------------------------+
+    | **Interface**                                      | **How It Looks in Bytecode**                  |
+    +====================================================+===============================================+
+    | .. code-block:: typescript                         | .. code-block:: typescript                    |
+    |                                                    |                                               |
+    |     interface TestInterface {}                     |     .TestInterface                            |
+    +----------------------------------------------------+-----------------------------------------------+
 
 .. table::
     :widths: 45, 55
 
-    +----------------------------------------------------+-------------------------------------------------------+
-    | **Array**                                          | **How it looks in the bytecode**                      |
-    +====================================================+=======================================================+
-    | .. code-block:: typescript                         | .. code-block:: typescript                            |
-    |                                                    |                                                       |
-    |     let arr: FixedArray<int> = [1, 2, 3]           |     i32[]                                             |
-    +----------------------------------------------------+-------------------------------------------------------+
+    +----------------------------------------------------+---------------------------------------------------+
+    | **Namespace**                                      | **How It Looks in Bytecode**                      |
+    +====================================================+===================================================+
+    | .. code-block:: typescript                         | .. code-block:: typescript                        |
+    |                                                    |                                                   |
+    |     namespace TestNamespace {}                     |     .TestNamespace                                |
+    +----------------------------------------------------+---------------------------------------------------+
 
 .. table::
     :widths: 45, 55
 
-    +----------------------------------------------------+-------------------------------------------------------+
-    | **Union**                                          | **How it looks in the bytecode**                      |
-    +====================================================+=======================================================+
-    | .. code-block:: typescript                         | .. code-block:: typescript                            |
-    |                                                    |                                                       |
-    |     class A {}                                     |     Type of 'testVar' in the bytecode is 'A',         |
-    |                                                    |     because 'A' is the LUB (least upper bound)        |
-    |     class B extends A {}                           |     type of 'B' and 'C'. A union is represented       |
-    |                                                    |     as the LUB of the types used in the union         |
-    |     class C extends A {}                           |     type.                                             |
-    |                                                    |                                                       |
-    |     let testVar: A | B                             |                                                       |
-    +----------------------------------------------------+-------------------------------------------------------+
+    +----------------------------------------------------+---------------------------------------------------+
+    | **Array**                                          | **How It Looks in Bytecode**                      |
+    +====================================================+===================================================+
+    | .. code-block:: typescript                         | .. code-block:: typescript                        |
+    |                                                    |                                                   |
+    |     let arr: int[] = [1, 2, 3]                     |     i32[]                                         |
+    +----------------------------------------------------+---------------------------------------------------+
 
 .. table::
     :widths: 45, 55
 
-    +----------------------------------------------------+-------------------------------------------------------+
-    | **Tuple**                                          | **How it looks in the bytecode**                      |
-    +====================================================+=======================================================+
-    | .. code-block:: typescript                         | .. code-block:: typescript                            |
-    |                                                    |                                                       |
-    |     class A {}                                     |     Type of 'testTuple' in the bytecode is 'A[]',     |
-    |                                                    |     because 'A' is the LUB (least upper bound)        |
-    |     class B extends A {}                           |     type of 'B' and 'C'. A tuple is represented       |
-    |                                                    |     as an array of the LUB type of the types used     |
-    |     class C extends A {}                           |     in the tuple.                                     |
-    |                                                    |                                                       |
-    |     let testTuple: [B, C]                          |                                                       |
-    +----------------------------------------------------+-------------------------------------------------------+
+    +----------------------------------------------------+---------------------------------------------------+
+    | **Union**                                          | **How It Looks in Bytecode**                      |
+    +====================================================+===================================================+
+    | .. code-block:: typescript                         | .. code-block:: typescript                        |
+    |                                                    |                                                   |
+    |     class A {}                                     |     Type of 'testVar' in bytecode is 'A',         |
+    |                                                    |     because 'A' is the LUB type of 'B' and 'C'.   |
+    |     class B extends A {}                           |     A union is represented as the LUB of the      |
+    |                                                    |     types used in the union type.                 |
+    |     class C extends A {}                           |                                                   |
+    |                                                    |                                                   |
+    |     let testVar: A | B                             |                                                   |
+    +----------------------------------------------------+---------------------------------------------------+
+
+.. table::
+    :widths: 45, 55
+
+    +----------------------------------------------------+---------------------------------------------------+
+    | **Tuple**                                          | **How It Looks in Bytecode**                      |
+    +====================================================+===================================================+
+    | .. code-block:: typescript                         | .. code-block:: typescript                        |
+    |                                                    |                                                   |
+    |     class A {}                                     |     Type of 'testTuple' in bytecode is 'A[]',     |
+    |                                                    |     because 'A' is the LUB type of 'B' and 'C'.   |
+    |     class B extends A {}                           |     A tuple is represented as an array of the LUB |
+    |                                                    |     type of the types used in the tuple.          |
+    |     class C extends A {}                           |                                                   |
+    |                                                    |                                                   |
+    |     let testTuple: [B, C]                          |                                                   |
+    +----------------------------------------------------+---------------------------------------------------+

@@ -96,7 +96,7 @@ Declaring Annotations
     frontend_status: Done
 
 Declaring an *annotation* is similar to declaring an interface where the
-keyword ``interface`` is prefixed with the character '``@``'.
+keyword ``interface`` is prefixed with the character ``'@'``.
 
 The syntax of *annotation declaration* is presented below:
 
@@ -220,7 +220,16 @@ and to define the values of annotation fields:
 .. code-block:: abnf
 
     annotationUsage:
-        '@' qualifiedName annotationValues?
+        AnnotationUsageNoParentheses |
+        annotationUsageWithParentheses
+        ;
+
+    annotationUsageNoParentheses:
+        '@' qualifiedName
+        ;
+
+    annotationUsageWithParentheses:
+        '@' qualifiedName annotationValues
         ;
     annotationValues:
         '(' (objectLiteral | constantExpression)? ')'
@@ -238,11 +247,18 @@ An annotation declaration is represented in the example below:
     @interface MyAnno{}
 
 In general, annotation field values are set by an *object literal*. In a
-special case, annotation field values are set by using an expression (see
+special case, an annotation field value is set by using an expression (see
 :ref:`Using Single Field Annotations`).
 
-All values in an *object literal* must be constant expressions. Otherwise,
-a :index:`compile-time error` occurs.
+A value for an annotation field must be:
+
+- a constant expression, if the field is not of an array type; or
+
+- an :ref:`Array Literal` with elements that are either
+  constant expressions or, in case of array of array,
+  enclosed array literals with constant expressions.
+
+Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    annotation
@@ -273,8 +289,10 @@ Annotations can be applied to the following:
 
 - :ref:`Top-Level Declarations`;
 
-- Class members (see :ref:`Class Members`) or interface members (see
-  :ref:`Interface Members`);
+- Class members (see :ref:`Class Members`) except overriden fields
+  (see :ref:`Override Fields and Implement Properties`);
+
+- Interface members (see :ref:`Interface Members`);
 
 - Type usage (see :ref:`Using Types`);
 
@@ -378,7 +396,7 @@ omitted after the annotation name:
    annotation
    syntax
    array literal
-   parenthesis
+   parentheses
    property
    annotation name
 
@@ -764,7 +782,7 @@ The annotation ``@Target`` has a single field ``targets`` of type
     // long form:
     @Target({targets: [AnnotationTargets.PARAMETER]})
     @interface SpecialParameter {/*some fields*/}
-    
+
 If the annotation is present in the declaration of annotation ``X``, then
 the compiler checks that ``X`` is used in the specified contexts only.
 Otherwise, a :index:`compile-time error` occurs.
@@ -811,7 +829,7 @@ targets:
     - INTERFACE_SETTER.
 
 -  Other targets:
-    
+
     - LAMBDA for :ref:`Lambda Expressions` and
       :ref:`Lambda Expressions with Receiver`;
     - PARAMETER for function, method, and lambda parameter;
@@ -876,7 +894,7 @@ If a field is of an array type, the array type is also ``readonly``.
    bytecode
    readonly field
    array type
- 
+
 For the following annotation:
 
 .. code-block:: typescript

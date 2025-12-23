@@ -15,35 +15,34 @@
 Why Migrate from |TS| to |LANG|
 ===============================
 
-This chapter explains why it makes sense to migrate from the standard |TS| to
-|LANG|. In general, there are two reasons for doing this:
+This chapter explains why migrating from the standard |TS| to |LANG| makes
+sense. There are two reasons for doing this in general:
 
 - Program stability. Dynamically-typed languages like |JS| are very good at
   allowing programs to write code fast. At the same time, these languages are
   notorious for unexpected runtime errors. For example, if you forget to check
-  a variable for an ``undefined`` value, then your program would crash as a
-  result, causing inconvenience to users. Detecting such issues during the
-  development would be more beneficial. |TS| helps greatly here: it allows you
-  to annotate code with types, and have the compiler detect many errors prior
-  to deploying and using the code. However, even |TS| has limitations, and
-  sometimes permits annotating code with types 'loosely', thus leaving room for
-  runtime errors. |LANG| enforces strict type checking and thus less runtime
-  errors.
-- Program performance. To ensure program correctness, dynamically-typed
-  languages have to check actual types of objects when the program actually
-  runs. Back to our example, |JS| does not allow reading a property from
-  ``undefined``. However, the only way to check if a property has ``undefined``
-  value is to perform a runtime check, which all |JS| engines do: if the
-  property value is not ``undefined``, then the property can be read;
+  a variable for an ``undefined`` value, then your program would crash causing
+  inconvenience to users as a result. Detecting such issues during development
+  is more beneficial, and |TS| helps greatly as it allows annotating code with
+  types, and the compiler can detect many errors prior to deploying and using
+  a code. However, even |TS| has limitations, and sometimes permits annotating
+  code with types 'loosely', thus leaving room for runtime errors. |LANG|
+  enforces strict type checking, and thus less runtime errors.
+- Program performance. Dynamically-typed languages have to check actual types
+  of objects to ensure program correctness when the program actually runs.
+  Back to the example, |JS| does not allow reading a property from
+  ``undefined``. However, the only way to check if a property has the value
+  ``undefined`` is to perform a runtime check, which all |JS| engines do: if the
+  value of a property is not ``undefined``, then the property can be read;
   otherwise, an exception is thrown. Modern engines can optimize such checks
-  greatly, but these checks cannot be eliminated completely, and cause code to
+  greatly, but these checks cannot be eliminated completely, and cause a code to
   slow down. Since the standard |TS| compiles to |JS|, any code written in |TS|
-  has exactly the same issues as described above. |LANG| addresses this
-  problem. Thanks to static typing, |LANG| compiles programs not to |JS| but to
-  a special execution format called bytecode. It is faster to execute and
-  easier to optimize even further.
+  has exactly the same issues as described above.
+  |LANG| addresses this problem by using static typing, and |LANG| compiles
+  programs not to |JS| but to a special execution format called bytecode. It
+  is faster to execute and easier to optimize even further.
 
-The following chapters explain how |LANG| can help you improve program
+The chapters that follow explain how |LANG| can help improving program
 stability and performance.
 
 |
@@ -54,7 +53,7 @@ Mandatory Initialization of Fields for Better Stability
 -------------------------------------------------------
 
 |LANG| requires all fields to be assigned with initial values either when the
-field is declared or in the ``constructor`` body. It is similar to
+field is declared, or in the ``constructor`` body. It is similar to
 ``strictPropertyInitialization`` mode of the standard |TS|.
 
 Consider the following |TS| code:
@@ -96,8 +95,8 @@ This code looks as follows in |LANG| due to the explicit initialization:
             this.name = n
         }
 
-        // The type of field "name" is always string, "null" and "undefined"
-        // values can never be obtained accessing "name".
+        // The type of field "name" is always string, the values "null" and
+        // "undefined" can never be obtained by accessing "name".
         getName(): string {
             return this.name
         }
@@ -108,22 +107,22 @@ This code looks as follows in |LANG| due to the explicit initialization:
     // buddys.setName("John")
     console.log(buddy.getName().length); // 0, no runtime error ever
 
-If a ``name`` can have ``undefined`` value, then you also have to specify its
-type explicitly:
+If a ``name`` can have the value  ``undefined``, then you also have to specify
+its type explicitly:
 
 .. code-block:: typescript
 
     class Person {
-        name?: string // The field may have "undefined" value
-        // Such declaratioin is identical to name: string | undefined
+        name?: string // The field may have the value "undefined"
+        // Such declaration is identical to name: string | undefined
 
         setName(n:string) {
             this.name = n
         }
        
         getNameWrong(): string {
-            return this.name // Compile-time error: name can have "undefined"
-                             // value, so we cannot return it as type "string"
+            return this.name // Compile-time error: name can have the value
+                             // "undefined", so we cannot return it as type "string"
         }
 
         getName(): string | undefined { // Return type matches the type of name
@@ -161,14 +160,14 @@ Consider the following code:
 
     notify("Jack", "You look great today")
 
-The function ``notify`` takes two arguments of type "string" and outputs a new
-string which is constructed from the parameters. However, some *special* values
+The function ``notify`` takes two arguments of type ``string`` and outputs a new
+string which is constructed from parameters. However, some *special* values
 ---e.g., ``notify(null, undefined)``---can be passed to the function. Then a
 program continues to run and produce output as expected
 (``Dear undefined, a message for you: null``). It looks quite fine at first,
 but note that the engine that runs the code must always check for such special
-cases to ensure the correct behavior. In pseudocode, something like the
-following happens:
+cases to ensure the correct behavior. Something like the following occurs in
+pseudocode:
 
 .. code-block:: typescript
 
@@ -182,19 +181,19 @@ following happens:
         // ...
     }
 
-Now, imagine the function ``notify`` as a part of a complex, heavy-loaded
-system that sends real notifications instead of just writing to the log.
-In this scenario, executing all the checks from our ``__internal_tostring``
-function become a performance bottleneck.
+Guess the function ``notify`` is a part of a complex, heavy-loaded system that
+sends real notifications rather than simply writing to the log. Executing all
+checks from our ``__internal_tostring`` function becomes a performance
+bottleneck in this scenario.
 
 However, if we can guarantee to the execution engine that the values passed
 to the ``notify`` function are only *real* strings and never some *special*
-values such as ``null`` or ``undefined``, then we are 100% sure that no corner
-cases can occur during program execution, and checks like ``__internal_tostring``
-become redundant. In this particular case, the mechanism can be called
-'*nullish-safety*' as it guarantees that ``null`` and ``undefined`` are not
-valid values of type ``string``. With this feature available, the code simply
-would not build:
+values such as ``null`` or ``undefined``, then we can be 100% sure that no
+corner cases occur during program execution, and checks like ``__internal_tostring``
+become redundant. The mechanism can be called '*nullish-safety*' in this
+particular case as it guarantees that ``null`` and ``undefined`` are not
+valid values of type ``string``. With this feature available, the code fails to
+build:
 
 .. code-block:: typescript
 
@@ -205,17 +204,16 @@ would not build:
     notify("Jack", "You look great today")
     notify(null, undefined) // Compile-time error
 
-In |TS|, such behavior can be turned on by a special compiler flag called
+Such behavior in |TS| can be turned on by a special compiler flag called
 ``strictNullChecks``. As a standard, |TS| is compiled to |JS|, which
-does not have such feature, and '*strict null checks*' work at compile-time
+does not have such a feature, and '*strict null checks*' work at compile time
 only for better type checking. However, |LANG| considers *null-safety* a very
 important feature from both stability and performance perspectives. That's why
-*null-safety* is enabled in the language. As a result, situations
-like that in the example above always cause compile-time errors. In exchange,
+*null-safety* is enabled in the language. Situations like that in the example
+above always cause compile-time errors as a result. In exchange,
 we provide our running engine with more information that guarantees possible
 type values and helps optimizing the performance.
 
-|
 
 |
 

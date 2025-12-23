@@ -47,11 +47,6 @@ Grammar Summary
        type '[' ']'
        ;
 
-.. functionType:
-   typeParameters? '(' ftParameterList? ')' ftReturnType
-   ;
-
-
     functionType:
         '(' ftParameterList? ')' ftReturnType
         ;
@@ -160,7 +155,7 @@ Grammar Summary
         ;
 
     optionalParameter:
-        identifier (':' type)? '=' expression
+        identifier ':' type '=' expression
         | identifier '?' ':' type
         ;
 
@@ -192,8 +187,12 @@ Grammar Summary
         '<' type (',' type)* '>'
         ;
 
-    overloadFunctionDeclaration:
-        'overload' identifier '{' qualifiedName (',' qualifiedName)* ','? '}'
+    explicitFunctionOverload:
+        'overload' identifier overloadList
+        ;
+
+    overloadList:
+        '{' identifier (',' identifier)* ','? '}'
         ;
 
 
@@ -233,6 +232,7 @@ Grammar Summary
 
     binaryExpression:
         multiplicativeExpression
+        | exponentiationExpression
         | additiveExpression
         | shiftExpression
         | relationalExpression
@@ -289,7 +289,7 @@ Grammar Summary
        identifier ':' expression
        ;
 
-    objectLiteralMethod
+    objectLiteralMethod:
        identifier typeParameters? signature block
        ;
 
@@ -403,13 +403,14 @@ Grammar Summary
         expression '||' expression
         ;
 
-    assignmentExpression:
-        lhsExpression assignmentOperator rhsExpression
+    assignmentExpression
+        : lhsExpression assignmentOperator rhsExpression
+        | destructuringAssignment
         ;
 
     assignmentOperator
         : '='
-        | '+='  | '-='  | '*='   | '='  | '%=' | `**=` | `/=`
+        | '+='  | '-='  | '*='   | '/='  | '%=' | `**=`
         | '<<=' | '>>=' | '>>>='
         | '&='  | '|='  | '^=' | `&&=` | `||=`
         | `??=`
@@ -606,11 +607,6 @@ Grammar Summary
         'abstract' | 'final'
         ;
 
-.. classModifier:
-   'abstract' | 'final' | 'sealed'
-   ;
-
-
     classExtendsClause:
         'extends' typeReference
         ;
@@ -633,10 +629,10 @@ Grammar Summary
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
-        | overloadConstructorDeclaration
+        | explicitConstructorOverload
         | classFieldDeclaration
         | classMethodDeclaration
-        | overloadMethodDeclaration
+        | explicitClassMethodOverload
         | classAccessorDeclaration
         )
         ;
@@ -678,18 +674,18 @@ Grammar Summary
         | 'async'
         ;
 
-    overloadMethodDeclaration:
-        overloadMethodModifier*
-        'overload' identifier '{' identifier (',' identifier)* ','? '}'
+    explicitClassMethodOverload:
+        explicitClassMethodOverloadModifier*
+        'overload' identifier overloadList
         ;
 
-    overloadMethodModifier: 'static' | 'async';
+    explicitClassMethodOverloadModifier: 'static' | 'async';
 
 
     classAccessorDeclaration:
         classAccessorModifier*
         ( 'get' identifier '(' ')' returnType? block?
-        | 'set' identifier '(' parameter ')' block?
+        | 'set' identifier '(' requiredParameter ')' block?
         )
         ;
 
@@ -708,8 +704,8 @@ Grammar Summary
         '{' statement* '}'
         ;
 
-    overloadConstructorDeclaration:
-        'overload' 'constructor' '{' identifier (',' identifier)* ','? '}'
+    explicitConstructorOverload:
+        'overload' 'constructor' overloadList
         ;
 
 
@@ -726,14 +722,14 @@ Grammar Summary
         : annotationUsage?
         ( interfaceProperty
         | interfaceMethodDeclaration
-        | overloadInterfaceMethodDeclaration
+        | explicitInterfaceMethodOverload
         )
         ;
 
     interfaceProperty:
         'readonly'? identifier '?'? ':' type
         | 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' parameter ')'
+        | 'set' identifier '(' requiredParameter ')'
         ;
 
     interfaceMethodDeclaration:
@@ -741,8 +737,8 @@ Grammar Summary
         | interfaceDefaultMethodDeclaration
         ;
 
-    overloadInterfaceMethodDeclaration:
-        'overload' identifier '{' identifier (',' identifier)* ','? '}'
+    explicitInterfaceMethodOverload:
+        'overload' identifier overloadList'
         ;
 
     enumDeclaration:
@@ -788,7 +784,7 @@ Grammar Summary
         ;
 
     nameBinding:
-        `type`? identifier bindingAlias?
+        'type'? identifier bindingAlias?
         | 'default' 'as' identifier
         ;
 
@@ -804,7 +800,7 @@ Grammar Summary
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
-        | overloadFunctionDeclaration
+        | explicitFunctionOverload
         | namespaceDeclaration
         | ambientDeclaration
         | annotationDeclaration
@@ -816,11 +812,7 @@ Grammar Summary
 
     namespaceDeclaration:
         'namespace' qualifiedName
-        '{' namespaceMember* staticBlock? namespaceMember* '}'
-        ;
-
-    namespaceMember:
-        topDeclaration | exportDirective
+        '{' (topDeclaration | topLevelStatements | exportDirective)* '}'
         ;
 
     exportDirective:
@@ -836,7 +828,7 @@ Grammar Summary
 
     singleExportDirective:
         'export'
-        ( `type`? identifier
+        ( 'type'? identifier
         | 'default' (expression | identifier)
         | '{' identifier 'as' 'default' '}'
         )
@@ -882,7 +874,7 @@ Grammar Summary
         ;
 
     ambientConst:
-        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral|MultilineStringLiteral)))
+        identifier ':' type
         ;
 
     ambientFunctionDeclaration:
@@ -934,7 +926,7 @@ Grammar Summary
     ambientClassAccessorDeclaration:
         ambientMethodModifier*
         ( 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' parameter ')'
+        | 'set' identifier '(' requiredParameter ')'
         )
         ;
 
@@ -992,7 +984,7 @@ Grammar Summary
 
     ambientAccessorDeclaration:
         ( 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' parameter ')' 
+        | 'set' identifier '(' requiredParameter ')'
         )
         ;
 
@@ -1031,7 +1023,7 @@ Grammar Summary
 
     accessorWithReceiverDeclaration:
           'get' identifier '(' receiverParameter ')' returnType block
-        | 'set' identifier '(' receiverParameter ',' parameter ')' block
+        | 'set' identifier '(' receiverParameter ',' requiredParameter ')' block
         ;
 
     functionTypeWithReceiver:
@@ -1202,7 +1194,7 @@ Grammar Summary
     FloatLiteral:
         DecimalIntegerLiteral '.' FractionalPart? ExponentPart? FloatTypeSuffix?
         | '.' FractionalPart ExponentPart? FloatTypeSuffix?
-        | DecimalIntegerLiteral ExponentPart FloatTypeSuffix?
+        | DecimalIntegerLiteral ExponentPart? FloatTypeSuffix
         ;
 
     ExponentPart:
@@ -1292,8 +1284,8 @@ Grammar Summary
         ;
 
     RegexSpecialForms:
-        CharacterClass ('(' '?='|'?!' CharacterClasse ')')?
-        ('(' '?<='|'?<!' CharacterClasse ')') CharacterClass
+        CharacterClass ('(' '?='|'?!' CharacterClass ')')?
+        ('(' '?<='|'?<!' CharacterClass ')') CharacterClass
         ;
 
     CharacterClass:

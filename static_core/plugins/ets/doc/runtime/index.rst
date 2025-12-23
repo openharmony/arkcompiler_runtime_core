@@ -23,4 +23,8 @@
     /03_file_format
     /04_names
     /05_imports
+    /06_runtime_class
+    /07_verifier
+
+
 
