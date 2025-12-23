@@ -225,20 +225,20 @@ public:
 
     void AddFilePathTestModified()
     {
-        AddElement<abckit_wrapper::Method>("A.foo1:i32;i32;void;", "foo1");
-        AddElement<abckit_wrapper::Field>("A.m1", "m1");
-        AddElement<abckit_wrapper::Method>("A1.foo1:i32;i32;void;", "foo1");
-        AddElement<abckit_wrapper::Field>("A1.m1", "m1");
-        AddElement<abckit_wrapper::Method>("dir.bar.A.foo1:i32;i32;void;", "foo1");
-        AddElement<abckit_wrapper::Field>("dir.bar.A.m1", "m1");
-        AddElement<abckit_wrapper::Method>("dir.bar.foo.A.foo1:i32;i32;void;", "foo1");
-        AddElement<abckit_wrapper::Field>("dir.bar.foo.A.m1", "m1");
-        AddElement<abckit_wrapper::Method>("dir.foo.A.foo1:i32;i32;void;", "foo1");
-        AddElement<abckit_wrapper::Field>("dir.foo.A.m1", "m1");
-        AddElement<abckit_wrapper::Method>("dir.foo.B.foo1:i32;i32;void;", "foo1");
-        AddElement<abckit_wrapper::Field>("dir.foo.B.m1", "m1");
-        AddElement<abckit_wrapper::Method>("foo.A.foo1:i32;i32;void;", "foo1");
-        AddElement<abckit_wrapper::Field>("foo.A.m1", "m1");
+        AddElement<abckit_wrapper::Method>("entry.A.foo1:i32;i32;void;", "foo1");
+        AddElement<abckit_wrapper::Field>("entry.A.m1", "m1");
+        AddElement<abckit_wrapper::Method>("entry.A1.foo1:i32;i32;void;", "foo1");
+        AddElement<abckit_wrapper::Field>("entry.A1.m1", "m1");
+        AddElement<abckit_wrapper::Method>("entry.dir.bar.A.foo1:i32;i32;void;", "foo1");
+        AddElement<abckit_wrapper::Field>("entry.dir.bar.A.m1", "m1");
+        AddElement<abckit_wrapper::Method>("entry.dir.bar.foo.A.foo1:i32;i32;void;", "foo1");
+        AddElement<abckit_wrapper::Field>("entry.dir.bar.foo.A.m1", "m1");
+        AddElement<abckit_wrapper::Method>("entry.dir.foo.A.foo1:i32;i32;void;", "foo1");
+        AddElement<abckit_wrapper::Field>("entry.dir.foo.A.m1", "m1");
+        AddElement<abckit_wrapper::Method>("entry.dir.foo.B.foo1:i32;i32;void;", "foo1");
+        AddElement<abckit_wrapper::Field>("entry.dir.foo.B.m1", "m1");
+        AddElement<abckit_wrapper::Method>("entry.foo.A.foo1:i32;i32;void;", "foo1");
+        AddElement<abckit_wrapper::Field>("entry.foo.A.m1", "m1");
     }
 
     void SetConfigFile(const string &path, const bool removeLogOverride = true)
@@ -305,6 +305,143 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_001, TestSize.Level1)
 
 // obfuscator test with graph end
 
+// config obf test begin
+// these test use the same abc file to test config file obf result
+/*
+ * @tc.name: obfuscator_test_101
+ * @tc.desc: test obf with reservedFileNames options
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_101, TestSize.Level1)
+{
+    std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.abc";
+    std::string obfAbcFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.updated.01.abc";
+    std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.01.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("entry.main", "main");
+
+    std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "projects/file_path_test/filepath_test_001_config.json";
+    SetConfigFile(configFilePath);
+
+    AddFilePathTestModified();
+
+    AddModuleElement("entry.A1", "entry.A1");
+    AddModuleElement("entry.dir.bar.A", "entry.dir.bar.A");
+    AddModuleElement("entry.dir.bar.foo.A", "entry.dir.bar.foo.A");
+    AddModuleElement("entry.dir.foo.A", "entry.dir.foo.A");
+    AddModuleElement("entry.dir.foo.B", "entry.dir.foo.B");
+
+    AddKeptModuleElement("entry.A", "entry.A");
+    AddKeptModuleElement("entry.foo.A", "entry.foo.A");
+
+    this->VerifyObfuscated();
+}
+
+/*
+ * @tc.name: obfuscator_test_102
+ * @tc.desc: test obf with universalReservedFileNames options
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_102, TestSize.Level1)
+{
+    std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.abc";
+    std::string obfAbcFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.updated.02.abc";
+    std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.02.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("entry.main", "main");
+
+    std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "projects/file_path_test/filepath_test_002_config.json";
+    SetConfigFile(configFilePath);
+
+    AddFilePathTestModified();
+
+    AddModuleElement("entry.A", "entry.A");
+    AddModuleElement("entry.A1", "entry.A1");
+    AddModuleElement("entry.dir.bar.foo.A", "entry.dir.bar.foo.A");
+    AddModuleElement("entry.foo.A", "entry.foo.A");
+
+    AddKeptModuleElement("entry.dir.bar.A", "entry.dir.bar.A");
+    AddKeptModuleElement("entry.dir.foo.A", "entry.dir.foo.A");
+    AddKeptModuleElement("entry.dir.foo.B", "entry.dir.foo.B");
+
+    this->VerifyObfuscated();
+}
+
+/*
+ * @tc.name: obfuscator_test_103
+ * @tc.desc: test obf with reservedPaths options
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_103, TestSize.Level1)
+{
+    std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.abc";
+    std::string obfAbcFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.updated.03.abc";
+    std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.03.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("entry.main", "main");
+
+    std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "projects/file_path_test/filepath_test_003_config.json";
+    SetConfigFile(configFilePath);
+
+    AddFilePathTestModified();
+
+    AddModuleElement("entry.A", "entry.A");
+    AddModuleElement("entry.A1", "entry.A1");
+    AddModuleElement("entry.dir.bar.A", "entry.dir.bar.A");
+    AddModuleElement("entry.dir.bar.foo.A", "entry.dir.bar.foo.A");
+    AddModuleElement("entry.dir.foo.A", "entry.dir.foo.A");
+    AddModuleElement("entry.dir.foo.B", "entry.dir.foo.B");
+    AddModuleElement("entry.foo.A", "entry.foo.A");
+
+    AddKeptModuleElement("entry.foo.A", "entry.foo.");
+    AddKeptModuleElement("entry.dir.bar.A", "entry.dir.bar.");
+    AddKeptModuleElement("entry.dir.bar.foo.A", "entry.dir.bar.");
+    AddKeptModuleElement("entry.dir.foo.A", "entry.dir.");
+    AddKeptModuleElement("entry.dir.foo.B", "entry.dir.");
+
+    this->VerifyObfuscated();
+}
+
+/*
+ * @tc.name: obfuscator_test_104
+ * @tc.desc: test obf with universalReservedPaths options
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_104, TestSize.Level1)
+{
+    std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.abc";
+    std::string obfAbcFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.updated.04.abc";
+    std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "projects/file_path_test/modules_static.04.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("entry.main", "main");
+
+    std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "projects/file_path_test/filepath_test_004_config.json";
+    SetConfigFile(configFilePath);
+
+    AddFilePathTestModified();
+
+    AddModuleElement("entry.A", "entry.A");
+    AddModuleElement("entry.A1", "entry.A1");
+    AddModuleElement("entry.dir.bar.A", "entry.dir.bar.A");
+    AddModuleElement("entry.dir.bar.foo.A", "entry.dir.bar.foo.A");
+    AddModuleElement("entry.dir.foo.A", "entry.dir.foo.A");
+    AddModuleElement("entry.dir.foo.B", "entry.dir.foo.B");
+    AddModuleElement("entry.foo.A", "entry.foo.A");
+
+    AddKeptModuleElement("entry.foo.A", "entry.foo.");
+
+    this->VerifyObfuscated();
+}
+// config obf test end
+
 /**
  * @tc.name: obfuscator_test_011
  * @tc.desc: test obfuscator, only verify obfuscated names
@@ -320,6 +457,8 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_011, TestSize.Level1)
     this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
 
     AddElement<abckit_wrapper::Field>("obfuscator_test.field1", "field1");
+    AddElement<abckit_wrapper::Field>("obfuscator_test.field2", "field2");
+    AddElement<abckit_wrapper::Field>("obfuscator_test.field3", "field3");
     AddElement<abckit_wrapper::Method>("obfuscator_test.foo1:void;", "foo1");
     AddElement<abckit_wrapper::Namespace>("obfuscator_test.ns1", "ns1");
     AddElement<abckit_wrapper::Field>("obfuscator_test.ns1.nsField1", "nsField1");
@@ -329,6 +468,9 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_011, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("obfuscator_test.cl1.cl1Foo1:obfuscator_test.cl1;void;", "cl1Foo1");
     AddElement<abckit_wrapper::AnnotationInterface>("obfuscator_test.Anno1", "Anno1");
     AddElement<abckit_wrapper::AnnotationInterface>("obfuscator_test.Anno2", "Anno2");
+    AddElement<abckit_wrapper::Class>("obfuscator_test.BaseInterface", "BaseInterface");
+    AddElement<abckit_wrapper::Class>("obfuscator_test.BaseClass", "BaseClass");
+    AddElement<abckit_wrapper::Class>("obfuscator_test.Class01", "Class01");
 
     this->VerifyObfuscated();
 }
@@ -417,60 +559,59 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_014, TestSize.Level1)
     std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "projects/import_test/modules_static.json";
 
     this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
-    this->InitRunAbcConfig("main", "main");
+    this->InitRunAbcConfig("entry.main", "main");
 
-    AddModuleElement("export_file2", "export_file2");
-    AddModuleElement("main", "main");
-    AddModuleElement("export_file", "export_file");
+    AddModuleElement("entry.export_file", "entry.export_file");
+    AddModuleElement("entry.main", "entry.main");
+    AddModuleElement("entry.common.export_file", "entry.common.export_file");
 
-    AddElement<abckit_wrapper::Method>("export_file2.process_field:export_file2.A;void;", "process_field");
-    AddElement<abckit_wrapper::Class>("export_file2.A", "A");
-    AddElement<abckit_wrapper::Method>("export_file2.A.foo:export_file2.A;std.core.String;", "foo");
-    AddElement<abckit_wrapper::Class>("export_file2.%%partial-B", "%%partial-B");
-    AddElement<abckit_wrapper::Field>("export_file2.%%partial-B.a", "a");
-    AddElement<abckit_wrapper::Class>("export_file2.B", "B");
-    AddElement<abckit_wrapper::Field>("export_file2.B.a", "a");
-    AddElement<abckit_wrapper::Method>("export_file2.B.foo:export_file2.B;void;", "foo");
+    AddElement<abckit_wrapper::Method>("entry.export_file.process_field:entry.export_file.A;void;", "process_field");
+    AddElement<abckit_wrapper::Class>("entry.export_file.A", "A");
+    AddElement<abckit_wrapper::Method>("entry.export_file.A.foo:entry.export_file.A;std.core.String;", "foo");
+    AddElement<abckit_wrapper::Class>("entry.export_file.B", "B");
+    AddElement<abckit_wrapper::Field>("entry.export_file.B.a", "a");
+    AddElement<abckit_wrapper::Method>("entry.export_file.B.foo:entry.export_file.B;void;", "foo");
 
-    AddElement<abckit_wrapper::Field>("main.b", "b");
-    AddElement<abckit_wrapper::Field>("main.var1", "var1");
-    AddElement<abckit_wrapper::Method>("main.foo1:void;", "foo1");
-    AddElement<abckit_wrapper::Method>("main.importTest:void;", "importTest");
-    AddElement<abckit_wrapper::Class>("main.C", "C");
-    AddElement<abckit_wrapper::Method>("main.C.foo:main.C;void;", "foo");
-    AddElement<abckit_wrapper::Field>("main.str1", "str1");
-    AddElement<abckit_wrapper::Field>("main.str2", "str2");
-    AddElement<abckit_wrapper::Field>("main.uni1", "uni1");
-    AddElement<abckit_wrapper::Field>("main.uni2", "uni2");
-    AddElement<abckit_wrapper::Field>("main.uni3", "uni3");
-    AddElement<abckit_wrapper::Field>("main.ct", "ct");
-    AddElement<abckit_wrapper::Field>("main.mct", "mct");
+    AddElement<abckit_wrapper::Field>("entry.main.b", "b");
+    AddElement<abckit_wrapper::Field>("entry.main.var1", "var1");
+    AddElement<abckit_wrapper::Method>("entry.main.foo1:void;", "foo1");
+    AddElement<abckit_wrapper::Method>("entry.main.importTest:void;", "importTest");
+    AddElement<abckit_wrapper::Class>("entry.main.C", "C");
+    AddElement<abckit_wrapper::Method>("entry.main.C.foo:entry.main.C;void;", "foo");
+    AddElement<abckit_wrapper::Field>("entry.main.str1", "str1");
+    AddElement<abckit_wrapper::Field>("entry.main.str2", "str2");
+    AddElement<abckit_wrapper::Field>("entry.main.uni1", "uni1");
+    AddElement<abckit_wrapper::Field>("entry.main.uni2", "uni2");
+    AddElement<abckit_wrapper::Field>("entry.main.uni3", "uni3");
+    AddElement<abckit_wrapper::Field>("entry.main.ct", "ct");
+    AddElement<abckit_wrapper::Field>("entry.main.mct", "mct");
 
-    AddElement<abckit_wrapper::Method>("export_file.f1:f64;void;", "f1");
-    AddElement<abckit_wrapper::Method>("export_file.f2:std.core.String;void;", "f2");
-    AddElement<abckit_wrapper::Namespace>("export_file.Space1", "Space1");
-    AddElement<abckit_wrapper::Field>("export_file.Space1.variable", "variable");
-    AddElement<abckit_wrapper::Field>("export_file.Space1.constant", "constant");
-    AddElement<abckit_wrapper::Method>("export_file.Space1.foo:void;", "foo");
-    AddElement<abckit_wrapper::Class>("export_file.%%partial-ExportClass", "%%partial-ExportClass");
-    AddElement<abckit_wrapper::Field>("export_file.%%partial-ExportClass.memA", "memA");
-    AddElement<abckit_wrapper::Field>("export_file.%%partial-ExportClass.memC", "memC");
-    AddElement<abckit_wrapper::Namespace>("export_file.Space2", "Space2");
-    AddElement<abckit_wrapper::Field>("export_file.Space2.tag", "tag");
-    AddElement<abckit_wrapper::Field>("export_file.Space2.variable", "variable");
-    AddElement<abckit_wrapper::AnnotationInterface>("export_file.MyAnno", "MyAnno");
-    AddElement<abckit_wrapper::Class>("export_file.%%partial-SomeClass", "%%partial-SomeClass");
-    AddElement<abckit_wrapper::Class>("export_file.SomeClass", "SomeClass");
-    AddElement<abckit_wrapper::Method>("export_file.SomeClass.foo:export_file.SomeClass;void;", "foo");
-    AddElement<abckit_wrapper::Class>("export_file.ExportClass", "ExportClass");
-    AddElement<abckit_wrapper::Field>("export_file.ExportClass.memC", "memC");
-    AddElement<abckit_wrapper::Method>("export_file.ExportClass.%%get-memA:export_file.ExportClass;std.core.String;",
-                                       "memA");
-    AddElement<abckit_wrapper::Method>("export_file.ExportClass.memB:export_file.ExportClass;std.core.String;", "memB");
-    AddElement<abckit_wrapper::Class>("export_file.ClassType1", "ClassType1");
-    AddElement<abckit_wrapper::Method>("export_file.ClassType1.test:export_file.ClassType1;std.core.String;", "test");
-    AddElement<abckit_wrapper::Class>("export_file.ClassType2", "ClassType2");
-    AddElement<abckit_wrapper::Method>("export_file.ClassType2.test:export_file.ClassType2;std.core.String;", "test");
+    AddElement<abckit_wrapper::Method>("entry.common.export_file.f1:f64;void;", "f1");
+    AddElement<abckit_wrapper::Method>("entry.common.export_file.f2:std.core.String;void;", "f2");
+    AddElement<abckit_wrapper::Namespace>("entry.common.export_file.Space1", "Space1");
+    AddElement<abckit_wrapper::Field>("entry.common.export_file.Space1.variable", "variable");
+    AddElement<abckit_wrapper::Field>("entry.common.export_file.Space1.constant", "constant");
+    AddElement<abckit_wrapper::Method>("entry.common.export_file.Space1.foo:void;", "foo");
+    AddElement<abckit_wrapper::Namespace>("entry.common.export_file.Space2", "Space2");
+    AddElement<abckit_wrapper::Field>("entry.common.export_file.Space2.tag", "tag");
+    AddElement<abckit_wrapper::Field>("entry.common.export_file.Space2.variable", "variable");
+    AddElement<abckit_wrapper::AnnotationInterface>("entry.common.export_file.MyAnno", "MyAnno");
+    AddElement<abckit_wrapper::Class>("entry.common.export_file.SomeClass", "SomeClass");
+    AddElement<abckit_wrapper::Method>(
+        "entry.common.export_file.SomeClass.foo:entry.common.export_file.SomeClass;void;", "foo");
+    AddElement<abckit_wrapper::Class>("entry.common.export_file.ExportClass", "ExportClass");
+    AddElement<abckit_wrapper::Field>("entry.common.export_file.ExportClass.memC", "memC");
+    AddElement<abckit_wrapper::Method>(
+        "entry.common.export_file.ExportClass.%%get-memA:entry.common.export_file.ExportClass;std.core.String;",
+        "memA");
+    AddElement<abckit_wrapper::Method>(
+        "entry.common.export_file.ExportClass.memB:entry.common.export_file.ExportClass;std.core.String;", "memB");
+    AddElement<abckit_wrapper::Class>("entry.common.export_file.ClassType1", "ClassType1");
+    AddElement<abckit_wrapper::Method>(
+        "entry.common.export_file.ClassType1.test:entry.common.export_file.ClassType1;std.core.String;", "test");
+    AddElement<abckit_wrapper::Class>("entry.common.export_file.ClassType2", "ClassType2");
+    AddElement<abckit_wrapper::Method>(
+        "entry.common.export_file.ClassType2.test:entry.common.export_file.ClassType2;std.core.String;", "test");
 
     this->VerifyObfuscated();
 }
@@ -589,7 +730,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_017, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("function_demo.Obj1.%%property-card", "card");
     AddElement<abckit_wrapper::Method>("function_demo.Obj1.%%set-card:function_demo.Obj1;f64;void;", "card");
     AddElement<abckit_wrapper::Method>("function_demo.Obj1.%%set-suit:function_demo.Obj1;std.core.String;void;",
-        "suit");
+                                       "suit");
     AddElement<abckit_wrapper::Class>("function_demo.ClassA", "ClassA");
     AddElement<abckit_wrapper::Method>(
         "function_demo.ClassA.method1:function_demo.ClassA;i32;std.core.String;std.core.Array;std.core.String;",
@@ -637,6 +778,11 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_018, TestSize.Level1)
 
     AddElement<abckit_wrapper::Field>("class_demo1.x", "x");
     AddElement<abckit_wrapper::Field>("class_demo1.y", "y");
+
+    AddElement<abckit_wrapper::Class>("class_demo1.ClassLong", "ClassLong");
+    AddElement<abckit_wrapper::Field>("class_demo1.ClassLong.field1", "field1");
+    AddElement<abckit_wrapper::Class>("class_demo1.ClassFloat", "ClassFloat");
+    AddElement<abckit_wrapper::Field>("class_demo1.ClassFloat.field1", "field1");
 
     this->VerifyObfuscated();
 }
@@ -715,7 +861,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_019, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("class_demo2.ClassC.%%property-field_inf2", "field_inf2");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassC.%%get-field_inf2:class_demo2.ClassC;f64;", "field_inf2");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassC.%%set-field_inf2:class_demo2.ClassC;f64;void;",
-        "field_inf2");
+                                       "field_inf2");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassC.method2:class_demo2.ClassC;std.core.String;", "method2");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassC.getDescription:class_demo2.ClassC;std.core.String;",
                                        "getDescription");
@@ -829,6 +975,8 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_022, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("annotation_demo.specialCls.name", "name");
     AddElement<abckit_wrapper::Method>("annotation_demo.specialCls.foo:annotation_demo.specialCls;void;", "foo");
     AddElement<abckit_wrapper::Field>("annotation_demo.cls1", "cls1");
+    AddElement<abckit_wrapper::AnnotationInterface>("annotation_demo.ListAnnotation", "ListAnnotation");
+    AddElement<abckit_wrapper::Class>("annotation_demo.ListAnnotationClass", "ListAnnotationClass");
 
     this->VerifyObfuscated();
 }
@@ -943,7 +1091,6 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_025, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("generics_demo2.constY", "constY");
     AddElement<abckit_wrapper::Field>("generics_demo2.recordX", "recordX");
     AddElement<abckit_wrapper::Field>("generics_demo2.myIssue", "myIssue");
-    AddElement<abckit_wrapper::Method>("generics_demo2.process:generics_demo2.%%partial-Issue;void;", "process");
     AddElement<abckit_wrapper::Class>("generics_demo2.Issue", "Issue");
     AddElement<abckit_wrapper::Field>("generics_demo2.Issue.%%property-title", "title");
     AddElement<abckit_wrapper::Field>("generics_demo2.Issue.%%property-description", "description");
@@ -965,19 +1112,6 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_025, TestSize.Level1)
                                        "title");
     AddElement<abckit_wrapper::Method>("generics_demo2.Issue2.%%set-title:generics_demo2.Issue2;std.core.String;void;",
                                        "title");
-    AddElement<abckit_wrapper::Class>("generics_demo2.%%partial-Issue", "%%partial-Issue");
-    addelement<abckit_wrapper::field>("generics_demo2.%%partial-issue.%%property-title", "title");
-    addelement<abckit_wrapper::field>("generics_demo2.%%partial-issue.%%property-description", "description");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%get-description:generics_demo2.%%partial-Issue;std.core.String;",
-        "description");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%get-title:generics_demo2.%%partial-Issue;std.core.String;", "title");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%set-description:generics_demo2.%%partial-Issue;std.core.String;void;",
-        "description");
-    AddElement<abckit_wrapper::Method>(
-        "generics_demo2.%%partial-Issue.%%set-title:generics_demo2.%%partial-Issue;std.core.String;void;", "title");
 
     this->VerifyObfuscated();
 }
@@ -1090,6 +1224,8 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_027, TestSize.Level1)
     AddElement<abckit_wrapper::Class>("class_demo3.BWPoint", "BWPoint");
     AddElement<abckit_wrapper::Field>("class_demo3.pt1", "pt1");
     AddElement<abckit_wrapper::Field>("class_demo3.pt2", "pt2");
+    AddElement<abckit_wrapper::Class>("class_demo3.AbstractClass", "AbstractClass");
+    AddElement<abckit_wrapper::Method>("class_demo3.getUnion:i32;{Uclass_demo3.Base,class_demo3.Point};", "getUnion");
 
     this->VerifyObfuscated();
 }
@@ -1251,7 +1387,7 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_033, TestSize.Level1)
         *;
     })";
     static const std::string keepStr2 = R"(-keep package incremental_test {
-        field2:string;
+        field2:std.core.String;
         foo2():void;
     })";
     static const std::string keepStr3 = R"(-keep namespace incremental_test.Ns1 {
@@ -1315,4 +1451,136 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_033, TestSize.Level1)
     ASSERT_EQ(namespace1Method1.value()->GetRawName(), "foo3");
     ASSERT_NE(class2.value()->GetName(), "Class2");
     ASSERT_NE(interface1.value()->GetName(), "Interface1");
+}
+
+/**
+ * @tc.name: obfuscator_test_034
+ * @tc.desc: test array objects scene
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_034, TestSize.Level1)
+{
+    std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/array_object_demo.abc";
+    std::string obfAbcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/array_object_demo.updated.abc";
+    std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/array_object_demo.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("array_object_demo", "main");
+
+    AddModuleElement("array_object_demo", "array_object_demo");
+    AddElement<abckit_wrapper::Field>("array_object_demo.myArr", "myArr");
+    AddElement<abckit_wrapper::Field>("array_object_demo.pickedCard1", "pickedCard1");
+    AddElement<abckit_wrapper::Field>("array_object_demo.arr2", "arr2");
+    AddElement<abckit_wrapper::Field>("array_object_demo.myDeck", "myDeck");
+    AddElement<abckit_wrapper::Field>("array_object_demo.suits", "suits");
+    AddElement<abckit_wrapper::Field>("array_object_demo.pickedCard2", "pickedCard2");
+    AddElement<abckit_wrapper::Method>("array_object_demo.pickCard:f64;array_object_demo.Obj1;", "pickCard");
+    AddElement<abckit_wrapper::Method>("array_object_demo.pickCard:std.core.Array;std.core.String;", "pickCard");
+    AddElement<abckit_wrapper::Method>("array_object_demo.pickCard:std.core.Array;f64;", "pickCard");
+    AddElement<abckit_wrapper::Class>("array_object_demo.Obj2", "Obj2");
+    AddElement<abckit_wrapper::Field>("array_object_demo.Obj2.%%property-suit", "suit");
+    AddElement<abckit_wrapper::Method>("array_object_demo.Obj2.%%get-suit:array_object_demo.Obj2;std.core.String;",
+                                       "suit");
+    AddElement<abckit_wrapper::Method>("array_object_demo.Obj2.%%set-suit:array_object_demo.Obj2;std.core.String;void;",
+                                       "suit");
+    AddElement<abckit_wrapper::Class>("array_object_demo.Object1", "Object1");
+    AddElement<abckit_wrapper::Class>("array_object_demo.Obj1", "Obj1");
+    AddElement<abckit_wrapper::Field>("array_object_demo.Obj1.%%property-suit", "suit");
+    AddElement<abckit_wrapper::Field>("array_object_demo.Obj1.%%property-card", "card");
+    AddElement<abckit_wrapper::Method>("array_object_demo.Obj1.%%get-card:array_object_demo.Obj1;f64;", "card");
+    AddElement<abckit_wrapper::Method>("array_object_demo.Obj1.%%set-card:array_object_demo.Obj1;f64;void;", "card");
+    AddElement<abckit_wrapper::Method>("array_object_demo.Obj1.%%get-suit:array_object_demo.Obj1;std.core.String;",
+                                       "suit");
+    AddElement<abckit_wrapper::Method>("array_object_demo.Obj1.%%set-suit:array_object_demo.Obj1;std.core.String;void;",
+                                       "suit");
+
+    this->VerifyObfuscated();
+}
+
+/**
+ * @tc.name: obfuscator_test_035
+ * @tc.desc: test async function
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_035, TestSize.Level1)
+{
+    std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/function_async_demo.abc";
+    std::string obfAbcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/function_async_demo.updated.abc";
+    std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/function_async_demo.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("function_async_demo", "main");
+
+    AddModuleElement("function_async_demo", "function_async_demo");
+    AddElement<abckit_wrapper::Method>("function_async_demo.sleep:i32;std.core.Promise;", "sleep");
+    AddElement<abckit_wrapper::Method>("function_async_demo.async1:std.core.Promise;", "async1");
+    AddElement<abckit_wrapper::Method>("function_async_demo.async2:std.core.Promise;", "async2");
+    AddElement<abckit_wrapper::Method>("function_async_demo.async3:std.core.Promise;", "async3");
+    AddElement<abckit_wrapper::Class>("function_async_demo.Exec", "Exec");
+    AddElement<abckit_wrapper::Field>("function_async_demo.Exec.val", "val");
+    AddElement<abckit_wrapper::Method>("function_async_demo.Exec.run:function_async_demo.Exec;void;", "run");
+    AddElement<abckit_wrapper::Method>("function_async_demo.async4:std.core.Promise;", "async4");
+    AddElement<abckit_wrapper::Method>("function_async_demo.async4Shell:std.core.Promise;", "async4Shell");
+    AddElement<abckit_wrapper::Method>("function_async_demo.print:std.core.Promise;", "print");
+    AddElement<abckit_wrapper::Class>("function_async_demo.AbstractClass", "AbstractClass");
+    AddElement<abckit_wrapper::Method>(
+        "function_async_demo.AbstractClass.methodAsync:function_async_demo.AbstractClass;std.core.Promise;",
+        "methodAsync");
+    AddElement<abckit_wrapper::Method>(
+        "function_async_demo.AbstractClass.methodAbs:function_async_demo.AbstractClass;std.core.String;", "methodAbs");
+    AddElement<abckit_wrapper::Class>("function_async_demo.ClassA", "ClassA");
+    AddElement<abckit_wrapper::Method>("function_async_demo.ClassA.method2:function_async_demo.ClassA;std.core.String;",
+                                       "method2");
+    AddElement<abckit_wrapper::Method>(
+        "function_async_demo.ClassA.methodAbs:function_async_demo.ClassA;std.core.String;", "methodAbs");
+    AddElement<abckit_wrapper::Method>("function_async_demo.ClassA.print:function_async_demo.ClassA;void;", "print");
+
+    this->VerifyObfuscated();
+}
+
+/**
+ * @tc.name: obfuscator_test_036
+ * @tc.desc: test namespace default symbol
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_036, TestSize.Level1)
+{
+    std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/namespace_default_symbol.abc";
+    std::string obfAbcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/namespace_default_symbol.updated.abc";
+    std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/namespace_default_symbol.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("namespace_default_symbol", "main");
+
+    AddModuleElement("namespace_default_symbol", "namespace_default_symbol");
+    AddElement<abckit_wrapper::Namespace>("namespace_default_symbol.External", "External");
+
+    this->VerifyObfuscated();
+}
+
+/**
+ * @tc.name: obfuscator_test_037
+ * @tc.desc: test union type ref
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_037, TestSize.Level1)
+{
+    std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/union_type_ref.abc";
+    std::string obfAbcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/union_type_ref.updated.abc";
+    std::string nameCacheFilePath = ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/union_type_ref.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    this->InitRunAbcConfig("union_type_ref", "main");
+
+    AddModuleElement("union_type_ref", "union_type_ref");
+    AddElement<abckit_wrapper::Class>("union_type_ref.BaseType", "BaseType");
+    AddElement<abckit_wrapper::Class>("union_type_ref.SomeType", "SomeType");
+    AddElement<abckit_wrapper::Field>("union_type_ref.var2", "var2");
+
+    this->VerifyObfuscated();
 }

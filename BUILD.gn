@@ -474,12 +474,33 @@ group("ark_guard_packages_windows") {
   }
 }
 
-group("ark_guard_host_unittest") {
-  testonly = true
-  deps = [
-    "$ark_root/ark_guard/abckit_wrapper/tests:host_unittest",
-    "$ark_root/ark_guard/tests:host_unittest",
-  ]
+group("ark_guard_packages_mac") {
+  deps = []
+  if (host_os == "mac") {
+    if (host_cpu == "arm64") {
+      deps += [
+        "$ark_root/ark_guard:ark_guard($build_root/toolchain/mac:clang_arm64)",
+      ]
+    } else {
+      deps += [
+        "$ark_root/ark_guard:ark_guard($build_root/toolchain/mac:clang_x64)",
+      ]
+    }
+  }
+
+  foreach(plugin, enabled_plugins) {
+    deps += [ "$ark_root/plugins/$plugin:ark_host_mac_tools_packages" ]
+  }
+}
+
+if (ark_standalone_build) {
+  group("ark_guard_host_unittest") {
+    testonly = true
+    deps = [
+      "$ark_root/ark_guard/abckit_wrapper/tests:host_unittest",
+      "$ark_root/ark_guard/tests:host_unittest",
+    ]
+  }
 }
 
 # NOTE(ipetrov): Temporary target common runtime

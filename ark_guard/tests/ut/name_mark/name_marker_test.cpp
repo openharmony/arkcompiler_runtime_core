@@ -81,7 +81,6 @@ void NameMarkerTestExecute(const std::string &abcFilePath, const std::string &co
     ark::guard::NameMarker nameMarker(configuration);
     nameMarker.Execute(fileView);
 }
-
 }  // namespace
 
 /**
@@ -92,8 +91,8 @@ void NameMarkerTestExecute(const std::string &abcFilePath, const std::string &co
  */
 HWTEST(NameMarkerTest, name_marker_class_test_001, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_001.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_001_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_001.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_001_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -117,8 +116,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_001, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_002, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_002.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_002_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_002.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_002_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -135,6 +134,20 @@ HWTEST(NameMarkerTest, name_marker_class_test_002, TestSize.Level1)
     AssertKept(fileView, "class_test_002.ClassC");
     AssertKept(fileView, "class_test_002.ClassC.method0:class_test_002.ClassC;void;");
     AssertNotKept(fileView, "class_test_002.ClassC.method1:class_test_002.ClassC;void;");
+
+    AssertKept(fileView, "class_test_002.ClassD");
+    AssertKept(fileView, "class_test_002.ClassD.method0:class_test_002.ClassD;void;");
+    AssertNotKept(fileView, "class_test_002.ClassD.method1:class_test_002.ClassD;void;");
+
+    AssertKept(fileView, "class_test_002.ClassE");
+    AssertNotKept(fileView, "class_test_002.ClassE.method0:class_test_002.ClassE;void;");
+    AssertNotKept(fileView, "class_test_002.ClassE.method1:class_test_002.ClassE;void;");
+    AssertKept(fileView, "class_test_002.ClassE.method2:class_test_002.ClassE;void;");
+
+    AssertKept(fileView, "class_test_002.ClassF");
+    AssertNotKept(fileView, "class_test_002.ClassF.method0:class_test_002.ClassF;void;");
+    AssertKept(fileView, "class_test_002.ClassF.method1:class_test_002.ClassF;void;");
+    AssertNotKept(fileView, "class_test_002.ClassF.method2:class_test_002.ClassF;void;");
 }
 
 /**
@@ -145,15 +158,14 @@ HWTEST(NameMarkerTest, name_marker_class_test_002, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_003, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_003.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_003_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_003.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_003_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
     AssertModuleNotKept(fileView, "class_test_003");
 
     AssertKept(fileView, "class_test_003.ClassA");
-    AssertKept(fileView, "class_test_003.ClassA.field1");
     AssertKept(fileView, "class_test_003.ClassA.field1");
 
     AssertKept(fileView, "class_test_003.ClassB");
@@ -163,6 +175,45 @@ HWTEST(NameMarkerTest, name_marker_class_test_003, TestSize.Level1)
     AssertKept(fileView, "class_test_003.ClassC");
     AssertKept(fileView, "class_test_003.ClassC.field1");
     AssertNotKept(fileView, "class_test_003.ClassC.field2");
+
+    AssertKept(fileView, "class_test_003.ClassD");
+    AssertKept(fileView, "class_test_003.ClassD.field1");
+
+    AssertKept(fileView, "class_test_003.ClassE");
+    AssertKept(fileView, "class_test_003.ClassE.field1");
+    AssertNotKept(fileView, "class_test_003.ClassE.field2");
+
+    AssertKept(fileView, "class_test_003.ClassF");
+    AssertKept(fileView, "class_test_003.ClassF.field1");
+    AssertNotKept(fileView, "class_test_003.ClassF.field2");
+
+    AssertKept(fileView, "class_test_003.ClassF");
+    AssertKept(fileView, "class_test_003.ClassF.field1");
+    AssertNotKept(fileView, "class_test_003.ClassF.field2");
+
+    AssertKept(fileView, "class_test_003.ClassG");
+    AssertNotKept(fileView, "class_test_003.ClassG.field1");
+    AssertNotKept(fileView, "class_test_003.ClassG.field2");
+    AssertKept(fileView, "class_test_003.ClassG.field3");
+    AssertNotKept(fileView, "class_test_003.ClassG.field4");
+
+    AssertKept(fileView, "class_test_003.ClassH");
+    AssertNotKept(fileView, "class_test_003.ClassH.field1");
+    AssertNotKept(fileView, "class_test_003.ClassH.field2");
+    AssertKept(fileView, "class_test_003.ClassH.field3");
+    AssertNotKept(fileView, "class_test_003.ClassH.field4");
+
+    AssertKept(fileView, "class_test_003.ClassI");
+    AssertNotKept(fileView, "class_test_003.ClassI.field1");
+    AssertNotKept(fileView, "class_test_003.ClassI.field2");
+    AssertNotKept(fileView, "class_test_003.ClassI.field3");
+    AssertKept(fileView, "class_test_003.ClassI.field4");
+
+    AssertKept(fileView, "class_test_003.ClassJ");
+    AssertNotKept(fileView, "class_test_003.ClassJ.field1");
+    AssertNotKept(fileView, "class_test_003.ClassJ.field2");
+    AssertNotKept(fileView, "class_test_003.ClassJ.field3");
+    AssertKept(fileView, "class_test_003.ClassJ.field4");
 }
 
 /**
@@ -173,8 +224,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_003, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_004, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_004.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_004_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_004.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_004_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -198,8 +249,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_004, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_005, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_005.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_005_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_005.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_005_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -226,8 +277,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_005, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_006, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_006.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_006_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_006.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_006_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -254,8 +305,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_006, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_007, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_007.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_007_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_007.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_007_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -278,8 +329,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_007, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_008, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_008.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_008_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_008.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_008_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -302,8 +353,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_008, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_009, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_009.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_009_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_009.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_009_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -327,8 +378,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_009, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_010, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_010.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_010_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_010.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_010_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -372,8 +423,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_010, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_011, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_011.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_011_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_011.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_011_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -402,6 +453,7 @@ HWTEST(NameMarkerTest, name_marker_class_test_011, TestSize.Level1)
 
     AssertKept(fileView, "class_test_011.C1");
     AssertKept(fileView, "class_test_011.C1.field");
+    AssertKept(fileView, "class_test_011.C1.field2");
 
     AssertKept(fileView, "class_test_011.C2");
     AssertKept(fileView, "class_test_011.C2.field");
@@ -421,8 +473,8 @@ HWTEST(NameMarkerTest, name_marker_class_test_011, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_class_test_012, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/class_test_012.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/class_test_012_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_012.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_012_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -445,8 +497,9 @@ HWTEST(NameMarkerTest, name_marker_class_test_012, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_interface_test_001, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/interface_test_001.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/interface_test_001_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/interface_test_001.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/interface_test_001_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -464,8 +517,9 @@ HWTEST(NameMarkerTest, name_marker_interface_test_001, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_interface_test_002, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/interface_test_002.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/interface_test_002_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/interface_test_002.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/interface_test_002_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -488,8 +542,9 @@ HWTEST(NameMarkerTest, name_marker_interface_test_002, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_interface_test_003, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/interface_test_003.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/interface_test_003_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/interface_test_003.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/interface_test_003_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -516,8 +571,9 @@ HWTEST(NameMarkerTest, name_marker_interface_test_003, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_interface_test_004, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/interface_test_004.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/interface_test_004_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/interface_test_004.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/interface_test_004_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -535,8 +591,9 @@ HWTEST(NameMarkerTest, name_marker_interface_test_004, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_interface_test_005, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/interface_test_005.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/interface_test_005_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/interface_test_005.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/interface_test_005_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -559,8 +616,9 @@ HWTEST(NameMarkerTest, name_marker_interface_test_005, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_interface_test_006, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/interface_test_006.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/interface_test_006_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/interface_test_006.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/interface_test_006_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -588,8 +646,9 @@ HWTEST(NameMarkerTest, name_marker_interface_test_006, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_interface_test_007, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/interface_test_007.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/interface_test_007_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/interface_test_007.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/interface_test_007_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -612,8 +671,8 @@ HWTEST(NameMarkerTest, name_marker_interface_test_007, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_enum_test_001, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/enum_test_001.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/enum_test_001_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/enum_test_001.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/enum_test_001_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -636,8 +695,8 @@ HWTEST(NameMarkerTest, name_marker_enum_test_001, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_enum_test_002, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/enum_test_002.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/enum_test_002_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/enum_test_002.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/enum_test_002_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -660,8 +719,8 @@ HWTEST(NameMarkerTest, name_marker_enum_test_002, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_enum_test_003, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/enum_test_003.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/enum_test_003_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/enum_test_003.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/enum_test_003_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -684,8 +743,9 @@ HWTEST(NameMarkerTest, name_marker_enum_test_003, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_namespace_test_001, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/namespace_test_001.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/namespace_test_001_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/namespace_test_001.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/namespace_test_001_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -705,8 +765,9 @@ HWTEST(NameMarkerTest, name_marker_namespace_test_001, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_namespace_test_002, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/namespace_test_002.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/namespace_test_002_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/namespace_test_002.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/namespace_test_002_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -725,8 +786,9 @@ HWTEST(NameMarkerTest, name_marker_namespace_test_002, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_namespace_test_003, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/namespace_test_003.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/namespace_test_003_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/namespace_test_003.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/namespace_test_003_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -745,8 +807,9 @@ HWTEST(NameMarkerTest, name_marker_namespace_test_003, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_namespace_test_004, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/namespace_test_004.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/namespace_test_004_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/namespace_test_004.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/namespace_test_004_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -792,8 +855,9 @@ HWTEST(NameMarkerTest, name_marker_namespace_test_004, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_namespace_test_005, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/namespace_test_005.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/namespace_test_005_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/namespace_test_005.abc";
+    const std::string configFilePath =
+        ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/namespace_test_005_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -817,8 +881,8 @@ HWTEST(NameMarkerTest, name_marker_namespace_test_005, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_module_test_001, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/module_test_001.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/module_test_001_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_001.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_001_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -835,8 +899,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_001, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_module_test_002, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/module_test_002.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/module_test_002_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_002.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_002_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -853,8 +917,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_002, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_module_test_003, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/module_test_003.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/module_test_003_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_003.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_003_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -888,7 +952,7 @@ HWTEST(NameMarkerTest, name_marker_module_test_003, TestSize.Level1)
     AssertKept(fileView, "module_test_003.Ns1.m2");
     AssertKept(fileView, "module_test_003.Ns1.Interface2");
     AssertKept(fileView,
-        "module_test_003.Ns1.Interface2.%%get-iField2:module_test_003.Ns1.Interface2;std.core.String;");
+               "module_test_003.Ns1.Interface2.%%get-iField2:module_test_003.Ns1.Interface2;std.core.String;");
     AssertKept(fileView,
                "module_test_003.Ns1.Interface2.%%set-iField2:module_test_003.Ns1.Interface2;std.core.String;void;");
     AssertKept(fileView, "module_test_003.Ns1.Interface2.iMethod2:module_test_003.Ns1.Interface2;void;");
@@ -915,8 +979,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_003, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_module_test_004, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/module_test_004.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/module_test_004_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_004.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_004_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -934,8 +998,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_004, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_module_test_005, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/module_test_005.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/module_test_005_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_005.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_005_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -952,8 +1016,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_005, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_module_test_006, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/module_test_006.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/module_test_006_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_006.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_006_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -970,8 +1034,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_006, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_module_test_007, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/module_test_007.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/module_test_007_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_007.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_007_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -1002,8 +1066,8 @@ HWTEST(NameMarkerTest, name_marker_module_test_007, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_module_test_008, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/module_test_008.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/module_test_008_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_008.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_008_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
@@ -1051,11 +1115,47 @@ HWTEST(NameMarkerTest, name_marker_module_test_008, TestSize.Level1)
  */
 HWTEST(NameMarkerTest, name_marker_module_test_009, TestSize.Level1)
 {
-    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/module_test_009.abc";
-    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/module_test_009_config.json";
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_009.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_009_config.json";
     abckit_wrapper::FileView fileView;
     NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
 
     AssertModuleNotKept(fileView, "module_test_009");
     AssertNotKept(fileView, "module_test_009.m1");
+}
+
+/**
+ * @tc.name: name_marker_module_test_010
+ * @tc.desc: test name marker keep lambda type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(NameMarkerTest, name_marker_module_test_010, TestSize.Level1)
+{
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_010.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_010_config.json";
+    abckit_wrapper::FileView fileView;
+    NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
+
+    AssertModuleKept(fileView, "module_test_010");
+    AssertKept(fileView, "module_test_010.math1");
+    AssertKept(fileView, "module_test_010.math2");
+}
+
+/**
+ * @tc.name: name_marker_module_test_011
+ * @tc.desc: test name marker keep tuple type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(NameMarkerTest, name_marker_module_test_011, TestSize.Level1)
+{
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/module_test_011.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/module_test_011_config.json";
+    abckit_wrapper::FileView fileView;
+    NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
+
+    AssertModuleKept(fileView, "module_test_011");
+    AssertKept(fileView, "module_test_011.field1");
+    AssertKept(fileView, "module_test_011.field2");
 }

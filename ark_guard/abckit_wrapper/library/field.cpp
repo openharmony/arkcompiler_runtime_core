@@ -113,8 +113,8 @@ void abckit_wrapper::Field::InitAccessFlags()
         this->accessFlags_ |= classField->IsProtected() ? AccessFlags::PROTECTED : AccessFlags::NONE;
         this->accessFlags_ |= classField->IsPrivate() ? AccessFlags::PRIVATE : AccessFlags::NONE;
         this->accessFlags_ |= classField->IsInternal() ? AccessFlags::INTERNAL : AccessFlags::NONE;
-
         this->accessFlags_ |= classField->IsStatic() ? AccessFlags::STATIC : AccessFlags::NONE;
+        this->accessFlags_ |= classField->IsFinal() ? AccessFlags::FINAL : AccessFlags::NONE;
     }
 }
 
