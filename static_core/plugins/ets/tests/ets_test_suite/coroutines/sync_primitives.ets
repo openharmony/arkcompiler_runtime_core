@@ -41,7 +41,7 @@ class SharedJob<T> {
         this.sharedJob.Await();
     }
 
-    private static async completeJob(jobs: Array<T>, sharedJob: CompletableJob<void>) {
+    private static async completeJob<T>(jobs: Array<T>, sharedJob: CompletableJob<void>) {
         Coroutine.Schedule();
         for (let job of jobs) {
             (job as Job<void>).Await();

@@ -785,7 +785,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return this.actualLength
     }
 
-    private static native unshiftInternal(self: FixedArray<Any>, selfLen: int, buffer: FixedArray<Any>, values: Array<T>): void
+    private static native unshiftInternal<T>(self: FixedArray<Any>, selfLen: int, buffer: FixedArray<Any>, values: Array<T>): void
 
     /**
      * Returns an iterator over all indices
@@ -1032,7 +1032,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return this
     }
 
-    private static native fillImpl(buffer: FixedArray<Any>, actualLength: int, value: T, start: int, end: int): void;
+    private static native fillImpl<T>(buffer: FixedArray<Any>, actualLength: int, value: T, start: int, end: int): void;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -1266,7 +1266,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    private static native lastIndexOfImpl(buffer: FixedArray<Any>, actualLength: int, searchElement: T, fromIndex: int): int;
+    private static native lastIndexOfImpl<T>(buffer: FixedArray<Any>, actualLength: int, searchElement: T, fromIndex: int): int;
 
     /**
      * Returns the last index at which a given element can be found in the array,
@@ -1525,7 +1525,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of val, -1 otherwise
      */
-    private static native indexOfImpl(buffer: FixedArray<Any>, actualLength: int, val: T, fromIndex1: int): int;
+    private static native indexOfImpl<T>(buffer: FixedArray<Any>, actualLength: int, val: T, fromIndex1: int): int;
 
     public indexOf(val: T): int {
         return Array.indexOfImpl(this.buffer, this.actualLength, val, 0)
