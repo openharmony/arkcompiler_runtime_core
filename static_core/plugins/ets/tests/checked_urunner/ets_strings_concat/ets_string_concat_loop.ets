@@ -1222,7 +1222,7 @@
 //! INST_COUNT    /StringBuilder::append/,6
 //! INST_NOT      /StringBuilder::toString/
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_COUNT    /StringBuilder::toString/,3
+//! INST_COUNT    /StringBuilder::toString/,2
 //!
 //! METHOD        "ets_string_concat_loop.ETSGLOBAL::nested_concat_loop0"
 //! PASS_AFTER    "BranchElimination"
@@ -1463,7 +1463,7 @@
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /StringBuilder::append/,3
-//! INST_COUNT    /StringBuilder::toString/,2
+//! INST_COUNT    /StringBuilder::toString/,1
 //!
 //! METHOD        "ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop1"
 //! PASS_AFTER    "BranchElimination"
