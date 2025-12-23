@@ -15,8 +15,10 @@
 # limitations under the License.
 
 from typing import Any
+
 from pydantic import BaseModel, Field
-from .common import ResponseLog, DisasmResponse
+
+from .common import DisasmResponse, ResponseLog
 
 
 class CompileRequestModel(BaseModel):

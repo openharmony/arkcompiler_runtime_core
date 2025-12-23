@@ -23,4 +23,8 @@ from arkts_playground.config import get_settings
 def main():
     sett = get_settings()
     app = create_app()
-    uvicorn.run(app=app, **sett.server.uvicorn_config)
+    uvicorn.run(app=app, **sett.server.uvicorn_config, log_config=None)
+
+
+if __name__ == '__main__':
+    main()

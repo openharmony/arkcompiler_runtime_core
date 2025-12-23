@@ -9,6 +9,8 @@
       "@typescript-eslint/explicit-function-return-type": ["error"],
       "react-hooks/exhaustive-deps": "off",
       "no-useless-escape": "off",
-      "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": false }]
+      "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": false }],
+      "curly": ["error", "all"],
+      "brace-style": ["error", "1tbs", { "allowSingleLine": false }]
     }
 }

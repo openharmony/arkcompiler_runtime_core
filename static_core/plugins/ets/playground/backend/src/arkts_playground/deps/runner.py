@@ -14,18 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import asyncio
 from collections.abc import Sequence
-from pathlib import Path
 from functools import lru_cache
-from importlib.metadata import version, PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 from typing import NamedTuple, TypedDict, final
-from typing_extensions import Unpack
 
 import aiofiles
+import structlog
+from typing_extensions import Unpack
 
 from ..config import get_settings
+from ..metrics import (AST_FAILURES, COMPILER_FAILURES, DISASM_FAILURES,
+                       RUNTIME_FAILURES)
+
+logger = structlog.stdlib.get_logger(__name__)
 
 
 class Binary(NamedTuple):
@@ -135,16 +139,30 @@ class Runner:
         """Compile code and make disassemble if disasm argument is True
         :rtype: Dict[str, Any]
         """
+        log = logger.bind(stage="compile")
+        log.info("Compilation pipeline started", stage="compile", disasm=disasm, verifier=verifier)
         async with aiofiles.tempfile.TemporaryDirectory(prefix="arkts_playground") as tempdir:
             stsfile_name = await self._save_code(tempdir, code)
+
             compile_result = await self._compile(stsfile_name, options)
+            log = log.bind(compile_ret=compile_result['exit_code'])
+
             res: CompileResult = {"compile": compile_result, "disassembly": None, "verifier": None}
+            if compile_result["exit_code"] != 0:
+                log.error("Compilation failed with nonzero exit code")
+                return res
+            log.info("Compilation succeeded")
+
             if disasm and compile_result["exit_code"] == 0:
                 disassembly = await self.disassembly(f"{stsfile_name}.abc", f"{stsfile_name}.pa")
+                log.debug("Disassembling completed", dis_exit_code=disassembly["exit_code"])
                 res["disassembly"] = disassembly
             if verifier and compile_result["exit_code"] == 0:
                 verifier_res = await self._verify(f"{stsfile_name}.abc")
+                log = logger.bind(verifier_ret=verifier_res['exit_code'])
+                log.debug("Verification completed", verify_exit_code=verifier_res["exit_code"])
                 res["verifier"] = verifier_res
+
             return res
 
     async def compile_run_arkts(self,
@@ -155,21 +173,34 @@ class Runner:
         """Compile, run code and make disassemble if disasm argument is True
         :rtype: Dict[str, Any]
         """
+        log = logger.bind(stage="compile-run")
+        log.info("Compile and run pipeline started", stage="compile", disasm=disasm)
         async with aiofiles.tempfile.TemporaryDirectory(prefix="arkts_playground") as tempdir:
             stsfile_name = await self._save_code(tempdir, code)
             abcfile_name = f"{stsfile_name}.abc"
+
             compile_result = await self._compile(stsfile_name, options)
+            log = log.bind(compile_ret=compile_result['exit_code'])
+
             res: CompileRunResult = {"compile": compile_result, "run": None, "disassembly": None, "verifier": None}
             if compile_result["exit_code"] != 0:
+                log.error("Compilation failed with nonzero exit code")
                 return res
+
             runtime_verify: bool = kwargs.get("runtime_verify", False)
+            log = log.bind(runtime_verify=runtime_verify)
             run_result = await self._run(abcfile_name, runtime_verify=runtime_verify)
             res["run"] = run_result
+            log = log.bind(compile_ret=compile_result['exit_code'])
+            log.info("Program run completed")
+
             if disasm:
                 disasm_res = await self.disassembly(f"{stsfile_name}.abc", f"{stsfile_name}.pa")
+                log.debug("Disassembling completed", dis_exit_code=disasm_res["exit_code"])
                 res["disassembly"] = disasm_res
             if kwargs.get("verifier", False):
                 verifier_res = await self._verify(f"{stsfile_name}.abc")
+                log.debug("Verification completed", verify_exit_code=verifier_res["exit_code"])
                 res["verifier"] = verifier_res
             return res
 
@@ -177,12 +208,19 @@ class Runner:
         """Call ark_disasm and read disassembly from file
         :rtype: Dict[str, Any]
         """
+        log = logger.bind(stage="disasm")
         stdout, stderr, retcode = await self._execute_cmd(self.binary.disasm_bin, input_file, output_file)
+        log = log.bind(disasm_ret=retcode)
         if retcode == -11:
             stderr += "disassembly: Segmentation fault"
+            log.error("Disassembling failed: segmentation fault")
+            DISASM_FAILURES.labels("segfault").inc()
+        elif retcode != 0:
+            DISASM_FAILURES.labels("normal").inc()
         result: DisasmResult = {"output": stdout, "error": stderr, "code": None, "exit_code": 0}
         if retcode != 0:
             result["exit_code"] = retcode
+            log.error("Disassembling failed with nonzero exit code")
             return result
         async with aiofiles.open(output_file, mode="r", encoding="utf-8", errors="replace") as f:
             result["code"] = await f.read()
@@ -190,15 +228,23 @@ class Runner:
 
     async def dump_ast(self, code: str, options: Sequence[str] | None = None) -> AstViewExecResult:
         """Parse ETS code and return AST dump strictly from stdout."""
+        log = logger.bind(stage="astdump")
         opts = list(options) if options else []
         async with aiofiles.tempfile.TemporaryDirectory(prefix="arkts_playground") as tempdir:
             stsfile_path = await self._save_code(tempdir, code)
             base = ["--dump-ast", "--extension=ets", f"--output={stsfile_path}.abc"]
             args = base + opts + [stsfile_path]
+
             stdout, stderr, retcode = await self._execute_cmd(self.binary.es2panda, *args)
+            log = log.bind(astdump_ret=retcode)
 
             if retcode == -11:
                 stderr += "ast: Segmentation fault"
+                log.error("AST dump failed: segmentation fault")
+                AST_FAILURES.labels("segfault").inc()
+            elif retcode != 0:
+                AST_FAILURES.labels("normal").inc()
+                log.info("Ast dump completed")
 
             ast_out = stdout if (retcode == 0 and stdout) else None
 
@@ -217,6 +263,10 @@ class Runner:
         stdout, stderr, retcode = await self._execute_cmd(self.binary.es2panda, *options)
         if retcode == -11:
             stderr += "compilation: Segmentation fault"
+            logger.error("Compilation failed: segmentation fault")
+            COMPILER_FAILURES.labels("segfault").inc()
+        elif retcode != 0:
+            COMPILER_FAILURES.labels("normal").inc()
         return {"output": stdout, "error": stderr, "exit_code": retcode}
 
     async def _verify(self, input_file: str) -> SubprocessExecResult:
@@ -231,6 +281,7 @@ class Runner:
         )
         if retcode == -11:
             stderr += "compilation: Segmentation fault"
+            logger.error("Verification failed: segmentation fault")
         return {"output": stdout, "error": stderr, "exit_code": retcode}
 
     async def _execute_cmd(self, cmd: str, *args: str) -> tuple[str, str, int | None]:
@@ -248,6 +299,7 @@ class Runner:
         except asyncio.exceptions.TimeoutError:
             proc.kill()
             stdout_b, stderr_b = b"", b"Timeout expired"
+            logger.error("Subprocess execution timed out", timeout=self._exec_timeout)
 
         stdout = stdout_b.decode("utf-8", errors="replace")
         stderr = stderr_b.decode("utf-8", errors="replace")
@@ -280,6 +332,7 @@ class Runner:
         """Runs abc file
         :rtype: Dict[str, Any]
         """
+        log = logger.bind(stage="run")
         entry_point = f"{Path(abcfile_name).stem[:-4]}.ETSGLOBAL::main"
         run_cmd = [f"--boot-panda-files={self.stdlib_abc}", "--load-runtimes=ets"]
         if runtime_verify:
@@ -289,8 +342,15 @@ class Runner:
         run_cmd.append(abcfile_name)
         run_cmd.append(entry_point)
         stdout, stderr, retcode = await self._execute_cmd(self.binary.ark_bin, *run_cmd)
+        log = log.bind(run_ret=retcode)
         if retcode == -11:
             stderr += "run: Segmentation fault"
+            log.error("Program run failed: segmentation fault",
+                      runtime_verify=runtime_verify,
+                      abcfile_name=abcfile_name)
+            RUNTIME_FAILURES.labels("segfault").inc()
+        elif retcode != 0:
+            RUNTIME_FAILURES.labels("normal").inc()
         return {"output": stdout, "error": stderr, "exit_code": retcode}
 
     def _validate(self):
