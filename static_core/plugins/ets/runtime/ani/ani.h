@@ -1394,13 +1394,13 @@ struct __ani_interaction_api {
     ani_status (*EnumItem_GetIndex)(ani_env *env, ani_enum_item enum_item, ani_size *result);
 
     /**
-     * @brief Invokes a functional object.
+     * @brief Invokes an object of function type.
      *
-     * This function invokes a functional object (e.g., a function or callable object) with the specified arguments.
+     * This function invokes an object of function type with the specified arguments.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] fn The functional object to invoke.
-     * @param[in] argc The number of arguments being passed to the functional object.
+     * @param[in] fn The function type object to invoke.
+     * @param[in] argc The number of arguments being passed on invocation.
      * @param[in] argv A pointer to an array of references representing the arguments. Can be null if `argc` is 0.
      * @param[out] result A pointer to store the result of the invocation. Must be non null.
      * @return Returns a status code of type `ani_status` indicating success or failure.

@@ -1463,8 +1463,8 @@ Finds a static field in the specified class by its name.
 `ani_status (*FunctionalObject_Call)(ani_env *env, ani_fn_object fn, ani_size argc, ani_ref *argv, ani_ref *result);`  
 **PARAMETERS:**
 - env: A pointer to the environment structure.
-- fn: The functional object to invoke.
-- argc: The number of arguments being passed to the functional object.
+- fn: The function type object to invoke.
+- argc: The number of arguments being passed on invocation.
 - argv: A pointer to an array of references representing the arguments. Can be null if `argc` is 0.
 - result: A pointer to store the result of the invocation. Can be null if the functional object does not return a value.
 
