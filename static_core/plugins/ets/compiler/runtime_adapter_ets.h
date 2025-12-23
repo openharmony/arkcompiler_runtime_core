@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,6 +119,11 @@ public:
     bool IsClassStringBuilder([[maybe_unused]] ClassPtr klass) const override
     {
         return GetClassName(klass) == "std.core.StringBuilder";
+    }
+
+    bool IsMethodStringBuilderGetStringLength([[maybe_unused]] MethodPtr method) const override
+    {
+        return GetMethodFullName(method, false) == "std.core.StringBuilder::%%get-stringLength";
     }
 
     bool IsIntrinsicStringBuilderToString([[maybe_unused]] IntrinsicId id) const override

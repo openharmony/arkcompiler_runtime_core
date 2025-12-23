@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -458,6 +458,11 @@ public:
     }
 
     virtual bool IsMethodStringBuilderToString([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsMethodStringBuilderGetStringLength([[maybe_unused]] MethodPtr method) const
     {
         return false;
     }

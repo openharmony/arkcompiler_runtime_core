@@ -290,6 +290,9 @@ private:
     void FixBrokenSaveStatesForStringBuilderCalls(Inst *instance);
     void OptimizeStringBuilderChain();
 
+    // 6. Removes extra call for StringBuilder::%%get-stringLength if possible
+    void OptimizeStringBuilderStringLength(BasicBlock *block);
+
 private:
     bool isApplied_ {false};
     SaveStateBridgesBuilder ssb_ {};
@@ -301,6 +304,7 @@ private:
     StringBuilderCallsMap stringBuilderCalls_;
     StringBuilderFirstLastCallsMap stringBuilderFirstLastCalls_;
     RuntimeInterface::FieldPtr sbStringLengthField_ {nullptr};
+    ArenaMap<Inst *, Inst *> sbStringLengthCalls_;
 };
 
 }  // namespace ark::compiler

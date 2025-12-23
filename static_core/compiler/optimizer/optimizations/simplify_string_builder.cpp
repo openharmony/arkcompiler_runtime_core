@@ -36,7 +36,8 @@ SimplifyStringBuilder::SimplifyStringBuilder(Graph *graph)
       usages_ {graph->GetLocalAllocator()->Adapter()},
       matches_ {graph->GetLocalAllocator()->Adapter()},
       stringBuilderCalls_ {graph->GetLocalAllocator()->Adapter()},
-      stringBuilderFirstLastCalls_ {graph->GetLocalAllocator()->Adapter()}
+      stringBuilderFirstLastCalls_ {graph->GetLocalAllocator()->Adapter()},
+      sbStringLengthCalls_ {graph->GetLocalAllocator()->Adapter()}
 {
 }
 
@@ -99,6 +100,7 @@ bool SimplifyStringBuilder::RunImpl()
         OptimizeStringBuilderToString(block);
         OptimizeStringConcatenation(block);
         OptimizeStringBuilderAppendChain(block);
+        OptimizeStringBuilderStringLength(block);
     }
 
     COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Simplify StringBuilder complete";
@@ -2454,6 +2456,69 @@ void SimplifyStringBuilder::OptimizeStringBuilderChain()
         FixBrokenSaveStatesForStringBuilderCalls(inputInstance);
 
         isApplied_ = true;
+    }
+}
+
+void SimplifyStringBuilder::OptimizeStringBuilderStringLength(BasicBlock *block)
+{
+    /*
+        Removes extra calls for get-stringLength
+        Example of get-stringLength calls:
+            let sb = new StringBuilder();
+            let len0 = sb.stringLength;
+            ...
+            let len1 = sb.stringLength;
+
+        If stringLength calls refer to the same object and if the object was not modified between stringLength calls,
+        we remove all unnecessary stringLength calls.
+
+        Calls are not removed in the following cases:
+            let sb = new StringBuilder();
+            let len0 = sb.stringLength;
+            ...
+            sb.append(...) // or any call modifying the StringBuilder object
+            ...
+            let len1 = sb.stringLength;
+    */
+
+    sbStringLengthCalls_.clear();
+
+    for (Inst *curInst : block->Insts()) {
+        if (IsMethodStringBuilderGetStringLength(curInst)) {
+            auto currStringLength = curInst;
+            auto instance = currStringLength->GetDataFlowInput(0);
+            auto prevStringLength = sbStringLengthCalls_.find(instance);
+            if (prevStringLength != sbStringLengthCalls_.end()) {
+                ASSERT(prevStringLength->second->IsDominate(currStringLength));
+                currStringLength->ReplaceUsers(prevStringLength->second);
+                currStringLength->ClearFlag(inst_flags::NO_DCE);
+
+                isApplied_ = true;
+
+                COMPILER_LOG(DEBUG, SIMPLIFY_SB)
+                    << "Remove StringBuilder stringLength()-call (id=" << curInst->GetId() << ")";
+            } else {
+                sbStringLengthCalls_.emplace(instance, currStringLength);
+            }
+            continue;
+        }
+
+        curInst = SkipSingleUserCheckInstruction(curInst);
+        if (IsStringBuilderToString(curInst) || curInst->IsSaveState() ||
+            IsMethodStringBuilderGetStringLength(curInst)) {
+            continue;
+        }
+
+        // Remove stringLength call from the sbStringLengthCalls_ Map if another instruction using the same SB instance
+        // is found after the stringLength call (except for the toString call)
+        for (size_t index = 0; index < curInst->GetInputsCount(); ++index) {
+            auto input = curInst->GetDataFlowInput(index);
+
+            auto prevStringLength = sbStringLengthCalls_.find(input);
+            if (prevStringLength != sbStringLengthCalls_.end()) {
+                sbStringLengthCalls_.erase(prevStringLength);
+            }
+        }
     }
 }
 
