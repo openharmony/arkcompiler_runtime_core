@@ -63,14 +63,29 @@ VRef *VEnv::AddGlobalVerifiedRef(ani_ref gref)
     return GetEnvANIVerifier()->AddGlobalVerifiedRef(gref);
 }
 
-void VEnv::DeleteDeleteGlobalRef(VRef *vgref)
+void VEnv::DeleteGlobalVerifiedRef(VRef *vgref)
 {
-    GetEnvANIVerifier()->DeleteDeleteGlobalRef(vgref);
+    GetEnvANIVerifier()->DeleteGlobalVerifiedRef(vgref);
 }
 
 bool VEnv::IsValidGlobalVerifiedRef(VRef *vgref)
 {
     return GetEnvANIVerifier()->IsValidGlobalVerifiedRef(vgref);
+}
+
+VResolver *VEnv::AddGlobalVerifiedResolver(ani_resolver resolver)
+{
+    return GetEnvANIVerifier()->AddGlobalVerifiedResolver(resolver);
+}
+
+void VEnv::DeleteGlobalVerifiedResolver(VResolver *vresolver)
+{
+    GetEnvANIVerifier()->DeleteGlobalVerifiedResolver(vresolver);
+}
+
+bool VEnv::IsValidGlobalVerifiedResolver(VResolver *vresolver)
+{
+    return GetEnvANIVerifier()->IsValidGlobalVerifiedResolver(vresolver);
 }
 
 EnvANIVerifier *VEnv::GetEnvANIVerifier()

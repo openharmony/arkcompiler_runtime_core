@@ -128,7 +128,7 @@ public:
     PANDA_PUBLIC_API EtsField *GetFieldIDByName(const char *name, const char *sig = nullptr);
 
     EtsField *GetOwnFieldByIndex(uint32_t i);
-    EtsField *GetDeclaredFieldIDByName(const char *name);
+    EtsField *GetDeclaredFieldIDByName(std::string_view name);
 
     PANDA_PUBLIC_API EtsField *GetStaticFieldIDByName(const char *name, const char *sig = nullptr);
     EtsField *GetStaticFieldIDByOffset(uint32_t fieldOffset);

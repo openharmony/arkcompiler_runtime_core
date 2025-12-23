@@ -102,6 +102,16 @@ public:
     NO_COPY_SEMANTIC(EtsReferenceStorage);
     NO_MOVE_SEMANTIC(EtsReferenceStorage);
 
+    void CleanUp()
+    {
+        mem::ReferenceStorage::CleanUp();
+    }
+
+    void ReInitialize()
+    {
+        mem::ReferenceStorage::ReInitialize();
+    }
+
     static EtsReference *NewEtsStackRef(EtsObject **obj)
     {
         mem::Reference *ref = mem::ReferenceStorage::NewStackRef(reinterpret_cast<ObjectHeader **>(obj));

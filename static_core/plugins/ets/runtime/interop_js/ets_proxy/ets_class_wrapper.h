@@ -120,8 +120,8 @@ private:
 
     bool SetupHierarchy(InteropCtx *ctx, const char *jsBuiltinName);
 
-    using PropsMap =
-        std::unordered_map<uint8_t const *, std::variant<EtsMethodSet *, Field *>, utf::Mutf8Hash, utf::Mutf8Equal>;
+    using PropsMethod = std::unordered_map<uint8_t const *, EtsMethodSet *, utf::Mutf8Hash, utf::Mutf8Equal>;
+    using PropsField = std::unordered_map<uint8_t const *, Field *, utf::Mutf8Hash, utf::Mutf8Equal>;
     using GetterSetterPropsMap = std::unordered_map<std::string, napi_property_descriptor>;
     using FieldsVec = std::vector<Field *>;
     using MethodsVec = std::vector<EtsMethodSet *>;
@@ -130,11 +130,11 @@ private:
 
     std::pair<FieldsVec, MethodsVec> CalculateProperties(const OverloadsMap *overloads);
     void SetBaseWrapperMethods(napi_env env, const EtsClassWrapper::MethodsVec &methods);
-    void UpdatePropsWithBaseClasses(PropsMap *props);
-    void CollectConstructors(PropsMap *props);
-    void CollectClassMethods(PropsMap *props, const OverloadsMap *overloads);
+    void UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMethod *propsMethod, EtsClassWrapper::PropsField *propsField);
+    void CollectClassMethods(EtsClassWrapper::PropsMethod *props, const OverloadsMap *overloads);
     bool HasOverloadsMethod(const OverloadsMap *overloads, Method *m);
-    std::pair<FieldsVec, MethodsVec> CalculateFieldsAndMethods(const PropsMap &props);
+    std::pair<FieldsVec, MethodsVec> CalculateFieldsAndMethods(const EtsClassWrapper::PropsMethod &propsMethod,
+                                                               const EtsClassWrapper::PropsField &propsField);
     std::vector<napi_property_descriptor> BuildJSProperties(napi_env &env, Span<Field *> fields,
                                                             Span<EtsMethodSet *> methods);
 

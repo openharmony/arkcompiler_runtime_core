@@ -14,3 +14,4 @@
 persist.ark.enableDebugMode=root:root:0777
 persist.sta.gc.SetG1TrackFreedObjects=root:root:0777
 persist.sta.gc.SetGCUseLargerYoungSpace=root:root:0777
+persist.sta.ark.EnableClassLinkerTrace=root:root:0777

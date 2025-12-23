@@ -262,6 +262,8 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_FIXED_ARRAY_LONG_STORAGE:     return "ani_fixedarray_long *";
         case ValueType::ANI_FIXED_ARRAY_FLOAT_STORAGE:    return "ani_fixedarray_float *";
         case ValueType::ANI_FIXED_ARRAY_DOUBLE_STORAGE:   return "ani_fixedarray_double *";
+        case ValueType::ANI_RESOLVER:                     return "ani_resolver";
+        case ValueType::ANI_RESOLVER_STORAGE:             return "ani_resolver *";
         default:                                          UNREACHABLE(); return "";
         case ValueType::METHOD_ARGS:
             if (action_ == Action::VERIFY_METHOD_A_ARGS) {
@@ -681,6 +683,15 @@ public:
         return err;
     }
 
+    std::optional<PandaString> VerifyResolver(VResolver *vresolver)
+    {
+        if (!GetEnvANIVerifier()->IsValidGlobalVerifiedResolver(vresolver)) {
+            return "wrong resolver";
+        }
+
+        return {};
+    }
+
 private:
     EnvANIVerifier *GetEnvANIVerifier()
     {
@@ -972,6 +983,18 @@ static std::optional<PandaString> VerifyFixedArrayDoubleStorage(Verifier &v, con
     return v.VerifyTypeStorage(arg.GetValueFixedArrayDoubleStorage(), "ani_fixedarray_double");
 }
 
+static std::optional<PandaString> VerifyResolver(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_RESOLVER);
+    return v.VerifyResolver(arg.GetValueResolver());
+}
+
+static std::optional<PandaString> VerifyResolverStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_RESOLVER_STORAGE);
+    return v.VerifyTypeStorage<VResolver **>(arg.GetValueResolverStorage(), "ani_resolver");
+}
+
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 static constexpr std::array<CheckerHandler, helpers::ToUnderlying(ANIArg::Action::NUMBER_OF_ELEMENTS)> HANDLERS = {
 // CC-OFFNXT(G.PRE.02) code generation
@@ -1118,9 +1141,6 @@ static PandaVector<ExtArgInfo> MakeExtArgInfoList(PandaEnv *pandaEnv, ANIArg::An
 
     PandaVector<ExtArgInfo> extArgInfoList;
     size_t i = 0;
-    if (methodArgs->method == nullptr) {
-        return {};
-    }
 
     CallArgs callArgs(methodArgs->method, methodArgs->vargs);
     auto envANIVerifier = pandaEnv->GetEnvANIVerifier();

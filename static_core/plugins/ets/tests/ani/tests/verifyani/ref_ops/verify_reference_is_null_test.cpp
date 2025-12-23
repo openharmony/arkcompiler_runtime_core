@@ -25,16 +25,28 @@ public:
 
         ASSERT_EQ(env_->GetNull(&nullRef), ANI_OK);
 
-        ASSERT_EQ(env_->FindModule("verify_reference_is_null_test", &module), ANI_OK);
+        ASSERT_EQ(env_->FindModule("verify_reference_is_null_test", &module_), ANI_OK);
         std::array functions = {
             ani_native_function {"foo", "X{C{std.core.Null}C{std.core.String}}:", reinterpret_cast<void *>(Foo)},
+            ani_native_function {"anotherFrame", nullptr, reinterpret_cast<void *>(AnotherFrame)},
+            ani_native_function {"checkRefFromAnotherFrame", nullptr,
+                                 reinterpret_cast<void *>(CheckRefFromAnotherFrame)},
+            ani_native_function {"funcAddress", nullptr, reinterpret_cast<void *>(FuncAddress)},
+            ani_native_function {"badStackRef", ":l", reinterpret_cast<void *>(BadStackRef)},
         };
-        ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+        ASSERT_EQ(env_->Module_BindNativeFunctions(module_, functions.data(), functions.size()), ANI_OK);
+
+        ani_function fn {};
+        ASSERT_EQ(env_->Module_FindFunction(module_, "getVar", nullptr, &fn), ANI_OK);
+
+        ASSERT_EQ(env_->Function_Call_Ref(fn, &var_), ANI_OK);
     }
 
 protected:
-    ani_ref nullRef {};    // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
-    ani_module module {};  // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
+    ani_ref nullRef {};
+    static ani_module module_;
+    static ani_ref someRef_;
+    ani_ref var_;
 
 private:
     static void Foo(ani_env *env, ani_ref ref)
@@ -43,7 +55,50 @@ private:
         ASSERT_EQ(env->c_api->Reference_IsNull(env, ref, &isNull), ANI_OK);
         ASSERT_EQ(isNull, ANI_TRUE);
     }
+
+    static ani_long AnotherFrame(ani_env *env, ani_ref ref)
+    {
+        someRef_ = ref;
+
+        ani_function fn;
+        auto status = env->Module_FindFunction(module_, "checkRefFromAnotherFrame", nullptr, &fn);
+        if (status != ANI_OK) {
+            return status;
+        }
+        ani_long res {};
+        status = env->Function_Call_Long(fn, &res);
+        if (status != ANI_OK) {
+            return status;
+        }
+        return res;
+    }
+
+    static ani_long CheckRefFromAnotherFrame(ani_env *env)
+    {
+        ani_boolean isNull = ANI_FALSE;
+        ani_status status = env->c_api->Reference_IsNull(env, someRef_, &isNull);
+        return status;
+    }
+
+    static ani_long FuncAddress(ani_env *env, ani_ref ref)
+    {
+        ani_boolean res {};
+        auto status = env->c_api->Reference_IsNull(env, ref - sizeof(void *), &res);
+        return status;
+    }
+
+    static ani_long BadStackRef(ani_env *env)
+    {
+        ani_boolean res {};
+        const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
+
+        auto status = env->c_api->Reference_IsNull(env, fakeRef, &res);
+        return status;
+    }
 };
+
+ani_ref ReferenceIsNullTest::someRef_ {};
+ani_module ReferenceIsNullTest::module_ {};
 
 TEST_F(ReferenceIsNullTest, wrong_env)
 {
@@ -120,13 +175,90 @@ TEST_F(ReferenceIsNullTest, global_ref)
     ASSERT_EQ(env_->GlobalReference_Delete(gref), ANI_OK);
 }
 
-// NOTE: enable when #28700 is resolved
-TEST_F(ReferenceIsNullTest, DISABLED_stack_ref)
+TEST_F(ReferenceIsNullTest, stack_ref)
 {
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "checkStackRef", ":", &fn), ANI_OK);
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Module_FindFunction(module_, "checkStackRef", ":", &fn), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
+}
+
+TEST_F(ReferenceIsNullTest, anotherFrame)
+{
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module_, "anotherFrame", nullptr, &fn), ANI_OK);
+
+    ani_long res;
+    ASSERT_EQ(env_->Function_Call_Long(fn, &res, var_), ANI_OK);
+    ASSERT_EQ(res, ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsNull", testLines);
+}
+
+TEST_F(ReferenceIsNullTest, funcAddress)
+{
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module_, "funcAddress", nullptr, &fn), ANI_OK);
+
+    ani_long res {};
+    ASSERT_EQ(env_->Function_Call_Long(fn, &res, var_), ANI_OK);
+    ASSERT_EQ(res, ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsNull", testLines);
+}
+
+TEST_F(ReferenceIsNullTest, bad_stack_ref1)
+{
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module_, "badStackRef", nullptr, &fn), ANI_OK);
+
+    ani_long res {};
+    ASSERT_EQ(env_->Function_Call_Long(fn, &res, var_), ANI_OK);
+    ASSERT_EQ(res, ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsNull", testLines);
+}
+
+TEST_F(ReferenceIsNullTest, bad_stack_ref2)
+{
+    const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
+
+    ani_boolean res {};
+    ASSERT_EQ(env_->c_api->Reference_IsNull(env_, fakeRef, &res), ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsNull", testLines);
+}
+
+TEST_F(ReferenceIsNullTest, bad_local_ref)
+{
+    const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff01));  // NOLINT(google-runtime-int)
+
+    ani_boolean res {};
+    ASSERT_EQ(env_->c_api->Reference_IsNull(env_, fakeRef, &res), ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsNull", testLines);
 }
 
 TEST_F(ReferenceIsNullTest, success)

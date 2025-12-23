@@ -849,7 +849,24 @@ public:
     static constexpr size_t PROMOTE_RATE = 50;
 };
 
-TEST_F(G1GCPromotionTest, TestCorrectPromotionYoungRegion)
+class G1GCPromotionTestNoSinglePass : public G1GCTest {
+public:
+    G1GCPromotionTestNoSinglePass() : G1GCTest(CreateOptions()) {}
+
+    static RuntimeOptions CreateOptions()
+    {
+        RuntimeOptions options = CreateDefaultOptions();
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        options.SetG1PromotionRegionAliveRate(PROMOTE_RATE);
+        options.SetG1SinglePassCompactionEnabled(false);
+        return options;
+    }
+
+    static constexpr size_t PROMOTE_RATE = 50;
+};
+
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
+TEST_F(G1GCPromotionTestNoSinglePass, TestCorrectPromotionYoungRegion)
 {
     // We will create a humongous object with a links to two young regions
     // and check promotion workflow
@@ -1164,7 +1181,7 @@ private:
     bool found_ = false;
 };
 
-TEST_F(G1GCPromotionTest, TestPromotedRegionHasValidRemSets)
+TEST_F(G1GCPromotionTestNoSinglePass, TestPromotedRegionHasValidRemSets)
 {
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     Runtime *runtime = Runtime::GetCurrent();
@@ -1799,6 +1816,7 @@ public:
         options.SetHeapSizeLimit(HEAP_SIZE_LIMIT_TEST);
         options.SetGcTriggerType("debug-never");
         options.SetG1NumberOfTenuredRegionsAtMixedCollection(0);
+        options.SetGcWorkersCount(0);
         return options;
     }
 

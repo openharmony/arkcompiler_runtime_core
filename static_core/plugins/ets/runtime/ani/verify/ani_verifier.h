@@ -17,8 +17,10 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_ANI_VERIFIER_H
 
 #include "libarkbase/macros.h"
+#include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
+#include "plugins/ets/runtime/ani/verify/types/vresolver.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include <string_view>
@@ -30,6 +32,17 @@ public:
     ANIVerifier() = default;
     ~ANIVerifier() = default;
 
+    struct GlobalData {
+        PandaMap<VRef *, PandaUniquePtr<InternalRef>> grefsMap GUARDED_BY(grefsMapMutex);
+        os::memory::Mutex grefsMapMutex;
+
+        PandaMap<impl::VMethod *, PandaUniquePtr<impl::VMethod>> methodsSet GUARDED_BY(methodsSetLock);
+        os::memory::RWLock methodsSetLock;
+
+        PandaMap<VResolver *, PandaUniquePtr<VResolver>> resolversMap GUARDED_BY(resolverMapMutex);
+        os::memory::Mutex resolverMapMutex;
+    };
+
     void Abort(const std::string_view message);
     void SetAbortHook(void (*hook)(void *data, const std::string_view message), void *data)
     {
@@ -38,21 +51,29 @@ public:
     }
 
     VRef *AddGlobalVerifiedRef(ani_ref gref);
-    void DeleteDeleteGlobalRef(VRef *vgref);
+    void DeleteGlobalVerifiedRef(VRef *vgref);
     bool IsValidGlobalVerifiedRef(VRef *vgref);
 
     impl::VMethod *AddMethod(EtsMethod *method);
     void DeleteMethod(impl::VMethod *vmethod);
     bool IsValidVerifiedMethod(impl::VMethod *vmethod);
 
+    bool IsValidStackRef(VRef *vref);
+
+    VResolver *AddGlobalVerifiedResolver(ani_resolver resolver);
+    void DeleteGlobalVerifiedResolver(VResolver *vresolver);
+    bool IsValidGlobalVerifiedResolver(VResolver *vresolver);
+
 private:
+    GlobalData &GetGlobalData()
+    {
+        return verifyObj_;
+    }
+
     void (*abortHook_)(void *data, const std::string_view message) {};
     void *abortHookData_ {};
 
-    PandaMap<VRef *, PandaUniquePtr<VRef>> grefsMap_ GUARDED_BY(grefsMapMutex_);
-    os::memory::Mutex grefsMapMutex_;
-    PandaMap<impl::VMethod *, PandaUniquePtr<impl::VMethod>> methodsSet_ GUARDED_BY(methodsSetLock_);
-    mutable os::memory::RWLock methodsSetLock_;
+    GlobalData verifyObj_;
 
     NO_COPY_SEMANTIC(ANIVerifier);
     NO_MOVE_SEMANTIC(ANIVerifier);

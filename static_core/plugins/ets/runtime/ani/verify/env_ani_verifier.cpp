@@ -122,7 +122,8 @@ VRef *EnvANIVerifier::AddLocalVerifiedRef(ani_ref ref)
     ASSERT(!frames_.empty());
     Frame &frame = frames_.back();
 
-    VRef *vref = frame.refsAllocator->New<VRef>(ref);
+    InternalRef *iref = frame.refsAllocator->New<InternalRef>(ref);
+    auto vref = InternalRef::CastToVRef(iref);
     [[maybe_unused]] auto ret = frame.refs.emplace(vref);
     ASSERT(ret.second);
     return vref;
@@ -162,6 +163,9 @@ bool EnvANIVerifier::IsValidRefInCurrentFrame(VRef *vref)
             break;
         }
     }
+    if (IsValidStackRef(vref)) {
+        return true;
+    }
     return false;
 }
 
@@ -193,14 +197,34 @@ VRef *EnvANIVerifier::AddGlobalVerifiedRef(ani_ref gref)
     return verifier_->AddGlobalVerifiedRef(gref);
 }
 
-void EnvANIVerifier::DeleteDeleteGlobalRef(VRef *vgref)
+void EnvANIVerifier::DeleteGlobalVerifiedRef(VRef *vgref)
 {
-    verifier_->DeleteDeleteGlobalRef(vgref);
+    verifier_->DeleteGlobalVerifiedRef(vgref);
 }
 
 bool EnvANIVerifier::IsValidGlobalVerifiedRef(VRef *vgref)
 {
     return verifier_->IsValidGlobalVerifiedRef(vgref);
+}
+
+bool EnvANIVerifier::IsValidStackRef(VRef *vref)
+{
+    return verifier_->IsValidStackRef(vref);
+}
+
+VResolver *EnvANIVerifier::AddGlobalVerifiedResolver(ani_resolver resolver)
+{
+    return verifier_->AddGlobalVerifiedResolver(resolver);
+}
+
+void EnvANIVerifier::DeleteGlobalVerifiedResolver(VResolver *vresolver)
+{
+    return verifier_->DeleteGlobalVerifiedResolver(vresolver);
+}
+
+bool EnvANIVerifier::IsValidGlobalVerifiedResolver(VResolver *vresolver)
+{
+    return verifier_->IsValidGlobalVerifiedResolver(vresolver);
 }
 
 }  // namespace ark::ets::ani::verify

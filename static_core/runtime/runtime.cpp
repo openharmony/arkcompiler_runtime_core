@@ -460,6 +460,7 @@ void Runtime::SetRuntimeOptions(RuntimeOptions &options)
 {
     SetDebuggerOptions(options);
     SetUseLargerYoungSpaceOptions(options);
+    SetEnableClassLinkerTraceOptions(options);
 }
 
 void Runtime::SetDebuggerOptions(RuntimeOptions &options)
@@ -484,10 +485,19 @@ void Runtime::SetUseLargerYoungSpaceOptions(RuntimeOptions &options)
         options.SetYoungSpaceSize(youngSpaceSize);
     }
 }
+
+void Runtime::SetEnableClassLinkerTraceOptions(RuntimeOptions &options)
+{
+    bool enableClassLinkerTrace = OHOS::system::GetBoolParameter("persist.sta.ark.EnableClassLinkerTrace", false);
+    if (enableClassLinkerTrace) {
+        options.SetEnableClassLinkerTrace(true);
+    }
+}
 #else
 void Runtime::SetRuntimeOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetDebuggerOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetUseLargerYoungSpaceOptions([[maybe_unused]] RuntimeOptions &options) {}
+void Runtime::SetEnableClassLinkerTraceOptions([[maybe_unused]] RuntimeOptions &options) {}
 #endif
 
 Runtime *Runtime::GetCurrent()

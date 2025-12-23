@@ -471,12 +471,13 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     };
 
     auto klass = etsClass_->GetRuntimeClass();
-    PropsMap props;
+    PropsMethod propsMethod;
+    PropsField propsField;
 
     // Collect fields
     for (auto &f : klass->GetFields()) {
         if (f.IsPublic()) {
-            props.insert({f.GetName().data, &f});
+            propsField.insert({f.GetName().data, &f});
         }
     }
     // Select preferred overloads
@@ -492,10 +493,10 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
             auto jsNameStr = utf::Mutf8AsCString(jsMethodName);
             auto etsMethodSet =
                 std::make_unique<EtsMethodSet>(EtsMethodSet::Create(EtsMethod::FromRuntimeMethod(method), jsNameStr));
-            auto it = props.insert({method->GetName().data, etsMethodSet.get()});
-            if (!it.second && std::holds_alternative<EtsMethodSet *>(it.first->second)) {
+            auto it = propsMethod.insert({method->GetName().data, etsMethodSet.get()});
+            if (!it.second) {
                 // Possible correct method overloading: merge to existing entry
-                auto addedMethods = std::get<EtsMethodSet *>(it.first->second);
+                auto addedMethods = it.first->second;
                 addedMethods->MergeWith(*etsMethodSet.get());
             } else {
                 etsMethods_.push_back(std::move(etsMethodSet));
@@ -503,37 +504,16 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
         }
     }
 
-    CollectClassMethods(&props, overloads);
+    CollectClassMethods(&propsMethod, overloads);
     if (etsClass_ != PlatformTypes()->coreObject) {
-        UpdatePropsWithBaseClasses(&props);
+        UpdatePropsWithBaseClasses(&propsMethod, &propsField);
     }
 
-    return CalculateFieldsAndMethods(props);
+    return CalculateFieldsAndMethods(propsMethod, propsField);
 }
 
-void EtsClassWrapper::CollectConstructors(EtsClassWrapper::PropsMap *props)
+void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMethod *props, const OverloadsMap *overloads)
 {
-    auto objCtors = etsClass_->GetConstructors();
-    // Assuming that ETS StdLib guarantee that Object has the only one ctor
-    ASSERT(objCtors.size() == 1);
-    auto ctor = objCtors[0]->GetPandaMethod();
-    auto etsMethodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(ctor));
-    props->insert({ctor->GetName().data, etsMethodSet.get()});
-    etsMethods_.push_back(std::move(etsMethodSet));
-}
-
-void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMap *props, const OverloadsMap *overloads)
-{
-    auto fatalMethodOverloaded = [](Method *method) {
-        for (auto &m : method->GetClass()->GetMethods()) {
-            if (utf::IsEqual(m.GetName().data, method->GetName().data)) {
-                INTEROP_LOG(ERROR) << "overload: " << EtsMethod::FromRuntimeMethod(&m)->GetMethodSignature(true);
-            }
-        }
-        InteropCtx::Fatal(std::string("Method ") + utf::Mutf8AsCString(method->GetName().data) + " of class " +
-                          utf::Mutf8AsCString(method->GetClass()->GetDescriptor()) + " is overloaded");
-    };
-
     auto klass = etsClass_->GetRuntimeClass();
     for (auto &m : klass->GetMethods()) {
         if (m.IsPrivate()) {
@@ -546,13 +526,9 @@ void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMap *props, cons
         }
         auto methodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(&m));
         auto it = props->insert({m.GetName().data, methodSet.get()});
-        if (!it.second && !std::holds_alternative<EtsMethodSet *>(it.first->second)) {
-            // Method overloads non-method field
-            fatalMethodOverloaded(&m);
-        }
-        if (!it.second && std::holds_alternative<EtsMethodSet *>(it.first->second)) {
+        if (!it.second) {
             // Possible correct method overloading: merge to existing entry
-            auto addedMethods = std::get<EtsMethodSet *>(it.first->second);
+            auto addedMethods = it.first->second;
             addedMethods->MergeWith(*methodSet.get());
         } else {
             etsMethods_.push_back(std::move(methodSet));
@@ -574,7 +550,8 @@ bool EtsClassWrapper::HasOverloadsMethod(const OverloadsMap *overloads, Method *
     return false;
 }
 
-void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMap *props)
+void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMethod *propsMethod,
+                                                 EtsClassWrapper::PropsField *propsField)
 {
     auto hasSquashedProtoOhosImpl = [](EtsClassWrapper *wclass) {
         ASSERT(wclass->HasBuiltin() || wclass->baseWrapper_ != nullptr);
@@ -602,11 +579,11 @@ void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMap *prop
              wclass = wclass->baseWrapper_) {
             for (auto &wfield : wclass->GetFields()) {
                 Field *field = wfield.GetField();
-                props->insert({field->GetName().data, field});
+                propsField->insert({field->GetName().data, field});
             }
             for (auto &link : wclass->GetMethods()) {
                 EtsMethodSet *methodSet = link.IsResolved() ? link.GetResolved()->GetMethodSet() : link.GetUnresolved();
-                props->insert({utf::CStringAsMutf8(methodSet->GetName()), methodSet});
+                propsMethod->insert({utf::CStringAsMutf8(methodSet->GetName()), methodSet});
             }
 
             if (hasSquashedProto(wclass)) {
@@ -617,25 +594,22 @@ void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMap *prop
 }
 
 std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapper::CalculateFieldsAndMethods(
-    const PropsMap &props)
+    const EtsClassWrapper::PropsMethod &propsMethod, const EtsClassWrapper::PropsField &propsField)
 {
     std::vector<EtsMethodSet *> methods;
     std::vector<Field *> fields;
 
-    for (auto &[n, p] : props) {
-        if (std::holds_alternative<EtsMethodSet *>(p)) {
-            auto method = std::get<EtsMethodSet *>(p);
-            if (method->IsConstructor() && !method->IsStatic()) {
-                etsCtorLink_ = LazyEtsMethodWrapperLink(method);
-            }
-            if (!method->IsConstructor()) {
-                methods.push_back(method);
-            }
-        } else if (std::holds_alternative<Field *>(p)) {
-            fields.push_back(std::get<Field *>(p));
-        } else {
-            UNREACHABLE();
+    for (auto &[n, p] : propsMethod) {
+        if (p->IsConstructor() && !p->IsStatic()) {
+            etsCtorLink_ = LazyEtsMethodWrapperLink(p);
         }
+        if (!p->IsConstructor()) {
+            methods.push_back(p);
+        }
+    }
+
+    for (auto &[n, p] : propsField) {
+        fields.push_back(p);
     }
 
     return {fields, methods};
@@ -810,13 +784,8 @@ static void SetAttachCallbackForClass(napi_env env, napi_value jsCtor, std::vect
 
 static void SortMethodByName(PandaVector<Method *> &methods)
 {
-    std::sort(methods.begin(), methods.end(), [](const Method *lhs, const Method *rhs) {
-        panda_file::File::StringData lhsName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(lhs->GetName().data)),
-                                                lhs->GetName().data};
-        panda_file::File::StringData rhsName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(rhs->GetName().data)),
-                                                rhs->GetName().data};
-        return lhsName < rhsName;
-    });
+    std::sort(methods.begin(), methods.end(),
+              [](const Method *lhs, const Method *rhs) { return lhs->GetName() < rhs->GetName(); });
 }
 
 /*static*/

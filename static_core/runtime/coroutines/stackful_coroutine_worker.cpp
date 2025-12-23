@@ -338,14 +338,14 @@ bool StackfulCoroutineWorker::RunnableCoroutinesExist() const
     return !runnables_.Empty();
 }
 
-void StackfulCoroutineWorker::WaitForRunnables(bool needTimedWait, uint64_t waitingTime)
+void StackfulCoroutineWorker::WaitForRunnables(uint64_t waitingTimeMs)
 {
     // NOTE(konstanting): in case of work stealing, use timed wait and try periodically to steal some runnables
     while (!RunnableCoroutinesExist() && IsActive()) {
         // profiling: no need to profile the SLEEPING state, closing the interval
         stats_.FinishInterval(CoroutineTimeStats::SCH_ALL);
-        if (needTimedWait) {
-            runnablesCv_.TimedWait(&runnablesLock_, waitingTime);
+        if (waitingTimeMs != WAITING_TIME_UNLIMITED) {
+            runnablesCv_.TimedWait(&runnablesLock_, waitingTimeMs);
         } else {
             runnablesCv_.Wait(&runnablesLock_);
         }
@@ -358,7 +358,7 @@ void StackfulCoroutineWorker::WaitForRunnables(bool needTimedWait, uint64_t wait
             LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::WaitForRunnables: wakeup!";
         }
 
-        if (needTimedWait) {
+        if (waitingTimeMs != WAITING_TIME_UNLIMITED) {
             break;
         }
     }
@@ -386,11 +386,14 @@ void StackfulCoroutineWorker::RequestScheduleImpl()
         SuspendCurrentCoroAndScheduleNext();
         ASSERT(!IsCrossWorkerCall() || (Coroutine::GetCurrent()->GetType() == Coroutine::Type::MUTATOR));
     } else {
-        auto [needTimedWait, waitingTime] = CalculateShortestTimerDelay();
+        auto [needToWait, waitingTimeMs] = CalculateShortestTimerDelay();
+        if (!needToWait) {
+            return;
+        }
         os::memory::LockHolder lh(runnablesLock_);
         coroManager_->TriggerMigration();
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::RequestSchedule: No runnables, starting to wait...";
-        WaitForRunnables(needTimedWait, waitingTime);
+        WaitForRunnables(waitingTimeMs);
     }
 }
 
@@ -502,7 +505,7 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
 {
     ASSERT(from != nullptr);
     ASSERT(to != nullptr);
-    EnsureCoroutineSwitchEnabled();
+    EnsureCoroutineSwitchEnabled(from->GetCoroutine());
     LOG(DEBUG, COROUTINES) << "Ctx switch: " << from->GetCoroutine()->GetName() << " --> "
                            << to->GetCoroutine()->GetName();
     stats_.FinishInterval(CoroutineTimeStats::SCH_ALL);
@@ -535,10 +538,9 @@ void StackfulCoroutineWorker::UpdateLoadFactor()
     loadFactor_ = (loadFactor_ + runnables_.Size()) / 2U;
 }
 
-void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()
+void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled(Coroutine *coro)
 {
     if (IsCoroutineSwitchDisabled()) {
-        auto coro = Coroutine::GetCurrent();
         coro->PrintCallStack();
         LOG(FATAL, COROUTINES) << "ERROR ERROR ERROR >>> Trying to switch coroutines on " << GetName()
                                << " when coroutine switch is DISABLED!!! <<< ERROR ERROR ERROR";
@@ -698,23 +700,24 @@ void StackfulCoroutineWorker::ProcessTimerEvents()
 
 std::pair<bool, uint64_t> StackfulCoroutineWorker::CalculateShortestTimerDelay()
 {
-    auto hasTimerEvents = false;
     uint64_t minTimerDelay = std::numeric_limits<uint64_t>::max();
-
     os::memory::LockHolder lh(waitersLock_);
     for (auto &[evt, _] : waiters_) {
         if (evt->GetType() == CoroutineEvent::Type::TIMER) {
             auto *timerEvent = static_cast<TimerEvent *>(evt);
             auto delay = timerEvent->GetDelay();
             if (timerEvent->IsExpired()) {
-                return {true, 0};
+                return {false, 0};
             }
-            hasTimerEvents = true;
             minTimerDelay = std::min(delay, minTimerDelay);
         }
     }
-    auto msDelay = minTimerDelay / 1000U;
-    return {hasTimerEvents, msDelay};
+    if (minTimerDelay == std::numeric_limits<uint64_t>::max()) {
+        // Should retun WAITING_TIME_UNLIMITED based on method declaration
+        return {true, WAITING_TIME_UNLIMITED};
+    }
+    // Returns time in ms that most close to correct one but is not less then it
+    return {true, (minTimerDelay - 1) / 1000U + 1};
 }
 
 }  // namespace ark

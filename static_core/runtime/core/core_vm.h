@@ -161,6 +161,11 @@ public:
 
     ObjectHeader *GetOOMErrorObject() override;
 
+    bool SupportGCSinglePassCompaction() const override
+    {
+        return true;
+    }
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,

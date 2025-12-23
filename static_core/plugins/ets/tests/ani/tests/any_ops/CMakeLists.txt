@@ -20,18 +20,15 @@ ani_add_gtest(ani_test_any_instanceof
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_instanceof_test.cpp
 )
 
-# NOTE(@srokashevich, #29220): enable with asan after fix
-if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
-    ani_add_gtest(ani_test_any_get_property
-        CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_get_property_test.cpp
-        ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_get_property_test.ets
-    )
+ani_add_gtest(ani_test_any_get_property
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_get_property_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_get_property_test.ets
+)
 
-    ani_add_gtest(ani_test_any_set_property
-        CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_set_property_test.cpp
-        ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_set_property_test.ets
-    )
-endif()
+ani_add_gtest(ani_test_any_set_property
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_set_property_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_set_property_test.ets
+)
 
 ani_add_gtest(ani_test_any_call
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/any_call_test.cpp

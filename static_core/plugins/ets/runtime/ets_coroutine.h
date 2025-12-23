@@ -129,6 +129,8 @@ public:
     }
 
     void Initialize() override;
+    void ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
+                      CoroutinePriority priority) override;
     void CleanUp() override;
     void RequestCompletion(Value returnValue) override;
     void FreeInternalMemory() override;

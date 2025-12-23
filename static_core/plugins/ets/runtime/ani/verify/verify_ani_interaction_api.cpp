@@ -4890,7 +4890,7 @@ NO_UB_SANITIZE static ani_status GlobalReference_Delete(VEnv *venv, VRef *vgref)
     VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
 
     ani_ref gref = vgref->GetRef();
-    venv->DeleteDeleteGlobalRef(vgref);
+    venv->DeleteGlobalVerifiedRef(vgref);
     return GetInteractionAPI(venv)->GlobalReference_Delete(venv->GetEnv(), gref);
 }
 
@@ -4933,24 +4933,61 @@ NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(VEnv *venv, ani_arraybuffer
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Promise_New(VEnv *venv, ani_resolver *resultResolver, ani_object *resultPromise)
+NO_UB_SANITIZE static ani_status Promise_New(VEnv *venv, VResolver **vresultResolver, VObject **vresultPromise)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Promise_New(venv->GetEnv(), resultResolver, resultPromise);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForResolverStorage(vresultResolver, "result_resolver"),
+        ANIArg::MakeForPromiseStorage(vresultPromise, "result_promise")
+    );
+    // clang-format on
+    ani_resolver realResolver {};
+    ani_object realPromise {};
+    ani_status status = GetInteractionAPI(venv)->Promise_New(venv->GetEnv(), &realResolver, &realPromise);
+    if (LIKELY(status == ANI_OK)) {
+        *vresultResolver = venv->AddGlobalVerifiedResolver(realResolver);
+        ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, realPromise, vresultPromise);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status PromiseResolver_Resolve(VEnv *venv, ani_resolver resolver, ani_ref resolution)
+NO_UB_SANITIZE static ani_status PromiseResolver_Resolve(VEnv *venv, VResolver *vresolver, VRef *vresolution)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->PromiseResolver_Resolve(venv->GetEnv(), resolver, resolution);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForResolver(vresolver, "resolver"),
+        ANIArg::MakeForRef(vresolution, "resolution")
+    );
+    // clang-format on
+
+    ani_status status = GetInteractionAPI(venv)->PromiseResolver_Resolve(venv->GetEnv(), vresolver->GetResolver(),
+                                                                         vresolution->GetRef());
+    if (LIKELY(status == ANI_OK)) {
+        venv->DeleteGlobalVerifiedResolver(vresolver);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status PromiseResolver_Reject(VEnv *venv, ani_resolver resolver, ani_error rejection)
+NO_UB_SANITIZE static ani_status PromiseResolver_Reject(VEnv *venv, VResolver *vresolver, VError *vrejection)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->PromiseResolver_Reject(venv->GetEnv(), resolver, rejection);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForResolver(vresolver, "resolver"),
+        ANIArg::MakeForError(vrejection, "rejection")
+    );
+    // clang-format on
+
+    ani_status status =
+        GetInteractionAPI(venv)->PromiseResolver_Reject(venv->GetEnv(), vresolver->GetResolver(), vrejection->GetRef());
+    if (LIKELY(status == ANI_OK)) {
+        venv->DeleteGlobalVerifiedResolver(vresolver);
+    }
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

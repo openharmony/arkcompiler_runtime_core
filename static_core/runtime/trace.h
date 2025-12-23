@@ -16,6 +16,8 @@
 #ifndef RUNTIME_TRACE_H
 #define RUNTIME_TRACE_H
 
+#include "libarkbase/macros.h"
+
 #ifdef PANDA_USE_HITRACE
 #include "hitrace_meter.h"
 constexpr uint64_t TRACER_TAG = HITRACE_TAG_ARK;
@@ -110,6 +112,30 @@ public:
     {
         CountTrace(TRACER_TAG, name, count);
     }
+};
+
+class ScopedTrace {
+public:
+    explicit ScopedTrace(const char *str, bool enabled) : enabled_(enabled)
+    {
+        if (UNLIKELY(enabled_)) {
+            Tracer::Start(str);
+        }
+    }
+    explicit ScopedTrace(const std::string &str, bool enabled) : ScopedTrace(str.c_str(), enabled) {}
+
+    ~ScopedTrace()
+    {
+        if (UNLIKELY(enabled_)) {
+            Tracer::Finish();
+        }
+    }
+
+    NO_COPY_SEMANTIC(ScopedTrace);
+    NO_MOVE_SEMANTIC(ScopedTrace);
+
+private:
+    bool enabled_;
 };
 
 }  // namespace ark

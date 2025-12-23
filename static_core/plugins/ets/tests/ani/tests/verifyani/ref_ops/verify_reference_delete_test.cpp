@@ -106,13 +106,16 @@ TEST_F(ReferenceDeleteTest, wrong_ref_stack)
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(m, "foo", "C{std.core.Object}:l", &fn), ANI_OK);
     ani_long ret {};
-    ASSERT_EQ(env_->Function_Call_Long(fn, &ret, ref), ANI_OK);  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    // NOTE(ypigunova): remove cast when #26993 will be solved
+    ani_ref realRef = reinterpret_cast<VRef *>(ref)->GetRef();
+
+    ASSERT_EQ(env_->Function_Call_Long(fn, &ret, realRef), ANI_OK);  // NOLINT(cppcoreguidelines-pro-type-vararg)
     ASSERT_EQ(ret, static_cast<long>(ANI_ERROR));
 
     // Check the error that occurs when deleting a stack reference.
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"lref", "ani_ref", "it is not local reference"},
+        {"lref", "ani_ref", "a local reference can only be deleted in the scope where it was created"},
     };
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_Delete", testLines);
 

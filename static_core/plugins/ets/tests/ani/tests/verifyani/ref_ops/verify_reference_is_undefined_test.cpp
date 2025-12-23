@@ -17,7 +17,7 @@
 
 namespace ark::ets::ani::verify::testing {
 
-class ReferenceIsUnderfinedTest : public VerifyAniTest {
+class ReferenceIsUndefinedTest : public VerifyAniTest {
 public:
     void SetUp() override
     {
@@ -25,16 +25,27 @@ public:
 
         ASSERT_EQ(env_->GetUndefined(&undefRef), ANI_OK);
 
-        ASSERT_EQ(env_->FindModule("verify_reference_is_undefined_test", &module), ANI_OK);
+        ASSERT_EQ(env_->FindModule("verify_reference_is_undefined_test", &module_), ANI_OK);
         std::array functions = {
             ani_native_function {"foo", "C{std.core.String}:", reinterpret_cast<void *>(Foo)},
+            ani_native_function {"anotherFrame", "C{std.core.String}:l", reinterpret_cast<void *>(AnotherFrame)},
+            ani_native_function {"checkRefFromAnotherFrame", ":l", reinterpret_cast<void *>(CheckRefFromAnotherFrame)},
+            ani_native_function {"funcAddress", "C{std.core.String}:l", reinterpret_cast<void *>(FuncAddress)},
+            ani_native_function {"badStackRef", ":l", reinterpret_cast<void *>(BadStackRef)},
         };
-        ASSERT_EQ(env_->Module_BindNativeFunctions(module, functions.data(), functions.size()), ANI_OK);
+        ASSERT_EQ(env_->Module_BindNativeFunctions(module_, functions.data(), functions.size()), ANI_OK);
+
+        ani_function fn {};
+        ASSERT_EQ(env_->Module_FindFunction(module_, "getVar", nullptr, &fn), ANI_OK);
+
+        ASSERT_EQ(env_->Function_Call_Ref(fn, &var_), ANI_OK);
     }
 
 protected:
-    ani_ref undefRef {};   // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
-    ani_module module {};  // NOLINT(misc-non-private-member-variables-in-classes,readability-identifier-naming)
+    ani_ref undefRef {};
+    static ani_module module_;
+    static ani_ref someRef_;
+    ani_ref var_;
 
 private:
     static void Foo(ani_env *env, ani_ref ref)
@@ -43,9 +54,52 @@ private:
         ASSERT_EQ(env->c_api->Reference_IsUndefined(env, ref, &isUndef), ANI_OK);
         ASSERT_EQ(isUndef, ANI_TRUE);
     }
+
+    static ani_long AnotherFrame(ani_env *env, ani_ref ref)
+    {
+        someRef_ = ref;
+
+        ani_function fn;
+        auto status = env->Module_FindFunction(module_, "checkRefFromAnotherFrame", nullptr, &fn);
+        if (status != ANI_OK) {
+            return status;
+        }
+        ani_long res {};
+        status = env->Function_Call_Long(fn, &res);
+        if (status != ANI_OK) {
+            return status;
+        }
+        return res;
+    }
+
+    static ani_long CheckRefFromAnotherFrame(ani_env *env)
+    {
+        ani_boolean isUndef = ANI_FALSE;
+        ani_status status = env->c_api->Reference_IsUndefined(env, someRef_, &isUndef);
+        return status;
+    }
+
+    static ani_long FuncAddress(ani_env *env, ani_ref ref)
+    {
+        ani_boolean res {};
+        auto status = env->c_api->Reference_IsUndefined(env, ref - sizeof(void *), &res);
+        return status;
+    }
+
+    static ani_long BadStackRef(ani_env *env)
+    {
+        ani_boolean res {};
+        const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
+
+        auto status = env->c_api->Reference_IsUndefined(env, fakeRef, &res);
+        return status;
+    }
 };
 
-TEST_F(ReferenceIsUnderfinedTest, wrong_env)
+ani_ref ReferenceIsUndefinedTest::someRef_ {};
+ani_module ReferenceIsUndefinedTest::module_ {};
+
+TEST_F(ReferenceIsUndefinedTest, wrong_env)
 {
     ani_boolean res {};
 
@@ -58,7 +112,7 @@ TEST_F(ReferenceIsUnderfinedTest, wrong_env)
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
 }
 
-TEST_F(ReferenceIsUnderfinedTest, wrong_ref)
+TEST_F(ReferenceIsUndefinedTest, wrong_ref)
 {
     ani_boolean res {};
 
@@ -71,7 +125,7 @@ TEST_F(ReferenceIsUnderfinedTest, wrong_ref)
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
 }
 
-TEST_F(ReferenceIsUnderfinedTest, wrong_res)
+TEST_F(ReferenceIsUndefinedTest, wrong_res)
 {
     ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, undefRef, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
@@ -82,7 +136,7 @@ TEST_F(ReferenceIsUnderfinedTest, wrong_res)
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
 }
 
-TEST_F(ReferenceIsUnderfinedTest, wrong_all_args)
+TEST_F(ReferenceIsUndefinedTest, wrong_all_args)
 {
     ASSERT_EQ(env_->c_api->Reference_IsUndefined(nullptr, nullptr, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
@@ -93,7 +147,7 @@ TEST_F(ReferenceIsUnderfinedTest, wrong_all_args)
     ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
 }
 
-TEST_F(ReferenceIsUnderfinedTest, throw_error)
+TEST_F(ReferenceIsUndefinedTest, throw_error)
 {
     ThrowError();
 
@@ -109,7 +163,7 @@ TEST_F(ReferenceIsUnderfinedTest, throw_error)
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
-TEST_F(ReferenceIsUnderfinedTest, global_ref)
+TEST_F(ReferenceIsUndefinedTest, global_ref)
 {
     ani_ref gref {};
     ASSERT_EQ(env_->GlobalReference_Create(undefRef, &gref), ANI_OK);
@@ -120,16 +174,93 @@ TEST_F(ReferenceIsUnderfinedTest, global_ref)
     ASSERT_EQ(env_->GlobalReference_Delete(gref), ANI_OK);
 }
 
-// NOTE: enable when #28700 is resolved
-TEST_F(ReferenceIsUnderfinedTest, DISABLED_stack_ref)
+TEST_F(ReferenceIsUndefinedTest, stack_ref)
 {
     ani_function fn {};
-    ASSERT_EQ(env_->Module_FindFunction(module, "checkStackRef", ":", &fn), ANI_OK);
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    ASSERT_EQ(env_->Module_FindFunction(module_, "checkStackRef", ":", &fn), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
 }
 
-TEST_F(ReferenceIsUnderfinedTest, success)
+TEST_F(ReferenceIsUndefinedTest, anotherFrame)
+{
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module_, "anotherFrame", nullptr, &fn), ANI_OK);
+
+    ani_long res;
+    ASSERT_EQ(env_->Function_Call_Long(fn, &res, var_), ANI_OK);
+    ASSERT_EQ(res, ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean *"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+}
+
+TEST_F(ReferenceIsUndefinedTest, funcAddress)
+{
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module_, "funcAddress", nullptr, &fn), ANI_OK);
+
+    ani_long res {};
+    ASSERT_EQ(env_->Function_Call_Long(fn, &res, var_), ANI_OK);
+    ASSERT_EQ(res, ANI_ERROR);
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+}
+
+TEST_F(ReferenceIsUndefinedTest, bad_stack_ref1)
+{
+    ani_function fn {};
+    ASSERT_EQ(env_->Module_FindFunction(module_, "badStackRef", nullptr, &fn), ANI_OK);
+
+    ani_long res {};
+    ASSERT_EQ(env_->Function_Call_Long(fn, &res, var_), ANI_OK);
+    ASSERT_EQ(res, ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+}
+
+TEST_F(ReferenceIsUndefinedTest, bad_stack_ref2)
+{
+    const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
+
+    ani_boolean res {};
+    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, fakeRef, &res), ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+}
+
+TEST_F(ReferenceIsUndefinedTest, bad_local_ref)
+{
+    const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff01));  // NOLINT(google-runtime-int)
+
+    ani_boolean res {};
+    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, fakeRef, &res), ANI_ERROR);
+
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"ref", "ani_ref", "wrong reference"},
+        {"result", "ani_boolean"},
+    };
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+}
+
+TEST_F(ReferenceIsUndefinedTest, success)
 {
     ani_boolean res = ANI_FALSE;
     ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, undefRef, &res), ANI_OK);
