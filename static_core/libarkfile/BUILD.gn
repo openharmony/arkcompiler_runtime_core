@@ -138,6 +138,10 @@ ohos_shared_library("libarktsfile") {
   }
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
+  if (is_gcov_tools) {
+    cflags = coverage_cflags
+    ldflags = coverage_ldflags
+  }
 }
 
 ohos_source_set("libarktsfile_frontend_set_static") {
