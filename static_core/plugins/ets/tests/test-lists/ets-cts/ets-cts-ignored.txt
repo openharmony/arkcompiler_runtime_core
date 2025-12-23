@@ -1028,14 +1028,14 @@
 13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_1.ets
 13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_2.ets
 13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_3.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_4.ets
 13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_5.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_7.ets
 13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_6.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_8.ets
+13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_7.ets
+13.modules_and_namespaces/07.program_entry_point/main_w_args_0.ets
+13.modules_and_namespaces/07.program_entry_point/main_w_args_1.ets
 13.modules_and_namespaces/07.program_entry_point/main_w_args_2.ets
 13.modules_and_namespaces/07.program_entry_point/main_w_args_3.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_4.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_5.ets
 13.modules_and_namespaces/07.program_entry_point/main_w_args_n_0.ets
 13.modules_and_namespaces/07.program_entry_point/main_w_args_n_1.ets
 
@@ -2012,13 +2012,6 @@
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_20.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_23.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_24.ets
-
-
-#28824
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_8.ets
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_9.ets
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_10.ets
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_11.ets
 
 #28823
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_location_2.ets

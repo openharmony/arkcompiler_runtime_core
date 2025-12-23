@@ -61,3 +61,31 @@ cases:
           function main1(args: string[]): int {
               return 1
           }
+    
+    # entry point function cannot have overloading, void return type
+    - cmd_line_args: X, Y
+      tags: 'compile-only, negative'
+      use: |-
+          export overload main { main1, main2, main }
+
+          export function main1(args: string[]) {
+              arktest.assertTrue(false)
+          }
+
+          export function main2(args: string[]) {
+              arktest.assertTrue(false)
+          }
+
+    # entry point function cannot have overloading, int return type
+    - cmd_line_args: X, Y
+      tags: 'compile-only, negative'
+      use: |-
+          export overload main { main1, main, main2 }
+
+          export function main1(args: string[]): int {
+              return 1
+          }
+
+          export function main2(args: string[]): int {
+              return 1
+          }
