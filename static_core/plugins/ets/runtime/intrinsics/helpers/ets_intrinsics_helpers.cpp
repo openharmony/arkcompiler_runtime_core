@@ -231,6 +231,7 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
     // 8. parse '.'
     if (*p == '.') {
         RETURN_IF_CONVERSION_END(++p, end, (digits > 0) ? (number * std::pow(radix, exponent)) : NAN_VALUE);
+        exponent = 0;
         while (ToDigit(*p) < radix) {
             --exponent;
             ++digits;
@@ -238,6 +239,8 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
                 break;
             }
         }
+    } else {
+        exponent = 0;
     }
     if (digits == 0 && !leadingZero) {
         // no digits there, like ".", "sss", or ".e1"
