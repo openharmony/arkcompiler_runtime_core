@@ -1847,12 +1847,6 @@
 #31152 int enum cannot be used in dimension expression
 17.experimental_features/03.resizable_array_creation_expressions/expr_9.ets
 
-#31154 no CTE on float or double type dimension
-17.experimental_features/03.resizable_array_creation_expressions/expr_n_14.ets
-17.experimental_features/03.resizable_array_creation_expressions/expr_n_15.ets
-17.experimental_features/03.resizable_array_creation_expressions/expr_n_16.ets
-17.experimental_features/03.resizable_array_creation_expressions/expr_n_17.ets
-
 #29160
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_export_decl_4.ets
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/enum_export_decl_5.ets
