@@ -142,6 +142,11 @@ public:
     NO_MOVE_SEMANTIC(AotDump);
     ~AotDump() = default;
 
+    void SetOptions(ark::aotdump::Options *options)
+    {
+        options_ = options;
+    }
+
     std::string GetFilePathFromContext(size_t index) const
     {
         std::string_view context = aotFile_->GetClassContext();
@@ -195,10 +200,8 @@ public:
         };
         std::unique_ptr<const char, decltype(finalizer)> tempFileRemover(nullptr, finalizer);
 
-        ark::Span<const char *> sp(argv, argc);
-        ark::aotdump::Options options(sp[0]);
-        options.AddOptions(&paParser);
-        options_ = &options;
+        options_->AddOptions(&paParser);
+
         if (!paParser.Parse(argc, argv)) {
             std::cerr << "Parse options failed: " << paParser.GetErrorString() << std::endl;
             return -1;
@@ -338,7 +341,7 @@ public:
     {
         auto methodName = pfile.GetMethodName(methodHeader.methodId);
         if (options_->WasSetMethodRegex() && !methodName.empty()) {
-            static std::regex rgx(options_->GetMethodRegex());
+            std::regex rgx(options_->GetMethodRegex());
             if (!std::regex_match(methodName, rgx)) {
                 return;
             }
@@ -488,7 +491,11 @@ int main(int argc, const char *argv[])
     // NOLINTEND(readability-magic-numbers)
     ark::PoolManager::Initialize();
     auto allocator = new ark::ArenaAllocator(ark::SpaceType::SPACE_TYPE_COMPILER);
+    // Initialize options before Run() - options lifetime covers entire main()
+    ark::Span<const char *> sp(argv, argc);
+    ark::aotdump::Options options(sp[0]);
     ark::aotdump::AotDump aotdump(allocator);
+    aotdump.SetOptions(&options);
 
     auto result = aotdump.Run(argc, argv);
 
