@@ -22,6 +22,8 @@ static_vm_config.gni @dmitriitr @Prof @igelhaus @ipetrov
 
 arkplatform/ @dmitriitr @udav @ipetrov @molotkovmikhail @Prof @igelhaus @jokerxd-liu
 
+common_runtime/ @ipetrov @xucheng46 @Prof ^dmitriitr ^igelhaus ^weng-changcheng ^artemu ^yingguofeng
+
 static_core/ @dmitriitr @Prof @igelhaus
 
 static_core/abc2program/              @nazarovkonstantin @oatuwwutao ^igelhaus ^seeuiceland
