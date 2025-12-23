@@ -377,7 +377,7 @@ superclass.
        }
 
        class B {}
-       export class D extends B {} 
+       export class D extends B {}
           /* Compile-time error as the derived class is exported but
              the base one is not */
 
@@ -445,7 +445,7 @@ A :index:`compile-time error` occurs if current class is exported but the
    :linenos:
 
     interface I { } // Not exported
-    export class C implements I {} 
+    export class C implements I {}
        /* Compile-time error as the current class is expoprted but the
           interface it implements is not */
 
@@ -629,12 +629,17 @@ Implementing Required Interface Properties
 ==========================================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: process last changes (see table) class field is always a field
 
 A class must implement all required properties from all superinterfaces (see
-:ref:`Interface Properties`) that can be defined in a form of a field
-or as a getter, a setter, or both. In any case implementation may be provided
-in a form of field or accessors.
+:ref:`Interface Properties`) that can be defined as one of the following:
+
+- Field,
+- Readonly field,
+- Getter,
+- Setter, or
+- Both a getter and a setter.
 
 The following table summarizes all valid variants of implementation, and
 a :index:`compile-time error` occurs for any other combinations:
@@ -642,138 +647,295 @@ a :index:`compile-time error` occurs for any other combinations:
    =========================== ======================================================
    Form of Interface Property  Implementation in a Class
    =========================== ======================================================
+   field                       field, or getter and setter
    readonly field              readonly field, field, getter, or getter and setter
    getter only                 readonly field, field, getter, or getter and setter
-   field                       field, or getter and setter
-   getter and setter           field, or getter and setter
    setter only                 field, setter, or setter and getter
+   getter and setter           field, or getter and setter
    =========================== ======================================================
 
-Providing implementation for a property in the form of a field is not necessary:
-
-.. index::
-   implementation
-   interface
-   class
-   superinterface
-   field
-   getter
-   setter
-   accessor
-   readonly
-
-.. code-block-meta:
+If a property is implemented as a class field, then accessing the field via
+a class instance always means accessing an ordinary class field.
+To provide access to a field via interface instance, additional getter and
+setter are implictly implemented in the class as represented
+in the following example:
 
 .. code-block:: typescript
    :linenos:
 
-    interface Style {
-      get color(): string
-      set color(s: string)
+    interface I {
+        n: number
     }
-
-    class StyleClassOne implements Style {
-      color: string = ""
+    class C implements I {
+        n: number = 1 // property is implemented as a field
     }
+    let c = new C()
+    console.log(c.n) // class field read
+    c.n = 1 // class field write
 
-    class StyleClassTwo implements Style {
-      private color_: string = ""
+    let i: I = c
+    console.log(c.n) // implicitly implemented getter is called
+    i.n = 2          // implicitly implemented setter is called
 
-      get color(): string {
-        return this.color_
-      }
+Implicitly implemented getter and setter for the code above look as follows:
 
-      set color(s: string) {
-        this.color_ = s
-      }
-    }
+.. code-block:: typescript
 
-If a property is implemented as a field, then any required accessors
-and a private hidden field are defined implicitly. Entities for
-``StyleClassOne`` are implicitly defined as follows:
+    get n(): number  { return this.n }
+    set n(x: number) { this.n = x }
+
+As ``this`` in the body of a getter and a setter refers to an instance
+of a class but not of an interface, such ``this.n`` constitutes
+an access to a class field but not a call to a getter or a setter.
+
+An interface property implemented as accessor is represented
+in the example below:
 
 .. code-block:: typescript
    :linenos:
 
-    class StyleClassOne implements Style {
-      private $$_color: string = "" // the exact name of the field is implementation specific
-      get color(): string  { return this.$$_color }
-      set color(s: string) { this.$$_color = s }
+    interface I {
+        n: number
+        readonly r: string
+    }
+    class C implements I {
+        // 'n' is implemented as getter and setter
+        get n(): number  { return 1 }
+        set n(x: number) { /*some body*/ }
+        // 'r' is implemented as getter
+        get r(): string { return "abc" }
+        // a setter can be defined for 'r', but it is not mandatory
+        set r(x: string) { /*some body*/ }
     }
 
-.. index::
-   property
-   interface
-   implementation
-   accessor
-   private field
-   hidden field
-   entity
-   class
-   field
-   string
+A :index:`compile-time error` occurs if
 
-If a property is defined in a form that requires a setter, then the
-implementation of the property in the form of a ``readonly`` field causes a
-:index:`compile-time error`:
+    - Interface property is ``readonly``, and the getter is not defined;
+    - Interface property is not ``readonly``, and either a getter or a setter
+      is not defined.
 
-.. code-block-meta:
-   expect-cte
+The errors are represented in the example below:
 
 .. code-block:: typescript
    :linenos:
 
-    interface Style {
-      set color(s: string)
-      writable: number
+    interface I {
+        n: number
+    }
+    class A implements I { // compile-time error: setter is not defined
+        get n(): number  { return 1 }
+    }
+    class B implements I { // compile-time error: getter is not defined
+        set n(x: number)  {}
+    }
+    class C implements I {
+        get n(): string { return "aa" } // compile-time error: wrong type
     }
 
-    class StyleClassTwo implements Style {
-      readonly color: string = "" // compile-time error
-      readonly writable: number = 0  // compile-time error
+    interface J {
+        readonly r: string
+    }
+    class D implements J { // compile-time error: getter is not defined
+        set r(x: string) {}
     }
 
-    function write_into_read_only (s: Style) {
-      s.color = "Black"
-      s.writable = 42
-    }
-
-    write_into_read_only (new StyleClassTwo)
-
-.. index::
-   implementation
-   setter
-   readonly field
-
-If a property is defined in the ``readonly`` form, then the implementation of
-the property can either keep the ``readonly`` form or extend it to a writable
-form as follows:
+If an interface property is defined in the form of an accessor
+(a getter, a setter, or both) and implemented by a class field, then
+implicit implementation is added to the class but only for the accessors
+defined in the interface. The situation is represented below:
 
 .. code-block:: typescript
    :linenos:
 
-    interface Style {
-      get color(): string
-      readonly readable: number
+    interface I {
+      get n(): number
+    }
+    class C implements I {
+        n: number = 1 // property implemented as a field
+        // getter is implicitly implemented
+        // setter is not implemented
+    }  
+
+    function foo(i: I) {
+      console.log(i.n) // OK, getter is used
+      i.n = 1 // compile-time error: setter is not defined
     }
 
-    class StyleClassThree implements Style {
-      get color(): string { return "Black" }
-      set color(s: string) {} // OK!
-      readable: number = 0  // OK!
+    interface J {
+      get n(): number
+      set n(x: number)
+    }
+    class D implements J {
+        n: number = 1 // property implemented as a field
+        // getter is implicitly implemented
+        // setter is implicitly implemented
+    }  
+
+    function bar(j: J) {
+      console.log(j.n) // OK, getter is used
+      j.n = 1          // OK, setter is used
     }
 
-    function how_to_write (s: Style) {
-      s.color = "Black" // compile-time error
-      s.readable = 42 // compile-time error
-      if (s instanceof StyleClassThree) {
-        let s1 = s as StyleClassThree
-        s1.color = "Black" // OK!
-        s1.readable = 42 // OK!
-      }
+A :index:`compile-time error` occurs if all of the following conditions
+are met:
+
+    - Interface defines both a getter and a setter that have the same name;
+    - Class implements a property by a field;
+    - Return type of a getter and parameter type of a setter are not of the same type.
+
+This situation is represented by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface J {
+      get n(): number
+      set n(x: string)
+    }
+    class D implements J {
+        n: number = 1 // compile-time error: types mismatch
+    }  
+
+If a property defines both a getter and a setter with different types,
+then the property can be implemented by accessors:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface J {
+      get n(): number
+      set n(x: string)
     }
 
-    how_to_write (new StyleClassThree)
+    class E implements J {
+      value: string = ""
+      get n(): number  { return Number.parseFloat(this.value) }
+      set n(x: string) { this.value = x }
+    }
+
+    let e = new E
+    e.n = "123"
+    console.log(e.n) 
+
+If a superclass implements an interface property, then all derived classes
+inherit the property in the same form. A :index:`compile-time error` occurs
+on an attempt to do one of the following:
+
+    - Override a superclass field by an accessor or accessors;
+    - Override a superclass accessor by a field.
+
+Such error situations are represented by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        n: number
+    }
+    class C implements I {
+        n: number = 1
+    }
+    class C1 extends C {
+        get n(): number { return 1 } // compile-time error: 'n' cannot be overridden by an accessor
+    }
+
+    class D implements I {
+        get n(): number { return 1 }
+        set n(x: number) {}
+    }
+    class D1 extends D {
+        n: number = 2 // compile-time error: 'n' cannot be overriden by a field
+    }
+
+A field that implements an interface property can override a field of the same
+type defined in a superclass:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        n: number
+    }
+    class A {
+        n: number = 1
+    }
+    class C extends A implements I {
+        n: number = 2 // ok, 'n' overrides 'n' from A and implements 'n' from I
+    }
+
+A :index:`compile-time error` occurs if types mismatch as represented
+in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        n: number
+    }
+    interface J {
+        n: string
+    }
+    class A implements I, J { // compile-time error: types mismatch
+    }
+
+    class B {
+        n: string = "aa"
+    }
+    class C extends B implements I { // compile-time error: types mismatch
+    }
+    
+    class C implements I {
+        get n(): string { return "aa" } // compile-time error: types mismatch
+    }    
+    
+If a property is defined as ``readonly``, then the implementation of
+the property can either be ``readonly`` or not ``readonly`` as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        readonly r: number
+    }
+    class A implements I {
+        r: number = 0 // OK, the field is writeable
+    }
+    class B implements I {
+        readonly r: number = 1  // OK, the field is readonly
+    }
+
+    function foo(i: I) {
+        i.r = 42 // compile-time error, 'r' is readonly
+        if (i instanceof A) {
+            i.r = 42 // OK, here 'i' is of type A, and 'r' is writeable
+        }
+        if (i instanceof B) {
+         i.r = 42 // compile-time error, here 'i' is of type B, and 'r' is readonly
+        }
+    }
+
+A :index:`compile-time error` occurs if a writeble interface properties is implemented
+as ``readonly`` as represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        r: number
+    }
+    class C implements I {
+        readonly r: number = 1 // compile-time error
+    }
+
+    interface J {
+        readonly r: number
+    }
+    class D implements I, J {
+        readonly r: number = 1 // compile-time error
+    }
+    class E implements I, J {
+        r: number = 1 // OK
+    }
 
 .. index::
    property

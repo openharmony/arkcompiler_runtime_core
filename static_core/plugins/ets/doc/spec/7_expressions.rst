@@ -1711,12 +1711,26 @@ object literal is an anonymous class implicitly created for interface ``I``:
 
     interface Person {
       name: string
-      age: number
+      set surname(s: string)
+      get age(): number
     }
-    let b: Person = {name: "Bob", age: 25}
+    let b: Person = {name: "Bob", surname: "Doe", age: 25}
 
-In the example above, type of *b* is an anonymous class that contains the
-same fields as the interface ``I`` properties.
+In the example above, type of ``b`` is an anonymous class that contains the
+same fields as the interface ``I`` properties. An anonymous class created
+for the example above has the following fields:
+
+    - ``name: string``
+    - ``surname: string``
+    - ``age: number``
+
+If a property is defined as a getter, then the type of a field is the 
+return type of the getter. If a property is defined as a setter, 
+then the type of a field is the type of the parameter.
+If a property is defined as both a getter and a setter, then
+the parameter type of the setter must be the same as the return type
+of the getter. Otherwise, a :index:`compile-time error` occurs, as
+described in :ref:`Implementing Required Interface Properties`.
 
 .. index::
    interface type
