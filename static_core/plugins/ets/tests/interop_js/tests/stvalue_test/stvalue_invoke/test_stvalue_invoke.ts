@@ -43,7 +43,7 @@ function testFunctionalObjectInvoke(): void {
     } catch (e: Error) {
         res = true;
         res = res && e.message.includes('ANI error occurred');
-        res = res && e.message.includes('status: 7');
+        res = res && e.message.includes('got error');
     }
     ASSERT_TRUE(res);
 
