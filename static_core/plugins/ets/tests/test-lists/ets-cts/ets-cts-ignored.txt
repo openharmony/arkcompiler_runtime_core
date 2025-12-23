@@ -1987,9 +1987,6 @@
 17.experimental_features/06.iterable_types/it_11.ets
 17.experimental_features/06.iterable_types/it_12.ets
 
-#18767 Cannot use $_iterator from superclass
-17.experimental_features/06.iterable_types/it_4.ets
-
 #31022
 17.experimental_features/06.iterable_types/it_20.ets
 
