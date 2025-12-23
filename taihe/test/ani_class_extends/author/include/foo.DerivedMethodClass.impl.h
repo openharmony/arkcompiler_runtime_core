@@ -12,26 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <iostream>
+#ifndef TEST_ANI_CLASS_EXTENDS_AUTHOR_INCLUDE_FOO_DERIVEDMETHODCLASS_TEMPLATE_H_
+#define TEST_ANI_CLASS_EXTENDS_AUTHOR_INCLUDE_FOO_DERIVEDMETHODCLASS_TEMPLATE_H_
+// NOLINTBEGIN
 
-#include "foo.DerivedMethodClass.template.hpp"
+#include "taihe/string.hpp"
 
-void DerivedMethodClassImpl::Derived()
-{
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
-}
-
-void DerivedMethodClassImpl::Base()
-{
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
-}
-
-void DerivedMethodClassImpl::Foo()
-{
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
-}
-
-void DerivedMethodClassImpl::Bar()
-{
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
-}
+class DerivedMethodClassImpl {
+public:
+    taihe::string Derived();
+    taihe::string Base();
+    taihe::string Foo();
+    taihe::string Bar();
+};
+// NOLINTEND
+#endif  // TEST_ANI_CLASS_EXTENDS_AUTHOR_INCLUDE_FOO_DERIVEDMETHODCLASS_TEMPLATE_H_

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "foo.impl.hpp"
-#include "foo.DerivedMethodClass.template.hpp"
+#include "foo.DerivedMethodClass.impl.h"
 #include "stdexcept"
 
 namespace {

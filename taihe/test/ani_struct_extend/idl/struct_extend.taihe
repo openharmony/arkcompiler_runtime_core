@@ -71,12 +71,30 @@ struct G {
 @class
 struct H {
     @extends g: G;
-    barh: Bar;
+    barH: Bar;
+}
+
+@class
+struct I {
+    @extends h: H;
+    barI: Bar;
+}
+
+@class
+struct J {
+    @extends i: I;
+    barJ: Bar;
 }
 
 function check_Bar(bar: Bar): bool;
 function check_F(f: F): bool;
 function check_G(g: G): bool;
+function check_H(h: H): bool;
+function check_I(i: I): bool;
+function check_J(j: J): bool;
 function create_Bar(e: E): Bar;
 function create_F(e: E): F;
 function create_G(e: E): G;
+function create_H(e: E): H;
+function create_I(e: E): I;
+function create_J(e: E): J;

@@ -14,14 +14,21 @@
  */
 from mate.bar use BarType;
 from nova use NovaType;
-from test.inner use MyStruct;
+from test.inner use MyStruct, MyClass;
 
 enum PuraType: i32 {
     A = 1,
     B = 2,
 }
 
+@class
+struct PuraClass {
+    @extends u: MyClass;
+    p: i64;
+}
+
 function testBar(bar: BarType): void;
 function testNova(nove: NovaType): void;
 
 function testMyStruct(s: MyStruct): void;
+function testPuraClass(s: PuraClass): void;

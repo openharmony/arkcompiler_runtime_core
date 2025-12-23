@@ -97,6 +97,60 @@ function check_struct_G() {
     arktest.assertEQ(e2.param5, 5);
 }
 
+function check_class_H() {
+    let in_e: StructExtendTest.E = {param4: 4, param5: 5};
+    let h: StructExtendTest.H = StructExtendTest.create_H(in_e);
+    arktest.assertEQ(StructExtendTest.check_H(h), true);
+    let e1: StructExtendTest.E = h.barF.getE();
+    arktest.assertEQ(e1.param4, 4);
+    arktest.assertEQ(e1.param5, 5);
+    let e2: StructExtendTest.E = h.barG.getE();
+    arktest.assertEQ(e2.param4, 4);
+    arktest.assertEQ(e2.param5, 5);
+    let e3: StructExtendTest.E = h.barH.getE();
+    arktest.assertEQ(e3.param4, 4);
+    arktest.assertEQ(e3.param5, 5);
+}
+
+function check_class_I() {
+    let in_e: StructExtendTest.E = {param4: 4, param5: 5};
+    let i: StructExtendTest.I = StructExtendTest.create_I(in_e);
+    arktest.assertEQ(StructExtendTest.check_I(i), true);
+    let e1: StructExtendTest.E = i.barF.getE();
+    arktest.assertEQ(e1.param4, 4);
+    arktest.assertEQ(e1.param5, 5);
+    let e2: StructExtendTest.E = i.barG.getE();
+    arktest.assertEQ(e2.param4, 4);
+    arktest.assertEQ(e2.param5, 5);
+    let e3: StructExtendTest.E = i.barH.getE();
+    arktest.assertEQ(e3.param4, 4);
+    arktest.assertEQ(e3.param5, 5);
+    let e4: StructExtendTest.E = i.barI.getE();
+    arktest.assertEQ(e4.param4, 4);
+    arktest.assertEQ(e4.param5, 5);
+}
+
+function check_class_J() {
+    let in_e: StructExtendTest.E = {param4: 4, param5: 5};
+    let j: StructExtendTest.J = StructExtendTest.create_J(in_e);
+    arktest.assertEQ(StructExtendTest.check_J(j), true);
+    let e1: StructExtendTest.E = j.barF.getE();
+    arktest.assertEQ(e1.param4, 4);
+    arktest.assertEQ(e1.param5, 5);
+    let e2: StructExtendTest.E = j.barG.getE();
+    arktest.assertEQ(e2.param4, 4);
+    arktest.assertEQ(e2.param5, 5);
+    let e3: StructExtendTest.E = j.barH.getE();
+    arktest.assertEQ(e3.param4, 4);
+    arktest.assertEQ(e3.param5, 5);
+    let e4: StructExtendTest.E = j.barI.getE();
+    arktest.assertEQ(e4.param4, 4);
+    arktest.assertEQ(e4.param5, 5);
+    let e5: StructExtendTest.E = j.barJ.getE();
+    arktest.assertEQ(e5.param4, 4);
+    arktest.assertEQ(e5.param5, 5);
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite("struct extend ut")
     suite.addTest("check struct A", check_struct_A)
@@ -105,7 +159,10 @@ function main() {
     suite.addTest("check struct D", check_struct_D)
     suite.addTest("check struct E", check_struct_E)
     suite.addTest("check class bar", check_class_Bar)
-    suite.addTest("check struct F", check_class_Bar)
-    suite.addTest("check struct G", check_class_Bar)
+    suite.addTest("check struct F", check_struct_F)
+    suite.addTest("check struct G", check_struct_G)
+    suite.addTest("check class H", check_class_H)
+    suite.addTest("check class I", check_class_I)
+    suite.addTest("check class J", check_class_J)
     exit(suite.run())
 }

@@ -126,6 +126,21 @@ bool check_G(::struct_extend::G const &g)
     return true;
 }
 
+bool check_H(::struct_extend::H const &h)
+{
+    return true;
+}
+
+bool check_I(::struct_extend::I const &i)
+{
+    return true;
+}
+
+bool check_J(::struct_extend::J const &j)
+{
+    return true;
+}
+
 ::struct_extend::Bar create_Bar(::struct_extend::E const &e)
 {
     return make_holder<Bar, ::struct_extend::Bar>(e);
@@ -147,6 +162,33 @@ bool check_G(::struct_extend::G const &g)
     };
     return g;
 }
+
+::struct_extend::H create_H(::struct_extend::E const &e)
+{
+    ::struct_extend::H h{
+      .g = create_G(e),
+      .barH = make_holder<Bar, ::struct_extend::Bar>(e),
+    };
+    return h;
+}
+
+::struct_extend::I create_I(::struct_extend::E const &e)
+{
+    ::struct_extend::I i{
+      .h = create_H(e),
+      .barI = make_holder<Bar, ::struct_extend::Bar>(e),
+    };
+    return i;
+}
+
+::struct_extend::J create_J(::struct_extend::E const &e)
+{
+    ::struct_extend::J j{
+      .i = create_I(e),
+      .barJ = make_holder<Bar, ::struct_extend::Bar>(e),
+    };
+    return j;
+}
 }  // namespace
 
 // because these macros are auto-generate, lint will cause false positive.
@@ -165,7 +207,13 @@ TH_EXPORT_CPP_API_getBar(getBar);
 TH_EXPORT_CPP_API_check_Bar(check_Bar);
 TH_EXPORT_CPP_API_check_F(check_F);
 TH_EXPORT_CPP_API_check_G(check_G);
+TH_EXPORT_CPP_API_check_H(check_H);
+TH_EXPORT_CPP_API_check_I(check_I);
+TH_EXPORT_CPP_API_check_J(check_J);
 TH_EXPORT_CPP_API_create_Bar(create_Bar);
 TH_EXPORT_CPP_API_create_F(create_F);
 TH_EXPORT_CPP_API_create_G(create_G);
+TH_EXPORT_CPP_API_create_H(create_H);
+TH_EXPORT_CPP_API_create_I(create_I);
+TH_EXPORT_CPP_API_create_J(create_J);
 // NOLINTEND
