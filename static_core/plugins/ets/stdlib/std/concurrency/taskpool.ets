@@ -505,11 +505,16 @@ export namespace taskpool {
         tryTriggerRunner(): void {
             // handle sequenceRunner
             if (this.seqId != 0) {
-                if (this.runnerImpl.tasks.length == 0) {
-                    this.runnerImpl.isRunning = false;
-                } else {
-                    let nextTask = this.runnerImpl.tasks.shift();
-                    InternalTask.of(nextTask!).enqueue(this.runnerImpl.priority);
+                ConcurrencyHelpers.mutexLock(this.runnerImpl.stateMutex);
+                try {
+                    if (this.runnerImpl.tasks.length == 0) {
+                        this.runnerImpl.isRunning = false;
+                    } else {
+                        let nextTask = this.runnerImpl.tasks.shift();
+                        InternalTask.of(nextTask!).enqueue(this.runnerImpl.priority);
+                    }
+                } finally {
+                    ConcurrencyHelpers.mutexUnlock(this.runnerImpl.stateMutex);
                 }
             }
 
@@ -960,11 +965,14 @@ export namespace taskpool {
         constructor(id: int) {
             this.id = id;
             this.seqPromise = Promise.resolve<Any>(new Object());
+            this.tasks = new Array<Task>();
+            this.stateMutex = ConcurrencyHelpers.mutexCreate();
         }
 
         priority: Priority;
         isRunning: Boolean = false;
         tasks: Array<Task>;
+        stateMutex: Object;
 
         readonly id: int;
         seqPromise: Promise<Any>;
@@ -984,7 +992,6 @@ export namespace taskpool {
         constructor(name: string, priority?: Priority) {
             this.impl = SequenceRunner.getOrCreateSeqRunnerImpl(name);
             this.impl.priority = priority === undefined ? Priority.MEDIUM : priority;
-            this.impl.tasks = new Array<Task>();
         }
 
         execute(task: Task): Promise<Any> {
