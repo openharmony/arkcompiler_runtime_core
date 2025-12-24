@@ -150,8 +150,7 @@ Predefined types include the following:
 -  :ref:`Type Any`;
 -  :ref:`Type Object`;
 -  :ref:`Type never`;
--  :ref:`Type void`;
--  :ref:`Type undefined`;
+-  :ref:`Types void or undefined`;
 -  :ref:`Type null`;
 -  :ref:`Type string`;
 -  :ref:`Type bigint`;
@@ -1049,8 +1048,7 @@ Reference Types
 -  :ref:`Type bigint`;
 -  :ref:`Type never`;
 -  :ref:`Type null`;
--  :ref:`Type undefined`;
--  :ref:`Type void`; and
+-  :ref:`Types void or undefined`; and
 -  :ref:`Type Parameters`.
 
 .. index::
@@ -1105,7 +1103,7 @@ Type ``Any``
 
 Type ``Any`` is a predefined type which is the supertype of all types. Type
 ``Any`` is a predefined *nullish-type* (see :ref:`Nullish Types`), i.e., a
-supertype of :ref:`Type void` and :ref:`Type null` in particular.
+supertype of :ref:`Types void or undefined` and :ref:`Type null` in particular.
 
 Type ``Any`` has no methods or fields.
 
@@ -1124,9 +1122,9 @@ Type ``Object``
     frontend_status: Done
 
 Type ``Object`` is a predefined class type which is the supertype
-(see :ref:`Subtyping`) of all types except :ref:`Type void`,
-:ref:`Type undefined`, :ref:`Type null`, :ref:`Nullish Types`,
-:ref:`Type Parameters`, and :ref:`Union types` that contain type parameters.
+(see :ref:`Subtyping`) of all types except :ref:`Types void or undefined`,
+:ref:`Type null`, :ref:`Nullish Types`, :ref:`Type Parameters`, and
+:ref:`Union types` that contain type parameters.
 Type ``Object`` is a subtype of type ``Any`` (see :ref:`Type Any`).
 All subtypes of ``Object`` inherit all methods of class ``Object`` (see
 :ref:`Inheritance`). All methods of class ``Object`` are described in full in
@@ -1206,13 +1204,37 @@ Type ``never`` has no instance. Type ``never`` is used as one of the following:
 
 |
 
-.. _Type void:
+.. _Types void or undefined:
 
-Type ``void``
-*************
+Types ``void`` or ``undefined``
+********************************
 
 .. meta:
     frontend_status: Done
+
+Type names ``void`` and ``undefined`` in fact refer to the same type with the
+single value named ``undefined`` (see :ref:`Undefined Literal`). 
+
+.. code-block:: typescript
+   :linenos:
+
+    function f1 (): void {
+        return undefined // OK
+    } 
+
+    function f2 (): undefined {
+        return // OK
+    } 
+
+    function f3 () {
+        return undefined // OK
+    } 
+
+    let v: void = undefined
+    let u: undefined = undefined
+    v = u // OK
+    u = v // OK
+
 
 Type ``void`` is used typically as a return type to highlight that a function, a method,
 or a lambda can contain :ref:`Return Statements` with no expression, or no
@@ -1233,37 +1255,6 @@ return statement at all:
 
     let funcTypeVariable: FunctionWithNoParametersType = (): void => {}
 
-At the same time type ``void`` is an ordinary type which can be used as
-arbitrary type annotation. Type ``void`` is a supertype of type ``undefined``
-(see :ref:`Type undefined`) and it implies the :ref:`Assignability` as follows:
-
-.. code-block-meta:
-   expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-    let x1: void = undefined // OK as undefined is a subtype of void
-    let x2: void = bar()     // OK
-    let x3: void = foo()     // OK
-    let x4       = foo()     // OK
-
-    function bar (): void {
-       return undefined    // OK as undefined is a subtype of void
-    }
-    function foo () {} // return type is void
-    
-
-.. index::
-   void type
-   undefined type
-   lambda
-   instance
-   supertype
-   value
-   return type
-   function
-   method
 
 Type ``void`` can be used as a type argument that instantiates a generic type,
 function, or method as follows:
@@ -1279,15 +1270,13 @@ function, or method as follows:
       m(): T { return this.f }
       constructor (f: T) { this.f = f }
    }
-   let a1 = new A<void>(undefined)      // ok, as undefined is a subtype of void
+   let a1 = new A<void>(undefined)      // ok, as undefined and void are the same type
    let a2 = new A<undefined>(undefined) // ok
-   let a3 = new A<void>(void)           // compile-time error: void is used as value
 
    console.log (a1.f, a2.m()) // Output is "undefined" "undefined"
 
    function foo<T>(p: T): T { return p }
    foo<void>(undefined) // ok, it returns 'undefined' value
-   foo<void>(void)      // compile-time error: void is used as value
 
    type F1<T> = () => T
    const f1: F1<void> = (): void => {}
@@ -1310,20 +1299,6 @@ function, or method as follows:
    generic type
    undefined type
 
-|
-
-.. _Type undefined:
-
-Type ``undefined``
-******************
-
-.. meta:
-    frontend_status: Done
-
-The only value of type ``undefined`` is the literal ``undefined`` (see
-:ref:`Undefined Literal`).
-
-Type ``undefined`` is a subtype of type ``void`` (see :ref:`Type void`).
 
 Using type ``undefined`` as type annotation is not recommended, except in
 nullish types (see :ref:`Nullish Types`).
@@ -1354,7 +1329,6 @@ type as follows:
    annotation
    nullish type
 
-|
 
 .. _Type null:
 

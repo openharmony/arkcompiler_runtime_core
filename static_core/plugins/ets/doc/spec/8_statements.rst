@@ -187,7 +187,7 @@ until a return occurs (see :ref:`Return Statements`).
 If a block is the body of a ``functionDeclaration`` (see
 :ref:`Function Declarations`) or a ``classMethodDeclaration`` (see
 :ref:`Method Declarations`) declared implicitly or explicitly with
-return type ``void`` (see :ref:`Type void`), then the block can contain no
+return type ``void`` (see :ref:`Types void or undefined`), then the block can contain no
 return statement at all. Such a block is equivalent to one that ends in a
 ``return`` statement, and is executed accordingly.
 
@@ -927,13 +927,13 @@ following:
 - Initializer block;
 - Constructor body;
 - Function, method, or lambda body with return type ``void`` (see
-  :ref:`Type void`);
+  :ref:`Types void or undefined`);
 
 A :index:`compile-time error` occurs if a ``return`` statement is found in:
 
 -  Top-level statements (see :ref:`Top-Level Statements`);
--  Functions or methods with return type ``void`` (see :ref:`Type void`)
-   that have an expression;
+-  Functions or methods with return type ``void`` (see
+   :ref:`Types void or undefined`) that have an expression;
 -  Functions or methods with a non-``void`` return type that have no
    expression.
 

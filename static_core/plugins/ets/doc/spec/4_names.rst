@@ -1700,11 +1700,11 @@ The syntax of *return type* is presented below:
         ':' (type | 'this')
         ;
 
-If a function, a method, or a lambda return type is other than ``void`` (see
-:ref:`Type void`) or ``undefined`` (see :ref:`Type undefined`), and the
-execution path in the function, method, or lambda body has neither a
-``return`` statement (see :ref:`Return Statements`) nor a ``throw`` statement
-(see :ref:`Throw Statements`), then a :index:`compile-time error` occurs.
+If a function, a method, or a lambda return type is other than ``void`` or
+``undefined`` (see :ref:`Types void or undefined`) , and the execution path in
+the function, method, or lambda body has neither a ``return`` statement (see
+:ref:`Return Statements`) nor a ``throw`` statement (see
+:ref:`Throw Statements`), then a :index:`compile-time error` occurs.
 
 If a function, a method, or a lambda return type is ``never`` (see
 :ref:`Type never`), and there is an execution path in which all statements
@@ -1717,7 +1717,7 @@ be used in class instance methods only (see :ref:`Methods Returning this`).
 If a function, a method, or a lambda return type is not specified, then it is
 inferred from its body (see :ref:`Return Type Inference`). If there is no body,
 then the function, method, or lambda return type is ``void`` (see
-:ref:`Type void`).
+:ref:`Types void or undefined`).
 
 
 .. code-block:: typescript

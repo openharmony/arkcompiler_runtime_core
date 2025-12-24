@@ -1680,9 +1680,9 @@ The current version of |LANG| allows inferring return types at least under
 the following conditions:
 
 -  If there is no return statement, or if all return statements have no
-   expressions, then the return type is ``void`` (see :ref:`Type void`). It
-   effectively implies that a call to a function, method, or lambda returns
-   the value ``undefined``.
+   expressions, then the return type is ``void`` (see
+   :ref:`Types void or undefined`). It effectively implies that a call to a
+   function, method, or lambda returns the value ``undefined``.
 -  If there are *k* return statements (where *k* is 1 or more) with
    the same type expression *R*, then ``R`` is the return type.
 -  If there are *k* return statements (where *k* is 2 or more) with

@@ -1832,8 +1832,8 @@ Entry point functions have the following features:
 - Entry point function must either have no parameters, or have one parameter of
   type ``string[]`` that provides access to the arguments of a program command
   line;
-- Entry point function return type is either ``void`` (see :ref:`Type void`) or
-  ``int``;
+- Entry point function return type is either ``void`` (see
+  :ref:`Types void or undefined`) or ``int``;
 - Entry point function cannot be overloaded;
 - Entry point function is called ``main`` by default.
 

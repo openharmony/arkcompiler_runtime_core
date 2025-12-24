@@ -7619,10 +7619,12 @@ If a *lambda body* is a single ``expression``, then it is handled as follows:
 
 -  Otherwise, the body is equivalent to the block: ``{ return expression }``.
 
-If *lambda signature* return type is not ``void`` (see :ref:`Type void`) or
-``never`` (see :ref:`Type never`), and the execution path of the lambda body
-has no return statement (see :ref:`Return Statements`) or no single expression
-as a body, then a :index:`compile-time error` occurs.
+If *lambda signature* return type is neither ``void`` (see
+:ref:`Types void or undefined`) nor ``never`` (see :ref:`Type never`), and the
+execution path of the lambda body has neither a return statement (see
+:ref:`Return Statements`) nor a single expression as a body, then a
+:index:`compile-time error` occurs.
+
 
 .. index::
    lambda body
