@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@ desc: >-
     A return statement may be used in the body of a constructor if it
     does not include an expression.
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0033: Return statement with expression isn't allowed in constructor.
+    Syntax error ESY0227: Unexpected token 'void'.
 ---*/
 
 class A {
@@ -25,6 +28,6 @@ class A {
 
     public constructor() {
         this.x = 5;
-        return this;
+        return void;
     }
 }

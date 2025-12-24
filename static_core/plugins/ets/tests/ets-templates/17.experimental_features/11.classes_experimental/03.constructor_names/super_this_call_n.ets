@@ -14,27 +14,32 @@ limitations under the License.
 ---*/
 
 /*---
-desc: If the compiler detects a circular reference, then a compile-time error occurs.
+desc: >-
+    A constructor body can have no more than one call to the current
+    class or direct superclass constructor
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0201: Call to 'this' must be first statement in constructor
 ---*/
 
 class A {
-    public str: string
-    public num: number
+    public i: int
 
-    constructor() {
-        this.str = ''
-        this.num = 0
-        this.fromString(this.str)
+    public constructor(i: int) {
+        this.i = i
+    }
+}
+
+class B extends A {
+    public s: string
+
+    public constructor fromString(s: string) {
+        super(1)
+        this.s = s
     }
 
-    constructor fromString(s: string) {
-        this.str = s
-        this.fromNumber(2.0)
-    }
-
-    constructor fromNumber(n: number) {
-        this.num = n
-        this()  // CTE: circular ref
+    public constructor() {
+        super(123)
+        this.fromString("Just a test") // CTE: second call to this constructor
     }
 }

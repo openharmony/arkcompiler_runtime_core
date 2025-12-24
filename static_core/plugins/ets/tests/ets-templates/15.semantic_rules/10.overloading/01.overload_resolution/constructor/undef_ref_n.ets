@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
+{%- for c in cases %}
+
 /*---
-desc: >-
-    A return statement may be used in the body of a constructor if it
-    does not include an expression.
+desc: |-
+    A compile-time error also occurs if a name referred by qualifiedName is one of the following:
+    - Undefined or inaccessible;
 tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out}}
 ---*/
 
-class A {
-    public x: int;
+{{c.decl}}
 
-    public constructor() {
-        this.x = 5;
-        return void;
-    }
+function main() {
+    {{ (c.main or '') | indent }}
 }
+{%- endfor %}

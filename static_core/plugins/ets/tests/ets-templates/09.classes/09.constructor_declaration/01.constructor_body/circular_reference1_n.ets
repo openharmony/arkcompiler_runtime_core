@@ -14,29 +14,29 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    A constructor body can have no more than one call to the current
-    class or direct superclass constructor
+desc: If the compiler detects a circular reference, then a compile-time error occurs.
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0309: Recursive constructor invocation
 ---*/
 
 class A {
-    public i: int
+    public str: string = ''
+    public num: number = 0
 
-    public constructor(i: int) {
-        this.i = i
-    }
-}
-
-class B extends A {
-    public s: string
-
-    public constructor fromString(s: string) {
-        this.s = s
+    constructor() {
+        this('abc')
+        this.str = ''
+        this.num = 0
     }
 
-    public constructor() {
-        super(123)
-        this.fromString("Just a test") // CTE: second call to this constructor
+    constructor(s: string) {
+        this(2.0)
+        this.str = s
+    }
+
+    constructor(n: number) {
+        this()  // CTE: circular ref
+        this.num = n
     }
 }

@@ -19,6 +19,8 @@ assert: >-
     The first statement of a constructor body may be an explicit invocation of another constructor of the same class
     or of the direct superclass.
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0192: Must call super constructor
 ---*/
 
 class A {
@@ -31,9 +33,6 @@ class A {
 
 class B extends A {
     constructor() {
-        if (true) {
-            this(42)
-        }
         // CTE: Must call super constructor
     }
 

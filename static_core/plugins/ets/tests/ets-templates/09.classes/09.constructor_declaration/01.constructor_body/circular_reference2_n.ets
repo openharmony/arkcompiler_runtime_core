@@ -14,21 +14,21 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Invocation constructor of superclass.
-assert: >-
-    The first statement of a constructor body may be an explicit invocation of another constructor of the same class
-    or of the direct superclass.
+desc: If the compiler detects a circular reference, then a compile-time error occurs.
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0309: Recursive constructor invocation
 ---*/
 
 class A {
-    public x: int
+    public str: string
 
-    public constructor(a: int) {
-        this.x = a
+    constructor() {
+        this('')
     }
-}
 
-class B extends A {
-    // CTE: Must call super constructor
+    constructor(s: string) {
+        this()  // CTE: circular ref
+        this.str = s
+    }
 }

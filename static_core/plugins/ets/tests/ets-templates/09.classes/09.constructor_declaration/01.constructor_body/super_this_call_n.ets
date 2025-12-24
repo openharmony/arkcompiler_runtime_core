@@ -14,23 +14,32 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Invocation constructor of superclass.
-assert: >-
-    The first statement of a constructor body may be an explicit invocation of another constructor of the same class
-    or of the direct superclass.
+desc: >-
+    A constructor body can have no more than one call to the current
+    class or direct superclass constructor
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0201: Call to 'this' must be first statement in constructor
 ---*/
 
 class A {
-    public x: int
+    public i: int
 
-    public constructor(a: int) {
-        this.x = a
+    public constructor(i: int) {
+        this.i = i
     }
 }
 
 class B extends A {
+    public s: string
+
+    public constructor(s: string) {
+        super(1)
+        this.s = s
+    }
+
     public constructor() {
-        // CTE: Must call super constructor
+        super(123)
+        this("Just a test") // CTE: second call to this constructor
     }
 }
