@@ -38,6 +38,10 @@ export interface ArrayBufferView {
  */
 export class ArrayBuffer
 {
+    toString(): String {
+        return "[object ArrayBuffer]";
+    }
+    
     public overload constructor { fromInt, fromNumber }
 
     /**

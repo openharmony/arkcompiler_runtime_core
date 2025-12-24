@@ -31,6 +31,10 @@ export final class WeakMap<K extends Object, V> {
     private static readonly KEY = 0
     private static readonly VAL = 1
 
+    toString(): String {
+        return "[object WeakMap]";
+    }
+
     /**
      * The WeakMap() constructor creates WeakMap objects.
      */
