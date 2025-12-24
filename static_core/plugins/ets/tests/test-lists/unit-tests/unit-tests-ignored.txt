@@ -30,7 +30,6 @@ ets-common-tests/atomics/base_operation_xor.ets
 ets-common-tests/atomics/base_operation_load.ets
 ets-common-tests/atomics/base_operation_compare_exchange.ets
 ets-common-tests/taskpool/long_task.ets
-ets-common-tests/taskpool/seqrunner_tasks.ets
 
 # 24986
 ets-common-tests/generics/generics_methods.ets
