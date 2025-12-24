@@ -23,6 +23,14 @@ params: >
 tags: [compile-only,negative]
 ---*/
 
+class T {}
+
+class T2<Z> {}
+
+class T3<Z> {}
+
+class T4<Z> {}
+
 {{cm}} class A<{{sd}}> {}
 
 {% endfor %}

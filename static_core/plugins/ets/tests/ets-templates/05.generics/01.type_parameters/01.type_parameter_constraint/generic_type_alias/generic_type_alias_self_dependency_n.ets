@@ -25,6 +25,15 @@ tags: [compile-only,negative]
 class SomeType {}
 type T = SomeType
 
+class SomeType2<Z> {}
+type T2<Z> = SomeType2<Z>
+
+class SomeType3<Z> {}
+type T3<Z> = SomeType3<Z>
+
+class SomeType4<Z> {}
+type T4<Z> = SomeType4<Z>
+
 {{cm}} class A<{{sd}}> {}
 
 {% endfor %}
