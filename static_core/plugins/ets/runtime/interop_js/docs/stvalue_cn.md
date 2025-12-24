@@ -105,6 +105,43 @@ let b2 = STValue.wrapBoolean(false);
 let b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]); // BooleanInvoke(b1: boolean, b2: boolean): boolean
 ```
 ---
+### 其它注意事项
+
+**1.如何通过STValue调用Ark-Sta内的处理静态数据的JSON.stringify()方法并将序列化的结果返回?**
+
+简单示例如下所示，其中主要步骤包括：
+- 通过命名空间获取实例变量student
+- 通过`findClass()`来定位获取JSON类
+- 通过`classInvokeStaticMethod()`调用了JSON类的静态方法`stringify()`来转换对应Ark-Sta中的实例对象student，其中`stringify()`结果是包装了String类型的STValue对象
+- 最后将返回的包装对象拆包为String类型。
+
+```typescript
+// ArkTS-Dyn
+let tns = STValue.findNamespace('stvalue_test.testNameSpace');
+let student = tns.namespaceGetVariable('student', SType.REFERENCE);
+let JOSNCls = STValue.findClass("escompat.JSON");
+// 调用stringify，函数签名表示入参为Object类型，返回值为String类型
+let stringfyRes = JSONCls.classInvokeStaticMethod('stringify', 'C{std.core.Object}:C{std.core.String}', [student]);
+let str = stringfyRes.unwrapToString(); // {"name":"student"}
+```
+
+```typescript
+// stvalue_test.ets ArkTS-Sta
+export class Student {
+    name: string;
+    constructor(n: string) {
+        this.name = n;
+    }
+}
+export namespace testNameSpace {
+    export let student: Student = new Student('student');
+}
+```
+**2.SType使用注意事项**
+
+在STValue中使用接口的时候会涉及到SType的使用，需要注意的是，SType的枚举值需要与对应的类型相对应，例如在`enumGetValueByName(memberName: string, valueType: SType)`（通过枚举名获取枚举值）中，第二个入参需要传入与枚举值相同的类型，如果枚举值为int，则应该传入**SType.INT**。同时如果SType对应的值为引用类型，如String，Array以及类实例等，则对应类型则为**SType.REFERENCE**。
+
+---
 ## 1 STValue_accessor
 
 ### 1.1 findClass
@@ -113,20 +150,20 @@ let b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]); // Boole
 
 用于根据ArkTS-Sta类名查找类定义，接受一个类的全限定路径字符串作为参数，返回封装了该类的STValue对象。
 
-**参数:**
+**参数：**
 
 | 参数名 |  类型  | 必填 |     说明     |
 | :----: | :----: | :--: | :----------: |
 |  desc  | string |  是  | 类全限定路径 |
 
-**返回值:**
+**返回值：**
 
 |  类型   |          说明           |
 | :-----: | :---------------------: |
 | STValue | 封装了该类的STValue对象 |
 
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -139,20 +176,20 @@ export class Student {}
 ```
 **报错异常：**
 
-当传入的路径不符合类描述符规范时（例如类名格式错误，类名包含非法字符等），报错`类名格式无效`；默认类加载器未找到类时，报错`查找失败`；遇到除`查找失败`之外的错误时，报错其它类型的错误。
+当调用时传入了的参数数量不为1时，产生编译错误`参数数量错误`；当传入的路径不符合类描述符规范时（例如类名格式错误，类名包含非法字符等），抛出运行错误`类名无效`；默认类加载器未找到类时，抛出运行错误`查找失败`；遇到除`查找失败`之外的错误时，抛出其它类型的运行错误异常。
 
 示例：
 ```typescript
 try{
-    // Illegal characters
-    let studentCls = STValue.findClass('stvalue_accessor.Student#');
-}catch(e){
-    // Throw Error
-    console.log(e.message); //
+    // Invalid Class
+    let klass = STValue.findClass('stvalue_accessor/Animal');
+}catch (e: Error){
+    // Throw Error 
+    console.log(e.message); 
 }
+// FindClass failed, invalid className: className=stvalue_accessor/Animal, aniStatus=4
 ```
 ---
-
 
 ### 1.2 findNamespace
 
@@ -160,19 +197,19 @@ try{
 
 用于根据名称查找命名空间，接受一个字符串参数（命名空间的全限定路径），返回表示该命名空间的STValue对象。
 
-**参数:**
+**参数：**
 
 | 参数名 |  类型  | 必填 |        说明        |
 | :----: | :----: | :--: | :----------------: |
 |  desc  | string |  是  | 命名空间全限定路径 |
 
-**返回值:**
+**返回值：**
 
 |  类型   |            说明             |
 | :-----: | :-------------------------: |
 | STValue | 代表该命名空间的STValue对象 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -185,17 +222,18 @@ export namespace MyNamespace {}
 ```
 **报错异常：**
 
-当传入的命名空间路径不符合规范时（例如格式错误，命名空间名包含非法字符等），报错`命名空间名格式无效`;未找到命名空间时，报错`查找失败`；遇到除`查找失败`之外的错误时，报错其它类型的错误。
+当调用时传入了的参数数量不为1时，产生编译错误`参数数量错误`；当传入的命名空间路径不符合规范时（例如格式错误，命名空间名包含非法字符等），抛出运行错误`命名空间名无效`;未找到命名空间时，抛出运行错误`查找失败`；遇到除`查找失败`之外的错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try{
-    // Illegal characters
-    let exampleNs = STValue.findNamespace('stvalue_accessor.Namespace#');
-}catch(e){
-    // Throw Error
-    console.log(e.message);
+    // Invalid Namespace
+    let exampleNs = STValue.findNamespace('stvalue_accessor.Namespace#'); 
+}catch (e: Error){
+    // Throw Error 
+    console.log(e.message);  
 }
+// FindNamespace failed, invalid namespaceName: namespaceName=stvalue_accessor.Namespace#, aniStatus=4
 ```
 ---
 
@@ -205,18 +243,18 @@ try{
 
 用于根据名称查找枚举类型定义，接受一个字符串参数（枚举的全限定路径），返回表示该枚举的STValue对象。如果枚举不存在或参数错误，会抛出异常。
 
-**参数:**
+**参数：**
 
 | 参数名 |  类型  | 必填 |      说明      |
 | :----: | :----: | :--: | :------------: |
 |  desc  | string |  是  | 枚举全限定路径 |
 
-**返回值:**
+**返回值：**
 |  类型   |          说明           |
 | :-----: | :---------------------: |
 | STValue | 代表该枚举的STValue对象 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -233,17 +271,18 @@ export enum COLOR {
 
 **报错异常：**
 
-当传入的枚举路径不符合规范（例如格式错误，枚举名包含非法字符等），报错`枚举名格式无效`;未找到枚举时，报错 `查找失败`；遇到除`查找失败`之外的错误时，报错其它类型错误。
+当调用时传入了的参数数量不为1时，产生编译错误`参数数量错误`；当传入的枚举路径不符合规范（例如格式错误，枚举名包含非法字符等），抛出运行错误`枚举名无效`;未找到枚举时，抛出运行错误 `查找失败`；遇到除`查找失败`之外的错误时，抛出其它类型运行错误异常。
 
-示例:
+示例：
 ```typescript
 try{
-    // Illegal characters
-    let testEnum = STValue.findEnum('stvalue_accessor.COLOR#');
-}catch(e){
-    // Throw Error
+    // Invalid Enum
+    let testEnum = STValue.findEnum('stvalue_accessor.COLOR#'); 
+}catch (e: Error){
+    // Throw Error 
     console.log(e.message);
 }
+// FindEnum failed, invalid enumName: enumName=stvalue_accessor.COLOR#, aniStatus=4
 ```
 ---
 
@@ -253,15 +292,15 @@ try{
 
 用于获取类的父类定义，不接受任何参数，返回表示父类的STValue对象。如果当前类没有父类（如Object类），会返回null；如果`this`不是类，则会抛出异常。
 
-**参数:** 无
+**参数：** 无
 
-**返回值:**
+**返回值：**
 
 |  类型   |         说明          |
 | :-----: | :-------------------: |
 | STValue | 代表父类的STValue对象 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -281,20 +320,20 @@ export class Dog extends Animal {
 
 **报错异常：**
 
-当调用时传入了参数（参数数量不为0），报错`参数数量错误`；当`this`不是有效的对象时，报错`非法对象`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的对象时，抛出运行错误`非法实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Illegal Object
+    // Invalid Instance
     let nonClass = STValue.wrapInt(111);
     let resClass = nonClass.classGetSuperClass();
-} catch (e) {
+} catch (e: Error) {
     // Throw Error
     console.log(e.message);
 }
+// 'this' STValue instance does not wrap a value of type reference
 ```
-
 ---
 
 ### 1.5 fixedArrayGetLength
@@ -303,15 +342,15 @@ try {
 
 用于获取固定长度数组的元素数量，不接受任何参数，返回表示数组长度的数字值。如果调用对象不是固定长度数组类型，会抛出异常。
 
-**参数:** 无
+**参数：** 无
 
-**返回值:**
+**返回值：**
 
 |  类型  |   说明   |
 | :----: | :------: |
 | number | 数组长度 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -329,40 +368,41 @@ export namespace testNameSpace {
 
 **报错异常：**
 
-当调用时传入了参数（参数数量不为0），报错`参数数量错误`；当`this`不是有效的固定数组对象时，报错`非法对象`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的固定数组对象时，抛出运行错误`非法实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    strArray.fixedArrayGetLength(11);
+    // Invalid Instance
+    STValue.wrapInt(1).fixedArrayGetLength();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
 ### 1.6 enumGetIndexByName
 
-`enumGetIndexByName(name: string): number`
+`enumGetIndexByName(memberName: string): number`
 
 用于根据枚举成员名称查询其在枚举中的索引位置，接受一个字符串参数（成员名称），返回表示该成员索引的数字值。如果成员不存在或参数错误，会抛出异常。
 
 
-**参数:**
+**参数：**
 
 | 参数名 |  类型  | 必填 |   说明   |
 | :----: | :----: | :--: | :------: |
-|  name  | string |  是  | 枚举名称 |
+|  memberName  | string |  是  | 枚举名称 |
 
-**返回值:**
+**返回值：**
 
 |  类型  |   说明   |
 | :----: | :------: |
 | number | 枚举索引 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -379,44 +419,45 @@ export enum COLOR{
 ```
 **报错异常：**
 
-当调用时传入的参数数量不为1，报错`参数数量错误`；当传入的参数不是有效字符串时，报错`参数类型错误`；当`this`不是有效的枚举对象时，报错`非法枚举对象`；未找到对应的枚举项时，报错`枚举不存在`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入的参数不是有效字符串时，抛出运行错误`参数类型错误`；当`this`不是有效的枚举对象时，抛出运行错误`非法实例对象`；未找到对应的枚举项时，抛出运行错误`枚举不存在`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    colorEnum.enumGetIndexByName('Black', SType.INT);
+    // Invalid Argument Type
+    colorEnum.enumGetIndexByName(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param are not string type; param=memberName
 ```
 ---
 
 ### 1.7 enumGetValueByName
 
-`enumGetValueByName(name: string, valueType: SType): STValue`
+`enumGetValueByName(memberName: string, valueType: SType): STValue`
 
-用于根据成员名称获取枚举成员的值，接受两个参数：成员名称和值类型，返回对应值的STValue对象。支持整型和字符串类型的枚举值，如果成员不存在、类型不匹配或参数错误，会抛出异常。
+用于根据成员名称获取枚举成员的值，接受两个参数：成员名称和值类型，返回对应值的STValue对象，其中对应传入的类型枚举SType需符合枚举成员的值类型。支持整型和字符串类型的枚举值，如果成员不存在、类型不匹配或参数错误，会抛出异常。
 
-**参数:**
+**参数：**
 
 |  参数名   |  类型  | 必填 |    说明    |
 | :-------: | :----: | :--: | :--------: |
-|   name    | string |  是  |  枚举名称  |
+|   memberName    | string |  是  |  枚举名称  |
 | valueType | SType  |  是  | 枚举值类型 |
 
-**返回值:**
+**返回值：**
 
 |  类型   |        说明         |
 | :-----: | :-----------------: |
 | STValue | 枚举值的STValue对象 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
-let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');
+let colorEnum = STValue.findEnum('stvalue_accessor.COLOR');  
 let redValue = colorEnum.enumGetValueByName('Red', SType.INT);
 // 获取的枚举值是一个STValue对象，需要拆箱获取对应primitive值
 let unwrapRedValue = redValue.unwrapToNumber(); // 1
@@ -432,40 +473,42 @@ export enum COLOR{
 
 **报错异常：**
 
-当调用时传入的参数数量不为2，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的枚举对象时，报错`非法枚举对象`；未找到对应的枚举项时，报错`枚举不存在`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为2时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的枚举对象时，抛出运行错误`非法实例对象`；未找到对应的枚举项时，抛出运行错误`枚举不存在`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument type
-    colorEnum.enumGetValueByName(1234, SType.REFERENCE);
+    // Invalid Object
+    let nullEnum = STValue.getNull();
+    nullEnum.enumGetValueByName('Red', SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
 ### 1.8 classGetStaticField
 
-`classGetStaticField(name: string, fieldType: SType): STValue`
+`classGetStaticField(fieldName: string, fieldType: SType): STValue`
 
-用于获取类的静态字段值，接受两个参数：字段名称和字段类型，返回对应值的STValue对象。如果字段不存在、类型不匹配或参数错误，会抛出异常。
+用于获取类的静态字段值，接受两个参数：字段名称和字段类型，返回对应值的STValue对象，其中对应传入的类型枚举SType需符合字段值类型。如果字段不存在、类型不匹配或参数错误，会抛出异常。
 
-**参数:**
+**参数：**
 
 |  参数名   |  类型  | 必填 |   说明   |
 | :-------: | :----: | :--: | :------: |
 | fieldName | string |  是  | 字段名称 |
 | fieldType | SType  |  是  | 字段类型 |
 
-**返回值:**
+**返回值：**
 
 |  类型   |        说明         |
 | :-----: | :-----------------: |
 | STValue | 字段值的STValue对象 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -483,28 +526,29 @@ export class Person {
 ```
 **报错异常：**
 
-当调用时传入的参数数量不为2，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的类对象时，报错`非法类对象`；未找到对应的字段时，报错`字段不存在`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为2时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的类对象时，抛出运行错误`非法实例对象`；未找到对应的字段时，抛出运行错误`字段不存在`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid class
+    // Invalid Instance
     let nonClass = STValue.wrapInt(111);
     nonClass.classGetStaticField('male', SType.BOOLEAN);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
 ### 1.9 classSetStaticField
 
-`classSetStaticField(name: string, val: STValue, fieldType: SType): void`
+`classSetStaticField(fieldName: string, val: STValue, fieldType: SType): void`
 
-用于设置类的静态字段值，接受三个参数：字段名称、要设置的值和字段类型）。主要作用是修改类的静态成员变量，支持基本类型和引用类型。如果类型不匹配、字段不存在或参数错误，会抛出异常。
+用于设置类的静态字段值，接受三个参数：字段名称、要设置的值和字段类型）。主要作用是修改类的静态成员变量，支持基本类型和引用类型，其中对应传入的类型枚举SType需符合字段值类型。如果类型不匹配、字段不存在或参数错误，会抛出异常。
 
-**参数:**
+**参数：**
 
 |  参数名   |  类型   | 必填 |    说明    |
 | :-------: | :-----: | :--: | :--------: |
@@ -512,9 +556,9 @@ try {
 |    val    | STValue |  是  | 要设置的值 |
 | fieldType |  SType  |  是  |  字段类型  |
 
-**返回值:** 无
+**返回值：** 无
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -535,41 +579,42 @@ export class Person {
 
 **报错异常：**
 
-当调用时传入的参数数量不为3，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的类对象时，报错`非法类对象`；当val参数类型和fieldType字段类型不匹配时，报错`不匹配的字段类型`；未找到对应的字段时，报错`字段不存在`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为3时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的类对象时，抛出运行错误`非法实例对象`；当val参数类型和fieldType字段类型不匹配时，抛出运行错误`不匹配的字段类型`；未找到对应的字段时，抛出运行错误`字段不存在`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Mismatched value type
+    // Invalid Type
     personClass.classSetStaticField('male', STValue.wrapBoolean(false), SType.INT);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// value STValue instance does not wrap a value of type int
 ```
 ---
 
 ### 1.10 objectGetProperty
 
-`objectGetProperty(name: string, propType: SType): STValue`
+`objectGetProperty(propName: string, propType: SType): STValue`
 
-用于获取对象实例的属性值，接受两个参数：属性名称和属性类型，返回对应值的STValue对象。主要作用是访问对象的成员变量，支持基本类型和引用类型。如果属性不存在、类型不匹配或参数错误，会抛出异常。
+用于获取对象实例的属性值，接受两个参数：属性名称和属性类型，返回对应值的STValue对象。主要作用是访问对象的成员变量，支持基本类型和引用类型，其中对应传入的类型枚举SType需符合实例属性值类型。如果属性不存在、类型不匹配或参数错误，会抛出异常。
 
 
-**参数:**
+**参数：**
 
 |  参数名  |  类型  | 必填 |   说明   |
 | :------: | :----: | :--: | :------: |
 | propName | string |  是  | 属性名称 |
 | propType | SType  |  是  | 属性类型 |
 
-**返回值:**
+**返回值：**
 
 |  类型   |        说明         |
 | :-----: | :-----------------: |
 | STValue | 属性值的STValue对象 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -594,27 +639,29 @@ export namespace testNameSpace {
 
 **报错异常：**
 
-当调用时传入的参数数量不为2，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的实例对象时，报错`非法实例对象`；未找到对应的属性时，报错`属性不存在`；属性类型不匹配时，报错`不匹配的属性类型`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为2时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的实例对象时，抛出运行错误`非法实例对象`；未找到对应的属性时，抛出运行错误`属性不存在`；属性类型不匹配时，抛出运行错误`不匹配的属性类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Mismatched property type
-    alice.objectGetProperty('name', SType.INT);
+    // Invalid Instance
+    let priObject = STValue.wrapInt(111);
+    priObject.objectGetProperty('name', SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
 ### 1.11 objectSetProperty
 
-`objectSetProperty(name: string, val: STValue, propType: SType): void`
+`objectSetProperty(propName: string, val: STValue, propType: SType): void`
 
-用于设置对象实例的属性值，接受三个参数：属性名称、要设置的值和属性类型。主要作用是修改对象的成员变量，支持基本类型和引用类型。如果类型不匹配、属性不存在或参数错误，会抛出异常。
+用于设置对象实例的属性值，接受三个参数：属性名称、要设置的值和属性类型。主要作用是修改对象的成员变量，支持基本类型和引用类型，其中对应传入的类型枚举SType需符合实例属性值类型。如果类型不匹配、属性不存在或参数错误，会抛出异常。
 
-**参数:**
+**参数：**
 
 |  参数名  |  类型   | 必填 |    说明    |
 | :------: | :-----: | :--: | :--------: |
@@ -622,9 +669,9 @@ try {
 |   val    | STValue |  是  | 要设置的值 |
 | propType |  SType  |  是  |  属性类型  |
 
-**返回值:** 无
+**返回值：** 无
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -650,17 +697,18 @@ export namespace testNameSpace {
 
 **报错异常：**
 
-当调用时传入的参数数量不为3，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的实例对象时，报错`非法实例对象`；未找到对应的属性时，报错`属性不存在`；属性类型不匹配时，报错`不匹配的属性类型`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为3时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的实例对象时，抛出运行错误`非法实例对象`；未找到对应的属性时，抛出运行错误`属性不存在`；属性类型不匹配时，抛出运行错误`不匹配的属性类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Mismatched property type
+    // Invalid Type
     alice.objectSetProperty('name', STValue.wrapNumber(111), SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// value STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -668,22 +716,22 @@ try {
 
 `fixedArrayGet(idx: number, elementType: SType): STValue`
 
-用于获取固定长度数组中指定索引的元素值，接受两个参数：索引位置和元素类型，返回对应值的STValue对象。主要作用是访问数组元素，支持基本类型和引用类型。如果索引越界、类型不匹配或参数错误，会抛出异常。
+用于获取固定长度数组中指定索引的元素值，接受两个参数：索引位置和元素类型，返回对应值的STValue对象。主要作用是访问数组元素，支持基本类型和引用类型，其中对应传入的类型枚举SType需符合数组元素类型。如果索引越界、类型不匹配或参数错误，会抛出异常。
 
-**参数:**
+**参数：**
 
 |   参数名    |  类型  | 必填 |     说明     |
 | :---------: | :----: | :--: | :----------: |
 |     idx     | number |  是  |   数组索引   |
 | elementType | SType  |  是  | 数组元素类型 |
 
-**返回值:**
+**返回值：**
 
 |  类型   |       说明        |
 | :-----: | :---------------: |
 | STValue | 元素的STValue对象 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -700,17 +748,19 @@ export namespace testNameSpace {
 ```
 **报错异常：**
 
-当调用时传入的参数数量不为2，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的数组对象时，报错`非法对象`；当索引idx超出数组范围时，报错`索引越界`；数组元素类型不匹配时，报错`不匹配的元素类型`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为2时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的数组对象时，抛出运行错误`非法实例对象`；当索引idx超出数组范围时，抛出运行错误`索引越界`；数组元素类型不匹配时，抛出运行错误`不匹配的元素类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Out of bounds
-    strArray.fixedArrayGet(-1, SType.REFERENCE);
+    // Invalid Instance
+    let notArray = STValue.wrapInt(111);  
+    notArray.fixedArrayGet(-1, SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -718,9 +768,9 @@ try {
 
 `fixedArraySet(idx: number, val: STValue, elementType: SType): void`
 
-用于设置固定长度数组中指定索引的元素值，接受三个参数：索引位置、要设置的值和元素类型。主要作用是修改数组元素，支持基本类型和引用类型。如果类型不匹配、索引越界或参数错误，会抛出异常。
+用于设置固定长度数组中指定索引的元素值，接受三个参数：索引位置、要设置的值和元素类型。主要作用是修改数组元素，支持基本类型和引用类型，其中对应传入的类型枚举SType需符合数组元素类型。如果类型不匹配、索引越界或参数错误，会抛出异常。
 
-**参数:**
+**参数：**
 
 |   参数名    |  类型   | 必填 |     说明     |
 | :---------: | :-----: | :--: | :----------: |
@@ -728,9 +778,9 @@ try {
 |     val     | STValue |  是  |  要设置的值  |
 | elementType |  SType  |  是  | 数组元素类型 |
 
-**返回值:** 无
+**返回值：** 无
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -749,41 +799,43 @@ export namespace testNameSpace {
 
 **报错异常：**
 
-当调用时传入的参数数量不为3，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的数组对象时，报错`非法对象`；当索引idx超出数组范围时，报错`索引越界`；数组元素类型不匹配或值不匹配时，报错`不匹配的元素类型`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为3时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的数组对象时，抛出运行错误`非法实例对象`；当索引idx超出数组范围时，抛出运行错误`索引越界`；数组元素类型不匹配或值不匹配时，抛出运行错误`不匹配的元素类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Mismatched element type
-    strArray.fixedArraySet(0, STValue.wrapString('11'), SType.INT);
+    // Invalid Instance
+    let notArray = STValue.wrapInt(111);
+    notArray.fixedArraySet(0, STValue.getNull(), SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
 ### 1.14 namespaceGetVariable
 
-`namespaceGetVariable(name: string, variableType: SType): STValue | null`
+`namespaceGetVariable(variableName: string, variableType: SType): STValue | null`
 
-用于获取命名空间中的变量值，接受两个参数：变量名称和变量类型，返回对应值的STValue对象。主要作用是访问命名空间中的全局变量，支持基本类型和引用类型。如果变量不存在、类型不匹配或参数错误，会抛出异常。
+用于获取命名空间中的变量值，接受两个参数：变量名称和变量类型，返回对应值的STValue对象。主要作用是访问命名空间中的全局变量，支持基本类型和引用类型，其中对应传入的类型枚举SType需符合对应变量类型。如果变量不存在、类型不匹配或参数错误，会抛出异常。
 
 
-**参数:**
+**参数：**
 
 |    参数名    |  类型  | 必填 |      说明      |
 | :----------: | :----: | :--: | :------------: |
-|     name     | string |  是  |    变量名称    |
+|     variableName     | string |  是  |    变量名称    |
 | variableType | SType  |  是  | 变量类型枚举值 |
 
-**返回值:**
+**返回值：**
 
 |  类型   |        说明         |
 | :-----: | :-----------------: |
 | STValue | 变量值的STValue对象 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -801,41 +853,42 @@ export namespace MyNamespace {
 
 **报错异常：**
 
-当调用时传入的参数数量不为2，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的命名空间时，报错`无效的命名空间`；当变量与变量类型不匹配时，报错`不匹配的变量类型`；当变量不存在时，报错`变量不存在`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为2时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的命名空间时，抛出运行错误`无效的命名空间`；当变量与变量类型不匹配时，抛出运行错误`不匹配的变量类型`；当变量不存在时，抛出运行错误`变量不存在`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Mismatched element type
-    ns.namespaceGetVariable('data', SType.BOOLEAN)
+    // Invalid Type
+    ns.namespaceGetVariable(1, SType.INT)
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param are not string type; param=variableName
 ```
 ---
 
 ### 1.15 namespaceSetVariable
 
-`namespaceSetVariable(name: string, value: STValue, variableType: SType): boolean`
+`namespaceSetVariable(variableName: string, value: STValue, variableType: SType): boolean`
 
-用于设置命名空间中的变量值，接受三个参数：变量名称、要设置的值和变量类型，返回操作是否成功的布尔值。主要作用是修改命名空间中的全局变量，支持基本类型和引用类型。如果变量不存在、类型不匹配或参数错误，会抛出异常。
+用于设置命名空间中的变量值，接受三个参数：变量名称、要设置的值和变量类型，返回操作是否成功的布尔值。主要作用是修改命名空间中的全局变量，支持基本类型和引用类型，其中对应传入的类型枚举SType需符合对应变量类型。如果变量不存在、类型不匹配或参数错误，会抛出异常。
 
-**参数:**
+**参数：**
 
 |    参数名    |  类型   | 必填 |      说明      |
 | :----------: | :-----: | :--: | :------------: |
-|     name     | string  |  是  |    变量名称    |
+|     variableName     | string  |  是  |    变量名称    |
 |    value     | STValue |  是  |   要设置的值   |
 | variableType |  SType  |  是  | 变量类型枚举值 |
 
-**返回值:**
+**返回值：**
 
 |  类型   |              说明               |
 | :-----: | :-----------------------------: |
 | boolean | 设置成功返回true，失败返回false |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -854,18 +907,18 @@ export namespace MyNamespace {
 
 **报错异常：**
 
-当调用时传入的参数数量不为3，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的命名空间时，报错`无效的命名空间`；当设置值与变量类型不匹配时，报错`不匹配的变量类型`；当变量不存在时，报错`变量不存在`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为3时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的命名空间时，抛出运行错误`无效的命名空间`；当设置值与变量类型不匹配时，抛出运行错误`不匹配的变量类型`；当变量不存在时，抛出运行错误`变量不存在`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid namespace
-    let num = STValue.wrapInt(111);
-    num.namespaceSetVariable('data', STValue.wrapInt(0), SType.INT);
+    // Invalid Type
+    ns.namespaceSetVariable(1, STValue.wrapInt(44), SType.INT);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param are not string type; param=variableName
 ```
 ---
 
@@ -875,15 +928,15 @@ try {
 
 用于获取引用类型对象的类型信息，不接受任何参数，返回表示对象类型的STValue对象。如果`this`包装的不是ArkTS-Sta对象引用，会抛出异常。
 
-**参数:** 无
+**参数：** 无
 
-**返回值:**
+**返回值：**
 
 |  类型   |         说明          |
 | :-----: | :-------------------: |
 | STValue | 类型信息的STValue对象 |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -894,17 +947,279 @@ let isString = strWrap.objectInstanceOf(strType); // true
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；当`this`不是有效的引用类型对象时，报错`无效对象`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的引用类型对象时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid object
+    // Invalid Instance
     STValue.getUndefined().objectGetType();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
+```
+---
+
+
+### 1.17 arrayGet
+
+`arrayGet(idx: number): STValue`
+
+用于获取动态数组指定索引位置的元素，并将其封装为STValue对象返回，调用该方法的对象需要是有效的STValue引用类型数组对象。
+
+**参数：** 
+
+| 参数名 |  类型  | 必填 |      说明      |
+| :----: | :----: | :--: | :------------: |
+|  idx   | number |  是  | 数组元素的索引 |
+
+**返回值：**
+
+|  类型   |              说明              |
+| :-----: | :----------------------------: |
+| STValue | 封装了指定位置元素的STValue对象 |
+
+**示例：**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+// 返回值为封装了Int类型的STValue对象
+let arrayValue0 = intArray.arrayGet(0);
+let num = arrayValue0.objectInvokeMethod('toInt', ':i', []).unwrapToNumber(); // 1
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**报错异常：**
+当调用时传入参数数量不为1时，产生编译错误`参数数量错误`；当调用对象`this`非有效的动态数组引用或为空时，抛出运行错误`调用对象非引用类型`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+try {
+    // Invalid Arguments Number
+    intArray.arrayGet(0, SType.INT);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 1 args, but got 2 args
+```
+---
+
+### 1.18 arraySet
+
+`arraySet(idx: number, val: STValue): void`
+
+用于设置动态数组指定索引位置的元素值，调用该方法的对象需要是有效的STValue引用类型数组对象，同时设置的数组值`val`需要是封装了引用类型对象的STValue对象。
+
+**参数：** 
+
+| 参数名 |  类型   | 必填 |          说明           |
+| :----: | :-----: | :--: | :---------------------: |
+|  idx   | number  |  是  |     要设置的数组索引    |
+|  val   | STValue |  是  | 要存入的STValue封装对象 |
+
+**返回值：** 无
+
+**示例：**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+let intClass = STValue.findClass('std.core.Int');
+let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(10)]);
+// 传入参数需要是有效的Int引用类型对象
+intArray.arraySet(0, intObj);
+let arrayValue0 = intArray.arrayGet(0);
+let num = arrayValue0.objectInvokeMethod('toInt', ':i', []).unwrapToNumber(); // 10
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**报错异常：**
+
+当调用时传入参数数量不为2时，产生编译错误`参数数量错误`；当`val`参数不是合法的STValue引用时，抛出运行错误`参数类型错误`；当调用对象`this`非有效的动态数组引用或为空时，抛出运行错误`调用对象非引用类型`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+
+示例：
+```typescript
+try {
+    // Invalid Arguments Number
+    intArray.arraySet(0);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 2 args, but got 1 args
+```
+---
+
+### 1.19 arrayPush
+
+`arrayPush(val: STValue): void`
+
+在动态数组的末尾添加一个新元素，调用该方法的对象需要是有效的STValue引用类型数组对象，同时新添加的数组值`val`需要是封装了引用类型对象的STValue对象。
+
+**参数：** 
+
+| 参数名 |  类型   | 必填 |          说明           |
+| :----: | :-----: | :--: | :---------------------: |
+|  val   | STValue |  是  | 要添加的STValue封装对象 |
+
+**返回值：** 无
+
+**示例：**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+let intClass = STValue.findClass('std.core.Int');
+let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(10)]);
+// 传入参数需要是有效的Int引用类型对象
+intArray.arrayPush(intObj);
+let arrayValue0 = intArray.arrayGet(5);
+let num = arrayValue0.objectInvokeMethod('toInt', ':i', []).unwrapToNumber(); // 10
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**报错异常：**
+
+当调用时传入参数数量不为1时，产生编译错误`参数数量错误`；当`val`参数不是合法的STValue引用时，抛出运行错误`参数类型错误`；当调用对象`this`非有效的动态数组引用或为空时，抛出运行错误`调用对象非引用类型`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+try {
+    // Invalid Arguments Number
+    intArray.arrayPush();
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 1 args, but got 0 args
+```
+---
+
+### 1.20 arrayPop
+
+`arrayPop(): STValue`
+
+移除并返回动态数组的最后一个元素，调用该方法的对象需要是有效的STValue引用类型数组对象。
+
+**参数：** 无
+
+**返回值：** 
+
+|  类型   |              说明              |
+| :-----: | :----------------------------: |
+| STValue | 被移除的末尾元素的STValue对象 |
+
+**示例：**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+let intPop = intArray.arrayPop();
+let num = intPop.objectInvokeMethod('toInt', ':i', []).unwrapToNumber(); // 5
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**报错异常：**
+
+当调用时传入参数数量不为0时，产生编译错误`参数数量错误`；当调用对象`this`非有效的动态数组引用或为空时，抛出运行错误`调用对象非引用类型`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+try {
+    // Invalid Arguments Number
+    intArray.arrayPop(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 0 args, but got 1 args
+```
+---
+
+### 1.21 arrayGetLength
+
+`arrayGetLength(): number`
+
+用于获取动态数组的长度，调用该方法的对象需要是有效的STValue引用类型数组对象。
+
+**参数：** 无
+
+**返回值：** 
+
+|  类型  |          说明          |
+| :----: | :--------------------: |
+| number | 动态数组当前的元素个数 |
+
+**示例：**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+let num = intArray.arrayGetLength(); // 5
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**报错异常：**
+
+当调用时传入参数数量不为0时，产生编译错误`参数数量错误`；当调用对象`this`非有效的动态数组引用或为空时，抛出运行错误`调用对象非引用类型`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+---
+
+示例：
+```typescript
+try {
+    // Invalid Arguments Number
+    let num = intArray.arrayGetLength(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 0 args, but got 1 args
 ```
 ---
 
@@ -916,15 +1231,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta字符串，不接受任何参数，返回布尔值结果。
 
-**参数:** 无
+**参数：** 无
 
-**返回值:**
+**返回值：**
 
 |  类型   |                  说明                   |
 | :-----: | :-------------------------------------: |
 | boolean | 如果是字符串类型返回true，否则返回false |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -932,11 +1247,11 @@ let str = STValue.wrapString("Hello");
 let isStr = str.isString(); // true
 
 let num = STValue.wrapInt(42);
-let isStr1 = num.isString(); // false
+let isStr1 = num.isString(); // false 
 
 let ns = STValue.findNamespace('stvalue_check.Check');
-data = ns.namespaceGetVariable('shouldBeString', SType.REFERENCE);
-let isStr2 = str.isString(); // true
+let str1 = ns.namespaceGetVariable('shouldBeString', SType.REFERENCE);
+let isStr2 = str1.isString(); // true
 ```
 
 ```typescript
@@ -948,17 +1263,19 @@ export namespace Check {
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let isStr = str.isString(11);
+    // Invalid Arguments Number
+let isStr = str.isString(1); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -968,15 +1285,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta BigInt对象，不接受任何参数，返回布尔值结果。
 
-**参数:** 无
+**参数：** 无
 
-**返回值:**
+**返回值：**
 
 |  类型   |                  说明                   |
 | :-----: | :-------------------------------------: |
 | boolean | 如果是大整数类型返回true，否则返回false |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -988,17 +1305,19 @@ let isBigInt1 = num.isBigInt(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
-```typescript
+示例：
+```typescript   
 try {
-    // Invalid argument count
-    let isBigInt = bigNum.isBigInt(11);
+    // Invalid Arguments Number
+    let isBigInt = 'STValue'.isBigInt(); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1008,15 +1327,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的`null`，不接受任何参数，返回布尔值结果。
 
-**参数:** 无
+**参数：** 无
 
-**返回值:**
+**返回值：**
 
 |  类型   |                说明                 |
 | :-----: | :---------------------------------: |
 | boolean | 如果是null值返回true，否则返回false |
 
-**示例:**
+**示例：**
 
 ```typescript
 // ArkTS-Dyn
@@ -1028,17 +1347,19 @@ let isNull1 = intValue.isNull(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let isNull = nullValue.isNull(123);
+    // Invalid Arguments Number
+    let isNull = 'STValue'.isNull();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1048,15 +1369,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的`undefined`，不接受任何参数，返回布尔值结果。
 
-**参数:** 无
+**参数：** 无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                   说明                   |
 | :-----: | :--------------------------------------: |
 | boolean | 如果是undefined值返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1068,17 +1389,19 @@ let isUndef1 = intValue.isUndefined(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let isUndef = undefValue.isUndefined(11);
+    // Invalid Arguments Number
+    let isUndef = 'STValue'.isUndefined(); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1087,21 +1410,21 @@ try {
 
 `isEqualTo(other: STValue): boolean`
 
-用于比较`this`和`other`包装的ArkTS-Sta对象引用是否相等，返回布尔值结果。`this`和`other`包装需要包装ArkTS-Sta对象引用。如果参数错误或类型不匹配，会抛出异常。
+用于比较`this`和`other`包装的ArkTS-Sta对象引用的具体值是否相等，返回布尔值结果。`this`和`other`包装需要包装ArkTS-Sta对象引用。如果参数错误或类型不匹配，会抛出异常。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型   | 必填 |           说明            |
 | :----: | :-----: | :--: | :-----------------------: |
 | other  | STValue |  是  | 要比较的另一个STValue对象 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                      说明                       |
 | :-----: | :---------------------------------------------: |
 | boolean | 如果两个引用相等true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1124,17 +1447,18 @@ export namespace Check {
 
 **报错异常：**
 
-当调用时传入的参数数量不为1，报错`参数数量错误`；当`this`或者`other`不是引用类型时，报错`无效对象`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为1时，产生编译错误`参数数量错误`；当`this`或者`other`不是引用类型时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
-try {
-    // Invalid argument count
-    let isEqual = ref1.isEqualTo(ref2，1);
-} catch (e: Error) {
+try{
+    // Invalid Instance
+    STValue.wrapInt(1).isEqualTo(STValue.wrapInt(1));
+} catch (e: Error){
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -1142,21 +1466,21 @@ try {
 
 `isStrictlyEqualTo(other: STValue): boolean`
 
-用于比较`this`和`other`包装的ArkTS-Sta对象引用是否严格相等，返回布尔值结果。`this`和`other`包装需要包装ArkTS-Sta对象引用。
+用于比较`this`和`other`包装的ArkTS-Sta对象引用的指针内存地址是否严格相等，返回布尔值结果。`this`和`other`包装需要包装ArkTS-Sta对象引用。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型   | 必填 |           说明            |
 | :----: | :-----: | :--: | :-----------------------: |
 | other  | STValue |  是  | 要比较的另一个STValue对象 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                    说明                     |
 | :-----: | :-----------------------------------------: |
 | boolean | 如果两个对象严格相等返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1181,17 +1505,18 @@ export namespace Check {
 
 **报错异常：**
 
-当调用时传入的参数数量不为1，报错`参数数量错误`；当`this`或者`other`不是引用类型时，报错`无效对象`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为1时，产生编译错误`参数数量错误`；当`this`或者`other`不是引用类型时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
-try {
-    // Invalid object
-    let isStrictlyEqual = ref1.isStrictlyEqualTo(STValue.wrapInt(1));
-} catch (e: Error) {
+try{
+    // Invalid Instance
+    magicString1.isEqualTo(STValue.wrapInt(1));
+} catch (e: Error){
     // Throw Error
     console.log(e.message);
- }
+}
+// 'other' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -1201,15 +1526,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的boolean值，不接受任何参数，返回布尔值结果。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                 说明                  |
 | :-----: | :-----------------------------------: |
 | boolean | 如果是布尔类型返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1221,17 +1546,19 @@ let isBool1 = numValue.isBoolean(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的STValue对象时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isBool = boolValue.isBoolean(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1241,15 +1568,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的byte值，不接受任何参数，返回布尔值结果。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                 说明                  |
 | :-----: | :-----------------------------------: |
 | boolean | 如果是字节类型返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1260,17 +1587,19 @@ let isByte1 = intValue.isByte(); // false
 ```
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的STValue对象时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isByte = byteValue.isByte(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1280,15 +1609,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的char值，不接受任何参数，返回布尔值结果。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                 说明                  |
 | :-----: | :-----------------------------------: |
 | boolean | 如果是字符类型返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1300,17 +1629,19 @@ let isChar1 = strValue.isChar(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的STValue对象时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isChar = charValue.isChar(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1320,15 +1651,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的short值，不接受任何参数，返回布尔值结果。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                  说明                   |
 | :-----: | :-------------------------------------: |
 | boolean | 如果是短整型类型返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1340,17 +1671,19 @@ let isShort1 = intValue.isShort(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的STValue对象时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isShort = shortValue.isShort(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1360,15 +1693,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的int值，不接受任何参数，返回布尔值结果。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                 说明                  |
 | :-----: | :-----------------------------------: |
 | boolean | 如果是整型类型返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1380,17 +1713,19 @@ let isInt1 = longValue.isInt(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的STValue对象时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isInt = intValue.isInt(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1400,15 +1735,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的long值，不接受任何参数，返回布尔值结果。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                  说明                   |
 | :-----: | :-------------------------------------: |
 | boolean | 如果是长整型类型返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1420,17 +1755,19 @@ let isLong1 = intValue.isLong(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的STValue对象时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let isLong = longValue.isLong(1);
+    // Invalid Arguments Number
+    let isLong = longValue.isLong(1); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1440,15 +1777,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的float值，不接受任何参数，返回布尔值结果。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                    说明                     |
 | :-----: | :-----------------------------------------: |
 | boolean | 如果是单精度浮点类型返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1460,17 +1797,19 @@ let isFloat1 = intValue.isFloat(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的STValue对象时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let isFloat = floatValue.isFloat(1);
+    // Invalid Arguments Number
+    let isFloat = floatValue.isFloat(1); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1480,15 +1819,15 @@ try {
 
 用于检查STValue对象是否包装的是ArkTS-Sta的number/double值，不接受任何参数，返回布尔值结果。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                    说明                     |
 | :-----: | :-----------------------------------------: |
 | boolean | 如果是双精度浮点类型返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1500,17 +1839,19 @@ let isNumber1 = intValue.isNumber(); // false
 
 **报错异常：**
 
-当调用时传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`不是有效的STValue对象时，抛出运行错误`无效实例对象`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isNumber = doubleValue.isNumber(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1520,20 +1861,20 @@ try {
 
 用于检查类型之间的赋值兼容性，接受两个参数：源类型（fromType）和目标类型（toType），返回布尔值结果。fromType和toType一般来源于`findClass`、`objectGetType`以及`classGetSuperClass`的返回值。基于底层类型系统的规则，判断源类型的值是否可以安全赋值给目标类型的变量。
 
-**参数:**
+**参数：** 
 
 |  参数名  |  类型   | 必填 |            说明            |
 | :------: | :-----: | :--: | :------------------------: |
 | fromType | STValue |  是  |   源类型（被赋值的类型）   |
 |  toType  | STValue |  是  | 目标类型（赋值的目标类型） |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                        说明                         |
 | :-----: | :-------------------------------------------------: |
 | boolean | 如果fromType可以赋值给toType返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1549,17 +1890,19 @@ export class SubStudent extends Student {}
 
 **报错异常：**
 
-当调用时传入的参数数量不为2，报错`参数数量错误`；当源类型或目标类型非引用类型或者为null和undefined，报错`无效类型`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为2时，产生编译错误`参数数量错误`；当源类型或目标类型非引用类型或者为null和undefined，抛出运行错误`无效类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isAssignable = STValue.typeIsAssignableFrom(subStudentCls);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 2 Arguments, bug got 1.
 ```
 ---
 
@@ -1569,23 +1912,24 @@ try {
 
 用于检查对象是否为指定类型的实例，接受一个参数（类型对象），返回布尔值结果。如果对象是指定类型的实例返回true，否则返回false。
 
-**参数:**
+**参数：** 
 
 | 参数名  |  类型   | 必填 |           说明           |
 | :-----: | :-----: | :--: | :----------------------: |
 | typeArg | STValue |  是  | 要检查的类型（类或接口） |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                   说明                    |
 | :-----: | :---------------------------------------: |
 | boolean | 如果是该类型的实例返回true，否则返回false |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
 let studentCls = STValue.findClass('stvalue_check.Student');
+// 调用类构造函数，签名为无传参无返回值
 let stuObj = studentCls.classInstantiate(':', []);
 let isInstance = stuObj.objectInstanceOf(studentCls); // true
 ```
@@ -1599,17 +1943,19 @@ export class Student {
 
 **报错异常：**
 
-当调用时传入的参数数量不为1，报错`参数数量错误`；当`this`指向对象不是有效实例对象，报错`无效实例对象`；当传入的typeArg参数无效，报错`无效的参数类型`；遇到其它错误时，报错其它类型的错误。
+当调用时传入的参数数量不为1时，产生编译错误`参数数量错误`；当`this`指向对象不是有效实例对象，抛出运行错误`无效实例对象`；当传入的typeArg参数无效，抛出运行错误`无效的参数类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid object
-    let isCls = STValue.getNull().objectInstanceOf(studentCls);
+    // Invalid Arguments Number
+    let isInstance = stuObj.objectInstanceOf(); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -1621,20 +1967,20 @@ try {
 
 用于通过类的构造函数实例化对象，接受两个参数：构造函数签名和参数数组，返回新创建的对象。动态创建类实例，支持带参数的构造函数调用，如果类不存在、构造函数不匹配或参数错误，会抛出异常。
 
-**参数:**
+**参数：** 
 
 |    参数名     |   类型    | 必填 |              说明               |
 | :-----------: | :-------: | :--: | :-----------------------------: |
 | ctorSignature |  string   |  是  | 构造函数（`参数类型:返回类型`） |
 |     args      | STValue[] |  是  |        构造函数参数数组         |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |       说明       |
 | :-----: | :--------------: |
 | STValue | 新创建的对象实例 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1656,17 +2002,18 @@ export class Student {
 
 **报错异常：**
 
-当传入的参数数量不为2，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`不是有效的类对象时，报错`非法类对象`；当未找到指定构造函数（签名不匹配），报错`无效构造函数`；当实例化对象失败时（构造函数参数不匹配），报错`实例化失败`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为2时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`不是有效的类对象时，抛出运行错误`非法类对象`；当未找到指定构造函数（签名不匹配），抛出运行错误`无效构造函数`；当实例化对象失败时（构造函数参数不匹配），抛出运行错误`实例化失败`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid class object
-    let intObj = STValue.getNull().classInstantiate('C{std.core.String}:', [STValue.wrapString('Alice')]);
+    // Invalid Argument Type
+    studentCls.classInstantiate(':', STValue.wrapNumber(1));
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param are not array type; param=args
 ```
 ---
 
@@ -1674,29 +2021,30 @@ try {
 
 `static newFixedArrayPrimitive(length: number, elementType: SType): STValue`
 
-用于创建预分配内存固定长度的基本类型数组，只接受两个参数：数组长度和元素类型（SType枚举），返回创建的数组对象。每种基本类型都有固定的默认值（例如SType.BOOLEAN默认false，SType.INT默认0），故不需要传入数组元素初始值，只需要指定数组长度以及元素类型即可。支持所有基本数据类型，如果元素类型不支持或参数错误，会抛出异常。
+用于创建预分配内存固定长度的基本类型数组，只接受两个参数：数组长度和元素类型（SType枚举），返回创建的数组对象，其中对应传入的类型枚举SType需符合数组元素类型。每种基本类型都有固定的默认值（例如SType.BOOLEAN默认false，SType.INT默认0），故不需要传入数组元素初始值，只需要指定数组长度以及元素类型即可。支持所有基本数据类型，如果元素类型不支持或参数错误，会抛出异常。
 
-**参数:**
+**参数：** 
 
 |   参数名    |  类型  | 必填 |           说明           |
 | :---------: | :----: | :--: | :----------------------: |
 |   length    | number |  是  |         数组长度         |
 | elementType | SType  |  是  | 数组元素类型（数值形式） |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |               说明                |
 | :-----: | :-------------------------------: |
 | STValue | 新创建的固定长度数组的STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
 let ns = STValue.findNamespace('stvalue_instance.Instance');
 // 创建的SType.BOOLEAN类型数组boolArray初始长度为5，初始值为false
 let boolArray = STValue.newFixedArrayPrimitive(5, SType.BOOLEAN);
-let isArray = ns.namespaceInvokeFunction('checkFixPrimitiveBooleanArray', 'A{z}:z', [boolArray]).unwrapToBoolean(); // true
+// 调用命名空间函数，其函数签名'A{z}:z'表示入参为FixedArray<boolean>，返回值为boolean
+let isArray = ns.namespaceInvokeFunction('checkFixPrimitiveBooleanArray', 'A{z}:z', [boolArray]).unwrapToBoolean(); 
 ```
 
 ```typescript
@@ -1719,17 +2067,18 @@ export namespace Instance {
 
 **报错异常：**
 
-当传入的参数数量不为2，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当数组长度非有效长度时，报错`无效长度`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为2时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当数组长度非有效长度时，抛出运行错误`无效长度`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let boolArray = STValue.newFixedArrayPrimitive(5);
+    // Invalid Argument Type
+    STValue.newFixedArrayPrimitive(5, SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Unsupported SType: SType::REFERENCE
 ```
 ---
 
@@ -1739,7 +2088,7 @@ try {
 
 用于创建预分配内存固定长度的引用类型数组，接受三个参数：数组长度、元素类型和**初始元素** ，返回创建的数组对象。由于引用类型没有统一的默认值，因此创建引用类型数组时，除了长度和元素类型，还需指定**初始元素** ，来将所有数组元素会初始化为该元素的引用。支持类、接口等引用类型元素，数组所有元素初始化为相同的初始值，如果参数错误或类型不匹配，会抛出异常。
 
-**参数:**
+**参数：** 
 
 |     参数名     |  类型   | 必填 |       说明       |
 | :------------: | :-----: | :--: | :--------------: |
@@ -1747,13 +2096,15 @@ try {
 |  elementType   | STValue |  是  |   数组元素类型   |
 | initialElement | STValue |  是  | 数组元素的初始值 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                 说明                  |
 | :-----: | :-----------------------------------: |
 | STValue | 新创建的固定长度引用数组的STValue对象 |
 
-**示例:**
+**示例：** 
+
+
 
 ```typescript
 // ArkTS-Dyn
@@ -1762,6 +2113,7 @@ let intClass = STValue.findClass('std.core.Int');
 let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(5)]);
 // 创建的Int引用类型数组refArray初始长度为3，初始值是一个装箱了值为5的Int引用类型
 let refArray = STValue.newFixedArrayReference(3, intClass, intObj);
+// 调用命名空间函数，其函数签名'A{C{std.core.Object}}:z'表示入参为FixedArray<Object>，返回值为boolean
 let res = ns.namespaceInvokeFunction('checkFixReferenceObjectArray', 'A{C{std.core.Object}}:z', [refArray])res.unwrapToBoolean(); // true
 ```
 
@@ -1784,20 +2136,66 @@ export namespace Instance {
 
 **报错异常：**
 
-当传入的参数数量不为3，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当数组长度非有效长度时，报错`无效长度`；当初始值与类型不匹配时，报错`不匹配的初始值类型`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为3时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当数组长度非有效长度时，抛出运行错误`无效长度`；当初始值与类型不匹配时，抛出运行错误`无效初始值`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid length
-    let refArray = STValue.newFixedArrayReference(-1, intClass, intObj);
+    // Invalid InitialElement
+    STValue.newFixedArrayReference(999, intClass, [STValue.getNull()]);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// initialElement STValue instance does not wrap a value of type reference
+```
+---          
+
+### 3.4 newArray
+
+`static newArray(len: number, initialElement: STValue): STValue`
+
+STValue静态方法，用于创建一个指定长度的新动态数组，并使用提供的初始元素填充数组的所有位置，其中初始元素STValue需要封装引用类型。
+
+**参数：**
+
+| 参数名 | 类型 | 必填 | 说明 |
+| :----: | :--: | :--: | :--: |
+| len | number | 是 | 数组的初始长度 |
+| initialElement | STValue | 是 | 用于填充数组每一个位置的初始元素（需为引用类型） |
+
+**返回值：**
+
+| 类型 | 说明 |
+| :--: | :--: |
+| STValue | 封装了新创建数组的 STValue 对象 |
+
+**示例：**
+
+```typescript
+let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(0)]);
+// 传入对象为Int引用类型
+let intArray = STValue.newArray(5, intObj); // [0, 0, 0, 0, 0]
+```
+
+**报错异常：**
+
+当传入的参数数量不为2时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；遇到其它错误时，抛出其它类型的运行错误异常。
+
+示例：
+```typescript
+try {
+    // Invalid InitialElement
+    STValue.newArray(999, STValue.wrapInt(123));
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// initialElement STValue instance does not wrap a value of type reference
 ```
 ---
 
+                 
 ## 4 STValue_invoke
 ### 4.1 namespaceInvokeFunction
 
@@ -1805,7 +2203,7 @@ try {
 
 用于在命名空间中调用指定函数，接受三个参数：函数名称、函数签名和参数数组，返回函数调用的结果。主要作用是执行命名空间中的全局函数或静态函数，支持带参数的函数调用，如果函数不存在、签名不匹配或参数错误，会抛出异常。
 
-**参数:**
+**参数：** 
 
 |    参数名    |   类型    | 必填 |                 说明                  |
 | :----------: | :-------: | :--: | :-----------------------------------: |
@@ -1813,13 +2211,13 @@ try {
 |  signature   |  string   |  是  | 函数签名（`参数类型:返回类型`） |
 |     args     | STValue[] |  是  |             函数参数数组              |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |           说明            |
 | :-----: | :-----------------------: |
 | STValue | 函数调用结果的STValue对象 |
 
-**示例:**
+**示例：** 
 
 
 ```typescript
@@ -1827,6 +2225,7 @@ try {
 let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 let b1 = STValue.wrapBoolean(false);
 let b2 = STValue.wrapBoolean(false);
+// 调用命名空间函数，函数签名表示有两个Boolean类型入参，返回值也为Boolean类型
 let b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]).unwrapToBoolean(); // false
 ```
 
@@ -1836,23 +2235,24 @@ export namespace Invoke{
   // boolean type
   export function BooleanInvoke(b1 : Boolean, b2 : Boolean) : Boolean{
       return b1 & b2;
-  }
+  }    
 }
 ```
 
 **报错异常：**
 
-当传入的参数数量不为3，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`指向的命名空间无效时，报错`无效的命名空间`；当未找到指定函数时（函数名或签名不匹配），报错`未找到对应函数`；当执行函数失败时（参数不匹配，函数无效），报错`调用函数失败`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为3时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`指向的命名空间无效时，抛出运行错误`无效的命名空间`；当未找到指定函数时（函数名或签名不匹配），抛出运行错误`未找到对应函数`；当执行函数失败时（参数不匹配，函数无效），抛出运行错误`调用函数失败`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid arguments count
-    let b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z');
+    // Invalid Parameter Count
+    b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zzz:z', [b1, b2]);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Failed to find function when namespace invoke function;functionName=BooleanInvoke;signatureName=zzz:z
 ```
 ---
 
@@ -1862,19 +2262,19 @@ try {
 
 用于调用函数式对象（如lambda表达式或函数对象），接受一个参数数组（必须为引用类型如果需要使用primitive需要事先装箱），返回函数调用的结果。主要作用是执行函数式对象，支持带参数的调用，如果参数非引用类型或函数对象无效，会抛出异常。
 
-**参数:**
+**参数：** 
 
 | 参数名 |   类型    | 必填 |              说明              |
 | :----: | :-------: | :--: | :----------------------------: |
 |  args  | STValue[] |  是  | 函数参数数组（必须为引用类型） |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                 说明                  |
 | :-----: | :-----------------------------------: |
 | STValue | 函数调用结果的STValue对象（引用类型） |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -1889,7 +2289,7 @@ let numberObj3 = numberCls.classInstantiate('d:', [STValue.wrapNumber(3)]); // �
 let numberObj5 = numberCls.classInstantiate('d:', [STValue.wrapNumber(5)]);
 let getSumFn = nsp.namespaceGetVariable('getSumFn', SType.REFERENCE);
 let sumRes = getSumFn.functionalObjectInvoke([numberObj3, numberObj5]); // 需要传入引用类型对象，这里是Double类型
-let sumNum = sumRes.objectInvokeMethod('toDouble', ':d', []); // 将结果转换为STValue装箱的double类型
+let sumNum = sumRes.objectInvokeMethod('toDouble', ':d', []); // 将结果转换为STValue装箱的double类型，函数签名表示返回值为double
 let unwrapSumNum = sumNum.unwrapToNumber(); // 8
 ```
 
@@ -1903,17 +2303,18 @@ export namespace Invoke {
 
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`指向的函数式对象无效时，报错`无效的函数对象`；当执行函数失败时（参数不匹配，函数无效），报错`调用函数失败`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`指向的函数式对象无效时，抛出运行错误`无效函数对象`；当执行函数失败时（参数不匹配，函数无效），抛出运行错误`调用函数失败`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid arguments count
-    let numRes = getNumberFn.functionalObjectInvoke([STValue.wrapInt(123)], 1);
+    // Invalid Function Instance
+    STValue.getUndefined().functionalObjectInvoke([]);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -1925,7 +2326,7 @@ try {
 用于动态调用对象的方法，接受三个参数：方法名称、方法签名以及参数数组，返回方法调用的结果。主要作用是执行对象的实例方法，支持带参数的方法调用，如果方法不存在、签名不匹配或参数错误，会抛出异常。
 
 
-**参数:**
+**参数：** 
 
 |  参数名   |      类型      | 必填 |                 说明                  |
 | :-------: | :------------: | :--: | :-----------------------------------: |
@@ -1933,20 +2334,22 @@ try {
 | signature |     string     |  是  | 方法签名（`参数类型:返回类型`） |
 |   args    | STValue[]     |  是  |             方法参数数组              |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                     说明                      |
 | :-----: | :-------------------------------------------: |
 | STValue | 方法调用结果的STValue对象（void方法返回null） |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
 let studentCls = STValue.findClass('stvalue_invoke.Student');
+// 类实例化函数，函数签名表示有两个入参分别为int和String类型，无返回值
 let clsObj = studentCls.classInstantiate('iC{std.core.String}:', [STValue.wrapInt(18), STValue.wrapString('stu1')]);
-let stuAge = clsObj.objectInvokeMethod('getStudentAge', ':i', []);
+let stuAge = clsObj.objectInvokeMethod('getStudentAge', ':i', []); 
 let unwrapStuAge = stuAge.unwrapToNumber(); // 18
+// 调用实例方法，函数签名表示无入参，返回值类型为String
 let stuName = clsObj.objectInvokeMethod('getStudentName', ':C{std.core.String}', []);
 let unwrapstuName.unwrapToString(); // 'stu1'
 ```
@@ -1971,17 +2374,18 @@ export class Student {
 
 **报错异常：**
 
-当传入的参数数量不为3，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`指向的对象无效时，报错`无效对象`；当未找到指定函数时（函数名或签名不匹配），报错`未找到对应函数`；当执行函数失败时（参数不匹配，函数无效），报错`调用函数失败`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为3时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`指向的对象无效时，抛出运行错误`无效实例对象`；当未找到指定函数时（函数名或签名不匹配），抛出运行错误`未找到对应函数`；当执行函数失败时（参数不匹配，函数无效），抛出运行错误`调用函数失败`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Function not found
-    let stuAge = stuObj.objectInvokeMethod('getStudentAge', 'i:i', []);
+    // Invalid Parameter Type
+    subClsObj.objectInvokeMethod('setStudentAge', 'i:', [[STValue.getUndefined()]]);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param array element are not STValue type; param=args; index=0
 ```
 ---
 
@@ -1991,7 +2395,7 @@ try {
 
 用于调用类的静态方法，接受三个参数：方法名称、方法签名和参数数组，返回方法调用的结果。主要作用是执行类的静态方法，支持带参数的方法调用，如果方法不存在、签名不匹配或参数错误，会抛出异常。
 
-**参数:**
+**参数：** 
 
 |  参数名   |   类型    | 必填 |                 说明                  |
 | :-------: | :-------: | :--: | :-----------------------------------: |
@@ -1999,13 +2403,13 @@ try {
 | signature |  string   |  是  | 方法签名（`参数类型:返回类型`） |
 |   args    | STValue[] |  是  |             方法参数数组              |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |                     说明                      |
 | :-----: | :-------------------------------------------: |
 | STValue | 方法调用结果的STValue对象（void方法返回null） |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2033,17 +2437,18 @@ export class Student {
 
 **报错异常：**
 
-当传入的参数数量不为3，报错`参数数量错误`；当传入的参数不是有效对应类型时，报错`参数类型错误`；当`this`指向的类无效时，报错`无效类`；当未找到指定函数时（函数名或签名不匹配），报错`未找到对应函数`；当执行函数失败时（参数不匹配，函数非静态函数或函数执行异常），报错`调用函数失败`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为3时，产生编译错误`参数数量错误`；当传入的参数不是有效对应类型时，抛出运行错误`参数类型错误`；当`this`指向的类无效时，抛出运行错误`无效类实例对象`；当未找到指定函数时（函数名或签名不匹配），抛出运行错误`未找到对应函数`；当执行函数失败时（参数不匹配，函数非静态函数或函数执行异常），抛出运行错误`调用函数失败`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Function call failed
-    studentCls.classInvokeStaticMethod('setStudentId', 'i:', [STValue.wrapNumber(12.34)]);
+    // Invalid Class Instance
+    STValue.getUndefined().classInvokeStaticMethod('setUId', 's:', []);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -2055,15 +2460,15 @@ try {
 
 用于将STValue对象解包为数字，不接受任何参数，返回数字值结果。支持基本数值类型(`boolean`, `byte`, `short`, `int`, `long`, `float`, `double`)的解包，如果值类型不支持或对象为引用类型，会抛出异常。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型  |      说明      |
 | :----: | :------------: |
 | number | 解包后的数字值 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2073,17 +2478,19 @@ let num = intValue.unwrapToNumber(); // 42
 
 **报错异常：**
 
-当传入的参数数量不为0，报错`参数数量错误`；当`this`指向的STValue对象非基本类型时（引用类型，null或undefined），报错`非基本类型`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`指向的STValue对象非基本类型时（引用类型，null或undefined），抛出运行错误`非基本类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let num = intValue.unwrapToNumber(1);
+    // Invalid Type
+    let magicSTValueNull = STValue.getNull();
+    let magicNull = magicSTValueNull.unwrapToNumber();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type primitive
 ```
 ---
 
@@ -2093,15 +2500,15 @@ try {
 
 用于将STValue对象解包为字符串，不接受任何参数，返回字符串结果。仅支持字符串对象（`std.core.String`）的解包，其它类型会抛出异常。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型  |       说明       |
 | :----: | :--------------: |
 | string | 解包后的字符串值 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2111,17 +2518,19 @@ let str = strValue.unwrapToString(); // "Hello World"
 
 **报错异常：**
 
-当传入的参数数量不为0，报错`参数数量错误`；当`this`指向的STValue对象非字符串对象时，报错`非字符串类型`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`指向的STValue对象非字符串对象时，抛出运行错误`非字符串类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let str = strValue.unwrapToString(1);
+    // Invalid Type
+    let magicSTValueNull = STValue.getNull();
+    let magicNull = magicSTValueNull.unwrapToString();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type std.core.String
 ```
 ---
 
@@ -2131,15 +2540,15 @@ try {
 
 用于将STValue对象解包为布尔值，不接受任何参数，返回布尔值结果。支持基本类型的解包，不支持引用类型。如果值类型不支持，会抛出异常。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |      说明      |
 | :-----: | :------------: |
 | boolean | 解包后的布尔值 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2153,17 +2562,19 @@ let bool2 = zeroValue.unwrapToBoolean(); // false
 
 **报错异常：**
 
-当传入的参数数量不为0，报错`参数数量错误`；当`this`指向的STValue对象非基本类型时（引用类型，null或undefined），报错`非基本类型`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`指向的STValue对象非基本类型时（引用类型，null或undefined），抛出运行错误`非基本类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let bool = boolValue.unwrapToBoolean(1);
+    // Invalid Type
+    let magicSTValueNull = STValue.getNull();
+    let magicNull = magicSTValueNull.unwrapToBoolean();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type primitive
 ```
 ---
 
@@ -2173,35 +2584,37 @@ try {
 
 用于将STValue中的大整数对象解包为BigInt类型，不接受任何参数，返回大整数值结果。支持特定的大整数类（`std.core.BigInt`），其它类型会抛出异常。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型  |       说明       |
 | :----: | :--------------: |
 | bigint | 解包后的大整数值 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
-let bigIntValue = STValue.wrapBigInt(12345678901234567890n);
+let bigIntValue = STValue.wrapBigInt(12345678901234567890n); 
 let bigInt = bigIntValue.unwrapToBigInt(); // 12345678901234567890n
 ```
 
 **报错异常：**
 
-当传入的参数数量不为0，报错`参数数量错误`；当`this`指向的STValue对象非大整数类时，报错`非大整数类型`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为0时，产生编译错误`参数数量错误`；当`this`指向的STValue对象非大整数类时，抛出运行错误`非大整数类型`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let bigInt = bigIntValue.unwrapToBigInt(1);
+    // Invalid Type
+    let magicSTValueNull = STValue.getNull();
+    let magicNull = magicSTValueNull.unwrapToBigInt();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Expected BigInt object, but got different type.
 ```
 ---
 
@@ -2214,19 +2627,19 @@ try {
 
 用于将数字包装为字节 byte（8 位有符号整数）的 STValue 对象，接受一个数字参数，返回包装后的 STValue 对象。如果值超出字节范围（-128到127），会抛出异常。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型  | 必填 |      说明      |
 | :----: | :----: | :--: | :------------: |
 | value  | number |  是  | 要包装的数字值 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |            说明             |
 | :-----: | :-------------------------: |
 | STValue | 包装后的字节类型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2236,17 +2649,18 @@ let isByte = byteValue.isByte(); // true
 
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；当传入参数值超出字节范围，报错`参数值超出有效字节类型范围`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；当传入参数值超出字节范围，抛出运行错误`参数值超出有效字节类型范围`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let byteValue = STValue.wrapByte();
+    // Out of Range
+    let byteValue = STValue.wrapByte(1000);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Value is out of range for byte type.
 ```
 ---
 
@@ -2255,21 +2669,21 @@ try {
 
 `static wrapChar(str: string): STValue`
 
-用于将字符串包装为字符类型（16位Unicode字符）的STValue对象，接受一个字符串参数，返回包装后的STValue对象。是将单个字符的字符串转换为字符类型，如果字符串长度不为1，会抛出异常。
+用于将字符串包装为字符类型（16位Unicode字符）的STValue对象，接受一个字符串参数，返回包装后的STValue对象。是将单个字符的字符串转换为字符类型，如果字符串长度不为1时，会抛出异常。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型  | 必填 |        说明        |
 | :----: | :----: | :--: | :----------------: |
 | str    | string |  是  | 要包装的单字节字符 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |            说明             |
 | :-----: | :-------------------------: |
 | STValue | 包装后的字符类型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2279,17 +2693,18 @@ let isChar = charValue.isChar(); // true
 
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；当传入字符串长度不为1，报错`传入字符串长度必须为1`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；当传入字符串长度不为1时，抛出运行错误`传入字符串长度必须为1`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let charValue = STValue.wrapChar();
+    // Invalid Input String Length
+    let charValue = STValue.wrapChar('123');
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// input string length must be 1.
 ```
 ---
 
@@ -2300,19 +2715,19 @@ try {
 
 用于将数字包装为短整型short（16 位有符号整数）的STValue对象，接受一个数字参数，返回包装后的STValue对象。如果值超出短整型范围（-2<sup>15</sup> 到2<sup>15</sup> -1），会抛出异常。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型  | 必填 |              说明               |
 | :----: | :----: | :--: | :-----------------------------: |
 | value  | number |  是  | 要包装的数字值（-2<sup>15</sup> 到2<sup>15</sup> -1） |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |           说明            |
 | :-----: | :-----------------------: |
 | STValue | 包装后的短整型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2321,17 +2736,18 @@ let isShort = shortValue.isShort(); // true
 ```
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；当传入参数值超出短整型范围，报错`参数值超出有效短整型范围`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；当传入参数值超出短整型范围，抛出运行错误`参数值超出有效短整型范围`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let shortValue = STValue.wrapShort();
+    // Out of Range
+    let shortValue = STValue.wrapShort(100000);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Value is out of range for short type.
 ```
 ---
 
@@ -2342,19 +2758,19 @@ try {
 
 用于将数字包装为整型（32位有符号整数）的STValue对象，接受一个数字参数，返回包装后的STValue对象。如果值超出整型范围（-2<sup>31</sup> 到2<sup>31</sup> -1），会抛出异常。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型  | 必填 |              说明               |
 | :----: | :----: | :--: | :-----------------------------: |
 | value  | number |  是  | 要包装的数字值（-2<sup>31</sup> 到2<sup>31</sup> -1） |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |          说明           |
 | :-----: | :---------------------: |
 | STValue | 包装后的整型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2363,17 +2779,18 @@ let isInt = intValue.isInt(); // true
 ```
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；当传入参数值超出整型范围，报错`参数值超出有效整型范围`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；当传入参数值超出整型范围，抛出运行错误`参数值超出有效整型范围`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let intValue = STValue.wrapInt();
+    // Out of Range
+    let intValue = STValue.wrapInt(2147483648);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Value is out of range for int type.
 ```
 ---
 
@@ -2385,19 +2802,19 @@ try {
 
 用于将数字或大整数包装为长整型（64位有符号整数）的STValue对象，接受一个数字或BigInt参数，返回包装后的STValue对象。如果输入的number类型的值超出了整数的精度范围（-2<sup>53</sup> -1到2<sup>53</sup> -1），或者输入的BigInt值超出长整型范围（-2<sup>63</sup> 到2<sup>63 </sup>-1），会抛出异常。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型  | 必填 |              说明               |
 | :----: | :----: | :--: | :-----------------------------: |
 | value  | number\|BigInt |  是  | 要包装的数字值（-2<sup>63</sup> 到2<sup>63</sup> -1） |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |           说明            |
 | :-----: | :-----------------------: |
 | STValue | 包装后的长整型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2410,17 +2827,20 @@ let isLong = longValue.isLong(); // true
 
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；当传入参数值超出整型或者传入的大整数超出长整型范围，报错`参数值超出有效范围`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；当传入参数值超出整型或者传入的大整数超出长整型范围，抛出运行错误`参数值超出有效长整型范围`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
-    let longValue = STValue.wrapLong();
+    // Out of Range
+    const MIN_LONG = -(1n << 63n);
+    const OVER_MAX_LONG = MAX_LONG + 1n;
+    STValue.wrapLong(OVER_MAX_LONG);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Value is out of range for long type.
 ```
 ---
 
@@ -2430,19 +2850,19 @@ try {
 
 用于将数字包装为单精度浮点型（32位浮点数）的STValue对象。针对从双精度浮点数value到单精度浮点数float的转换，实际效果和c++的`static_cast<float>(value)`相同。接受一个数字参数，返回包装后的STValue对象。若数字参数超出单精度浮点数可表示的范围，会被转换为正无穷（+Infinity）或负无穷（-Infinity）。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型  | 必填 |      说明      |
 | :----: | :----: | :--: | :------------: |
 | value  | number |  是  | 要包装的数字值 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |              说明               |
 | :-----: | :-----------------------------: |
 | STValue | 包装后的单精度浮点型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2451,17 +2871,19 @@ let isFloat = floatValue.isFloat(); // true
 ```
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let floatValue = STValue.wrapFloat();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2472,19 +2894,19 @@ try {
 
 用于将数字包装为双精度浮点型（64位浮点数）的STValue对象，接受一个数字参数，返回包装后的STValue对象。若数字参数超出双精度浮点数可表示的范围，会被转换为正无穷（+Infinity）或负无穷（-Infinity）
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型  | 必填 |      说明      |
 | :----: | :----: | :--: | :------------: |
 | value  | number |  是  | 要包装的数字值 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |              说明               |
 | :-----: | :-----------------------------: |
 | STValue | 包装后的双精度浮点型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2494,17 +2916,19 @@ let isDouble = doubleValue.isNumber(); // true
 
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let doubleValue = STValue.wrapNumber();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2514,19 +2938,19 @@ try {
 
 用于将布尔值包装为布尔类型的STValue对象，接受一个布尔参数，返回包装后的STValue对象，支持true和false两种值。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型   | 必填 |      说明      |
 | :----: | :-----: | :--: | :------------: |
 | value  | boolean |  是  | 要包装的数字值 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |            说明             |
 | :-----: | :-------------------------: |
 | STValue | 包装后的布尔类型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2536,17 +2960,19 @@ let isBool = boolValue.isBoolean(); // true
 
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let boolValue = STValue.wrapBoolean();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2556,19 +2982,19 @@ try {
 
 用于将字符串包装为字符串类型的STValue对象，接受一个字符串参数，返回包装后的STValue对象。
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型  | 必填 |       说明       |
 | :----: | :----: | :--: | :--------------: |
 | value  | string |  是  | 要包装的字符串值 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |             说明              |
 | :-----: | :---------------------------: |
 | STValue | 包装后的字符串类型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2578,17 +3004,19 @@ let isStr = strValue.isString(); // true
 
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let strValue = STValue.wrapString();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2599,19 +3027,19 @@ try {
 用于将ArkTS-Dyn BigInt对象包装为ArkTS-Sta BigInt类型的STValue对象，接受一个BigInt参数，返回包装后的STValue对象。
 
 
-**参数:**
+**参数：** 
 
 | 参数名 |  类型  | 必填 |       说明       |
 | :----: | :----: | :--: | :--------------: |
 | value  | bigint |  是  | 要包装的大整数值 |
 
-**返回值:**
+**返回值：** 
 
 |  类型   |             说明              |
 | :-----: | :---------------------------: |
 | STValue | 包装后的BigInt类型STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2621,17 +3049,19 @@ let isBigInt = stBigInt.isBigInt(); // true
 
 **报错异常：**
 
-当传入的参数数量不为1，报错`参数数量错误`；当传入参数类型错误，报错`参数类型错误`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为1时，产生编译错误`参数数量错误`；当传入参数类型错误，抛出运行错误`参数类型错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let stBigInt = STValue.wrapBigInt();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2641,15 +3071,15 @@ try {
 
 用于获取表示ArkTS-Sta内表示`null`的STValue对象，不接受任何参数，返回一个特殊的STValue对象。该对象在所有调用中返回相同的STValue实例。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |         说明          |
 | :-----: | :-------------------: |
 | STValue | 表示`null`的STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
@@ -2661,17 +3091,19 @@ stNull === stNull1; // true
 
 **报错异常：**
 
-当传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为0时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let stNull = STValue.getNull(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2681,36 +3113,40 @@ try {
 
 用于获取表示ArkTS-Sta内表示`undefined`的STValue对象，不接受任何参数，返回一个特殊的STValue对象。该对象在所有调用中返回相同的STValue实例。
 
-**参数:**  无
+**参数：**  无
 
-**返回值:**
+**返回值：** 
 
 |  类型   |            说明            |
 | :-----: | :------------------------: |
 | STValue | 表示`undefined`的STValue对象 |
 
-**示例:**
+**示例：** 
 
 ```typescript
 // ArkTS-Dyn
 let undefValue = STValue.getUndefined();
 let isUndef = undefValue.isUndefined(); // true
 let undefValue1 = STValue.getUndefined();
-undefValue === undefValue1;  // true
+let tst = (undefValue === undefValue1); // true
 ```
 
 **报错异常：**
 
-当传入的参数数量不为0，报错`参数数量错误`；遇到其它错误时，报错其它类型的错误。
+当传入的参数数量不为0时，产生编译错误`参数数量错误`；遇到其它错误时，抛出其它类型的运行错误异常。
 
-示例:
+示例：
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let undefValue = STValue.getUndefined(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
+ 
+ 

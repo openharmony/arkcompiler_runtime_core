@@ -64,6 +64,43 @@ let b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z', [b1, b2]); // Boole
 ```
 For more detailed information on the name mangling rules and usage, please refer to: [Mangling Rules](https://gitcode.com/openharmony/arkcompiler_runtime_core/blob/OpenHarmony_feature_20250702/static_core/plugins/ets/runtime/ani/docs/mangling.md)。
 
+### Other Notes
+
+**1. How to invoke the JSON.stringify() method (which processes static data) in Ark-Sta via STValue and return the serialized result?**
+
+A simple example is shown below, with the main steps including:
+- Obtain the instance variable `student` via the namespace.
+- Locate and get the JSON class using `findClass()`.
+- Invoke the static method `stringify()` of the JSON class through `classInvokeStaticMethod()` to convert the corresponding instance object `student` in Ark-Sta. The result of `stringify()` is an STValue object wrapping a String type.
+- Finally, unwrap the returned wrapped object to a String type.
+
+```typescript
+// ArkTS-Dyn
+let tns = STValue.findNamespace('stvalue_test.testNameSpace');
+let student = tns.namespaceGetVariable('student', SType.REFERENCE);
+let JSONCls = STValue.findClass("escompat.JSON");
+// Invoke stringify; the function signature indicates the input parameter is of Object type and the return value is of String type
+let stringfyRes = JSONCls.classInvokeStaticMethod('stringify', 'C{std.core.Object}:C{std.core.String}', [student]);
+let str = stringfyRes.unwrapToString(); // {"name":"student"}
+```
+
+```typescript
+// stvalue_test.ets ArkTS-Sta
+export class Student {
+    name: string;
+    constructor(n: string) {
+        this.name = n;
+    }
+}
+export namespace testNameSpace {
+    export let student: Student = new Student('student');
+}
+```
+
+**2. Notes on the Use of SType**
+
+The use of SType is involved when using interfaces in STValue. It should be noted that the enumeration values of SType must correspond to the corresponding types. For example, in `enumGetValueByName(memberName: string, valueType: SType)` (obtain an enumeration value by its name), the second input parameter needs to be the same type as the enumeration value. If the enumeration value is of int type, **SType.INT** should be passed in. Meanwhile, if the value corresponding to SType is a reference type (such as String, Array, and class instances), the corresponding type is **SType.REFERENCE**.
+
 ---
 ## 1 STValue_accessor
 
@@ -98,17 +135,18 @@ let studentCls = STValue.findClass('stvalue_accessor.Student');
 export class Student {}
 ```
 **Error:**
-When the incoming path does not conform to the class descriptor specification (for example, the class name is in an incorrect format, the class name contains illegal characters, etc.), the error `Invalid class name format` is reported; when the default class loader does not find the class, the error `Finding failed` is reported; when an error other than `Finding failed` is encountered, other types of errors are reported.
+When the number of parameters passed during invocation is not 1, a compilation error `Invalid parameter count` shall be raised; when the passed path does not comply with the class descriptor specification (e.g., invalid class name format, class name containing illegal characters, etc.), a runtime error `Invalid class name` shall be thrown; when the default class loader fails to find the class, a runtime error `Lookup failed` shall be thrown; for any errors other than `Lookup failed`, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try{
-    // Illegal characters
-    let studentCls = STValue.findClass(`stvalue_accessor.Student#`); 
-}catch(e){
+    // Invalid Class
+    let klass = STValue.findClass('stvalue_accessor/Animal');
+}catch (e: Error){
     // Throw Error 
     console.log(e.message); 
 }
+// FindClass failed, invalid className: className=stvalue_accessor/Animal, aniStatus=4
 ```
 ---
 
@@ -143,17 +181,18 @@ let ns = STValue.findNamespace('stvalue_accessor.MyNamespace');
 export namespace MyNamespace {}
 ```
 **Error:**
-When the incoming namespace path does not conform to the specification (for example, the format is wrong, the namespace name contains illegal characters, etc.), the error `Invalid namespace name format` is reported; when the namespace is not found, the error `Foundation failed` is reported; when an error other than `Foundation failed` is encountered, other types of errors are reported.
+When the number of parameters passed during invocation is not 1, a compilation error `Invalid parameter count` shall be raised; when the passed namespace path does not comply with the specification (e.g., invalid format, namespace name containing illegal characters, etc.), a runtime error `Invalid namespace name` shall be thrown; when the namespace cannot be found, a runtime error `Lookup failed` shall be thrown; for any errors other than `Lookup failed`, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try{
-    // Illegal characters
+    // Invalid Namespace
     let exampleNs = STValue.findNamespace('stvalue_accessor.Namespace#'); 
-}catch(e){
+}catch (e: Error){
     // Throw Error 
-    console.log(e.message); // 
+    console.log(e.message);  
 }
+// FindNamespace failed, invalid namespaceName: namespaceName=stvalue_accessor.Namespace#, aniStatus=4
 ```
 ---
 
@@ -190,17 +229,18 @@ export enum COLOR {
 ```
 
 **Error:**
-When the incoming enumeration path does not conform to the specification (for example, it is malformed, the enumeration name contains illegal characters, etc.), the error `Invalid enumeration name format` is reported; when the enumeration is not found, the error `Foundation failed` is reported; when an error other than `Foundation failed` is encountered, other types of errors are reported.
+When the number of parameters passed during invocation is not 1, a compilation error `Invalid parameter count` shall be raised; when the passed enumeration path does not comply with the specification (e.g., invalid format, enumeration name containing illegal characters, etc.), a runtime error `Invalid enumeration name` shall be thrown; when the enumeration cannot be found, a runtime error `Lookup failed` shall be thrown; for any errors other than `Lookup failed`, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try{
-    // Illegal characters
+    // Invalid Enum
     let testEnum = STValue.findEnum('stvalue_accessor.COLOR#'); 
-}catch(e){
+}catch (e: Error){
     // Throw Error 
     console.log(e.message);
 }
+// FindEnum failed, invalid enumName: enumName=stvalue_accessor.COLOR#, aniStatus=4
 ```
 ---
 
@@ -237,18 +277,19 @@ export class Dog extends Animal {
 ```
 
 **Error:**
-When parameters are passed in during the call (the number of parameters is not 0), the error `wrong number of parameters` is reported; when `this` is not a valid object, the error `illegal object` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` shall be raised; when `this` is not a valid object, a runtime error `Illegal instance object` shall be thrown; for any other errors, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try {
-    // Illegal Object
+    // Invalid Instance
     let nonClass = STValue.wrapInt(111);
     let resClass = nonClass.classGetSuperClass();
-} catch (e) {
+} catch (e: Error) {
     // Throw Error
     console.log(e.message);
 }
+// 'this' STValue instance does not wrap a value of type reference
 ```
 
 ---
@@ -284,17 +325,18 @@ export namespace testNameSpace {
 ```
 
 **Error:**
-When parameters are passed in during the call (the number of parameters is not 0), the error `wrong number of parameters` is reported; when `this` is not a valid fixed array object, the error `illegal object` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` shall be raised; when `this` is not a valid fixed array object, a runtime error `Illegal instance object` shall be thrown; for any other errors, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    strArray.fixedArrayGetLength(11);
+    // Invalid Instance
+    STValue.wrapInt(1).fixedArrayGetLength();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -333,17 +375,18 @@ export enum COLOR{
 }
 ```
 **Error:**
-When the number of parameters passed in when calling is not 1, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid string, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid string, an error is reported: `Wrong parameter type`; when `this` is not a valid enumeration object, an error is reported: `Illegal enumeration object`; when the corresponding enumeration item is not found, Error `enumeration does not exist`; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 1, a compilation error `Invalid parameter count` is raised; if the passed parameter is not a valid string, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid enumeration object, a runtime error `Illegal instance object` is thrown; if the corresponding enumeration item cannot be found, a runtime error `Enumeration does not exist` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    colorEnum.enumGetIndexByName('Black', SType.INT);
+    // Invalid Argument Type
+    colorEnum.enumGetIndexByName(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param are not string type; param=memberName
 ```
 ---
 
@@ -385,17 +428,19 @@ export enum COLOR{
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 2, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when `this` is not a valid enumeration object, an error is reported: `Illegal enumeration object`; when no corresponding enumeration item is found, Error `enumeration does not exist`; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 2, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid enumeration object, a runtime error `Illegal instance object` is thrown; if the corresponding enumeration item cannot be found, a runtime error `Enumeration does not exist` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument type
-    colorEnum.enumGetValueByName(1234, SType.REFERENCE);
+    // Invalid Object
+    let nullEnum = STValue.getNull();
+    nullEnum.enumGetValueByName('Red', SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -435,18 +480,19 @@ export class Person {
 }
 ```
 **Error:**
-When the number of parameters passed in during the call is not 2, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when `this` is not a valid class object, an error is reported: `Illegal class object`; when the corresponding field is not found, Error `field does not exist`; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 2, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid class object, a runtime error `Illegal instance object` is thrown; if the corresponding field cannot be found, a runtime error `Field does not exist` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid class
+    // Invalid Instance
     let nonClass = STValue.wrapInt(111);
     nonClass.classGetStaticField('male', SType.BOOLEAN);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -486,17 +532,18 @@ export class Person {
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 3, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when `this` is not a valid class object, an error is reported: `Illegal class object`; when the val parameter type and the fieldType field type do not match, Report an error `Mismatched field type`; when the corresponding field is not found, report an error `Field does not exist`; when other errors are encountered, report an error of other types.
+If the number of parameters passed during invocation is not 3, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid class object, a runtime error `Illegal instance object` is thrown; if the type of the val parameter does not match the type of the fieldType field, a runtime error `Mismatched field type` is thrown; if the corresponding field cannot be found, a runtime error `Field does not exist` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Mismatched value type
+    // Invalid Type
     personClass.classSetStaticField('male', STValue.wrapBoolean(false), SType.INT);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// value STValue instance does not wrap a value of type int
 ```
 ---
 
@@ -544,17 +591,18 @@ export namespace testNameSpace {
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 2, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when `this` is not a valid instance object, an error is reported: `Illegal instance object`; when the corresponding property is not found, Report an error `attribute does not exist`; when the attribute type does not match, report an error `unmatched attribute type`; when other errors are encountered, report an error of other types.
-
+If the number of parameters passed during invocation is not 2, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid instance object, a runtime error `Illegal instance object` is thrown; if the corresponding property cannot be found, a runtime error `Property does not exist` is thrown; if the property types do not match, a runtime error `Mismatched property type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 Example:
 ```typescript
 try {
-    // Mismatched property type
-    alice.objectGetProperty('name', SType.INT);
+    // Invalid Instance
+    let priObject = STValue.wrapInt(111);
+    priObject.objectGetProperty('name', SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -568,7 +616,7 @@ Used to set the property value of an object instance, it accepts three parameter
 
 | Parameter Name | Type | Required | Description |
 | :------: | :-----:| :-------: | :--------: |
-| propName | string | is | property name |
+| propName | string | yes | property name |
 | val | STValue | yes | value to set |
 | propType | SType | yes | property type |
 
@@ -599,17 +647,18 @@ export namespace testNameSpace {
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 3, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when `this` is not a valid instance object, an error is reported: `Illegal instance object`; when the corresponding property is not found, Report an error `attribute does not exist`; when the attribute type does not match, report an error `unmatched attribute type`; when other errors are encountered, report an error of other types.
+If the number of parameters passed during invocation is not 3, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid instance object, a runtime error `Illegal instance object` is thrown; if the corresponding property cannot be found, a runtime error `Property does not exist` is thrown; if the property types do not match, a runtime error `Mismatched property type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Mismatched property type
+    // Invalid Type
     alice.objectSetProperty('name', STValue.wrapNumber(111), SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// value STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -648,17 +697,19 @@ export namespace testNameSpace {
 }
 ```
 **Error:**
-When the number of parameters passed in during the call is not 2, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when `this` is not a valid array object, an error is reported: `Illegal object`; when the index idx exceeds the array range, The error `index out of bounds` is reported; when the array element types do not match, the error `mismatched element types` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 2, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid array object, a runtime error `Illegal instance object` is thrown; if the index idx is out of the array range, a runtime error `Index out of bounds` is thrown; if the array element types do not match, a runtime error `Mismatched element type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Out of bounds
-    strArray.fixedArrayGet(-1, SType.REFERENCE);
+    // Invalid Instance
+    let notArray = STValue.wrapInt(111);  
+    notArray.fixedArrayGet(-1, SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -696,17 +747,19 @@ export namespace testNameSpace {
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 3, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when `this` is not a valid array object, an error is reported: `Illegal object`; when the index idx exceeds the array range, The error `index out of bounds` is reported; when the array element types do not match or the values do not match, the error `mismatched element types` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 3, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid array object, a runtime error `Illegal instance object` is thrown; if the index idx is out of the array range, a runtime error `Index out of bounds` is thrown; if the array element types or values do not match, a runtime error `Mismatched element type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Mismatched element type
-    strArray.fixedArraySet(0, STValue.wrapString('11'), SType.INT);
+    // Invalid Instance
+    let notArray = STValue.wrapInt(111);
+    notArray.fixedArraySet(0, STValue.getNull(), SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -721,7 +774,7 @@ Used to get the variable value in the namespace, it accepts two parameters: vari
 
 | Parameter Name | Type | Required | Description |
 | :----------: | :----: | :--: | :-----------: |
-| name | string | is | variable name |
+| name | string | yes | variable name |
 | variableType | SType | yes | variable type enumeration value |
 
 **Return value:**
@@ -747,17 +800,18 @@ export namespace MyNamespace {
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 2, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when `this` is not a valid namespace, an error is reported: `Invalid namespace`; when the variable does not match the variable type, Report the error `Mismatched variable type`; when the variable does not exist, report the error `Variable does not exist`; when other errors are encountered, report other types of errors.
+If the number of parameters passed during invocation is not 2, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid namespace, a runtime error `Invalid namespace` is thrown; if a variable does not match its variable type, a runtime error `Mismatched variable type` is thrown; if a variable does not exist, a runtime error `Variable does not exist` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Mismatched element type
-    ns.namespaceGetVariable('data', SType.BOOLEAN)
+    // Invalid Type
+    ns.namespaceGetVariable(1, SType.INT)
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param are not string type; param=variableName
 ```
 ---
 
@@ -771,7 +825,7 @@ Used to set the value of a variable in a namespace, it accepts three parameters:
 
 | Parameter Name | Type | Required | Description |
 | :----------: | :-----: | :--: | :-----------: |
-| name | string | is | variable name |
+| name | string | yes | variable name |
 | value | STValue | yes | value to set |
 | variableType | SType | yes | variable type enumeration value |
 
@@ -799,18 +853,18 @@ export namespace MyNamespace {
 ```
 
 **Error:**
-When the number of parameters passed in when calling is not 3, the error `Wrong number of parameters` is reported; when the number of parameters passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when the number of parameters passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when `this` is not a valid namespace, the error `Invalid namespace` is reported; when the set value does not match the variable type, Report the error `Mismatched variable type`; when the variable does not exist, report the error `Variable does not exist`; when other errors are encountered, report other types of errors.
+If the number of parameters passed during invocation is not 3, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid namespace, a runtime error `Invalid namespace` is thrown; if the set value does not match the variable type, a runtime error `Mismatched variable type` is thrown; if a variable does not exist, a runtime error `Variable does not exist` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid namespace
-    let num = STValue.wrapInt(111);
-    num.namespaceSetVariable(`data`, STValue.wrapInt(0), SType.INT);
+    // Invalid Type
+    ns.namespaceSetVariable(1, STValue.wrapInt(44), SType.INT);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param are not string type; param=variableName
 ```
 ---
 
@@ -838,19 +892,279 @@ let isString = strWrap.objectInstanceOf(strType); // true
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error of `wrong number of parameters` is reported; when `this` is not a valid reference type object, an error of `invalid object` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` is raised; if `this` is not a valid reference type object, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid object
+    // Invalid Instance
     STValue.getUndefined().objectGetType();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
+### 1.17 arrayGet
+
+`arrayGet(idx: number): STValue`
+
+Used to retrieve the element at the specified index of a dynamic array, encapsulate it as an STValue object and return it. The object invoking this method must be a valid STValue reference-type array object.
+
+**Parameters:** 
+
+| Parameter | Type   | Required | Description                |
+| :-------: | :-----: | :------: | :------------------------- |
+|   idx     | number |    Yes   | Index of the array element |
+
+**Return Value:**
+
+| Type     | Description                                          |
+| :------: | :--------------------------------------------------- |
+| STValue  | STValue object encapsulating the element at the specified position |
+
+**Example:**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+// Returns an STValue object encapsulating an Int type
+let arrayValue0 = intArray.arrayGet(0);
+let num = arrayValue0.objectInvokeMethod('toInt', ':i', []).unwrapToNumber(); // 1
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**Error:**
+A compilation error `Incorrect number of arguments` is thrown if the number of parameters passed during invocation is not 1; a runtime error `Invoking object is not a reference type` is thrown if the invoking object `this` is not a valid dynamic array reference or is null; other types of runtime errors are thrown if other errors occur.
+
+Example:
+```typescript
+try {
+    // Invalid Arguments Number
+    intArray.arrayGet(0, SType.INT);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 1 args, but got 2 args
+```
+---
+
+### 1.18 arraySet
+
+`arraySet(idx: number, val: STValue): void`
+
+Used to set the value of the element at the specified index of a dynamic array. The object invoking this method must be a valid STValue reference-type array object, and the array value `val` to be set must be an STValue object encapsulating a reference-type object.
+
+**Parameters:** 
+
+| Parameter | Type     | Required | Description                          |
+| :-------: | :-------: | :------: | :----------------------------------- |
+|   idx     | number   |    Yes   | Index of the array element to set    |
+|   val     | STValue  |    Yes   | STValue encapsulated object to store |
+
+**Return Value:** None
+
+**Example:**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+let intClass = STValue.findClass('std.core.Int');
+let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(10)]);
+// The passed parameter must be a valid Int reference-type object
+intArray.arraySet(0, intObj);
+let arrayValue0 = intArray.arrayGet(0);
+let num = arrayValue0.objectInvokeMethod('toInt', ':i', []).unwrapToNumber(); // 10
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**Error:**
+
+A compilation error `Incorrect number of arguments` is thrown if the number of parameters passed during invocation is not 2; a runtime error `Incorrect parameter type` is thrown if the `val` parameter is not a valid STValue reference; a runtime error `Invoking object is not a reference type` is thrown if the invoking object `this` is not a valid dynamic array reference or is null; other types of runtime errors are thrown if other errors occur.
+
+Example:
+```typescript
+try {
+    // Invalid Arguments Number
+    intArray.arraySet(0);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 2 args, but got 1 args
+```
+---
+
+### 1.19 arrayPush
+
+`arrayPush(val: STValue): void`
+
+Adds a new element to the end of a dynamic array. The object invoking this method must be a valid STValue reference-type array object, and the new array value `val` to be added must be an STValue object encapsulating a reference-type object.
+
+**Parameters:** 
+
+| Parameter | Type     | Required | Description                          |
+| :-------: | :-------: | :------: | :----------------------------------- |
+|   val     | STValue  |    Yes   | STValue encapsulated object to add   |
+
+**Return Value:** None
+
+**Example:**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+let intClass = STValue.findClass('std.core.Int');
+let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(10)]);
+// The passed parameter must be a valid Int reference-type object
+intArray.arrayPush(intObj);
+let arrayValue0 = intArray.arrayGet(5);
+let num = arrayValue0.objectInvokeMethod('toInt', ':i', []).unwrapToNumber(); // 10
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**Error:**
+
+A compilation error `Incorrect number of arguments` is thrown if the number of parameters passed during invocation is not 1; a runtime error `Incorrect parameter type` is thrown if the `val` parameter is not a valid STValue reference; a runtime error `Invoking object is not a reference type` is thrown if the invoking object `this` is not a valid dynamic array reference or is null; other types of runtime errors are thrown if other errors occur.
+
+Example:
+```typescript
+try {
+    // Invalid Arguments Number
+    intArray.arrayPush();
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 1 args, but got 0 args
+```
+---
+
+### 1.20 arrayPop
+
+`arrayPop(): STValue`
+
+Removes and returns the last element of a dynamic array. The object invoking this method must be a valid STValue reference-type array object.
+
+**Parameters:** None
+
+**Return Value:** 
+
+| Type     | Description                                          |
+| :------: | :--------------------------------------------------- |
+| STValue  | STValue object of the removed last element |
+
+**Example:**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+let intPop = intArray.arrayPop();
+let num = intPop.objectInvokeMethod('toInt', ':i', []).unwrapToNumber(); // 5
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**Error:**
+
+A compilation error `Incorrect number of arguments` is thrown if the number of parameters passed during invocation is not 0; a runtime error `Invoking object is not a reference type` is thrown if the invoking object `this` is not a valid dynamic array reference or is null; other types of runtime errors are thrown if other errors occur.
+
+Example:
+```typescript
+try {
+    // Invalid Arguments Number
+    intArray.arrayPop(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 0 args, but got 1 args
+```
+---
+
+### 1.21 arrayGetLength
+
+`arrayGetLength(): number`
+
+Used to retrieve the length of a dynamic array. The object invoking this method must be a valid STValue reference-type array object.
+
+**Parameters:** None
+
+**Return Value:** 
+
+| Type    | Description                          |
+| :-----: | :----------------------------------- |
+| number  | Current number of elements in the dynamic array |
+
+**Example:**
+
+```typescript
+// Ark-Dyn
+let tns = STValue.findNamespace('stvalue_accessor.testNameSpace')
+let intArray = tns.namespaceGetVariable('intArray', SType.REFERENCE);
+let num = intArray.arrayGetLength(); // 5
+```
+
+```typescript
+// Ark-Sta
+export namespace testNameSpace {
+    export let intArray: Array<int> = [1, 2, 3, 4, 5];
+}
+```
+
+**Error:**
+
+A compilation error `Incorrect number of arguments` is thrown if the number of parameters passed during invocation is not 0; a runtime error `Invoking object is not a reference type` is thrown if the invoking object `this` is not a valid dynamic array reference or is null; other types of runtime errors are thrown if other errors occur.
+
+---
+
+Example:
+```typescript
+try {
+    // Invalid Arguments Number
+    let num = intArray.arrayGetLength(1);
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// ArkTS Compiler Error
+// Expect 0 args, but got 1 args
+```
+---
+
 
 ## 2 STValue_check
 
@@ -891,17 +1205,19 @@ export namespace Check {
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let isStr = str.isString(11); 
+    // Invalid Arguments Number
+let isStr = str.isString(1); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -930,17 +1246,19 @@ let isBigInt1 = num.isBigInt(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let isBigInt = bigNum.isBigInt(11); 
+    // Invalid Arguments Number
+    let isBigInt = 'STValue'.isBigInt(); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -969,17 +1287,19 @@ let isNull1 = intValue.isNull(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let isNull = nullValue.isNull(123); 
+    // Invalid Arguments Number
+    let isNull = 'STValue'.isNull();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1008,17 +1328,20 @@ let isUndef1 = intValue.isUndefined(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
+
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let isUndef = undefValue.isUndefined(11); 
+    // Invalid Arguments Number
+    let isUndef = 'STValue'.isUndefined(); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1033,7 +1356,7 @@ Used to compare whether the ArkTS-Sta object references wrapped with `this` and 
 
 | Parameter Name | Type | Required | Description |
 | :----: | :-----: | :-----: | :-----------------------
-| other | STValue | is | another STValue object to compare |
+| other | STValue | yes | another STValue object to compare |
 
 **Return value:** 
 
@@ -1063,17 +1386,18 @@ export namespace Check {
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 1, an error of `wrong number of parameters` is reported; when `this` or `other` is not a reference type, an error of `invalid object` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed during invocation is not 1, a compilation error `Invalid parameter count` is raised; if either `this` or `other` is not a reference type, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
-try {
-    // Invalid argument count
-    let isEqual = ref1.isEqualTo(ref2,1);
-} catch (e: Error) {
+try{
+    // Invalid Instance
+    STValue.wrapInt(1).isEqualTo(STValue.wrapInt(1));
+} catch (e: Error){
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -1087,7 +1411,7 @@ ArkTS-Sta object references used to compare `this` and `other` wrappers are stri
 
 | Parameter Name | Type | Required | Description |
 | :----: | :-----:| :-----: | :-----------------------
-| other | STValue | is | another STValue object to compare |
+| other | STValue | yes | another STValue object to compare |
 
 **Return value:** 
 
@@ -1119,17 +1443,18 @@ export namespace Check {
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 1, an error of `wrong number of parameters` is reported; when `this` or `other` is not a reference type, an error of `invalid object` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed during invocation is not 1, a compilation error `Invalid parameter count` is raised; if either `this` or `other` is not a reference type, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
-try {
-    // Invalid object
-    let isStrictlyEqual = ref1.isStrictlyEqualTo(STValue.wrapInt(1));
-} catch (e: Error) {
+try{
+    // Invalid Instance
+    magicString1.isEqualTo(STValue.wrapInt(1));
+} catch (e: Error){
     // Throw Error
     console.log(e.message);
- }
+}
+// 'other' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -1158,17 +1483,19 @@ let isBool1 = numValue.isBoolean(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` is raised; if `this` is not a valid STValue object, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let isBool = boolValue.isBoolean(1); 
+    // Invalid Arguments Number
+    let isBool = boolValue.isBoolean(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1196,17 +1523,19 @@ let intValue = STValue.wrapInt(42);g
 let isByte1 = intValue.isByte(); // false
 ```
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` is raised; if `this` is not a valid STValue object, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let isByte = byteValue.isByte(1); 
+    // Invalid Arguments Number
+    let isByte = byteValue.isByte(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1235,17 +1564,19 @@ let isChar1 = strValue.isChar(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` is raised; if `this` is not a valid STValue object, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let isChar = charValue.isChar(1); 
+    // Invalid Arguments Number
+    let isChar = charValue.isChar(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1274,17 +1605,19 @@ let isShort1 = intValue.isShort(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` is raised; if `this` is not a valid STValue object, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isShort = shortValue.isShort(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1313,17 +1646,19 @@ let isInt1 = longValue.isInt(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` is raised; if `this` is not a valid STValue object, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isInt = intValue.isInt(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1352,17 +1687,19 @@ let isLong1 = intValue.isLong(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` is raised; if `this` is not a valid STValue object, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isLong = longValue.isLong(1); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1391,17 +1728,19 @@ let isFloat1 = intValue.isFloat(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` is raised; if `this` is not a valid STValue object, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let isFloat = floatValue.isFloat(1);
+    // Invalid Arguments Number
+    let isFloat = floatValue.isFloat(1); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1430,17 +1769,19 @@ let isNumber1 = intValue.isNumber(); // false
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed during invocation is not 0, a compilation error `Invalid parameter count` is raised; if `this` is not a valid STValue object, a runtime error `Invalid instance object` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Arguments Number
     let isNumber = doubleValue.isNumber(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 0 Arguments, bug got 1.
 ```
 ---
 
@@ -1478,17 +1819,19 @@ export class SubStudent extends Student {}
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 2, an error of `wrong number of parameters` is reported; when the source type or target type is not a reference type or is null and undefined, an error of `invalid type` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed during invocation is not 2, a compilation error `Invalid parameter count` is raised; if the source type or target type is not a reference type, or is null or undefined, a runtime error `Invalid type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let isAssignable = STValue.typeIsAssignableFrom(subStudentCls); 
+    // Invalid Arguments Number
+    let isAssignable = STValue.typeIsAssignableFrom(subStudentCls);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 2 Arguments, bug got 1.
 ```
 ---
 
@@ -1527,17 +1870,19 @@ export class Student {
 ```
 
 **Error:**
-When the number of parameters passed in during the call is not 1, an error of `wrong number of parameters` is reported; when the object pointed to by `this` is not a valid instance object, an error of `invalid instance object` is reported; when the typeArg parameter passed in is invalid, an error of `invalid parameter type` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed during invocation is not 1, a compilation error `Invalid parameter count` is raised; if the object pointed to by `this` is not a valid instance object, a runtime error `Invalid instance object` is thrown; if the passed typeArg parameter is invalid, a runtime error `Invalid parameter type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid object
-    let isCls = STValue.getNull().objectInstanceOf(studentCls);
+    // Invalid Arguments Number
+    let isInstance = stuObj.objectInstanceOf(); 
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -1583,17 +1928,18 @@ export class Student {
 ```
 
 **Error:**
-When the number of parameters passed in is not 2, the error `Wrong number of parameters` is reported; when the number of parameters passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when `this` is not a valid class object, the error `Illegal class object` is reported; when the specified constructor is not found (signature mismatch), The error `Invalid constructor` is reported; when instantiating an object fails (constructor parameters do not match), the error `Instantiation failed` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed is not 2, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if `this` is not a valid class object, a runtime error `Illegal class object` is thrown; if the specified constructor is not found (signature mismatch), a runtime error `Invalid constructor` is thrown; if object instantiation fails (constructor parameter mismatch), a runtime error `Instantiation failed` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid class object
-    let intObj = STValue.getNull().classInstantiate('C{std.core.String}:', [STValue.wrapString('Alice')]);
+    // Invalid Argument Type
+    studentCls.classInstantiate(':', STValue.wrapNumber(1));
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param are not array type; param=args
 ```
 ---
 
@@ -1645,17 +1991,18 @@ export namespace Instance {
 ```
 
 **Error:**
-When the number of parameters passed in is not 2, an error of `wrong number of parameters` is reported; when the number of parameters passed in is not a valid corresponding type, an error of `wrong parameter type` is reported; when the parameter passed in is not a valid corresponding type, an error of `wrong parameter type` is reported; when the array length is not a valid length, an error of `invalid length` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed is not 2, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if the array length is not a valid length, a runtime error `Invalid length` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let boolArray = STValue.newFixedArrayPrimitive(5);
+    // Invalid Argument Type
+    STValue.newFixedArrayPrimitive(5, SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Unsupported SType: SType::REFERENCE
 ```
 ---
 
@@ -1709,19 +2056,64 @@ export namespace Instance {
 ```
 
 **Error:**
-When the number of parameters passed in is not 3, the error `Wrong number of parameters` is reported; when the parameter passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when the parameter passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when the array length is not a valid length, the error `Invalid length` is reported; when the initial value does not match the type, Report an error `Mismatched initial value type`; when other errors are encountered, report an error of other types.
+If the number of parameters passed is not 3, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if the array length is not a valid length, a runtime error `Invalid length` is thrown; if the initial value does not match the type, a runtime error `Invalid initial value` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid length
-    let refArray = STValue.newFixedArrayReference(-1, intClass, intObj);
+    // Invalid InitialElement
+    STValue.newFixedArrayReference(999, intClass, [STValue.getNull()]);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// initialElement STValue instance does not wrap a value of type reference
 ```
 ---
+### 3.4 newArray
+
+`static newArray(len: number, initialElement: STValue): STValue`
+
+A static method of STValue, used to create a new dynamic array of the specified length and populate all positions of the array with the provided initial element. The initial element (an STValue object) must encapsulate a reference type.
+
+**Parameters:**
+
+| Parameter      | Type     | Required | Description                                                                 |
+| :------------: | :------: | :------: | :-------------------------------------------------------------------------- |
+| len            | number   |    Yes   | Initial length of the array                                                 |
+| initialElement | STValue  |    Yes   | Initial element used to populate each position of the array (must be a reference type) |
+
+**Return Value:**
+
+| Type    | Description                                                |
+| :-----: | :--------------------------------------------------------- |
+| STValue | STValue object encapsulating the newly created array       |
+
+**Example:**
+
+```typescript
+let intObj = intClass.classInstantiate('i:', [STValue.wrapInt(0)]);
+// The passed object is an Int reference type
+let intArray = STValue.newArray(5, intObj); // [0, 0, 0, 0, 0]
+```
+
+**Error:**
+
+A compilation error `Incorrect number of arguments` is thrown if the number of passed parameters is not 2; a runtime error `Incorrect parameter type` is thrown if the passed parameters are not valid for their corresponding types; other types of runtime errors are thrown if other errors occur.
+
+Example:
+```typescript
+try {
+    // Invalid InitialElement
+    STValue.newArray(999, STValue.wrapInt(123));
+} catch (e: Error) {
+    // Throw Error
+    console.log(e.message);
+}
+// initialElement STValue instance does not wrap a value of type reference
+```
+---
+
 
 ## 4 STValue_invoke
 ### 4.1 namespaceInvokeFunction
@@ -1766,17 +2158,18 @@ export namespace Invoke{
 ```
 
 **Error:**
-When the number of parameters passed in is not 3, the error `Wrong number of parameters` is reported; when the parameter passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when the parameter passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when the namespace pointed to by `this` is invalid, the error `Invalid namespace` is reported; when the specified function is not found (function name or signature does not match), The error `No corresponding function found` is reported; when the function fails to execute (parameter mismatch, invalid function), the error `Failed to call function` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed is not 3, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if the namespace pointed to by `this` is invalid, a runtime error `Invalid namespace` is thrown; if the specified function is not found (mismatched function name or signature), a runtime error `Function not found` is thrown; if function execution fails (parameter mismatch or invalid function), a runtime error `Function call failed` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid arguments count
-    let b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zz:z');
+    // Invalid Parameter Count
+    b = nsp.namespaceInvokeFunction('BooleanInvoke', 'zzz:z', [b1, b2]);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Failed to find function when namespace invoke function;functionName=BooleanInvoke;signatureName=zzz:z
 ```
 ---
 
@@ -1826,17 +2219,18 @@ export namespace Invoke {
 ```
 
 **Error:**
-When the number of parameters passed in is not 1, an error is reported: `Wrong number of parameters`; when the number of parameters passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the parameter passed in is not a valid corresponding type, an error is reported: `Wrong parameter type`; when the functional object pointed to by `this` is invalid, an error is reported: `Invalid function object`; when the execution function fails (parameter mismatch, invalid function), Error `Failed to call function`; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed is not 1, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if the functional object pointed to by `this` is invalid, a runtime error `Invalid function object` is thrown; if function execution fails (parameter mismatch or invalid function), a runtime error `Function call failed` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid arguments count
-    let numRes = getNumberFn.functionalObjectInvoke([STValue.wrapInt(123)], 1); 
+    // Invalid Function Instance
+    STValue.getUndefined().functionalObjectInvoke([]);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -1852,7 +2246,7 @@ A method used to dynamically call an object that accepts three parameters: the m
 
 | Parameter Name | Type | Required | Description |
 | :----------: | :--------: | :--: | :-----: |
-| name | string | is | method name |
+| name | string | yes | method name |
 | signature | string | yes | method signature(`parameter type: return type`) |
 | args | STValue[] | yes | method parameter array |
 
@@ -1893,17 +2287,18 @@ export class Student {
 ```
 
 **Error:**
-When the number of parameters passed in is not 3, the error `Wrong number of parameters` is reported; when the parameter passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when the parameter passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when the object pointed to by `this` is invalid, the error `Invalid object` is reported; when the specified function is not found (function name or signature does not match), The error `No corresponding function found` is reported; when the function fails to execute (parameter mismatch, invalid function), the error `Failed to call function` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed is not 3, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if the object pointed to by `this` is invalid, a runtime error `Invalid instance object` is thrown; if the specified function is not found (mismatched function name or signature), a runtime error `Function not found` is thrown; if function execution fails (parameter mismatch or invalid function), a runtime error `Function call failed` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Function not found
-    let stuAge = stuObj.objectInvokeMethod('getStudentAge', 'i:i', []);
+    // Invalid Parameter Type
+    subClsObj.objectInvokeMethod('setStudentAge', 'i:', [[STValue.getUndefined()]]);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// param array element are not STValue type; param=args; index=0
 ```
 ---
 
@@ -1954,17 +2349,18 @@ export class Student {
 ```
 
 **Error:**
-When the number of parameters passed in is not 3, the error `Wrong number of parameters` is reported; when the parameter passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when the parameter passed in is not a valid corresponding type, the error `Wrong parameter type` is reported; when the class pointed to by `this` is invalid, the error `Invalid class` is reported; when the specified function is not found (function name or signature does not match), The error `No corresponding function found` is reported; when the function fails to execute (parameter mismatch, function is not static or function execution exception), the error `Failed to call function` is reported; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed is not 3, a compilation error `Invalid parameter count` is raised; if the passed parameters are not of the valid corresponding types, a runtime error `Invalid parameter type` is thrown; if the class pointed to by `this` is invalid, a runtime error `Invalid class instance object` is thrown; if the specified function is not found (mismatched function name or signature), a runtime error `Function not found` is thrown; if function execution fails (parameter mismatch, non-static function, or function execution exception), a runtime error `Function call failed` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Function call failed
-    studentCls.classInvokeStaticMethod('setStudentId', 'i:', [STValue.wrapNumber(12.34)]);
+    // Invalid Class Instance
+    STValue.getUndefined().classInvokeStaticMethod('setUId', 's:', []);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type reference
 ```
 ---
 
@@ -1993,17 +2389,19 @@ let num = intValue.unwrapToNumber(); // 42
 ```
 
 **Error:**
-When the number of parameters passed in is not 0, an error of `wrong number of parameters` is reported; when the STValue object pointed to by `this` is not of a basic type (reference type, null or undefined), an error of `non-basic type` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed is not 0, a compilation error `Invalid parameter count` is raised; if the STValue object pointed to by `this` is not a primitive type (reference type, null, or undefined), a runtime error `Non-primitive type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let num = intValue.unwrapToNumber(1);
+    // Invalid Type
+    let magicSTValueNull = STValue.getNull();
+    let magicNull = magicSTValueNull.unwrapToNumber();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type primitive
 ```
 ---
 
@@ -2030,17 +2428,19 @@ let str = strValue.unwrapToString(); // 'Hello World'
 ```
 
 **Error:**
-When the number of parameters passed in is not 0, an error `Wrong number of parameters` is reported; when the STValue object pointed to by `this` is not a string object, an error `Non-string type` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed is not 0, a compilation error `Invalid parameter count` is raised; if the STValue object pointed to by `this` is not a string object, a runtime error `Non-string type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let str = strValue.unwrapToString(1); 
+    // Invalid Type
+    let magicSTValueNull = STValue.getNull();
+    let magicNull = magicSTValueNull.unwrapToString();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type std.core.String
 ```
 ---
 
@@ -2071,17 +2471,19 @@ let bool2 = zeroValue.unwrapToBoolean(); // false
 ```
 
 **Error:**
-When the number of parameters passed in is not 0, the error `Wrong number of parameters` is reported; when the STValue object pointed to by `this` is not of a basic type (reference type, null or undefined), the error `Not of a basic type` is reported; when other errors are encountered, errors of other types are reported.
+If the number of parameters passed is not 0, a compilation error `Invalid parameter count` is raised; if the STValue object pointed to by `this` is not a string object, a runtime error `Non-string type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let bool = boolValue.unwrapToBoolean(1);
+    // Invalid Type
+    let magicSTValueNull = STValue.getNull();
+    let magicNull = magicSTValueNull.unwrapToBoolean();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// 'this' STValue instance does not wrap a value of type primitive
 ```
 ---
 
@@ -2108,17 +2510,19 @@ let bigInt = bigIntValue.unwrapToBigInt(); // 12345678901234567890n
 ```
 
 **Error:**
-When the number of parameters passed in is not 0, an error is reported: `Wrong number of parameters`; when the STValue object pointed to by `this` is not a large integer class, an error is reported: `Non-large integer type`; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed is not 0, a compilation error `Invalid parameter count` is raised; if the STValue object pointed to by `this` is not a big integer class, a runtime error `Non-big integer type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let bigInt = bigIntValue.unwrapToBigInt(1);
+    // Invalid Type
+    let magicSTValueNull = STValue.getNull();
+    let magicNull = magicSTValueNull.unwrapToBigInt();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Expected BigInt object, but got different type.
 ```
 ---
 
@@ -2152,17 +2556,18 @@ let isByte = byteValue.isByte(); // true
 ```
 
 **Error:**
-When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the byte range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the byte range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the byte range, an error `Wrong parameter type` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed is not 1, a compilation error `Invalid parameter count` is raised; if the passed parameter type is incorrect, a runtime error `Invalid parameter type` is thrown; if the passed parameter value exceeds the byte range, a runtime error `Value is out of range for byte type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let byteValue = STValue.wrapByte();
+    // Out of Range
+    let byteValue = STValue.wrapByte(1000);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Value is out of range for byte type.
 ```
 ---
 
@@ -2194,17 +2599,18 @@ let isChar = charValue.isChar(); // true
 ```
 
 **Error:**
-When the number of parameters passed in is not 1, an error is reported: `Wrong number of parameters`; when the parameter type passed in is wrong, an error is reported: `Wrong parameter type`; when the parameter type passed in is wrong, an error is reported: `Wrong parameter type`; when the length of the string passed in is not 1, an error is reported: `The length of the string passed in must be 1`; when other errors are encountered, other types of errors are reported.
+If the number of parameters passed is not 1, a compilation error `Invalid parameter count` is raised; if the passed parameter type is incorrect, a runtime error `Invalid parameter type` is thrown; if the length of the passed string is not 1, a runtime error `The length of the input string must be 1` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let charValue = STValue.wrapChar();
+    // Invalid Input String Length
+    let charValue = STValue.wrapChar('123');
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// input string length must be 1.
 ```
 ---
 
@@ -2235,17 +2641,18 @@ let shortValue = STValue.wrapShort(32767);
 let isShort = shortValue.isShort(); // true
 ```
 **Error:**
-When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the short integer range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the short integer range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the short integer range, an error `Wrong parameter type` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed is not 1, a compilation error `Invalid parameter count` is raised; if the passed parameter type is incorrect, a runtime error `Invalid parameter type` is thrown; if the passed parameter value exceeds the range of short integer, a runtime error `Value is out of range for short type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let shortValue = STValue.wrapShort();
+    // Out of Range
+    let shortValue = STValue.wrapShort(100000);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Value is out of range for short type.
 ```
 ---
 
@@ -2276,17 +2683,18 @@ let intValue = STValue.wrapInt(123);
 let isInt = intValue.isInt(); // true
 ```
 **Error:**
-When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the integer range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the integer range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the integer range, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the integer range, an error `Wrong parameter type` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed is not 1, a compilation error `Invalid parameter count` is raised; if the passed parameter type is incorrect, a runtime error `Invalid parameter type` is thrown; if the passed parameter value exceeds the range of integer, a runtime error `Value is out of range for int type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let intValue = STValue.wrapInt();
+    // Out of Range
+    let intValue = STValue.wrapInt(2147483648);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Value is out of range for int type.
 ```
 ---
 
@@ -2302,7 +2710,7 @@ An STValue object used to wrap a number or large integer into a long integer (a 
 
 | Parameter Name | Type | Required | Description |
 | :----: | :----: | :--: | :----: |
-| value | number\|BigInt | is | the number value to wrap (-2<sup>63</sup> to 2<sup>63</sup>-1) |
+| value | number\|BigInt | yes | the number value to wrap (-2<sup>63</sup> to 2<sup>63</sup>-1) |
 
 **Return value:** 
 
@@ -2322,17 +2730,20 @@ let isLong = longValue.isLong(); // true
 ```
 
 **Error:**
-When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when the parameter value passed in exceeds the integer or the large integer passed in exceeds the long integer range, an error `Wrong parameter value exceeds the valid range` is reported; when other errors are encountered, an error of other types is reported.
+If the number of parameters passed is not 1, a compilation error `Invalid parameter count` is raised; if the passed parameter type is incorrect, a runtime error `Invalid parameter type` is thrown; if the passed parameter value exceeds the integer range, or the passed big integer exceeds the long integer range, a runtime error `Value is out of range for long type` is thrown; for any other errors, other types of runtime error exceptions are thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
-    let longValue = STValue.wrapLong();
+    // Out of Range
+    const MIN_LONG = -(1n << 63n);
+    const OVER_MAX_LONG = MAX_LONG + 1n;
+    STValue.wrapLong(OVER_MAX_LONG);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// Value is out of range for long type.
 ```
 ---
 
@@ -2367,12 +2778,14 @@ When the number of parameters passed in is not 1, an error `Wrong number of para
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let floatValue = STValue.wrapFloat();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2409,12 +2822,14 @@ When the number of parameters passed in is not 1, an error `Wrong number of para
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let doubleValue = STValue.wrapNumber();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2445,17 +2860,19 @@ let isBool = boolValue.isBoolean(); // true
 ```
 
 **Error:**
-When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when other errors are encountered, an error of other types is reported.
+If the number of passed parameters is not 1, raise compilation error `Invalid parameter count`; if the passed parameter type is wrong, throw runtime error `Invalid parameter type`; for other errors, throw other types of runtime exceptions.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let boolValue = STValue.wrapBoolean();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2486,17 +2903,19 @@ let isStr = strValue.isString(); // true
 ```
 
 **Error:**
-When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when other errors are encountered, an error of other types is reported.
+If the number of passed parameters != 1, raise compilation error `Invalid parameter count`; if passed parameter type is wrong, throw runtime error `Invalid parameter type`; for other errors, throw other runtime exceptions.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let strValue = STValue.wrapString();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2528,17 +2947,19 @@ let isBigInt = stBigInt.isBigInt(); // true
 ```
 
 **Error:**
-When the number of parameters passed in is not 1, an error `Wrong number of parameters` is reported; when the parameter type passed in is wrong, an error `Wrong parameter type` is reported; when other errors are encountered, an error of other types is reported.
+When the number of parameters passed is not 1, a compilation error `Invalid parameter count` shall be raised; when the passed parameter type is incorrect, a runtime error `Invalid parameter type` shall be thrown; for any other errors, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let stBigInt = STValue.wrapBigInt();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2567,17 +2988,19 @@ stNull === stNull1; // true
 ```
 
 **Error:**
-When the number of parameters passed in is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed is not 0, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let stNull = STValue.getNull(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
 
@@ -2606,16 +3029,18 @@ undefValue === undefValue1; // true
 ```
 
 **Error:**
-When the number of parameters passed in is not 0, an error `Wrong number of parameters` is reported; when other errors are encountered, other types of errors are reported.
+When the number of parameters passed is not 0, a compilation error `Invalid parameter count` shall be raised; for any other errors, other types of runtime error exceptions shall be thrown.
 
 Example:
 ```typescript
 try {
-    // Invalid argument count
+    // Invalid Argument Number
     let undefValue = STValue.getUndefined(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
- }
+}
+// ArkTS Compiler Error
+// Expected 1 Arguments, bug got 0.
 ```
 ---
