@@ -4043,6 +4043,13 @@ Type mapping determines the *effective types* as follows:
        number of element types *n*.
    * - :ref:`String Literal Types`
      - ``string``
+   * - undefined
+     - ``undefined``
+   * - null
+     - ``null``
+   * - Any
+     - ``Any``
+
 
 Otherwise, the original type is *preserved*.
 
