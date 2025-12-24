@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -608,7 +608,8 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         isSuccessful = SerializeEmptyObject();
     } else if (value->GetCoreType() == coro->GetNullValue()) {
         isSuccessful = SerializeJSONNullValue();
-    } else if (value->IsInstanceOf(platformTypes->interopJSValue)) {
+    } else if (value->IsInstanceOf(platformTypes->interopJSValue) ||
+               value->IsInstanceOf(platformTypes->interopESValue)) {
         isSuccessful = false;
     } else if (valueCls->IsEtsEnum()) {
         isSuccessful = false;

@@ -106,6 +106,7 @@
     T("Lstd/core/Set;", coreSet)                                                                                      \
     /* Interop */                                                                                                     \
     T("Lstd/interop/js/JSValue;", interopJSValue)                                                                     \
+    T("Lstd/interop/ESValue;", interopESValue)                                                                        \
     /* TypeAPI */                                                                                                     \
     T("Lstd/core/Field;", coreField)                                                                                  \
     T("Lstd/core/Method;", coreMethod)                                                                                \
