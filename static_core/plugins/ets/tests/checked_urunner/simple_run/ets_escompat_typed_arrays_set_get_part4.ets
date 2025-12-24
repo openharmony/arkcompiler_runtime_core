@@ -14,7 +14,8 @@
  */
 
 //! CHECKER       JIT Test cpp intrinsics
-//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex='.*test.*ArrayGetUnsafe'", entry: "ets_escompat_typed_arrays_set_get_part4.ETSGLOBAL::main"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get_part4.ETSGLOBAL::main",
+//!               options: "--compiler-encode-intrinsics=false --compiler-regex='.*test.*ArrayGetUnsafe'"
 //!
 //! METHOD        "testUint8ArrayGetUnsafe"
 //! METHOD        "escompat_Uint8Array::at"
@@ -41,7 +42,8 @@
 //! INST_NOT      /Call.*Array::getUnsafe/
 
 //! CHECKER       JIT Test IR intrinsics
-//! RUN           force_jit: true, options: "--compiler-regex='(.*test.*ArrayGetUnsafe)|(escompat\.*Array::at)'", entry: "ets_escompat_typed_arrays_set_get_part4.ETSGLOBAL::main"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_set_get_part4.ETSGLOBAL::main",
+//!               options: "--compiler-regex='(.*test.*ArrayGetUnsafe)|(escompat\.*Array::at)'"
 //!
 //! METHOD        "testUint8ArrayGetUnsafe"
 //! METHOD        "escompat_Uint8Array::at"
