@@ -57,6 +57,9 @@ class Tool(ToolBase):
             if OptFlags.SKIP_COMPILATION not in self.flags:
                 abc.unlink(missing_ok=True)
             res = self.run_es2abc(src, abc, lang)
+            if self.no_run:
+                bu.status = BUStatus.NOT_RUN
+                return
             if res.ret != 0 or not abc.is_file():
                 bu.status = BUStatus.COMPILATION_FAILED
                 raise VmbToolExecError(f'{self.name} failed: {src}', res)

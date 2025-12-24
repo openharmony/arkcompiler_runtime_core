@@ -38,8 +38,12 @@ log = logging.getLogger('vmb')
 class PlatformBase(CrossShell, ABC):
     """Platform Base."""
 
+    DEFAULT_TIMEOUT = 900
+
     def __init__(self, args: Args) -> None:
-        self.__sh = ShellHost(args.timeout)
+        self.flags = args.get_opts_flags()
+        self.no_run = OptFlags.NO_RUN in self.flags
+        self.__sh = ShellHost(args.timeout, no_run=self.no_run)
         self.__andb = None
         self.__hdc = None
         self.__dev_dir = Path(args.get('device_dir', 'unknown'))
@@ -48,17 +52,18 @@ class PlatformBase(CrossShell, ABC):
         if self.target == Target.DEVICE:
             self.__andb = ShellAdb(dev_serial=args.device,
                                    timeout=args.timeout,
-                                   tmp_dir=args.device_dir)
+                                   tmp_dir=args.device_dir,
+                                   no_run=self.no_run)
         if self.target == Target.OHOS:
             self.__hdc = ShellHdc(dev_serial=args.device,
                                   dev_host=args.device_host,
                                   timeout=args.timeout,
-                                  tmp_dir=args.device_dir)
+                                  tmp_dir=args.device_dir,
+                                  no_run=self.no_run)
         ToolBase.sh_ = self.sh
         ToolBase.andb_ = self.andb
         ToolBase.hdc_ = self.hdc
         ToolBase.dev_dir = self.dev_dir
-        self.flags = args.get_opts_flags()
         self.tools = {}
         # dir with shared libs (init before the suite)
         ToolBase.libs = Path(args.get_shared_path()).joinpath('libs').resolve()
@@ -194,6 +199,8 @@ class PlatformBase(CrossShell, ABC):
             return
         bu.device_path = self.dev_dir.joinpath(bu.path.name)
         self.x_sh.run(f'mkdir -p {bu.device_path.as_posix()}')
+        if self.no_run:
+            self.x_sh.push(bu.path.joinpath('*'), bu.device_path)
         for f in bu.path.glob('*'):
             # skip if suffix filter provided
             if ext and f.suffix not in ext:

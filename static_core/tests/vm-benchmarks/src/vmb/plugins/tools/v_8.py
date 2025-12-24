@@ -16,7 +16,7 @@
 #
 
 from vmb.tool import ToolBase, OptFlags
-from vmb.unit import BenchUnit
+from vmb.unit import BenchUnit, BUStatus
 from vmb.target import Target
 
 
@@ -55,6 +55,9 @@ class Tool(ToolBase):
             if OptFlags.DISABLE_INLINING in bu_flags else ''
         mjs = self.x_src(bu, '.mjs')
         res = self.x_run(f'{self.d_8} {opts}{mjs}')
+        if self.no_run:
+            bu.status = BUStatus.NOT_RUN
+            return
         bu.parse_run_output(res)
 
     def kill(self) -> None:

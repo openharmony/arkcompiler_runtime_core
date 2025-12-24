@@ -19,6 +19,7 @@ import argparse
 import sys
 import logging
 import re
+import os
 from typing import Any, List, Dict, Set
 from pathlib import Path
 from vmb.helpers import StringEnum, split_params, read_list_file, die
@@ -69,18 +70,21 @@ def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('-gc', '--sys-gc-pause', default=None, type=int,
                         help='If <val> >= 0 invoke GC twice '
                         'and wait <val> ms before iteration')
-    parser.add_argument("-aot-co", "--aot-compiler-options", default=[],
-                        type=str, action="append",
-                        help="Sets ahead-of-time compiler options")
-    parser.add_argument("-aot-lib-co", "--aot-lib-compiler-options", default=[],
-                        type=str, action="append",
-                        help="Sets ahead-of-time compiler options for libraries")
     parser.add_argument("-c", "--concurrency-level",
                         default=None, type=str,
                         help="Concurrency level (DEPRECATED)")
     parser.add_argument("-compiler-inlning", "--compiler-inlining",
                         default=None, type=str,
                         help="enable compiler inlining")
+
+
+def add_compiler_specific_opts(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("-aot-co", "--aot-compiler-options", default=[],
+                        type=str, action="append",
+                        help="Sets ahead-of-time compiler options")
+    parser.add_argument("-aot-lib-co", "--aot-lib-compiler-options", default=[],
+                        type=str, action="append",
+                        help="Sets ahead-of-time compiler options for librarsies")
 
 
 def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
@@ -155,6 +159,8 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         help='Do not remove compiled files after test')
     parser.add_argument('--skip-compilation', action='store_true',
                         help='Do not compile tests. Reuse existing binaries.')
+    parser.add_argument('-N', '--no-run', action='store_true',
+                        help='Do not execute commands, just print them.')
 
 
 def add_report_opts(parser: argparse.ArgumentParser) -> None:
@@ -218,11 +224,13 @@ def add_logparser_opts(parser: argparse.ArgumentParser) -> None:
 
 class _ArgumentParser(argparse.ArgumentParser):
 
+    cmd = Command.ALL
+
     def __init__(self, command: Command) -> None:
         super().__init__(
             prog=f'vmb {command.value}',
             formatter_class=argparse.RawDescriptionHelpFormatter,
-            epilog=self.__epilog()
+            epilog=self.__epilog(command)
         )
         # Options common for all commands
         self.add_argument('paths', nargs='*', help='Dirs or files')
@@ -241,11 +249,15 @@ class _ArgumentParser(argparse.ArgumentParser):
         if command in (Command.GEN, Command.ALL):
             add_gen_opts(self, command)
             add_measurement_opts(self)
+            add_compiler_specific_opts(self)
             add_filter_opts(self)
         # Runner-specific options
         if command in (Command.RUN, Command.ALL):
             add_run_opts(self)
             add_presentation_opts(self)
+        # Add compiler opts to RUN
+        if command in (Command.RUN,):
+            add_compiler_specific_opts(self)
         # Report-specific options
         if command in (Command.REPORT,):
             add_report_opts(self)
@@ -255,7 +267,11 @@ class _ArgumentParser(argparse.ArgumentParser):
             add_logparser_opts(self)
 
     @staticmethod
-    def __epilog() -> str:
+    def __epilog(command: Command) -> str:
+        if command in (Command.RUN, Command.ALL):
+            return os.linesep.join(
+                ['  --<tool>-custom-option=<opt>  Add <opt> to <tool> cmdline (no spaces allowed)',
+                 '  --<tool>-path=/path/to/tool   Override path to <tool> binary'])
         return ''
 
 
@@ -272,6 +288,7 @@ class Args(argparse.Namespace):
                 or sys.argv[1] not in Command.getall():
             print('Usage: vmb COMMAND [options] [paths]')
             print(f'       COMMAND {{{",".join(Command.getall())}}}')
+            print('For detailed help on command, please, issue: vmb <cmd> --help')
             for c in Command:
                 print('=' * 80)
                 try:
@@ -359,6 +376,8 @@ class Args(argparse.Namespace):
             flags |= OptFlags.JIT
         if self.get('dry_run', False):
             flags |= OptFlags.DRY_RUN
+        if self.get('no_run', False):
+            flags |= OptFlags.NO_RUN
         if self.get('aot_skip_libs', False):
             flags |= OptFlags.AOT_SKIP_LIBS
         if self.get('enable_gc_logs', False):

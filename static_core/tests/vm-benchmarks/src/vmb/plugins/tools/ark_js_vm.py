@@ -17,10 +17,11 @@
 
 from vmb.tool import ToolBase, OptFlags, VmbToolExecError
 from vmb.target import Target
-from vmb.unit import BenchUnit
+from vmb.unit import BenchUnit, BUStatus
 
 
 class Tool(ToolBase):
+    JIT_PARAMS = '--compiler-enable-jit=true --compiler-jit-hotness-threshold=2 --compiler-enable-litecg=true '
 
     def __init__(self, *args) -> None:
         super().__init__(*args)
@@ -44,11 +45,15 @@ class Tool(ToolBase):
         bu_path = bu.path if self.target == Target.HOST \
             else bu.device_path
         aot = f'--aot-file={name} ' if OptFlags.AOT in self.flags or OptFlags.AOTPGO in self.flags else ''
+        jit = self.JIT_PARAMS if OptFlags.JIT in self.flags else ''
         res = self.x_run(
             f'{self.ark_js_vm} --entry-point={name} '
             f'--open-ark-tools=true '
-            f'{aot}{self.custom} {name}.abc',
+            f'{aot}{jit}{self.custom} {name}.abc',
             cwd=str(bu_path))
+        if self.no_run:
+            bu.status = BUStatus.NOT_RUN
+            return
         bu.parse_run_output(res)
 
     def profile(self, bu: BenchUnit, with_aot: bool = False) -> None:

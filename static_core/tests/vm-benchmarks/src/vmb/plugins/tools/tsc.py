@@ -53,6 +53,8 @@ class Tool(ToolBase):
                 '--module es2022 '
                 f'{self.custom} '
                 f'--outDir {bu.path} {ts}', measure_time=True)
+            if self.no_run:
+                return
             js = ts.with_suffix('.js')
             if res.ret != 0 or not js.is_file():
                 bu.status = BUStatus.COMPILATION_FAILED
