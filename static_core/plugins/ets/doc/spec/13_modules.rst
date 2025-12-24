@@ -36,12 +36,15 @@ Module Declarations
 Each module creates its own scope (see :ref:`Scopes`).
 Variables, functions, classes, interfaces, or other declarations of a module
 are only accessible (see :ref:`Accessible`) within such a scope if not
-explicitly exported (see :ref:`Export Directives`).
+exported explicitly. Types of all exported entities must be set explicitly
+(see details in :ref:`Export Directives`).
 
 A variable, function, class, interface, or other declarations exported from
 a module must be imported first by the module that is to use them.
 
-.. Only exported declarations are available for the 3rd party tools and programs written in other programming languages.
+.. note::
+   Only exported declarations are available for the 3rd party tools and programs
+   written in other programming languages.
 
 All *modules* are stored in a file system or a database
 (see :ref:`Modules in Host System`).
@@ -140,25 +143,25 @@ The usage of namespaces is represented in the example below:
    :linenos:
 
     namespace NS1 {
-        export function foo() {  }
-        export let variable = 1234
-        export const constant = 1234
+        export function foo(): void {  }
+        export let variable: int = 1234
+        export const constant: int = 1234
         export let someVar: string
 
         // Will be executed before any use of NS1 members
         someVar = "some string"
         console.log("Init for NS1 done")
-        export function bar() {}
+        export function bar(): void {}
     }
 
     namespace NS2 {
-        export const constant = 1
+        export const constant:int = 1
         // Will never be executed since NS2 members are never used
         console.log("Init for NS2 done")
-        export function bar() {}
+        export function bar(): void {}
     }
 
-    export function bar() {}  // That is a different bar()
+    export function bar(): void {}  // That is a different bar()
 
     if (NS1.variable == NS1.constant) {
         NS1.variable = 4321
@@ -198,13 +201,13 @@ The usage of namespaces is represented in the example below:
            export let a: number = 1
            let b = 2
 
-           export function foo() {
+           export function foo(): void {
                let v: number
                v = a // OK, no qualification
                v = NS.a // OK, `a` exported
            }
 
-           export function bar() {
+           export function bar(): void {
                let v: number
                v = b  // OK, no qualification
                v = NS.b // CTE, `b` not exported
@@ -222,13 +225,13 @@ The usage of namespaces is represented in the example below:
 
        // File1
        namespace Space1 {
-           export function foo() { ... }
-           export let variable = 1234
-           export const constant = 1234
+           export function foo(): void { ... }
+           export let variable: int = 1234
+           export const constant: int = 1234
        }
        export namespace Space2 {
-           export function foo(p: number) { ... }
-           export let variable = "1234"
+           export function foo(p: number): void { ... }
+           export let variable: int = "1234"
        }
 
        // File2
@@ -260,10 +263,10 @@ The usage of namespaces is represented in the example below:
       :linenos:
 
        namespace ExternalSpace {
-           export function foo() { ... }
-           export let variable = 1234
+           export function foo(): void { ... }
+           export let variable: number = 1234
            export namespace EmbeddedSpace {
-               export const constant = 1234
+               export const constant: int = 1234
            }
        }
 
@@ -296,23 +299,23 @@ The usage of namespaces is represented in the example below:
 
     // One source file
     namespace A {
-        export function foo() { console.log ("1st A.foo() exported") }
-        function bar() {  }
+        export function foo(): void { console.log ("1st A.foo() exported") }
+        function bar(): void {  }
         export namespace C {
-            export function too() { console.log ("1st A.C.too() exported") }
+            export function too(): void { console.log ("1st A.C.too() exported") }
         }
     }
 
     namespace B {  }
 
     namespace A {
-        export function goo() {
+        export function goo(): void {
             A.foo() // calls exported foo()
             foo()   /* calls exported foo() as well as all A namespace
                        declarations are merged into one */
             A.C.moo()
         }
-        //export function foo() {  }
+        //export function foo(): void {  }
         // Compile-time error as foo() was already defined
 
         // function foo() { console.log ("2nd A.foo() non-exported") }
@@ -320,10 +323,9 @@ The usage of namespaces is represented in the example below:
     }
 
     namespace A.C {
-        export function moo() {
+        export function moo(): void {
             too() // too()  accessible when namespace C and too() are both exported
             A.C.too()
-
         }
     }
 
@@ -331,13 +333,13 @@ The usage of namespaces is represented in the example below:
 
     // File
     namespace A {
-        export function foo() { ... }
-        export function bar() { ... }
+        export function foo(): void { ... }
+        export function bar(): void { ... }
     }
 
     namespace A {
         function goo() { bar() }  // exported bar() is accessible in the same namespace
-        export function foo() { ... }  // Compile-time error as foo() was already defined
+        export function foo(): void { ... }  // Compile-time error as foo() was already defined
     }
 
 .. index::
@@ -380,7 +382,7 @@ The usage of namespaces is represented in the example below:
       :linenos:
 
        namespace A.B.C {
-           export function foo() { ... }
+           export function foo(): void { ... }
        }
 
        A.B.C.foo() // Valid function call, as 'B' and 'C' are implicitly exported
@@ -394,12 +396,12 @@ The usage of namespaces is represented in the example below:
        namespace A {
            function foo() { ... } // #1
            export namespace B {
-              export function foo() { ... } // #2
+              export function foo(): void { ... } // #2
            }
        }
 
        namespace A.B {
-           export function foo() { ... } // #3
+           export function foo(): void { ... } // #3
        }
 
        // Declarations of functions #2 and #3 lead to a compile-time error:
@@ -682,9 +684,9 @@ including *explicitly overloaded functions* (see
    :linenos:
 
     // File1
-    export function foo(p: number) {} // #1
-    export function foo(p: string) {} // #2
-    export function fooBoolean(p: Boolean) {}
+    export function foo(p: number): void {} // #1
+    export function foo(p: string): void {} // #2
+    export function fooBoolean(p: Boolean): void {}
     export overload foo {foo, fooBoolean)
 
     function foo() {} // #3
@@ -718,7 +720,7 @@ below:
 .. code-block:: typescript
    :linenos:
 
-    export const PI = 3.14
+    export const PI: number = 3.14
     export function sin(d: number): number {}
 
 .. note::
@@ -1189,7 +1191,7 @@ inside the module they are declared in.
    :linenos:
 
     export class Point {}
-    export let Origin = new Point(0, 0)
+    export let Origin: Point = new Point(0, 0)
     export function Distance(p1: Point, p2: Point): number {
       // ...
     }
@@ -1216,7 +1218,7 @@ occurs if more than one top-level declaration is marked as ``default``.
 .. code-block:: typescript
    :linenos:
 
-    export default let PI = 3.141592653589
+    export default let PI: number = 3.141592653589
 
 .. index::
    top-level declaration
@@ -1328,9 +1330,78 @@ and such a new name clashes with the name of another exported declaration.
 .. code-block:: typescript
    :linenos:
 
-    export function foo() {}
-    function bar() {}
+    export function foo(): void {}
+    function bar(): void {}
     export {bar as foo} // Compile-time error: 'foo' is already exported
+
+Types of exported functions, variables, constants, public and protected APIs
+of classes, default interface methods, interface getters and setters must be
+set explicitly where applicable as represented in the examples below.
+Otherwise, a :index:`compile-time error` occurs.
+
+- Exported constants and variables must have explicit types. Exported functions
+  must have explicit return types:
+
+  .. code-block:: typescript
+     :linenos:
+
+     export let a: int = 1 // OK
+     export let b = 1 // compile-time error - no explicit type
+
+     export const c: int = 1 // OK
+     export const d = 1 // compile-time error - no explicit type
+
+     export function foo(): void {} // OK
+     function bar() {}  // compile-time error - no return type
+
+- Exported classes must explicitly declare method and field types, both static
+  and instance, of its public and protected APIs.
+
+  .. code-block:: typescript
+     :linenos:
+
+     export class C {
+       // Public and protected static and instance fields and methods
+       x = 1   // compile-time-error - no explicit type for public field
+       static v = 1 // compile-time-error - no explicit type for public field
+       y: int = 1   // OK
+       private z = 1 // OK - not a public/protected field
+
+       foo() { return 1 } // compile-time error - no explicit return type 
+                          // for public method
+
+       static bar() {} // compile time error - no return type for public static
+       static bar_ok(): void {} // OK
+
+
+       protected i_bar() { return 1 } // compile-time error - no explicit return
+                                      // type for protected method
+       protected bar_ok(): int { return 1 } // OK
+
+       private nevermind() {} // private - no return type but OK
+
+       private baz() { return "hello" } // OK - baz() not in public/protected API
+     }
+
+- Exported getters (see :ref:`Accessor declarations`) at the top level
+  or in a namespace must have an explicit return types.
+
+  The internal storage variable, if used, can have or not have an explicit type:
+  
+  .. code-block:: typescript
+     :linenos:
+
+     let _counter: int = 1  // OK
+     let _name = "empty"         // OK
+     export get counter() { return _counter } // compile-time error, no return type
+     export get name(): string { return _name } // OK
+
+     export namespace NS {
+       get name() { return "Bob" } // OK since not exported
+       export get age(): int { return 1 }  // OK
+       export get sex() { return "male" } // compile-time error, no explicit
+                                          // return type
+     }
 
 
 .. index::
@@ -1345,6 +1416,31 @@ and such a new name clashes with the name of another exported declaration.
    syntax
 
 |
+
+- Default methods of exported interfaces must have explicit return types.
+
+  .. code-block:: typescript
+     :linenos:
+
+     interface I {
+       get_count(): number { return 1; }
+       set_count(n: number): void {}
+     }
+
+     interface J {
+       get_count() { return 1; }
+       set_count(n: number) {}
+     }
+
+     export I   // OK
+     export J   // Compile-time error: no explicit types for get_count and set_count
+
+
+- *Modules with ambient declarations*
+
+  The limitations for modules with ambient declarations already imply requirements
+  of explicit type as described in :ref:`ambient declarations`.
+
 
 .. _Selective Export Directive:
 
@@ -1437,7 +1533,7 @@ The directive in the example below exports variable 'v' by its name:
    :linenos:
 
     export v
-    let v = 1
+    let v: int = 1
 
 
 The directive in the example below exports class 'A' by its name as default
@@ -1889,10 +1985,10 @@ below:
     console.log ("Hello, world!")
 
     // Option 5: top-level exported function
-    export function entry() {}
+    export function entry(): void {}
 
     // Option 5: top-level exported function with command-line arguments
-    export function entry(cmdLine: string[]) {}
+    export function entry(cmdLine: string[]): void {}
 
 .. index::
    entry point
