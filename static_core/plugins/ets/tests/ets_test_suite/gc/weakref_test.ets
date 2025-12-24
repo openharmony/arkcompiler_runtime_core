@@ -12,14 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class DerivedWeakRef extends WeakRef<Object> {
-    constructor(target: Object) {
-        super(target);
-    }
-}
 
 let globalWr: WeakRef<Object>|undefined = undefined;
-let globalDwr: DerivedWeakRef|undefined = undefined;
 
 function check() {
 }
@@ -31,14 +25,10 @@ class WeakRefTestSuite extends arktest.ArkTestsuite {
 
     before() {
         globalWr = new WeakRef<Object>(new Object());
-        globalDwr = new DerivedWeakRef(new Object());
     }
 
     after() {
     }
-
-    private weakRef: WeakRef<Object>|undefined = undefined;
-    private derivedWeakRef: DerivedWeakRef|undefined = undefined;
 }
 
 function weakRefTest() {
@@ -49,7 +39,6 @@ function weakRefTest() {
     }
     GC.startGC(GC.Cause.FULL, true);
     arktest.assertEQ(globalWr!.deref(), undefined);
-    arktest.assertEQ(globalDwr!.deref(), undefined);
 }
 
 function main() {

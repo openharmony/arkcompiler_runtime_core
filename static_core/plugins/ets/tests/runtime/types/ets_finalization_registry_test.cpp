@@ -104,11 +104,11 @@ TEST_F(EtsFinalizationRegistryLayoutTest, FinalizationRegistryMemoryLayout)
 
 TEST_F(EtsFinalizationRegistryLayoutTest, FinRegNodeMemoryLayout)
 {
-    // Check the parent is WeakRef because it affects memory layout of fields
-    EtsClass *weakRefClass = vm_->GetClassLinker()->GetClass("Lstd/core/WeakRef;");
-    ASSERT_NE(nullptr, weakRefClass);
+    // Check the parent is BaseWeakRef because it affects memory layout of fields
+    EtsClass *baseWeakRefClass = PlatformTypes(vm_)->coreBaseWeakRef;
+    ASSERT_NE(nullptr, baseWeakRefClass);
     EtsClass *finRegNodeClass = PlatformTypes(vm_)->coreFinRegNode;
-    ASSERT_EQ(weakRefClass, finRegNodeClass->GetBase());
+    ASSERT_EQ(baseWeakRefClass, finRegNodeClass->GetBase());
     MirrorFieldInfo::CompareMemberOffsets(finRegNodeClass, GetFinRegNodeMembers());
 }
 }  // namespace ark::ets::test

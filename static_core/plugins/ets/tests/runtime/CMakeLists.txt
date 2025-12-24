@@ -75,6 +75,17 @@ panda_ets_add_gtest(
     DEPS_TARGETS etsstdlib
 )
 
+# Test checks IterCounter overflow. Cpp part set pre-overflowed value 
+# to IterCounter, then ets part check overflow. It requires cpp part,
+# because it takes a long time to overflow IterCouner without hacking.
+panda_add_gtest_with_ani(map_iter_overflow_test
+    CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/map_iter_overflow_test.cpp
+    ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/map_iter_overflow_test.ets
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    LIBRARIES arkbase arkfile arkruntime
+    TEST_GROUP ets_tests_runtime_gtests
+)
+
 add_dependencies(ets_tests_runtime_gtests
     ets_vm_test_gtests
     static_object_accessor_test_gtests

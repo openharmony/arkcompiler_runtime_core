@@ -97,13 +97,19 @@ export namespace taskpool {
             };
             let p = Promise.resolve<Any>(new Object()).then<Any, Any>(taskRunner, taskRunner);
             p.then((res: Any) => {
-                InternalTask.of(task!).resolve(res);
-                InternalTask.of(task!).resolve = (_: Any) => {};
-                InternalTask.of(task!).reject = (_: Error) => {};
+                ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
+                    InternalTask.of(task!).resolve[0]?.(res);
+                });
             }).catch((e) => {
-                InternalTask.of(task!).reject(e);
+                ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
+                    InternalTask.of(task!).reject[0]?.(e);
+                });
             }).finally(() => {
                 this.currentPriority = undefined;
+                ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
+                    InternalTask.of(task!).resolve.shift();
+                    InternalTask.of(task!).reject.shift();
+                });
                 ConcurrencyHelpers.lockGuard(workersMutex, () => {
                     workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! - 1);
                 });
@@ -548,8 +554,8 @@ export namespace taskpool {
         taskMutex: Object;
         condVar: Object;
 
-        resolve: (value: Any) => void;
-        reject: (e: Error) => void;
+        resolve: Array<(value: Any) => void> = [];
+        reject: Array<(e: Error) => void> = [];
 
         priority: Priority;
 
@@ -1002,8 +1008,10 @@ export namespace taskpool {
             }
 
             const promise = new Promise<Any>((resolve, reject) => {
-                InternalTask.of(task).resolve = resolve;
-                InternalTask.of(task).reject = reject;
+                ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
+                    InternalTask.of(task).resolve.push(resolve);
+                    InternalTask.of(task).reject.push(reject);
+                });
             });
             if (this.impl.isRunning) {
                 this.impl.tasks.push(task);
@@ -1166,8 +1174,10 @@ export namespace taskpool {
             InternalTask.of(task).isSubmitted = true;
 
             const promise = new Promise<Any>((resolve, reject) => {
-                InternalTask.of(task).resolve = resolve;
-                InternalTask.of(task).reject = reject;
+                ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
+                    InternalTask.of(task).resolve.push(resolve);
+                    InternalTask.of(task).reject.push(reject);
+                });
             });
 
             ConcurrencyHelpers.mutexLock(this.impl.implInnerMutex);
@@ -1185,8 +1195,10 @@ export namespace taskpool {
                             // the waiting queue exceeds capacity, discard the head task.
                             const head = this.impl.waitingQueue.shift();
                             if (head != undefined) {
-                                if (InternalTask.of(head).reject) {
-                                    InternalTask.of(head).reject(new Error(TASKPOOL_ERROR_ASYNC_RUNNER_WAITING_QUEUE_DROPPED, "taskpool:: waiting queue dropped head"));
+                                if (InternalTask.of(head).reject.length) {
+                                    ConcurrencyHelpers.lockGuard(mutex, ()=>{
+                                        InternalTask.of(head).reject.shift()?.(new Error(TASKPOOL_ERROR_ASYNC_RUNNER_WAITING_QUEUE_DROPPED, "taskpool:: waiting queue dropped head"));
+                                    });
                                 }
                                 InternalTask.of(head).isSubmitted = false;
                             }
@@ -1320,8 +1332,10 @@ export namespace taskpool {
         }
 
         const promise = new Promise<Any>((resolve, reject) => {
-            InternalTask.of(task).resolve = resolve;
-            InternalTask.of(task).reject = reject;
+            ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
+                InternalTask.of(task).resolve.push(resolve);
+                InternalTask.of(task).reject.push(reject);
+            });
         });
         notifyExecuteTask();
         return promise;
@@ -1351,8 +1365,10 @@ export namespace taskpool {
                 promises.push(launchPromise(InternalTask.of(task).execute));
             } else {
                 const promise = new Promise<Any>((resolve, reject) => {
-                    InternalTask.of(task).resolve = resolve;
-                    InternalTask.of(task).reject = reject;
+                    ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
+                        InternalTask.of(task).resolve.push(resolve);
+                        InternalTask.of(task).reject.push(reject);
+                    });
                 });
                 notifyExecuteTask();
                 promises.push(promise);
@@ -1412,8 +1428,10 @@ export namespace taskpool {
                     })
                 } else {
                     const p = new Promise<Any>((resolve, reject) => {
-                        InternalTask.of(task).resolve = resolve;
-                        InternalTask.of(task).reject = reject;
+                        ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
+                            InternalTask.of(task).resolve.push(resolve);
+                            InternalTask.of(task).reject.push(reject);
+                        });
                     })
                     notifyExecuteTask();
                     p.then((res: Any) => {
@@ -1448,8 +1466,10 @@ export namespace taskpool {
                 launchImpl(task, priority);
             } else {
                 const p = new Promise<Any>((resolve, reject) => {
-                    InternalTask.of(task).resolve = resolve;
-                    InternalTask.of(task).reject = reject;
+                    ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
+                        InternalTask.of(task).resolve.push(resolve);
+                        InternalTask.of(task).reject.push(reject);
+                    });
                 })
                 notifyExecuteTask();
             }
@@ -1884,22 +1904,23 @@ export namespace taskpool {
      * @see taskpool.AsyncRunner.constructor
      */
     function initWorkerPool(): void {
-        if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
+        if (isWorkersInitialized.get() || isTaskPoolUseLaunch || isInitTaskLaunched.get()) {
                 return;
         }
-        ConcurrencyHelpers.lockGuard(workersMutex, () => {
-            if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
-                return;
-            }
 
-            if (managerWorker === undefined) {
-                // Create managerWorker, and start to trigger shrink.
-                managerWorker = new TaskPoolWorker(isTaskpoolSupportInterop);
-                managerWorker.retriggerShrink();
-            }
-
-            // Init taskpool worker pool.
-            managerWorker!.run<void>(() => {
+        let initTask = ()=> {
+            ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
+                    return;
+                }
+    
+                if (managerWorker === undefined) {
+                    // Create managerWorker, and start to trigger shrink.
+                    managerWorker = new TaskPoolWorker();
+                    managerWorker.retriggerShrink();
+                }
+    
+                // Init taskpool worker pool.
                 for (let i = 0; i < initialWorkersNumber; ++i) {
                     let w = new TaskPoolWorker(isTaskpoolSupportInterop);
                     workers.add(w);
@@ -1908,8 +1929,11 @@ export namespace taskpool {
                     triggerExecuteNextTask();
                 }
                 isWorkersInitialized.set(true);
-            });
-        })
+            })
+        }
+        launch<void, ()=>void>(initTask);
+        isInitTaskLaunched.set(true);
+
     }
 
     /**
@@ -2167,6 +2191,7 @@ export namespace taskpool {
     let workers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
     let idleWorkers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
     let isWorkersInitialized: AtomicFlag = new AtomicFlag(false);
+    let isInitTaskLaunched: AtomicFlag = new AtomicFlag(false);
 
     const taskQueuesMutex = ConcurrencyHelpers.mutexCreate();
     let isTaskQueuesInitialized: boolean = false;

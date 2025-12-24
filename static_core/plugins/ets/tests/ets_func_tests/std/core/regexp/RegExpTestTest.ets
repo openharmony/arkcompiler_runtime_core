@@ -46,7 +46,7 @@ function test(): void {
 function main(): int {
     const suite = new arktest.ArkTestsuite("RegExp.test")
 
-    suite.addTest("test", test)
+    suite.addTest("RegExp.test", test)
 
     return suite.run()
 }

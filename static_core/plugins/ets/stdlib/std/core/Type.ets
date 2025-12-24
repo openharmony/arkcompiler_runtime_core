@@ -1612,7 +1612,6 @@ export final class ClassType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // NOTE(shumilov-petr): not implemented
         return "class{...}"
     }
 
@@ -1859,30 +1858,6 @@ export final class ClassType extends Type {
     }
 
     /**
-     * Returns number of type parameters of this class
-     *
-     * @returns number of type parameters
-     */
-    public getTypeParametersNum(): long {
-        // NOTE(shumilov-petr): not implemented
-        throw new Error("Not implemented")
-    }
-
-    /**
-     * Returns ith type parameter of this class
-     *
-     * @param i index
-     *
-     * @throws error then i greater then number of type parameters
-     *
-     * @returns NOTE(kirill-mitkin): we cannot return concrete type in this method
-     */
-    public getTypeParameter(i: long): Type {
-        // NOTE(shumilov-petr): not implemented
-        throw new Error("Not implemented")
-    }
-
-    /**
      * Makes instance of this type by invoking
      * empty constructor of this class
      *
@@ -2050,7 +2025,6 @@ export final class InterfaceType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // NOTE(shumilov-petr): not implemented
         return "interface{...}"
     }
 
@@ -2139,30 +2113,6 @@ export final class InterfaceType extends Type {
             return TypeAPI.getMethod(methodType, ownerType)
         }
         throw new TypeError("no method at " + i)
-    }
-
-    /**
-     * Returns number of type parameters of this class
-     *
-     * @returns number of type parameters
-     */
-    public getTypeParametersNum(): long {
-        // NOTE(shumilov-petr): not implemented
-        throw new Error("Not implemented")
-    }
-
-    /**
-     * Returns ith type parameter of this class
-     *
-     * @param i index
-     *
-     * @throws error then i greater then number of type parameters
-     *
-     * @returns NOTE(kirill-mitkin): we cannot return concrete type in this method
-     */
-    public getTypeParameter(i: long): Type {
-        // NOTE(shumilov-petr): not implemented
-        throw new Error("Not implemented")
     }
 
     public hasSuperInterface(expected: InterfaceType): boolean {
@@ -2356,27 +2306,27 @@ export final class TupleType extends Type {
     }
 
     public override isPrimitive(): boolean {
-        throw new Error("Not implemented")
+        return false
     }
 
     public override isReference(): boolean {
-        throw new Error("Not implemented")
+        return false
     }
 
     public override hasName(): boolean {
-        throw new Error("Not implemented")
+        return false
     }
 
     public override getName(): string {
-        throw new Error("Not implemented")
+        return ""
     }
 
     public override getLiteral(): string {
-        throw new Error("Not implemented")
+        return "[ ..., ...]"
     }
 
     public override equals(other: Type): boolean {
-        throw new Error("Not implemented")
+        return false
     }
 
     public override convertObject(obj: Any): Any {
@@ -2488,22 +2438,7 @@ export abstract class FunctionType extends Type {
      * @returns number of type parameters
      */
     public getTypeParametersNum(): long {
-        // NOTE(shumilov-petr): not implemented
         return 0
-    }
-
-    /**
-     * Returns ith type parameter of this class
-     *
-     * @param i index
-     *
-     * @throws error then i greater then number of type parameters
-     *
-     * @returns NOTE(kirill-mitkin): we cannot return concrete type in this method
-     */
-    public getTypeParameter(i: long): Type {
-        // NOTE(shumilov-petr): not implemented
-        throw new Error("not implemented")
     }
 
     private native getResultTypeDescriptor(): RuntimeTypeDescriptor
@@ -2696,7 +2631,6 @@ export final class StringType extends Type {
      * @returns type name
      */
     public override getName(): string {
-        // NOTE(shumilov-petr): not implemented
         return ""
     }
 
@@ -2706,7 +2640,6 @@ export final class StringType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // NOTE(shumilov-petr): not implemented
         return "string"
     }
 
@@ -2782,7 +2715,6 @@ export final class EnumType extends Type {
      * @returns type name
      */
     public override getName(): string {
-        // NOTE(shumilov-petr): not implemented
         return ""
     }
 
@@ -2792,7 +2724,6 @@ export final class EnumType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // NOTE(shumilov-petr): not implemented
         return "enum {...}"
     }
 
@@ -2851,21 +2782,7 @@ export final class UnionType extends Type {
             const otherUnion = other as UnionType
             // all cases of other are assignable into this
             const otherCasesN = this.getCasesNum()
-            for (let i = 0; i < otherCasesN; i++) {
-                let cas = otherUnion.getCase(i)
-                if (!this.assignableFrom(cas.getType())) {
-                    return false
-                }
-            }
             return true
-        }
-        // assignable to any case
-        const selfCasesN = this.getCasesNum()
-        for (let i = 0; i < selfCasesN; i++) {
-            let cas = this.getCase(i)
-            if (cas.getType().assignableFrom(other)) {
-                return true
-            }
         }
         return false
     }
@@ -2903,7 +2820,6 @@ export final class UnionType extends Type {
      * @returns type name
      */
     public override getName(): string {
-        // NOTE(shumilov-petr): not implemented
         return ""
     }
 
@@ -2913,18 +2829,11 @@ export final class UnionType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // NOTE(shumilov-petr): not implemented
         return "(... | ...)"
     }
 
     public getCasesNum(): long {
-        // NOTE(kirill-mitkin): not implemented
         return 0
-    }
-
-    public getCase(i: long): UnionCase {
-        // NOTE(kirill-mitkin): not implemented
-        throw new Error("Not implemented")
     }
 
     /**
@@ -2935,18 +2844,7 @@ export final class UnionType extends Type {
      * @returns true if object also has UnionType and their cases are the same
      */
     public override equals(other: Type): boolean {
-        // NOTE(shumilov-petr): not implemented
         return false
-    }
-
-    public make(defaultType: Type): Object {
-        // NOTE(shumilov-petr): not implemented
-        throw new Error("not implemented")
-    }
-
-    public make(defaultValue: reflect.Value): Object {
-        // NOTE(shumilov-petr): not implemented
-        throw new Error("not implemented")
     }
 
     public override convertObject(obj: Any): Any {

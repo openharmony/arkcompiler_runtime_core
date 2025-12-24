@@ -196,14 +196,11 @@ export class Object {
         } else if (t instanceof LambdaType) {
             return new string[0]
         } else if (t instanceof EnumType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid EnumType")
         } else if (t instanceof UnionType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid UnionType")
         } else if (t instanceof TupleType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid TupleType")
         }
 
         throw new AssertionError("Invalid object type");
@@ -288,14 +285,11 @@ export class Object {
         } else if (t instanceof LambdaType) {
             return new Any[0]
         } else if (t instanceof EnumType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid EnumType")
         } else if (t instanceof UnionType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid UnionType")
         } else if (t instanceof TupleType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid TupleType")
         }
 
         throw new AssertionError("Invalid object type")
@@ -386,14 +380,11 @@ export class Object {
         } else if (t instanceof LambdaType) {
             return new NullishEntryType[0]
         } else if (t instanceof EnumType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid EnumType")
         } else if (t instanceof UnionType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid UnionType")
         } else if (t instanceof TupleType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid TupleType")
         }
 
         throw new AssertionError("Invalid object type")
@@ -437,14 +428,11 @@ export class Object {
         } else if (t instanceof LambdaType) {
             return [FUNCTION_LENGTH_MEMBER_NAME, FUNCTION_NAME_MEMBER_NAME]
         } else if (t instanceof EnumType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid EnumType")
         } else if (t instanceof UnionType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid UnionType")
         } else if (t instanceof TupleType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid TupleType")
         }
 
         throw new AssertionError("Invalid object type")
@@ -471,14 +459,11 @@ export class Object {
             const len = av.getLength()
             return (0 <= idx && idx < len)
         } else if (t instanceof EnumType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid EnumType")
         } else if (t instanceof UnionType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid UnionType")
         } else if (t instanceof TupleType) {
-            // NOTE(shumilov-petr): Not implemented
-            throw new Error("Not implemented")
+            throw new Error("Invalid TupleType")
         } else if (cls === Class.from<Array<Any>>()) {
             let arr = this as Array<Any>
             let len = arr.length
