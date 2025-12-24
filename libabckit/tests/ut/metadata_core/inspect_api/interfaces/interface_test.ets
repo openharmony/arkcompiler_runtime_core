@@ -48,5 +48,5 @@ interface Clickable {
 }
 
 class MyButton implements Clickable {
-  disabled: boolean = false;
+  public disabled: boolean = false;
 }

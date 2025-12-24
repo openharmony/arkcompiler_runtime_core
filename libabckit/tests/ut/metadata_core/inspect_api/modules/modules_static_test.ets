@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { Ns3 } from './import_test.ets';
-import { testA } from './import_test.ets';
+import { TestA } from './import_test.ets';
 
 const moduleField: string = 'Module Field';
 
@@ -27,13 +27,13 @@ let add = (a: number, b: number) => {
 }
 
 class Test {
-    static TestA: testA = new testA()
-    a: number = 10
-    b: Array<number> = [1, 2, 3]
-    d: string = "abc"
+    public static testA: TestA = new TestA()
+    public a: number = 10
+    public b: Array<number> = [1, 2, 3]
+    public d: string = 'abc'
 
     func() {
-        console.log("this is class Test");
+        console.log('this is class Test');
     }
 }
 

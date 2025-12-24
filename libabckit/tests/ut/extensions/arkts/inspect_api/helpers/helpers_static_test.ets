@@ -14,9 +14,9 @@
  */
 
  class Person {
-  name: string = "Alice";
-  age: number = 30;
-  static cnt: number = 0;
+  public name: string = 'Alice';
+  public age: number = 30;
+  public static cnt: number = 0;
 
   constructor(n: string, a: number) {
     this.name = n;
@@ -29,7 +29,7 @@
 }
 
 function main() {
-  let c = new Person("Alice", 20);
+  let c = new Person('Alice', 20);
   Person.cnt++;
   console.log(Person.cnt);
   console.log(c.name);
