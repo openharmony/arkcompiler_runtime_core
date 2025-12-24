@@ -52,6 +52,7 @@ type arrType = String | undefined;
 export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: FixedArray<Any>
     protected actualLength: int
+    private static INIT_CAPACITY: int = 4
 
     override get length(): int {
         return this.actualLength
@@ -62,6 +63,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (len < 0 || len > this.actualLength) {
             throw new RangeError("can't change length to bigger or negative")
         }
+        if (len == 0) {
+            this.buffer = new Any[Array.INIT_CAPACITY]
+        } else {
+            const other = this.slice(0, len)
+            this.buffer = other.buffer
+        }
         this.actualLength = len
     }
 
@@ -71,7 +78,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     public native $_set(idx: int, val: T): void;
 
-    private final native $_set_unsafe(idx: int, val: T): void
+    private final native $_set_unsafe(idx: int, val: T | undefined): void
 
     /**
      * Creates a new instance of Array
@@ -87,7 +94,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     public constructor() {
-        this.buffer = new Any[4]
+        this.buffer = new Any[Array.INIT_CAPACITY]
         this.actualLength = 0
     }
 
@@ -619,6 +626,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         }
         let index = this.actualLength - 1
         let obj = this.$_get_unsafe(index)
+        this.$_set_unsafe(index, undefined)
         this.actualLength = index
         return obj
     }
@@ -710,6 +718,9 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         } else {
             for (let i = 0; i < rightLen; i++) {
                 this.$_set_unsafe(start + itemsLength + i, this.$_get_unsafe(start + delete + i))
+            }
+            for (let i = newLen; i < oldLen; i++) {
+                this.$_set_unsafe(i, undefined)
             }
         }
         // insert middle part
