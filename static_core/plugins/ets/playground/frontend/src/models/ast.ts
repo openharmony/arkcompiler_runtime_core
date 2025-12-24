@@ -19,6 +19,7 @@ export interface IAstFetch {
     code: string;
     options?: IObj | null;
 }
+
 export interface IAstReq {
     ast: string | null;
     output: string;
