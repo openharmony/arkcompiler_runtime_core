@@ -69,7 +69,7 @@ bool LLVMIrConstructor::EmitStringBuilderAppendChar(Inst *inst)
 {
     auto offset = GetGraph()->GetRuntime()->GetArrayU16ClassPointerTlsOffset(GetGraph()->GetArch());
     auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, offset, builder_.getPtrTy());
-    auto eid = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_CHAR_COMPRESSED;
+    auto eid = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_CHAR;
     auto call = CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), GetInputValue(inst, 1), klass});
     ValueMapAdd(inst, call);
     return true;

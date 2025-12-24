@@ -176,16 +176,6 @@
     - uint16_t            # char
     - ark::Class*         # array class pointer
 
-- name: StringBuilderAppendCharCompressed
-  entrypoint: StringBuilderAppendCharCompressed
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - ark::ObjectHeader*  # string builder (result)
-    - ark::ObjectHeader*  # string builder
-    - uint16_t            # char
-    - ark::Class*         # array class pointer
-
 - name: StringBuilderAppendCharSlowPath
   entrypoint: StringBuilderAppendCharEntrypoint
   bridge: slow_path
@@ -531,6 +521,16 @@
     - int32_t             # unused
     - int32_t             # unused
 
+- name: StringTrimLeftBaseNativePlus
+  entrypoint: StringTrimLeftBaseNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
 - name: StringTrimRight
   entrypoint: StringTrimRight
   bridge: none
@@ -551,6 +551,16 @@
     - int32_t             # unused
     - int32_t             # unused
 
+- name: StringTrimRightBaseNativePlus
+  entrypoint: StringTrimRightBaseNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
 - name: StringTrim
   entrypoint: StringTrim
   bridge: none
@@ -563,6 +573,16 @@
 
 - name: StringTrimBase
   entrypoint: StringTrimBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimBaseNativePlus
+  entrypoint: StringTrimBaseNativePlus
   bridge: none
   properties: [irtoc]
   signature:

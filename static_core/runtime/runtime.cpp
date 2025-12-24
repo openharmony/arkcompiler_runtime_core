@@ -1056,13 +1056,6 @@ static inline void InitializeCompilerOptions()
         compiler::g_options.SetCompilerOptimizeStringConcat(!Runtime::GetOptions().IsUseAllStrings());
     }
 
-#ifdef PANDA_TARGET_OHOS
-    // NOTE(compiler team): #29517 Remove this after full support of inline external methods in AOT mode
-    if (!compiler::g_options.WasSetCompilerInlineExternalMethodsAot()) {
-        compiler::g_options.SetCompilerInlineExternalMethodsAot(false);
-    }
-#endif
-
 #if defined(PANDA_COMPILER_DEBUG_INFO) && !defined(NDEBUG)
     if (!compiler::g_options.WasSetCompilerEmitDebugInfo()) {
         compiler::g_options.SetCompilerEmitDebugInfo(true);

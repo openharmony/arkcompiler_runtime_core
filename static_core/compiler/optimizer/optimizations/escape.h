@@ -203,6 +203,10 @@ public:
     void VisitDefault([[maybe_unused]] Inst *inst) override
     {
         COMPILER_LOG(DEBUG, PEA_EXT) << "Visit " << *inst;
+        if (inst->CanDeoptimize()) {
+            MaterializeDeoptSaveState(inst);
+            return;
+        }
         VisitSaveStateUser(inst);
         Materialize(inst);
     }

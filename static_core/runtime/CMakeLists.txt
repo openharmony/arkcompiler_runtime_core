@@ -993,6 +993,13 @@ add_gtests(
     tests/dyn_buffer_test.cpp
 )
 
+if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release" AND NOT PANDA_TARGET_ARM32)
+    add_gtests(
+        arkruntime_getclass_cache_collision_test
+        tests/getclass_cache_collision_test.cpp
+    )
+endif()
+
 # We run irtoc tests only in host mode, because irtoc tests are intended for testing only Irtoc language capabilities.
 if (PANDA_WITH_TESTS OR HOST_TOOLS)
     if (NOT CMAKE_CROSSCOMPILING)

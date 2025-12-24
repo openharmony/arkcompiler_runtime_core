@@ -38,7 +38,7 @@ end
 # for the case when 'allocate_string_tlab' fails (see StringTrim as an example)
 # Now TLAB implementation initializes memory with zero, so the hashcode field
 # is not initialized with zero explicitly.
-macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _not_compressed|
+macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _not_compressed, _cgmode|
   If(_char_count, Cast(_str_len).u32).EQ.Unlikely.b {
     # Return the string itself
     _same_str := Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr
@@ -47,7 +47,7 @@ macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _not_compr
   _klass := load_class(_str)
   If(_char_count, 0).EQ.Unlikely.b {
     # Allocate and return an empty string
-    _empty_str := allocate_string_tlab(_klass, 0)
+    _empty_str := allocate_string_tlab(_klass, 0, _cgmode)
     Goto(:_Fast_Substring_Result)
   }
   # Allocate a new normal string
@@ -63,7 +63,7 @@ macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _not_compr
     _data_size2 := Cast(ShlI(_char_count).Imm(1).u32).word
 Label(:_L1)
     _data_size := Phi(_data_size1, _data_size2).word
-    _new_str1 := allocate_string_tlab(_klass, _data_size)
+    _new_str1 := allocate_string_tlab(_klass, _data_size, _cgmode)
     _new_str_data := Add(_new_str1, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
     If(_compressable, 1).EQ.Likely.b {
       compress_u16_to_u8_chars(_src_str_data, _new_str_data, Cast(_char_count).u64)
@@ -75,7 +75,7 @@ Label(:_L1)
     Goto(:_Fast_Substring_Result)
   }
   # Source string is already compressed
-  _new_str2 := allocate_string_tlab(_klass, Cast(_char_count).word)
+  _new_str2 := allocate_string_tlab(_klass, Cast(_char_count).word, _cgmode)
   _new_str_data2 := Add(_new_str2, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
   copy_u8_chars(_src_str_data, _new_str_data2, Cast(_char_count).u64)
   StoreI(_new_str2, ShlI(_char_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -222,10 +222,8 @@ function(:CharIsWhiteSpace,
   Return(is_white_space_u16(ch)).b
 }
 
-
 GenerateStringEquals(lang='Ets', dynamic=false, :FastPath)
 GenerateStringEquals(lang='Ets', dynamic=false, :NativePlus)
-
 
 function(:StringEmpty,
           params: {str: 'ref'},
@@ -240,7 +238,7 @@ function(:StringEmpty,
   end
 
   klass := load_class(str)
-  empty_str := allocate_string_tlab(klass, 0)
+  empty_str := allocate_string_tlab(klass, 0, :FastPath)
   # String is supposed to be a constant object, so all its data should be visible by all threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   Return(empty_str).ptr
@@ -251,11 +249,12 @@ Label(:SlowPathEntrypoint)
 }
 
 
-function(:StringTrimLeftBase,
+def GenerateStringTrimLeftBase(cgmode)
+  function("StringTrimLeftBase#{(cgmode == :FastPath ? '' : 'NativePlus')}".to_sym,
           params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -296,30 +295,42 @@ Label(:Loop2)
 Label(:TrimLeft)
   index := Phi(index1, index2).i32
   char_count := Sub(length, index).u32
-  trimmed := fast_substring(str, length, index, char_count, not_compressed)
+  trimmed := fast_substring(str, length, index, char_count, not_compressed, cgmode)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, index, length).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str, index, length).Method('SubStringFromStringEntrypoint').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str, index, length).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+GenerateStringTrimLeftBase(:FastPath)
+GenerateStringTrimLeftBase(:NativePlus)
 
-
-function(:StringTrimLeft,
-          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringTrimLeft(cgmode)
+  function("StringTrimLeft#{(cgmode == :FastPath ? '' : 'NativePlus')}".to_sym,
+            params: {str_orig: 'ref', unused1: 'i32', unused2: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
     ReturnVoid().void
     next
   end
-  
-  check_not_tree_string_type(str) if defines.DEBUG
-  # it still can be slice
-  check_string_type(str)
+
+  if cgmode == :NativePlus
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
+  else
+    check_not_tree_string_type(str) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str_orig)
+    str := str_orig
+  end
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   If(length_packed, 1).LE.Unlikely.b {
@@ -342,23 +353,39 @@ Label(:L1)
     entrypoint1 = get_entrypoint_offset("STRING_EMPTY")
     Intrinsic(:TAIL_CALL).AddImm(entrypoint1).MethodAsImm("StringEmpty").Terminator.ptr
   }
-  LiveOut(str).DstReg(regmap[:arg0]).ref
-  LiveOut(unused1).DstReg(regmap[:arg1]).i32
-  LiveOut(unused2).DstReg(regmap[:arg2]).i32
-  entrypoint2 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimLeftBase").Terminator.ptr
+  
+  # NativePlus is not handled by LLVM backend right now, so, passing
+  # fake parameters to match the function signature is not required
+  if cgmode == :NativePlus
+    LiveOut(str).DstReg(regmap[:arg1]).ref
+    entrypoint2 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE_NATIVE_PLUS")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimLeftBaseNativePlus").Terminator.ptr
+  else
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    LiveOut(unused1).DstReg(regmap[:arg1]).i32
+    LiveOut(unused2).DstReg(regmap[:arg2]).i32
+    entrypoint2 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimLeftBase").Terminator.ptr
+  end
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_TRIM_LEFT_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrimLeft3ArgBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str_orig).Method('StdCoreStringTrimLeft').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset("STRING_TRIM_LEFT_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig).AddImm(entrypoint).MethodAsImm("StringTrimLeft3ArgBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+GenerateStringTrimLeft(:FastPath)
+GenerateStringTrimLeft(:NativePlus)
 
-
-function(:StringTrimRightBase,
+def GenerateStringTrimRightBase(cgmode)
+  function("StringTrimRightBase#{(cgmode == :FastPath ? '' : 'NativePlus')}".to_sym,
           params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -399,27 +426,43 @@ Label(:Loop2)
 Label(:TrimRight)
   index := Phi(index1, index2).i32
   index := AddI(index).Imm(1).i32
-  trimmed := fast_substring(str, length, 0, Cast(index).u32, not_compressed)
+  trimmed := fast_substring(str, length, 0, Cast(index).u32, not_compressed, cgmode)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, Cast(0).i32, index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str, 0, index).Method('SubStringFromStringEntrypoint').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str, Cast(0).i32, index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+GenerateStringTrimRightBase(:FastPath)
+GenerateStringTrimRightBase(:NativePlus)
 
-
-function(:StringTrimRight,
-          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+def GenerateStringTrimRight(cgmode)
+  function("StringTrimRight#{(cgmode == :FastPath ? '' : 'NativePlus')}".to_sym,
+          params: {str_orig: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
     ReturnVoid().void
     next
   end
-  
+
+  if cgmode == :NativePlus
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
+  else
+    check_not_tree_string_type(str) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str_orig)
+    str := str_orig
+  end
+ 
   check_not_tree_string_type(str) if defines.DEBUG
   # it still can be slice
   check_string_type(str)
@@ -444,26 +487,42 @@ Label(:L1)
   }
   If(length, 1).EQ.Unlikely.b {
     LiveOut(str).DstReg(regmap[:arg0]).ref
-    entrypoint1 = get_entrypoint_offset("STRING_EMPTY")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint1).MethodAsImm("StringEmpty").Terminator.ptr
+    entrypoint1 = get_entrypoint_offset('STRING_EMPTY')
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint1).MethodAsImm('StringEmpty').Terminator.ptr
   }
-  LiveOut(str).DstReg(regmap[:arg0]).ref
-  LiveOut(unused1).DstReg(regmap[:arg1]).i32
-  LiveOut(unused2).DstReg(regmap[:arg2]).i32
-  entrypoint2 = get_entrypoint_offset("STRING_TRIM_RIGHT_BASE")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimRightBase").Terminator.ptr
+
+  if cgmode == :NativePlus
+    LiveOut(str).DstReg(regmap[:arg1]).ref
+    entrypoint2 = get_entrypoint_offset('STRING_TRIM_RIGHT_BASE_NATIVE_PLUS')
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm('StringTrimRightBaseNativePlus').Terminator.ptr
+  else
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    LiveOut(unused1).DstReg(regmap[:arg1]).i32
+    LiveOut(unused2).DstReg(regmap[:arg2]).i32
+    entrypoint2 = get_entrypoint_offset('STRING_TRIM_RIGHT_BASE')
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm('StringTrimRightBase').Terminator.ptr
+  end
+
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_TRIM_RIGHT_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrimRight3ArgBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str_orig).Method('StdCoreStringTrimRight').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset('STRING_TRIM_RIGHT_SLOW_PATH')
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig).AddImm(entrypoint).MethodAsImm('StringTrimRight3ArgBridge').Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+GenerateStringTrimRight(:FastPath)
+GenerateStringTrimRight(:NativePlus)
 
 
-function(:StringTrimBase,
+def GenerateStringTrimBase(cgmode)
+  function("StringTrimBase#{(cgmode == :FastPath ? '' : 'NativePlus')}".to_sym,
           params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -522,30 +581,42 @@ Label(:Trim)
   l := Phi(left, left1, left, left11).i32
   r := Phi(right1, right3, right11, right33).i32
   char_count := Sub(r, l).u32
-  trimmed := fast_substring(str, length, l, char_count, not_compressed)
+  trimmed := fast_substring(str, length, l, char_count, not_compressed, cgmode)
   Return(trimmed).ptr
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, l, r).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str, l, r).Method('SubStringFromStringEntrypoint').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset('SUB_STRING_FROM_STRING_SLOW_PATH')
+    Intrinsic(:SLOW_PATH_ENTRY, str, l, r).AddImm(entrypoint).MethodAsImm('SubStringFromStringOddSavedBridge').Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+GenerateStringTrimBase(:FastPath)
+GenerateStringTrimBase(:NativePlus)
 
-
-function(:StringTrim,
-          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+def GenerateStringTrim(cgmode)
+  function("StringTrim#{(cgmode == :FastPath ? '' : 'NativePlus')}".to_sym,
+          params: {str_orig: 'ref', unused1: 'i32', unused2: 'i32'},
           regmap: $full_regmap,
           regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+          mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
     ReturnVoid().void
     next
   end
-
-  check_not_tree_string_type(str) if defines.DEBUG
-  # it still can be slice
-  check_string_type(str)
+   
+  if cgmode == :NativePlus
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
+  else
+    check_not_tree_string_type(str) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str_orig)
+    str := str_orig
+  end
 
   length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
   # length == 0
@@ -596,22 +667,41 @@ Label(:L3)
     Goto(:FirstCharWhitespace)
   }
   # last char is whitespace, so call StringTrimBase
-  LiveOut(str).DstReg(regmap[:arg0]).ref
-  LiveOut(unused1).DstReg(regmap[:arg1]).i32
-  LiveOut(unused2).DstReg(regmap[:arg2]).i32
-  entrypoint2 = get_entrypoint_offset("STRING_TRIM_BASE")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimBase").Terminator.ptr
-Label(:FirstCharWhitespace)
-  LiveOut(str).DstReg(regmap[:arg0]).ref
-  LiveOut(unused1).DstReg(regmap[:arg1]).i32
-  LiveOut(unused2).DstReg(regmap[:arg2]).i32
-  entrypoint3 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint3).MethodAsImm("StringTrimLeftBase").Terminator.ptr
-Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_TRIM_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("StringTrim3ArgBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    LiveOut(str).DstReg(regmap[:arg1]).ref
+    entrypoint2 = get_entrypoint_offset('STRING_TRIM_BASE_NATIVE_PLUS')
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm('StringTrimBaseNativePlus').Terminator.ptr
+  else
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    LiveOut(unused1).DstReg(regmap[:arg1]).i32
+    LiveOut(unused2).DstReg(regmap[:arg2]).i32
+    entrypoint2 = get_entrypoint_offset('STRING_TRIM_BASE')
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm('StringTrimBase').Terminator.ptr
+  end
+  Label(:FirstCharWhitespace)
+  if cgmode == :NativePlus
+    LiveOut(str).DstReg(regmap[:arg1]).ref
+    entrypoint3 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE_NATIVE_PLUS")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint3).MethodAsImm("StringTrimLeftBaseNativePlus").Terminator.ptr
+  else
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    LiveOut(unused1).DstReg(regmap[:arg1]).i32
+    LiveOut(unused2).DstReg(regmap[:arg2]).i32
+    entrypoint3 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint3).MethodAsImm("StringTrimLeftBase").Terminator.ptr
+  end
+  Label(:SlowPathEntrypoint)
+  if cgmode == :NativePlus
+    Return(Call(str_orig).Method('StdCoreStringTrim').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset("STRING_TRIM_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig).AddImm(entrypoint).MethodAsImm("StringTrim3ArgBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+GenerateStringTrim(:FastPath)
+GenerateStringTrim(:NativePlus)
 
 
 scoped_macro(:at) do |str_data, index, not_compressed|
@@ -898,12 +988,12 @@ end
 GenerateStringEndsWith(:FastPath)
 GenerateStringEndsWith(:NativePlus)
 
-
-function(:StringGetBytesTlab,
-        params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
-        regmap: $full_regmap,
-        regalloc_set: $panda_mask,
-        mode: [:FastPath]) {
+def GenerateStringGetBytesTlab(cgmode)
+  function("StringGetBytesTlab#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+           params: {str_orig: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -911,9 +1001,14 @@ function(:StringGetBytesTlab,
     next
   end
 
-  check_not_tree_string_type(str) if defines.DEBUG
-  # it still can be slice
-  check_string_type(str)
+  if cgmode == :NativePlus
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
+  else
+    check_not_tree_string_type(str) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str_orig)
+    str := str_orig
+  end
 
   If(begin_index, end_index).GT.Unlikely.b {
     Goto(:SlowPathEntrypoint)  # Out of range
@@ -938,7 +1033,7 @@ function(:StringGetBytesTlab,
 
 # Allocate a new array of u8 (bytes)
   count := Sub(Cast(end_index).u32, Cast(begin_index).u32).u64
-  new_arr := allocate_array_of_bytes_tlab(array_klass, Cast(count).word)
+  new_arr := allocate_array_of_bytes_tlab(array_klass, Cast(count).word, cgmode)
   new_arr_data := Add(new_arr, Cast(Constants::ARRAY_DATA_OFFSET).u64).ptr
   If(uncompressed, Cast(0).u32).EQ.Likely.b {
     copy_u8_chars(src_str_data, new_arr_data, count)
@@ -950,10 +1045,19 @@ function(:StringGetBytesTlab,
   Return(new_arr).ptr
 
   Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_GET_BYTES_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetBytes4ArgBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str_orig, begin_index, end_index).Method('StdCoreStringGetBytes').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset("STRING_GET_BYTES_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetBytes4ArgBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+
+GenerateStringGetBytesTlab(:FastPath)
+GenerateStringGetBytesTlab(:NativePlus)
+
 
 ###
 # Char codes in an instance of 'std.core.Array' are represented as an array of object pointers to instances of the
@@ -1148,7 +1252,7 @@ function(:CreateStringFromCharCodeTlab,
     data_size2 := Cast(ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_U16).u32).word
   }
   data_size := Phi(data_size1, data_size2).word
-  new_str := allocate_string_tlab(string_klass, data_size)
+  new_str := allocate_string_tlab(string_klass, data_size, :FastPath)
   str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
 
   # Copy data from char_codes to the new string with the required preprocessing
@@ -1218,7 +1322,7 @@ def GenerateCreateStringFromCharCodeSingleTlab(cache_flag)
     compressible := Phi(compressible1, compressible2).b
     data_size := Phi(data_size1, data_size2).word
 
-    new_str := allocate_string_tlab(string_klass, data_size)
+    new_str := allocate_string_tlab(string_klass, data_size, :FastPath)
     str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
 
     # Copy the char to the new string with the required preprocessing
@@ -1864,12 +1968,12 @@ end
 GenerateStringIndexOfAfter(:FastPath)
 GenerateStringIndexOfAfter(:NativePlus)
 
-
-function(:StringRepeatTlab,
-        params: {str: 'ref', cnt: 'i32'},
-        regmap: $full_regmap,
-        regalloc_set: $panda_mask,
-        mode: [:FastPath]) {
+def GenerateStringRepeatTlab(cgmode)
+  function("StringRepeatTlab#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+          params: {str_orig: 'ref', cnt: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [cgmode]) {
 
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
@@ -1881,13 +1985,18 @@ function(:StringRepeatTlab,
     Goto(:SlowPathEntrypoint)
   }
 
-  check_not_tree_string_type(str) if defines.DEBUG
-  # it still can be slice
-  check_string_type(str)
+  if cgmode == :NativePlus
+    str := try_use_cached_flat_str_reject_sliced(str_orig)
+  else
+    check_not_tree_string_type(str_orig) if defines.DEBUG
+    # it still can be slice
+    check_string_type(str_orig)
+    str := str_orig
+  end
 
   IfImm(Compare(count, 0).EQ.b).Imm(0).NE {
     klass := load_class(str)
-    new_str := allocate_string_tlab(klass, Cast(0).u64);
+    new_str := allocate_string_tlab(klass, Cast(0).u64, cgmode);
     Return(new_str).ptr
   }
 
@@ -1903,7 +2012,7 @@ function(:StringRepeatTlab,
   length := Shl(ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32, uncompressed).u32
   size := Mul(length, count).u32
   codes_count := Mul(codes_count, count).u32
-  new_str := allocate_string_tlab(klass, Cast(size).u64);
+  new_str := allocate_string_tlab(klass, Cast(size).u64, cgmode);
   new_buf := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
 
   If(new_str, 0).EQ {
@@ -1940,16 +2049,24 @@ Label(:End)
   Return(new_str).ptr
 
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_REPEAT_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, str, count).AddImm(entrypoint).MethodAsImm("StringRepeatUsualBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(str_orig, count).Method('StdCoreStringRepeat').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset("STRING_REPEAT_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, count).AddImm(entrypoint).MethodAsImm("StringRepeatUsualBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+GenerateStringRepeatTlab(:FastPath)
+GenerateStringRepeatTlab(:NativePlus)
 
-function(:StringConcat2Tlab,
-          params: {str1_orig: 'ref', str2_orig: 'ref'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringConcat2Tlab(cgmode)
+  function("StringConcat2Tlab#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+            params: {str1_orig: 'ref', str2_orig: 'ref'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
 
     if Options.arch == :arm32
       Intrinsic(:UNREACHABLE).void.Terminator
@@ -1972,7 +2089,7 @@ function(:StringConcat2Tlab,
     size := Add(count1, count2).u32
     data_size := Shl(size, has_uncompressed).u32
     length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
-    new_str := allocate_string_tlab(klass, data_size)
+    new_str := allocate_string_tlab(klass, data_size, cgmode)
 
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
     StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
@@ -2015,16 +2132,25 @@ function(:StringConcat2Tlab,
     Return(new_str).ptr
 
 Label(:SlowPathEntrypoint)
-    ep_offset = get_entrypoint_offset("STRING_CONCAT2_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig).AddImm(ep_offset).MethodAsImm("StringConcat2UsualBridge").Terminator.ptr
-    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    if cgmode == :NativePlus
+      Return(Call(str1_orig, str2_orig).Method('CoreStringConcat2').ptr).ptr
+    else
+      ep_offset = get_entrypoint_offset("STRING_CONCAT2_SLOW_PATH")
+      Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig).AddImm(ep_offset).MethodAsImm("StringConcat2UsualBridge").Terminator.ptr
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    end
 }
+end
 
-function(:StringConcat3Tlab,
-         params: {str1_orig: 'ref', str2_orig: 'ref', str3_orig: 'ref'},
-         regmap: $full_regmap,
-         regalloc_set: $panda_mask,
-         mode: [:FastPath]) {
+GenerateStringConcat2Tlab(:FastPath)
+GenerateStringConcat2Tlab(:NativePlus)
+
+def GenerateStringConcat3Tlab(cgmode)
+  function("StringConcat3Tlab#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+           params: {str1_orig: 'ref', str2_orig: 'ref', str3_orig: 'ref'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
     if Options.arch == :arm32
       Intrinsic(:UNREACHABLE).void.Terminator
@@ -2049,7 +2175,7 @@ function(:StringConcat3Tlab,
     size := Add(count1, Add(count2, count3).u32).u32
     data_size := Shl(size, has_uncompressed).u32
     length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
-    new_str := allocate_string_tlab(klass, data_size)
+    new_str := allocate_string_tlab(klass, data_size, cgmode)
 
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
     StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
@@ -2108,16 +2234,25 @@ Label(:EndCopy)
     Return(new_str).ptr
 
 Label(:SlowPathEntrypoint)
-    ep_offset = get_entrypoint_offset("STRING_CONCAT3_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig, str3_orig).AddImm(ep_offset).MethodAsImm("StringConcat3OddSavedBridge").Terminator.ptr
-    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    if cgmode == :NativePlus
+      Return(Call(str1_orig, str2_orig, str3_orig).Method('CoreStringConcat3').ptr).ptr
+    else
+      ep_offset = get_entrypoint_offset("STRING_CONCAT3_SLOW_PATH")
+      Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig, str3_orig).AddImm(ep_offset).MethodAsImm("StringConcat3OddSavedBridge").Terminator.ptr
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    end
 }
+end
 
-function(:StringConcat4Tlab,
-         params: {str1_orig: 'ref', str2_orig: 'ref', str3_orig: 'ref', str4_orig: 'ref'},
-         regmap: $full_regmap,
-         regalloc_set: $panda_mask,
-         mode: [:FastPath]) {
+GenerateStringConcat3Tlab(:FastPath)
+GenerateStringConcat3Tlab(:NativePlus)
+
+def GenerateStringConcat4Tlab(cgmode)
+  function("StringConcat4Tlab#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+           params: {str1_orig: 'ref', str2_orig: 'ref', str3_orig: 'ref', str4_orig: 'ref'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
     if Options.arch == :arm32
       Intrinsic(:UNREACHABLE).void.Terminator
       next
@@ -2146,7 +2281,7 @@ function(:StringConcat4Tlab,
     size := Add(count1, Add(count2, Add(count3, count4).u32).u32).u32
     data_size := Shl(size, has_uncompressed).u32
     length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
-    new_str := allocate_string_tlab(klass, data_size)
+    new_str := allocate_string_tlab(klass, data_size, cgmode)
 
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
     StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
@@ -2220,10 +2355,18 @@ Label(:EndCopy)
     Return(new_str).ptr
 
 Label(:SlowPathEntrypoint)
-    ep_offset = get_entrypoint_offset("STRING_CONCAT4_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig, str3_orig, str4_orig).AddImm(ep_offset).MethodAsImm("StringConcat4UsualBridge").Terminator.ptr
-    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    if cgmode == :NativePlus
+      Return(Call(str1_orig, str2_orig, str3_orig, str4_orig).Method('CoreStringConcat4').ptr).ptr
+    else
+      ep_offset = get_entrypoint_offset("STRING_CONCAT4_SLOW_PATH")
+      Intrinsic(:SLOW_PATH_ENTRY, str1_orig, str2_orig, str3_orig, str4_orig).AddImm(ep_offset).MethodAsImm("StringConcat4UsualBridge").Terminator.ptr
+      Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    end
 }
+end
+
+GenerateStringConcat4Tlab(:FastPath)
+GenerateStringConcat4Tlab(:NativePlus)
 
 ###
 # StringConcat2 supporting all string types
@@ -2325,15 +2468,16 @@ Label(:SlowPathEntrypoint)
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
-def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enabled)
-  suffix = (all_strings_enabled ? "AllStrings" : "")
-  suffix += (string_compression_enabled ? "Compressed" : "")
+def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enabled, cgmode = :FastPath)
+  suffix = (all_strings_enabled ? 'AllStrings' : '')
+  suffix += (string_compression_enabled ? 'Compressed' : '')
+  suffix += (cgmode == :NativePlus ? 'NativePlus' : '')
   available_regs = $panda_mask
   function("SubStringFromStringTlab#{suffix}".to_sym,
-           params: {str: 'ref', begin_index: 'i32', end_index: 'i32'},
+           params: {str_orig: 'ref', begin_index: 'i32', end_index: 'i32'},
            regmap: $full_regmap,
            regalloc_set: available_regs,
-           mode: [:FastPath]) {
+           mode: [cgmode]) {
 
     if Options.arch == :arm32
       Intrinsic(:UNREACHABLE).Terminator.void
@@ -2341,7 +2485,14 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       next
     end
 
-    check_not_tree_string_type(str) if defines.DEBUG
+    if cgmode == :NativePlus
+      str := try_use_cached_flat_str_reject_sliced(str_orig)
+    else
+      check_not_tree_string_type(str_orig) if defines.DEBUG
+      # it still can be slice
+      check_string_type(str_orig)
+      str := str_orig
+    end
 
     # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
     length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -2393,7 +2544,8 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       offset := ShlI(bx6).Imm(1).u32
     end
 
-    if all_strings_enabled
+	# NativePlus is not yet supported for unified strings
+    if all_strings_enabled  && cgmode == :FastPath
       baseClass := load_class(str)
       stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
 
@@ -2415,7 +2567,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       }
 
       # create line substring from line string
-      result := fast_substring(fromStr, length, resultStartIndex, charCount, not_compressed)
+      result := fast_substring(fromStr, length, resultStartIndex, charCount, not_compressed, cgmode)
       Return(result).ptr
 
     Label(:CreateSlicedString)
@@ -2434,13 +2586,19 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
 
       Return(result).ptr
     else
-      result := fast_substring(str, length, bx6, charCount, not_compressed)
+      result := fast_substring(str, length, bx6, charCount, not_compressed, cgmode)
       Return(result).ptr
     end
-  Label(:SlowPathEntrypoint)
-    entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+Label(:SlowPathEntrypoint)
+  if cgmode == :NativePlus
+    # even though it technically technically belongs to the core part
+    # the ETS plugin is always present, so, we can refer to it (right?)_
+    Return(Call(str_orig, begin_index, end_index).Method('SubStringFromStringEntrypoint').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset('SUB_STRING_FROM_STRING_SLOW_PATH')
+    Intrinsic(:SLOW_PATH_ENTRY, str_orig, begin_index, end_index).AddImm(entrypoint).MethodAsImm('SubStringFromStringOddSavedBridge').Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
   }
 end  # def GenerateSubstringFromStringTlab
 
@@ -2448,3 +2606,5 @@ GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_en
 GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=false)
 GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=true)
 GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=false)
+GenerateSubstringFromStringTlab(all_strings_enabled=false, string_compression_enabled=true, :NativePlus)
+GenerateSubstringFromStringTlab(all_strings_enabled=true, string_compression_enabled=true, :NativePlus)

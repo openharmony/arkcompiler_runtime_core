@@ -114,11 +114,12 @@ scoped_macro(:store_with_barrier) do |buffer, buffer_uint, offset, obj, sync_typ
   end
 end
 
-function(:StringBuilderAppendLong,
-         params: {sb: 'ref', v: 'i64', array_klass: 'ref'},
-         regmap: $full_regmap,
-         regalloc_set: $panda_mask,
-         mode: [:FastPath]) {
+def GenerateStringBuilderAppendLong(cgmode)
+  function("StringBuilderAppendLong#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+           params: {sb: 'ref', v: 'i64', array_klass: 'ref'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
   # Arm32 is not supported
   if Options.arch == :arm32
@@ -135,7 +136,7 @@ function(:StringBuilderAppendLong,
   # 2. CountDigits
   n_digits := count_digits(v)
   # 3. Allocate array of chars in TLAB
-  char_array := allocate_array_of_chars_tlab(array_klass, Cast(n_digits).word)
+  char_array := allocate_array_of_chars_tlab(array_klass, Cast(n_digits).word, cgmode)
   # Let the memory writes (TLAB) be visible to other threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   # 4. Convert Long to utf16 chars
@@ -153,17 +154,24 @@ function(:StringBuilderAppendLong,
   # Do not update 'compress' field, as a string representation of a number is always compressable
   Return(sb).ref
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_LONG_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, v).AddImm(entrypoint).MethodAsImm("StringBuilderAppendLong3ArgBridge").Terminator.ref
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(sb, v).Method('StringBuilderAppendLongEntrypoint').ref).ref
+  else
+    entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_LONG_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, sb, v).AddImm(entrypoint).MethodAsImm("StringBuilderAppendLong3ArgBridge").Terminator.ref
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+GenerateStringBuilderAppendLong(:FastPath)
+GenerateStringBuilderAppendLong(:NativePlus)
 
-
-function(:StringBuilderAppendBool,
-         params: {sb: 'ref', v: 'u8', array_klass: 'ref'},
-         regmap: $full_regmap,
-         regalloc_set: $panda_mask,
-         mode: [:FastPath]) {
+def GenerateStringBuilderAppendBool(cgmode)
+  function("StringBuilderAppendBool#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+           params: {sb: 'ref', v: 'u8', array_klass: 'ref'},
+           regmap: $full_regmap,
+           regalloc_set: $panda_mask,
+           mode: [cgmode]) {
 
   # Arm32 is not supported
   if Options.arch == :arm32
@@ -184,7 +192,7 @@ function(:StringBuilderAppendBool,
     n_digits2 := Cast(4).word  # true
   }
   n_digits := Phi(n_digits1, n_digits2).word
-  char_array := allocate_array_of_chars_tlab(array_klass, n_digits)
+  char_array := allocate_array_of_chars_tlab(array_klass, n_digits, cgmode)
   # Let the memory writes (TLAB) be visible to other threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   # 3. Store 'true' or 'false' to array
@@ -202,19 +210,24 @@ function(:StringBuilderAppendBool,
   # Do not update 'compress' field, as 'true' and 'false' are always compressable
   Return(sb).ref
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_BOOL_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, v).AddImm(entrypoint).MethodAsImm("StringBuilderAppendBool3ArgBridge").Terminator.ref
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(sb, v).Method('StringBuilderAppendBoolEntrypoint').ref).ref
+  else
+    entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_BOOL_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, sb, v).AddImm(entrypoint).MethodAsImm("StringBuilderAppendBool3ArgBridge").Terminator.ref
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+GenerateStringBuilderAppendBool(:FastPath)
+GenerateStringBuilderAppendBool(:NativePlus)
 
-
-def GenerateStringBuilderAppendChar(string_compression_enabled)
-    suffix = (string_compression_enabled ? "Compressed" : "")
-    function("StringBuilderAppendChar#{suffix}".to_sym,
-          params: {sb: 'ref', ch: 'u16', array_klass: 'ref'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringBuilderAppendChar(cgmode)
+  function("StringBuilderAppendChar#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+        params: {sb: 'ref', ch: 'u16', array_klass: 'ref'},
+        regmap: $full_regmap,
+        regalloc_set: $panda_mask,
+        mode: [cgmode]) {
 
   # Arm32 is not supported
   if Options.arch == :arm32
@@ -229,7 +242,7 @@ def GenerateStringBuilderAppendChar(string_compression_enabled)
     Goto(:SlowPathEntrypoint)
   }
   # 2. Allocate array of chars in TLAB
-  char_array := allocate_array_of_chars_tlab(array_klass, Cast(1).word)
+  char_array := allocate_array_of_chars_tlab(array_klass, Cast(1).word, cgmode)
   # Let the memory writes (TLAB) be visible to other threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   # 3. Store char to array
@@ -247,25 +260,24 @@ def GenerateStringBuilderAppendChar(string_compression_enabled)
   # 7. Update 'compress' field
   compress := LoadI(sb).Imm(Constants::SB_COMPRESS_OFFSET).u8
   If(compress, 0).NE.Likely.b {
-    if string_compression_enabled
-      compressable := Compare(SubI(ch).Imm(1).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).B.b
-      If(compressable, 0).EQ.Unlikely.b {
+    compressable := Compare(SubI(ch).Imm(1).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).B.b
+    If(compressable, 0).EQ.Unlikely.b {
         StoreI(sb, 0).Imm(Constants::SB_COMPRESS_OFFSET).u8
-      }
-    else
-      StoreI(sb, 0).Imm(Constants::SB_COMPRESS_OFFSET).u8
-    end
+    }
   }
   Return(sb).ref
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_CHAR_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, ch).AddImm(entrypoint).MethodAsImm("StringBuilderAppendChar3ArgBridge").Terminator.ref
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(sb, ch).Method('StringBuilderAppendCharEntrypoint').ref).ref
+  else
+    entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_CHAR_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, sb, ch).AddImm(entrypoint).MethodAsImm("StringBuilderAppendChar3ArgBridge").Terminator.ref
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
 end
-
-GenerateStringBuilderAppendChar(true)
-GenerateStringBuilderAppendChar(false)
+GenerateStringBuilderAppendChar(:FastPath)
+GenerateStringBuilderAppendChar(:NativePlus)
 
 def GenerateStringBuilderAppendStrings(num_args, sync_type)
   case num_args
@@ -465,11 +477,12 @@ GenerateStringBuilderAppendStrings(4, :AsyncManual)
 #
 # Assumtion: string compression is enabled.
 #
-function(:StringBuilderToString,
-          params: {sb: 'ref', string_klass: 'ref'},
-          regmap: $full_regmap,
-          regalloc_set: $panda_mask,
-          mode: [:FastPath]) {
+def GenerateStringBuilderToString(cgmode)
+  function("StringBuilderToString#{(cgmode == :NativePlus ? 'NativePlus' : '')}".to_sym,
+            params: {sb: 'ref', string_klass: 'ref'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [cgmode]) {
 
   # Arm32 is not supported
   if Options.arch == :arm32
@@ -487,7 +500,7 @@ function(:StringBuilderToString,
   }
   data_size := Phi(data_size1, data_size2).u32
   # Allocate a string
-  new_str := allocate_string_tlab(string_klass, Cast(data_size).word)
+  new_str := allocate_string_tlab(string_klass, Cast(data_size).word, cgmode)
   # Let the memory writes (TLAB) be visible to other threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   # Set new string's length
@@ -567,9 +580,18 @@ Label(:NextObject)
   }
   # Everything is done
   Return(new_str).ptr
+
   # SlowPath if new string can not be allocated in TLAB
 Label(:SlowPathEntrypoint)
-  entrypoint = get_entrypoint_offset("STRING_BUILDER_TO_STRING_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, sb).AddImm(entrypoint).MethodAsImm("StringBuilderToString2ArgBridge").Terminator.ptr
-  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  if cgmode == :NativePlus
+    Return(Call(sb).Method('StringBuilderToStringEntrypoint').ptr).ptr
+  else
+    entrypoint = get_entrypoint_offset("STRING_BUILDER_TO_STRING_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, sb).AddImm(entrypoint).MethodAsImm("StringBuilderToString2ArgBridge").Terminator.ptr
+    Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+  end
 }
+end
+
+GenerateStringBuilderToString(:FastPath)
+GenerateStringBuilderToString(:NativePlus)
