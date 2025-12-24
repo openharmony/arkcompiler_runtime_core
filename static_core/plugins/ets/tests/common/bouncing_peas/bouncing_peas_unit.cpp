@@ -357,6 +357,11 @@ TEST(EtsVMConfing, PeasAOT)
     GTEST_SKIP();
 #endif
 
+    // NOTE(dslynko, #32431): enable the test after fixing issue with incorrect AOT file used
+#if defined(PANDA_ENABLE_THREAD_SANITIZER) && defined(PANDA_TARGET_AMD64)
+    GTEST_SKIP();
+#endif
+
     std::string stdlibAbc;
     std::string pathAbc;
     std::string pathAn;
@@ -390,6 +395,11 @@ TEST(EtsVMConfing, PeasLLVMAOT)
 #endif
 
 #ifndef PANDA_LLVM_AOT
+    GTEST_SKIP();
+#endif
+
+    // NOTE(dslynko, #32431): enable the test after fixing issue with incorrect AOT file used
+#if defined(PANDA_ENABLE_THREAD_SANITIZER) && defined(PANDA_TARGET_AMD64)
     GTEST_SKIP();
 #endif
 
