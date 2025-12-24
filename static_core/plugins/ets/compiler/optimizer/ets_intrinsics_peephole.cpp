@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -348,15 +348,28 @@ static bool ReplaceWithStdCoreStringEquals(IntrinsicInst *intrinsic, Graph *grap
     return true;
 }
 
+static bool MayBeBoxedFloating(RuntimeInterface::ClassPtr klass, compiler::Graph *graph)
+{
+    if (klass == nullptr) {
+        return true;
+    }
+    if (graph->GetRuntime()->IsClassBoxedFloat(klass) || graph->GetRuntime()->IsClassBoxedDouble(klass)) {
+        return true;
+    }
+    return false;
+}
+
 bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     auto input0 = intrinsic->GetInput(0).GetInst();
     auto input1 = intrinsic->GetInput(1).GetInst();
-    if (input0 == input1 || (IsNullish(input0) && IsNullish(input1))) {
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if ((IsNullish(input0) && IsNullish(input1)) ||
+        (input0 == input1 && !MayBeBoxedFloating(GetClassPtrForObject(intrinsic, 0), graph)))  // NaN != NaN
+    {
         intrinsic->ReplaceUsers(ConstFoldingCreateIntConst(intrinsic, 1));
         return true;
     }
-    auto graph = intrinsic->GetBasicBlock()->GetGraph();
     if (graph->IsBytecodeOptimizer()) {
         return false;
     }
@@ -372,12 +385,12 @@ bool Peepholes::PeepholeStrictEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
 {
     auto input0 = intrinsic->GetInput(0).GetInst();
     auto input1 = intrinsic->GetInput(1).GetInst();
-    if (input0 == input1) {
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (input0 == input1 && !MayBeBoxedFloating(GetClassPtrForObject(intrinsic, 0), graph)) {  // NaN != NaN
         intrinsic->ReplaceUsers(ConstFoldingCreateIntConst(intrinsic, 1));
         return true;
     }
 
-    auto graph = intrinsic->GetBasicBlock()->GetGraph();
     if (graph->IsBytecodeOptimizer()) {
         return false;
     }

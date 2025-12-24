@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ function getobj(): SomeRef { return new Object(); }
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
-//! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
+//! INST         /Intrinsic.CompilerEtsStrictEquals/
 //!
 //! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_null"
 //! PASS_AFTER   "IrBuilder"
@@ -72,6 +72,18 @@ function getobj(): SomeRef { return new Object(); }
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //! INST_NOT     /Compare/
 //!
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_union_input"
+//! PASS_AFTER   "IrBuilder"
+//! INST         /Intrinsic.CompilerEtsStrictEquals/
+//! PASS_AFTER   "ChecksElimination"
+//! INST         /Intrinsic.CompilerEtsStrictEquals/
+//!
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_object_input"
+//! PASS_AFTER   "IrBuilder"
+//! INST         /Intrinsic.CompilerEtsStrictEquals/
+//! PASS_AFTER   "ChecksElimination"
+//! INST         /Intrinsic.CompilerEtsStrictEquals/
+//!
 //! RUN          entry: "ets_strict_equals.ETSGLOBAL::main"
 
 function strict_equals_dce(x: SomeRef, y: SomeRef) {
@@ -95,6 +107,12 @@ function strict_equals_null_undefined() {
 function strict_equals_reftyped_input() {
     return getobj() === getobj();
 }
+function strict_equals_union_input(x: double | string) {
+    return x === x;
+}
+function strict_equals_object_input(x: SomeRef) {
+    return x === x;
+}
 
 function main() {
     let a = new Int(123);
@@ -107,4 +125,8 @@ function main() {
     arktest.assertTrue(strict_equals_undefined(undefined) && !strict_equals_undefined(null) && !strict_equals_undefined(a));
     arktest.assertTrue(!strict_equals_null_undefined());
     arktest.assertTrue(!strict_equals_reftyped_input());
+    arktest.assertTrue(!strict_equals_union_input(NaN));
+
+    let objNaN: object = NaN;
+    arktest.assertTrue(!strict_equals_object_input(objNaN));
 }

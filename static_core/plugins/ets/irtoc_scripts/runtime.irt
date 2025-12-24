@@ -1,5 +1,5 @@
 # plugin ets_map
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,28 +40,9 @@ module RuntimeConstants
 
   INT_MAX = "std::numeric_limits<int>::max()"
   INT_MIN = "std::numeric_limits<int>::min()"
-
-  FLOAT32_NAN_EXPONENT_BITS = "(~(~0u << 8)) << 23"
-  FLOAT32_NAN_SIGNIFICAND_BITS = "~(~0u << 23)"
-  FLOAT64_NAN_EXPONENT_BITS = "(~(~0Lu << 11)) << 52"
-  FLOAT64_NAN_SIGNIFICAND_BITS = "~(~0Lu << 52)"
 end
 
 ################################################################
-
-scoped_macro(:isNan32) do |val|
-  bits := Bitcast(val).u32
-  exponent := AndI(bits).Imm(RuntimeConstants::FLOAT32_NAN_EXPONENT_BITS).u32
-  significand := AndI(bits).Imm(RuntimeConstants::FLOAT32_NAN_SIGNIFICAND_BITS).u32
-  is_nan := And(Compare(exponent, RuntimeConstants::FLOAT32_NAN_EXPONENT_BITS).b, Not(Compare(significand, 0).b).b).b
-end
-
-scoped_macro(:isNan64) do |val|
-  bits := Bitcast(val).u64
-  exponent := AndI(bits).Imm(RuntimeConstants::FLOAT64_NAN_EXPONENT_BITS).u64
-  significand := AndI(bits).Imm(RuntimeConstants::FLOAT64_NAN_SIGNIFICAND_BITS).u64
-  is_nan := And(Compare(exponent, RuntimeConstants::FLOAT64_NAN_EXPONENT_BITS).b, Not(Compare(significand, 0).b).b).b
-end
 
 scoped_macro(:isHashedString) do |obj|
   Compare(LoadI(obj).Imm(Constants::STRING_HASHCODE_OFFSET).u32, 0).NE.b

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ function getobj(): Any { return new Object(); }
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
-//! INST_NOT     /Intrinsic.CompilerEtsEquals/
+//! INST         /Intrinsic.CompilerEtsEquals/
 //!
 //! METHOD       "ets_equals.ETSGLOBAL::equals_null"
 //! PASS_AFTER   "IrBuilder"
@@ -70,6 +70,18 @@ function getobj(): Any { return new Object(); }
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //! INST_NOT     /Compare/
 //!
+//! METHOD       "ets_equals.ETSGLOBAL::equals_union_input"
+//! PASS_AFTER   "IrBuilder"
+//! INST         /Intrinsic.CompilerEtsEquals/
+//! PASS_AFTER   "ChecksElimination"
+//! INST         /Intrinsic.CompilerEtsEquals/
+//!
+//! METHOD       "ets_equals.ETSGLOBAL::equals_object_input"
+//! PASS_AFTER   "IrBuilder"
+//! INST         /Intrinsic.CompilerEtsEquals/
+//! PASS_AFTER   "ChecksElimination"
+//! INST         /Intrinsic.CompilerEtsEquals/
+//!
 //! RUN          entry: "ets_equals.ETSGLOBAL::main"
 
 function equals_dce(x: Any, y: Any) {
@@ -93,6 +105,12 @@ function equals_null_undefined() {
 function equals_reftyped_input() {
     return getobj() == getobj();
 }
+function equals_union_input(x: double | string) {
+    return x == x;
+}
+function equals_object_input(x: Any) {
+    return x == x;
+}
 
 function main() {
     let a = new Int(123);
@@ -105,4 +123,8 @@ function main() {
     arktest.assertTrue(equals_undefined(undefined) && equals_undefined(null) && !equals_undefined(a));
     arktest.assertTrue(equals_null_undefined());
     arktest.assertTrue(!equals_reftyped_input());
+    arktest.assertTrue(!equals_union_input(NaN));
+
+    let objNaN: object = NaN;
+    arktest.assertTrue(!equals_object_input(objNaN));
 }

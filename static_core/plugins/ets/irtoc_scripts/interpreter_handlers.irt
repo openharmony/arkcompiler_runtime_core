@@ -1,5 +1,5 @@
 # plugin interpreter_handlers
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -292,7 +292,30 @@ end
 ['', '_strict'].each do |suffix|
   macro(:"handle_ets_equals#{suffix}") do |v1, v2|
     If(Compare(v1, v2).b, 0).NE.Unlikely {
-      result_0 := 1
+      v1isnullish_pe = is_nullish(v1)
+      If(v1isnullish_pe, 0).NE.Unlikely {
+        pe_true := 1
+        Goto(:"PtrEqJoin#{suffix}")
+      } Else {
+        obj_klass := load_class(v1)
+        obj_flags := LoadI(obj_klass).Imm(EtsConstants::ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET).u32
+        btype := getBoxedType(obj_flags)
+        If(getBoxedType(obj_flags), Cast(EtsConstants::ETS_CLASS_BOXED_TYPE_DOUBLE_MASK_VALUE).u32).EQ.b {
+          value_double := LoadI(v1).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
+          pe_cmp1 := Compare(isNan64(value_double).b, 0).EQ.b
+          Goto(:"PtrEqJoin#{suffix}")
+        }
+        If(getBoxedType(obj_flags), Cast(EtsConstants::ETS_CLASS_BOXED_TYPE_FLOAT_MASK_VALUE).u32).EQ.b {
+          value_float := LoadI(v1).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f32
+          pe_cmp2 := Compare(isNan32(value_float).b, 0).EQ.b
+          Goto(:"PtrEqJoin#{suffix}")
+        } Else {
+          pe_true2 := 1
+          Goto(:"PtrEqJoin#{suffix}")
+        }
+      }
+      Label(:"PtrEqJoin#{suffix}")
+      result_0 := Phi(pe_true, pe_cmp1, pe_cmp2, pe_true2).b
     } Else {
       v1isnullish = is_nullish(v1)
       v2isnullish = is_nullish(v2)

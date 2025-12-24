@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -672,6 +672,16 @@ bool EtsRuntimeInterface::IsFunctionReference(ClassPtr klass) const
 bool EtsRuntimeInterface::IsClassBoxedBoolean(ClassPtr klass) const
 {
     return PlatformTypes(PandaEtsVM::GetCurrent())->coreBoolean->GetRuntimeClass() == klass;
+}
+
+bool EtsRuntimeInterface::IsClassBoxedFloat(ClassPtr klass) const
+{
+    return PlatformTypes(PandaEtsVM::GetCurrent())->coreFloat->GetRuntimeClass() == klass;
+}
+
+bool EtsRuntimeInterface::IsClassBoxedDouble(ClassPtr klass) const
+{
+    return PlatformTypes(PandaEtsVM::GetCurrent())->coreDouble->GetRuntimeClass() == klass;
 }
 
 ark::compiler::DataType::Type EtsRuntimeInterface::GetBoxedClassDataType(ClassPtr klass) const
