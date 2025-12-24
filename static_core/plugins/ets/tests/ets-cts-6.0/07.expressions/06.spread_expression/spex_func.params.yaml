@@ -669,7 +669,7 @@ cases:
 
     - decl: |-
           function foo(...p: FixedArray<Object>): number {
-              return p.length ? p[p.length - 1] : -1.0
+              return (p.length ? p[p.length - 1] : -1.0) as number
           }
       use: |-
           // expression in parentheses

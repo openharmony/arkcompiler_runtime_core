@@ -545,7 +545,6 @@ cases:
           arktest.assertEQ(a.p[1], 1)
           arktest.assertEQ(a.p[2], 2)
 
-    - tags: 'compile-only, negative'
       decl: |-
           class A {
               p: Object[]
@@ -555,7 +554,7 @@ cases:
           }
           let arr: number[] = [0.0, 1.0, 2.0]
       use: |-
-          let a = new A(...arr) // CTE: wrong type array
+          let a = new A(...arr)
 
     # Array spread to rest
     - decl: |-
@@ -675,3 +674,14 @@ cases:
           let tup: [string, number|undefined] = [ 'abc', undefined ]
       use: |-
           let a = new A(...tup) // CTE: wrong number of arguments
+
+    - decl: |-
+        class A {
+            p: Object[]
+            constructor(...obj: Object[]) {
+                this.p = obj
+            }
+        }
+        let arr: number[] = [0.0, 1.0, 2.0]
+      use: |-
+        let a = new A(...arr)

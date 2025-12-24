@@ -78,9 +78,6 @@
 #2236
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
 
-#30757
-04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/lambda_declaration_0.ets
-
 #30760
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_0.ets
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_1.ets
@@ -281,16 +278,6 @@
 07.expressions/06.spread_expression/spex_func_96.ets
 07.expressions/06.spread_expression/spex_func_97.ets
 
-#30371 Cannot spread into array with supertype elements
-07.expressions/06.spread_expression/spex_func_15.ets
-07.expressions/06.spread_expression/spex_func_28.ets
-07.expressions/06.spread_expression/spex_func_53.ets
-07.expressions/06.spread_expression/spex_func_57.ets
-07.expressions/06.spread_expression/spex_func_59.ets
-07.expressions/06.spread_expression/spex_func_60.ets
-07.expressions/06.spread_expression/spex_func_69.ets
-07.expressions/06.spread_expression/spex_func_70.ets
-
 #30368  Cannot spread tuple of strings to FixedArray of strings
 07.expressions/06.spread_expression/spex_80.ets
 
@@ -299,39 +286,6 @@
 07.expressions/06.spread_expression/spex_88.ets
 07.expressions/06.spread_expression/spex_89.ets
 07.expressions/06.spread_expression/spex_90.ets
-
-#20371 Unexpected Type Error on string array
-07.expressions/06.spread_expression/spex_lmbd_32.ets
-
-#20376 No support for spread arguments in lambda
-07.expressions/06.spread_expression/spex_lmbd_2.ets
-07.expressions/06.spread_expression/spex_lmbd_3.ets
-07.expressions/06.spread_expression/spex_lmbd_4.ets
-07.expressions/06.spread_expression/spex_lmbd_5.ets
-07.expressions/06.spread_expression/spex_lmbd_6.ets
-07.expressions/06.spread_expression/spex_lmbd_7.ets
-07.expressions/06.spread_expression/spex_lmbd_8.ets
-07.expressions/06.spread_expression/spex_lmbd_9.ets
-07.expressions/06.spread_expression/spex_lmbd_10.ets
-07.expressions/06.spread_expression/spex_lmbd_11.ets
-07.expressions/06.spread_expression/spex_lmbd_12.ets
-07.expressions/06.spread_expression/spex_lmbd_13.ets
-07.expressions/06.spread_expression/spex_lmbd_15.ets
-07.expressions/06.spread_expression/spex_lmbd_16.ets
-07.expressions/06.spread_expression/spex_lmbd_17.ets
-07.expressions/06.spread_expression/spex_lmbd_18.ets
-07.expressions/06.spread_expression/spex_lmbd_19.ets
-07.expressions/06.spread_expression/spex_lmbd_20.ets
-07.expressions/06.spread_expression/spex_lmbd_21.ets
-07.expressions/06.spread_expression/spex_lmbd_22.ets
-07.expressions/06.spread_expression/spex_lmbd_23.ets
-07.expressions/06.spread_expression/spex_lmbd_24.ets
-07.expressions/06.spread_expression/spex_lmbd_25.ets
-07.expressions/06.spread_expression/spex_lmbd_26.ets
-07.expressions/06.spread_expression/spex_lmbd_27.ets
-07.expressions/06.spread_expression/spex_lmbd_28.ets
-07.expressions/06.spread_expression/spex_lmbd_29.ets
-07.expressions/06.spread_expression/spex_lmbd_31.ets
 
 #31617 Catch NPE (tests should be updated)
 07.expressions/06.spread_expression/spex_lmbd_37.ets
