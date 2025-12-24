@@ -300,10 +300,25 @@ extern "C" coretypes::String *SubStringFromStringEntrypoint(ObjectHeader *obj, i
     auto substr = coretypes::String::FastSubString(static_cast<coretypes::String *>(obj), indexes.first, substrLength,
                                                    vm->GetLanguageContext(), vm);
     if (UNLIKELY(substr == nullptr)) {
+        /* if called from the interpreter context do not handle the exceptions just yet */
+        if (!StackWalker::Create(thread).IsCFrame()) {
+            return nullptr;
+        }
         HandlePendingException();
         UNREACHABLE();
     }
     return substr;
+}
+
+static coretypes::Array *HandleGetCharsException(int32_t arg1, int32_t arg2)
+{
+    ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
+    ark::ThrowStringIndexOutOfBoundsException(arg1, arg2);
+    if (StackWalker::Create(ManagedThread::GetCurrent()).IsCFrame()) {
+        HandlePendingException(UnwindPolicy::SKIP_INLINED);
+        UNREACHABLE();
+    }
+    return nullptr;
 }
 
 extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t begin, int32_t end)
@@ -312,24 +327,17 @@ extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t
 
     auto length = static_cast<coretypes::String *>(obj)->GetLength();
     if (UNLIKELY(static_cast<uint32_t>(end) > length)) {
-        ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
-        ark::ThrowStringIndexOutOfBoundsException(end, length);
-        HandlePendingException(UnwindPolicy::SKIP_INLINED);
-        UNREACHABLE();
+        return HandleGetCharsException(end, length);
     }
+
     if (UNLIKELY(begin > end)) {
-        ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
-        ark::ThrowStringIndexOutOfBoundsException(begin, length);
-        HandlePendingException(UnwindPolicy::SKIP_INLINED);
-        UNREACHABLE();
+        return HandleGetCharsException(begin, length);
     }
 
     if (UNLIKELY(begin < 0)) {
-        ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
-        ark::ThrowStringIndexOutOfBoundsException(begin, length);
-        HandlePendingException(UnwindPolicy::SKIP_INLINED);
-        UNREACHABLE();
+        return HandleGetCharsException(begin, length);
     }
+
     auto thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
     auto vm = thread->GetVM();
@@ -337,6 +345,10 @@ extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t
     auto array = coretypes::String::GetChars(static_cast<coretypes::String *>(obj), begin, arrayLength,
                                              vm->GetLanguageContext());
     if (UNLIKELY(array == nullptr)) {
+        /* if called from the interpreter context do not handle the exceptions just yet */
+        if (!StackWalker::Create(ManagedThread::GetCurrent()).IsCFrame()) {
+            return nullptr;
+        }
         HandlePendingException();
         UNREACHABLE();
     }
@@ -547,7 +559,7 @@ static Class *GetClass(const Method *caller, FileEntityId fileEntityId, ClassLin
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
-    Class *klass = caller->GetPandaFile()->GetPandaCache()->GetClassFromCache(entityId);
+    Class *klass = pf->GetPandaCache()->GetClassFromCache(entityId);
     if (klass != nullptr) {
         return klass;
     }
@@ -557,7 +569,7 @@ static Class *GetClass(const Method *caller, FileEntityId fileEntityId, ClassLin
     klass = ext->GetClass(*pf, entityId, caller->GetClass()->GetLoadContext(),
                           (errorHandler == nullptr) ? ext->GetErrorHandler() : errorHandler);
     if (LIKELY(klass != nullptr)) {
-        caller->GetPandaFile()->GetPandaCache()->SetClassCache(entityId, klass);
+        pf->GetPandaCache()->SetClassCache(entityId, klass);
     }
     return klass;
 }

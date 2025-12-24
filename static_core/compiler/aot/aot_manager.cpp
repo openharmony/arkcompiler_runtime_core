@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,9 +83,13 @@ void AotManager::UpdatePandaFilesSnapshot(const panda_file::File *pf, ClassLinke
         return;
     }
     if (isArkAot) {
+        os::memory::LockHolder lock {snapshotFilesLock_};
         pandaFilesSnapshot_.emplace_back(pf->GetFullFileName(), std::make_pair(pf, ctx));
     } else {
-        pandaFilesLoaded_.try_emplace(pf->GetFullFileName(), std::make_pair(pf, ctx));
+        {
+            os::memory::LockHolder lock {snapshotFilesLock_};
+            pandaFilesLoaded_.try_emplace(pf->GetFullFileName(), std::make_pair(pf, ctx));
+        }
         UpdatePandaFilesSnapshot(isArkAot, true, true);
     }
 }
@@ -97,36 +101,38 @@ void AotManager::UpdatePandaFilesSnapshot(bool isArkAot, [[maybe_unused]] bool b
         return;
     }
 
-    auto parseClassContext = [this](std::string_view context) {
+    auto parseClassContext = [](std::string_view context, const auto &loadedFiles, auto &snapshotFiles) {
         size_t start = 0;
         size_t end;
         size_t pathEnd;
         if (context.empty()) {
             return;
         }
-        auto parseAndAddFile = [this, &context, &start, &pathEnd]() {
+        auto parseAndAddFile = [&context, &start, &pathEnd](const auto &loaded, auto &snapshot) {
             pathEnd = context.find(AotClassContextCollector::HASH_DELIMETER, start);
             ASSERT(pathEnd != std::string_view::npos);
             auto fileName = context.substr(start, pathEnd - start);
-            auto loadedFile = pandaFilesLoaded_.find(fileName);
-            pandaFilesSnapshot_.emplace_back(fileName, loadedFile != pandaFilesLoaded_.end()
-                                                           ? loadedFile->second
-                                                           : std::make_pair(nullptr, nullptr));
+            auto loadedFile = loaded.find(fileName);
+            snapshot.emplace_back(fileName,
+                                  loadedFile != loaded.end() ? loadedFile->second : std::make_pair(nullptr, nullptr));
         };
         while ((end = context.find(AotClassContextCollector::DELIMETER, start)) != std::string_view::npos) {
-            parseAndAddFile();
+            parseAndAddFile(loadedFiles, snapshotFiles);
             start = end + 1;
         }
-        parseAndAddFile();
+        parseAndAddFile(loadedFiles, snapshotFiles);
     };
 
+    // NOTE: Possibly not optimal #31915
+    os::memory::LockHolder lock {snapshotFilesLock_};
     pandaFilesSnapshot_.clear();
-    parseClassContext(bootClassContext_);
-    parseClassContext(appClassContext_);
+    parseClassContext(bootClassContext_, pandaFilesLoaded_, pandaFilesSnapshot_);
+    parseClassContext(appClassContext_, pandaFilesLoaded_, pandaFilesSnapshot_);
 }
 
 uint32_t AotManager::GetPandaFileSnapshotIndex(const std::string &fileName)
 {
+    os::memory::LockHolder lock {snapshotFilesLock_};
     for (uint32_t i = 0; i < pandaFilesSnapshot_.size(); i++) {
         if (fileName == pandaFilesSnapshot_.at(i).first) {
             return i;
@@ -137,6 +143,7 @@ uint32_t AotManager::GetPandaFileSnapshotIndex(const std::string &fileName)
 
 const panda_file::File *AotManager::GetPandaFileBySnapshotIndex(uint32_t index) const
 {
+    os::memory::LockHolder lock {snapshotFilesLock_};
     ASSERT(index < pandaFilesSnapshot_.size());
     return pandaFilesSnapshot_.at(index).second.first;
 }

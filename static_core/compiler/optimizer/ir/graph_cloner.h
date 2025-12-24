@@ -165,6 +165,11 @@ public:
         if constexpr (TYPE == UnrollType::UNROLL_CONSTANT_ITERATIONS) {
             RemoveLoopPreHeader(unrollData);
         }
+
+        // Ensure DominatorsTree is valid after CloneBlocksAndInstructions adds new blocks to the graph
+        // and BuildLoopUnrollControlFlow / BuildLoopUnrollDataFlow modify control and data flow
+        GetGraph()->GetValidAnalysis<DominatorsTree>();
+
         ssb_.FixPhisWithCheckInputs(unrollData->outer);
     }
 

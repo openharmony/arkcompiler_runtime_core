@@ -153,13 +153,14 @@ end  # try_use_cached_flat_str_accept_sliced
 
 # Try to allocate String in TLAB.
 # The result is either a pointer to a new string or null if there is no enough space in TLAB.
-macro(:allocate_string_tlab) do |string_klass, data_size|
+macro(:allocate_string_tlab) do |string_klass_dummy, data_size, cgmode|
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
     ReturnVoid().void
     next
   end
 
+  string_klass := LoadI(%tr).Imm(Constants::CORE_STRING_CLASS_OFFSET).ref
   # Add sizeof(String) and do align
   _data_size := Cast(data_size).word
   _size := AndI(AddI(_data_size).Imm(Constants::STRING_CLASS_SIZE_WITH_ALIGNMENT).word).Imm(Constants::ALIGNMENT_MASK).word
@@ -173,9 +174,19 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
   If(Sub(_end, _start).word, _size).B.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
-  Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
+
+  if cgmode == :FastPath
+    Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
+  else
+    Call(_start, _size, Cast(-1).u64).Method('WriteTlabStatsEntrypoint').void if defines.DEBUG
+  end
+
   if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
-    call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+    if cgmode == :FastPath
+      call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+    else
+      Call(_start, _size).Method('AnnotateSanitizersEntrypoint').void
+    end
   end
   # Store class of the object
   store_class(_start, string_klass)
@@ -285,13 +296,14 @@ end  # allocate_string_tlab_no_debug
 
 # Try to allocate Array of i8 chars in TLAB.
 # The result is either a pointer to a new array or null if there is no enough space in TLAB.
-macro(:allocate_array_of_bytes_tlab) do |array_klass, char_count|
+macro(:allocate_array_of_bytes_tlab) do |array_klass_dummy, char_count, cgmode|
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
     ReturnVoid().void
     next
   end
 
+  array_klass := LoadI(%tr).Imm(Constants::BYTE_ARRAY_CLASS_OFFSET).ref
   elements_num := And(char_count, "0x00000000ffffffff").word
   # Account for u16 char size
   _size := Cast(elements_num).word
@@ -307,9 +319,17 @@ macro(:allocate_array_of_bytes_tlab) do |array_klass, char_count|
   If(Sub(_end, _start).word, _size).B.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
-  Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
+  if cgmode == :FastPath
+    Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
+  else
+    Call(_start, _size, Cast(-1).u64).Method('WriteTlabStatsEntrypoint').void if defines.DEBUG
+  end
   if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
-    call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+    if cgmode == :FastPath
+      call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+    else
+      Call(_start, _size).Method('AnnotateSanitizersEntrypoint').void
+    end
   end
   # Store class of the object
   store_class(_start, array_klass)
@@ -323,16 +343,18 @@ end  # allocate_array_of_bytes_tlab
 
 # Try to allocate Array of u16 chars in TLAB.
 # The result is either a pointer to a new array or null if there is no enough space in TLAB.
-macro(:allocate_array_of_chars_tlab) do |array_klass, char_count|
+macro(:allocate_array_of_chars_tlab) do |array_klass_dummy, char_count, cgmode|
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
     ReturnVoid().void
     next
   end
 
-  elements_num := And(char_count, "0x00000000ffffffff").word
+  array_klass := LoadI(%tr).Imm(Constants::CHAR_ARRAY_CLASS_OFFSET).ref
+
+  elements_num := AndI(char_count).Imm(0xffffffff).word
+  _size := ShlI(char_count).Imm(1).word
   # Account for u16 char size
-  _size := Shl(elements_num, 1).word
   # Add sizeof(Array) and do align
   _size := AndI(AddI(_size).Imm(Constants::ARRAY_CLASS_SIZE_WITH_ALIGNMENT).word).Imm(Constants::ALIGNMENT_MASK).word
   # Load pointer to the TLAB from TLS
@@ -345,9 +367,17 @@ macro(:allocate_array_of_chars_tlab) do |array_klass, char_count|
   If(Sub(_end, _start).word, _size).B.Unlikely.b {
     Goto(:SlowPathEntrypoint)
   }
-  Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
+  if cgmode == :FastPath
+    Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
+  else
+    Call(_start, _size, Cast(-1).u64).Method('WriteTlabStatsEntrypoint').void if defines.DEBUG
+  end
   if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
-    call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+    if cgmode == :FastPath
+      call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+    else
+      Call(_start, _size).Method('AnnotateSanitizersEntrypoint').void
+    end
   end
   # Store class of the object
   store_class(_start, array_klass)
@@ -726,6 +756,46 @@ scoped_macro(:compare_mixed_strings) do |buf1, buf2, len, utf_is_first|
   }
   ret := Phi(ret1, ret2).i32
 end  # compare_mixed_strings
+
+###
+# Compute string hashcode
+#
+scoped_macro(:u8_string_hashcode) do |str_data, char_count|
+  hash := Cast(0).u32
+  If(char_count, 0).A.Likely.b {
+    i1 := Cast(0).u32
+    imm31 := Cast(31).u32
+Label(:Loop_hash)
+    hash1 := Phi(hash, hash2).u32
+    i := Phi(i1, i2).u32
+    ch := Cast(Load(str_data, i).u8).SrcType(Constants::COMPILER_UINT8).u32
+    hash2 := Add(Mul(hash1, imm31).u32, ch).u32
+    i2 := AddI(i).Imm(1).u32
+    If(i2, char_count).B.Likely.b {
+      Goto(:Loop_hash)
+    }
+  }
+  hashcode := Phi(hash, hash2).u32
+end  # u8_string_hashcode
+
+scoped_macro(:u16_string_hashcode) do |str_data, char_count|
+  hash := Cast(0).u32
+  If(char_count, 0).A.Likely.b {
+    i1 := Cast(0).u64
+    imm31 := Cast(31).u32
+    stop := ShlI(Cast(char_count).u64).Imm(1).u64
+Label(:Loop_hash)
+    hash1 := Phi(hash, hash2).u32
+    i := Phi(i1, i2).u64
+    ch := Cast(Load(str_data, i).u16).SrcType(Constants::COMPILER_UINT16).u32
+    hash2 := Add(Mul(hash1, imm31).u32, ch).u32
+    i2 := AddI(i).Imm(2).u64
+    If(i2, stop).B.Likely.b {
+      Goto(:Loop_hash)
+    }
+  }
+  hashcode := Phi(hash, hash2).u32
+end  # u16_string_hashcode
 
 scoped_macro(:macroStringCompareTo) do |str1, str2|
   If(str1, str2).EQ.Unlikely.b {

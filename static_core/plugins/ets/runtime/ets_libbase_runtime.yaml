@@ -950,6 +950,7 @@ intrinsics:
         - i32
         - i32
     impl: ark::ets::intrinsics::StdCoreStringGetChars
+    irtoc_impl: StringGetCharsTlabCompressedNativePlus
     codegen_func: CreateStringGetCharsTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringGetCharsTlab
@@ -969,6 +970,7 @@ intrinsics:
         - i32
         - i32
     impl: ark::ets::intrinsics::StdCoreStringGetBytes
+    irtoc_impl: StringGetBytesTlabNativePlus
     codegen_func: CreateStringGetBytesTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringGetBytesTlab
@@ -1188,6 +1190,7 @@ intrinsics:
       ret: std.core.String
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::StdCoreStringSubstring
+    irtoc_impl: SubStringFromStringTlabCompressedNativePlus
     codegen_func: CreateStringSubstringTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStdStringSubstring
@@ -1204,24 +1207,6 @@ intrinsics:
       ret: i32
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringCodePointToChar
-
-#  Not yet clear if we have to retain the dedicated hashcode implementation
-#  for Strings as an intrinsic, will clear this out in the follow up patch
-#  Now just make sure it works as intended wrt finalized Object.$_hashCode
-#  - name: StdCoreStringHashCode
-#    space: ets
-#    class_name: std.core.String
-#    method_name: $_hashCode
-#    static: false
-#    signature:
-#      ret: i32
-#      args: [ ]
-#    impl: ark::ets::intrinsics::StdCoreStringHashCode
-#    irtoc_impl: StringHashCodeCompressedNativePlus
-#    codegen_func: CreateStringHashCode
-#    codegen_arch: [arm64, amd64]
-#    llvm_codegen_func: EmitStringHashCode
-#    safe_intrinsic: true
 
   - name: StdCoreStringIsCompressed
     space: ets
@@ -1244,6 +1229,7 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::StdCoreStringConcat2
+    irtoc_impl: StringConcat2TlabNativePlus
     codegen_func: CreateStringConcat
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringConcat2
@@ -1259,6 +1245,7 @@ intrinsics:
       ret: std.core.String
       args: [std.core.String, std.core.String, std.core.String]
     impl: ark::ets::intrinsics::StdCoreStringConcat3
+    irtoc_impl: StringConcat3TlabNativePlus
     codegen_func: CreateStringConcat
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringConcat3
@@ -1273,6 +1260,7 @@ intrinsics:
       ret: std.core.String
       args: [std.core.String, std.core.String, std.core.String, std.core.String]
     impl: ark::ets::intrinsics::StdCoreStringConcat4
+    irtoc_impl: StringConcat4TlabNativePlus
     codegen_func: CreateStringConcat
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringConcat4
@@ -1303,6 +1291,7 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringTrimLeft
+    irtoc_impl: StringTrimLeftNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringTrimLeft
     llvm_codegen_func: EmitStringTrimLeft
@@ -1317,6 +1306,7 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringTrimRight
+    irtoc_impl: StringTrimRightNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringTrimRight
     llvm_codegen_func: EmitStringTrimRight
@@ -1331,6 +1321,7 @@ intrinsics:
       ret: std.core.String
       args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringTrim
+    irtoc_impl: StringTrimNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringTrim
     llvm_codegen_func: EmitStringTrim
@@ -1399,6 +1390,7 @@ intrinsics:
       ret: std.core.String
       args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringRepeat
+    irtoc_impl: StringRepeatTlabNativePlus
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringRepeat
     llvm_codegen_func: EmitStringRepeat
@@ -1506,6 +1498,7 @@ intrinsics:
       ret: std.core.StringBuilder
       args: [i64]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendLong
+    irtoc_impl: StringBuilderAppendLongNativePlus
     codegen_func: CreateStringBuilderAppendNumber
     llvm_codegen_func: EmitStringBuilderAppendLong
     codegen_arch: [arm64, amd64]
@@ -1560,6 +1553,7 @@ intrinsics:
       ret: std.core.StringBuilder
       args: [u16]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendChar
+    irtoc_impl: StringBuilderAppendCharNativePlus
     codegen_func: CreateStringBuilderAppendChar
     llvm_codegen_func: EmitStringBuilderAppendChar
     codegen_arch: [arm64, amd64]
@@ -1573,6 +1567,7 @@ intrinsics:
       ret: std.core.StringBuilder
       args: [u1]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendBool
+    irtoc_impl: StringBuilderAppendBoolNativePlus
     codegen_func: CreateStringBuilderAppendBool
     llvm_codegen_func: EmitStringBuilderAppendBool
     codegen_arch: [arm64, amd64]
@@ -1640,6 +1635,7 @@ intrinsics:
       ret: std.core.String
       args: []
     impl: ark::ets::intrinsics::StdCoreStringBuilderToString
+    irtoc_impl: StringBuilderToStringNativePlus
     clear_flags: []
     codegen_func: CreateStringBuilderToString
     llvm_codegen_func: EmitStringBuilderToString

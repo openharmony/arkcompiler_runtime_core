@@ -125,46 +125,6 @@ GenerateTypedArrayFillInternal('UInt16', 'U_INT16', 'i32', 'u16', 1, :NativePlus
 GenerateTypedArrayFillInternal('UInt32', 'U_INT32', 'i64', 'u32', 2, :NativePlus)
 GenerateTypedArrayFillInternal('BigUInt64', 'BIG_U_INT64', 'i64', 'u64', 3, :NativePlus)
 
-# Try to allocate object in TLAB.
-# The result is either a pointer to a new object or null if there is no enough space in TLAB.
-macro(:allocate_object_tlab) do |klass, klass_size, data_size|
-    if Options.arch == :arm32
-      Intrinsic(:UNREACHABLE).Terminator.void
-      ReturnVoid().void
-      next
-    end
-
-    _data_size := Cast(data_size).word
-    _klass_size_align := AddI(Cast(klass_size).word).Imm("TLAB_ALIGNMENT - 1").word
-    _size_0 := AndI(_klass_size_align).Imm(Constants::ALIGNMENT_MASK).word
-    If(_data_size, Cast(0).word).NE.Unlikely {
-        _size_1 := Add(Add(_data_size, Cast(klass_size).word).word, "DEFAULT_ALIGNMENT_IN_BYTES - 1").word
-        _size_1 := And(_size_1, "(~(DEFAULT_ALIGNMENT_IN_BYTES - 1))").word
-    }
-    _size := Phi(_size_0, _size_1).word
-
-    # Load pointer to the TLAB from TLS
-    _tlab := LoadI(%tr).Imm(Constants::TLAB_OFFSET).ptr
-    # Load pointer to the start address of free memory in the TLAB
-    _start := LoadI(_tlab).Imm(Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
-    # Load pointer to the end address of free memory in the TLAB
-    _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
-    # Check if there is enough space
-    If(Sub(_end, _start).word, _size).B.Unlikely {
-        Goto(:SlowPathEntrypoint)
-    }
-    Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
-    if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
-      call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
-    end
-    # Store class of the object
-    store_class(_start, klass)
-    # Update the TLAB state
-    StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
-    # Return a pointer to the newly allocated string
-    _allocated_object := _start
-end
-
 ###
 # Numbers in an instance of 'std.core.Array' are represented as an array of object pointers to instances of the
 # boxing class 'std.core.Double' or 'std.core.Int'.

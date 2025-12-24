@@ -465,7 +465,7 @@ options:
 
 - name: compiler-inline-external-methods-aot
   type: bool
-  default: false
+  default: true
   description: Enable inlining external methods in AOT mode
   tags: [perf]
 
