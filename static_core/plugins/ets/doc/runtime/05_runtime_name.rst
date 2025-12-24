@@ -10,21 +10,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-============================
-|LANG| Runtime Specification
-============================
+.. _RT Runtime Name:
 
-.. toctree::
-    :numbered:
-    :maxdepth: 3
-
-    /01_intro
-    /02_fully_qualified_name
-    /03_binary_file_format
-    /04_runtime_type_system
-    /05_runtime_name
-    /06_language_representation_in_binary_file
-    /07_verification
-
-
-
+Runtime Name
+************
