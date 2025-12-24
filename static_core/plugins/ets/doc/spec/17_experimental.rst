@@ -2883,11 +2883,11 @@ All other arguments are handled in an ordinary manner.
          bar1(e, 1)
 
 
-The keyword ``this`` can be used inside a *function with receiver*. It
-corresponds to the first parameter. Otherwise, a :index:`compile-time error`
-occurs.
-The type of parameter ``this`` is called the *receiver type* (see
-:ref:`Receiver Type`):
+The keyword ``this`` must be used in the parameter list for the first parameter only.
+A :index:`compile-time error` occurs if it is used for other parameters.
+The keyword ``this`` can be used inside a *function with receiver* where it corresponds
+to the first parameter. The type of parameter ``this`` is called the *receiver type*
+(see :ref:`Receiver Type`):
 
 .. code-block:: typescript
    :linenos:
@@ -2940,15 +2940,6 @@ body of a *function with receiver*. Only ``public`` members can be accessed:
       let a = new A()
       a.foo() // Ordinary class method is called
       a.bar() // Function with receiver is called
-
-*Function with receiver* cannot have the same name as a global function.
-Otherwise, a :index:`compile-time error` occurs.
-
-.. code-block:: typescript
-   :linenos:
-
-      function foo(this: A) { ... }
-      function foo() { ... } // Compile-time error
 
 *Function with receiver* can be generic as in the following example:
 
