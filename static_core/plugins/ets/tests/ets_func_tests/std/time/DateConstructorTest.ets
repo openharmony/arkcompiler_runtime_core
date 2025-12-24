@@ -205,6 +205,15 @@ function testStringConstructorInvalidArgs(): void {
     arktest.expectError(() => {
         const invalidSecond = new Date("2000-01-01T00:00:99.001Z")
     }, "Invalid time value: '2000-01-01T00:00:99.001Z'")
+
+    arktest.expectError(
+        () => { new Date("275761") },
+        new FormatError("Invalid time value: '275761'")
+    )
+    arktest.expectError(
+        () => { new Date("1622505600000") },
+        new FormatError("Invalid time value: '1622505600000'")
+    )
 }
 
 function testStringConstructorExpandedYear(): void {

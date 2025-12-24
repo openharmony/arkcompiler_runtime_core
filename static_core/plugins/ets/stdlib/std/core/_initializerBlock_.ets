@@ -50,4 +50,6 @@ static {
 
     maxDateOffset = 8.64e15.toLong();
     INVALID_DATE = maxDateOffset + 1;
+
+    maxDateYears = 275760;
 }

@@ -63,6 +63,9 @@ const maxDateOffset: long;
 
 const INVALID_DATE: long;
 
+/** maxDateOffset in years */
+const maxDateYears: long;
+
 // initialized in _initializerBlock_.ets
 /** Day names */
 const dayNames: String[];
@@ -370,10 +373,9 @@ function ecmaMakeDate(day: long, time: long): long {
  *
  */
 function ecmaTimeClip(time: long): long {
-    if ((time > maxDateOffset) || (time < -maxDateOffset)) {
+    if (time > maxDateOffset || time < -maxDateOffset) {
         throw new RangeError()
     }
-
     return time;
 }
 
@@ -2851,22 +2853,22 @@ class LegacyDateParser {
 
     public parseDate(): long {
         const time = this.parseLegacyDateString(this.dateStr);
-        if (time != null) {
-            let day = ecmaMakeDay(time.year_, time.month_, time.day_)
-            let dateTime = ecmaMakeTime(time.hour_, time.minute_, time.second_, time.ms_)
-            let timeValue = ecmaTimeClip(ecmaMakeDate(day, dateTime));
-            if (isNaN(timeValue)) {
-                return timeValue;
-            }
-            let localMs: Double = 0;
-            if (time.tz_ == Int.MAX_VALUE) {
-                localMs = this.getLocalOffsetFromOS(timeValue, true) * msPerMinute;
-            } else {
-                localMs = time.tz_ * msPerSecond;
-            }
-            timeValue -= localMs;
-            return timeValue;
+        if (time == null) {
+            return INVALID_DATE;
         }
-        return INVALID_DATE;
+        if (time.year_ > maxDateYears || time.year_ < -maxDateYears) {
+            return INVALID_DATE;
+        }
+        let day = ecmaMakeDay(time.year_, time.month_, time.day_)
+        let dateTime = ecmaMakeTime(time.hour_, time.minute_, time.second_, time.ms_)
+        let timeValue = ecmaTimeClip(ecmaMakeDate(day, dateTime));
+        let localMs: Double = 0;
+        if (time.tz_ == Int.MAX_VALUE) {
+            localMs = this.getLocalOffsetFromOS(timeValue, true) * msPerMinute;
+        } else {
+            localMs = time.tz_ * msPerSecond;
+        }
+        timeValue -= localMs;
+        return timeValue;
     }
 }
