@@ -125,6 +125,7 @@ if (enable_codegen) {
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
       "$ark_root/compiler:libarkcompiler_opcodes_h_arch_info_gen_h",
       "$ark_root/libarkbase:libarktsbase",
+      "$ark_root/compiler:arktscompiler_header_deps",
     ]
 
     if (is_mingw || is_win) {
@@ -218,6 +219,7 @@ if (enable_codegen) {
       "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
       "$ark_root/compiler:libarkcompiler_opcodes_h_arch_info_gen_h",
       "$ark_root/libarkbase:libarktsbase_frontend_static",
+      "$ark_root/compiler:arktscompiler_header_deps",
     ]
     part_name = ark_part_name
     subsystem_name = ark_subsystem_name
