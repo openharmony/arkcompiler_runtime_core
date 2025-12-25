@@ -18,8 +18,8 @@ package std.debug;
 export final class RuntimeDebug {
     /**
      * Count number of live instances of a class.
-     * @param kclass The class type to count.
+     * @param cls The class type to count.
      * @returns The number of instances.
      */
-    public static native countInstancesOfClass(kclass: ClassType): int;
+    public static native countInstancesOfClass(cls: Class): int;
 }

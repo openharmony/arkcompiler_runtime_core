@@ -9026,7 +9026,7 @@ intrinsics:
     static: true
     signature:
       ret: i32
-      args: [ std.core.ClassType ]
+      args: [ std.core.Class ]
     impl: ark::ets::intrinsics::CountInstancesOfClass
 
 ###############################
