@@ -14,3 +14,46 @@
 
 Runtime Name
 ************
+
+The |LANG| runtime (e.g. standard library reflection, and class loading APIs)
+and build time (build system, compiler, bytecode manipulation tools) use
+*runtime name* to work with modules, classes, and other entities.
+The syntax of a *runtime name* is presented below:
+
+.. code-block:: abnf
+
+    RuntimeName:
+        PrimitiveType
+        | ArrayType
+        | RefType
+        | UnionType
+        ;
+    PrimitiveType:
+        "void"
+        | "u1"
+        | "i8"
+        | "u8"
+        | "i16"
+        | "u16"
+        | "i32"
+        | "u32"
+        | "f32"
+        | "f64"
+        | "i64"
+        | "u64"
+        | "any"
+        ;
+    ArrayType:
+        RuntimeName '[]'
+        ;
+    RefType:
+        RefTypeName '[]'
+        ;
+    UnionType:
+        '{U' RuntimeName ',' RuntimeName (',' RuntimeName)* '}'
+        ;
+
+``RefTypeName`` is the :ref:`Fully Qualified Name <RT Fully Qualified Name>` of the type.
+
+**Constraint**: ``UnionType`` must be canonicalized. Canonicalization
+presumes sorting ``RuntimeName`` s of all *constituent types* alphabetically.
