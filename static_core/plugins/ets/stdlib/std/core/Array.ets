@@ -936,10 +936,21 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @return new Array after map and than flat
      */
-    // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
-    public flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
-        let mapped: Array<U> = this.map<U>(fn)
-        return mapped.flat<U>()
+    public flatMap<U = T>(fn: (v: T, k: int, arr: Array<T>) => U | ReadonlyArray<U>): Array<U> {
+        const result = new Array<U>();
+        for (let i = 0; i < this.actualLength; ++i) {
+            let value: U | ReadonlyArray<U> = fn(this.$_get_unsafe(i), i, this);
+            if (value instanceof ReadonlyArray) {
+                let vv: ReadonlyArray<U> = value;
+                for (let i = 0; i < vv.length; ++i) {
+                    result.push(vv[i]);  // Workaround to not use 'push(value[i] as U)'
+                }
+            }
+            else {
+                result.push(value);
+            }
+        }
+        return result;
     }
 
     // === methods common among all arrays ===

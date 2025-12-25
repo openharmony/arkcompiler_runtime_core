@@ -630,7 +630,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.popImpl()
         return obj
     }
-    
+
     private popImpl(): void {
         const index: int = this.actualLength - 1
         this.$_set_unsafe(index, undefined)
@@ -936,10 +936,21 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @return new Array after map and than flat
      */
-    // NOTE(ivan-tyulyandin): TBD, flatMap may be not subset, see ReadonlyArray
-    public flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
-        let mapped: Array<U> = this.map<U>(fn)
-        return mapped.flat<U>()
+    public flatMap<U = T>(fn: (v: T, k: int, arr: Array<T>) => U | ReadonlyArray<U>): Array<U> {
+        const result = new Array<U>();
+        for (let i = 0; i < this.actualLength; ++i) {
+            let value: U | ReadonlyArray<U> = fn(this.$_get_unsafe(i), i, this);
+            if (value instanceof ReadonlyArray) {
+                let vv: ReadonlyArray<U> = value;
+                for (let i = 0; i < vv.length; ++i) {
+                    result.push(vv[i]);  // Workaround to not use 'push(value[i] as U)'
+                }
+            }
+            else {
+                result.push(value);
+            }
+        }
+        return result;
     }
 
 
@@ -984,6 +995,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % template = ERB.new(File.read("Array_common.erb"), trim_mode: '%', eoutvar: '_sub01')
 <%= template.result(ctx.instance_eval { binding }).gsub(/^/, '    ') %>
 % template = ERB.new(File.read("Array_map.erb"), trim_mode: '%', eoutvar: '_sub02')
+% ctx.mapped_type_readonlyarray = 'U | ReadonlyArray<U>'
 % ctx.mapped_type = 'U'
 % ctx.map_generic = '<U>'
 <%= template.result(ctx.instance_eval { binding }).gsub(/^/, '    ') %>
