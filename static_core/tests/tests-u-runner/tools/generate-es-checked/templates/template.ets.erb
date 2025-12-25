@@ -32,68 +32,6 @@ function __fail(): void {
   __fail_count += 1;
 }
 
-class ArrayValueIterator implements IterableIterator<Any> {
-  private idx: int
-  private val: ArrayValue
-
-  constructor(val: ArrayValue) {
-    this.idx = 0
-    this.val = val
-  }
-
-  override $_iterator(): IterableIterator<Any> {
-    return this;
-  }
-
-  override next(): IteratorResult<Any> {
-    if (this.idx >= this.val.getLength()) {
-      return new IteratorResult<Any>()
-    }
-    return new IteratorResult<Any>(this.val.getElement(this.idx++).getData());
-  }
-}
-
-function __value_rewrap_builtin_array(a: Any): Any {
-  if (!(Type.of(a) instanceof ArrayType)) {
-    return a;
-  }
-  return new ArrayValueIterator(reflect.Value.of(a) as ArrayValue)
-}
-
-class IterableData {
-  cls: ClassType
-  meth: Method
-  constructor(cls: ClassType, meth: Method) {
-    this.cls = cls
-    this.meth = meth
-  }
-}
-const KNOWN_ITERABLES = new Array<IterableData>()
-
-function getIteratorFromIterable(a: Any, aTypeUncasted: Type): Iterator<Any> | undefined {
-  if (!(aTypeUncasted instanceof ClassType)) {
-    return undefined
-  }
-
-  const aType = aTypeUncasted as ClassType
-
-  for (let i = 0; i < KNOWN_ITERABLES.length; i++) {
-    const ki = KNOWN_ITERABLES[i];
-    if (ki.cls.equals(aType)) {
-      return ki.meth.invoke(a, [])! as Iterator<Any>
-    }
-  }
-  const mNum = aType.getMethodsNum();
-  for (let i = 0; i < mNum; i++) {
-    const m = aType.getMethod(i);
-    if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-      KNOWN_ITERABLES.push(new IterableData(aType, m));
-      return m.invoke(a, [])! as Iterator<Any>
-    }
-  }
-  return undefined;
-}
-
 function __value_is_same(a: Any, b: Any): boolean {
   if (Runtime.sameValue(a, b)) {
     return true;
@@ -135,17 +73,9 @@ function __value_is_same(a: Any, b: Any): boolean {
       a = arr
   }
 
-  a = __value_rewrap_builtin_array(a);
-  b = __value_rewrap_builtin_array(b);
-
-  const aType = Type.of(a)
-  const bType = Type.of(b)
-
-  const aItMb = getIteratorFromIterable(a, aType);
-  const bItMb = getIteratorFromIterable(b, bType);
-  if (aItMb != undefined && bItMb != undefined) {
-    const aIt = aItMb;
-    const bIt = bItMb;
+  if (a instanceof Iterable && b instanceof Iterable) {
+    const aIt = a.$_iterator()
+    const bIt = b.$_iterator()
     while (true) {
         const an = aIt.next();
         const bn = bIt.next();
@@ -171,8 +101,8 @@ function __check_value(a: Any, b: Any): void {
     return
   }
 
-  __fail_description += "\ngot " + reflect.Value.of(a).toPrint(10) + " of type " + Type.of(a).toString();
-  __fail_description += "\nexp " + reflect.Value.of(b).toPrint(10) + " of type " + Type.of(b).toString();
+  __fail_description += "\ngot " + a + " of type " + Class.ofAny(a)?.getName();
+  __fail_description += "\nexp " + b + " of type " + Class.ofAny(b)?.getName();
 
   __fail();
 }
