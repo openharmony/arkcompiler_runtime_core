@@ -30,6 +30,7 @@ enum ThreadFlag : uint16_t {
     ACTIVE_BARRIER = 1 << 1,
     PENDING_GC_CALLBACKS = 1 << 2,
     FULL_MARK_REQUEST = 1 << 3,
+    PENDING_SHARED_HEAP_OOM = 1 << 4,
 };
 
 constexpr uint32_t THREAD_STATE_OFFSET = 16;
