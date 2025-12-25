@@ -54,12 +54,18 @@ def copy_directory_excluding_files(base_dir, output_dir):
     excluded_patterns = [
         "*.taihe.mark",
         "lib/pyrt/lib/python3.11/site-packages/taihe/cli/tryit.py",
-        "bin/taihe-tryit"
+        "bin/taihe-tryit",
+        "napi_taihe"
     ]
     
     for root, dirs, files in os.walk(base_dir):
         root_path = Path(root)
         relative_path = root_path.relative_to(base_path)
+
+        if "napi_taihe" in str(relative_path):
+            dirs[:] = []
+            continue
+
         dest_dir = output_path / relative_path
         
         dest_dir.mkdir(parents=True, exist_ok=True)
