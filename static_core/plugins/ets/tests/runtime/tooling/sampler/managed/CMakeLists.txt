@@ -56,12 +56,6 @@ add_custom_target(sampler_es2panda
     DEPENDS ${es2panda_target}
 )
 
-# In order to make sure that the test passes in CI, we need to make more iterations in non-debug builds
-set(ETS_ENTRY_POINT "releaseMain")
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(ETS_ENTRY_POINT "debugMain")
-endif()
-
 # NOTE(kurnevichstanislav): fix SIGSEGV in sampler tests with TaskManager (#14278)
 set(RUNTIME_ARGUMENTS ${RUNTIME_ARGUMENTS} --workers-type=threadpool)
 
@@ -69,7 +63,7 @@ foreach(c_arg ${COMPILER_ARGUMENTS_LIST})
     foreach(i_arg ${INTERPRETER_ARGUMENTS_LIST})
         # Run tests
         add_custom_target(sampler_run_${c_arg}_${i_arg}
-            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --compiler-enable-jit=${c_arg} --interpreter-type=${i_arg} --sampling-profiler-output-file=${testing_dir}/stack_output_${c_arg}_${i_arg}.aspt ${testing_dir}/SamplerTest.abc SamplerTest.ETSGLOBAL::${ETS_ENTRY_POINT}
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --compiler-enable-jit=${c_arg} --interpreter-type=${i_arg} --sampling-profiler-output-file=${testing_dir}/stack_output_${c_arg}_${i_arg}.aspt ${testing_dir}/SamplerTest.abc SamplerTest.ns::main
             WORKING_DIRECTORY "${testing_dir}"
             DEPENDS ark etsstdlib sampler_es2panda
         )
