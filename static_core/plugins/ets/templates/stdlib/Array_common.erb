@@ -464,26 +464,34 @@ private isPrimitive(element: T): boolean {
 }
 private static native joinInternal(buffer: FixedArray<Any>, actualLength: int, sep: string): string;
 
-private joinObject(sep?: String): string {
-    const sepReal = sep === undefined ? "," : sep!
-    // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
-    const first_el = this.$_get_unsafe(0)
-    let first_str = ""
-    if (first_el !== undefined && first_el !== null) {
-        first_str = new String(first_el)
+private joinObject(arr: Array<T>, visited: Set<Array<T>>, result: StringBuilder, sep?: String): void {
+    let length = arr.length
+    if (length == 0 || visited.has(arr)) {
+        return
     }
-    let sb = new StringBuilder(first_str)
-    for (let i: int = 1; i < this.actualLength; i++) {
-        const tmp = this.$_get_unsafe(i)
-        sb.append(sepReal);
-        // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
-        if (tmp !== undefined && tmp !== null) {
-            sb.append(new String(tmp))
+    visited.add(arr)
+    const sepReal = sep === undefined ? "," : sep!
+    const first_el = arr[0]
+    if (first_el != null) {
+        if (first_el instanceof Array) {
+            this.joinObject(first_el as Array<T>, visited, result)
         } else {
-            sb.append("")
+            result.append(new String(first_el))
         }
     }
-    return sb.toString();
+    for (let i: int = 1; i < length; i++) {
+        result.append(sepReal)
+        const tmp = arr[i]
+        if (tmp == null) {
+            continue
+        }
+        if (tmp instanceof Array) {
+            this.joinObject(tmp as Array<T>, visited, result)
+        } else {
+            result.append(new String(tmp))
+        }
+    }
+    visited.delete(arr)
 }
 <% end %>
 
@@ -521,7 +529,10 @@ private joinObject(sep?: String): string {
     }
 
     if (objArray) {
-        return this.joinObject(sep);
+        const visited: Set<Array<T>> = new Set<Array<T>>()
+        const result: StringBuilder = new StringBuilder()
+        this.joinObject(this, visited, result, sep)
+        return result.toString()
     }
 
     return Array.joinInternal(this.buffer, <%= this_len_int %>, sep === undefined ? "," : sep!);
