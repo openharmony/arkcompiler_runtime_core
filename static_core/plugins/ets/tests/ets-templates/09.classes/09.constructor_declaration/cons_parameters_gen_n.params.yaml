@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,10 @@
 
 ---
 cases:
-    - decl: |-
+    # readonly array
+    - expected_out: |-
+          Semantic error ESE0318: Type 'ReadonlyArray<null|T>' cannot be assigned to type 'Array<null|T>'
+      decl: |-
           class A<T> {
               fld: (null|T)[]
               constructor(p: readonly (null|T)[]) {
@@ -21,7 +24,9 @@ cases:
               }
           }
 
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter
+      decl: |-
           class A<T, U> {
               fld: ReadonlyArray<T|U|null>
               constructor(p: readonly (T|U|null)[]) {
@@ -30,7 +35,9 @@ cases:
               }
           }
 
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter
+      decl: |-
           class A<T> {
               fld: ReadonlyArray<T|null>
               constructor(p: readonly (null|T)[]) {
@@ -40,7 +47,9 @@ cases:
           }
 
     # readonly tuple
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0318: Type 'readonly [T, U]' cannot be assigned to type '[T, U]'
+      decl: |-
           class A<T, U> {
               fld: [T, U]
               constructor(p: readonly [T, U]) {
@@ -48,7 +57,9 @@ cases:
               }
           }
 
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter
+      decl: |-
           class A<T extends string[], U> {
               fld: readonly [T, U]
               constructor(p: readonly [T, U]) {
@@ -57,7 +68,9 @@ cases:
               }
           }
 
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter
+      decl: |-
           class A<T extends string, U> {
               fld: readonly [FixedArray<T>, (p: T) => Array<T>]
               constructor(p: readonly [FixedArray<T>, (p: T) => Array<T>]) {
@@ -67,7 +80,10 @@ cases:
           }
 
     # optional parameters
-    - decl: |-
+    - expected_out: |-
+          Syntax error ESY0219: A required parameter cannot follow an optional parameter.
+          Syntax error ESY0014: Required parameter follows default parameter(s).
+      decl: |-
           class A<T, U, V> {
               fld: Array<T|U|V|undefined>
               constructor(b?: T, s: U, i?: V) { // CTE: required parameter after optional
@@ -76,7 +92,10 @@ cases:
           }
 
     # optional parameters with default value
-    - decl: |-
+    - expected_out: |-
+          Syntax error ESY0219: A required parameter cannot follow an optional parameter.
+          Syntax error ESY0014: Required parameter follows default parameter(s).
+      decl: |-
           enum Color { Red, Green, Blue }
           class A<T> {
               p: Color
@@ -88,7 +107,9 @@ cases:
           }
 
     # rest parameter with [] array
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter
+      decl: |-
           class A<T extends Object> {
               fld: readonly T[][]
               constructor(...p: readonly T[][]) {
@@ -98,7 +119,9 @@ cases:
           }
 
     # rest parameter with Array<T> array
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter
+      decl: |-
           class A<T> {
               fld: ReadonlyArray<ReadonlyArray<T|null>>
               constructor(...p: readonly Array<Array<T|null>>) {
@@ -108,7 +131,9 @@ cases:
           }
 
     # rest parameter with tuple
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0127: No matching construct signature for cons_parameters_gen_n_10.A("abc", "def")
+      decl: |-
           class A<T, U> {
               fld: [T, T, U]
               constructor(...p: [T, T, U]) {
@@ -118,7 +143,9 @@ cases:
       use: |-
           let a = new A<string, number>('abc', 'def') // CTE: not enough arguments
 
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0127: No matching construct signature for cons_parameters_gen_n_11.A("abc", "def", Double, Double)
+      decl: |-
           class A<T, U> {
               fld: [T, T, U]
               constructor(...p: [T, T, U]) {
@@ -128,7 +155,9 @@ cases:
       use: |-
           let a = new A<string, number>('abc', 'def', 1.0, 2.0) // CTE: too many arguments
 
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0127: No matching construct signature for cons_parameters_gen_n_12.A(Boolean, "abc", Double)
+      decl: |-
           class A<T, U> {
               fld: [T, T, U]
               constructor(...p: [T, T, U]) {
@@ -138,7 +167,9 @@ cases:
       use: |-
           let a = new A<string, number>(true, 'abc', 2.0) // CTE: wrong argument type
 
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter
+      decl: |-
           class A<T, V, W> {
               fld: readonly [T|undefined, V|W]
               constructor(...p: readonly [T|undefined, V|W]) {
@@ -148,7 +179,10 @@ cases:
           }
 
     # [] spread to rest
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0127: No matching construct signature for cons_parameters_gen_n_14.A(Double)
+          Semantic error ESE0323: Type 'Double' is not compatible with rest parameter type 'String' at index 1
+      decl: |-
           class A<T> {
               p: T[]
               constructor(...obj: T[]) {
@@ -159,7 +193,10 @@ cases:
       use: |-
           let a = new A<string>(...arr) // CTE: wrong type array
 
-    - decl: |-
+    # tuple spread to rest
+    - expected_out: |-
+          Semantic error ESE0127: No matching construct signature for cons_parameters_gen_n_15.A(Boolean, [String, Double|undefined])
+      decl: |-
           class A<T, U, V> {
               tup: readonly [T, U, V|undefined]
               constructor(...tup: [T, U, V|undefined]) {
@@ -170,7 +207,9 @@ cases:
       use: |-
           let a = new A<boolean, string, number>(true, ...tup) // CTE: spread argument must correspond to rest parameter
 
-    - decl: |-
+    - expected_out: |-
+          Semantic error ESE0127: No matching construct signature for cons_parameters_gen_n_16.A([String, Double|undefined])
+      decl: |-
           class A<T, U, V> {
               tup: readonly [T, U, V|undefined]
               constructor(...tup: [T, U, V|undefined]) {

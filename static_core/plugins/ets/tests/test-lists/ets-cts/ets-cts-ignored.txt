@@ -830,7 +830,10 @@
 09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters6.ets
 
 #28527
-09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_gen_20.ets
+09.classes/09.constructor_declaration/cons_parameters_gen_20.ets
+
+#67 Cannot spread FixedArray<string> for rest parameter of FixedArray<T> 
+09.classes/09.constructor_declaration/cons_parameters_gen_23.ets
 
 #28693 CTE when a call to `super` is not the first statement
 09.classes/09.constructor_declaration/02.constructor_body/spec_example1.ets
