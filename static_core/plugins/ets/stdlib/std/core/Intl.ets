@@ -2033,6 +2033,9 @@ export class DateTimeFormat {
                         if (localOptions.minimumFractionDigits == undefined) {
                             this.options.minimumFractionDigits = 0
                         }
+                        if(this.options.maximumFractionDigits < this.options.minimumFractionDigits) {
+                            this.options.maximumFractionDigits = this.options.minimumFractionDigits
+                        }
                     }
 
                     // Handle currency style
