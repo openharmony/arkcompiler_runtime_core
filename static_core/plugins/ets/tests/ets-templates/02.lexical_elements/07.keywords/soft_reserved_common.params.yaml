@@ -11,31 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of keywords, denoting data types
+--- # List of reserved keywords
 keywords:
-    - Any
-    - bigint
-    - BigInt
-    - boolean
-    - Boolean
-    - byte
-    - Byte
-    - char
-    - Char
-    - double
-    - Double
-    - float
-    - Float
-    - int
-    - Int
-    - long
-    - Long
-    - number
-    - Number
-    - object
-    - Object
-    - short
-    - Short
-    - string
-    - String
-    - void
+    - is
+    - yield
+    - memo

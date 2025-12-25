@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for kwd in keywords %}
 /*---
 desc: ->
     The following identifiers are also treated as soft keywords reserved for the future use,
     or currently used in TypeScript
-tags: [compile-only]
-params: '{{kwd}}'
+expected_out: "Syntax error ESY0297: 'var' keyword is not supported. Use 'let' instead."
+tags: [negative, compile-only]
 ---*/
 
-let {{kwd}} = 0;
-
-{% endfor %}
+let var = 0
+var = 1
