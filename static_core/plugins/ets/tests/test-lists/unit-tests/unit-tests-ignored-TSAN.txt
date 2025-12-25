@@ -1,5 +1,2 @@
-# 28957
-ets-common-tests/intrinsics/string_compare_to.ets
-
 #30702
 ets-common-tests/intrinsics/copyTo.ets
