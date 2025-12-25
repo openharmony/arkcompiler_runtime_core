@@ -19,9 +19,9 @@ interface ExtendedStyle {
 }
 
 class RectangleSize implements ExtendedStyle {
-  color: string;
-  width: number;
-  height: number;
+  public color: string;
+  public width: number;
+  public height: number;
   constructor(c: string, w: number, h:number) {
     this.color = c;
     this.width = w;
@@ -36,7 +36,7 @@ class RectangleSize implements ExtendedStyle {
 }
 
 function main() {
-    let c = new RectangleSize("red", 20, 30);
+    let c = new RectangleSize('red', 20, 30);
     c.showColor();
 }
 

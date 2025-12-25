@@ -15,4 +15,4 @@
 
  export namespace Ns3 {}
 
- export class testA {}
+ export class TestA {}
