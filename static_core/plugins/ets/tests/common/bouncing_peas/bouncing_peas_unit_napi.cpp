@@ -409,7 +409,8 @@ TEST_F(EtsVMConfingNapi, PeasJIT)
     ASSERT_TRUE(DestroyRuntime());
 }
 
-TEST_F(EtsVMConfingNapi, PeasAOT)
+// NOTE(dslynko, #32431): enable the test after fixing issue with incorrect AOT file used
+TEST_F(EtsVMConfingNapi, DISABLED_PeasAOT)
 {
 #ifdef HOST_CROSSCOMPILING
     GTEST_SKIP();
@@ -439,7 +440,8 @@ TEST_F(EtsVMConfingNapi, PeasAOT)
     ASSERT_TRUE(DestroyRuntime());
 }
 
-TEST_F(EtsVMConfingNapi, PeasLLVMAOT)
+// NOTE(dslynko, #32431): enable the test after fixing issue with incorrect AOT file used
+TEST_F(EtsVMConfingNapi, DISABLED_PeasLLVMAOT)
 {
 #ifdef HOST_CROSSCOMPILING
     GTEST_SKIP();
