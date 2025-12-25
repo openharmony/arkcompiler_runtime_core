@@ -1,2 +1,5 @@
 #30702
 ets-common-tests/intrinsics/copyTo.ets
+
+#32342
+ets-common-tests/taskpool/asyncrunner_tasks.ets
