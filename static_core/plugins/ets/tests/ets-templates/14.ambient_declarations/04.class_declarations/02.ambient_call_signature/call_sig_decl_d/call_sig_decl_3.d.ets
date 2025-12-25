@@ -21,6 +21,6 @@ tags:
 ---*/
 
 export declare class CallSignatureDeclaration {
-  (a: number, b: number): string
-  (a: string, b: boolean): string
+    (a: string): boolean
+    (a: number): string
 }

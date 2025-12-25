@@ -35,14 +35,15 @@ implementations:
           return '5'
       }
     }
-
   - >
     export class CallSignatureDeclaration {
-      static $_invoke(a: number, b: number): string {
-        return a.toString() + b.toString()
+      static $_invoke(x: string): boolean {
+        if (x == "a") {
+          return true
+        }
+        return false    
       }
-
-      static $_invoke(a: string, b: boolean): string {
-        return a
+      static $_invoke(x: number): string {
+        return (x + 1).toString()
       }
     }

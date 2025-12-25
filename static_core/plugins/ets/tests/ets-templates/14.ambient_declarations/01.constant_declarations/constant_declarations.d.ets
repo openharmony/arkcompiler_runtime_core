@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,7 +16,6 @@ limitations under the License.
 
 /*---
 desc: Ambient Constant declarations
-files: ['./constant_declarations.d.ets']
 tags: [compile-only, not-a-test]
 ---*/
 
@@ -36,19 +35,18 @@ export declare enum Color3 { Red = "1" , Green = "2", Blue =  "3" }
     
 export declare const enum Color4 { Red, Green, Blue }
   
-export declare const QuestionOfAll1 = 42
+export declare const QuestionOfAll1: int
 
-export declare const QuestionOfAll2 = 0xBAD3
+export declare const QuestionOfAll2: int
   
-export declare const BigLongLiteral = 9223372036854775807
+export declare const BigLongLiteral: long
   
-export declare const FloatConst1 = 3.14f
+export declare const FloatConst1: float
   
-export declare const FloatConst2 = 3.141_592
+export declare const FloatConst2: double
   
-export declare const FloatConst3 = .5    
+export declare const FloatConst3: double  
   
-export declare const Hello = "Hello"
+export declare const Hello: string
   
-export declare const MultilineSentence = `This is an example of multi-line string,
-      which should be enclosed in backticks (\`)`
+export declare const MultilineSentence: string

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,11 +16,12 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Constant declarations implementations
-files: ['./constant_declarations_n.ets']
-tags: [negative]
+files: ['./constant_declarations_n_{{loop.index0}}.ets']
+tags: [negative, compile-only]
+expected_out: {{c.expected}} 
 ---*/
 
-import { {{c.decl}} } from './constant_declarations_n.d'
+import { {{c.decl}} } from './constant_declarations_nd_{{loop.index0}}'
 
 function usage() {
   {{c.use|indent}}
