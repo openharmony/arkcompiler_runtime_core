@@ -783,7 +783,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return this.actualLength
     }
 
-    private static native unshiftInternal(self: FixedArray<Any>, selfLen: int, buffer: FixedArray<Any>, values: Array<T>): void
+    private static native unshiftInternal<T>(self: FixedArray<Any>, selfLen: int, buffer: FixedArray<Any>, values: Array<T>): void
 
     /**
      * Returns an iterator over all indices

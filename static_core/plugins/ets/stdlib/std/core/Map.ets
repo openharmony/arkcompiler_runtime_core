@@ -350,14 +350,14 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         Map.setBucketByIdx(this.buckets, idx, bucket)
     }
 
-    private static setKey(data: DataArrType, idx: int, key: K) {
+    private static setKey<K>(data: DataArrType, idx: int, key: K) {
         data[idx + Const.KEY_DATA_OFS] = key
     }
     private setKey(idx: int, key: K) {
         Map.setKey(this.data, idx, key)
     }
 
-    private static setValue(data: DataArrType, idx: int, val: V) {
+    private static setValue<V>(data: DataArrType, idx: int, val: V) {
         data[idx + Const.VAL_DATA_OFS] = val
     }
     private setValue(idx: int, val: V) {

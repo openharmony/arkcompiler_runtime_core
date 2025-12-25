@@ -134,7 +134,7 @@
     return this
 }
 
-<%= access_private %> static native fillImpl(buffer: FixedArray<Any>, actualLength: int, value: T, start: int, end: int): void;
+<%= access_private %> static native fillImpl<T>(buffer: FixedArray<Any>, actualLength: int, value: T, start: int, end: int): void;
 % end
 
 % TemplateData::get_lambda_data.each { |lambda_args_params|
@@ -408,7 +408,7 @@
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-<%= access_private %> static native lastIndexOfImpl<%= this_generic %>(<%= this_arg %>buffer: FixedArray<Any>, actualLength: int, searchElement: T, fromIndex: int): int;
+<%= access_private %> static native lastIndexOfImpl<T>(<%= this_arg %>buffer: FixedArray<Any>, actualLength: int, searchElement: T, fromIndex: int): int;
 
 /**
  * Returns the last index at which a given element can be found in the array,
@@ -729,7 +729,7 @@ private joinObject(arr: Array<T>, visited: Set<Array<T>>, result: StringBuilder,
     return -1
 }
 % else
-<%= access_private %> static native indexOfImpl<%= this_generic %>(<%= this_arg %>buffer: FixedArray<Any>, actualLength: int, val: <%= el_type %>, fromIndex1: int): int;
+<%= access_private %> static native indexOfImpl<<%= el_type %>>(<%= this_arg %>buffer: FixedArray<Any>, actualLength: int, val: <%= el_type %>, fromIndex1: int): int;
 % end
 
 % if this_array == 'escompat_array'

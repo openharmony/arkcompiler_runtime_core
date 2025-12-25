@@ -218,7 +218,7 @@ export final class FinalizationRegistry<T> {
         this.mapSize--;
     }
 
-    private static execCleanup(head: FinRegNode<T> | undefined): void {
+    private static execCleanup<T>(head: FinRegNode<T> | undefined): void {
         while (head != undefined) {
             let finReg = head.finReg;
             let arg = head.arg;
