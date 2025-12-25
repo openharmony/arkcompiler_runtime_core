@@ -489,6 +489,7 @@
 07.expressions/15.instanceof_expression/instanceof_neg_29.ets
 07.expressions/15.instanceof_expression/instanceof_neg_31.ets
 07.expressions/15.instanceof_expression/instanceof_neg_33.ets
+07.expressions/15.instanceof_expression/instanceof_neg_35.ets
 07.expressions/15.instanceof_expression/instanceof_neg_36.ets
 07.expressions/15.instanceof_expression/instanceof_neg_38.ets
 
