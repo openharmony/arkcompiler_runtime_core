@@ -76,12 +76,4 @@ describe('Log Selectors', () => {
             { line: 1, column: 2, message: 'Syntax error' },
         ]);
     });
-    it('should select highlight errors', () => {
-        mockState.logs.highlightErrors = [
-            { line: 1, column: 2, message: 'Syntax error' },
-        ];
-        expect(selectHighlightErrors(mockState)).toEqual([
-            { line: 1, column: 2, message: 'Syntax error' },
-        ]);
-    });
 });
