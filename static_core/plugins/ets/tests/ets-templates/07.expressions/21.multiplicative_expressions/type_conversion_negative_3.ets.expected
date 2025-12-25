@@ -11,4 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type.
+Semantic error ESE295768: The operands of exponentiation must both be numeric type or bigint type.
