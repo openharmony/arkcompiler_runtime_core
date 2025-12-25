@@ -237,36 +237,6 @@
 07.expressions/06.spread_expression/spex_func_77.ets
 07.expressions/06.spread_expression/spex_func_78.ets
 
-#30372 Spread of union doesn't work
-07.expressions/06.spread_expression/spex_52.ets
-07.expressions/06.spread_expression/spex_53.ets
-07.expressions/06.spread_expression/spex_54.ets
-07.expressions/06.spread_expression/spex_55.ets
-07.expressions/06.spread_expression/spex_56.ets
-07.expressions/06.spread_expression/spex_57.ets
-07.expressions/06.spread_expression/spex_58.ets
-07.expressions/06.spread_expression/spex_59.ets
-07.expressions/06.spread_expression/spex_60.ets
-07.expressions/06.spread_expression/spex_61.ets
-07.expressions/06.spread_expression/spex_62.ets
-07.expressions/06.spread_expression/spex_63.ets
-07.expressions/06.spread_expression/spex_64.ets
-07.expressions/06.spread_expression/spex_65.ets
-07.expressions/06.spread_expression/spex_func_79.ets
-07.expressions/06.spread_expression/spex_func_80.ets
-07.expressions/06.spread_expression/spex_func_81.ets
-07.expressions/06.spread_expression/spex_func_82.ets
-07.expressions/06.spread_expression/spex_func_83.ets
-07.expressions/06.spread_expression/spex_func_84.ets
-07.expressions/06.spread_expression/spex_func_85.ets
-07.expressions/06.spread_expression/spex_func_86.ets
-07.expressions/06.spread_expression/spex_func_87.ets
-07.expressions/06.spread_expression/spex_func_88.ets
-07.expressions/06.spread_expression/spex_func_89.ets
-07.expressions/06.spread_expression/spex_func_90.ets
-07.expressions/06.spread_expression/spex_func_91.ets
-07.expressions/06.spread_expression/spex_func_92.ets
-
 #30371 Cannot spread into array with supertype elements
 07.expressions/06.spread_expression/spex_func_12.ets
 07.expressions/06.spread_expression/spex_func_25.ets
@@ -278,13 +248,7 @@
 07.expressions/06.spread_expression/spex_func_65.ets
 
 #30368  Cannot spread tuple of strings to FixedArray of strings
-07.expressions/06.spread_expression/spex_71.ets
-
-#30367 Cannot spread custom array
-07.expressions/06.spread_expression/spex_73.ets
-07.expressions/06.spread_expression/spex_74.ets
-07.expressions/06.spread_expression/spex_75.ets
-07.expressions/06.spread_expression/spex_76.ets
+07.expressions/06.spread_expression/spex_57.ets
 
 #20371 Unexpected Type Error on string array
 07.expressions/06.spread_expression/spex_lmbd_28.ets
