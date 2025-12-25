@@ -1,10 +1,10 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,7 +37,8 @@ void AniObjectCallMethodByNameRefFuzzTest(const char *data, size_t size)
     ani_object obj {};
     engine->AniGetIntObj(&obj);
     ani_ref res {};
-    env->Object_CallMethodByName_Ref(obj, data, nullptr, &res);
+    std::string input(data, size);
+    env->Object_CallMethodByName_Ref(obj, input.c_str(), nullptr, &res);
 }
 }  // namespace OHOS
 
