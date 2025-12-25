@@ -32,7 +32,8 @@ G1EvacuateRegionsWorkerState<LanguageConfig>::G1EvacuateRegionsWorkerState(G1GC<
       cardTable_(gc->GetCardTable()),
       regionSizeBits_(gc_->regionSizeBits_),
       refStack_(refStack),
-      evacuationObjectPointerHandler_(this)
+      evacuationObjectPointerHandler_(this),
+      evacuationObjectPointerWithUpdRemsetHandler_(this)
 {
     regionTo_ = GetNextRegion();
 }
@@ -207,7 +208,8 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::IterateRefsInMemRange(const M
     auto *endAddress = ToVoidPtr(memRange.GetEndAddress());
     auto wrapper = [this, startAddress, endAddress](void *mem) {
         ObjectIterator<LanguageConfig::LANG_TYPE>::template IterateAndDiscoverReferences(
-            GetGC(), static_cast<ObjectHeader *>(mem), &evacuationObjectPointerHandler_, startAddress, endAddress);
+            GetGC(), static_cast<ObjectHeader *>(mem), &evacuationObjectPointerWithUpdRemsetHandler_, startAddress,
+            endAddress);
     };
     if (region->HasFlag(RegionFlag::IS_LARGE_OBJECT)) {
         bitmap->CallForMarkedChunkInHumongousRegion<false>(ToVoidPtr(region->Begin()), wrapper);
