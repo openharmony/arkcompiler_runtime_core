@@ -31,7 +31,6 @@ class Parent {
     overridedField: int = 2;
 }
 class Child extends Parent {
-    // NOTE: uncomment when issue #23050 is resolved
-    // overridedField: int = 4;
+    overridedField: int = 4;
     childField: int = 3;
 }

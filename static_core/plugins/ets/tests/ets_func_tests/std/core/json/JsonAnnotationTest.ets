@@ -68,7 +68,6 @@ class TestClass6 extends TestClass5 {
 }
 
 class TestClass7 extends TestClass5 {
-    @JSONRename("name2")
     name1: string = "class7"
     nickname: string = "class7_nickname"
 }
@@ -100,8 +99,9 @@ class TestClass12 extends TestClass8 {
 }
 
 class TestClass13 {
-    @JSONRename("name8")
+    @JSONRename("name9")
     name1: string = "TestClass13"
+    @JSONRename("nicknametest")
     nickname: string = "class13_nickname"
     nickname2: string = "class13_nickname2"
     nickname3: string = "class13_nickname3"
@@ -110,10 +110,8 @@ class TestClass13 {
 class TestClass14 extends TestClass13 {
     @JSONRename("name14test")
     name10: string = "TestClass14"
-    @JSONRename("name9")
-    name1: string = "TestClass14"
-    @JSONRename("nicknametest")
-    nickname: string = "class14_nickname"
+    name9: string = "TestClass14"
+    nicknametest: string = "class14_nickname"
     nickname3: string = "class14_nickname3"
 }
 
@@ -195,11 +193,7 @@ function jsonStringifyExtend() {
     let json6 = JSON.stringify(obj6)
     arktest.assertEQ(json6, '{"name1":"class6","nickname":"class6_nickname"}')
     let json7 = JSON.stringify(obj7)
-    /**
-     * Attention: after the overriding fields problem is solved, we should only have field in subclass
-     * the expected output should be "{"name2":"class7","nickname":"class7_nickname"}"
-     */
-    arktest.assertEQ(json7, '{"name1":"class5","name2":"class7","nickname":"class7_nickname"}')
+    arktest.assertEQ(json7, '{"name1":"class7","nickname":"class7_nickname"}')
 }
 
 function jsonStringifyNest() {
@@ -229,14 +223,8 @@ function jsonThrowWithExtends() {
 
 function jsonTestWithExtends() {
     let obj: TestClass14 = new TestClass14()
-    /**
-     * Attention: after the overriding fields problem is solved, we should only have field in subclass
-     * the expected output may be only "{"nickname2":"class13_nickname2","name14test":"TestClass14"
-     * ,"name9":"TestClass14","nicknametest":"class14_nickname"}"
-     */
-    const targetOutput = '{"name8":"TestClass13","nickname":"class13_nickname","nickname2":' +
-        '"class13_nickname2","nickname3":"class14_nickname3","name14test":"TestClass14","' +
-        'name9":"TestClass14","nicknametest":"class14_nickname"}'
+    const targetOutput = '{"name9":"TestClass14","nicknametest":"class14_nickname",' +
+        '"nickname2":"class13_nickname2","nickname3":"class14_nickname3","name14test":"TestClass14"}'
     let json = JSON.stringify(obj)
     arktest.assertEQ(json, targetOutput)
 }

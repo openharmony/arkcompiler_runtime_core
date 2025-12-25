@@ -11,4 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Expected CTE output is unknown
+Semantic error ESE0141: num(): Boolean in D cannot override num(): Double in I because overriding return type is not compatible with the other return type.
+Semantic error ESE0136: Method num(): Boolean in D not overriding any method
+Semantic error ESE0141: num(): Boolean in D cannot override num(): Double in I because overriding return type is not compatible with the other return type.
+Semantic error ESE0136: Method num(): Boolean in D not overriding any method
+Semantic error ESE0136: Method num(%%property-num: Boolean): void in D not overriding any method
+Semantic error ESE0141: num(): Boolean in D cannot override num(): Double in I because overriding return type is not compatible with the other return type.
+Semantic error ESE0136: Method num(): Boolean in D not overriding any method
+Semantic error ESE0136: Method num(%%property-num: Boolean): void in D not overriding any method
+Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Boolean'

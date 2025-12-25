@@ -11,4 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Expected CTE output is unknown
+Semantic error ESE225047: Static field field cannot override base field.
+Syntax error ESY69198: Not allowed to contain the modifier 'static' along with the modifier 'override'.

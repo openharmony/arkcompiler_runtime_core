@@ -14,7 +14,11 @@
 ---
 cases:
   - decl: |-
-      class C {
+      interface I {
+        i: number |undefined
+      }
+
+      class C implements I {
         _i: number|undefined
         set i(i: number|undefined) { this._i = 1; }
         get i(): number|undefined { return this._i; }
@@ -26,7 +30,10 @@ cases:
       arktest.assertEQ( a.i , 2.1 )
 
   - decl: |-
-      abstract class C {
+      interface I {
+      }
+
+      abstract class C implements I {
         _i: number|undefined
         set i(i: number|undefined) { this._i = 1; }
         get i(): number|undefined { return this._i; }
