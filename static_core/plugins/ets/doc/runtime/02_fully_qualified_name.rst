@@ -14,3 +14,11 @@
 
 Fully Qualified Name
 ********************
+
+*Fully qualified name* is used to create unique identifiers for different types
+and entities at runtime and in binary files. A *Fully qualified name* of an
+entity is generated from its *unqualified name* by a build system, and
+specific rules vary from one build system to another. However, the |LANG|
+runtime expects concrete *fully qualified name* for some predefined types.
+Such cases are described in
+:ref:`Language Representation In Binary File <RT Language Representation In Binary File>`.
