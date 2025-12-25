@@ -2333,6 +2333,8 @@ after another:
    account to the ``readonly`` type flag priority.
 #. If one type in a union is ``string``, then all string literal types (if
    any) are removed.
+#. If one type in a union is ``never``, then type ``never`` is removed.
+
 
    This procedure is performed recursively until none of the above steps can
    can be performed again.
