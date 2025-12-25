@@ -1250,6 +1250,7 @@
 15.semantic_rules/06.compatibility_call_args/spec_examples2_0.ets
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
 15.semantic_rules/06.compatibility_call_args/spec_examples2_2.ets
+15.semantic_rules/06.compatibility_call_args/spec_examples2_3.ets
 
 #30553 intersection in smart casts
 15.semantic_rules/08.smart_casts_and_smart_types/02.intersection_types/case1_0.ets
