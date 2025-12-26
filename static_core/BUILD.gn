@@ -439,3 +439,18 @@ merge_yamls("merge_compiler_options_yamls") {
   add_yamls =
       [ "$ark_root/compiler/compiler.yaml" ] + plugin_compiler_options_yamls
 }
+
+action("ark_clang_format_check") {
+  script = "${ark_root}/scripts/code_style/code_style_check.py"
+  args = [ rebase_path("${ark_root}") ]
+  outputs = [ "${target_gen_dir}/ark_static_core_clang_format.txt" ]
+}
+
+action("ark_clang_force_format_check") {
+  script = "${ark_root}/scripts/code_style/code_style_check.py"
+  args = [
+    rebase_path("${ark_root}"),
+    "--reformat",
+  ]
+  outputs = [ "${target_gen_dir}/ark_static_core_force_clang_format.txt" ]
+}
