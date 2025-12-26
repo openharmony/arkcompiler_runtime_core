@@ -27,6 +27,10 @@ export class CSSLogicRule extends CSSRule {
     }
 }
 
+export function createCSSLogicRule(): CSSLogicRule {
+    return new CSSLogicRule();
+}
+
 export class CountOverloadRule {
     mergeRule(rule: number): boolean {
         return true;

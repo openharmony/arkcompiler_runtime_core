@@ -419,7 +419,6 @@ EtsClassWrapper *EtsClassWrapper::Get(InteropCtx *ctx, EtsClass *etsClass)
 
     std::unique_ptr<EtsClassWrapper> wrapper = EtsClassWrapper::Create(ctx, etsClass);
     if (UNLIKELY(wrapper == nullptr)) {
-        ctx->ForwardEtsException(EtsCoroutine::GetCurrent());
         return nullptr;
     }
     return cache->Insert(etsClass, std::move(wrapper));
