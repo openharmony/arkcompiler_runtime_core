@@ -144,6 +144,8 @@ export enum FaultID {
   AddDeclareToTopLevelInterfaces,
   AddDeclareToTopLevelVariable,
   AddDeclareToTopLevelFunction,
+  AddDeclareToTopLevelNamespace,
+  AddDeclareToTopLevelClass,
   RemoveLimitDecorator,
   TupleTypeToArray,
   StructDeclaration,

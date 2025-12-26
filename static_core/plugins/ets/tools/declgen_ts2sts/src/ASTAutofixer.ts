@@ -65,7 +65,9 @@ export class Autofixer {
         this[FaultID.LimitExtends].bind(this),
         this[FaultID.AddDeclareToTopLevelInterfaces].bind(this),
         this[FaultID.AddDeclareToTopLevelVariable].bind(this),
-        this[FaultID.AddDeclareToTopLevelFunction].bind(this)
+        this[FaultID.AddDeclareToTopLevelFunction].bind(this),
+        this[FaultID.AddDeclareToTopLevelNamespace].bind(this),
+        this[FaultID.AddDeclareToTopLevelClass].bind(this)
       ]
     ],
     [
@@ -1730,6 +1732,76 @@ export class Autofixer {
     return node
   }
 
+  /**
+   * Rule: `arkts-add-declare-to-exported-top-lavel-namespaces`
+   */
+  private [FaultID.AddDeclareToTopLevelNamespace](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isSourceFile(node)) {
+      return node;
+    }
+
+    const statements = node.statements.map((stmt) => {
+      if (ts.isModuleDeclaration(stmt) && stmt.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) {
+        if (stmt.modifiers.some((m) => m.kind === ts.SyntaxKind.DeclareKeyword)) {
+          return stmt;
+        }
+
+        const newModifiers: ts.Modifier[] = [];
+        for (const modifier of stmt.modifiers) {
+          newModifiers.push(modifier);
+          if (modifier.kind === ts.SyntaxKind.ExportKeyword) {
+            newModifiers.push(this.context.factory.createToken(ts.SyntaxKind.DeclareKeyword) as ts.Modifier);
+          }
+        }
+
+        return this.context.factory.updateModuleDeclaration(stmt, undefined, newModifiers, stmt.name, stmt.body);
+      }
+      return stmt;
+    });
+
+    return this.context.factory.updateSourceFile(node, statements);
+  }
+
+  /**
+   * Rule: `arkts-add-declare-to-exported-top-lavel-classes`
+   */
+  private [FaultID.AddDeclareToTopLevelClass](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isSourceFile(node)) {
+      return node;
+    }
+
+    const statements = node.statements.map((stmt) => {
+      if (ts.isClassDeclaration(stmt) && stmt.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) {
+        if (stmt.modifiers.some((m) => m.kind === ts.SyntaxKind.DeclareKeyword)) {
+          return stmt;
+        }
+
+        if (stmt.modifiers.some((m) => m.kind === ts.SyntaxKind.DefaultKeyword)) {
+          return stmt;
+        }
+
+        const newModifiers: ts.Modifier[] = [];
+        for (const modifier of stmt.modifiers) {
+          newModifiers.push(modifier as ts.Modifier);
+          if (modifier.kind === ts.SyntaxKind.ExportKeyword) {
+            newModifiers.push(this.context.factory.createToken(ts.SyntaxKind.DeclareKeyword) as ts.Modifier);
+          }
+        }
+
+        return this.context.factory.updateClassDeclaration(
+          stmt,
+          newModifiers,
+          stmt.name,
+          stmt.typeParameters,
+          stmt.heritageClauses,
+          stmt.members
+        );
+      }
+      return stmt;
+    });
+
+    return this.context.factory.updateSourceFile(node, statements);
+  }
 }
 
 /**

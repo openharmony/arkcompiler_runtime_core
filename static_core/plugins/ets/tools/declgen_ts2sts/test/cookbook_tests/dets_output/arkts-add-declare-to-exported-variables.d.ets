@@ -69,3 +69,16 @@ declare namespace PrivateFunctionNamespace {
     export function internalFunction(): void;
     export function publicFunction(): string;
 }
+export declare namespace ExportedNamespace {
+    export const exportedVar: string;
+    export function exportedFunction(): void;
+    export interface ExportedInterface {
+        id: number;
+    }
+    export class ExportedClass {
+        prop: string;
+    }
+}
+export declare class ExportedClass {
+    prop: string;
+}
