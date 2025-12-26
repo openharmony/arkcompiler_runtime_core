@@ -806,11 +806,11 @@ function bugfix_chain_concat20(): void
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    /StringBuilder::append/,6
-//! INST_COUNT    /StringBuilder::toString/,5
+//! INST_COUNT    /StringBuilder::toString/,1
 //! IN_BLOCK      /prehead \(loop 2\)/
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    /StringBuilder::append/,2
-//! INST_COUNT    /StringBuilder::toString/,1
+//! INST_NOT      /StringBuilder::toString/
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! IN_BLOCK      /loop 2, depth 1/
 //! INST_NOT      /StringBuilder::<ctor>/
@@ -820,7 +820,7 @@ function bugfix_chain_concat20(): void
 //! IN_BLOCK      /prehead \(loop 1\)/
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_COUNT    /StringBuilder::append/,1
-//! INST_COUNT    /StringBuilder::toString/,2
+//! INST_NOT      /StringBuilder::toString/
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! IN_BLOCK      /loop 1, depth 1/
 //! INST_NOT      /StringBuilder::<ctor>/
@@ -836,7 +836,7 @@ function bugfix_chain_concat20(): void
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    /StringBuilder::append/,8
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_COUNT    /StringBuilder::toString/,7
+//! INST_COUNT    /StringBuilder::toString/,1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat2"
 //! PASS_AFTER    "BranchElimination"
@@ -846,7 +846,7 @@ function bugfix_chain_concat20(): void
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    /StringBuilder::append/,10
-//! INST_COUNT    /StringBuilder::toString/,9
+//! INST_COUNT    /StringBuilder::toString/,1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::chain_concat3"
 //! PASS_AFTER    "BranchElimination"
@@ -856,7 +856,7 @@ function bugfix_chain_concat20(): void
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",2
 //! INST_COUNT    /StringBuilder::append/,16
-//! INST_COUNT    /StringBuilder::toString/,14
+//! INST_COUNT    /StringBuilder::toString/,2
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::supported_chain_concat5"
 //! PASS_AFTER    "BranchElimination"
@@ -938,7 +938,7 @@ function bugfix_chain_concat20(): void
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
 //! INST_COUNT    /StringBuilder::append/,4
-//! INST_COUNT    /StringBuilder::toString/,2
+//! INST_COUNT    /StringBuilder::toString/,1
 //!
 //! METHOD        "ets_string_builder_merge.ETSGLOBAL::partially_supported_chain_concat16"
 //! PASS_AFTER    "BranchElimination"

@@ -223,7 +223,7 @@ function main() {
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",59
 //! INST_COUNT    /StringBuilder::append/,123
-//! INST_COUNT    /StringBuilder::toString/,64
+//! INST_COUNT    /StringBuilder::toString/,59
 
 //! CHECKER       INTERP-IRTOC, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"

@@ -1199,7 +1199,9 @@ void SimplifyStringBuilder::Cleanup(const ConcatenationLoopMatch &match)
                 userInst->ClearFlag(compiler::inst_flags::NO_DCE);
             }
         }
-        temp.intermediateValue->ClearFlag(compiler::inst_flags::NO_DCE);
+        if (temp.intermediateValue != match.exit.toStringCall) {
+            temp.intermediateValue->ClearFlag(compiler::inst_flags::NO_DCE);
+        }
         temp.instance->ReplaceUsers(match.preheader.instance);
         temp.instance->ClearFlag(compiler::inst_flags::NO_DCE);
         temp.ctorCall->ClearFlag(compiler::inst_flags::NO_DCE);
@@ -2268,7 +2270,8 @@ void SimplifyStringBuilder::Cleanup(Inst *instance, Inst *instanceFirstAppendCal
             auto userInst = user.GetInst();
             auto isSaveState = userInst->IsSaveState();
             auto isAppend = userInst == instanceFirstAppendCall;
-            return !isSaveState && !isAppend;
+            auto isCheckCast = IsCheckCastWithoutUsers(userInst);
+            return !isSaveState && !isAppend && !isCheckCast;
         })) {
         if (GetGraph()->IsBytecodeOptimizer()) {
             // Mark 'inputInstance' toString call as dead with it's users
