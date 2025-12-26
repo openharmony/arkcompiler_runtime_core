@@ -37,7 +37,7 @@ cases:
         num: number
       }
       class D extends C implements I { 
-        num: number = 2
+        num: boolean = 2
       }
 
   # Field declaration contains the modifier static along with the modifier override.

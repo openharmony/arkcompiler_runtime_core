@@ -49,9 +49,9 @@ class B extends A {
 function main() {
     cnt = 0
     let b = new B('x') // call primary constructor
-    arktest.assertEQ(b.f00, 0)
-    arktest.assertEQ(b.f01, 1)
-    arktest.assertEQ(b.f02, 2)
-    arktest.assertEQ(b.f03, 3)
-    arktest.assertEQ(b.f04, 4)
+    arktest.assertEQ(b.f00, 5)
+    arktest.assertEQ(b.f01, 6)
+    arktest.assertEQ(b.f02, 7)
+    arktest.assertEQ(b.f03, 8)
+    arktest.assertEQ(b.f04, 9)
 }

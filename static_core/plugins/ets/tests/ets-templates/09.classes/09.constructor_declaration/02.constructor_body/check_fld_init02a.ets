@@ -56,13 +56,13 @@ class B extends A {
 function main() {
     res = 0
     let b = new B(true)  // primary to primary
-    arktest.assertEQ(b.fld, 1)
+    arktest.assertEQ(b.fld, 2)
 
     res = 0
     b = new B()  // primary to secondary
-    arktest.assertEQ(b.fld, 1)
+    arktest.assertEQ(b.fld, 2)
 
     res = 0
     b = new B(1.0)  // primary to secondary
-    arktest.assertEQ(b.fld, 1)
+    arktest.assertEQ(b.fld, 2)
 }

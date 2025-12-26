@@ -69,7 +69,7 @@ function testField(): void {
     let sf = typePoint3D.getInstanceField("state")!
     let rf = typePoint3D.getInstanceField("r")!
     let abilityf = typePoint3D.getInstanceField("ability")!
-    yf = typePoint3D.getInstanceField("y")!
+    arktest.assertEQ(typePoint3D.getInstanceField("yf"), undefined) // parent field
     arktest.assertEQ(typePoint3D.getInstanceField("stateP"), undefined) // private
     arktest.assertEQ(typePoint3D.getInstanceField("xP"), undefined) // parent field
     arktest.assertEQ(typePoint3D.getInstanceField("x"), undefined) // parent field
@@ -163,7 +163,7 @@ function testInstanceGetSetPrimitive(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childIdFld = childCls.getInstanceField('id')!
+    const childIdFld = childCls.getSuper()!.getInstanceField('id')!
 
     arktest.assertNE(localNum, childInst.id)
     arktest.assertNE(localNum, childIdFld.getValue(childInst))
@@ -193,13 +193,13 @@ function testInstanceGetSetReference(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childStrFld = childCls.getInstanceField('str')!
+    const childStrFld = childCls.getSuper()!.getInstanceField('str')!
 
     arktest.assertNE(localStr, childInst.str)
     arktest.assertNE(localStr, childStrFld.getValue(childInst))
     childStrFld.setValue(childInst, localStr)
     arktest.assertEQ(localStr, childInst.str)
-    arktest.assertEQ(localNum, parentIdFld.getValue(childInst))
+    arktest.assertEQ(childInst.id, parentIdFld.getValue(childInst))
 
     childStrFld.setValue(childInst, undefined)
     arktest.assertEQ(undefined, childInst.str)
@@ -306,7 +306,7 @@ function testInstanceGetSetPrimitiveNegative(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childIdFld = childCls.getInstanceField('id')!
+    const childIdFld = childCls.getSuper()!.getInstanceField('id')!
     const localNumChild = childInst.id
 
     arktest.expectError(() => {
@@ -348,7 +348,7 @@ function testInstanceGetSetReferenceNegative(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childStrFld = childCls.getInstanceField('str')!
+    const childStrFld = childCls.getSuper()!.getInstanceField('str')!
     const localStrChild = childInst.str
 
     arktest.expectError(() => {
@@ -594,18 +594,18 @@ function testInstanceField(): void {
 
     const childInst = new Child()
     const childCls = Class.of(childInst)
-    const childIdFld = childCls.getInstanceField('id')!
-    const childStrFld = childCls.getInstanceField('str')!
+    const childIdFld = childCls.getSuper()!.getInstanceField('id')!
+    const childStrFld = childCls.getSuper()!.getInstanceField('str')!
 
     arktest.assertEQ(childIdFld.getType(), Class.PRIMITIVE_NUMBER)
-    arktest.assertEQ(childIdFld.getOwner(), childCls)
+    arktest.assertEQ(childIdFld.getOwner(), parentCls)
     arktest.assertEQ(childStrFld.getType(), Class.of(new String()))
-    arktest.assertEQ(childStrFld.getOwner(), childCls)
+    arktest.assertEQ(childStrFld.getOwner(), parentCls)
 
     arktest.assertEQ(parentCls.getInstanceField('prop'), undefined)
     arktest.assertEQ(parentCls.getInstanceField('priv'), undefined)
     arktest.assertEQ(parentCls.getInstanceField('prot'), undefined)
-    arktest.assertEQ(childCls.getInstanceField('prot'), undefined)
+    arktest.assertEQ(childCls.getSuper()!.getInstanceField('prot'), undefined)
 
     const parentFlds = parentCls.getInstanceFields()
     const parentFldNames = new Set<string>(Array.from<reflect.InstanceField, string>(parentFlds, (f) => f.getName()))

@@ -24,7 +24,7 @@ cases:
       }
     use: |
         let a: A = new B();
-        arktest.assertEQ(a.fld, 1)
+        arktest.assertEQ(a.fld, 2)
 
 
   - desc: "Static dispatch, class, namespace"

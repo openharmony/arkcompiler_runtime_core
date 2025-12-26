@@ -73,10 +73,10 @@ cases:
               fld: string|Integral = 'B'
           }
           class AA extends A {
-              fld: Integral = new Int(42)
+              fld: string|Integral = new Int(42)
           }
           class BB extends B {
-              fld: Integral = new Short(33 as short)
+              fld: string|Integral = new Short(33 as short)
           }
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB

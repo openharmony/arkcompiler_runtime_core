@@ -139,6 +139,7 @@ TEST_F(ObjectGetFieldIntTest, check_hierarchy)
     const ani_int parentFieldValueInParent = 1;
     const ani_int overridedFieldValueInParent = 2;
     const ani_int childFieldValueInChild = 3;
+    const ani_int overridedFieldValueInChild = 4;
 
     // |-------------------------------------------------------------------------------------------------------|
     // | ani_object  |             ani_field              |  ani_status  |               action                |
@@ -172,9 +173,9 @@ TEST_F(ObjectGetFieldIntTest, check_hierarchy)
     ASSERT_EQ(env_->Object_GetField_Int(objChild, childFieldInChild, &value), ANI_OK);
     ASSERT_EQ(value, childFieldValueInChild);
     ASSERT_EQ(env_->Object_GetField_Int(objChild, overridedFieldInChild, &value), ANI_OK);
-    ASSERT_EQ(value, overridedFieldValueInParent);
+    ASSERT_EQ(value, overridedFieldValueInChild);
     ASSERT_EQ(env_->Object_GetField_Int(objChild, overridedFieldInParent, &value), ANI_OK);
-    ASSERT_EQ(value, overridedFieldValueInParent);
+    ASSERT_EQ(value, overridedFieldValueInChild);
 }
 
 }  // namespace ark::ets::ani::testing

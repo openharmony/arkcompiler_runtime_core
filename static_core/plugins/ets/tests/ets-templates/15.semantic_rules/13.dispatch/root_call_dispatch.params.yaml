@@ -26,7 +26,7 @@ cases:
       }
     
       let a: A = new B();
-      arktest.assertEQ(a.fld, 1) // static dispatch
+      arktest.assertEQ(a.fld, 2) // static dispatch
       arktest.assertEQ(a.met(), "B") // dynamic dispatch
 
   - desc: "Static and dynamic dispatch, interface, root call"
