@@ -75,7 +75,7 @@ static_core/libarkbase/tests/*mem*                       @udav ^ipetrov
 static_core/platforms/**/*mem*                           ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/abc2program	                     @nazarovkonstantin @oatuwwutao	^seeuiceland
 static_core/plugins/ets/disassembler                     @nazarovkonstantin @oatuwwutao ^seeuiceland
-static_core/plugins/ets/playground                       @anton-sysoev @Nojpg
+static_core/plugins/ets/playground                       @anton-sysoev @Nojpg ^ivan-tyulyandin ^magikarp777 ^templinkonstantin
 static_core/runtime/arch/                                @Prof @xucheng46 ^gitee-dakeQI @asidorov ^chernykhsergey
 static_core/runtime/bridge/                              @Prof @dingding5 @asidorov @xucheng46 ^gitee-dakeQI ^chernykhsergey
 static_core/runtime/coroutines/                          ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
@@ -132,8 +132,8 @@ static_core/plugins/ets/runtime/ets_native_library_provider.cpp               @v
 static_core/plugins/ets/runtime/ets_native_library_provider.h                 @vpukhov @shilei123
 static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
-static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @yuan-yao14
-static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^chernykhsergey
+static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @yuan-yao14 ^templinkonstantin
+static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 @lijin1039 ^templinkonstantin ^chernykhsergey
 static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis
 static_core/plugins/ets/verification/                    @igelhaus @oatuwwutao @slynkodenis @groshevmaksim ^seeuiceland
 static_core/runtime/include/mem/                         ^dmitriitr @udav @xucheng46 ^gitee-dakeQI
@@ -160,11 +160,11 @@ static_core/plugins/ets/runtime/regexp/                                       ^a
 static_core/plugins/ets/runtime/types/                                        @nazarovkonstantin @slynkodenis
 static_core/plugins/ets/runtime/types/*atomic*                                ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/types/*promise*                               ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876
-static_core/plugins/ets/runtime/types/*reflect*                               @magikarp777 ^anton-sysoev @Nojpg
-static_core/plugins/ets/runtime/types/*typeapi*                               @magikarp777 ^anton-sysoev @Nojpg
+static_core/plugins/ets/runtime/types/*reflect*                               @magikarp777 ^anton-sysoev @Nojpg ^ivan-tyulyandin
+static_core/plugins/ets/runtime/types/*typeapi*                               @magikarp777 ^anton-sysoev @Nojpg ^ivan-tyulyandin
 static_core/plugins/ets/runtime/types/ets_abc_runtime_linker.h                @nazarovkonstantin @slynkodenis @shilei123
-static_core/plugins/ets/runtime/types/ets_class*                              @magikarp777 ^anton-sysoev @Nojpg
-static_core/plugins/ets/runtime/types/ets_method*                             @magikarp777 ^anton-sysoev @Nojpg
+static_core/plugins/ets/runtime/types/ets_class*                              @magikarp777 ^anton-sysoev @Nojpg ^ivan-tyulyandin
+static_core/plugins/ets/runtime/types/ets_method*                             @magikarp777 ^anton-sysoev @Nojpg ^ivan-tyulyandin
 static_core/plugins/ets/runtime/types/ets_promise.h                           ^tanglu100 @MofengMa ^weixin_41079876 ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/ets_runtime_linker.h                    @nazarovkonstantin @slynkodenis @shilei123
 static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting
@@ -182,9 +182,9 @@ static_core/plugins/ets/tests/interop_js/                                     @i
 static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
-static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg ^luobohua ^luchenxu ^Wangyuzhong11
-static_core/plugins/ets/tools/declgen_ts2sts/                                 @Nojpg ^trubachevilya @nazarovkonstantin @luobohua @luchenxu ^Wangyuzhong11
-static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @Nojpg ^amate @sergeyandreev @anton-sysoev
+static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @shimenkovmikhail ^v-cherkashin ^Nojpg ^luobohua ^luchenxu ^Wangyuzhong11
+static_core/plugins/ets/tools/declgen_ts2sts/                                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya @nazarovkonstantin @luobohua @luchenxu ^Wangyuzhong11
+static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
@@ -228,13 +228,13 @@ static_core/plugins/ets/tests/interop_js/xgc/                                 @i
 static_core/plugins/ets/tests/native/promise/                                 @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/runtime/tooling/                                @slynkodenis
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^udav ^tanglu100 @MofengMa ^weixin_41079876
-static_core/plugins/ets/tests/test-lists/ets-func-tests/                      ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev
-static_core/plugins/ets/tests/test-lists/ets-sdk/                             ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev
+static_core/plugins/ets/tests/test-lists/ets-func-tests/                      ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev ^ivan-tyulyandin ^magikarp777
+static_core/plugins/ets/tests/test-lists/ets-sdk/                             ^amate ^sergeyandreev @Prof @kuchkovairina @Nojpg @anton-sysoev ^ivan-tyulyandin ^magikarp777
 static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^Nojpg ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/interop_js/tests/checked/                       ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof ^kurnevichstanislav @dingding5
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof @dingding5
-static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @Nojpg ^igelhaus ^trubachevilya ^ivagin ^Prof @luobohua @luchenxu ^Wangyuzhong11
+static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                ^Nojpg ^igelhaus @shimenkovmikhail ^v-cherkashin @trubachevilya ^Prof @luobohua @luchenxu ^Wangyuzhong11
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/generate-es-checked ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 
