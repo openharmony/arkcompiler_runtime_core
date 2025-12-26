@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -208,12 +208,16 @@ class WorkflowOptions(IOptions):
             step_content['env'] = new_env
         step = Step(step_name, step_content)
         if step.enabled:
+            if not step.executable_path_exists():
+                raise FileNotFoundException(f"Step executable path is empty or incorrect: {step.executable_path}"
+                                            f"\nCheck step '{step_name}' in the '{self.name}' workflow")
+
             parent_step_name = f"{self.parent_step_name}." if self.parent_step_name else ""
             step.name = f"{parent_step_name}{step.name}"
             _LOGGER.all(f"Step '{step.name}' is loaded and added")
             self.__steps.append(step)
         else:
-            _LOGGER.all(f"Step '{step_name}' is not enabled and so not loaded")
+            _LOGGER.all(f"Step '{step_name}' is disabled and won't be loaded")
 
     def __expand_macro_for_str(self, value_in_workflow: str) -> str | list[str]:
         try:
