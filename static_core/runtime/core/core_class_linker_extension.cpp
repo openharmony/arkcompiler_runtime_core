@@ -478,4 +478,24 @@ CoreClassLinkerExtension::~CoreClassLinkerExtension()
     FreeLoadedClasses();
 }
 
+ClassLinkerContext *CoreClassLinkerExtension::GetCommonContext(Span<Class *> classes)
+{
+    ASSERT(!classes.Empty());
+    auto *commonCtx = classes[0]->GetLoadContext();
+
+    size_t foundClassesNum = 0;
+    while (!commonCtx->IsBootContext()) {
+        for (auto *klass : classes) {
+            if (commonCtx->FindClass(klass->GetDescriptor()) != nullptr) {
+                foundClassesNum++;
+            }
+        }
+        if (foundClassesNum == classes.Size()) {
+            break;
+        }
+        commonCtx = GetBootContext();  // yield the uppermost context conservatively
+    }
+    return commonCtx;
+}
+
 }  // namespace ark

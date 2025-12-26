@@ -812,7 +812,7 @@ ClassLinkerContext *EtsClassLinkerExtension::GetParentContext(ClassLinkerContext
     return parentLinker->GetClassLinkerContext();
 }
 
-ClassLinkerContext *EtsClassLinkerExtension::GetCommonContext(Span<Class *> classes) const
+ClassLinkerContext *EtsClassLinkerExtension::GetCommonContext(Span<Class *> classes)
 {
     ASSERT(!classes.Empty());
     auto *commonCtx = classes[0]->GetLoadContext();

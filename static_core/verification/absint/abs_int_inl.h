@@ -1828,13 +1828,7 @@ public:
 
         ScopedChangeThreadStatus st {ManagedThread::GetCurrent(), ThreadStatus::RUNNING};
         Job::ErrorHandler handler;
-        Class *typeCls {nullptr};
-        if (field->GetType().IsReference()) {
-            auto classId = panda_file::FieldDataAccessor::GetTypeId(*field->GetPandaFile(), field->GetFileId());
-            typeCls = job_->GetClass(classId, field->GetClass()->GetLoadContext(), field->GetPandaFile(), &handler);
-        } else {
-            typeCls = field->ResolveTypeClass(&handler);
-        }
+        auto typeCls = field->ResolveTypeClass(&handler);
         if (typeCls == nullptr) {
             return Type {};
         }
@@ -2530,18 +2524,40 @@ public:
     bool CheckFieldAccessByName(int regIdx, [[maybe_unused]] Type expectedFieldType)
     {
         Field const *rawField = GetCachedField();
-        Type objType;
 
-        // currently all union type named access sites are encoded as “%%union_prop-” class fields
-        // at bytecode level, thus we do not have accurate union type info to verify each variables
-        // so the current temporary solution would be to skip verification for union types.This
-        // actually introduce insecure possibilities here. Accurate verification for union types
-        // will need redesign for union types support in the future
-        //
-        // based on the above,here we skip:
-        // 1. checking whether a field existed in the union or not
-        // 2. skip checking member access violiations
-        return CheckFieldAccessByNameStartCheck(regIdx, rawField, objType);
+        if (rawField == nullptr) {
+            SET_STATUS_FOR_MSG(CannotResolveFieldId, OK);
+            return false;
+        }
+
+        if (rawField->IsStatic()) {
+            SHOW_MSG(ExpectedStaticOrInstanceField)
+            LOG_VERIFIER_EXPECTED_STATIC_OR_INSTANCE_FIELD(false);
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(ExpectedStaticOrInstanceField, WARNING);
+            return false;
+        }
+
+        if (!GetFieldType().IsConsistent()) {
+            LOG_VERIFIER_CANNOT_RESOLVE_FIELD_TYPE(GetFieldName(rawField));
+            return false;
+        }
+
+        if (!CheckRegType(regIdx, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (GetRegType(regIdx) == nullRefType_) {
+            // NOTE(vdyadov): redesign next code, after support exception handlers,
+            //                treat it as always throw NPE
+            SHOW_MSG(AlwaysNpe)
+            LOG_VERIFIER_ALWAYS_NPE(regIdx);
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(AlwaysNpe, OK);
+            return false;
+        }
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -4271,51 +4287,6 @@ private:
         }
 
         return !result.IsError();
-    }
-
-    bool CheckFieldAccessByNameStartCheck(int regIdx, Field const *&rawField, Type &objType)
-    {
-        if (rawField == nullptr) {
-            SET_STATUS_FOR_MSG(CannotResolveFieldId, OK);
-            return false;
-        }
-
-        if (rawField->IsStatic()) {
-            SHOW_MSG(ExpectedStaticOrInstanceField)
-            LOG_VERIFIER_EXPECTED_STATIC_OR_INSTANCE_FIELD(false);
-            END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(ExpectedStaticOrInstanceField, WARNING);
-            return false;
-        }
-
-        if (!GetFieldType().IsConsistent()) {
-            LOG_VERIFIER_CANNOT_RESOLVE_FIELD_TYPE(GetFieldName(rawField));
-            return false;
-        }
-
-        if (!IsRegDefined(regIdx)) {
-            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
-            return false;
-        }
-        objType = GetRegType(regIdx);
-        if (objType == nullRefType_) {
-            // NOTE(vdyadov): redesign next code, after support exception handlers,
-            //                treat it as always throw NPE
-            SHOW_MSG(AlwaysNpe)
-            LOG_VERIFIER_ALWAYS_NPE(regIdx);
-            END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(AlwaysNpe, OK);
-            return false;
-        }
-
-        if (!objType.IsClass()) {
-            SHOW_MSG(BadRegisterType)
-            LOG_VERIFIER_BAD_REGISTER_CLASS_TYPE(RegisterName(regIdx, true), ToString(objType));
-            END_SHOW_MSG();
-            return false;
-        }
-
-        return true;
     }
 
     bool CheckCastArrayObjectRegDef(Type &cachedType)

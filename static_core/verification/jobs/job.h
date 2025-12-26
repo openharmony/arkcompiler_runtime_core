@@ -133,13 +133,7 @@ public:
         void OnError(ClassLinker::Error error, PandaString const &message) override;
     };
 
-    Class *GetClass(panda_file::File::EntityId classId, ClassLinkerContext *ctx, const panda_file::File *pfile,
-                    ErrorHandler *errorHandler) const;
-
 private:
-    Class *GetClass(panda_file::File::EntityId classId, ErrorHandler *errorHandler = nullptr) const;
-    Field *GetField(panda_file::File::EntityId fieldIdx, bool isStatic, ErrorHandler *errorHandler) const;
-
     Service *service_;
     ClassLinker *classLinker_;
     Method const *method_;

@@ -103,7 +103,7 @@ public:
 
     virtual ClassLinkerContext *CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path);
 
-    virtual ClassLinkerContext *GetCommonContext([[maybe_unused]] Span<Class *> classes) const
+    virtual ClassLinkerContext *GetCommonContext([[maybe_unused]] Span<Class *> classes)
     {
         UNREACHABLE();
     }

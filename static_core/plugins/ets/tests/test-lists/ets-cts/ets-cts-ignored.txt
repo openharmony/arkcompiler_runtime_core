@@ -50,6 +50,10 @@
 03.types/20.union_types/united_switch_ext_7.ets
 03.types/20.union_types/united_switch_ext_8.ets
 
+#32346
+03.types/20.union_types/union_type_assignment_66.ets
+03.types/20.union_types/union_type_assignment_77.ets
+
 #30239 first match overload
 03.types/20.union_types/02.access_to_common_union_members/overload/overload_6.ets
 

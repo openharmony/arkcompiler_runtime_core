@@ -1188,7 +1188,7 @@ class JSONWriter {
         return writableEntries
     }
 
-    private writeRecordEntry<K extends Number | string, V>(entryKey: K, entryVal: V, entryDumped: boolean): boolean {
+    private writeRecordEntry<K extends Numeric | string, V>(entryKey: K, entryVal: V, entryDumped: boolean): boolean {
         const entryName = (entryKey as object).toString()
         const replacedVal = this.useReplacer ? this.replacer!(entryName, entryVal) : entryVal
         return this.writeField(entryName, replacedVal, entryDumped)

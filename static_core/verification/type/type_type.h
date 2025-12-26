@@ -143,7 +143,7 @@ public:
     }
     ALWAYS_INLINE bool IsClass() const
     {
-        return IsValid() && !IsBuiltin() && IsPointer(content_);
+        return IsRTClass() && !reinterpret_cast<Class const *>(content_)->IsUnionClass();
     }
     ALWAYS_INLINE bool IsIntersection() const
     {
@@ -151,7 +151,8 @@ public:
     }
     ALWAYS_INLINE bool IsUnion() const
     {
-        return IsNotPointer(content_) && GetTag(content_) == UNION_TAG;
+        return (IsRTClass() && GetRTClass()->IsUnionClass()) ||
+               (IsNotPointer(content_) && GetTag(content_) == UNION_TAG);
     }
 
     ALWAYS_INLINE Builtin GetBuiltin() const
@@ -162,7 +163,7 @@ public:
     ALWAYS_INLINE Class const *GetClass() const
     {
         ASSERT(IsClass());
-        return reinterpret_cast<Class const *>(content_);
+        return GetRTClass();
     }
 
     bool IsConsistent() const;
@@ -179,6 +180,16 @@ public:
 
 private:
     uintptr_t content_ {0};
+
+    ALWAYS_INLINE bool IsRTClass() const
+    {
+        return IsValid() && !IsBuiltin() && IsPointer(content_);
+    }
+    ALWAYS_INLINE Class const *GetRTClass() const
+    {
+        ASSERT(IsRTClass());
+        return reinterpret_cast<Class const *>(content_);
+    }
 
     static Type IntersectSpans(Span<Type const> lhs, Span<Type const> rhs, TypeSystem *tsys);
 
