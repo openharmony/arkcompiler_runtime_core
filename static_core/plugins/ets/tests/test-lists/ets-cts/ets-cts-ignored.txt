@@ -555,22 +555,6 @@
 07.expressions/25.equality_expressions/eq_neg_18.ets
 07.expressions/25.equality_expressions/eq_neg_19.ets
 
-#30412 Incorrect evaluation order for compound assignment
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_0.ets
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_1.ets
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_2.ets
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_3.ets
-07.expressions/29.assignment/02.compound_assignment_operators/array_compound_assignment_order_4.ets
-07.expressions/29.assignment/02.compound_assignment_operators/no_indexing_compound_assignment_order_0.ets
-07.expressions/29.assignment/02.compound_assignment_operators/no_indexing_compound_assignment_order_2.ets
-07.expressions/29.assignment/02.compound_assignment_operators/no_indexing_compound_assignment_order_3.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_0.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_1.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_2.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_3.ets
-07.expressions/29.assignment/02.compound_assignment_operators/record_compound_assignment_order_4.ets
-
-
 #30340 &&= ||= ??= still not supported in code
 07.expressions/29.assignment/02.compound_assignment_operators/ops_12.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_13.ets
