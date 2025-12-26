@@ -159,20 +159,20 @@ function checkSubsetByValueClass(): boolean {
 	const subsetByValueClass = SubsetByValueClass.instantiate();
 	const userClass = subsetByValueClass.invokeMethod('get');
 
-	return (tsNumber as int) === (userClass.getProperty('value').toNumber());
+	return (tsNumber.toInt()) === (userClass.getProperty('value').toNumber());
 }
 
 function checkCreateSubsetByValueClassFromTs(): boolean {
 	const subsetByValueClass = createSubsetByValueClassFromTs.invoke();
 	const userClass = subsetByValueClass.invokeMethod('get');
 
-	return (tsNumber as int) === (userClass.getProperty('value').toNumber());
+	return (tsNumber.toInt()) === (userClass.getProperty('value').toNumber());
 }
 
 function checkInstanceSubsetByValueClassFromTs(): boolean {
 	const userClass = subsetByValueInstanceClass.invokeMethod('get');
 
-	return (tsNumber as int) === (userClass.getProperty('value').toNumber());
+	return (tsNumber.toInt()) === (userClass.getProperty('value').toNumber());
 }
 
 function checkTupleTypeClass(): boolean {
@@ -203,7 +203,7 @@ function checkInstanceTupleClassFromTs(): boolean {
 function checkWithOptionalMethodClass(): boolean {
 	const optionalClass = WithOptionalMethodClass.instantiate();
 
-	return (optionalClass.invokeMethod('getNum').toNumber()) === (tsNumber as int) &&
+	return (optionalClass.invokeMethod('getNum').toNumber()) === (tsNumber.toInt()) &&
 		   (optionalClass.invokeMethod('getStr').toString()) === (tsString as string);
 }
 
@@ -216,7 +216,7 @@ function checkWithoutOptionalMethodClass(): boolean {
 function checkCreateClassWithOptionalMethod() {
 	const optionalClass = createClassWithOptionalMethod.invoke();
 
-	return (optionalClass.invokeMethod('getNum').toNumber()) === (tsNumber as int) &&
+	return (optionalClass.invokeMethod('getNum').toNumber()) === (tsNumber.toInt()) &&
 		   (optionalClass.invokeMethod('getStr').toString()) === (tsString as string);
 }
 
@@ -229,7 +229,7 @@ function checkCreateClassWithoutOptionalMethod() {
 function checkWithOptionalMethodInstanceClass(): boolean {
 	let resNum = (withOptionalMethodInstanceClass.invokeMethod('getNum').toNumber());
 	let resStr = (withOptionalMethodInstanceClass.invokeMethod('getStr').toString());
-	return resNum === (tsNumber as int) && resStr === (tsString as string);
+	return resNum === (tsNumber.toInt()) && resStr === (tsString as string);
 }
 
 function checkWithoutOptionalMethodInstanceClass() {

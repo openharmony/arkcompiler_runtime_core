@@ -25,7 +25,7 @@ cases:
 
     - decl: |-
           // check primitive defaults
-          function foo(a: byte = 1, b: short = 2, c: int = 3, d: long = 4, e: float = 5.0, f: double = 6.0, g: boolean = true, h: char = c'W') {
+          function foo(a: byte = 1, b: short = 2, c: int = 3, d: long = 4, e: float = 5.0f, f: double = 6.0, g: boolean = true, h: char = c'W') {
               arktest.assertEQ( a, 1 )
               arktest.assertEQ( b, 2 )
               arktest.assertEQ( c, 3 )

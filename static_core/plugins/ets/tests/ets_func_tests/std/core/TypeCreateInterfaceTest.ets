@@ -28,7 +28,7 @@ class C implements I1, I2 {
 
 function getIfaces(): (InterfaceType | undefined)[] {
 	const c = Type.of(new C()) as ClassType
-	let n = c.getInterfacesNum() as int
+	let n = c.getInterfacesNum().toInt()
 	let r = new (InterfaceType | undefined)[n]
 	for (let i = 0; i < n; i++) {
 		r[i] = c.getInterface(i)

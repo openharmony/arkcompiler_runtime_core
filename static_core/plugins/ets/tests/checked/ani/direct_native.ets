@@ -61,9 +61,9 @@ function test(i0: byte, i1: short, i2: int, i3: long, f0: float, f1: double, f2:
 function main(): int {
     let res = 0;
     for (let i = 0; i < 100; ++i) {
-        res = test(0 as byte, 1 as short, 2, 3 as long, 0.0 as float, 1.0, 2.0,
+        res = test(0 as byte, 1 as short, 2, 3 as long, 0.0f, 1.0, 2.0,
           4, 5, 6, 7 as long, 8, 9 as short, 10, 11, 12, 13, 14,
-          3.0 as float, 4.0 as float, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0);
+          3.0f, 4.0f, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0);
         if (res != 0) {
             return res;
         }

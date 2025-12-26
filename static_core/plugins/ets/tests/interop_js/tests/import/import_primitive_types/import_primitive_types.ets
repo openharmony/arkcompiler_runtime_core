@@ -36,7 +36,7 @@ function checkChangeNumber(): boolean {
     const oldValue = tsNumber;
     increment();
 
-    return tsNumber as int > oldValue as int;
+    return tsNumber.toInt() > oldValue.toInt();
 }
 
 function checkChangeString(): boolean {

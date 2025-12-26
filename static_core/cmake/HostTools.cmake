@@ -84,6 +84,7 @@ function(panda_configure_host_tools)
         -DMOBILE_NATIVE_LIBS_SOURCE_PATH=${MOBILE_NATIVE_LIBS_SOURCE_PATH}
         -DPANDA_TARGET_ARM32_ABI_HARD=${PANDA_TARGET_ARM32_ABI_HARD}
         -DPANDA_MINIMAL_VIXL=false
+        -DPANDA_STRICT_MODE=${PANDA_STRICT_MODE}
         --no-warn-unused-cli
     )
 

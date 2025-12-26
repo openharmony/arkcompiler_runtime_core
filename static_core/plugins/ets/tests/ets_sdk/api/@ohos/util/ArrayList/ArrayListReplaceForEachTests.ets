@@ -103,7 +103,7 @@ function testForEachFunctionWithValue() {
     let forEachFlag: double = 0;
     arrayList.forEach((value: double) => {
         if (value != arrayList[forEachCount++]) {
-            forEachFlag = TestData.testNumber1;
+            forEachFlag = TestData.testNumber1.toDouble();
         }
     });
     arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
@@ -117,7 +117,7 @@ function testForEachFunctionWithValueAndIndex() {
     let forEachFlag: double = 0;
     arrayList.forEach((value: double, index: int) => {
         if (value != arrayList[forEachCount] || index != forEachCount) {
-            forEachFlag = TestData.testNumber1;
+            forEachFlag = TestData.testNumber1.toDouble();
         }
         forEachCount++;
     });
@@ -134,7 +134,7 @@ function testForEachFunctionWithValueIndexAndTempArrayList() {
         arktest.assertEQ(arrayList, tempArrayList, "TempArrayList should be this");
         if (value != arrayList[forEachCount] || index != forEachCount ||
             tempArrayList[forEachCount] != arrayList[forEachCount]) {
-            forEachFlag = TestData.testNumber1;
+            forEachFlag = TestData.testNumber1.toDouble();
         }
         forEachCount++;
     });

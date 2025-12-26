@@ -18,14 +18,12 @@
 desc: Casting contexts allow the use of the narrowing reference conversion.
 ---*/
 
-function main(): int {
+function main() {
   {%- for t in c['types'] %}
   let s{{loop.index}}: {{t.stype}} = new {{t.dtype}}({{t.pval}});
   let d{{loop.index}}: {{t.dtype}} = s{{loop.index}} as {{t.dtype}};
-  if (d{{loop.index}} != {{t.pval}}) {
-      return 1;
-  }
+  arktest.assertEQ(d{{loop.index}}, {{t.pval}})
+
   {%- endfor %}
-  return 0;
 }
 {% endfor %}

@@ -159,7 +159,7 @@ cases:
           - { from_type: 'A', ref_type: 'A', expr: 'a', eq: '===' }
           - { from_type: 'B', ref_type: 'B', expr: 'b', eq: '===' }
           - { from_type: 'float', ref_type: 'Float', expr: '2.5e02f', eq: '==' }
-          - { from_type: 'short', ref_type: 'Short', expr: '0x8001 as short', eq: '==' }
+          - { from_type: 'short', ref_type: 'Short', expr: '(0x8001).toShort()', eq: '==' }
           - { from_type: 'boolean', ref_type: 'Boolean', expr: '!!false', eq: '==' }
           - { from_type: 'undefined', ref_type: 'undefined', expr: 'u', eq: '==' }
           - { from_type: 'null', ref_type: 'null', expr: 'n', eq: '==' }

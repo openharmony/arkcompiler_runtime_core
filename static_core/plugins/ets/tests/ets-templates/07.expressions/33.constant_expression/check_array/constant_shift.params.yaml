@@ -24,9 +24,9 @@ cases:
   - { type: int, value: 38, sign: '>>',  expected: 4    }
   - { type: int, value: 38, sign: '>>>', expected: 4    }
 
-  - { type: long, value: 46, sign: '<<',  expected: 368 }
-  - { type: long, value: 46, sign: '>>',  expected: 5   }
-  - { type: long, value: 46, sign: '>>>', expected: 5   }
+  - { type: long, value: (46).toLong(), sign: '<<',  expected: 368 }
+  - { type: long, value: (46).toLong(), sign: '>>',  expected: 5   }
+  - { type: long, value: (46).toLong(), sign: '>>>', expected: 5   }
 
   - { type: float, value: 53.2f, sign: '<<',  expected: 424 }
   - { type: float, value: 53.2f, sign: '>>',  expected: 6   }

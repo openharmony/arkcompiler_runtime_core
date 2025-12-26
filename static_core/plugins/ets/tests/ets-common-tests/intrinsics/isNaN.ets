@@ -29,7 +29,7 @@ function main(): int {
     if (Float.isNaN(Float.MIN_VALUE)) {
         return 5;
     }
-    if (Float.isNaN(1.2345 as float)) {
+    if (Float.isNaN(1.2345f)) {
         return 6;
     }
 

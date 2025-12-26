@@ -27,7 +27,7 @@ desc: >-
 {{c.decl}}
 
 class A {
-    {{c.field}}
+    {{c.field|indent}}
     bar(i: T): T {
         return i;
     }

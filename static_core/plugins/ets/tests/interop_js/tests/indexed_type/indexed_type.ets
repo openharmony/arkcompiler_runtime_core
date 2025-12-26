@@ -38,7 +38,7 @@ function changeArrValueByIndex(): boolean {
 
 function checkLengthArr(): boolean {
     const jsArray: Array<string> = getArray.invoke(arr).unwrap() as Array<string>;
-    return jsArray.length as number === arr.length.toDouble();
+    return jsArray.length.toDouble() === arr.length.toDouble();
 }
 
 function checkAllArrValue(): boolean {
@@ -59,7 +59,7 @@ function changeCustomArrValueByIndex(): boolean {
 
 function checkLengthCustomArr(): boolean {
     const jsArray: Array<string> = returnCustomArray.invoke(arr).unwrap() as Array<string>;
-    return jsArray.length as number === arr.length.toDouble();
+    return jsArray.length.toDouble() === arr.length.toDouble();
 }
 
 function checkAllCustomArrValue(): boolean {
@@ -113,7 +113,7 @@ function getTypedArrayValueByIndex(): boolean {
 
 function checkLengthTypedArray(): boolean {
     const jsTypedArray = createInt8Array.invoke(3).unwrap() as Int8Array;
-    return jsTypedArray.length as number === 3 as number;
+    return jsTypedArray.length.toDouble() === 3 as number;
 }
 
 function checkAllTypedArrayValue(): boolean {

@@ -44,16 +44,16 @@ cases:
     - from_type: Float
       values:
           - { to_type: Floating, init_value: 0.0, expr: new Float(Byte.MIN_VALUE.toFloat()) }
-          - { to_type: Numeric, init_value: 0, expr: new Float(-0.0 as float) }
-          - { to_type: Object, init_value: new Object(), expr: new Float(+0.0 as float) }
-          - { to_type: Comparable<Float>, init_value: new Float(), expr: new Float(+0.0 as float) }
+          - { to_type: Numeric, init_value: 0, expr: new Float(-0.0f) }
+          - { to_type: Object, init_value: new Object(), expr: new Float(+0.0f) }
+          - { to_type: Comparable<Float>, init_value: new Float(), expr: new Float(+0.0f) }
 
     - from_type: Double
       values:
           - { to_type: Floating, init_value: 0.0, expr: new Double(Byte.MIN_VALUE.toDouble()) }
-          - { to_type: Numeric, init_value: 0, expr: new Double(-0.0 as float) }
-          - { to_type: Object, init_value: new Object(), expr: new Double(+0.0 as float) }
-          - { to_type: Comparable<Double>, init_value: new Double(), expr: new Double(+0.0 as float) }
+          - { to_type: Numeric, init_value: 0, expr: new Double(-0.0f) }
+          - { to_type: Object, init_value: new Object(), expr: new Double(+0.0f) }
+          - { to_type: Comparable<Double>, init_value: new Double(), expr: new Double(+0.0f) }
 
     - from_type: Char
       values:

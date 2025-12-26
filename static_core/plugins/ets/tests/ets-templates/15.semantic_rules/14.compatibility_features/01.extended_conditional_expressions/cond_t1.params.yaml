@@ -50,7 +50,7 @@ cases:
     - new Byte(11)
     - new Short(1111)
     - new Int(111111)
-    - new Float(11111111.0)
+    - new Float(11111111.0f)
     - new Double(1111111111.0)
     - new Number(1e33 as number)
 

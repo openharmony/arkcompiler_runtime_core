@@ -1466,7 +1466,7 @@ export final class BigInt {
         } else {
             // (1.xxx... * 2^(exponentBits - bias))
             mantissaNum += Math.pow(2, 52);  // hidden bit
-            exponent = (exponentBits - 1023 - 52) as int;
+            exponent = (exponentBits - 1023 - 52).toInt();
         }
 
         // mantissaNum is integer <= 2^53-1

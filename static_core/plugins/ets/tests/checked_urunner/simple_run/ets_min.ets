@@ -103,12 +103,12 @@ function test_i64() : int {
 function test_f32() : int {
     if (min(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 21;
     if (min(Float.MAX_VALUE, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 22;
-    if (min(0. as float, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 23;
-    if (min(0. as float, Float.MIN_VALUE) != 0. as float) return 24;
+    if (min(0.0f, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 23;
+    if (min(0.0f, Float.MIN_VALUE) != 0.0f) return 24;
     if (min(Float.MAX_VALUE, Float.MIN_VALUE) != Float.MIN_VALUE) return 25;
-    if (min(0. as float, 2. as float) != 0. as float) return 26;
-    if (min(0. as float, -4. as float) != -4. as float) return 27;
-    if (min(1.e-10 as float, 2.e+12 as float) != 1.e-10 as float) return 28;
+    if (min(0.0f, 2.0f) != 0.0f) return 26;
+    if (min(0.0f, -4.0f) != -4.0f) return 27;
+    if (min((1.e-10).toFloat(), (2.e+12).toFloat()) != (1.e-10).toFloat()) return 28;
     if (!Float.isNaN(min(Float.NaN, Float.NaN))) return 29;
     if (!Float.isNaN(min(Float.MAX_VALUE, Float.NaN))) return 30;
 

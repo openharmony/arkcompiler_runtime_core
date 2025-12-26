@@ -23,8 +23,8 @@ cases:
       decl: |-
           let vByte: Byte = new Byte(127 as byte)
           let vInt: Int = new Int(-7)
-          let vShort: Short = new Short(0xCAFE as short)
-          let vLong: Long = new Long(0o777 as long)
+          let vShort: Short = new Short((0xCAFE).toShort())
+          let vLong: Long = new Long((0o777).toLong())
       values:
           - { from_type: 'Byte|Long', expr: vByte, eq: '===' }
           - { from_type: 'Short|Byte|Int', expr: vInt, eq: '===' }
@@ -61,8 +61,8 @@ cases:
       decl: |-
           let vByte: Byte = new Byte(127 as byte)
           let vInt: Int = new Int(-7)
-          let vShort: Short = new Short(0xCAFE as short)
-          let vLong: Long = new Long(0o777 as long)
+          let vShort: Short = new Short((0xCAFE).toShort())
+          let vLong: Long = new Long((0o777).toLong())
           let vFloat: Float = new Float(3.5f)
           let vDouble: Double = new Double(-1.1E-20)
           let vNumber: Number = new Number(1234567e8)
@@ -77,9 +77,9 @@ cases:
     - to_type: byte|short|int|long|boolean|char|float|double|bigint|string
       values:
           - { from_type: 'byte|boolean|char', ref_type: Byte, expr: '127 as byte', eq: '==' }
-          - { from_type: 'short|char|string|double', ref_type: Short, expr: '0xCAFE as short', eq: '==' }
+          - { from_type: 'short|char|string|double', ref_type: Short, expr: '(0xCAFE).toShort()', eq: '==' }
           - { from_type: 'int|boolean', ref_type: Int, expr: -7, eq: '==' }
-          - { from_type: 'long|string|long|string|boolean', ref_type: Long, expr: 0o777 as long, eq: '==' }
+          - { from_type: 'long|string|long|string|boolean', ref_type: Long, expr: '(0o777).toLong()', eq: '==' }
           - { from_type: 'char|byte|short', ref_type: Char, expr: "c'\\u5C5C'", eq: '==' }
           - { from_type: 'boolean|string', ref_type: Boolean, expr: 'false', eq: '==' }
           - { from_type: 'float|bigint', ref_type: Float, expr: 3.5f, eq: '==' }

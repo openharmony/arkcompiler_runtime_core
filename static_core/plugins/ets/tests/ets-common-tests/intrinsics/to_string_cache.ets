@@ -44,7 +44,7 @@ function parseLong(s: String): long|null {
         if (!Char.isDecDigit(ch)) {
             return null;
         }
-        let digit = (ch.toInt() - Char.toInt(c'0')) as int;
+        let digit = (ch.toInt() - Char.toInt(c'0')).toInt();
         if (negative) {
             if (result < (Long.MIN_VALUE + digit) / 10) {
                 return null;
@@ -89,8 +89,8 @@ function isEqual<T>(s: String, number: T): boolean {
         if (Float.isNaN(number)) {
             return s == 'NaN';
         }
-        let eps: float = Math.abs(number.toFloat()) * 2 * Float.EPSILON as float;
-        let parsed = Double.parseFloat(s) as float;
+        let eps: float = (Math.abs(number.toFloat()) * 2 * Float.EPSILON).toFloat();
+        let parsed = Double.parseFloat(s).toFloat();
         let delta: float = parsed - number.toFloat();
         if (Math.abs(delta) > eps) {
             console.println(`float parsed: ${parsed}, bitCastToInt: ${Float.bitCastToInt(parsed as float)} eps: ${eps} delta: ${delta}`)
@@ -114,7 +114,7 @@ class Worker<T> {
         let numbers = new Array<T>;
         for (let i = 0; i < iters; i++) {
             state = xorshift(state);
-            let randomInt = (state >>> 33) as int;
+            let randomInt = (state >>> 33).toInt();
             let index = randomInt % this.values.length;
             let value = this.values[index]!;
             let str = (value as object).toString();
@@ -143,7 +143,7 @@ const iterCount = valueCount * 3;
 function doTest<T>(values: T[], workers: int) {
     let jobs = new (Job<String> | undefined)[workers];
     for (let i = 0; i < workers; i++) {
-        let state = (i as long * 1234567) | 42;
+        let state = (i.toLong() * 1234567) | 42;
         // check only in one worker to make others faster
         let check = i == 0;
         let worker = new Worker<T>(values);
@@ -162,7 +162,7 @@ function testDoubles() {
     // console.println('testDoubles')
     let values = new Double[valueCount];
     for (let i = 0; i < valueCount; i++) {
-        let exp = (Math.random() * 2 - 1) * 310 as int
+        let exp = (Math.random() * 2 - 1) * (310).toInt()
         values[i] = Math.random() * Math.pow(10, exp);
     }
     doTest(values, workerCount);
@@ -183,8 +183,8 @@ function testFloats() {
     // console.println('testFloats');
     let values = new Float[valueCount];
     for (let i = 0; i < valueCount; i++) {
-        let exp = (Math.random() * 2 - 1) * 39 as int
-        values[i] = Math.random() * Math.pow(10, exp) as float;
+        let exp = (Math.random() * 2 - 1) * (39).toInt()
+        values[i] = (Math.random() * Math.pow(10, exp)).toFloat();
     }
     doTest(values, workerCount);
 }
@@ -195,7 +195,7 @@ function testFloatsBitcast() {
     let state = 42 as long;
     for (let i = 0; i < valueCount; i++) {
         state = xorshift(state);
-        values[i] = Float.bitCastFromInt(state as int);
+        values[i] = Float.bitCastFromInt(state.toInt());
     }
     doTest(values, workerCount);
 }

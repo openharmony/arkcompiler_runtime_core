@@ -36,10 +36,10 @@ cases:
     - { from_type: long, expr: 0 as long, to_type: Color }
 
     # from float
-    - { from_type: float, expr: +0.0.toFloat(), to_type: byte }
-    - { from_type: float, expr: +0.0.toFloat(), to_type: short }
-    - { from_type: float, expr: +0.0.toFloat(), to_type: int }
-    - { from_type: float, expr: +0.0.toFloat(), to_type: long }
-    - { from_type: float, expr: +0.0.toFloat(), to_type: boolean }
-    - { from_type: float, expr: +0.0.toFloat(), to_type: Color }
+    - { from_type: float, expr: +0.0f, to_type: byte }
+    - { from_type: float, expr: +0.0f, to_type: short }
+    - { from_type: float, expr: +0.0f, to_type: int }
+    - { from_type: float, expr: +0.0f, to_type: long }
+    - { from_type: float, expr: +0.0f, to_type: boolean }
+    - { from_type: float, expr: +0.0f, to_type: Color }
 

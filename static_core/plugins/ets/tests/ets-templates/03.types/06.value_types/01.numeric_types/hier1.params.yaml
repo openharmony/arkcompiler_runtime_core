@@ -57,7 +57,7 @@ cases:
           - { op: '<<=', val: 1280 }
           - { op: '>>=', val: 0 }
           - { op: '>>>=', val: 0 }
-    - lg: 'float = 16.0 as float'
+    - lg: 'float = 16.0f'
       sm: 'byte = 4 as byte'
       ops:
           - { op: '=', val: 4 }
@@ -106,7 +106,7 @@ cases:
           - { op: '<<=', val: 1280 }
           - { op: '>>=', val: 0 }
           - { op: '>>>=', val: 0 }
-    - lg: 'float = 16.0 as float'
+    - lg: 'float = 16.0f'
       sm: 'short = 4 as short'
       ops:
           - { op: '=', val: 4 }
@@ -140,7 +140,7 @@ cases:
           - { op: '<<=', val: 1280 }
           - { op: '>>=', val: 0 }
           - { op: '>>>=', val: 0 }
-    - lg: 'float = 16.0 as float'
+    - lg: 'float = 16.0f'
       sm: 'int = 4 as int'
       ops:
           - { op: '=', val: 4 }
@@ -159,7 +159,7 @@ cases:
           - { op: '/=', val: 4 }
           - { op: '%=', val: 0 }
 
-    - lg: 'float = 16.0 as float'
+    - lg: 'float = 16.0f'
       sm: 'long = 4 as long'
       ops:
           - { op: '=', val: 4 }
@@ -179,7 +179,7 @@ cases:
           - { op: '%=', val: 0 }
 
     - lg: 'double = 16.0 as double'
-      sm: 'float = 4 as float'
+      sm: 'float = 4.0f'
       ops:
           - { op: '=', val: 4 }
           - { op: '+=', val: 20 }

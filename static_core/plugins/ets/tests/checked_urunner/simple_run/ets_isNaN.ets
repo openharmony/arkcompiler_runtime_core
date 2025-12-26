@@ -63,7 +63,7 @@ function check_isnan_f32() : int {
     if (Float.isNaN(Float.NEGATIVE_INFINITY)) return 3;
     if (Float.isNaN(Float.MAX_VALUE)) return 4;
     if (Float.isNaN(Float.MIN_VALUE)) return 5;
-    if (Float.isNaN(1.2345 as float)) return 6;
+    if (Float.isNaN(1.2345f)) return 6;
 
     return 0;
 }

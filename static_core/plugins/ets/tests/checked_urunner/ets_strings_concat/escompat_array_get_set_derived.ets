@@ -156,7 +156,7 @@ function __noinline__testWithRandomBranch(branch: int): void {
 }
 
 function __noinline__getRandomBranch() {
-    return (Date.now() % NUM_ARRAY_BRANCHES) as int;
+    return (Date.now() % NUM_ARRAY_BRANCHES).toInt();
 }
 
 function test1(): void {

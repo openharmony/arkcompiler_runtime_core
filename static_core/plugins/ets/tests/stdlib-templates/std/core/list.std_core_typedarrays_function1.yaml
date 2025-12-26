@@ -72,7 +72,7 @@
 - {
   objectType: "Float32Array",
   type: "number",
-  primitiveType: "number",
+  primitiveType: "double",
   elementType: "float",
   cast2primitive: ".toFloat()",
   create: "",

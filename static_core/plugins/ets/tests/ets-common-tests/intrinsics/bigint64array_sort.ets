@@ -32,7 +32,7 @@ function sortEmpty(): void {
 function sortSingle(): void {
     let single: BigInt64Array = new BigInt64Array(SINGLE);
     single.sort();
-    arktest.assertEQ(single[0].getLong(), SINGLE[0] as long);
+    arktest.assertEQ(single[0].getLong(), SINGLE[0].toLong());
 }
 
 function sortNormal(): void {

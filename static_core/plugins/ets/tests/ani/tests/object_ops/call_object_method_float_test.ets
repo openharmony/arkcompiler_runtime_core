@@ -26,7 +26,7 @@ class A {
 
     public floatMethodVoidParam(): float
     {
-        return 5.0 as float;
+        return 5.0f;
     }
 
     public floatMethodMultipleParam(a0: short, a1: boolean, a2:float, a3:short, a4:float): float
@@ -63,7 +63,7 @@ final class B extends A {
 
     public subFloatMethodVoidParam(): float
     {
-        return 8.0 as float;
+        return 8.0f;
     }
 }
 

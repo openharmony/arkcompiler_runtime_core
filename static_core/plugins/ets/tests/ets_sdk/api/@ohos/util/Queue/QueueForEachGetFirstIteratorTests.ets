@@ -58,7 +58,7 @@ function testQueueForEachWithValue() {
     let forEachFlag: double = 0;
     queue.forEach((value: double) => {
         if (value != queue.pop()) {
-            forEachFlag = TestData.testNumber1;
+            forEachFlag = TestData.testNumber1.toDouble();
         }
         forEachCount++;
     });
@@ -73,7 +73,7 @@ function testQueueForEachWithValueAndIndex() {
     let forEachFlag: double = 0;
     queue.forEach((value: double, index: int) => {
         if (value != queue.pop() || index != forEachCount) {
-            forEachFlag = TestData.testNumber1;
+            forEachFlag = TestData.testNumber1.toDouble();
         }
         forEachCount++;
     });
@@ -91,7 +91,7 @@ function testQueueForEachWithAllParams() {
         let elem1 = tempQueue.getFirst();
         let elem2 = queue.pop();
         if (value != elem2 || index != forEachCount || elem1 != elem2) {
-            forEachFlag = TestData.testNumber1;
+            forEachFlag = TestData.testNumber1.toDouble();
         }
         forEachCount++;
     });

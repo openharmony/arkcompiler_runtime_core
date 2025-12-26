@@ -22,12 +22,12 @@ cases:
     - val: '[[0.0f, 2.0]]'
 
     # primitives
-    - { val: '[[0b1.toByte()]]', type: byte }
-    - { val: '[[0xF.toShort()]]', type: short}
-    - { val: '[[0o7.toInt()]]', type: int }
-    - { val: '[[new Long(-9223372036854775807)]]', type: long }
-    - { val: '[[111e11.toFloat()]]', type: float }
-    - { val: '[[222e22.toDouble()]]', type: number }
+    - { val: '[[0b1 as byte]]', type: byte }
+    - { val: '[[0xF as short]]', type: short}
+    - { val: '[[0o7 as int]]', type: int }
+    - { val: '[[-9223372036854775807 as long]]', type: long }
+    - { val: '[[(111e11).toFloat()]]', type: float }
+    - { val: '[[222e22 as double]]', type: number }
     - { val: '[[11111111111n]]', type: BigInt }
 
     # boxed

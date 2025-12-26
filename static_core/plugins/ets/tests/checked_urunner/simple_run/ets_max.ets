@@ -103,12 +103,12 @@ function test_i64() : int {
 function test_f32() : int {
     if (max(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY) != Float.POSITIVE_INFINITY) return 21;
     if (max(Float.MAX_VALUE, Float.NEGATIVE_INFINITY) != Float.MAX_VALUE) return 22;
-    if (max(0. as float, Float.NEGATIVE_INFINITY) != 0 as float) return 23;
-    if (max(0. as float, Float.MIN_VALUE) != Float.MIN_VALUE) return 24;
+    if (max((0.).toFloat(), Float.NEGATIVE_INFINITY) != 0 as float) return 23;
+    if (max((0).toFloat(), Float.MIN_VALUE) != Float.MIN_VALUE) return 24;
     if (max(Float.MAX_VALUE, Float.MIN_VALUE) != Float.MAX_VALUE) return 25;
-    if (max(0. as float, 2. as float) != 2. as float) return 26;
-    if (max(0. as float, -4. as float) != 0. as float) return 27;
-    if (max(1.e-10 as float, 2.e+12 as float) != 2.e+12 as float) return 28;
+    if (max((0).toFloat(), (2).toFloat()) != (2).toFloat()) return 26;
+    if (max((0).toFloat(), (-4).toFloat()) != (0).toFloat()) return 27;
+    if (max((1.e-10).toFloat(), (2.e+12).toFloat()) != (2.e+12).toFloat()) return 28;
     if (!Float.isNaN(max(Float.NaN, Float.NaN))) return 29;
     if (!Float.isNaN(max(Float.MAX_VALUE, Float.NaN))) return 30;
 

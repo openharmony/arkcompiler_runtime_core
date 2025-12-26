@@ -86,7 +86,7 @@ function testSymbolIteratorWithStringValues() {
     let iter = plainArray.$_iterator();
     let temp: IteratorResult<[Int, string]> = iter.next();
     while (!temp.done) {
-        let key = temp.value![0] as double;
+        let key = temp.value![0].toDouble();
         let value = temp.value![1] as string;
         arktest.assertEQ(plainArray.get(key.toInt()), value);
         temp = iter.next();
@@ -102,7 +102,7 @@ function testSymbolIteratorWithDuplicateStringValues() {
     let iter = plainArray.$_iterator();
     let temp: IteratorResult<[Int, string]> = iter.next();
     while (!temp.done) {
-        let key = temp.value![0] as double;
+        let key = temp.value![0].toDouble();
         let value = temp.value![1] as string;
         arktest.assertEQ(plainArray.get(key.toInt()), value);
         temp = iter.next();
@@ -115,7 +115,7 @@ function testSymbolIteratorWithEmptyArray() {
     let iter = plainArray.$_iterator();
     let temp: IteratorResult<[Int, string]> = iter.next();
     while (!temp.done) {
-        let key = temp.value![0] as double;
+        let key = temp.value![0].toDouble();
         let value = temp.value![1] as string;
         arktest.assertEQ(plainArray.get(key.toInt()), value);
         temp = iter.next();

@@ -25,7 +25,7 @@ function fillBuffer(buf: ArrayBuffer): void {
     arktest.assertEQ(Short.BYTE_SIZE, 2);
     for (let i = 0; i < AB_SIZE; ++i) {
         if ((i % Short.BYTE_SIZE) == 0) {
-            let v: short = UNSORTED[i / 2] as short;
+            let v: short = UNSORTED[i / 2].toShort();
             if (Runtime.isLittleEndianPlatform()) {
                 buf.set(i, v.toByte());
                 buf.set(i + 1, (v >>> 8).toByte());

@@ -29,7 +29,7 @@ function main(): int {
     if (!Float.isFinite(Float.MIN_VALUE)) {
         return 5;
     }
-    if (!Float.isFinite(1.2345 as float)) {
+    if (!Float.isFinite(1.2345f)) {
         return 6;
     }
     if (Double.isFinite(Double.NaN)) {

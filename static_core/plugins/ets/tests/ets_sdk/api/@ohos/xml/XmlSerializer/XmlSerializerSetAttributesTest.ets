@@ -43,7 +43,7 @@ function main(): int {
 function performXmlTest(
     setupCallback: (serializer: xml.XmlSerializer) => void, 
     expectedXml: string, 
-    bufferSize: number = MaxBufferLength
+    bufferSize: number = MaxBufferLength.toDouble()
 ): void {
     const arrayBuffer = new ArrayBuffer(bufferSize);
     const serializer = new xml.XmlSerializer(arrayBuffer);
