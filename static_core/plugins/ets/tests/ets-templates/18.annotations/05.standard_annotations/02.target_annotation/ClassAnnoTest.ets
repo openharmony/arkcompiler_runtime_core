@@ -85,7 +85,6 @@ export namespace app {
     }
 }
 
-@ads.AFunction
 @ads.MethodOrFunction
 @ads.ReceiverFunction
 function echo(@ads.CallParameter this: app.api.MyClass) {
