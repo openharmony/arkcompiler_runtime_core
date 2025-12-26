@@ -207,7 +207,7 @@ cases:
       type: ArrayBuffer | number
       value1: new ArrayBuffer(8)
       value2: |-
-          [object Object]
+          [object ArrayBuffer]
 
     - realType: string
       type: ArrayBuffer | string

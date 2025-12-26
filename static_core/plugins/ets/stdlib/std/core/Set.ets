@@ -144,6 +144,9 @@ export class Set<K> implements ReadonlySet<K> {
     }
 
     override toString(): String {
+        if(this.elements.size == 0) {
+            return "[object Set]"
+        }
         return "Set[" + this.toStringVals() + "]"
     }
 

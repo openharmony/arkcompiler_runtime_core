@@ -505,6 +505,9 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 
     override toString(): String {
+        if(this.sizeVal == 0) {
+            return "[object Map]"
+        }
         const strBuf = new StringBuilder()
 
         const entriesIter = this.entries()
