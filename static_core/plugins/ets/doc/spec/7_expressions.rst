@@ -4113,9 +4113,10 @@ is defined as follows:
 |                                 |                         |  let f: () => void = ...    |
 |                                 |                         |  typeof f                   |
 +---------------------------------+-------------------------+-----------------------------+
-| ``undefined``                   | "undefined"             | .. code-block:: typescript  |
+| ``undefined``, ``void``         | "undefined"             | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  typeof undefined           |
+|                                 |                         |  typeof void                |
 +---------------------------------+-------------------------+-----------------------------+
 | ``null``                        | "object"                | .. code-block:: typescript  |
 |                                 |                         |                             |
