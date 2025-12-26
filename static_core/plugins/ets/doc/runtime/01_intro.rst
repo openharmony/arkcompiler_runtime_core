@@ -23,9 +23,9 @@ module-based applications on microcontrollers and mobile devices.
 The Design Principles
 =====================
 
--  Simple and portable design
--  Minimalistic and lightweight implementation
--  Documented design, rationales, and public API
--  Buildable and tested master
--  Explicit maintenance and development process
+-  Simple and portable design,
+-  Minimalist and lightweight implementation,
+-  Documented design, rationales, and public API,
+-  Buildable and tested master,
+-  Explicit maintenance and development process.
 

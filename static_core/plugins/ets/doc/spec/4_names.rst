@@ -1059,7 +1059,7 @@ If the type of the initializer expression cannot be inferred, then a
 .. code-block:: typescript
    :linenos:
 
-    // Get boolean value unknown at compiletime
+    // Get boolean value unknown at compile time
     function cond(): boolean { return Math.random() < 0.5 ? true : false; }
 
     let a = null                // type of 'a' is null
@@ -1319,10 +1319,10 @@ Optional Parameters
         ;
 
 The first form contains an ``expression`` that specifies a *default value*.
-It is called a *parameter with default value*. The value of the parameter is set
-to the *default value* if the argument corresponding to that parameter is
-omitted in a function or a method call, or if it has *undefined* passed as an
-argument:
+It is called a *parameter with default value*, and acts as an optional parameter
+of the type of a function and of its call sites. If a corresponding argument
+value is `undefined`` (i.e., a parameter is omitted, or `undefined` is
+passed explicitly), then the default value is used:
 
 .. index::
    optional parameter
@@ -1700,11 +1700,11 @@ The syntax of *return type* is presented below:
         ':' (type | 'this')
         ;
 
-If a function, a method, or a lambda return type is other than ``void`` (see
-:ref:`Type void`) or ``undefined`` (see :ref:`Type undefined`), and the
-execution path in the function, method, or lambda body has neither a
-``return`` statement (see :ref:`Return Statements`) nor a ``throw`` statement
-(see :ref:`Throw Statements`), then a :index:`compile-time error` occurs.
+If a function, a method, or a lambda return type is other than ``void`` or
+``undefined`` (see :ref:`Types void or undefined`) , and the execution path in
+the function, method, or lambda body has neither a ``return`` statement (see
+:ref:`Return Statements`) nor a ``throw`` statement (see
+:ref:`Throw Statements`), then a :index:`compile-time error` occurs.
 
 If a function, a method, or a lambda return type is ``never`` (see
 :ref:`Type never`), and there is an execution path in which all statements
@@ -1717,7 +1717,7 @@ be used in class instance methods only (see :ref:`Methods Returning this`).
 If a function, a method, or a lambda return type is not specified, then it is
 inferred from its body (see :ref:`Return Type Inference`). If there is no body,
 then the function, method, or lambda return type is ``void`` (see
-:ref:`Type void`).
+:ref:`Types void or undefined`).
 
 
 .. code-block:: typescript

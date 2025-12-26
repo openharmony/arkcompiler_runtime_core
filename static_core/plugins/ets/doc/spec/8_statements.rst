@@ -20,9 +20,9 @@ Statements
 
 *Statements* are designed to control execution.
 
-Some statements are simple like single expressions (see
-:ref:`Expression Statements`); other statements consist of other statements, and
-take many lines of program code like :ref:`Block` or :ref:`If statements`:
+Some statements are simple like a single *expressionStatement*
+(see :ref:`Expression Statements`), while others like :ref:`Block` or
+:ref:`if Statements` take several lines of program code.
 
 .. code-block:: typescript
 
@@ -39,9 +39,13 @@ take many lines of program code like :ref:`Block` or :ref:`If statements`:
    The difference between statements and expressions is that :ref:`Expressions`
    evaluate a value of a certain type, while statements do not.
 
+   From the viewpoint of the grammar rules, any expression ending in the
+   semicolon '``;``' forms an *expressionStatement*. A missing semicolon is added
+   automatically to an expression used as a statement.
+
    A statement can consist of one or more expressions, or contain no expression
    at all. For example, the statement ``i = 1`` consists of an assignment
-   expresssion that has the inferred type ``int``, and the evaluated value
+   expression that has the inferred type ``int``, and the evaluated value
    ``'1'``.
 
 The syntax of *statements* is presented below:
@@ -183,7 +187,7 @@ until a return occurs (see :ref:`Return Statements`).
 If a block is the body of a ``functionDeclaration`` (see
 :ref:`Function Declarations`) or a ``classMethodDeclaration`` (see
 :ref:`Method Declarations`) declared implicitly or explicitly with
-return type ``void`` (see :ref:`Type void`), then the block can contain no
+return type ``void`` (see :ref:`Types void or undefined`), then the block can contain no
 return statement at all. Such a block is equivalent to one that ends in a
 ``return`` statement, and is executed accordingly.
 
@@ -258,7 +262,7 @@ surrounding scope.
     function foo (item: boolean) {
        // Here 'item' is of type 'number'
        let item: number[] = [] // Compile-time error as parameter 'item' and
-                               // local variable 'item' lead to duplciation as
+                               // local variable 'item' lead to duplication as
                                // they are in the same scope
     }
 
@@ -396,7 +400,7 @@ Loop Statements
 .. meta:
     frontend_status: Done
 
-|LANG| has four kinds of loops. A loop of each kind can be optionally labelled
+|LANG| has four kinds of loops. A loop of each kind can be optionally labeled
 with an *identifier*. The *identifier* can be used only by the
 :ref:`Break Statements` and :ref:`Continue Statements` contained in the loop body.
 
@@ -923,13 +927,13 @@ following:
 - Initializer block;
 - Constructor body;
 - Function, method, or lambda body with return type ``void`` (see
-  :ref:`Type void`);
+  :ref:`Types void or undefined`);
 
 A :index:`compile-time error` occurs if a ``return`` statement is found in:
 
 -  Top-level statements (see :ref:`Top-Level Statements`);
--  Functions or methods with return type ``void`` (see :ref:`Type void`)
-   that have an expression;
+-  Functions or methods with return type ``void`` (see
+   :ref:`Types void or undefined`) that have an expression;
 -  Functions or methods with a non-``void`` return type that have no
    expression.
 

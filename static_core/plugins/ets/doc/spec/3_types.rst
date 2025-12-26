@@ -150,8 +150,7 @@ Predefined types include the following:
 -  :ref:`Type Any`;
 -  :ref:`Type Object`;
 -  :ref:`Type never`;
--  :ref:`Type void`;
--  :ref:`Type undefined`;
+-  :ref:`Types void or undefined`;
 -  :ref:`Type null`;
 -  :ref:`Type string`;
 -  :ref:`Type bigint`;
@@ -541,10 +540,10 @@ Each numeric type has its own set of values.
 :ref:`Widening Numeric Conversions` are used in expressions
 to convert a value of a smaller type to a value of a larger type.
 
-Numeric type hierachy is defined in the following way, where the smallest type
-is ``byte``, and the largest type is ``double``:
+Numeric type hierarchy is defined in the following way:
 
-- ``byte`` < ``short`` < ``int`` < ``long`` < ``float`` < ``double``
+- ``byte`` < ``short`` < ``int`` < ``long`` < ``float`` < ``double``, where
+  the smallest type is ``byte``, and the largest type is ``double``.
 
 Type ``bigint`` does not belong to this hierarchy. No implicit conversion from
 numeric types to ``bigint`` occurs. The methods of class ``BigInt``
@@ -927,7 +926,6 @@ significant bit zero out of any two equally near representable values.
    flush to zero
    round to nearest
    rounding mode
-   denormalizaton
    denormalized number
    nearest value
    IEEE 754
@@ -1049,8 +1047,7 @@ Reference Types
 -  :ref:`Type bigint`;
 -  :ref:`Type never`;
 -  :ref:`Type null`;
--  :ref:`Type undefined`;
--  :ref:`Type void`; and
+-  :ref:`Types void or undefined`; and
 -  :ref:`Type Parameters`.
 
 .. index::
@@ -1069,9 +1066,9 @@ Reference Types
    void type
    type parameter
 
-Variables and constants (see :ref:`Variable and Constant Declarations`) of
-reference types refer to instances of any types called under the term
-*objects* in this document. 
+The term *Objects* is used further in this document to denote any instances
+pointed at by variables and constants of reference types
+(see :ref:`Variable and Constant Declarations`).
 
 Multiple references to an object are possible.
 
@@ -1080,10 +1077,9 @@ stored in its fields. A state of an object that is an array (see
 :ref:`Array Types`) or a tuple (see :ref:`Tuple Types`) is stored in
 its elements.
 
-If two variables of any type except :ref:`Value Types` contain references
-to the same object, and the state of that object is modified in the reference
-of either variable, then the state so modified can be seen in the reference of
-the other variable.
+If two variables of a reference type contain references
+to the same object, and either variable modifies the state of that object,
+then the change of the state is also visible in the other variable.
 
 .. index::
    object
@@ -1106,7 +1102,7 @@ Type ``Any``
 
 Type ``Any`` is a predefined type which is the supertype of all types. Type
 ``Any`` is a predefined *nullish-type* (see :ref:`Nullish Types`), i.e., a
-supertype of :ref:`Type void` and :ref:`Type null` in particular.
+supertype of :ref:`Types void or undefined` and :ref:`Type null` in particular.
 
 Type ``Any`` has no methods or fields.
 
@@ -1125,9 +1121,9 @@ Type ``Object``
     frontend_status: Done
 
 Type ``Object`` is a predefined class type which is the supertype
-(see :ref:`Subtyping`) of all types except :ref:`Type void`,
-:ref:`Type undefined`, :ref:`Type null`, :ref:`Nullish Types`,
-:ref:`Type Parameters`, and :ref:`Union types` that contain type parameters.
+(see :ref:`Subtyping`) of all types except :ref:`Types void or undefined`,
+:ref:`Type null`, :ref:`Nullish Types`, :ref:`Type Parameters`, and
+:ref:`Union types` that contain type parameters.
 Type ``Object`` is a subtype of type ``Any`` (see :ref:`Type Any`).
 All subtypes of ``Object`` inherit all methods of class ``Object`` (see
 :ref:`Inheritance`). All methods of class ``Object`` are described in full in
@@ -1207,13 +1203,37 @@ Type ``never`` has no instance. Type ``never`` is used as one of the following:
 
 |
 
-.. _Type void:
+.. _Types void or undefined:
 
-Type ``void``
-*************
+Types ``void`` or ``undefined``
+********************************
 
 .. meta:
     frontend_status: Done
+
+Type names ``void`` and ``undefined`` in fact refer to the same type with the
+single value named ``undefined`` (see :ref:`Undefined Literal`). 
+
+.. code-block:: typescript
+   :linenos:
+
+    function f1 (): void {
+        return undefined // OK
+    } 
+
+    function f2 (): undefined {
+        return // OK
+    } 
+
+    function f3 () {
+        return undefined // OK
+    } 
+
+    let v: void = undefined
+    let u: undefined = undefined
+    v = u // OK
+    u = v // OK
+
 
 Type ``void`` is used typically as a return type to highlight that a function, a method,
 or a lambda can contain :ref:`Return Statements` with no expression, or no
@@ -1234,37 +1254,6 @@ return statement at all:
 
     let funcTypeVariable: FunctionWithNoParametersType = (): void => {}
 
-At the same time type ``void`` is an ordinary type which can be used as
-arbitrary type annotation. Type ``void`` is a supertype of type ``undefined``
-(see :ref:`Type undefined`) and it implies the :ref:`Assignability` as follows:
-
-.. code-block-meta:
-   expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-    let x1: void = undefined // OK as undefined is a subtype of void
-    let x2: void = bar()     // OK
-    let x3: void = foo()     // OK
-    let x4       = foo()     // OK
-
-    function bar (): void {
-       return undefined    // OK as undefined is a subtype of void
-    }
-    function foo () {} // return type is void
-    
-
-.. index::
-   void type
-   undefined type
-   lambda
-   instance
-   supertype
-   value
-   return type
-   function
-   method
 
 Type ``void`` can be used as a type argument that instantiates a generic type,
 function, or method as follows:
@@ -1280,15 +1269,13 @@ function, or method as follows:
       m(): T { return this.f }
       constructor (f: T) { this.f = f }
    }
-   let a1 = new A<void>(undefined)      // ok, as undefined is a subtype of void
+   let a1 = new A<void>(undefined)      // ok, as undefined and void are the same type
    let a2 = new A<undefined>(undefined) // ok
-   let a3 = new A<void>(void)           // compile-time error: void is used as value
 
    console.log (a1.f, a2.m()) // Output is "undefined" "undefined"
 
    function foo<T>(p: T): T { return p }
    foo<void>(undefined) // ok, it returns 'undefined' value
-   foo<void>(void)      // compile-time error: void is used as value
 
    type F1<T> = () => T
    const f1: F1<void> = (): void => {}
@@ -1311,20 +1298,6 @@ function, or method as follows:
    generic type
    undefined type
 
-|
-
-.. _Type undefined:
-
-Type ``undefined``
-******************
-
-.. meta:
-    frontend_status: Done
-
-The only value of type ``undefined`` is the literal ``undefined`` (see
-:ref:`Undefined Literal`).
-
-Type ``undefined`` is a subtype of type ``void`` (see :ref:`Type void`).
 
 Using type ``undefined`` as type annotation is not recommended, except in
 nullish types (see :ref:`Nullish Types`).
@@ -1355,7 +1328,6 @@ type as follows:
    annotation
    nullish type
 
-|
 
 .. _Type null:
 
@@ -2200,6 +2172,10 @@ from.
 A :index:`compile-time error` occurs if the type in the right-hand side of a
 union type declaration leads to a circular reference.
 
+A :index:`compile-time error` occurs if the *type* is a function type (see
+:ref:`Function Types`) and is used without parenthesis around.
+
+
 .. index::
    union type
    reference type
@@ -2243,6 +2219,11 @@ Typical usage examples of *union* types are represented below:
     enum StringEnum {One = "One", Two = "Two"}
 
     type Union1 = string | StringEnum // OK, will be reduced during normalization
+
+    type Invalid = string | () => string | number // Compile-time error - function type with no parenthesis around
+    type Valid1 = string | (() => string) | number // OK
+    type Valid21 = string | (() => string | number) // OK
+
 
 .. index::
    union type
@@ -2307,32 +2288,8 @@ Literal types are represented by the following example:
 .. index::
    literal type
    predefined type
-   conversion
-
-.. note::
-   A :index:`compile-time error` occurs if an expression of a *union*
-   type is compared to a literal value or a constant that does not belong to the
-   values of the *union* type:
-
-.. code-block:: typescript
-   :linenos:
-
-    type BMW_ModelCode = "325" | "530" | "735"
-    let car_code: BMW_ModelCode = "325"
-    if (car_code == "234"){ ... }
-    /*
-       compile-time error as "234" does not belong to
-       values of literal type BMW_ModelCode
-    */
-
-    function model_code_test (code: string) {
-       if (car_code == code) { ... }
-       // This test is to be resolved during program execution
-    }
-
-
-.. index::
    union type
+   conversion
    literal value
    value
 
@@ -2375,6 +2332,8 @@ after another:
    account to the ``readonly`` type flag priority.
 #. If one type in a union is ``string``, then all string literal types (if
    any) are removed.
+#. If one type in a union is ``never``, then type ``never`` is removed.
+
 
    This procedure is performed recursively until none of the above steps can
    can be performed again.

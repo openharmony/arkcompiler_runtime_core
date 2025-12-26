@@ -126,36 +126,6 @@ is handled as a :index:`compile-time error`.
    pattern
    super
 
-The syntax of *arguments* is presented below:
-
-.. code-block:: abnf
-
-    arguments:
-        '(' argumentSequence? ')'
-        ;
-
-    argumentSequence:
-        restArgument
-        | expression (',' expression)* (',' restArgument)? ','?
-        ;
-
-    restArgument:
-        '...'? expression
-        ;
-
-The *arguments* grammar rule refers to the list of call arguments. Only
-the last argument can have the form of a spread expression (see
-:ref:`Spread Expression`).
-
-.. index::
-   argument
-   call argument
-   syntax
-   expression
-   call
-   grammar rule
-   spread expression
-
 |
 
 .. _Operators:
@@ -1276,6 +1246,16 @@ is of readonly array type.
    readonly
    array
 
+If the other type used in a context then the
+ref:`Array Type Inference from Types of Elements` is used to inference the type
+of the array literal.
+
+.. code-block:: typescript
+   :linenos:
+
+    let o: Object = [1, 2] /* Type of array literal is inferred from the type
+                              of its elements */
+
 |
 
 .. _Array Type Inference from Types of Elements:
@@ -1584,9 +1564,22 @@ field type:
     let f: Friend = {name: 123} /* compile-time error - type of right hand-side
     is not assignable to the type of the left hand-side */
 
-If some class fields have default values (see :ref:`Default Values for Types`)
-or explicit initializers (see :ref:`Variable and Constant Declarations`), then
-such fields can be skipped in the object literal.
+Only class fields that have default values (see :ref:Default Values for Types)
+or explicit initializers (see :ref:Variable and Constant Declarations) can be
+skipped in the object literal. A :index:compile-time error occurs otherwise.
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        f1: number
+        f2: string
+        f3!: Object
+    }
+    let c1: C = {f2: "xyz", f3: new Object} // OK, f1 type has a default value
+    let c2: C = {f2: "xyz"} // compile-time error, f3 value is not provided
+
+
 
 .. index::
    expression
@@ -1670,7 +1663,7 @@ object literal. Otherwise, a :index:`compile-time error` occurs:
    setter
    object literal
 
-If a class is an abstract one it can be also used with *object lietrals*:
+If a class is an abstract one it can be also used with *object literals*:
 
 .. code-block:: typescript
    :linenos:
@@ -1679,7 +1672,7 @@ If a class is an abstract one it can be also used with *object lietrals*:
         foo () : void
     }
     const a1: A = { foo() {} } // OK, foo() is properly defined
-    const a2: A = {} // compile-time error as foo() implemention is not defined
+    const a2: A = {} // compile-time error as foo() implementation is not defined
 
 *Object literal* may provide a method with override-compatible (see
 :ref:`Override-Compatible Signatures`) signature:
@@ -1696,7 +1689,7 @@ If a class is an abstract one it can be also used with *object lietrals*:
         foo (p: Drv2) {}
     }
     const a1: A = { foo(p: Base) {} } // OK, foo(p: Base) overrides both foo (p: Drv1) and foo (p: Drv2)
-    const a2: A = { foo (p: number) {} } // compile-time error as foo(p: numebr) is a new method declaration
+    const a2: A = { foo (p: number) {} } // compile-time error as foo(p: number) is a new method declaration
     const a3: A = { foo(p: Drv2) {} } // OK, foo(p: Drv2) overrides only foo (p: Drv2) but not foo (p: Drv1)
 
 
@@ -1718,12 +1711,26 @@ object literal is an anonymous class implicitly created for interface ``I``:
 
     interface Person {
       name: string
-      age: number
+      set surname(s: string)
+      get age(): number
     }
-    let b: Person = {name: "Bob", age: 25}
+    let b: Person = {name: "Bob", surname: "Doe", age: 25}
 
-In the example above, type of *b* is an anonymous class that contains the
-same fields as the interface ``I`` properties.
+In the example above, type of ``b`` is an anonymous class that contains the
+same fields as the interface ``I`` properties. An anonymous class created
+for the example above has the following fields:
+
+    - ``name: string``
+    - ``surname: string``
+    - ``age: number``
+
+If a property is defined as a getter, then the type of a field is the 
+return type of the getter. If a property is defined as a setter, 
+then the type of a field is the type of the parameter.
+If a property is defined as both a getter and a setter, then
+the parameter type of the setter must be the same as the return type
+of the getter. Otherwise, a :index:`compile-time error` occurs, as
+described in :ref:`Implementing Required Interface Properties`.
 
 .. index::
    interface type
@@ -1770,7 +1777,7 @@ interface type are public.
     p.print_name ("Alice")
 
 Any reference to ``this`` in an object literal method is a reference to
-an anonymous class (which is a subtype of the interafce) created for the
+an anonymous class (which is a subtype of the interface) created for the
 inferred interface type:
 
 .. index::
@@ -2661,11 +2668,10 @@ The syntax of *method call expression* is presented below:
 .. code-block:: abnf
 
     methodCallExpression:
-        objectReference ('.' | '?.') identifier typeArguments? arguments block?
+        objectReference ('.' | '?.') identifier typeArguments? callArguments
         ;
 
-The syntax form that has a block associated with the method call is a special
-form called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
+*Call arguments* are described in :ref:`Call Arguments`.
 
 A method call with ``'?.'`` (see :ref:`Chaining Operator`) is called a
 *safe method call* because it handles nullish values safely.
@@ -2868,11 +2874,10 @@ The syntax of *function call expression* is presented below:
 .. code-block:: abnf
 
     functionCallExpression:
-        expression ('?.' | typeArguments)? arguments block?
+        expression ('?.' | typeArguments)? callArguments
         ;
 
-A special syntactic form that contains a block associated with the function
-call is called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
+*Call arguments* are described in :ref:`Call Arguments`.
 
 A :index:`compile-time error` occurs if the expression type is one of the
 following:
@@ -2899,9 +2904,9 @@ following:
 If the operator ``'?.'`` (see :ref:`Chaining Operator`) is present, and the
 *expression* evaluates to a nullish value, then:
 
--  *Arguments* are not evaluated;
+-  *Call arguments* are not evaluated;
 -  Call is not performed; and
--  Result of *functionCallExpression* is not produced as a consequence.
+-  Result of *function call expression* is not produced as a consequence.
 
 The function call is *safe* because it handles nullish values properly.
 
@@ -2982,6 +2987,44 @@ Type of a *function call expression* is the return type of the function.
    callee
    type annotation
    return type
+
+|
+
+.. _Call Arguments:
+
+Call Arguments
+==============
+
+.. meta:
+    frontend_status: Done
+
+The syntax of *call arguments* is presented below:
+
+.. code-block:: abnf
+
+    callArguments:
+        '(' argumentSequence? ')' trailingLambda?
+        | trailingLambda
+        ;
+
+    argumentSequence:
+        expression (',' expression)* ','?
+        ;
+
+The ``callArguments`` grammar rule refers to the list of call arguments. Only
+an argument that corresponds to a *rest parameter* can be a spread expression (see
+:ref:`Spread Expression`).
+
+A special syntactic form of call arguments that contains a *trailing lambda*
+is called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
+
+.. index::
+   argument
+   call argument
+   syntax
+   expression
+   call
+   spread expression
 
 |
 
@@ -6097,13 +6140,6 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
 
 - Both operands are of :ref:`Type bigint` and have the same value;
 
-- One operand is of :ref:`Type bigint`, the other is one of :ref:`Numeric Types`,
-  and the following conditions are met:
-
-  1. Fractional part  of a ``numeric`` operand (*R = F % 1*) is *0* (zero), and
-  2. Integer part  of a ``numeric`` operand converted to ``bigint``
-     (*BigInt(F - R)*) has the same value as the ``bigint`` operand.
-
 - Both operands are of :ref:`Numeric Types` and have the same value except ``NaN``
   (see :ref:`Numeric Equality Operators` for detail) after a numeric conversion
   (see :ref:`Widening numeric conversions`,
@@ -6339,26 +6375,8 @@ operators ``'=='`` or ``'==='`` produce the value ``true``. Otherwise, the
 result is ``false``. The result produced by ``a != b`` and ``a !== b``
 is the same as the result of ``!(a == b)`` and ``!(a === b)``, respectively.
 
-A special case is where one operand in an equality operator is of type
-``bigint``, and the other operand is of type ``numeric``. In this case, not
-only the operand ``bigint`` must be compared to the result of the ``BigInt()``
-conversion of the numeric operand (thus truncating the fractional part), but
-the fractional part of the numeric operand must be also taken into account.
-
-Where the left operand *N* is of type ``bigint``, and the right operand *F* is
-of any numeric type, *R = F % 1* is the fractional part of *F*), and
-*I = BigInt(F - R)* is the integer part of *F* converted to ``bigint``, the
-result of the operator ``'=='`` or ``'==='`` produces the value ``true`` if
-*N == I*, and *R == 0*. The results produced by ``a != b`` and ``a !== b`` are
-the same as the results of ``!(a == b)`` and ``!(a === b)``, respectively.
-
-.. code-block:: typescript
-   :linenos:
-
-   console.log(2n == 2)    // true
-   console.log(2n == 2.0)  // true
-   console.log(2n == 2.5)  // false
-
+If one operand is of type ``bigint``, and the other is of a numeric type, then
+the result is ``false``.
 
 .. _Function Type Equality Operators:
 
@@ -7615,10 +7633,12 @@ If a *lambda body* is a single ``expression``, then it is handled as follows:
 
 -  Otherwise, the body is equivalent to the block: ``{ return expression }``.
 
-If *lambda signature* return type is not ``void`` (see :ref:`Type void`) or
-``never`` (see :ref:`Type never`), and the execution path of the lambda body
-has no return statement (see :ref:`Return Statements`) or no single expression
-as a body, then a :index:`compile-time error` occurs.
+If *lambda signature* return type is neither ``void`` (see
+:ref:`Types void or undefined`) nor ``never`` (see :ref:`Type never`), and the
+execution path of the lambda body has neither a return statement (see
+:ref:`Return Statements`) nor a single expression as a body, then a
+:index:`compile-time error` occurs.
+
 
 .. index::
    lambda body
@@ -7869,11 +7889,7 @@ following:
    (see :ref:`Ternary Conditional Expressions`);
 
 -  Parenthesized expressions (see :ref:`Parenthesized Expression`) that contain
-   constant expressions;
-
--  Simple names or qualified names that refer to constants (see
-   :ref:`Constant Declarations`) with constant expressions as initializers,
-   declared in the same module.
+   constant expressions.
 
 .. index::
    constant expression
@@ -7924,31 +7940,6 @@ following:
    constant expression
    initializer
    module
-
-The examples of constant expressions are presented below:
-
-.. code-block:: typescript
-   :linenos:
-
-    const a = 2
-
-    // Constant expressions:
-    1 + 2
-    a + 1
-    "aa" + "bb"
-    (a < 0) || (a > 5)
-
-.. note::
-   The following expressions are not constant expressions:
-
-   .. code-block:: typescript
-      :linenos:
-
-       let x = 2
-
-       // non-constant expressions:
-       x + 1
-       0x7f as short
 
 .. raw:: pdf
 

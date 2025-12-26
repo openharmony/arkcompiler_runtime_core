@@ -31,10 +31,10 @@ other in case of plugin-related code) can be obtained using
    panda::Class *cls = obj->ClassAddr()->GetManagedObject();
 
 We store common runtime information separately from managed object to
-give more flexebility for its layout. Disadvantage of this approach is
+give more flexibility for its layout. Disadvantage of this approach is
 that we need additional dereference to get ``panda::Class`` from mirror
 class and vice versa. But we can use composition to reduce number of
-additional dereferencies. For example:
+additional dereferences. For example:
 
 .. code:: cpp
 
@@ -66,7 +66,7 @@ Note: as ``panda::Class`` object has variable size it must be last in
 the mirror class.
 
 Such layout allows to get pointer to the ``panda::Class`` object from
-the ``coretypes::Class`` one and vice versa without dereferencies if we
+the ``coretypes::Class`` one and vice versa without dereferences if we
 know language context and it’s constant (some language specific code):
 
 .. code:: cpp

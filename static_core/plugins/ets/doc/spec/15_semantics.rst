@@ -1680,9 +1680,9 @@ The current version of |LANG| allows inferring return types at least under
 the following conditions:
 
 -  If there is no return statement, or if all return statements have no
-   expressions, then the return type is ``void`` (see :ref:`Type void`). It
-   effectively implies that a call to a function, method, or lambda returns
-   the value ``undefined``.
+   expressions, then the return type is ``void`` (see
+   :ref:`Types void or undefined`). It effectively implies that a call to a
+   function, method, or lambda returns the value ``undefined``.
 -  If there are *k* return statements (where *k* is 1 or more) with
    the same type expression *R*, then ``R`` is the return type.
 -  If there are *k* return statements (where *k* is 2 or more) with
@@ -2771,6 +2771,7 @@ the superinterface, then the following semantic rules apply:
    }
 
 
+
 If more than one method of the subinterface overrides the same method of the
 superinterface a :index:`compile-time error` occurs.
 
@@ -3121,9 +3122,6 @@ declaration scope are *implicitly overloaded*.
    A :index:`compile-time error` occurs if the names of an imported function
    and of a function declared in the current module are the same.
 
-A :index:`compile-time error` occurs if signatures of two implicitly overloaded
-functions are *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`).
-
 When calling an overloaded function (see :ref:`Function Call Expression`),
 :ref:`Overload Resolution` is used to determine exactly which function must be
 called.
@@ -3151,17 +3149,29 @@ called.
    overload set
    call
 
-Instantiation of a generic function can cause a :index:`compile-time error`
-if it leads to a function that is *overload-equivalent* to other function:
+If signatures of two non-generic implicitly overloaded functions are
+overload-equivalent (see :ref:Overload-Equivalent Signatures), then a
+:index:compile-time error occurs. However, an implicit overload with
+instantiation of a generic and overload-equivalent non-generic
+function causes no compile-time error, and the textually first function is
+used:
 
 .. code-block:: typescript
    :linenos:
 
+     function goo(x: int): void {}
+     function goo(x: int): void {}  // compile-time error, overload-equivalent 
+                                    // non-generic functions
+
      function foo<T>(x: T) {}
      function foo(x: number) {}
 
-     // This instantiation leads to two *overload-equivalent* functions:
-     foo<number>(1)
+     foo(1)   // OK, instance of foo<T>() with T=number called
+
+     function bar(x: number) {}
+     function bar<T>(x: T) {}
+
+     bar(1)   // OK, plain bar() called
 
 |
 
@@ -3237,19 +3247,23 @@ called.
     c.foo("5") // method marked #2 is called
 
 If an instantiation of a generic class or a generic interface leads to an
-*overload-equivalent* method, then a :index:`compile-time error` occurs
-as follows:
+*overload-equivalent* method, then the textually first method is called:
 
 .. code-block:: typescript
    :linenos:
 
      class Template<T> {
-        foo (p: number) { ... }
-        foo (p: T) { ... }
+        foo (p: T) { console.log("generic foo") }
+        foo (p: number) { console.log("plain foo") }
+        bar (p: number) { console.log("plain bar") }
+        bar (p: T) { console.log("generic bar") }
      }
 
      // This instantiation leads to two *overload-equivalent* methods
-     let instantiation: Template<number>
+     let instantiation: Template<number> = new Template<number>
+
+     instantiation.foo(1)  // prints 'generic foo'
+     instantiation.bar(1)  // prints 'plain bar'
 
 |
 
@@ -3815,7 +3829,7 @@ Overload Set at Method Call
 ===========================
 
 Additional processing of an *overload set* is used at
-:ref:`Method Call Expression` because an identifer at the call site can denote
+:ref:`Method Call Expression` because an identifier at the call site can denote
 both *instance methods* and :ref:`Functions with Receiver`.
 
 If the identifier at the call expression denotes *functions with receiver*
@@ -4030,6 +4044,13 @@ Type mapping determines the *effective types* as follows:
        number of element types *n*.
    * - :ref:`String Literal Types`
      - ``string``
+   * - undefined
+     - ``undefined``
+   * - null
+     - ``null``
+   * - Any
+     - ``Any``
+
 
 Otherwise, the original type is *preserved*.
 

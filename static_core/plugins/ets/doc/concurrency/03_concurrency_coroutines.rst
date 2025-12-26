@@ -70,7 +70,7 @@ All coroutines in an application forms a forest
 where each coroutine is a node of some tree.
 The topmost coroutine of a tree is called *root coroutine*.
 
-Each corroutine except *root corutine* has a parent, i.e., a coroutine in
+Each coroutine except *root coroutine* has a parent, i.e., a coroutine in
 which the coroutine is created.
 
 In general, the following root coroutines exist:
@@ -103,7 +103,7 @@ For async functions lifetime is limited to the lifetime of root coroutine for co
 Threads Structure and Types of Coroutines
 -----------------------------------------
 
-In |LANG| VM we have M:N scheduling, i.e., for M coroutines execution N OS-threads are used. The only special thread is `main Thread` and it is always exist. At start we have main Jcoroutine (it is the default main context for execution of JS code) and main Acoroutine(it is default main context for execution of |LANG| code) running on it.
+In |LANG| VM we have M:N scheduling, i.e., for M coroutines execution N OS-threads are used. The only special thread is `main Thread` and it is always exist. At start we have main Jcoroutine (it is the default main context for execution of JS code) and main Acoroutine (it is default main context for execution of |LANG| code) running on it.
 
 We have different types of coroutines in |LANG|:
 
@@ -128,7 +128,7 @@ Coroutine affinity is described in the table below:
   Jcoroutine       Main, EA           root coroutine    |JS| / |TS| interop |LANG| -> |JS| / |TS|, or directly from |JS| / |TS|
   Main Acoroutine  Main               main thread       |LANG|      interop |JS| / |TS| -> |LANG|
   Acoroutine       Main, General, EA  \-                |LANG|      from main Acoroutine via launch
-  AJcoroutine      Main, General, EA  parent coroutine  |LANG|      from Acoroutine(any) via call of ``async`` function
+  AJcoroutine      Main, General, EA  parent coroutine  |LANG|      from Acoroutine (any) via call of ``async`` function
   ================ ================== ================= =========== ===========================================================
 
 .. note::

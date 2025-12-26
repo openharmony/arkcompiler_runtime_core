@@ -179,6 +179,8 @@ A :index:`compile-time error` occurs if:
 -  `typeReference`` in the ``extends`` clause refers directly to, or is an
    alias of non-interface type.
 -  Interface type named by ``typeReference`` is not :ref:`Accessible`.
+-  Current interface is exported but the ``typeReference`` refers to a
+   non-exported one.
 -  Type arguments (see :ref:`Type Arguments`) of ``typeReference`` denote a
    parameterized type that is not well-formed (see
    :ref:`Generic Instantiations`).
@@ -301,6 +303,12 @@ Otherwise, a :index:`compile-time error` occurs.
     }
     interface II3 extends II1, II2 {}
         // foo() from II1 overrides foo() from II2
+
+
+    interface BI {}
+    export interface DI extends BI {}
+         /* Compile-time error as the derived interface is exported
+            while the base one is not */
 
 .. index::
    interface
@@ -701,6 +709,7 @@ superinterface of *I*.
    superinterface
    private method
    signature
+
 
 The same scheme applies to properties and accessors:
 

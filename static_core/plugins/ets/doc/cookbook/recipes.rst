@@ -2363,7 +2363,7 @@ classes to achieve that same behavior.
 .. code-block:: typescript
 
     with (Math) { // Compile-time error, but JavaScript code still can be
-                  // emitted (depends on TS strict type checking serttings)
+                  // emitted (depends on TS strict type check settings)
         let r: number = 42
         console.log("Area: ", PI * r * r)
     }
@@ -2494,9 +2494,8 @@ explicitly.
 
 |CB_ERROR|
 
-|LANG| Does not support destructuring in parameters.
-Parameters must be passed to the function directly, and local names must be
-assigned manually.
+|LANG| does not support parameter destructuring. Parameters must be passed to
+the function directly, and local names must be assigned manually.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2785,8 +2784,8 @@ appropriate type before use.
 
 .. _R099:
 
-|CB_R| Only arrays or classes derived from arrays can be spread into the rest parameter or array literals
----------------------------------------------------------------------------------------------------------
+|CB_R| Only arrays, tuples or objects with iteators can be spread into the rest parameter or array literals
+-----------------------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-spread``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2796,47 +2795,87 @@ appropriate type before use.
 
 |CB_ERROR|
 
-|LANG| supports the scenario in which the spread operator spreads an array and
-tuples (or class derived from an array) into a rest parameter, an array, or a
-tuple literal. Otherwise, *unpack* data from arrays and objects manually, where
-necessary. |LANG| also supports all typed arrays from the standard library
-(e.g., ``Int32Array``).
+The |TS| supports a wide number of scenarios where
+the *spread operator* can be used. In  |LANG|, the *spread expression* can be
+used only within an array literal or in argument passing, and the expression
+must be of  array type, tuple type, or a type with an iterator defined. When
+porting legacy |TS| code to |LANG|, you must rework such unsupported scenarios,
+for example, by unpacking data manually.
 
 |CB_BAD|
 ~~~~~~~~
 
 .. code-block:: typescript
 
-    function foo(x: number, y: number, z: number) {
-        console.log(x, y, z)
+    // OK, function receivig array of numbers into `rest`
+    function sum(...data: number[])  {
+        let d : number = 0
+        for (let n of data) {
+           d += n
+        }
+        console.log("Sum is ", d )
     }
 
-    let list1 = [1, 2]
-    let list2 = [...list1, 3, 4]
+    let list1: number[] = [1, 2]
 
-    let point2d = {x: 1, y: 2}
-    let point3d = {...point2d, z: 3}
+    // OK, spread array into literal
+    let list2: number[] = [...list1, 3, 4]
+
+    let t: [number, number] = [3, 4]
+    // OK, spread array and tuple into array literal
+    let list3 = [ ...list1, ...t ]
+
+    // OK, put numbers into `rest` directly
+    sum(0, 1)
+
+    // OK, spread arrays into `rest`
+    sum(...list1)
+    sum(...list2)
+    sum(...list3)
+
+    // TS - OK, ArkTS - compile-time error - extend layout of class
+    let p2d = {x: 1, y: 2}
+    let p3d = {...p2d, z: 3}
+    console.log(p3d.x, p3d.y, p3d.z)
+
 
 |CB_OK|
 ~~~~~~~
 
 .. code-block:: typescript
 
-    function sum_numbers(...numbers: number[]): number {
-        let res = 0
-        for (let n of numbers)
-            res += n
-        return res
-    }
-    console.log(sum_numbers(1, 2, 3))
-
-    function log_numbers(x: number, y: number, z: number) {
-        console.log(x, y, z)
+    // OK, function receivig array of numbers into `rest`
+    function sum(...data: number[])  {
+        let d : number = 0
+        for (let n of data) {
+           d += n
+        }
+        console.log("Sum is ", d )
     }
 
     let list1: number[] = [1, 2]
-    let list2: number[] = [list1[0], list1[1], 3, 4]
 
+    // OK, spread array into literal
+    let list2: number[] = [...list1, 3, 4]
+
+    let t: [number, number] = [3, 4]
+    // OK, spread array and tuple into array literal
+    let list3 = [ ...list1, ...t ]
+
+    // OK, put numbers into `rest` directly
+    sum(0, 1)
+
+    // OK, spread arrays into `rest`
+    sum(...list1)
+    sum(...list2)
+    sum(...list3)
+
+    // TS - OK, ArkTS - compile-time error - extend layout of class
+    // let p2d = {x: 1, y: 2}
+    // let p3d = {...p2d, z: 3}
+    // console.log(p3d.x, p3d.y, p3d.z)
+
+    // TS - OK, ArkTS - OK: extending layout revised using inheritance
     class Point2D {
         x: number = 0; y: number = 0
     }
@@ -2852,13 +2891,6 @@ necessary. |LANG| also supports all typed arrays from the standard library
 
     let p3d = new Point3D({x: 1, y: 2} as Point2D, 3)
     console.log(p3d.x, p3d.y, p3d.z)
-
-    class DerivedFromArray extends Uint16Array {}
-
-    let arr1 = [1, 2, 3]
-    let arr2 = new Uint16Array([4, 5, 6])
-    let arr3 = new DerivedFromArray([7, 8, 9])
-    let arr4 = [...arr1, 10, ...arr2, 11, ...arr3]
 
 .. _R102:
 
@@ -3554,9 +3586,9 @@ they are considered an excessive compiler hint.
 Use declaration with initialization instead.
 
 .. note::
-    |LANG| uses ``!:`` for requesting class fields late initialization,
-    the check that entity was initialized is performed at runtime on read
-    operation.
+   |LANG| uses ``!:`` to request late initialization of class fields.
+   A check of an entity initialization is performed on a ``read`` operation
+   at runtime.
 
 |CB_BAD|
 ~~~~~~~~
@@ -4303,8 +4335,8 @@ not a value in the language.
 
 |CB_ERROR|
 
-All ``import`` statements in |LANG| must precede any other statements in
-a program.
+All ``import`` directives in |LANG| must precede any other directives,
+declarations and statements in a program.
 
 |CB_BAD|
 ~~~~~~~~
@@ -5608,14 +5640,14 @@ identifiers.
 
 .. code-block:: typescript
 
-    let foo(internal: number) {}
+    function foo(internal: number) {}
 
 |CB_OK|
 ~~~~~~~
 
 .. code-block:: typescript
 
-    let foo(internal_param: number) {}
+    function foo(internal_param: number) {}
 
 
 .. _R228:
@@ -5715,15 +5747,16 @@ specified for a certain ``loop`` statement.
 .. code-block:: typescript
 
     type Point = { x: number; y: number };
-    type P = keyof Point;
+    type P = keyof Point
 
 |CB_OK|
 ~~~~~~~
 
 .. code-block:: typescript
 
-    type Point = { x: number; y: number };
-    type P = "x" || "y"
+    class CPoint { x: number; y: number };
+    type Point = CPoint
+    type P = "x" | "y"
 
 .. _R230:
 
@@ -6122,53 +6155,6 @@ fixed implementation.
         callback2(): void {}
     }
 
-
-.. _R237:
-
-|CB_R| Implementation signature must have a predefined form
------------------------------------------------------------
-
-|CB_RULE| ``arkts-no-arbitrary-implementation-signature``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: ImplementationSignatureForm
-
-|CB_ERROR|
-
-An implementation signature must have a predefined form.
-
-|LANG| enforces any implementation signature to have the most general
-form: method_of_function_name (...parameter: Any[]): Any
-
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    interface I {
-        foo (p: number): void
-        foo (p: string): void
-    }
-
-    class C implements I {
-        foo (p: number|string): void {}
-    }
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    interface I {
-        foo (p: number): void
-        foo (p: string): void
-    }
-
-    class C implements I {
-        foo (...p: Any[]): Any {}
-    }
 
 .. _R238:
 

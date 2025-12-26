@@ -289,7 +289,7 @@ Annotations can be applied to the following:
 
 - :ref:`Top-Level Declarations`;
 
-- Class members (see :ref:`Class Members`) except overriden fields
+- Class members (see :ref:`Class Members`) except overridden fields
   (see :ref:`Override Fields and Implement Properties`);
 
 - Interface members (see :ref:`Interface Members`);
@@ -495,15 +495,18 @@ Unqualified import is also allowed:
     @MyAnno
     class C {/*body*/}
 
-An annotation is not a type. Using ``export type`` or ``import type`` notations
-to export or import annotations is forbidden:
+Any annotation declaration does not define a type, thus using ``export type``
+or ``import type`` notations to export or import annotations leads to a 
+:index:`compile-time error`:
 
 .. code-block:: typescript
    :linenos:
 
     import type { MyAnno } from "./a" // compile-time error
 
-Annotations are forbidden in the following cases:
+
+Also a :index:`compile-time error` occurs if annotations are used in the
+following cases:
 
 - Export default,
 

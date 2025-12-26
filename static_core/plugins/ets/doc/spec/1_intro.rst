@@ -293,8 +293,7 @@ sequence of *expressions* separated by the terminal symbol ``','``. The
 sequence must have at least one *expression*. The list is optionally
 terminated by the terminal symbol ``','``.
 
-All grammar rules are presented in the Grammar section (see
-:ref:`Grammar Summary`) of this Specification.
+All grammar rules are presented in :ref:`Grammar Summary` of this Specification.
 
 .. index::
    structuring rule
@@ -322,14 +321,14 @@ as used in other languages, application areas, or industries.
 
    compile-time warning
      -- a text message displayed by the compiler if a program code is found
-     to have some logical inconsistencies, and it is recommended that the
-     programmer reconsiders the design and actual coding.
+     to have some logical inconsistencies, and a programmer is recommended to
+     reconsider design and actual coding.
 
    expression
-     -- a formula for calculating values. An expression has the syntactic
-     form that is a composition of operators and parentheses, where
-     parentheses are used to change the order of calculation. The default order
-     of calculation is determined by operator preferences.
+     -- a formula for calculating values. The syntactic form of an expression
+     is a composition of operators and parentheses, where parentheses are used
+     to change the order of calculation. The default order of calculation is
+     determined by operator preferences.
 
    operator (in programming languages)
      -- the term can have several meanings as follows:
@@ -342,7 +341,7 @@ as used in other languages, application areas, or industries.
      one or more operands.
 
      In unary operators that have a single operand, the operator sign can be
-     placed either in front of or after an operand (*prefix* and *postfix*
+     placed either before or after an operand (*prefix* and *postfix*
      unary operator respectively).
 
      If both operands are available, then the operator sign can be placed
@@ -355,8 +354,8 @@ as used in other languages, application areas, or industries.
      Some languages treat operators as *syntactic sugar*, i.e., a conventional
      version of a more common construct or *function call*. Therefore,
      an operator like ``a+b`` is conceptually handled as the call ``+(a,b)``,
-     where the operator sign plays the role of a function name, and the operands
-     are function call arguments.
+     where the operator sign acts as a function name, and the operands as
+     function call arguments.
 
    operation sign
      -- a language token that signifies an operator and conventionally
@@ -369,8 +368,8 @@ as used in other languages, application areas, or industries.
    operand
      -- an argument of an operation. Syntactically, operands have the form of
      simple or qualified identifiers that refer to variables or members of
-     structured objects. In turn, operands can be operators whose preferences
-     ('priorities') are higher than the preference of a given operator.
+     structured objects. In turn, operands can be operators with preferences
+     ('priorities') higher than those of a given operator.
 
    operation
      -- an informal notion that signifies an action or a process of operator
@@ -431,7 +430,7 @@ as used in other languages, application areas, or industries.
      that can hold values of type ``T`` and its derived types.
 
    nullish value
-     -- a reference which is null or undefined.
+     -- a reference that is null or undefined.
 
    simple name
      -- a name that consists of a single identifier.
@@ -441,8 +440,8 @@ as used in other languages, application areas, or industries.
      token ``'.'``.
 
    name scope
-     -- a region of program code within which an entity---as declared by
-     that name---can be accessed or referred to by its simple name without
+     -- a region of program code within which an entity (as declared by
+     that name) can be accessed or referred to by its simple name without
      any qualification.
 
    function declaration
@@ -458,7 +457,7 @@ as used in other languages, application areas, or industries.
      -- see *terminal symbol*.
 
    nonterminal symbol
-     -- a syntactically variable token that results from the successive
+     -- a syntactically variable token that results from a successive
      application of production rules.
 
    context-free grammar
@@ -469,8 +468,8 @@ as used in other languages, application areas, or industries.
      -- see *nonterminal symbol*.
 
    keyword
-     -- one of *reserved words* that have their meanings permanently predefined
-     in the language.
+     -- one of the *reserved words* that have their meanings permanently
+     predefined in the language.
 
    variable
      -- see *variable declaration*.
@@ -483,34 +482,34 @@ as used in other languages, application areas, or industries.
      -- see *constant declaration*.
 
    constant declaration
-     -- declaration that introduces a new variable to which an immutable
+     -- a declaration that introduces a new variable to which an immutable
      initial value can be assigned only once at the time of instantiation.
 
    grammar
-     -- set of rules that describe what possible sequences of terminal and
+     -- a set of rules that describe what possible sequences of terminal and
      nonterminal symbols a programming language interprets as correct.
 
      Grammar is a range of productions. Each production comprises an
      abstract symbol (nonterminal) as its left-hand side, and a sequence
      of nonterminal and terminal symbols as its right-hand side.
-     Each production contains the characters ``':'`` as a separator between the
-     left- and right-hand sides, and ``';'`` as the end marker.
+     Each production contains the character ``':'`` as a separator between the
+     left- and right-hand sides, and the character ``';'`` as the end marker.
 
    production
      -- a sequence of terminal and nonterminal symbols that a programming
      language interprets as correct.
 
    white space
-     -- lexical input elements that separates tokens from one another in order
+     -- lexical input elements that separate tokens from one another in order
      to improve the source code readability and avoid ambiguities.
 
    widening conversion
-     -- a conversion that causes no loss of information about the overall
+     -- a conversion causing no loss of information about the overall
      magnitude of a numeric value.
 
    narrowing conversion
-     -- a conversion that can cause a loss information about the overall
-     magnitude of a numeric value, and potentially a loss of precision
+     -- a conversion causing a loss of information about the overall
+     magnitude of a numeric value, and a potential loss of precision
      and range.
 
    function types conversion
@@ -525,8 +524,8 @@ as used in other languages, application areas, or industries.
      return types.
 
    abstract declaration
-     -- an ordinary interface method declaration that specifies the method’s name
-     and signature.
+     -- an ordinary interface method declaration that specifies the name
+     and signature of a method.
 
    overloading
      -- a language feature that allows using a single name to call several
@@ -543,13 +542,13 @@ as used in other languages, application areas, or industries.
      It can be accessed outside the namespace if exported.
 
    class level scope
-     -- a name that is declared inside a class, and is accessible inside the
-     class and sometimes outside that class by means of an access modifier, or
-     via a derived class).
+     -- a name that is declared inside a class. It is accessible inside
+     and sometimes outside the class by means of an access modifier or
+     a derived class.
 
    interface level scope
      -- a name declared inside an interface is considered to have interface
-     level scope, and is accessible inside and outside the interface.
+     level scope. It is accessible inside and outside the interface.
 
    function type parameter scope
      -- a scope of a type parameter name in a function declaration.
@@ -575,7 +574,7 @@ as used in other languages, application areas, or industries.
      a qualified name notation (qualification is the name of a class).
 
    linearization
-     -- de-nesting of all nested types in a union type to present them in
+     -- de-nesting of all nested types of a union type to present them in
      the form of a flat line that includes no more union types.
 
    fit into (v.)
@@ -598,11 +597,11 @@ as used in other languages, application areas, or industries.
      component.
 
    array length
-     -- the number of elements in a resizable array.
+     -- a number of elements in a resizable array.
 
    resizable array type
      -- a built-in type that consists of more than one element, and can have
-     the number of constituent elements changed at runtime.
+     its number of constituent elements changed at runtime.
 
    fixed-size array type
      -- a built-in type that consists of more than one element, and has its

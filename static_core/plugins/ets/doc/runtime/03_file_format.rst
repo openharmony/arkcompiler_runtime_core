@@ -162,7 +162,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``utf1 6_length``
      - ``uleb128``
@@ -188,7 +188,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``t ag_value``
      - ``uint8_t``
@@ -251,7 +251,7 @@ Field Access Flags
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``ACC_PUBLIC``
      - ``0x0001``
@@ -304,7 +304,7 @@ Method Access Flags
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``ACC_PUBLIC``
      - ``0x0001``
@@ -365,7 +365,7 @@ Class Access Flags
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``ACC_PUBLIC``
      - ``0x0001``
@@ -442,7 +442,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``magic``
      - ``uint8_t[8]``
@@ -547,7 +547,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``start_off``
      - ``uint32_t``
@@ -627,7 +627,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``class_idx``
      - ``uint16_t``
@@ -671,7 +671,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``class_idx``
      - ``uint16_t``
@@ -717,7 +717,7 @@ FieldTag
      - Tag
      - Quantity
      - Data Format
-     - Descrition
+     - Description
 
    * - ``NOTHING``
      - ``0x00``
@@ -819,7 +819,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``class_idx``
      - ``uint16_t``
@@ -863,7 +863,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``class_idx``
      - ``uint16_t``
@@ -910,7 +910,7 @@ MethodTag
      - Tag
      - Quantity
      - Data Format
-     - Descrition
+     - Description
 
    * - ``NOTHING``
      - ``0x00``
@@ -1012,7 +1012,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``name``
      - ``String``
@@ -1034,7 +1034,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``name``
      - ``String``
@@ -1091,7 +1091,7 @@ ClassTag
      - Tag
      - Quantity
      - Data Format
-     - Descrition
+     - Description
 
    * - ``NOTHING``
      - ``0x00``
@@ -1170,7 +1170,7 @@ Alignment: none
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``num_literals``
      - ``uint32_t``
@@ -1196,7 +1196,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``shorty``
      - ``uint16_t[]``
@@ -1282,7 +1282,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``num_vregs``
      - ``uleb128``
@@ -1324,7 +1324,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``start_pc``
      - ``uleb128``
@@ -1361,7 +1361,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``type_idx``
      - ``uleb128``
@@ -1397,7 +1397,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``class_idx``
      - ``uint16_t``
@@ -1490,7 +1490,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``name_off``
      - ``uint32_t``
@@ -1517,7 +1517,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``count``
      - ``uint32_t``
@@ -1546,7 +1546,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``count``
      - ``uint32_t``
@@ -1639,7 +1639,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``value``
      - ``uint8_t[4]``
@@ -1661,7 +1661,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``value``
      - ``uint8_t[8]``
@@ -1683,7 +1683,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``value``
      - ``uint32_t``
@@ -1704,7 +1704,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``value``
      - ``uint32_t``
@@ -1726,7 +1726,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``value``
      - ``uint32_t``
@@ -1748,7 +1748,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``value``
      - ``uint32_t``
@@ -1769,7 +1769,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``value``
      - ``uint32_t``
@@ -1791,7 +1791,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``value``
      - ``uint32_t``
@@ -1812,7 +1812,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``value``
      - ``uint32_t``
@@ -1833,7 +1833,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``count``
      - ``uleb128``
@@ -1933,7 +1933,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``offsets``
      - ``uint32_t[]``
@@ -1963,7 +1963,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``offsets``
      - ``uint32_t[]``
@@ -1990,7 +1990,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``types``
      - ``FieldType[]``
@@ -2018,7 +2018,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``offsets``
      - ``uint32_t[]``
@@ -2046,7 +2046,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``offsets``
      - ``uint32_t[]``
@@ -2074,7 +2074,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``offsets``
      - ``uint32_t[]``
@@ -2101,7 +2101,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``offsets``
      - ``uint32_t[]``
@@ -2131,7 +2131,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``line_start``
      - ``uleb128``
@@ -2195,7 +2195,7 @@ the following registers:
 
    * - Name
      - Initial Value
-     - Descrition
+     - Description
 
    * - ``address``
      - 0
@@ -2294,7 +2294,7 @@ requires the value to be read from the constant pool.
        Register value ``-1`` signifies the accumulator register.
        The name is an offset to `String <#String>`__, the type is an offset to
        `ForeignClass <#foreign class>`__ or `Class <#class>`__, and the
-       signature is an offset to TODO: figure out what are signatures.If
+       signature is an offset to TODO: figure out what are signatures. If
        offset is ``0``, then the corresponding in formation is missing.
 
    * - ``END_LOCAL``
@@ -2393,7 +2393,7 @@ Format:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``type``
      - ``uint8_t``
@@ -2419,7 +2419,7 @@ The types available for a method handle are as follows:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``PUT_STATIC``
      - ``0x00``
@@ -2489,7 +2489,7 @@ A bootstrap method can accept static arguments of the following types:
 
    * - Name
      - Format
-     - Descrition
+     - Description
 
    * - ``Integer``
      - ``0x00``
