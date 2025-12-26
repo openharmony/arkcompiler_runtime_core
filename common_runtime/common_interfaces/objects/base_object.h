@@ -58,14 +58,20 @@ public:
         return GetOperator()->IsValidObject(this);
     }
 
-    void ForEachRefField(const RefFieldVisitor &visitor)
+    void ForEachRefField(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler)
     {
-        GetOperator()->ForEachRefField(this, visitor);
+        GetOperator()->ForEachRefField(this, fieldHandler, weakFieldHandler);
     }
 
-    size_t ForEachRefFieldAndGetSize(const RefFieldVisitor &visitor)
+    size_t ForEachRefFieldAndGetSize(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler)
     {
-        return GetOperator()->ForEachRefFieldAndGetSize(this, visitor);
+        return GetOperator()->ForEachRefFieldAndGetSize(this, fieldHandler, weakFieldHandler);
+    }
+
+    // Clear the specified field
+    void ClearRef(RefField<> &field)
+    {
+        GetOperator()->ClearRef(field);
     }
 
     inline BaseObject *GetForwardingPointer() const

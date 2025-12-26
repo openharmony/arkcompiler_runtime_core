@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,7 +143,7 @@ static void MarkingRefField(BaseObject *obj, BaseObject *targetObj, RefField<> &
                             ParallelLocalMarkStack &markStack, RegionDesc *targetRegion);
 // note each ref-field will not be marked twice, so each old pointer the markingr meets must come from previous gc.
 static void MarkingRefField(BaseObject *obj, RefField<> &field, ParallelLocalMarkStack &markStack,
-                            WeakStack &weakStack, const GCReason gcReason)
+                            const GCReason gcReason)
 {
     RefField<> oldField(field);
     BaseObject* targetObj = oldField.GetTargetObject();
@@ -155,14 +155,6 @@ static void MarkingRefField(BaseObject *obj, RefField<> &field, ParallelLocalMar
     DCHECK_CC(Heap::IsHeapAddress(targetObj));
 
     auto targetRegion = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>((void*)targetObj));
-    if (gcReason != GC_REASON_YOUNG && oldField.IsWeak()) {
-        DLOG(TRACE, "marking: skip weak obj when full gc, object: %p@%p, targetObj: %p", obj, &field, targetObj);
-        // weak ref is cleared after roots pre-forward, so there might be a to-version weak ref which also need to be
-        // cleared, offset recorded here will help us find it
-        weakStack.emplace_back(&field, reinterpret_cast<uintptr_t>(&field) - reinterpret_cast<uintptr_t>(obj));
-        return;
-    }
-
     // cannot skip objects in EXEMPTED_FROM_REGION, because its rset is incomplete
     if (gcReason == GC_REASON_YOUNG && !targetRegion->IsInYoungSpace()) {
         DLOG(TRACE, "marking: skip non-young object %p@%p, target object: %p<%p>(%zu)",
@@ -191,20 +183,45 @@ static void MarkingRefField(BaseObject *obj, BaseObject *targetObj, RefField<> &
     markStack.Push(targetObj);
 }
 
+// GC passes this function to ObjectOperator::ForEachRefField.
+// ObjectOperator must call it for reference fields of WeakRef objects.
+// Its responcibility of ObjectOperator to determine whether 'obj' is kind of WeakRef or not.
+static void MarkWeakRefField(BaseObject *obj, RefField<> &field, WeakStack &weakStack, const GCReason gcReason)
+{
+    RefField<> oldField(field);
+    BaseObject* targetObj = oldField.GetTargetObject();
+
+    if (gcReason == GC_REASON_YOUNG) {
+        return;
+    }
+
+    if (!Heap::IsTaggedObject(oldField.GetFieldValue())) {
+        return;
+    }
+    // field is tagged object, should be in heap
+    DCHECK_CC(Heap::IsHeapAddress(targetObj));
+    DLOG(TRACE, "marking: skip weak obj when full gc, object: %p@%p, targetObj: %p", obj, &field, targetObj);
+    // weak ref is cleared after roots pre-forward, so there might be a to-version weak ref which also need to be
+    // cleared, offset recorded here will help us find it
+    weakStack.emplace_back(&field, reinterpret_cast<uintptr_t>(&field) - reinterpret_cast<uintptr_t>(obj));
+}
+
 MarkingCollector::MarkingRefFieldVisitor ArkCollector::CreateMarkingObjectRefFieldsVisitor(
     ParallelLocalMarkStack &markStack, WeakStack &weakStack)
 {
     MarkingRefFieldVisitor visitor;
 
+    auto func = [obj = visitor.GetClosure(), &markStack](RefField<> &field) {
+        const GCReason gcReason = GCReason::GC_REASON_YOUNG;
+        MarkingRefField(*obj, field, markStack, gcReason);
+    };
+    visitor.SetVisitor(func);
     if (gcReason_ == GCReason::GC_REASON_YOUNG) {
-        visitor.SetVisitor([obj = visitor.GetClosure(), &markStack, &weakStack](RefField<> &field) {
-            const GCReason gcReason = GCReason::GC_REASON_YOUNG;
-            MarkingRefField(*obj, field, markStack, weakStack, gcReason);
-        });
+        visitor.SetWeakVisitor(func);
     } else {
-        visitor.SetVisitor([obj = visitor.GetClosure(), &markStack, &weakStack](RefField<> &field) {
+        visitor.SetWeakVisitor([obj = visitor.GetClosure(), &weakStack](RefField<> &field) {
             const GCReason gcReason = GCReason::GC_REASON_HEU;
-            MarkingRefField(*obj, field, markStack, weakStack, gcReason);
+            MarkWeakRefField(*obj, field, weakStack, gcReason);
         });
     }
     return visitor;
@@ -286,7 +303,7 @@ void ArkCollector::FixObjectRefFields(BaseObject* obj) const
 {
     DLOG(FIX, "fix obj %p<%p>(%zu)", obj, obj->GetTypeInfo(), obj->GetSize());
     auto refFunc = [this, obj](RefField<>& field) { FixRefField(obj, field); };
-    obj->ForEachRefField(refFunc);
+    obj->ForEachRefField(refFunc, refFunc);
 }
 
 BaseObject* ArkCollector::ForwardUpdateRawRef(ObjectRef& root)
@@ -681,10 +698,6 @@ void ArkCollector::PreforwardFlip()
     if (LIKELY_CC(allocBuffer != nullptr)) {
         allocBuffer->ClearRegions();
     }
-    if (gcReason_ == GC_REASON_YOUNG || globalWeakStack_.empty()) {
-        return;
-    }
-    globalWeakStack_.clear();
 }
 
 void ArkCollector::Preforward()

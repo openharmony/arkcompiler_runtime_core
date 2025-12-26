@@ -29,7 +29,6 @@ namespace ark::mem {
 
 StaticObjectOperator StaticObjectOperator::instance_;
 
-#ifdef PANDA_JS_ETS_HYBRID_MODE
 class SkipReferentHandler {
 public:
     explicit SkipReferentHandler(const common::RefFieldVisitor &visitor, ObjectPointerType *weakReferentPointer)
@@ -55,7 +54,6 @@ private:
     const common::RefFieldVisitor &visitor_;
     const ObjectPointerType *weakReferentPointer_ {nullptr};
 };
-#endif
 
 class Handler {
 public:
@@ -75,41 +73,49 @@ private:
     const common::RefFieldVisitor &visitor_;
 };
 
-void StaticObjectOperator::Initialize(ark::ets::PandaEtsVM *vm)
+void StaticObjectOperator::Initialize()
 {
 #if defined(ARK_HYBRID)
-    instance_.vm_ = vm;
     common::BaseObject::RegisterStatic(&instance_);
 #endif
 }
 
 void StaticObjectOperator::ForEachRefField(const common::BaseObject *object,
-                                           const common::RefFieldVisitor &visitor) const
+                                           const common::RefFieldVisitor &fieldHandler,
+                                           const common::RefFieldVisitor &weakFieldHandler) const
 {
     const auto *objHeader = reinterpret_cast<const ObjectHeader *>(object);
-    const auto *cls = objHeader->template ClassAddr<const Class>();
+    auto *cls = objHeader->template ClassAddr<Class>();
     auto *etsClass = ark::ets::EtsClass::FromRuntimeClass(cls);
     if (UNLIKELY(etsClass->IsReference())) {
-        auto *refProcessor = static_cast<ark::mem::ets::EtsReferenceProcessor *>(vm_->GetReferenceProcessor());
-        refProcessor->EnqueueReference(objHeader);
         ObjectPointerType *referentPointer = reinterpret_cast<ObjectPointerType *>(
             ToUintPtr(objHeader) + ark::ets::EtsWeakReference::GetReferentOffset());
-        SkipReferentHandler handler(visitor, referentPointer);
+        if (*referentPointer != 0) {
+            weakFieldHandler(
+                reinterpret_cast<common::RefField<> &>(*reinterpret_cast<common::BaseObject **>(referentPointer)));
+        }
+        SkipReferentHandler handler(fieldHandler, referentPointer);
         ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, const_cast<ObjectHeader *>(objHeader),
                                                                              &handler);
     } else {
-        Handler handler(visitor);
+        Handler handler(fieldHandler);
         ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, const_cast<ObjectHeader *>(objHeader),
                                                                              &handler);
     }
 }
 
 size_t StaticObjectOperator::ForEachRefFieldAndGetSize(const common::BaseObject *object,
-                                                       const common::RefFieldVisitor &visitor) const
+                                                       const common::RefFieldVisitor &fieldHandler,
+                                                       const common::RefFieldVisitor &weakFieldHandler) const
 {
     size_t size = GetSize(object);
-    ForEachRefField(object, visitor);
+    ForEachRefField(object, fieldHandler, weakFieldHandler);
     return size;
+}
+
+void StaticObjectOperator::ClearRef(common::RefField<> &field) const
+{
+    field.SetTargetObject(nullptr);
 }
 
 common::BaseObject *StaticObjectOperator::GetForwardingPointer(const common::BaseObject *object) const

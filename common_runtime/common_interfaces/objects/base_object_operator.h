@@ -42,9 +42,13 @@ public:
     // Check is valid object.
     virtual bool IsValidObject(const BaseObject *object) const = 0;
     // Iterate object field.
-    virtual void ForEachRefField(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
+    virtual void ForEachRefField(const BaseObject *object, const RefFieldVisitor &visitor,
+                                 const RefFieldVisitor &weakFieldHandler) const = 0;
     // Iterate object field And Get Object Size.
-    virtual size_t ForEachRefFieldAndGetSize(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
+    virtual size_t ForEachRefFieldAndGetSize(const BaseObject *object, const RefFieldVisitor &visitor,
+                                             const RefFieldVisitor &weakFieldHandler) const = 0;
+    // Clear the field
+    virtual void ClearRef(RefField<> &field) const = 0;
     // Get forwarding pointer.
     virtual BaseObject *GetForwardingPointer(const BaseObject *object) const = 0;
     // Set forwarding pointer.
