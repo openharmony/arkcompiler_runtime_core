@@ -170,14 +170,19 @@ def read_expected_file(path_to_file: Path) -> str:
         return ''.join(line for line in f if not line.startswith('#')).strip()
 
 
-def get_opener(mode: int) -> Callable[[str | Path, int], int]:
+def get_opener(mode: int, extra_flags: int = 0) -> Callable[[str | Path, int], int]:
     def opener(path_name: str | Path, flags: int) -> int:
-        return os.open(path_name, os.O_RDWR | os.O_APPEND | os.O_CREAT | flags, mode)
+        try:
+            return os.open(path_name, os.O_RDWR | os.O_APPEND | os.O_CREAT | extra_flags | flags, mode)
+        except FileExistsError as err:
+            _LOGGER.all(f"{path_name} already exists")
+            raise InvalidConfiguration(f"'{path_name}': test file already exists, check test id") from err
 
     return opener
 
 
-def write_2_file(file_path: Path | str, content: str | list, mode: int = 0o644) -> None:
+def write_2_file(file_path: Path | str, content: str | list, mode: int = 0o644,
+                 disallow_overwrite: bool = False) -> None:
     """
     write content to file if file exists it will be truncated. if file does not exist it wil be created
     """
@@ -187,7 +192,9 @@ def write_2_file(file_path: Path | str, content: str | list, mode: int = 0o644) 
     if isinstance(content, list):
         processed_content = '\n'.join(str(entity) for entity in content)
 
-    custom_opener = get_opener(mode)
+    extra_flag = os.O_EXCL if disallow_overwrite else 0
+    custom_opener = get_opener(mode, extra_flags=extra_flag)
+
     with open(file_path, mode='w+', encoding='utf-8', opener=custom_opener) as f_handle:
         f_handle.write(str(processed_content))
 

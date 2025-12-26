@@ -144,7 +144,7 @@ class MetadataTest(unittest.TestCase):
         self.assertEqual(len(metadata.tags.invalid_tags), 2)
         self.assertEqual(metadata.tags.invalid_tags, ['compily-only', 'negatives'])
 
-    def test_all_valid_atgs(self) -> None:
+    def test_all_valid_tags(self) -> None:
         metadata = TestMetadata.create_filled_metadata({
             'tags': ['compile-only', 'negative', 'not-a-test', 'no-warmup'],
         }, Path(__file__))

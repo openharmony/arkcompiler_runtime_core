@@ -107,7 +107,7 @@ class FuncTestsCodeGenerator(IGenerator):
             test = self._add_generator_artefact(test, template_path, template_config_path)
             output_fname = "test-" + template_name + "-" + str(test_idx).zfill(4) + ".ets"
             outpath_final = outpath / template_relative_path.with_name(output_fname)
-            write_2_file(outpath_final, test)
+            write_2_file(outpath_final, test, disallow_overwrite=True)
             test_idx += 1
             yield outpath_final.as_posix()
 

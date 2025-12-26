@@ -96,8 +96,7 @@ static_core/tests/benchmarks/                            @igelhaus
 static_core/tests/checked/                               @Prof @dingding5 ^chernykhsergey
 static_core/tests/panda/                                 @igelhaus
 static_core/tests/test-lists/                            ^amate ^sergeyandreev @Prof @kuchkovairina
-static_core/tests/tests-u-runner-2/                      ^amate ^sergeyandreev @anton-sysoev ^Nojpg @shirunova_viktoria @kozhevnikova_elizaveta
-static_core/tests/tests-u-runner/                        ^amate ^sergeyandreev @anton-sysoev ^Nojpg @shirunova_viktoria @kozhevnikova_elizaveta
+static_core/tests/tests-u-runner/                        ^amate @sergeyandreev @anton-sysoev @Nojpg
 static_core/tests/verifier-tests/                        @igelhaus
 static_core/tools/ark_js_napi_cli/                       @nazarovkonstantin @ipetrov ^rokashevichsvetlana ^kurnevichstanislav
 static_core/compiler/tools/paoc/                         @asidorov @Prof ^chernykhsergey @dingding5 @sukhikhalexander
