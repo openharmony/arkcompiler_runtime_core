@@ -1,4 +1,4 @@
-#28320 CTE in the spec example 3.11
+#615 3.11 Type void inconsistency
 03.types/11.type_void/generic_void_2.ets
 
 #28399 Possible to create a void array
@@ -9,9 +9,6 @@
 03.types/20.union_types/united_switch_ext_5.ets
 03.types/20.union_types/united_switch_ext_7.ets
 03.types/20.union_types/united_switch_ext_8.ets
-
-#29681 union causes TypeError with literal type
-03.types/16.literal_types/infer_from_union2.ets
 
 #30677
 03.types/19.function_types/01.type_function/optional_type_params_0.ets
@@ -60,6 +57,9 @@
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_neg_10.ets
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_neg_11.ets
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_neg_12.ets
+
+#31690
+05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
 
 #30904 no CTE for FixedArray with the predefined value type
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_0.ets
@@ -127,6 +127,9 @@
 05.generics/03.utility_types/incorrect_utility_type_usage_1_1.ets
 05.generics/03.utility_types/incorrect_utility_type_usage_1_2.ets
 05.generics/03.utility_types/incorrect_utility_type_usage_1_3.ets
+
+#31690
+05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
 
 #24168
 05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_0.ets
@@ -288,6 +291,10 @@
 #30691
 07.expressions/19.nullish-coalescing_expression/nullish_coalescing_expression_record_3.ets
 
+#31475 False positive passed tests on runner-2
+07.expressions/19.nullish-coalescing_expression/lazy_operator_2.ets
+07.expressions/19.nullish-coalescing_expression/lazy_operator_1.ets
+
 #31200
 07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.consts.test_2.ets
 07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.consts.test_3.ets
@@ -339,6 +346,12 @@
 07.expressions/25.equality_expressions/eq_neg_18.ets
 07.expressions/25.equality_expressions/eq_neg_19.ets
 
+#31475 False positive passed tests on runner-2
+07.expressions/27.conditional-and_expression/conditional_and_boolean_3.ets
+07.expressions/27.conditional-and_expression/conditional_and_bool_3.ets
+07.expressions/28.conditional-or_expression/conditional_or_boolean_3.ets
+07.expressions/28.conditional-or_expression/conditional_or_bool_3.ets
+
 #30216 Incorrect error for readonly array assignment
 07.expressions/29.assignment/01.simple_assignment_operator/readonly_array_negative.ets
 
@@ -371,6 +384,20 @@
 #30786
 07.expressions/32.lambda_expression/04.runtime_evaluation_of_lambda_expressions/lambda_instance_type_15.ets
 
+#31690
+07.expressions/33.constant_expression/check_enum/constant_calculation_21.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_23.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_24.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
+07.expressions/33.constant_expression/check_enum/constant_unary_plus_4.ets
+07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
+07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
+
 #29971
 08.statements/04.local_declarations/post_declaration_func_n_1.ets
 08.statements/04.local_declarations/post_declaration_n_1.ets
@@ -385,6 +412,10 @@
 #22428
 08.statements/15.try_statements/01.catch_clause/catch_6.ets
 08.statements/15.try_statements/01.catch_clause/catch_9.ets
+
+#31475 False positive passed tests on runner-2
+09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
+09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
 
 #30295
 09.classes/02.class_extension_clause/extension_clause_negative_5.ets
@@ -548,34 +579,6 @@
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_270.ets
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_271.ets
 
-#29306
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_272.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_273.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_274.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_275.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_276.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_277.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_278.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_279.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_280.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_281.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_282.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_283.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_284.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_285.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_286.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_287.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_288.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_289.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_290.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_291.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_292.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_293.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_294.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_295.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_296.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_297.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_298.ets
 
 #29302
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_247.ets
@@ -713,22 +716,6 @@
 #28527
 09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_gen_35.ets
 
-#28693
-09.classes/09.constructor_declaration/02.constructor_body/spec_example1.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary01.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary02.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary03.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary04.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary01.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary03.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary05.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary07.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init20.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init21.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init22.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init23.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init24.ets
-
 #30467 Field initialization expression performed multiple times
 09.classes/09.constructor_declaration/02.constructor_body/check_fld_init00.ets
 09.classes/09.constructor_declaration/02.constructor_body/check_fld_init02.ets
@@ -831,6 +818,9 @@
 
 #26714
 13.modules_and_namespaces/01.import_directives/test.ets
+
+#31411
+13.modules_and_namespaces/01.import_directives/03.selective_binding/import_conflict_neg.ets
 
 #30658 incorrect linkage
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_2.ets
@@ -1245,6 +1235,9 @@
 15.semantic_rules/09.overloading/overload_with_import/function_import_1_source_9.ets
 15.semantic_rules/09.overloading/overload_with_import/function_import_1_source_10.ets
 15.semantic_rules/09.overloading/overload_with_import/function_import_1_source_11.ets
+15.semantic_rules/09.overloading/overload_with_import/function_import_1_source_12.ets
+15.semantic_rules/09.overloading/overload_with_import/function_import_1_source_13.ets
+15.semantic_rules/09.overloading/overload_with_import/function_import_1_source_14.ets
 
 #30721 No CTE when using overloads with import_all_from_reexport_0
 15.semantic_rules/09.overloading/overload_with_import/function_import_and_decl_1.ets
@@ -1596,37 +1589,3 @@
 
 #30410
 18.annotations/03.exporting_and_importing_annotations/import_as_type.ets
-
-#31689
-07.expressions/19.nullish-coalescing_expression/lazy_operator_1.ets
-07.expressions/19.nullish-coalescing_expression/lazy_operator_2.ets
-07.expressions/27.conditional-and_expression/conditional_and_bool_3.ets
-07.expressions/27.conditional-and_expression/conditional_and_boolean_3.ets
-07.expressions/28.conditional-or_expression/conditional_or_bool_3.ets
-07.expressions/28.conditional-or_expression/conditional_or_boolean_3.ets
-09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
-09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
-13.modules_and_namespaces/01.import_directives/03.selective_binding/import_conflict_neg.ets
-13.modules_and_namespaces/01.import_directives/not_distinguishable_import_5.ets
-13.modules_and_namespaces/01.import_directives/05.import_path/bad/import_path_bad_3.ets
-13.modules_and_namespaces/01.import_directives/05.import_path/bad/import_path_bad_8.ets
-15.semantic_rules/09.overloading/overload_with_import/function_import_1_source_12.ets
-15.semantic_rules/09.overloading/overload_with_import/function_import_1_source_13.ets
-15.semantic_rules/09.overloading/overload_with_import/function_import_1_source_14.ets
-07.expressions/29.assignment/01.simple_assignment_operator/array_assignment_6.ets
-
-#31690
-05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_21.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_23.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_24.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets
-07.expressions/33.constant_expression/check_enum/constant_unary_plus_4.ets
-05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
-07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
-07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets

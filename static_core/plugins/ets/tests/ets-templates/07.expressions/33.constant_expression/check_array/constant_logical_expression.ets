@@ -17,7 +17,6 @@
 /*---
 desc:
     Constant expression with logical calculations as array size.
-tags: [{{c.tags}}]
 ---*/
 
 const value1: {{c.type}} = {{c.value}}

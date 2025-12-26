@@ -12,40 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+{%- for c in cases %}
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause
-    on all execution paths of the constructor body.
+    if the expression 'e' is not a nullable type, then the operator '!' has no effect.
+    If the result of the evaluation of e is not equal to null or undefined, then the
+    result of e! is the outcome of the evaluation of e. If the result of the evaluation
+    of e is equal to null or undefined, then NullPointerError is thrown.
+tags: [compile-only, negative]
 ---*/
-
-class A {
-    fldA: int
-
-    constructor(a: int) {
-        this.fldA = a
-    }
-}
-
-class B extends A {
-    constructor(a: int) {
-        try {
-            if (a == 0) {
-                throw new Error('Error thrown')
-            }
-            super(a)
-        } catch (e) {
-            super(-1)
-        }
-    }
-}
+{{c.decl}}
 
 function main() {
-    let b: B
-
-    arktest.expectError(() => { b = new B(0) }, 'Error thrown')
-    arktest.assertEQ(b.fldA, -1)
-
-    b = new B(1)
-    arktest.assertEQ(b.fldA, 1)
+    {{c.use|indent}}
 }
+{%- endfor %}

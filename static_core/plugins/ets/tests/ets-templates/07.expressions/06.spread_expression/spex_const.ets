@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: If an array is spread while calling a function, then an appropriate parameter must be of the spread array kind.
-tags: [{{c.tags}}]
 ---*/
 
 {{c.decl}}

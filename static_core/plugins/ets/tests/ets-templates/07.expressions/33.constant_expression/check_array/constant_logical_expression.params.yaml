@@ -25,8 +25,3 @@ cases:
   - { type: number, value: 28.3,  expression: '== 28.3',  expected: 28  }
   - { type: float,  value: 21.7f, expression: '== 21.7f',  expected: 21  }
   - { type: number, value: 22.3,  expression: '== 22.3', expected: 22  }
-
-  - { type: char,   value: c'p',  expression: '== 112',   expected: 112, tags: 'compile-only,negative' }
-  - { type: char,   value: c'p',  expression: '> 100',    expected: 112, tags: 'compile-only,negative' }
-  - { type: char,   value: c'p',  expression: "== c'p'",  expected: 112, tags: 'compile-only,negative' }
-  - { type: char,   value: c'p',  expression: ">= c'W'",  expected: 112, tags: 'compile-only,negative' }

@@ -149,6 +149,10 @@ class TestMetadata:     # type: ignore[explicit-any]
             del metadata['flags']
         if isinstance(type(metadata.get('ark_options')), str):
             metadata['ark_options'] = [metadata['ark_options']]
+        if isinstance(metadata.get('expected_out'), list):
+            metadata['expected_out'] = '\n'.join(metadata['expected_out'])
+        if isinstance(metadata.get('expected_error'), list):
+            metadata['expected_error'] = '\n'.join(metadata['expected_error'])
         arktsconfig = metadata.get('arktsconfig')
         package = metadata.get("package")
         if arktsconfig is not None:

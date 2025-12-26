@@ -189,22 +189,17 @@
 #29887
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_73.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_74.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_75.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_76.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_77.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_78.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_79.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_80.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_81.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_82.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_83.ets
+
+#31755
+06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/explicit_type_conversion_6.ets
 
 #30469
 07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets
 
-#30896
-07.expressions/03.named_reference/02.method_reference/method_ref_neg_2.ets
+#30653
+07.expressions/03.named_reference/01.function_reference/static_field_as_ref.ets
 
 #23363 No CTE when array type cannot be determined
 07.expressions/04.array_literal/arr_n_2.ets
@@ -236,13 +231,18 @@
 07.expressions/06.spread_expression/iterable2.ets
 07.expressions/06.spread_expression/iterable3.ets
 07.expressions/06.spread_expression/iterable4.ets
-07.expressions/06.spread_expression/spex_55.ets
-07.expressions/06.spread_expression/spex_56.ets
-07.expressions/06.spread_expression/spex_func_50.ets
-07.expressions/06.spread_expression/spex_func_82.ets
-07.expressions/06.spread_expression/spex_func_83.ets
+07.expressions/06.spread_expression/spex_50.ets
+07.expressions/06.spread_expression/spex_51.ets
+07.expressions/06.spread_expression/spex_func_46.ets
+07.expressions/06.spread_expression/spex_func_77.ets
+07.expressions/06.spread_expression/spex_func_78.ets
 
 #30372 Spread of union doesn't work
+07.expressions/06.spread_expression/spex_52.ets
+07.expressions/06.spread_expression/spex_53.ets
+07.expressions/06.spread_expression/spex_54.ets
+07.expressions/06.spread_expression/spex_55.ets
+07.expressions/06.spread_expression/spex_56.ets
 07.expressions/06.spread_expression/spex_57.ets
 07.expressions/06.spread_expression/spex_58.ets
 07.expressions/06.spread_expression/spex_59.ets
@@ -252,11 +252,11 @@
 07.expressions/06.spread_expression/spex_63.ets
 07.expressions/06.spread_expression/spex_64.ets
 07.expressions/06.spread_expression/spex_65.ets
-07.expressions/06.spread_expression/spex_66.ets
-07.expressions/06.spread_expression/spex_67.ets
-07.expressions/06.spread_expression/spex_68.ets
-07.expressions/06.spread_expression/spex_69.ets
-07.expressions/06.spread_expression/spex_70.ets
+07.expressions/06.spread_expression/spex_func_79.ets
+07.expressions/06.spread_expression/spex_func_80.ets
+07.expressions/06.spread_expression/spex_func_81.ets
+07.expressions/06.spread_expression/spex_func_82.ets
+07.expressions/06.spread_expression/spex_func_83.ets
 07.expressions/06.spread_expression/spex_func_84.ets
 07.expressions/06.spread_expression/spex_func_85.ets
 07.expressions/06.spread_expression/spex_func_86.ets
@@ -266,24 +266,62 @@
 07.expressions/06.spread_expression/spex_func_90.ets
 07.expressions/06.spread_expression/spex_func_91.ets
 07.expressions/06.spread_expression/spex_func_92.ets
-07.expressions/06.spread_expression/spex_func_93.ets
-07.expressions/06.spread_expression/spex_func_94.ets
-07.expressions/06.spread_expression/spex_func_95.ets
-07.expressions/06.spread_expression/spex_func_96.ets
-07.expressions/06.spread_expression/spex_func_97.ets
+
+#30371 Cannot spread into array with supertype elements
+07.expressions/06.spread_expression/spex_func_12.ets
+07.expressions/06.spread_expression/spex_func_25.ets
+07.expressions/06.spread_expression/spex_func_49.ets
+07.expressions/06.spread_expression/spex_func_53.ets
+07.expressions/06.spread_expression/spex_func_55.ets
+07.expressions/06.spread_expression/spex_func_56.ets
+07.expressions/06.spread_expression/spex_func_64.ets
+07.expressions/06.spread_expression/spex_func_65.ets
 
 #30368  Cannot spread tuple of strings to FixedArray of strings
-07.expressions/06.spread_expression/spex_80.ets
+07.expressions/06.spread_expression/spex_71.ets
 
 #30367 Cannot spread custom array
-07.expressions/06.spread_expression/spex_87.ets
-07.expressions/06.spread_expression/spex_88.ets
-07.expressions/06.spread_expression/spex_89.ets
-07.expressions/06.spread_expression/spex_90.ets
+07.expressions/06.spread_expression/spex_73.ets
+07.expressions/06.spread_expression/spex_74.ets
+07.expressions/06.spread_expression/spex_75.ets
+07.expressions/06.spread_expression/spex_76.ets
+
+#20371 Unexpected Type Error on string array
+07.expressions/06.spread_expression/spex_lmbd_28.ets
+
+#20376 No support for spread arguments in lambda
+07.expressions/06.spread_expression/spex_lmbd_0.ets
+07.expressions/06.spread_expression/spex_lmbd_1.ets
+07.expressions/06.spread_expression/spex_lmbd_2.ets
+07.expressions/06.spread_expression/spex_lmbd_3.ets
+07.expressions/06.spread_expression/spex_lmbd_4.ets
+07.expressions/06.spread_expression/spex_lmbd_5.ets
+07.expressions/06.spread_expression/spex_lmbd_6.ets
+07.expressions/06.spread_expression/spex_lmbd_7.ets
+07.expressions/06.spread_expression/spex_lmbd_8.ets
+07.expressions/06.spread_expression/spex_lmbd_9.ets
+07.expressions/06.spread_expression/spex_lmbd_10.ets
+07.expressions/06.spread_expression/spex_lmbd_11.ets
+07.expressions/06.spread_expression/spex_lmbd_13.ets
+07.expressions/06.spread_expression/spex_lmbd_12.ets
+07.expressions/06.spread_expression/spex_lmbd_14.ets
+07.expressions/06.spread_expression/spex_lmbd_15.ets
+07.expressions/06.spread_expression/spex_lmbd_16.ets
+07.expressions/06.spread_expression/spex_lmbd_17.ets
+07.expressions/06.spread_expression/spex_lmbd_18.ets
+07.expressions/06.spread_expression/spex_lmbd_19.ets
+07.expressions/06.spread_expression/spex_lmbd_20.ets
+07.expressions/06.spread_expression/spex_lmbd_21.ets
+07.expressions/06.spread_expression/spex_lmbd_22.ets
+07.expressions/06.spread_expression/spex_lmbd_23.ets
+07.expressions/06.spread_expression/spex_lmbd_24.ets
+07.expressions/06.spread_expression/spex_lmbd_25.ets
+07.expressions/06.spread_expression/spex_lmbd_26.ets
+07.expressions/06.spread_expression/spex_lmbd_27.ets
 
 #31617 Catch NPE (tests should be updated)
-07.expressions/06.spread_expression/spex_lmbd_37.ets
-07.expressions/06.spread_expression/spex_lmbd_39.ets
+07.expressions/06.spread_expression/spex_lmbd_33.ets
+07.expressions/06.spread_expression/spex_lmbd_35.ets
 
 #28326
 07.expressions/09.field_access_expressions/field_access_to_override.ets
@@ -292,7 +330,7 @@
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_from_method_3.ets
 
 #26730
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_27.ets
+07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_22.ets
 
 #30904 no CTE for FixedArray with the predefined value type, spec #644
 07.expressions/11.function_call_expression/fixed_array_predefined_neg_0.ets
@@ -447,12 +485,13 @@
 07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_4.ets
 
 #29203 Warning: Type parameter is erased from type 'Array' when used in instanceof expression
-07.expressions/15.instanceof_expression/instanceof_161.ets
-07.expressions/15.instanceof_expression/instanceof_169.ets
-07.expressions/15.instanceof_expression/instanceof_177.ets
-07.expressions/15.instanceof_expression/instanceof_187.ets
-07.expressions/15.instanceof_expression/instanceof_194.ets
-07.expressions/15.instanceof_expression/instanceof_205.ets
+07.expressions/15.instanceof_expression/instanceof_neg_27.ets
+07.expressions/15.instanceof_expression/instanceof_neg_29.ets
+07.expressions/15.instanceof_expression/instanceof_neg_31.ets
+07.expressions/15.instanceof_expression/instanceof_neg_33.ets
+07.expressions/15.instanceof_expression/instanceof_neg_35.ets
+07.expressions/15.instanceof_expression/instanceof_neg_36.ets
+07.expressions/15.instanceof_expression/instanceof_neg_38.ets
 
 #28907 Specifying type for too large integer number with as doesn't produce CTE
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
@@ -560,16 +599,16 @@
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
 
 #29160
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_6.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
 
 # 31662 Float to float comparison
+07.expressions/33.constant_expression/check_enum/constant_calculation_16.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_17.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_18.ets
+07.expressions/33.constant_expression/check_enum/constant_calculation_19.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_21.ets
 07.expressions/33.constant_expression/check_enum/constant_calculation_22.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_23.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_24.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_26.ets
-07.expressions/33.constant_expression/check_enum/constant_calculation_27.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
+07.expressions/33.constant_expression/check_enum/constant_number_conversion_4.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_10.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_minus_4.ets
 07.expressions/33.constant_expression/check_enum/constant_unary_plus_10.ets

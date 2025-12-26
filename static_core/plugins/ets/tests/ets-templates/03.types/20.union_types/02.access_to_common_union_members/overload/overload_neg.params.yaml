@@ -35,8 +35,8 @@ cases:
       use: |-
           arktest.assertEQ(u1.meth(), 1)  // CTE: method with overload signature
       tags: compile-only, negative
-      stderr: |-
-          "Unhandled exception: std.core.LinkerUnresolvedMethodError"
+      stdout: |-
+          "Semantic error ESE0124: Expected 1 arguments, got 0."
 
     - decl: |-
           // overload alias in both
@@ -62,5 +62,5 @@ cases:
       use: |-
           arktest.assertEQ(u1.meth(), 1)  // CTE: method with overload signature
       tags: compile-only, negative
-      stderr: |-
+      stdout: |-
           "Semantic error ESE0391: Overload declaration cannot be called by union."

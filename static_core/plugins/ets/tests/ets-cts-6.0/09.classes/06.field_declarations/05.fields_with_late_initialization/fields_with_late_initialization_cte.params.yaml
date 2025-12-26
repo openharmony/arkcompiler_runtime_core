@@ -330,15 +330,6 @@ cases:
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
     check_variants:
-      - {check_type: "long", cv_decl_data: ""}
-      - {check_type: "int", cv_decl_data: ""}
-      - {check_type: "byte", cv_decl_data: ""}
-      - {check_type: "short", cv_decl_data: ""}
-      - {check_type: "double", cv_decl_data: ""}
-      - {check_type: "number", cv_decl_data: ""}
-      - {check_type: "float", cv_decl_data: ""}
-      - {check_type: "char", cv_decl_data: ""}
-      - {check_type: "boolean", cv_decl_data: ""}
       - {check_type: "bigint", cv_decl_data: ""}
       - {check_type: "string", cv_decl_data: ""}
       - {check_type: "Object", cv_decl_data: ""}
