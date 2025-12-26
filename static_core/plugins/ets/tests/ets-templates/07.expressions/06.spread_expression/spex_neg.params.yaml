@@ -107,3 +107,214 @@ cases:
           // spread array of objects to tuple of strings
           let r: [string, string] = [...a]
           arktest.assertEQ(r[0], '1')
+
+# Unions
+    - decl: |-
+          type UT = Array<string>|Array<number>
+          let a: UT = ['1', '2', '3']
+      use: |-
+          // union of arrays in spread expression
+          let r = [...a, ...a]
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], '2')
+          arktest.assertEQ(r[2], '3')
+          arktest.assertEQ(r[3], '1')
+          arktest.assertEQ(r[4], '2')
+          arktest.assertEQ(r[5], '3')
+
+    - decl: |-
+          type UT = [number, string]|[string, number]
+          let a: UT = [1.0, '1']
+      use: |-
+          // union of tuples in spread expression
+          let r: [number, string] = [...a]
+          arktest.assertEQ(r[0], 1.0)
+          arktest.assertEQ(r[1], '1')
+
+    - decl: |-
+          type UT = FixedArray<string>|FixedArray<number>
+          let a: UT = [1.0, 2.0, 3.0]
+      use: |-
+          // union of fixed arrays in spread expression
+          let r: number[] = [...a, ...a]
+          arktest.assertEQ(r[0], 1.0)
+          arktest.assertEQ(r[1], 2.0)
+          arktest.assertEQ(r[2], 3.0)
+          arktest.assertEQ(r[3], 1.0)
+          arktest.assertEQ(r[4], 2.0)
+          arktest.assertEQ(r[5], 3.0)
+
+    - decl: |-
+          type UT = Array<string>|[string, int]
+          let a: UT = ['1', '2', '3']
+      use: |-
+          // union of array and tuple in spread expression
+          let r = [...a, ...a]
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], '2')
+          arktest.assertEQ(r[2], '3')
+          arktest.assertEQ(r[3], '1')
+          arktest.assertEQ(r[4], '2')
+          arktest.assertEQ(r[5], '3')
+
+    - decl: |-
+          type UT = Array<string>|[string, int]
+          let a: UT = ['1', 2]
+      use: |-
+          // union of array and tuple in spread expression
+          let r: [string, int] = [...a]
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], 2)
+
+    - decl: |-
+          type UT = Array<string>|FixedArray<int>|[string, int]|[int, string]
+          let a: UT = ['1', '2', '3']
+      use: |-
+          // union of arrays and tuples in spread expression
+          let r = [...a, ...a]
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], '2')
+          arktest.assertEQ(r[2], '3')
+          arktest.assertEQ(r[3], '1')
+          arktest.assertEQ(r[4], '2')
+          arktest.assertEQ(r[5], '3')
+
+    - decl: |-
+          type UT = Array<string>|FixedArray<int>|[string, int]|[int, string]
+          let a: UT = [1, 2, 3]
+      use: |-
+          // union of arrays and tuples in spread expression
+          let r: int[] = [...a, ...a]
+          arktest.assertEQ(r[0], 1)
+          arktest.assertEQ(r[1], 2)
+          arktest.assertEQ(r[2], 3)
+          arktest.assertEQ(r[3], 1)
+          arktest.assertEQ(r[4], 2)
+          arktest.assertEQ(r[5], 3)
+
+    - decl: |-
+          type UT = Array<string>|FixedArray<int>|[string, int]|[int, string]
+          let a: UT = ['1', 2]
+      use: |-
+          // union of arrays and tuples in spread expression
+          let r = [...a]
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], 2)
+
+    - decl: |-
+          type UT = Array<string>|Iterable<string>
+          let a: UT = ['1', '2', '3']
+      use: |-
+          // union of array and iterable in spread expression
+          let r = [...a]
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], '2')
+          arktest.assertEQ(r[2], '3')
+
+    - decl: |-
+          type UT = Array<string>|Iterable<string>
+          let a: UT = 'iterable'
+      use: |-
+          // union of array and iterable in spread expression
+          let r: Array<string> = [...a]
+          arktest.assertEQ(r.length, 8)
+          arktest.assertEQ(r[0], 'i')
+          arktest.assertEQ(r[1], 't')
+          arktest.assertEQ(r[7], 'e')
+
+    - decl: |-
+          type UT = FixedArray<string>|Iterable<[string, int]>|Iterable<string>|[string, int]
+          let a: UT = { 'a': 1, 'b': 2 } as Record<string, int>
+      use: |-
+          // union of array, iterables, and tuple in spread expression
+          let r: Array<[string, int]> = [...a]
+          arktest.assertEQ(r.length, 2)
+          arktest.assertEQ(r[0][0], 'a')
+          arktest.assertEQ(r[0][1], 1)
+          arktest.assertEQ(r[1][0], 'b')
+          arktest.assertEQ(r[1][1], 2)
+
+    - decl: |-
+          type UT = FixedArray<string>|Iterable<[string, int]>|Iterable<string>|[string, int]
+          let a: UT = 'xyz'
+      use: |-
+          // union of array, iterables, and tuple in spread expression
+          let r = [...a]
+          arktest.assertEQ(r[0], 'x')
+          arktest.assertEQ(r[1], 'y')
+          arktest.assertEQ(r[2], 'z')
+
+    - decl: |-
+          type UT = FixedArray<string>|Iterable<[string, int]>|Iterable<string>|[string, int]
+          let a: UT = ['xyz', 'abc']
+      use: |-
+          // union of array, iterables, and tuple in spread expression
+          let r = [...a]
+          arktest.assertEQ(r[0], 'xyz')
+          arktest.assertEQ(r[1], 'abc')
+
+    - decl: |-
+          type UT = FixedArray<string>|Iterable<[string, int]>|Iterable<string>|[string, int]
+          let a: UT = ['xyz', 42]
+      use: |-
+          // union of array, iterables, and tuple in spread expression
+          let r: [string, int] = [...a]
+          arktest.assertEQ(r[0], 'xyz')
+          arktest.assertEQ(r[1], 42)
+
+# Custom array class
+    - decl: |-
+          class MyArray extends Array<string> {
+              constructor(p: int) {
+                  super(p)
+              }
+          }
+
+          let a: MyArray = new MyArray(2)
+          a[0] = '1'
+          a[1] = '2'
+      use: |-
+          // spread custom array of strings to custom array
+          let r: MyArray = [...a]
+          arktest.assertEQ(r.length, 2)
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], '2')
+
+    - decl: |-
+          class MyArray<T> extends Array<T> {
+              constructor(p: int) {
+                  super(p)
+              }
+          }
+
+          let a: MyArray<string> = new MyArray<string>(2)
+          a[0] = '1'
+          a[1] = '2'
+      use: |-
+          // spread custom array to custom array of objects
+          let r: MyArray<Object> = [...a]
+          arktest.assertEQ(r.length, 2)
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], '2')
+
+    - decl: |-
+          class MyArray extends Array<string> {}
+
+          let a: [string, string] = ['1', '2']
+      use: |-
+          // spread tuple of strings to custom array
+          let r: MyArray = [...a]
+          arktest.assertEQ(r.length, 2)
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], '2')
+
+    - decl: |-
+          class MyArray<T> extends Array<T> {}
+
+          let a: [string, int] = ['1', 2]
+      use: |-
+          // spread tuple to custom array
+          let r: MyArray<Object> = [...a]
+          arktest.assertEQ(r.length, 2)
+          arktest.assertEQ(r[0], '1')
+          arktest.assertEQ(r[1], 2)

@@ -59,3 +59,130 @@ cases:
       use: |-
           // nullish expression
           arktest.assertEQ(foo(5, ...a1), 7)  // CTE expected
+
+# unions
+    - decl: |-
+          function foo(...p: Object[]): string {
+              return ''.concat(...p.map((p: Any) => '' + p))
+          }
+          let a: Array<string>|Array<number> = ['1', '2', '3']
+      use: |-
+          // union of arrays in spread expression
+          arktest.assertEQ(foo(...a), '123')
+
+    - decl: |-
+          function foo(...p: (number|string)[]): string {
+              return '' + p[0] + p[1]
+          }
+          let a: [number, string]|[string, number] = [2.0, '1']
+      use: |-
+          // union of tuples in spread expression
+          arktest.assertEQ(foo(...a), '21')
+
+    - decl: |-
+          function foo(...p: Object[]): string {
+              return ''.concat(...p.map((p: Any) => '' + p))
+          }
+          let a: FixedArray<string>|FixedArray<number> = [1.0, 2.0, 3.0]
+      use: |-
+          // union of fixed arrays in spread expression
+          arktest.assertEQ(foo(...a), '123')
+
+    - decl: |-
+          function foo(...p: (int|number|string)[]): string {
+              return '' + p[0] + p[1]
+          }
+          let a: Array<string>|[string, int] = ['1', '2', '3']
+      use: |-
+          // union of array and tuple in spread expression
+          arktest.assertEQ(foo(...a), '12')
+
+    - decl: |-
+          function foo(...p: Array<int|string>): string {
+              return '' + p[0] + p[1]
+          }
+          let a: Array<string>|[string, int] = ['1', 2]
+      use: |-
+          // union of array and tuple in spread expression
+          arktest.assertEQ(foo(...a), '12')
+
+    - decl: |-
+          function foo(...p: Object[]): string {
+              return '' + p[0] + p[1]
+          }
+          let a: Array<string>|FixedArray<int>|[string, int]|[int, string] = ['1', '2', '3']
+      use: |-
+          // union of arrays and tuples in spread expression
+          arktest.assertEQ(foo(...a), '12')
+
+    - decl: |-
+          function foo(...p: Array<string|int>): string {
+              return '' + p[0] + p[1]
+          }
+          let a: Array<string>|FixedArray<int>|[string, int]|[int, string] = [1, 2, 3]
+      use: |-
+          // union of arrays and tuples in spread expression
+          arktest.assertEQ(foo(...a), '12')
+
+    - decl: |-
+          function foo(...p: (int|string)[]): string {
+              return '' + p[0] + p[1]
+          }
+          let a: Array<string>|FixedArray<int>|[string, int]|[int, string] = ['1', 2]
+      use: |-
+          // union of arrays and tuples in spread expression
+          arktest.assertEQ(foo(...a), '12')
+
+    - decl: |-
+          function foo(...p: string[]): string {
+              return ''.concat(...p.map((p: Any) => '' + p))
+          }
+          let a: Array<string>|Iterable<string> = ['1', '2', '3']
+      use: |-
+          // union of array and iterable in spread expression
+          arktest.assertEQ(foo(...a), '123')
+
+    - decl: |-
+          function foo(...p: Array<string>): string {
+              return ''.concat(...p.map((p: Any) => '' + p + '-'))
+          }
+          let a: Array<string>|Iterable<string> = 'iterable'
+      use: |-
+          // union of array and iterable in spread expression
+          arktest.assertEQ(foo(...a), 'i-t-e-r-a-b-l-e-')
+
+    - decl: |-
+          function foo(...p: Object[]): string {
+              return '' + p[0]
+          }
+          let a: Iterable<[string, int]>|Iterable<string>|[string, int] = { 'a': 1, 'b': 2 } as Record<string, int>
+      use: |-
+          // union of array, iterables, and tuple in spread expression
+          arktest.assertEQ(foo(...a), 'a,1')
+
+    - decl: |-
+          function foo(...p: Object[]): string {
+              return '' + p[0]
+          }
+          let a: Iterable<[string, int]>|Iterable<string>|[string, int] = 'xyz'
+      use: |-
+          // union of array, iterables, and tuple in spread expression
+          arktest.assertEQ(foo(...a), 'x')
+
+    - decl: |-
+          function foo(...p: (string|[string, int]|int)[]): string {
+              return '' + p[0]
+          }
+          let a: FixedArray<string>|Iterable<[string, int]>|[string, int] = ['xyz', 'abc']
+      use: |-
+          // union of array, iterables, and tuple in spread expression
+          arktest.assertEQ(foo(...a), 'xyz')
+
+    - decl: |-
+          function foo(...p: Array<Object>): string {
+              return '' + p[0]
+          }
+          let a: FixedArray<string>|Iterable<[string, int]>|Iterable<string>|[string, int] = ['xyz', 42]
+      use: |-
+          // union of array, iterables, and tuple in spread expression
+          arktest.assertEQ(foo(...a), 'xyz')
