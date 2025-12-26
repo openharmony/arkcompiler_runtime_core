@@ -641,35 +641,45 @@ export class JSON {
     }
 
     // TODO(kirill-mitkin): Map<Long, Long> blocked by internal issue
-    private static checkType(type: Class, used: Array<TypeColor>): boolean {
-        let ind = used.findIndex((tc: TypeColor) => type === tc.type)
-        if (ind != -1) {
-            return (used.at(ind) as TypeColor).color == TypeColor.VISITED
+    private static checkType(type: Class, used: Map<Class, TypeColor>): void {
+        const tc = used.get(type)
+        if (tc !== undefined) {
+            if (tc.color == TypeColor.VISITED) {
+                return
+            }
+            throw new Error(`Incorrect type: ${type.getName()}`)
         }
-        used.push(new TypeColor(type, TypeColor.AT_STACK))
-        let ok = true
-        if (type === BigIntType) {
-            ok = true
-        } else if (type.isFixedArray()) {
-            ok = JSON.checkType(type.getFixedArrayComponentType()!, used)
+        if (type === BigIntType ||
+                type === TypeColor.STRING_CLASS ||
+                Types.isPrimitiveType(type) ||
+                type === TypeColor.NULL_CLASS) {
+            return
+        }
+        if (type.isFixedArray()) {
+            JSON.checkType(type.getFixedArrayComponentType()!, used)
         } else if (type.isUnion()) {
             // NOTE(lyupaanastasia) parse union #27136
             throw new Error("UnionType is not supported yet")
-        } else if (type === TypeColor.STRING_CLASS || Types.isPrimitiveType(type) || type === TypeColor.NULL_CLASS) {
-            ok = true
         } else if (type.isSubtypeOf(TypeColor.OBJECT_CLASS)) {
-            ok &= JSON.classHasDefaultCtor(type)
+            const newTc = new TypeColor(type, TypeColor.AT_STACK)
+            used.set(type, newTc)
+            if (!JSON.classHasDefaultCtor(type)) {
+                throw new Error(`Incorrect type: '${type.getName()}' doesn't provide default public constructor`)
+            }
             for (const field of getClassInstanceFieldsAll(type)) {
                 if (JSONAPI.getJSONParseIgnore(field)) {
                     continue
                 }
-                ok &= JSON.checkType(field.getType(), used)
+                try {
+                    JSON.checkType(field.getType(), used)
+                } catch (e) {
+                    throw new Error(`Incorrect field: '${type.getName()}.${field.getName()}'. ${e.message}`)
+                }
             }
+            newTc.color = TypeColor.VISITED
         } else {
-            ok = false
+            throw new Error(`Incorrect type: ${type.getName()}`)
         }
-        (used.at(ind) as TypeColor).color = TypeColor.VISITED
-        return ok
     }
 
     private static classHasDefaultCtor(cls: Class): boolean {
@@ -683,7 +693,12 @@ export class JSON {
 
     // TODO(kirill-mitkin): For testing purpose only, shpuld be replaced by error checking
     public static isCorrectForParsing(type: Class): boolean {
-        return JSON.checkType(type, new Array<TypeColor>())
+        try {
+            JSON.checkType(type, new Map<Class, TypeColor>())
+            return true
+        } catch (e) {
+            return false
+        }
     }
 
     public static parse<T>(text: String, type: Type): T | null | undefined {
@@ -707,9 +722,7 @@ export class JSON {
     }
 
     public static parse<T>(json: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Class, options?: jsonx.ParseOptions): T | null | undefined {
-        if (!JSON.checkType(type, new Array<TypeColor>())) {
-            throw new Error("Incorrect type: " + type.getName())
-        }
+        JSON.checkType(type, new Map<Class, TypeColor>())
 
         let bigIntOpt: int = options ? options.bigIntMode as int : 0
         if (bigIntOpt > 2 || bigIntOpt < 0) {
@@ -1754,7 +1767,8 @@ class TypeColor {
     readonly static STRING_CLASS = Class.of("")
 
     readonly static OBJECT_CLASS = Class.from<Object>()
-    readonly static NULL_CLASS = Class.of(null)
+    readonly static NULL_CLASS = Class.from<null>()
+    readonly static ARRAY_CLASS = Class.from<Array<object>>()
 
     type: Class
     color: int
@@ -2074,11 +2088,22 @@ class JSONValueParser {
             return new Boolean(false)
         } else if (value instanceof JSONNull && type === TypeColor.NULL_CLASS) {
             return null
-        } else if (value instanceof JSONObject && type.isSubtypeOf(TypeColor.OBJECT_CLASS)) {
+        } else if (value instanceof JSONObject && this.isParseableObjectType(type)) {
             return this.parseObject(value as JSONObject, type)
         } else {
-            throw new Error(type.getName() + " is expected, but get " + value)
+            const valueType = Class.of(value)
+            throw new Error(type.getName() + " is expected, but get " + valueType.getName())
         }
+    }
+
+    private isParseableObjectType(type: Class): boolean {
+        return !(type === TypeColor.STRING_CLASS ||
+                Types.isPrimitiveType(type) ||
+                Types.isCharType(type) ||
+                type === TypeColor.NULL_CLASS ||
+                type.isSubtypeOf(TypeColor.ARRAY_CLASS) ||
+                type.isFixedArray() ||
+                type.isInterface())
     }
 
     private parseObject(jsonObj: JSONObject, classType: Class): Object {
