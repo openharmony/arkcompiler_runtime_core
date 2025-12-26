@@ -11,12 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("$ark_root/plugins/ets/tests/interop_js/interop_tests.gni")
 
-panda_ets_interop_js_gtest(ets_interop_js_test_default_import_namespace
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_interop.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_static.ets
-    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_dynamic.ts
-    ETS_CONFIG ${ETS_CONFIG}
-)
+interop_test("load_dynamic_sdk_test") {
+  js = [ "load_native_test.js" ]
+  ets = "esvalue_load_ohos.ets"
+  sources = [ "native_module.cpp" ]
+  arktsconfig = "arktsconfig.json"
+}
+
+group("load_dynamic_sdk_tests") {
+  if (ark_ets_hybrid) {
+    deps = [
+      ":load_dynamic_sdk_test"
+    ]
+  }
+}

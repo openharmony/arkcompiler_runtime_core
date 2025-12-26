@@ -508,6 +508,33 @@ std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view
     return {module, REQUIRE};
 }
 
+static bool CheckModuleLoadStatus(EtsCoroutine *coro, napi_status status, const PandaString &moduleName,
+                                  napi_value loadedObj)
+{
+    auto ctx = InteropCtx::Current(coro);
+    auto env = ctx->GetJSEnv();
+    if (status != napi_ok) {
+        INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception";
+        ctx->ForwardJSException(coro);
+        return false;
+    }
+    if (IsNullOrUndefined(env, loadedObj)) {
+        PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to null result";
+        INTEROP_LOG(ERROR) << exp;
+        InteropCtx::ThrowETSError(coro, exp.c_str());
+        return false;
+    }
+    return true;
+}
+
+static bool NeedWrapDefault(const PandaString &moduleName, const std::string_view &func)
+{
+    constexpr std::string_view OHOS_PLUGIN_PREFIX = "@ohos";
+    constexpr size_t OHOS_PLUGIN_PREFIX_SIZE = OHOS_PLUGIN_PREFIX.size();
+    return moduleName.length() >= OHOS_PLUGIN_PREFIX_SIZE &&
+           moduleName.compare(0, OHOS_PLUGIN_PREFIX_SIZE, OHOS_PLUGIN_PREFIX) == 0 && func == "requireNapi";
+}
+
 JSValue *JSRuntimeLoadModule(EtsString *module)
 {
     auto coro = EtsCoroutine::GetCurrent();
@@ -533,24 +560,22 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
         ScopedNativeCodeThread etsNativeScope(coro);
         napi_value requireFn;
         NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), func.data(), &requireFn));
-
         INTEROP_FATAL_IF(GetValueType(env, requireFn) != napi_function);
         napi_value jsName;
         NAPI_CHECK_FATAL(napi_create_string_utf8(env, mod.data(), NAPI_AUTO_LENGTH, &jsName));
         std::array<napi_value, 1> args = {jsName};
         napi_value recv;
         NAPI_CHECK_FATAL(napi_get_undefined(env, &recv));
-        auto status = napi_call_function(env, recv, requireFn, args.size(), args.data(), &modObj);
-        if (status != napi_ok) {
-            INTEROP_LOG(ERROR) << "Unable to load module " << moduleName.c_str() << " due to Forward Exception";
-            ctx->ForwardJSException(coro);
+        napi_value loadedObj;
+        auto status = napi_call_function(env, recv, requireFn, args.size(), args.data(), &loadedObj);
+        if (!CheckModuleLoadStatus(coro, status, moduleName, loadedObj)) {
             return nullptr;
         }
-        if (IsUndefined(env, modObj)) {
-            PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to null result";
-            INTEROP_LOG(ERROR) << exp;
-            InteropCtx::ThrowETSError(coro, exp.c_str());
-            return nullptr;
+        if (NeedWrapDefault(moduleName, func)) {
+            NAPI_CHECK_FATAL(napi_create_object(env, &modObj));
+            NAPI_CHECK_FATAL(napi_set_named_property(env, modObj, "default", loadedObj));
+        } else {
+            modObj = loadedObj;
         }
         jsHandleScope.Escape(modObj);
     }
