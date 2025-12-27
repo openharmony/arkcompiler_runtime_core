@@ -214,7 +214,7 @@ export namespace util {
 
         }
 
-        protected createDefault(key: K): V | undefined {
+        public createDefault(key: K): V | undefined {
             return undefined;
         }
 
