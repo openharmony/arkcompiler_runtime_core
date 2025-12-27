@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
 config("ark_guard_public_config") {
   include_dirs = [ "$ark_root/ark_guard/include" ]
@@ -73,6 +74,12 @@ ohos_shared_library("ark_guard_shared") {
     "$ark_root/static_core/libarkbase:libarktsbase",
   ]
 
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
+    output_extension = "so"
+  }
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
@@ -88,22 +95,47 @@ ohos_static_library("ark_guard_static") {
 
   deps = [ "$ark_root/ark_guard/abckit_wrapper:abckit_wrapper_static" ]
 
+  if (is_mingw || is_win) {
+    output_extension = "lib"
+  } else {
+    output_extension = "a"
+  }
+
+  complete_static_lib = true
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
 
-ohos_executable("ark_guard") {
-  sources = [ "ark_guard/main.cpp" ]
+if (abckit_enable) {
+  ohos_executable("ark_guard") {
+    sources = [ "ark_guard/main.cpp" ]
 
-  configs = [
-    ":ark_guard_public_config",
-    "$ark_root/libabckit:abckit_config",
-  ]
+    configs = [
+      ":ark_guard_public_config",
+      "$ark_root/libabckit:abckit_config",
+    ]
 
-  deps = [ ":ark_guard_static" ]
+    if (is_linux) {
+      libs = [ "stdc++fs" ]
+    }
 
-  install_enable = false
+    if (is_mac) {
+      ldflags = [
+        "-Wl,-rpath,@executable_path/../lib",
+        "-Wl,-rpath,@loader_path/../lib",
+      ]
+    }
 
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
+    deps = [ ":ark_guard_static" ]
+
+    install_enable = false
+
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
+} else {
+  group("ark_guard") {
+    deps = []
+  }
 }

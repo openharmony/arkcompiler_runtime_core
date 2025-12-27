@@ -293,7 +293,7 @@ fs::path Relative(const fs::path &src, const fs::path &base)
 #ifdef STD_FILESYSTEM_EXPERIMENTAL
     fs::path tmpPath = src;
     fs::path relPath;
-    while (fs::abcolute(tmpPath) != fs::absolute(base)) {
+    while (fs::absolute(tmpPath) != fs::absolute(base)) {
         relPath = relPath.empty() ? tmpPath.filename() : tmpPath.filename() / relPath;
         if (tmpPath == tmpPath.parent_path()) {
             return "";
