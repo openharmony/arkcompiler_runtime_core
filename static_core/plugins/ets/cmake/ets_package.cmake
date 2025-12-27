@@ -118,12 +118,15 @@ function(do_panda_ets_package TARGET)
         endif()
 
         if (ARG_VERIFY_SOURCES)
+            set(VERIFY_OUTPUT ${BUILD_DIR}/.verified)
             add_custom_command(
-                TARGET ${TARGET}
+                OUTPUT ${VERIFY_OUTPUT}
                 COMMENT "${TARGET}: Verify abc file ${OUTPUT_ABC}"
-                COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:verifier> ${VERIFIER_ARGUMENTS} ${OUTPUT_ABC}
+                COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:verifier> ${VERIFIER_ARGUMENTS} ${OUTPUT_ABC} && touch ${VERIFY_OUTPUT}
                 DEPENDS verifier ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${OUTPUT_ABC}
             )
+            add_custom_target(${TARGET}_verify DEPENDS ${VERIFY_OUTPUT})
+            add_dependencies(${TARGET} ${TARGET}_verify)
         else()
             message(STATUS "do_panda_ets_package: Skip verify: ${TARGET}")
         endif()

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,7 +102,8 @@ static Span<ITable::Entry> LinearizeITable(ClassLinker *classLinker, Class *base
         if (!(iterator != interfaces.end() && !iterator->second)) {
             continue;
         }
-        for (auto &item : interface->GetITable().Get()) {
+        auto interfaceItable = interface->GetITable().Get();
+        for (auto &item : interfaceItable) {
             auto subIterator = interfaces.find(item.GetInterface());
             if (subIterator != interfaces.end() && !subIterator->second) {
                 itable[shift++] = item.Copy(allocator);

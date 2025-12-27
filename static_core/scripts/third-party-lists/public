@@ -28,7 +28,7 @@
 
 
 # ARK common:
-googletest,https://github.com/google/googletest,tag,v1.13.0,no_patches,no_submodules
+googletest,https://github.com/google/googletest,tag,v1.13.0,with_patches,no_submodules
 utils_native,https://gitee.com/openharmony/utils_native,branch,OpenHarmony-3.2-Beta1,no_patches,no_submodules
 zlib,https://gitee.com/openharmony/third_party_zlib,branch,OpenHarmony-5.0.1-Release,no_patches,no_submodules
 
