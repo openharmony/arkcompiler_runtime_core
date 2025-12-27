@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -672,6 +672,7 @@ LaunchResult StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, Panda
             GetCurrentWorker()->AddRunnableCoroutine(co);
             return LaunchResult::NO_SUITABLE_WORKER;
         }
+        Coroutine::GetCurrent()->OnChildCoroutineCreated(co);
         w->AddRunnableCoroutine(co);
     }
 #ifndef NDEBUG
@@ -702,6 +703,7 @@ LaunchResult StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&ep
     // since we are going to switch the context, we have to close the interval
     GetCurrentWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::LAUNCH);
     co->SetImmediateLauncher(Coroutine::GetCurrent());
+    Coroutine::GetCurrent()->OnChildCoroutineCreated(co);
     w->AddCreatedCoroutineAndSwitchToIt(co);
     // resume the interval once we schedule the original coro again
     GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::LAUNCH);

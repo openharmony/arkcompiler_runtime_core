@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"
 #include "runtime/include/runtime.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
 
 namespace ark::ets::intrinsics::taskpool {
 
@@ -30,6 +31,21 @@ static std::atomic<EtsInt> g_asyncRunnerId = 1;
 extern "C" EtsInt GenerateTaskId()
 {
     return g_taskId++;
+}
+
+extern "C" EtsInt GetTaskId()
+{
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto id = coro->GetTaskpoolTaskId();
+    return id;
+}
+
+extern "C" void SetTaskId(EtsInt taskId)
+{
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    coro->SetTaskpoolTaskId(taskId);
 }
 
 extern "C" EtsInt GenerateGroupId()
