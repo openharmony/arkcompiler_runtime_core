@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
@@ -26,10 +27,15 @@ if TYPE_CHECKING:
 
 _LOGGER = Log.get_logger(__file__)
 
+ValidatorFunction = Callable[["TestStandardFlow", str, str, str, int], ValidationResult]
+
 
 class ParserValidator(BaseValidator):
+
     def __init__(self) -> None:
-        super().__init__()
+
+        super().__init__(add_base_validators=False)
+
         for value in StepKind.values():
             self.add(value, ParserValidator.es2panda_result_validator)
 

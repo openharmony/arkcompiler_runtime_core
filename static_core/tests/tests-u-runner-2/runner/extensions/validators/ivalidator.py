@@ -34,17 +34,27 @@ ValidatorFunction = Callable[["TestStandardFlow", str, str, str, int], Validatio
 
 
 class IValidator(ABC):  # noqa: B024
-    __validators: dict[str, ValidatorFunction] = {}  # noqa: RUF012
+
+    def __init__(self) -> None:
+        self._validators: dict[str, list[ValidatorFunction]] = {}
 
     @property
-    def validators(self) -> dict[str, ValidatorFunction]:
-        return self.__validators
+    def validators(self) -> dict[str, list[ValidatorFunction]]:
+        return self._validators
 
     def add(self, step_name: str, function: ValidatorFunction) -> None:
-        self.__validators[step_name] = function
+        if step_name not in self._validators:
+            self._validators[step_name] = []
+        self._validators[step_name].append(function)
+
+    def delete(self, step_name: str, function: ValidatorFunction) -> None:
+        step_validators = self._validators[step_name]
+        if function in step_validators:
+            step_validators.remove(function)
+        self._validators[step_name] = step_validators
 
     def has_step(self, step_name: str) -> bool:
-        return step_name in self.__validators
+        return step_name in self._validators
 
-    def get_validator(self, step_name: str) -> ValidatorFunction | None:
-        return self.__validators.get(step_name)
+    def get_validator(self, step_name: str) -> list[ValidatorFunction] | None:
+        return self._validators.get(step_name)

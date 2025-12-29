@@ -104,10 +104,10 @@ class FailuresFromIgnoreTest(TestCase):
                 test.passed = False
                 test.reports[ReportFormat.LOG] = "failure"
                 if test.test_id == "test3.ets":
-                    _ = BaseValidator.check_return_code_0(cast(TestStandardFlow, test), "step1", test_output_test3,
+                    _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), "step1", test_output_test3,
                                                                                 err_output, 0)
                 else:
-                    _ = BaseValidator.check_return_code_0(cast(TestStandardFlow, test), "step1", test_output,
+                    _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), "step1", test_output,
                                                         err_output, 0)
 
             runner.results = actual_tests
@@ -146,7 +146,7 @@ class FailuresFromIgnoreTest(TestCase):
             for test in actual_tests:
                 test.passed = False
                 test.reports[ReportFormat.LOG] = "failure"
-                _ = BaseValidator.check_return_code_0(cast(TestStandardFlow, test), "step1", test_output,
+                _ = BaseValidator.check_return_code(cast(TestStandardFlow, test), "step1", test_output,
                                                                                 err_output, 0)
             runner.results = actual_tests
             failed = runner.summarize()
