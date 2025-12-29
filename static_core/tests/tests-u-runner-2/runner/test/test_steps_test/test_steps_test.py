@@ -23,6 +23,7 @@ from typing import ClassVar, cast
 from unittest import TestCase
 from unittest.mock import patch
 
+from runner.common_exceptions import InvalidConfiguration
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.suites.runner_standard_flow import RunnerStandardFlow
@@ -360,6 +361,26 @@ class TestStepsTest(TestCase):
             # clear up
             work_dir = Path(os.environ["WORK_DIR"])
             shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow", "test_suite", "--test-file=d_file_in_meta.ets"],),
+        (["runner.sh", "workflow", "test_suite", "--test-file=d_file_in_meta.ets", "--gn-build"],),
+    ])
+    def test_dependent_d_ets(self, argv: Callable) -> None:
+        """
+        Feature: the main file 'd_file_in_meta.ets' has a dependent .d.ets file
+        Expected:
+        - exception should be raised
+        """
+        with patch('sys.argv', argv):
+
+            self.assertRaises(InvalidConfiguration, self.prepare)
 
     def check_steps(self, steps: list[TestStep], expected_types: list[str]) -> None:
         actual_types = [step.type for step in steps]

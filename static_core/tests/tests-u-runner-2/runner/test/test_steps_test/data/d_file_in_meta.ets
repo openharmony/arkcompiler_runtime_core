@@ -14,16 +14,12 @@
  */
 
 /*---
-desc: >-
-      The declarations not marked as exported can be used only inside the compilation unit they are declared in.
-      Call not exported declared item using import all directive.
-tags: [compile-only, negative]
-files:
-- ./modules/partial_export.ets
+    files: [./any_file.d.ets]
 ---*/
 
-import * as A from "./modules/partial_export.d"
+import * from "./dependent_nat_co"
 
-function main() {
-  A.foo()
+function main(): void {
+  foo();
+  return;
 }

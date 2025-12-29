@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Interface implementations
-files: ['./interface_declarations.d.ets']
+files: ['./interface_declarations.ets']
 tags: [negative]
 ---*/
 

@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Indexer declarations
-files: ['./index_decl_d/index_decl_{{loop.index0}}.d.ets']
+files: ['./index_decl_{{loop.index0}}.ets']
 ---*/
 
 import { {{c.import}} } from './index_decl_d/index_decl_{{loop.index0}}.d'

@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Overload Ambient Function declarations
-files: ['./overload_function_declarations.d.ets']
+files: ['./overload_function_declarations.ets']
 ---*/
 
 import { {{c.decl}} } from './overload_function_declarations.d'

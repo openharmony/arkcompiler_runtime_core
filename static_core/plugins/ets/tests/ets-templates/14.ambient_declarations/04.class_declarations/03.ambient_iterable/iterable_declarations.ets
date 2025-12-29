@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Iterable declarations
-files: ['./iterable_decl_d/iterable_decl_{{loop.index0}}.d.ets']
+files: ['./iterable_decl_{{loop.index0}}.ets']
 ---*/
 
 import { {{c.import}} } from './iterable_decl_d/iterable_decl_{{loop.index0}}.d'

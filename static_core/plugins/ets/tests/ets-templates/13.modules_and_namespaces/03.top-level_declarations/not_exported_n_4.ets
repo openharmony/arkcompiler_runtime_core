@@ -20,7 +20,6 @@ desc: >-
 tags: [compile-only, negative]
 files:
 - ./modules/partial_export.ets
-- ./modules/partial_export.d.ets
 ---*/
 
 import {foo} from "./modules/partial_export.d"

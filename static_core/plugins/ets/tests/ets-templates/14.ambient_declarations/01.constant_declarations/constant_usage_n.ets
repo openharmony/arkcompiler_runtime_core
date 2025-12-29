@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Constant declarations implementations
-files: ['./constant_declarations_n.d.ets']
+files: ['./constant_declarations_n.ets']
 tags: [negative]
 ---*/
 

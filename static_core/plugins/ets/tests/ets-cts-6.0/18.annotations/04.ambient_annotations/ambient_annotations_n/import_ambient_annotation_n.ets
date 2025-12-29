@@ -19,10 +19,10 @@
 desc: Ambient declaration does not introduce a new annotation but provides type information
       to use an annotation that must be defined elsewhere
       A runtime error occurs if no annotation corresponds to the ambient annotation used in the program
-files: ['./ambient_annotations_n.d.ets', './ambient_annotations_n.ets']
+files: ['./ambient_annotations_n.ets']
 ---*/
 
-import { SomeAnnotation{{ loop.index }} } from "./ambient_annotations_n"
+import { SomeAnnotation{{ loop.index }} } from "./ambient_annotations_n.d"
 import { MyEnum } from "./ambient_annotations_n"
 
 // Need some situation which causes RTE

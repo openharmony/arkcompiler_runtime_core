@@ -21,7 +21,7 @@ desc: If an ambient namespace (see Ambient Namespace Declarations) defined in a 
       and top-level statements of the module.
       {{c.doc}}
 files:
- - ./ns_ambient_decl.d.ets
+ - ./ns_ambient_decl.ets
 ---*/
 
 import { NS } from './ns_ambient_decl.d'

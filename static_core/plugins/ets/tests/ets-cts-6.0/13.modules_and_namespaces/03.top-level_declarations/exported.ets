@@ -18,7 +18,6 @@ desc: Not exported item could still be used inside the module.
 tags: [compile-only, negative]
 files:
 - ./modules/partial_export.ets
-- ./modules/partial_export.d.ets
 ---*/
 
 import * as A from "./modules/partial_export.d"

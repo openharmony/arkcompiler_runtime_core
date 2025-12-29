@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: Ambient Call Signature run examples
-files: ['./call_sig_decl_d/call_sig_decl_{{loop.index0}}.d.ets']
+files: ['./call_sig_decl_{{loop.index0}}.ets']
 ---*/
 
 import { {{c.import}} } from './call_sig_decl_d/call_sig_decl_{{loop.index0}}.d'
