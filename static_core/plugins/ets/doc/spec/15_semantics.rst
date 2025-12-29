@@ -4058,6 +4058,24 @@ member is excluded in the right-hand-side column for brevity):
        number of element types *n*.
    * - :ref:`String Literal Types`
      - ``string``
+   * - Awaited<T>
+     - - if ``T`` is neither a type parameter nor a subtype of ``Promise``, then 
+         the Effective type (Awaited<T>) is Effective type (T);
+       - if ``T`` is a ``Promise<U>``, then the Effective type (Awaited<T>) is Effective type (U);
+       - if ``T`` is a type parameter with ``in`` variance, then the Effective type (Awaited<T>) is ``never``;
+       - if ``T`` is a type parameter with ``out`` variance or no variance specified, then the Effective type (Awaited<T>) is Effective type (upper-bound(T)).
+   * - NonNullable<T>
+     - Effective type (T) - ``null``
+   * - Partial<T>
+     - Special runtime partial class
+   * - Required<T>
+     - ``Effective type (T)``
+   * - Readonly<T>
+     - ``Effective type (T)``
+   * - Record<K, V>
+     - ``Map <Effective type (K), Effective type (V)>``
+   * - ReturnType<F>
+     - ``Effective type (return type of F)``
 
 Additional type mapping defines an *effective signature type*, i.e.,
 an *effective type* of a corresponding type except the following:
