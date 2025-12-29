@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,9 +32,15 @@ export class Transformer {
     this.transformers = transformerCallbacks;
   }
 
-  createCustomTransformer(): ts.CustomTransformer {
+  createCustomTransformer(onVisitSourceFile: (sf: ts.SourceFile) => void): ts.CustomTransformer {
     const visitor = <T extends ts.Node>(sourceFile: T): T => {
-      return ts.visitNode(sourceFile, this.visitNode.bind(this));
+      const visitResult = ts.visitNode(sourceFile, this.visitNode.bind(this));
+
+      if (visitResult && ts.isSourceFile(visitResult)) {
+        onVisitSourceFile(visitResult);
+      }
+
+      return visitResult;
     };
 
     return {

@@ -45,6 +45,8 @@ export class Declgen {
   private readonly compilerOptions: ts.CompilerOptions;
   private readonly declgenOptions: DeclgenCLIOptions;
   private readonly codeInputs?: CodeInput[];
+  private visitedFiles: Map<string, ts.SourceFile>;
+  private writedFiles: Set<string>;
 
   constructor(
     declgenOptions: DeclgenCLIOptions,
@@ -58,6 +60,8 @@ export class Declgen {
     this.declgenOptions = declgenOptions;
     this.codeInputs = codeInputs;
     this.sourceFileMap = new Map<string, ts.SourceFile>();
+    this.visitedFiles = new Map<string, ts.SourceFile>();
+    this.writedFiles = new Set<string>();
 
     // Create SourceFile based on code content.
     if (codeInputs) {
@@ -82,7 +86,7 @@ export class Declgen {
     // Prevent the noemit of the passed compilerOptions from being true
     this.compilerOptions.noEmit = false;
     this.compilerOptions.experimentalDecorators = true;
-    this.hookedHost = Declgen.createHookedCompilerHost(this.sourceFileMap, this.compilerOptions, declgenOptions);
+    this.hookedHost = Declgen.createHookedCompilerHost(this.sourceFileMap, this.compilerOptions, declgenOptions, this.writedFiles);
     if (customResolveModuleNames) {
       this.hookedHost.resolveModuleNames = customResolveModuleNames;
     }
@@ -116,9 +120,31 @@ export class Declgen {
           const autofixer = new Autofixer(typeChecker, ctx);
           const transformer = new Transformer(ctx, this.sourceFileMap, [autofixer.fixNode.bind(autofixer)]);
 
-          return transformer.createCustomTransformer();
+          return transformer.createCustomTransformer((sourceFile: ts.SourceFile) => {
+            this.visitedFiles.set(sourceFile.fileName, sourceFile);
+          });
         }
       ]
+    });
+
+    this.visitedFiles.forEach((sourceFile, fileName) => {
+        const outDir = this.compilerOptions.outDir || path.dirname(fileName);
+        const rootDir = this.compilerOptions.rootDir || path.dirname(fileName);
+        const relativePath = path.relative(rootDir, fileName);
+        const parsedPath = path.parse(path.join(outDir, relativePath));
+        const dEtsFilePath = path.join(parsedPath.dir, `${parsedPath.name}${Extension.DETS}`);
+        if (!this.writedFiles.has(dEtsFilePath) && Declgen.isFileInAllowedPath(this.declgenOptions, [sourceFile])) {
+          const outPath = path.dirname(dEtsFilePath);
+          if (!fs.existsSync(outPath)) {
+            fs.mkdirSync(outPath, { recursive: true });
+          }
+          const printer = ts.createPrinter({
+            newLine: ts.NewLineKind.LineFeed
+          });
+          const transformedCode = printer.printFile(sourceFile);
+          const finalCode = `'use static'\n${transformedCode}`;
+          fs.writeFileSync(dEtsFilePath, finalCode, { encoding: 'utf-8' });
+        }
     });
 
     return {
@@ -166,6 +192,7 @@ export class Declgen {
     if (Declgen.isFileInAllowedPath(this.declgenOptions, [sourceFile])) {
       const outPath = path.dirname(dEtsFilePath);
       const finalCode = `'use static'\n${transformedCode}`;
+      this.writedFiles.add(dEtsFilePath);
       if (!fs.existsSync(outPath)) {
         fs.mkdirSync(outPath, { recursive: true });
       }
@@ -204,7 +231,8 @@ export class Declgen {
   private static createHookedCompilerHost(
     sourceFileMap: Map<string, ts.SourceFile>,
     compilerOptions: ts.CompilerOptions,
-    declgenOptions: DeclgenCLIOptions
+    declgenOptions: DeclgenCLIOptions,
+    writedFiles: Set<string>
   ): ts.CompilerHost {
     const host = ts.createCompilerHost(compilerOptions);
     const fallbackGetSourceFile = host.getSourceFile;
@@ -235,12 +263,17 @@ export class Declgen {
         }
         const newText = `'use static'\n${text}`;
         const parsedPath = path.parse(fileName);
+        const outPath = path.join(parsedPath.dir, `${parsedPath.name}${Extension.ETS}`);
+        if (writedFiles.has(outPath)) {
+          return;
+        }
+        writedFiles.add(outPath);
         fallbackWriteFile(
           /*
            * Since `.d` part of `.d.ts` extension is a part of the parsedPath.name,
            * use `Extension.Ets` for output file name generation.
            */
-          path.join(parsedPath.dir, `${parsedPath.name}${Extension.ETS}`),
+          outPath,
           newText,
           writeByteOrderMark,
           onError,
