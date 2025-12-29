@@ -170,21 +170,18 @@ public:
     explicit NapiEscapableScope(napi_env env) : env_(env)
     {
         ASSERT_MANAGED_CODE();
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_open_escapable_handle_scope(env_, &scope_);
         ASSERT(status == napi_ok);
     }
 
     void Escape(napi_value &val)
     {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_escape_handle(env_, scope_, val, &val);
         ASSERT(status == napi_ok);
     }
 
     ~NapiEscapableScope()
     {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         [[maybe_unused]] auto status = napi_close_escapable_handle_scope(env_, scope_);
         ASSERT(status == napi_ok);
     }
