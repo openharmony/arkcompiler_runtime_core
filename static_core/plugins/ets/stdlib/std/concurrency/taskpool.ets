@@ -113,7 +113,6 @@ export namespace taskpool {
                 ConcurrencyHelpers.lockGuard(workersMutex, () => {
                     workerPendingTasksCount.set(this.workerId, workerPendingTasksCount.get(this.workerId)! - 1);
                 });
-                this.notifyTaskFinished(task);
                 setTimeout(() => {
                     InternalTask.of(task!).notifyDependencies();
                     this.notifyTaskFinished(task);

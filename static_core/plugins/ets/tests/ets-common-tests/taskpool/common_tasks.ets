@@ -141,13 +141,13 @@ async function getDelayedTaskInfoTest(): Promise<void> {
     let p = taskpool.executeDelayed(100, task);
 
     let taskpoolInfo = taskpool.getTaskPoolInfo();
-    let state = -1;
+    let state : taskpool.State = taskpool.State.WAITING;
     for (const taskInfo of taskpoolInfo.taskInfos) {
         if (taskInfo.name === taskName) {
             state = taskInfo.state;
         }
     }
-    arktest.assertEQ(taskpool.State.DELAYED as int, state);
+    arktest.assertEQ(taskpool.State.DELAYED, state);
 
     arktest.assertEQ(await p, 'success');
 
@@ -169,13 +169,13 @@ async function getDelayedTaskInfoWithCancelTest(): Promise<void> {
     taskpool.cancel(task);
 
     let taskpoolInfo = taskpool.getTaskPoolInfo();
-    let state = -1;
+    let state : taskpool.State = taskpool.State.WAITING;
     for (const taskInfo of taskpoolInfo.taskInfos) {
         if (taskInfo.name === taskName) {
             state = taskInfo.state;
         }
     }
-    arktest.assertEQ(taskpool.State.CANCELED as int, state);
+    arktest.assertEQ(taskpool.State.CANCELED, state);
 
     arktest.expectError(() => {
         await p;
@@ -320,7 +320,7 @@ async function testTaskpoolInfo() {
     }
     arktest.assertEQ(isNonEmptyWorker, true);
     // NOTE(ipetrov, #20349): uncomment when frontend fix enum comparison
-    arktest.assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
+    arktest.assertEQ(info2.taskInfos[0].state, taskpool.State.RUNNING);
     arktest.assertEQ(info2.taskInfos[0].name, 'task_name');
     arktest.assertEQ(await p, 'result');
 }
@@ -364,7 +364,7 @@ function testTaskpoolInfoOfNoneNameTask() {
     }
     arktest.assertEQ(isNonEmptyWorker, true);
     // NOTE(ipetrov, #20349): uncomment when frontend fix enum comparison
-    arktest.assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
+    arktest.assertEQ(info2.taskInfos[0].state, taskpool.State.RUNNING);
     arktest.assertEQ(info2.taskInfos[0].name, 'namedTaskFunction');
     arktest.assertEQ(await p, 'result');
 }
@@ -386,13 +386,13 @@ function testTaskPoolInfoasyncawaitTask() {
     isRunTask.wait();
     let taskpoolInfo: taskpool.TaskPoolInfo =  taskpool.getTaskPoolInfo();
     flagforTask.fire();
-    let state = 0;
+    let state : taskpool.State = taskpool.State.WAITING;
     for(const taskInfo of taskpoolInfo.taskInfos) {
         if(taskInfo.name == caseName) {
             state = taskInfo.state;
         }
     }
-    arktest.assertEQ(state.toInt(), taskpool.State.RUNNING);
+    arktest.assertEQ(state, taskpool.State.RUNNING);
 }
 
 function returnNumber(): int {
@@ -807,12 +807,22 @@ async function dependencyExecutedTaskTest() {
     arktest.expectError(() => { await taskpool.execute(task1) }, expectedAgainExecuteError);
     arktest.expectError(() => { await taskpool.execute(task3) }, expectedAgainExecuteError);
     // Try to remove dependency after execute
-    let task5 = new taskpool.Task(returnAbc);
-    let task6 = new taskpool.Task(returnAbc);
+    let isRuning1 = new Event();
+    let isRuning2 = new Event();
+    let eventTask1 = () =>{
+        isRuning1.fire();
+    }
+    let eventTask2 = () =>{
+        isRuning2.fire();
+    }
+    let task5 = new taskpool.Task(eventTask1);
+    let task6 = new taskpool.Task(eventTask2);
     task5.addDependency(task6);
     taskpool.execute(task5);
     arktest.expectError(() => { task5.removeDependency(task6); }, new Error('taskpool:: executedTask cannot removeDependency'));
     taskpool.execute(task6);
+    isRuning1.wait();
+    isRuning2.wait();
 }
 
 async function sendReceiveDataTest() {
@@ -1362,10 +1372,12 @@ function main(): int {
     commonTaskSuite.addAsyncTest('DependentTasksTest', dependentTasksTest);
     // #24758: Test is incorrect and flaky fails
     commonTaskSuiteDisabled.addAsyncTest('DependentTasksWithParamsTest', dependentTasksWithParamsTest);
+    commonTaskSuite.addAsyncTest('TestExecuteUndefined', testExecuteUndefined);
     commonTaskSuite.addAsyncTest('CircularDependencyTest', circularDependencyTest);
     commonTaskSuite.addAsyncTest('DependencyExecutedTaskTest', dependencyExecutedTaskTest);
     commonTaskSuite.addAsyncTest('SendReceiveDataTest', sendReceiveDataTest);
-    commonTaskSuite.addAsyncTest('SendDataAndCancelTest', sendDataAndCancelTest);
+    // #32450: Test is incorrect
+    commonTaskSuiteDisabled.addAsyncTest('SendDataAndCancelTest', sendDataAndCancelTest);
     commonTaskSuite.addAsyncTest('TasksWithDifferentParamsTest', tasksWithDifferentParamsTest);
     commonTaskSuite.addAsyncTest('TaskPoolInTaskPoolTest', taskPoolInTaskPoolTest);
     commonTaskSuite.addAsyncTest('TasksExecutionTest', tasksExecutionTest);

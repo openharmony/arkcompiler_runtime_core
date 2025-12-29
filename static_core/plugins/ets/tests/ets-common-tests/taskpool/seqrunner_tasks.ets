@@ -39,6 +39,40 @@ function launchImpl(func: () => Any): Promise<Any> {
     });
 }
 
+async function delay(ms: int) {
+    await new Promise<void>((res, rej) => {
+        setTimeout(() => {
+            res(undefined);
+        }, ms);
+    });
+}
+
+class Event {
+    constructor() {
+        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
+            this.resolveFn = resolve;
+        })
+        this.job = new CompletableJob<boolean>();
+        this.promise.then((result: boolean) => {
+            this.job.finish(result);
+        }).catch((e: Error) => {
+            this.job.fail(e);
+        });
+    }
+
+    public wait(): boolean {
+        return this.job.Await();
+    }
+
+    public fire(val: boolean = true) {
+        this.resolveFn!(val);
+    }
+
+    private promise: Promise<boolean>;
+    private resolveFn: ((val: boolean) => void) | null = null;
+    private job: CompletableJob<boolean>;
+}
+
 async function testDelayFunc(): Promise<Any> {
     let task = new taskpool.Task(max, 80, 90);
     let res = await taskpool.executeDelayed(50, task);
@@ -273,6 +307,28 @@ async function taskWithDifferentParamsTest() {
     arktest.assertEQ(longTask.isDone(), true);
 }
 
+async function testSequenceRunnerexecuteorder(){
+    let count : int = 0;
+    let runner = new taskpool.SequenceRunner();
+    let result : int[] = [];
+    let isRunning = new Event();
+    for(let i : int = 0; i < 10; i++){
+        let task = new taskpool.Task(`task_${i}`, () => {
+            await delay(30);
+            result.push(i);
+            count++;
+            if(count >= 10){
+                isRunning.fire();
+            }
+        });
+        runner.execute(task);
+    }
+    isRunning.wait();
+    for(let i : int = 0; i< 10; i++) {
+        arktest.assertEQ(result[i], i);
+    }
+}
+
 function main(): int {
     let seqRunnerSuite = new arktest.ArkTestsuite('taskpool.SequenceRunner');
     let seqRunnerSuiteDisabled = new arktest.ArkTestsuite('taskpool.SequenceRunner.DISABLED');
@@ -289,6 +345,7 @@ function main(): int {
     seqRunnerSuite.addTest('AddDependentTaskTest', addDependentTaskTest);
     seqRunnerSuite.addTest('AddDependencyExecutedTaskTest', addDependencyExecutedTaskTest);
     seqRunnerSuite.addAsyncTest('TaskWithDifferentParamsTest', taskWithDifferentParamsTest);
+    seqRunnerSuite.addAsyncTest('TestSequenceRunnerExecuteOrder', testSequenceRunnerexecuteorder);
     let res = seqRunnerSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
