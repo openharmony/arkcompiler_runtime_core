@@ -15,31 +15,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 import argparse
 import logging
+import pathlib
+from typing import Final
 
 parser = argparse.ArgumentParser(description="Sampler trace test")
 parser.add_argument("--file", type=str)
 args = parser.parse_args()
 file_name = args.file
 
-trace_list = [
-    "LSamplerTest/ETSGLOBAL::execute_test; LSamplerTest/ETSGLOBAL::CallSlowFunction; "
-    "LSamplerTest/ETSGLOBAL::SlowETSFunction;",
-    "LSamplerTest/ETSGLOBAL::execute_test; LSamplerTest/ETSGLOBAL::CallSlowFunction; "
-    "LSamplerTest/ETSGLOBAL::SlowETSFunctionCopy1;",
-    "LSamplerTest/ETSGLOBAL::execute_test; LSamplerTest/ETSGLOBAL::CallSlowFunction; "
-    "LSamplerTest/ETSGLOBAL::SlowETSFunctionCopy2;",
-    "LSamplerTest/ETSGLOBAL::execute_test; LSamplerTest/ETSGLOBAL::CallSlowFunction; "
-    "LSamplerTest/ETSGLOBAL::SlowETSFunctionCopy3;",
+TRACE_LIST: Final[list[str]] = [
+    "LSamplerTest/ns::executeTest; LSamplerTest/ns::callSlowFunction; "
+    "LSamplerTest/ns::slowFunction;",
+    "LSamplerTest/ns::executeTest; LSamplerTest/ns::callSlowFunction; "
+    "LSamplerTest/ns::slowFunctionCopy1;",
+    "LSamplerTest/ns::executeTest; LSamplerTest/ns::callSlowFunction; "
+    "LSamplerTest/ns::slowFunctionCopy2;",
+    "LSamplerTest/ns::executeTest; LSamplerTest/ns::callSlowFunction; "
+    "LSamplerTest/ns::slowFunctionCopy3;",
 ]
 
 ALL_TRACES_FOUND = True
 
-with open(file_name, 'r') as my_file:
+with pathlib.Path(file_name).open(mode="r") as my_file:
     content = my_file.read()
-    for string in trace_list:
-        if string not in content:
+    for method in TRACE_LIST:
+        if method not in content:
             ALL_TRACES_FOUND = False
     if not ALL_TRACES_FOUND:
         logging.error("Actual stack trace")

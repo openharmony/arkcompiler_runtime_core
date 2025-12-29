@@ -13,105 +13,124 @@
  * limitations under the License.
  */
 
-export function debugMain(): int {
-    let repetitions: int = 500000;
+export namespace ns {
 
-    return execute_test(repetitions);
+export function main(): int {
+    // By providing the upper-bound execution time of the test functions we ensure that
+    // enough profiler samples are collected while preventing timeouts in CI
+    const repetitions: int = 10000000
+    const functionExecTimeMs: int = 1000
+    return executeTest(repetitions, functionExecTimeMs)
 }
 
-export function releaseMain(): int {
-    let repetitions: int = 10000000;
+function executeTest(repetitions: int, functionExecTimeMs: int): int {
+    let res: double = 0
+    let pi: double = 3.14158
 
-    return execute_test(repetitions);
+    res = callSlowFunction(1, repetitions, functionExecTimeMs)
+    if (absolute(res - pi) > 0.0001) {
+        console.println("Pi calculation went wrong")
+        return 1
+    }
+    res = callSlowFunction(2, repetitions, functionExecTimeMs)
+    if (absolute(res - pi) > 0.0001) {
+        console.println("Pi calculation went wrong")
+        return 1
+    }
+    res = callSlowFunction(3, repetitions, functionExecTimeMs)
+    if (absolute(res - pi) > 0.0001) {
+        console.println("Pi calculation went wrong")
+        return 1
+    }
+    res = callSlowFunction(4, repetitions, functionExecTimeMs)
+    if (absolute(res - pi) > 0.0001) {
+        console.println("Pi calculation went wrong")
+        return 1
+    }
+
+    return 0
 }
 
-function execute_test(repetitions: int): int {
-
-    let res: double = 0;
-    let pi: double = 3.14158;
-
-    res = CallSlowFunction(1, repetitions);
-    if (Absolute(res - pi) > 0.0001) {
-        console.println("Pi calculation went wrong")
-        return 1;
-    }
-    res = CallSlowFunction(2, repetitions);
-    if (Absolute(res - pi) > 0.0001) {
-        console.println("Pi calculation went wrong")
-        return 1;
-    }
-    res = CallSlowFunction(3, repetitions);
-    if (Absolute(res - pi) > 0.0001) {
-        console.println("Pi calculation went wrong")
-        return 1;
-    }
-    res = CallSlowFunction(4, repetitions);
-    if (Absolute(res - pi) > 0.0001) {
-        console.println("Pi calculation went wrong")
-        return 1;
-    }
-
-    return 0;
-}
-
-function Absolute(val: double): double {
+function absolute(val: double): double {
     if (val < 0) {
-        return val *= -1;
+        return val *= -1
     }
-    return val;
+    return val
 }
 
-function CallSlowFunction(foo: int, repetitions: int): double {
-    let res: double = 0;
+function callSlowFunction(foo: int, repetitions: int, functionExecTimeMs: int): double {
+    let res: double = 0
     if (foo == 1) {
-        res = SlowETSFunction(repetitions);
+        res = slowFunction(repetitions, functionExecTimeMs)
     } else if (foo == 2) {
-        res = SlowETSFunctionCopy1(repetitions);
+        res = slowFunctionCopy1(repetitions, functionExecTimeMs)
     } else if (foo == 3) {
-        res = SlowETSFunctionCopy2(repetitions);
+        res = slowFunctionCopy2(repetitions, functionExecTimeMs)
     } else if (foo == 4) {
-        res = SlowETSFunctionCopy3(repetitions);
+        res = slowFunctionCopy3(repetitions, functionExecTimeMs)
     }
-    return res;
+    return res
 }
 
 // Doing copypaste because of compiler optimisations
-function SlowETSFunction(repetitions: int): double {
-    let ret: double = 0.0;
-    let sign: int = 1;
+function slowFunction(repetitions: int, functionExecTimeMs: int): double {
+    let ret: double = 0.0
+    let sign: int = 1
+    const startTime = Date.now()
     for (let i: int = 0; i < repetitions; i++) {
         ret += sign / (2.0 * i + 1);
-        sign *= -1;
+        sign *= -1
+
+        if ((Date.now() - startTime) > functionExecTimeMs) {
+            break
+        }
     }
-    return 4 * ret;
+    return 4 * ret
 }
 
-function SlowETSFunctionCopy1(repetitions: int): double {
-    let ret: double = 0.0;
-    let sign: int = 1;
+function slowFunctionCopy1(repetitions: int, functionExecTimeMs: int): double {
+    let ret: double = 0.0
+    let sign: int = 1
+    const startTime = Date.now()
     for (let i: int = 0; i < repetitions; i++) {
         ret += sign / (2.0 * i + 1);
-        sign *= -1;
+        sign *= -1
+
+        if ((Date.now() - startTime) > functionExecTimeMs) {
+            break
+        }
     }
-    return 4 * ret;
+    return 4 * ret
 }
 
-function SlowETSFunctionCopy2(repetitions: int): double {
-    let ret: double = 0.0;
-    let sign: int = 1;
+function slowFunctionCopy2(repetitions: int, functionExecTimeMs: int): double {
+    let ret: double = 0.0
+    let sign: int = 1
+    const startTime = Date.now()
     for (let i: int = 0; i < repetitions; i++) {
         ret += sign / (2.0 * i + 1);
-        sign *= -1;
+        sign *= -1
+
+        if ((Date.now() - startTime) > functionExecTimeMs) {
+            break
+        }
     }
-    return 4 * ret;
+    return 4 * ret
 }
 
-function SlowETSFunctionCopy3(repetitions: int): double {
-    let ret: double = 0.0;
-    let sign: int = 1;
+function slowFunctionCopy3(repetitions: int, functionExecTimeMs: int): double {
+    let ret: double = 0.0
+    let sign: int = 1
+    const startTime = Date.now()
     for (let i: int = 0; i < repetitions; i++) {
         ret += sign / (2.0 * i + 1);
-        sign *= -1;
+        sign *= -1
+
+        if ((Date.now() - startTime) > functionExecTimeMs) {
+            break
+        }
     }
-    return 4 * ret;
+    return 4 * ret
+}
+
 }
