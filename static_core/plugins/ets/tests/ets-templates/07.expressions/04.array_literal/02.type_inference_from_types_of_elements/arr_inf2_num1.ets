@@ -22,7 +22,13 @@ desc: >-
 
 {{c.decl}}
 
+type my_type = {%- if c.type is defined %} {{c.type}} {%- else %} Numeric {%- endif %}
+
 function main() {
-    arktest.assertTrue( {{c.val}} instanceof {%- if c.type is defined %} {{c.type}} {%- else %} Numeric {%- endif %} [] )
+    let x = {{c.val}}
+    arktest.assertTrue( x instanceof Array, "failed instanceof Array" )
+    for(let idx = 0; idx < x.length; idx++) {
+        arktest.assertTrue(x[idx] instanceof my_type)
+    }
 }
 {% endfor %}

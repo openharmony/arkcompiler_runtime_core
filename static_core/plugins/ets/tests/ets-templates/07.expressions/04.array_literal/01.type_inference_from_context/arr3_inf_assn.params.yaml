@@ -257,6 +257,59 @@ cases:
           arktest.assertTrue( a.length == 2 && sum(a) == 0.0 )
 
     - decl: |-
+        function sum(p: Array<Number>): number {
+            let s: number = 0
+            for (let v of p)
+                s += v
+            return s
+        }
+        let a: Array<number> = [0]
+      use: |-
+        // assignment context
+        a = [1, 2, 3, ]
+        arktest.assertTrue( a.length == 3 && sum(a) == 6.0 )
+        a = [1.1, 2.2, 3.3, 4.4, 0.1]
+        arktest.assertTrue( a.length == 5 && sum(a) == 11.1 )
+        a = [0, 0, ]
+        arktest.assertTrue( a.length == 2 && sum(a) == 0.0 )
+
+    - decl: |-
+        function sum(p: Array<Number>): number {
+            let s: number = 0
+            for (let v of p) {
+                arktest.assertTrue(v instanceof Double)
+                s += v
+            }
+            return s
+        }
+        let a: Array<Number> = [0]
+      use: |-
+        // assignment context
+        a = [1.0, 2, 3, ]
+        arktest.assertTrue( a.length == 3 && sum(a) == 6.0 )
+        a = [1.1, 2.2, 3.3, 4.4, 0.1]
+        arktest.assertTrue( a.length == 5 && sum(a) == 11.1 )
+        a = [0, 0.0, ]
+        arktest.assertTrue( a.length == 2 && sum(a) == 0.0 )
+
+    - decl: |-
+        function sum(p: number[]): number {
+            let s: number = 0
+            for (let v of p)
+                s += v
+            return s
+        }
+        let a: number[] = [0]
+      use: |-
+        // assignment context
+        a = [1, 2, 3, ]
+        arktest.assertTrue( a.length == 3 && sum(a) == 6.0 )
+        a = [1.1, 2.2, 3.3, 4.4, 0.1]
+        arktest.assertTrue( a.length == 5 && sum(a) == 11.1 )
+        a = [0, 0, ]
+        arktest.assertTrue( a.length == 2 && sum(a) == 0.0 )
+
+    - decl: |-
           let a: FixedArray<boolean|int|string|null> = []
       use: |-
           // assignment context, array of unions
