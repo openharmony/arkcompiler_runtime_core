@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1286,6 +1286,30 @@ TEST(emittertests, test_any_in_instructions)
             checkcast Y[][]
             return.void
         }
+
+        .function void foo13(Y a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast.nonnull Y
+            return.void
+        }
+
+        .function void foo14(N a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast.nonnull N
+            return.void
+        }
+
+        .function void foo15(Y a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast.nonnull Y[]
+            return.void
+        }
+
+        .function void foo16(Y a0) <static, access.function=public> {
+            lda.obj a0
+            checkcast.nonnull Y[][]
+            return.void
+        }
     )";
     std::string sourceFilename = "source.pa";
     auto res = p.Parse(source, sourceFilename);
@@ -1298,7 +1322,7 @@ TEST(emittertests, test_any_in_instructions)
     auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
 
     panda_file::ClassDataAccessor cda(*pf, classId);
-    ASSERT_TRUE(cda.GetMethodsNumber() == 12U);
+    ASSERT_TRUE(cda.GetMethodsNumber() == 16U);
 }
 
 TEST(emittertests, test_any_function)

@@ -1459,6 +1459,24 @@ void InstBuilder::BuildCheckCast(const BytecodeInstruction *bcInst)
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::BuildCheckCastNonnull(const BytecodeInstruction *bcInst)
+{
+    auto typeIndex = bcInst->GetId(0).AsIndex();
+    auto typeId = GetRuntime()->ResolveTypeIndex(GetMethod(), typeIndex);
+    auto klassType = GetRuntime()->GetClassType(GetGraph()->GetMethod(), typeId);
+    auto pc = GetPc(bcInst->GetAddress());
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    auto loadClass = BuildLoadClass(typeId, pc, saveState);
+    auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinitionAcc(), saveState,
+                                                 TypeIdMixin {typeId, GetGraph()->GetMethod()});
+    nullCheck->SetIsClassCastCheck(true);
+    auto inst = GetGraph()->CreateInstCheckCast(DataType::NO_TYPE, pc, nullCheck, loadClass, saveState,
+                                                TypeIdMixin {typeId, GetGraph()->GetMethod()}, klassType);
+    inst->SetIsNotNullCheck(true);
+    AddInstruction(saveState, loadClass, nullCheck, inst);
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
 void InstBuilder::BuildIsInstance(const BytecodeInstruction *bcInst)
 {
     auto typeIndex = bcInst->GetId(0).AsIndex();

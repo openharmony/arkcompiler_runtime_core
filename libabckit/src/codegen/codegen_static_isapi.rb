@@ -527,6 +527,10 @@ def call_me_from_template
     plain('checkcast', type_id(0))
   end
 
+  visit('CheckCastNonnullIntrinsic') do
+    plain('checkcast.nonnull', type_id(0))
+  end
+
   visit('IsInstanceIntrinsic') do
     plain('isinstance', type_id(0))
   end
@@ -559,6 +563,7 @@ def call_me_from_template
        case_(['REFERENCE'], 'ets.ldobj.name.obj', r(0), field_id_from_imm)]
     )
   end
+
   # Empty visitors for IR instructions we want to ignore
   # (Add missing IRs on demand)
   %w[NullCheck BoundsCheck ZeroCheck NegativeCheck SafePoint

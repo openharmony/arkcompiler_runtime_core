@@ -4892,10 +4892,13 @@ public:
     }
 };
 
-class NullCheckInst : public FixedInputsInst2 {
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class NullCheckInst : public FixedInputsInst2, public TypeIdMixin {
 public:
     using Base = FixedInputsInst2;
     using Base::Base;
+
+    NullCheckInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     bool IsImplicit() const
     {
@@ -4916,9 +4919,32 @@ public:
         return DataType::REFERENCE;
     }
 
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        auto clone = Base::Clone(targetGraph);
+        clone->CastToNullCheck()->SetTypeId(GetTypeId());
+        clone->CastToNullCheck()->SetMethod(GetMethod());
+        return clone;
+    }
+
+    bool GetIsClassCastCheck() const
+    {
+        return GetField<IsClassCastCheck>();
+    }
+
+    void SetIsClassCastCheck(bool isClassCastCheck = true)
+    {
+        SetField<IsClassCastCheck>(isClassCastCheck);
+        // NOTE(lyupaanastasia): remove after supporting throw class cast exception from nullcheck
+        if (isClassCastCheck) {
+            SetFlag(inst_flags::CAN_DEOPTIMIZE);
+        }
+    }
+
 private:
     using IsImplicitFlag = LastField::NextFlag;
-    using LastField = IsImplicitFlag;
+    using IsClassCastCheck = IsImplicitFlag::NextFlag;
+    using LastField = IsClassCastCheck;
 };
 
 /// Return immediate
@@ -6007,6 +6033,20 @@ public:
         ASSERT(clone->CastToCheckCast()->GetOmitNullCheck() == GetOmitNullCheck());
         return clone;
     }
+
+    bool GetIsNotNullCheck() const
+    {
+        return GetField<IsNotNullCheck>();
+    }
+
+    void SetIsNotNullCheck(bool isNotNullCheck = true)
+    {
+        SetField<IsNotNullCheck>(isNotNullCheck);
+    }
+
+private:
+    using IsNotNullCheck = LastField::NextFlag;
+    using LastField = IsNotNullCheck;
 };
 
 /// Is instance
@@ -7158,7 +7198,11 @@ public:
     {
         switch (inst->GetOpcode()) {
             case Opcode::NullCheck:
-                SetDeoptimizeType(DeoptimizeType::NULL_CHECK);
+                if (inst->CastToNullCheck()->GetIsClassCastCheck()) {
+                    SetDeoptimizeType(DeoptimizeType::CHECK_CAST);
+                } else {
+                    SetDeoptimizeType(DeoptimizeType::NULL_CHECK);
+                }
                 break;
             case Opcode::BoundsCheck:
                 SetDeoptimizeType(DeoptimizeType::BOUNDS_CHECK);

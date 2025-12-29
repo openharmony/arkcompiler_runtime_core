@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,23 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// Before AOP:
 
-/*---
-  tags: [not-a-test]
----*/
+class A {}
+class B extends A {}
 
-// inline tree
-export function riskyArray(arr: int[]): int {
-    let sum = 0;
-    for (let i = 0; i <= arr.length; i++) {
-        sum += arr[i];
-    }
-    return sum;
+function main() {
+    let a = new B();
+    return;
 }
 
-export function riskyType(f: FixedArray<Object>, o: Object): int {
-  for (let i = 0; i < f.length; i++) {
-    f[i] = o; // RefTypeCheck Deoptimize
-  }
-  return f.length
-}
+// After AOP:
+//
+// class A {}
+// class B extends A {}
+//
+// function main() {
+//     let a = new B();
+//     <checkcast.nonnull A>;
+//     return;
+// }

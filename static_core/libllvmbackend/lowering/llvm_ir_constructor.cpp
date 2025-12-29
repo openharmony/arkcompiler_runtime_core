@@ -733,7 +733,11 @@ static DeoptimizeType GetDeoptimizationType(Inst *inst)
 {
     switch (inst->GetOpcode()) {
         case Opcode::NullCheck:
-            return DeoptimizeType::NULL_CHECK;
+            if (inst->CastToNullCheck()->GetIsClassCastCheck()) {
+                return DeoptimizeType::CHECK_CAST;
+            } else {
+                return DeoptimizeType::NULL_CHECK;
+            }
         case Opcode::DeoptimizeIf:
             return inst->CastToDeoptimizeIf()->GetDeoptimizeType();
         case Opcode::BoundsCheck:

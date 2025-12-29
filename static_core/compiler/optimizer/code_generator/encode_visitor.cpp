@@ -710,8 +710,10 @@ void EncodeVisitor::VisitNullCheck(GraphVisitor *visitor, Inst *inst)
         return;
     }
     auto *enc = static_cast<EncodeVisitor *>(visitor);
+    auto deoptimizeType =
+        inst->CastToNullCheck()->GetIsClassCastCheck() ? DeoptimizeType::CHECK_CAST : DeoptimizeType::NULL_CHECK;
     enc->GetCodegen()->template CreateUnaryCheck<SlowPathImplicitNullCheck>(inst, EntrypointId::NULL_POINTER_EXCEPTION,
-                                                                            DeoptimizeType::NULL_CHECK, Condition::EQ);
+                                                                            deoptimizeType, Condition::EQ);
 }
 
 void EncodeVisitor::VisitBoundsCheck(GraphVisitor *visitor, Inst *inst)

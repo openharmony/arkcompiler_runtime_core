@@ -34,7 +34,7 @@
 //! PASS_BEFORE     "Peepholes"
 //! INST_COUNT      "IsInstance", 3
 //! PASS_AFTER      "Codegen"
-//! INST_COUNT      "IsInstance", 1
+//! INST_COUNT      "IsInstance", 0
 //!
 //! METHOD          "union_type_isinstance_elimination.ETSGLOBAL::checkEliminationForInterfaces"
 //! PASS_BEFORE     "Peepholes"

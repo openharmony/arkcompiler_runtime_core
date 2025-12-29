@@ -1785,24 +1785,33 @@ macro(:handle_isinstance_id16) do |id|
   set_acc_primitive(res)
 end
 
-macro(:handle_checkcast_id16) do |id|
-  type := type_ptr(id, true).ptr
-  acc := Phi(acc, acc_restored).ref
+["", "nonnull_"].each do |kind|
+  macro(:"handle_checkcast_#{kind}id16") do |id|
+    type := type_ptr(id, true).ptr
+    acc := Phi(acc, acc_restored).ref
 
-  If(type, nullptr).EQ.Unlikely {
-    move_to_exception
-  }
+    If(type, nullptr).EQ.Unlikely {
+      move_to_exception
+    }
 
-  handle_isinstance_checkcast_common(acc.ref, type)
+    if (kind == "nonnull_")
+      If(acc.ref, 0).EQ.Unlikely {
+        call_runtime("ThrowClassCastExceptionFromInterpreter", type).void
+        move_to_exception
+      }
+    end
 
-  Label(:SlowPath)
-  If(call_runtime("CheckCastNoSuperTraversalEntrypoint", obj_class, type).u32, 0).NE.Unlikely {
-    move_to_exception
-  }
+    handle_isinstance_checkcast_common(acc.ref, type)
 
-  Label(:ReturnValue0)
-  Label(:ReturnValue1)
-  Label(:End)
+    Label(:SlowPath)
+    If(call_runtime("CheckCastNoSuperTraversalEntrypoint", obj_class, type).u32, 0).NE.Unlikely {
+      move_to_exception
+    }
+
+    Label(:ReturnValue0)
+    Label(:ReturnValue1)
+    Label(:End)
+  end
 end
 
 macro(:handle_sta_obj_v8) do |vd|
@@ -3034,6 +3043,8 @@ Panda.instructions.each do |i|
       handle_isinstance_id16(as_id(op[0]))
     when "CHECKCAST_ID16"
       handle_checkcast_id16(as_id(op[0]))
+    when "CHECKCAST_NONNULL_ID16"
+      handle_checkcast_nonnull_id16(as_id(op[0]))
     # cast
     when "I32TOU1_PREF_NONE"
       handle_i32tou1()

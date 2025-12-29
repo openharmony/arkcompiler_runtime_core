@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -530,6 +530,20 @@ extern "C" AbckitInst *IcreateCheckCast(AbckitGraph *graph, AbckitInst *inputObj
     return IcreateCheckCastStatic(graph, inputObj, targetType);
 }
 
+extern "C" AbckitInst *IcreateCheckCastNonnull(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputObj, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(targetType, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, inputObj->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
+    return IcreateCheckCastNonnullStatic(graph, inputObj, targetType);
+}
+
 extern "C" AbckitInst *IcreateIsInstance(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -989,6 +1003,7 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateLenArray,
     IcreateLoadConstArray,
     IcreateCheckCast,
+    IcreateCheckCastNonnull,
     IcreateIsInstance,
     IcreateLoadNullValue,
     IcreateReturnVoid,

@@ -177,7 +177,7 @@ static void CheckErrorDescription(const std::string &errorDescription, const std
     stackTraceIndexes.reserve(stackTrace.size() + 1);
     stackTraceIndexes.push_back(errorDescription.find(errorMessage));
     for (const auto &traceLine : stackTrace) {
-        stackTraceIndexes.push_back(errorDescription.find(traceLine));
+        stackTraceIndexes.push_back(errorDescription.find(traceLine, stackTraceIndexes.back() + 1));
     }
 
     for (size_t i = 0; i < stackTraceIndexes.size(); ++i) {
@@ -489,7 +489,7 @@ TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
     std::string errorDescription {};
     GetErrorDescription(env_, errorDescription);
     CheckErrorDescription(errorDescription, std::string(MESSAGE_FROM_THROW_ERROR),
-                          {"at escompat.Error.<ctor> (Error.ets:99:0)", "at escompat.Error.<ctor> (Error.ets:82:0)"});
+                          {"at escompat.Error.<ctor>", "at escompat.Error.<ctor>"});
 
     ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);

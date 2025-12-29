@@ -92,6 +92,26 @@ intrinsics:
   is_fastpath: false
   need_param_locations: false
 
+- name: AbckitCheckCastNonnull
+  space: abckit
+  class_name: "CheckCastNonnull"
+  method_name: "checkcast.nonnull"
+  compiler_only: true
+  private: false
+  static: true
+  safepoint_after_call: false
+  signature:
+    ret: none
+    args: [ ref, type_id ]
+  clear_flags: [ "require_state", "call", "heap_inv", "acc_write", "barrier" ]
+  set_flags: ["load", "no_dst"]
+  is_stub: false
+  additional_temps: 0
+  codegen_arch: []
+  need_nullcheck: []
+  is_fastpath: false
+  need_param_locations: false
+
 - name: AbckitIsInstance
   space: abckit
   class_name: "IsInstance"

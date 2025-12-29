@@ -27,10 +27,10 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",64
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",10
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    "Intrinsic.StdCoreSbToString",5
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",10
 //!
 //! RUN           entry: "ets_string_builder_merge_uber_export.ETSGLOBAL::main"
 
@@ -47,10 +47,10 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",64
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",10
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    "Intrinsic.StdCoreSbToString",5
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",10
 
 export function uberChainConcat4(doExit:boolean, a:String, n:int, b:String, m:int, c:String, l:int, d:String, k:int,
                                  cond0:boolean, cond1:boolean, doThrow0:boolean, doThrow1:boolean): String {

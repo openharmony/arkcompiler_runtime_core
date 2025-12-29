@@ -52,6 +52,7 @@ private:
     void BuildNewObject(const BytecodeInstruction *bcInst) override;
     void BuildInitObject(const BytecodeInstruction *bcInst, bool isRange) override;
     void BuildCheckCast(const BytecodeInstruction *bcInst) override;
+    void BuildCheckCastNonnull(const BytecodeInstruction *bcInst) override;
     void BuildIsInstance(const BytecodeInstruction *bcInst) override;
     void BuildThrow(const BytecodeInstruction *bcInst) override;
     void BuildAbcKitInitObjectIntrinsic(const BytecodeInstruction *bcInst, bool isRange = false);

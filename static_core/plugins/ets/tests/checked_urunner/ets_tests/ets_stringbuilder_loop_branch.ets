@@ -30,7 +30,7 @@
 //! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! INST_COUNT  /NewObject/,2
-//! INST_COUNT  /Intrinsic.StdCoreSbToString/,1
+//! INST_COUNT  /Intrinsic.StdCoreSbToString/,2
 //!
 //! RUN         entry: "ets_stringbuilder_loop_branch.ETSGLOBAL::main", result: 0
 

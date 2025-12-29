@@ -79,6 +79,7 @@ enum AbckitIsaApiStaticOpcode {
     ABCKIT_ISA_API_STATIC_OPCODE_LENARRAY,
     ABCKIT_ISA_API_STATIC_OPCODE_LOADCONSTARRAY,
     ABCKIT_ISA_API_STATIC_OPCODE_CHECKCAST,
+    ABCKIT_ISA_API_STATIC_OPCODE_CHECKCASTNONNULL,
     ABCKIT_ISA_API_STATIC_OPCODE_ISINSTANCE,
     ABCKIT_ISA_API_STATIC_OPCODE_ISNULLVALUE,
     ABCKIT_ISA_API_STATIC_OPCODE_LOADNULLVALUE,
@@ -623,6 +624,21 @@ struct CAPI_EXPORT AbckitIsaApiStatic {
      */
     AbckitInst *(*iCreateCheckCast)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */,
                                     AbckitType *targetType /* in */);
+
+    /**
+     * @brief Creates `CheckCastNonnull` inst.
+     * @return AbckitInst *.
+     * @param [ in ] AbckitGraph *graph .
+     * @param [ in ]  AbckitInst *inputObj .
+     * @param [ in ] AbckitType *targetType .
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inputObj  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitType *targetType  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph` and `inputObj->graph`
+     * @note are not the same.
+     */
+    AbckitInst *(*iCreateCheckCastNonnull)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */,
+                                           AbckitType *targetType /* in */);
 
     /**
      * @brief Creates `IsInstance` inst.

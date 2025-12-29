@@ -167,19 +167,17 @@ function test3InfLoop(): int {
 //! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::test4EliminateThrow"
 //! PASS_AFTER       "Inline"
 //! INST             /Call.*Inlined.*eliminateThrow/
-//! INST_COUNT       "CallStatic.Inlined", 6
-//! INST_COUNT       "ReturnInlined", 9
-//! INST_COUNT       "Throw", 3
+//! INST_COUNT       "CallStatic.Inlined", 1
+//! INST_COUNT       "ReturnInlined", 2
+//! INST_COUNT       "Throw", 2
 //! PASS_BEFORE_NTH  "BranchElimination", 2
 //! INST             /Call.*Inlined.*eliminateThrow/
 //! INST             /LoadClass.*escompat.Error/
 //! INST_NEXT        "ReturnInlined"
 //! INST_NEXT        "Throw"
-//! INST_NEXT        "Intrinsic.StdCoreRuntimeFailedTypeCastExclUndefinedStub"
 //! INST_NEXT        "ReturnInlined"
-//! INST_NEXT        "Throw"
-//! INST_COUNT       "Throw", 3
-//! INST_COUNT       "ReturnInlined", 9
+//! INST_COUNT       "Throw", 2
+//! INST_COUNT       "ReturnInlined", 2
 //! PASS_AFTER_NTH   "BranchElimination", 2
 //! INST             /Call.*Inlined.*eliminateThrow/
 //! INST_NEXT        "ReturnInlined"

@@ -109,6 +109,12 @@ void AbcKitInstBuilder::BuildCheckCast(const BytecodeInstruction *bcInst)
     BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_CHECK_CAST);
 }
 
+void AbcKitInstBuilder::BuildCheckCastNonnull(const BytecodeInstruction *bcInst)
+{
+    BuildDefaultAbcKitIntrinsic(bcInst,
+                                ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_CHECK_CAST_NONNULL);
+}
+
 void AbcKitInstBuilder::BuildIsInstance(const BytecodeInstruction *bcInst)
 {
     BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_IS_INSTANCE);

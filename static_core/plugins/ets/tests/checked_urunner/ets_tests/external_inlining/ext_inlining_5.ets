@@ -20,7 +20,7 @@
 //! RUN_FRONTEND            options: "--opt-level=2 --ets-strings-concat=false"
 
 
-import { middle } from './ext_funcs_4_1.ets';
+import { middle, middle2 } from './ext_funcs_4_1.ets';
 
 //! CHECKER    Check external inlining with deoptimization
 //! RUN_PAOC   options: "--panda-files=../ext_inlining_5_ext_funcs_4.ets.abc:../ext_inlining_5_ext_funcs_4_1.ets.abc",
@@ -29,7 +29,6 @@ import { middle } from './ext_funcs_4_1.ets';
 //! EVENT      /Inline,ext_inlining_5.ETSGLOBAL::main1,ext_funcs_4_1.ETSGLOBAL::middle,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../ext_inlining_5_ext_funcs_4.ets.abc:../ext_inlining_5_ext_funcs_4_1.ets.abc",
 //!            entry: "ext_inlining_5.ETSGLOBAL::main1"
-//! EVENT      /DeoptimizationReason,ext_funcs_4.ETSGLOBAL::riskyArray,BOUNDS_CHECK_WITH_DEOPT/
 //! EVENT      /Deoptimization,ext_inlining_5.ETSGLOBAL::main1,.*,IFRAME/
 //! METHOD     "ext_inlining_5.ETSGLOBAL::main1"
 //! PASS_BEFORE "Inline"
@@ -43,6 +42,36 @@ function main1(): int {
         total = middle(arr); // inlining: main → middle → riskyArray
     } catch (e) {
         total = -1;
+    }
+
+    if (total == -1) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+//! CHECKER    Check external inlining with deoptimizationReason
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_5_ext_funcs_4.ets.abc:../ext_inlining_5_ext_funcs_4_1.ets.abc",
+//!            entry: "ext_inlining_5.ETSGLOBAL::main2"
+//! EVENT      /Inline,ext_funcs_4_1.ETSGLOBAL::middle2,ext_funcs_4.ETSGLOBAL::riskyType,.*,STATIC,SUCCESS/
+//! EVENT      /Inline,ext_inlining_5.ETSGLOBAL::main2,ext_funcs_4_1.ETSGLOBAL::middle2,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../ext_inlining_5_ext_funcs_4.ets.abc:../ext_inlining_5_ext_funcs_4_1.ets.abc",
+//!            entry: "ext_inlining_5.ETSGLOBAL::main2"
+//! EVENT      /Deoptimization,ext_inlining_5.ETSGLOBAL::main2,.*,IFRAME/
+//! EVENT      /DeoptimizationReason,ext_funcs_4.ETSGLOBAL::riskyType,CHECK_CAST/
+//! METHOD     "ext_inlining_5.ETSGLOBAL::main1"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_4_1\.ETSGLOBAL::middle.*\[file=\d+\]/
+class A{}
+function main2(): int {
+    let arr = new FixedArray<A>(3)
+    let total = 0;
+
+    try {
+        total = middle2(arr); // inlining: main → middle2 → riskyType
+    } catch (e) {
+        total --;
     }
 
     if (total == -1) {

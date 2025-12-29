@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2617,6 +2617,31 @@ public:
             ObjectHeader *obj = this->GetAcc().GetReference();
 
             if (UNLIKELY(obj != nullptr && !type->IsAssignableFrom(obj->ClassAddr<Class>()))) {
+                RuntimeIfaceT::ThrowClassCastException(type, obj->ClassAddr<Class>());
+                this->MoveToExceptionHandler();
+            } else {
+                this->template MoveToNextInst<FORMAT, true>();
+            }
+        } else {
+            this->MoveToExceptionHandler();
+        }
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleCheckcastNonnull()
+    {
+        auto typeId = this->GetInst().template GetId<FORMAT>();
+
+        LOG_INST() << "checkcast.nonnull " << std::hex << "0x" << typeId;
+
+        Class *type = ResolveType(typeId);
+        if (LIKELY(type != nullptr)) {
+            ObjectHeader *obj = this->GetAcc().GetReference();
+
+            if (UNLIKELY(obj == nullptr)) {
+                RuntimeIfaceT::ThrowClassCastException(type, nullptr);
+                this->MoveToExceptionHandler();
+            } else if (UNLIKELY(!type->IsAssignableFrom(obj->ClassAddr<Class>()))) {
                 RuntimeIfaceT::ThrowClassCastException(type, obj->ClassAddr<Class>());
                 this->MoveToExceptionHandler();
             } else {

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -387,6 +387,16 @@ AbckitInst *IcreateCheckCast(AbckitGraph *graph, AbckitInst *inputObj, AbckitTyp
     return DEFAULT_INST;
 }
 
+AbckitInst *IcreateCheckCastNonnull(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(inputObj == DEFAULT_INST);
+    EXPECT_TRUE(targetType == DEFAULT_TYPE);
+    return DEFAULT_INST;
+}
+
 AbckitInst *IcreateIsInstance(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
 {
     g_calledFuncs.push(__func__);
@@ -601,63 +611,35 @@ AbckitInst *IcreateLoadObject(AbckitGraph *graph, AbckitInst *inputObj, AbckitCo
 }
 
 AbckitIsaApiStatic g_isaApiStaticImpl = {
-    IgetClass,
-    IsetClass,
-    IgetConditionCode,
-    IsetConditionCode,
-    IgetOpcode,
-    IsetTargetType,
-    IgetTargetType,
-    IcreateCmp,
-    IcreateLoadString,
-    IcreateReturn,
-    IcreateIf,
-    IcreateNeg,
-    IcreateNot,
-    IcreateAdd,
-    IcreateSub,
-    IcreateMul,
-    IcreateDiv,
-    IcreateMod,
-    IcreateShl,
-    IcreateShr,
-    IcreateAShr,
-    IcreateAnd,
-    IcreateOr,
-    IcreateXor,
-    IcreateCast,
-    GcreateNullPtr,
-    IcreateNewArray,
-    IcreateNewObject,
-    IcreateInitObject,
-    IcreateLoadObject,
-    IcreateStoreObject,
-    IcreateLoadArray,
-    IcreateStoreArray,
-    IcreateStoreArrayWide,
-    IcreateLenArray,
-    IcreateLoadConstArray,
-    IcreateCheckCast,
-    IcreateIsInstance,
-    IcreateLoadNullValue,
-    IcreateReturnVoid,
-    IcreateEquals,
-    IcreateStrictEquals,
-    IcreateCallStatic,
-    IcreateCallVirtual,
-    IcreateAddI,
-    IcreateSubI,
-    IcreateMulI,
-    IcreateDivI,
-    IcreateModI,
-    IcreateShlI,
-    IcreateShrI,
-    IcreateAShrI,
-    IcreateAndI,
-    IcreateOrI,
-    IcreateXorI,
-    IcreateThrow,
-    IcreateIsUndefined,
+    IgetClass,           IsetClass,
+    IgetConditionCode,   IsetConditionCode,
+    IgetOpcode,          IsetTargetType,
+    IgetTargetType,      IcreateCmp,
+    IcreateLoadString,   IcreateReturn,
+    IcreateIf,           IcreateNeg,
+    IcreateNot,          IcreateAdd,
+    IcreateSub,          IcreateMul,
+    IcreateDiv,          IcreateMod,
+    IcreateShl,          IcreateShr,
+    IcreateAShr,         IcreateAnd,
+    IcreateOr,           IcreateXor,
+    IcreateCast,         GcreateNullPtr,
+    IcreateNewArray,     IcreateNewObject,
+    IcreateInitObject,   IcreateLoadObject,
+    IcreateStoreObject,  IcreateLoadArray,
+    IcreateStoreArray,   IcreateStoreArrayWide,
+    IcreateLenArray,     IcreateLoadConstArray,
+    IcreateCheckCast,    IcreateCheckCastNonnull,
+    IcreateIsInstance,   IcreateLoadNullValue,
+    IcreateReturnVoid,   IcreateEquals,
+    IcreateStrictEquals, IcreateCallStatic,
+    IcreateCallVirtual,  IcreateAddI,
+    IcreateSubI,         IcreateMulI,
+    IcreateDivI,         IcreateModI,
+    IcreateShlI,         IcreateShrI,
+    IcreateAShrI,        IcreateAndI,
+    IcreateOrI,          IcreateXorI,
+    IcreateThrow,        IcreateIsUndefined,
     IcreateNullCheck,
 };
 

@@ -113,7 +113,7 @@ end
   /^ldstatic/ => "ldstatic",
   /^ststatic/ => "ststatic",
   /^isinstance/ => "isinstance",
-  /^checkcast/ => "checkcast",
+  /^checkcast?$/ => "checkcast",
   /^throw/ => "throw",
   /^monitor/ => "monitor",
   /^nop/ => "nop",
@@ -204,7 +204,7 @@ int64_t InstBuilder::GetInstructionJumpOffset(const BytecodeInstruction* inst) {
 // NOLINTNEXTLINE(readability-function-size)
 bool IrBuilderInliningAnalysis::IsSuitableForInline(const BytecodeInstruction* inst) {
     switch(inst->GetOpcode()) {
-% runtime_insts = [/^(div|mod)u?[2i]?/, /^call/, /(ld|st|len|new)(arr|obj)/, /throw/, /^initobj/, /^checkcast/, /^ldstatic/, /^ststatic/, /^lda.type/, /^lda.str/, /^lda.const/, /^isinstance/, /^builtin/,
+% runtime_insts = [/^(div|mod)u?[2i]?/, /^call/, /(ld|st|len|new)(arr|obj)/, /throw/, /^initobj/, /^checkcast/, /^checkcast.nonnull/, /^ldstatic/, /^ststatic/, /^lda.type/, /^lda.str/, /^lda.const/, /^isinstance/, /^builtin/,
 %                  /^monitor/,
 %                  /^any.ldbyname/, /^any.stbyname/, /^any.ldbyidx/, /^any.stbyidx/, /^any.ldbyval/, /^any.stbyval/, /^any.call/, /^any.call.new/,
 %                  /^ets.typeof/, /^ets.call.name/, /^ets.nullcheck/, /^ets.equals/, /^ets.strictequals/
