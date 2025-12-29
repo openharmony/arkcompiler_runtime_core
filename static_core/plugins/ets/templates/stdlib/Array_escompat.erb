@@ -244,7 +244,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         const len = arr.length
         const ret : FixedArray<Any> = new Any[len.toInt()]
         for (let i: int = 0; i < len; i++) {
-            ret[i] = arr[i] as Any
+            ret[i] = arr[i]
         }
         return new Array<T>(FROM_BUFFER, ret)
     }
