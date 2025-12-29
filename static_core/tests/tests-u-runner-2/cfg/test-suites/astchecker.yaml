@@ -25,6 +25,57 @@ parameters:
   with-js: false
 
 collections:
+  #  js tests
+  ark_tests/ast/parser/js:
+    parameters:
+      extension: js
+      es2panda-workflow-args:
+        - "--dump-ast"
+        - "--extension=${parameters.extension}"
+        - "--thread=0"
+        - "--parse-only"
+  ast/parser/js:
+    parameters:
+      extension: js
+      es2panda-workflow-args:
+        - "--dump-ast"
+        - "--extension=${parameters.extension}"
+        - "--thread=0"
+        - "--parse-only"
+  ast/compiler/js:
+    parameters:
+      extension: js
+      es2panda-workflow-args:
+        - "--dump-ast"
+        - "--extension=${parameters.extension}"
+        - "--thread=0"
+        - "--output=/dev/null"
+  #  ts tests
+  ast/parser/ts:
+    parameters:
+      extension: ts
+      es2panda-workflow-args:
+        - "--dump-ast"
+        - "--extension=${parameters.extension}"
+        - "--thread=0"
+        - "--parse-only"
+  ast/compiler/ts:
+    parameters:
+      extension: ts
+      es2panda-workflow-args:
+        - "--dump-ast"
+        - "--extension=${parameters.extension}"
+        - "--thread=0"
+        - "--output=/dev/null"
+  # as/ts tests
+  ast/parser/as:
+    parameters:
+      extension: ts
+      es2panda-workflow-args:
+        - "--dump-ast"
+        - "--extension=as"
+        - "--thread=0"
+        - "--parse-only"
   # sts tests
   ast/compiler/ets:
     parameters:
