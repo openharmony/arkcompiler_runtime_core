@@ -278,9 +278,6 @@ std/containers/BuiltinArrayMapTest.ets
 #25264
 std/core/ConsoleArrayTest.ets
 
-#25130
-std/core/dateformat/DateTimeFormatTest.ets
-
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
 std/core/std_core_array_forEach_byte_array_func_byte.ets
