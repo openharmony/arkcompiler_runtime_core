@@ -71,6 +71,21 @@ public:
 
     virtual const uint8_t *GetObjectClassDescriptor() const = 0;
 
+    virtual const uint8_t *GetAsyncAnnotationDescriptor() const
+    {
+        return nullptr;
+    }
+
+    virtual const uint8_t *GetAsyncContextClassDescriptor() const
+    {
+        return nullptr;
+    }
+
+    virtual const uint8_t *GetPromiseClassDescriptor() const
+    {
+        return nullptr;
+    }
+
     virtual const uint8_t *GetClassClassDescriptor() const = 0;
 
     virtual const uint8_t *GetUniqueObjectClassDescriptor() const
@@ -370,6 +385,21 @@ public:
     const uint8_t *GetObjectClassDescriptor() const
     {
         return base_->GetObjectClassDescriptor();
+    }
+
+    const uint8_t *GetAsyncAnnotationDescriptor() const
+    {
+        return base_->GetAsyncAnnotationDescriptor();
+    }
+
+    const uint8_t *GetAsyncContextClassDescriptor() const
+    {
+        return base_->GetAsyncContextClassDescriptor();
+    }
+
+    const uint8_t *GetPromiseClassDescriptor() const
+    {
+        return base_->GetPromiseClassDescriptor();
     }
 
     const uint8_t *GetClassClassDescriptor() const

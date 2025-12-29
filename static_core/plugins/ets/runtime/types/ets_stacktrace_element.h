@@ -16,12 +16,12 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_STACKTRACE_ELEMENT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_STACKTRACE_ELEMENT_H
 
-#include "ets_platform_types.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
 
 namespace ark::ets {
 

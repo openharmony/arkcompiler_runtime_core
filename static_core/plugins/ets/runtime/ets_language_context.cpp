@@ -74,12 +74,12 @@ void EtsLanguageContext::ThrowStackOverflowException(ManagedThread *thread) cons
     EtsHandleScope scope(coroutine);
     EtsHandle<EtsObject> exc(coroutine, EtsObject::Create(cls));
 
-    auto *error = Error::FromEtsObject(exc.GetPtr());
+    auto *error = EtsError::FromEtsObject(exc.GetPtr());
     if (UNLIKELY(error == nullptr)) {
         ASSERT(coroutine->HasPendingException());
         return;
     }
-    EtsHandle<Error> errHandle(coroutine, error);
+    EtsHandle<EtsError> errHandle(coroutine, error);
 
     auto *name = cls->GetName();
     if (UNLIKELY(name == nullptr)) {

@@ -31,22 +31,22 @@ class EtsErrorTest;
 // class Error is mirror class for escompat.Error
 // Currently, there is no necessity to declare this class as mirror in yaml files,
 // this this class is auxiliary for describing std.core error classes as mirror classes.
-class Error : public EtsObject {
+class EtsError : public EtsObject {
 public:
-    NO_COPY_SEMANTIC(Error);
-    NO_MOVE_SEMANTIC(Error);
+    NO_COPY_SEMANTIC(EtsError);
+    NO_MOVE_SEMANTIC(EtsError);
 
-    Error() = delete;
-    ~Error() = delete;
+    EtsError() = delete;
+    ~EtsError() = delete;
 
-    static Error *Create(EtsCoroutine *coro, EtsClass *klass)
+    static EtsError *Create(EtsCoroutine *coro, EtsClass *klass)
     {
         return FromEtsObject(EtsObject::Create(coro, klass));
     }
 
-    static Error *FromEtsObject(EtsObject *object)
+    static EtsError *FromEtsObject(EtsObject *object)
     {
-        return static_cast<Error *>(object);
+        return static_cast<EtsError *>(object);
     }
 
     EtsObject *AsObject()
@@ -62,25 +62,25 @@ public:
     void SetName(EtsCoroutine *coro, EtsString *name)
     {
         ASSERT(name != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(Error, name_), name->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsError, name_), name->GetCoreType());
     }
 
     void SetMessage(EtsCoroutine *coro, EtsString *msg)
     {
         ASSERT(msg != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(Error, message_), msg->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsError, message_), msg->GetCoreType());
     }
 
     void SetStack(EtsCoroutine *coro, EtsString *stack)
     {
         ASSERT(stack != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(Error, stack_), stack->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsError, stack_), stack->GetCoreType());
     }
 
     void SetStackLines(EtsCoroutine *coro, EtsTypedObjectArray<EtsStackTraceElement> *stackLines)
     {
         ASSERT(stackLines != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(Error, stackLines_), stackLines->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsError, stackLines_), stackLines->GetCoreType());
     }
 
 private:
@@ -96,7 +96,7 @@ private:
 
 // Purpose of this class is to have preallocated OOM object in runtime, that can be useful in situation
 // when all heap is filled and we don't have space to allocate stdlib OOM error.
-class EtsOutOfMemoryError final : public Error {
+class EtsOutOfMemoryError final : public EtsError {
 public:
     static constexpr std::string_view OOM_ERROR_NAME = "OutOfMemoryError";
     // Default message should be empty string to avoid allocations in .toString()
@@ -116,7 +116,7 @@ public:
         [[maybe_unused]] EtsHandleScope scope(coro);
 
         auto oomH = EtsHandle<EtsOutOfMemoryError>(
-            coro, FromError(Error::Create(coro, PlatformTypes(coro)->coreOutOfMemoryError)));
+            coro, FromError(EtsError::Create(coro, PlatformTypes(coro)->coreOutOfMemoryError)));
 
         ASSERT(oomH.GetPtr() != nullptr);
         auto *name = EtsString::CreateFromMUtf8(OOM_ERROR_NAME.data());
@@ -135,7 +135,7 @@ public:
         return oomH.GetPtr();
     }
 
-    static EtsOutOfMemoryError *FromError(Error *error)
+    static EtsOutOfMemoryError *FromError(EtsError *error)
     {
         ASSERT(error->GetClass() == PlatformTypes()->coreOutOfMemoryError);
         return static_cast<EtsOutOfMemoryError *>(error);

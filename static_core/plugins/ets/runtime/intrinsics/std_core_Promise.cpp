@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_async_context-inl.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/job_queue.h"
@@ -208,6 +209,13 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
                           "Cannot await in the current context!");
         return nullptr;
     }
+    auto *refStorage = currentCoro->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto *ctxRef = currentCoro->GetAsyncContext();
+    if (ctxRef != nullptr) {
+        auto *asyncCtx = EtsAsyncContext::FromEtsObject(refStorage->GetEtsObject(ctxRef));
+        asyncCtx->SetAwaitee(currentCoro, promise);
+    }
+
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
 

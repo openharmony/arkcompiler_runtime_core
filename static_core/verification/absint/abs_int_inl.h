@@ -4044,6 +4044,58 @@ public:
         return true;
     }
 
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsAsyncSuspend()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT>();
+        Sync();
+        if (!CheckRegType(vs, GetTypeSystem()->AsyncContext())) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+
+        if (!context_.HasAsyncAnnotation()) {
+            SHOW_MSG(SuspendInstOutsideAsyncFunction)
+            LOG_VERIFIER_SUSPEND_INST_OUTSIDE_ASYNC_FUNCTION();
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(SuspendInstOutsideAsyncFunction, ERROR);
+            return false;
+        }
+
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsAsyncDispatch()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT>();
+        Sync();
+        if (!CheckRegType(vs, GetTypeSystem()->AsyncContext())) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+
+        if (!context_.HasAsyncAnnotation()) {
+            SHOW_MSG(DispatchInstOutsideAsyncFunction)
+            LOG_VERIFIER_DISPATCH_INST_OUTSIDE_ASYNC_FUNCTION();
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(DispatchInstOutsideAsyncFunction, ERROR);
+            return false;
+        }
+
+        SetAcc(refType_);
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
 private:
     Type GetCachedType() const
     {

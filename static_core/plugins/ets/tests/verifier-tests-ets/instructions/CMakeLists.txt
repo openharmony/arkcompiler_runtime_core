@@ -11,17 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(ets_call_name)
-add_subdirectory(access_modifiers)
-add_subdirectory(instructions)
-
-add_custom_target(
-    ets_verifier_tests
-)
-
-add_dependencies(
-    ets_verifier_tests 
-    ets_verify_access_modifiers
-    ets_verify_call_name
-    verifier
+panda_ets_add_gtest(
+    NO_CORES
+    NAME verifier_ets_instructions_test
+    SOURCES 
+        async_dispatch_test.cpp
+        async_suspend_test.cpp
+    LIBRARIES arkruntime arkassembler
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+    DEPS_TARGETS etsstdlib
 )

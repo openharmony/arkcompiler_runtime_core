@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -346,3 +346,54 @@ groups:
         acc: in:ref
         format: [pref_op_none]
         intrinsic_name: INTRINSIC_COMPILER_ETS_NULLCHECK
+
+  - title: Suspend coroutine and return to the caller
+    description: >
+      Suspend coroutine and return to the caller
+    verification:
+      - none
+    exceptions:
+      - x_null
+    properties:
+      - suspend
+    pseudo: |
+      context = vs
+      if context == null then
+       throw NullPointerException
+      end
+      resume_point_id = convert_resume_point_pc_to_id(next_pc)
+      if resume_point_id == INVALID_RESUME_POINT_ID then
+        throw_ets_exception(...)
+      end
+      store_resume_point_id(context, resume_point_id)
+      save_vregs_to(context)
+      acc = load_return_value(context)
+      return acc
+    namespace: ets
+    instructions:
+      - sig: ets.async.suspend v:in:ref
+        prefix: ets
+        acc: out:ref
+        format: [pref_op_v_8]
+
+  - title: Select a resume point and move to it
+    description: >
+      Select a resume point and move to it
+    verification:
+      - none
+    exceptions:
+      - x_none
+    pseudo: |
+      context = vs
+      if context != null then
+        restore_vregs_from(context)
+        resume_point_id = load_resume_point_id(context)
+        new_pc = convert_resume_point_id_to_pc(resume_point_id)
+        pc = new_pc
+      end
+    namespace: ets
+    instructions:
+      - sig: ets.async.dispatch v:in:ref
+        prefix: ets
+        acc: out:ref
+        format: [pref_op_v_8]

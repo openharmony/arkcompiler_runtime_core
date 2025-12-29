@@ -417,4 +417,16 @@ void InstBuilder::BuildNullcheck(const BytecodeInstruction *bcInst)
     }
 }
 
+void InstBuilder::BuildSuspend([[maybe_unused]] const BytecodeInstruction *bcInst)
+{
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Suspend is not yet supported in the inst builder";
+    failed_ = true;
+}
+
+void InstBuilder::BuildDispatch([[maybe_unused]] const BytecodeInstruction *bcInst)
+{
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Dispatch is not yet supported in the inst builder";
+    failed_ = true;
+}
+
 }  // namespace ark::compiler

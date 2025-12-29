@@ -120,6 +120,7 @@
     /* Object array */                                                                                                \
     TP("[Lstd/core/Object;", coreObjectArray)                                                                         \
     /* Concurrency */                                                                                                 \
+    TP("Larkruntime/AsyncContext;", arkruntimeAsyncContext)                                                           \
     TP("Lstd/core/Promise;", corePromise)                                                                             \
     TP("Lstd/core/Job;", coreJob)                                                                                     \
     IM("Lstd/core/Promise;", "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V",                                 \

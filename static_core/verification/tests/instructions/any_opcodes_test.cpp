@@ -13,67 +13,11 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <string>
-
-#include "assembly-emitter.h"
-#include "assembly-parser.h"
-#include "include/class_linker_extension.h"
-#include "include/language_context.h"
-#include "include/method.h"
-#include "public.h"
-#include "libarkbase/utils/utf.h"
-#include "util/tests/verifier_test.h"
-#include "include/runtime.h"
+#include "opcode_test.h"
 
 namespace ark::verifier::test {
 
-class VerifyAnyOpcodes : public VerifierTest {
-public:
-    VerifyAnyOpcodes()
-    {
-        config_ = verifier::NewConfig();
-        service_ = CreateService(config_, Runtime::GetCurrent()->GetInternalAllocator(),
-                                 ark::Runtime::GetCurrent()->GetClassLinker(), "");
-    }
-
-    ~VerifyAnyOpcodes() override
-    {
-        DestroyService(service_, false);
-        DestroyConfig(config_);
-    }
-
-    NO_COPY_SEMANTIC(VerifyAnyOpcodes);
-    NO_MOVE_SEMANTIC(VerifyAnyOpcodes);
-
-    std::unique_ptr<const panda_file::File> EmitPandasm(const char *source)
-    {
-        pandasm::Parser p;
-        auto res = p.Parse(source);
-        return pandasm::AsmEmitter::Emit(res.Value());
-    }
-
-    ClassLinkerExtension *GetLinkerExtention(std::unique_ptr<const panda_file::File> pf)
-    {
-        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
-        classLinker->AddPandaFile(std::move(pf));
-        return classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-    }
-
-    Method *GetDirectMethodFromClass(ClassLinkerExtension *ext, const std::string &className,
-                                     const std::string &methodName)
-    {
-        PandaString descriptor;
-        Class *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor));
-        return klass->GetDirectMethod(utf::CStringAsMutf8(methodName.c_str()));
-    }
-
-private:
-    verifier::Config *config_;
-    verifier::Service *service_;
-};
-
-TEST_F(VerifyAnyOpcodes, AnyIsInstance)
+TEST_F(VerifyOpcodeTest, AnyIsInstance)
 {
     auto source = R"(
         .record R {}
@@ -93,7 +37,7 @@ TEST_F(VerifyAnyOpcodes, AnyIsInstance)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyCallShort)
+TEST_F(VerifyOpcodeTest, AnyCallShort)
 {
     auto source = R"(
         .record R {}
@@ -114,7 +58,7 @@ TEST_F(VerifyAnyOpcodes, AnyCallShort)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, NegAnyCallShort)
+TEST_F(VerifyOpcodeTest, NegAnyCallShort)
 {
     auto source = R"(
         .record R {}
@@ -135,7 +79,7 @@ TEST_F(VerifyAnyOpcodes, NegAnyCallShort)
     ASSERT_TRUE(!result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyCallRange)
+TEST_F(VerifyOpcodeTest, AnyCallRange)
 {
     auto source = R"(
         .record R {}
@@ -158,7 +102,7 @@ TEST_F(VerifyAnyOpcodes, AnyCallRange)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyCallThisShort)
+TEST_F(VerifyOpcodeTest, AnyCallThisShort)
 {
     auto source = R"(
         .record R {}
@@ -179,7 +123,7 @@ TEST_F(VerifyAnyOpcodes, AnyCallThisShort)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyCallThisRange)
+TEST_F(VerifyOpcodeTest, AnyCallThisRange)
 {
     auto source = R"(
         .record R {}
@@ -202,7 +146,7 @@ TEST_F(VerifyAnyOpcodes, AnyCallThisRange)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyCall0)
+TEST_F(VerifyOpcodeTest, AnyCall0)
 {
     auto source = R"(
         .record R {}
@@ -221,7 +165,7 @@ TEST_F(VerifyAnyOpcodes, AnyCall0)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyNew0)
+TEST_F(VerifyOpcodeTest, AnyNew0)
 {
     auto source = R"(
         .record R {}
@@ -240,7 +184,7 @@ TEST_F(VerifyAnyOpcodes, AnyNew0)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyNewRange)
+TEST_F(VerifyOpcodeTest, AnyNewRange)
 {
     auto source = R"(
         .record R {}
@@ -263,7 +207,7 @@ TEST_F(VerifyAnyOpcodes, AnyNewRange)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyNewShort)
+TEST_F(VerifyOpcodeTest, AnyNewShort)
 {
     auto source = R"(
         .record R {}
@@ -284,7 +228,7 @@ TEST_F(VerifyAnyOpcodes, AnyNewShort)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyCallThis0)
+TEST_F(VerifyOpcodeTest, AnyCallThis0)
 {
     auto source = R"(
         .record R {}
@@ -303,7 +247,7 @@ TEST_F(VerifyAnyOpcodes, AnyCallThis0)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyLdbyval)
+TEST_F(VerifyOpcodeTest, AnyLdbyval)
 {
     auto source = R"(
         .record R {}
@@ -322,7 +266,7 @@ TEST_F(VerifyAnyOpcodes, AnyLdbyval)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyLdbyname)
+TEST_F(VerifyOpcodeTest, AnyLdbyname)
 {
     auto source = R"(
         .record R {}
@@ -341,7 +285,7 @@ TEST_F(VerifyAnyOpcodes, AnyLdbyname)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyLdbynamev)
+TEST_F(VerifyOpcodeTest, AnyLdbynamev)
 {
     auto source = R"(
         .record R {}
@@ -360,7 +304,7 @@ TEST_F(VerifyAnyOpcodes, AnyLdbynamev)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyLdbyidx)
+TEST_F(VerifyOpcodeTest, AnyLdbyidx)
 {
     auto source = R"(
         .record R {}
@@ -380,7 +324,7 @@ TEST_F(VerifyAnyOpcodes, AnyLdbyidx)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyStbyval)
+TEST_F(VerifyOpcodeTest, AnyStbyval)
 {
     auto source = R"(
         .record R {}
@@ -400,7 +344,7 @@ TEST_F(VerifyAnyOpcodes, AnyStbyval)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyStbyvalWithNull)
+TEST_F(VerifyOpcodeTest, AnyStbyvalWithNull)
 {
     auto source = R"(
         .record R {}
@@ -420,7 +364,7 @@ TEST_F(VerifyAnyOpcodes, AnyStbyvalWithNull)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyStbyname)
+TEST_F(VerifyOpcodeTest, AnyStbyname)
 {
     auto source = R"(
         .record R {}
@@ -440,7 +384,7 @@ TEST_F(VerifyAnyOpcodes, AnyStbyname)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyStbynameWithNull)
+TEST_F(VerifyOpcodeTest, AnyStbynameWithNull)
 {
     auto source = R"(
         .record R {}
@@ -461,7 +405,7 @@ TEST_F(VerifyAnyOpcodes, AnyStbynameWithNull)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyStbynamev)
+TEST_F(VerifyOpcodeTest, AnyStbynamev)
 {
     auto source = R"(
         .record R {}
@@ -480,7 +424,7 @@ TEST_F(VerifyAnyOpcodes, AnyStbynamev)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyStbynamevWithNull)
+TEST_F(VerifyOpcodeTest, AnyStbynamevWithNull)
 {
     auto source = R"(
         .record R {}
@@ -501,7 +445,7 @@ TEST_F(VerifyAnyOpcodes, AnyStbynamevWithNull)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyStvalidx)
+TEST_F(VerifyOpcodeTest, AnyStvalidx)
 {
     auto source = R"(
         .record R {}
@@ -523,7 +467,7 @@ TEST_F(VerifyAnyOpcodes, AnyStvalidx)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, AnyStvalidxWithNull)
+TEST_F(VerifyOpcodeTest, AnyStvalidxWithNull)
 {
     auto source = R"(
         .record R {}
@@ -545,7 +489,7 @@ TEST_F(VerifyAnyOpcodes, AnyStvalidxWithNull)
     ASSERT_TRUE(result);
 }
 
-TEST_F(VerifyAnyOpcodes, NegAnyStvalidx)
+TEST_F(VerifyOpcodeTest, NegAnyStvalidx)
 {
     auto source = R"(
         .record R {}

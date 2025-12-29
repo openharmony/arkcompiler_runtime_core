@@ -84,6 +84,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/gc_task_tracker.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_gc.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_registry.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_AsyncContext.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Promise.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_StackTrace.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Type.cpp
@@ -122,6 +123,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_escompat_array.cpp
     ${ETS_EXT_SOURCES}/types/ets_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_method.cpp
+    ${ETS_EXT_SOURCES}/types/ets_async_context.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_object.cpp
