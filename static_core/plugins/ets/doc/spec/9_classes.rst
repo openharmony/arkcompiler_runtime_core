@@ -2967,9 +2967,10 @@ The high-level sequence of a *primary constructor* body includes the following:
 As step 4 above cannot be guaranteed at compile time in all possible cases, the
 following strategy is to be taken:
 
-  - If the compiler can detect that a non-initialized field is accessed
-    during compilation, then a :index:`compile-time error` occurs;
-  - Otherwise, the behavior is determined by the implementation.
+  - Compiler can detect that a non-initialized field is accessed
+    during compilation, and if the check is possible in the current
+    compilation context, then a :index:`compile-time error` occurs;
+  - Otherwise, the execution-time behavior is determined by the implementation.
 
 .. code-block:: typescript
    :linenos:

@@ -3739,8 +3739,8 @@ The result of an ``instanceof`` expression is ``true`` if the *actual type* of
 evaluated ``expr`` is a subtype of ``T`` (see :ref:`Subtyping`). Otherwise,
 the result is ``false``.
 
-A :index:`compile-time error` occurs if type ``T`` is not retained by
-:ref:`Type Erasure`.
+If type ``T`` is not *preserved up to undefined* by :ref:`Type Erasure`, then a
+:index:`compile-time error` occurs.
 
 *Generic type* (see :ref:`Generics`) in the form of *type name* (see
 :ref:`Type References`) can be used as the operand ``T`` of an ``instanceof``
@@ -3767,7 +3767,7 @@ The approach is represented in the following example:
 
       if(a instanceof B) {  // OK, type of instanceOf will be used for smart
                             // cast in `if` clause
-         let b = a as B<T>      // compile time error, T was erased by instanceOf
+         let b = a as B<T>  // OK
       }
    }
 
@@ -3843,8 +3843,8 @@ A :index:`compile-time error` occurs if the ``target`` type is type ``never``:
    never type
    target type
 
-A :index:`compile-time error` occurs if ``target`` type is not preserved by
-:ref:`Type Erasure`.
+If ``target`` type is not *preserved up to undefined* by :ref:`Type Erasure`,
+then a :index:`compile-time error` occurs.
 
 Two specific cases of a *cast expression* are described in the sections below:
 
@@ -3967,8 +3967,8 @@ If the *actual type* of ``expr`` is a subtype of ``target`` (see
 :ref:`Subtyping`), then the result of an ``as`` expression is the result of
 the evaluated ``expr``. Otherwise, ``ClassCastError`` is thrown.
 
-If ``target`` type is not preserved by :ref:`Type Erasure`, then the check is
-performed against an *effective type* of the ``target`` type. As the
+If ``target`` type is not *preserved up to undefined* by :ref:`Type Erasure`,
+then a check is performed against the *effective type* of the type. As the
 *effective type* is less specific than ``target`` in the case described,
 the usage of the resulting value can cause type violation, and ``ClassCastError``
 is thrown as a consequence (see :ref:`Type Erasure` for detail).
@@ -3990,9 +3990,6 @@ Semantically, a *cast expression* of this kind is coupled tightly with
 -  If the result of ``x instanceof T`` is ``true``, then ``x as T`` never
    causes a runtime error;
 
--  If ``x instanceof T`` causes a :index:`compile-time error` as a result of
-   :ref:`Type Erasure`, then ``x as T`` also causes
-   a :index:`compile-time error`.
 
 -  If otherwise the result of ``x instanceof T`` is ``false``, then ``x as T``
    causes ``ClassCastError`` thrown at runtime.

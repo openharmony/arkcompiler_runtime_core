@@ -2674,6 +2674,10 @@ applied:
 - If signatures are *override-compatible* (see
   :ref:`Override-Compatible Signatures`), then *overriding* is used.
 
+- If signatures formed using *effective signature types*
+  of original signatures are *override-compatible*, then
+  a :index:`compile-time error` occurs.
+
 - Otherwise, :ref:`Implicit Method Overloading` is used.
 
 .. note::
@@ -2729,11 +2733,11 @@ Overriding in Interfaces
 If a method is defined in a subinterface with the same name as the method in
 the superinterface, then the following semantic rules apply:
 
-- A :index:`compile-time error` occurs if a method is ``private`` in
-  superinterface, but ``public`` in subinterface;
-
-- If signatures are *override-compatible* (see
-  :ref:`Override-Compatible Signatures`), then *overriding* is used.
+- If a method is ``private`` in  superinterface but ``public`` in subinterface,
+  then a :index:`compile-time error` occurs;
+- If signatures formed by using *effective signature types* of original
+  signatures are *override-compatible*, then a
+  :index:`compile-time error` occurs.
 
 - Otherwise, :ref:`Implicit Method Overloading` is used.
 
@@ -3316,7 +3320,7 @@ Signatures *S1* and *S2* are *overload-equivalent* if:
 
 - Both have the same number of parameters;
 
-- *Effective types* (see :ref:`Type Erasure`) of each parameter type in *S1*
+- *Effective signature types* (see :ref:`Type Erasure`) of each parameter type in *S1*
   and *S2* are equal.
 
 Return types of *S1* and *S2* do not affect *overload-equivalence*.
@@ -3966,25 +3970,34 @@ Type Erasure
 .. meta:
     frontend_status: Done
 
-*Type erasure* is the compilation technique which provides a special handling
-of certain language *types*, primarily :ref:`Generics`, when applied to the
-semantics of the following expressions:
+*Type erasure* is the concept that refers to a special handling of some language
+*types*, primarily :ref:`Generics`, as members of a smaller subset of the language
+*type system* when considering certain parts of the language semantics.
+The subset defined via type mapping is referred to as *effective type*.
+*Effective type* mapping satisfies the following properties:
+
+- For arbitrary types ``A`` and ``B``, if ``A`` is a subtype of ``B``, then an
+  ``EffectiveType(A)`` is a subtype of ``EffectiveType(B)``
+
+- For arbitrary types ``A`` and ``B``, ``EffectiveType(A | B)`` is identical to
+  ``EffectiveType(A) | EffectiveType(B)``
+
+- For an arbitrary type ``A``, ``A | undefined`` is a subtype of ``EffectiveType(A | undefined)``
+
+  - In particular, for an arbitrary type ``A``, ``undefined`` is a subtype of ``EffectiveType(A)``
+
+An original type and an *effective type* can have relationships of two kinds:
+
+-  If *Effective type* of ``T`` is identical to ``T``, then type ``T`` is *preserved by type erasure*;
+-  Otherwise, the type is considered as *affected by type erasure*.
+
+If ``T | undefined`` is *preserved by type erasure*, then type ``T`` is *preserved
+up to undefined*.
+
+This property limits the possible applications of type-checking expressions:
 
 -  :ref:`InstanceOf Expression`;
 -  :ref:`Cast Expression`.
-
-As a result, special types must be used for the execution of such expressions.
-Certain *types* in such expressions are handled as their corresponding
-*effective types*, while the *effective type* is defined as type mapping.
-The *effective type* of a specific type ``T`` is always a supertype of ``T``.
-As a result, the relationship of an original type and an *effective type* can
-have the following two kinds:
-
--  *Effective type* of ``T`` is identical to ``T``, and *type erasure* has no
-   effect. So, type ``T`` is *retained*.
-
--  If *effective type* of ``T`` is not identical to ``T``, then the type ``T``
-   is considered affected by *type erasure*, i.e., *erased*.
 
 .. index::
    type erasure
@@ -3999,7 +4012,8 @@ have the following two kinds:
    type mapping
    supertype
 
-Type mapping determines the *effective types* as follows:
+Type mapping determines *effective types* as follows (the ``undefined`` union
+member is excluded in the right-hand-side column for brevity):
 
 .. list-table::
    :width: 100%
@@ -4007,26 +4021,28 @@ Type mapping determines the *effective types* as follows:
    :header-rows: 1
 
    * - **Original Type**
-     - **Effective Type**
+     - **Effective Type (undefined member excluded)**
+   * - ``Any``
+     - ``Any``
+   * - ``never``
+     - ``never``
+   * - ``undefined``
+     - ``undefined``
+   * - ``null``
+     - ``null``
    * - *Generic types* (see :ref:`Generics`)
      - Instantiation of the same generic type
        (see :ref:`Explicit Generic Instantiations`) with type arguments selected
        in accordance with :ref:`Type Parameter Variance`:
-   * -
-     -
+
        - *Covariant* type parameters are instantiated with the constraint type;
-   * -
-     -
        - *Contravariant* type parameters are instantiated with type ``never``;
-   * -
-     -
        - *Invariant* type parameters are instantiated with no type argument,
          i.e., ``Array<T>`` is instantiated as ``Array<>``.
    * - :ref:`Type Parameters`
      - :ref:`Type Parameter Constraint`
    * - :ref:`Union Types` in the form ``T1 | T2 ... Tn``
-     - Union type constructed from effective types
-       ``T1 | T2 ... Tn`` within the original union type.
+     - Union of effective types of each member type of ``T1 ... Tn``.
    * - :ref:`Array Types` in the form ``T[]``
      - Same as for a generic type ``Array<T>``.
    * - :ref:`Fixed-Size Array Types` (``FixedArray<T>``)
@@ -4042,13 +4058,19 @@ Type mapping determines the *effective types* as follows:
        number of element types *n*.
    * - :ref:`String Literal Types`
      - ``string``
-   * - undefined
-     - ``undefined``
-   * - null
-     - ``null``
-   * - Any
-     - ``Any``
 
+Additional type mapping defines an *effective signature type*, i.e.,
+an *effective type* of a corresponding type except the following:
+
+.. list-table::
+   :width: 100%
+   :widths: 45 55
+   :header-rows: 1
+
+   * - **Original Type**
+     - **Effective signature type**
+   * - Return type ``never``
+     - ``never``
 
 Otherwise, the original type is *preserved*.
 
@@ -4076,32 +4098,33 @@ Otherwise, the original type is *preserved*.
    parameter type
    type preservation
 
-In addition, accessing a value of type ``T``, particularly by
-:ref:`Field Access Expression`, :ref:`Method Call Expression`, or
-:ref:`Function Call Expression`, can cause ``ClassCastError`` thrown if
-type ``T`` and the ``target`` type are both affected by *type erasure*, and the
-value is produced by a :ref:`Cast Expression`.
+A program that uses types not *preserved* by erasure, and relies
+on certain cast expressions (see :ref:`Cast Expression`) which narrow
+values to types not *preserved up to undefined*,
+can cause ``ClassCastError`` thrown during the evaluation of
+:ref:`Field Access Expression`, :ref:`Method Call Expression`,
+or :ref:`Function Call Expression`. Checks that result in the above-mentioned
+runtime errors ensure type safety of program execution:
 
 .. code-block:: typescript
    :linenos:
 
     class A<T> {
-      field?: T
+      field: T
 
-      test(value: Object) {
-        return value instanceof T  // CTE, T is erased
-      }
-
-      cast(value: Object) {
-        return value as T          // OK, but check is done during execution
+      constructor(value: T) {
+        this.field = value
       }
     }
 
-    function castToA(p: Object) {
-      p instanceof A<number> // CTE, A<number> is erased
-
-      return p as A<number>  // OK, but check is performed against type A, but not A<number>
+    function unsafe(p: Object): A<number> {
+      return p as A<number>  // OK, but check is performed against type A<>, but not against A<number>
+                             // thus it can cause exception later during execution
     }
+
+    let a: A<number> = unsafe(new A<string>("a")) // A<string> resides in A<number>
+    
+    let n = a.field // An exception is raised as the expected type is number but the actual type is string
 
 .. index::
    access
