@@ -20,14 +20,12 @@ cases:
       - "let v = foo<void>()"
 
   - description: "Generic function with void parameter calling number-returning function should be CTE"
-    tags: [compile-only, negative]
     declarations:
       - "function foo<T>(f: () => T): T { return f() }"
     statements:
       - "let v = foo<void>(() => 0)"
 
   - description: "Generic function with array of void should be CTE"
-    tags: [compile-only, negative]
     declarations:
       - "function foo<T>(a: Array<T>): T { return a[0] }"
     statements:

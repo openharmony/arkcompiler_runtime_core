@@ -28,7 +28,6 @@ cases:
       - "let obj: Base = new Derived()"
 
   - description: "Cannot override non-void method with void method"
-    tags: [compile-only, negative]
     declarations:
       - "class Base { qux(): number { return 1 } }"
       - "class Derived extends Base { override qux(): void {} }"
