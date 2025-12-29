@@ -17,6 +17,7 @@
 /*---
 desc: A string value for enumeration constants must be set explicitly
 tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 
 {{c.decl}}

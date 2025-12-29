@@ -14,6 +14,8 @@
  */
 
 {% for c in cases %}
+{% set nsglob = namespace() %}
+{% set nsglob.stdoutCounter = 0 %}
 
 {% for decl in c.decl_variants %}
 
@@ -24,6 +26,7 @@
 /*---
 desc: {{c.desc}}
 tags: [compile-only, negative]
+expected_out: {{c.stdout[nsglob.stdoutCounter]}}
 ---*/
 
 {{decl}}
@@ -32,5 +35,6 @@ function main() {
 {{logic_data}}
 }
 
+{% set nsglob.stdoutCounter = nsglob.stdoutCounter + 1 %}
 {% endfor %}
 {% endfor %}

@@ -1761,7 +1761,7 @@
 10.interfaces/06.interface_inheritance/superinterfaces_and_subinterfaces/verify_constant_values_subinterface_class/constants_union_class_in_subclass_interface_20.ets
 11.enumerations/02.enumeration_string_values/enum_str_10.ets
 11.enumerations/02.enumeration_string_values/enum_str_9.ets
-11.enumerations/enum_cte_36.ets
+11.enumerations/enum_cte_n_36.ets
 11.enumerations/repeating_constants.ets
 11.enumerations/03.enumeration_operations/enum_implicit_type_constant_get_name_10.ets
 11.enumerations/03.enumeration_operations/enum_implicit_type_constant_get_name_11.ets
@@ -2891,3 +2891,8 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_10.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_11.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_12.ets
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_generic_array_tuple_n_0.ets
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_generic_array_tuple_n_1.ets
+04.names_declarations_and_scopes/07.function_declarations/03.readonly_parameters/readonly_generic_array_tuple_n_2.ets
+#FailKind.TSC_FAIL
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_extend_n.ets

@@ -17,21 +17,29 @@ cases:
           enum Enum { first = "a", second, third }   // strings must be set explicitly
       use: |-
           arktest.assertEQ(Enum.first.toString(), "a")
+      stdout: |- 
+        "Syntax error ESY0276: All items of non-Integer enumeration should be explicitly initialized."
 
     - decl: |-
           enum Enum { first = 11, second = "12", third = 13 }  // cannot combine string and int values
       use: |-
           arktest.assertEQ(Enum.second.toString(), "12")
+      stdout: |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
 
     - decl: |-
           enum Enum { first = "11", second = null, third = "13" }  // cannot use null
       use: |-
           arktest.assertEQ(Enum.first.toString(), "11")
+      stdout: |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
 
     - decl: |-
           enum Enum { first = "11", second = undefined, third = "13" }  // cannot use undefined
       use: |-
           arktest.assertEQ(Enum.first.toString(), "11")
+      stdout: |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
 
     - decl: |-
           let a = "ABC"   // not a constant
@@ -39,5 +47,7 @@ cases:
       use: |-
           arktest.assertEQ(Enum.e1.toString(), "ABC")
           arktest.assertEQ(Enum.e2.toString(), "DEF")
+      stdout: |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
 
 

@@ -12,14 +12,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
-
 /*---
-desc: const enum is supported for source-level compatibility with TypeScript, and const is skipped
-tags: [compile-only]
+desc: Ambient Interface implementations
+files:
+- ./interface_declarations.ets
+name: interface_usage_n_1
+tags: [negative, compile-only]
+expected_out: 'Semantic error ESE0141: a(): String|undefined in Extended cannot override a(): String in A because overriding return type is not compatible with the other return type.'
 ---*/
 
-const enum Colors {
-    Red,
-    Green,
-    Blue
+import { A } from './interface_declarations2.d'
+
+interface Extended extends A {
+  a?: string; //Error string|undefined to type string
+}
+
+class B implements A {
+    a: string = 'b'
+}
+
+function main() {
+    const c: B  = new B()
 }

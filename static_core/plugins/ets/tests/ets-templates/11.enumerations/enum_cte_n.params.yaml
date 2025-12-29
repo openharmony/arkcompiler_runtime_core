@@ -30,7 +30,14 @@ cases:
         let c = Green
       - |-
         let c = Blue
-
+    stdout:
+      - |- 
+        "Semantic error ESE0143: Unresolved reference Red"
+      - |- 
+        "Semantic error ESE0143: Unresolved reference Green"
+      - |- 
+        "Semantic error ESE0143: Unresolved reference Blue"
+      
   - desc: |-
       >-
         Enumeration type enum specifies a distinct user-defined type
@@ -53,6 +60,13 @@ cases:
         Color.Green = 3
       - |-
         Color.Blue = 4
+    stdout:
+      - |- 
+        "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Color'"
+      - |- 
+        "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Color'"
+      - |- 
+        "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Color'"
 
   - desc: |-
       >-
@@ -76,6 +90,13 @@ cases:
         Color.Green = Color.Blue
       - |-
         Color.Blue = Color.Red
+    stdout:
+      - |- 
+        "Semantic error ESE4002: Cannot assign to a readonly field Red"
+      - |- 
+        "Semantic error ESE4002: Cannot assign to a readonly field Green"
+      - |- 
+        "Semantic error ESE4002: Cannot assign to a readonly field Blue"
 
   - desc: |-
       >-
@@ -100,6 +121,13 @@ cases:
       - |-
         let b: Color = Color.Blue
         b = 5
+    stdout:
+      - |- 
+        "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Color'"
+      - |- 
+        "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Color'"
+      - |- 
+        "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Color'"
 
   - desc: |-
       >-
@@ -123,6 +151,13 @@ cases:
         (Color as Any).Green = 3
       - |-
         (Color as Any).Blue = 4
+    stdout:
+      - |- 
+        "Semantic error ESE0144: Enum name 'Color' used in the wrong context"
+      - |- 
+        "Semantic error ESE0144: Enum name 'Color' used in the wrong context"
+      - |- 
+        "Semantic error ESE0144: Enum name 'Color' used in the wrong context"
 
   - desc: |-
       >-
@@ -144,6 +179,11 @@ cases:
         Color.Unexist = 5
       - |-
         let v: Color = Color.Unexist
+    stdout:
+      - |- 
+        "Semantic error ESE0087: Property 'Unexist' does not exist on type 'Color'"
+      - |- 
+        "Semantic error ESE0087: Property 'Unexist' does not exist on type 'Color'"
 
   - desc: |-
       >-
@@ -157,6 +197,10 @@ cases:
     decl: |-
       [decl_data]
     logic: ""
+    stdout:
+      - |- 
+        "Semantic error ESE0342: Enumeration members can be initialized only by compile-time expressions and initializers must be of the same type."
+
 
   - desc: |-
       >-
@@ -168,3 +212,6 @@ cases:
     decl: |-
       [decl_data]
     logic: ""
+    stdout:
+      - |- 
+        "Semantic error ESE0351: Variable 'A' has already been declared."
