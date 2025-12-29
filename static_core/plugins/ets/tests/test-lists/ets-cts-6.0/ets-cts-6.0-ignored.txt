@@ -319,24 +319,6 @@
 07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.result_expression.test_2.ets
 07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.result_expression.test_42.ets
 
-#30486
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_21.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_22.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_23.ets
-
-#30485
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_24.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_25.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_26.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_11.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_12.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_13.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_14.ets
-
-#30487
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_9.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_10.ets
-
 #30891
 07.expressions/21.multiplicative_expressions/04.exponentiation/enum.ets
 

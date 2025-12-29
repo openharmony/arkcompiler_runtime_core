@@ -25,8 +25,8 @@ nan:
     - { x: Double.NaN, y: Double.NEGATIVE_INFINITY, result: Double.NaN }
     - { x: Double.NEGATIVE_INFINITY, y: Double.NaN, result: Double.NaN }
 
-    - { x: 1, y: Double.POSITIVE_INFINITY, result: Double.NaN }
-    - { x: 1, y: Double.NEGATIVE_INFINITY, result: Double.NaN }
+    - { x: 1, y: Double.POSITIVE_INFINITY, result: 1 }
+    - { x: 1, y: Double.NEGATIVE_INFINITY, result: 1 }
 
     - { x: -1, y: 1.5f, result: Double.NaN }
     - { x: -1, y: 1.5, result: Double.NaN }
