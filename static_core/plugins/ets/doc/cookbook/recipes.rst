@@ -2784,8 +2784,8 @@ appropriate type before use.
 
 .. _R099:
 
-|CB_R| Only arrays, tuples or objects with iteators can be spread into the rest parameter or array literals
------------------------------------------------------------------------------------------------------------
+|CB_R| Only arrays, tuples or iterable objects can be spread into the rest parameter or array literals
+------------------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-spread``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2807,7 +2807,7 @@ for example, by unpacking data manually.
 
 .. code-block:: typescript
 
-    // OK, function receivig array of numbers into `rest`
+    // OK, function receiving array of numbers into `rest`
     function sum(...data: number[])  {
         let d : number = 0
         for (let n of data) {
@@ -2844,7 +2844,7 @@ for example, by unpacking data manually.
 
 .. code-block:: typescript
 
-    // OK, function receivig array of numbers into `rest`
+    // OK, function receiving array of numbers into `rest`
     function sum(...data: number[])  {
         let d : number = 0
         for (let n of data) {
