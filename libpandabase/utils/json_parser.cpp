@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <sstream>
+
 #include "utils/json_parser.h"
 #include "utils/logger.h"
 #include "utils/utils.h"
@@ -128,26 +130,25 @@ bool JsonObject::Parser::GetJsonString()
     return GetString('"');
 }
 
-static bool UnescapeStringChunk(std::string *result, const std::string &chunk, char delim, bool *finished)
+static bool UnescapeStringChunk(std::ostringstream &result, std::string_view chunk, char delim, bool *finished)
 {
     for (size_t start = 0; start < chunk.size();) {
         size_t end = chunk.find('\\', start);
-        *result += chunk.substr(start, end - start);
-
-        if (end == std::string::npos) {
+        if (end == std::string_view::npos) {
+            result << chunk.substr(start);
             // No more escapes.
             break;
         }
+        result << chunk.substr(start, end - start);
 
         if (end == chunk.size() - 1) {
             // Chunk ends with an unfinished escape sequence.
-            *result += delim;
+            result << delim;
             *finished = false;
             return true;
         }
 
-        ++end;
-        start = end + 1;
+        start = ++end + 1;
 
         constexpr unsigned ULEN = 4;
 
@@ -155,27 +156,27 @@ static bool UnescapeStringChunk(std::string *result, const std::string &chunk, c
             case '"':
             case '\\':
             case '/':
-                *result += chunk[end];
+                result << chunk[end];
                 break;
             case 'b':
-                *result += '\b';
+                result << '\b';
                 break;
             case 'f':
-                *result += '\f';
+                result << '\f';
                 break;
             case 'n':
-                *result += '\n';
+                result << '\n';
                 break;
             case 'r':
-                *result += '\r';
+                result << '\r';
                 break;
             case 't':
-                *result += '\t';
+                result << '\t';
                 break;
             case 'u':
                 if (end + ULEN < chunk.size()) {
                     // Char strings cannot include multibyte characters, ignore top byte.
-                    *result += static_cast<char>((HexValue(chunk[end + ULEN - 1]) << 4U) | HexValue(chunk[end + ULEN]));
+                    result << static_cast<char>((HexValue(chunk[end + ULEN - 1]) << 4U) | HexValue(chunk[end + ULEN]));
                     start += ULEN;
                     break;
                 }
@@ -192,19 +193,19 @@ static bool UnescapeStringChunk(std::string *result, const std::string &chunk, c
 
 bool JsonObject::Parser::GetString(char delim)
 {
-    std::string string;
+    std::ostringstream result;
 
     for (bool finished = false; !finished;) {
         std::string chunk;
-        if (!std::getline(istream_, chunk, delim) || !UnescapeStringChunk(&string, chunk, delim, &finished)) {
+        if (!std::getline(istream_, chunk, delim) || !UnescapeStringChunk(result, chunk, delim, &finished)) {
             LOG_JSON(ERROR) << "Error while reading a string";
             return false;
         }
     }
 
-    LOG_JSON(DEBUG) << "Got a string: \"" << string << '"';
-    string_temp_ = string;
-    parsed_temp_.SetValue(std::move(string));
+    string_temp_ = result.str();
+    LOG_JSON(DEBUG) << "Got a string: \"" << string_temp_ << '"';
+    parsed_temp_.SetValue(string_temp_);
 
     return true;
 }
