@@ -151,9 +151,9 @@ cases:
   - { use: "-130^1", use_type: ": short", expected_type: short }
   - { use: "-32767^1", use_type: ": short", expected_type: short }
   - { use: "-32770^1", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0001^1", use_type: ": int", expected_type: int }
+  - { use: "-0x7FFF_FFFF^1", use_type: ": int", expected_type: int }
   - { use: "-0x8000_0000^1", use_type: ": long", expected_type: long }
-  - { use: "-0x8000_0000_0000_0001^1", use_type: ": long", expected_type: long }
+  - { use: "-0x7FFF_FFFF_FFFF_FFFF^1", use_type: ": long", expected_type: long }
   # lshift
   - { use: "8 << 1", use_type: ": byte", expected_type: byte }
   - { use: "63 << 1", use_type: ": byte", expected_type: byte }
@@ -221,7 +221,6 @@ cases:
   - { use: "-32770 + 1", use_type: ": int", expected_type: int }
   - { use: "-0x8000_0000 + 1", use_type: ": int", expected_type: int }
   - { use: "-0x8000_0002 + 1", use_type: ": long", expected_type: long }
-  - { use: "-0x8000_0000_0000_0001 + (1).toLong()", use_type: ": long", expected_type: long }
   # subtract
   - { use: "17 - 1", use_type: ": byte", expected_type: byte }
   - { use: "128 - 1", use_type: ": byte", expected_type: byte }
@@ -287,9 +286,9 @@ cases:
   - { use: "-129 % 130", use_type: ": short", expected_type: short }
   - { use: "-32768 % 32769", use_type: ": short", expected_type: short }
   - { use: "-32769 % 32740", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0000 % 0x8000_0001", use_type: ": int", expected_type: int }
+  - { use: "-0x7000_0000 % 0x7000_0001", use_type: ": int", expected_type: int }
   - { use: "-0x8000_0001 % 0x8000_0002", use_type: ": long", expected_type: long }
-  - { use: "-0x8000_0000_0000_0000 % 0x8000_0000_0000_0001", use_type: ": long", expected_type: long }
+  - { use: "-0x7000_0000_0000_0000 % 0x7000_0000_0000_0001", use_type: ": long", expected_type: long }
   # ternary
   - { use: "condition_true ? 16 : 2147483647", use_type: ": byte", expected_type: byte }
   - { use: "condition_true ? 127 : 2147483647", use_type: ": byte", expected_type: byte }

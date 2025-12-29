@@ -14,16 +14,11 @@
  */
 
 /*---
-desc: NegativeArraySizeError is thrown by an array creation expression
-  if any dimension expression has a value that is less than zero.
+desc: Incorrect int literals with bases 16, 10, 8 and 2
+tags: [negative, compile-only]
 ---*/
 
-function main() {
-  let a: int = 1;
-  let b: int = 1;
-  let sz: int = -0x80000000;
-  let expectedException = (e: Error): boolean => { return (e instanceof NegativeArraySizeError) }
-  arktest.expectThrow(() => { let v: String = "" + (a = 2) + new byte[2][sz] + (b = 2); }, expectedException)
-  arktest.assertEQ(a, 2, "a value not changed")
-  arktest.assertEQ(b, 1, "b value changed")
-}
+{% for c in cases %}
+let b{{loop.index}} = new Int({{c['lit']}})
+{% endfor %}
+

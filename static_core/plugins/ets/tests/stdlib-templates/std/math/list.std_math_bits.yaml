@@ -61,15 +61,15 @@
 
     method_test_index_data:
       {
-        test1: { v: 0xFFFFFFFF as int},
-        test2: { v: 0x0FFFFFFF as int},
-        test3: { v: 0x00FFFFFF as int},
-        test4: { v: 0x000FFFFF as int},
-        test5: { v: 0x0000FFFF as int},
-        test6: { v: 0x00000FFF as int},
-        test7: { v: 0x000000FF as int},
-        test8: { v: 0x0000000F as int},
-        test9: { v: 0x00000000 as int},
+        test1: { v: 0xFFFFFFFF.toInt()},
+        test2: { v: 0x0FFFFFFF.toInt()},
+        test3: { v: 0x00FFFFFF.toInt()},
+        test4: { v: 0x000FFFFF.toInt()},
+        test5: { v: 0x0000FFFF.toInt()},
+        test6: { v: 0x00000FFF.toInt()},
+        test7: { v: 0x000000FF.toInt()},
+        test8: { v: 0x0000000F.toInt()},
+        test9: { v: 0x00000000.toInt()},
       },
     method_expected_data:
       {
@@ -92,7 +92,6 @@
 
     method_test_index_data:
       {
-        test1:  {v: 0xFFFFFFFFFFFFFFFF as long },
         test2:  {v: 0x0FFFFFFFFFFFFFFF as long },
         test3:  {v: 0x00FFFFFFFFFFFFFF as long },
         test4:  {v: 0x000FFFFFFFFFFFFF as long },

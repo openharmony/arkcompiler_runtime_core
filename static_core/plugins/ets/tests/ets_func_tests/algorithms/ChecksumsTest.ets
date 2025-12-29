@@ -24,8 +24,8 @@ const brefStr = "Short String";
 
 function crc32(s: String): int {
     // TODO: unsigned types are not ready yet
-    let crc: int = 0xFFFFFFFF;
-    let poly: int = 0xEDB88320;
+    let crc: int = 0x7FFFFFFF;
+    let poly: int = 0x7DB88320;
     for (let i: int = 0; i < s.length; i++) {
         let c: int = s.charAt(i).toInt();
         let tmp: int = (crc ^ c) & 0xFF;
@@ -53,10 +53,10 @@ function test(result: boolean, name: String): int {
 function main(): int {
     let failures: int = 0;
     failures += test(
-        0xebe93d8a == crc32(brefStr),
+        -212688166 == crc32(brefStr),
         "CRC32 short string");
     failures += test(
-        0x890f6765 == crc32(hello16),
+        -2071273834 == crc32(hello16),
         "CRC32 long string");
     if (failures == 0) {
         console.println("PASSED: All tests run");

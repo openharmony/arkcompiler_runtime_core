@@ -14,12 +14,12 @@
  */
 
 const SINGLE = [1];
-const ARRAY: Array<Double> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xffffffffffffffff];
-const EMPTY_JOINED = '012345678918446744073709551615';
-const COMMA_JOINED = '0,1,2,3,4,5,6,7,8,9,18446744073709551615';
-const NSIGN_JOINED = '0###1###2###3###4###5###6###7###8###9###18446744073709551615';
-const UTF16_JOINED = '0 ΔΘΩ 1 ΔΘΩ 2 ΔΘΩ 3 ΔΘΩ 4 ΔΘΩ 5 ΔΘΩ 6 ΔΘΩ 7 ΔΘΩ 8 ΔΘΩ 9 ΔΘΩ 18446744073709551615';
-const UTF16_JOINED_1 = '0Ω1Ω2Ω3Ω4Ω5Ω6Ω7Ω8Ω9Ω18446744073709551615';
+const ARRAY: Array<Double> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x7fffffffffff0000];
+const EMPTY_JOINED = '01234567899223372036854710272';
+const COMMA_JOINED = '0,1,2,3,4,5,6,7,8,9,9223372036854710272';
+const NSIGN_JOINED = '0###1###2###3###4###5###6###7###8###9###9223372036854710272';
+const UTF16_JOINED = '0 ΔΘΩ 1 ΔΘΩ 2 ΔΘΩ 3 ΔΘΩ 4 ΔΘΩ 5 ΔΘΩ 6 ΔΘΩ 7 ΔΘΩ 8 ΔΘΩ 9 ΔΘΩ 9223372036854710272';
+const UTF16_JOINED_1 = '0Ω1Ω2Ω3Ω4Ω5Ω6Ω7Ω8Ω9Ω9223372036854710272';
 
 function joinEmpty(): void {
     let a: BigUint64Array = new BigUint64Array(0);

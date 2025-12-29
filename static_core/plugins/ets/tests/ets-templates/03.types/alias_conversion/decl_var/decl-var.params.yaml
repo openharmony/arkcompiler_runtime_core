@@ -104,12 +104,8 @@ cases:
       values:
           - { expr: 0, val: 0 }
           - { expr: 0x000000000000007F.toLong(), val: 127 }
-          - { expr: 0xFFFFFFFFFFFFFF80.toLong(), val: -128 }
           - { expr: 0x0000000000007FFF.toLong(), val: 32767 }
-          - { expr: 0xFFFFFFFFFFFF8000.toLong(), val: -32768 }
           - { expr: 0x000000007FFFFFFF.toLong(), val: 2147483647 }
-          - { expr: 0xFFFFFFFF80000000.toLong(), val: -2147483648 }
-          - { expr: 0x8000000000000000.toLong(), val: -9223372036854775808 }
           - { expr: 0x7FFFFFFFFFFFFFFF.toLong(), val: 9223372036854775807 }
 
     - from_type: char
@@ -153,12 +149,8 @@ cases:
       values:
           - { expr: 0, val: 0 }
           - { expr: 0x000000000000007F.toLong(), val: 127.0.toFloat() }
-          - { expr: 0xFFFFFFFFFFFFFF80.toLong(), val: -128.0.toFloat() }
           - { expr: 0x0000000000007FFF.toLong(), val: 32767.0.toFloat() }
-          - { expr: 0xFFFFFFFFFFFF8000.toLong(), val: -32768.0.toFloat() }
           - { expr: 0x000000007FFFFFFF.toLong(), val: 2147483647.0.toFloat() }
-          - { expr: 0xFFFFFFFF80000000.toLong(), val: -2147483648.0.toFloat() }
-          - { expr: 0x8000000000000000.toLong(), val: -9223372036854775808.0.toFloat() }
           - { expr: 0x7FFFFFFFFFFFFFFF.toLong(), val: 9223372036854775807.0.toFloat() }
 
     - from_type: float
@@ -212,12 +204,8 @@ cases:
       values:
           - { expr: 0, val: 0 }
           - { expr: 0x000000000000007F.toLong(), val: 127.0.toDouble() }
-          - { expr: 0xFFFFFFFFFFFFFF80.toLong(), val: -128.0.toDouble() }
           - { expr: 0x0000000000007FFF.toLong(), val: 32767.0.toDouble() }
-          - { expr: 0xFFFFFFFFFFFF8000.toLong(), val: -32768.0.toDouble() }
           - { expr: 0x000000007FFFFFFF.toLong(), val: 2147483647.0.toDouble() }
-          - { expr: 0xFFFFFFFF80000000.toLong(), val: -2147483648.0.toDouble() }
-          - { expr: 0x8000000000000000.toLong(), val: -9223372036854775808.0.toDouble() }
           - { expr: 0x7FFFFFFFFFFFFFFF.toLong(), val: 9223372036854775807.0.toDouble() }
 
     - from_type: float

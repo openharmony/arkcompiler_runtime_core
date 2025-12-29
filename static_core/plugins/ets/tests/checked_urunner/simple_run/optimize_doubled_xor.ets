@@ -257,8 +257,8 @@ function test_xor_chain_optimization_const3(param: int): int {
 }
 
 function test_xor_chain_no_optimization_diff_const(param: int): int {
-    const XOR_CONST1: int = 0x12345678;
-    const XOR_CONST2: int = 0x87654321;
+    const XOR_CONST1: int = 0x1234567;
+    const XOR_CONST2: int = 0x7654321;
     // Should NOT be optimized - different constants
     let result = (param ^ XOR_CONST1) ^ XOR_CONST2;
 
@@ -336,7 +336,7 @@ function main() {
     arktest.assertEQ(test_xor_chain_optimization_const1(param), param);
     arktest.assertEQ(test_xor_chain_optimization_const2(param), param);
     arktest.assertEQ(test_xor_chain_optimization_const3(param), param);
-    arktest.assertEQ(test_xor_chain_no_optimization_diff_const(param), param ^ 0x12345678 ^ 0x87654321);
+    arktest.assertEQ(test_xor_chain_no_optimization_diff_const(param), param ^ 0x1234567 ^ 0x7654321);
     arktest.assertEQ(test_xor_chain_no_optimization_multi_users(param), (param ^ 0x12345678 ^ 0x12345678) + ((param ^ 0x12345678) + 1));
     let byteParam: byte = 42 as byte;
     arktest.assertEQ(test_xor_chain_byte(byteParam), byteParam);

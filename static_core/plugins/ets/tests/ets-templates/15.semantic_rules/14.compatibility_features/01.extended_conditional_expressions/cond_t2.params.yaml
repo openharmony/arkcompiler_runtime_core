@@ -15,8 +15,8 @@
 cases:
     - { val: '(0x80).toByte()', type: 'byte' }
     - { val: '(0x8000).toShort()', type: 'short' }
-    - { val: '0x80000000', type: 'int' }
-    - { val: '0x8000000000000000.toLong()', type: 'long' }
+    - { val: '0x7fffffff', type: 'int' }
+    - { val: '0x7fffffffffffffff.toLong()', type: 'long' }
     - { val: '0.000001f', type: 'float' }
     - { val: '0.0000000001', type: 'double' }
     - { val: '0.000001f', type: 'float' }

@@ -19,8 +19,8 @@ values:
 - { left: 1, right: 31, result: 0 }
 - { left: -1, right: 1, result: -1 }
 - { left: -1, right: 31, result: -1 }
-- { left: Long.MIN_VALUE, right: 1, result: '0xc000000000000000' }
-- { left: Long.MIN_VALUE, right: 31, result: '0xffffffff00000000' }
+- { left: Long.MIN_VALUE, right: 1, result: '-0x4000000000000000' }
+- { left: Long.MIN_VALUE, right: 31, result: '-0x100000000' }
 - { left: Long.MAX_VALUE, right: 1, result: '0x3fffffffffffffff' }
 - { left: Long.MAX_VALUE, right: 30, result: '0x1ffffffff' }
 - { left: Long.MAX_VALUE, right: 31, result: 4294967295 }

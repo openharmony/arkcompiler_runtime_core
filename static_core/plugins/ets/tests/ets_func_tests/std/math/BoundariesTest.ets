@@ -137,13 +137,13 @@ function test_exp(): boolean {
 }
 
 function test_clz32(): boolean {
-    return (clz32(0xFFFFFFFF) == 0)
+    return (clz32(-0x1) == 0)
         && (clz32(0x0000FFFF) == 16)
         && (clz32(0x0) == 32);
 }
 
 function test_clz64(): boolean {
-    return (clz64(0xFFFFFFFFFFFFFFFF) == 0)
+    return (clz64(-0x1) == 0)
         && (clz64(0x0000FFFFFFFFFFFF) == 16)
         && (clz64(0x0) == 64);
 }
@@ -168,7 +168,7 @@ function main(): int {
     failures += test(test_log2(), "Test log2()");
     failures += test(test_log10(), "Test log10()");
     failures += test(test_clz32(), "Test clz32()");
-    failures += test(test_clz32(), "Test clz64()");
+    failures += test(test_clz64(), "Test clz64()");
     failures += test(test_exp(), "Test exp()");
     if (failures == 0) {
         console.println("PASSED: All tests run");

@@ -31,8 +31,8 @@ cases:
           // different numeric types literals
           enum Color { Red = 0B11111111111111111111111111111111, Green, Blue = 0xF, White, Gray, Black, Pink}
       use: |-
-          arktest.assertTrue(Color.Red == -1, "Red problem")
-          arktest.assertTrue(Color.Green == 0, "Green problem")
+          arktest.assertTrue(Color.Red == 4294967295, "Red problem")
+          arktest.assertTrue(Color.Green == 4294967296, "Green problem")
           arktest.assertTrue(Color.Blue == 15, "Blue problem")
           arktest.assertTrue(Color.White == 16, "White problem")
 

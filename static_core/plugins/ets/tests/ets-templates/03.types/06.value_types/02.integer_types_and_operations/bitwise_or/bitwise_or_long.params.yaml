@@ -24,4 +24,4 @@ values:
 - { left: 42, right: -42, result: -2 }
 - { left: 40, right: -40, result: -8 }
 - { left: 48, right: -48, result: -16 }
-- { left: "0x5555555555555555", right: "0xaaaaaaaaaaaaaaaa", result: -1 }
+- { left: "0x5555555555555555", right: "-0x5555555555555556", result: -1 }
