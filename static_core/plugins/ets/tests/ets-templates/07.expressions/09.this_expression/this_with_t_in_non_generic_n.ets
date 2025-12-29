@@ -14,26 +14,17 @@
  */
 
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: A compile-time error occurs if the qualified this expression occurs in a class or interface which is not class T or an inner class of class T.
+tags: [compile-only, negative]
+expected_out: 
+  - "Syntax error ESY0316: Hard keyword 'this' cannot be used as identifier"
+  - "Syntax error ESY0224: Identifier expected, got 'this'."
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
+class T {}
+
+class A {
+  public foo(): T { 
+    return T.this();
   }
-
-  foo(): int {
-    let x = this.bar();
-    return x;
-  }
-}
-
-class B implements A {}
-
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
 }

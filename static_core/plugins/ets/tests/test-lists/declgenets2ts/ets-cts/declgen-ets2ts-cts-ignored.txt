@@ -173,8 +173,9 @@
 07.expressions/04.named_reference/01.function_reference/overload_function_reference_3.ets
 07.expressions/04.named_reference/01.function_reference/overload_function_reference_4.ets
 07.expressions/07.spread_expression/spex_meth_13.ets
-07.expressions/10.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_2.ets
-07.expressions/10.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_6.ets
+07.expressions/09.this_expression/this_in_toplevel_n.ets
+07.expressions/10.field_access_expressions/02.accessing_current_object_fields/class_field_access_n_2.ets
+07.expressions/10.field_access_expressions/02.accessing_current_object_fields/class_field_access_n_6.ets
 07.expressions/15.new_expressions/constructor_param_array_default_n_10.ets
 07.expressions/15.new_expressions/constructor_param_array_default_n_11.ets
 07.expressions/15.new_expressions/constructor_param_array_default_n_12.ets
@@ -340,8 +341,8 @@
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_7.ets
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_9.ets
 07.expressions/07.spread_expression/spex_meth_17.ets
-07.expressions/10.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_1.ets
-07.expressions/10.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_5.ets
+07.expressions/10.field_access_expressions/02.accessing_current_object_fields/class_field_access_n_1.ets
+07.expressions/10.field_access_expressions/02.accessing_current_object_fields/class_field_access_n_5.ets
 07.expressions/11.method_call_expression/01.step_1_selection_of_type_to_use/step1_4.ets
 08.statements/06.loop_statements/labeled_statement_n_1.ets
 08.statements/15.try_statements/01.catch_clause/catch_2.ets
@@ -409,8 +410,8 @@
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/type_inside_decl_1.ets
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/interface_method.ets
 07.expressions/07.spread_expression/spex_meth_41.ets
-07.expressions/10.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_3.ets
-07.expressions/10.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_4.ets
+07.expressions/10.field_access_expressions/02.accessing_current_object_fields/class_field_access_n_3.ets
+07.expressions/10.field_access_expressions/02.accessing_current_object_fields/class_field_access_n_4.ets
 07.expressions/11.method_call_expression/01.step_1_selection_of_type_to_use/step1_2.ets
 07.expressions/11.method_call_expression/03.step_3_checking_method_modifiers/step3b_1.ets
 07.expressions/11.method_call_expression/interface_method.ets
@@ -463,7 +464,7 @@
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_11.ets
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_13.ets
 04.names_declarations_and_scopes/07.function_declarations/08.return_type_inference/ret_type_infer_37.ets
-07.expressions/10.field_access_expressions/01.accessing_current_object_fields/incorrect_class_field_access_0.ets
+07.expressions/10.field_access_expressions/02.accessing_current_object_fields/class_field_access_n_0.ets
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/refer_to_same_impl_at_class_n3.ets
 
 09.classes/03.class_implementation_clause/abstract_method_inheritance_2.ets
@@ -1296,8 +1297,8 @@
 07.expressions/05.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_30.ets
 07.expressions/07.spread_expression/spex_46.ets
 07.expressions/07.spread_expression/spex_47.ets
-07.expressions/10.field_access_expressions/02.accessing_superclass_fields/access_by_super_in_constructor_2.ets
-07.expressions/10.field_access_expressions/02.accessing_superclass_fields/accessing_by_super_indirect_2.ets
+07.expressions/10.field_access_expressions/03.accessing_superclass_fields/access_by_super_in_constructor_2_n.ets
+07.expressions/10.field_access_expressions/03.accessing_superclass_fields/accessing_by_super_indirect_2_n.ets
 07.expressions/11.method_call_expression/03.step_3_checking_method_modifiers/step3c_n_0.ets
 07.expressions/11.method_call_expression/03.step_3_checking_method_modifiers/step3c_n_1.ets
 07.expressions/11.method_call_expression/03.step_3_checking_method_modifiers/step3c_n_2.ets

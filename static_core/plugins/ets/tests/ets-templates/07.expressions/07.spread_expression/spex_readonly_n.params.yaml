@@ -1,0 +1,127 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+# Cannot modify readonly target array created by spread
+    - use: |-
+          // RW array in spread, readonly target - cannot modify
+          let b: int[] = [1, 2, 3]
+          let ro: readonly int[] = [...b]
+          ro[1] = 1
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+    - use: |-
+          // readonly array spread to readonly - cannot modify
+          let a: readonly number[] = [1.0, 2.0, 3.0]
+          let ro: readonly number[] = [...a]
+          ro[0] = 25.0
+      expected: Cannot assign to read-only property
+
+    - use: |-
+          // Mutable array spread to readonly with elements - cannot modify
+          let b: string[] = ["a", "b"]
+          let ro: readonly string[] = ["x", ...b, "y"]
+          ro[2] = "modified"
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+# Cannot modify readonly rest parameters
+    - decl: |-
+          function foo(...p_ro: readonly int[]) {
+              p_ro[1] = 1
+          }
+      use: |-
+          let b: int[] = [1, 2, 3]
+          foo(...b)
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+    - decl: |-
+          function foo(...p_ro: readonly number[]) {
+              p_ro[0] = 100.0
+          }
+      use: |-
+          let a: readonly number[] = [1.0, 2.0]
+          foo(...a)
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+    - decl: |-
+          function foo(...p_ro: readonly string[]) {
+              p_ro[2] = "modified"
+          }
+      use: |-
+          let a: string[] = ["a", "b", "c"]
+          let b: string[] = ["d", "e"]
+          foo(...a, ...b)
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+# Cannot modify readonly FixedArray
+    - use: |-
+          // Mutable FixedArray spread to readonly - cannot modify
+          let b: FixedArray<int> = [1, 2, 3]
+          let ro: readonly FixedArray<int> = [...b]
+          ro[0] = 25
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+    - use: |-
+          // readonly FixedArray spread to readonly - cannot modify
+          let a: readonly FixedArray<number> = [1.0, 2.0, 3.0]
+          let ro: readonly FixedArray<number> = [...a]
+          ro[1] = 25.0
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+# Cannot modify readonly tuple
+    - use: |-
+          // Mutable tuple spread to readonly - cannot modify
+          let b: [int, int] = [1, 2]
+          let ro: readonly [int, int] = [...b]
+          ro[0] = 25
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+    - use: |-
+          // readonly tuple spread to readonly - cannot modify
+          let a: readonly [string, string] = ["a", "b"]
+          let ro: readonly [string, string] = [...a]
+          ro[1] = "modified"
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+# Cannot modify readonly with value types
+    - use: |-
+          // byte array spread to readonly - cannot modify
+          let b: byte[] = [1 as byte, 2 as byte]
+          let ro: readonly byte[] = [...b]
+          ro[0] = 25 as byte
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+    - use: |-
+          // long array spread to readonly - cannot modify
+          let b: long[] = [100 as long, 200 as long]
+          let ro: readonly long[] = [...b]
+          ro[1] = 259 as long
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+    - use: |-
+          // char array spread to readonly - cannot modify
+          let b: char[] = [c'a', c'b', c'c']
+          let ro: readonly char[] = [...b]
+          ro[0] = c'Z'
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'
+
+# Function with readonly return - cannot modify return value
+    - decl: |-
+          function foo(...p: int[]): readonly int[] {
+              return [...p]
+          }
+      use: |-
+          let result = foo(1, 2, 3)
+          result[0] = 25
+      expected: 'Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter'

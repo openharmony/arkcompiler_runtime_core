@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,34 @@
  */
 
 /*---
-desc: This in class method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: Verify return of 'this' type for classes.
+assert: The keyword this should return the class type when used in a class method.
 ---*/
 
 class A {
   public x: int;
 
-  public foo(x: int): void {
-    this.x = x;
+  public setValue(val: int): A {
+    this.x = val;
+    return this;
+  }
+
+  public getSelf(): A {
+    return this;
   }
 }
 
 function main(): void {
-  let a = new A();
-  a.foo(10);
-  arktest.assertEQ(a.x, 10);
+  let a: A = new A();
+  let result: A = a.setValue(15);
+  arktest.assertEQ(result, a);
+  arktest.assertEQ(result.x, 15);
+
+  let self: A = a.getSelf();
+  arktest.assertEQ(self, a);
+
+  // Test method chaining
+  let chained: A = a.setValue(10).setValue(20).getSelf();
+  arktest.assertEQ(chained, a);
+  arktest.assertEQ(chained.x, 20);
 }

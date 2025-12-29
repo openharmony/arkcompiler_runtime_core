@@ -14,26 +14,16 @@
  */
 
 /*---
-desc: This in interface method.
+desc: This in class method.
 assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0202: 'this' cannot be referenced from a static context"
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
-  }
-
-  foo(): int {
-    let x = this.bar();
-    return x;
-  }
+class A {
+  public x: int;
 }
 
-class B implements A {}
-
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
+public foo(int x) { 
+  this.x = x;
 }

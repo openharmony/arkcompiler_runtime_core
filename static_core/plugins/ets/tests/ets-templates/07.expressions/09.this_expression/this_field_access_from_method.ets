@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,23 @@
  */
 
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: Accessing field through this from instance method.
+assert: The keyword this can be used to access instance fields from within instance methods.
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
-  }
+class A {
+  public x: int;
+  public y: int;
 
-  foo(): int {
-    let x = this.bar();
-    return x;
+  public foo(): void {
+    this.x = 10;
+    this.y = this.x + 5;
   }
 }
 
-class B implements A {}
-
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
+function main(): void {
+  let a: A = new A();
+  a.foo();
+  arktest.assertEQ(a.x, 10);
+  arktest.assertEQ(a.y, 15);
 }

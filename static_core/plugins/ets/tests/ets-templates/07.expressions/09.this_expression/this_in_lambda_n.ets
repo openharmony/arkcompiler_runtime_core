@@ -14,26 +14,20 @@
  */
 
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: Keyword this in lambda.
+assert: >-
+    It may be used in a lambda expression only if it is allowed in the context in which the lambda expression appears.
+tags: [compile-only,negative]
+expected_out: 'Warning W0010: The instance field initializer expression cannot use the this.'
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
-  }
-
-  foo(): int {
-    let x = this.bar();
-    return x;
-  }
+type func = () => int;
+let y = 6;	
+class A { 
+  bar: func = (): int => { return this.y; };
 }
 
-class B implements A {}
-
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
+function main(): void{
+  let instance: A = new A();
+  arktest.assertEQ(instance.bar(), 6 );
 }

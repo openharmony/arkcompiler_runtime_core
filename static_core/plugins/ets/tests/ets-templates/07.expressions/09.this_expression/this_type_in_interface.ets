@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,31 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: String value is immutable, and is not allowed to change a value of a string element by indexing.
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0250: Object type doesn't have proper index access method."
+desc: Type of this in interface method.
+assert: A corresponding interface type is the type of this expression when used in interface method.
 ---*/
 
-let str: string = "abcdefg"
+interface anInterface {
+  x: int;
+
+  method(): anInterface {
+    return this; // type of 'this' is anInterface
+  }
+}
+
+class ImplClass implements anInterface {
+  public x: int = 33;
+
+  method(): anInterface {
+    arktest.assertTrue(this instanceof anInterface);
+    return this;
+  }
+}
 
 function main(): void {
-  str[{{c.index}}] = '{{c.value}}'
+  let instance: ImplClass = new ImplClass();
+  let result: anInterface = instance.method();
+
+  arktest.assertEQ(result.x, 33);
 }
-{% endfor %}
