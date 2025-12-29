@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2831,7 +2831,16 @@ void GraphChecker::VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *in
     auto loadImm = inst->CastToLoadImmediate();
     [[maybe_unused]] auto type = inst->GetType();
     [[maybe_unused]] auto objType = loadImm->GetObjectType();
+    [[maybe_unused]] auto graph = static_cast<GraphChecker *>(v)->GetGraph();
     CHECKER_IF_NOT_PRINT_VISITOR(v, objType != LoadImmediateInst::ObjectType::UNKNOWN);
+    if (!graph->IsJitOrOsrMode()) {
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
+            objType == LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET ||
+                objType == LoadImmediateInst::ObjectType::TLS_OFFSET,
+            (std::cerr << "Non-JIT/OSR LoadImmediate must be PANDA_FILE_OFFSET or TLS_OFFSET:\n",
+             inst->Dump(&std::cerr)));
+    }
     CHECKER_IF_NOT_PRINT_VISITOR(
         v, (type == DataType::REFERENCE &&
             (objType == LoadImmediateInst::ObjectType::CLASS || objType == LoadImmediateInst::ObjectType::OBJECT)) ||

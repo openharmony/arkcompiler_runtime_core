@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2627,11 +2627,16 @@ bool Peepholes::SkipThisPeepholeInOSR(Inst *inst, Inst *newInput)
 
 void Peepholes::VisitGetInstanceClass(GraphVisitor *v, Inst *inst)
 {
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    // AOT: don't fold GetInstanceClass into LoadImmediate(class).
+    // In AOT class pointer may not match runtime class pointer, causing INLINE_IC deopt.
+    if (!graph->IsJitOrOsrMode()) {
+        return;
+    }
     auto typeInfo = inst->GetDataFlowInput(0)->GetObjectTypeInfo();
     if (typeInfo && typeInfo.IsExact()) {
         auto klass = typeInfo.GetClass();
         auto bb = inst->GetBasicBlock();
-        auto graph = bb->GetGraph();
         auto classImm = graph->CreateInstLoadImmediate(DataType::REFERENCE, inst->GetPc(), klass);
         inst->ReplaceUsers(classImm);
         bb->InsertAfter(classImm, inst);

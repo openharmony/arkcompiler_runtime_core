@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1669,6 +1669,12 @@ void EscapeAnalysis::VisitSafePoint(Inst *inst)
 
 void EscapeAnalysis::VisitGetInstanceClass(Inst *inst)
 {
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    // AOT: don't fold GetInstanceClass into LoadImmediate(class).
+    // In AOT class pointer may not match runtime class pointer, causing INLINE_IC deopt.
+    if (!graph->IsJitOrOsrMode()) {
+        return;
+    }
     auto blockState = GetState(inst->GetBasicBlock());
     auto input = inst->GetInput(0).GetInst();
     if (auto vstate = blockState->GetState(input)) {
@@ -2143,10 +2149,14 @@ void ScalarReplacement::ReplaceAliases()
                 user->ReplaceInput(inst, replacement);
             }
         } else if (replacement != nullptr && replacement->IsClassInst()) {
-            auto classImm = graph_->CreateInstLoadImmediate(DataType::REFERENCE, replacement->GetPc(),
-                                                            static_cast<ClassInst *>(replacement)->GetClass());
-            replacement->InsertAfter(classImm);
-            replacement = classImm;
+            // AOT: don't fold GetInstanceClass into LoadImmediate(class).
+            // In AOT class pointer may not match runtime class pointer, causing INLINE_IC deopt.
+            if (graph_->IsJitOrOsrMode()) {
+                auto classImm = graph_->CreateInstLoadImmediate(DataType::REFERENCE, replacement->GetPc(),
+                                                                static_cast<ClassInst *>(replacement)->GetClass());
+                replacement->InsertAfter(classImm);
+                replacement = classImm;
+            }
         }
 
         if (replacement != nullptr) {
