@@ -18,7 +18,7 @@
 ---*/
 
 //! CHECKER      Check retrieving external method info during deoptimization
-//! RUN_PAOC     options: "--panda-files=../../inline_external_test_external_file_1.ets.abc:../../inline_external_test_external_file_2.ets.abc:../../inline_external_test_external_file_3.ets.abc --paoc-use-cha=true --compiler-inline-external-methods-aot=true"
+//! RUN_PAOC     options: "--panda-files=../../inline_external_test_external_file_1.ets.abc:../../inline_external_test_external_file_2.ets.abc:../../inline_external_test_external_file_3.ets.abc --paoc-use-cha=true" # CC-OFF(G.FMT.02) special comment for testing
 //! METHOD       "inline_external_test.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /CallStatic.*B::array_test/
@@ -26,7 +26,7 @@
 //! PASS_AFTER   "Inline"
 //! INST         /CallStatic.Inlined.*B::array_test/
 //! INST         /CallStatic.Inlined.*C::array_test/
-//! RUN          options: "--panda-files=../../inline_external_test_external_file_1.ets.abc:../../inline_external_test_external_file_2.ets.abc:../../inline_external_test_external_file_3.ets.abc", entry: "inline_external_test.ETSGLOBAL::main"
+//! RUN          options: "--panda-files=../../inline_external_test_external_file_1.ets.abc:../../inline_external_test_external_file_2.ets.abc:../../inline_external_test_external_file_3.ets.abc", entry: "inline_external_test.ETSGLOBAL::main" # CC-OFF(G.FMT.02) special comment for testing
 //! READ_FILE    "console.out"
 //! INST         "RangeError: Out of bounds"
 

@@ -17,13 +17,13 @@
   files: [ext_funcs.ets, ext_funcs_1.ets]
 ---*/
 
-import { get_element } from "./ext_funcs_1.ets";
+import { get_element } from './ext_funcs_1.ets';
 
 //! CHECKER    Check external inlining with depth 1 and two panda files
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_2_ext_funcs.ets.abc:../../ext_inlining_2_ext_funcs_1.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_2.ETSGLOBAL::main"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_2_ext_funcs.ets.abc:../../ext_inlining_2_ext_funcs_1.ets.abc", entry: "ext_inlining_2.ETSGLOBAL::main" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_funcs_1.ETSGLOBAL::get_element,ext_funcs.ETSGLOBAL::add,.*,STATIC,SUCCESS/
 //! EVENT_NEXT /Inline,ext_inlining_2.ETSGLOBAL::main,ext_funcs_1.ETSGLOBAL::get_element,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_2_ext_funcs.ets.abc:../../ext_inlining_2_ext_funcs_1.ets.abc", entry: "ext_inlining_2.ETSGLOBAL::main"
+//! RUN        options: "--panda-files=../../ext_inlining_2_ext_funcs.ets.abc:../../ext_inlining_2_ext_funcs_1.ets.abc", entry: "ext_inlining_2.ETSGLOBAL::main" # CC-OFF(G.FMT.02) special comment for testing
 
 function main(): int {
     let arr: int[] = [1, 2, 3, 4];

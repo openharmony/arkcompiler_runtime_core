@@ -17,20 +17,20 @@
   files: [ext_funcs_2.ets]
 ---*/
 
-import { add } from "./ext_funcs_2.ets";
-import { add_with_log } from "./ext_funcs_2.ets";
-import { rand_plus } from "./ext_funcs_2.ets";
-import { get_arr_element } from "./ext_funcs_2.ets";
-import { make_array } from "./ext_funcs_2.ets";
-import { stringify } from "./ext_funcs_2.ets";
-import { safe_div } from "./ext_funcs_2.ets";
+import { add } from './ext_funcs_2.ets';
+import { add_with_log } from './ext_funcs_2.ets';
+import { rand_plus } from './ext_funcs_2.ets';
+import { get_arr_element } from './ext_funcs_2.ets';
+import { make_array } from './ext_funcs_2.ets';
+import { stringify } from './ext_funcs_2.ets';
+import { safe_div } from './ext_funcs_2.ets';
 
 //! CHECKER    Check external inlining without side effects
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_1"
-//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_1,ext_funcs_2.ETSGLOBAL::add,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main_1"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
+//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main1,ext_funcs_2.ETSGLOBAL::add,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
 
-function main_1(): int {
+function main1(): int {
     let result = 0;
 
     for (let i = 0; i < 5; i++) {
@@ -45,11 +45,11 @@ function main_1(): int {
 }
 
 //! CHECKER    Check external inlining function with runtime call from std core
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_2"
-//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_2,ext_funcs_2.ETSGLOBAL::add_with_log,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main_2"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
+//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main2,ext_funcs_2.ETSGLOBAL::add_with_log,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
 
-function main_2(): int {
+function main2(): int {
     let result = 0;
 
     for (let i = 0; i < 5; i++) {
@@ -64,11 +64,11 @@ function main_2(): int {
 }
 
 //! CHECKER    Check inlining of external function with runtime call of managed func
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_3"
-//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_3,ext_funcs_2.ETSGLOBAL::rand_plus,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main_3"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main3" # CC-OFF(G.FMT.02) special comment for testing
+//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main3,ext_funcs_2.ETSGLOBAL::rand_plus,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main3" # CC-OFF(G.FMT.02) special comment for testing
 
-function main_3(): int {
+function main3(): int {
     let ok = true;
     for (let i = 0; i < 5; i++) {
         let result = rand_plus(5);
@@ -81,35 +81,35 @@ function main_3(): int {
 }
 
 //! CHECKER    Check external inlining with possible ArrayIndexOutOfBounds
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_4"
-//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_4,ext_funcs_2.ETSGLOBAL::get_arr_element,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main_4"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main4" # CC-OFF(G.FMT.02) special comment for testing
+//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main4,ext_funcs_2.ETSGLOBAL::get_arr_element,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main4" # CC-OFF(G.FMT.02) special comment for testing
 
-function main_4(): int {
+function main4(): int {
     let arr: int[] = [1, 2, 3, 4];
     let val: int = get_arr_element(arr, 3);
     return val === 4 ? 0 : 1;
 }
 
 //! CHECKER    Check external inlining with heap allocation
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_5"
-//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_5,ext_funcs_2.ETSGLOBAL::make_array,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main_5"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main5" # CC-OFF(G.FMT.02) special comment for testing
+//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main5,ext_funcs_2.ETSGLOBAL::make_array,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main5" # CC-OFF(G.FMT.02) special comment for testing
 
-function main_5(): int {
+function main5(): int {
     let arr: int[] = make_array(3);
     return arr[2] === 0 ? 0 : 1;
 }
 
 //! CHECKER    Check external inlining with virtual call
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_6"
-//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_6,ext_funcs_2.ETSGLOBAL::stringify,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main_6"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main6" # CC-OFF(G.FMT.02) special comment for testing
+//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main6,ext_funcs_2.ETSGLOBAL::stringify,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main6" # CC-OFF(G.FMT.02) special comment for testing
 
-function main_6(): int {
+function main6(): int {
     let num: int = 42;
     let s = stringify(num);
-    if (s === "42") {
+    if (s === '42') {
         return 0;
     } else {
         return 1;
@@ -117,11 +117,11 @@ function main_6(): int {
 }
 
 //! CHECKER    Check external inlining with possible ZeroDivision
-//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc --compiler-inline-external-methods-aot=true", entry: "ext_inlining_3.ETSGLOBAL::main_7"
-//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main_7,ext_funcs_2.ETSGLOBAL::safe_div,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main_7"
+//! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main7" # CC-OFF(G.FMT.02) special comment for testing
+//! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main7,ext_funcs_2.ETSGLOBAL::safe_div,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main7" # CC-OFF(G.FMT.02) special comment for testing
 
-function main_7(): int {
+function main7(): int {
     let a = 10;
     let b = 5;
 

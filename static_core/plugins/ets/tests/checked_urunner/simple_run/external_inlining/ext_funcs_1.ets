@@ -17,7 +17,7 @@
   tags: [not-a-test]
 ---*/
 
-import { add } from "./ext_funcs.ets";
+import { add } from './ext_funcs.ets';
 
 export function get_element(arr: int[], idx: int): int {
     return add(arr[idx], arr[idx]);
