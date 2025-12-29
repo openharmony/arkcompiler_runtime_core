@@ -36,17 +36,17 @@ class Tool(ToolBase):
             self.etsstdlib = self.ensure_file(
                 panda_root, 'plugins', 'ets', 'etsstdlib.abc')
         elif self.target in (Target.DEVICE, Target.OHOS):
-            self.ark = f'{self.dev_dir}/ark'
-            self.ark_lib = f'{self.dev_dir}/lib'
-            self.etsstdlib = f'{self.dev_dir}/etsstdlib.abc'
+            self.ark = f'{self.dev_dir.as_posix()}/ark'
+            self.ark_lib = f'{self.dev_dir.as_posix()}/lib'
+            self.etsstdlib = f'{self.dev_dir.as_posix()}/etsstdlib.abc'
         else:
             raise NotImplementedError(f'Wrong target: {self.target}!')
         opts = '--gc-trigger-type=heap-trigger '
         self.an_files = []
         if OptFlags.AOT_SKIP_LIBS not in self.flags:
-            stdlib = str(ToolBase.libs / 'etsstdlib.an') \
+            stdlib = f'{ToolBase.libs.as_posix()}/etsstdlib.an' \
                 if Target.HOST == self.target \
-                else str(self.dev_dir / 'etsstdlib.an')
+                else f'{self.dev_dir.as_posix()}/etsstdlib.an'
             self.an_files.append(stdlib)
         if OptFlags.INT in self.flags:
             opts += '--compiler-enable-jit=false ' \
@@ -112,7 +112,7 @@ class Tool(ToolBase):
                         '--compiler-enable-jit=false '
                         f'--profile-output={abc}.profdata ')
         arkts_cmd = self.get_cmd(
-            name=bu.name, abc=str(abc), options=options, gclog=gclog, an=an)
+            name=bu.name, abc=abc.as_posix(), options=options, gclog=gclog, an=an)
         res = self.x_run(arkts_cmd)
         if self.no_run:
             bu.status = BUStatus.NOT_RUN
