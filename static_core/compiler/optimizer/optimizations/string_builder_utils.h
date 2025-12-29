@@ -27,6 +27,7 @@ namespace ark::compiler {
 
 bool IsStringBuilderInstance(Inst *inst);
 bool IsMethodStringConcat(const Inst *inst);
+bool IsMethodStringBuilderGetStringLength(Inst *inst);
 bool IsMethodStringBuilderConstructorWithStringArg(const Inst *inst);
 bool IsMethodStringBuilderConstructorWithCharArrayArg(const Inst *inst);
 bool IsStringBuilderToString(const Inst *inst);

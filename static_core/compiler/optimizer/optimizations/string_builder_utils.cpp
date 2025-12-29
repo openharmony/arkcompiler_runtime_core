@@ -32,6 +32,21 @@ bool IsStringBuilderInstance(Inst *inst)
     return runtime->IsClassStringBuilder(klass);
 }
 
+bool IsMethodStringBuilderGetStringLength(Inst *inst)
+{
+    if (inst->GetOpcode() != Opcode::CallStatic) {
+        return false;
+    }
+
+    auto call = inst->CastToCallStatic();
+    if (call->IsInlined()) {
+        return false;
+    }
+
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    return runtime->IsMethodStringBuilderGetStringLength(call->GetCallMethod());
+}
+
 bool IsMethodStringConcat(const Inst *inst)
 {
     if (inst->GetOpcode() != Opcode::CallStatic && inst->GetOpcode() != Opcode::CallVirtual) {

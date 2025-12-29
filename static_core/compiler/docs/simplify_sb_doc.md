@@ -213,6 +213,21 @@ Equivalent code after transformation will be the following:
     let output = sb.toString()
 ```
 
+**Remove extra call for stringLength**
+
+Example:
+```TS
+let sb = new StringBuilder()
+let len0 = sb.stringLength;
+let len1 = sb.stringLength;
+```
+Since there are no `StringBuilder::append()`-calls or any call modifying the StringBuilder object in between `stringLength`  calls, `len0` value is equal to `len1` value. So, the example code is equivalent to
+```TS
+let sb = new StringBuilder()
+let len0 = sb.stringLength;
+let len1 = len0;
+```
+
 ## Pseudocode
 
 **Complete algorithm**
@@ -228,6 +243,7 @@ function SimplifyStringBuilder(graph: Graph)
         OptimizeStringBuilderToString(block)
         OptimizeStringConcatenation(block)
         OptimizeStringBuilderAppendChain(block)
+        OptimizeStringBuilderStringLength(block)
 ```
 
 Below we describe the algorithm in more details
@@ -424,6 +440,24 @@ function OptimizeStringBuilderChain()
                 remove lastToString from inputInstance users
                 foreach call being user of instance
                     call.setInput(0, inputInstance) // retarget append call to inputInstance
+```
+
+**Remove extra call for stringLength**
+The algorithm works as follows. In the basic block for all instructions, if it is a stringLength instruction and it is in the cashMap, then this instruction is removed from the block. If the instruction is not in the cashMap, then it is written there together with the first input as a key. If it is not stringLength instruction, all its inputs are checked, and if one of the inputs is in the cashMap, the entry with the input key is removed from the cashMap.
+```C#
+function OptimizeStringBuilderStringLength(block: BasicBlock)
+    foreach instructions in block
+        if instruction is StringBuilder.stringLength
+            let sbInstance be 1st input instruction
+            if sbInstance in cashMap
+                remove instruction from block
+            else
+                (sbInstance, instruction) add into cashMap
+        if instruction is StringBuilder.stringLength
+            continue
+        foreach input in instruction.inputs
+            if input in cashMap
+                remove (input, instruction) from cashMap
 ```
 
 ## Examples
@@ -1273,6 +1307,62 @@ prop:
 succs: [bb 5]
 
 BB 5  preds: [bb 1]
+prop: end
+```
+
+**Remove extra call for stringLength**
+
+ETS function example:
+```TS
+function StringCalculation() {
+    let sb = new StringBuilder();
+    let len0 = sb.stringLength;
+    let len1 = sb.stringLength;
+    let len2 = sb.stringLength;
+    return len2.toString();
+}
+```
+IR before transformation:
+(Save state instructions are skipped for simplicity)
+```
+BB 1
+prop: start
+succs: [bb 0]
+
+BB 0  preds: [bb 1]
+prop:
+    1.ref  LoadAndInitClass 'std.core.StringBuilder' v0 -> (v2) 
+    2.ref  NewObject 327              v1, v0 -> (v13, v10, v7, v3) 
+    3.void CallStatic 380 std.core.StringBuilder::<ctor> v2, v4 
+    7.i32  CallStatic 371 std.core.StringBuilder::%%get-stringLength v2, v5  
+   10.i32  CallStatic 371 std.core.StringBuilder::%%get-stringLength v2, v9 
+   13.i32  CallStatic 371 std.core.StringBuilder::%%get-stringLength v2, v11 -> (v15)
+   16.     InitClass 'std.core.Int'    v14  
+   15.ref  CallStatic 353 std.core.Int::toString v13, v14 -> (v17)
+   17.ref  Return                     v15
+succs: [bb 2]
+
+BB 2  preds: [bb 0]
+prop: end
+```
+IR after transformation:
+```
+BB 1
+prop: start
+succs: [bb 0]
+
+BB 0  preds: [bb 1]
+prop:
+    1.ref  LoadAndInitClass 'std.core.StringBuilder' v0 -> (v2)
+    2.ref  NewObject 327              v1, v0 -> (v7, v3)
+    3.void CallStatic 380 std.core.StringBuilder::<ctor> v2, v4 
+    7.i32  CallStatic 371 std.core.StringBuilder::%%get-stringLength v2, v5 -> (v15)
+   16.     InitClass 'std.core.Int'    v14
+   15.ref  CallStatic 353 std.core.Int::toString v7, v14 -> (v17)
+   17.ref  Return                     v15
+succs: [bb 2]
+
+BB 2  preds: [bb 0]
 prop: end
 ```
 

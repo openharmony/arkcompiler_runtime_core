@@ -45,6 +45,7 @@ public:
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override;
     bool IsMethodStringBuilderToString(MethodPtr method) const override;
     bool IsMethodStringBuilderAppend(MethodPtr method) const override;
+    bool IsMethodStringBuilderGetStringLength(MethodPtr method) const override;
     bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const override;
     bool IsMethodTypedArrayCtor([[maybe_unused]] MethodPtr method) const override;
     bool IsClassStringBuilder(ClassPtr klass) const override;

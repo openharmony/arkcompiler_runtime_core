@@ -215,6 +215,11 @@ bool EtsRuntimeInterface::IsMethodStringBuilderAppend(MethodPtr method) const
     return GetMethodFullName(method, false) == "std.core.StringBuilder::append";
 }
 
+bool EtsRuntimeInterface::IsMethodStringBuilderGetStringLength([[maybe_unused]] MethodPtr method) const
+{
+    return GetMethodFullName(method, false) == "std.core.StringBuilder::%%get-stringLength";
+}
+
 bool EtsRuntimeInterface::IsMethodInModuleScope(MethodPtr method) const
 {
     return static_cast<EtsMethod *>(method)->GetClass()->IsModule();
