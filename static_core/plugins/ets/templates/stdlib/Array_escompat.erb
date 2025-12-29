@@ -605,13 +605,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns shifted element, i.e. that was at index zero
      */
     public shift(): T | undefined {
-        if(this.actualLength == 0) {
+        const len: int = this.actualLength
+        if(len == 0) {
             return undefined
         }
-        let obj = this.$_get_unsafe(0)
-        const other = this.slice(1, this.actualLength)
-        this.buffer = other.buffer
-        this.actualLength = other.actualLength
+        let obj: T = this.$_get_unsafe(0)
+        copyToFastWithBarriers(this.buffer, this.buffer, 0, 1, len)
+        this.popImpl()
         return obj
     }
 
@@ -622,14 +622,19 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns removed element
      */
     public pop(): T | undefined {
-        if(this.actualLength == 0) {
+        const len: int = this.actualLength
+        if(len == 0) {
             return undefined
         }
-        let index = this.actualLength - 1
-        let obj = this.$_get_unsafe(index)
+        let obj: T = this.$_get_unsafe(len - 1)
+        this.popImpl()
+        return obj
+    }
+    
+    private popImpl(): void {
+        const index: int = this.actualLength - 1
         this.$_set_unsafe(index, undefined)
         this.actualLength = index
-        return obj
     }
 
     /**
@@ -1000,6 +1005,27 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
  * ```
  */
 native function copyToFast(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
+
+/**
+ * copies src array into dst with respect to passed indexes and with setting pre-write barriers.
+ * dst could be the same src array and must have enough space, otherwise out-of-bounds might occur
+ *
+ * @param src source array to be copied
+ *
+ * @param dst destination array
+ *
+ * @param dstStart index of dst to start from
+ *
+ * @param srcStart index of src to start from
+ *
+ * @param srcEnd last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
+ *
+ * @example: copy src to dst
+ * ```
+ * copyToFastWithBarriers(src, dst, 0, 1, src.length)
+ * ```
+ */
+native function copyToFastWithBarriers(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 export function tryGetIteratorLength(obj: Object): int | undefined {
     const objCls = Class.of(obj)
