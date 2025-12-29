@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -226,6 +226,24 @@ TEST(Utf, ConvertRegionUtf16ToMUtf8_3b)
         out[out.size() - 1L] = '\0';
         EXPECT_EQ(out, res);
     }
+}
+
+TEST(Utf, ConvertUtf16ToUtf8IsolatedHighSurrogate)
+{
+    uint16_t lead = 0xD834U;
+    uint16_t nonTrail = 0x0041U;  // 'A', not a trail surrogate
+
+    auto res = ConvertUtf16ToUtf8(lead, nonTrail, false);
+    EXPECT_EQ(res.n, UtfLength::THREE);
+    EXPECT_EQ(res.ch[0], 0xEFU);
+    EXPECT_EQ(res.ch[1], 0xBFU);
+    EXPECT_EQ(res.ch[2], 0xBDU);
+
+    auto mutfRes = ConvertUtf16ToUtf8(lead, nonTrail, true);
+    EXPECT_EQ(mutfRes.n, UtfLength::THREE);
+    EXPECT_EQ(mutfRes.ch[0], 0xEFU);
+    EXPECT_EQ(mutfRes.ch[1], 0xBFU);
+    EXPECT_EQ(mutfRes.ch[2], 0xBDU);
 }
 
 TEST(Utf, CompareMUtf8ToMUtf8_1b)
