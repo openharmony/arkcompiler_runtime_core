@@ -18,30 +18,9 @@ cases:
         set f(i: int)
       }
       class C implements I {
-        readonly f: int = 1
-      }
-    tags: compile-only, negative
-    doc: use readonly parameter form for writable field is prohibited
-
-  - decl: |-
-      interface I {
-        set f(i: int)
-      }
-      class C implements I {
         f: int = 1
       }
-    tags: compile-only
     doc: initialize property using writable form
-
-  - decl: |-
-      interface I {
-        set f(i: int)
-      }
-      class C implements I {
-        get f(): int { return 1 }
-      }
-    tags: compile-only, negative
-    doc: cannot implement setter using getter form
 
   - decl: |-
       interface I {
@@ -50,7 +29,6 @@ cases:
       class C implements I {
         set f(i: int) {}
       }
-    tags: compile-only
     doc: implement setter with the setter form
 
   - decl: |-
@@ -61,23 +39,5 @@ cases:
         get f(): int { return 1 }
         set f(i: int) {}
       }
-    tags: compile-only
     doc: implement setter with the getter and setter forms
 
-  - decl: |-
-      interface I {
-        set f(i: int)
-      }
-      class C implements I {
-        f: boolean = false
-      }
-    tags: compile-only, negative
-    doc: incorrect field type
-
-  - decl: |-
-      interface I {
-        set f(i: int)
-      }
-      class C implements I {}
-    tags: compile-only, negative
-    doc: required property is not initialized

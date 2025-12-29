@@ -62,35 +62,6 @@ cases:
           arktest.assertEQ(a.fld[0]!(42.0), 43.0)
           arktest.assertEQ(a.fld[1], null)
 
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: (null|(p: number) => number)[]
-              constructor(p: readonly (null|(p: number) => number)[]) {
-                  this.fld = p // CTE: cannot assign readonly array to read-write array
-              }
-          }
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: ReadonlyArray<null|(p: number) => number>
-              constructor(p: readonly (null|(p: number) => number)[]) {
-                  this.fld = p
-                  p[0] = null // CTE: cannot change an element of readonly array
-              }
-          }
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: ReadonlyArray<null|(p: number) => number>
-              constructor(p: readonly (null|(p: number) => number)[]) {
-                  this.fld = p
-                  this.fld[0] = null // CTE: cannot change an element of ReadonlyArray
-              }
-          }
-
     # readonly tuple
     - decl: |-
           class A {
@@ -105,35 +76,6 @@ cases:
           let a = new A(tup)
           arktest.assertEQ(a.fld[1]('hello')[0], 'hello')
           arktest.assertEQ(a.fld, tup)
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: [FixedArray<string>, (p: string) => Array<string>]
-              constructor(p: readonly [FixedArray<string>, (p: string) => Array<string>]) {
-                  this.fld = p // CTE: cannot assign readonly tuple to read-write tuple
-              }
-          }
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: readonly [FixedArray<string>, (p: string) => Array<string>]
-              constructor(p: readonly [FixedArray<string>, (p: string) => Array<string>]) {
-                  this.fld = p
-                  p[0] = ['x', 'y']  // CTE: cannot change an element of readonly tuple
-              }
-          }
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: readonly [FixedArray<string>, (p: string) => Array<string>]
-              constructor(p: readonly [FixedArray<string>, (p: string) => Array<string>]) {
-                  this.fld = p
-                  this.fld[0] = ['x', 'y']  // CTE: cannot change an element of readonly tuple
-              }
-          }
 
     # optional parameters
     - decl: |-
@@ -232,15 +174,6 @@ cases:
           arktest.assertEQ(new A(undefined).fld, undefined)
           arktest.assertEQ(new A(42.0).fld, 42.0)
 
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: Array<byte|short|int|undefined>
-              constructor(b?: byte, s: short, i?: int) { // CTE: required parameter after optional
-                  this.fld = [b, s, i]
-              }
-          }
-
     # optional parameters with default value
     - decl: |-
           class A {
@@ -264,18 +197,6 @@ cases:
           )
           arktest.assertEQ(a.p(42), 'Z42')
           arktest.assertEQ(a.q(42.0), 'X42')
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          enum Color { Red, Green, Blue }
-          class A {
-              p: Color
-              q: boolean
-              constructor(p: Color = Color.Green, q: boolean) { // CTE: required parameter after optional
-                  this.p = p
-                  this.q = q
-              }
-          }
 
     - decl: |-
           class A {
@@ -376,15 +297,7 @@ cases:
           arktest.assertEQ(a.fld.length, 1)
           arktest.assertEQ(a.fld[0][0], 'abc')
 
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: readonly Any[][]
-              constructor(...p: readonly Any[][]) {
-                  this.fld = p
-                  p[0] = [new Object] // CTE: cannot update readonly array
-              }
-          }
+
 
     # rest parameter with Array<T> array
     - decl: |-
@@ -418,16 +331,6 @@ cases:
           a = new A(['abc', 'def'])
           arktest.assertEQ(a.fld.length, 1)
           arktest.assertEQ(a.fld[0][0], 'abc')
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: ReadonlyArray<ReadonlyArray<Any>>
-              constructor(...p: readonly Array<Array<Any>>) {
-                  this.fld = p
-                  p[0] = [new Object] // CTE: cannot update readonly array
-              }
-          }
 
     # rest parameter with FixedArray<T> array
     - decl: |-
@@ -475,39 +378,6 @@ cases:
           arktest.assertEQ(a.fld[0], 'abc')
           arktest.assertEQ(a.fld[1](true), 'result = true')
 
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: [string, string, number]
-              constructor(...p: [string, string, double]) {
-                  this.fld = p
-              }
-          }
-      use: |-
-          let a = new A('abc', 'def') // CTE: not enough arguments
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: [string, string, number]
-              constructor(...p: [string, string, double]) {
-                  this.fld = p
-              }
-          }
-      use: |-
-          let a = new A('abc', 'def', 1.0, 2.0) // CTE: too many arguments
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: [string, string, number]
-              constructor(...p: [string, string, double]) {
-                  this.fld = p
-              }
-          }
-      use: |-
-          let a = new A(true, 'abc', 2.0) // CTE: wrong argument type
-
     - decl: |-
           class A {
               fld: readonly [Any, boolean|null]
@@ -519,16 +389,6 @@ cases:
           let a = new A('abc', null)
           arktest.assertEQ(a.fld[0], 'abc')
           arktest.assertEQ(a.fld[1], null)
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: readonly [string|undefined, string|null]
-              constructor(...p: readonly [string|undefined, string|null]) {
-                  this.fld = p
-                  p[0] = undefined // CTE: cannot update readonly tuple
-              }
-          }
 
     # [] spread to rest
     - decl: |-
@@ -545,7 +405,7 @@ cases:
           arktest.assertEQ(a.p[1], 1)
           arktest.assertEQ(a.p[2], 2)
 
-      decl: |-
+    - decl: |-
           class A {
               p: Object[]
               constructor(...obj: Object[]) {
@@ -606,18 +466,6 @@ cases:
           arktest.assertEQ(a.fld[1], 5)
           arktest.assertEQ(a.fld[2], 5)
 
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              fld: FixedArray<number>
-              constructor(...p: FixedArray<number>) {
-                  this.fld = p
-              }
-          }
-      use: |-
-          // CTE: spread argument must correspond to rest parameter
-          let a = new A(12.0, ...([ 13.0, 14.0 ] as FixedArray<number>))
-
     - decl: |-
           class A {
               p: FixedArray<Object>
@@ -650,30 +498,6 @@ cases:
           arktest.assertEQ(a.tup[0](), true)
           arktest.assertEQ(a.tup[1](), 'abc')
           arktest.assertEQ(a.tup[2](), 42.0)
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              tup: readonly [boolean, string, number|undefined]
-              constructor(...tup: [boolean, string, number|undefined]) {
-                  this.tup = tup
-              }
-          }
-          let tup: [string, number|undefined] = [ 'abc', undefined ]
-      use: |-
-          let a = new A(true, ...tup) // CTE: spread argument must correspond to rest parameter
-
-    - tags: 'compile-only, negative'
-      decl: |-
-          class A {
-              tup: readonly [boolean, string, number|undefined]
-              constructor(...tup: [boolean, string, number|undefined]) {
-                  this.tup = tup
-              }
-          }
-          let tup: [string, number|undefined] = [ 'abc', undefined ]
-      use: |-
-          let a = new A(...tup) // CTE: wrong number of arguments
 
     - decl: |-
         class A {

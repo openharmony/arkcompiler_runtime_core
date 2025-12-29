@@ -891,19 +891,19 @@
 
 #30939
 09.classes/07.method_declarations/01.static_methods/use_instance_field_4.ets
-09.classes/07.method_declarations/01.static_methods/use_instance_field_7.ets
-09.classes/07.method_declarations/01.static_methods/use_instance_field_9.ets
+09.classes/07.method_declarations/01.static_methods/use_instance_field_6.ets
+09.classes/07.method_declarations/01.static_methods/use_instance_field_8.ets
 09.classes/07.method_declarations/01.static_methods/use_instance_method_4.ets
-09.classes/07.method_declarations/01.static_methods/use_instance_method_7.ets
-09.classes/07.method_declarations/01.static_methods/use_instance_method_9.ets
+09.classes/07.method_declarations/01.static_methods/use_instance_method_6.ets
+09.classes/07.method_declarations/01.static_methods/use_instance_method_8.ets
 
 #27886 Issues with default values
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_3.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_4.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_5.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_8.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_11.ets
-09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_12.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_1.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_2.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_3.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_4.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_5.ets
+09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_6.ets
 
 #23238 Method returning 'this' returns wrong instance
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_8.ets
@@ -927,7 +927,7 @@
 09.classes/09.constructor_declaration/constructor_declaration_with_type_parameters6.ets
 
 #28527
-09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_gen_35.ets
+09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_gen_20.ets
 
 #28693 CTE when a call to `super` is not the first statement
 09.classes/09.constructor_declaration/02.constructor_body/spec_example1.ets
@@ -957,19 +957,19 @@
 09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass10.ets
 
 #28235 Constructor Names not yet work
+09.classes/09.constructor_declaration/03.explicit_constructor_call/this_constructor.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_0.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_1.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_2.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_3.ets
-09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_13.ets
-09.classes/09.constructor_declaration/03.explicit_constructor_call/this_constructor.ets
+09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_neg_9.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_m_1.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_m_4.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_m_7.ets
 
 #29811  no matching call signature if undefined is used for optional parameter
-09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_40.ets
-09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_41.ets
+09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_13.ets
+09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_14.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_m_10.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_m_11.ets
 

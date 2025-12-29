@@ -13,17 +13,36 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
     In the process of inheriting and overriding, accessors behave as methods. The getter parameter type follows
     the covariance pattern, and the setter parameter type follows the contravariance pattern.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
-{{c.decl}}
+/*
+  # inheriting and overriding done right: covariance for the return type
+  # and contravariance for parameters
+*/
+
+class Base {
+  get field(): Base { return new Base }
+  set field(a_field: Derived) {}
+}
+
+class Derived extends Base {
+  override get field(): Derived { return new Derived }
+  override set field(a_field: Base) {}
+}
+
+function foo (base: Base) {
+  base.field = new Derived // setter is called
+  let b: Base = base.field // getter is called
+  arktest.assertTrue(base.field instanceof Derived)
+  arktest.assertTrue(b instanceof Base)
+}
 
 function main() {
-{{c.use}}
+    foo (new Derived)
 }
-{% endfor %}
+

@@ -18,7 +18,7 @@
 desc: >-
     The syntax and semantics of a constructor's formal parameters are
     identical to those of a method.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 {{c.decl}}

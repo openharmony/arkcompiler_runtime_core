@@ -12,20 +12,8 @@
 # limitations under the License.
 
 ---
-interface_props:
-  - "n?: number"
-  - "n: number|undefined"
 
 cases:
-  - decl: |-
-     n = 42
-    tags: compile-only, negative
-    doc: optional property is implemented as non-optional
-
-  - decl: |-
-     readonly n = 42
-    tags: compile-only, negative
-    doc: optional property is implemented as readonly
 
   - decl: |-
      n: number|undefined = 42
@@ -36,20 +24,20 @@ cases:
     doc: optional property is implemented as union
 
   - decl: |-
-     n: int|number|undefined = 42
-    tags: compile-only, negative
-    doc: optional property is implemented as extended union
-
-  - decl: |-
      get n(): number|undefined {
        return undefined
      }
     check: |-
-      function main() {
-        let a: C = new C().n
+      function main(): int {
+        let a: C = new C()
         arktest.assertEQ(a.n, undefined)
-        a.n = 41
-        arktest.assertEQ(a.n, 41)
+        try {
+          a.n = 41
+        } catch(e) {
+          arktest.assertTrue(e instanceof InvalidStoreAccessError)
+          return 0
+        }
+        return 1
       }
     doc: optional property is implemented as getter
 
@@ -64,10 +52,10 @@ cases:
      set n(i: number|undefined) {}
     check: |-
       function main() {
-        let a: C = new C().n
+        let a: C = new C()
         arktest.assertEQ(a.n, 1)
         a.n = 41
         arktest.assertEQ(a.n, 1)
       }
-    tags: compile-only
+
     doc: optional property is implemented as getter and setter

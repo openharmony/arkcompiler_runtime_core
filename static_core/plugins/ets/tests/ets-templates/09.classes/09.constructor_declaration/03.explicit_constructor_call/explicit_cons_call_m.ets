@@ -18,7 +18,7 @@
 desc: >-
     To call a named constructor, the name of the constructor must be
     provided while calling a superclass or another same-class constructor
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 {{c.decl}}

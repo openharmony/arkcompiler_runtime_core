@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-{% for i in interface_props %}
 {% for c in cases %}
 /*---
 desc: >-
       A compile-time error occurs, if an optional property in an interface is implemented as non-optional field
       {{c.doc}}
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 interface I {
-  n?: number
+  n?: number // Short form. See 10.4.2
 }
 
 class C implements I {
   {{c.decl}}
 }
-{% endfor %}
+
+{{c.check}}
 {% endfor %}

@@ -19,7 +19,7 @@ desc: >-
     Class static methods may access protected or private members of the same class type
     or derived one represented as parameters or local variables
     {{c.doc}}
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 {{c.decl}}
