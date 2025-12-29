@@ -216,6 +216,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/reserve_string_builder_buffer.cpp
         optimizer/optimizations/savestate_optimization.cpp
         optimizer/optimizations/scheduler.cpp
+        optimizer/optimizations/select_optimization.cpp
         optimizer/optimizations/simplify_string_builder.cpp
         optimizer/optimizations/string_builder_utils.cpp
         optimizer/optimizations/try_catch_resolving.cpp
@@ -366,6 +367,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/rpo_test.cpp
     tests/savestate_optimization_tests.cpp
     tests/scheduler_test.cpp
+    tests/select_optimization_test.cpp
     tests/split_resolver_test.cpp
     tests/try_catch_resolving_test.cpp
     tests/unit_test.cpp

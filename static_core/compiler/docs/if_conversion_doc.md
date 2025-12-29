@@ -260,11 +260,100 @@ x = SomeOpA w
 y = SomeOpB x
 ```
 
+### Pattern 3.1: Candidates with the same inputs
+
+Instruction `Select v1, v1, x1, x2` has identical inputs (`v1`), and can be optimized to `v1`, since it returns one of the first two inputs:
+
+```
+y = Select v1, v1, x1, x2
+=>
+y = v1
+```
+
+### Pattern 3.1: Candidates with boolean constant inputs
+
+In case some inputs of the Select-instruction are boolean constants and the type of instruction is boolean, we can optimize it using the following patterns:
+
+#### Case: (v2 == false) ? false : true
+```
+v0 = false
+v1 = true
+y = SelectImm EQ v0, v1, v2, false
+=>
+y = v2
+```
+
+#### Case: (v2 == true) ? true : false
+```
+v0 = true
+v1 = false
+y = SelectImm EQ v0, v1, v2, true
+=>
+y = v2
+```
+
+#### Case: (v2 == false) ? true : false
+```
+v0 = true
+v1 = false
+y = SelectImm EQ v0, v1, v2, false
+=>
+y = invert(v2)
+```
+
+#### Case: (v2 == true) ? false : true
+```
+v0 = false
+v1 = true
+y = SelectImm EQ v0, v1, v2, true
+=>
+y = invert(v2)
+```
+
+#### Case: (v2 != false) ? true : false
+```
+v0 = true
+v1 = false
+y = SelectImm NE v0, v1, v2, false
+=>
+y = v2
+```
+
+####  Case: (v2 != true) ? false : true
+```
+v0 = false
+v1 = true
+y = SelectImm NE v0, v1, v2, true
+=>
+y = v2
+```
+
+#### Case: (v2 != false) ? false : true
+```
+v0 = false
+v1 = true
+y = SelectImm NE v0, v1, v2, false
+=>
+y = invert(v2)
+```
+
+#### Case: (v2 != true) ? true : false
+```
+v0 = true
+v1 = false
+y = SelectImm NE v0, v1, v2, true
+=>
+y = invert(v2)
+```
+
 ## Links
 
-Source code:   
-[if_conversion.cpp](../optimizer/optimizations/if_conversion.cpp)    
-[if_conversion.h](../optimizer/optimizations/if_conversion.h)  
+Source code:
+* [if_conversion.cpp](../optimizer/optimizations/if_conversion.cpp)
+* [if_conversion.h](../optimizer/optimizations/if_conversion.h)
+* [select_optimization.cpp](../optimizer/optimizations/select_optimization.cpp)
+* [select_optimization.h](../optimizer/optimizations/select_optimization.h)
 
-Tests:  
-[if_conversion_test.cpp](../tests/if_conversion_test.cpp)
+Tests:
+* [if_conversion_test.cpp](../tests/if_conversion_test.cpp)
+* [select_optimization_test.cpp](../tests/select_optimization_test.cpp)

@@ -187,6 +187,7 @@ libarkcompiler_sources = [
   "optimizer/optimizations/reserve_string_builder_buffer.cpp",
   "optimizer/optimizations/savestate_optimization.cpp",
   "optimizer/optimizations/scheduler.cpp",
+  "optimizer/optimizations/select_optimization.cpp",
   "optimizer/optimizations/simplify_string_builder.cpp",
   "optimizer/optimizations/string_builder_utils.cpp",
   "optimizer/optimizations/string_flat_check.cpp",
