@@ -259,6 +259,7 @@
 13.modules_and_namespaces/03.top-level_declarations/top_level_declarations_negative_28.ets
 13.modules_and_namespaces/03.top-level_declarations/top_level_declarations_negative_29.ets
 13.modules_and_namespaces/03.top-level_declarations/top_level_declarations_negative_37.ets
+13.modules_and_namespaces/05.export_directives/03.export_type_directive/export_type_set2_neg_2.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/module_all_a_plus_c.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/re_export_clash_0_1.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/modules/re_export_clash_1.ets
