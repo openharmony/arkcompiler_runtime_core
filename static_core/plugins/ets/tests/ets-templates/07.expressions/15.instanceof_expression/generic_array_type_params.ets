@@ -26,7 +26,7 @@ desc: |-
 
 class OtherType {}
 
-{%- if s.syntax == 'square' %}
+{%- if s == 'square' %}
 type my_type = {{c.type}}[]
 {%- else %}
 type my_type = Array<{{c.type}}>

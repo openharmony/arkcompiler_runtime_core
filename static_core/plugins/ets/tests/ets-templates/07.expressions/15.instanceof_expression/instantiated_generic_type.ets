@@ -14,26 +14,16 @@
  */
 
 {% for c in cases %}
-{% for s in syntax %}
 /*---
 desc: |-
-    T[] and Array<T> specify identical, i.e., indistinguishable types... Generic type in the form of type name can be
-    used as T operand of an instanceof expression. In this case, the check is performed against the type name, and
-    type parameters are ignored.
+    A compile-time error occurs if type T is not retained by Type Erasure... Instantiated generic types
+    cannot be used because the T operand of an instanceof must be retained by Type Erasure.
+tags: [compile-only, negative]
 ---*/
 
-{{c.top_decl}}
-
-{%- if s == 'square' %}
-type my_type = {{c.type}}[]
-{%- else %}
-type my_type = Array<{{c.type}}>
-{%- endif %}
+{{c.decl}}
 
 function main() {
-    {{c.decl}}
-    let v: my_type = {{c.init}}
-    arktest.assertTrue(v instanceof Array)
+    {{c.use}}
 }
-{% endfor %}
 {% endfor %}

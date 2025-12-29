@@ -37,6 +37,12 @@ cases:
   - type: 'long'
     init: '[2147483648, 2147483648]'
 
+  - type: 'float'
+    init: '[1.0f, 1.0f]'
+
+  - type: 'double'
+    init: '[1.0, 1.0]'
+
   - type: 'bigint'
     init: '[1n, 1n]'
 
@@ -88,6 +94,12 @@ cases:
     type: 'Color'
     init: '[Color.Red, Color.Green]'
 
+  - top_decl: |-
+      type foo_type = (a: string) => string
+    type: 'foo_type'
+    decl: 'let elem: foo_type = (a: string) => a'
+    init: '[elem, elem]'
+
 syntax:
-  - 'square'
-  - 'diamond'
+  - square
+  - diamond
