@@ -76,6 +76,7 @@ napi_value GetETSClassImpl(napi_env env, std::string_view classDescriptor)
 
     EtsClassWrapper *etsClassWrapper = EtsClassWrapper::Get(ctx, etsKlass);
     if (UNLIKELY(etsClassWrapper == nullptr)) {
+        ctx->ForwardEtsException(coro);
         return nullptr;
     }
 

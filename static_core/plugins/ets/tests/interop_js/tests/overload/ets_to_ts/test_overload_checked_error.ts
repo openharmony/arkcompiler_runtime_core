@@ -23,6 +23,17 @@ function testExtendsOverloadConflict(): void {
     }
 }
 
+function testStaInsOverload(): void {
+    try {
+        let cssLogicRuleIns = etsVm.getFunction('Ltest_overload_checked_error/ETSGLOBAL;','createCSSLogicRule');
+        cssLogicRuleIns();
+        ASSERT_TRUE(false);
+    } catch(e) {
+        ASSERT_TRUE(e.message === 'Multiple override Ltest_overload_checked_error/CSSLogicRule;mergeRule Ltest_overload_checked_error/CSSLogicRule;mergeRule')
+    }
+}
+
+
 function testCountOverload(): void {
     let CountOverloadRule = etsVm.getClass('Ltest_overload_checked_error/CountOverloadRule;');
     let r = new CountOverloadRule();
@@ -43,6 +54,7 @@ function testAll(): void {
     testExtendsOverloadConflict();
     testCountOverload();
     testTypeOverload();
+    testStaInsOverload();
 }
 
 function main() {

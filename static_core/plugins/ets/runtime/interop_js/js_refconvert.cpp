@@ -90,15 +90,18 @@ template <bool ALLOW_INIT>
 JSRefConvert *JSRefConvertCreate(InteropCtx *ctx, Class *klass)
 {
     INTEROP_TRACE();
+    auto coro = EtsCoroutine::GetCurrent();
     if (!CheckClassInitialized<ALLOW_INIT>(klass)) {
-        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        ASSERT(coro->HasPendingException());
         return nullptr;
     }
     auto conv = JSRefConvertCreateImpl(ctx, klass);
     if (UNLIKELY(conv == nullptr)) {
-        ctx->ThrowETSError(EtsCoroutine::GetCurrent(), std::string("Seamless conversion for class ") +
-                                                           utf::Mutf8AsCString(klass->GetDescriptor()) +
-                                                           std::string(" is not supported"));
+        if (!coro->HasPendingException()) {
+            ctx->ThrowETSError(coro, std::string("Seamless conversion for class ") +
+                                         utf::Mutf8AsCString(klass->GetDescriptor()) +
+                                         std::string(" is not supported"));
+        }
         return nullptr;
     }
     return ctx->GetRefConvertCache()->Insert(klass, std::move(conv));
