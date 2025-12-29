@@ -23,8 +23,8 @@ add_custom_target(ets_test_suite_coroutines)
 #                         [OPTIONS "--gc-type=epsilon"]
 #                         IMPL "THREADED" "STACKFUL"
 #                         OPTION_SETS_THREADED "DEFAULT"
-#                         OPTION_SETS_STACKFUL "DEFAULT" "POOL" "MIGRATION_AWAIT"
-#                         WORKERS "AUTO" "ONE"
+#                         OPTION_SETS_STACKFUL "DEFAULT" "POOL" "MIGRATE_AWAKENED"
+#                         WORKERS "AUTO" "ONE" "THREE"
 #                         MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
 # )
 # This funciont will create a number of tests as a cartesian product of IMPL, OPTION_SETS_${IMPL}, WORKERS, and MODES, e.g.
@@ -66,6 +66,8 @@ function(add_ets_coroutines_test)
             set(workers_option "--coroutine-workers-count=0")
             if (workers_count STREQUAL "ONE")
                 set(workers_option "--coroutine-workers-count=1")
+            elseif (workers_count STREQUAL "THREE")
+                set(workers_option "--coroutine-workers-count=3")
             endif()
             string(TOLOWER "${workers_count}" workers_count)
 
@@ -75,8 +77,8 @@ function(add_ets_coroutines_test)
                     set(additional_options "--use-coroutine-pool=false")
                 elseif(option_set STREQUAL "STATS")
                     set(additional_options "--coroutine-dump-stats=true")
-                elseif(option_set STREQUAL "MIGRATION_AWAIT")
-                    set(additional_options "--coroutine-enable-features:migration,migrate-await")
+                elseif(option_set STREQUAL "MIGRATE_AWAKENED")
+                    set(additional_options "--coroutine-enable-features:migrate-awakened")
                 endif()
                 string(TOLOWER "${option_set}" options_name)
 
@@ -441,11 +443,11 @@ add_ets_coroutines_test(FILE scale_workers_pool.ets
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE await_migrate.ets
+add_ets_coroutines_test(FILE migrate_awakened_coro.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
-                        OPTION_SETS_STACKFUL "MIGRATION_AWAIT"
-                        WORKERS "AUTO"
+                        OPTION_SETS_STACKFUL "MIGRATE_AWAKENED"
+                        WORKERS "THREE"
                         MODE "INT"
 )
 
