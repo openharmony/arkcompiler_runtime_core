@@ -41,6 +41,16 @@ cases:
       arktest.assertEQ(p[2], true)
       arktest.assertEQ(p[3], 123)
 
+  - decl_args: |-
+      (...p: Object[])
+    use_args: |-
+      (...[1, "str", true], ...[ ...123])
+    verify_args: |-
+      arktest.assertEQ(p[0], 1)
+      arktest.assertEQ(p[1], "str")
+      arktest.assertEQ(p[2], true)
+      arktest.assertEQ(p[3], 123)
+
 # NOTE below can split to separate cases to make tests more narrowly focused
 context:
   - function_lambda_constructor_method_interface

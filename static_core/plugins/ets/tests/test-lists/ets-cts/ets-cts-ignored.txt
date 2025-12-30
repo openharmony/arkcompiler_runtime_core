@@ -1388,6 +1388,7 @@
 15.semantic_rules/06.compatibility_call_args/spec_examples2_0.ets
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
 15.semantic_rules/06.compatibility_call_args/spec_examples2_2.ets
+15.semantic_rules/06.compatibility_call_args/spec_examples2_3.ets
 
 #32543
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_45.ets
