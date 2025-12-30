@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,7 @@ export class EAWorker {
      * Create EAWorker instance
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      */
-    constructor supportInterop(needInterop: boolean = false) {
+    constructor(needInterop: boolean = false) {
         this("EAWorker", needInterop);
     }
 
@@ -82,7 +82,7 @@ export class EAWorker {
      * @param { string } name The name of the worker
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      */
-    constructor withName(name: string, needInterop: boolean = false) {
+    constructor(name: string, needInterop: boolean = false) {
         this.worker = needInterop ? new InteropWorker(name) : new StaticWorker(name);
     }
 
@@ -91,7 +91,7 @@ export class EAWorker {
      * @param { Task } task The task function to execute
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      */
-    constructor withTask(task: Task, needInterop: boolean = false) {
+    constructor(task: Task, needInterop: boolean = false) {
         this("EAWorker", task, needInterop);
     }
 
@@ -101,19 +101,17 @@ export class EAWorker {
      * @param { Task } task The task function to execute
      * @param { boolean } [needInterop=false] true if need to create JS runtime
      */
-    constructor withNameAndTask(name: string, task: Task, needInterop: boolean = false) {
+    constructor(name: string, task: Task, needInterop: boolean = false) {
         this.worker = needInterop ? new InteropWorker(name) : new StaticWorker(name);
         this.initialTask = task;
     }
 
     // NOTE(panferovi): make this constructor private
-    protected constructor mainW(worker: MainWorker) {
+    protected constructor(worker: MainWorker) {
         this.worker = worker;
         this.loopStarted.set(true);
         EAWorker.workers.set(this.worker.getWorkerId(), this);
     }
-
-    overload constructor { supportInterop, withName, withTask, withNameAndTask, mainW }
 
     /**
      * Get all registered EAWorker instances.
