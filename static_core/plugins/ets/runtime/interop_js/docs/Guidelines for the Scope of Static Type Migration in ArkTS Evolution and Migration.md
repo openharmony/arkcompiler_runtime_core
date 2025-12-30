@@ -22,7 +22,7 @@ Through the guidance in this document, developers can more systematically optimi
 
 # 2 **Description of ArkTS Dynamic and Static Type Interaction**
 
-Advantages of Static Type ArkTS
+Advantages of Static Type ArkTS:
 
 - Concurrent sharing
 
