@@ -16,6 +16,16 @@
 02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
 02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
 
+#31559
+03.types/06.value_types/01.numeric_types/smaller_to_larger_type/int_to_float/int_to_float.lets_const.ets
+03.types/06.value_types/01.numeric_types/smaller_to_larger_type/long_to_float/long_to_float.lets_const.ets
+
+#31742
+03.types/06.value_types/01.numeric_types/smaller_to_larger_type/float_to_double/float_to_double.outside_let_const_selected_values.ets
+
+#31766
+03.types/06.value_types/01.numeric_types/smaller_to_larger_type/float_to_double/float_to_double.lets_const_hex.ets
+
 #615 3.11 Type void inconsistency
 03.types/11.type_void/generic_void_2.ets
 
