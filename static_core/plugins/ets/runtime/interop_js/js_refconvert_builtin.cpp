@@ -505,6 +505,8 @@ public:
         RegisterClassWithLeafMatcher(descriptors::ARRAY_KEYS_ITERATOR, nullptr);
         RegisterClassWithLeafMatcher(descriptors::ARRAY_VALUES_ITERATOR_T, nullptr);
 
+        RegisterClassWithLeafMatcher(descriptors::PROXY);
+
         RegisterError();
         RegisterArray();
 
