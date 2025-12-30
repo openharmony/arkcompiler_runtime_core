@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,15 @@
 {% for c in cases %}
 /*---
 desc: >-
-    Any assignment of readonly parameters and variables must follow the limitations stated in Contexts and Conversions.
-tags: [compile-only]
+    If the parameter type is prefixed with readonly, then the type must be of array type T[] (see Array Types) or tuple
+    type [T1, T2, ..., Tn] (see Tuple Types). Otherwise, a compile-time error occurs.
+    Explicitly limits the type annotation to be array or tuple.
+    'Readonly' type modifier is only permitted on resizable array and tuple types
+tags: [compile-only, negative]
+expected_out: >-
+    Syntax error ESY0141: 'readonly' type modifier is only permitted on resizable array and tuple types.
 ---*/
+
 {{c.decl}}
-{{c.use}}
 
 {% endfor %}

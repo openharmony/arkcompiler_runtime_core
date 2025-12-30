@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,16 +13,19 @@
 
 ---
 cases:
-  # read-write argument could be used as readonly.
-    - decl: |-
-        function foo(i: readonly int[]) {
-            return 1;
-        }
-        function foo(i: int[]) {
-            return 2;
-        }
-      use: |-
-        function main() {
-            let rw: int[] = [1, 2];
-            foo(rw);
-        }
+    # Custom
+  - decl: |-
+      type T = int[]
+    init: |-
+      foo = [1, -2];
+    check: |-
+      function main() {
+          let a: A = new A();
+          arktest.assertEQ(a.foo.length, 2);
+          arktest.assertEQ(a.foo[0], 1);
+          arktest.assertEQ(a.foo[1], -2);
+          let c = a.bar(a.foo);
+          arktest.assertEQ(a.foo.length, c.length);
+          arktest.assertEQ(a.foo[0], c[0]);
+          arktest.assertEQ(a.foo[1], c[1]);
+      }

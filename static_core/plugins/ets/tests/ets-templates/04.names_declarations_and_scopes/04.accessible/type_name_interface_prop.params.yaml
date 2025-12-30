@@ -138,23 +138,6 @@ cases:
 
     # Custom
   - decl: |-
-      type T = int[]
-    tags: 'compile-only, negative'
-    init: |-
-      foo = [1, -2];
-    check: |-
-      function main() {
-          let a: A = new A();
-          arktest.assertEQ(a.foo.length, 2);
-          arktest.assertEQ(a.foo[0], 1);
-          arktest.assertEQ(a.foo[1], -2);
-          let c = a.bar(a.foo);
-          arktest.assertEQ(a.foo.length, c.length);
-          arktest.assertEQ(a.foo[0], c[0]);
-          arktest.assertEQ(a.foo[1], c[1]);
-      }
-
-  - decl: |-
       type T = Int[][]
     init: |-
       foo = [[new Int(1), new Int(3)], [new Int(-2)]];

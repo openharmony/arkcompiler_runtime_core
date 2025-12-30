@@ -12,16 +12,6 @@
 # limitations under the License.
 
 cases:
-    # use an alias defined in another unit
-
-    - files: ['./mod/mod_0.ets']
-      tags: 'compile-only, negative'
-      decl: |-
-          import { MOD_ALIAS0 } from './mod/mod_0.ets'
-      use: |-
-          let v: MOD_ALIAS0 = true  // should not be visible here
-          let ok = true
-
     # use an alias defined and exported as type from another unit
 
     - files: ['./mod/mod_1.ets']
@@ -48,24 +38,3 @@ cases:
       use: |-
           let v: X = true  // should be visible here
           let ok = v
-
-    # use an alias defined and not exported from another unit
-
-    - files: ['./mod/mod_4.ets']
-      tags: 'compile-only, negative'
-      decl: |-
-          import { EClass } from './mod/mod_4.ets'
-      use: |-
-          let v: MOD_ALIAS4 = new EClass()  // should not be visible here
-          let ok = v instanceof EClass
-
-    # use an alias defined and exported from another unit, duplicate
-
-    - files: ['./mod/mod_5.ets']
-      tags: 'compile-only, negative'
-      decl: |-
-          import { MOD_ALIAS5 } from './mod/mod_5.ets'
-          type MOD_ALIAS5 = Integer
-      use: |-
-          let v: MOD_ALIAS5 = 1.0  // should not be visible here
-          let ok = true

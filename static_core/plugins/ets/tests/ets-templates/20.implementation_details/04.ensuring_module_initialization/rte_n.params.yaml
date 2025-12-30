@@ -10,10 +10,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-Unhandled exception: throw_neg2.Ex
-Error
-	at escompat.Error.<ctor> (Error.ets:56:0)
-	at throw_neg2.Ex.<ctor> (throw_neg2.ets:25:0)
-	at throw_neg2.ETSGLOBAL.getEx (throw_neg2.ets:28:0)
-	at throw_neg2.ETSGLOBAL.main (throw_neg2.ets:34:0)
+
+tests:
+  - desc: |-
+      If such module is not available or any other runtime issue occurs
+      then a proper exception is thrown.
+    files:
+      - ./rte_module_n.ets
+    decls:
+      - |-
+        initModule("./rte_module_n.ets")

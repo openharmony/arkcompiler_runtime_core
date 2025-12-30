@@ -13,21 +13,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for test in tests %}
-{% for decl in test.decls %}
+{% for c in cases %}
+
 /*---
 desc: >-
-    {{test.desc|indent}}
-tags: [negative]
-{% if test.files is defined %}
-files: [{{test.files|join(', ')}}]
-{% endif %}
+    Entity is considered accessible if it belongs to the current scope (see Scopes) and means that its name can be used
+    for different purposes as follows
+    - Type name is used to declare interface properties
+    - Function or method name is used to call the function or method
+    - Variable name is used to read or change the value of the variable
+tags: [compile-only, negative]
 ---*/
 
-{{decl}}
+{{c.decl}}
 
-function main(): void {
+interface I {
+    foo: T;
+    bar(i: T): T {
+        return i;
+    }
 }
 
-{% endfor %}
+class A implements I {
+    {{c.init}}
+}
+
+{{c.check}}
+
 {% endfor %}

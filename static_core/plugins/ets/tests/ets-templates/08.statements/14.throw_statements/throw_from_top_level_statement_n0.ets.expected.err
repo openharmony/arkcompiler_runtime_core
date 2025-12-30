@@ -10,13 +10,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-tests:
-  - desc: |-
-      If such module is not available or any other runtime issue occurs
-      then a proper exception is thrown.
-    files:
-      - ./negative_test_rte_module.ets
-    decls:
-      - |-
-        initModule("./negative_test_rte_module.ets")
+#
+Unhandled exception: throw_from_top_level_statement_n0.TLSErr
+Error
+        at escompat.Error.<ctor> (Error.ets:56:0)
+        at throw_from_top_level_statement_n0.TLSErr.<ctor> (throw_from_top_level_statement_n0.ets:23:0)
+        at throw_from_top_level_statement_n0.ETSGLOBAL.assignMeAndThrow (throw_from_top_level_statement_n0.ets:26:0)
+        at throw_from_top_level_statement_n0.ETSGLOBAL.<cctor> (throw_from_top_level_statement_n0.ets:30:0)

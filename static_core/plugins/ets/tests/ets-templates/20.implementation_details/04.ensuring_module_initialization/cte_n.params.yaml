@@ -42,7 +42,7 @@ tests:
       If such module is not available or any other runtime issue occurs
       then a proper exception is thrown.
     files:
-      - ./negative_test_cte_module.ets
+      - ./cte_module_n.ets
     decls:
       - |-
-        initModule("./negative_test_cte_module.ets")
+        initModule("./cte_module_n.ets")
