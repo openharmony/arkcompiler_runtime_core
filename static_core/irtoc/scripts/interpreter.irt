@@ -793,6 +793,9 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
   entrypoint := LoadI(callee).Imm(Constants::METHOD_COMPILED_ENTRY_POINT_OFFSET).ptr
   If(call_runtime("IsCompiled", entrypoint).i32, 0).NE.Unlikely {
     save_acc_var(acc, acc_tag) unless is_initobj
+    if !@compile_for_llvm
+    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
+    end
     call_runtime("InterpreterToCompiledCodeBridge", pc, frame, callee, %tr).void
 
     StoreI(%tr, 0).Imm(Constants::GET_FRAME_KIND_OFFSET).u16

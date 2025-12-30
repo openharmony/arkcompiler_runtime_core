@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,9 +69,11 @@ static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani
     uintptr_t bcCode = 0;
     std::vector<ark::tooling::Function> frames;
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-    while (fp != 0 && ark::tooling::Backtrace::StepArk(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcCode)) {
+    while (fp != 0 &&
+           ark::tooling::Backtrace::StepArkByManagedFrame(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcCode)) {
         ark::tooling::Function function;
-        if (ark::tooling::Backtrace::Symbolize(pc, fileHeader, bcCode, abcBuffer.data(), abcSize, &function) == 1) {
+        if (ark::tooling::Backtrace::SymbolizeByManagedFrame(pc, fileHeader, bcCode, abcBuffer.data(), abcSize,
+                                                             &function) == 1) {
             frames.emplace_back(function);
         } else {
             LOG(INFO, TOOLING) << "Symbolize failed";
