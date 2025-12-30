@@ -3651,8 +3651,6 @@ language/statements/for-of/dstr/obj-rest-getter-abrupt-get-error.js
 language/statements/class/elements/fields-computed-name-static-computed-var-propname-prototype.js
 #end of #20544
 
-# #12861
-built-ins/Math/round/S15.8.2.15_A6.js
 # #9381
 language/statements/class/dstr/private-gen-meth-static-ary-ptrn-elem-id-iter-val-array-prototype.js
 # #11968

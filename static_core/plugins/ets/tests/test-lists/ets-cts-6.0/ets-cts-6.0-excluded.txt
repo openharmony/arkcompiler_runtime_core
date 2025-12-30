@@ -1,19 +1,24 @@
-################################################
-# primitive types refactoring. Need to rework the following tests, because they're incorrect:
-################################################
-
-# primitives
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_7.ets
-
 # TypeError: No matching call signature
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_7.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_7.ets
 
-# Verifier error 8: Bad array element type
-17.experimental_features/02.fixed_array_types/far3_6.ets
-
 # c'\u0000' + '0000' != "00000"
 07.expressions/31.string_interpolation_expressions/siexp_6.ets
+
+# Verifier error 8: Bad array element type
+17.experimental_features/02.fixed_array_types/far3_6.ets
+17.experimental_features/02.fixed_array_types/far3_4.ets
+17.experimental_features/02.fixed_array_types/far3_1.ets
+17.experimental_features/02.fixed_array_types/far3_3.ets
+17.experimental_features/02.fixed_array_types/far3_0.ets
+17.experimental_features/02.fixed_array_types/far3_2.ets
+17.experimental_features/02.fixed_array_types/far3_7.ets
+
+#30101 Tests shouldn't rely on default arktsconfig contents.:
+13.modules_and_namespaces/01.import_directives/05.import_path/file/import_baseURL_path_file.ets
+18.annotations/01.declaring_annotations/declaration_default_values_1.ets
+18.annotations/01.declaring_annotations/declaration_default_values_3.ets
+18.annotations/01.declaring_annotations/declaration_default_values_7.ets
 
 # #27402, #28006 Deprecated char operations and conversions:
 03.types/17.array_types/array_index.ets
@@ -116,39 +121,8 @@
 05.generics/03.utility_types/06.record_utility_type/union_in_rec.ets
 08.statements/09.for_of_statements/for_of_15.ets
 
-#30101 Tests shouldn't rely on default arktsconfig contents.:
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_baseURL_path_file.ets
-
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_0.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_1.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_10.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_11.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_12.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_13.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_14.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_2.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_3.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_4.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_5.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_6.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_7.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_8.ets
-13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_9.ets
-15.semantic_rules/02.subtyping/subtyping_among_primitive_types/primitive_types_cast_3.ets
-15.semantic_rules/06.compatibility_call_args/single_params_20.ets
-15.semantic_rules/06.compatibility_call_args/single_params_21.ets
-15.semantic_rules/06.compatibility_call_args/single_params_22.ets
-15.semantic_rules/06.compatibility_call_args/single_params_23.ets
-15.semantic_rules/06.compatibility_call_args/single_params_6.ets
-17.experimental_features/02.fixed_array_types/fixed_array_types_ext_17.ets
-18.annotations/01.declaring_annotations/declaration_default_values_0.ets
-18.annotations/01.declaring_annotations/declaration_default_values_1.ets
-18.annotations/01.declaring_annotations/declaration_default_values_2.ets
-18.annotations/01.declaring_annotations/declaration_default_values_3.ets
-18.annotations/01.declaring_annotations/declaration_default_values_4.ets
-18.annotations/01.declaring_annotations/declaration_default_values_5.ets
-18.annotations/01.declaring_annotations/declaration_default_values_6.ets
-18.annotations/01.declaring_annotations/declaration_default_values_7.ets
+#30498
+16.concurrency/03.asynchronous_api/05.promise/promise_negative_1.ets
 
 # 28232 runtime timeout only in CI
 05.generics/03.utility_types/01.awaited_utility_type/awaited_return_1.ets

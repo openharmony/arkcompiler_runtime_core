@@ -28,6 +28,9 @@
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
 
+#30653
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_37.ets
+
 #30697
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_39.ets
 
@@ -38,6 +41,9 @@
 
 #2236
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
+
+#30757
+04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/lambda_declaration_0.ets
 
 #30760
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_0.ets
@@ -148,25 +154,14 @@
 #29887
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_73.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_74.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_75.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_76.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_77.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_78.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_79.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_80.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_81.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_82.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_83.ets
 
 #30469
 07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets
 
-# 28179
-07.expressions/03.named_reference/01.function_reference/function_reference_neg.ets
-
-#30896
-07.expressions/03.named_reference/02.method_reference/method_ref_neg_2.ets
+#30653
+07.expressions/03.named_reference/01.function_reference/static_field_as_ref.ets
 
 #23363 No CTE when array type cannot be determined
 07.expressions/04.array_literal/arr_n_2.ets
@@ -228,7 +223,7 @@
 07.expressions/06.spread_expression/spex_lmbd_33.ets
 07.expressions/06.spread_expression/spex_lmbd_35.ets
 
-#28326
+#28786
 07.expressions/09.field_access_expressions/field_access_to_override.ets
 
 #26730
@@ -256,12 +251,8 @@
 07.expressions/11.function_call_expression/fixed_array_predefined_neg_15.ets
 
 #31355 Semantic error ESE0131: Function foo with this assembly signature already declared.
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_20.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_4.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.ets
-
-#31357 wrong function selected
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_21.ets
 
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
 07.expressions/15.instanceof_expression/instanceof-cte_1.ets
@@ -315,6 +306,24 @@
 #31208
 07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.result_expression.test_2.ets
 07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.result_expression.test_42.ets
+
+#30486
+07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_21.ets
+07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_22.ets
+07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_23.ets
+
+#30485
+07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_24.ets
+07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_25.ets
+07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_26.ets
+07.expressions/21.multiplicative_expressions/04.exponentiation/nan_11.ets
+07.expressions/21.multiplicative_expressions/04.exponentiation/nan_12.ets
+07.expressions/21.multiplicative_expressions/04.exponentiation/nan_13.ets
+07.expressions/21.multiplicative_expressions/04.exponentiation/nan_14.ets
+
+#30487
+07.expressions/21.multiplicative_expressions/04.exponentiation/nan_9.ets
+07.expressions/21.multiplicative_expressions/04.exponentiation/nan_10.ets
 
 #30891
 07.expressions/21.multiplicative_expressions/04.exponentiation/enum.ets
@@ -380,6 +389,7 @@
 #31475 False positive passed tests on runner-2
 09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
 09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
+09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri30.ets
 
 #30295
 09.classes/02.class_extension_clause/extension_clause_negative_5.ets
@@ -543,7 +553,6 @@
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_270.ets
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_271.ets
 
-
 #29302
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_247.ets
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_248.ets
@@ -680,15 +689,6 @@
 #28527
 09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_gen_35.ets
 
-#30467 Field initialization expression performed multiple times
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init00.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init02.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init11.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init15.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init01a.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init13a.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init13b.ets
-
 #28235 Constructor Names not yet work
 09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_same_class1.ets
 09.classes/09.constructor_declaration/02.constructor_body/secondary02.ets
@@ -792,11 +792,6 @@
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_6.ets
 13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_7.ets
 
-#29725
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default.ets
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_2.ets
-13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_3.ets
-
 #28972 CTE on string[] type parameter
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_3.ets
 13.modules_and_namespaces/07.program_entry_point/entry_point_foo_args_4.ets
@@ -832,7 +827,7 @@
 #31384
 14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
 
-#28326
+#28786
 15.semantic_rules/02.subtyping/02.subtyping_for_generic_classes_and_interfaces/generic_cast_to_generic_superclass.ets
 15.semantic_rules/02.subtyping/02.subtyping_for_generic_classes_and_interfaces/generic_cast_to_object_with_parameters.ets
 
@@ -1287,9 +1282,6 @@
 15.semantic_rules/10.type_erasure/instanceof_gen_7.ets
 15.semantic_rules/10.type_erasure/instanceof_gen_8.ets
 
-#30498
-16.concurrency/03.asynchronous_api/05.promise/promise_negative_1.ets
-
 #29982
 16.concurrency/03.asynchronous_api/03.async_methods/async_method17.ets
 
@@ -1332,13 +1324,6 @@
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_6.ets
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_7.ets
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_5.ets
-
-#30504
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/negative_cases/async_lambda_returns_not_promise_4.ets
-
-#30546
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/negative_cases/async_lambda_returns_not_promise_1.ets
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/negative_cases/async_lambda_returns_not_promise_3.ets
 
 #30786
 16.concurrency/03.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_user_defined_array_9.ets
@@ -1418,24 +1403,19 @@
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_8.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_9.ets
 
-
 #31150 cannot create array of enums
 17.experimental_features/03.resizable_array_creation_expressions/expr_8.ets
 
-#31152 int enum cannot be used in dimension expression
-17.experimental_features/03.resizable_array_creation_expressions/expr_9.ets
-
-#25111
-17.experimental_features/02.fixed_array_types/far3_0.ets
-17.experimental_features/02.fixed_array_types/far3_1.ets
-17.experimental_features/02.fixed_array_types/far3_2.ets
-17.experimental_features/02.fixed_array_types/far3_3.ets
-17.experimental_features/02.fixed_array_types/far3_4.ets
-17.experimental_features/02.fixed_array_types/far3_7.ets
+#29160 byte or short types in enums not supported
+17.experimental_features/03.resizable_array_creation_expressions/expr_10.ets
+17.experimental_features/03.resizable_array_creation_expressions/expr_11.ets
 
 #18763 es2panda aborts on for-of over a union type array
 17.experimental_features/06.iterable_types/it_11.ets
 17.experimental_features/06.iterable_types/it_12.ets
+
+#18767 Cannot use $_iterator from superclass
+17.experimental_features/06.iterable_types/it_4.ets
 
 #31022
 17.experimental_features/06.iterable_types/it_20.ets
@@ -1454,6 +1434,12 @@
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_20.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_23.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_24.ets
+
+#28824
+17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_8.ets
+17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_9.ets
+17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_10.ets
+17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_11.ets
 
 #29101
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_access_modifier_n_0.ets
@@ -1550,6 +1536,3 @@
 17.experimental_features/13.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_6.ets
 17.experimental_features/14.trailing_lambdas/trlambda_met_13.ets
 17.experimental_features/14.trailing_lambdas/trlambda_met_14.ets
-
-#30410
-18.annotations/03.exporting_and_importing_annotations/import_as_type.ets
