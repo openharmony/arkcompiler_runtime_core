@@ -43,10 +43,21 @@ function test(): void {
     arktest.assertEQ(RegExp("\\1(a)").test("aa"), true)
 }
 
+function testSurrogate(): void {
+    let regex = new RegExp('\uD800', 'u');
+    let result = regex.exec('\uD800');
+    arktest.assertEQ(result?.[0], '\uD800');
+
+    regex = new RegExp('\uD800', 'gmu');
+    result = regex.exec('\uD800');
+    arktest.assertEQ(result?.[0], '\uD800');
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite("RegExp.test")
 
     suite.addTest('test', test)
+    suite.addTest('RegExp.testSurrogate', testSurrogate)
 
     return suite.run()
 }
