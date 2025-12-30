@@ -15,7 +15,7 @@
 
 //! CHECKER     Test StringGet inlining in compiler
 //! SKIP_IF     @architecture == "arm32"
-//! RUN         force_jit: true, options: "", entry: "ets_string_get.ETSGLOBAL::main"
+//! RUN         force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_string_get.ETSGLOBAL::main"
 //! METHOD      "ets_string_get.ETSGLOBAL::main"
 //! PASS_AFTER  "IrBuilder"
 //! INST        "Intrinsic.StdCoreStringGet"

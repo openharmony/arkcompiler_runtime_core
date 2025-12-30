@@ -23,7 +23,7 @@
 
 //! CHECKER       JIT IR Builder, check String Builders merging (w/o optimizations)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--panda-files=../../ets_string_builder_merge_uber_part2_ets_string_builder_merge_uber_export.ets.abc --compiler-inlining=false --compiler-simplify-string-builder=false", entry: "ets_string_builder_merge_uber_part2.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--panda-files=../../ets_string_builder_merge_uber_part2_ets_string_builder_merge_uber_export.ets.abc --compiler-regex='.*chain_concat[0-9]+.*' --compiler-inlining=false --compiler-simplify-string-builder=false", entry: "ets_string_builder_merge_uber_part2.ETSGLOBAL::main"
 
 import { uber_chain_concat4 } from "./ets_string_builder_merge_uber_export.ets"
 

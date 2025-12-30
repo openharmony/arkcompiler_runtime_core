@@ -14,8 +14,10 @@ simple_run/external_inlining/ext_inlining_5.ets
 simple_run/external_inlining/ext_inlining_6.ets
 simple_run/inlining_test/inline_external_test.ets
 simple_run/ets_escompat_typed_arrays_fill.ets
+simple_run/ets_escompat_typed_arrays_fill_part2.ets
 
 #No deoptimization occurs in String.split on arm32
 simple_run/loop_idioms/memmove_bailout.ets
 simple_run/loop_idioms/memmove_supported.ets
+simple_run/loop_idioms/memmove_supported_part2.ets
 simple_run/loop_idioms/memmove_unsupported.ets

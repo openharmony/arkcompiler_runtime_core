@@ -15,7 +15,7 @@
 
 //! CHECKER      Test charAt intrinsic
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "", entry: "charAt.ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-regex=charAt.*", entry: "charAt.ETSGLOBAL::main"
 //! METHOD       "charAt.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "Call.*std.core.String::charAt"
@@ -31,7 +31,7 @@ function main(): void {
 
 //! CHECKER      Test charAt intrinsic with tree string
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--use-all-strings=true", entry: "charAt.ETSGLOBAL::testTreeStringCharAt"
+//! RUN          force_jit: true, options: "--use-all-strings=true --compiler-regex=charAt.*", entry: "charAt.ETSGLOBAL::testTreeStringCharAt"
 //! METHOD       "charAt.ETSGLOBAL::testTreeStringCharAt"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     "Call.*std.core.String::charAt"

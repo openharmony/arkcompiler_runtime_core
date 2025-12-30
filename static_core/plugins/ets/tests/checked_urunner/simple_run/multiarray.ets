@@ -15,7 +15,7 @@
 
 //! CHECKER         Test check optimize LenArray and MultiArray two layers
 //! SKIP_IF         @architecture == "arm32"
-//! RUN             force_jit: true, options: "", entry: "multiarray.ETSGLOBAL::main1"
+//! RUN             force_jit: true, options: "--compiler-regex='.*main1.*'", entry: "multiarray.ETSGLOBAL::main1"
 //! EVENT           /Compilation,multiarray.ETSGLOBAL::main1,.*,COMPILED/
 //! METHOD          "multiarray.ETSGLOBAL::main1"
 //! PASS_BEFORE     "Peepholes"

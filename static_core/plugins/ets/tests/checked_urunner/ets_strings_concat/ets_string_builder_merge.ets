@@ -758,7 +758,7 @@ function main() {
 
 //! CHECKER       Unsupported concat pattern JIT (IBLDF4/22718)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, entry: "ets_string_builder_merge.ETSGLOBAL::bugfix_chain_concat20"
+//! RUN           force_jit: true, options: "--compiler-regex='.*bugfix_chain_concat20'", entry: "ets_string_builder_merge.ETSGLOBAL::bugfix_chain_concat20"
 
 function bugfix_chain_concat20(): void
 {
@@ -972,8 +972,8 @@ function bugfix_chain_concat20(): void
 
 //! CHECKER       INTERP-IRTOC, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           options: "--compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_builder_merge.ETSGLOBAL::main"
+//! RUN           options: "--compiler-regex='ets_string_builder_merge.ETSGLOBAL::main' --compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_builder_merge.ETSGLOBAL::main"
 
 //! CHECKER       INTERP-CPP, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_builder_merge.ETSGLOBAL::main"
+//! RUN           options: "--compiler-regex='ets_string_builder_merge.ETSGLOBAL::main' --compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_builder_merge.ETSGLOBAL::main"
