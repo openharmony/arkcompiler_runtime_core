@@ -20,24 +20,48 @@ list-root: ${ARKCOMPILER_RUNTIME_CORE_PATH}/static_core/plugins/ets/tests/test-l
 parameters:
     extension: ets
     load-runtimes: ets
+    command-token: "//!"
     work-dir: ${WORK_DIR}/${suite-name}
 
 collections:
     simple_run:
         parameters:
+            extension: ets
             es2panda-test-suite-args:
+                - "--extension=${parameters.extension}"
                 - "--opt-level=2"
+            checker-test-suite-args:
+                - "--command-token=${parameters.command-token}"
     simple_run/optimize_doubled_xor.ets:
         parameters:
+            extension: ets
             es2panda-test-suite-args:
+                - "--extension=${parameters.extension}"
                 - "--opt-level=0"
+            checker-test-suite-args:
+                - "--command-token=${parameters.command-token}"
     ets_strings_concat:
         parameters:
+            extension: ets
             es2panda-test-suite-args:
+                - "--extension=${parameters.extension}"
                 - "--opt-level=2"
                 - "--ets-strings-concat=false"
+            checker-test-suite-args:
+                - "--command-token=${parameters.command-token}"
     ets_strings_concat/ets_stringbuilder_loop_branch.ets:
         parameters:
+            extension: ets
             es2panda-test-suite-args:
+                - "--extension=${parameters.extension}"
                 - "--opt-level=1"
                 - "--ets-strings-concat=false"
+            checker-test-suite-args:
+                - "--command-token=${parameters.command-token}"
+    pa_folder:
+        parameters:
+            extension: pa
+            es2panda-test-suite-args:
+                - "--extension=${parameters.extension}"
+            checker-test-suite-args:
+                - "--command-token=#!"

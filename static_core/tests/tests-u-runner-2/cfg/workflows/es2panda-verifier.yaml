@@ -40,12 +40,14 @@ parameters:
     # adds --boot-panda-files option to verifier with all dependent and the current abc files
     is-panda: true
     boot-panda-files: ""
+    es2panda-verifier-step-filter: "*"
 steps:
     es2panda:
         executable-path: ${parameters.build}/bin/es2panda
         timeout: ${parameters.es2panda-timeout}
         enabled: ${parameters.enable-es2panda}
         step-type: compiler
+        step-filter: ${parameters.es2panda-verifier-step-filter}
         args:
             - "${parameters.es2panda-workflow-args}"
             - "${parameters.es2panda-args}"
@@ -56,6 +58,7 @@ steps:
         timeout: ${parameters.verifier-timeout}
         enabled: ${parameters.enable-verifier}
         step-type: verifier
+        step-filter: ${parameters.es2panda-verifier-step-filter}
         args:
             - "--boot-panda-files=${parameters.stdlib}${parameters.boot-panda-files}"
             - "--load-runtimes=${parameters.load-runtimes}"

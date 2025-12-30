@@ -46,6 +46,7 @@ class Step(IOptions):
     args: list[str]
     env: dict[str, str]
     step_kind: StepKind
+    step_filter: str = "*"
     enabled: bool = True
     executable_path: Path | None = None
     can_be_instrumented: bool = False
@@ -69,6 +70,7 @@ class Step(IOptions):
         self.args = self.__get_list_property(step_body, 'args', [])
         self.skip_qemu = self.__get_bool_property(step_body, 'skip-qemu', False)
         self.env = self.__get_dict_property(step_body, 'env', {})
+        self.step_filter = self.__get_str_property(step_body, 'step-filter', '*')
 
     def __str__(self) -> str:
         indent = 3
@@ -80,6 +82,7 @@ class Step(IOptions):
         result += [f"{utils.indent(indent)}enabled: {self.enabled}"]
         result += [f"{utils.indent(indent)}skip-qemu: {self.skip_qemu}"]
         result += [f"{utils.indent(indent)}step-type: {self.step_kind}"]
+        result += [f"{utils.indent(indent)}step-filter: {self.step_filter}"]
 
         if self.args:
             result += self.__str_process_args(indent)

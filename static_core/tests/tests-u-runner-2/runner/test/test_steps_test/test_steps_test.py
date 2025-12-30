@@ -79,6 +79,45 @@ class TestStepsTest(TestCase):
     @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow_step_filter_ext", "test_suite", "--test-file=simple1.ets"],),
+        (["runner.sh", "workflow_step_filter_ext", "test_suite", "--test-file=simple1.pa"],),
+        (["runner.sh", "workflow_step_filter_name", "test_suite", "--test-file=simple1.ets"],),
+        (["runner.sh", "workflow_step_filter_name", "test_suite", "--test-file=simple1.pa"],),
+    ])
+    def test_step_filter(self, argv: Callable) -> None:
+        """
+        Feature: workflow steps contain filters by file name/extension
+        Expected:
+        - test 'simple1.ets'/'simple1.pa' should contain 2 steps - 1 compilation for ets/pa and 1 runtime
+        """
+        with patch('sys.argv', argv):
+            # preparation
+            result = self.prepare()[0]
+            # test
+            steps = self.get_steps(result.reproduce)
+            expected_main_ets = os.path.basename(result.path)
+            file_type = expected_main_ets.split('.')[-1]
+            expected_types = [file_type, RUNTIME_STEP]
+            expected_main_ets_abc = f"{INTERMEDIATE}/{expected_main_ets}.abc"
+
+            self.assertEqual(len(steps), len(expected_types))
+            self.check_steps(steps, expected_types)
+            self.check_names(steps, [expected_main_ets, expected_main_ets])
+
+            self.check_args(steps[0], "--output=", [expected_main_ets_abc])
+            self.check_args(steps[1], "--output=", [expected_main_ets_abc])
+
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @test_utils.parametrized_test_cases([
         (["runner.sh", "workflow", "test_suite", "--test-file=imports_nat.ets"],),
         (["runner.sh", "workflow", "test_suite", "--test-file=imports_nat.ets", "--gn-build"],),
     ])
