@@ -329,6 +329,34 @@ async function testSequenceRunnerexecuteorder(){
     }
 }
 
+async function sameNameSharedRunnerTest() {
+    let resultStr: string = '';
+    let func = (str: string): string => {
+        resultStr += str;
+        return resultStr;
+    };
+    
+    const sharedName = 'shared_runner';
+    let runner1 = new taskpool.SequenceRunner(sharedName);
+    let task1 = new taskpool.Task(func, 'a');
+    let task2 = new taskpool.Task(func, 'b');
+    let p1 = runner1.execute(task1);
+    let p2 = runner1.execute(task2);
+
+    let runner2 = new taskpool.SequenceRunner(sharedName);
+    let task3 = new taskpool.Task(func, 'c');
+    let task4 = new taskpool.Task(func, 'd');
+    let p3 = runner2.execute(task3);
+    let p4 = runner2.execute(task4);
+
+    await Promise.all<Any>([p1, p2, p3, p4]);
+    arktest.assertEQ(task1.isDone(), true);
+    arktest.assertEQ(task2.isDone(), true);
+    arktest.assertEQ(task3.isDone(), true);
+    arktest.assertEQ(task4.isDone(), true);
+    arktest.assertEQ(resultStr, 'abcd');
+}
+
 function main(): int {
     let seqRunnerSuite = new arktest.ArkTestsuite('taskpool.SequenceRunner');
     let seqRunnerSuiteDisabled = new arktest.ArkTestsuite('taskpool.SequenceRunner.DISABLED');
@@ -346,6 +374,7 @@ function main(): int {
     seqRunnerSuite.addTest('AddDependencyExecutedTaskTest', addDependencyExecutedTaskTest);
     seqRunnerSuite.addAsyncTest('TaskWithDifferentParamsTest', taskWithDifferentParamsTest);
     seqRunnerSuite.addAsyncTest('TestSequenceRunnerExecuteOrder', testSequenceRunnerexecuteorder);
+    seqRunnerSuite.addAsyncTest('sameNameSharedRunnerTest', sameNameSharedRunnerTest);
     let res = seqRunnerSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
