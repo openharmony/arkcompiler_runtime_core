@@ -195,12 +195,12 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events occured
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=false --compiler-inlining=true", entry: "ets_string_builder_reserve_part30-44.ETSGLOBAL::main_events_check"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*' --compiler-reserve-string-builder-buffer=false --compiler-inlining=true", entry: "ets_string_builder_reserve_part30-44.ETSGLOBAL::main_events_check"
 //! EVENT         "SbBufferRealloc"
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_part30-44.ETSGLOBAL::main_events_check"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*' --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_part30-44.ETSGLOBAL::main_events_check"
 //! EVENT_NOT     "SbBufferRealloc"
 
 function try_catch_reserve30(do_throw: boolean) : string {

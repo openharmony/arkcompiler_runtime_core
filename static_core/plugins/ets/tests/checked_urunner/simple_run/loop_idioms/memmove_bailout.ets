@@ -23,7 +23,7 @@ function check(arr1: Object, arr2: Object): int {
 
 class TestBailout {
     //! CHECKER       TestBailout1
-    //! RUN           force_jit: true, options: "--compiler-inlining-blacklist='memmove_bailout.TestBailout::mayAlias.*,memmove_bailout.TestBailout::patternMissmatch_offsets1,memmove_bailout.TestBailout::patternMissmatch_offsets2,memmove_bailout.TestBailout::refArray,memmove_bailout.TestBailout::differentTypes'", entry: "memmove_bailout.TestBailout::main"
+    //! RUN           force_jit: true, options: "--compiler-regex='.*memmove_bailout.TestBailout::.*' --compiler-inlining-blacklist='memmove_bailout.TestBailout::mayAlias.*,memmove_bailout.TestBailout::patternMissmatch_offsets1,memmove_bailout.TestBailout::patternMissmatch_offsets2,memmove_bailout.TestBailout::refArray,memmove_bailout.TestBailout::differentTypes'", entry: "memmove_bailout.TestBailout::main"
     //!
     //! METHOD        "memmove_bailout.TestBailout::__noinline__mayAlias"
     //! PASS_AFTER    "LoopIdioms"
