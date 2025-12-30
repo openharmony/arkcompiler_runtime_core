@@ -27,6 +27,7 @@
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/xref_object_operator.h"
+#include "plugins/ets/runtime/interop_js/interop_common.h"
 #endif
 
 namespace ark::ets {
@@ -612,6 +613,7 @@ EtsObject *EtsLdbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File:
     auto fieldName = utf::Mutf8AsCString(name.data);
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
@@ -648,6 +650,7 @@ bool EtsStbyname(EtsCoroutine *coro, EtsObject *thisObj, panda_file::File::Strin
     auto fieldName = utf::Mutf8AsCString(name.data);
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             EtsHandle<EtsObject> valueHandle(coro, value);
@@ -679,6 +682,7 @@ EtsObject *EtsLdbyidx(EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] u
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
@@ -699,6 +703,7 @@ bool EtsStbyidx(EtsCoroutine *coro, EtsObject *thisObj, uint32_t idx, EtsObject 
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             EtsHandle<EtsObject> valueHandle(coro, value);
@@ -723,6 +728,7 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             auto xRefObjectThis = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
@@ -773,6 +779,7 @@ static ALWAYS_INLINE bool EtsStbyvalWithXRefClass([[maybe_unused]] EtsCoroutine 
                                                   [[maybe_unused]] EtsObject *key, [[maybe_unused]] EtsObject *value)
 {
     PANDA_ETS_INTEROP_JS_GUARD({
+        INTEROP_TRACE();
         [[maybe_unused]] EtsHandleScope s(coro);
         EtsHandle<EtsObject> objHandle(coro, obj);
         EtsHandle<EtsObject> valueHandle(coro, value);
@@ -811,6 +818,7 @@ bool EtsStbyval(EtsCoroutine *coro, EtsObject *obj, EtsObject *key, EtsObject *v
     }
     if (value->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             auto ctx = interop::js::InteropCtx::Current(coro);
             auto env = ctx->GetJSEnv();
             interop::js::ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
@@ -845,6 +853,7 @@ EtsObject *EtsCall([[maybe_unused]] EtsCoroutine *coro, EtsObject *funcObj,
 {
     if (funcObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> funcObjHandle(coro, funcObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(funcObjHandle);
@@ -884,6 +893,7 @@ EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] 
     [[maybe_unused]] auto fieldName = utf::Mutf8AsCString(name.data);
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
@@ -902,6 +912,7 @@ EtsObject *EtsCallThis(EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] 
 {
     if (thisObj->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             EtsHandle<EtsObject> funcObjHandle(coro, funcObj);
@@ -920,6 +931,7 @@ EtsObject *EtsCallNew([[maybe_unused]] EtsCoroutine *coro, EtsObject *ctor,
 {
     if (ctor->GetClass()->GetRuntimeClass()->IsXRefClass()) {
         PANDA_ETS_INTEROP_JS_GUARD({
+            INTEROP_TRACE();
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> ctorHandle(coro, ctor);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(ctorHandle);

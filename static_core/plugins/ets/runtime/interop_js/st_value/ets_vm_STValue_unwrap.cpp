@@ -54,6 +54,7 @@ namespace ark::ets::interop::js {
 
 napi_value STValueUnwrapToNumberImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -99,6 +100,7 @@ napi_value STValueUnwrapToNumberImpl(napi_env env, napi_callback_info info)
 
 napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     size_t jsArgc = 0;
@@ -154,6 +156,7 @@ napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callbac
 
 napi_value STValueUnwrapToBooleanImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -198,6 +201,7 @@ napi_value STValueUnwrapToBooleanImpl(napi_env env, [[maybe_unused]] napi_callba
 
 napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 

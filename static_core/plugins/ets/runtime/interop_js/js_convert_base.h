@@ -139,6 +139,7 @@ struct JSConvertBase {
 
     static napi_value WrapWithNullCheck(napi_env env, cpptype etsVal)
     {
+        INTEROP_TRACE();
         if constexpr (IS_REFTYPE) {
             if (UNLIKELY(etsVal == nullptr)) {
                 return GetUndefined(env);
@@ -151,6 +152,7 @@ struct JSConvertBase {
 
     static std::optional<cpptype> UnwrapWithNullCheck(InteropCtx *ctx, napi_env env, napi_value jsVal)
     {
+        INTEROP_TRACE();
         if constexpr (IS_REFTYPE) {
             // NOTE(kprokopenko) can't assign null to EtsString *, hence fallback into UnwrapImpl
             if (UNLIKELY(IsUndefined<true>(env, jsVal))) {

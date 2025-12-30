@@ -133,21 +133,25 @@ napi_value WrapNumberImplIner(napi_env env, napi_callback_info info)
 
 napi_value WrapByteImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     return WrapNumberImplIner<ani_byte>(env, info);
 }
 
 napi_value WrapCharImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     return WrapNumberImplIner<ani_char>(env, info);
 }
 
 napi_value WrapShortImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     return WrapNumberImplIner<ani_short>(env, info);
 }
 
 napi_value WrapIntImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     return WrapNumberImplIner<ani_int>(env, info);
 }
 
@@ -174,6 +178,7 @@ std::string BigIntToStringJS(napi_env env, napi_value bigint)
 
 napi_value WrapLongImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -273,16 +278,19 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
 
 napi_value WrapFloatImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     return WrapNumberImplIner<ani_float>(env, info);
 }
 
 napi_value WrapNumberImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     return WrapNumberImplIner<double>(env, info);
 }
 
 napi_value WrapStringImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -309,11 +317,13 @@ napi_value WrapStringImpl(napi_env env, napi_callback_info info)
 
 napi_value WrapBooleanImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     return WrapNumberImplIner<ani_boolean>(env, info);
 }
 
 napi_value WrapBigIntImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -349,6 +359,7 @@ napi_value WrapBigIntImpl(napi_env env, napi_callback_info info)
 
 napi_value GetNullImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -369,6 +380,7 @@ napi_value GetNullImpl(napi_env env, napi_callback_info info)
 
 napi_value GetUndefinedImpl(napi_env env, napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 

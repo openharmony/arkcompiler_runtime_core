@@ -177,6 +177,7 @@ static napi_value STValueTemplateInvokeFunction(
 
 napi_value STValueNamespaceInvokeFunctionImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
+    INTEROP_TRACE();
     auto namespaceFindFunction = [env](STValueData *data, std::string &functionName,
                                        std::string &signatureName) -> ani_function {
         auto aniEnv = GetAniEnv();
@@ -195,6 +196,7 @@ napi_value STValueNamespaceInvokeFunctionImpl(napi_env env, [[maybe_unused]] nap
 
 napi_value STValueFunctionalObjectInvokeImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
     auto *aniEnv = GetAniEnv();
@@ -244,6 +246,7 @@ napi_value STValueFunctionalObjectInvokeImpl(napi_env env, [[maybe_unused]] napi
 napi_value ObjectInvokeMethodWithNoArgs(napi_env env, ani_object invokeObj, const std::string &nameString,
                                         const std::string &signatureString, SType returnType)
 {
+    INTEROP_TRACE();
     auto aniEnv = GetAniEnv();
     auto name = nameString.c_str();
     auto signature = signatureString.c_str();
@@ -310,6 +313,7 @@ napi_value ObjectInvokeMethodWithArgs(napi_env env, ani_object invokeObj, const 
                                       const std::string &signatureString, SType returnType,
                                       std::vector<ani_value> argArray)
 {
+    INTEROP_TRACE();
     auto aniEnv = GetAniEnv();
     auto name = nameString.c_str();
     auto signature = signatureString.c_str();
@@ -386,6 +390,7 @@ napi_value ObjectInvokeMethodWithArgs(napi_env env, ani_object invokeObj, const 
 // objectInvokeMethod(name: string, signature: string, returnType: STtype, args: Array<STValue>): STValue
 napi_value STValueObjectInvokeMethodImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
@@ -433,6 +438,7 @@ napi_value STValueObjectInvokeMethodImpl(napi_env env, [[maybe_unused]] napi_cal
 napi_value ClassInvokeStaticMethodWithNoArgs(napi_env env, ani_class clsClass, const std::string &nameString,
                                              const std::string &signatureString, SType returnType)
 {
+    INTEROP_TRACE();
     auto aniEnv = GetAniEnv();
     auto name = nameString.c_str();
     auto signature = signatureString.c_str();
@@ -506,6 +512,7 @@ napi_value ClassInvokeStaticMethodWitArgs(napi_env env, ani_class clsClass, cons
                                           const std::string &signatureString, SType returnType,
                                           std::vector<ani_value> argArray)
 {
+    INTEROP_TRACE();
     auto aniEnv = GetAniEnv();
     auto name = nameString.c_str();
     auto signature = signatureString.c_str();
@@ -582,6 +589,7 @@ napi_value ClassInvokeStaticMethodWitArgs(napi_env env, ani_class clsClass, cons
 // classInvokeStaticMethod(name: string, signature: string, returnType: STtype, args: Array<STValue>): STValue
 napi_value STValueClassInvokeStaticMethodImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
+    INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
     NAPI_TO_ANI_SCOPE;
 
