@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -203,7 +203,7 @@ namespace ark::ets::test {
 }
 [[maybe_unused]] static void SkoalaParagraphParagraph1nLayout([[maybe_unused]] ark::Method *m,
                                                               [[maybe_unused]] long ptr /*KNativePointer*/,
-                                                              [[maybe_unused]] float width)
+                                                              [[maybe_unused]] long width)
 {
 }
 [[maybe_unused]] static void SkoalaParagraphParagraph1nPaint([[maybe_unused]] ark::Method *m,

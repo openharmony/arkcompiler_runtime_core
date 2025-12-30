@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ native function _skoala_paragraph_FontCollection__1nMake(): long/*KNativePointer
 native function _skoala_paragraph_FontCollection__1nSetDefaultFontManager(ptr: long/*KNativePointer*/, fontManagerPtr: long/*KNativePointer*/, defaultFamilyNameStr: long/*KStringPtr*/): void;
 native function _skoala_FontMgr__1nDefault(): long/*KNativePointer*/;
 native function _skoala_paragraph_ParagraphStyle__1nMake(): long/*KNativePointer*/;
-native function _skoala_paragraph_Paragraph__1nLayout(ptr: long/*KNativePointer*/, width: float): void;
+native function _skoala_paragraph_Paragraph__1nLayout(ptr: long/*KNativePointer*/, width: long): void;
 native function _skoala_paragraph_Paragraph__1nPaint(ptr: long/*KNativePointer*/, canvasPtr: long/*KNativePointer*/, x: float, y: float): void;
 native function _skoala_paragraph_TextStyle__1nMake(): long/*KNativePointer*/;
 native function _skoala_paragraph_TextStyle__1nSetColor(ptr: long/*KNativePointer*/, color: int): void;
@@ -210,7 +210,7 @@ class Drawer {
 
         const paragraphPtr = _skoala_paragraph_ParagraphBuilder__1nBuild(paragraphBuilderPtr);
         const paragraphFinalizer = _skoala_paragraph_Paragraph__1nGetFinalizer()
-        _skoala_paragraph_Paragraph__1nLayout(paragraphPtr, /*Infinity*/500 as float/*KFloat*/);
+        _skoala_paragraph_Paragraph__1nLayout(paragraphPtr, /*Infinity*/500 /*KFloat*/);
 
         _skoala_paragraph_Paragraph__1nPaint(paragraphPtr, canvasPtr, 100, 100);
 
