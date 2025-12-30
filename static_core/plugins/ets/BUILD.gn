@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//arkcompiler/runtime_core/static_vm_config.gni")
 
 if (ark_standalone_build) {
   import("$build_root/ark.gni")
@@ -320,39 +321,22 @@ if (with_stdlib) {
     ]
   }
 
-  if (is_linux) {
-    copy("etsstdlib_copy_linux") {
+  if (!ark_standalone_build && !ark_static_standalone_build) {
+    ohos_copy("ohos_ets_etsstdlib_abc") {
       deps = [ ":etsstdlib" ]
-      if (ark_static_standalone_build) {
-        sources = [ "$root_build_dir/plugins/ets/etsstdlib.abc" ]
-      } else {
-        sources = [ "$target_gen_dir/etsstdlib.abc" ]
-      }
-      outputs = [ "$root_build_dir/ohos-sdk/linux/ets/static/build-tools/ets2panda/lib/etsstdlib.abc" ]
+      sources = get_target_outputs(":etsstdlib")
+      outputs = [ ohos_ets_etsstdlib_path ]
+      part_name = "runtime_core"
+      subsystem_name = "arkcompiler"
     }
-  }
 
-  if (is_win || is_mingw) {
-    copy("etsstdlib_copy_windows") {
+    etsstdlib_path_list = get_target_outputs(":etsstdlib")
+    ohos_prebuilt_etc("etsstdlib_abc") {
       deps = [ ":etsstdlib" ]
-      if (ark_static_standalone_build) {
-        sources = [ "$root_build_dir/plugins/ets/etsstdlib.abc" ]
-      } else {
-        sources = [ "$target_gen_dir/etsstdlib.abc" ]
-      }
-      outputs = [ "$root_build_dir/ohos-sdk/windows/ets/static/build-tools/ets2panda/lib/etsstdlib.abc" ]
-    }
-  }
-
-  if (is_mac) {
-    copy("etsstdlib_copy_mac") {
-      deps = [ ":etsstdlib" ]
-      if (ark_static_standalone_build) {
-        sources = [ "$root_build_dir/plugins/ets/etsstdlib.abc" ]
-      } else {
-        sources = [ "$target_gen_dir/etsstdlib.abc" ]
-      }
-      outputs = [ "$root_build_dir/ohos-sdk/mac/ets/ets1.2/build-tools/ets2panda/lib/etsstdlib.abc" ]
+      source = etsstdlib_path_list[0]
+      install_enable = false
+      part_name = "runtime_core"
+      subsystem_name = "arkcompiler"
     }
   }
 
