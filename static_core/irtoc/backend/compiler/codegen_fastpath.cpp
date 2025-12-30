@@ -278,6 +278,18 @@ void CodegenFastPath::EmitSimdIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS sr
     } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_MEM_LAST_CHAR_U8_X16_USING_SIMD) {
         GetEncoder()->EncodeMemLastCharU8X16UsingSimd(dst, src[FIRST_OPERAND], src[SECOND_OPERAND],
                                                       ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_CHARS_TO_UPPER_CASE_U8_X16_USING_SIMD) {
+        GetEncoder()->EncodeCharsToUpperCaseU8X16UsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                           ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_CHARS_TO_UPPER_CASE_U8_X8_USING_SIMD) {
+        GetEncoder()->EncodeCharsToUpperCaseU8X8UsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                          ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_CHARS_TO_LOWER_CASE_U8_X16_USING_SIMD) {
+        GetEncoder()->EncodeCharsToLowerCaseU8X16UsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                           ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_CHARS_TO_LOWER_CASE_U8_X8_USING_SIMD) {
+        GetEncoder()->EncodeCharsToLowerCaseU8X8UsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                          ConvertInstTmpReg(inst, DataType::FLOAT64));
     } else {
         UNREACHABLE();
     }

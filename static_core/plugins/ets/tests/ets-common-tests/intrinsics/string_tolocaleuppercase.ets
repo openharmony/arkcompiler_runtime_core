@@ -42,8 +42,8 @@ function main() {
         testCompressedDutchLocaleSpecificLinearShortLocale);
     suite.addTest('testCompressedItalianLocaleSpecificLinearShortLocale',
         testCompressedItalianLocaleSpecificLinearShortLocale);
-    suite.addTest('testCompressedSpainLocaleSpecificLinearShortLocale',
-        testCompressedSpainLocaleSpecificLinearShortLocale);
+    suite.addTest('testCompressedSpanishLocaleSpecificLinearShortLocale',
+        testCompressedSpanishLocaleSpecificLinearShortLocale);
     suite.addTest('testCompressedPortugueseLocaleSpecificLinearShortLocale',
         testCompressedPortugueseLocaleSpecificLinearShortLocale);
     suite.addTest('testCompressedMalayLocaleSpecificLinearShortLocale',
@@ -64,6 +64,8 @@ function main() {
         testCompressedChineseLocaleSpecificTreeLocale);
     suite.addTest('testCompressedChineseLocaleSpecificLinearSlicedLocale',
         testCompressedChineseLocaleSpecificSlicedLocale);
+    suite.addTest('testShortestCompressedEnglishLocaleSpecificLinearLocale',
+        testShortestCompressedEnglishLocaleSpecificLinearLocale);
     suite.addTest('testShortCompressedEnglishLocaleSpecificLinearLocale',
         testShortCompressedEnglishLocaleSpecificLinearLocale);
     return suite.run();
@@ -206,40 +208,41 @@ function testCompressedEnglishLocaleSpecificSlicedLocale() {
     testCompressedCompatibleLocaleSpecific(getSlicedLocale('en', 'US'));
 }
 
+function testShortCompressedStringInEnglishLocale(input: String, len: int, expected: String, next: String) {
+    const inputNext = next.concat('x');
+    const inputNextLen = inputNext.length;
+    arktest.assertEQ(input.length, len);
+    const result = input.toLocaleUpperCase('en-US');
+    arktest.assertEQ(result, expected, `Short Compressible en-US Locale Failed: ${result} vs ${expected}`);
+    arktest.assertEQ(inputNext, next.concat('x'), 'the next string must not be touched');
+    arktest.assertEQ(inputNext.length, inputNextLen, 'the next string must not be touched including the length');
+}
+
 /**
- * Tests english-compatible locale uppercase conversion for a short (less than 8 characters) compressible
+ * Tests english-compatible locale uppercase conversion for a shortest (less than or equal to 8 characters) compressible
+ * (basic-latin-only) strings.
+ */
+function testShortestCompressedEnglishLocaleSpecificLinearLocale() {
+    testShortCompressedStringInEnglishLocale('a', 1, 'A', 'alphaNewString');
+    testShortCompressedStringInEnglishLocale('abcdefg', 7, 'ABCDEFG', 'betaNewString');
+    testShortCompressedStringInEnglishLocale('abcdefgh', 8, 'ABCDEFGH', 'gammaNewString');
+}
+
+/**
+ * Tests english-compatible locale uppercase conversion for a short (less than 9-32 characters) compressible
  * (basic-latin-only) strings.
  */
 function testShortCompressedEnglishLocaleSpecificLinearLocale() {
-    const input1 = 'a';
-    const input1Next = 'alphaNewString';
-    const input1NextLen = input1Next.length;
-    arktest.assertEQ(input1.length, 1);
-    const expected1 = 'A';
-    const result1 = input1.toLocaleUpperCase('en-US');
-    arktest.assertEQ(result1, expected1, `Short Compressible en-US Locale Failed: ${result1} vs ${expected1}`);
-    arktest.assertEQ(input1Next, 'alphaNewString', 'the next string must not be touched');
-    arktest.assertEQ(input1Next.length, input1NextLen, 'the next string must not be touched including the length');
-
-    const input7 = 'abcdefg';
-    const input7Next = 'betaNewString';
-    const input7NextLen = input7Next.length;
-    arktest.assertEQ(input7.length, 7);
-    const expected7 = 'ABCDEFG';
-    const result7 = input7.toLocaleUpperCase('en-US');
-    arktest.assertEQ(result7, expected7, `Short Compressible en-US Locale Failed: ${result7} vs ${expected7}`);
-    arktest.assertEQ(input7Next, 'betaNewString', 'the next string must not be touched');
-    arktest.assertEQ(input7Next.length, input7NextLen, 'the next string must not be touched including the length');
-
-    const input8 = 'abcdefgh';
-    const input8Next = 'gammaNewString';
-    const input8NextLen = input8Next.length;
-    arktest.assertEQ(input8.length, 8);
-    const expected8 = 'ABCDEFGH';
-    const result8 = input8.toLocaleUpperCase('en-US');
-    arktest.assertEQ(result8, expected8, `Short Compressible en-US Locale Failed: ${result8} vs ${expected8}`);
-    arktest.assertEQ(input8Next, 'gammaNewString', 'the next string must not be touched');
-    arktest.assertEQ(input8Next.length, input8NextLen, 'the next string must not be touched including the length');
+    testShortCompressedStringInEnglishLocale('alphaloca', 9, 'ALPHALOCA', 'alphaNewString');
+    testShortCompressedStringInEnglishLocale('alphalocale1abc', 15, 'ALPHALOCALE1ABC', 'betaNewString');
+    testShortCompressedStringInEnglishLocale('alphalocale1abcd', 16, 'ALPHALOCALE1ABCD', 'gammaNewString');
+    testShortCompressedStringInEnglishLocale('alphalocale1abcde', 17, 'ALPHALOCALE1ABCDE', 'deltaNewString');
+    testShortCompressedStringInEnglishLocale('alphalocale1abcdefxyzwop', 24,
+        'ALPHALOCALE1ABCDEFXYZWOP', 'upsilonNewString');
+    testShortCompressedStringInEnglishLocale('alphalocale1abcdefxyzwopqrs', 27,
+        'ALPHALOCALE1ABCDEFXYZWOPQRS', 'omicronNewString');
+    testShortCompressedStringInEnglishLocale('alphalocale1abcdefxyzwopqrstuvjk', 32,
+        'ALPHALOCALE1ABCDEFXYZWOPQRSTUVJK', 'zetNewString');
 }
 
 /**
@@ -318,9 +321,9 @@ function testCompressedItalianLocaleSpecificLinearShortLocale() {
 }
 
 /**
- * Test Spain locale uppercase conversion for compressible (basic-latin-only) strings.
+ * Test Spanish locale uppercase conversion for compressible (basic-latin-only) strings.
  */
-function testCompressedSpainLocaleSpecificLinearShortLocale() {
+function testCompressedSpanishLocaleSpecificLinearShortLocale() {
     testCompressedCompatibleLocaleSpecific('es');
 }
 

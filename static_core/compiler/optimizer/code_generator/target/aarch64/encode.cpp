@@ -1325,6 +1325,60 @@ void Aarch64Encoder::EncodeMemLastCharU8X16UsingSimd(Reg dst, Reg ch, Reg srcAdd
     GetMasm()->Bind(labelReturn);
 }
 
+template <uint8_t BEGIN, uint8_t END, bool EIGHT_BYTES>
+static void EncodeCharsToCaseU8UsingSimd(Aarch64Encoder *encoder, Reg srcAddr, Reg dstAddr, Reg tmp)
+{
+    ScopedTmpReg vTmp0(encoder, FLOAT64_TYPE);
+    ScopedTmpReg vTmp1(encoder, FLOAT64_TYPE);
+    auto vRegSrc = vixl::aarch64::VRegister(vTmp0.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    auto vRegDst = vixl::aarch64::VRegister(vTmp1.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    constexpr uint8_t CASE_CONVERSION_FLIP_BIT = 1U << 5U;     // CC-OFF(G.NAM.03-CPP) project code style
+    constexpr uint8_t INVERTED_BEGIN = 0xFFU - BEGIN + 0x01U;  // CC-OFF(G.NAM.03-CPP) project code style
+    auto vRegFlip = vixl::aarch64::VRegister(tmp.GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+
+    if constexpr (EIGHT_BYTES) {
+        encoder->GetMasm()->Ldr(vRegSrc.V1D(), vixl::aarch64::MemOperand(VixlReg(srcAddr)));
+    } else {
+        encoder->GetMasm()->Ldr(vRegSrc, vixl::aarch64::MemOperand(VixlReg(srcAddr)));
+    }
+    encoder->GetMasm()->Movi(vRegDst, INVERTED_BEGIN);
+    encoder->GetMasm()->Add(vRegDst, vRegDst, vRegSrc);
+    encoder->GetMasm()->Movi(vRegFlip, END - BEGIN);
+    encoder->GetMasm()->Cmhs(vRegDst, vRegFlip, vRegDst);
+    encoder->GetMasm()->Movi(vRegFlip, CASE_CONVERSION_FLIP_BIT);
+    encoder->GetMasm()->Eor(vRegFlip, vRegSrc, vRegFlip);
+    encoder->GetMasm()->Bsl(vRegDst, vRegFlip, vRegSrc);
+    if constexpr (EIGHT_BYTES) {
+        encoder->GetMasm()->Str(vRegDst.V1D(), vixl::aarch64::MemOperand(VixlReg(dstAddr)));
+    } else {
+        encoder->GetMasm()->Str(vRegDst, vixl::aarch64::MemOperand(VixlReg(dstAddr)));
+    }
+}
+
+void Aarch64Encoder::EncodeCharsToUpperCaseU8X16UsingSimd(Reg srcAddr, Reg dstAddr, Reg tmp)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EncodeCharsToCaseU8UsingSimd<0x61U, 0x7aU, false>(this, srcAddr, dstAddr, tmp);
+}
+
+void Aarch64Encoder::EncodeCharsToUpperCaseU8X8UsingSimd(Reg srcAddr, Reg dstAddr, Reg tmp)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EncodeCharsToCaseU8UsingSimd<0x61U, 0x7aU, true>(this, srcAddr, dstAddr, tmp);
+}
+
+void Aarch64Encoder::EncodeCharsToLowerCaseU8X16UsingSimd(Reg srcAddr, Reg dstAddr, Reg tmp)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EncodeCharsToCaseU8UsingSimd<0x41U, 0x5aU, false>(this, srcAddr, dstAddr, tmp);
+}
+
+void Aarch64Encoder::EncodeCharsToLowerCaseU8X8UsingSimd(Reg srcAddr, Reg dstAddr, Reg tmp)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EncodeCharsToCaseU8UsingSimd<0x41U, 0x5aU, true>(this, srcAddr, dstAddr, tmp);
+}
+
 void Aarch64Encoder::EncodeUnsignedExtendBytesToShorts(Reg dst, Reg src)
 {
     GetMasm()->Uxtl(VixlVReg(dst).V8H(), VixlVReg(src).V8B());

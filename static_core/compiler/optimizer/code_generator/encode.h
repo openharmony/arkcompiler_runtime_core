@@ -370,6 +370,10 @@ public:
     virtual void EncodeMemCharU16X8UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp);
     virtual void EncodeMemLastCharU16X8UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp);
     virtual void EncodeMemLastCharU8X16UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp);
+    virtual void EncodeCharsToUpperCaseU8X16UsingSimd(Reg srcAddr, Reg dstAddr, Reg tmp);
+    virtual void EncodeCharsToUpperCaseU8X8UsingSimd(Reg srcAddr, Reg dstAddr, Reg tmp);
+    virtual void EncodeCharsToLowerCaseU8X16UsingSimd(Reg srcAddr, Reg dstAddr, Reg tmp);
+    virtual void EncodeCharsToLowerCaseU8X8UsingSimd(Reg srcAddr, Reg dstAddr, Reg tmp);
     virtual void EncodeUnsignedExtendBytesToShorts(Reg dst, Reg src);
     virtual void SetCursorOffset([[maybe_unused]] size_t offset) {}
     virtual void SaveRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp);

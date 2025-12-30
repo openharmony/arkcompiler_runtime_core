@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,6 +94,10 @@ function main(): void {
             "Strings must be equal after toLowerCase");
     arktest.assertTrue( str1.toUpperCase().equals("|PREF|ABCD|SUF|:|PREF|XTT|SUF|:|PREF|G|SUF|" as Object),
             "Strings must be equal after toUpperCase");
+    arktest.assertTrue( str1.toLocaleLowerCase("en").equals("|pref|abcd|suf|:|pref|xtt|suf|:|pref|g|suf|" as Object),
+            "Strings must be equal after toLocaleLowerCase");
+    arktest.assertTrue( str1.toLocaleUpperCase("en").equals("|PREF|ABCD|SUF|:|PREF|XTT|SUF|:|PREF|G|SUF|" as Object),
+            "Strings must be equal after toLocaleUpperCase");
 
     str1 = "Sky";
     arktest.assertTrue(str1.padLeft(c'.', 0).equals("Sky" as Object), "String must be equal 'Sky'");

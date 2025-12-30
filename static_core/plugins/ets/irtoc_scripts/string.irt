@@ -18,6 +18,7 @@ module Constants
   MEM_BLOCK_8_BYTES = "8"
   MEM_BLOCK_8_ALIGN_CHECK_MASK = "8ULL - 1ULL"
   MEM_BLOCK_16_BYTES = "16"
+  MEM_BLOCK_16_ALIGN_MASK = "~15ULL"
   MEM_BLOCK_32_BYTES = "32"
   MEM_BLOCK_32_ALIGN_MASK = "~31ULL"
   LOG2_BITS_PER_U8 = "3"
@@ -2944,6 +2945,10 @@ end
 #
 ["upper", "lower"].each do |tocase|
   scoped_macro("chars_to_#{tocase}_case_8".to_sym) do |chars|
+    if Options.arch != :x86_64
+      Intrinsic(:UNREACHABLE).Terminator.void
+      next
+    end
     char := u64tou8(ShrI(chars).Imm(8 * 7).u64)
     new_chars := eval("u8tou64(char_to_#{tocase}_case(char))")
     (6 * 8).step(8, -8) do |shift|
@@ -2955,6 +2960,22 @@ end
     new_char := eval("u8tou64(char_to_#{tocase}_case(char))")
     Or(ShlI(new_chars).Imm(Constants::MEM_BLOCK_8_BYTES).u64, new_char).u64
   end  # chars_to_#{tocase}_case_8
+end
+
+###
+# chars_to_#{tocase}_case_memblock_#{width} converts 8 or 16 latin chars from addr `addr` to the upper/lower
+# case using the SIMD instructions.
+#
+["upper", "lower"].each do |tocase|
+  ["8", "16"].each do |width|
+    scoped_macro("chars_to_#{tocase}_case_memblock_#{width}".to_sym) do |src_addr, dst_addr|
+      if Options.arch != :arm64
+        Intrinsic(:UNREACHABLE).Terminator.void
+        next
+      end
+      Intrinsic("CHARS_TO_#{tocase.upcase}_CASE_U8_X#{width}_USING_SIMD".to_sym, src_addr, dst_addr).void
+    end
+  end  # chars_to_#{tocase}_case_memblock_#{width}
 end
 
 ###
@@ -3014,8 +3035,12 @@ def GenerateStringToCaseTlab(with_locale, tocase, cgmode = :FastPath)
   case tocase
     when "lower"
       chars_converter = "chars_to_lower_case_8"
+      memblock_converter_8 = "chars_to_lower_case_memblock_8"
+      memblock_converter_16 = "chars_to_lower_case_memblock_16"
     when "upper"
       chars_converter = "chars_to_upper_case_8"
+      memblock_converter_8 = "chars_to_upper_case_memblock_8"
+      memblock_converter_16 = "chars_to_upper_case_memblock_16"
     else
       raise "Unexpected tocase argument: #{tocase}, only 'lower'- and 'upper'-case conversions are supported."
   end
@@ -3089,16 +3114,57 @@ def GenerateStringToCaseTlab(with_locale, tocase, cgmode = :FastPath)
     # Now we are sure that the string data are aligned by 8 bytes as well as any new allocated string so that
     # we may process the chars in chunks. It makes no sense if we touch the padding; moreover, the padding bytes will
     # remain intact if they contains zeros.
-    offs0 := Cast(0).word
-  Label(:TransformLoop_8b)
-    offs := Phi(offs0, offs1).word
-    new_chars := eval("#{chars_converter}(Load(src_str_data, offs).u64)")
-    Store(dst_str_data, offs, new_chars).u64
-    offs1 := AddI(offs).Imm(8).word
-    If(offs1, data_size).B.Likely.b {
-      Goto(:TransformLoop_8b)
-    }
+    if Options.arch == :arm64
+      src_addr0 := src_str_data
+      src_end := Add(src_addr0, data_size).ptr
+      dst_addr0 := dst_str_data
 
+      # If the string is strictly longer than 8 bytes, we may convert all the 16 bytes including the padding
+      # in one hop.
+      If(data_size, Constants::MEM_BLOCK_8_BYTES).A.Likely {
+        src_end_of_aligned := Add(src_addr0, AndI(Cast(data_size).word).Imm(Constants::MEM_BLOCK_16_ALIGN_MASK).word).ptr
+  Label(:TransformLoop_16b)
+        src_addr := Phi(src_addr0, src_addr1).ptr
+        dst_addr := Phi(dst_addr0, dst_addr1).ptr
+        eval("#{memblock_converter_16}(src_addr, dst_addr)")
+        src_addr1 := AddI(src_addr).Imm(Constants::MEM_BLOCK_16_BYTES).ptr
+        dst_addr1 := AddI(dst_addr).Imm(Constants::MEM_BLOCK_16_BYTES).ptr
+        If(src_addr1, src_end_of_aligned).B.Likely {
+          Goto(:TransformLoop_16b)
+        }
+        If(src_addr1, src_end).AE.Unlikely {
+          Goto(:ReturnNewString)
+        }
+      }
+
+      src_addr2 := Phi(src_addr0, src_addr1).ptr
+      dst_addr2 := Phi(dst_addr0, dst_addr1).ptr
+      eval("#{memblock_converter_8}(src_addr2, dst_addr2)")
+      src_addr3 := AddI(src_addr2).Imm(Constants::MEM_BLOCK_8_BYTES).ptr
+      dst_addr3 := AddI(dst_addr2).Imm(Constants::MEM_BLOCK_8_BYTES).ptr
+      If(src_addr3, src_end).AE.Unlikely {
+        Goto(:ReturnNewString)
+      }
+      eval("#{memblock_converter_8}(src_addr3, dst_addr3)")
+      if defines.DEBUG
+        # After handling all the possible 16 byte memory blocks, maximum two 8 byte blocks comprises the tail.
+        If(AddI(src_addr3).Imm(Constants::MEM_BLOCK_8_BYTES).ptr, src_end).B.Unlikely {
+          Intrinsic(:UNREACHABLE).Terminator.void
+        }
+      end
+    else
+      offs0 := Cast(0).word
+  Label(:TransformLoop_8b)
+      offs := Phi(offs0, offs1).word
+      new_chars := eval("#{chars_converter}(Load(src_str_data, offs).u64)")
+      Store(dst_str_data, offs, new_chars).u64
+      offs1 := AddI(offs).Imm(Constants::MEM_BLOCK_8_BYTES).word
+      If(offs1, data_size).B.Likely.b {
+        Goto(:TransformLoop_8b)
+      }
+    end
+
+  Label(:ReturnNewString)
     # String is supposed to be a constant object, so all its data should be visible by all threads
     Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     Return(new_str).ptr
