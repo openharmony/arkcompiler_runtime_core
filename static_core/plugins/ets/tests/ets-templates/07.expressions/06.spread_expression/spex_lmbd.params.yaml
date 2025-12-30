@@ -82,11 +82,15 @@ cases:
           let a1: Object[]|null = null
       use: |-
           // ensure-not-nullish expression
-          try {
-            arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!), 7)  // NPE expected
-          } catch (e: Error) {
-            arktest.assertTrue(e instanceof NullPointerError)
-          }
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
+          arktest.expectThrow(() => {((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!)}, expectedException) // NPE expected
+
+    - decl: |-
+          let a1: Object[]|null = [new Object, new Object]
+      use: |-
+          // nullish expression
+          arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1), 7)  // CTE expected
+      tags: 'negative, compile-only'
 
     - decl: |-
           let a1: Object[]|null = null
@@ -276,8 +280,8 @@ cases:
           let a1: [Object, Error]|null = null
       use: |-
           // ensure-not-nullish expression
-          arktest.assertEQ(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...a1!), 3) // NPE expected
-      tags: 'negative'
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
+          arktest.expectThrow(() => {((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...a1!)}, expectedException) // NPE expected
 
     - decl: |-
           let a1: [Object, Error]|null = null
@@ -291,8 +295,8 @@ cases:
           let a2: [Object, Error]|null = null
       use: |-
           // nullish-coalescing expression
-          arktest.assertEQ(((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)!), 3) // NPE expected
-      tags: 'negative'
+          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
+          arktest.expectThrow(() => {((...p: [Object, Error]): int => p[0] != p[1] ? 3 : 0)(...(a1 ?? a2)!)}, expectedException) // NPE expected
 
     - decl: |-
           function foo(): [number, string] {

@@ -19,10 +19,12 @@ cases:
       let x1 = a ?? non_eval()
       arktest.assertEQ(x1, 1)
   - description: "If lhs is null, rhs is evaluated"
+    expected_error: '"expected true but was false"'
     main: |-
       a = null
       arktest.expectThrow(() => {let x2 = a ?? non_eval()}, e=>(e instanceof AssertionError))
   - description: "If lhs is undefined, rhs is evaluated"
+    expected_error: '"expected true but was false"'
     main: |-
       a = undefined
       arktest.expectThrow(() => {let x3 = a ?? non_eval()}, e=>(e instanceof AssertionError))
