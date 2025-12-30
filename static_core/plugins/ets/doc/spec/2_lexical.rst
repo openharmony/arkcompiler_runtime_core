@@ -865,7 +865,7 @@ String Literals
     frontend_status: Done
     todo: "" sample is invalid: SyntaxError: Newline is not allowed in strings
 
-*String literals* comprizes of zero or more characters enclosed between
+*String literals* comprize zero or more characters enclosed between
 single or double quotes. A *multiline string* literal (see
 :ref:`Multiline String Literal`) is а special form of a string literal.
 

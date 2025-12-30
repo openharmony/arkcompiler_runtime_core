@@ -495,8 +495,8 @@ Unqualified import is also allowed:
     @MyAnno
     class C {/*body*/}
 
-Any annotation declaration does not define a type, thus using ``export type``
-or ``import type`` notations to export or import annotations leads to a 
+An annotation declaration does not define a type, and using ``export type``
+or ``import type`` notations to export or import an annotation causes a
 :index:`compile-time error`:
 
 .. code-block:: typescript
@@ -505,8 +505,8 @@ or ``import type`` notations to export or import annotations leads to a
     import type { MyAnno } from "./a" // compile-time error
 
 
-Also a :index:`compile-time error` occurs if annotations are used in the
-following cases:
+If annotations are used in the following cases, then a
+:index:`compile-time error` also occurs:
 
 - Export default,
 

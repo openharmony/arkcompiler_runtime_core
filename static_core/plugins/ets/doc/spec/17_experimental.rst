@@ -1540,11 +1540,11 @@ An overloaded entity in an *explicit overload declaration* can be *generic*
 (see :ref:`Generics`).
 
 If type arguments are provided explicitly in a call of an overloaded entity
-(see :ref:Explicit Generic Instantiations), then only the entities that have
+(see :ref:`Explicit Generic Instantiations`), then only the entities that have
 the number of type arguments compatible with the number of mandatory and
-optional type parameters (entities with optional type parameters are the
-entities that have type parameter default) are
-considered during :ref:Overload Resolution:
+optional type parameters (i.e., entities with optional type parameters are the
+entities that have type parameter default) are considered during
+:ref:`Overload Resolution`:
 
 .. code-block:: typescript
    :linenos:
@@ -1743,11 +1743,9 @@ but an overloaded function is not:
     export overload foo { foo1, foo2 } // compile-time error, 'foo2' is not exported
     overload bar { foo1, foo2 } // ok, as 'bar' is not exported
 
-|
-
-A :index:`compile-time error` occurs, if an *explicit overload* is called
-like a function with receiver, that is, using syntax of method call
-(see ref:`Functions with Receiver`):
+If an *explicit overload* is called like a function with receiver, i.e., syntax
+of method call is used (see :ref:`Functions with Receiver`), then a
+:index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -2883,11 +2881,11 @@ All other arguments are handled in an ordinary manner.
          bar1(e, 1)
 
 
-The keyword ``this`` must be used in the parameter list for the first parameter only.
-A :index:`compile-time error` occurs if it is used for other parameters.
-The keyword ``this`` can be used inside a *function with receiver* where it corresponds
-to the first parameter. The type of parameter ``this`` is called the *receiver type*
-(see :ref:`Receiver Type`):
+The keyword ``this`` must be used in the parameter list for the first parameter
+only. If it is used for other parameters, then a :index:`compile-time error`
+occurs. The keyword ``this`` can be used inside a *function with receiver* where
+it corresponds to the first parameter. The type of parameter ``this`` is called
+*receiver type* (see :ref:`Receiver Type`):
 
 .. code-block:: typescript
    :linenos:
@@ -2969,7 +2967,7 @@ body of a *function with receiver*. Only ``public`` members can be accessed:
 
 A :index:`compile-time error` occurs if the name of a *function with receiver*
 (including generic functions) is the same as the name of an accessible
-(see :ref:`Accessible`) instance method or field of the receiver type:
+instance method or field of the receiver type (see :ref:`Accessible`):
 
 .. code-block:: typescript
    :linenos:
@@ -3059,12 +3057,12 @@ This situation is represented in the following example:
     i.foo()    // compile-time error: 'foo' is not resolved
     i.NS.foo() // compile-time error: 'NS' is not defined for 'int'
 
-|
-
 .. note::
-    While a function with receiver can be used in the explicit overload list,
-    such an overload cannot be called using syntax of method access
-    (see axemple in :ref:`Explicit Function Overload`)
+    While a function with receiver can be used in an explicit overload list,
+    such an overload cannot be called by using the method access syntax
+    (an example is provided in :ref:`Explicit Function Overload`)
+
+|
 
 .. _Receiver Type:
 
@@ -3077,7 +3075,7 @@ Receiver Type
 *Receiver type* is the type of the *receiver parameter* in a function,
 function type, and lambda with receiver. 
 
-The use of array type as a *receiver type* is presented in the example below:
+Using array type as a *receiver type* is presented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -3327,9 +3325,9 @@ The usual rule of function type compatibility (see
       f2 = foo // ok
       f1 = f2 // ok
 
-The sole difference is that only an entity of *function type with receiver* can
-be used in :ref:`Method Call Expression` but not an entity of compatible
-*function type*.
+The sole difference is that only an entity of *function type with receiver*
+and not an entity of a compatible *function type* can be used in
+:ref:`Method Call Expression`.
 
 .. code-block:: typescript
    :linenos:
@@ -3348,15 +3346,15 @@ be used in :ref:`Method Call Expression` but not an entity of compatible
    expression
    compile-time error
 
-|
 
 .. note::
-    The limitation with method call syntax can be easily bypassed by assigning
-    ordinary function to a compatible *function type with receiver*. See,
-    for example, a code snippet with parameter type with receiver below.
+    The limitation of the method call syntax can be easily bypassed by assigning
+    an ordinary function to a compatible *function type with receiver*.
+    A snippet of code illustrative of parameter type with receiver is
+    represented by the example below.
 
-The function type with receiver can be used as a parameter type.
-The example illustrates usage of parameter type with receiver:
+Function type with receiver can be used as a parameter type. Using parameter
+type with receiver is represented by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -3374,11 +3372,10 @@ The example illustrates usage of parameter type with receiver:
     foo(n, bar)  // prints `2 2`
     foo(n, compat)  // prints `1 1`
 
-|
 
-The method call syntax can not be used when assigning the actual entity to a
-variable of *function type with receiver*. An attempt to do so causes a
-compile-time error:
+The method call syntax cannot be used when assigning the actual entity to a
+variable of *function type with receiver*. Attempting to do so causes a
+:index:`compile-time error`:
 
 .. code-block:: typescript
    :linenos:
@@ -3669,7 +3666,7 @@ function type, and the argument is passed as a lambda using the
    lambda
    block notation
 
-The use of a trailing lambda is represented in the example below:
+The use of trailing lambda is represented in the example below:
 
 .. code-block:: typescript
    :linenos:

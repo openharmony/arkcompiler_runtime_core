@@ -1079,7 +1079,7 @@ its elements.
 
 If two variables of a reference type contain references
 to the same object, and either variable modifies the state of that object,
-then the change of the state is also visible in the other variable.
+then the change of state is also visible in the other variable.
 
 .. index::
    object
@@ -2172,8 +2172,8 @@ from.
 A :index:`compile-time error` occurs if the type in the right-hand side of a
 union type declaration leads to a circular reference.
 
-A :index:`compile-time error` occurs if the *type* is a function type (see
-:ref:`Function Types`) and is used without parenthesis around.
+A :index:`compile-time error` occurs if *type* is a function type (see
+:ref:`Function Types`) not enclosed in parentheses.
 
 
 .. index::

@@ -180,7 +180,7 @@ A :index:`compile-time error` occurs if:
    alias of non-interface type.
 -  Interface type named by ``typeReference`` is not :ref:`Accessible`.
 -  Current interface is exported but the ``typeReference`` refers to a
-   non-exported one.
+   non-exported interface.
 -  Type arguments (see :ref:`Type Arguments`) of ``typeReference`` denote a
    parameterized type that is not well-formed (see
    :ref:`Generic Instantiations`).
@@ -308,7 +308,7 @@ Otherwise, a :index:`compile-time error` occurs.
     interface BI {}
     export interface DI extends BI {}
          /* Compile-time error as the derived interface is exported
-            while the base one is not */
+            while the base interface is not */
 
 .. index::
    interface

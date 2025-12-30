@@ -1519,8 +1519,8 @@ Type Inference for Numeric Literals
 .. meta:
     frontend_status: Partly
 
-The type of a numeric literal (see :ref:`Numeric Literals`) is firstly
-inferred from the context, if the context allows it.
+The type of a numeric literal (see :ref:`Numeric Literals`) is first
+inferred from the context, if the context allows.
 The following contexts allow inference:
 
 - :ref:`Assignment-like Contexts`;
@@ -1543,7 +1543,7 @@ a literal is not inferred:
 
     let x: b = 1 as short // compile-time error as type of expression is 'short'
 
-Type inference is used only where the *target type* is one of the two cases:
+Type inference is used only where the *target type* is one of the following two:
 
 - Case 1: *Numeric type* (see :ref:`Numeric Types`); or
 - Case 2: Union type (see :ref:`Union Types`) containing at least one
@@ -1566,7 +1566,7 @@ Where a *target type* is numeric, the type of a literal is inferred from the
    A *floating-point suffix* if present declares a ``floating-point literal``,
    and no type inference occurs.
 
-If none of the conditions above is met means that the *target type* is not a
+If none of the conditions above is met, then the *target type* is not a
 valid type for the literal, and a :index:`compile-time error` occurs.
 
 Type inference for a numeric *target type* is represented in the examples below:
@@ -1601,15 +1601,15 @@ i.e., a supertype of a numeric type:
 
 In the case the *target type* is a union type
 (``N``:sub:`1` ``| ... | N``:sub:`k` ``| ... | U``:sub:`n`), where ``k``
-:math:`\geq` ``1`` and ``N``:sub:`i` is a numeric type, the inferred literal
-type is determined as follows:
+:math:`\geq` ``1`` and ``N``:sub:`i` is a numeric type, then the inferred
+literal type is determined as follows:
 
 #. If no ``N``:sub:`i` suits the literal, then the default literal type is used;
 
 #. If only a single ``N``:sub:`i` suits the literal, then ``N``:sub:`i` is the
    inferred type;
 
-#. If several ``N``'s types suit the literal, then the following checks are
+#. If several ``N`` types suit the literal, then the following checks are
    performed:
 
    - If the literal is an *integer literal*, and only one suitable *integer*
@@ -2738,7 +2738,7 @@ the superinterface, then the following semantic rules apply:
 - Otherwise, :ref:`Implicit Method Overloading` is used.
 
 .. note::
-   Several methods of superinterface can be overriden by a single method in
+   Several methods of superinterface can be overridden by a single method in
    a subinterface.
 
 .. index::
@@ -3149,9 +3149,9 @@ called.
    overload set
    call
 
-If signatures of two non-generic implicitly overloaded functions are
-overload-equivalent (see :ref:Overload-Equivalent Signatures), then a
-:index:compile-time error occurs. However, an implicit overload with
+If signatures of two implicitly overloaded non-generic functions are
+overload-equivalent (see :ref:`Overload-Equivalent Signatures`), then a
+:index:`compile-time error` occurs. However, an implicit overload with
 instantiation of a generic and overload-equivalent non-generic
 function causes no compile-time error, and the textually first function is
 used:
@@ -3275,14 +3275,13 @@ Implicit Constructor Overloading
 .. meta:
     frontend_status: None
 
-Two or more unnamed constructors within a class are *implicitly overloaded*.
+Two or more unnamed constructors within a class are *implicitly overloaded*. If
+signatures of two overloaded constructors are *overload-equivalent* (see
+:ref:`Overload-Equivalent Signatures`), then a :index:`compile-time error`
+occurs.
 
-A :index:`compile-time error` occurs, if signatures of two overloaded constructors
-are *overload-equivalent*  (see :ref:`Overload-Equivalent Signatures`).
-
-In a class instance creation expression (see :ref:`New Expressions`)
-:ref:`Overload Resolution` is used to determine exactly which one
-constructor is to be called.
+:ref:`Overload Resolution` is used to determine exactly which one constructor is
+to be called in a class instance creation expression (see :ref:`New Expressions`).
 
 .. index::
    constructor overloading
@@ -3648,14 +3647,13 @@ the following:
 
 - Explicitly overloaded methods listed in :ref:`Explicit Class Method Overload`;
 
-- Methods from a direct superclass, if any;
+- Methods from a direct superclass, if any.
 
-- Methods from direct superclasses, if any.
 
 The following steps are taken to form an overload set:
 
 #. Explicitly and implicitly overloaded methods defined
-   in a given class are added into the overload set in the order
+   in a given class are added into an overload set in the order
    described in :ref:`Forming an Overload Set`, including the
    methods that override or implement methods from supertypes.
 
@@ -3713,7 +3711,7 @@ in the example below:
         */
     }
 
-That only direct supertypes are considered for overload sets is represented in
+Only direct supertypes are considered for overload sets. It is represented in
 the example below:
 
 .. code-block:: typescript
@@ -4160,18 +4158,18 @@ executed for the first time:
 - Calling a function or accessing a variable of a namespace or a module.
 
 .. note::
-   None of the operations above invokes an *static initialization* recursively
-   if the *static initialization* of the same entity is not complete.
+   None of the operations above invokes a *static initialization* of the same
+   entity recursively if it is not completed.
 
-   For namespaces, the code in a static block is executed only when
-   namespace members are used in the program (an example is provided in
+   The code in a static block of a namespace is executed only if namespace
+   members are used in a program (an example is provided in
    :ref:`Namespace Declarations`).
 
-An initialization is not complete if the execution of an *static
+An initialization is not complete if the execution of a *static
 initialization* is terminated due to an exception thrown. A repeated attempt to
 execute the *static initialization* can throw an exception again.
 
-If an *static initialization* invokes a concurrent execution (see
+If a *static initialization* invokes a concurrent execution (see
 :ref:`Coroutines (Experimental)`), then all *coroutines* that try to invoke it
 are synchronized. The synchronization is to ensure that the initialization
 is performed only once, and that the operations requiring the *static

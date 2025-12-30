@@ -1246,9 +1246,8 @@ is of readonly array type.
    readonly
    array
 
-If the other type used in a context then the
-ref:`Array Type Inference from Types of Elements` is used to inference the type
-of the array literal.
+If another type is used in a context, then type of an array literal is inferred
+by using :ref:`Array Type Inference from Types of Elements`.
 
 .. code-block:: typescript
    :linenos:
@@ -1564,9 +1563,9 @@ field type:
     let f: Friend = {name: 123} /* compile-time error - type of right hand-side
     is not assignable to the type of the left hand-side */
 
-Only class fields that have default values (see :ref:Default Values for Types)
-or explicit initializers (see :ref:Variable and Constant Declarations) can be
-skipped in the object literal. A :index:compile-time error occurs otherwise.
+Only class fields that have default values (see :ref:`Default Values for Types`)
+or explicit initializers (see :ref:`Variable and Constant Declarations`) can be
+skipped in an object literal. A :index:`compile-time` error occurs otherwise.
 
 .. code-block:: typescript
    :linenos:
@@ -1717,7 +1716,7 @@ object literal is an anonymous class implicitly created for interface ``I``:
     let b: Person = {name: "Bob", surname: "Doe", age: 25}
 
 In the example above, type of ``b`` is an anonymous class that contains the
-same fields as the interface ``I`` properties. An anonymous class created
+same fields as properties of interface ``I``. An anonymous class created
 for the example above has the following fields:
 
     - ``name: string``
@@ -1729,7 +1728,7 @@ return type of the getter. If a property is defined as a setter,
 then the type of a field is the type of the parameter.
 If a property is defined as both a getter and a setter, then
 the parameter type of the setter must be the same as the return type
-of the getter. Otherwise, a :index:`compile-time error` occurs, as
+of the getter. Otherwise, a :index:`compile-time error` occurs as
 described in :ref:`Implementing Required Interface Properties`.
 
 .. index::
@@ -2998,7 +2997,7 @@ Call Arguments
 .. meta:
     frontend_status: Done
 
-The syntax of *call arguments* is presented below:
+The syntax of a *call argument* is presented below:
 
 .. code-block:: abnf
 
@@ -3764,7 +3763,7 @@ The approach is represented in the following example:
       let c = a as B<T>   // OK
       let x = new B<string> // OK, explicit type parameter
       console.log(x instanceof B)        // OK
-      console.log(x instanceOf B<T>)     // compile-time error, T was erased
+      console.log(x instanceof B<T>)     // compile-time error, T was erased
 
       if(a instanceof B) {  // OK, type of instanceOf will be used for smart
                             // cast in `if` clause

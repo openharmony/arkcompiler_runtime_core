@@ -39,7 +39,7 @@ Some statements are simple like a single *expressionStatement*
    The difference between statements and expressions is that :ref:`Expressions`
    evaluate a value of a certain type, while statements do not.
 
-   From the viewpoint of the grammar rules, any expression ending in the
+   From the viewpoint of grammar rules, any expression ending in the
    semicolon '``;``' forms an *expressionStatement*. A missing semicolon is added
    automatically to an expression used as a statement.
 

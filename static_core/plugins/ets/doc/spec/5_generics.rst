@@ -660,10 +660,10 @@ Implicit Generic Instantiations
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
 Such type arguments are inferred (see :ref:`Type Inference`) from the context
-in which a generic is referred. If type arguments can not be inferred then
+in which a generic is referred. If type arguments cannot be inferred, then
 a :index:`compile-time error` occurs.
 
-Different cases type argument inference are represented in the examples below:
+Different cases of type argument inference are represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -680,7 +680,7 @@ Different cases type argument inference are represented in the examples below:
     process (123, () => {}) // P is inferred as 'int', while R is 'void'
 
     function bar <T> (p: number) {}
-    bar (1) // Compile-time error: type argument can not be inferred
+    bar (1) // Compile-time error: type argument cannot be inferred
 
 
 Implicit instantiation is only possible for generic functions and methods.
@@ -691,8 +691,16 @@ to the class or interface type parameter, the implicit generic instantiation of
 such method will use the argument types for the method type argument inference
 and class or interface type argument when the context, defined by parameter
 types, has no information how to infer the type argument.
-
 Example below illustartes that:
+
+.. Reversed revision of this paragraph -- PR#52, Branch 523:
+   In case a generic class or interface method has its own type parameter that
+   is default (see :ref:`Type Parameter Default`) and equals the type parameter
+   of the class or the interface, then implicit generic instantiation of such a
+   method infers method argument types by using argument types. If the context
+   defined by    parameter types has no information required to infer type
+   arguments, then    class or interface type arguments are used instead. The
+   situation is represented by the following example:
 
 .. code-block:: typescript
    :linenos:
