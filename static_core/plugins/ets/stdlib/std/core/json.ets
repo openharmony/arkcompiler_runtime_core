@@ -1105,7 +1105,7 @@ class JSONWriter {
                 this.buffer.append(" ")
             }
 
-            if (objToDump !== undefined) {
+            if (objToDump != null && !(objToDump instanceof Function)) {
                 this.writeObject(objToDump)
             } else {
                 this.buffer.append("null")

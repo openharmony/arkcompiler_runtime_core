@@ -280,8 +280,8 @@ function jsonStringifyRecordWithSameValue(): void {
 }
 
 function jsonStringifyRecordWithEmpty(): void {
-    const record: Record<string, NullishType> = new Record<string, NullishType>()
-    assertEQ(JSON.stringify(record), '{}')
+    const record: Record<string, Any> = new Record<string, Any>()
+    arktest.assertEQ(JSON.stringify(record), '{}')
 }
 
 function jsonStringifyNestedMap(): void {
@@ -320,6 +320,18 @@ function jsonStringifyEscapeCharacter(): void {
     for (let i = 0; i < arr.length; i++) {
         arktest.assertEQ(JSON.stringify(arr[i]), res[i]);
     }
+}
+
+function jsonStringifyTupleWithFunction(): void {
+    let add = (a:number, b:number) => a + b;
+    let sub = (a:number, b:number) => a - b;
+    let set = new Set<Function>([add, sub]);
+    let res = JSON.stringify(Array.from(set.entries()));
+    arktest.assertEQ(res, '[[null,null],[null,null]]');
+
+    let data: [int, int | undefined, String | null, Function, String] = [1, undefined, null, add, 'test'];
+    res = JSON.stringify(data);
+    arktest.assertEQ(res, '[1,null,null,null,"test"]');
 }
 
 function jsonStringifyTupleWithUndefinedValue(): void {
@@ -387,6 +399,7 @@ function main(): int {
     suite.addTest('JSON.stringify for cyclic Record', jsonStringifyCyclicRecord);
     suite.addTest('JSON.stringify for control character', jsonStringifyControlCharacter);
     suite.addTest('JSON.stringify for escape character', jsonStringifyEscapeCharacter);
+    suite.addTest('JSON.stringify for tuple with function', jsonStringifyTupleWithFunction);
     suite.addTest('JSON.stringify for tuple with undefined value', jsonStringifyTupleWithUndefinedValue);
     suite.addTest('JSON.stringify for enum', jsonStringifyEnum);
 
