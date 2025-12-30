@@ -31,8 +31,9 @@ desc: >-
     type-compatible (see Type Compatibility) with the
     respective type parameter constraint in the base type;
     - Otherwise, a compile-time error occurs.
-tags: [{{c.tags}}]
+
 params: {{c.params}}
+tags: []
 ---*/
 
 let res: number = 0;

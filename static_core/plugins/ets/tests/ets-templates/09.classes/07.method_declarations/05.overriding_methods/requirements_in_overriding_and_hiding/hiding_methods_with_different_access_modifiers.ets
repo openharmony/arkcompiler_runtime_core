@@ -25,7 +25,7 @@ assert: >-
     otherwise, a compile-time error occurs. If the overridden or hidden method has package access,
     then the overriding or hiding method must be internal; otherwise, a compile-time error occurs.
 params: {{mod.m1}} and {{mod.m2}}
-tags: {{mod.tags}}
+tags: []
 ---*/
 
 class A {

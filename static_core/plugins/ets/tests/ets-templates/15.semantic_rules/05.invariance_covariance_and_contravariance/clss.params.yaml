@@ -17,33 +17,6 @@ cases:
     - decl: |-
           class A {}
           class B extends A {}
-          class BBox<T> {}  // invariance
-          let boxA: BBox<A> = new BBox<A>
-      use: |-
-          ((p: BBox<B>) => {})(boxA)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          class BBox<T> {}  // invariance
-          let boxB: BBox<B> = new BBox<B>
-      use: |-
-          ((p: BBox<A>) => {})(boxB)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          class BBox<out T> {}  // covariance
-          let boxA: BBox<A> = new BBox<A>
-      use: |-
-          ((p: BBox<B>) => {})(boxA)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
           class BBox<out T> {  // covariance
               readonly f: T
               constructor(p: T) {
@@ -74,33 +47,7 @@ cases:
               arktest.assertEQ(res, b)
           })(boxA)
 
-    - decl: |-
-          class A {}
-          class B extends A {}
-          class BBox<in T> {}  // contravariance
-          let boxB: BBox<B> = new BBox<B>
-      use: |-
-          ((p: BBox<A>) => {})(boxB)
-      tags: 'compile-only, negative'
-
     # subtyping in classes, assignment
-    - decl: |-
-          class A {}
-          class B extends A {}
-          class BBox<T> {}  // invariance
-          let boxA: BBox<A> = new BBox<A>
-      use: |-
-          boxA = new BBox<B>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          class BBox<T> {}  // invariance
-          let boxB: BBox<B> = new BBox<B>
-      use: |-
-          boxB = new BBox<A>
-      tags: 'compile-only, negative'
 
     - decl: |-
           class A {}
@@ -121,24 +68,6 @@ cases:
     - decl: |-
           class A {}
           class B extends A {}
-          class BBox<out T> {}  // covariance
-          let boxB: BBox<B> = new BBox<B>
-      use: |-
-          boxB = new BBox<A>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          class BBox<in T> {}  // contravariance
-          let boxA: BBox<A> = new BBox<A>
-      use: |-
-          boxA = new BBox<B>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
           class BBox<in T> {  // contravariance
               meth(p: T) {
                   res = p
@@ -153,32 +82,6 @@ cases:
           arktest.assertEQ(res, b)
 
     # subtyping in classes/interfaces, call context
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          class BBox<T> {}  // invariance
-          let boxI: BBox<I> = new BBox<I>
-      use: |-
-          ((p: BBox<B>) => {})(boxI)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          class BBox<T> {}  // invariance
-          let boxB: BBox<B> = new BBox<B>
-      use: |-
-          ((p: BBox<I>) => {})(boxB)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          class BBox<out T> {}  // covariance
-          let boxI: BBox<I> = new BBox<I>
-      use: |-
-          ((p: BBox<B>) => {})(boxI)
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {}
@@ -213,33 +116,7 @@ cases:
               arktest.assertEQ(res, b)
           })(boxI)
 
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          class BBox<in T> {}  // contravariance
-          let boxB: BBox<B> = new BBox<B>
-      use: |-
-          ((p: BBox<I>) => {})(boxB)
-      tags: 'compile-only, negative'
-
     # subtyping in classes/interfaces, assignment
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          class BBox<T> {}  // invariance
-          let boxI: BBox<I> = new BBox<I>
-      use: |-
-          boxI = new BBox<B>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          class BBox<T> {}  // invariance
-          let boxB: BBox<B> = new BBox<B>
-      use: |-
-          boxB = new BBox<I>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {}
@@ -260,24 +137,6 @@ cases:
     - decl: |-
           interface I {}
           class B implements I {}
-          class BBox<out T> {}  // covariance
-          let boxB: BBox<B> = new BBox<B>
-      use: |-
-          boxB = new BBox<I>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          class BBox<in T> {}  // contravariance
-          let boxI: BBox<I> = new BBox<I>
-      use: |-
-          boxI = new BBox<B>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
           class BBox<in T> {  // contravariance
               meth(p: T) {
                   res = p
@@ -292,32 +151,6 @@ cases:
           arktest.assertEQ(res, b)
 
     # subtyping in interfaces, call context
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          class BBox<T> {}  // invariance
-          let boxI: BBox<I> = new BBox<I>
-      use: |-
-          ((p: BBox<J>) => {})(boxI)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          class BBox<T> {}  // invariance
-          let boxJ: BBox<J> = new BBox<J>
-      use: |-
-          ((p: BBox<I>) => {})(boxJ)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          class BBox<out T> {}  // covariance
-          let boxI: BBox<I> = new BBox<I>
-      use: |-
-          ((p: BBox<J>) => {})(boxI)
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {}
@@ -352,33 +185,7 @@ cases:
               arktest.assertEQ(res, j)
           })(boxI)
 
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          class BBox<in T> {}  // contravariance
-          let boxJ: BBox<J> = new BBox<J>
-      use: |-
-          ((p: BBox<I>) => {})(boxJ)
-      tags: 'compile-only, negative'
-
     # subtyping in interfaces, assignment
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          class BBox<T> {}  // invariance
-          let boxI: BBox<I> = new BBox<I>
-      use: |-
-          boxI = new BBox<J>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          class BBox<T> {}  // invariance
-          let boxJ: BBox<J> = new BBox<J>
-      use: |-
-          boxJ = new BBox<I>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {}
@@ -399,24 +206,6 @@ cases:
     - decl: |-
           interface I {}
           interface J extends I {}
-          class BBox<out T> {}  // covariance
-          let boxJ: BBox<J> = new BBox<J>
-      use: |-
-          boxJ = new BBox<I>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          class BBox<in T> {}  // contravariance
-          let boxI: BBox<I> = new BBox<I>
-      use: |-
-          boxI = new BBox<J>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
           class BBox<in T> {  // contravariance
               meth(p: T) {
                   res = p
@@ -431,27 +220,6 @@ cases:
           arktest.assertEQ(res, j)
 
     # subtyping in functions, call context
-    - decl: |-
-          class BBox<T> {} // invariance
-          let boxSup = new BBox<(p: string, q: number) => Object>
-      use: |-
-          ((p: BBox<() => string>) => {})(boxSup)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<T> {} // invariance
-          let boxSub = new BBox<() => string>
-      use: |-
-          ((p: BBox<(p: string, q: number) => Object>) => {})(boxSub)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<out T> {} // covariance
-          let boxSup = new BBox<(p: string, q: number) => Object>
-      use: |-
-          ((p: BBox<() => string>) => {})(boxSup)
-      tags: 'compile-only, negative'
-
     - decl: |-
           class BBox<out T> { // covariance
               readonly f: T
@@ -481,27 +249,7 @@ cases:
               arktest.assertEQ(res, fSub)
           })(boxSup)
 
-    - decl: |-
-          class BBox<in T> {} // contravariance
-          let boxSub = new BBox<() => string>
-      use: |-
-          ((p: BBox<(p: string, q: number) => Object>) => {})(boxSub)
-      tags: 'compile-only, negative'
-
     # subtyping in functions, assignment
-    - decl: |-
-          class BBox<T> {} // invariance
-          let boxSup = new BBox<(p: string, q: number) => Object>
-      use: |-
-          boxSup = new BBox<() => string>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<T> {} // invariance
-          let boxSub = new BBox<() => string>
-      use: |-
-          boxSub = new BBox<(p: string, q: number) => Object>
-      tags: 'compile-only, negative'
 
     - decl: |-
           class BBox<out T> { // covariance
@@ -518,20 +266,6 @@ cases:
           arktest.assertEQ(boxSup.f, fSub)
 
     - decl: |-
-          class BBox<out T> {} // covariance
-          let boxSub = new BBox<() => string>
-      use: |-
-          boxSub = new BBox<(p: string, q: number) => Object>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<in T> {} // contravariance
-          let boxSup = new BBox<(p: string, q: number) => Object>
-      use: |-
-          boxSup = new BBox<() => string>
-      tags: 'compile-only, negative'
-
-    - decl: |-
           class BBox<in T> { // contravariance
               meth(p: T) {
                   res = p
@@ -546,26 +280,6 @@ cases:
           arktest.assertEQ(res, fSub)
 
     # subtyping in unions, call context
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSup: BBox<string|number|boolean|null> = new BBox<string|number|boolean|null>
-      use: |-
-          ((p: BBox<string|boolean|null>) => {})(boxSup)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSub: BBox<string|boolean|null> = new BBox<string|boolean|null>
-      use: |-
-          ((p: BBox<string|number|boolean|null>) => {})(boxSub)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<out T> {}  // covariance
-          let boxSup: BBox<string|number|boolean|null> = new BBox<string|number|boolean|null>
-      use: |-
-          ((p: BBox<string|boolean|null>) => {})(boxSup)
-      tags: 'compile-only, negative'
 
     - decl: |-
           class BBox<out T> {  // covariance
@@ -596,27 +310,7 @@ cases:
               arktest.assertEQ(res, "A")
           })(boxSup)
 
-    - decl: |-
-          class BBox<in T> {}  // contravariance
-          let boxSub: BBox<string|boolean|null> = new BBox<string|boolean|null>
-      use: |-
-          ((p: BBox<string|number|boolean|null>) => {})(boxSub)
-      tags: 'compile-only, negative'
-
     # subtyping in unions, assignment
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSup: BBox<string|number|boolean|null> = new BBox<string|number|boolean|null>
-      use: |-
-          boxSup = new BBox<string|boolean|null>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSub: BBox<string|boolean|null> = new BBox<string|boolean|null>
-      use: |-
-          boxSub = new BBox<string|number|boolean|null>
-      tags: 'compile-only, negative'
 
     - decl: |-
           class BBox<out T> {  // covariance
@@ -633,20 +327,6 @@ cases:
           arktest.assertEQ(boxSup.f, "B")
 
     - decl: |-
-          class BBox<out T> {}  // covariance
-          let boxSub: BBox<string|boolean|null> = new BBox<string|boolean|null>
-      use: |-
-          boxSub = new BBox<string|number|boolean|null>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<in T> {}  // contravariance
-          let boxSup: BBox<string|number|boolean|null> = new BBox<string|number|boolean|null>
-      use: |-
-          boxSup = new BBox<string|boolean|null>
-      tags: 'compile-only, negative'
-
-    - decl: |-
           class BBox<in T> {  // contravariance
               meth(p: T) {
                   res = p
@@ -661,26 +341,6 @@ cases:
           arktest.assertEQ(res, "B")
 
     # subtyping in FixedArrays, call context
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSup: BBox<FixedArray<Object>> = new BBox<FixedArray<Object>>
-      use: |-
-          ((p: BBox<FixedArray<string>>) => {})(boxSup)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSub: BBox<FixedArray<string>> = new BBox<FixedArray<string>>
-      use: |-
-          ((p: BBox<FixedArray<Object>>) => {})(boxSub)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<out T> {}  // covariance
-          let boxSup: BBox<FixedArray<Object>> = new BBox<FixedArray<Object>>
-      use: |-
-          ((p: BBox<FixedArray<string>>) => {})(boxSup)
-      tags: 'compile-only, negative'
 
     - decl: |-
           class BBox<out T> {  // covariance
@@ -711,27 +371,7 @@ cases:
               arktest.assertEQ(res, sub)
           })(boxSup)
 
-    - decl: |-
-          class BBox<in T> {}  // contravariance
-          let boxSub: BBox<FixedArray<string>> = new BBox<FixedArray<string>>
-      use: |-
-          ((p: BBox<FixedArray<Object>>) => {})(boxSub)
-      tags: 'compile-only, negative'
-
     # subtyping in FixedArrays, assignment
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSup: BBox<FixedArray<Object>> = new BBox<FixedArray<Object>>
-      use: |-
-          boxSup = new BBox<FixedArray<string>>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSub: BBox<FixedArray<string>> = new BBox<FixedArray<string>>
-      use: |-
-          boxSub = new BBox<FixedArray<Object>>
-      tags: 'compile-only, negative'
 
     - decl: |-
           class BBox<out T> {  // covariance
@@ -748,20 +388,6 @@ cases:
           arktest.assertEQ(boxSup.f, sub)
 
     - decl: |-
-          class BBox<out T> {}  // covariance
-          let boxSub: BBox<FixedArray<string>> = new BBox<FixedArray<string>>
-      use: |-
-          boxSub = new BBox<FixedArray<Object>>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<in T> {}  // contravariance
-          let boxSup: BBox<FixedArray<Object>> = new BBox<FixedArray<Object>>
-      use: |-
-          boxSup = new BBox<FixedArray<string>>
-      tags: 'compile-only, negative'
-
-    - decl: |-
           class BBox<in T> {  // contravariance
               meth(p: T) {
                   res = p
@@ -776,26 +402,6 @@ cases:
           arktest.assertEQ(res, sub)
 
     # subtyping in literals, call context
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSup: BBox<string> = new BBox<string>
-      use: |-
-          ((p: BBox<"ABC">) => {})(boxSup)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSub: BBox<"ABC"> = new BBox<"ABC">
-      use: |-
-          ((p: BBox<string>) => {})(boxSub)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<out T> {}  // covariance
-          let boxSup: BBox<string> = new BBox<string>
-      use: |-
-          ((p: BBox<"ABC">) => {})(boxSup)
-      tags: 'compile-only, negative'
 
     - decl: |-
           class BBox<out T> {  // covariance
@@ -824,27 +430,7 @@ cases:
               arktest.assertEQ(res, "ABC")
           })(boxSup)
 
-    - decl: |-
-          class BBox<in T> {}  // contravariance
-          let boxSub: BBox<"ABC"> = new BBox<"ABC">
-      use: |-
-          ((p: BBox<string>) => {})(boxSub)
-      tags: 'compile-only, negative'
-
     # subtyping in literals, assignment
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSup: BBox<string> = new BBox<string>
-      use: |-
-          boxSup = new BBox<"ABC">
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<T> {}  // invariance
-          let boxSub: BBox<"ABC"> = new BBox<"ABC">
-      use: |-
-          boxSub = new BBox<string>
-      tags: 'compile-only, negative'
 
     - decl: |-
           class BBox<out T> {  // covariance
@@ -857,20 +443,6 @@ cases:
       use: |-
           boxSup = new BBox<"ABC">("ABC")
           arktest.assertEQ(boxSup.f, "ABC")
-
-    - decl: |-
-          class BBox<out T> {}  // covariance
-          let boxSub: BBox<"ABC"> = new BBox<"ABC">
-      use: |-
-          boxSub = new BBox<string>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class BBox<in T> {}  // contravariance
-          let boxSup: BBox<string> = new BBox<string>
-      use: |-
-          boxSup = new BBox<"ABC">
-      tags: 'compile-only, negative'
 
     - decl: |-
           class BBox<in T> {  // contravariance

@@ -17,9 +17,9 @@ cases:
     type2: 'long'
     val1: '1'
     val2: '1'
-    tags: [compile-only, negative]
+
   - type1: 'int'
     type2: 'int | null'
     val1: '1'
     val2: '1'
-    tags: [compile-only, negative]
+

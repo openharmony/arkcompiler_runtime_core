@@ -20,7 +20,6 @@ cases:
       class C implements I {
         readonly f: int = 1
       }
-    tags: compile-only
     doc: use readonly parameter form
 
   - decl: |-
@@ -30,7 +29,6 @@ cases:
       class C implements I {
         f: int = 1
       }
-    tags: compile-only
     doc: extend readonly parameter to writable
 
   - decl: |-
@@ -40,18 +38,7 @@ cases:
       class C implements I {
         get f(): int { return 1 }
       }
-    tags: compile-only
     doc: utilize parameter by implementing get method
-
-  - decl: |-
-      interface I {
-        readonly f: int
-      }
-      class C implements I {
-        set f(i: int) {}
-      }
-    tags: compile-only, negative
-    doc: utilize readonly parameter by implementing set method is not allowed
 
   - decl: |-
       interface I {
@@ -61,23 +48,6 @@ cases:
         get f(): int { return 1 }
         set f(i: int) {}
       }
-    tags: compile-only
     doc: extend readonly parameter to writable by implementing getter and setter
 
-  - decl: |-
-      interface I {
-        readonly f: int
-      }
-      class C implements I {
-        f: boolean = false
-      }
-    tags: compile-only, negative
-    doc: incorrect field type
 
-  - decl: |-
-      interface I {
-        readonly f: int
-      }
-      class C implements I {}
-    tags: compile-only, negative
-    doc: required property is not initialized

@@ -17,7 +17,7 @@
 
 /*---
 desc: The values of intersection type I & A are all values that belong to both I and A.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 interface I {

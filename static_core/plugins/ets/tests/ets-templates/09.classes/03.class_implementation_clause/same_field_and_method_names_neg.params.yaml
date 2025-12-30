@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,11 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
+--- # List of wildcard type arguments
+class_types:
+    - "abstract"
+    - "final"
+    - ""
+
 cases:
-  - { assign: foo, call: 1, res: 1 }
-  - { assign: bars, call: 1, res: -1, tags: "compile-only, negative" }
-  - { assign: bars, call: "1, \"some str\"", res: -1, tags: "compile-only, negative" }
-  - { assign: barf, call: 1, res: -1, tags: "compile-only, negative" }
-  - { assign: barl, call: 1, res: -1, tags: "compile-only, negative" }
-  - { assign: barretstr, call: 1, res: "\"str\"", tags: "compile-only, negative" }
+    - doc: "class method and interface field"
+      interface: "foo: int"
+      class: "foo(): int { return 1;}"
+
+    - doc: "class field and interface method"
+      interface: "foo(): int"
+      class: "foo: int"
+

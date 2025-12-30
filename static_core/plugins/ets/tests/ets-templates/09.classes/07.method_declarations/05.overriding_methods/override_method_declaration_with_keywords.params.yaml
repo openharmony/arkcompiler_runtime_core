@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,22 +13,6 @@
 
 --- # List of valid method modifiers
 cases:
-  - modifier: "abstract"
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label Error TypeError: Invalid method modifier(s): an abstract method can't have private, override, static, final or native modifier. */
-    function: |-
-      /* @@ label */override abstract foo(): int;
-
-  - modifier: "override"
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label Error SyntaxError: Duplicated modifier is not allowed. */
-    function: |-
-      override /* @@ label */override foo(): int {
-        return 5;
-      }
-
   - modifier: "final"
     function: |-
       override final foo(): int {
@@ -38,15 +22,6 @@ cases:
       function main(): void {
         let a: A = (() => new B)()
         arktest.assertEQ(a.foo(), 5)
-      }
-
-  - modifier: "static"
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label Error TypeError: Invalid method modifier(s): a static method can't have abstract, final or override modifier. */
-    function: |-
-      /* @@ label */override static foo(): int {
-        return 5;
       }
 
   - modifier: "native"
@@ -59,14 +34,4 @@ cases:
           return (e instanceof LinkerUnresolvedMethodError)
         }
         arktest.expectThrow(() => { a.foo() }, checkException)
-      }
-
-  - modifier: "async"
-    tags: "compile-only, negative"
-    expected_error: |-
-      /* @@@ label Error TypeError: foo(): Promise<Int> in B cannot override foo(): Int in A because overriding return type is not compatible with the other return type. */
-      /* @@@ label Error TypeError: Method foo(): Promise<Int> in B not overriding any method */
-    function: |-
-      override async foo/* @@ label */(): Promise<int> {
-        return 5;
       }

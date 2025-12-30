@@ -32,15 +32,3 @@ cases:
     use: |-
       new Derived().get_protected_foo(new Number());
       arktest.assertEQ(res, 11);
-
-  - doc: Protected member can be overridden by the protected or public one.
-    tags: negative, compile-only
-    decl: |-
-      class Derived extends Base {
-        private override protected_foo/* @@ label */(i: Number) { res = 11; }
-      }
-    use: ""
-    expected_error: |-
-      /* @@@ label Error TypeError: protected_foo(i: Double): void in Derived cannot override 
-      protected_foo(i: Double): void in Base because overridden method has weaker access privilege. */
-      /* @@@ label Error Method protected_foo(i: Double): void in Derived not overriding any method */

@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,19 +13,7 @@
 
 ---
 cases:
- - run: |-
-      let a: A = new A(1);
-      let b: B = new B(1, "some str");
-      let c: Object;
-      c = a;
-      c = b;
-
- - tags: negative, compile-only
-   run: |-
-      let b: B = new B(1, "some str");
-      let a: A = b;
-
- - tags: negative, compile-only
-   run: |-
-      let a: A = new A(1);
-      let b: B = a;
+  - { import: '* as FM',          list: 'FM.foo08, Math.abs', call: 'foo(-6)',           res: 6}
+  - { import: '* as FM',          list: 'FM.foo08, Math.abs', call: 'foo("Hi")',         res: '"Hi"'}
+  - { import: '{ foo10 }',        list: 'Math.abs, foo10',    call: 'foo(-6.3)',         res: 6}
+  - { import: '{ foo10 }',        list: 'Math.abs, foo10',    call: 'foo([-6, 6.3])',    res: 10}

@@ -18,7 +18,7 @@ limitations under the License.
 /*---
 desc: Overload function from imported functions
 files: [./modules/function_export_all.ets]
-tags: {{c.tags}}
+tags: []
 ---*/
 
 import {{c.import}} from "./modules/function_export_all.ets";

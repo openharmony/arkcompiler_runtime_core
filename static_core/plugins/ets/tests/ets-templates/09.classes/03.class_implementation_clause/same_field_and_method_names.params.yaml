@@ -18,22 +18,11 @@ class_types:
     - ""
 
 cases:
-    - doc: "class method and interface field"
-      interface: "foo: int"
-      class: "foo(): int { return 1;}"
-      tags: "compile-only, negative"
-
-    - doc: "class field and interface method"
-      interface: "foo(): int"
-      class: "foo: int"
-      tags: "compile-only, negative"
 
     - doc: "class static method and interface non-static field"
       interface: "foo: int"
       class: "static foo(): int { return 1;}; foo = 1"
-      tags: "compile-only"
 
     - doc: "class static field and interface non-static method"
       interface: "foo(): int"
       class: "static foo: int; foo() { return 1;}"
-      tags: "compile-only"

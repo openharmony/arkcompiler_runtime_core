@@ -17,33 +17,6 @@ cases:
     - decl: |-
           class A {}
           class B extends A {}
-          interface Holder<T> {}  // invariance
-          let holderA: Holder<A> = {} as Holder<A>
-      use: |-
-          ((p: Holder<B>) => {})(holderA)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          interface Holder<T> {}  // invariance
-          let holderB: Holder<B> = {} as Holder<B>
-      use: |-
-          ((p: Holder<A>) => {})(holderB)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          interface Holder<out T> {}  // covariance
-          let holderA: Holder<A> = {} as Holder<A>
-      use: |-
-          ((p: Holder<B>) => {})(holderA)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
           interface Holder<out T> {  // covariance
               readonly f: T
           }
@@ -74,34 +47,7 @@ cases:
               arktest.assertEQ(res, b)
           })(holderA)
 
-    - decl: |-
-          class A {}
-          class B extends A {}
-          interface Holder<in T> {}  // contravariance
-          let holderB: Holder<B> = {} as Holder<B>
-      use: |-
-          ((p: Holder<A>) => {})(holderB)
-      tags: 'compile-only, negative'
-
     # subtyping in classes, assignment
-    - decl: |-
-          class A {}
-          class B extends A {}
-          interface Holder<T> {}  // invariance
-          let holderA: Holder<A> = {} as Holder<A>
-      use: |-
-          holderA = {} as Holder<B>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          interface Holder<T> {}  // invariance
-          let holderB: Holder<B> = {} as Holder<B>
-      use: |-
-          holderB = {} as Holder<A>
-      tags: 'compile-only, negative'
-
     - decl: |-
           class A {}
           class B extends A {}
@@ -114,24 +60,6 @@ cases:
       use: |-
           holderA = { f: b } as Holder<B>
           arktest.assertEQ(holderA.f, b)
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          interface Holder<out T> {}  // covariance
-          let holderB: Holder<B> = {} as Holder<B>
-      use: |-
-          holderB = {} as Holder<A>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          interface Holder<in T> {}  // contravariance
-          let holderA: Holder<A> = {} as Holder<A>
-      use: |-
-          holderA = {} as Holder<B>
-      tags: 'compile-only, negative'
 
     - decl: |-
           class A {}
@@ -153,32 +81,6 @@ cases:
           arktest.assertEQ(res, b)
 
     # subtyping in classes/interfaces, call context
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          interface Holder<T> {}  // invariance
-          let holderI: Holder<I> = {} as Holder<I>
-      use: |-
-          ((p: Holder<B>) => {})(holderI)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          interface Holder<T> {}  // invariance
-          let holderB: Holder<B> = {} as Holder<B>
-      use: |-
-          ((p: Holder<I>) => {})(holderB)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          interface Holder<out T> {}  // covariance
-          let holderI: Holder<I> = {} as Holder<I>
-      use: |-
-          ((p: Holder<B>) => {})(holderI)
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {}
@@ -213,33 +115,7 @@ cases:
               arktest.assertEQ(res, b)
           })(holderI)
 
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          interface Holder<in T> {}  // contravariance
-          let holderB: Holder<B> = {} as Holder<B>
-      use: |-
-          ((p: Holder<I>) => {})(holderB)
-      tags: 'compile-only, negative'
-
     # subtyping in classes/interfaces, assignment
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          interface Holder<T> {}  // invariance
-          let holderI: Holder<I> = {} as Holder<I>
-      use: |-
-          holderI = {} as Holder<B>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          interface Holder<T> {}  // invariance
-          let holderB: Holder<B> = {} as Holder<B>
-      use: |-
-          holderB = {} as Holder<I>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {}
@@ -253,24 +129,6 @@ cases:
       use: |-
           holderI = { f: b } as Holder<B>
           arktest.assertEQ(holderI.f, b)
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          interface Holder<out T> {}  // covariance
-          let holderB: Holder<B> = {} as Holder<B>
-      use: |-
-          holderB = {} as Holder<I>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          class B implements I {}
-          interface Holder<in T> {}  // contravariance
-          let holderI: Holder<I> = {} as Holder<I>
-      use: |-
-          holderI = {} as Holder<B>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {}
@@ -292,33 +150,6 @@ cases:
           arktest.assertEQ(res, b)
 
     # subtyping in interfaces, call context
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          interface Holder<T> {}  // invariance
-          let holderI: Holder<I> = {} as Holder<I>
-      use: |-
-          ((p: Holder<J>) => {})(holderI)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          interface Holder<T> {}  // invariance
-          let holderJ: Holder<J> = {} as Holder<J>
-      use: |-
-          ((p: Holder<I>) => {})(holderJ)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          interface Holder<out T> {}  // covariance
-          let holderI: Holder<I> = {} as Holder<I>
-      use: |-
-          ((p: Holder<J>) => {})(holderI)
-      tags: 'compile-only, negative'
-
     - decl: |-
           interface I {}
           interface J extends I {}
@@ -352,33 +183,7 @@ cases:
               arktest.assertEQ(res, j)
           })(holderI)
 
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          interface Holder<in T> {}  // contravariance
-          let holderJ: Holder<J> = {} as Holder<J>
-      use: |-
-          ((p: Holder<I>) => {})(holderJ)
-      tags: 'compile-only, negative'
-
     # subtyping in interfaces, assignment
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          interface Holder<T> {}  // invariance
-          let holderI: Holder<I> = {} as Holder<I>
-      use: |-
-          holderI = {} as Holder<J>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          interface Holder<T> {}  // invariance
-          let holderJ: Holder<J> = {} as Holder<J>
-      use: |-
-          holderJ = {} as Holder<I>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {}
@@ -392,24 +197,6 @@ cases:
       use: |-
           holderI = { f: j } as Holder<J>
           arktest.assertEQ(holderI.f, j)
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          interface Holder<out T> {}  // covariance
-          let holderJ: Holder<J> = {} as Holder<J>
-      use: |-
-          holderJ = {} as Holder<I>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface I {}
-          interface J extends I {}
-          interface Holder<in T> {}  // contravariance
-          let holderI: Holder<I> = {} as Holder<I>
-      use: |-
-          holderI = {} as Holder<J>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface I {}
@@ -431,27 +218,6 @@ cases:
           arktest.assertEQ(res, j)
 
     # subtyping in functions, call context
-    - decl: |-
-          interface Holder<T> {} // invariance
-          let holderSuper = {} as Holder<(p: string, q: number) => Object>
-      use: |-
-          ((p: Holder<() => string>) => {})(holderSuper)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<T> {} // invariance
-          let holderSub = {} as Holder<() => string>
-      use: |-
-          ((p: Holder<(p: string, q: number) => Object>) => {})(holderSub)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<out T> {} // covariance
-          let holderSuper = {} as Holder<(p: string, q: number) => Object>
-      use: |-
-          ((p: Holder<() => string>) => {})(holderSuper)
-      tags: 'compile-only, negative'
-
     - decl: |-
           interface Holder<out T> { // covariance
               readonly f: T
@@ -481,27 +247,7 @@ cases:
               arktest.assertEQ(res, fSub)
           })(holderSuper)
 
-    - decl: |-
-          interface Holder<in T> {} // contravariance
-          let holderSub = {} as Holder<() => string>
-      use: |-
-          ((p: Holder<(p: string, q: number) => Object>) => {})(holderSub)
-      tags: 'compile-only, negative'
-
     # subtyping in functions, assignment
-    - decl: |-
-          interface Holder<T> {} // invariance
-          let holderSuper = {} as Holder<(p: string, q: number) => Object>
-      use: |-
-          holderSuper = {} as Holder<() => string>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<T> {} // invariance
-          let holderSub = {} as Holder<() => string>
-      use: |-
-          holderSub = {} as Holder<(p: string, q: number) => Object>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<out T> { // covariance
@@ -513,20 +259,6 @@ cases:
       use: |-
           holderSuper = { f: fSub } as Holder<() => string>
           arktest.assertEQ(holderSuper.f, fSub)
-
-    - decl: |-
-          interface Holder<out T> {} // covariance
-          let holderSub = {} as Holder<() => string>
-      use: |-
-          holderSub = {} as Holder<(p: string, q: number) => Object>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<in T> {} // contravariance
-          let holderSuper = {} as Holder<(p: string, q: number) => Object>
-      use: |-
-          holderSuper = {} as Holder<() => string>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<in T> { // contravariance
@@ -546,26 +278,6 @@ cases:
           arktest.assertEQ(res, fSub)
 
     # subtyping in unions, call context
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSuper: Holder<string|number|boolean|null> = {} as Holder<string|number|boolean|null>
-      use: |-
-          ((p: Holder<string|boolean|null>) => {})(holderSuper)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSub: Holder<string|boolean|null> = {} as Holder<string|boolean|null>
-      use: |-
-          ((p: Holder<string|number|boolean|null>) => {})(holderSub)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<out T> {}  // covariance
-          let holderSuper: Holder<string|number|boolean|null> = {} as Holder<string|number|boolean|null>
-      use: |-
-          ((p: Holder<string|boolean|null>) => {})(holderSuper)
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<out T> {  // covariance
@@ -596,27 +308,7 @@ cases:
               arktest.assertEQ(res, "A")
           })(holderSuper)
 
-    - decl: |-
-          interface Holder<in T> {}  // contravariance
-          let holderSub: Holder<string|boolean|null> = {} as Holder<string|boolean|null>
-      use: |-
-          ((p: Holder<string|number|boolean|null>) => {})(holderSub)
-      tags: 'compile-only, negative'
-
     # subtyping in unions, assignment
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSuper: Holder<string|number|boolean|null> = {} as Holder<string|number|boolean|null>
-      use: |-
-          holderSuper = {} as Holder<string|boolean|null>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSub: Holder<string|boolean|null> = {} as Holder<string|boolean|null>
-      use: |-
-          holderSub = {} as Holder<string|number|boolean|null>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<out T> {  // covariance
@@ -628,20 +320,6 @@ cases:
       use: |-
           holderSuper = { f: sub } as Holder<string|boolean|null>
           arktest.assertEQ(holderSuper.f, "B")
-
-    - decl: |-
-          interface Holder<out T> {}  // covariance
-          let holderSub: Holder<string|boolean|null> = {} as Holder<string|boolean|null>
-      use: |-
-          holderSub = {} as Holder<string|number|boolean|null>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<in T> {}  // contravariance
-          let holderSuper: Holder<string|number|boolean|null> = {} as Holder<string|number|boolean|null>
-      use: |-
-          holderSuper = {} as Holder<string|boolean|null>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<in T> {  // contravariance
@@ -661,27 +339,6 @@ cases:
           arktest.assertEQ(res, "B")
 
     # subtyping in FixedArrays, call context
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSuper: Holder<FixedArray<Object>> = {} as Holder<FixedArray<Object>>
-      use: |-
-          ((p: Holder<FixedArray<string>>) => {})(holderSuper)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSub: Holder<FixedArray<string>> = {} as Holder<FixedArray<string>>
-      use: |-
-          ((p: Holder<FixedArray<Object>>) => {})(holderSub)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<out T> {}  // covariance
-          let holderSuper: Holder<FixedArray<Object>> = {} as Holder<FixedArray<Object>>
-      use: |-
-          ((p: Holder<FixedArray<string>>) => {})(holderSuper)
-      tags: 'compile-only, negative'
-
     - decl: |-
           interface Holder<out T> {  // covariance
               readonly f: T
@@ -711,27 +368,7 @@ cases:
               arktest.assertEQ(res, sub)
           })(holderSuper)
 
-    - decl: |-
-          interface Holder<in T> {}  // contravariance
-          let holderSub: Holder<FixedArray<string>> = {} as Holder<FixedArray<string>>
-      use: |-
-          ((p: Holder<FixedArray<Object>>) => {})(holderSub)
-      tags: 'compile-only, negative'
-
     # subtyping in FixedArrays, assignment
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSuper: Holder<FixedArray<Object>> = {} as Holder<FixedArray<Object>>
-      use: |-
-          holderSuper = {} as Holder<FixedArray<string>>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSub: Holder<FixedArray<string>> = {} as Holder<FixedArray<string>>
-      use: |-
-          holderSub = {} as Holder<FixedArray<Object>>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<out T> {  // covariance
@@ -743,20 +380,6 @@ cases:
       use: |-
           holderSuper = { f: sub } as Holder<FixedArray<string>>
           arktest.assertEQ(holderSuper.f, sub)
-
-    - decl: |-
-          interface Holder<out T> {}  // covariance
-          let holderSub: Holder<FixedArray<string>> = {} as Holder<FixedArray<string>>
-      use: |-
-          holderSub = {} as Holder<FixedArray<Object>>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<in T> {}  // contravariance
-          let holderSuper: Holder<FixedArray<Object>> = {} as Holder<FixedArray<Object>>
-      use: |-
-          holderSuper = {} as Holder<FixedArray<string>>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<in T> {  // contravariance
@@ -776,26 +399,6 @@ cases:
           arktest.assertEQ(res, sub)
 
     # subtyping in literals, call context
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSuper: Holder<string> = {} as Holder<string>
-      use: |-
-          ((p: Holder<"ABC">) => {})(holderSuper)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSub: Holder<"ABC"> = {} as Holder<"ABC">
-      use: |-
-          ((p: Holder<string>) => {})(holderSub)
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<out T> {}  // covariance
-          let holderSuper: Holder<string> = {} as Holder<string>
-      use: |-
-          ((p: Holder<"ABC">) => {})(holderSuper)
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<out T> {  // covariance
@@ -824,27 +427,7 @@ cases:
               arktest.assertEQ(res, "ABC")
           })(holderSuper)
 
-    - decl: |-
-          interface Holder<in T> {}  // contravariance
-          let holderSub: Holder<"ABC"> = {} as Holder<"ABC">
-      use: |-
-          ((p: Holder<string>) => {})(holderSub)
-      tags: 'compile-only, negative'
-
     # subtyping in literals, assignment
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSuper: Holder<string> = {} as Holder<string>
-      use: |-
-          holderSuper = {} as Holder<"ABC">
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<T> {}  // invariance
-          let holderSub: Holder<"ABC"> = {} as Holder<"ABC">
-      use: |-
-          holderSub = {} as Holder<string>
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<out T> {  // covariance
@@ -854,20 +437,6 @@ cases:
       use: |-
           holderSuper = { f: "ABC" } as Holder<"ABC">
           arktest.assertEQ(holderSuper.f, "ABC")
-
-    - decl: |-
-          interface Holder<out T> {}  // covariance
-          let holderSub: Holder<"ABC"> = {} as Holder<"ABC">
-      use: |-
-          holderSub = {} as Holder<string>
-      tags: 'compile-only, negative'
-
-    - decl: |-
-          interface Holder<in T> {}  // contravariance
-          let holderSuper: Holder<string> = {} as Holder<string>
-      use: |-
-          holderSuper = {} as Holder<"ABC">
-      tags: 'compile-only, negative'
 
     - decl: |-
           interface Holder<in T> {  // contravariance

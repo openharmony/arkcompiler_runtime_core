@@ -13,26 +13,6 @@
 
 ---
 cases:
-  # inheriting and overriding done right: covariance for the return type
-  # and contravariance for parameters
-  - decl: |-
-      class Base {
-          get field(): Base { return new Base }
-          set field(a_field: Derived) {}
-      }
-
-      class Derived extends Base {
-          override get field(): Derived { return new Derived }
-          override set field(a_field: Base) {}
-      }
-    
-      function foo (base: Base) {
-          base.field = new Derived // setter is called
-          let b: Base = base.field // getter is called
-          arktest.assertTrue(base.field instanceof Derived)
-          arktest.assertTrue(b instanceof Base)
-      }
-    use: 'foo (new Derived)'
 
   # broken covariance for the return type
   - decl: |-
@@ -45,7 +25,7 @@ cases:
           override get field(): Base { return new Base }
           override set field(a_field: Base) {}
       }
-    tags: 'compile-only, negative'
+
 
   # broken  contravariance for parameters
   - decl: |-
@@ -58,7 +38,7 @@ cases:
           override get field(): Derived { return new Derived }
           override set field(a_field: Derived) {}
       }
-    tags: 'compile-only, negative'
+
 
   # broken both covariance for the return type and contravariance for parameters
   - decl: |-
@@ -71,4 +51,4 @@ cases:
           override get field(): Base { return new Base }
           override set field(a_field: Derived) {}
       }
-    tags: 'compile-only, negative'
+

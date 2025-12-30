@@ -29,13 +29,7 @@ cases:
           arktest.assertEQ( new B(42).foo, 44 )
 
     # protected access modifier
-    - files: './dir_prot_1/file_A.ets'
-      tags: 'negative, compile-only'
-      decl: |-
-          import { A } from './dir_prot_1/file_A';
-      use: |-
-          // separate module, negative case with protected field
-          arktest.assertEQ( new A(42).fld, 43 )
+
 
     - files: './dir_prot_2/file_B.ets'
       decl: |-
@@ -44,19 +38,4 @@ cases:
           // separate module, positive case with protected field, from subclass
           arktest.assertEQ( new B(42).foo, 44 )
 
-    # private access modifier
-    - files: './dir_priv_1/file_A.ets'
-      tags: 'negative, compile-only'
-      decl: |-
-          import { A } from './dir_priv_1/file_A';
-      use: |-
-          // separate module, negative case with private field
-          arktest.assertEQ( new A(42).fld, 43 )
 
-    - files: './dir_priv_2/file_B.ets'
-      tags: 'negative, compile-only'
-      decl: |-
-          import { B } from './dir_priv_2/file_B';
-      use: |-
-          // separate module, negative case with private field, from subclass
-          arktest.assertEQ( new B(42).foo, 44 )

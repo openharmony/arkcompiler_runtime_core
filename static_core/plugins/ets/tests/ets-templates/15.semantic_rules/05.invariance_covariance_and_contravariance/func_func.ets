@@ -18,7 +18,7 @@
 desc: >-
     Variance is how subtyping between types relates to subtyping between derived types.
     Functions are covariant on return type and contravariant on parameter types.
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 class A {}

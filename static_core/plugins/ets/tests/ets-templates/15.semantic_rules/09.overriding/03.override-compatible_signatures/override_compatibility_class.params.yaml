@@ -76,30 +76,6 @@ cases:
       doc: Class/Interface type
       params: override-compatible parameter (contravariance)
 
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: Base): void {
-              res = 1;
-          }
-      derived: |-
-          override foo(i: Derived): void {
-              res = 2;
-          }
-      doc: Class/Interface type
-      params: override-incompatible parameter
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(i: Base): void {
-              res = 1;
-          }
-      derived: |-
-          foo(i: Derived): void {  // overriding assumed
-              res = 2;
-          }
-      doc: Class/Interface type
-      params: override-incompatible parameter
-
     # CLASS, METHOD RETURN TYPE
     - base: |-
           foo(): Base {
@@ -166,31 +142,3 @@ cases:
           arktest.assertEQ(res, 2)
       doc: Class/Interface type
       params: override-compatible return type (covariance)
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): Derived {
-              res = 1;
-              return new Derived();
-          }
-      derived: |-
-          override foo(): Base {
-              res = 2;
-              return new Base();
-          }
-      doc: Class/Interface type
-      params: override-incompatible return type
-
-    - tags: 'negative, compile-only'
-      base: |-
-          foo(): Derived {
-              res = 1;
-              return new Derived();
-          }
-      derived: |-
-          foo(): Base {
-              res = 2;
-              return new Base();
-          }
-      doc: Class/Interface type
-      params: override-incompatible return type

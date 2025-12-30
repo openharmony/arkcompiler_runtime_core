@@ -21,7 +21,7 @@ assert: >-
     If the signature of an overridden method contains parameters with default values (see Optional Parameters),
     then the overriding method always uses the default parameter values of the overridden method.
     A compile-time error occurs if a parameter in the overriding method has a default value
-tags: [{{c.tags}}]
+tags: []
 ---*/
 
 class A {
@@ -40,6 +40,5 @@ function main() {
   {{c.main|indent}}
 }
 
-{{c.expected_error}}
 
 {% endfor %}

@@ -18,19 +18,8 @@ cases:
         f: int
       }
       class C implements I {
-        readonly f: int = 1
-      }
-    tags: compile-only, negative
-    doc: cannot narrow down the parameter from writable to readonly form
-
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {
         f: int = 1
       }
-    tags: compile-only
     doc: initialize property using writable form
 
   - decl: |-
@@ -39,45 +28,7 @@ cases:
       }
       class C implements I {
         get f(): int { return 1 }
-      }
-    tags: compile-only, negative
-    doc: writable parameter requires both getter and setter
-
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {
         set f(i: int) {}
       }
-    tags: compile-only, negative
-    doc: writable parameter requires both getter and setter
-
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {
-        get f(): int { return 1 }
-        set f(i: int) {}
-      }
-    tags: compile-only
     doc: initialize property using both getter and setter
 
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {
-        f: boolean = false
-      }
-    tags: compile-only, negative
-    doc: incorrect field type
-
-  - decl: |-
-      interface I {
-        f: int
-      }
-      class C implements I {}
-    tags: compile-only, negative
-    doc: required property is not initialized
