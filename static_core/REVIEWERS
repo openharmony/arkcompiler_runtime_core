@@ -61,7 +61,7 @@ static_core/static_linker/            @nazarovkonstantin ^igelhaus @oatuwwutao	^
 static_core/tests/                    @Prof
 static_core/tests/cts-*               @igelhaus
 static_core/tests/irtoc-interpreter-* @mbolshov ^igelhaus @schernykh
-static_core/tests/vm-benchmarks       @ignatenkooleg @Prof @mr_aramis @giteeman46 ^asidorov ^dingding5
+static_core/tests/vm-benchmarks       @ignatenkooleg @Prof @michaelfrost @giteeman46 ^asidorov ^dingding5
 static_core/verification/             @slynkodenis @groshevmaksim ^igelhaus @oatuwwutao ^seeuiceland
 static_core/compiler/aot/             @asidorov @Prof ^chernykhsergey @dingding5 @sukhikhalexander
 static_core/compiler/code_generator/  @asidorov @Prof ^chernykhsergey @dingding5

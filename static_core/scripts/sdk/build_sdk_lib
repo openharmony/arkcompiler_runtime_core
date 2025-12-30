@@ -187,6 +187,8 @@ function ohos_arm64() {
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_ETS_INTEROP_JS=ON \
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
+        -DPANDA_WITH_SAFEPOINT_CHECKER=${PANDA_WITH_SAFEPOINT_CHECKER} \
+        -DPANDA_TRACK_INTERNAL_ALLOCATIONS=${PANDA_TRACK_INTERNAL_ALLOCATIONS} \
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
@@ -334,6 +336,11 @@ function print_help() {
                             Path to fastverify llvm prebuilts for ohos (aarch64)
 
     --panda_build_llvm_bin  Run building LLVM-binaries
+
+    --safepoint_checker_build Enable intrinsic timing data collection for ohos (aarch64)
+
+    --panda_track_internal_allocations
+                            Enable internal memory profiling statistics for ohos (aarch64)
     "
 
     echo "$HELP_MESSAGE"
@@ -485,6 +492,14 @@ function parse_options() {
             shift;;
         --panda_build_llvm_bin)
             PANDA_BUILD_LLVM_BINARIES="ON"
+            shift
+            ;;
+        --safepoint_checker_build)
+            PANDA_WITH_SAFEPOINT_CHECKER="ON"
+            shift
+            ;;
+        --panda_track_internal_allocations)
+            PANDA_TRACK_INTERNAL_ALLOCATIONS=1
             shift
             ;;
         *)
