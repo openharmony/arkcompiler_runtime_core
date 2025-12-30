@@ -28,17 +28,6 @@ cases:
           arktest.assertEQ(A.goo(), 3)
         }
 
-  - doc: Compile-time error as function has already been defined
-    tags: compile-only, negative
-    decl: |-
-        namespace A {
-          export function foo(): int { return 1 }
-          export function bar(): int { return 2 }
-        }
-        namespace A {
-          export function foo(): int { return (bar()+1) }
-        }
-
   - doc: Qualified namespace name.
     decl: |-
         namespace A {
@@ -53,16 +42,4 @@ cases:
         }
         function main() {
           arktest.assertEQ(A.B.foo(), 7)
-        }
-
-  - doc: A namespace name can be a qualified name. Still cannot access to non-exported namespace field.
-    tags: compile-only, negative
-    decl: |-
-        namespace A {
-          export namespace B {
-            let i: int = 7
-          }
-        }
-        function main() {
-          A.B.i = 8
         }

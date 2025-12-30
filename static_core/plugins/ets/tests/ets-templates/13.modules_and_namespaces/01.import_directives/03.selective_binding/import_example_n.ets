@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
+
 /*---
-desc: Method signature of the same name is compatible.
-tags: [compile-only]
+desc: >-
+      If an identifier denotes an overload alias (see Function Overload Declarations),
+      then all its accessible overloaded functions, either imported or not, are considered
+      in the process of Overload Resolution for Overload Declarations for call validity.
+      {{c.doc}}
+tags: [negative,compile-only]
+files:
+- ./modules/example.ets
 ---*/
 
-interface Parent1 {
-  greet(message: string): void;
+import foo from "modules/example.ets"
+
+function main() {
+{{c.use|indent}}
 }
 
-interface Parent2 {
-  greet(message: number): void;
-}
-
-interface Child extends Parent1, Parent2 {
-  greet(message: string | number): void;
-}
-
-class ChildClass implements Child {
-  greet(message: string | number): void {}
-}
+{% endfor %}

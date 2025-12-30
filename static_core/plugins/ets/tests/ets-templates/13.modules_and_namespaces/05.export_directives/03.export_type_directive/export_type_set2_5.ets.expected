@@ -1,3 +1,4 @@
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,11 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
-cases:
-  - { type: byte,   value: 16,     expected: 16    }
-  - { type: short,  value: 300,    expected: 300   }
-  - { type: int,    value: 3000,   expected: 3000  }
-  - { type: long,   value: 50000,  expected: 50000 }
-  - { type: float,  value: 120.2f, expected: 120.2f }
-  - { type: number, value: 5050.9, expected: 5050.9}
+#
+Warning W0000: Duplicated export aliases for 'NUM'.
+Warning W125428: 'NUM' has already imported

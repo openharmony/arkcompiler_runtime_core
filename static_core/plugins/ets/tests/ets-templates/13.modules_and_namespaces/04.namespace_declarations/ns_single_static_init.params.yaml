@@ -13,35 +13,6 @@
 
 ---
 cases:
-  - tags: compile-only, negative
-    decl: |-
-        namespace X {
-          static {}
-        }
-        namespace X {
-          static {}
-        }
-
-  - tags: compile-only, negative
-    decl: |-
-        namespace A.B {
-          static {}
-        }
-        namespace A.B {
-          static {}
-        }
-
-  - tags: compile-only, negative
-    decl: |-
-        namespace A {
-          namespace B {
-            static {}
-          }
-        }
-        namespace A.B {
-          static {}
-        }
-
   - doc: Qualified namespace name used.
     decl: |-
         namespace A {

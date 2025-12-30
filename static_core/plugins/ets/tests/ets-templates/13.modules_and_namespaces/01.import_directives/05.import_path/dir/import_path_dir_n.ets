@@ -13,23 +13,20 @@
  * limitations under the License.
  */
 
+{% for stmt in import_stmts %}
+
 /*---
-desc: Method signature of the same name is compatible.
-tags: [compile-only]
+desc: >-
+    If the import path refers to a folder, then the way to handle the case is determined by the actual compiler.
+    If the compiler cannot locate a module source definitely, then a compile-time error occurs.
+    {{stmt.doc}}
+tags: [negative, compile-only]
+files:
+    - ./module_a.ets
+    - ./module_a/module_a.ets
+    - ./module_b/module_b.ets
 ---*/
 
-interface Parent1 {
-  greet(message: string): void;
-}
+{{stmt.import}}
 
-interface Parent2 {
-  greet(message: number): void;
-}
-
-interface Child extends Parent1, Parent2 {
-  greet(message: string | number): void;
-}
-
-class ChildClass implements Child {
-  greet(message: string | number): void {}
-}
+{% endfor %}

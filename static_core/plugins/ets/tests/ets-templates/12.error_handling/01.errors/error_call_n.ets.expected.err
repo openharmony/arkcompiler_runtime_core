@@ -10,11 +10,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
----
-cases:
-  - { type: byte,   value: 16,     expected: 16    }
-  - { type: short,  value: 300,    expected: 300   }
-  - { type: int,    value: 3000,   expected: 3000  }
-  - { type: long,   value: 50000,  expected: 50000 }
-  - { type: float,  value: 120.2f, expected: 120.2f }
-  - { type: number, value: 5050.9, expected: 5050.9}
+#
+Unhandled exception: error_call_n.TestError
+Error
+	at escompat.Error.<ctor> (Error.ets:56:0)
+	at error_call_n.TestError.<ctor> (error_call_n.ets:26:0)
+	at error_call_n.ETSGLOBAL.main (error_call_n.ets:29:0)

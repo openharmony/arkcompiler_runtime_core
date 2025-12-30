@@ -13,7 +13,4 @@
 
 import_stmts:
   - { import: 'import * as ma from "./module_a.ets"', res: '"module_a.ets"', doc: "file and folder with the same name" }
-  - { import: 'import * as ma from "./module_a"', tags: "negative, compile-only", doc: "file and folder with the same name" }
-  - { import: 'import * as ma from "./module_b"', tags: "negative, compile-only", doc: "unique folder name in use" }
-  - { import: 'import * as ma from "./module_b/../module_a/../module_b"', tags: "negative, compile-only", doc: "file name to import is not specified" }
   - { import: 'import * as ma from "./module_a/../module_a.ets"', res: '"module_a.ets"' }
