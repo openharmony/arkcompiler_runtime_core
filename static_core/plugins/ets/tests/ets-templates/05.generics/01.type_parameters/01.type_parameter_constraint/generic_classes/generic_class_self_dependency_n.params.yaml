@@ -14,10 +14,10 @@
 --- # Self dependency tests
 self_dependency:
   - T extends T
-  - T extends U<T>
-  - T extends U<W<T>>
-  - T extends U<U<T>>
-  - T extends T<U>
+  - T2 extends T2<T>
+  - T2 extends T2<T3<T>>
+  - T2 extends T2<T2<T>>
+  - T4 extends T4<T2<T>>
 
 # Top level class modifiers
 top_level_class_modifiers:

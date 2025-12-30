@@ -14,6 +14,7 @@ limitations under the License.
 ---*/
 
 {% for sd in self_dependency %}
+{% for kind in kinds %}
 
 /*---
 desc: A compile-time error occurs if a type parameter in the type parameter section depends on itself.
@@ -21,11 +22,21 @@ tags: [compile-only, negative]
 params: >
   {{sd}}
 ---*/
-class SomeType {}
+{{kind}}  SomeType {}
 type T = SomeType
+
+{{kind}}  SomeType2<Z> {}
+type T2<Z> = SomeType2<Z>
+
+{{kind}}  SomeType3<Z> {}
+type T3<Z> = SomeType3<Z>
+
+{{kind}}  SomeType4<Z> {}
+type T4<Z> = SomeType4<Z>
 
 interface X<{{sd}}> {}
 
 function main(): void {}
 
+{% endfor %}
 {% endfor %}

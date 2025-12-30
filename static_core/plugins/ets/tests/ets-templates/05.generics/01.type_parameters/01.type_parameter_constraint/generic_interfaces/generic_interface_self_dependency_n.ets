@@ -14,6 +14,7 @@ limitations under the License.
 ---*/
 
 {% for sd in self_dependency %}
+{% for kind in kinds %}
 
 /*---
 desc: A compile-time error occurs if a type parameter in the type parameter section depends on itself.
@@ -22,8 +23,17 @@ params: >
   {{sd}}
 ---*/
 
+{{kind}} T {}
+
+{{kind}} T2<Z> {}
+
+{{kind}} T3<Z> {}
+
+{{kind}} T4<Z> {}
+
 interface X<{{sd}}> {}
 
 function main(): void {}
 
+{% endfor %}
 {% endfor %}
