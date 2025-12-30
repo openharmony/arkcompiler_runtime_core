@@ -324,7 +324,7 @@ def GenerateStringTrimLeft(cgmode)
   end
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str_reject_sliced(str_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
   else
     check_not_tree_string_type(str) if defines.DEBUG
     # it still can be slice
@@ -367,7 +367,7 @@ Label(:L1)
     entrypoint2 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
     Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimLeftBase").Terminator.ptr
   end
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
     Return(Call(str_orig).Method('StdCoreStringTrimLeft').ptr).ptr
   else
@@ -455,7 +455,7 @@ def GenerateStringTrimRight(cgmode)
   end
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str_reject_sliced(str_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
   else
     check_not_tree_string_type(str) if defines.DEBUG
     # it still can be slice
@@ -503,7 +503,7 @@ Label(:L1)
     Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm('StringTrimRightBase').Terminator.ptr
   end
 
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
     Return(Call(str_orig).Method('StdCoreStringTrimRight').ptr).ptr
   else
@@ -610,7 +610,7 @@ def GenerateStringTrim(cgmode)
   end
    
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str_reject_sliced(str_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
   else
     check_not_tree_string_type(str) if defines.DEBUG
     # it still can be slice
@@ -690,7 +690,7 @@ Label(:L3)
     entrypoint3 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
     Intrinsic(:TAIL_CALL).AddImm(entrypoint3).MethodAsImm("StringTrimLeftBase").Terminator.ptr
   end
-  Label(:SlowPathEntrypoint)
+  LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
     Return(Call(str_orig).Method('StdCoreStringTrim').ptr).ptr
   else
@@ -771,8 +771,8 @@ def GenerateStringStartsWith(cgmode)
   end
 
   if cgmode == :NativePlus
-    str_orig0 := try_use_cached_flat_str_accept_sliced(str_orig)
-    pfx_orig0 := try_use_cached_flat_str_accept_sliced(pfx_orig)
+    str_orig0 := try_use_cached_flat_str_accept_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    pfx_orig0 := try_use_cached_flat_str_accept_sliced(pfx_orig, AsGlobalLabel(:SlowPathEntrypoint))
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     check_not_tree_string_type(pfx_orig) if defines.DEBUG
@@ -852,7 +852,7 @@ def GenerateStringStartsWith(cgmode)
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase#{suffix}").Terminator.b
 
   if cgmode == :NativePlus
-  Label(:SlowPathEntrypoint)
+  LabelGlobal(:SlowPathEntrypoint)
     Return(Call(str_orig, pfx_orig, from_index).Method("StdCoreStringStartsWith").b).b
   end
 }
@@ -919,8 +919,8 @@ def GenerateStringEndsWith(cgmode)
   end
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str_reject_sliced(str_orig)
-    sfx := try_use_cached_flat_str_reject_sliced(sfx_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    sfx := try_use_cached_flat_str_reject_sliced(sfx_orig, AsGlobalLabel(:SlowPathEntrypoint))
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     check_not_tree_string_type(sfx_orig) if defines.DEBUG
@@ -974,7 +974,7 @@ def GenerateStringEndsWith(cgmode)
   end
   entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE#{upsuffix}")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase#{suffix}").Terminator.b
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
     Return(Call(str_orig, sfx_orig, end_index).Method("StdCoreStringEndsWith").b).b
   else
@@ -1002,7 +1002,7 @@ def GenerateStringGetBytesTlab(cgmode)
   end
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str_reject_sliced(str_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
   else
     check_not_tree_string_type(str) if defines.DEBUG
     # it still can be slice
@@ -1044,7 +1044,7 @@ def GenerateStringGetBytesTlab(cgmode)
   Label(:End)
   Return(new_arr).ptr
 
-  Label(:SlowPathEntrypoint)
+  LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
     Return(Call(str_orig, begin_index, end_index).Method('StdCoreStringGetBytes').ptr).ptr
   else
@@ -1802,7 +1802,7 @@ def GenerateStringIndexOfAfter(cgmode)
   end
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str_reject_sliced(str_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     # it still can be slice
@@ -1954,7 +1954,7 @@ def GenerateStringIndexOfAfter(cgmode)
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED#{upsuffix}")
     Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm(name).Terminator.i32
   end
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
       Return(Call(str_orig, ch, start_index).Method("StdCoreStringIndexOfAfter").i32).i32
   else
@@ -1986,7 +1986,7 @@ def GenerateStringRepeatTlab(cgmode)
   }
 
   if cgmode == :NativePlus
-    str := try_use_cached_flat_str_reject_sliced(str_orig)
+    str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
   else
     check_not_tree_string_type(str_orig) if defines.DEBUG
     # it still can be slice
@@ -2048,7 +2048,7 @@ Label(:End)
   }
   Return(new_str).ptr
 
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
     Return(Call(str_orig, count).Method('StdCoreStringRepeat').ptr).ptr
   else
@@ -2073,8 +2073,8 @@ def GenerateStringConcat2Tlab(cgmode)
       next
     end
 
-    str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
-    str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
+    str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -2131,7 +2131,7 @@ def GenerateStringConcat2Tlab(cgmode)
     Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     Return(new_str).ptr
 
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
     if cgmode == :NativePlus
       Return(Call(str1_orig, str2_orig).Method('CoreStringConcat2').ptr).ptr
     else
@@ -2157,9 +2157,9 @@ def GenerateStringConcat3Tlab(cgmode)
       next
     end
 
-    str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
-    str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
-    str3 := try_use_cached_flat_str_reject_sliced(str3_orig)
+    str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    str3 := try_use_cached_flat_str_reject_sliced(str3_orig, AsGlobalLabel(:SlowPathEntrypoint))
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -2233,7 +2233,7 @@ Label(:EndCopy)
     Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     Return(new_str).ptr
 
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
     if cgmode == :NativePlus
       Return(Call(str1_orig, str2_orig, str3_orig).Method('CoreStringConcat3').ptr).ptr
     else
@@ -2258,10 +2258,10 @@ def GenerateStringConcat4Tlab(cgmode)
       next
     end
 
-    str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
-    str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
-    str3 := try_use_cached_flat_str_reject_sliced(str3_orig)
-    str4 := try_use_cached_flat_str_reject_sliced(str4_orig)
+    str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    str3 := try_use_cached_flat_str_reject_sliced(str3_orig, AsGlobalLabel(:SlowPathEntrypoint))
+    str4 := try_use_cached_flat_str_reject_sliced(str4_orig, AsGlobalLabel(:SlowPathEntrypoint))
 
     klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -2354,7 +2354,7 @@ Label(:EndCopy)
     Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     Return(new_str).ptr
 
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
     if cgmode == :NativePlus
       Return(Call(str1_orig, str2_orig, str3_orig, str4_orig).Method('CoreStringConcat4').ptr).ptr
     else
@@ -2486,7 +2486,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
     end
 
     if cgmode == :NativePlus
-      str := try_use_cached_flat_str_reject_sliced(str_orig)
+      str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
     else
       check_not_tree_string_type(str_orig) if defines.DEBUG
       # it still can be slice
@@ -2589,7 +2589,7 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       result := fast_substring(str, length, bx6, charCount, not_compressed, cgmode)
       Return(result).ptr
     end
-Label(:SlowPathEntrypoint)
+LabelGlobal(:SlowPathEntrypoint)
   if cgmode == :NativePlus
     # even though it technically technically belongs to the core part
     # the ETS plugin is always present, so, we can refer to it (right?)_

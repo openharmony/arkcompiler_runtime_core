@@ -110,10 +110,10 @@ macro(:check_not_tree_string_type) do |str|
   }
 end
 
-macro(:try_get_flattened_tree_str) do |str|
+scoped_macro(:try_get_flattened_tree_str) do |str, slowpath|
   stringCache := LoadI(%tr).Imm(Constants::THREAD_FLATTENED_STRING_CACHE_OFFSET).ref
   If(stringCache, 0).EQ {
-    Goto(:SlowPathEntrypoint)
+    GotoGlobal(slowpath)
   }
 
   # cannot cast directly from ref to uint
@@ -124,29 +124,29 @@ macro(:try_get_flattened_tree_str) do |str|
   strIndex := Mul(strMasked, FlattenedStringCacheConstants::ENTRY_SIZE).word
   key := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
   If(key, str).NE {
-    Goto(:SlowPathEntrypoint)
+    GotoGlobal(slowpath)
   }
   strIndex := AddI(strIndex).Imm(FlattenedStringCacheConstants::VALUE_OFFSET).ref_uint
   strCached := LoadArray(stringCache, strIndex).SetNeedBarrier(true).ref
 end  # try_get_flattened_tree_str
 
-macro(:try_use_cached_flat_str_reject_sliced) do |str|
+scoped_macro(:try_use_cached_flat_str_reject_sliced) do |str, slowpath|
   baseClass := load_class(str)
   stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
   If(stringType, Constants::STRING_TYPE_SLICE).EQ {
-    Goto(:SlowPathEntrypoint)
+    GotoGlobal(slowpath)
   }
   If(stringType, Constants::STRING_TYPE_TREE).EQ {
-    strCached := try_get_flattened_tree_str(str)
+    strCached := try_get_flattened_tree_str(str, slowpath)
   }
   result := Phi(str, strCached).ref
 end  # try_use_cached_flat_str_reject_sliced
 
-macro(:try_use_cached_flat_str_accept_sliced) do |str|
+scoped_macro(:try_use_cached_flat_str_accept_sliced) do |str, slowpath|
   baseClass := load_class(str)
   stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
   If(stringType, Constants::STRING_TYPE_TREE).EQ {
-    strCached := try_get_flattened_tree_str(str)
+    strCached := try_get_flattened_tree_str(str, slowpath)
   }
   result := Phi(str, strCached).ref
 end  # try_use_cached_flat_str_accept_sliced
@@ -915,14 +915,14 @@ def GenerateStringEquals(lang, dynamic, cgmode = :FastPath)
             }
         end
         if cgmode == :NativePlus
-            str1 := try_use_cached_flat_str_reject_sliced(str1_orig)
+            str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
         else
             check_not_tree_string_type(str1_orig) if defines.DEBUG
             # it still can be slice
             check_string_type(str1_orig)
             str1 := str1_orig
         end
-        str2 := try_use_cached_flat_str_reject_sliced(str2_orig)
+        str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
         if dynamic
             length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
             length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -1003,7 +1003,7 @@ def GenerateStringEquals(lang, dynamic, cgmode = :FastPath)
         Goto(:Loop)
     Label(:NotEqual)
         Return(0).b
-    Label(:SlowPathEntrypoint)
+    LabelGlobal(:SlowPathEntrypoint)
       if cgmode == :NativePlus
         method = "#{lang.empty? ? 'Core' : lang}StringEqualsEntrypoint"
         Return(Call(str1_orig, str2_orig).Method(method).b).b
