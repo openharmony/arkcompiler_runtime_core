@@ -62,6 +62,8 @@ ohos_shared_library("arklinker") {
   if (is_mingw || is_win) {
     output_extension = "dll"
   }
+
+  install_enable = false
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }
