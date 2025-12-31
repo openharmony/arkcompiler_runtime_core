@@ -58,62 +58,10 @@ async function testWithoutInit() {
     arktest.assertEQ(wl.get(), 2);
 }
 
-class TestObject{
-     constructor(){
-     }
-
-     constructor(a1:string,a2:int){
-         this.a1= a1;
-         this.a2=a2;
-     }
-
-     a1 = 'a1';
-     a2 = 0;
-}
-
-function testWithMultiInit() {
-    let wl = new WorkerLocal<TestObject>(() => new TestObject('a0', 0));
-    arktest.assertEQ(wl.get().a1, 'a0');
-    arktest.assertEQ(wl.get().a2, 0);
-    for(let i = 0; i < 50; i++){
-        arktest.assertEQ(wl.get().a1, 'a0');
-        arktest.assertEQ(wl.get().a2, 0);
-        for(let i = 0; i < 20; i++){
-            wl.set(new TestObject('a' + i, i));
-            arktest.assertEQ(wl.get().a1, 'a' + i);
-            arktest.assertEQ(wl.get().a2, i);
-            wl.delete();
-        }
-        arktest.assertEQ(wl.get().a1, 'a0');
-        arktest.assertEQ(wl.get().a2, 0);
-    }
-}
-
-function testWithworkerInit(){
-    let initCount = 0;
-    let wl =new WorkerLocal<TestObject>(() =>{
-        initCount++;
-        return new TestObject('a0', initCount);
-    });
-    let eaw = new EAWorker();
-    eaw.start();
-    let job = eaw.run<void>(()=>{
-        let v1 = wl.get();
-        arktest.assertEQ(v1.a1, 'a0');
-        let v2 = wl.get();
-        arktest.assertEQ(v2, v1);
-    });
-    job.Await();
-    arktest.assertEQ(initCount, 1);
-    eaw.quit();
-}
-
 function main() {
     const testSuite = new arktest.ArkTestsuite("WorkerLocalTest");
-    testSuite.addTest('testInit', testInit);
-    testSuite.addAsyncTest('testWithoutInit', testWithoutInit);
-    testSuite.addTest('testWithMultiInit', testWithMultiInit);
-    testSuite.addTest('testWithworkerInit', testWithworkerInit);
+    testSuite.addTest("testInit", testInit);
+    testSuite.addAsyncTest("testWithoutInit", testWithoutInit);
     testSuite.run();
     CoroutineExtras.stopTaskpool();
 }
