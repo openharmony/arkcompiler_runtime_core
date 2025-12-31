@@ -16,41 +16,41 @@
 function numberToStringTest1(): void {
     let n: Number = Number(233);
     let radix: Number = 16;
-    arktest.assertEQ(n.toString(radix), "e9", "Number(233).toString(16) should be equal to e9");
+    arktest.assertEQ(n.toString(radix), 'e9', 'Number(233).toString(16) should be equal to e9');
 }
 
 function numberToStringTest2(): void {
     let n: Number = Number(233);
     let radix: Number = 16.99;
-    arktest.assertEQ(n.toString(radix), "e9", "Number(233).toString(16.99) should be equal to e9");
+    arktest.assertEQ(n.toString(radix), 'e9', 'Number(233).toString(16.99) should be equal to e9');
 }
 
 function numberToStringTest3(): void {
     let n: Number = Number(42);
-    arktest.assertEQ(n.toString(), "42", "Number(42).toString() should be equal to 42");
+    arktest.assertEQ(n.toString(), '42', 'Number(42).toString() should be equal to 42');
 }
 
 function numberToStringTest4(): void {
     let n: Number = Number(10);
     let radix: Number = 2;
-    arktest.assertEQ(n.toString(radix), "1010", "Number(10).toString(2) should be equal to 1010");
+    arktest.assertEQ(n.toString(radix), '1010', 'Number(10).toString(2) should be equal to 1010');
 }
 
 function numberToStringTest5(): void {
     let n: Number = Number(255);
     let radix: Number = 16;
-    arktest.assertEQ(n.toString(radix), "ff", "Number(255).toString(16) should be equal to ff");
+    arktest.assertEQ(n.toString(radix), 'ff', 'Number(255).toString(16) should be equal to ff');
 }
 
 function testNumberToExponential(): void {
     let n: number | undefined = 1
     let m: number = 1
-    arktest.assertEQ(m.toExponential(n), "1.0e+0")
+    arktest.assertEQ(m.toExponential(n), '1.0e+0')
 }
 
 function testNumberToExponentialUndefined(): void {
     let m: number = 1
-    arktest.assertEQ(m.toExponential(undefined), "1e+0")
+    arktest.assertEQ(m.toExponential(undefined), '1e+0')
 }
 
 function testNumberForParseFloat1(): void {
@@ -81,18 +81,57 @@ function testNumberForParseFloat4(): void {
     arktest.assertDoubleEQ(num2, -1.0, 0.000001)
 }
 
+function testNumberForParseFloat5(): void {
+    let res = Double.parseFloat('9999999999999999999999n');
+    arktest.assertDoubleEQ(res, 1e+22, 0.000001);
+
+    res = Double.parseFloat('9999999999999999999999.');
+    arktest.assertDoubleEQ(res, 1e+22, 0.000001);
+
+    res = Double.parseFloat('9999999999999999999999');
+    arktest.assertDoubleEQ(res, 1e+22, 0.000001);
+
+    res = Double.parseFloat('999999999999999999999999999n');
+    arktest.assertDoubleEQ(res, 1e+27, 0.000001);
+
+    res = Double.parseFloat('1000000000000000000000sd');
+    arktest.assertDoubleEQ(res, 1e+21, 0.000001);
+}
+
+function testNumberForParseFloat6(): void {
+    let res = Double.parseFloat('1.7976931348623159e+308');
+    arktest.assertEQ(res.toString(), 'Infinity');
+
+    res = Double.parseFloat('-1.7976931348623159e+308');
+    arktest.assertEQ(res.toString(), '-Infinity');
+
+    res = Double.parseFloat('1.8976931348623159e+308');
+    arktest.assertEQ(res.toString(), 'Infinity');
+
+    res = Double.parseFloat('-1.8976931348623159e+308');
+    arktest.assertEQ(res.toString(), '-Infinity');
+
+    res = Double.parseFloat('2e+308');
+    arktest.assertEQ(res.toString(), 'Infinity');
+
+    res = Double.parseFloat('-2e+308');
+    arktest.assertEQ(res.toString(), '-Infinity');
+}
+
 function main() {
-    let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
-    myTestsuite.addTest("NumberToStringTest1", numberToStringTest1);
-    myTestsuite.addTest("NumberToStringTest2", numberToStringTest2);
-    myTestsuite.addTest("NumberToStringTest3", numberToStringTest3);
-    myTestsuite.addTest("NumberToStringTest4", numberToStringTest4);
-    myTestsuite.addTest("NumberToStringTest5", numberToStringTest5);
+    let myTestsuite = new arktest.ArkTestsuite('myTestsuite');
+    myTestsuite.addTest('NumberToStringTest1', numberToStringTest1);
+    myTestsuite.addTest('NumberToStringTest2', numberToStringTest2);
+    myTestsuite.addTest('NumberToStringTest3', numberToStringTest3);
+    myTestsuite.addTest('NumberToStringTest4', numberToStringTest4);
+    myTestsuite.addTest('NumberToStringTest5', numberToStringTest5);
     myTestsuite.addTest('testNumberToExponential', testNumberToExponential);
     myTestsuite.addTest('testNumberToExponentialUndefined', testNumberToExponentialUndefined);
     myTestsuite.addTest('testNumberForParseFloat exceeding int16_t', testNumberForParseFloat1);
     myTestsuite.addTest('testNumberForParseFloat not exceeding int16_t', testNumberForParseFloat2);
     myTestsuite.addTest('testNumberForParseFloat normal number', testNumberForParseFloat3);
     myTestsuite.addTest('testNumberForParseFloat special', testNumberForParseFloat4);
+    myTestsuite.addTest('testNumberForParseFloat big number', testNumberForParseFloat5);
+    myTestsuite.addTest('testNumberForParseFloat Infinity', testNumberForParseFloat6);
     myTestsuite.run();
 }

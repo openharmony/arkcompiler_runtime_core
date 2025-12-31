@@ -225,7 +225,7 @@ inline double Strtod(const char *str, int exponent, uint8_t radix)
     } else {
         result = number * std::pow(radix, exponent);
     }
-    if (!std::isfinite(result) || (result == 0 && number != 0)) {
+    if (result == 0 && number != 0) {
         result = PowHelper(number, exponent, radix);
     }
     return sign == Sign::NEG ? -result : result;
