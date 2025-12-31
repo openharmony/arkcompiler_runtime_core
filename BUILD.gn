@@ -455,6 +455,15 @@ ohos_prebuilt_etc("app_static_runtime_enable_list") {
   subsystem_name = "arkcompiler"
 }
 
+ohos_prebuilt_etc("static_aot_methods_black_list.json") {
+  relative_install_dir = "ark"
+  source = "$ark_root/static_core/compiler/tools/paoc/static_aot_methods_black_list.json"
+
+  # Set the subsystem name
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
+
 group("ark_guard_packages_linux") {
   deps = []
   if (host_os != "mac") {

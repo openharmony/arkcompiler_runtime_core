@@ -155,6 +155,41 @@ The option is used for compile one(or several) method(s), instead of all methods
 1. `--compiler-regex` - selects methods with fully-matched qualified name (i.e. 'Class::Method').
 2. `--compiler-regex-with-signature` - selects methods with fully-matched qualified name with signature (i.e. 'void Class::Method(f64)'). Useful for overloaded method.
 
+**How to add black method list on the device**
+
+The list of functions on the device is stored in a JSON file, with the corresponding path: runtime_core/static_core/compiler/tools/paoc/static_aot_methods_black_list.json
+
+example:
+```
+{
+    "blackMethodList": [
+        {
+            "bundleName":"/system/framework/xxx.abc",
+            "type": "framework",
+            "methodLists": [
+                "Test:f1",
+                "Test:f2"
+            ],
+            "issue":"https://issue"
+        },
+        {
+            "bundleName":"bundlename1",
+            "type": "application",
+            "moduleLists": [
+                {
+                  "name": "moduleName1",
+                  "methodLists": [
+                    "Test:f1",
+                    "Test:f2"
+                  ]
+                }
+            ]
+            "issue":"https://issue"
+        }
+    ]
+}
+```
+
 ## compiler-check-final
 
 ArkCompiler has GraphChecker(doesn't works in Release mode), which checks that the graph state is correct after each optimization.  
