@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -719,6 +719,27 @@ AbckitLiteral *FindOrCreateLiteralMethodDynamicImpl(AbckitFile *file, const std:
     return FindOrCreateLiteral(file, file->literals.methodLits, value, panda_file::LiteralTag::METHOD);
 }
 
+AbckitLiteral *FindOrCreateLiteralNullValueDynamicImpl(AbckitFile *file)
+{
+    if (file->literals.nullValueLit != nullptr) {
+        return file->literals.nullValueLit.get();
+    }
+
+    auto literalDeleter = [](pandasm_Literal *p) -> void {
+        delete reinterpret_cast<pandasm::LiteralArray::Literal *>(p);
+    };
+
+    // According to assembly-literals.h, NULLVALUE uses uint8_t (IsByteValue() returns true)
+    // The emitter expects std::get<uint8_t>(literal.value_) for NULLVALUE
+    auto *literal = new pandasm::LiteralArray::Literal();
+    literal->tag_ = panda_file::LiteralTag::NULLVALUE;
+    literal->value_ = uint8_t {0};
+    auto abcLit = std::make_unique<AbckitLiteral>(
+        file, AbckitLiteralImplT(reinterpret_cast<pandasm_Literal *>(literal), literalDeleter));
+    file->literals.nullValueLit = std::move(abcLit);
+    return file->literals.nullValueLit.get();
+}
+
 AbckitLiteral *FindOrCreateLiteralDynamic(AbckitFile *file, const pandasm::LiteralArray::Literal &value)
 {
     switch (value.tag_) {
@@ -757,6 +778,8 @@ AbckitLiteral *FindOrCreateLiteralDynamic(AbckitFile *file, const pandasm::Liter
             return FindOrCreateLiteralMethodAffiliateDynamicImpl(file, std::get<uint16_t>(value.value_));
         case panda_file::LiteralTag::LITERALARRAY:
             return FindOrCreateLiteralLiteralArrayDynamicImpl(file, std::get<std::string>(value.value_));
+        case panda_file::LiteralTag::NULLVALUE:
+            return FindOrCreateLiteralNullValueDynamicImpl(file);
         default:
             LIBABCKIT_UNREACHABLE;
     }

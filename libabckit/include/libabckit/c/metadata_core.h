@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2285,6 +2285,15 @@ struct CAPI_EXPORT AbckitModifyApi {
      * @note Allocates
      */
     AbckitLiteral *(*createLiteralMethod)(AbckitFile *file, AbckitCoreFunction *function);
+
+    /**
+     * @brief Creates literal containing null value.
+     * @return Pointer to the `AbckitLiteral`.
+     * @param [ in ] file - Binary file to be modified.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
+     * @note Allocates
+     */
+    AbckitLiteral *(*createLiteralNullValue)(AbckitFile *file);
 };
 
 /**

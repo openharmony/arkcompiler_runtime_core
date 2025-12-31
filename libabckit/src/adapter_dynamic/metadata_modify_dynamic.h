@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,7 @@ AbckitLiteral *FindOrCreateLiteralDoubleDynamic(AbckitFile *file, double value);
 AbckitLiteral *FindOrCreateLiteralStringDynamic(AbckitFile *file, const char *value, size_t len);
 AbckitLiteral *FindOrCreateLiteralMethodDynamic(AbckitFile *file, AbckitCoreFunction *function);
 AbckitLiteral *FindOrCreateLiteralLiteralArrayDynamic(AbckitFile *file, AbckitLiteralArray *litarr);
+AbckitLiteral *FindOrCreateLiteralNullValueDynamic(AbckitFile *file);
 AbckitLiteralArray *CreateLiteralArrayDynamic(AbckitFile *file, AbckitLiteral **value, size_t size);
 
 AbckitValue *FindOrCreateValueU1Dynamic(AbckitFile *file, bool value);

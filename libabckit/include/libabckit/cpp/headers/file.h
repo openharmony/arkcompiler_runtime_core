@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,6 +223,14 @@ public:
      * @note Allocates
      */
     abckit::Literal CreateLiteralString(std::string_view val) const;
+
+    /**
+     * @brief Creates literal containing null value.
+     * @return `Literal`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current File is false.
+     * @note Allocates
+     */
+    abckit::Literal CreateLiteralNullValue() const;
 
     /**
      * @brief Creates Literal containing the given function `function`.

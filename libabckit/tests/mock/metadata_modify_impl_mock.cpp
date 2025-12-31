@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -249,6 +249,13 @@ AbckitLiteral *CreateLiteralString(AbckitFile *file, const char *value, size_t l
     return DEFAULT_LITERAL;
 }
 
+AbckitLiteral *CreateLiteralNullValue(AbckitFile *file)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(file == DEFAULT_FILE);
+    return DEFAULT_LITERAL;
+}
+
 AbckitLiteral *CreateLiteralMethod(AbckitFile *file, AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
@@ -376,6 +383,7 @@ static AbckitModifyApi g_modifyApiImpl = {
     CreateLiteralLiteralArray,
     CreateLiteralString,
     CreateLiteralMethod,
+    CreateLiteralNullValue,
 };
 
 }  // namespace libabckit::mock::metadata_modify
