@@ -46,6 +46,19 @@ public:
             ANI_OK);
         ASSERT_STREQ(utfBuffer.data(), expected.c_str());
     }
+    static void CheckANIUTF16Str(const ani_string &str, std::u16string_view expected)
+    {
+        ani_env *env {};
+        ASSERT_EQ(GetAniEnv(&env), true);
+        const ani_size utfBufferSize = 50U;
+        std::array<uint16_t, utfBufferSize> utfBuffer = {0U};
+        ani_size resultSize;
+        const ani_size offset = 0;
+        ASSERT_EQ(env->String_GetUTF16SubString(str, offset, expected.size(), utfBuffer.data(), utfBuffer.size(),
+                                                &resultSize),
+                  ANI_OK);
+        ASSERT_EQ(std::u16string_view(reinterpret_cast<const char16_t *>(utfBuffer.data()), expected.size()), expected);
+    }
     static ani_boolean NativeCheckAnyGetProperty(ani_env *env, ani_ref anyRef)
     {
         std::string propName = "_name";
@@ -55,6 +68,14 @@ public:
             return ANI_FALSE;
         }
         NativeAniAnyTsToEtsTest::CheckANIStr(static_cast<ani_string>(nameRef), expectedName);
+
+        std::string propCountry = "_原產地";
+        std::u16string_view expectedCountry = u"中國";
+        ani_ref countryRef {};
+        if (env->Any_GetProperty(anyRef, propCountry.c_str(), &countryRef) != ANI_OK) {
+            return ANI_FALSE;
+        }
+        NativeAniAnyTsToEtsTest::CheckANIUTF16Str(static_cast<ani_string>(countryRef), expectedCountry);
 
         return ANI_TRUE;
     }

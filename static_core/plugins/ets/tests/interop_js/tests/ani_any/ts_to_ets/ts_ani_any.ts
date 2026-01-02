@@ -16,6 +16,7 @@
 class TestObject {
     private _name: string = "Leechy";
     private _age: number = 24;
+    private _原產地: string = "中國";
 
     constructor() {}
 

@@ -49,6 +49,14 @@ class Worker {
     }
 }
 
+class Client {
+    原產地: string;
+
+    constructor(country: string) {
+        this.原產地 = country;
+    }
+}
+
 function getArray(): string[] {
     let a: string[] = ["Leechy", "Rocket", "Bird", "hello", "world"];
     return a;
