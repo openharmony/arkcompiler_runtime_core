@@ -663,17 +663,19 @@ export class JSON {
         } else if (type.isSubtypeOf(TypeColor.OBJECT_CLASS)) {
             const newTc = new TypeColor(type, TypeColor.AT_STACK)
             used.set(type, newTc)
-            if (!JSON.classHasDefaultCtor(type)) {
-                throw new Error(`Incorrect type: '${type.getName()}' doesn't provide default public constructor`)
-            }
-            for (const field of getClassInstanceFieldsAll(type)) {
-                if (JSONAPI.getJSONParseIgnore(field)) {
-                    continue
+            if (!type.isEnum()) {
+                if (!JSON.classHasDefaultCtor(type)) {
+                    throw new Error(`Incorrect type: '${type.getName()}' doesn't provide default public constructor`)
                 }
-                try {
-                    JSON.checkType(field.getType(), used)
-                } catch (e) {
-                    throw new Error(`Incorrect field: '${type.getName()}.${field.getName()}'. ${e.message}`)
+                for (const field of getClassInstanceFieldsAll(type)) {
+                    if (JSONAPI.getJSONParseIgnore(field)) {
+                        continue
+                    }
+                    try {
+                        JSON.checkType(field.getType(), used)
+                    } catch (e) {
+                        throw new Error(`Incorrect field: '${type.getName()}.${field.getName()}'. ${e.message}`)
+                    }
                 }
             }
             newTc.color = TypeColor.VISITED
@@ -2047,17 +2049,17 @@ class JSONValueParser {
     private createNumber(value: JSONNumber, type: Class): Any {
         if (type === BigIntType && (this.bigIntMode === 2 || (!Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new BigInt(value.bigintValue)
-        } else if (Types.isDoubleType(type) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+        } else if ((Types.isDoubleType(type) || type.isEnum()) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value)
-        } else if (Types.isIntType(type) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
+        } else if ((Types.isIntType(type) || type.isEnum()) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value).toInt()
-        } else if (Types.isLongType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if ((Types.isLongType(type) || type.isEnum()) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Long().createFromJSONValue(value)
-        } else if (Types.isShortType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if ((Types.isShortType(type) || type.isEnum()) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Short().createFromJSONValue(value)
-        } else if (Types.isFloatType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if ((Types.isFloatType(type) || type.isEnum()) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Float().createFromJSONValue(value)
-        } else if (Types.isByteType(type) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if ((Types.isByteType(type) || type.isEnum()) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Byte().createFromJSONValue(value)
         } else {
             throw new Error(type.getName() + " is expected, but get " + Class.of(value.value).getName() + " with bigIntMode=" + this.bigIntMode)
@@ -2078,10 +2080,29 @@ class JSONValueParser {
                     Types.isLongType(type) ||
                     Types.isByteType(type) ||
                     Types.isShortType(type) ||
-                    Types.isFloatType(type))) {
-            return this.createNumber(value as JSONNumber, type)
-        } else if (value instanceof JSONString && type === TypeColor.STRING_CLASS) {
-            return (value as JSONString).value
+                    Types.isFloatType(type) ||
+                    type.isEnum())) {
+            const num = this.createNumber(value as JSONNumber, type)
+            if (type.isEnum()) {
+                let valArray = type.getStaticMethod('values')!.invoke() as FixedArray<Any>
+                for (let idx = 0; idx < valArray.length; idx++) {
+                    if (valArray[idx] == num) {
+                        return valArray[idx]
+                    }
+                }
+            }
+            return num
+        } else if (value instanceof JSONString && (type === TypeColor.STRING_CLASS || type.isEnum())) {
+            const str = (value as JSONString).value
+            if (type.isEnum()) {
+                let strArray = type.getStaticMethod('values')!.invoke() as FixedArray<Any>
+                for (let idx = 0; idx < strArray.length; idx++) {
+                    if (strArray[idx] == str) {
+                        return strArray[idx]
+                    }
+                }
+            }
+            return str
         } else if (value instanceof JSONTrue && Types.isBooleanType(type)) {
             return new Boolean(true)
         } else if (value instanceof JSONFalse && Types.isBooleanType(type)) {
