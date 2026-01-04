@@ -276,9 +276,6 @@
 #30583
 07.expressions/19.nullish-coalescing_expression/resulting_type_crash.ets
 
-#30691
-07.expressions/19.nullish-coalescing_expression/nullish_coalescing_expression_record_3.ets
-
 #31475 False positive passed tests on runner-2
 07.expressions/19.nullish-coalescing_expression/lazy_operator_2.ets
 07.expressions/19.nullish-coalescing_expression/lazy_operator_1.ets

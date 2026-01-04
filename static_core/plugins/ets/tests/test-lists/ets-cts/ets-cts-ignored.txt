@@ -506,9 +506,6 @@
 #30583
 07.expressions/19.nullish-coalescing_expression/resulting_type_crash.ets
 
-#30691
-07.expressions/19.nullish-coalescing_expression/nullish_coalescing_expression_record_3.ets
-
 #31200
 07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.consts.test_2.ets
 07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.consts.test_3.ets
