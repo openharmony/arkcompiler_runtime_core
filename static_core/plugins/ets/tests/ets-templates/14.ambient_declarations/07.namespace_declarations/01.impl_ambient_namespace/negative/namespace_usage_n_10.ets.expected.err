@@ -15,7 +15,11 @@ E/verifier: Cannot link class: Cannot find field 'x' in class 'namespace_declara
 E/verifier: Cannot link class: Cannot find field 'y' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp'
 E/verifier: Cannot link class: Cannot find method 'foo ()I' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp'
 E/verifier: Cannot link class: Cannot find field 'a' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.A'
-E/verifier: Cannot link class: Cannot find method 'valueOf ()I' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.Color'
-E/verifier: Cannot link class: Cannot find method 'valueOf ()Lstd/core/String;' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.Season'
+E/verifier: Cannot link class: Cannot find method '%%get-a ()Lstd/core/String;' in class 'namespace_declarations_n_10.Ambient.NestedAmbientExp.I'
+E/verifier: Verifier error 55: Cache miss for field at offset
+E/verifier: Verifier error 61: Cannot resolve field id
+E/verifier: Method verification failed: void namespace_usage_n_10.ETSGLOBAL::usage()
+E/verifier: Class verification failed: 'namespace_usage_n_10.ETSGLOBAL' method: void namespace_usage_n_10.ETSGLOBAL::usage()
+E/runtime: Cannot initialize class 'namespace_usage_n_10.ETSGLOBAL'
 Unhandled exception: std.core.LinkerVerificationError
 LinkerVerificationError: Lnamespace_usage_n_10/ETSGLOBAL;

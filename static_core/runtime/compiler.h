@@ -595,6 +595,11 @@ public:
         return ClassCast(klass)->IsInterface();
     }
 
+    bool IsUnionClass(ClassPtr klass) const override
+    {
+        return ClassCast(klass)->IsUnionClass();
+    }
+
     uintptr_t GetManagedType(uintptr_t klass) const override;
 
     ark::Class *TypeCast(uintptr_t klass) const

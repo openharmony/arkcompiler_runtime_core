@@ -106,6 +106,7 @@ public:
     uint32_t GetRuntimeClassOffset(Arch arch) const override;
     bool IsBoxedClass(ClassPtr klass) const override;
     bool IsEnumClass(ClassPtr klass) const override;
+    ClassPtr GetEnumBoxedClass(ClassPtr klass) const override;
     bool IsBigIntClass(ClassPtr klass) const override;
     bool IsFunctionReference(ClassPtr klass) const override;
     bool IsClassBoxedBoolean(ClassPtr klass) const override;

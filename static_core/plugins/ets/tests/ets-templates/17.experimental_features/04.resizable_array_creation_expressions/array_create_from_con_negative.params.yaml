@@ -54,11 +54,11 @@ cases:
         enum Color: byte { Red, Green, Blue }
       logic: |-
         let v: Color[] = new Color[Color.Green](new Color)
-      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 2"
+      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 3"
 
     - decl: |-
         // enum constants of short type
         enum Color: short { Red = 42, Green, Blue }
       logic: |-
         let v: Color[] = new Color[Color.Green](new Color)
-      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 2"
+      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 3"

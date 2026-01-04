@@ -16,6 +16,7 @@
 #include <string>
 
 #include "ets_runtime_interface.h"
+#include "optimizer/ir/datatype.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "types/ets_method.h"
@@ -669,6 +670,50 @@ bool EtsRuntimeInterface::IsClassBoxedFloat(ClassPtr klass) const
 bool EtsRuntimeInterface::IsClassBoxedDouble(ClassPtr klass) const
 {
     return PlatformTypes(PandaEtsVM::GetCurrent())->coreDouble->GetRuntimeClass() == klass;
+}
+
+EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEnumBoxedClass(ClassPtr klass) const
+{
+    if (klass == nullptr) {
+        return nullptr;
+    }
+
+    auto *etsClass = EtsClass::FromRuntimeClass(ClassCast(klass));
+    if (!etsClass->IsEtsEnum()) {
+        return nullptr;
+    }
+
+    auto platformTypes = PlatformTypes(PandaEtsVM::GetCurrent());
+    auto *runtimeClass = etsClass->GetRuntimeClass();
+    for (auto &method : runtimeClass->GetMethods()) {
+        auto *methodName = utf::Mutf8AsCString(method.GetName().data);
+        if (std::string_view(methodName) != "fromValue") {
+            continue;
+        }
+
+        switch (method.GetArgType(0).GetId()) {
+            case panda_file::Type::TypeId::U1:
+                return platformTypes->coreBoolean->GetRuntimeClass();
+            case panda_file::Type::TypeId::I8:
+                return platformTypes->coreByte->GetRuntimeClass();
+            case panda_file::Type::TypeId::U16:
+                return platformTypes->coreChar->GetRuntimeClass();
+            case panda_file::Type::TypeId::I16:
+                return platformTypes->coreShort->GetRuntimeClass();
+            case panda_file::Type::TypeId::I32:
+                return platformTypes->coreInt->GetRuntimeClass();
+            case panda_file::Type::TypeId::I64:
+                return platformTypes->coreLong->GetRuntimeClass();
+            case panda_file::Type::TypeId::F32:
+                return platformTypes->coreFloat->GetRuntimeClass();
+            case panda_file::Type::TypeId::F64:
+                return platformTypes->coreDouble->GetRuntimeClass();
+            default:
+                return nullptr;
+        }
+    }
+
+    return nullptr;
 }
 
 ark::compiler::DataType::Type EtsRuntimeInterface::GetBoxedClassDataType(ClassPtr klass) const

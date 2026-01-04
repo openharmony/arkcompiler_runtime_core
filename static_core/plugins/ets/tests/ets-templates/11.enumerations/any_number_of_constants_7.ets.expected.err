@@ -1,3 +1,4 @@
+#
 # Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,5 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Unhandled exception: std.core.ClassCastError
-ClassCastError: std.core.Int cannot be cast to std.core.String
+E/bytecode_optimizer: Optimizing any_number_of_constants_7.GeneratedEnum.<cctor>:void;: Running optimizations failed!
