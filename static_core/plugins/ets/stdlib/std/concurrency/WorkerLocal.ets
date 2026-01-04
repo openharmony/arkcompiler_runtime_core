@@ -63,11 +63,11 @@ export class WorkerLocal<T> {
      * @throws {Error} When value not initialized and no init function provided
      */
     get(): T {
-        let res : T | undefined = undefined;
+        let res : Any = undefined;
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, (): T => {
             res = this.getinner();
         });
-        return res!;
+        return res as T;
     }
  
     private getinner(): T {
