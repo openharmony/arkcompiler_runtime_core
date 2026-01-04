@@ -115,8 +115,8 @@ cases:
           arktest.assertEQ( c.met(new Number()),  "ND2" )
 
     # step2_12
-    # The best candidate is the candidate that requires no transformation for all arguments.
-    # If such a candidate is available, then other candidates are not considered.
+    # If an overload set is formed from implicit overloads only, then the order of the overload
+    # set corresponds to the textual order of entity declaration.
     - decl: |-
           class C {
               met(...p: number[]): string {
@@ -126,12 +126,11 @@ cases:
                   return "ND1"
               }
           }
-      tags: 'compile-only'
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          arktest.assertEQ( c.met(0.0),  "nR" )
-          arktest.assertEQ( c.met(1, 2),  "ND1" )
+          arktest.assertEQ( c.met(0.0),  "nR", "Failed at default parameter" )
+          arktest.assertEQ( c.met(1, 2),  "nR", "Failed at rest parameter" )
 
     # step2_13
     - decl: |-
@@ -143,12 +142,11 @@ cases:
                   return "nR"
               }
           }
-      tags: 'compile-only'
       use: |-
           // select method with rest parameter and undefined parameter
           let c: C = new C()
-          arktest.assertEQ( c.met(0.0),  "nR" )
-          arktest.assertEQ( c.met(2, 3),  "ND2" )
+          arktest.assertEQ( c.met(0.0),  "nR", "Failed at default parameter" )
+          arktest.assertEQ( c.met(2, 3),  "nR", "Failed at rest parameter" )
 
     # step2_14
     - decl: |-
@@ -160,12 +158,11 @@ cases:
                   return "NR"
               }
           }
-      tags: 'compile-only'
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          arktest.assertEQ( c.met(0.0),  "nD1" )
-          arktest.assertEQ( c.met(3, 4),  "NR" )
+          arktest.assertEQ( c.met(0.0),  "nD1", "Failed at default parameter" )
+          arktest.assertEQ( c.met(3, 4),  "nD1", "Failed at rest parameter" )
 
     # step2_15
     - decl: |-
@@ -177,12 +174,11 @@ cases:
                   return "NR"
               }
           }
-      tags: 'compile-only'
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          arktest.assertEQ( c.met(0.0),  "nD2" )
-          arktest.assertEQ( c.met(4, 5),  "NR" )
+          arktest.assertEQ( c.met(0.0),  "nD2", "Failed at default parameter" )
+          arktest.assertEQ( c.met(4, 5),  "nD2", "Failed at rest parameter" )
 
     - decl: |-
           class C {
