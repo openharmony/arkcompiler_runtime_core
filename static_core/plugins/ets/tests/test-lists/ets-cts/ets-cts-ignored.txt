@@ -483,6 +483,21 @@
 07.expressions/15.instanceof_expression/instanceof_func_39.ets
 07.expressions/15.instanceof_expression/instanceof_func_40.ets
 07.expressions/15.instanceof_expression/instanceof_func_41.ets
+07.expressions/15.instanceof_expression/mix_array_tuple_union_3.ets
+07.expressions/15.instanceof_expression/mix_array_tuple_union_4.ets
+07.expressions/15.instanceof_expression/mix_array_tuple_union_5.ets
+07.expressions/15.instanceof_expression/mix_array_tuple_union_8.ets
+07.expressions/15.instanceof_expression/mix_array_tuple_union_9.ets
+07.expressions/15.instanceof_expression/mix_array_tuple_union_11.ets
+07.expressions/15.instanceof_expression/tuple_explicit_implicit_0.ets
+07.expressions/15.instanceof_expression/tuple_explicit_implicit_1.ets
+07.expressions/15.instanceof_expression/tuple_explicit_implicit_2.ets
+07.expressions/15.instanceof_expression/tuple_explicit_implicit_3.ets
+07.expressions/15.instanceof_expression/tuple_explicit_implicit_4.ets
+07.expressions/15.instanceof_expression/tuple_explicit_implicit_5.ets
+07.expressions/15.instanceof_expression/tuple_explicit_implicit_6.ets
+07.expressions/15.instanceof_expression/tuple_explicit_implicit_7.ets
+07.expressions/15.instanceof_expression/tuple_explicit_implicit_8.ets
 
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
 07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_1.ets
@@ -497,6 +512,13 @@
 07.expressions/15.instanceof_expression/instanceof_neg_33.ets
 07.expressions/15.instanceof_expression/instanceof_neg_36.ets
 07.expressions/15.instanceof_expression/instanceof_neg_38.ets
+
+#32103
+07.expressions/15.instanceof_expression/instantiated_generic_type_0.ets
+07.expressions/15.instanceof_expression/instantiated_generic_type_1.ets
+07.expressions/15.instanceof_expression/instantiated_generic_type_2.ets
+07.expressions/15.instanceof_expression/instantiated_generic_type_3.ets
+07.expressions/15.instanceof_expression/instantiated_generic_type_4.ets
 
 #28907 Specifying type for too large integer number with as doesn't produce CTE
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets

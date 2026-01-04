@@ -13,93 +13,112 @@
 
 ---
 cases:
-  - type: 'Any'
+  - type: 'Any[]'
+    effective_elem_type: 'Any'
     decl: 'let elem: Any = null'
     init: '[elem, elem]'
 
-  - type: 'undefined'
+  - type: 'undefined[]'
+    effective_elem_type: 'undefined'
     init: '[undefined, undefined]'
 
-  - type: 'null'
+  - type: 'null[]'
+    effective_elem_type: 'null'
     init: '[null, null]'
 
-  - type: 'byte'
+  - type: 'byte[]'
+    effective_elem_type: 'byte'
     decl: 'let elem: byte = 1'
     init: '[elem, elem]'
 
-  - type: 'short'
+  - type: 'short[]'
+    effective_elem_type: 'short'
     decl: 'let elem: short = 1'
     init: '[elem, elem]'
 
-  - type: 'int'
+  - type: 'int[]'
+    effective_elem_type: 'Numeric'
     init: '[1, 1]'
 
-  - type: 'long'
+  - type: 'long[]'
+    effective_elem_type: 'Numeric'
     init: '[2147483648, 2147483648]'
 
-  - type: 'float'
+  - type: 'float[]'
+    effective_elem_type: 'Numeric'
     init: '[1.0f, 1.0f]'
 
-  - type: 'double'
+  - type: 'double[]'
+    effective_elem_type: 'double'
     init: '[1.0, 1.0]'
 
-  - type: 'bigint'
+  - type: 'bigint[]'
+    effective_elem_type: 'bigint'
     init: '[1n, 1n]'
 
-  - type: 'boolean'
+  - type: 'boolean[]'
+    effective_elem_type: 'boolean'
     init: '[true, false]'
 
-  - type: 'char'
+  - type: 'char[]'
+    effective_elem_type: 'char'
     init: "[c'a', c'a']"
 
-  - type: 'string'
+  - type: 'string[]'
+    effective_elem_type: 'string'
     init: '["string", "string"]'
 
-  - type: 'Object'
+  - type: 'Object[]'
+    effective_elem_type: 'Object'
     decl: 'let elem: Object = new Object()'
     init: '[elem, elem]'
 
-  - type: '[string, int]'
-    decl: 'let elem: [string, int] = ["string", 1]'
-    init: '[elem, elem]'
-
-  - type: '"aa"'
+  - type: "'aa'[]"
+    effective_elem_type: 'string'
     init: '["aa", "aa"]'
 
-  - top_decl: 'class A {}'
-    type: 'A'
-    decl: 'let elem: A = new A'
+  - type: 'A[]'
+    effective_elem_type: 'A'
+    decl: |-
+      class A {}
+      let elem: A = new A
     init: '[elem, elem]'
 
-  - top_decl: |-
+  - type: 'I[]'
+    effective_elem_type: 'I'
+    decl: |-
       interface I {}
       class A implements I {}
-    type: 'I'
-    decl: 'let elem: I = new A()'
+      let elem: I = new A
     init: '[elem, elem]'
 
-  - top_decl: 'class A<T> {}'
-    type: 'A<int>'
-    decl: 'let elem: A<int> = new A<int>'
+  - type: 'A<int>[]'
+    effective_elem_type: 'A'
+    decl: |-
+      class A<T> {}
+      let elem: A<int> = new A<int>
     init: '[elem, elem]'
 
-  - top_decl: |-
+  - type: 'I<int>[]'
+    effective_elem_type: 'I'
+    decl: |-
       interface I<T> {}
       class A<T> implements I<T> {}
-    type: 'I<int>'
-    decl: 'let elem: I<int> = new A<int>()'
+      let elem: I<int> = new A<int>
     init: '[elem, elem]'
 
-  - top_decl: 'enum Color { Red, Green, Blue }'
-    type: 'Color'
+  - type: 'Color[]'
+    effective_elem_type: 'Color'
+    decl: 'enum Color { Red, Green, Blue }'
     init: '[Color.Red, Color.Green]'
 
-  - top_decl: |-
+  - type: 'foo_type[]'
+    effective_elem_type: 'foo_type'
+    decl: |-
       type foo_type = (a: string) => string
-    type: 'foo_type'
-    decl: 'let elem: foo_type = (a: string) => a'
+      let elem: foo_type = (a: string) => a
     init: '[elem, elem]'
 
 syntax:
-  - square
-  - diamond
+  - 'explicit'
+  - 'implicit'
