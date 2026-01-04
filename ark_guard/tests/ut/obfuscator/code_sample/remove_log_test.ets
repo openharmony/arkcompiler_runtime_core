@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,3 +56,46 @@ function foo1(a: int, b: ClassA, c: string, d: Array<int>) {
 }
 let cls1 = new ClassA();
 foo1(2, cls1, 'abc', [1, 2, 3]);
+
+function foo3() {
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.log('log');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.debug('debug');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.info('info');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.warn('warn');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.error('error');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.assert('assert');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.count('conut');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.countReset('countReset');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.dir('dir');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.dirxml('dirxml');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.group('group');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.groupCollapsed('groupCollapsed');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.groupEnd();
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.table('table');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.time('time');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.timeEnd('timeEnd');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.timeLog('timeLog');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.trace('trace');
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.toString();
+}
+
+foo3();

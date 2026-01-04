@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,9 +33,7 @@ bool MatchAnnotationName(const std::string &configAnnotationName, const std::vec
         return true;
     }
     return std::any_of(annotationNames.begin(), annotationNames.end(),
-                       [&](const auto &name) {
-                           return ark::guard::StringUtil::IsMatch(name, configAnnotationName);
-                       });
+                       [&](const auto &name) { return ark::guard::StringUtil::IsMatch(name, configAnnotationName); });
 }
 
 bool MatchAccessFlags(uint32_t accessFlag, uint32_t setAccessFlag, uint32_t unSetAccessFlag)
@@ -94,13 +92,11 @@ bool CollectMatchedMembers(const std::unordered_map<std::string, MemberType *> &
                            std::unordered_map<std::string, abckit_wrapper::Member *> &matchedMembers)
 {
     if (specifications.empty()) {
-        return true;
+        return false;
     }
 
-    bool hasKeepAllMember =
-        std::any_of(specifications.begin(), specifications.end(), [](const auto &spec) {
-            return IsKeepAllMembers(spec);
-        });
+    bool hasKeepAllMember = std::any_of(specifications.begin(), specifications.end(),
+                                        [](const auto &spec) { return IsKeepAllMembers(spec); });
     if (hasKeepAllMember) {
         for (const auto &[memberName, member] : memberTable) {
             if (matchedMembers.find(memberName) != matchedMembers.end()) {
@@ -128,23 +124,17 @@ bool CollectMatchedMembers(const std::unordered_map<std::string, MemberType *> &
         }
     }
 
-    return std::any_of(matchedFlags.begin(), matchedFlags.end(), [](bool matched) {
-        return matched;
-    });
+    return std::any_of(matchedFlags.begin(), matchedFlags.end(), [](bool matched) { return matched; });
 }
 
 bool IsKeepAll(const ark::guard::ClassSpecification &specification)
 {
     bool keepAllField =
         std::any_of(specification.fieldSpecifications_.begin(), specification.fieldSpecifications_.end(),
-                    [](const auto &spec) {
-                        return IsKeepAllMembers(spec);
-                    });
+                    [](const auto &spec) { return IsKeepAllMembers(spec); });
     bool keepAllMethod =
         std::any_of(specification.methodSpecifications_.begin(), specification.methodSpecifications_.end(),
-                    [](const auto &spec) {
-                        return IsKeepAllMembers(spec);
-                    });
+                    [](const auto &spec) { return IsKeepAllMembers(spec); });
     return keepAllField && keepAllMethod;
 }
 
@@ -165,7 +155,7 @@ bool MatchTypeDeclarations(uint32_t typeDeclarations, uint32_t setTypeDeclaratio
     }
     return true;
 }
-} // namespace
+}  // namespace
 
 bool ark::guard::NameMarker::Execute(abckit_wrapper::FileView &fileView)
 {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ const std::string NAME_CACHE_PATH = ARK_GUARD_UNIT_TEST_DIR "ut/name_cache";
 HWTEST(NameCacheParserTest, name_cache_parser_test_001, TestSize.Level0)
 {
     string applyNameCache = NAME_CACHE_PATH + "/" + "name_cache_parser_test_001.json";
-    ark::guard::NameCacheParser parser(applyNameCache, "");
+    ark::guard::NameCacheParser parser(applyNameCache);
     parser.Parse();
 
     auto moduleCaches = parser.GetNameCache();
@@ -76,6 +76,6 @@ HWTEST(NameCacheParserTest, name_cache_parser_test_001, TestSize.Level0)
 HWTEST(NameCacheParserTest, name_cache_parser_test_002, TestSize.Level0)
 {
     string applyNameCache = NAME_CACHE_PATH + "/" + "name_cache_parser_test_002.json";
-    ark::guard::NameCacheParser parser(applyNameCache, "");
+    ark::guard::NameCacheParser parser(applyNameCache);
     EXPECT_DEATH(parser.Parse(), "");
 }

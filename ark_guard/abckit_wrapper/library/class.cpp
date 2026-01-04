@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -190,16 +190,16 @@ bool abckit_wrapper::Class::Accept(ChildVisitor &visitor)
 bool abckit_wrapper::Class::HierarchyAccept(ClassVisitor &visitor, const bool visitThis, const bool visitSuper,
                                             const bool visitInterfaces, const bool visitSubclasses)
 {
+    // ignore external class hierarchy visit
+    if (this->IsExternal()) {
+        return true;
+    }
+
     // 1. visit this
     if (visitThis) {
         if (!this->Accept(visitor)) {
             return false;
         }
-    }
-
-    // ignore external class hierarchy visit
-    if (this->IsExternal()) {
-        return true;
     }
 
     // 2. visit super class recursively

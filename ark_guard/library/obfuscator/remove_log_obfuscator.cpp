@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 
 namespace {
 const std::vector<std::regex> LOG_PATTERNS = {
-    std::regex("^log:std.core.Console;.*"),       std::regex("^debug:.*;std.core.Array;void;"),
+    std::regex("^.*:std.core.Console;.*"),        std::regex("^debug:.*;std.core.Array;void;"),
     std::regex("^info:.*;std.core.Array;void;"),  std::regex("^warn:.*;std.core.Array;void;"),
     std::regex("^error:.*;std.core.Array;void;"), std::regex("^fatal:.*;std.core.Array;void;")};
 
@@ -44,7 +44,6 @@ bool RemoveConsoleLog(const abckit_wrapper::Method *method)
     if (function.IsExternal() || arkTsFunction.IsAbstract() || arkTsFunction.IsNative()) {
         return true;
     }
-    LOG_I << "Remove console log for method: " << method->GetFullyQualifiedName();
     auto graph = function.CreateGraph();
     bool isRemove = false;
     for (const auto &block : graph.GetBlocksRPO()) {
@@ -56,6 +55,7 @@ bool RemoveConsoleLog(const abckit_wrapper::Method *method)
         }
     }
     if (isRemove) {
+        LOG_I << "Remove console log for method: " << method->GetFullyQualifiedName();
         function.SetGraph(graph);
     }
     return true;
