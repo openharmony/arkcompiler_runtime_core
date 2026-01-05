@@ -109,6 +109,12 @@
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_n_11.ets
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_n_12.ets
 
+#32423
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_self_dependency_n_18.ets
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_self_dependency_n_19.ets
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_self_dependency_n_20.ets
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_interfaces/generic_interface_self_dependency_n_6.ets
+
 #30904 no CTE for FixedArray with the predefined value type
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_0.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined_neg_1.ets

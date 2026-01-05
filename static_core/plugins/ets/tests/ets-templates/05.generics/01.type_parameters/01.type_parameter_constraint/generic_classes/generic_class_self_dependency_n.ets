@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,20 +16,16 @@ limitations under the License.
 {% for sd in self_dependency %}
 {% for cm in top_level_class_modifiers %}
 /*---
-desc: A compile-time error occurs if a type parameter in the type parameter section depends on itself.
+desc: >
+    A compile-time error occurs if a type parameter in the type parameter section depends on itself.
+    The scope of a type parameter name in a class or interface declaration is that entire declaration,
+    excluding static member declarations... A compile-time error occurs if a type parameter in the
+    type parameter section depends on itself directly or indirectly.
 params: >
     {{sd}}
     {{cm}}
 tags: [compile-only,negative]
 ---*/
-
-class T {}
-
-class T2<Z> {}
-
-class T3<Z> {}
-
-class T4<Z> {}
 
 {{cm}} class A<{{sd}}> {}
 

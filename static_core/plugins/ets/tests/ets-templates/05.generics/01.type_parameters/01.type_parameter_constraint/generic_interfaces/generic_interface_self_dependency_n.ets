@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,26 +14,20 @@ limitations under the License.
 ---*/
 
 {% for sd in self_dependency %}
-{% for kind in kinds %}
 
 /*---
-desc: A compile-time error occurs if a type parameter in the type parameter section depends on itself.
+desc: >
+    A compile-time error occurs if a type parameter in the type parameter section depends on itself.
+    The scope of a type parameter name in a class or interface declaration is that entire declaration,
+    excluding static member declarations... A compile-time error occurs if a type parameter in the
+    type parameter section depends on itself directly or indirectly.
 tags: [compile-only, negative]
 params: >
   {{sd}}
 ---*/
 
-{{kind}} T {}
-
-{{kind}} T2<Z> {}
-
-{{kind}} T3<Z> {}
-
-{{kind}} T4<Z> {}
-
 interface X<{{sd}}> {}
 
 function main(): void {}
 
-{% endfor %}
 {% endfor %}
