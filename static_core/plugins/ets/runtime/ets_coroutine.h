@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,6 +153,7 @@ public:
     // event handlers
     void OnHostWorkerChanged() override;
     void OnContextSwitchedTo() override;
+    void OnChildCoroutineCreated(Coroutine *child) override;
 
     /// @brief print stack and exit the program
     void HandleUncaughtException() override;
@@ -161,6 +162,10 @@ public:
     bool IsContextSwitchRisky() const override;
 
     void PrintCallStack() const override;
+
+    void SetTaskpoolTaskId(int32_t taskid);
+
+    int32_t GetTaskpoolTaskId() const;
 
     static constexpr CoroutinePriority ASYNC_CALL = CoroutinePriority::HIGH_PRIORITY;
     static constexpr CoroutinePriority PROMISE_CALLBACK = CoroutinePriority::HIGH_PRIORITY;
@@ -198,6 +203,10 @@ private:
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;
+
+    // NOTE(atlantiswang, #32562): this member variable should be moved to the coroutine's local storage
+    static constexpr int32_t INVALID_TASKPOOL_TASK_ID = 0;
+    int32_t taskpoolTaskid_ {INVALID_TASKPOOL_TASK_ID};
 };
 }  // namespace ark::ets
 

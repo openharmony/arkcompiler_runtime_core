@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -404,6 +404,7 @@ export namespace taskpool {
             this.startTime = Chrono.nanoNow();
             const startCpuTime: long = Chrono.getCpuTime();
             try {
+                setTaskId(this.task.taskId);
                 result = this.task.taskFunction();
                 if (result instanceof Promise) {
                     result.then(() => {
@@ -1755,10 +1756,9 @@ export namespace taskpool {
         // NOTE(ipetrov, #20208): CoroutineExtras is debug functionality, maybe need to create a separate intrinsic
         const currentCoroId: int = CoroutineExtras.getCoroutineId()
         InternalTask.of(task).coroId = currentCoroId;
-        executingTasks.set(currentCoroId, task);
+        taskIdToTask.set(task.taskId, task);
         const currentWorkerId: int = CoroutineExtras.getWorkerId();
         InternalTask.of(task).workerId = currentWorkerId;
-        currentExecutingTasks.set(currentWorkerId, task);
         const workerTasks: Set<Task> = workerToTasks.get(currentWorkerId, /* default */ new Set<Task>());
         workerTasks.add(task);
         workerToTasks.set(currentWorkerId, workerTasks);
@@ -1776,8 +1776,7 @@ export namespace taskpool {
     function taskFinished(task: Task): boolean {
         let isTaskCanceled: boolean = false;
         ConcurrencyHelpers.lockGuard(mutex, () => {
-            executingTasks.delete(InternalTask.of(task).coroId);
-            currentExecutingTasks.delete(InternalTask.of(task).workerId);
+            taskIdToTask.delete(task.taskId);
             workerToTasks.get(InternalTask.of(task).workerId)!.delete(task);
             const cancelByTask: boolean = popFromMap(task, runningTasks, waitingTasks, tasksToBeCanceled);
             let cancelByGroup: boolean = false;
@@ -1792,19 +1791,9 @@ export namespace taskpool {
     }
 
     function getCurrentTaskUnsafe(): Task | undefined {
-        // NOTE(ipetrov, #20208): CoroutineExtras is debug functionality, maybe need to create a separate intrinsic
-        if (isTaskPoolUseLaunch) {
-            return executingTasks.get(CoroutineExtras.getCoroutineId());
-        }
-        let currTask = currentExecutingTasks.get(CoroutineExtras.getWorkerId());
-        if (currTask != undefined)
-            return currTask;
-    
-        let setTask = workerToTasks.get(CoroutineExtras.getWorkerId());  
-        if(setTask == undefined)
-            return undefined;
-        
-        return setTask.values().next().value;
+        let taskId = getTaskId();
+        let currTask = taskIdToTask.get(taskId);
+        return currTask;
     }
 
     function getCurrentTask(): Task | undefined {
@@ -2199,6 +2188,8 @@ export namespace taskpool {
     native function isUsingLaunch(): boolean;
     native function isSupportingInterop(): boolean;
     native function getTaskPoolWorkersLimit(): int;
+    native function getTaskId(): int;
+    native function setTaskId(taskid: int): void;
 
     // managed mutex for taskpool containers below
     const mutex = ConcurrencyHelpers.mutexCreate();
@@ -2212,10 +2203,8 @@ export namespace taskpool {
     const waitingGroupTasks: Map<int, int> = new Map<int, int>();
     const runningGroupTasks: Map<int, int> = new Map<int, int>();
     const groupsToBeCanceled: Set<int> = new Set<int>();
-    // value is executing task on the associated coroutine
-    const executingTasks: Map<CoroutineId, Task> = new Map<CoroutineId, Task>();
-    // value is current executing task on the associated worker
-    const currentExecutingTasks: Map<WorkerId, Task> = new Map<WorkerId, Task>();
+    // value is executing task on the associated taskId
+    const taskIdToTask: Map<int, Task> = new Map<int, Task>();
     // value is set of executing tasks on this worker
     const workerToTasks: Map<WorkerId, Set<Task>> = new Map<WorkerId, Set<Task>>();
     // Count of pending tasks per worker

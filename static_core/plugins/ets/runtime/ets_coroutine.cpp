@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,7 @@ void EtsCoroutine::ReInitialize(PandaString name, CoroutineContext *context, std
 
 void EtsCoroutine::CleanUp()
 {
+    taskpoolTaskid_ = INVALID_TASKPOOL_TASK_ID;
     etsNapiEnv_->CleanUp();
     Coroutine::CleanUp();
     // add the required local storage entries cleanup here!
@@ -304,6 +305,13 @@ void EtsCoroutine::OnContextSwitchedTo()
     }
 }
 
+void EtsCoroutine::OnChildCoroutineCreated(Coroutine *child)
+{
+    Coroutine::OnChildCoroutineCreated(child);
+    auto etsChild = static_cast<EtsCoroutine *>(child);
+    etsChild->SetTaskpoolTaskId(GetTaskpoolTaskId());
+}
+
 void EtsCoroutine::HandleUncaughtException()
 {
     ASSERT(HasPendingException());
@@ -398,6 +406,16 @@ void EtsCoroutine::PrintCallStack() const
     }
     ASSERT(istkIt == istk.rend() || istkIt->etsFrame == nullptr);
     printIstkFrames(nullptr);
+}
+
+void EtsCoroutine::SetTaskpoolTaskId(int32_t taskid)
+{
+    taskpoolTaskid_ = taskid;
+}
+
+int32_t EtsCoroutine::GetTaskpoolTaskId() const
+{
+    return taskpoolTaskid_;
 }
 
 }  // namespace ark::ets
