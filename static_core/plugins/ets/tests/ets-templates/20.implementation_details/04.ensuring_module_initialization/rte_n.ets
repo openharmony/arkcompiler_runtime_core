@@ -28,7 +28,7 @@ expected_error: >-
         at std.core.ArithmeticError.<ctor> (Errors.ets:114:0)
         at rte_module_n.ETSGLOBAL.foo (rte_module_n.ets:27:0)
         at rte_module_n.ETSGLOBAL.<cctor> (rte_module_n.ets:29:0)
-        at rte_n.ETSGLOBAL.<cctor> (rte_n.ets:1:0)
+        at rte_n.ETSGLOBAL.<cctor> (rte_n.ets:-1:0)
 {% if test.files is defined %}
 files: [{{test.files|join(', ')}}]
 {% endif %}
