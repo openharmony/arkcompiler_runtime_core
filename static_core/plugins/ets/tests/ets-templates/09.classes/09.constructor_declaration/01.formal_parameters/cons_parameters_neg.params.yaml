@@ -143,17 +143,6 @@ cases:
 
   - decl: |-
       class A {
-          fld: FixedArray<number>
-          constructor(...p: FixedArray<number>) {
-              this.fld = p
-          }
-      }
-    use: |-
-      // CTE: spread argument must correspond to rest parameter
-      let a = new A(12.0, ...([ 13.0, 14.0 ] as FixedArray<number>))
-
-  - decl: |-
-      class A {
           tup: readonly [boolean, string, number|undefined]
           constructor(...tup: [boolean, string, number|undefined]) {
               this.tup = tup

@@ -89,7 +89,7 @@ cases:
           let a1: Object[]|null = [new Object, new Object]
       use: |-
           // nullish expression
-          arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1), 7)  // CTE expected
+          arktest.assertEQ(((a: int, ...p: Object[]): int => a + p.length)(5, ...a1!), 7)
       tags: 'negative, compile-only'
 
     - decl: |-

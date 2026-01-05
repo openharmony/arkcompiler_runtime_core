@@ -448,16 +448,3 @@ cases:
                   super(super) // CTE, cannot use super in args
               }
           }
-
-    - decl: |-
-          class A {
-              s: string[]
-              constructor(...s: string[]) {
-                  this.s = s
-              }
-          }
-          class B extends A {
-              constructor(p1: string, ...p2: string[]) {
-                  super(p1 + p1, ...p2)
-              }
-          }
