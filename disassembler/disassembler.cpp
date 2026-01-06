@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -431,8 +431,8 @@ std::vector<std::string> Disassembler::GetModuleLiteralArray(panda_file::File::E
     std::stringstream module_requests_stringstream;
     module_requests_stringstream << "\tMODULE_REQUEST_ARRAY: {\n";
     for (size_t index = 0; index < request_modules_offset.size(); ++index) {
-        module_requests_stringstream << "\t\t" << index <<
-            " : " << GetStringByOffset(request_modules_offset[index]) << ",\n";
+        module_requests_stringstream << "\t\t" << index << " : " << GetStringByOffset(request_modules_offset[index])
+                                     << ",\n";
     }
     module_requests_stringstream << "\t}";
     module_literal_array.push_back(module_requests_stringstream.str());
@@ -440,8 +440,8 @@ std::vector<std::string> Disassembler::GetModuleLiteralArray(panda_file::File::E
                                   uint32_t import_name_offset, uint32_t local_name_offset) {
         std::stringstream ss;
         ss << "\tModuleTag: " << ModuleTagToString(tag);
-        if (tag == panda_file::ModuleTag::REGULAR_IMPORT ||
-            tag == panda_file::ModuleTag::NAMESPACE_IMPORT || tag == panda_file::ModuleTag::LOCAL_EXPORT) {
+        if (tag == panda_file::ModuleTag::REGULAR_IMPORT || tag == panda_file::ModuleTag::NAMESPACE_IMPORT ||
+            tag == panda_file::ModuleTag::LOCAL_EXPORT) {
             if (!IsValidOffset(local_name_offset)) {
                 LOG(ERROR, DISASSEMBLER) << "Get invalid local name offset!" << std::endl;
                 return;
@@ -586,7 +586,7 @@ void Disassembler::GetMethodAnnotations(pandasm::Function &method, const panda_f
         panda_file::AnnotationDataAccessor ada(*file_, annotation_id);
         auto annotation_name =
             std::string {reinterpret_cast<const char *>(file_->GetStringData(ada.GetClassId()).data)};
-        annotation_name.pop_back(); // remove ; from annotation name
+        annotation_name.pop_back();  // remove ; from annotation name
 
         if (annotation_name.empty()) {
             return;
@@ -844,7 +844,7 @@ bool Disassembler::LocateTryBlock(const BytecodeInstruction &bc_ins, const Bytec
 
     if (!try_begin_offset_in_range || !try_begin_offset_valid) {
         LOG(ERROR, DISASSEMBLER) << "> invalid try block begin offset! address is: 0x" << std::hex
-                                 << try_begin_bc_ins.GetAddress();
+                                 << static_cast<const void *>(try_begin_bc_ins.GetAddress());
         return false;
     } else {
         std::stringstream ss {};
@@ -861,7 +861,7 @@ bool Disassembler::LocateTryBlock(const BytecodeInstruction &bc_ins, const Bytec
 
     if (!try_end_offset_in_range || !try_end_offset_valid) {
         LOG(ERROR, DISASSEMBLER) << "> invalid try block end offset! address is: 0x" << std::hex
-                                 << try_end_bc_ins.GetAddress();
+                                 << static_cast<const void *>(try_end_bc_ins.GetAddress());
         return false;
     } else {
         std::stringstream ss {};
@@ -901,7 +901,7 @@ bool Disassembler::LocateCatchBlock(const BytecodeInstruction &bc_ins, const Byt
 
     if (!handler_begin_offset_in_range || !handler_begin_offset_valid) {
         LOG(ERROR, DISASSEMBLER) << "> invalid catch block begin offset! address is: 0x" << std::hex
-                                 << handler_begin_bc_ins.GetAddress();
+                                 << static_cast<const void *>(handler_begin_bc_ins.GetAddress());
         return false;
     } else {
         std::stringstream ss {};
@@ -918,7 +918,7 @@ bool Disassembler::LocateCatchBlock(const BytecodeInstruction &bc_ins, const Byt
 
     if (!handler_end_offset_in_range || !handler_end_offset_valid) {
         LOG(ERROR, DISASSEMBLER) << "> invalid catch block end offset! address is: 0x" << std::hex
-                                 << handler_end_bc_ins.GetAddress();
+                                 << static_cast<const void *>(handler_end_bc_ins.GetAddress());
         return false;
     } else if (handler_end_present) {
         std::stringstream ss {};
@@ -1420,7 +1420,7 @@ std::string Disassembler::SerializeModuleLiteralArray(const std::vector<std::str
 
     std::stringstream ss;
     ss << "{ ";
-    ss << (module_array.size() - 1); // Only needs to show the count of module tag, exclude module request array
+    ss << (module_array.size() - 1);  // Only needs to show the count of module tag, exclude module request array
     ss << " [\n";
     for (size_t index = 0; index < module_array.size(); index++) {
         ss << module_array[index] << ";\n";
