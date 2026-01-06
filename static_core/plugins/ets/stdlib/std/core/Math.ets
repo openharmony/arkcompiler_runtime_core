@@ -581,6 +581,24 @@ export class Math {
      * Math.exp(doubleNegInf) = 0
      * ```
      */
+    public static exp(x: float): float {
+        return exp(x);
+    }
+
+    /**
+     * e raised to power `x`
+     *
+     * @param x power value
+     *
+     * @returns {@link Math.E} raised to the power of a number `x`.
+     *
+     * @example
+     * ```
+     * Math.exp(doubleNaN) = -NaN
+     * Math.exp(doubleInf) = Inf
+     * Math.exp(doubleNegInf) = 0
+     * ```
+     */
     public static exp(x: double): double {
         return exp(x);
     }
@@ -599,7 +617,7 @@ export class Math {
      * Math.expm1(doubleNegInf) = -1
      * ```
      */
-    public static expm1(x: double): double {
+    public static expm1(x: float): float {
         return expm1(x);
     }
 
@@ -617,7 +635,7 @@ export class Math {
      * Math.expm1(doubleNegInf) = -1
      * ```
      */
-    public static expm1(x: float): float {
+    public static expm1(x: double): double {
         return expm1(x);
     }
 
@@ -714,7 +732,7 @@ export class Math {
      * Math.log(doubleNegInf) = -nan
      * ```
      */
-    public static log(x: double): double {
+    public static log(x: float): float {
         return log(x);
     }
 
@@ -732,7 +750,7 @@ export class Math {
      * Math.log(doubleNegInf) = -nan
      * ```
      */
-    public static log(x: float): float {
+    public static log(x: double): double {
         return log(x);
     }
 
