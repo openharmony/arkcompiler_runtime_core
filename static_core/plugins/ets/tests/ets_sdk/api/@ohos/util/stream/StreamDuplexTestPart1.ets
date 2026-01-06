@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,7 +166,7 @@ class MyDuplex3 extends stream.Duplex {
 }
 // Test cases ported from ArkTS 1.0:testStreamDuplex001
 function testDuplexBasicReadWrite() {
-    let read: Object;
+    let read: Object = new Object();
     let duplex = new MyDuplex3();
     arktest.assertTrue(duplex instanceof stream.Duplex, "duplex instanceof Duplex should be true");
     duplex.on('data', (...param: Object[]): void => {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -387,7 +387,7 @@ enum MessageType {
 }
 function removeMessageHandlerTest() {
     let waiter = new Event();
-    let handler: concurrency.MessageHandler;
+    let handler: concurrency.MessageHandler | undefined;
     let restExecuted = false;
     handler = new concurrency.MessageHandler((msg: concurrency.Message)=>{
         if (msg.getWhat() == 1) {
@@ -399,15 +399,15 @@ function removeMessageHandlerTest() {
         }
     }, eaw);
 
-    let msg = new concurrency.Message(1, handler);
+    let msg = new concurrency.Message(1, handler!);
     let callback = () => {
-        handler.removeMessages(1);
+        handler?.removeMessages(1);
         waiter.Fire();
     }
-    let msg2 = new concurrency.Message(callback, handler);
+    let msg2 = new concurrency.Message(callback, handler!);
 
-    handler.sendMessage(msg2);
-    handler.sendMessage(msg);
+    handler?.sendMessage(msg2);
+    handler?.sendMessage(msg);
 
     waiter.Wait();
     arktest.assertEQ(restExecuted, false);
@@ -423,15 +423,15 @@ function testEAWorkerCommmunicateWithMessage()
     let eaw2Tag = 2222;
     let messageGot = false;
 
-    let handler1 : concurrency.MessageHandler;
-    let handler2 : concurrency.MessageHandler;
+    let handler1 : concurrency.MessageHandler | undefined;
+    let handler2 : concurrency.MessageHandler | undefined;
 
     handler1 = new concurrency.MessageHandler((msg: concurrency.Message) => {
         arktest.assertEQ(msg.getWhat(), eaw2Tag);
         if (msg.getObject() != undefined) {
             let obj = msg.getObject() as string;
             arktest.assertEQ(obj, "message from eaw2");
-            handler2.sendMessage(new concurrency.Message(eaw1Tag, "message from eaw1", handler2));
+            handler2?.sendMessage(new concurrency.Message(eaw1Tag, "message from eaw1", handler2!));
         }
     }, eaw);
 
@@ -442,7 +442,7 @@ function testEAWorkerCommmunicateWithMessage()
         waiter.Fire();
     }, eaw2);
 
-    handler1.sendMessage(new concurrency.Message(eaw2Tag, "message from eaw2", handler1));
+    handler1?.sendMessage(new concurrency.Message(eaw2Tag, "message from eaw2", handler1!));
 
     waiter.Wait();
     arktest.assertEQ(messageGot, true);

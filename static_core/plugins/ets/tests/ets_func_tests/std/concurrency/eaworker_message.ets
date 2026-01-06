@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,15 +198,15 @@ function testCommunication() {
     let eaw2Tag = 2222;
     let messageGot = false;
 
-    let handler1 : concurrency.MessageHandler;
-    let handler2 : concurrency.MessageHandler;
+    let handler1 : concurrency.MessageHandler | undefined;
+    let handler2 : concurrency.MessageHandler | undefined;
 
     handler1 = new concurrency.MessageHandler((msg: concurrency.Message) => {
         arktest.assertEQ(msg.getWhat(), eaw2Tag);
         if (msg.getObject() != undefined) {
             let obj = msg.getObject() as string;
             arktest.assertEQ(obj, "message from eaw2");
-            handler2.sendMessage(new concurrency.Message(eaw1Tag, "message from eaw1", handler2));
+            handler2?.sendMessage(new concurrency.Message(eaw1Tag, "message from eaw1", handler2!));
         }
     }, eaw1);
 
@@ -217,7 +217,7 @@ function testCommunication() {
         waiter.fire();
     }, eaw2);
 
-    handler1.sendMessage(new concurrency.Message(eaw2Tag, "message from eaw2", handler1));
+    handler1?.sendMessage(new concurrency.Message(eaw2Tag, "message from eaw2", handler1!));
 
     waiter.wait();
     arktest.assertEQ(messageGot, true);
