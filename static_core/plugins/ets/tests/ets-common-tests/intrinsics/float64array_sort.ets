@@ -34,7 +34,7 @@ const SORTED_WITH_NAN = [
     Double.NEGATIVE_INFINITY, -1.125, 0.0, 100.5,
     Double.MAX_VALUE, Double.NaN, Double.MIN_VALUE, 1.125, 1.375, 7.375, 10.5, 36.625, 45.125, 123.375,
     Double.POSITIVE_INFINITY];
-const SINGLE = [88.0];
+const SINGLE: number[] = [88.0];
 
 function checkSorted(a: Float64Array): void {
     for (let i = 0; i < ARRAY_SIZE; ++i) {

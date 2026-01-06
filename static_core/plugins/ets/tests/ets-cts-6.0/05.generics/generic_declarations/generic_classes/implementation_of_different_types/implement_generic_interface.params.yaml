@@ -243,7 +243,7 @@ cases:
   - type: number[]
     desc: Test the generic implementation class to handle an integer array with a single element.
     decl: |-
-      let arr = [1];
+      let arr: number[] = [1];
     values: arr
     expected: |-
       for (let i = 0; i < arr.length; i++) {
@@ -253,7 +253,7 @@ cases:
   - type: number[]
     desc: Test the generic implementation class to handle an integer array with multiple elements.
     decl: |-
-      let arr = [1, 2, 3];
+      let arr: number[] = [1, 2, 3];
     values: arr
     expected: |-
       for (let i = 0; i < arr.length; i++) {

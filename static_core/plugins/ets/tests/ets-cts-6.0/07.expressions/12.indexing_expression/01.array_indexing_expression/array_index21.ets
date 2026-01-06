@@ -22,6 +22,6 @@ class NonNumeric {}
 
 function main(): void {
   let obj = new NonNumeric();
-  let arr = [1];
+  let arr: number[] = [1];
   console.error(arr[obj]);
 }

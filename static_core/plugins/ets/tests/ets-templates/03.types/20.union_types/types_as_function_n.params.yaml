@@ -55,6 +55,7 @@ cases:
 
     - realType: array
       type: Color | string
+      typeAnno: ": number[]"
       value: |-
           [1, 2, 3]
       enumerate: |-

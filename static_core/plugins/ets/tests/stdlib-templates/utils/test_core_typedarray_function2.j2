@@ -579,7 +579,7 @@ function testTypedArrayEntries(): int {
     let failures = 0
     const firstResult = [0, {{.item.create}}(1)] as [number, {{.item.type}}]
     const secondResult = [1, {{.item.create}}(2)] as [number, {{.item.type}}]
-    const numbers = [{{.item.create}}(1), {{.item.create}}(2)]
+    const numbers{% if item.objectType != 'BigInt64Array' %}: number[]{% endif %} = [{{.item.create}}(1), {{.item.create}}(2)]
     let entries = (new {{.item.objectType}}(numbers)).entries()
 
     let entry1 = entries.next().value!

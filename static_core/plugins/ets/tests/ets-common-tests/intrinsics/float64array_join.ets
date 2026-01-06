@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const SINGLE = [1];
+const SINGLE: number[] = [1];
 const ARRAY: Double[] = [
     Double.MIN_VALUE, Double.NaN, -1.1, 0.0, 0.2, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0,
     8.0, 9.0, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.MAX_VALUE];

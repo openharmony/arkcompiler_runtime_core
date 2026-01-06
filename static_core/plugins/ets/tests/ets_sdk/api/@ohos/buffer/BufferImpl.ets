@@ -197,12 +197,12 @@ function testByteLengthBufferAndViews() {
 
 // buffer.from tests
 function testFromArray() {
-    const arr = [72, 101, 108, 108, 111] // "Hello" in ASCII
+    const arr: number[] = [72, 101, 108, 108, 111] // "Hello" in ASCII
     const buf = buffer.from(arr)
     arktest.assertEQ(buf.length, 5)
     arktest.assertEQ(buf.toString('ascii'), "Hello")
 
-    const singular = [256, 300, -1, 255]
+    const singular: number[] = [256, 300, -1, 255]
     const truncatedBuf = buffer.from(singular)
     arktest.assertEQ(truncatedBuf.length, 4)
     // Values should be truncated to fit in 0-255 range

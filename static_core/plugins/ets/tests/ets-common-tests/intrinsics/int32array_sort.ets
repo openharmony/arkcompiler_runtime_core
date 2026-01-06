@@ -18,7 +18,7 @@ const AB_SIZE = ARRAY_SIZE * Int.BYTE_SIZE;
 const UNSORTED: Array<Double> = [5, 3, Int.MAX_VALUE, 2, 4, -1, 99, 10, 7, 0, 45, 1, 88, Int.MIN_VALUE, 37];
 const SORTED = [Int.MIN_VALUE, -1, 0, 1, 2, 3, 4, 5, 7, 10, 37, 45, 88, 99, Int.MAX_VALUE];
 const SORTED_UNALIGNED = [Int.MIN_VALUE, -1, 0, 1, 2, 3, 4, 7, 10, 37, 45, 88, 99,Int.MAX_VALUE];
-const SINGLE = [88];
+const SINGLE: number[] = [88];
 
 function fillBuffer(buf: ArrayBuffer): void {
     arktest.assertEQ(Int.BYTE_SIZE, Int32Array.BYTES_PER_ELEMENT);

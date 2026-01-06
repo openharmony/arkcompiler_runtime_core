@@ -30,7 +30,7 @@ function processValue(value: {{c.type}}): string {
 }
 
 function main(): void {
-  const testValue = {{c.value}};
+  const testValue {{c.typeAnno}} = {{c.value}};
   const result = processValue(testValue);
 }
 {%- endfor %}

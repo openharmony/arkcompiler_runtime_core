@@ -16,7 +16,7 @@
 const ARRAY_SIZE = 15;
 const UNSORTED: Array<Double> = [5, 3, 127, 2, 4, 255, 99, 10, 7, 0, 45, 1, 88, 6, 0x7fffffffffff0000];
 const SORTED = [0, 1, 2, 3, 4, 5, 6, 7, 10, 45, 88, 99, 127, 255, 0x7fffffffffff0000];
-const SINGLE = [88];
+const SINGLE: number[] = [88];
 
 function checkSorted(a: BigUint64Array): void {
     for (let i = 0; i < ARRAY_SIZE; ++i) {
