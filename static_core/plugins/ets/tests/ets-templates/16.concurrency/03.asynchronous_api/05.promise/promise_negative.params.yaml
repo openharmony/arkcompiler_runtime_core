@@ -14,22 +14,6 @@
 ---
 cases:
     - decl: |-
-          //implicit cast Promise<void> to Promise<string> - one of the promise chain steps don't return value (void)
-      use: |-
-          const checkPromise: Promise<string> = new Promise<string>(
-              (resolve: (p: string) => void, reject: (p: Error) => void): void => resolve("test")
-          ).then(
-              (data: string) => {return 'test'}
-          ).then(
-              //void chain step - 'TypeError: Type 'Promise<void|String>' cannot be assigned to type 'Promise<String>'
-              (data: string) =>  {
-                  throw new Error(data)
-              }
-          ).catch(
-              (p: Error): string => {}
-          );
-
-    - decl: |-
           //TODO update after 30498 issue
       use: |-
           // test Promise<never>

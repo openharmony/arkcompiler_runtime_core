@@ -1784,7 +1784,7 @@
 15.semantic_rules/13.dispatch/root_call_dispatch_2.ets
 
 #30498
-16.concurrency/03.asynchronous_api/05.promise/promise_negative_1.ets
+16.concurrency/03.asynchronous_api/05.promise/promise_negative.ets
 
 #29982
 16.concurrency/03.asynchronous_api/03.async_methods/async_method17.ets

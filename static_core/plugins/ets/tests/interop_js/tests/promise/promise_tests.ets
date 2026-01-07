@@ -755,9 +755,10 @@ function testPromiseRaceRejected(): void {
 
 function testPromiseThenOnRejection(): void {
     globalTest = new Test();
-    Promise.reject<Error>(new Error("test")).then<void, string>(
-    (value: Object): void => {
+    Promise.reject<Error>(new Error("test")).then<string, string>(
+    (value: Object): string => {
         globalTest!.fail();
+        return "fail";
     }, (error: Error): string => {
         return "correct flow";
     }).then<string, void>((value: string): string => {
